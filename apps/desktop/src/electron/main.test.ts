@@ -50,7 +50,8 @@ vi.mock('./ipc', () => ({
   registerIPCHandlers: mocks.mockRegisterIPCHandlers,
 }));
 
-vi.mock('./utils', () => ({
+// Mock @abe-stack/core which exports waitForPort
+vi.mock('@abe-stack/core', () => ({
   waitForPort: mocks.mockWaitForPort,
 }));
 
@@ -137,8 +138,10 @@ describe('main', () => {
       const readyCallback = readyCall![1] as () => Promise<void>;
       await readyCallback();
 
+      // The code builds array as [rendererPortPreference, 5174, 5173, 5175]
+      // where rendererPortPreference defaults to 5174, resulting in [5174, 5174, 5173, 5175]
       expect(mocks.mockWaitForPort).toHaveBeenCalledWith(
-        expect.arrayContaining([5174, 5173, 5175]),
+        [5174, 5174, 5173, 5175],
         'localhost',
       );
     });

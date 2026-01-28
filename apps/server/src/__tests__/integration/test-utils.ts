@@ -15,7 +15,7 @@ import {
   registerPrototypePollutionProtection,
   registerRequestInfoHook,
 } from '@http/index';
-import { RateLimiter } from '@rate-limit/index';
+import { RateLimiter } from '@security/rate-limit';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 

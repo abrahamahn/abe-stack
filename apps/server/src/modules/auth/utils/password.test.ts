@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/utils/__tests__/password.test.ts
+// apps/server/src/modules/auth/utils/password.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import {
@@ -9,7 +9,7 @@ import {
   resetDummyHashPool,
   verifyPassword,
   verifyPasswordSafe,
-} from '../password';
+} from './password';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {

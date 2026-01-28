@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/data/storage/utils/__tests__/normalizeKey.test.ts
+// apps/server/src/infrastructure/data/storage/utils/normalizeKey.test.ts
 import { normalizeStorageKey } from '@abe-stack/core';
 import { describe, expect, it } from 'vitest';
 

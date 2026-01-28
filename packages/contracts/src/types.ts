@@ -114,15 +114,15 @@ export interface Logger {
 export interface EmailOptions {
   to: string;
   subject: string;
-  text?: string;
-  html?: string;
-  from?: { name: string; address: string };
+  text?: string | undefined;
+  html?: string | undefined;
+  from?: { name: string; address: string } | undefined;
 }
 
 export interface EmailResult {
   success: boolean;
-  messageId?: string;
-  error?: string;
+  messageId?: string | undefined;
+  error?: string | undefined;
 }
 
 export interface EmailService {

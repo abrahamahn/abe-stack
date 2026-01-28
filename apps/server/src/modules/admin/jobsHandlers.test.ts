@@ -6,7 +6,7 @@
  * Verifies authentication, error handling, and service integration.
  */
 
-import { ERROR_MESSAGES } from '@shared';
+import { ERROR_MESSAGES } from '../../shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -17,14 +17,15 @@ import {
   handleRetryJob,
 } from './jobsHandlers';
 
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('./jobsService.js', () => ({
+// Mock paths must match EXACTLY what the source file imports
+vi.mock('./jobsService', () => ({
   listJobs: vi.fn(),
   getJobDetails: vi.fn(),
   getQueueStats: vi.fn(),
@@ -54,7 +55,7 @@ vi.mock('@abe-stack/core', async () => {
   };
 });
 
-vi.mock('@infrastructure', () => ({
+vi.mock('@/infrastructure', () => ({
   PostgresQueueStore: vi.fn(),
 }));
 
@@ -123,7 +124,7 @@ describe('Jobs Handlers', () => {
   describe('handleListJobs', () => {
     describe('when authenticated', () => {
       test('should return 200 with job list on success', async () => {
-        const { listJobs } = await import('./jobsService.js');
+        const { listJobs } = await import('./jobsService');
         const { jobListQuerySchema } = await import('@abe-stack/core');
 
         const mockJobList = {
@@ -165,7 +166,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should pass all query parameters to listJobs service', async () => {
-        const { listJobs } = await import('./jobsService.js');
+        const { listJobs } = await import('./jobsService');
         const { jobListQuerySchema } = await import('@abe-stack/core');
 
         const queryParams = {
@@ -197,22 +198,17 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 when query validation fails', async () => {
-        const { jobListQuerySchema } = await import('@abe-stack/core');
-
-        vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
-          success: false,
-          error: { message: 'Invalid query parameters' } as never,
-        });
-
+        // The actual Zod validation runs and returns a specific error message
         const req = createMockRequest({}, {}, { page: 'invalid' });
         const result = await handleListJobs(mockCtx, undefined, req, createMockReply());
 
         expect(result.status).toBe(500);
-        expect(result.body).toEqual({ message: 'Invalid query parameters' });
+        // The Zod validation returns a specific message about the page parameter
+        expect(result.body).toEqual({ message: 'Page must be an integer >= 1' });
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
-        const { listJobs, QueueStoreNotAvailableError } = await import('./jobsService.js');
+        const { listJobs, QueueStoreNotAvailableError } = await import('./jobsService');
         const { jobListQuerySchema } = await import('@abe-stack/core');
 
         vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
@@ -230,7 +226,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 for unexpected errors', async () => {
-        const { listJobs } = await import('./jobsService.js');
+        const { listJobs } = await import('./jobsService');
         const { jobListQuerySchema } = await import('@abe-stack/core');
 
         vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
@@ -267,7 +263,7 @@ describe('Jobs Handlers', () => {
   describe('handleGetJobDetails', () => {
     describe('when authenticated', () => {
       test('should return 200 with job details on success', async () => {
-        const { getJobDetails } = await import('./jobsService.js');
+        const { getJobDetails } = await import('./jobsService');
 
         const mockJobDetails = {
           id: 'job-123',
@@ -299,7 +295,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 404 when job not found', async () => {
-        const { getJobDetails, JobNotFoundError } = await import('./jobsService.js');
+        const { getJobDetails, JobNotFoundError } = await import('./jobsService');
 
         vi.mocked(getJobDetails).mockRejectedValue(new JobNotFoundError('job-404'));
 
@@ -311,7 +307,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
-        const { getJobDetails, QueueStoreNotAvailableError } = await import('./jobsService.js');
+        const { getJobDetails, QueueStoreNotAvailableError } = await import('./jobsService');
 
         vi.mocked(getJobDetails).mockRejectedValue(
           new QueueStoreNotAvailableError('getJobDetails'),
@@ -327,7 +323,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 for unexpected errors', async () => {
-        const { getJobDetails } = await import('./jobsService.js');
+        const { getJobDetails } = await import('./jobsService');
 
         vi.mocked(getJobDetails).mockRejectedValue(new Error('Database error'));
 
@@ -358,7 +354,7 @@ describe('Jobs Handlers', () => {
   describe('handleGetQueueStats', () => {
     describe('when authenticated', () => {
       test('should return 200 with queue statistics on success', async () => {
-        const { getQueueStats } = await import('./jobsService.js');
+        const { getQueueStats } = await import('./jobsService');
 
         const mockStats = {
           pending: 5,
@@ -379,7 +375,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
-        const { getQueueStats, QueueStoreNotAvailableError } = await import('./jobsService.js');
+        const { getQueueStats, QueueStoreNotAvailableError } = await import('./jobsService');
 
         vi.mocked(getQueueStats).mockRejectedValue(
           new QueueStoreNotAvailableError('getQueueStats'),
@@ -395,7 +391,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 for unexpected errors', async () => {
-        const { getQueueStats } = await import('./jobsService.js');
+        const { getQueueStats } = await import('./jobsService');
 
         vi.mocked(getQueueStats).mockRejectedValue(new Error('Stats calculation failed'));
 
@@ -426,7 +422,7 @@ describe('Jobs Handlers', () => {
   describe('handleRetryJob', () => {
     describe('when authenticated', () => {
       test('should return 200 with success response when retry succeeds', async () => {
-        const { retryJob } = await import('./jobsService.js');
+        const { retryJob } = await import('./jobsService');
 
         const mockResponse = {
           success: true,
@@ -447,7 +443,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 200 with failure response when retry fails due to status', async () => {
-        const { retryJob } = await import('./jobsService.js');
+        const { retryJob } = await import('./jobsService');
 
         const mockResponse = {
           success: false,
@@ -464,7 +460,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 404 when job not found', async () => {
-        const { retryJob, JobNotFoundError } = await import('./jobsService.js');
+        const { retryJob, JobNotFoundError } = await import('./jobsService');
 
         vi.mocked(retryJob).mockRejectedValue(new JobNotFoundError('job-404'));
 
@@ -476,7 +472,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
-        const { retryJob, QueueStoreNotAvailableError } = await import('./jobsService.js');
+        const { retryJob, QueueStoreNotAvailableError } = await import('./jobsService');
 
         vi.mocked(retryJob).mockRejectedValue(new QueueStoreNotAvailableError('retryJob'));
 
@@ -488,7 +484,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 for unexpected errors', async () => {
-        const { retryJob } = await import('./jobsService.js');
+        const { retryJob } = await import('./jobsService');
 
         vi.mocked(retryJob).mockRejectedValue(new Error('Queue operation failed'));
 
@@ -519,7 +515,7 @@ describe('Jobs Handlers', () => {
   describe('handleCancelJob', () => {
     describe('when authenticated', () => {
       test('should return 200 with success response when cancel succeeds', async () => {
-        const { cancelJob } = await import('./jobsService.js');
+        const { cancelJob } = await import('./jobsService');
 
         const mockResponse = {
           success: true,
@@ -540,7 +536,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 200 with failure response when cancel fails due to status', async () => {
-        const { cancelJob } = await import('./jobsService.js');
+        const { cancelJob } = await import('./jobsService');
 
         const mockResponse = {
           success: false,
@@ -557,7 +553,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 404 when job not found', async () => {
-        const { cancelJob, JobNotFoundError } = await import('./jobsService.js');
+        const { cancelJob, JobNotFoundError } = await import('./jobsService');
 
         vi.mocked(cancelJob).mockRejectedValue(new JobNotFoundError('job-404'));
 
@@ -569,7 +565,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
-        const { cancelJob, QueueStoreNotAvailableError } = await import('./jobsService.js');
+        const { cancelJob, QueueStoreNotAvailableError } = await import('./jobsService');
 
         vi.mocked(cancelJob).mockRejectedValue(new QueueStoreNotAvailableError('cancelJob'));
 
@@ -581,7 +577,7 @@ describe('Jobs Handlers', () => {
       });
 
       test('should return 500 for unexpected errors', async () => {
-        const { cancelJob } = await import('./jobsService.js');
+        const { cancelJob } = await import('./jobsService');
 
         vi.mocked(cancelJob).mockRejectedValue(new Error('Queue operation failed'));
 
@@ -628,7 +624,7 @@ describe('Jobs Handlers', () => {
     });
 
     test('should extract jobId from request params correctly', async () => {
-      const { getJobDetails } = await import('./jobsService.js');
+      const { getJobDetails } = await import('./jobsService');
 
       vi.mocked(getJobDetails).mockResolvedValue({
         id: 'custom-job-id-789',
@@ -653,7 +649,7 @@ describe('Jobs Handlers', () => {
     });
 
     test('should log admin actions with user context', async () => {
-      const { retryJob } = await import('./jobsService.js');
+      const { retryJob } = await import('./jobsService');
 
       vi.mocked(retryJob).mockResolvedValue({ success: true, message: 'Retried' });
 

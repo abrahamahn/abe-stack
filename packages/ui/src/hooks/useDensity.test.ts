@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useDensity.test.ts
+// packages/ui/src/hooks/useDensity.test.ts
 /** @vitest-environment jsdom */
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';

@@ -305,17 +305,17 @@ export class MediaSecurityScanner {
     } catch {
       // Fallback to extension-based detection
       const ext = path.extname(filePath).toLowerCase();
-      const mimeTypes: Record<string, string> = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.gif': 'image/gif',
-        '.webp': 'image/webp',
-        '.mp3': 'audio/mpeg',
-        '.wav': 'audio/wav',
-        '.mp4': 'video/mp4',
-      };
-      return mimeTypes[ext] ?? 'application/octet-stream';
+      const mimeTypes = new Map<string, string>([
+        ['.jpg', 'image/jpeg'],
+        ['.jpeg', 'image/jpeg'],
+        ['.png', 'image/png'],
+        ['.gif', 'image/gif'],
+        ['.webp', 'image/webp'],
+        ['.mp3', 'audio/mpeg'],
+        ['.wav', 'audio/wav'],
+        ['.mp4', 'video/mp4'],
+      ]);
+      return mimeTypes.get(ext) ?? 'application/octet-stream';
     }
   }
 
@@ -323,16 +323,16 @@ export class MediaSecurityScanner {
    * Get expected file signature for a MIME type
    */
   private getExpectedSignature(mimeType: string): Buffer | null {
-    const signatures: Record<string, Buffer> = {
-      'image/jpeg': Buffer.from([0xff, 0xd8, 0xff]),
-      'image/png': Buffer.from([0x89, 0x50, 0x4e, 0x47]),
-      'image/gif': Buffer.from([0x47, 0x49, 0x46]),
-      'image/webp': Buffer.from([0x52, 0x49, 0x46, 0x46]),
-      'audio/mpeg': Buffer.from([0xff, 0xfb]),
-      'video/mp4': Buffer.from([0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70]),
-    };
+    const signatures = new Map<string, Buffer>([
+      ['image/jpeg', Buffer.from([0xff, 0xd8, 0xff])],
+      ['image/png', Buffer.from([0x89, 0x50, 0x4e, 0x47])],
+      ['image/gif', Buffer.from([0x47, 0x49, 0x46])],
+      ['image/webp', Buffer.from([0x52, 0x49, 0x46, 0x46])],
+      ['audio/mpeg', Buffer.from([0xff, 0xfb])],
+      ['video/mp4', Buffer.from([0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70])],
+    ]);
 
-    return signatures[mimeType] ?? null;
+    return signatures.get(mimeType) ?? null;
   }
 
   /**

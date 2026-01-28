@@ -15,13 +15,15 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock dependencies before importing the module
-const mockBuildConnectionString = vi.fn();
-const mockCreateDbClient = vi.fn();
-const mockRaw = vi.fn();
-const mockClose = vi.fn();
+// Use vi.hoisted to ensure mock functions are available when vi.mock factory runs
+const { mockBuildConnectionString, mockCreateDbClient, mockRaw, mockClose } = vi.hoisted(() => ({
+  mockBuildConnectionString: vi.fn(),
+  mockCreateDbClient: vi.fn(),
+  mockRaw: vi.fn(),
+  mockClose: vi.fn(),
+}));
 
-vi.mock('@database', () => ({
+vi.mock('../infrastructure/data/database', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
 }));
@@ -77,7 +79,7 @@ describe('db-push script', () => {
 
   describe('pushSchema function', () => {
     it('should execute all SQL statements in sequence', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -88,7 +90,7 @@ describe('db-push script', () => {
     });
 
     it('should build connection string from environment', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -96,7 +98,7 @@ describe('db-push script', () => {
     });
 
     it('should create database client with connection string', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -104,7 +106,7 @@ describe('db-push script', () => {
     });
 
     it('should create pgcrypto extension first', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -113,7 +115,7 @@ describe('db-push script', () => {
     });
 
     it('should create users table with correct schema', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -132,7 +134,7 @@ describe('db-push script', () => {
     });
 
     it('should create refresh_token_families table with foreign key to users', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -149,7 +151,7 @@ describe('db-push script', () => {
     });
 
     it('should create refresh_tokens table with family relationship', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -166,7 +168,7 @@ describe('db-push script', () => {
     });
 
     it('should create login_attempts table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -182,7 +184,7 @@ describe('db-push script', () => {
     });
 
     it('should create password_reset_tokens table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -199,7 +201,7 @@ describe('db-push script', () => {
     });
 
     it('should create email_verification_tokens table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -215,7 +217,7 @@ describe('db-push script', () => {
     });
 
     it('should create security_events table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -232,7 +234,7 @@ describe('db-push script', () => {
     });
 
     it('should create magic_link_tokens table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -249,7 +251,7 @@ describe('db-push script', () => {
     });
 
     it('should create oauth_connections table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -267,7 +269,7 @@ describe('db-push script', () => {
     });
 
     it('should create push_subscriptions table', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -285,7 +287,7 @@ describe('db-push script', () => {
     });
 
     it('should create notification_preferences table with jsonb columns', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -302,7 +304,7 @@ describe('db-push script', () => {
     });
 
     it('should create all required indexes', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -326,7 +328,7 @@ describe('db-push script', () => {
     });
 
     it('should create unique index on notification_preferences user_id', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -338,7 +340,7 @@ describe('db-push script', () => {
     });
 
     it('should close database connection after schema push', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -348,7 +350,7 @@ describe('db-push script', () => {
     it('should close connection even if an error occurs', async () => {
       mockRaw.mockRejectedValueOnce(new Error('SQL execution failed'));
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('SQL execution failed');
 
@@ -358,7 +360,7 @@ describe('db-push script', () => {
     });
 
     it('should execute statements in correct order', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -383,7 +385,7 @@ describe('db-push script', () => {
         throw new Error('Missing DATABASE_URL');
       });
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Missing DATABASE_URL');
     });
@@ -393,7 +395,7 @@ describe('db-push script', () => {
         throw new Error('Connection failed');
       });
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Connection failed');
     });
@@ -401,7 +403,7 @@ describe('db-push script', () => {
     it('should propagate SQL execution errors', async () => {
       mockRaw.mockRejectedValueOnce(new Error('Syntax error in SQL'));
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Syntax error in SQL');
     });
@@ -409,7 +411,7 @@ describe('db-push script', () => {
     it('should handle connection close errors gracefully', async () => {
       mockClose.mockRejectedValueOnce(new Error('Connection already closed'));
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Connection already closed');
     });
@@ -425,7 +427,7 @@ describe('db-push script', () => {
         return Promise.resolve([]);
       });
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Permission denied');
 
@@ -437,7 +439,7 @@ describe('db-push script', () => {
 
   describe('main module execution', () => {
     it('should call pushSchema when run as main module', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       // Simulate main module execution
       await expect(pushSchema()).resolves.toBeUndefined();
@@ -447,7 +449,7 @@ describe('db-push script', () => {
     });
 
     it('should handle successful execution with proper logging', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -459,7 +461,7 @@ describe('db-push script', () => {
     it('should throw error on schema push failure', async () => {
       mockRaw.mockRejectedValueOnce(new Error('Database error'));
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await expect(pushSchema()).rejects.toThrow('Database error');
     });
@@ -468,7 +470,7 @@ describe('db-push script', () => {
 
   describe('SQL statement validation', () => {
     it('should use IF NOT EXISTS for all CREATE statements', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -481,7 +483,7 @@ describe('db-push script', () => {
     });
 
     it('should use CASCADE delete for user-dependent tables', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -506,7 +508,7 @@ describe('db-push script', () => {
     });
 
     it('should use SET NULL delete for optional relationships', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -526,7 +528,7 @@ describe('db-push script', () => {
     });
 
     it('should define timestamptz columns with proper defaults', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -555,7 +557,7 @@ describe('db-push script', () => {
         return Promise.resolve([]);
       });
 
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 
@@ -566,7 +568,7 @@ describe('db-push script', () => {
     });
 
     it('should not leave connections open on success', async () => {
-      const { pushSchema } = await import('./db-push.js');
+      const { pushSchema } = await import('./db-push');
 
       await pushSchema();
 

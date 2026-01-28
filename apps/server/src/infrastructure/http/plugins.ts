@@ -2,8 +2,8 @@
 
 import path from 'node:path';
 
-import { RateLimiter } from '@rate-limit/index';
-import { isAppError, type ApiErrorResponse } from '@shared/index';
+import { isAppError, type ApiErrorResponse } from '@abe-stack/core/infrastructure/errors';
+import { RateLimiter } from '@security/rate-limit';
 
 import {
     applyCors,
@@ -163,15 +163,17 @@ export function registerPlugins(server: FastifyInstance, config: AppConfig): voi
       details = undefined; // Never leak internal details in production
     }
 
+    const errorPayload: { code: string; message: string; details?: Record<string, unknown>; correlationId: string } = {
+      code,
+      message,
+      correlationId,
+    };
+    if (details !== undefined) {
+      errorPayload.details = details;
+    }
     const response: ApiErrorResponse = {
       ok: false,
-      error: {
-        code,
-        message,
-        details,
-        // Always include correlation ID for error tracking/support
-        correlationId,
-      },
+      error: errorPayload,
     };
 
     void reply.status(statusCode).send(response);

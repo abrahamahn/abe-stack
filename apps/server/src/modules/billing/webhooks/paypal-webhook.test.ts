@@ -12,7 +12,7 @@
 
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
-import { PayPalProvider } from '@infrastructure/billing';
+import { PayPalProvider } from '@/infrastructure/billing';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { handlePayPalWebhook } from './paypal-webhook';
@@ -37,8 +37,18 @@ import type { FastifyBaseLogger } from 'fastify';
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@infrastructure/billing', () => ({
-  PayPalProvider: vi.fn(),
+// Use vi.hoisted to create mock that can be referenced in vi.mock factory
+const { MockPayPalProvider } = vi.hoisted(() => {
+  return { MockPayPalProvider: vi.fn() };
+});
+
+// Mock the billing infrastructure module
+vi.mock('@/infrastructure/billing', () => ({
+  PayPalProvider: MockPayPalProvider,
+  // Re-export other members as-is (they're not used in this test)
+  StripeProvider: vi.fn(),
+  createBillingProvider: vi.fn(),
+  isBillingConfigured: vi.fn(),
 }));
 
 // ============================================================================
@@ -175,12 +185,13 @@ describe('handlePayPalWebhook', () => {
     mockParseWebhookEvent = vi.fn();
 
     // Mock PayPalProvider as a class constructor
-    vi.mocked(PayPalProvider).mockImplementation(
-      function (this: any) {
+    // Use MockPayPalProvider which is the hoisted mock used in vi.mock
+    MockPayPalProvider.mockImplementation(
+      function (this: { verifyWebhookSignature: Mock; parseWebhookEvent: Mock }) {
         this.verifyWebhookSignature = mockVerifyWebhookSignature;
         this.parseWebhookEvent = mockParseWebhookEvent;
         return this;
-      } as any,
+      },
     );
   });
 
@@ -193,7 +204,10 @@ describe('handlePayPalWebhook', () => {
 
       await expect(
         handlePayPalWebhook(payload, signature, config, repos, log),
-      ).rejects.toThrow(WebhookSignatureError);
+      ).rejects.toMatchObject({
+        name: 'WebhookSignatureError',
+        code: 'WEBHOOK_SIGNATURE_INVALID',
+      });
     });
 
     it('should proceed when signature is valid', async () => {
@@ -263,7 +277,10 @@ describe('handlePayPalWebhook', () => {
 
       await expect(
         handlePayPalWebhook(payload, signature, config, repos, log),
-      ).rejects.toThrow(WebhookEventAlreadyProcessedError);
+      ).rejects.toMatchObject({
+        name: 'WebhookEventAlreadyProcessedError',
+        code: 'WEBHOOK_EVENT_ALREADY_PROCESSED',
+      });
 
       expect(log.info).toHaveBeenCalledWith(
         { eventId },

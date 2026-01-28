@@ -1,4 +1,4 @@
-// packages/sdk/src/storage/__tests__/idb.test.ts
+// packages/sdk/src/storage/idb.test.ts
 /**
  * IDB Tests
  *

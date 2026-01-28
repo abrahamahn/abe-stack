@@ -1,3 +1,4 @@
+// apps/server/src/modules/auth/utils/refresh-token.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/utils/refresh-token.test.ts
 /**
@@ -7,8 +8,7 @@
  * and token reuse attack detection with proper database mocking.
  */
 
-import { TokenReuseError } from '@abe-stack/core';
-import { logTokenFamilyRevokedEvent, logTokenReuseEvent, withTransaction } from '@infrastructure';
+import { logTokenFamilyRevokedEvent, logTokenReuseEvent, withTransaction } from '@/infrastructure';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
@@ -21,7 +21,7 @@ import {
 } from './refresh-token';
 
 import type { RefreshToken, RefreshTokenFamily, User } from '@abe-stack/db';
-import type { DbClient } from '@infrastructure';
+import type { DbClient } from '../../../infrastructure';
 
 // ============================================================================
 // Mock Dependencies
@@ -32,8 +32,8 @@ vi.mock('./jwt', () => ({
   getRefreshTokenExpiry: vi.fn(),
 }));
 
-vi.mock('@infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
+vi.mock('@/infrastructure', async () => {
+  const actual = await vi.importActual<typeof import('@/infrastructure')>('@/infrastructure');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => callback(db)),
@@ -373,7 +373,7 @@ describe('rotateRefreshToken', () => {
 
       await expect(
         rotateRefreshToken(db, 'old-token', '127.0.0.1', 'Mozilla/5.0'),
-      ).rejects.toThrow(TokenReuseError);
+      ).rejects.toThrow('Token has already been used');
 
       expect(logTokenReuseEvent).toHaveBeenCalledWith(
         db,
@@ -431,7 +431,7 @@ describe('rotateRefreshToken', () => {
 
       await expect(
         rotateRefreshToken(db, mockToken.token, '127.0.0.1', 'Mozilla/5.0', 7, 30),
-      ).rejects.toThrow(TokenReuseError);
+      ).rejects.toThrow('Token has already been used');
 
       expect(logTokenReuseEvent).toHaveBeenCalled();
       expect(logTokenFamilyRevokedEvent).toHaveBeenCalled();

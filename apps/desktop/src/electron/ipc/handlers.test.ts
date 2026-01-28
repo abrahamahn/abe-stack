@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/ipc/__tests__/handlers.test.ts
+// apps/desktop/src/electron/ipc/handlers.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock types
@@ -87,7 +87,7 @@ vi.mock('electron', () => {
 });
 
 // Import the module under test
-import { registerIPCHandlers } from '../handlers';
+import { registerIPCHandlers } from './handlers';
 
 describe('registerIPCHandlers', () => {
   let mockMainWindow: MockBrowserWindow;

@@ -1,4 +1,9 @@
-// apps/server/src/modules/auth/__tests__/handlers.test.ts
+// apps/server/src/modules/auth/handlers.test.ts
+/**
+ * Auth Handlers Integration Tests
+ *
+ * Tests the auth handler functions by mocking service layer dependencies.
+ */
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -6,6 +11,106 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@abe-stack/core';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { ERROR_MESSAGES, REFRESH_COOKIE_NAME, SUCCESS_MESSAGES } from '../../shared';
+
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../shared';
+
+// ============================================================================
+// Mock Dependencies - use vi.hoisted() so mocks are available before vi.mock
+// ============================================================================
+
+const {
+  mockRegisterUser,
+  mockAuthenticateUser,
+  mockRefreshUserTokens,
+  mockLogoutUser,
+  mockRequestPasswordReset,
+  mockResetPassword,
+  mockVerifyEmail,
+  mockSetRefreshTokenCookie,
+  mockClearRefreshTokenCookie,
+  mockVerifyToken,
+  mockMapErrorToResponse,
+} = vi.hoisted(() => ({
+  mockRegisterUser: vi.fn(),
+  mockAuthenticateUser: vi.fn(),
+  mockRefreshUserTokens: vi.fn(),
+  mockLogoutUser: vi.fn(),
+  mockRequestPasswordReset: vi.fn(),
+  mockResetPassword: vi.fn(),
+  mockVerifyEmail: vi.fn(),
+  mockSetRefreshTokenCookie: vi.fn(),
+  mockClearRefreshTokenCookie: vi.fn(),
+  mockVerifyToken: vi.fn(),
+  // Error mapper that checks error.name instead of instanceof (ESM compatibility)
+  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log?: { error?: unknown } }) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'EmailAlreadyExistsError':
+          return { status: 409, body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
+        case 'WeakPasswordError':
+          return { status: 400, body: { message: ERROR_MESSAGES.WEAK_PASSWORD } };
+        case 'InvalidCredentialsError':
+          return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
+        case 'AccountLockedError':
+          return { status: 429, body: { message: ERROR_MESSAGES.ACCOUNT_LOCKED } };
+        case 'InvalidTokenError':
+          return { status: 400, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+        default:
+          if (ctx.log && typeof ctx.log.error === 'function') {
+            (ctx.log.error as (obj: object, msg: string) => void)(
+              { error: error.message },
+              'Internal error',
+            );
+          }
+          return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+      }
+    }
+    if (ctx.log && typeof ctx.log.error === 'function') {
+      (ctx.log.error as (obj: object, msg: string) => void)({ error: 'Unknown' }, 'Internal error');
+    }
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }),
+}));
+
+// Mock the service module - use path that handlers use via @auth/service alias
+vi.mock('./service', () => ({
+  registerUser: mockRegisterUser,
+  authenticateUser: mockAuthenticateUser,
+  refreshUserTokens: mockRefreshUserTokens,
+  logoutUser: mockLogoutUser,
+  requestPasswordReset: mockRequestPasswordReset,
+  resetPassword: mockResetPassword,
+  verifyEmail: mockVerifyEmail,
+  createEmailVerificationToken: vi.fn(),
+}));
+
+// Mock utilities
+vi.mock('./utils', () => ({
+  verifyToken: mockVerifyToken,
+  setRefreshTokenCookie: mockSetRefreshTokenCookie,
+  clearRefreshTokenCookie: mockClearRefreshTokenCookie,
+  hashPassword: vi.fn(),
+  verifyPasswordSafe: vi.fn(),
+  createAccessToken: vi.fn(),
+  createRefreshTokenFamily: vi.fn(),
+  rotateRefreshToken: vi.fn(),
+  createAuthResponse: vi.fn(),
+  needsRehash: vi.fn(),
+}));
+
+// Mock @shared to provide working mapErrorToResponse
+vi.mock('../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
+
+// Import handlers AFTER mocks are set up
 import {
   handleForgotPassword,
   handleLogin,
@@ -14,67 +119,7 @@ import {
   handleRegister,
   handleResetPassword,
   handleVerifyEmail,
-} from '@auth/handlers';
-import {
-  authenticateUser,
-  logoutUser,
-  refreshUserTokens,
-  registerUser,
-  requestPasswordReset,
-  resetPassword,
-  verifyEmail,
-} from '@auth/service';
-import {
-  clearRefreshTokenCookie,
-  setRefreshTokenCookie,
-  verifyToken as verifyJwtToken,
-} from '@auth/utils';
-import { ERROR_MESSAGES, REFRESH_COOKIE_NAME, SUCCESS_MESSAGES } from '@shared';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
-
-// ============================================================================
-// Mock Dependencies
-// ============================================================================
-
-// Mock @abe-stack/auth (needed because service.ts imports from it)
-vi.mock('@abe-stack/auth', () => ({
-  createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
-    accessToken,
-    refreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
-  })),
-}));
-
-// Mock the service module
-vi.mock('@auth/service', () => ({
-  registerUser: vi.fn(),
-  authenticateUser: vi.fn(),
-  refreshUserTokens: vi.fn(),
-  logoutUser: vi.fn(),
-  requestPasswordReset: vi.fn(),
-  resetPassword: vi.fn(),
-  verifyEmail: vi.fn(),
-  createEmailVerificationToken: vi.fn(),
-}));
-
-// Mock config
-vi.mock('@config', () => ({
-  getRefreshCookieOptions: vi.fn(() => ({
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    path: '/',
-  })),
-}));
-
-// Mock utilities
-vi.mock('../utils', () => ({
-  verifyToken: vi.fn(),
-  setRefreshTokenCookie: vi.fn(),
-  clearRefreshTokenCookie: vi.fn(),
-}));
+} from './handlers';
 
 // ============================================================================
 // Test Helpers
@@ -145,7 +190,7 @@ describe('handleRegister', () => {
       email: 'test@example.com',
     };
 
-    vi.mocked(registerUser).mockResolvedValue(mockResult);
+    mockRegisterUser.mockResolvedValue(mockResult);
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -160,9 +205,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'existing@example.com', password: 'StrongPass123!' };
 
-    vi.mocked(registerUser).mockRejectedValue(
-      new EmailAlreadyExistsError('Email already registered'),
-    );
+    mockRegisterUser.mockRejectedValue(new EmailAlreadyExistsError('Email already registered'));
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -176,9 +219,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'weak' };
 
-    vi.mocked(registerUser).mockRejectedValue(
-      new WeakPasswordError({ errors: ['Password too short'] }),
-    );
+    mockRegisterUser.mockRejectedValue(new WeakPasswordError({ errors: ['Password too short'] }));
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -193,7 +234,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'StrongPass123!' };
 
-    vi.mocked(registerUser).mockRejectedValue(new Error('Database connection failed'));
+    mockRegisterUser.mockRejectedValue(new Error('Database connection failed'));
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -233,7 +274,7 @@ describe('handleLogin', () => {
       },
     };
 
-    vi.mocked(authenticateUser).mockResolvedValue(mockResult);
+    mockAuthenticateUser.mockResolvedValue(mockResult);
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -242,8 +283,12 @@ describe('handleLogin', () => {
       token: 'access-token',
       user: mockResult.user,
     });
-    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
-    expect(authenticateUser).toHaveBeenCalledWith(
+    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
+      reply,
+      'refresh-token',
+      ctx.config.auth,
+    );
+    expect(mockAuthenticateUser).toHaveBeenCalledWith(
       ctx.db,
       ctx.repos,
       ctx.config.auth,
@@ -262,7 +307,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'wrongpassword' };
 
-    vi.mocked(authenticateUser).mockRejectedValue(new InvalidCredentialsError());
+    mockAuthenticateUser.mockRejectedValue(new InvalidCredentialsError());
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -277,7 +322,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'locked@example.com', password: 'password123' };
 
-    vi.mocked(authenticateUser).mockRejectedValue(new AccountLockedError());
+    mockAuthenticateUser.mockRejectedValue(new AccountLockedError());
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -291,7 +336,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'password123' };
 
-    vi.mocked(authenticateUser).mockRejectedValue(new Error('Unexpected error'));
+    mockAuthenticateUser.mockRejectedValue(new Error('Unexpected error'));
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -320,13 +365,17 @@ describe('handleRefresh', () => {
       refreshToken: 'new-refresh-token',
     };
 
-    vi.mocked(refreshUserTokens).mockResolvedValue(mockResult);
+    mockRefreshUserTokens.mockResolvedValue(mockResult);
 
     const result = await handleRefresh(ctx, request, reply);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ token: 'new-access-token' });
-    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'new-refresh-token', ctx.config.auth);
+    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
+      reply,
+      'new-refresh-token',
+      ctx.config.auth,
+    );
   });
 
   test('should return 401 when no refresh token is provided', async () => {
@@ -338,7 +387,7 @@ describe('handleRefresh', () => {
 
     expect(result.status).toBe(401);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.NO_REFRESH_TOKEN });
-    expect(refreshUserTokens).not.toHaveBeenCalled();
+    expect(mockRefreshUserTokens).not.toHaveBeenCalled();
   });
 
   test('should return 401 and clear cookie on invalid token', async () => {
@@ -346,13 +395,13 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
     const reply = createMockReply();
 
-    vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
+    mockRefreshUserTokens.mockRejectedValue(new InvalidTokenError());
 
     const result = await handleRefresh(ctx, request, reply);
 
     expect(result.status).toBe(401);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
-    expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+    expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
   });
 
   test('should return 500 on unexpected errors', async () => {
@@ -360,7 +409,7 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
     const reply = createMockReply();
 
-    vi.mocked(refreshUserTokens).mockRejectedValue(new Error('Database error'));
+    mockRefreshUserTokens.mockRejectedValue(new Error('Database error'));
 
     const result = await handleRefresh(ctx, request, reply);
 
@@ -384,14 +433,14 @@ describe('handleLogout', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'refresh-token' });
     const reply = createMockReply();
 
-    vi.mocked(logoutUser).mockResolvedValue(undefined);
+    mockLogoutUser.mockResolvedValue(undefined);
 
     const result = await handleLogout(ctx, request, reply);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
-    expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
-    expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'refresh-token');
+    expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+    expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'refresh-token');
   });
 
   test('should return 200 even when no refresh token cookie exists', async () => {
@@ -399,14 +448,14 @@ describe('handleLogout', () => {
     const request = createMockRequest(); // No cookies
     const reply = createMockReply();
 
-    vi.mocked(logoutUser).mockResolvedValue(undefined);
+    mockLogoutUser.mockResolvedValue(undefined);
 
     const result = await handleLogout(ctx, request, reply);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
-    expect(clearRefreshTokenCookie).toHaveBeenCalled();
-    expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
+    expect(mockClearRefreshTokenCookie).toHaveBeenCalled();
+    expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
   });
 
   test('should return 500 on unexpected errors', async () => {
@@ -414,7 +463,7 @@ describe('handleLogout', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'refresh-token' });
     const reply = createMockReply();
 
-    vi.mocked(logoutUser).mockRejectedValue(new Error('Database error'));
+    mockLogoutUser.mockRejectedValue(new Error('Database error'));
 
     const result = await handleLogout(ctx, request, reply);
 
@@ -437,13 +486,13 @@ describe('handleForgotPassword', () => {
     const ctx = createMockContext();
     const body = { email: 'test@example.com' };
 
-    vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+    mockRequestPasswordReset.mockResolvedValue(undefined);
 
     const result = await handleForgotPassword(ctx, body);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
-    expect(requestPasswordReset).toHaveBeenCalledWith(
+    expect(mockRequestPasswordReset).toHaveBeenCalledWith(
       ctx.db,
       ctx.repos,
       ctx.email,
@@ -456,7 +505,7 @@ describe('handleForgotPassword', () => {
     const ctx = createMockContext();
     const body = { email: 'test@example.com' };
 
-    vi.mocked(requestPasswordReset).mockRejectedValue(new Error('Database error'));
+    mockRequestPasswordReset.mockRejectedValue(new Error('Database error'));
 
     const result = await handleForgotPassword(ctx, body);
 
@@ -479,13 +528,13 @@ describe('handleResetPassword', () => {
     const ctx = createMockContext();
     const body = { token: 'reset-token', password: 'newPassword123!' };
 
-    vi.mocked(resetPassword).mockResolvedValue(undefined);
+    mockResetPassword.mockResolvedValue(undefined);
 
     const result = await handleResetPassword(ctx, body);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: 'Password reset successfully' });
-    expect(resetPassword).toHaveBeenCalledWith(
+    expect(mockResetPassword).toHaveBeenCalledWith(
       ctx.db,
       ctx.repos,
       ctx.config.auth,
@@ -498,7 +547,7 @@ describe('handleResetPassword', () => {
     const ctx = createMockContext();
     const body = { token: 'reset-token', password: 'weak' };
 
-    vi.mocked(resetPassword).mockRejectedValue(new WeakPasswordError({ errors: ['Too weak'] }));
+    mockResetPassword.mockRejectedValue(new WeakPasswordError({ errors: ['Too weak'] }));
 
     const result = await handleResetPassword(ctx, body);
 
@@ -511,7 +560,7 @@ describe('handleResetPassword', () => {
     const ctx = createMockContext();
     const body = { token: 'invalid-token', password: 'newPassword123!' };
 
-    vi.mocked(resetPassword).mockRejectedValue(new InvalidTokenError('Invalid token'));
+    mockResetPassword.mockRejectedValue(new InvalidTokenError('Invalid token'));
 
     const result = await handleResetPassword(ctx, body);
 
@@ -523,7 +572,7 @@ describe('handleResetPassword', () => {
     const ctx = createMockContext();
     const body = { token: 'reset-token', password: 'newPassword123!' };
 
-    vi.mocked(resetPassword).mockRejectedValue(new Error('Database error'));
+    mockResetPassword.mockRejectedValue(new Error('Database error'));
 
     const result = await handleResetPassword(ctx, body);
 
@@ -557,7 +606,7 @@ describe('handleVerifyEmail', () => {
       role: 'user' as const,
       createdAt,
     };
-    vi.mocked(verifyEmail).mockResolvedValue({
+    mockVerifyEmail.mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
       user: mockUser,
@@ -571,8 +620,17 @@ describe('handleVerifyEmail', () => {
       token: 'access-token',
       user: mockUser,
     });
-    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, ctx.repos, ctx.config.auth, 'verify-token');
-    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
+    expect(mockVerifyEmail).toHaveBeenCalledWith(
+      ctx.db,
+      ctx.repos,
+      ctx.config.auth,
+      'verify-token',
+    );
+    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
+      reply,
+      'refresh-token',
+      ctx.config.auth,
+    );
   });
 
   test('should return bad request for invalid token', async () => {
@@ -580,7 +638,7 @@ describe('handleVerifyEmail', () => {
     const reply = createMockReply();
     const body = { token: 'invalid-token' };
 
-    vi.mocked(verifyEmail).mockRejectedValue(new InvalidTokenError('Invalid token'));
+    mockVerifyEmail.mockRejectedValue(new InvalidTokenError('Invalid token'));
 
     const result = await handleVerifyEmail(ctx, body, reply);
 
@@ -594,7 +652,7 @@ describe('handleVerifyEmail', () => {
     const reply = createMockReply();
     const body = { token: 'verify-token' };
 
-    vi.mocked(verifyEmail).mockRejectedValue(new Error('Database error'));
+    mockVerifyEmail.mockRejectedValue(new Error('Database error'));
 
     const result = await handleVerifyEmail(ctx, body, reply);
 
@@ -621,20 +679,20 @@ describe('verifyToken (from utils/jwt)', () => {
       role: 'user' as const,
     };
 
-    vi.mocked(verifyJwtToken).mockReturnValue(mockPayload);
+    mockVerifyToken.mockReturnValue(mockPayload);
 
-    const result = verifyJwtToken('valid-token', 'secret-key-32-characters-long!!');
+    const result = mockVerifyToken('valid-token', 'secret-key-32-characters-long!!');
 
     expect(result).toEqual(mockPayload);
-    expect(verifyJwtToken).toHaveBeenCalledWith('valid-token', 'secret-key-32-characters-long!!');
+    expect(mockVerifyToken).toHaveBeenCalledWith('valid-token', 'secret-key-32-characters-long!!');
   });
 
   test('should throw error for invalid token', () => {
-    vi.mocked(verifyJwtToken).mockImplementation(() => {
+    mockVerifyToken.mockImplementation(() => {
       throw new Error('Invalid token');
     });
 
-    expect(() => verifyJwtToken('invalid-token', 'secret-key-32-characters-long!!')).toThrow(
+    expect(() => mockVerifyToken('invalid-token', 'secret-key-32-characters-long!!')).toThrow(
       'Invalid token',
     );
   });

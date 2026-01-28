@@ -178,7 +178,7 @@ async function refreshProviderToken(
 
   const data = (await response.json()) as ProviderTokenResponse;
 
-  if (!data.access_token) {
+  if (data.access_token === '') {
     throw new Error('No access token in refresh response');
   }
 
@@ -265,7 +265,7 @@ export async function refreshExpiringOAuthTokens(
     const provider = connection.provider as OAuthProvider;
     const providerConfig = providerConfigs[provider];
 
-    if (!providerConfig) {
+    if (providerConfig === undefined) {
       result.failureCount++;
       result.failures.push({
         connectionId: connection.id,

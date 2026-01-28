@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/Radio.test.tsx
+// packages/ui/src/components/Radio.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

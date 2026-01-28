@@ -14,7 +14,7 @@ import {
 } from './processor';
 import { CustomJobQueue } from './queue';
 
-import type { Logger } from '@logger';
+import type { Logger } from '@monitor/logger';
 
 export interface MediaJobData {
   fileId: string;

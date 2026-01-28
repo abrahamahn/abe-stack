@@ -1,14 +1,14 @@
-// apps/web/src/api/__tests__/ApiProvider.test.tsx
+// apps/web/src/api/ApiProvider.test.tsx
 import { QueryCache } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
-import { ClientEnvironmentProvider } from '@app';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ClientEnvironmentProvider } from '../app';
 
 import { ApiProvider, useApi } from './ApiProvider';
 
-import type { ClientConfig, ClientEnvironment } from '@app';
-import type { AuthService } from '@features/auth';
+import type { ClientConfig, ClientEnvironment } from '../app';
+import type { AuthService } from '../features/auth';
 
 // Use vi.hoisted to hoist mock functions along with vi.mock
 const { mockTokenGet } = vi.hoisted(() => ({

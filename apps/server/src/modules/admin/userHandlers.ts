@@ -44,25 +44,28 @@ export async function handleListUsers(
     // Parse query parameters from the request
     const query = (request.query ?? {}) as Record<string, unknown>;
 
-    const filters: AdminUserListFilters = {
-      search: typeof query.search === 'string' ? query.search : undefined,
-      role:
-        typeof query.role === 'string' ? (query.role as AdminUserListFilters['role']) : undefined,
-      status:
-        typeof query.status === 'string'
-          ? (query.status as AdminUserListFilters['status'])
-          : undefined,
-      sortBy:
-        typeof query.sortBy === 'string'
-          ? (query.sortBy as AdminUserListFilters['sortBy'])
-          : undefined,
-      sortOrder:
-        typeof query.sortOrder === 'string'
-          ? (query.sortOrder as AdminUserListFilters['sortOrder'])
-          : undefined,
-      page: query.page !== undefined && query.page !== null ? Number(query.page) : undefined,
-      limit: query.limit !== undefined && query.limit !== null ? Number(query.limit) : undefined,
-    };
+    const filters: AdminUserListFilters = {};
+    if (typeof query['search'] === 'string') {
+      filters.search = query['search'];
+    }
+    if (typeof query['role'] === 'string') {
+      filters.role = query['role'] as 'user' | 'admin' | 'moderator';
+    }
+    if (typeof query['status'] === 'string') {
+      filters.status = query['status'] as 'active' | 'locked' | 'unverified';
+    }
+    if (typeof query['sortBy'] === 'string') {
+      filters.sortBy = query['sortBy'] as 'email' | 'name' | 'createdAt' | 'updatedAt';
+    }
+    if (typeof query['sortOrder'] === 'string') {
+      filters.sortOrder = query['sortOrder'] as 'asc' | 'desc';
+    }
+    if (query['page'] !== undefined && query['page'] !== null) {
+      filters.page = Number(query['page']);
+    }
+    if (query['limit'] !== undefined && query['limit'] !== null) {
+      filters.limit = Number(query['limit']);
+    }
 
     const result = await listUsers(ctx.repos.users, filters);
 
@@ -101,7 +104,7 @@ export async function handleGetUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (userId === undefined || userId === '') {
+    if (userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -143,7 +146,7 @@ export async function handleUpdateUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (userId === undefined || userId === '') {
+    if (userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -194,7 +197,7 @@ export async function handleLockUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (userId === undefined || userId === '') {
+    if (userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -255,7 +258,7 @@ export async function handleUnlockUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (userId === undefined || userId === '') {
+    if (userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 

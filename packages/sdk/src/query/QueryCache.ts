@@ -430,7 +430,7 @@ export class QueryCache {
     let count = 0;
     for (const [hash, entry] of this.queries) {
       if (predicate === undefined || predicate(JSON.parse(hash) as QueryKey)) {
-        if (entry.gcTimeout !== null && entry.gcTimeout !== undefined) {
+        if (entry.gcTimeout !== undefined) {
           clearTimeout(entry.gcTimeout);
         }
         this.queries.delete(hash);
@@ -545,7 +545,7 @@ export class QueryCache {
 
     for (const [hash, entry] of this.queries) {
       if (entry.subscribers.size === 0 && now - entry.lastAccessedAt > entry.gcTime) {
-        if (entry.gcTimeout !== null && entry.gcTimeout !== undefined) {
+        if (entry.gcTimeout !== undefined) {
           clearTimeout(entry.gcTimeout);
         }
         this.queries.delete(hash);

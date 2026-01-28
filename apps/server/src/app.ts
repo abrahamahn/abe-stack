@@ -1,6 +1,8 @@
 // apps/server/src/app.ts
 import { BaseError, createConsoleLogger } from '@abe-stack/core';
 import { createPostgresPubSub, SubscriptionManager } from '@abe-stack/core/pubsub';
+import { type AppContext, type IServiceContainer } from '@shared';
+
 import {
     createBillingProvider,
     createDbClient,
@@ -15,14 +17,10 @@ import {
     logStartupSummary,
     registerWebSocket,
     requireValidSchema,
-} from '@infrastructure/index';
-import { registerRoutes } from '@modules/index';
-import { type AppContext, type IServiceContainer } from '@shared/index';
-
+} from './infrastructure/index';
+import { registerRoutes } from './modules/index';
 import { createCacheService, type CacheService } from './services/cache-service';
 
-import type { AppConfig, BillingService, FcmConfig as FcmConfigType } from '@abe-stack/core';
-import type { PostgresPubSub } from '@abe-stack/core/pubsub';
 import type {
     DbClient,
     EmailService,
@@ -34,7 +32,9 @@ import type {
     ServerSearchProvider,
     StorageProvider,
     WriteService,
-} from '@infrastructure/index';
+} from './infrastructure/index';
+import type { AppConfig, BillingService, FcmConfig as FcmConfigType } from '@abe-stack/core';
+import type { PostgresPubSub } from '@abe-stack/core/pubsub';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 import { buildConnectionString } from '@/config';
@@ -98,12 +98,10 @@ export class App implements IServiceContainer {
     if (options.notifications !== undefined) {
       this.notifications = options.notifications;
     } else {
-      const notificationOptions: NotificationFactoryOptions = {
-        fcm:
-          this.config.notifications.provider === 'fcm'
-            ? (this.config.notifications.config as FcmConfig as FcmConfigType)
-            : undefined,
-      };
+      const notificationOptions: NotificationFactoryOptions = {};
+      if (this.config.notifications.provider === 'fcm') {
+        notificationOptions.fcm = this.config.notifications.config as FcmConfig as FcmConfigType;
+      }
       this.notifications = createNotificationService(notificationOptions);
     }
 
@@ -162,7 +160,7 @@ export class App implements IServiceContainer {
     if (pubsubConnString !== null && pubsubConnString !== '' && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
-        onMessage: (key: string, version: string) => {
+        onMessage: (key, version) => {
           this.pubsub.publishLocal(key, version);
         },
         onError: (err: Error) => {

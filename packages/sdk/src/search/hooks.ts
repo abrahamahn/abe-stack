@@ -389,7 +389,7 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
 
   // Flatten data from all pages
   const data = useMemo(() => {
-    if (infiniteResult.data?.pages === undefined || infiniteResult.data.pages === null) return [];
+    if (infiniteResult.data?.pages === undefined) return [];
     return infiniteResult.data.pages.flatMap((page: CursorSearchResult<T>) =>
       page.data.map((item: SearchResultItem<T>) => item.item),
     );

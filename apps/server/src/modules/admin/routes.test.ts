@@ -1,3 +1,4 @@
+// apps/server/src/modules/admin/routes.test.ts
 /*
  * Admin Routes Tests
  *

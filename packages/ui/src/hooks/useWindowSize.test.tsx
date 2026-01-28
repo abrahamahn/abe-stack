@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useWindowSize.test.tsx
+// packages/ui/src/hooks/useWindowSize.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

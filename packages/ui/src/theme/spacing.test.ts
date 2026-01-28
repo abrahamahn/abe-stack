@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/spacing.test.ts
+// packages/ui/src/theme/spacing.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { spacing } from './spacing';

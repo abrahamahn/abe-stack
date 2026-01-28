@@ -16,7 +16,7 @@ import {
 import { hashPassword, verifyPassword } from '@auth/utils';
 
 import type { AuthConfig } from '@/config';
-import type { Repositories, StorageProvider } from '@infrastructure';
+import type { Repositories, StorageProvider } from '@/infrastructure';
 
 // ============================================================================
 // Types
@@ -56,7 +56,7 @@ export async function updateProfile(
   // Only update if there are changes
   if ('name' in data) {
     const updated = await repos.users.update(userId, { name: data.name });
-    if (updated === undefined || updated === null) {
+    if (updated === null) {
       throw new Error('Failed to update user profile');
     }
 

@@ -1,10 +1,10 @@
-// apps/server/src/infrastructure/jobs/queue/__tests__/queueServer.test.ts
+// apps/server/src/infrastructure/jobs/queue/queueServer.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMemoryQueueStore, createQueueServer } from '../index';
+import { createMemoryQueueStore, createQueueServer } from './index';
 
-import type { MemoryQueueStore } from '../index';
-import type { TaskHandlers } from '../types';
+import type { MemoryQueueStore } from './index';
+import type { TaskHandlers } from './types';
 
 // ============================================================================
 // QueueServer Tests

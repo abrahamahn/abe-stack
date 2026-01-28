@@ -103,14 +103,18 @@ describe('useUserActions', () => {
 
       const { result } = renderHook(() => useUserActions());
 
-      const updatePromise = act(async () => {
-        await result.current.updateUserAction('user-123', { name: 'Test' });
+      act(() => {
+        void result.current.updateUserAction('user-123', { name: 'Test' });
       });
 
-      expect(result.current.isUpdating).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isUpdating).toBe(true);
+      });
 
-      resolvePromise(mockUpdateResponse);
-      await updatePromise;
+      await act(async () => {
+        resolvePromise(mockUpdateResponse);
+        await promise;
+      });
 
       expect(result.current.isUpdating).toBe(false);
     });
@@ -194,14 +198,18 @@ describe('useUserActions', () => {
 
       const { result } = renderHook(() => useUserActions());
 
-      const lockPromise = act(async () => {
-        await result.current.lockUserAction('user-123', { reason: 'Test' });
+      act(() => {
+        void result.current.lockUserAction('user-123', { reason: 'Test' });
       });
 
-      expect(result.current.isLocking).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isLocking).toBe(true);
+      });
 
-      resolvePromise(mockLockResponse);
-      await lockPromise;
+      await act(async () => {
+        resolvePromise(mockLockResponse);
+        await promise;
+      });
 
       expect(result.current.isLocking).toBe(false);
     });
@@ -267,14 +275,18 @@ describe('useUserActions', () => {
 
       const { result } = renderHook(() => useUserActions());
 
-      const unlockPromise = act(async () => {
-        await result.current.unlockUserAction('user-123', 'Test');
+      act(() => {
+        void result.current.unlockUserAction('user-123', 'Test');
       });
 
-      expect(result.current.isUnlocking).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isUnlocking).toBe(true);
+      });
 
-      resolvePromise(mockLockResponse);
-      await unlockPromise;
+      await act(async () => {
+        resolvePromise(mockLockResponse);
+        await promise;
+      });
 
       expect(result.current.isUnlocking).toBe(false);
     });

@@ -1,9 +1,9 @@
 // apps/server/src/modules/auth/security/events.ts
 import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '@abe-stack/db';
-import { emailTemplates } from '@email';
+import { emailTemplates } from '@messaging/email';
 
-import type { DbClient } from '@database';
-import type { EmailService } from '@email';
+import type { DbClient } from '@data/database';
+import type { EmailService } from '@messaging/email';
 
 /**
  * Security event types
@@ -50,13 +50,13 @@ export interface SecurityEventMetadata {
  */
 export interface LogSecurityEventParams {
   db: DbClient;
-  userId?: string;
-  email?: string;
+  userId?: string | undefined;
+  email?: string | undefined;
   eventType: SecurityEventType;
   severity: SecurityEventSeverity;
-  ipAddress?: string;
-  userAgent?: string;
-  metadata?: SecurityEventMetadata;
+  ipAddress?: string | undefined;
+  userAgent?: string | undefined;
+  metadata?: SecurityEventMetadata | undefined;
 }
 
 /**

@@ -1,9 +1,8 @@
-// apps/server/src/modules/admin/__tests__/handlers.test.ts
-import { handleAdminUnlock } from '@admin/handlers';
+// apps/server/src/modules/admin/handlers.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock dependencies
-vi.mock('../service.js', () => ({
+// Mock dependencies - use relative paths to match how vitest resolves modules
+vi.mock('./service', () => ({
   unlockUserAccount: vi.fn(),
   UserNotFoundError: class UserNotFoundError extends Error {
     constructor(message: string) {
@@ -13,7 +12,7 @@ vi.mock('../service.js', () => ({
   },
 }));
 
-vi.mock('@shared', () => ({
+vi.mock('../../shared', () => ({
   ERROR_MESSAGES: {
     UNAUTHORIZED: 'Unauthorized',
     USER_NOT_FOUND: 'User not found',
@@ -23,6 +22,9 @@ vi.mock('@shared', () => ({
     ACCOUNT_UNLOCKED: 'Account unlocked successfully',
   },
 }));
+
+import { handleAdminUnlock } from './handlers';
+import * as service from './service';
 
 describe('Admin Handlers', () => {
   const mockCtx = {
@@ -49,7 +51,7 @@ describe('Admin Handlers', () => {
 
   describe('handleAdminUnlock', () => {
     test('should return 401 when user is not authenticated', async () => {
-      const requestWithoutUser = { ...mockRequest, user: null };
+      const requestWithoutUser = { ...mockRequest, user: undefined };
 
       const result = await handleAdminUnlock(
         mockCtx as never,
@@ -62,8 +64,7 @@ describe('Admin Handlers', () => {
     });
 
     test('should successfully unlock account with reason', async () => {
-      const { unlockUserAccount } = await import('../service.js');
-      (unlockUserAccount as ReturnType<typeof vi.fn>).mockResolvedValue({
+      vi.mocked(service.unlockUserAccount).mockResolvedValue({
         email: 'test@example.com',
       });
 
@@ -82,8 +83,7 @@ describe('Admin Handlers', () => {
     });
 
     test('should pass reason to unlockUserAccount service', async () => {
-      const { unlockUserAccount } = await import('../service.js');
-      (unlockUserAccount as ReturnType<typeof vi.fn>).mockResolvedValue({
+      vi.mocked(service.unlockUserAccount).mockResolvedValue({
         email: 'test@example.com',
       });
 
@@ -94,7 +94,7 @@ describe('Admin Handlers', () => {
         mockRequest as never,
       );
 
-      expect(unlockUserAccount).toHaveBeenCalledWith(
+      expect(service.unlockUserAccount).toHaveBeenCalledWith(
         mockCtx.db,
         'test@example.com',
         'admin-123',
@@ -105,9 +105,8 @@ describe('Admin Handlers', () => {
     });
 
     test('should return 404 when user not found', async () => {
-      const { unlockUserAccount, UserNotFoundError } = await import('../service.js');
-      (unlockUserAccount as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new UserNotFoundError('User not found'),
+      vi.mocked(service.unlockUserAccount).mockRejectedValue(
+        new service.UserNotFoundError('User not found'),
       );
 
       const result = await handleAdminUnlock(
@@ -121,8 +120,7 @@ describe('Admin Handlers', () => {
     });
 
     test('should return 500 on unexpected error', async () => {
-      const { unlockUserAccount } = await import('../service.js');
-      (unlockUserAccount as ReturnType<typeof vi.fn>).mockRejectedValue(
+      vi.mocked(service.unlockUserAccount).mockRejectedValue(
         new Error('Database connection failed'),
       );
 

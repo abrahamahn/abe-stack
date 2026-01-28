@@ -2,34 +2,72 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createServer, isAddrInUse, listen } from './server';
-
 import type { AppConfig } from '@/config/index';
-import type { DbClient } from '@infrastructure/index';
+import type { DbClient } from '@/infrastructure/index';
 import type { HasContext, IServiceContainer } from '@shared/index';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
-// Mock Dependencies
+// Mock Dependencies - Using vi.hoisted for Vitest 4.x compatibility
 // ============================================================================
 
+// Define mock values that can be accessed by vi.mock factories
+const { mockFastifyInstance, mockRegisterPlugins, mockCreateConsoleLogger } = vi.hoisted(() => {
+  const mockFastifyInstance = {
+    log: {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      fatal: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      child: vi.fn().mockReturnThis(),
+    },
+    addHook: vi.fn(),
+    listen: vi.fn(),
+    removeContentTypeParser: vi.fn(),
+    addContentTypeParser: vi.fn(),
+    register: vi.fn(),
+  };
+
+  const mockRegisterPlugins = vi.fn();
+
+  const mockCreateConsoleLogger = vi.fn((level: string) => ({
+    level,
+    stream: {
+      write: vi.fn(),
+    },
+  }));
+
+  return { mockFastifyInstance, mockRegisterPlugins, mockCreateConsoleLogger };
+});
+
+// Mock fastify - must match exact import path in server.ts
 vi.mock('fastify', () => ({
-  default: vi.fn(),
+  default: vi.fn(() => mockFastifyInstance),
 }));
 
 vi.mock('@abe-stack/core', () => ({
-  createConsoleLogger: vi.fn((level: string) => ({
-    level,
-    transport: {
-      target: 'pino-pretty',
-      options: { colorize: true },
-    },
-  })),
+  createConsoleLogger: mockCreateConsoleLogger,
 }));
 
+// Mock the http index - using both alias and relative paths to ensure coverage
 vi.mock('@http/index', () => ({
-  registerPlugins: vi.fn(),
+  registerPlugins: mockRegisterPlugins,
 }));
+
+// Also mock the plugins module directly in case the barrel re-export doesn't work
+vi.mock('./infrastructure/http/plugins', () => ({
+  registerPlugins: mockRegisterPlugins,
+}));
+
+// Also mock with relative path from server.ts perspective
+vi.mock('../infrastructure/http/index', () => ({
+  registerPlugins: mockRegisterPlugins,
+}));
+
+// Import after mocks are set up
+const { createServer, isAddrInUse, listen } = await import('./server');
 
 // ============================================================================
 // Test Helpers
@@ -101,31 +139,37 @@ function createMockApp(): IServiceContainer & HasContext {
 }
 
 function createMockFastifyInstance(): FastifyInstance {
-  const mockInfo = vi.fn();
-  const mockWarn = vi.fn();
-  const mockError = vi.fn();
-  const mockFatal = vi.fn();
-  const mockDebug = vi.fn();
-  const mockTrace = vi.fn();
-  const mockChild = vi.fn().mockReturnThis();
-  const mockAddHook = vi.fn();
-  const mockListen = vi.fn();
-
-  const mockInstance = {
+  return {
     log: {
-      info: mockInfo,
-      warn: mockWarn,
-      error: mockError,
-      fatal: mockFatal,
-      debug: mockDebug,
-      trace: mockTrace,
-      child: mockChild,
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      fatal: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      child: vi.fn().mockReturnThis(),
     },
-    addHook: mockAddHook,
-    listen: mockListen,
-  };
+    addHook: vi.fn(),
+    listen: vi.fn(),
+    removeContentTypeParser: vi.fn(),
+    addContentTypeParser: vi.fn(),
+    register: vi.fn(),
+  } as unknown as FastifyInstance;
+}
 
-  return mockInstance as unknown as FastifyInstance;
+function resetMockFastifyInstance(): void {
+  mockFastifyInstance.log.info.mockClear();
+  mockFastifyInstance.log.warn.mockClear();
+  mockFastifyInstance.log.error.mockClear();
+  mockFastifyInstance.log.fatal.mockClear();
+  mockFastifyInstance.log.debug.mockClear();
+  mockFastifyInstance.log.trace.mockClear();
+  mockFastifyInstance.log.child.mockClear();
+  mockFastifyInstance.addHook.mockClear();
+  mockFastifyInstance.listen.mockClear();
+  mockFastifyInstance.removeContentTypeParser.mockClear();
+  mockFastifyInstance.addContentTypeParser.mockClear();
+  mockFastifyInstance.register.mockClear();
 }
 
 // ============================================================================
@@ -135,24 +179,23 @@ function createMockFastifyInstance(): FastifyInstance {
 describe('createServer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetMockFastifyInstance();
   });
 
   describe('basic server creation', () => {
     it('should create Fastify instance with correct configuration in test environment', async () => {
       const config = createMockConfig();
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
 
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
+      const fastify = await import('fastify');
+      const mockedFastify = vi.mocked(fastify.default);
 
       await createServer({ config, db });
 
       expect(mockedFastify).toHaveBeenCalledWith({
         logger: expect.objectContaining({
           level: 'info',
-          transport: expect.any(Object),
+          stream: expect.any(Object),
         }),
         disableRequestLogging: true,
         trustProxy: false,
@@ -163,11 +206,9 @@ describe('createServer', () => {
     it('should create Fastify instance with production logger configuration', async () => {
       const config = createMockConfig({ env: 'production' });
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
 
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
+      const fastify = await import('fastify');
+      const mockedFastify = vi.mocked(fastify.default);
 
       await createServer({ config, db });
 
@@ -184,11 +225,9 @@ describe('createServer', () => {
       config.server.trustProxy = true;
 
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
 
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
+      const fastify = await import('fastify');
+      const mockedFastify = vi.mocked(fastify.default);
 
       await createServer({ config, db });
 
@@ -204,11 +243,9 @@ describe('createServer', () => {
       config.server.logLevel = 'debug';
 
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
 
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
+      const fastify = await import('fastify');
+      const mockedFastify = vi.mocked(fastify.default);
 
       await createServer({ config, db });
 
@@ -227,11 +264,6 @@ describe('createServer', () => {
       const config = createMockConfig();
       const db = createMockDb();
       const app = createMockApp();
-      const mockFastifyInstance = createMockFastifyInstance();
-
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
 
       await createServer({ config, db, app });
 
@@ -243,11 +275,17 @@ describe('createServer', () => {
       // Test the hook implementation
       const addHookFn = mockFastifyInstance.addHook as ReturnType<typeof vi.fn>;
       const hookCalls = addHookFn.mock.calls;
-      const onRequestHook = hookCalls.find((call) => call[0] === 'onRequest');
+      const onRequestHook = hookCalls.find(
+        (call: [string, unknown]) => call[0] === 'onRequest',
+      );
       expect(onRequestHook).toBeDefined();
 
       if (onRequestHook !== undefined) {
-        const hookHandler = onRequestHook[1];
+        const hookHandler = onRequestHook[1] as (
+          req: unknown,
+          reply: unknown,
+          done: () => void,
+        ) => void;
         const mockReq = {} as never;
         const mockReply = {} as never;
         const done = vi.fn();
@@ -263,11 +301,6 @@ describe('createServer', () => {
     it('should not attach context hook when app is not provided', async () => {
       const config = createMockConfig();
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
-
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
 
       await createServer({ config, db });
 
@@ -277,11 +310,6 @@ describe('createServer', () => {
     it('should handle undefined app explicitly', async () => {
       const config = createMockConfig();
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
-
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
 
       await createServer({ config, db, app: undefined });
 
@@ -293,18 +321,10 @@ describe('createServer', () => {
     it('should register plugins with config', async () => {
       const config = createMockConfig();
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
-
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
-
-      const { registerPlugins } = await import('@http/index');
-      const mockedRegisterPlugins = vi.mocked(registerPlugins);
 
       await createServer({ config, db });
 
-      expect(mockedRegisterPlugins).toHaveBeenCalledWith(mockFastifyInstance, config);
+      expect(mockRegisterPlugins).toHaveBeenCalledWith(mockFastifyInstance, config);
     });
   });
 
@@ -312,11 +332,6 @@ describe('createServer', () => {
     it('should return configured Fastify instance', async () => {
       const config = createMockConfig();
       const db = createMockDb();
-      const mockFastifyInstance = createMockFastifyInstance();
-
-      const { default: Fastify } = await import('fastify');
-      const mockedFastify = vi.mocked(Fastify);
-      mockedFastify.mockReturnValue(mockFastifyInstance);
 
       const server = await createServer({ config, db });
 

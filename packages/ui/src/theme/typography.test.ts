@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/typography.test.ts
+// packages/ui/src/theme/typography.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { typography } from './typography';

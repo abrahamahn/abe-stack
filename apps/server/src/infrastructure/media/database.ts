@@ -85,7 +85,7 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
     },
   ): Promise<void> {
     const record = this.records.get(fileId);
-    if (record) {
+    if (record !== undefined) {
       this.records.set(fileId, {
         ...record,
         ...result,
@@ -115,7 +115,7 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
     let files: MediaProcessingRecord[] = [];
     for (const record of this.records.values()) {
       if (record.ownerId === userId) {
-        if (contentType === undefined || contentType === null || contentType === '' || (record.contentType?.startsWith(contentType) ?? false)) {
+        if (contentType === undefined || contentType === '' || (record.contentType?.startsWith(contentType) ?? false)) {
           files.push(record);
         }
       }
@@ -167,8 +167,8 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
 
   getFileById(fileId: string, userId?: string): Promise<MediaProcessingRecord | null> {
     const record = this.records.get(fileId);
-    if (!record) return Promise.resolve(null);
-    if (userId !== undefined && userId !== null && userId !== '' && record.ownerId !== userId) return Promise.resolve(null);
+    if (record === undefined) return Promise.resolve(null);
+    if (userId !== undefined && userId !== '' && record.ownerId !== userId) return Promise.resolve(null);
     return Promise.resolve(record);
   }
 
@@ -182,14 +182,21 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
   ): Promise<void> {
     for (const update of updates) {
       const record = this.records.get(update.fileId);
-      if (record) {
-        this.records.set(update.fileId, {
+      if (record !== undefined) {
+        const updatedRecord: MediaProcessingRecord = {
           ...record,
-          storageKey: update.storageKey ?? record.storageKey,
-          contentType: update.contentType ?? record.contentType,
-          size: update.size ?? record.size,
           updatedAt: new Date(),
-        });
+        };
+        if (update.storageKey !== undefined) {
+          updatedRecord.storageKey = update.storageKey;
+        }
+        if (update.contentType !== undefined) {
+          updatedRecord.contentType = update.contentType;
+        }
+        if (update.size !== undefined) {
+          updatedRecord.size = update.size;
+        }
+        this.records.set(update.fileId, updatedRecord);
       }
     }
     return Promise.resolve();

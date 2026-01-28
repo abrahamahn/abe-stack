@@ -1,11 +1,11 @@
-// apps/server/src/infrastructure/media/__tests__/database.test.ts
+// apps/server/src/infrastructure/media/database.test.ts
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 
 import {
   InMemoryMediaDatabase,
   type MediaProcessingRecord,
   type MediaDatabaseAdapter,
-} from '../database';
+} from './database';
 
 describe('InMemoryMediaDatabase', () => {
   let db: InMemoryMediaDatabase;

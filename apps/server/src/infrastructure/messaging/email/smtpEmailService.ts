@@ -7,8 +7,9 @@
 
 import { SmtpClient } from './smtp';
 
+import type { EmailOptions, EmailResult, EmailService } from './types';
 import type { EmailConfig } from '@/config';
-import type { EmailOptions, EmailResult, EmailService } from '@email/types';
+
 
 export class SmtpEmailService implements EmailService {
   private client: SmtpClient;
@@ -16,32 +17,43 @@ export class SmtpEmailService implements EmailService {
 
   constructor(config: EmailConfig) {
     this.config = config;
-    this.client = new SmtpClient({
+    const smtpConfig: import('./smtp').SmtpConfig = {
       host: this.config.smtp.host,
       port: this.config.smtp.port,
       secure: this.config.smtp.secure,
-      auth: this.config.smtp.auth != null
-        ? {
-            user: this.config.smtp.auth.user,
-            pass: this.config.smtp.auth.pass,
-          }
-        : undefined,
-    });
+    };
+    if (this.config.smtp.auth != null) {
+      smtpConfig.auth = {
+        user: this.config.smtp.auth.user,
+        pass: this.config.smtp.auth.pass,
+      };
+    }
+    this.client = new SmtpClient(smtpConfig);
   }
 
   async send(options: EmailOptions): Promise<EmailResult> {
-    const result = await this.client.send({
+    const message: import('./smtp').SmtpMessage = {
       from: `"${this.config.from.name}" <${this.config.from.address}>`,
       to: options.to,
       subject: options.subject,
-      text: options.text,
-      html: options.html,
-    });
-
-    return {
-      success: result.success,
-      messageId: result.messageId,
-      error: result.error,
     };
+    if (options.text !== undefined) {
+      message.text = options.text;
+    }
+    if (options.html !== undefined) {
+      message.html = options.html;
+    }
+    const result = await this.client.send(message);
+
+    const emailResult: EmailResult = {
+      success: result.success,
+    };
+    if (result.messageId !== undefined) {
+      emailResult.messageId = result.messageId;
+    }
+    if (result.error !== undefined) {
+      emailResult.error = result.error;
+    }
+    return emailResult;
   }
 }

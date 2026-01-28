@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/security/crypto/__tests__/jwt.test.ts
+// apps/server/src/infrastructure/security/crypto/jwt.test.ts
 import { decode, JwtError, sign, verify } from '@abe-stack/core/crypto';
 import { describe, expect, test, vi } from 'vitest';
 

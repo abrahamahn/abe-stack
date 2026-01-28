@@ -1,4 +1,4 @@
-// packages/sdk/src/realtime/__tests__/SubscriptionCache.test.ts
+// packages/sdk/src/realtime/SubscriptionCache.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { SubscriptionCache } from '../SubscriptionCache';

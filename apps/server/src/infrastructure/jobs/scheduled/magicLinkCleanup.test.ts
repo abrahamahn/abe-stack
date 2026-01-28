@@ -69,17 +69,16 @@ function createMockDb(): RawDb {
 
 describe('cleanupMagicLinkTokens', () => {
   let mockDb: RawDb;
-  let originalDateNow: typeof Date.now;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    originalDateNow = Date.now;
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
   });
 
   afterEach(() => {
-    Date.now = originalDateNow;
+    vi.useRealTimers();
   });
 
   describe('dry-run mode', () => {
@@ -136,26 +135,29 @@ describe('cleanupMagicLinkTokens', () => {
 
   describe('actual deletion', () => {
     it('should delete old tokens and return count', async () => {
-      vi.mocked(mockDb.execute).mockResolvedValueOnce(15).mockResolvedValueOnce(0);
+      // When deleted count < batchSize, loop stops (no continuation needed)
+      vi.mocked(mockDb.execute).mockResolvedValueOnce(15);
 
       const result = await cleanupMagicLinkTokens(mockDb);
 
       expect(result.dryRun).toBe(false);
       expect(result.deletedCount).toBe(15);
-      expect(mockDb.execute).toHaveBeenCalledTimes(2);
+      // Only one call since 15 < MAX_BATCH_SIZE (10000)
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     it('should delete in batches when count exceeds batch size', async () => {
+      // Loop continues while batchDeleted === batchSize, stops when < batchSize
       vi.mocked(mockDb.execute)
-        .mockResolvedValueOnce(1000)
-        .mockResolvedValueOnce(1000)
-        .mockResolvedValueOnce(500)
-        .mockResolvedValueOnce(0);
+        .mockResolvedValueOnce(1000) // Full batch, continue
+        .mockResolvedValueOnce(1000) // Full batch, continue
+        .mockResolvedValueOnce(500); // Partial batch, stop
 
       const result = await cleanupMagicLinkTokens(mockDb, { batchSize: 1000 });
 
       expect(result.deletedCount).toBe(2500);
-      expect(mockDb.execute).toHaveBeenCalledTimes(4);
+      // Three calls: two full batches + one partial batch
+      expect(mockDb.execute).toHaveBeenCalledTimes(3);
     });
 
     it('should use correct SQL with cutoff date and batch size', async () => {
@@ -183,16 +185,17 @@ describe('cleanupMagicLinkTokens', () => {
     });
 
     it('should continue deleting until no more records', async () => {
+      // Loop continues while batchDeleted === batchSize, stops when < batchSize
       vi.mocked(mockDb.execute)
-        .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(50)
-        .mockResolvedValueOnce(0);
+        .mockResolvedValueOnce(100) // Full batch, continue
+        .mockResolvedValueOnce(100) // Full batch, continue
+        .mockResolvedValueOnce(50); // Partial batch, stop
 
       const result = await cleanupMagicLinkTokens(mockDb, { batchSize: 100 });
 
       expect(result.deletedCount).toBe(250);
-      expect(mockDb.execute).toHaveBeenCalledTimes(4);
+      // Three calls: two full batches + one partial batch
+      expect(mockDb.execute).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -281,7 +284,12 @@ describe('countOldMagicLinkTokens', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return count of old tokens with default retention', async () => {
@@ -365,7 +373,12 @@ describe('getMagicLinkTokenStats', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return complete statistics with default retention', async () => {

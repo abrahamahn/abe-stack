@@ -1,13 +1,14 @@
+// apps/server/src/infrastructure/media/facade.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/__tests__/facade.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { ServerMediaQueue, createServerMediaQueue, type MediaJobData } from '../facade';
+import { ServerMediaQueue, createServerMediaQueue, type MediaJobData } from './facade';
 
 import type { Logger } from '@logger';
 
 // Mock the processor module with class syntax
-vi.mock('../processor', () => ({
+vi.mock('./processor', () => ({
   MediaProcessingOrchestrator: class MockMediaProcessingOrchestrator {
     processFile = vi.fn().mockResolvedValue({
       success: true,
@@ -40,7 +41,7 @@ vi.mock('../processor', () => ({
 }));
 
 // Mock the queue module with class syntax
-vi.mock('../queue', () => ({
+vi.mock('./queue', () => ({
   CustomJobQueue: class MockCustomJobQueue {
     protected options: Record<string, unknown>;
     constructor(options: Record<string, unknown>) {

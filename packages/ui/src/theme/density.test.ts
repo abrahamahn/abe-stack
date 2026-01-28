@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/density.test.ts
+// packages/ui/src/theme/density.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

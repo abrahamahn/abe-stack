@@ -16,13 +16,15 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@infrastructure/index', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@infrastructure/index')>();
-  return {
-    ...actual,
-    getDetailedHealth: vi.fn(),
-  };
-});
+// Use vi.hoisted to create mock function that survives hoisting
+const { mockGetDetailedHealth } = vi.hoisted(() => ({
+  mockGetDetailedHealth: vi.fn(),
+}));
+
+// Mock the infrastructure module with the relative path that Vitest resolves
+vi.mock('../../infrastructure/index', () => ({
+  getDetailedHealth: mockGetDetailedHealth,
+}));
 
 import {
   handleApiInfo,
@@ -34,11 +36,8 @@ import {
   handleSystemStatus,
 } from './handlers';
 
-import type { AppContext } from '@shared/index';
+import type { AppContext } from '../../shared/index';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-
-// Import mocked function after vi.mock
-const { getDetailedHealth } = await import('@infrastructure/index');
 
 // ============================================================================
 // Test Helpers
@@ -305,7 +304,7 @@ describe('System Handlers', () => {
           },
         };
 
-        vi.mocked(getDetailedHealth).mockResolvedValue(mockDetailedHealth);
+        mockGetDetailedHealth.mockResolvedValue(mockDetailedHealth);
 
         const ctx = createMockContext();
         const req = createMockRequest();
@@ -315,7 +314,7 @@ describe('System Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual(mockDetailedHealth);
-        expect(vi.mocked(getDetailedHealth)).toHaveBeenCalledWith(ctx);
+        expect(mockGetDetailedHealth).toHaveBeenCalledWith(ctx);
       });
     });
 
@@ -336,7 +335,7 @@ describe('System Handlers', () => {
           },
         };
 
-        vi.mocked(getDetailedHealth).mockResolvedValue(mockDetailedHealth);
+        mockGetDetailedHealth.mockResolvedValue(mockDetailedHealth);
 
         const ctx = createMockContext();
         const req = createMockRequest();
@@ -366,7 +365,7 @@ describe('System Handlers', () => {
           },
         };
 
-        vi.mocked(getDetailedHealth).mockResolvedValue(mockDetailedHealth);
+        mockGetDetailedHealth.mockResolvedValue(mockDetailedHealth);
 
         const ctx = createMockContext();
         const req = createMockRequest();

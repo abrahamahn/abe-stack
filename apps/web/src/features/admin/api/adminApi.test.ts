@@ -1,10 +1,25 @@
-// apps/web/src/features/admin/api/__tests__/adminApi.test.ts
+// apps/web/src/features/admin/api/adminApi.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { adminApi } from './adminApi';
 
-vi.mock('@config', () => ({
+vi.mock('@/config', () => ({
   clientConfig: { apiUrl: 'http://localhost:3000' },
+}));
+
+vi.mock('@abe-stack/core', () => ({
+  addAuthHeader: vi.fn(),
+  tokenStore: { get: vi.fn().mockReturnValue(null) },
+}));
+
+vi.mock('@abe-stack/sdk', () => ({
+  createApiError: vi.fn((status: number, data: unknown) => new Error(`API Error ${status}: ${JSON.stringify(data)}`)),
+  NetworkError: class NetworkError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'NetworkError';
+    }
+  },
 }));
 
 describe('adminApi', () => {

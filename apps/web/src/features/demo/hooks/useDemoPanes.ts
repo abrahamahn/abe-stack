@@ -2,7 +2,7 @@
 import { useLocalStorage, useMediaQuery } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { DemoPaneConfig } from '@demo/types';
+import type { DemoPaneConfig } from '../types';
 
 const DEFAULT_PANE_CONFIG: DemoPaneConfig = {
   top: { visible: true, size: 6 },

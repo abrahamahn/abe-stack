@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { QueueStats } from '@abe-stack/core';
+import type { QueueStats } from '@abe-stack/contracts';
 
 // ============================================================================
 // Types

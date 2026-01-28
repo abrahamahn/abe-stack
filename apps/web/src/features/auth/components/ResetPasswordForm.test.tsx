@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/__tests__/ResetPasswordForm.test.tsx
+// apps/web/src/features/auth/components/ResetPasswordForm.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
 import { ResetPasswordForm } from '@auth/components/ResetPasswordForm';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';

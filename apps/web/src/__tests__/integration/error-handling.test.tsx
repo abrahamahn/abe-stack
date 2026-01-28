@@ -9,14 +9,14 @@
  * - Unauthorized access handling
  */
 
-import { LoginPage, RegisterPage } from '@features/auth';
-import { DashboardPage } from '@features/dashboard';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { LoginPage, RegisterPage } from '../../features/auth';
+import { DashboardPage } from '../../features/dashboard';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 
-import type { AuthService } from '@features/auth';
+import type { AuthService } from '../../features/auth';
 
 describe('Error Handling Integration', () => {
   // ============================================================================

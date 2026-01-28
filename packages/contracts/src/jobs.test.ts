@@ -197,17 +197,17 @@ describe('jobDetailsSchema', () => {
 
   it('should reject non-integer attempts', () => {
     const job = { ...validJob, attempts: 1.5 };
-    expect(() => jobDetailsSchema.parse(job)).toThrow('Attempts must be an integer');
+    expect(() => jobDetailsSchema.parse(job)).toThrow('Attempts must be a non-negative integer');
   });
 
   it('should reject negative attempts', () => {
     const job = { ...validJob, attempts: -1 };
-    expect(() => jobDetailsSchema.parse(job)).toThrow('Attempts must be an integer');
+    expect(() => jobDetailsSchema.parse(job)).toThrow('Attempts must be a non-negative integer');
   });
 
   it('should reject non-integer maxAttempts', () => {
     const job = { ...validJob, maxAttempts: 3.5 };
-    expect(() => jobDetailsSchema.parse(job)).toThrow('Max attempts must be an integer');
+    expect(() => jobDetailsSchema.parse(job)).toThrow('Max attempts must be a non-negative integer');
   });
 
   it('should validate with various arg types', () => {

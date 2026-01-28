@@ -1,5 +1,5 @@
-// apps/server/src/infrastructure/security/rate-limit/__tests__/limiter.test.ts
-import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '@rate-limit';
+// apps/server/src/infrastructure/security/rate-limit/limiter.test.ts
+import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '.';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 const createRecord = (overrides?: {

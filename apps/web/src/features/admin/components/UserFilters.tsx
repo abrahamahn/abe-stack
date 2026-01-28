@@ -9,7 +9,7 @@ import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
 import type { AdminUserListFilters, UserRole, UserStatus } from '@abe-stack/core';
-import type { JSX, FormEvent } from 'react';
+import type { JSX } from 'react';
 
 export interface UserFiltersProps {
   filters: AdminUserListFilters;
@@ -46,7 +46,7 @@ export const UserFilters = ({
   const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
   const handleSearch = useCallback(
-    (e: FormEvent) => {
+    (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
       onFiltersChange({ ...(searchValue.length > 0 && { search: searchValue }) });
     },

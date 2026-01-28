@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/data/storage/providers/__tests__/s3StorageProvider.test.ts
+// apps/server/src/infrastructure/data/storage/providers/s3StorageProvider.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { S3StorageProvider } from '../s3StorageProvider';
+import { S3StorageProvider } from './s3StorageProvider';
 
 import type { S3StorageConfig } from '@abe-stack/core';
 

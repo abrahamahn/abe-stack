@@ -19,7 +19,7 @@ import {
   getValidatedPathParam,
 } from './request-utils';
 
-import type { RequestWithCookies } from '@shared/index';
+import type { RequestWithCookies } from '../../shared/index';
 
 /**
  * Helper to create a mock request object with specified properties

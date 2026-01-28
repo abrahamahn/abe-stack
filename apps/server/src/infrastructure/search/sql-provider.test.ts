@@ -1,10 +1,10 @@
-// apps/server/src/infrastructure/search/__tests__/sql-provider.test.ts
+// apps/server/src/infrastructure/search/sql-provider.test.ts
 import { FILTER_OPERATORS, QueryTooComplexError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { SqlSearchProvider, createSqlSearchProvider } from '../sql-provider';
+import { SqlSearchProvider, createSqlSearchProvider } from './sql-provider';
 
-import type { SqlTableConfig } from '../types';
+import type { SqlTableConfig } from './types';
 import type { RawDb, Repositories } from '@database';
 
 // Mock RawDb interface
@@ -204,13 +204,13 @@ describe('SqlSearchProvider', () => {
       expect(sql).toContain('IN');
     });
 
-    test('should support IS_NULL operator', async () => {
+    test('should support IsNull operator', async () => {
       mockRaw.mockResolvedValue([]);
 
       const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
       await provider.search({
-        filters: { field: 'email', operator: FILTER_OPERATORS.IS_NULL, value: null },
+        filters: { field: 'email', operator: FILTER_OPERATORS.IsNull, value: null },
       });
 
       const [sql] = mockRaw.mock.calls[0] as [string];
@@ -293,7 +293,9 @@ describe('SqlSearchProvider', () => {
         ],
       };
 
-      await expect(provider.search({ filters: deepFilter })).rejects.toThrow(QueryTooComplexError);
+      await expect(provider.search({ filters: deepFilter })).rejects.toMatchObject({
+        name: 'QueryTooComplexError',
+      });
     });
 
     test('should throw error for too many conditions', async () => {
@@ -310,9 +312,9 @@ describe('SqlSearchProvider', () => {
         ],
       };
 
-      await expect(provider.search({ filters: manyConditions })).rejects.toThrow(
-        QueryTooComplexError,
-      );
+      await expect(provider.search({ filters: manyConditions })).rejects.toMatchObject({
+        name: 'QueryTooComplexError',
+      });
     });
   });
 

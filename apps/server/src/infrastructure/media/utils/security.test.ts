@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/media/utils/__tests__/security.test.ts
+// apps/server/src/infrastructure/media/utils/security.test.ts
 import { promises as fs } from 'fs';
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { MediaSecurityScanner, type SecurityScanResult } from '../security';
+import { MediaSecurityScanner, type SecurityScanResult } from './security';
 
 // Mock fs/promises
 vi.mock('fs', () => ({

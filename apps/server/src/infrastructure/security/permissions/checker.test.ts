@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/security/permissions/__tests__/checker.test.ts
+// apps/server/src/infrastructure/security/permissions/checker.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -8,10 +8,10 @@ import {
     createMemberRule,
     createOwnerRule,
     createPermissionChecker,
-} from '../checker';
+} from './checker';
 
-import type { PermissionChecker } from '../checker';
-import type { PermissionConfig, PermissionRecord, RecordLoader } from '../types';
+import type { PermissionChecker } from './checker';
+import type { PermissionConfig, PermissionRecord, RecordLoader } from './types';
 
 // ============================================================================
 // Test Helpers

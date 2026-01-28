@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/media/processors/__tests__/audio.test.ts
+// apps/server/src/infrastructure/media/processors/audio.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { parseFile } from 'music-metadata';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
-import { AudioProcessor, type AudioProcessingOptions } from '../audio';
+import { AudioProcessor, type AudioProcessingOptions } from './audio';
 
 // Mock fluent-ffmpeg
 vi.mock('fluent-ffmpeg', () => ({

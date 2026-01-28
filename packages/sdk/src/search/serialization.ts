@@ -91,23 +91,23 @@ export function serializeToURLParams<T = Record<string, unknown>>(
   const { compact = false, includeDefaults = false } = options;
 
   // Filters
-  if (query.filters) {
+  if (query.filters !== undefined) {
     const key = compact ? 'f' : 'filters';
     params.set(key, JSON.stringify(serializeFilter(query.filters, compact)));
   }
 
   // Sort
-  if (query.sort && query.sort.length > 0) {
+  if (query.sort !== undefined && query.sort.length > 0) {
     const key = compact ? 's' : 'sort';
     params.set(key, serializeSort(query.sort));
   }
 
   // Search
-  if (query.search) {
+  if (query.search !== undefined) {
     const qKey = compact ? 'q' : 'q';
     params.set(qKey, query.search.query);
 
-    if (query.search.fields && query.search.fields.length > 0) {
+    if (query.search.fields !== undefined && query.search.fields.length > 0) {
       const sfKey = compact ? 'sf' : 'searchFields';
       params.set(sfKey, query.search.fields.join(','));
     }
@@ -129,19 +129,19 @@ export function serializeToURLParams<T = Record<string, unknown>>(
     params.set(key, String(query.limit));
   }
 
-  if (query.cursor) {
+  if (query.cursor !== undefined && query.cursor !== '') {
     const key = compact ? 'c' : 'cursor';
     params.set(key, query.cursor);
   }
 
   // Select
-  if (query.select && query.select.length > 0) {
+  if (query.select !== undefined && query.select.length > 0) {
     const key = compact ? 'sl' : 'select';
     params.set(key, query.select.map(String).join(','));
   }
 
   // Include count
-  if (query.includeCount) {
+  if (query.includeCount === true) {
     const key = compact ? 'ic' : 'includeCount';
     params.set(key, '1');
   }
@@ -160,7 +160,7 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
 
   // Filters (try both compact and full keys)
   const filtersStr = searchParams.get('f') ?? searchParams.get('filters');
-  if (filtersStr) {
+  if (filtersStr !== null && filtersStr !== '') {
     try {
       query.filters = deserializeFilter<T>(JSON.parse(filtersStr) as SerializedFilter);
     } catch {
@@ -170,22 +170,22 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
 
   // Sort
   const sortStr = searchParams.get('s') ?? searchParams.get('sort');
-  if (sortStr) {
+  if (sortStr !== null && sortStr !== '') {
     query.sort = deserializeSort<T>(sortStr);
   }
 
   // Search
   const searchQuery = searchParams.get('q');
-  if (searchQuery) {
+  if (searchQuery !== null && searchQuery !== '') {
     query.search = { query: searchQuery };
 
     const searchFields = searchParams.get('sf') ?? searchParams.get('searchFields');
-    if (searchFields) {
+    if (searchFields !== null && searchFields !== '') {
       query.search.fields = searchFields.split(',').filter(Boolean);
     }
 
     const fuzziness = searchParams.get('fz') ?? searchParams.get('fuzziness');
-    if (fuzziness) {
+    if (fuzziness !== null && fuzziness !== '') {
       const parsed = parseFloat(fuzziness);
       if (!isNaN(parsed)) {
         query.search.fuzziness = parsed;
@@ -195,7 +195,7 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
 
   // Pagination
   const page = searchParams.get('p') ?? searchParams.get('page');
-  if (page) {
+  if (page !== null && page !== '') {
     const parsed = parseInt(page, 10);
     if (!isNaN(parsed) && parsed > 0) {
       query.page = parsed;
@@ -203,7 +203,7 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
   }
 
   const limit = searchParams.get('l') ?? searchParams.get('limit');
-  if (limit) {
+  if (limit !== null && limit !== '') {
     const parsed = parseInt(limit, 10);
     if (!isNaN(parsed) && parsed > 0) {
       query.limit = parsed;
@@ -211,13 +211,13 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
   }
 
   const cursor = searchParams.get('c') ?? searchParams.get('cursor');
-  if (cursor) {
+  if (cursor !== null && cursor !== '') {
     query.cursor = cursor;
   }
 
   // Select
   const select = searchParams.get('sl') ?? searchParams.get('select');
-  if (select) {
+  if (select !== null && select !== '') {
     query.select = select.split(',').filter(Boolean) as Array<keyof T | string>;
   }
 
@@ -244,7 +244,7 @@ export function serializeToJSON<T = Record<string, unknown>>(
   const serialized = serializeQuery(query, options.compact ?? false);
   const json = JSON.stringify(serialized);
 
-  if (options.base64) {
+  if (options.base64 === true) {
     return btoa(json);
   }
 
@@ -260,7 +260,7 @@ export function deserializeFromJSON<T = Record<string, unknown>>(
 ): SearchQuery<T> {
   let decoded = json;
 
-  if (options.base64) {
+  if (options.base64 === true) {
     decoded = atob(json);
   }
 
@@ -275,17 +275,17 @@ export function deserializeFromJSON<T = Record<string, unknown>>(
 function serializeQuery<T>(query: SearchQuery<T>, compact: boolean): SerializedQuery {
   const result: SerializedQuery = {};
 
-  if (query.filters) {
+  if (query.filters !== undefined) {
     result.f = serializeFilter(query.filters, compact);
   }
 
-  if (query.sort && query.sort.length > 0) {
+  if (query.sort !== undefined && query.sort.length > 0) {
     result.s = serializeSort(query.sort);
   }
 
-  if (query.search) {
+  if (query.search !== undefined) {
     result.q = query.search.query;
-    if (query.search.fields) {
+    if (query.search.fields !== undefined) {
       result.sf = query.search.fields.join(',');
     }
     if (query.search.fuzziness !== undefined) {
@@ -301,15 +301,15 @@ function serializeQuery<T>(query: SearchQuery<T>, compact: boolean): SerializedQ
     result.l = query.limit;
   }
 
-  if (query.cursor) {
+  if (query.cursor !== undefined && query.cursor !== '') {
     result.c = query.cursor;
   }
 
-  if (query.select) {
+  if (query.select !== undefined) {
     result.sl = query.select.map(String).join(',');
   }
 
-  if (query.includeCount) {
+  if (query.includeCount === true) {
     result.ic = true;
   }
 
@@ -319,17 +319,17 @@ function serializeQuery<T>(query: SearchQuery<T>, compact: boolean): SerializedQ
 function deserializeQuery<T>(serialized: SerializedQuery): SearchQuery<T> {
   const query: SearchQuery<T> = {};
 
-  if (serialized.f) {
+  if (serialized.f !== undefined) {
     query.filters = deserializeFilter<T>(serialized.f);
   }
 
-  if (serialized.s) {
+  if (serialized.s !== undefined && serialized.s !== '') {
     query.sort = deserializeSort<T>(serialized.s);
   }
 
-  if (serialized.q) {
+  if (serialized.q !== undefined && serialized.q !== '') {
     query.search = { query: serialized.q };
-    if (serialized.sf) {
+    if (serialized.sf !== undefined && serialized.sf !== '') {
       query.search.fields = serialized.sf.split(',');
     }
     if (serialized.fz !== undefined) {
@@ -345,15 +345,15 @@ function deserializeQuery<T>(serialized: SerializedQuery): SearchQuery<T> {
     query.limit = serialized.l;
   }
 
-  if (serialized.c) {
+  if (serialized.c !== undefined && serialized.c !== '') {
     query.cursor = serialized.c;
   }
 
-  if (serialized.sl) {
+  if (serialized.sl !== undefined && serialized.sl !== '') {
     query.select = serialized.sl.split(',') as Array<keyof T | string>;
   }
 
-  if (serialized.ic) {
+  if (serialized.ic === true) {
     query.includeCount = true;
   }
 
@@ -389,7 +389,7 @@ function serializeFilter<T>(
 function deserializeFilter<T>(
   serialized: SerializedFilter,
 ): FilterCondition<T> | CompoundFilter<T> {
-  if (serialized.op && serialized.c) {
+  if (serialized.op !== undefined && serialized.c !== undefined) {
     return {
       operator: serialized.op as 'and' | 'or' | 'not',
       conditions: serialized.c.map((c) => deserializeFilter<T>(c)),

@@ -13,45 +13,51 @@ import {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
 } from '@abe-stack/core';
-import { publicRoute, type RouteMap, type RouteResult } from '@router';
+import { createRouteMap, publicRoute, type BaseRouteDefinition, type RouteResult } from '@http/router';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
 // ============================================================================
-// Route Definitions
+// Route Entries (for merging with parent routes)
 // ============================================================================
 
-export const magicLinkRoutes: RouteMap = {
-  'auth/magic-link/request': publicRoute<
-    MagicLinkRequest,
-    MagicLinkRequestResponse | { message: string; code?: string }
-  >(
-    'POST',
-    async (
-      ctx: AppContext,
-      body: MagicLinkRequest,
-      req: RequestWithCookies,
-    ): Promise<RouteResult<MagicLinkRequestResponse | { message: string; code?: string }>> => {
-      return handleMagicLinkRequest(ctx, body, req);
-    },
-    magicLinkRequestSchema,
-  ),
+export const magicLinkRouteEntries: Array<[string, BaseRouteDefinition]> = [
+  [
+    'auth/magic-link/request',
+    publicRoute<MagicLinkRequest, MagicLinkRequestResponse | { message: string; code?: string }>(
+      'POST',
+      async (
+        ctx: AppContext,
+        body: MagicLinkRequest,
+        req: RequestWithCookies,
+      ): Promise<RouteResult<MagicLinkRequestResponse | { message: string; code?: string }>> => {
+        return handleMagicLinkRequest(ctx, body, req);
+      },
+      magicLinkRequestSchema,
+    ),
+  ],
 
-  'auth/magic-link/verify': publicRoute<
-    MagicLinkVerifyRequest,
-    AuthResponse | { message: string; code?: string }
-  >(
-    'POST',
-    async (
-      ctx: AppContext,
-      body: MagicLinkVerifyRequest,
-      req: RequestWithCookies,
-      reply: ReplyWithCookies,
-    ): Promise<RouteResult<AuthResponse | { message: string; code?: string }>> => {
-      return handleMagicLinkVerify(ctx, body, req, reply);
-    },
-    magicLinkVerifySchema,
-  ),
-};
+  [
+    'auth/magic-link/verify',
+    publicRoute<MagicLinkVerifyRequest, AuthResponse | { message: string; code?: string }>(
+      'POST',
+      async (
+        ctx: AppContext,
+        body: MagicLinkVerifyRequest,
+        req: RequestWithCookies,
+        reply: ReplyWithCookies,
+      ): Promise<RouteResult<AuthResponse | { message: string; code?: string }>> => {
+        return handleMagicLinkVerify(ctx, body, req, reply);
+      },
+      magicLinkVerifySchema,
+    ),
+  ],
+];
+
+// ============================================================================
+// Route Map (for standalone use)
+// ============================================================================
+
+export const magicLinkRoutes = createRouteMap(magicLinkRouteEntries);

@@ -1,19 +1,16 @@
 // apps/server/src/shared/types.ts
+
+import type { QueueServer, ServerSearchProvider, WriteService } from '@/infrastructure/index';
 import type {
   AppConfig,
   BillingService,
-  UserRole as CoreUserRole,
   EmailService,
   NotificationService,
   StorageService as StorageProvider,
+  UserRole as CoreUserRole,
 } from '@abe-stack/core';
-import type { DbClient, Repositories } from '@database';
-import type {
-  QueueServer,
-  ServerSearchProvider,
-  SubscriptionManager,
-  WriteService,
-} from '@infrastructure/index';
+import type { SubscriptionManager } from '@abe-stack/core/pubsub';
+import type { DbClient, Repositories } from '@data/database';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================
@@ -108,19 +105,19 @@ export interface ReplyWithCookies {
 export interface RequestWithCookies {
   cookies: Record<string, string | undefined>;
   headers: {
-    authorization?: string;
-    'user-agent'?: string;
+    authorization?: string | undefined;
+    'user-agent'?: string | undefined;
     [key: string]: string | string[] | undefined;
   };
   /** Client IP address (from Fastify's request.ip, respects trustProxy) */
-  ip?: string;
-  user?: { userId: string; email: string; role: string };
+  ip?: string | undefined;
+  user?: { userId: string; email: string; role: string } | undefined;
   /** Request info extracted by middleware (IP address, user agent) */
   requestInfo: RequestInfo;
   /** Start time for request timing in development (bigint from process.hrtime.bigint()) */
-  requestStart?: bigint;
+  requestStart?: bigint | undefined;
   /** Application Context (Hybrid Pattern) - Available on request via hook */
-  context?: AppContext;
+  context?: AppContext | undefined;
 }
 
 // ============================================================================

@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/components/__tests__/DemoPreviewArea.test.tsx
+// apps/web/src/features/demo/components/DemoPreviewArea.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

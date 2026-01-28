@@ -1,11 +1,11 @@
-// apps/server/src/modules/admin/__tests__/securityService.test.ts
+// apps/server/src/modules/admin/securityService.test.ts
 import {
     exportSecurityEvents,
     getSecurityEvent,
     getSecurityMetrics,
     listSecurityEvents,
     SecurityEventNotFoundError,
-} from '@admin/securityService';
+} from './securityService';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { DbClient } from '@database';

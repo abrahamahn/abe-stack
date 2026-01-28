@@ -7,7 +7,7 @@
  */
 
 import { SubKeys } from '@abe-stack/core/pubsub';
-import { withTransaction } from '@database';
+import { withTransaction } from '@data/database';
 
 import {
     applyOperations,
@@ -19,7 +19,7 @@ import {
 } from './service';
 
 import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
-import type { RouteResult } from '@router';
+import type { RouteResult } from '@http/router';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================
@@ -139,7 +139,7 @@ export async function handleWrite(
     setImmediate(() => {
       for (const { table, id } of result.modifiedRecords) {
         const record = result.recordMap[table]?.[id];
-        if (record && typeof record === 'object' && 'version' in record) {
+        if (record !== undefined && typeof record === 'object' && 'version' in record) {
           ctx.pubsub.publish(SubKeys.record(table, id), (record as { version: number }).version);
         }
       }

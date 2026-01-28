@@ -1,10 +1,10 @@
-// apps/server/src/infrastructure/http/pagination/__tests__/integration.test.ts
+// apps/server/src/infrastructure/http/pagination/pagination-integration.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { createPaginationHelpers } from '../helpers';
-import { createPaginationMiddleware } from '../middleware';
+import { createPaginationHelpers } from './helpers';
+import { createPaginationMiddleware } from './middleware';
 
-import type { PaginationRequest } from '../types';
+import type { PaginationRequest } from './types';
 import type { PaginationOptions } from '@abe-stack/core';
 import type { FastifyReply } from 'fastify';
 

@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/pagination.test.ts
+// packages/contracts/src/pagination.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

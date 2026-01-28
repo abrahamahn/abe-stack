@@ -1,4 +1,4 @@
-// apps/server/src/modules/realtime/__tests__/handlers.test.ts
+// apps/server/src/modules/realtime/handlers.test.ts
 /**
  * Realtime Handlers Unit Tests
  *
@@ -16,7 +16,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('../service', () => ({
+vi.mock('./service', () => ({
   isTableAllowed: vi.fn((table: string) => table === 'users' || table === 'posts'),
   loadRecords: vi.fn(),
   getOperationPointers: vi.fn((ops) =>
@@ -27,12 +27,12 @@ vi.mock('../service', () => ({
   saveRecords: vi.fn(),
 }));
 
-vi.mock('@database', () => ({
+vi.mock('../../infrastructure/data/database', () => ({
   withTransaction: vi.fn((_db, callback) => callback(_db)),
 }));
 
-vi.mock('@infrastructure/index', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@infrastructure/index')>();
+vi.mock('@abe-stack/core/pubsub', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core/pubsub')>();
   return {
     ...actual,
     SubKeys: {
@@ -46,7 +46,7 @@ import {
   handleWrite,
   RecordNotFoundError,
   VersionConflictError,
-} from '../handlers';
+} from './handlers';
 
 import type { AppContext, RequestWithCookies } from '../../../shared/types';
 import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
@@ -142,7 +142,7 @@ describe('Realtime Handlers', () => {
       });
 
       test('should accept operations on allowed tables', async () => {
-        const service = await import('../service.js');
+        const service = await import('./service');
         const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } = service;
 
         vi.mocked(loadRecords).mockResolvedValue({
@@ -169,7 +169,7 @@ describe('Realtime Handlers', () => {
 
     describe('Record Not Found', () => {
       test('should return 400 when record does not exist', async () => {
-        const { loadRecords } = await import('../service.js');
+        const { loadRecords } = await import('./service');
         vi.mocked(loadRecords).mockResolvedValue({ users: {} }); // Empty - no records
 
         const ctx = createMockContext();
@@ -188,7 +188,7 @@ describe('Realtime Handlers', () => {
     describe('Version Conflicts', () => {
       test('should return 409 when version conflict detected', async () => {
         const { loadRecords, applyOperations, checkVersionConflicts } =
-          await import('../service.js');
+          await import('./service');
 
         vi.mocked(loadRecords).mockResolvedValue({
           users: { 'user-1': { id: 'user-1', version: 1 } },
@@ -220,7 +220,7 @@ describe('Realtime Handlers', () => {
     describe('Success Path', () => {
       test('should apply operations and return updated records', async () => {
         const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } =
-          await import('../service.js');
+          await import('./service');
 
         const originalRecord = { id: 'user-1', version: 1, name: 'Original' };
         const updatedRecord = { id: 'user-1', version: 2, name: 'Updated' };
@@ -249,7 +249,7 @@ describe('Realtime Handlers', () => {
 
       test('should log transaction details', async () => {
         const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } =
-          await import('../service.js');
+          await import('./service');
 
         vi.mocked(loadRecords).mockResolvedValue({
           users: { 'user-1': { id: 'user-1', version: 1 } },
@@ -282,7 +282,7 @@ describe('Realtime Handlers', () => {
 
     describe('Error Handling', () => {
       test('should return 500 for unexpected errors', async () => {
-        const { loadRecords } = await import('../service.js');
+        const { loadRecords } = await import('./service');
         vi.mocked(loadRecords).mockRejectedValue(new Error('Database connection failed'));
 
         const ctx = createMockContext();
@@ -331,7 +331,7 @@ describe('Realtime Handlers', () => {
 
     describe('Success Path', () => {
       test('should return loaded records', async () => {
-        const { loadRecords } = await import('../service.js');
+        const { loadRecords } = await import('./service');
 
         const mockRecords = {
           users: {
@@ -357,7 +357,7 @@ describe('Realtime Handlers', () => {
       });
 
       test('should log request details', async () => {
-        const { loadRecords } = await import('../service.js');
+        const { loadRecords } = await import('./service');
         vi.mocked(loadRecords).mockResolvedValue({});
 
         const ctx = createMockContext();
@@ -375,7 +375,7 @@ describe('Realtime Handlers', () => {
 
     describe('Error Handling', () => {
       test('should return 500 for unexpected errors', async () => {
-        const { loadRecords } = await import('../service.js');
+        const { loadRecords } = await import('./service');
         vi.mocked(loadRecords).mockRejectedValue(new Error('Database error'));
 
         const ctx = createMockContext();

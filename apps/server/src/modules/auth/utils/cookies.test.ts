@@ -1,8 +1,8 @@
-// apps/server/src/modules/auth/utils/__tests__/cookies.test.ts
-import { REFRESH_COOKIE_NAME } from '@shared/constants';
+// apps/server/src/modules/auth/utils/cookies.test.ts
+import { REFRESH_COOKIE_NAME } from '../../../shared/constants';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { clearRefreshTokenCookie, setRefreshTokenCookie } from '../cookies';
+import { clearRefreshTokenCookie, setRefreshTokenCookie } from './cookies';
 
 import type { AuthConfig } from '@/config';
 

@@ -93,9 +93,13 @@ export async function handleSubscribe(
     };
   } catch (error) {
     if (isAppError(error)) {
+      const errorBody: { message: string; code?: string } = { message: error.message };
+      if (error.code !== undefined) {
+        errorBody.code = error.code;
+      }
       return {
         status: 400,
-        body: { message: error.message, code: error.code },
+        body: errorBody,
       };
     }
 
@@ -218,9 +222,13 @@ export async function handleUpdatePreferences(
     };
   } catch (error) {
     if (isAppError(error)) {
+      const errorBody: { message: string; code?: string } = { message: error.message };
+      if (error.code !== undefined) {
+        errorBody.code = error.code;
+      }
       return {
         status: 400,
-        body: { message: error.message, code: error.code },
+        body: errorBody,
       };
     }
 

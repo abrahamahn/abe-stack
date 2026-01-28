@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/csrf.test.ts
+// apps/server/src/infrastructure/http/middleware/csrf.test.ts
 import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { registerCookies } from '../cookie';
-import { registerCsrf, validateCsrfToken } from '../csrf';
+import { registerCookies } from './cookie';
+import { registerCsrf, validateCsrfToken } from './csrf';
 
 import type { FastifyInstance } from 'fastify';
 

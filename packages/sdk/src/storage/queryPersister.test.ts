@@ -1,4 +1,4 @@
-// packages/sdk/src/storage/__tests__/queryPersister.test.ts
+// packages/sdk/src/storage/queryPersister.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { clearQueryCache, createQueryPersister } from '../queryPersister';

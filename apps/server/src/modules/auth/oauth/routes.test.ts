@@ -29,7 +29,7 @@ vi.mock('./handlers', () => ({
 import { oauthRoutes } from './routes';
 
 import type { BaseRouteDefinition, RouteResult } from '@router';
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -194,7 +194,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should call handleOAuthInitiate with correct provider', async () => {
-            const { handleOAuthInitiate } = await import('./handlers.js');
+            const { handleOAuthInitiate } = await import('./handlers');
             const mockResult: RouteResult<{ url: string }> = {
               status: 302,
               body: { url: `https://${provider}.com/oauth/authorize` },
@@ -216,7 +216,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should return result from handleOAuthInitiate', async () => {
-            const { handleOAuthInitiate } = await import('./handlers.js');
+            const { handleOAuthInitiate } = await import('./handlers');
             const expectedResult: RouteResult<{ url: string }> = {
               status: 302,
               body: { url: `https://${provider}.com/oauth/authorize?state=abc123` },
@@ -270,7 +270,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should call handleOAuthCallbackRequest with query parameters', async () => {
-            const { handleOAuthCallbackRequest } = await import('./handlers.js');
+            const { handleOAuthCallbackRequest } = await import('./handlers');
             const mockResult: RouteResult = {
               status: 200,
               body: {
@@ -315,7 +315,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should handle OAuth error in query parameters', async () => {
-            const { handleOAuthCallbackRequest } = await import('./handlers.js');
+            const { handleOAuthCallbackRequest } = await import('./handlers');
             const mockResult: RouteResult = {
               status: 400,
               body: { message: 'User denied access', code: 'access_denied' },
@@ -349,7 +349,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should return result from handleOAuthCallbackRequest', async () => {
-            const { handleOAuthCallbackRequest } = await import('./handlers.js');
+            const { handleOAuthCallbackRequest } = await import('./handlers');
             const expectedResult: RouteResult = {
               status: 200,
               body: {
@@ -415,7 +415,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should call handleOAuthLink with correct provider', async () => {
-            const { handleOAuthLink } = await import('./handlers.js');
+            const { handleOAuthLink } = await import('./handlers');
             const mockResult: RouteResult<{ url: string }> = {
               status: 302,
               body: { url: `https://${provider}.com/oauth/authorize?prompt=consent` },
@@ -441,7 +441,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should return result from handleOAuthLink', async () => {
-            const { handleOAuthLink } = await import('./handlers.js');
+            const { handleOAuthLink } = await import('./handlers');
             const expectedResult: RouteResult<{ url: string }> = {
               status: 302,
               body: { url: `https://${provider}.com/oauth/authorize` },
@@ -499,7 +499,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should call handleOAuthUnlink with correct provider', async () => {
-            const { handleOAuthUnlink } = await import('./handlers.js');
+            const { handleOAuthUnlink } = await import('./handlers');
             const mockResult: RouteResult<{ message: string }> = {
               status: 200,
               body: { message: `${provider} account unlinked successfully` },
@@ -525,7 +525,7 @@ describe('OAuth Routes', () => {
           });
 
           test('should return result from handleOAuthUnlink', async () => {
-            const { handleOAuthUnlink } = await import('./handlers.js');
+            const { handleOAuthUnlink } = await import('./handlers');
             const expectedResult: RouteResult<{ message: string }> = {
               status: 200,
               body: { message: 'Account unlinked' },
@@ -578,7 +578,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should call handleGetConnections with correct arguments', async () => {
-        const { handleGetConnections } = await import('./handlers.js');
+        const { handleGetConnections } = await import('./handlers');
         const mockResult: RouteResult = {
           status: 200,
           body: {
@@ -604,7 +604,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should return result from handleGetConnections', async () => {
-        const { handleGetConnections } = await import('./handlers.js');
+        const { handleGetConnections } = await import('./handlers');
         const expectedResult: RouteResult = {
           status: 200,
           body: { connections: [] },
@@ -793,7 +793,7 @@ describe('OAuth Routes', () => {
   describe('Edge Cases', () => {
     describe('Callback Query Parameters', () => {
       test('should handle callback with missing code parameter', async () => {
-        const { handleOAuthCallbackRequest } = await import('./handlers.js');
+        const { handleOAuthCallbackRequest } = await import('./handlers');
         vi.mocked(handleOAuthCallbackRequest).mockResolvedValue({
           status: 400,
           body: { message: 'Missing authorization code', code: 'invalid_request' },
@@ -822,7 +822,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle callback with missing state parameter', async () => {
-        const { handleOAuthCallbackRequest } = await import('./handlers.js');
+        const { handleOAuthCallbackRequest } = await import('./handlers');
         vi.mocked(handleOAuthCallbackRequest).mockResolvedValue({
           status: 400,
           body: { message: 'Invalid state parameter', code: 'invalid_state' },
@@ -851,7 +851,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle callback with empty query object', async () => {
-        const { handleOAuthCallbackRequest } = await import('./handlers.js');
+        const { handleOAuthCallbackRequest } = await import('./handlers');
         vi.mocked(handleOAuthCallbackRequest).mockResolvedValue({
           status: 400,
           body: { message: 'Invalid callback request', code: 'invalid_request' },
@@ -880,7 +880,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle callback with both error and code (edge case)', async () => {
-        const { handleOAuthCallbackRequest } = await import('./handlers.js');
+        const { handleOAuthCallbackRequest } = await import('./handlers');
         vi.mocked(handleOAuthCallbackRequest).mockResolvedValue({
           status: 400,
           body: { message: 'User denied access', code: 'access_denied' },
@@ -915,7 +915,7 @@ describe('OAuth Routes', () => {
 
     describe('Handler Return Values', () => {
       test('should handle initiate returning error response', async () => {
-        const { handleOAuthInitiate } = await import('./handlers.js');
+        const { handleOAuthInitiate } = await import('./handlers');
         const errorResult: RouteResult = {
           status: 500,
           body: { message: 'OAuth provider configuration error' },
@@ -933,7 +933,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle link returning error when already linked', async () => {
-        const { handleOAuthLink } = await import('./handlers.js');
+        const { handleOAuthLink } = await import('./handlers');
         const errorResult: RouteResult<{ message: string }> = {
           status: 400,
           body: { message: 'Account already linked' },
@@ -955,7 +955,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle unlink returning error when not linked', async () => {
-        const { handleOAuthUnlink } = await import('./handlers.js');
+        const { handleOAuthUnlink } = await import('./handlers');
         const errorResult: RouteResult<{ message: string }> = {
           status: 404,
           body: { message: 'OAuth account not linked' },
@@ -977,7 +977,7 @@ describe('OAuth Routes', () => {
       });
 
       test('should handle connections returning empty array', async () => {
-        const { handleGetConnections } = await import('./handlers.js');
+        const { handleGetConnections } = await import('./handlers');
         const emptyResult: RouteResult = {
           status: 200,
           body: { connections: [] },

@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/cookie.test.ts
+// apps/server/src/infrastructure/http/middleware/cookie.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { parseCookies, serializeCookie, signCookie, unsignCookie } from '../cookie';
+import { parseCookies, serializeCookie, signCookie, unsignCookie } from './cookie';
 
 describe('Cookie Utilities', () => {
   describe('parseCookies', () => {

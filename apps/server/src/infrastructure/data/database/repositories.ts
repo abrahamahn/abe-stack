@@ -135,7 +135,7 @@ type GlobalWithRepos = typeof globalThis & {
  * Get or create repository context (singleton in development)
  */
 export function getRepositoryContext(connectionString: string): RepositoryContext {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env['NODE_ENV'] !== 'production') {
     const globalWithRepos = globalThis as GlobalWithRepos;
 
     globalWithRepos.repositoryContext ??= createRepositories(connectionString);

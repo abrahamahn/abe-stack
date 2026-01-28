@@ -8,7 +8,7 @@
  * - Startup validation summary
  */
 
-import { REQUIRED_TABLES, validateSchema } from '@database';
+import { REQUIRED_TABLES, validateSchema } from '@data/database';
 
 import { getWebSocketStats } from '../../messaging/websocket/websocket';
 

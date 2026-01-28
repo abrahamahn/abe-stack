@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/proxyValidation.test.ts
+// apps/server/src/infrastructure/http/middleware/proxyValidation.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -11,7 +11,7 @@ import {
   parseCidr,
   parseXForwardedFor,
   validateCidrList,
-} from '../proxyValidation';
+} from './proxyValidation';
 
 // ============================================================================
 // Tests

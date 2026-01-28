@@ -1,3 +1,4 @@
+// apps/server/src/modules/auth/magic-link/service.test.ts
  
 // apps/server/src/modules/auth/magic-link/__tests__/service.test.ts
 /**
@@ -9,7 +10,7 @@
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
+import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
 import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index';
 import type { AuthConfig } from '@/config';
@@ -56,9 +57,9 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-vi.mock('../../../../infrastructure/index.js', async () => {
-  const actual = await vi.importActual<typeof import('../../../../infrastructure/index.js')>(
-    '../../../../infrastructure/index.js',
+vi.mock('@/infrastructure', async () => {
+  const actual = await vi.importActual<typeof import('@/infrastructure')>(
+    '@/infrastructure',
   );
   return {
     ...actual,
@@ -77,7 +78,7 @@ vi.mock('../../../../infrastructure/index.js', async () => {
   };
 });
 
-vi.mock('../../utils/index.js', () => ({
+vi.mock('../utils', () => ({
   createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
     accessToken,
     refreshToken,
@@ -577,7 +578,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -620,7 +621,7 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'valid-token';
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -668,7 +669,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ emailVerified: false, emailVerifiedAt: null });
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -725,8 +726,8 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
-      const { createRefreshTokenFamily } = await import('../../utils/index.js');
+      const { withTransaction } = await import('@/infrastructure');
+      const { createRefreshTokenFamily } = await import('../utils');
 
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
@@ -773,7 +774,7 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'invalid-token';
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -796,7 +797,7 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'expired-token';
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -819,7 +820,7 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'used-token';
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -842,7 +843,7 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'valid-token';
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -879,7 +880,7 @@ describe('verifyMagicLink', () => {
       const token = 'plain-text-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       const mockQuery = vi.fn().mockResolvedValue([
         {
           id: 'token-123',
@@ -924,7 +925,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       const mockQuery = vi.fn().mockResolvedValue([
         {
           id: 'token-123',
@@ -970,7 +971,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ name: null });
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {
@@ -1012,7 +1013,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ role: 'admin' });
 
-      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { withTransaction } = await import('@/infrastructure');
       vi.mocked(withTransaction).mockImplementation(
         async (_db: DbClient, callback: TransactionCallback) => {
           const mockTx = {

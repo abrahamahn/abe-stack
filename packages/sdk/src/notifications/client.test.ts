@@ -1,4 +1,4 @@
-// packages/sdk/src/notifications/__tests__/client.test.ts
+// packages/sdk/src/notifications/client.test.ts
 /**
  * Notification Client Tests
  *

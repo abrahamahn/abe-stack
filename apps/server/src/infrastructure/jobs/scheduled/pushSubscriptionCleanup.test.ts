@@ -65,17 +65,16 @@ function createMockDb(): RawDb {
 
 describe('cleanupPushSubscriptions', () => {
   let mockDb: RawDb;
-  let originalDateNow: typeof Date.now;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    originalDateNow = Date.now;
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
   });
 
   afterEach(() => {
-    Date.now = originalDateNow;
+    vi.useRealTimers();
   });
 
   describe('dry-run mode', () => {
@@ -100,9 +99,13 @@ describe('cleanupPushSubscriptions', () => {
 
       const result = await cleanupPushSubscriptions(mockDb, { dryRun: true });
 
-      // Cutoff should be 90 days ago at start of day
-      const expectedCutoff = new Date('2024-10-17T00:00:00Z');
-      expect(result.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+      // Cutoff should be 90 days ago (2024-01-15 - 90 days = 2023-10-17) at start of day
+      // setHours(0, 0, 0, 0) uses local time, so we compare date parts only
+      expect(result.cutoffDate.getFullYear()).toBe(2023);
+      expect(result.cutoffDate.getMonth()).toBe(9); // October (0-indexed)
+      expect(result.cutoffDate.getDate()).toBe(17);
+      expect(result.cutoffDate.getHours()).toBe(0);
+      expect(result.cutoffDate.getMinutes()).toBe(0);
     });
 
     it('should use custom inactive days', async () => {
@@ -113,9 +116,11 @@ describe('cleanupPushSubscriptions', () => {
         inactiveDays: 30,
       });
 
-      // Cutoff should be 30 days ago at start of day
-      const expectedCutoff = new Date('2023-12-16T00:00:00Z');
-      expect(result.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+      // Cutoff should be 30 days ago (2024-01-15 - 30 days = 2023-12-16) at start of day
+      expect(result.cutoffDate.getFullYear()).toBe(2023);
+      expect(result.cutoffDate.getMonth()).toBe(11); // December (0-indexed)
+      expect(result.cutoffDate.getDate()).toBe(16);
+      expect(result.cutoffDate.getHours()).toBe(0);
     });
 
     it('should handle zero counts in all categories', async () => {
@@ -140,28 +145,29 @@ describe('cleanupPushSubscriptions', () => {
 
   describe('actual deletion', () => {
     it('should delete subscriptions and return total count', async () => {
-      vi.mocked(mockDb.execute)
-        .mockResolvedValueOnce(50)
-        .mockResolvedValueOnce(0);
+      // When deleted count < batchSize, loop stops (no continuation needed)
+      vi.mocked(mockDb.execute).mockResolvedValueOnce(50);
 
       const result = await cleanupPushSubscriptions(mockDb);
 
       expect(result.dryRun).toBe(false);
       expect(result.deletedCount).toBe(50);
-      expect(mockDb.execute).toHaveBeenCalledTimes(2);
+      // Only one call since 50 < MAX_BATCH_SIZE (1000)
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     it('should delete in batches when count exceeds batch size', async () => {
+      // Loop continues while batchDeleted === batchSize, stops when < batchSize
       vi.mocked(mockDb.execute)
-        .mockResolvedValueOnce(1000)
-        .mockResolvedValueOnce(1000)
-        .mockResolvedValueOnce(500)
-        .mockResolvedValueOnce(0);
+        .mockResolvedValueOnce(1000) // Full batch, continue
+        .mockResolvedValueOnce(1000) // Full batch, continue
+        .mockResolvedValueOnce(500); // Partial batch, stop
 
       const result = await cleanupPushSubscriptions(mockDb, { batchSize: 1000 });
 
       expect(result.deletedCount).toBe(2500);
-      expect(mockDb.execute).toHaveBeenCalledTimes(4);
+      // Three calls: two full batches + one partial batch
+      expect(mockDb.execute).toHaveBeenCalledTimes(3);
     });
 
     it('should use correct SQL with proper conditions', async () => {
@@ -195,16 +201,17 @@ describe('cleanupPushSubscriptions', () => {
     });
 
     it('should continue deleting until no more records match', async () => {
+      // Loop continues while batchDeleted === batchSize, stops when < batchSize
       vi.mocked(mockDb.execute)
-        .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(100)
-        .mockResolvedValueOnce(75)
-        .mockResolvedValueOnce(0);
+        .mockResolvedValueOnce(100) // Full batch, continue
+        .mockResolvedValueOnce(100) // Full batch, continue
+        .mockResolvedValueOnce(75); // Partial batch, stop
 
       const result = await cleanupPushSubscriptions(mockDb, { batchSize: 100 });
 
       expect(result.deletedCount).toBe(275);
-      expect(mockDb.execute).toHaveBeenCalledTimes(4);
+      // Three calls: two full batches + one partial batch
+      expect(mockDb.execute).toHaveBeenCalledTimes(3);
     });
 
     it('should not populate breakdown in actual deletion mode', async () => {
@@ -228,9 +235,11 @@ describe('cleanupPushSubscriptions', () => {
         inactiveDays: 3, // Below MIN_INACTIVE_DAYS (7)
       });
 
-      // Should use MIN_INACTIVE_DAYS instead
-      const expectedCutoff = new Date('2024-01-08T00:00:00Z');
-      expect(result.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+      // Should use MIN_INACTIVE_DAYS (7) instead: 2024-01-15 - 7 days = 2024-01-08
+      expect(result.cutoffDate.getFullYear()).toBe(2024);
+      expect(result.cutoffDate.getMonth()).toBe(0); // January
+      expect(result.cutoffDate.getDate()).toBe(8);
+      expect(result.cutoffDate.getHours()).toBe(0);
     });
 
     it('should enforce minimum for negative values', async () => {
@@ -241,8 +250,10 @@ describe('cleanupPushSubscriptions', () => {
         inactiveDays: -10,
       });
 
-      const expectedCutoff = new Date('2024-01-08T00:00:00Z');
-      expect(result.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+      // Should use MIN_INACTIVE_DAYS (7): 2024-01-15 - 7 days = 2024-01-08
+      expect(result.cutoffDate.getFullYear()).toBe(2024);
+      expect(result.cutoffDate.getMonth()).toBe(0); // January
+      expect(result.cutoffDate.getDate()).toBe(8);
     });
 
     it('should allow inactive days above minimum', async () => {
@@ -253,8 +264,10 @@ describe('cleanupPushSubscriptions', () => {
         inactiveDays: 180,
       });
 
-      const expectedCutoff = new Date('2023-07-19T00:00:00Z');
-      expect(result.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+      // 2024-01-15 - 180 days = approximately 2023-07-19
+      expect(result.cutoffDate.getFullYear()).toBe(2023);
+      expect(result.cutoffDate.getMonth()).toBe(6); // July
+      expect(result.cutoffDate.getDate()).toBe(19);
     });
 
     it('should normalize cutoff to start of day', async () => {
@@ -262,11 +275,11 @@ describe('cleanupPushSubscriptions', () => {
 
       const result = await cleanupPushSubscriptions(mockDb, { dryRun: true });
 
-      // Hours, minutes, seconds should be 0
-      expect(result.cutoffDate.getUTCHours()).toBe(0);
-      expect(result.cutoffDate.getUTCMinutes()).toBe(0);
-      expect(result.cutoffDate.getUTCSeconds()).toBe(0);
-      expect(result.cutoffDate.getUTCMilliseconds()).toBe(0);
+      // Hours, minutes, seconds should be 0 (local time)
+      expect(result.cutoffDate.getHours()).toBe(0);
+      expect(result.cutoffDate.getMinutes()).toBe(0);
+      expect(result.cutoffDate.getSeconds()).toBe(0);
+      expect(result.cutoffDate.getMilliseconds()).toBe(0);
     });
   });
 
@@ -316,7 +329,12 @@ describe('getPushSubscriptionStats', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return comprehensive subscription statistics', async () => {
@@ -348,8 +366,10 @@ describe('getPushSubscriptionStats', () => {
 
     const stats = await getPushSubscriptionStats(mockDb, 30);
 
-    const expectedCutoff = new Date('2023-12-16T00:00:00Z');
-    expect(stats.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+    // 2024-01-15 - 30 days = 2023-12-16
+    expect(stats.cutoffDate.getFullYear()).toBe(2023);
+    expect(stats.cutoffDate.getMonth()).toBe(11); // December
+    expect(stats.cutoffDate.getDate()).toBe(16);
   });
 
   it('should enforce minimum inactive days', async () => {
@@ -358,8 +378,10 @@ describe('getPushSubscriptionStats', () => {
 
     const stats = await getPushSubscriptionStats(mockDb, 3);
 
-    const expectedCutoff = new Date('2024-01-08T00:00:00Z');
-    expect(stats.cutoffDate.toISOString()).toBe(expectedCutoff.toISOString());
+    // Should use MIN_INACTIVE_DAYS (7): 2024-01-15 - 7 = 2024-01-08
+    expect(stats.cutoffDate.getFullYear()).toBe(2024);
+    expect(stats.cutoffDate.getMonth()).toBe(0); // January
+    expect(stats.cutoffDate.getDate()).toBe(8);
   });
 
   it('should handle all zero counts', async () => {
@@ -421,7 +443,12 @@ describe('countCleanupCandidates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should count total subscriptions matching cleanup criteria', async () => {

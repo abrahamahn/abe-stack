@@ -1,4 +1,4 @@
-// packages/db/src/builder/__tests__/select.test.ts
+// packages/db/src/builder/select.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { select } from './select';

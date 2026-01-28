@@ -113,11 +113,14 @@ export function memoize<TArgs extends unknown[], TResult>(
     }
 
     // Store result
-    cache.set(key, {
+    const newEntry: MemoEntry<TResult> = {
       value: result,
-      expiresAt: ttl !== undefined && ttl > 0 ? now + ttl : undefined,
       lastAccessedAt: now,
-    });
+    };
+    if (ttl !== undefined && ttl > 0) {
+      newEntry.expiresAt = now + ttl;
+    }
+    cache.set(key, newEntry);
     accessOrder.push(key);
 
     return result;

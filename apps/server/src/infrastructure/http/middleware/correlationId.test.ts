@@ -1,11 +1,11 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/correlationId.test.ts
+// apps/server/src/infrastructure/http/middleware/correlationId.test.ts
 /**
  * Correlation ID Middleware Tests
  */
 
 import { describe, it, expect, vi } from 'vitest';
 
-import { registerCorrelationIdHook, generateCorrelationId } from '../correlationId';
+import { registerCorrelationIdHook, generateCorrelationId } from './correlationId';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

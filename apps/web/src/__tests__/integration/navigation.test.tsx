@@ -10,11 +10,11 @@
  */
 
 import { Navigate, Outlet, Route, Routes, useLocation } from '@abe-stack/ui';
-import { ProtectedRoute } from '@features/auth';
-import { DashboardPage } from '@features/dashboard';
-import { HomePage } from '@pages';
 import { screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ProtectedRoute } from '../../features/auth';
+import { DashboardPage } from '../../features/dashboard';
+import { HomePage } from '../../pages';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 
@@ -28,7 +28,7 @@ const LocationDisplay = (): ReactElement => {
 
 // Mock useAuth hook for ProtectedRoute tests
 const mockUseAuth = vi.fn();
-vi.mock('@auth/hooks/useAuth', () => ({
+vi.mock('../../features/auth/hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 

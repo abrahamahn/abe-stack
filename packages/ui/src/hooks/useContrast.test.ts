@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useContrast.test.ts
+// packages/ui/src/hooks/useContrast.test.ts
 /** @vitest-environment jsdom */
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

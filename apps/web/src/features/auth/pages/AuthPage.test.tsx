@@ -1,22 +1,69 @@
 // apps/web/src/features/auth/pages/AuthPage.test.tsx
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderWithProviders } from './../../../__tests__/utils';
 import { AuthPage } from './AuthPage';
 
-vi.mock('@abe-stack/ui', () => {
-  const Container = ({ children }: { children: React.ReactNode }): JSX.Element => <div>{children}</div>;
-  return { Container };
-});
+// Mock the auth hook
+const mockLogin = vi.fn();
+const mockRegister = vi.fn();
+const mockForgotPassword = vi.fn();
+const mockResetPassword = vi.fn();
+const mockResendVerification = vi.fn();
+const mockUseAuth = vi.fn(() => ({
+  login: mockLogin,
+  register: mockRegister,
+  forgotPassword: mockForgotPassword,
+  resetPassword: mockResetPassword,
+  resendVerification: mockResendVerification,
+  isLoading: false,
+  user: null,
+  isAuthenticated: false,
+  logout: vi.fn(),
+}));
 
-vi.mock('../components', () => {
-  const AuthForms = (): JSX.Element => <div>Auth Forms</div>;
-  return { AuthForms };
-});
+vi.mock('@auth/hooks', () => ({
+  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+}));
 
 describe('AuthPage', () => {
+  beforeEach((): void => {
+    vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      login: mockLogin,
+      register: mockRegister,
+      forgotPassword: mockForgotPassword,
+      resetPassword: mockResetPassword,
+      resendVerification: mockResendVerification,
+      isLoading: false,
+      user: null,
+      isAuthenticated: false,
+      logout: vi.fn(),
+    });
+  });
+
+  const renderAuthPage = (route = '/auth?mode=login') =>
+    renderWithProviders(<AuthPage />, { route });
+
   it('should render', () => {
-    const { container } = render(<AuthPage />);
+    const { container } = renderAuthPage();
     expect(container).toBeInTheDocument();
+  });
+
+  it('should render login form by default', () => {
+    renderAuthPage('/auth');
+    // The form should render with login mode as default
+    expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
+  });
+
+  it('should render register form when mode is register', () => {
+    renderAuthPage('/auth?mode=register');
+    expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+  });
+
+  it('should render forgot password form when mode is forgot-password', () => {
+    renderAuthPage('/auth?mode=forgot-password');
+    expect(screen.getByRole('heading', { name: /reset your password/i })).toBeInTheDocument();
   });
 });

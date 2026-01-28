@@ -1,3 +1,4 @@
+// apps/server/src/modules/billing/webhooks/stripe-webhook.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/billing/webhooks/stripe-webhook.test.ts
 /**
@@ -26,7 +27,7 @@ import type {
   PlanRepository,
   SubscriptionRepository,
 } from '@abe-stack/db';
-import type { NormalizedWebhookEvent } from '@infrastructure/billing';
+import type { NormalizedWebhookEvent } from '@/infrastructure/billing';
 import type { FastifyBaseLogger } from 'fastify';
 
 
@@ -35,16 +36,24 @@ import type { FastifyBaseLogger } from 'fastify';
 // Mock Dependencies
 // ============================================================================
 
+// Create hoisted mock for StripeProvider
+const { MockStripeProvider } = vi.hoisted(() => {
+  return { MockStripeProvider: vi.fn() };
+});
+
+vi.mock('@/infrastructure/billing', () => ({
+  StripeProvider: MockStripeProvider,
+  // Re-export other members as needed
+  PayPalProvider: vi.fn(),
+  createBillingProvider: vi.fn(),
+  isBillingConfigured: vi.fn(),
+}));
+
+// Mock instance object that will hold the mock methods
 const mockStripeProviderInstance = {
   verifyWebhookSignature: vi.fn(),
   parseWebhookEvent: vi.fn(),
 };
-
-vi.mock('@infrastructure/billing', () => ({
-  StripeProvider: vi.fn(function () {
-    return mockStripeProviderInstance;
-  }),
-}));
 
 // ============================================================================
 // Test Helpers
@@ -148,6 +157,15 @@ describe('handleStripeWebhook', () => {
     // Reset all mocks
     vi.clearAllMocks();
 
+    // Reconfigure MockStripeProvider as a class constructor after clearAllMocks
+    MockStripeProvider.mockImplementation(
+      function (this: { verifyWebhookSignature: typeof mockStripeProviderInstance.verifyWebhookSignature; parseWebhookEvent: typeof mockStripeProviderInstance.parseWebhookEvent }) {
+        this.verifyWebhookSignature = mockStripeProviderInstance.verifyWebhookSignature;
+        this.parseWebhookEvent = mockStripeProviderInstance.parseWebhookEvent;
+        return this;
+      },
+    );
+
     // Reset mock provider methods to default behavior
     mockStripeProviderInstance.verifyWebhookSignature.mockReturnValue(true);
     mockStripeProviderInstance.parseWebhookEvent.mockReturnValue(createNormalizedEvent());
@@ -159,7 +177,10 @@ describe('handleStripeWebhook', () => {
 
       await expect(
         handleStripeWebhook(payload, signature, mockConfig, mockRepos, mockLog),
-      ).rejects.toThrow(WebhookSignatureError);
+      ).rejects.toMatchObject({
+        name: 'WebhookSignatureError',
+        code: 'WEBHOOK_SIGNATURE_INVALID',
+      });
 
       expect(mockStripeProviderInstance.verifyWebhookSignature).toHaveBeenCalledWith(payload, signature);
     });
@@ -209,7 +230,10 @@ describe('handleStripeWebhook', () => {
 
       await expect(
         handleStripeWebhook(payload, signature, mockConfig, mockRepos, mockLog),
-      ).rejects.toThrow(WebhookEventAlreadyProcessedError);
+      ).rejects.toMatchObject({
+        name: 'WebhookEventAlreadyProcessedError',
+        code: 'WEBHOOK_EVENT_ALREADY_PROCESSED',
+      });
 
       expect(mockRepos.billingEvents.wasProcessed).toHaveBeenCalledWith('stripe', event.id);
       expect(mockLog.info).toHaveBeenCalledWith(

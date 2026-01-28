@@ -70,7 +70,7 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
     },
 
     // SaaS Plan IDs (The "Business" logic)
-    plans: (() => {
+    plans: ((): BillingPlansConfig => {
       const plans: BillingPlansConfig = {};
       if (env.PLAN_FREE_ID !== undefined) {
         plans.free = env.PLAN_FREE_ID;

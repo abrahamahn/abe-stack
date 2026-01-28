@@ -1,4 +1,4 @@
-// packages/sdk/src/notifications/__tests__/hooks.test.ts
+// packages/sdk/src/notifications/hooks.test.ts
 /**
  * Notification Hooks Tests
  *
@@ -14,11 +14,11 @@ import {
   usePushPermission,
   usePushSubscription,
   useTestNotification,
-} from '../hooks';
+} from './hooks';
 
 // Mock the client module
-vi.mock('../client', async () => {
-  const actual = await vi.importActual('../client');
+vi.mock('./client', async () => {
+  const actual = await vi.importActual('./client');
   return {
     ...actual,
     isPushSupported: vi.fn(() => true),

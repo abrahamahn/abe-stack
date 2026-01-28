@@ -6,9 +6,8 @@
  * Thin layer that calls services and formats responses.
  */
 
-import { InvalidTokenError } from '@abe-stack/core';
+
 import {
-  EmailSendError,
   mapErrorToResponse,
   SUCCESS_MESSAGES,
   type AppContext,
@@ -25,7 +24,12 @@ import { setRefreshTokenCookie } from '../utils';
 
 import { requestMagicLink, verifyMagicLink } from './service';
 
-import type { AuthResponse, MagicLinkRequest, MagicLinkRequestResponse } from '@abe-stack/core';
+import type {
+  AuthResponse,
+  EmailSendError,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+} from '@abe-stack/core';
 
 import { isStrategyEnabled } from '@/config';
 
@@ -83,9 +87,16 @@ export async function handleMagicLinkRequest(
     };
   } catch (error) {
     // Email send failed - log but return success to prevent user enumeration
-    if (error instanceof EmailSendError) {
+    // Use name-based check for cross-module boundary compatibility
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === 'EmailSendError'
+    ) {
+      const emailError = error as EmailSendError;
       ctx.log.error(
-        { email: body.email, originalError: error.originalError?.message },
+        { email: body.email, originalError: emailError.originalError?.message },
         'Failed to send magic link email',
       );
       // Return success anyway to prevent enumeration (user can retry)
@@ -154,7 +165,13 @@ export async function handleMagicLinkVerify(
     };
   } catch (error) {
     // Log failed verification attempt
-    if (error instanceof InvalidTokenError) {
+    // Use name-based check for cross-module boundary compatibility
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === 'InvalidTokenError'
+    ) {
       void logMagicLinkFailedEvent(
         ctx.db,
         undefined, // email unknown for invalid tokens

@@ -8,8 +8,9 @@
 import { emailSchema, errorResponseSchema, uuidSchema } from './common';
 import { paginatedResultSchema } from './pagination';
 import { createSchema } from './schema';
-import type { Contract, Schema } from './types';
 import { USER_ROLES, userRoleSchema, type UserRole } from './users';
+
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // Admin User Types

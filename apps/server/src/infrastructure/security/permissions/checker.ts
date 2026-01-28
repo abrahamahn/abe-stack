@@ -73,7 +73,9 @@ export class PermissionChecker {
 
     this.recordLoader = options.recordLoader;
 
-    this.batchRecordLoader = options.batchRecordLoader;
+    if (options.batchRecordLoader !== undefined) {
+      this.batchRecordLoader = options.batchRecordLoader;
+    }
 
     // Build table config lookup map
 
@@ -655,12 +657,15 @@ export function createOwnerRule(
   ownerField?: string,
   priority: number = 50,
 ): OwnershipRule {
-  return {
+  const rule: OwnershipRule = {
     type: 'ownership',
-    ownerField,
     grants,
     priority,
   };
+  if (ownerField !== undefined) {
+    rule.ownerField = ownerField;
+  }
+  return rule;
 }
 
 /**
@@ -671,12 +676,15 @@ export function createMemberRule(
   memberField?: string,
   priority: number = 25,
 ): MembershipRule {
-  return {
+  const rule: MembershipRule = {
     type: 'membership',
-    memberField,
     grants,
     priority,
   };
+  if (memberField !== undefined) {
+    rule.memberField = memberField;
+  }
+  return rule;
 }
 
 /**
@@ -688,11 +696,14 @@ export function createCustomRule(
   tables?: string[],
   priority: number = 0,
 ): CustomRule {
-  return {
+  const rule: CustomRule = {
     type: 'custom',
     check,
     grants,
-    tables,
     priority,
   };
+  if (tables !== undefined) {
+    rule.tables = tables;
+  }
+  return rule;
 }

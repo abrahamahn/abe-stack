@@ -1,3 +1,4 @@
+// apps/server/src/modules/billing/service.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/billing/service.test.ts
 /**
@@ -397,9 +398,9 @@ describe('createCheckoutSession', () => {
       const subscription = createMockSubscription();
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(createCheckoutSession(repos, provider, params)).rejects.toThrow(
-        BillingSubscriptionExistsError,
-      );
+      await expect(createCheckoutSession(repos, provider, params)).rejects.toMatchObject({
+        name: 'SubscriptionExistsError',
+      });
       expect(repos.plans.findById).not.toHaveBeenCalled();
     });
 
@@ -407,9 +408,9 @@ describe('createCheckoutSession', () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(null);
       vi.mocked(repos.plans.findById).mockResolvedValue(null);
 
-      await expect(createCheckoutSession(repos, provider, params)).rejects.toThrow(
-        PlanNotFoundError,
-      );
+      await expect(createCheckoutSession(repos, provider, params)).rejects.toMatchObject({
+        name: 'PlanNotFoundError',
+      });
     });
 
     it('should throw PlanNotActiveError if plan is not active', async () => {
@@ -417,9 +418,9 @@ describe('createCheckoutSession', () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(null);
       vi.mocked(repos.plans.findById).mockResolvedValue(plan);
 
-      await expect(createCheckoutSession(repos, provider, params)).rejects.toThrow(
-        PlanNotActiveError,
-      );
+      await expect(createCheckoutSession(repos, provider, params)).rejects.toMatchObject({
+        name: 'PlanNotActiveError',
+      });
     });
 
     it('should throw error if plan has no Stripe price ID', async () => {
@@ -505,12 +506,12 @@ describe('cancelSubscription', () => {
   });
 
   describe('error cases', () => {
-    it('should throw BillingSubscriptionNotFoundError if no active subscription', async () => {
+    it('should throw SubscriptionNotFoundError if no active subscription', async () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(null);
 
-      await expect(cancelSubscription(repos, provider, 'user-1')).rejects.toThrow(
-        BillingSubscriptionNotFoundError,
-      );
+      await expect(cancelSubscription(repos, provider, 'user-1')).rejects.toMatchObject({
+        name: 'SubscriptionNotFoundError',
+      });
       expect(provider.cancelSubscription).not.toHaveBeenCalled();
     });
 
@@ -518,18 +519,18 @@ describe('cancelSubscription', () => {
       const subscription = createMockSubscription({ status: 'canceled' });
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(cancelSubscription(repos, provider, 'user-1')).rejects.toThrow(
-        SubscriptionAlreadyCanceledError,
-      );
+      await expect(cancelSubscription(repos, provider, 'user-1')).rejects.toMatchObject({
+        name: 'SubscriptionAlreadyCanceledError',
+      });
     });
 
     it('should throw SubscriptionAlreadyCanceledError if already set to cancel at period end', async () => {
       const subscription = createMockSubscription({ cancelAtPeriodEnd: true });
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(cancelSubscription(repos, provider, 'user-1', false)).rejects.toThrow(
-        SubscriptionAlreadyCanceledError,
-      );
+      await expect(cancelSubscription(repos, provider, 'user-1', false)).rejects.toMatchObject({
+        name: 'SubscriptionAlreadyCanceledError',
+      });
     });
 
     it('should allow immediate cancel even if already set to cancel at period end', async () => {
@@ -569,21 +570,21 @@ describe('resumeSubscription', () => {
   });
 
   describe('error cases', () => {
-    it('should throw BillingSubscriptionNotFoundError if no active subscription', async () => {
+    it('should throw SubscriptionNotFoundError if no active subscription', async () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(null);
 
-      await expect(resumeSubscription(repos, provider, 'user-1')).rejects.toThrow(
-        BillingSubscriptionNotFoundError,
-      );
+      await expect(resumeSubscription(repos, provider, 'user-1')).rejects.toMatchObject({
+        name: 'SubscriptionNotFoundError',
+      });
     });
 
     it('should throw SubscriptionNotCancelingError if not set to cancel', async () => {
       const subscription = createMockSubscription({ cancelAtPeriodEnd: false });
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(resumeSubscription(repos, provider, 'user-1')).rejects.toThrow(
-        SubscriptionNotCancelingError,
-      );
+      await expect(resumeSubscription(repos, provider, 'user-1')).rejects.toMatchObject({
+        name: 'SubscriptionNotCancelingError',
+      });
     });
   });
 });
@@ -629,30 +630,30 @@ describe('updateSubscription', () => {
   });
 
   describe('error cases', () => {
-    it('should throw BillingSubscriptionNotFoundError if no active subscription', async () => {
+    it('should throw SubscriptionNotFoundError if no active subscription', async () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(null);
 
-      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toThrow(
-        BillingSubscriptionNotFoundError,
-      );
+      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toMatchObject({
+        name: 'SubscriptionNotFoundError',
+      });
     });
 
     it('should throw SubscriptionNotActiveError if subscription is canceled', async () => {
       const subscription = createMockSubscription({ status: 'canceled' });
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toThrow(
-        SubscriptionNotActiveError,
-      );
+      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toMatchObject({
+        name: 'SubscriptionNotActiveError',
+      });
     });
 
     it('should throw SubscriptionNotActiveError if subscription is past_due', async () => {
       const subscription = createMockSubscription({ status: 'past_due' });
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toThrow(
-        SubscriptionNotActiveError,
-      );
+      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toMatchObject({
+        name: 'SubscriptionNotActiveError',
+      });
     });
 
     it('should throw PlanNotFoundError if new plan does not exist', async () => {
@@ -660,9 +661,9 @@ describe('updateSubscription', () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
       vi.mocked(repos.plans.findById).mockResolvedValue(null);
 
-      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toThrow(
-        PlanNotFoundError,
-      );
+      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toMatchObject({
+        name: 'PlanNotFoundError',
+      });
     });
 
     it('should throw PlanNotActiveError if new plan is not active', async () => {
@@ -671,9 +672,9 @@ describe('updateSubscription', () => {
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
       vi.mocked(repos.plans.findById).mockResolvedValue(newPlan);
 
-      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toThrow(
-        PlanNotActiveError,
-      );
+      await expect(updateSubscription(repos, provider, 'user-1', 'plan-2')).rejects.toMatchObject({
+        name: 'PlanNotActiveError',
+      });
     });
 
     it('should throw error if new plan has no Stripe price ID', async () => {
@@ -919,7 +920,7 @@ describe('addPaymentMethod', () => {
 
       await expect(
         addPaymentMethod(repos, provider, 'user-1', 'user@example.com', 'pm_nonexistent'),
-      ).rejects.toThrow(PaymentMethodNotFoundError);
+      ).rejects.toMatchObject({ name: 'PaymentMethodNotFoundError' });
     });
   });
 });
@@ -961,18 +962,18 @@ describe('removePaymentMethod', () => {
     it('should throw PaymentMethodNotFoundError if payment method not found', async () => {
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(null);
 
-      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        PaymentMethodNotFoundError,
-      );
+      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'PaymentMethodNotFoundError',
+      });
     });
 
     it('should throw PaymentMethodNotFoundError if payment method belongs to different user', async () => {
       const paymentMethod = createMockPaymentMethod({ userId: 'user-2' });
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(paymentMethod);
 
-      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        PaymentMethodNotFoundError,
-      );
+      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'PaymentMethodNotFoundError',
+      });
     });
 
     it('should throw CannotRemoveDefaultPaymentMethodError if default with active subscription', async () => {
@@ -981,9 +982,9 @@ describe('removePaymentMethod', () => {
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(paymentMethod);
       vi.mocked(repos.subscriptions.findActiveByUserId).mockResolvedValue(subscription);
 
-      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        CannotRemoveDefaultPaymentMethodError,
-      );
+      await expect(removePaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'CannotRemoveDefaultPaymentMethodError',
+      });
     });
   });
 });
@@ -1021,18 +1022,18 @@ describe('setDefaultPaymentMethod', () => {
     it('should throw PaymentMethodNotFoundError if payment method not found', async () => {
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(null);
 
-      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        PaymentMethodNotFoundError,
-      );
+      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'PaymentMethodNotFoundError',
+      });
     });
 
     it('should throw PaymentMethodNotFoundError if payment method belongs to different user', async () => {
       const paymentMethod = createMockPaymentMethod({ userId: 'user-2' });
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(paymentMethod);
 
-      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        PaymentMethodNotFoundError,
-      );
+      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'PaymentMethodNotFoundError',
+      });
     });
 
     it('should throw CustomerNotFoundError if customer mapping not found', async () => {
@@ -1040,9 +1041,9 @@ describe('setDefaultPaymentMethod', () => {
       vi.mocked(repos.paymentMethods.findById).mockResolvedValue(paymentMethod);
       vi.mocked(repos.customerMappings.findByUserIdAndProvider).mockResolvedValue(null);
 
-      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        CustomerNotFoundError,
-      );
+      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'CustomerNotFoundError',
+      });
     });
 
     it('should throw PaymentMethodNotFoundError if setAsDefault returns null', async () => {
@@ -1052,9 +1053,9 @@ describe('setDefaultPaymentMethod', () => {
       vi.mocked(repos.customerMappings.findByUserIdAndProvider).mockResolvedValue(customerMapping);
       vi.mocked(repos.paymentMethods.setAsDefault).mockResolvedValue(null);
 
-      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toThrow(
-        PaymentMethodNotFoundError,
-      );
+      await expect(setDefaultPaymentMethod(repos, provider, 'user-1', 'pm-1')).rejects.toMatchObject({
+        name: 'PaymentMethodNotFoundError',
+      });
     });
   });
 });

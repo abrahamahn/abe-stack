@@ -92,10 +92,16 @@ export function createNotificationService(
 export function createNotificationServiceFromEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): NotificationService {
-  const fcmProvider = createFcmProvider({
-    FCM_CREDENTIALS: env.FCM_CREDENTIALS,
-    FCM_PROJECT_ID: env.FCM_PROJECT_ID,
-  });
+  const fcmCredentials = env['FCM_CREDENTIALS'];
+  const fcmProjectId = env['FCM_PROJECT_ID'];
+  const fcmConfig: { FCM_CREDENTIALS?: string; FCM_PROJECT_ID?: string } = {};
+  if (fcmCredentials !== undefined) {
+    fcmConfig.FCM_CREDENTIALS = fcmCredentials;
+  }
+  if (fcmProjectId !== undefined) {
+    fcmConfig.FCM_PROJECT_ID = fcmProjectId;
+  }
+  const fcmProvider = createFcmProvider(fcmConfig);
 
   return new NotificationServiceImpl(fcmProvider);
 }

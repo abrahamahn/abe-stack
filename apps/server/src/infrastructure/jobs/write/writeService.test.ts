@@ -10,8 +10,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WriteService, createWriteService, type WriteServiceOptions } from './writeService';
 import type { WriteBatch, WriteOperation, WriteHooks } from './types';
 import type { SubscriptionManager } from '@abe-stack/core/pubsub';
-import type { DbClient } from '@database';
-import type { Logger } from '@logger';
+import type { DbClient } from '@data/database';
+import type { Logger } from '@monitor/logger';
 
 // ============================================================================
 // Mock Modules
@@ -27,10 +27,12 @@ vi.mock('@abe-stack/core/pubsub', () => ({
   },
 }));
 
-vi.mock('@infrastructure/index', () => ({
+// Mock the transaction utility - uses relative path from test location
+vi.mock('../../data/database/utils/transaction', () => ({
   withTransaction: vi.fn(async (db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
     return fn(db);
   }),
+  isInTransaction: vi.fn(() => false),
 }));
 
 // ============================================================================

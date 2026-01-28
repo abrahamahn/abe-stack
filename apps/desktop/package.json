@@ -14,7 +14,7 @@
     "start": "electron --disable-features=SystemdIntegration dist/electron/main.js",
     "package": "electron-builder",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --reporter=dot",
+    "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-desktop --report-unused-disable-directives"
   },
   "dependencies": {

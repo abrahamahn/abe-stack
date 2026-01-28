@@ -8,17 +8,17 @@
  * - rate-limit: Token bucket rate limiter
  */
 
-// Crypto (JWT)
+// Crypto (JWT) - Base functions from core
 export {
-  jwtDecode,
+  decode as jwtDecode,
   JwtError,
-  jwtSign,
-  jwtVerify,
+  sign as jwtSign,
+  verify as jwtVerify,
   type JwtErrorCode,
   type JwtHeader,
   type JwtPayload,
-  type JwtSignOptions,
-} from './crypto';
+  type SignOptions as JwtSignOptions,
+} from '@abe-stack/core/crypto';
 
 // JWT Rotation Support
 export {

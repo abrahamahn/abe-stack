@@ -7,7 +7,7 @@
 
 import { Alert, Card, Heading, Spinner, Text } from '@abe-stack/ui';
 
-import type { QueueStats } from '@abe-stack/core';
+import type { QueueStats } from '@abe-stack/contracts';
 import type { JSX } from 'react';
 
 // ============================================================================

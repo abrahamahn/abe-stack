@@ -106,7 +106,7 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
     },
 
     async getSecurityMetrics(period?: 'hour' | 'day' | 'week' | 'month'): Promise<SecurityMetrics> {
-      const queryString = period !== null && period !== undefined ? `?period=${period}` : '';
+      const queryString = period !== undefined ? `?period=${period}` : '';
       return request<SecurityMetrics>(`/admin/security/metrics${queryString}`);
     },
 
@@ -122,12 +122,12 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
     // Job monitoring methods
     async listJobs(query: Partial<JobListQuery> = {}): Promise<JobListResponse> {
       const params = new URLSearchParams();
-      if (query.status !== undefined && query.status !== null) params.set('status', query.status);
-      if (query.name !== undefined && query.name !== null && query.name !== '') params.set('name', query.name);
-      if (query.page !== undefined && query.page !== null && query.page !== 0) params.set('page', String(query.page));
-      if (query.limit !== undefined && query.limit !== null && query.limit !== 0) params.set('limit', String(query.limit));
-      if (query.sortBy !== undefined && query.sortBy !== null) params.set('sortBy', query.sortBy);
-      if (query.sortOrder !== undefined && query.sortOrder !== null) params.set('sortOrder', query.sortOrder);
+      if (query.status !== undefined) params.set('status', query.status);
+      if (query.name !== undefined && query.name !== '') params.set('name', query.name);
+      if (query.page !== undefined && query.page !== 0) params.set('page', String(query.page));
+      if (query.limit !== undefined && query.limit !== 0) params.set('limit', String(query.limit));
+      if (query.sortBy !== undefined) params.set('sortBy', query.sortBy);
+      if (query.sortOrder !== undefined) params.set('sortOrder', query.sortOrder);
 
       const queryString = params.toString();
       const path = queryString !== '' ? `/admin/jobs?${queryString}` : '/admin/jobs';

@@ -286,7 +286,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
   const {
     path = '/',
     httpOnly = true,
-    secure = process.env.NODE_ENV === 'production',
+    secure = process.env['NODE_ENV'] === 'production',
     sameSite = secure ? 'strict' : 'lax',
     signed = true,
   } = cookieOpts;
@@ -371,7 +371,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     const headerToken =
       req.headers[headerName] ??
       req.headers[headerName.toLowerCase()] ??
-      (req.body as Record<string, unknown> | null)?._csrf;
+      (req.body as Record<string, unknown> | null)?.['_csrf'];
 
     if ((headerToken ?? '') === '' || typeof headerToken !== 'string') {
       reply.status(403).send({

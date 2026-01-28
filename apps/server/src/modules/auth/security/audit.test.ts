@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/security/__tests__/audit.test.ts
+// apps/server/src/modules/auth/security/audit.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 import { promises as fs } from 'fs';
 
@@ -10,7 +10,7 @@ import {
     type AuditConfig,
     type AuditEventType,
     type IntrusionRule,
-} from '../audit';
+} from './audit';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

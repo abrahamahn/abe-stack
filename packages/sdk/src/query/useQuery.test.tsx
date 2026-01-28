@@ -1,4 +1,4 @@
-// packages/sdk/src/query/useQuery.test.ts
+// packages/sdk/src/query/useQuery.test.tsx
 /**
  * useQuery Hook Tests
  *

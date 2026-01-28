@@ -8,7 +8,7 @@
  * @complexity O(1) per test - all operations are mocked
  */
 
-import { ERROR_MESSAGES } from '@shared';
+import { ERROR_MESSAGES } from '../../shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -25,7 +25,7 @@ import type {
   SecurityEventsListRequest,
   SecurityMetrics,
 } from '@abe-stack/core';
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -163,7 +163,7 @@ describe('Security Handlers', () => {
   describe('handleListSecurityEvents', () => {
     describe('when authenticated', () => {
       test('should return 200 with security events list', async () => {
-        const { listSecurityEvents } = await import('./securityService.js');
+        const { listSecurityEvents } = await import('./securityService');
         const mockEvents = [
           createMockSecurityEvent(),
           createMockSecurityEvent({ id: 'event-456', eventType: 'account_locked' }),
@@ -196,7 +196,7 @@ describe('Security Handlers', () => {
       });
 
       test('should pass pagination options to service', async () => {
-        const { listSecurityEvents } = await import('./securityService.js');
+        const { listSecurityEvents } = await import('./securityService');
         vi.mocked(listSecurityEvents).mockResolvedValue({
           data: [],
           total: 0,
@@ -230,7 +230,7 @@ describe('Security Handlers', () => {
       });
 
       test('should pass filters to service', async () => {
-        const { listSecurityEvents } = await import('./securityService.js');
+        const { listSecurityEvents } = await import('./securityService');
         vi.mocked(listSecurityEvents).mockResolvedValue({
           data: [],
           total: 0,
@@ -267,7 +267,7 @@ describe('Security Handlers', () => {
       });
 
       test('should handle empty results', async () => {
-        const { listSecurityEvents } = await import('./securityService.js');
+        const { listSecurityEvents } = await import('./securityService');
         vi.mocked(listSecurityEvents).mockResolvedValue({
           data: [],
           total: 0,
@@ -303,7 +303,7 @@ describe('Security Handlers', () => {
 
     describe('error handling', () => {
       test('should return 500 on service error', async () => {
-        const { listSecurityEvents } = await import('./securityService.js');
+        const { listSecurityEvents } = await import('./securityService');
         vi.mocked(listSecurityEvents).mockRejectedValue(new Error('Database error'));
 
         const req = createMockRequest();
@@ -324,7 +324,7 @@ describe('Security Handlers', () => {
   describe('handleGetSecurityEvent', () => {
     describe('when authenticated', () => {
       test('should return 200 with security event details', async () => {
-        const { getSecurityEvent } = await import('./securityService.js');
+        const { getSecurityEvent } = await import('./securityService');
         const mockEvent = createMockSecurityEvent();
         vi.mocked(getSecurityEvent).mockResolvedValue(mockEvent);
 
@@ -341,7 +341,7 @@ describe('Security Handlers', () => {
       });
 
       test('should extract id from request params', async () => {
-        const { getSecurityEvent } = await import('./securityService.js');
+        const { getSecurityEvent } = await import('./securityService');
         vi.mocked(getSecurityEvent).mockResolvedValue(createMockSecurityEvent());
 
         const req = createMockRequest({}, { id: 'event-789' });
@@ -378,7 +378,7 @@ describe('Security Handlers', () => {
       });
 
       test('should return 500 on service error', async () => {
-        const { getSecurityEvent } = await import('./securityService.js');
+        const { getSecurityEvent } = await import('./securityService');
         vi.mocked(getSecurityEvent).mockRejectedValue(new Error('Database error'));
 
         const req = createMockRequest({}, { id: 'event-123' });
@@ -398,7 +398,7 @@ describe('Security Handlers', () => {
   describe('handleGetSecurityMetrics', () => {
     describe('when authenticated', () => {
       test('should return 200 with security metrics', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         const mockMetrics = createMockSecurityMetrics();
         vi.mocked(getSecurityMetrics).mockResolvedValue(mockMetrics);
 
@@ -415,7 +415,7 @@ describe('Security Handlers', () => {
       });
 
       test('should use day as default period', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(createMockSecurityMetrics());
 
         const req = createMockRequest({}, {}, {});
@@ -425,7 +425,7 @@ describe('Security Handlers', () => {
       });
 
       test('should accept hour period from query', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(
           createMockSecurityMetrics({ period: 'hour' }),
         );
@@ -437,7 +437,7 @@ describe('Security Handlers', () => {
       });
 
       test('should accept week period from query', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(
           createMockSecurityMetrics({ period: 'week' }),
         );
@@ -449,7 +449,7 @@ describe('Security Handlers', () => {
       });
 
       test('should accept month period from query', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(
           createMockSecurityMetrics({ period: 'month' }),
         );
@@ -461,7 +461,7 @@ describe('Security Handlers', () => {
       });
 
       test('should ignore invalid period values', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(createMockSecurityMetrics());
 
         const req = createMockRequest({}, {}, { period: 'invalid' });
@@ -471,7 +471,7 @@ describe('Security Handlers', () => {
       });
 
       test('should ignore empty period string', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(createMockSecurityMetrics());
 
         const req = createMockRequest({}, {}, { period: '' });
@@ -481,7 +481,7 @@ describe('Security Handlers', () => {
       });
 
       test('should ignore non-string period values', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockResolvedValue(createMockSecurityMetrics());
 
         const req = createMockRequest({}, {}, { period: 123 });
@@ -503,7 +503,7 @@ describe('Security Handlers', () => {
 
     describe('error handling', () => {
       test('should return 500 on service error', async () => {
-        const { getSecurityMetrics } = await import('./securityService.js');
+        const { getSecurityMetrics } = await import('./securityService');
         vi.mocked(getSecurityMetrics).mockRejectedValue(new Error('Database error'));
 
         const req = createMockRequest();
@@ -523,7 +523,7 @@ describe('Security Handlers', () => {
   describe('handleExportSecurityEvents', () => {
     describe('when authenticated', () => {
       test('should return 200 with JSON export', async () => {
-        const { exportSecurityEvents } = await import('./securityService.js');
+        const { exportSecurityEvents } = await import('./securityService');
         const mockExport = {
           data: JSON.stringify([createMockSecurityEvent()]),
           filename: 'security-events-2024-01-01.json',
@@ -545,7 +545,7 @@ describe('Security Handlers', () => {
       });
 
       test('should return 200 with CSV export', async () => {
-        const { exportSecurityEvents } = await import('./securityService.js');
+        const { exportSecurityEvents } = await import('./securityService');
         const mockExport = {
           data: 'id,userId,email,eventType,severity\nevent-123,user-456,user@example.com,suspicious_login,high',
           filename: 'security-events-2024-01-01.csv',
@@ -563,7 +563,7 @@ describe('Security Handlers', () => {
       });
 
       test('should pass filters to export service', async () => {
-        const { exportSecurityEvents } = await import('./securityService.js');
+        const { exportSecurityEvents } = await import('./securityService');
         vi.mocked(exportSecurityEvents).mockResolvedValue({
           data: '[]',
           filename: 'security-events-2024-01-01.json',
@@ -584,7 +584,7 @@ describe('Security Handlers', () => {
       });
 
       test('should handle export with all filter options', async () => {
-        const { exportSecurityEvents } = await import('./securityService.js');
+        const { exportSecurityEvents } = await import('./securityService');
         vi.mocked(exportSecurityEvents).mockResolvedValue({
           data: '[]',
           filename: 'security-events-2024-01-01.json',
@@ -625,7 +625,7 @@ describe('Security Handlers', () => {
 
     describe('error handling', () => {
       test('should return 500 on service error', async () => {
-        const { exportSecurityEvents } = await import('./securityService.js');
+        const { exportSecurityEvents } = await import('./securityService');
         vi.mocked(exportSecurityEvents).mockRejectedValue(new Error('Database error'));
 
         const req = createMockRequest();

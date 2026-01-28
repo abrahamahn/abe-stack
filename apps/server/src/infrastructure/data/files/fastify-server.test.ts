@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/data/files/__tests__/fastify-server.test.ts
+// apps/server/src/infrastructure/data/files/fastify-server.test.ts
 import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -6,10 +6,10 @@ import path from 'node:path';
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { createSignature } from '../signatures';
+import { createSignature } from './signatures';
 
-import type { FilesConfig } from '../fastify-server';
-import type { FileSignatureData } from '../helpers';
+import type { FilesConfig } from './fastify-server';
+import type { FileSignatureData } from './helpers';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -42,7 +42,7 @@ describe('File Server', () => {
     });
 
     // Dynamically import to avoid hoisting issues with mocks
-    const { registerFileServer } = await import('../fastify-server.js');
+    const { registerFileServer } = await import('./fastify-server');
     registerFileServer(config, server);
 
     await server.ready();

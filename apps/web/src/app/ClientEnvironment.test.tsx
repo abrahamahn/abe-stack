@@ -1,4 +1,4 @@
-// apps/web/src/app/__tests__/ClientEnvironment.test.tsx
+// apps/web/src/app/ClientEnvironment.test.tsx
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -8,6 +8,7 @@
 
 import * as crypto from 'crypto';
 
+import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 import type {
     BillingService,
     CheckoutParams,
@@ -21,7 +22,6 @@ import type {
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';
 
-import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 
 
 // ============================================================================

@@ -6,9 +6,8 @@
  */
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
-import type { StripeProviderConfig as StripeConfig } from '@abe-stack/core';
-import { StripeProvider, type NormalizedWebhookEvent } from '@infrastructure/billing';
 
+import type { StripeProviderConfig as StripeConfig } from '@abe-stack/core';
 import type {
     BillingEventRepository,
     CustomerMappingRepository,
@@ -17,6 +16,8 @@ import type {
     SubscriptionRepository,
 } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
+
+import { StripeProvider, type NormalizedWebhookEvent } from '@/infrastructure/billing';
 
 // ============================================================================
 // Types
@@ -173,7 +174,7 @@ async function handleSubscriptionCreated(
   }
 
   // Find plan by metadata or Stripe price ID
-  const planId = metadata?.planId;
+  const planId = metadata?.['planId'];
   if (planId === undefined || planId === '' || typeof planId !== 'string') {
     log.warn({ event }, 'No planId in subscription metadata');
     return;
@@ -243,17 +244,28 @@ async function handleSubscriptionUpdated(
     trial_end?: number | null;
   };
 
-  // Update subscription record
-  await repos.subscriptions.update(subscription.id, {
+  // Build update object conditionally to satisfy exactOptionalPropertyTypes
+  const updateData: Parameters<typeof repos.subscriptions.update>[1] = {
     status: mapStatus(status),
-    currentPeriodStart: raw.current_period_start !== undefined
-      ? new Date(raw.current_period_start * 1000)
-      : undefined,
-    currentPeriodEnd: raw.current_period_end !== undefined ? new Date(raw.current_period_end * 1000) : undefined,
-    cancelAtPeriodEnd: raw.cancel_at_period_end,
-    canceledAt: (raw.canceled_at !== undefined && raw.canceled_at !== null) ? new Date(raw.canceled_at * 1000) : undefined,
-    trialEnd: (raw.trial_end !== undefined && raw.trial_end !== null) ? new Date(raw.trial_end * 1000) : undefined,
-  });
+  };
+  if (raw.current_period_start !== undefined) {
+    updateData.currentPeriodStart = new Date(raw.current_period_start * 1000);
+  }
+  if (raw.current_period_end !== undefined) {
+    updateData.currentPeriodEnd = new Date(raw.current_period_end * 1000);
+  }
+  if (raw.cancel_at_period_end !== undefined) {
+    updateData.cancelAtPeriodEnd = raw.cancel_at_period_end;
+  }
+  if (raw.canceled_at !== undefined && raw.canceled_at !== null) {
+    updateData.canceledAt = new Date(raw.canceled_at * 1000);
+  }
+  if (raw.trial_end !== undefined && raw.trial_end !== null) {
+    updateData.trialEnd = new Date(raw.trial_end * 1000);
+  }
+
+  // Update subscription record
+  await repos.subscriptions.update(subscription.id, updateData);
 
   log.info({ subscriptionId, status }, 'Updated subscription from webhook');
 }

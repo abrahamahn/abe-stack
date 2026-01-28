@@ -11,12 +11,32 @@ import { StripeProvider } from './stripe-provider';
 // Mock Dependencies
 // ============================================================================
 
+const { MockStripeProvider, MockPayPalProvider } = vi.hoisted(() => {
+  class MockStripeProvider {
+    static mock = { calls: [] as unknown[][] };
+    constructor(...args: unknown[]) {
+      MockStripeProvider.mock.calls.push(args);
+    }
+    createCheckoutSession = vi.fn();
+  }
+
+  class MockPayPalProvider {
+    static mock = { calls: [] as unknown[][] };
+    constructor(...args: unknown[]) {
+      MockPayPalProvider.mock.calls.push(args);
+    }
+    createCheckoutSession = vi.fn();
+  }
+
+  return { MockStripeProvider, MockPayPalProvider };
+});
+
 vi.mock('./stripe-provider', () => ({
-  StripeProvider: vi.fn(),
+  StripeProvider: MockStripeProvider,
 }));
 
 vi.mock('./paypal-provider', () => ({
-  PayPalProvider: vi.fn(),
+  PayPalProvider: MockPayPalProvider,
 }));
 
 // ============================================================================
@@ -76,18 +96,19 @@ function createPayPalConfig(): BillingConfig {
 describe('createBillingProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    MockStripeProvider.mock.calls = [];
+    MockPayPalProvider.mock.calls = [];
   });
 
   describe('when provider is stripe', () => {
     it('should create StripeProvider with config', () => {
       const config = createStripeConfig();
-      const mockProvider = { createCheckoutSession: vi.fn() };
-      vi.mocked(StripeProvider).mockReturnValue(mockProvider as never);
 
       const provider = createBillingProvider(config);
 
-      expect(StripeProvider).toHaveBeenCalledWith(config.stripe);
-      expect(provider).toBe(mockProvider);
+      expect(MockStripeProvider.mock.calls).toHaveLength(1);
+      expect(MockStripeProvider.mock.calls[0]).toEqual([config.stripe]);
+      expect(provider).toBeInstanceOf(MockStripeProvider);
     });
 
     it('should pass complete stripe configuration', () => {
@@ -96,28 +117,25 @@ describe('createBillingProvider', () => {
       config.stripe.publishableKey = 'pk_live_different';
       config.stripe.webhookSecret = 'whsec_live_different';
 
-      vi.mocked(StripeProvider).mockReturnValue({} as never);
-
       createBillingProvider(config);
 
-      expect(StripeProvider).toHaveBeenCalledWith({
+      expect(MockStripeProvider.mock.calls[0]).toEqual([{
         secretKey: 'sk_live_different',
         publishableKey: 'pk_live_different',
         webhookSecret: 'whsec_live_different',
-      });
+      }]);
     });
   });
 
   describe('when provider is paypal', () => {
     it('should create PayPalProvider with config', () => {
       const config = createPayPalConfig();
-      const mockProvider = { createCheckoutSession: vi.fn() };
-      vi.mocked(PayPalProvider).mockReturnValue(mockProvider as never);
 
       const provider = createBillingProvider(config);
 
-      expect(PayPalProvider).toHaveBeenCalledWith(config.paypal);
-      expect(provider).toBe(mockProvider);
+      expect(MockPayPalProvider.mock.calls).toHaveLength(1);
+      expect(MockPayPalProvider.mock.calls[0]).toEqual([config.paypal]);
+      expect(provider).toBeInstanceOf(MockPayPalProvider);
     });
 
     it('should pass complete paypal configuration', () => {
@@ -126,15 +144,13 @@ describe('createBillingProvider', () => {
       config.paypal.clientSecret = 'different_client_secret';
       config.paypal.webhookId = 'different_webhook_id';
 
-      vi.mocked(PayPalProvider).mockReturnValue({} as never);
-
       createBillingProvider(config);
 
-      expect(PayPalProvider).toHaveBeenCalledWith({
+      expect(MockPayPalProvider.mock.calls[0]).toEqual([{
         clientId: 'different_client_id',
         clientSecret: 'different_client_secret',
         webhookId: 'different_webhook_id',
-      });
+      }]);
     });
   });
 
@@ -145,7 +161,12 @@ describe('createBillingProvider', () => {
         provider: 'unsupported' as BillingConfig['provider'],
       };
 
-      expect(() => createBillingProvider(config)).toThrow(BillingProviderNotConfiguredError);
+      expect(() => createBillingProvider(config)).toThrow();
+      try {
+        createBillingProvider(config);
+      } catch (error) {
+        expect(error).toMatchObject({ name: 'ProviderNotConfiguredError' });
+      }
     });
 
     it('should include provider name in error', () => {
@@ -158,7 +179,7 @@ describe('createBillingProvider', () => {
         createBillingProvider(config);
         expect.fail('Should have thrown error');
       } catch (error) {
-        expect(error).toBeInstanceOf(BillingProviderNotConfiguredError);
+        expect(error).toMatchObject({ name: 'ProviderNotConfiguredError' });
       }
     });
   });

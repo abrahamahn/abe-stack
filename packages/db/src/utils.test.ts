@@ -1,4 +1,4 @@
-// packages/db/src/__tests__/utils.test.ts
+// packages/db/src/utils.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { camelizeKeys, snakeifyKeys, toCamelCase, toSnakeCase } from './utils';
@@ -224,14 +224,14 @@ describe('Database Utils', () => {
         ['object_val']: { ['nested_val']: 'value' },
       };
 
-      const result = camelizeKeys(input) as any;
+      const result = camelizeKeys(input) as Record<string, unknown>;
 
-      expect(result.stringValue).toBe('unchanged');
-      expect(result.numberValue).toBe(42);
-      expect(result.boolValue).toBe(false);
-      expect(result.nullValue).toBe(null);
-      expect(result.arrayValue).toEqual([1, 2, 3]);
-      expect(result.objectValue).toEqual({ nestedVal: 'value' });
+      expect(result['stringVal']).toBe('unchanged');
+      expect(result['numberVal']).toBe(42);
+      expect(result['boolVal']).toBe(false);
+      expect(result['nullVal']).toBe(null);
+      expect(result['arrayVal']).toEqual([1, 2, 3]);
+      expect(result['objectVal']).toEqual({ nestedVal: 'value' });
     });
 
     test('should handle already camelCased keys', () => {

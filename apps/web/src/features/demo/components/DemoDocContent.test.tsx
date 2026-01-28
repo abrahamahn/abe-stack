@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/components/__tests__/DemoDocContent.test.tsx
+// apps/web/src/features/demo/components/DemoDocContent.test.tsx
 import { DemoDocContent } from '@demo/components/DemoDocContent';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

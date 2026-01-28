@@ -1,4 +1,4 @@
-// apps/server/src/scripts/__tests__/seed.test.ts
+// apps/server/src/scripts/seed.test.ts
 /* eslint-disable no-console, @typescript-eslint/unbound-method */
 /**
  * Tests for Database Seed Script
@@ -11,29 +11,46 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock dependencies before importing the module
-const mockLoadConfig = vi.fn();
-const mockBuildConnectionString = vi.fn();
-const mockCreateDbClient = vi.fn();
-const mockExecute = vi.fn();
-const mockHashPassword = vi.fn();
-const mockInsert = vi.fn();
-const mockValues = vi.fn();
-const mockOnConflictDoNothing = vi.fn();
-const mockToSql = vi.fn();
+// Use vi.hoisted() to ensure mock functions are available when vi.mock factory runs
+const {
+  mockLoadConfig,
+  mockBuildConnectionString,
+  mockCreateDbClient,
+  mockExecute,
+  mockHashPassword,
+  mockInsert,
+  mockValues,
+  mockOnConflictDoNothing,
+  mockToSql,
+} = vi.hoisted(() => ({
+  mockLoadConfig: vi.fn(),
+  mockBuildConnectionString: vi.fn(),
+  mockCreateDbClient: vi.fn(),
+  mockExecute: vi.fn(),
+  mockHashPassword: vi.fn(),
+  mockInsert: vi.fn(),
+  mockValues: vi.fn(),
+  mockOnConflictDoNothing: vi.fn(),
+  mockToSql: vi.fn(),
+}));
 
-vi.mock('@config', () => ({
+// Mock the config factory module directly using relative path from test file
+// In Vitest 4.x, vi.mock paths are resolved relative to the test file
+vi.mock('../config/factory', () => ({
+  load: mockLoadConfig,
   loadConfig: mockLoadConfig,
 }));
 
-vi.mock('@database', () => ({
+// Mock the database module using relative path from test file
+vi.mock('../infrastructure/data/database', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',
   insert: mockInsert,
 }));
 
-vi.mock('@modules/auth/utils/password', () => ({
+// Mock the password utils using relative path from test file
+vi.mock('../modules/auth/utils/password', () => ({
   hashPassword: mockHashPassword,
 }));
 
@@ -112,7 +129,7 @@ describe('seed script', () => {
       process.env.NODE_ENV = 'production';
 
       // Import the seed function directly
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(1)');
 
@@ -125,7 +142,7 @@ describe('seed script', () => {
     it('should display security warning in production', async () => {
       process.env.NODE_ENV = 'production';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(1)');
 
@@ -138,7 +155,7 @@ describe('seed script', () => {
     it('should seed users in development environment', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -151,7 +168,7 @@ describe('seed script', () => {
     it('should seed all three test users', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -162,7 +179,7 @@ describe('seed script', () => {
     it('should hash passwords with argon2 config', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -178,7 +195,7 @@ describe('seed script', () => {
     it('should seed admin user with admin role', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -195,7 +212,7 @@ describe('seed script', () => {
     it('should seed regular users with user role', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -219,7 +236,7 @@ describe('seed script', () => {
     it('should use onConflictDoNothing for existing users', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -230,7 +247,7 @@ describe('seed script', () => {
     it('should display success message after seeding', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -241,7 +258,7 @@ describe('seed script', () => {
     it('should display seeding progress', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -252,7 +269,7 @@ describe('seed script', () => {
     it('should run with undefined NODE_ENV (defaults to non-production)', async () => {
       delete process.env.NODE_ENV;
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -274,7 +291,7 @@ describe('seed script', () => {
         return Promise.resolve(1);
       });
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -286,7 +303,7 @@ describe('seed script', () => {
 
       mockExecute.mockRejectedValue(new Error('Connection refused'));
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('Connection refused');
     });
@@ -298,7 +315,7 @@ describe('seed script', () => {
         throw new Error('Cannot connect to database');
       });
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('Cannot connect to database');
     });
@@ -310,7 +327,7 @@ describe('seed script', () => {
         throw new Error('Invalid config');
       });
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('Invalid config');
     });
@@ -320,7 +337,7 @@ describe('seed script', () => {
 
       mockHashPassword.mockRejectedValue(new Error('Hashing failed'));
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('Hashing failed');
     });
@@ -330,7 +347,7 @@ describe('seed script', () => {
     it('should use expected test credentials', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -362,7 +379,7 @@ describe('seed script', () => {
     it('should use the same password for all test users', async () => {
       process.env.NODE_ENV = 'development';
 
-      const { seed } = await import('../seed.js');
+      const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
@@ -375,7 +392,7 @@ describe('seed script', () => {
 
   describe('TEST_USERS export', () => {
     it('should export TEST_USERS array with correct structure', async () => {
-      const { TEST_USERS } = await import('../seed.js');
+      const { TEST_USERS } = await import('./seed');
 
       expect(TEST_USERS).toHaveLength(3);
 
@@ -389,7 +406,7 @@ describe('seed script', () => {
     });
 
     it('should have admin user with admin role', async () => {
-      const { TEST_USERS } = await import('../seed.js');
+      const { TEST_USERS } = await import('./seed');
 
       const adminUser = TEST_USERS.find((u) => u.email === 'admin@example.com');
       expect(adminUser).toBeDefined();
@@ -397,7 +414,7 @@ describe('seed script', () => {
     });
 
     it('should have user and demo with user role', async () => {
-      const { TEST_USERS } = await import('../seed.js');
+      const { TEST_USERS } = await import('./seed');
 
       const testUser = TEST_USERS.find((u) => u.email === 'user@example.com');
       const demoUser = TEST_USERS.find((u) => u.email === 'demo@example.com');
@@ -410,7 +427,7 @@ describe('seed script', () => {
   describe('SeedUser interface', () => {
     it('should export SeedUser type for external use', async () => {
       // This test verifies the type is exported and usable
-      const seedModule = await import('../seed.js');
+      const seedModule = await import('./seed');
       type SeedUserType = (typeof seedModule.TEST_USERS)[number];
 
       const testUser: SeedUserType = {

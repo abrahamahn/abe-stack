@@ -1,15 +1,15 @@
 // apps/web/src/features/admin/hooks/useJobsList.test.ts
 import { useQuery } from '@abe-stack/sdk';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobsList } from './useJobsList';
 
-import type { AdminApiClient } from '../services/adminApi';
 import type { JobListResponse } from '@abe-stack/core';
 import type { UseQueryResult } from '@abe-stack/sdk';
+import type { AdminApiClient } from '../services/adminApi';
 
 vi.mock('@abe-stack/sdk', () => ({
   useQuery: vi.fn(),
@@ -23,11 +23,15 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/core', () => ({
-  tokenStore: {
-    get: vi.fn().mockReturnValue('mock-token'),
-  },
-}));
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: vi.fn().mockReturnValue('mock-token'),
+    },
+  };
+});
 
 describe('useJobsList', () => {
   const mockJobsResponse: JobListResponse = {

@@ -6,9 +6,8 @@
  */
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/core';
-import { PayPalProvider, type NormalizedWebhookEvent } from '@infrastructure/billing';
 
+import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/core';
 import type {
     BillingEventRepository,
     CustomerMappingRepository,
@@ -17,6 +16,8 @@ import type {
     SubscriptionRepository,
 } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
+
+import { PayPalProvider, type NormalizedWebhookEvent } from '@/infrastructure/billing';
 
 // ============================================================================
 // Types
@@ -163,8 +164,8 @@ async function handleSubscriptionCreated(
   }
 
   // Parse metadata to get userId and planId
-  const userId = metadata?.userId;
-  const planId = metadata?.planId;
+  const userId = metadata?.['userId'];
+  const planId = metadata?.['planId'];
 
   if (typeof userId !== 'string' || userId === '' || typeof planId !== 'string' || planId === '') {
     log.warn({ event }, 'Missing userId or planId in subscription metadata');
@@ -277,13 +278,20 @@ async function handleSubscriptionUpdated(
   // SUSPENDED in PayPal means cancel at period end
   const cancelAtPeriodEnd = status === 'SUSPENDED';
 
-  // Update subscription record
-  await repos.subscriptions.update(subscription.id, {
+  // Build update object conditionally to satisfy exactOptionalPropertyTypes
+  const updateData: Parameters<typeof repos.subscriptions.update>[1] = {
     status: mapStatus(status),
-    currentPeriodStart: lastPaymentTime,
-    currentPeriodEnd: nextBillingTime,
     cancelAtPeriodEnd,
-  });
+  };
+  if (lastPaymentTime !== undefined) {
+    updateData.currentPeriodStart = lastPaymentTime;
+  }
+  if (nextBillingTime !== undefined) {
+    updateData.currentPeriodEnd = nextBillingTime;
+  }
+
+  // Update subscription record
+  await repos.subscriptions.update(subscription.id, updateData);
 
   log.info({ subscriptionId, status }, 'Updated subscription from PayPal webhook');
 }

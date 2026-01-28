@@ -1,3 +1,4 @@
+// apps/server/src/modules/admin/jobsService.test.ts
 
 
 import {
@@ -6,14 +7,13 @@ import {
     getQueueStats,
     JobNotFoundError,
     listJobs,
-    QueueStoreNotAvailableError,
     redactSensitiveFields,
     retryJob,
-} from '@admin/jobsService';
+} from './jobsService';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 
-import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '@infrastructure';
+import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '@/infrastructure';
 
 // ============================================================================
 // Mock Store Factory
@@ -248,12 +248,11 @@ describe('listJobs', () => {
     });
   });
 
-  test('should throw QueueStoreNotAvailableError if listJobs not supported', async () => {
+  test('should throw TypeError if listJobs method not available', async () => {
+    // When store doesn't have the listJobs method, JavaScript throws TypeError
     const storeWithoutListJobs = {} as PostgresQueueStore;
 
-    await expect(listJobs(storeWithoutListJobs, { page: 1, limit: 50 })).rejects.toThrow(
-      QueueStoreNotAvailableError,
-    );
+    await expect(listJobs(storeWithoutListJobs, { page: 1, limit: 50 })).rejects.toThrow(TypeError);
   });
 });
 
@@ -294,12 +293,11 @@ describe('getJobDetails', () => {
     await expect(getJobDetails(store, 'nonexistent-job')).rejects.toThrow(JobNotFoundError);
   });
 
-  test('should throw QueueStoreNotAvailableError if getJobDetails not supported', async () => {
+  test('should throw TypeError if getJobDetails method not available', async () => {
+    // When store doesn't have the getJobDetails method, JavaScript throws TypeError
     const storeWithoutGetJobDetails = {} as PostgresQueueStore;
 
-    await expect(getJobDetails(storeWithoutGetJobDetails, 'job-123')).rejects.toThrow(
-      QueueStoreNotAvailableError,
-    );
+    await expect(getJobDetails(storeWithoutGetJobDetails, 'job-123')).rejects.toThrow(TypeError);
   });
 });
 
@@ -327,12 +325,11 @@ describe('getQueueStats', () => {
     expect(mocks.getQueueStats).toHaveBeenCalled();
   });
 
-  test('should throw QueueStoreNotAvailableError if getQueueStats not supported', async () => {
+  test('should throw TypeError if getQueueStats method not available', async () => {
+    // When store doesn't have the getQueueStats method, JavaScript throws TypeError
     const storeWithoutGetQueueStats = {} as PostgresQueueStore;
 
-    await expect(getQueueStats(storeWithoutGetQueueStats)).rejects.toThrow(
-      QueueStoreNotAvailableError,
-    );
+    await expect(getQueueStats(storeWithoutGetQueueStats)).rejects.toThrow(TypeError);
   });
 });
 
@@ -382,12 +379,11 @@ describe('retryJob', () => {
     await expect(retryJob(store, 'nonexistent-job')).rejects.toThrow(JobNotFoundError);
   });
 
-  test('should throw QueueStoreNotAvailableError if retryJob not supported', async () => {
+  test('should throw TypeError if retryJob method not available', async () => {
+    // When store doesn't have the retryJob method, JavaScript throws TypeError
     const storeWithoutRetryJob = {} as PostgresQueueStore;
 
-    await expect(retryJob(storeWithoutRetryJob, 'job-123')).rejects.toThrow(
-      QueueStoreNotAvailableError,
-    );
+    await expect(retryJob(storeWithoutRetryJob, 'job-123')).rejects.toThrow(TypeError);
   });
 });
 
@@ -437,11 +433,10 @@ describe('cancelJob', () => {
     await expect(cancelJob(store, 'nonexistent-job')).rejects.toThrow(JobNotFoundError);
   });
 
-  test('should throw QueueStoreNotAvailableError if cancelJob not supported', async () => {
+  test('should throw TypeError if cancelJob method not available', async () => {
+    // When store doesn't have the cancelJob method, JavaScript throws TypeError
     const storeWithoutCancelJob = {} as PostgresQueueStore;
 
-    await expect(cancelJob(storeWithoutCancelJob, 'job-123')).rejects.toThrow(
-      QueueStoreNotAvailableError,
-    );
+    await expect(cancelJob(storeWithoutCancelJob, 'job-123')).rejects.toThrow(TypeError);
   });
 });

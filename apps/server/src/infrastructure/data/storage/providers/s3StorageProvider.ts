@@ -7,27 +7,38 @@ import {
 } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { normalizeStorageKey } from '@storage/utils';
+import { normalizeStorageKey } from '@data/storage/utils';
 
-import type { S3StorageConfig, StorageProvider } from '@storage/types';
+import type { S3StorageConfig, StorageProvider } from '@data/storage/types';
+
+/** AWS credential provider type derived from fromEnv return type */
+type AwsCredentials = ReturnType<typeof fromEnv> | { accessKeyId: string; secretAccessKey: string };
 
 export class S3StorageProvider implements StorageProvider {
   private readonly client: S3Client;
   private readonly defaultExpires: number;
 
   constructor(private readonly config: S3StorageConfig) {
-    this.client = new S3Client({
+    const clientConfig: {
+      region: string;
+      endpoint?: string;
+      forcePathStyle: boolean;
+      credentials: AwsCredentials;
+    } = {
       region: config.region,
-      endpoint: config.endpoint,
       forcePathStyle: config.forcePathStyle,
       credentials:
-         (config.accessKeyId !== '' && config.secretAccessKey !== '')
-           ? {
+        config.accessKeyId !== '' && config.secretAccessKey !== ''
+          ? {
               accessKeyId: config.accessKeyId,
               secretAccessKey: config.secretAccessKey,
             }
           : fromEnv(),
-    });
+    };
+    if (config.endpoint !== undefined) {
+      clientConfig.endpoint = config.endpoint;
+    }
+    this.client = new S3Client(clientConfig);
     this.defaultExpires = config.presignExpiresInSeconds;
   }
 

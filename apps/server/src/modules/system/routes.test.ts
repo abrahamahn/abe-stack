@@ -31,7 +31,7 @@ vi.mock('./handlers', () => ({
 import { systemRoutes } from './routes';
 
 import type { BaseRouteDefinition } from '@router';
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -172,7 +172,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleRoot with correct arguments', async () => {
-          const { handleRoot } = await import('./handlers.js');
+          const { handleRoot } = await import('./handlers');
           vi.mocked(handleRoot).mockResolvedValue({
             status: 200,
             body: {
@@ -191,7 +191,7 @@ describe('System Routes', () => {
         });
 
         test('should return result from handleRoot', async () => {
-          const { handleRoot } = await import('./handlers.js');
+          const { handleRoot } = await import('./handlers');
           const expectedResult = {
             status: 200 as const,
             body: {
@@ -237,7 +237,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleApiInfo with correct arguments', async () => {
-          const { handleApiInfo } = await import('./handlers.js');
+          const { handleApiInfo } = await import('./handlers');
           vi.mocked(handleApiInfo).mockResolvedValue({
             status: 200,
             body: {
@@ -289,7 +289,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleHealth with correct arguments', async () => {
-          const { handleHealth } = await import('./handlers.js');
+          const { handleHealth } = await import('./handlers');
           vi.mocked(handleHealth).mockResolvedValue({
             status: 200,
             body: {
@@ -355,7 +355,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleLive with correct arguments', async () => {
-          const { handleLive } = await import('./handlers.js');
+          const { handleLive } = await import('./handlers');
           vi.mocked(handleLive).mockResolvedValue({
             status: 200,
             body: {
@@ -406,7 +406,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleHealth with correct arguments', async () => {
-          const { handleHealth } = await import('./handlers.js');
+          const { handleHealth } = await import('./handlers');
           vi.mocked(handleHealth).mockResolvedValue({
             status: 200,
             body: {
@@ -456,7 +456,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleSystemStatus with correct arguments', async () => {
-          const { handleSystemStatus } = await import('./handlers.js');
+          const { handleSystemStatus } = await import('./handlers');
           vi.mocked(handleSystemStatus).mockResolvedValue({
             status: 200,
             body: {
@@ -507,7 +507,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleListModules with correct arguments', async () => {
-          const { handleListModules } = await import('./handlers.js');
+          const { handleListModules } = await import('./handlers');
           vi.mocked(handleListModules).mockResolvedValue({
             status: 200,
             body: {
@@ -560,7 +560,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleListRoutes with correct arguments', async () => {
-          const { handleListRoutes } = await import('./handlers.js');
+          const { handleListRoutes } = await import('./handlers');
           vi.mocked(handleListRoutes).mockResolvedValue({
             status: 200,
             body: {
@@ -615,7 +615,7 @@ describe('System Routes', () => {
         });
 
         test('should call handleSystemStatus with correct arguments', async () => {
-          const { handleSystemStatus } = await import('./handlers.js');
+          const { handleSystemStatus } = await import('./handlers');
           vi.mocked(handleSystemStatus).mockResolvedValue({
             status: 200,
             body: {

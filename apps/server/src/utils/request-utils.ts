@@ -5,7 +5,7 @@
  * Common utility functions for handling requests.
  */
 
-import type { RequestWithCookies } from '@shared/index';
+import type { RequestWithCookies } from '@shared';
 
 /**
  * Extract a path parameter from the request

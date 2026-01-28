@@ -304,6 +304,7 @@ export {
   // User
   createRefreshTokenRepository,
   createUserRepository,
+  type AdminUserListFilters,
   type RefreshTokenRepository,
   type UserRepository,
   // Auth

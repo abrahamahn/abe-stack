@@ -1,16 +1,16 @@
-// apps/server/src/infrastructure/media/__tests__/processor.test.ts
+// apps/server/src/infrastructure/media/processor.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     MediaProcessingOrchestrator,
     type ProcessingJob,
     type ProcessingLimits,
-} from '../processor';
+} from './processor';
 
-import type { AudioProcessor } from '../processors/audio';
-import type { ImageProcessor } from '../processors/image';
-import type { VideoProcessor } from '../processors/video';
-import type { ProcessingResult } from '../types';
+import type { AudioProcessor } from './processors/audio';
+import type { ImageProcessor } from './processors/image';
+import type { VideoProcessor } from './processors/video';
+import type { ProcessingResult } from './types';
 
 // Create a hoisted mock for fs.stat
 const mockFsStat = vi.hoisted(() =>
@@ -30,7 +30,7 @@ vi.mock('fs/promises', () => {
 });
 
 // Mock security scanner with class syntax
-vi.mock('../utils/security', () => ({
+vi.mock('./utils/security', () => ({
   MediaSecurityScanner: class MockMediaSecurityScanner {
     scanFile = vi.fn().mockResolvedValue({
       safe: true,

@@ -13,7 +13,7 @@
  */
 
 import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
-import type { Logger } from '@logger';
+import type { Logger } from '@monitor/logger';
 
 // ============================================================================
 // Constants
@@ -51,7 +51,9 @@ export class QueueServer {
     this.store = options.store;
     this.handlers = options.handlers;
     this.config = { ...DEFAULT_CONFIG, ...options.config };
-    this.log = options.log;
+    if (options.log !== undefined) {
+      this.log = options.log;
+    }
   }
 
   // ==========================================================================
@@ -257,11 +259,14 @@ export class QueueServer {
  */
 function serializeError(error: unknown): TaskError {
   if (error instanceof Error) {
-    return {
+    const taskError: TaskError = {
       name: error.name,
       message: error.message,
-      stack: error.stack,
     };
+    if (error.stack !== undefined) {
+      taskError.stack = error.stack;
+    }
+    return taskError;
   }
 
   return {

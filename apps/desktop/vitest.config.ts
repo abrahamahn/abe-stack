@@ -1,3 +1,4 @@
+// apps/desktop/vitest.config.ts
 import react from '@vitejs/plugin-react';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';

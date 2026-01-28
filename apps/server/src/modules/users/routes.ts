@@ -6,7 +6,7 @@
  * All routes require authentication.
  */
 
-import { protectedRoute, type RouteMap, type RouteResult } from '@router';
+import { createRouteMap, protectedRoute, type RouteResult } from '@http/router';
 
 import { handleListUsers, handleMe } from './handlers';
 
@@ -17,29 +17,35 @@ import type { AppContext, RequestWithCookies } from '@shared';
 // Route Definitions
 // ============================================================================
 
-export const userRoutes: RouteMap = {
-  'users/me': protectedRoute<undefined, User | { message: string }>(
-    'GET',
-    async (
-      ctx: AppContext,
-      _body: undefined,
-      req: RequestWithCookies,
-    ): Promise<RouteResult<User | { message: string }>> => {
-      return handleMe(ctx, req);
-    },
-    'user',
-  ),
+export const userRoutes = createRouteMap([
+  [
+    'users/me',
+    protectedRoute<undefined, User | { message: string }>(
+      'GET',
+      async (
+        ctx: AppContext,
+        _body: undefined,
+        req: RequestWithCookies,
+      ): Promise<RouteResult<User | { message: string }>> => {
+        return handleMe(ctx, req);
+      },
+      'user',
+    ),
+  ],
 
   // Example paginated endpoint using cursor-based pagination
-  'users/list': protectedRoute<undefined, CursorPaginatedResult<User> | { message: string }>(
-    'GET',
-    (
-      ctx: AppContext,
-      _body: undefined,
-      req: RequestWithCookies,
-    ): Promise<RouteResult<CursorPaginatedResult<User> | { message: string }>> => {
-      return handleListUsers(ctx, req);
-    },
-    'admin', // Only admins can list users
-  ),
-};
+  [
+    'users/list',
+    protectedRoute<undefined, CursorPaginatedResult<User> | { message: string }>(
+      'GET',
+      (
+        ctx: AppContext,
+        _body: undefined,
+        req: RequestWithCookies,
+      ): Promise<RouteResult<CursorPaginatedResult<User> | { message: string }>> => {
+        return handleListUsers(ctx, req);
+      },
+      'admin', // Only admins can list users
+    ),
+  ],
+]);

@@ -1,4 +1,4 @@
-// packages/ui/src/layouts/shells/__tests__/AppShell.test.tsx
+// packages/ui/src/layouts/shells/AppShell.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

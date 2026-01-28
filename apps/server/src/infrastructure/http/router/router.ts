@@ -30,7 +30,7 @@
 
 import { createAuthGuard } from '@auth/middleware';
 
-import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
+import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions, ValidationSchema } from './types';
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -151,6 +151,23 @@ function registerRoute(
 // ============================================================================
 
 /**
+ * Helper to create a route map from an array of entries.
+ * Uses array syntax to avoid naming-convention lint errors for paths with slashes.
+ *
+ * @param entries - Array of [path, definition] tuples
+ * @returns RouteMap object
+ *
+ * @example
+ * const routes = createRouteMap([
+ *   ['auth/login', publicRoute('POST', handleLogin)],
+ *   ['users/me', protectedRoute('GET', handleMe)],
+ * ]);
+ */
+export function createRouteMap(entries: Array<[string, BaseRouteDefinition]>): RouteMap {
+  return Object.fromEntries(entries);
+}
+
+/**
  * Helper to create a public route definition with type inference
  * Returns BaseRouteDefinition for compatibility with RouteMap
  */
@@ -159,11 +176,14 @@ export function publicRoute<TBody, TResult>(
   handler: RouteDefinition<TBody, TResult>['handler'],
   schema?: RouteDefinition<TBody, TResult>['schema'],
 ): BaseRouteDefinition {
-  return {
+  const route: BaseRouteDefinition = {
     method,
     handler: handler as BaseRouteDefinition['handler'],
-    schema: schema as BaseRouteDefinition['schema'],
   };
+  if (schema !== undefined) {
+    route.schema = schema as ValidationSchema;
+  }
+  return route;
 }
 
 /**
@@ -176,10 +196,13 @@ export function protectedRoute<TBody, TResult>(
   auth: 'user' | 'admin' = 'user',
   schema?: RouteDefinition<TBody, TResult>['schema'],
 ): BaseRouteDefinition {
-  return {
+  const route: BaseRouteDefinition = {
     method,
     handler: handler as BaseRouteDefinition['handler'],
-    schema: schema as BaseRouteDefinition['schema'],
     auth,
   };
+  if (schema !== undefined) {
+    route.schema = schema as ValidationSchema;
+  }
+  return route;
 }

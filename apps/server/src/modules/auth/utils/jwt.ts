@@ -90,8 +90,8 @@ function isTokenPayload(value: unknown): value is TokenPayload {
   if (value === null || typeof value !== 'object') return false;
   const record = value as Record<string, unknown>;
   return (
-    typeof record.userId === 'string' &&
-    typeof record.email === 'string' &&
-    typeof record.role === 'string'
+    typeof record['userId'] === 'string' &&
+    typeof record['email'] === 'string' &&
+    typeof record['role'] === 'string'
   );
 }

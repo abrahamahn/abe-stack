@@ -1,14 +1,14 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/factory.test.ts
+// apps/server/src/infrastructure/messaging/email/factory.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { ConsoleEmailService } from '../consoleEmailService';
-import { createEmailService } from '../factory';
-import { SmtpEmailService } from '../smtpEmailService';
+import { ConsoleEmailService } from './consoleEmailService';
+import { createEmailService } from './factory';
+import { SmtpEmailService } from './smtpEmailService';
 
 import type { EmailConfig } from '@/config';
 
 // Mock the SmtpClient to prevent actual SMTP connections
-vi.mock('../smtp.js', () => ({
+vi.mock('./smtp', () => ({
   SmtpClient: class MockSmtpClient {
     send = vi.fn().mockResolvedValue({ success: true, messageId: 'mock-123' });
     constructor(public config: unknown) {}

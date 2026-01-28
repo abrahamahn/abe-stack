@@ -1,15 +1,15 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/smtpEmailService.test.ts
+// apps/server/src/infrastructure/messaging/email/smtpEmailService.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { SmtpEmailService } from '../smtpEmailService';
+import { SmtpEmailService } from './smtpEmailService';
 
-import type { EmailOptions } from '../types';
+import type { EmailOptions } from './types';
 import type { EmailConfig } from '@/config';
 
 // Mock the SmtpClient
 const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123' });
 
-vi.mock('../smtp.js', () => ({
+vi.mock('./smtp', () => ({
   SmtpClient: class MockSmtpClient {
     send = mockSend;
     constructor(public config: unknown) {}
@@ -104,9 +104,11 @@ describe('SmtpEmailService', () => {
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           text: 'Plain text body',
-          html: undefined,
         }),
       );
+      // Verify html is not included when not provided
+      const callArg = mockSend.mock.calls[0][0] as Record<string, unknown>;
+      expect(callArg).not.toHaveProperty('html');
     });
 
     test('should format from address correctly', async () => {

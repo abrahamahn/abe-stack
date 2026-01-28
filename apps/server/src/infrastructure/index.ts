@@ -201,22 +201,25 @@ export {
   type RateLimiterStats,
 } from './security/rate-limit';
 
-// Crypto (Native JWT)
+// Crypto (Native JWT) - Base JWT from core, rotation support from local
 export {
+  decode as jwtDecode,
   JwtError,
-  // JWT Rotation Support
-  checkTokenSecret,
-  createJwtRotationHandler,
-  jwtDecode,
-  jwtSign,
-  jwtVerify,
-  signWithRotation,
-  verifyWithRotation,
+  sign as jwtSign,
+  verify as jwtVerify,
   type JwtErrorCode,
   type JwtHeader,
   type JwtPayload,
+  type SignOptions as JwtSignOptions,
+} from '@abe-stack/core/infrastructure/crypto';
+
+// JWT Rotation Support
+export {
+  checkTokenSecret,
+  createJwtRotationHandler,
+  signWithRotation,
+  verifyWithRotation,
   type JwtRotationConfig,
-  type JwtSignOptions,
   type RotatingJwtOptions,
 } from './security/crypto';
 

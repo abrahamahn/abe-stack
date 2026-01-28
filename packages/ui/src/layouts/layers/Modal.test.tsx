@@ -1,4 +1,4 @@
-// packages/ui/src/layouts/layers/__tests__/Modal.test.tsx
+// packages/ui/src/layouts/layers/Modal.test.tsx
 // packages/ui/src/elements/__tests__/Modal.test.tsx
 /** @vitest-environment jsdom */
 import { Modal } from '@layers/Modal';

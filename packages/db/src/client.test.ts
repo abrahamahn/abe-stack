@@ -1,4 +1,4 @@
-// packages/db/src/__tests__/client.test.ts
+// packages/db/src/client.test.ts
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 import { createRawDb, type RawDb } from './client';
@@ -83,31 +83,37 @@ describe('Database Client', () => {
   });
 
   describe('DbClient interface', () => {
-    let dbClient: RawDb;
-
-    beforeEach(() => {
-      dbClient = createRawDb(mockConnectionString);
-    });
+    // Helper to create a mock and client together
+    function createMockedClient(mockUnsafe: Mock) {
+      postgresMock.mockImplementation(() => ({
+        unsafe: mockUnsafe,
+        end: vi.fn().mockResolvedValue(undefined),
+        begin: vi
+          .fn()
+          .mockImplementation(async (_isolation: string, cb: (tx: unknown) => unknown) => {
+            const tx = { unsafe: vi.fn().mockResolvedValue([]) };
+            return await cb(tx);
+          }),
+      }));
+      return createRawDb(mockConnectionString);
+    }
 
     describe('execute', () => {
       test('should execute a query with parameters', async () => {
         const mockResult = { count: 1 };
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResult),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResult);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const query = { text: 'SELECT * FROM users WHERE id = $1', values: [1] };
         const result = await dbClient.execute(query);
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(1);
-        expect(mockInstance.unsafe).toHaveBeenCalledWith(query.text, query.values);
+        expect(mockUnsafe).toHaveBeenCalledWith(query.text, query.values);
       });
 
       test('should handle execute with empty result', async () => {
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue({ count: 0 }),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue({ count: 0 });
+        const dbClient = createMockedClient(mockUnsafe);
 
         const query = { text: 'SELECT * FROM users WHERE id = $1', values: [999] };
         const result = await dbClient.execute(query);
@@ -117,9 +123,8 @@ describe('Database Client', () => {
 
       test('should handle execute errors', async () => {
         const error = new Error('Query failed');
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(error),
-        }));
+        const mockUnsafe = vi.fn().mockRejectedValue(error);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const query = { text: 'INVALID SQL', values: [] };
 
@@ -128,9 +133,8 @@ describe('Database Client', () => {
 
       test('should handle execute with complex query', async () => {
         const complexResult = { count: 2 };
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(complexResult),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(complexResult);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const query = {
           text: 'SELECT id, name, created_at, active FROM users WHERE active = $1 ORDER BY created_at DESC LIMIT $2',
@@ -148,37 +152,32 @@ describe('Database Client', () => {
           { id: 1, name: 'Alice' },
           { id: 2, name: 'Bob' },
         ];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResults),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResults);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.query({ text: 'SELECT * FROM users', values: [] });
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResults);
-        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users', []);
+        expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users', []);
       });
 
       test('should handle query with parameters', async () => {
         const mockResults = [{ id: 1, name: 'Alice' }];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResults),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResults);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.query({
           text: 'SELECT * FROM users WHERE id = $1',
           values: [1],
         });
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResults);
-        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
+        expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
       });
 
       test('should handle empty query results', async () => {
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue([]),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue([]);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.query({
           text: 'SELECT * FROM users WHERE id = $1',
@@ -190,9 +189,8 @@ describe('Database Client', () => {
 
       test('should handle query errors', async () => {
         const error = new Error('Invalid query');
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(error),
-        }));
+        const mockUnsafe = vi.fn().mockRejectedValue(error);
+        const dbClient = createMockedClient(mockUnsafe);
 
         await expect(dbClient.query({ text: 'INVALID QUERY', values: [] })).rejects.toThrow(
           'Invalid query',
@@ -203,9 +201,8 @@ describe('Database Client', () => {
         const mockResults = [
           { id: 1, name: 'Alice', email: 'alice@example.com', ['created_at']: new Date() },
         ];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResults),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResults);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.query({
           text: 'SELECT * FROM users WHERE name = $1 AND email LIKE $2 AND created_at > $3',
@@ -222,26 +219,21 @@ describe('Database Client', () => {
           { id: 1, name: 'Alice' },
           { id: 2, name: 'Bob' },
         ];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResults),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResults);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.queryOne({
           text: 'SELECT * FROM users WHERE name = $1',
           values: ['Alice'],
         });
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual({ id: 1, name: 'Alice' });
-        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', [
-          'Alice',
-        ]);
+        expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', ['Alice']);
       });
 
       test('should return null for empty results', async () => {
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue([]),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue([]);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.queryOne({
           text: 'SELECT * FROM users WHERE id = $1',
@@ -253,9 +245,8 @@ describe('Database Client', () => {
 
       test('should handle queryOne errors', async () => {
         const error = new Error('Query failed');
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(error),
-        }));
+        const mockUnsafe = vi.fn().mockRejectedValue(error);
+        const dbClient = createMockedClient(mockUnsafe);
 
         await expect(dbClient.queryOne({ text: 'INVALID QUERY', values: [] })).rejects.toThrow(
           'Query failed',
@@ -264,9 +255,8 @@ describe('Database Client', () => {
 
       test('should handle queryOne with no parameters', async () => {
         const mockResult = { id: 1, name: 'Alice' };
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue([mockResult]),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue([mockResult]);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.queryOne({ text: 'SELECT * FROM users LIMIT 1', values: [] });
 
@@ -280,9 +270,8 @@ describe('Database Client', () => {
           profile: { bio: 'Software engineer', skills: ['TypeScript', 'React'] },
           settings: { theme: 'dark', notifications: true },
         };
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue([complexResult]),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue([complexResult]);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.queryOne({
           text: 'SELECT * FROM users WHERE id = $1',
@@ -299,37 +288,29 @@ describe('Database Client', () => {
           { column1: 'value1', column2: 'value2' },
           { column1: 'value3', column2: 'value4' },
         ];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResult),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResult);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.raw('SELECT column1, column2 FROM some_table');
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResult);
-        expect(mockInstance.unsafe).toHaveBeenCalledWith(
-          'SELECT column1, column2 FROM some_table',
-          [],
-        );
+        expect(mockUnsafe).toHaveBeenCalledWith('SELECT column1, column2 FROM some_table', []);
       });
 
       test('should handle raw query with parameters', async () => {
         const mockResult = [{ id: 1, name: 'Test' }];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResult),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResult);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.raw('SELECT * FROM users WHERE id = $1', [1]);
-        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResult);
-        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
+        expect(mockUnsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
       });
 
       test('should handle raw query with no results', async () => {
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue([]),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue([]);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const result = await dbClient.raw('SELECT * FROM empty_table');
 
@@ -338,18 +319,16 @@ describe('Database Client', () => {
 
       test('should handle raw query errors', async () => {
         const error = new Error('Raw query failed');
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(error),
-        }));
+        const mockUnsafe = vi.fn().mockRejectedValue(error);
+        const dbClient = createMockedClient(mockUnsafe);
 
         await expect(dbClient.raw('INVALID RAW QUERY')).rejects.toThrow('Raw query failed');
       });
 
       test('should handle raw query with complex SQL', async () => {
         const mockResult = [{ ['user_id']: 1, ['total_orders']: 5, ['avg_amount']: 99.99 }];
-        postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockResult),
-        }));
+        const mockUnsafe = vi.fn().mockResolvedValue(mockResult);
+        const dbClient = createMockedClient(mockUnsafe);
 
         const sql = `
           SELECT
@@ -444,11 +423,10 @@ describe('Database Client', () => {
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue([]),
           end: mockClose,
+          begin: vi.fn(),
         }));
 
         const client = createRawDb(mockConnectionString);
-        // Assuming there's a way to close the client
-        // This depends on the actual implementation
         await client.close();
         expect(mockClose).toHaveBeenCalled();
       });
@@ -457,8 +435,9 @@ describe('Database Client', () => {
     describe('health checks', () => {
       test('should handle health check queries', async () => {
         const healthResult = [{ ok: 1 }];
+        const mockUnsafe = vi.fn().mockResolvedValue(healthResult);
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(healthResult),
+          unsafe: mockUnsafe,
           end: vi.fn().mockResolvedValue(undefined),
           begin: vi
             .fn()
@@ -467,6 +446,7 @@ describe('Database Client', () => {
             ),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         const result = await dbClient.query({ text: 'SELECT 1 as health_check', values: [] });
 
         expect(result).toEqual(healthResult);
@@ -478,8 +458,9 @@ describe('Database Client', () => {
 
       test('should handle ping-style queries', async () => {
         const pingResult = [{ now: new Date() }];
+        const mockUnsafe = vi.fn().mockResolvedValue(pingResult);
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(pingResult),
+          unsafe: mockUnsafe,
           end: vi.fn().mockResolvedValue(undefined),
           begin: vi
             .fn()
@@ -488,6 +469,7 @@ describe('Database Client', () => {
             ),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         const result = await dbClient.query({ text: 'SELECT NOW() as now', values: [] });
 
         expect(result).toEqual(pingResult);
@@ -503,19 +485,23 @@ describe('Database Client', () => {
           { id: 3, name: 'User 3' },
         ];
 
+        const mockUnsafe = vi.fn().mockImplementation((sql: string) => {
+          if (sql.includes('WHERE id = 1')) return Promise.resolve([mockResults[0]]);
+          if (sql.includes('WHERE id = 2')) return Promise.resolve([mockResults[1]]);
+          return Promise.resolve([mockResults[2]]);
+        });
+
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockImplementation((sql: string) => {
-            // Simulate different results based on query
-            if (sql.includes('WHERE id = 1')) return Promise.resolve([mockResults[0]]);
-            if (sql.includes('WHERE id = 2')) return Promise.resolve([mockResults[1]]);
-            return Promise.resolve([mockResults[2]]);
-          }),
+          unsafe: mockUnsafe,
+          end: vi.fn(),
+          begin: vi.fn(),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         const [result1, result2, result3] = await Promise.all([
-          dbClient.query({ text: 'SELECT * FROM users WHERE id = $1', values: [1] }),
-          dbClient.query({ text: 'SELECT * FROM users WHERE id = $1', values: [2] }),
-          dbClient.query({ text: 'SELECT * FROM users WHERE id = $1', values: [3] }),
+          dbClient.query({ text: 'SELECT * FROM users WHERE id = 1', values: [] }),
+          dbClient.query({ text: 'SELECT * FROM users WHERE id = 2', values: [] }),
+          dbClient.query({ text: 'SELECT * FROM users WHERE id = 3', values: [] }),
         ]);
 
         expect(result1).toEqual([mockResults[0]]);
@@ -525,10 +511,14 @@ describe('Database Client', () => {
 
       test('should handle concurrent execute operations', async () => {
         const mockExecuteResult = { count: 1 };
+        const mockUnsafe = vi.fn().mockResolvedValue(mockExecuteResult);
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockResolvedValue(mockExecuteResult),
+          unsafe: mockUnsafe,
+          end: vi.fn(),
+          begin: vi.fn(),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         const queries = [
           { text: 'UPDATE users SET name = $1 WHERE id = $2', values: ['New Name 1', 1] },
           { text: 'UPDATE users SET name = $1 WHERE id = $2', values: ['New Name 2', 2] },
@@ -554,10 +544,14 @@ describe('Database Client', () => {
 
       test('should handle query syntax errors', async () => {
         const syntaxError = new Error('Syntax error in SQL');
+        const mockUnsafe = vi.fn().mockRejectedValue(syntaxError);
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(syntaxError),
+          unsafe: mockUnsafe,
+          end: vi.fn(),
+          begin: vi.fn(),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         await expect(dbClient.query({ text: 'INVALID SQL SYNTAX', values: [] })).rejects.toThrow(
           'Syntax error in SQL',
         );
@@ -565,10 +559,14 @@ describe('Database Client', () => {
 
       test('should handle constraint violation errors', async () => {
         const constraintError = new Error('Unique constraint violation');
+        const mockUnsafe = vi.fn().mockRejectedValue(constraintError);
         postgresMock.mockImplementation(() => ({
-          unsafe: vi.fn().mockRejectedValue(constraintError),
+          unsafe: mockUnsafe,
+          end: vi.fn(),
+          begin: vi.fn(),
         }));
 
+        const dbClient = createRawDb(mockConnectionString);
         await expect(
           dbClient.execute({
             text: 'INSERT INTO users (email) VALUES ($1)',

@@ -200,7 +200,7 @@ export function useInfiniteQuery<
 
   // Sync cache state to local state
   useEffect(() => {
-    if (state !== undefined && state.data !== undefined && state.data !== null) {
+    if (state?.data !== undefined) {
       setInfiniteData(state.data);
     }
   }, [state]);
@@ -247,7 +247,7 @@ export function useInfiniteQuery<
     try {
       const firstPage = await fetchPage(initialPageParam);
 
-      if (abortController.current !== null && abortController.current.signal.aborted) return;
+      if (abortController.current.signal.aborted) return;
 
       const newData: InfiniteData<TData, TPageParam> = {
         pages: [firstPage],
@@ -260,7 +260,7 @@ export function useInfiniteQuery<
         onSuccess(newData);
       }
     } catch (err) {
-      if (abortController.current !== null && abortController.current.signal.aborted) return;
+      if (abortController.current.signal.aborted) return;
 
       const error = err instanceof Error ? err : new Error(String(err));
       cache.setQueryError(queryKey, error);
@@ -329,7 +329,12 @@ export function useInfiniteQuery<
 
   // Fetch previous page
   const fetchPreviousPage = useCallback(async (): Promise<void> => {
-    if (!enabled || infiniteData === undefined || infiniteData.pages.length === 0 || getPreviousPageParam === undefined)
+    if (
+      !enabled ||
+      infiniteData === undefined ||
+      infiniteData.pages.length === 0 ||
+      getPreviousPageParam === undefined
+    )
       return;
 
     const firstPage = infiniteData.pages[0];
@@ -422,7 +427,9 @@ export function useInfiniteQuery<
 
   const firstPageForPrev = infiniteData?.pages[0];
   const hasPreviousPage =
-    firstPageForPrev !== undefined && getPreviousPageParam !== undefined && infiniteData !== undefined
+    firstPageForPrev !== undefined &&
+    getPreviousPageParam !== undefined &&
+    infiniteData !== undefined
       ? getPreviousPageParam(firstPageForPrev, infiniteData.pages) !== undefined
       : false;
 

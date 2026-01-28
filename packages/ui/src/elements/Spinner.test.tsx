@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/Spinner.test.tsx
+// packages/ui/src/elements/Spinner.test.tsx
 // packages/ui/src/components/__tests__/Spinner.test.tsx
 /** @vitest-environment jsdom */
 import { render } from '@testing-library/react';

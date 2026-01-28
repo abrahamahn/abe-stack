@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/motion.test.ts
+// packages/ui/src/theme/motion.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { motion } from './motion';

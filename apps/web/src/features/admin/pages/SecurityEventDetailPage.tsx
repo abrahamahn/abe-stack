@@ -40,7 +40,7 @@ export const SecurityEventDetailPage = (): JSX.Element => {
               <Heading as="h1" size="xl">
                 Security Event
               </Heading>
-              {event !== null && event !== undefined && (
+              {event !== undefined && (
                 <Text tone="muted" size="sm">
                   ID: {event.id}
                 </Text>

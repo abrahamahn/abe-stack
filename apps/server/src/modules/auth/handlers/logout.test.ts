@@ -1,30 +1,49 @@
-// apps/server/src/modules/auth/handlers/__tests__/logout.test.ts
+// apps/server/src/modules/auth/handlers/logout.test.ts
 /**
  * Logout Handler Tests
  *
  * Comprehensive tests for user logout via HTTP-only refresh token cookie.
  */
 
-import { logoutUser } from '@auth/service';
-import { clearRefreshTokenCookie } from '@auth/utils';
-import { REFRESH_COOKIE_NAME } from '@shared/constants';
+import { REFRESH_COOKIE_NAME } from '../../../shared/constants';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogout } from '../logout';
+import { handleLogout } from './logout';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/service', () => ({
-  logoutUser: vi.fn(),
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const { mockLogoutUser, mockClearRefreshTokenCookie, mockMapErrorToResponse } = vi.hoisted(() => ({
+  mockLogoutUser: vi.fn(),
+  mockClearRefreshTokenCookie: vi.fn(),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log: { error: (e: unknown) => void } }) => {
+    ctx.log.error(error);
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
 }));
 
-vi.mock('@auth/utils', () => ({
-  clearRefreshTokenCookie: vi.fn(),
+// Mock the service module - use relative path
+vi.mock('../service', () => ({
+  logoutUser: mockLogoutUser,
 }));
+
+vi.mock('../utils', () => ({
+  clearRefreshTokenCookie: mockClearRefreshTokenCookie,
+}));
+
+// Mock @shared to provide working mapErrorToResponse
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
 
 // ============================================================================
 // Test Helpers
@@ -85,7 +104,7 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       const result = await handleLogout(ctx, request, reply);
 
@@ -98,11 +117,11 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'test-refresh-token-123' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       await handleLogout(ctx, request, reply);
 
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'test-refresh-token-123');
+      expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'test-refresh-token-123');
     });
 
     test('should clear refresh token cookie on successful logout', async () => {
@@ -110,11 +129,11 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       await handleLogout(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+      expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     });
 
     test('should handle logout when no refresh token cookie exists', async () => {
@@ -122,13 +141,13 @@ describe('handleLogout', () => {
       const request = createMockRequest({});
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
-      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+      expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
+      expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     });
 
     test('should handle logout with undefined cookie value', async () => {
@@ -136,12 +155,12 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: undefined });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
+      expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
     });
   });
 
@@ -151,7 +170,7 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockRejectedValue(new Error('Database connection failed'));
+      mockLogoutUser.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleLogout(ctx, request, reply);
 
@@ -164,11 +183,11 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockRejectedValue(new Error('Database error'));
+      mockLogoutUser.mockRejectedValue(new Error('Database error'));
 
       await handleLogout(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockClearRefreshTokenCookie).not.toHaveBeenCalled();
     });
 
     test('should handle unexpected error types', async () => {
@@ -176,7 +195,7 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockRejectedValue('String error');
+      mockLogoutUser.mockRejectedValue('String error');
 
       const result = await handleLogout(ctx, request, reply);
 
@@ -194,11 +213,11 @@ describe('handleLogout', () => {
       });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       await handleLogout(ctx, request, reply);
 
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'correct-token');
+      expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'correct-token');
     });
 
     test('should handle empty string refresh token', async () => {
@@ -206,12 +225,12 @@ describe('handleLogout', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: '' });
       const reply = createMockReply();
 
-      vi.mocked(logoutUser).mockResolvedValue(undefined);
+      mockLogoutUser.mockResolvedValue(undefined);
 
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, '');
+      expect(mockLogoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, '');
     });
   });
 });

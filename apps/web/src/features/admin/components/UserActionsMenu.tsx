@@ -11,7 +11,7 @@ import { useCallback, useState } from 'react';
 import { getUserStatus } from './StatusBadge';
 
 import type { AdminUser, UserRole } from '@abe-stack/core';
-import type { JSX, FormEvent } from 'react';
+import type { JSX } from 'react';
 
 export interface UserActionsMenuProps {
   user: AdminUser;
@@ -64,7 +64,7 @@ export const UserActionsMenu = ({
   const isAnyLoading = isUpdating || isLocking || isUnlocking;
 
   const handleUpdateSubmit = useCallback(
-    async (e: FormEvent) => {
+    async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
       const updates: { name?: string | null; role?: UserRole } = {};
 
@@ -83,7 +83,7 @@ export const UserActionsMenu = ({
   );
 
   const handleLockSubmit = useCallback(
-    async (e: FormEvent) => {
+    async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (lockReason.trim().length === 0) return;
 
@@ -96,7 +96,7 @@ export const UserActionsMenu = ({
   );
 
   const handleUnlockSubmit = useCallback(
-    async (e: FormEvent) => {
+    async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (unlockReason.trim().length === 0) return;
 

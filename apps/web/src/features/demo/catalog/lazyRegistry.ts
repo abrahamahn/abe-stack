@@ -1,7 +1,7 @@
 // apps/web/src/features/demo/catalog/lazyRegistry.ts
 import { getAllCategories, getComponentsByCategory } from './index';
 
-import type { ComponentCategory, ComponentDemo } from '@demo/types';
+import type { ComponentCategory, ComponentDemo } from '../types';
 
 // Cache for loaded categories
 const categoryCache: Map<ComponentCategory, ComponentDemo[]> = new Map();

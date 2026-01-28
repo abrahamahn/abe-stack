@@ -1,7 +1,7 @@
-// apps/server/src/modules/auth/utils/__tests__/response.test.ts
+// apps/server/src/modules/auth/utils/response.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { createAuthResponse } from '../response';
+import { createAuthResponse } from './response';
 
 import type { UserRole } from '@abe-stack/core';
 

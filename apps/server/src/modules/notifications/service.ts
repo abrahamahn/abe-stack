@@ -29,7 +29,6 @@ import {
     type NotificationPreference as DbNotificationPreference,
     type PushSubscription as DbPushSubscription,
 } from '@abe-stack/db';
-import { type DbClient, type QuietHoursConfig, type TypePreferences } from '@infrastructure';
 
 import type {
     NotificationPreferences,
@@ -38,6 +37,9 @@ import type {
     StoredPushSubscription,
     UpdatePreferencesRequest,
 } from '@abe-stack/core';
+
+import { type DbClient, type QuietHoursConfig, type TypePreferences } from '@/infrastructure';
+
 
 // ============================================================================
 // Subscription Management
@@ -65,7 +67,7 @@ export async function subscribe(
     select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', subscription.endpoint)).limit(1).toSql(),
   );
 
-  if (existingRow !== undefined && existingRow !== null) {
+  if (existingRow !== null) {
     const existing = toCamelCase<DbPushSubscription>(existingRow, PUSH_SUBSCRIPTION_COLUMNS);
     if (existing.userId === userId) {
       // Update existing subscription - reactivate and update lastUsedAt
@@ -98,7 +100,7 @@ export async function subscribe(
         keys_p256dh: subscription.keys.p256dh,
         keys_auth: subscription.keys.auth,
         device_id: deviceId,
-        user_agent: userAgent || null,
+        user_agent: userAgent !== '' ? userAgent : null,
         is_active: true,
       })
       .returning('id')
@@ -180,7 +182,7 @@ export async function getSubscriptionById(
     select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', subscriptionId)).limit(1).toSql(),
   );
 
-  if (row === null || row === undefined) return undefined;
+  if (row === null) return undefined;
   const sub = toCamelCase<DbPushSubscription>(row, PUSH_SUBSCRIPTION_COLUMNS);
   return dbSubToStoredSub(sub);
 }
@@ -230,7 +232,7 @@ function dbSubToStoredSub(dbSub: DbPushSubscription): StoredPushSubscription {
     id: dbSub.id,
     userId: dbSub.userId,
     endpoint: dbSub.endpoint,
-    expirationTime: dbSub.expirationTime ? dbSub.expirationTime.getTime() : null,
+    expirationTime: dbSub.expirationTime !== null ? dbSub.expirationTime.getTime() : null,
     keys: {
       p256dh: dbSub.keysP256dh,
       auth: dbSub.keysAuth,
@@ -262,7 +264,7 @@ export async function getPreferences(
     select(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).limit(1).toSql(),
   );
 
-  if (existingRow !== undefined && existingRow !== null) {
+  if (existingRow !== null) {
     const prefs = toCamelCase<DbNotificationPreference>(
       existingRow,
       NOTIFICATION_PREFERENCE_COLUMNS,
@@ -316,10 +318,10 @@ export async function updatePreferences(
   };
 
   if (updates.globalEnabled !== undefined) {
-    updateData.global_enabled = updates.globalEnabled;
+    updateData['global_enabled'] = updates.globalEnabled;
   }
 
-  if (updates.quietHours) {
+  if (updates.quietHours !== undefined) {
     const newQuietHours = { ...current.quietHours };
     if (updates.quietHours.enabled !== undefined) {
       newQuietHours.enabled = updates.quietHours.enabled;
@@ -333,10 +335,10 @@ export async function updatePreferences(
     if (updates.quietHours.timezone !== undefined) {
       newQuietHours.timezone = updates.quietHours.timezone;
     }
-    updateData.quiet_hours = newQuietHours;
+    updateData['quiet_hours'] = newQuietHours;
   }
 
-  if (updates.types) {
+  if (updates.types !== undefined) {
     const newTypes = { ...current.types };
     for (const type of Object.keys(updates.types) as NotificationType[]) {
       const typeUpdate = updates.types[type];
@@ -350,7 +352,7 @@ export async function updatePreferences(
         newTypes[type].channels = typeUpdate.channels;
       }
     }
-    updateData.types = newTypes;
+    updateData['types'] = newTypes;
   }
 
   const updatedRows = await db.query<Record<string, unknown>>(
@@ -437,7 +439,7 @@ function getCurrentHourInTimezone(timezone: string): number {
     });
     const parts = formatter.formatToParts(new Date());
     const hourPart = parts.find((p) => p.type === 'hour');
-    return hourPart ? parseInt(hourPart.value, 10) : new Date().getUTCHours();
+    return hourPart !== undefined ? parseInt(hourPart.value, 10) : new Date().getUTCHours();
   } catch {
     // Invalid timezone, fall back to UTC
     return new Date().getUTCHours();

@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/auth.test.ts
+// packages/contracts/src/auth.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

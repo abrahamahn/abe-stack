@@ -1,5 +1,5 @@
-// apps/server/src/infrastructure/data/storage/__tests__/factory.test.ts
-import { createStorage } from '@storage';
+// apps/server/src/infrastructure/data/storage/factory.test.ts
+import { createStorage } from '.';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@abe-stack/core';
@@ -29,11 +29,11 @@ const { MockLocalStorageProvider, MockS3StorageProvider } = vi.hoisted(() => {
   return { MockLocalStorageProvider, MockS3StorageProvider };
 });
 
-vi.mock('@providers/localStorageProvider', () => ({
+vi.mock('./providers/localStorageProvider', () => ({
   LocalStorageProvider: MockLocalStorageProvider,
 }));
 
-vi.mock('@providers/s3StorageProvider', () => ({
+vi.mock('./providers/s3StorageProvider', () => ({
   S3StorageProvider: MockS3StorageProvider,
 }));
 

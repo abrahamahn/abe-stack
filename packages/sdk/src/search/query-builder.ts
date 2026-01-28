@@ -178,7 +178,7 @@ export class ClientSearchQueryBuilder<T = Record<string, unknown>> {
       query.sort = this._sort;
     }
 
-    if (this._search) {
+    if (this._search !== undefined) {
       query.search = this._search;
     }
 
@@ -219,31 +219,31 @@ export class ClientSearchQueryBuilder<T = Record<string, unknown>> {
   ): ClientSearchQueryBuilder<T> {
     const builder = new ClientSearchQueryBuilder<T>();
 
-    if (query.filters) {
+    if (query.filters !== undefined) {
       builder._filters = [query.filters];
     }
 
-    if (query.sort) {
+    if (query.sort !== undefined) {
       builder._sort = [...query.sort];
     }
 
-    if (query.search) {
+    if (query.search !== undefined) {
       builder._search = { ...query.search };
     }
 
-    if (query.page) {
+    if (query.page !== undefined && query.page !== 0) {
       builder._page = query.page;
     }
 
-    if (query.limit) {
+    if (query.limit !== undefined && query.limit !== 0) {
       builder._limit = query.limit;
     }
 
-    if (query.cursor) {
+    if (query.cursor !== undefined && query.cursor !== '') {
       builder._cursor = query.cursor;
     }
 
-    if (query.select) {
+    if (query.select !== undefined) {
       builder._select = [...query.select];
     }
 
@@ -294,20 +294,20 @@ export function queryToURLSearchParams<T = Record<string, unknown>>(
   const params = new URLSearchParams();
 
   // Filters - serialize as JSON
-  if (query.filters) {
+  if (query.filters !== undefined) {
     params.set('filters', JSON.stringify(serializeFilters(query.filters)));
   }
 
   // Sort - serialize as "field:order,field2:order2"
-  if (query.sort && query.sort.length > 0) {
+  if (query.sort !== undefined && query.sort.length > 0) {
     const sortStr = query.sort.map((s: SortConfig<T>) => `${String(s.field)}:${s.order}`).join(',');
     params.set('sort', sortStr);
   }
 
   // Full-text search
-  if (query.search?.query) {
+  if (query.search?.query !== undefined && query.search.query !== '') {
     params.set('q', query.search.query);
-    if (query.search.fields && query.search.fields.length > 0) {
+    if (query.search.fields !== undefined && query.search.fields.length > 0) {
       params.set('searchFields', query.search.fields.join(','));
     }
     if (query.search.fuzziness !== undefined) {
@@ -324,17 +324,17 @@ export function queryToURLSearchParams<T = Record<string, unknown>>(
     params.set('limit', String(query.limit));
   }
 
-  if (query.cursor) {
+  if (query.cursor !== undefined && query.cursor !== '') {
     params.set('cursor', query.cursor);
   }
 
   // Field selection
-  if (query.select && query.select.length > 0) {
+  if (query.select !== undefined && query.select.length > 0) {
     params.set('select', query.select.map(String).join(','));
   }
 
   // Include count
-  if (query.includeCount) {
+  if (query.includeCount === true) {
     params.set('includeCount', '1');
   }
 
@@ -351,7 +351,7 @@ export function urlSearchParamsToQuery<T = Record<string, unknown>>(
 
   // Parse filters
   const filtersStr = params.get('filters');
-  if (filtersStr) {
+  if (filtersStr !== null && filtersStr !== '') {
     try {
       const parsed = JSON.parse(filtersStr) as SerializedFilter;
       query.filters = deserializeFilters(parsed);
@@ -362,7 +362,7 @@ export function urlSearchParamsToQuery<T = Record<string, unknown>>(
 
   // Parse sort
   const sortStr = params.get('sort');
-  if (sortStr) {
+  if (sortStr !== null && sortStr !== '') {
     query.sort = sortStr.split(',').map((s) => {
       const [field, order] = s.split(':');
       return {
@@ -374,39 +374,39 @@ export function urlSearchParamsToQuery<T = Record<string, unknown>>(
 
   // Parse search
   const searchQuery = params.get('q');
-  if (searchQuery) {
+  if (searchQuery !== null && searchQuery !== '') {
     query.search = { query: searchQuery };
 
     const searchFields = params.get('searchFields');
-    if (searchFields) {
+    if (searchFields !== null && searchFields !== '') {
       query.search.fields = searchFields.split(',');
     }
 
     const fuzziness = params.get('fuzziness');
-    if (fuzziness) {
+    if (fuzziness !== null && fuzziness !== '') {
       query.search.fuzziness = parseFloat(fuzziness);
     }
   }
 
   // Parse pagination
   const page = params.get('page');
-  if (page) {
+  if (page !== null && page !== '') {
     query.page = parseInt(page, 10);
   }
 
   const limit = params.get('limit');
-  if (limit) {
+  if (limit !== null && limit !== '') {
     query.limit = parseInt(limit, 10);
   }
 
   const cursor = params.get('cursor');
-  if (cursor) {
+  if (cursor !== null && cursor !== '') {
     query.cursor = cursor;
   }
 
   // Parse select
   const select = params.get('select');
-  if (select) {
+  if (select !== null && select !== '') {
     query.select = select.split(',') as Array<keyof T | string>;
   }
 
@@ -464,7 +464,7 @@ function serializeFilters<T>(filter: FilterCondition<T> | CompoundFilter<T>): Se
 function deserializeFilters<T>(
   serialized: SerializedFilter,
 ): FilterCondition<T> | CompoundFilter<T> {
-  if (serialized.op && serialized.c) {
+  if (serialized.op !== undefined && serialized.c !== undefined) {
     // Compound filter
     return {
       operator: serialized.op as 'and' | 'or' | 'not',

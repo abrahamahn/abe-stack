@@ -8,6 +8,7 @@
 
 import { errorResponseSchema } from './common';
 import { createSchema } from './schema';
+
 import type { Contract, Schema } from './types';
 
 // ============================================================================
@@ -101,11 +102,11 @@ export const jobDetailsSchema: Schema<JobDetails> = createSchema((data: unknown)
     throw new Error('Job name must be a string');
   }
   const status = jobStatusSchema.parse(obj['status']);
-  if (typeof obj['attempts'] !== 'number' || !Number.isInteger(obj['attempts'])) {
-    throw new Error('Attempts must be an integer');
+  if (typeof obj['attempts'] !== 'number' || !Number.isInteger(obj['attempts']) || obj['attempts'] < 0) {
+    throw new Error('Attempts must be a non-negative integer');
   }
-  if (typeof obj['maxAttempts'] !== 'number' || !Number.isInteger(obj['maxAttempts'])) {
-    throw new Error('Max attempts must be an integer');
+  if (typeof obj['maxAttempts'] !== 'number' || !Number.isInteger(obj['maxAttempts']) || obj['maxAttempts'] < 0) {
+    throw new Error('Max attempts must be a non-negative integer');
   }
   if (typeof obj['scheduledAt'] !== 'string') {
     throw new Error('Scheduled at must be a string');

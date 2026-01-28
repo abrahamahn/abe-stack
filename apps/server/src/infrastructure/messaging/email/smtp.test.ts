@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/smtp.test.ts
+// apps/server/src/infrastructure/messaging/email/smtp.test.ts
 /**
  * Tests for the SMTP client utility functions.
  *
@@ -9,7 +9,7 @@ import { EventEmitter } from 'node:events';
 
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
-import { SmtpClient, type SmtpConfig } from '../smtp';
+import { SmtpClient, type SmtpConfig } from './smtp';
 
 // ----------------------------------------------------------------------------
 // Mocks

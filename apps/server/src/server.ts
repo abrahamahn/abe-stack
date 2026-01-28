@@ -13,11 +13,11 @@
 
 import { createConsoleLogger } from '@abe-stack/core';
 import { registerPlugins } from '@http/index';
-import Fastify from 'fastify';
+import fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';
-import type { DbClient } from '@infrastructure/index';
-import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared/index';
+import type { DbClient } from '@/infrastructure/index';
+import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -51,7 +51,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     ? { level: config.server.logLevel }
     : createConsoleLogger(config.server.logLevel);
 
-  const server = Fastify({
+  const server = fastify({
     logger: loggerConfig,
     disableRequestLogging: !isProd,
     trustProxy: config.server.trustProxy,

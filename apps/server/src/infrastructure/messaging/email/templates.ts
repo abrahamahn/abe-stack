@@ -6,7 +6,7 @@
  * Uses shared styles and a layout helper to maintain consistency.
  */
 
-import type { EmailOptions } from '@email/types';
+import type { EmailOptions } from './types';
 
 // ============================================================================
 // Styles

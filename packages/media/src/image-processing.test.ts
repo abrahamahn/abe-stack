@@ -1,4 +1,4 @@
-// packages/media/src/__tests__/image-processing.test.ts
+// packages/media/src/image-processing.test.ts
 import sharp from 'sharp';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

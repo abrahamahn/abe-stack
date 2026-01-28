@@ -18,16 +18,11 @@ import {
     selectCount,
     toCamelCase,
     toCamelCaseArray,
-    type SecurityEvent as DbSecurityEvent, SqlFragment 
- 
- 
- 
- 
- 
- 
- 
+    type SecurityEvent as DbSecurityEvent,
+    type SqlFragment,
 } from '@abe-stack/db';
 
+import type { DbClient } from '@/infrastructure/data/database';
 import type {
     PaginationOptions,
     SecurityEvent,
@@ -35,7 +30,6 @@ import type {
     SecurityEventsListResponse,
     SecurityMetrics,
 } from '@abe-stack/core';
-import type { DbClient } from '@database';
 
 // ============================================================================
 // Types
@@ -75,35 +69,35 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
 function buildFilterConditions(filter: SecurityEventsFilter): SqlFragment[] {
   const conditions: SqlFragment[] = [];
 
-  if (filter.eventType !== undefined && filter.eventType !== null && filter.eventType !== '') {
+  if (filter.eventType !== undefined && filter.eventType !== '') {
     conditions.push(eq('event_type', filter.eventType));
   }
 
-  if (filter.severity !== undefined && filter.severity !== null && filter.severity !== '') {
+  if (filter.severity !== undefined && filter.severity !== '') {
     conditions.push(eq('severity', filter.severity));
   }
 
-  if (filter.userId !== undefined && filter.userId !== null && filter.userId !== '') {
+  if (filter.userId !== undefined && filter.userId !== '') {
     conditions.push(eq('user_id', filter.userId));
   }
 
-  if (filter.email !== undefined && filter.email !== null && filter.email !== '') {
+  if (filter.email !== undefined && filter.email !== '') {
     // Use case-insensitive partial match for email
     conditions.push(ilike('email', `%${filter.email}%`));
   }
 
-  if (filter.ipAddress !== undefined && filter.ipAddress !== null && filter.ipAddress !== '') {
+  if (filter.ipAddress !== undefined && filter.ipAddress !== '') {
     conditions.push(eq('ip_address', filter.ipAddress));
   }
 
-  if (filter.startDate !== undefined && filter.startDate !== null) {
+  if (filter.startDate !== undefined) {
     const startDate = new Date(filter.startDate);
     if (!isNaN(startDate.getTime())) {
       conditions.push(gte('created_at', startDate));
     }
   }
 
-  if (filter.endDate !== undefined && filter.endDate !== null) {
+  if (filter.endDate !== undefined) {
     const endDate = new Date(filter.endDate);
     if (!isNaN(endDate.getTime())) {
       conditions.push(lte('created_at', endDate));
@@ -189,7 +183,7 @@ export async function listSecurityEvents(
   }
 
   const countResult = await db.queryOne<{ count: string }>(countQuery.toSql());
-  const total = countResult ? parseInt(countResult.count, 10) : 0;
+  const total = countResult !== null ? parseInt(countResult.count, 10) : 0;
 
   const totalPages = Math.ceil(total / limit);
 
@@ -237,21 +231,22 @@ export async function getSecurityMetrics(
       .toSql(),
   );
 
-  const events = rows.map((row) => ({
-    eventType: row.event_type as string,
-    severity: row.severity as string,
+  interface EventInfo { eventType: string; severity: string }
+  const events: EventInfo[] = rows.map((row) => ({
+    eventType: row['event_type'] as string,
+    severity: row['severity'] as string,
   }));
 
   // Calculate metrics
   const totalEvents = events.length;
-  const criticalEvents = events.filter((e) => e.severity === 'critical').length;
-  const highEvents = events.filter((e) => e.severity === 'high').length;
-  const mediumEvents = events.filter((e) => e.severity === 'medium').length;
-  const lowEvents = events.filter((e) => e.severity === 'low').length;
+  const criticalEvents = events.filter((e: EventInfo) => e.severity === 'critical').length;
+  const highEvents = events.filter((e: EventInfo) => e.severity === 'high').length;
+  const mediumEvents = events.filter((e: EventInfo) => e.severity === 'medium').length;
+  const lowEvents = events.filter((e: EventInfo) => e.severity === 'low').length;
 
-  const tokenReuseCount = events.filter((e) => e.eventType === 'token_reuse_detected').length;
-  const accountLockedCount = events.filter((e) => e.eventType === 'account_locked').length;
-  const suspiciousLoginCount = events.filter((e) => e.eventType === 'suspicious_login').length;
+  const tokenReuseCount = events.filter((e: EventInfo) => e.eventType === 'token_reuse_detected').length;
+  const accountLockedCount = events.filter((e: EventInfo) => e.eventType === 'account_locked').length;
+  const suspiciousLoginCount = events.filter((e: EventInfo) => e.eventType === 'suspicious_login').length;
 
   // Count by event type
   const eventsByType: Record<string, number> = {};

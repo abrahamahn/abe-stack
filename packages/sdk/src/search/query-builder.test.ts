@@ -1,4 +1,4 @@
-// packages/sdk/src/search/__tests__/query-builder.test.ts
+// packages/sdk/src/search/query-builder.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

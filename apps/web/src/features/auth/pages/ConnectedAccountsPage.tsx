@@ -8,14 +8,14 @@
  * - Disconnect existing OAuth providers
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
 
 import { OAUTH_PROVIDERS, tokenStore, type OAuthConnection, type OAuthProvider } from '@abe-stack/core';
 import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/sdk';
 import { Button, Card, Dialog, PageContainer } from '@abe-stack/ui';
-
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useCallback, useMemo, useState } from 'react';
+
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Provider Display Config
@@ -168,7 +168,7 @@ export const ConnectedAccountsPage = (): ReactElement => {
             const display = PROVIDER_DISPLAY[provider];
 
             // Don't show providers that aren't enabled
-            if (isEnabled === false) return null;
+            if (!isEnabled) return null;
 
             return (
               <Card key={provider} className="connected-account-card">
@@ -196,7 +196,7 @@ export const ConnectedAccountsPage = (): ReactElement => {
                             handleDisconnect(connection);
                           }}
                           disabled={isActing || !canDisconnect}
-                          {...(canDisconnect === false && {
+                          {...(!canDisconnect && {
                             title: 'You must have at least one login method',
                           })}
                         >

@@ -31,19 +31,7 @@ import {
     USERS_TABLE,
     type User,
 } from '@abe-stack/db';
-import {
-    applyProgressiveDelay,
-    emailTemplates,
-    getAccountLockoutStatus,
-    isAccountLocked,
-    logAccountLockedEvent,
-    logLoginAttempt,
-    withTransaction,
-    type DbClient,
-    type EmailService,
-    type Logger,
-    type Repositories,
-} from '@infrastructure';
+
 
 import {
     createAccessToken,
@@ -56,6 +44,20 @@ import {
 } from './utils';
 
 import type { AuthConfig } from '@/config';
+
+import {
+    applyProgressiveDelay,
+    emailTemplates,
+    getAccountLockoutStatus,
+    isAccountLocked,
+    logAccountLockedEvent,
+    logLoginAttempt,
+    withTransaction,
+    type DbClient,
+    type EmailService,
+    type Logger,
+    type Repositories,
+} from '@/infrastructure';
 
 // ============================================================================
 // Types
@@ -112,12 +114,17 @@ export async function registerUser(
     // and return a generic success message to prevent user enumeration.
     try {
       const emailTemplate = emailTemplates.existingAccountRegistrationAttempt(existingUser.email);
-      await emailService.send({
+      const emailOptions: import('@abe-stack/core').EmailOptions = {
         to: existingUser.email,
         subject: emailTemplate.subject,
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-      });
+      };
+      if (emailTemplate.text !== undefined) {
+        emailOptions.text = emailTemplate.text;
+      }
+      if (emailTemplate.html !== undefined) {
+        emailOptions.html = emailTemplate.html;
+      }
+      await emailService.send(emailOptions);
     } catch {
       // Log the error but don't expose it to the client
       // A monitoring/alerting system should be in place for such errors

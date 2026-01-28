@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/data/files/__tests__/helpers.test.ts
+// apps/server/src/infrastructure/data/files/helpers.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { normalizeFilename } from '../helpers';
+import { normalizeFilename } from './helpers';
 
 describe('normalizeFilename', () => {
   describe('basic normalization', () => {

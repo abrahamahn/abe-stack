@@ -5,12 +5,12 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { type RequestWithCookies } from '@modules/auth';
+import { type RequestWithCookies } from '@auth';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
 import { getUserById, listUsers } from '@users/service';
 
 import type { CursorPaginatedResult, User } from '@abe-stack/core';
-import type { PaginationRequest } from '@pagination';
+import type { PaginationRequest } from '@http/pagination';
 
 /**
  * Get current authenticated user's profile
@@ -60,7 +60,7 @@ export async function handleListUsers(
 > {
   const { pagination } = request as RequestWithCookies & PaginationRequest;
 
-  if (pagination.type !== 'cursor' || pagination.cursor === undefined || pagination.cursor === null) {
+  if (pagination.type !== 'cursor' || pagination.cursor === undefined) {
     return {
       status: 400,
       body: { message: 'This endpoint only supports cursor pagination' },

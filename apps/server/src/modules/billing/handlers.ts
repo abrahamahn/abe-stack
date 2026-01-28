@@ -34,7 +34,7 @@ import {
     type SubscriptionResponse,
     type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
-import { createBillingProvider } from '@infrastructure/billing';
+
 
 import {
     addPaymentMethod,
@@ -53,6 +53,8 @@ import {
 } from './service';
 
 import type { AppContext, RequestWithCookies } from '@shared';
+
+import { createBillingProvider } from '@/infrastructure/billing';
 
 
 // ============================================================================
@@ -192,28 +194,37 @@ function handleError(
   error: unknown,
   ctx: AppContext,
 ): { status: 400 | 404 | 409 | 500; body: { message: string } } {
-  if (
-    error instanceof PlanNotFoundError ||
-    error instanceof BillingSubscriptionNotFoundError ||
-    error instanceof PaymentMethodNotFoundError ||
-    error instanceof CustomerNotFoundError
-  ) {
-    return { status: 404, body: { message: error.message } };
-  }
-  if (error instanceof BillingSubscriptionExistsError) {
-    return { status: 409, body: { message: error.message } };
-  }
-  if (
-    error instanceof PlanNotActiveError ||
-    error instanceof SubscriptionAlreadyCanceledError ||
-    error instanceof SubscriptionNotCancelingError ||
-    error instanceof SubscriptionNotActiveError ||
-    error instanceof CannotRemoveDefaultPaymentMethodError
-  ) {
-    return { status: 400, body: { message: error.message } };
-  }
-  if (error instanceof BillingProviderNotConfiguredError) {
-    return { status: 500, body: { message: 'Billing service is not configured' } };
+  // Use error.name checking for reliability across module boundaries in monorepo setup
+  // Note: Error class names are the original class names, not aliases (e.g., SubscriptionNotFoundError, not BillingSubscriptionNotFoundError)
+  if (error instanceof Error) {
+    const notFoundErrors = [
+      'PlanNotFoundError',
+      'SubscriptionNotFoundError',
+      'PaymentMethodNotFoundError',
+      'CustomerNotFoundError',
+    ];
+    if (notFoundErrors.includes(error.name)) {
+      return { status: 404, body: { message: error.message } };
+    }
+
+    if (error.name === 'SubscriptionExistsError') {
+      return { status: 409, body: { message: error.message } };
+    }
+
+    const badRequestErrors = [
+      'PlanNotActiveError',
+      'SubscriptionAlreadyCanceledError',
+      'SubscriptionNotCancelingError',
+      'SubscriptionNotActiveError',
+      'CannotRemoveDefaultPaymentMethodError',
+    ];
+    if (badRequestErrors.includes(error.name)) {
+      return { status: 400, body: { message: error.message } };
+    }
+
+    if (error.name === 'ProviderNotConfiguredError') {
+      return { status: 500, body: { message: 'Billing service is not configured' } };
+    }
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));

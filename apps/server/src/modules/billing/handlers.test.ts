@@ -38,7 +38,7 @@ import {
 import * as billingService from './service';
 
 import type { BillingService } from '@abe-stack/core';
-import type { AppContext, RequestWithCookies } from '@shared';
+import type { AppContext, RequestWithCookies } from '../../shared';
 
 // ============================================================================
 // Mock Dependencies
@@ -59,20 +59,27 @@ vi.mock('./service', () => ({
   createSetupIntent: vi.fn(),
 }));
 
-vi.mock('@infrastructure/billing', () => ({
-  createBillingProvider: vi.fn(() => ({
-    provider: 'stripe',
-    createCustomer: vi.fn(),
-    createCheckoutSession: vi.fn(),
-    cancelSubscription: vi.fn(),
-    resumeSubscription: vi.fn(),
-    updateSubscription: vi.fn(),
-    createSetupIntent: vi.fn(),
-    attachPaymentMethod: vi.fn(),
-    detachPaymentMethod: vi.fn(),
-    setDefaultPaymentMethod: vi.fn(),
-    listPaymentMethods: vi.fn(),
-  })),
+// Create hoisted mock for billing provider
+const { mockBillingProvider } = vi.hoisted(() => {
+  return {
+    mockBillingProvider: {
+      provider: 'stripe' as const,
+      createCustomer: vi.fn(),
+      createCheckoutSession: vi.fn(),
+      cancelSubscription: vi.fn(),
+      resumeSubscription: vi.fn(),
+      updateSubscription: vi.fn(),
+      createSetupIntent: vi.fn(),
+      attachPaymentMethod: vi.fn(),
+      detachPaymentMethod: vi.fn(),
+      setDefaultPaymentMethod: vi.fn(),
+      listPaymentMethods: vi.fn(),
+    },
+  };
+});
+
+vi.mock('@/infrastructure/billing', () => ({
+  createBillingProvider: vi.fn(() => mockBillingProvider),
 }));
 
 // ============================================================================

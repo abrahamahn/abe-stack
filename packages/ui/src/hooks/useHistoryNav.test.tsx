@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useHistoryNav.test.tsx
+// packages/ui/src/hooks/useHistoryNav.test.tsx
 /** @vitest-environment jsdom */
 import { MemoryRouter, useLocation } from '@router';
 import { render, screen, act } from '@testing-library/react';

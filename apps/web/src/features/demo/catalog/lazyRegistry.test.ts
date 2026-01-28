@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/catalog/__tests__/lazyRegistry.test.ts
+// apps/web/src/features/demo/catalog/lazyRegistry.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

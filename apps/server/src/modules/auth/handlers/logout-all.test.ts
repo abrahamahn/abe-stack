@@ -1,22 +1,22 @@
-// apps/server/src/modules/auth/handlers/__tests__/logout-all.test.ts
+// apps/server/src/modules/auth/handlers/logout-all.test.ts
 /**
  * Logout All Devices Handler Tests
  *
  * Comprehensive tests for logging out from all devices by revoking all refresh tokens.
  */
 
-import { clearRefreshTokenCookie, revokeAllUserTokens } from '@auth/utils';
+import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogoutAll } from '../logout-all';
+import { handleLogoutAll } from './logout-all';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/utils', () => ({
+vi.mock('../utils', () => ({
   clearRefreshTokenCookie: vi.fn(),
   revokeAllUserTokens: vi.fn(),
 }));

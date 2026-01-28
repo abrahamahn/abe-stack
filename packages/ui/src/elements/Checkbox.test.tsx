@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/Checkbox.test.tsx
+// packages/ui/src/elements/Checkbox.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

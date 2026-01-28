@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useOptimizedMemo.test.tsx
+// packages/ui/src/hooks/useOptimizedMemo.test.tsx
 /** @vitest-environment jsdom */
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

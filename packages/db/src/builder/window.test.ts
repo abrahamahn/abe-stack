@@ -1,4 +1,4 @@
-// packages/db/src/builder/__tests__/window.test.ts
+// packages/db/src/builder/window.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

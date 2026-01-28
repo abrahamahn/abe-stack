@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/provider.test.tsx
+// packages/ui/src/theme/provider.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

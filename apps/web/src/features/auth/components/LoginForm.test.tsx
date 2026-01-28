@@ -1,13 +1,13 @@
-// apps/web/src/features/auth/components/__tests__/LoginForm.test.tsx
-import { LoginForm } from '@auth/components/LoginForm';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+// apps/web/src/features/auth/components/LoginForm.test.tsx
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { LoginForm } from './LoginForm';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 
-import type { LoginFormProps } from '@auth/components/LoginForm';
 import type { ReactElement } from 'react';
+import type { LoginFormProps } from './LoginForm';
 
 // Helper function to render with providers
 function renderWithRouter(ui: ReactElement) {

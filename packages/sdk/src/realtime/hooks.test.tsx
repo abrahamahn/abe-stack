@@ -1,4 +1,4 @@
-// packages/sdk/src/realtime/__tests__/hooks.test.tsx
+// packages/sdk/src/realtime/hooks.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen, act } from '@testing-library/react';

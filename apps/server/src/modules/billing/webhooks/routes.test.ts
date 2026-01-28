@@ -32,7 +32,7 @@ import { handlePayPalWebhook } from './paypal-webhook';
 import { registerWebhookRoutes } from './routes';
 import { handleStripeWebhook } from './stripe-webhook';
 
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../../shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest, RouteOptions } from 'fastify';
 
 // ============================================================================

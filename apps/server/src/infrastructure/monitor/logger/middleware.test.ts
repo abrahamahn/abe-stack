@@ -1,8 +1,9 @@
+// apps/server/src/infrastructure/monitor/logger/middleware.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/monitor/logger/__tests__/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createJobCorrelationId, createJobLogger, registerLoggingMiddleware } from '../middleware';
+import { createJobCorrelationId, createJobLogger, registerLoggingMiddleware } from './middleware';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

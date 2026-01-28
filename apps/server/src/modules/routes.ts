@@ -6,7 +6,7 @@
  * All routes are defined in their respective module route files.
  */
 
-import { registerRouteMap } from '@router';
+import { registerRouteMap } from '@http/router';
 
 import { adminRoutes } from './admin/routes';
 import { authRoutes } from './auth/routes';
@@ -16,7 +16,7 @@ import { realtimeRoutes } from './realtime/routes';
 import { systemRoutes } from './system/routes';
 import { userRoutes } from './users/routes';
 
-import type { AppContext } from '@shared/index';
+import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 
 // Re-export modules
@@ -67,7 +67,7 @@ export {
   type RouteResult,
   type RouterOptions,
   type ValidationSchema,
-} from '@router';
+} from '@http/router';
 
 // Route definitions for external use
 export { adminRoutes } from './admin/routes';

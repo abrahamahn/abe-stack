@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/native.test.ts
+// packages/contracts/src/native.test.ts
 import { describe, expect, it } from 'vitest';
 
 import type { NativeBridge } from './native';

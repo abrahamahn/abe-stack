@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useUndoRedoShortcuts.test.tsx
+// packages/ui/src/hooks/useUndoRedoShortcuts.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';

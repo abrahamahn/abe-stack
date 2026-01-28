@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/FocusTrap.test.tsx
+// packages/ui/src/components/FocusTrap.test.tsx
 // packages/ui/src/elements/__tests__/FocusTrap.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';

@@ -6,7 +6,7 @@
  * Provides basic queuing, retry logic, and concurrency control.
  */
 
-import type { Logger } from '@logger';
+import type { Logger } from '@monitor/logger';
 
 export interface JobData<T = unknown> {
   id: string;
@@ -332,7 +332,7 @@ export class CustomJobQueue<T = unknown> {
    * Stop the cleanup interval
    */
   private stopCleanupInterval(): void {
-    if (this.cleanupIntervalId) {
+    if (this.cleanupIntervalId !== null) {
       clearInterval(this.cleanupIntervalId);
       this.cleanupIntervalId = null;
     }

@@ -1,3 +1,4 @@
+// apps/server/src/modules/users/sessions.service.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/users/sessions.service.test.ts
 /**
@@ -9,7 +10,6 @@
  * @complexity O(n) for all operations where n is session count
  */
 
-import { NotFoundError } from '@abe-stack/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -21,7 +21,7 @@ import {
 } from './sessions.service';
 
 import type { RefreshTokenFamily } from '@abe-stack/db';
-import type { Repositories } from '@infrastructure';
+import type { Repositories } from '@/infrastructure';
 
 // ============================================================================
 // Test Data Factories
@@ -299,11 +299,11 @@ describe('revokeSession', () => {
     it('should throw NotFoundError', async () => {
       await expect(
         revokeSession(repos, 'user-1', 'current-session', 'current-session'),
-      ).rejects.toThrow(NotFoundError);
-
-      await expect(
-        revokeSession(repos, 'user-1', 'current-session', 'current-session'),
-      ).rejects.toThrow('Cannot revoke current session. Use logout instead.');
+      ).rejects.toMatchObject({
+        name: 'NotFoundError',
+        message: 'Cannot revoke current session. Use logout instead.',
+        statusCode: 404,
+      });
 
       expect(repos.refreshTokenFamilies.findById).not.toHaveBeenCalled();
       expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
@@ -314,13 +314,11 @@ describe('revokeSession', () => {
     it('should throw NotFoundError', async () => {
       vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(null);
 
-      await expect(revokeSession(repos, 'user-1', 'non-existent')).rejects.toThrow(
-        NotFoundError,
-      );
-
-      await expect(revokeSession(repos, 'user-1', 'non-existent')).rejects.toThrow(
-        'Session not found',
-      );
+      await expect(revokeSession(repos, 'user-1', 'non-existent')).rejects.toMatchObject({
+        name: 'NotFoundError',
+        message: 'Session not found',
+        statusCode: 404,
+      });
 
       expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
     });
@@ -335,13 +333,11 @@ describe('revokeSession', () => {
 
       vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(mockFamily);
 
-      await expect(revokeSession(repos, 'user-1', 'session-1')).rejects.toThrow(
-        NotFoundError,
-      );
-
-      await expect(revokeSession(repos, 'user-1', 'session-1')).rejects.toThrow(
-        'Session not found',
-      );
+      await expect(revokeSession(repos, 'user-1', 'session-1')).rejects.toMatchObject({
+        name: 'NotFoundError',
+        message: 'Session not found',
+        statusCode: 404,
+      });
 
       expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
     });

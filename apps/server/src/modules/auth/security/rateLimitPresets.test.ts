@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/security/__tests__/rateLimitPresets.test.ts
+// apps/server/src/modules/auth/security/rateLimitPresets.test.ts
 /**
  * Auth Rate Limit Presets Tests
  */
@@ -10,7 +10,7 @@ import {
   authRateLimiters,
   createAuthRateLimitHook,
   type AuthEndpoint,
-} from '../rateLimitPresets';
+} from './rateLimitPresets';
 
 describe('AUTH_RATE_LIMITS', () => {
   it('should have login limits of 5 per minute', () => {

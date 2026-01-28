@@ -10,14 +10,14 @@
  */
 
 import { Route, Routes, useLocation } from '@abe-stack/ui';
-import { LoginPage, RegisterPage } from '@features/auth';
 import { act, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { LoginPage, RegisterPage } from '../../features/auth';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 
-import type { AuthService } from '@features/auth';
 import type { ReactElement } from 'react';
+import type { AuthService } from '../../features/auth';
 
 // Helper component to capture and display current location for testing
 const LocationDisplay = (): ReactElement => {

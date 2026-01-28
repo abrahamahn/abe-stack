@@ -6,7 +6,7 @@
  */
 
 // Routes
-export { magicLinkRoutes } from './routes';
+export { magicLinkRouteEntries, magicLinkRoutes } from './routes';
 
 // Handlers
 export { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';

@@ -9,6 +9,7 @@
 import { tokenStore } from '@abe-stack/core';
 import { createApiClient } from '@abe-stack/sdk';
 
+import type { ClientConfig } from '@/config';
 import type {
   AuthResponse,
   EmailVerificationRequest,
@@ -26,7 +27,6 @@ import type {
   User,
 } from '@abe-stack/core';
 import type { ApiClient } from '@abe-stack/sdk';
-import type { ClientConfig } from '@/config';
 
 // ============================================================================
 // Types
@@ -111,7 +111,7 @@ export class AuthService {
 
     // Start refresh interval if we have a token
     const currentToken = tokenStoreTyped.get();
-    if (currentToken !== null && currentToken !== undefined) {
+    if (currentToken !== null) {
       this.startRefreshInterval();
     }
   }
@@ -133,7 +133,7 @@ export class AuthService {
 
     // If we already have a token in memory, fetch the user
     const existingToken = this.tokenStore.get();
-    if (existingToken !== null && existingToken !== undefined) {
+    if (existingToken !== null) {
       try {
         return await this.fetchCurrentUser();
       } catch {
@@ -238,7 +238,6 @@ export class AuthService {
       // Type guard: ensure response has token property
       if (
         typeof response === 'object' &&
-        response !== null &&
         'token' in response &&
         typeof response.token === 'string'
       ) {
@@ -272,7 +271,7 @@ export class AuthService {
   /** Fetch current user (call on app load if token exists) */
   async fetchCurrentUser(): Promise<User | null> {
     const currentToken = this.tokenStore.get();
-    if (currentToken === null || currentToken === undefined) {
+    if (currentToken === null) {
       return null;
     }
 
@@ -324,7 +323,7 @@ export class AuthService {
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
     const response: EmailVerificationResponse = await this.api.verifyEmail(data);
     // Auto-login on successful verification
-    if (response.verified && response.token !== null && response.token !== undefined) {
+    if (response.verified) {
       this.handleAuthSuccess({ token: response.token, user: response.user });
     }
     return response;
@@ -382,7 +381,7 @@ export class AuthService {
       // On failure, increment backoff and reschedule if we still have a token
       // (refreshToken() calls clearAuth() on failure, but we check anyway)
       const stillHasToken = this.tokenStore.get();
-      if (stillHasToken !== null && stillHasToken !== undefined) {
+      if (stillHasToken !== null) {
         this.incrementRefreshBackoff();
         this.scheduleNextRefresh();
       }

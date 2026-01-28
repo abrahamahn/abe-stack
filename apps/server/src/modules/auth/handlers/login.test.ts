@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/handlers/__tests__/login.test.ts
+// apps/server/src/modules/auth/handlers/login.test.ts
 /**
  * Login Handler Tests
  *
@@ -10,26 +10,68 @@ import {
     EmailNotVerifiedError,
     InvalidCredentialsError,
 } from '@abe-stack/core';
-import { authenticateUser } from '@auth/service';
-import { setRefreshTokenCookie } from '@auth/utils';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogin } from '../login';
+import { handleLogin } from './login';
 
 import type { LoginRequest } from '@abe-stack/core';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/service', () => ({
-  authenticateUser: vi.fn(),
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const { mockAuthenticateUser, mockSetRefreshTokenCookie, mockMapErrorToResponse } = vi.hoisted(
+  () => ({
+    mockAuthenticateUser: vi.fn(),
+    mockSetRefreshTokenCookie: vi.fn(),
+    // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+    mockMapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case 'AccountLockedError':
+            return {
+              status: 429,
+              body: { message: 'Account temporarily locked due to too many failed attempts' },
+            };
+          case 'EmailNotVerifiedError':
+            return {
+              status: 401,
+              body: {
+                message: (error as Error & { email?: string }).message || 'Please verify your email',
+                code: 'EMAIL_NOT_VERIFIED',
+              },
+            };
+          case 'InvalidCredentialsError':
+            return { status: 401, body: { message: 'Invalid email or password' } };
+          default:
+            return { status: 500, body: { message: 'Internal server error' } };
+        }
+      }
+      return { status: 500, body: { message: 'Internal server error' } };
+    }),
+  }),
+);
+
+// Mock the service module - use relative path from this test file
+vi.mock('../service', () => ({
+  authenticateUser: mockAuthenticateUser,
 }));
 
-vi.mock('@auth/utils', () => ({
-  setRefreshTokenCookie: vi.fn(),
+// Mock utils module
+vi.mock('../utils', () => ({
+  setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
+
+// Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
 
 // ============================================================================
 // Test Helpers
@@ -138,7 +180,7 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -168,11 +210,11 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(authenticateUser).toHaveBeenCalledWith(
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -204,11 +246,11 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(setRefreshTokenCookie).toHaveBeenCalledWith(
+      expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
         reply,
         'refresh-token-456',
         ctx.config.auth,
@@ -234,7 +276,7 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -261,7 +303,7 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -277,7 +319,7 @@ describe('handleLogin', () => {
       const reply = createMockReply();
       const body = createLoginBody();
 
-      vi.mocked(authenticateUser).mockRejectedValue(new InvalidCredentialsError());
+      mockAuthenticateUser.mockRejectedValue(new InvalidCredentialsError());
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -291,7 +333,7 @@ describe('handleLogin', () => {
       const reply = createMockReply();
       const body = createLoginBody();
 
-      vi.mocked(authenticateUser).mockRejectedValue(new AccountLockedError());
+      mockAuthenticateUser.mockRejectedValue(new AccountLockedError());
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -305,7 +347,7 @@ describe('handleLogin', () => {
       const reply = createMockReply();
       const body = createLoginBody();
 
-      vi.mocked(authenticateUser).mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -319,7 +361,7 @@ describe('handleLogin', () => {
       const reply = createMockReply();
       const body = createLoginBody();
 
-      vi.mocked(authenticateUser).mockRejectedValue(new Error('Database connection failed'));
+      mockAuthenticateUser.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleLogin(ctx, body, request, reply);
 
@@ -333,11 +375,11 @@ describe('handleLogin', () => {
       const reply = createMockReply();
       const body = createLoginBody();
 
-      vi.mocked(authenticateUser).mockRejectedValue(new InvalidCredentialsError());
+      mockAuthenticateUser.mockRejectedValue(new InvalidCredentialsError());
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(setRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockSetRefreshTokenCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -362,7 +404,7 @@ describe('handleLogin', () => {
       };
 
       let capturedCallback: ((userId: string) => void) | undefined;
-      vi.mocked(authenticateUser).mockImplementation(
+      mockAuthenticateUser.mockImplementation(
         (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
           capturedCallback = callback;
           return Promise.resolve(mockAuthResult);
@@ -398,11 +440,11 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(authenticateUser).toHaveBeenCalledWith(
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -434,11 +476,11 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(authenticateUser).toHaveBeenCalledWith(
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -470,11 +512,11 @@ describe('handleLogin', () => {
         },
       };
 
-      vi.mocked(authenticateUser).mockResolvedValue(mockAuthResult);
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(authenticateUser).toHaveBeenCalledWith(
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),

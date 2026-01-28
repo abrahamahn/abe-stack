@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { JobDetailsPanel, JobsTable, QueueStatsCard } from '../components';
 import { useJobActions, useJobDetails, useJobsList, useQueueStats } from '../hooks';
 
-import type { JobDetails } from '@abe-stack/core';
+import type { JobDetails } from '@abe-stack/contracts';
 import type { JSX } from 'react';
 
 // ============================================================================

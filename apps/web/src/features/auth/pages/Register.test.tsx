@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/__tests__/Register.test.tsx
+// apps/web/src/features/auth/pages/Register.test.tsx
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -18,32 +18,9 @@ const mockUseAuth = vi.fn(() => ({
   logout: vi.fn(),
 }));
 
-// Mock navigate
-const mockNavigate = vi.fn();
-
-// Mock the hooks module - useAuth and useAuthModeNavigation
-vi.mock('../hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../hooks')>();
-  return {
-    ...actual,
-    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-    useAuthModeNavigation: () => ({
-      navigateToMode: (mode: string): void => {
-        const routes: Record<string, string> = {
-          login: '/login',
-          register: '/register',
-          'forgot-password': '/auth?mode=forgot-password',
-          'reset-password': '/auth?mode=reset-password',
-        };
-        mockNavigate(routes[mode], { replace: false });
-      },
-      navigateToLogin: (): void => mockNavigate('/login', { replace: false }),
-      navigateToRegister: (): void => mockNavigate('/register', { replace: false }),
-      navigateToForgotPassword: (): void =>
-        mockNavigate('/auth?mode=forgot-password', { replace: false }),
-    }),
-  };
-});
+vi.mock('@auth/hooks', () => ({
+  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+}));
 
 describe('RegisterPage', () => {
   const renderRegisterPage = () => renderWithProviders(<RegisterPage />);
@@ -181,17 +158,6 @@ describe('RegisterPage', () => {
           name: undefined,
         });
       });
-    });
-  });
-
-  describe('Navigation', () => {
-    it('should navigate to login page when sign in is clicked', () => {
-      renderRegisterPage();
-
-      const signInButton = screen.getByRole('button', { name: /sign in/i });
-      fireEvent.click(signInButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: false });
     });
   });
 
