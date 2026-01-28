@@ -8,8 +8,18 @@ import { useEffect } from 'react';
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { JSX } from 'react';
 
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface UserLocal {
+  role?: string;
+}
+
 export const LoginPage = (): JSX.Element => {
-  const { login, forgotPassword, isAuthenticated, user } = useAuth();
+  const authResult = useAuth();
+  const { login, forgotPassword, isAuthenticated } = authResult;
+  const user = authResult.user as UserLocal | null;
   const { isLoading, error, wrapHandler } = useFormState();
   const { navigateToMode } = useAuthModeNavigation();
   const navigate = useNavigate();

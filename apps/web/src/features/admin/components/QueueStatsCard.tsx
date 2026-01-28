@@ -7,15 +7,26 @@
 
 import { Alert, Card, Heading, Spinner, Text } from '@abe-stack/ui';
 
-import type { QueueStats } from '@abe-stack/contracts';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface QueueStatsLocal {
+  pending: number;
+  processing: number;
+  completed: number;
+  failed: number;
+  deadLetter: number;
+  total: number;
+  failureRate: number;
+  recentCompleted: number;
+  recentFailed: number;
+}
+
 export interface QueueStatsCardProps {
-  stats: QueueStats | undefined;
+  stats: QueueStatsLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;

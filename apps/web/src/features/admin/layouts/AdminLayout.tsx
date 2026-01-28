@@ -224,7 +224,9 @@ const AdminSidebar = (): ReactElement => {
  * Renders child routes in a scrollable main content area.
  */
 export const AdminLayout = ({ children }: AdminLayoutProps): ReactElement => {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const authResult = useAuth();
+  const user = authResult.user as { role?: string } | null | undefined;
+  const { isLoading, isAuthenticated } = authResult;
 
   // Show loading state while checking auth
   if (isLoading) {

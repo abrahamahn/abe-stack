@@ -10,11 +10,25 @@ import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
-import type { AdminUser } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
+  failedLoginAttempts: number;
+  lockedUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserDetailCardProps {
-  user: AdminUser | null;
+  user: AdminUserLocal | null;
   isLoading: boolean;
 }
 

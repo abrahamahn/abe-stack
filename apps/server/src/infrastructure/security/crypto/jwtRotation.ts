@@ -15,9 +15,9 @@
  * 5. Remove previousSecret
  */
 
-import { JwtError, sign as jwtSign, verify as jwtVerify } from '@abe-stack/core/crypto';
+import { JwtError, sign as jwtSign, verify as jwtVerify } from '@abe-stack/core';
 
-import type { JwtPayload, SignOptions as JwtSignOptions } from '@abe-stack/core/crypto';
+import type { JwtPayload, SignOptions as JwtSignOptions } from '@abe-stack/core';
 
 // ============================================================================
 // Types

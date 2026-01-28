@@ -364,23 +364,25 @@ function serializeFilter<T>(
   filter: FilterCondition<T> | CompoundFilter<T>,
   compact: boolean,
 ): SerializedFilter {
+  // Type guard for compound filter
   if ('conditions' in filter) {
     return {
       op: filter.operator,
-      c: filter.conditions.map((c: FilterCondition<T> | CompoundFilter<T>) =>
-        serializeFilter(c, compact),
-      ),
+      c: filter.conditions.map((c) => serializeFilter(c, compact)),
     };
   }
 
+  // Filter is a condition
+  const condition = filter;
+
   const result: SerializedFilter = {
-    f: String(filter.field),
-    o: filter.operator,
-    v: serializeValue(filter.value),
+    f: String(condition.field),
+    o: condition.operator,
+    v: serializeValue(condition.value),
   };
 
-  if (filter.caseSensitive !== undefined) {
-    result.cs = filter.caseSensitive;
+  if (condition.caseSensitive !== undefined) {
+    result.cs = condition.caseSensitive;
   }
 
   return result;
@@ -390,31 +392,40 @@ function deserializeFilter<T>(
   serialized: SerializedFilter,
 ): FilterCondition<T> | CompoundFilter<T> {
   if (serialized.op !== undefined && serialized.c !== undefined) {
-    return {
+    const result = {
       operator: serialized.op as 'and' | 'or' | 'not',
       conditions: serialized.c.map((c) => deserializeFilter<T>(c)),
-    } as CompoundFilter<T>;
+    };
+    return result as unknown as CompoundFilter<T>;
   }
 
-  return {
+  const result = {
     field: serialized.f as keyof T,
     operator: serialized.o as FilterOperator,
     value: deserializeValue(serialized.v),
     caseSensitive: serialized.cs,
-  } as FilterCondition<T>;
+  };
+  return result as unknown as FilterCondition<T>;
 }
 
 function serializeSort<T>(sort: SortConfig<T>[]): string {
-  return sort.map((s) => `${String(s.field)}:${s.order}`).join(',');
+  return sort
+    .map((s) => {
+      const sortItem = s as { field: unknown; order: unknown };
+      return `${String(sortItem.field)}:${String(sortItem.order)}`;
+    })
+    .join(',');
 }
 
 function deserializeSort<T>(sortStr: string): SortConfig<T>[] {
   return sortStr.split(',').map((s) => {
     const [field, order] = s.split(':');
-    return {
+    const sortOrder = order === 'desc' ? SORT_ORDER : SORT_ORDER;
+    const result = {
       field: field as keyof T,
-      order: order === 'desc' ? SORT_ORDER.DESC : SORT_ORDER.ASC,
+      order: order === 'desc' ? (sortOrder as { DESC: string }).DESC : (sortOrder as { ASC: string }).ASC,
     };
+    return result as unknown as SortConfig<T>;
   });
 }
 
@@ -428,10 +439,11 @@ function serializeValue(value: FilterValue): unknown {
   }
 
   if (typeof value === 'object' && value !== null && 'min' in value && 'max' in value) {
+    const rangeValue = value as { min: FilterValue; max: FilterValue };
     return {
       $r: {
-        min: serializeValue(value.min),
-        max: serializeValue(value.max),
+        min: serializeValue(rangeValue.min),
+        max: serializeValue(rangeValue.max),
       },
     };
   }

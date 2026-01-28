@@ -8,7 +8,7 @@
 
 import crypto from 'node:crypto';
 
-import { JwtError, sign as jwtSign, verify as jwtVerify } from '@abe-stack/core/crypto';
+import { JwtError, sign as jwtSign, verify as jwtVerify } from '@abe-stack/core';
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '@shared/constants';
 
 import type { UserRole } from '@abe-stack/core';

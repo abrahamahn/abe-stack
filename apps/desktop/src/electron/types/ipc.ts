@@ -1,6 +1,4 @@
 // apps/desktop/src/electron/types/ipc.ts
-import type { NativeBridge } from '@abe-stack/core';
-
 /**
  * IPC Channel Type Definitions
  *
@@ -8,11 +6,25 @@ import type { NativeBridge } from '@abe-stack/core';
  * the main process and renderer process.
  */
 
-/** Open dialog options extracted from NativeBridge */
-export type OpenDialogOptions = Parameters<NonNullable<NativeBridge['showOpenDialog']>>[0];
+/** File filter for dialog options */
+export interface DialogFileFilter {
+  name: string;
+  extensions: string[];
+}
 
-/** Save dialog options extracted from NativeBridge */
-export type SaveDialogOptions = Parameters<NonNullable<NativeBridge['showSaveDialog']>>[0];
+/** Open dialog options (matches NativeBridge.showOpenDialog options) */
+export interface OpenDialogOptions {
+  title?: string;
+  filters?: DialogFileFilter[];
+  multiple?: boolean;
+}
+
+/** Save dialog options (matches NativeBridge.showSaveDialog options) */
+export interface SaveDialogOptions {
+  title?: string;
+  defaultPath?: string;
+  filters?: DialogFileFilter[];
+}
 
 /**
  * Actual IPC channel names (kebab-case for wire protocol).

@@ -6,7 +6,7 @@
  * Used for API validation and type inference.
  */
 
-import { createSchema } from '@abe-stack/contracts';
+import { createSchema, type Schema } from '@abe-stack/contracts';
 
 
 import { FILTER_OPERATORS, LOGICAL_OPERATORS, SORT_ORDER } from './types';
@@ -31,7 +31,6 @@ import type {
     SortConfig,
     SortOrder,
 } from './types';
-import type { Schema } from '@abe-stack/contracts/types';
 
 // ============================================================================
 // Filter Operator Schemas

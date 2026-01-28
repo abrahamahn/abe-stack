@@ -61,7 +61,7 @@ export const ExportDialog = ({ isOpen, onClose, filter }: ExportDialogProps): JS
             </RadioGroup>
           </div>
 
-          {Object.keys(filter).length > 0 && (
+          {Object.keys(filter as Record<string, unknown>).length > 0 && (
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <Text size="sm" tone="muted">
                 Active filters will be applied to the export.

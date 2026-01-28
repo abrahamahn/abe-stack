@@ -23,21 +23,36 @@ import type { JSX } from 'react';
 // Component
 // ============================================================================
 
+interface SecurityEventsFilterLocal {
+  eventType?: string;
+  severity?: string;
+  email?: string;
+  ipAddress?: string;
+  startDate?: string;
+  endDate?: string;
+  userId?: string;
+}
+
+interface PaginationLocal {
+  page: number;
+  limit: number;
+}
+
 export const SecurityEventsPage = (): JSX.Element => {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const {
-    data: eventsData,
-    isLoading: eventsLoading,
-    filter,
-    pagination,
-    setFilter,
-    setPage,
-    refetch: refetchEvents,
-  } = useSecurityEvents();
+  const eventsResult = useSecurityEvents();
+  const eventsData = eventsResult.data;
+  const eventsLoading = eventsResult.isLoading;
+  const filter = eventsResult.filter as SecurityEventsFilterLocal;
+  const pagination = eventsResult.pagination as PaginationLocal;
+  const { setFilter, setPage, refetch: refetchEvents } = eventsResult;
 
-  const { data: metricsData, isLoading: metricsLoading, period, setPeriod } = useSecurityMetrics();
+  const metricsResult = useSecurityMetrics();
+  const metricsData = metricsResult.data;
+  const metricsLoading = metricsResult.isLoading;
+  const { period, setPeriod } = metricsResult;
 
   const handlePeriodChange = useCallback(
     (value: string) => {

@@ -1,5 +1,5 @@
 // packages/core/src/shared/pagination/cursor.ts
-import type { SortOrder } from '@abe-stack/contracts/pagination';
+import type { SortOrder } from '@abe-stack/contracts';
 
 /**
  * Cursor data structure for encoding pagination state

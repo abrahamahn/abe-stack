@@ -110,7 +110,7 @@ export const BILLING_EVENT_TYPES = [
 export interface PlanFeature {
   name: string;
   included: boolean;
-  description?: string;
+  description?: string | undefined;
 }
 
 /**

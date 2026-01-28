@@ -9,7 +9,7 @@
  */
 
 
-import { OAUTH_PROVIDERS, tokenStore, type OAuthConnection, type OAuthProvider } from '@abe-stack/core';
+import { OAUTH_PROVIDERS, tokenStore } from '@abe-stack/core';
 import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/sdk';
 import { Button, Card, Dialog, PageContainer } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
@@ -18,11 +18,23 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 
 // ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+type OAuthProviderLocal = 'google' | 'github' | 'apple';
+
+interface OAuthConnectionLocal {
+  provider: OAuthProviderLocal;
+  providerEmail?: string | null;
+  connectedAt: Date;
+}
+
+// ============================================================================
 // Provider Display Config
 // ============================================================================
 
 const PROVIDER_DISPLAY: Record<
-  OAuthProvider,
+  OAuthProviderLocal,
   { label: string; color: string; icon: ReactElement }
 > = {
   google: {
@@ -75,12 +87,15 @@ const PROVIDER_DISPLAY: Record<
 
 export const ConnectedAccountsPage = (): ReactElement => {
   const { config } = useClientEnvironment();
-  const [disconnectTarget, setDisconnectTarget] = useState<OAuthConnection | null>(null);
+  const [disconnectTarget, setDisconnectTarget] = useState<OAuthConnectionLocal | null>(null);
 
   const clientConfig = useMemo(
     () => ({
       baseUrl: config.apiUrl,
-      getToken: (): string | null => tokenStore.get(),
+      getToken: (): string | null => {
+        const token = tokenStore.get();
+        return typeof token === 'string' ? token : null;
+      },
     }),
     [config.apiUrl],
   );
@@ -101,8 +116,9 @@ export const ConnectedAccountsPage = (): ReactElement => {
 
   // Build a map of connected providers
   const connectedProviderMap = useMemo(() => {
-    const map = new Map<OAuthProvider, OAuthConnection>();
-    for (const conn of connections) {
+    const map = new Map<OAuthProviderLocal, OAuthConnectionLocal>();
+    const typedConnections = connections as OAuthConnectionLocal[];
+    for (const conn of typedConnections) {
       map.set(conn.provider, conn);
     }
     return map;
@@ -110,7 +126,7 @@ export const ConnectedAccountsPage = (): ReactElement => {
 
   // Handlers
   const handleConnect = useCallback(
-    (provider: OAuthProvider): void => {
+    (provider: OAuthProviderLocal): void => {
       // For linking, we need to use the link endpoint which requires auth
       // The link endpoint is POST /api/auth/oauth/:provider/link which returns a URL
       // However, for simplicity, we'll redirect to the main OAuth URL
@@ -121,7 +137,7 @@ export const ConnectedAccountsPage = (): ReactElement => {
     [config.apiUrl],
   );
 
-  const handleDisconnect = useCallback((connection: OAuthConnection): void => {
+  const handleDisconnect = useCallback((connection: OAuthConnectionLocal): void => {
     setDisconnectTarget(connection);
   }, []);
 
@@ -129,7 +145,8 @@ export const ConnectedAccountsPage = (): ReactElement => {
     if (disconnectTarget === null) return;
 
     try {
-      await unlink(disconnectTarget.provider);
+      const provider = disconnectTarget.provider;
+      await unlink(provider);
       setDisconnectTarget(null);
     } catch {
       // Error is handled by the hook
@@ -162,8 +179,8 @@ export const ConnectedAccountsPage = (): ReactElement => {
         </Card>
       ) : (
         <div className="connected-accounts-list">
-          {OAUTH_PROVIDERS.map((provider) => {
-            const isEnabled = enabledProviders.includes(provider);
+          {([...OAUTH_PROVIDERS] as OAuthProviderLocal[]).map((provider: OAuthProviderLocal) => {
+            const isEnabled = ([...enabledProviders] as OAuthProviderLocal[]).includes(provider);
             const connection = connectedProviderMap.get(provider);
             const display = PROVIDER_DISPLAY[provider];
 
@@ -181,7 +198,7 @@ export const ConnectedAccountsPage = (): ReactElement => {
                         {connection !== undefined ? (
                           <span className="connected-account-email">
                             {connection.providerEmail ?? 'Connected'} &middot; Since{' '}
-                            {formatDate(connection.connectedAt)}
+                            {formatDate(new Date(connection.connectedAt))}
                           </span>
                         ) : (
                           <span className="connected-account-status">Not connected</span>

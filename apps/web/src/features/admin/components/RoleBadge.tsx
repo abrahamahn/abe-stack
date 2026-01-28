@@ -7,14 +7,15 @@
 
 import { Badge } from '@abe-stack/ui';
 
-import type { UserRole } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
 export interface RoleBadgeProps {
-  role: UserRole;
+  role: UserRoleLocal;
 }
 
-function getRoleTone(role: UserRole): 'info' | 'success' | 'danger' | 'warning' {
+function getRoleTone(role: UserRoleLocal): 'info' | 'success' | 'danger' | 'warning' {
   switch (role) {
     case 'admin':
       return 'danger';

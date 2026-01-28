@@ -6,5 +6,5 @@ import { clientConfig } from '@/config';
 
 export const api: ApiClient = createApiClient({
   baseUrl: clientConfig.apiUrl,
-  getToken: () => tokenStore.get(),
+  getToken: (): string | null => tokenStore.get(),
 });

@@ -6,24 +6,39 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { JobDetails } from '@abe-stack/core';
-
 // ============================================================================
 // Types
 // ============================================================================
+
+type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+
+interface JobDetailsLocal {
+  id: string;
+  name: string;
+  status: JobStatusLocal;
+  createdAt: string;
+  scheduledAt: string;
+  completedAt: string | null;
+  durationMs: number | null;
+  attempts: number;
+  maxAttempts: number;
+  args: unknown;
+  error: { name: string; message: string; stack?: string } | null;
+  deadLetterReason?: string | null;
+}
 
 export interface UseJobDetailsOptions {
   enabled?: boolean;
 }
 
 export interface UseJobDetailsResult {
-  data: JobDetails | undefined;
+  data: JobDetailsLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -44,16 +59,17 @@ export function useJobDetails(
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
-  const queryResult: UseQueryResult<JobDetails> = useQuery({
+  const queryResult = useQuery<JobDetailsLocal>({
     queryKey: ['job', jobId],
-    queryFn: async () => {
+    queryFn: async (): Promise<JobDetailsLocal> => {
       if (jobId === undefined || jobId.length === 0) throw new Error('Job ID is required');
-      return adminApi.getJobDetails(jobId);
+      const result = await adminApi.getJobDetails(jobId);
+      return result as JobDetailsLocal;
     },
     enabled: options.enabled !== false && jobId !== undefined && jobId.length > 0,
   });

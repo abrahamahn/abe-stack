@@ -57,7 +57,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
         return reply.status(400).send({ error: 'Missing stripe-signature header' });
       }
 
-      if (!ctx.config.billing.stripe.secretKey) {
+      if (ctx.config.billing.stripe.secretKey === '') {
         return reply.status(500).send({ error: 'Stripe not configured' });
       }
 
@@ -126,7 +126,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
         transmissionSig,
       });
 
-      if (!ctx.config.billing.paypal.clientId) {
+      if (ctx.config.billing.paypal.clientId === '') {
         return reply.status(500).send({ error: 'PayPal not configured' });
       }
 
