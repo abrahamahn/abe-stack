@@ -7,15 +7,26 @@
 
 import { Badge, Button, Card } from '@abe-stack/ui';
 
-import type { Session } from '../api';
 import type { ReactElement } from 'react';
+
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface SessionLocal {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  isCurrent: boolean;
+}
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface SessionCardProps {
-  session: Session;
+  session: SessionLocal;
   onRevoke: () => void;
   isRevoking?: boolean;
 }

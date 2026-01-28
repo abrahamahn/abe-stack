@@ -6,20 +6,35 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { JobListResponse, JobStatus } from '@abe-stack/core';
-
 // ============================================================================
 // Types
 // ============================================================================
 
+type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+
+interface JobDetailsLocal {
+  id: string;
+  name: string;
+  status: JobStatusLocal;
+  createdAt: string;
+  attempts: number;
+  maxAttempts: number;
+}
+
+interface JobListResponseLocal {
+  data: JobDetailsLocal[];
+  page: number;
+  totalPages: number;
+}
+
 export interface JobsFilter {
-  status?: JobStatus;
+  status?: JobStatusLocal;
   name?: string;
 }
 
@@ -37,14 +52,14 @@ export interface UseJobsListOptions {
 }
 
 export interface UseJobsListResult {
-  data: JobListResponse | undefined;
+  data: JobListResponseLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
   setFilter: (filter: JobsFilter) => void;
   setPage: (page: number) => void;
-  setStatus: (status: JobStatus | undefined) => void;
+  setStatus: (status: JobStatusLocal | undefined) => void;
   filter: JobsFilter;
   pagination: JobsPagination;
 }
@@ -67,17 +82,17 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
   const queryKey = useMemo(() => ['jobs', filter, pagination], [filter, pagination]);
 
-  const queryResult: UseQueryResult<JobListResponse> = useQuery({
+  const queryResult = useQuery<JobListResponseLocal>({
     queryKey,
-    queryFn: async () => {
-      return adminApi.listJobs({
+    queryFn: async (): Promise<JobListResponseLocal> => {
+      const result = await adminApi.listJobs({
         ...(filter.status !== undefined && { status: filter.status }),
         ...(filter.name !== undefined && { name: filter.name }),
         page: pagination.page,
@@ -85,6 +100,7 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
         sortBy: pagination.sortBy,
         sortOrder: pagination.sortOrder,
       });
+      return result as JobListResponseLocal;
     },
     enabled: options.enabled !== false,
   });
@@ -99,7 +115,7 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
 
-  const setStatus = useCallback((status: JobStatus | undefined) => {
+  const setStatus = useCallback((status: JobStatusLocal | undefined) => {
     setFilter((prev) => ({ ...prev, ...(status !== undefined && { status }) }));
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);

@@ -6,11 +6,21 @@ import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface UserLocal {
+  role?: string;
+}
+
 export const ConfirmEmailPage = (): ReactElement => {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
-  const { verifyEmail, user } = useAuth();
+  const authResult = useAuth();
+  const { verifyEmail } = authResult;
+  const user = authResult.user as UserLocal | null;
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');

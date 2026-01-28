@@ -17,20 +17,31 @@ import {
   SessionsList,
 } from '../components';
 
-import type { User } from '../api';
+// ============================================================================
+// Types
+// ============================================================================
+
+interface UserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  role: 'user' | 'admin' | 'moderator';
+  createdAt: string;
+}
 
 // ============================================================================
 // Tab Content Components
 // ============================================================================
 
-const ProfileTab = ({ user }: { user: User }): ReactElement => {
+const ProfileTab = ({ user }: { user: UserLocal }): ReactElement => {
   return (
     <div className="space-y-6">
       <div>
         <Heading as="h3" size="md" className="mb-4">
           Avatar
         </Heading>
-        <AvatarUpload currentAvatarUrl={user.avatarUrl} userName={user.name} />
+        <AvatarUpload currentAvatarUrl={user.avatarUrl ?? ''} userName={user.name ?? ''} />
       </div>
 
       <div className="border-t pt-6">
@@ -106,14 +117,9 @@ export const SettingsPage = (): ReactElement => {
   // Fetch current user
   const apiBaseUrl =
     typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
-  const {
-    data: user,
-    status,
-    error,
-    refetch,
-  } = useQuery<User>({
+  const queryResult = useQuery<UserLocal>({
     queryKey: ['user', 'me'],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserLocal> => {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`${apiBaseUrl}/api/users/me`, {
         headers: {
@@ -126,10 +132,13 @@ export const SettingsPage = (): ReactElement => {
         throw new Error('Failed to fetch user');
       }
 
-      const data = (await response.json()) as User;
+      const data = (await response.json()) as UserLocal;
       return data;
     },
   });
+
+  const user = queryResult.data;
+  const { status, error, refetch } = queryResult;
 
   // Build tabs
   const tabs = useMemo(

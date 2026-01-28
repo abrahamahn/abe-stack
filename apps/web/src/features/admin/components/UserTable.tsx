@@ -22,11 +22,28 @@ import {
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
-import type { AdminUser, AdminUserListResponse } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  lockedUntil: string | null;
+  createdAt: string;
+}
+
+interface AdminUserListResponseLocal {
+  data: AdminUserLocal[];
+  total: number;
+  totalPages: number;
+}
+
 export interface UserTableProps {
-  data: AdminUserListResponse | undefined;
+  data: AdminUserListResponseLocal | undefined;
   isLoading: boolean;
   page: number;
   onPageChange: (page: number) => void;
@@ -39,7 +56,7 @@ function formatDate(dateString: string): string {
 export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProps): JSX.Element => {
   const navigate = useNavigate();
 
-  const handleRowClick = (user: AdminUser): void => {
+  const handleRowClick = (user: AdminUserLocal): void => {
     navigate(`/admin/users/${user.id}`);
   };
 
@@ -83,7 +100,7 @@ export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProp
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.data.map((user: AdminUser) => (
+          {data.data.map((user: AdminUserLocal) => (
             <TableRow
               key={user.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"

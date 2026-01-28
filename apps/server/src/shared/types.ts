@@ -7,9 +7,9 @@ import type {
   EmailService,
   NotificationService,
   StorageService as StorageProvider,
+  SubscriptionManager,
   UserRole as CoreUserRole,
 } from '@abe-stack/core';
-import type { SubscriptionManager } from '@abe-stack/core/pubsub';
 import type { DbClient, Repositories } from '@data/database';
 import type { FastifyBaseLogger } from 'fastify';
 

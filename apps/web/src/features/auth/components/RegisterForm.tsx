@@ -6,12 +6,34 @@ import { useState } from 'react';
 import { OAuthButtons } from './OAuthButtons';
 
 import type { AuthMode } from './AuthForms';
-import type { RegisterRequest, RegisterResponse, ResendVerificationRequest } from '@abe-stack/core';
 import type { ChangeEvent, ReactElement } from 'react';
 
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface RegisterRequestLocal {
+  email: string;
+  password: string;
+  name?: string;
+}
+
+interface RegisterResponseLocal {
+  email: string;
+  message: string;
+}
+
+interface ResendVerificationRequestLocal {
+  email: string;
+}
+
+// ============================================================================
+// Types
+// ============================================================================
+
 export interface RegisterFormProps {
-  onRegister?: (data: RegisterRequest) => Promise<RegisterResponse>;
-  onResendVerification?: (data: ResendVerificationRequest) => Promise<void>;
+  onRegister?: (data: RegisterRequestLocal) => Promise<RegisterResponseLocal>;
+  onResendVerification?: (data: ResendVerificationRequestLocal) => Promise<void>;
   onSuccess?: () => void;
   onModeChange?: (mode: AuthMode) => void;
   isLoading?: boolean;
@@ -28,7 +50,7 @@ export const RegisterForm = ({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [registrationResult, setRegistrationResult] = useState<RegisterResponse | null>(null);
+  const [registrationResult, setRegistrationResult] = useState<RegisterResponseLocal | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const { cooldown, isOnCooldown, startCooldown } = useResendCooldown();
@@ -38,7 +60,7 @@ export const RegisterForm = ({
     if (onRegister === undefined) return;
 
     try {
-      const result = await onRegister({
+      const result: RegisterResponseLocal = await onRegister({
         email,
         password,
         ...(name.length > 0 && { name }),
@@ -61,7 +83,8 @@ export const RegisterForm = ({
     setResendLoading(true);
     setResendMessage(null);
     try {
-      await onResendVerification({ email: registrationResult.email });
+      const resultEmail: string = registrationResult.email;
+      await onResendVerification({ email: resultEmail });
       setResendMessage('Verification email resent! Check your inbox.');
       startCooldown();
     } catch {

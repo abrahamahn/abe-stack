@@ -19,17 +19,36 @@ import {
   useNavigate,
 } from '@abe-stack/ui';
 
-import type { SecurityEvent, SecurityEventsListResponse, PaginationOptions } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface SecurityEventLocal {
+  id: string;
+  createdAt: string;
+  eventType: string;
+  severity: string;
+  email?: string | null;
+  ipAddress?: string | null;
+}
+
+interface SecurityEventsListResponseLocal {
+  data: SecurityEventLocal[];
+  total: number;
+  totalPages: number;
+}
+
+interface PaginationOptionsLocal {
+  page: number;
+  limit: number;
+}
+
 export interface SecurityEventsTableProps {
-  data: SecurityEventsListResponse | undefined;
+  data: SecurityEventsListResponseLocal | undefined;
   isLoading: boolean;
-  pagination: PaginationOptions;
+  pagination: PaginationOptionsLocal;
   onPageChange: (page: number) => void;
 }
 
@@ -72,7 +91,7 @@ export const SecurityEventsTable = ({
 }: SecurityEventsTableProps): JSX.Element => {
   const navigate = useNavigate();
 
-  const handleRowClick = (event: SecurityEvent): void => {
+  const handleRowClick = (event: SecurityEventLocal): void => {
     navigate(`/admin/security/${event.id}`);
   };
 

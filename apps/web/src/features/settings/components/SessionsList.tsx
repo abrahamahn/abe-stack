@@ -13,6 +13,18 @@ import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
 import { SessionCard } from './SessionCard';
 
 // ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface SessionLocal {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  isCurrent: boolean;
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -64,7 +76,8 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
   };
 
   const handleRevokeAll = (): void => {
-    const otherSessions = sessions.filter((s) => !s.isCurrent);
+    const typedSessions = sessions as SessionLocal[];
+    const otherSessions = typedSessions.filter((s: SessionLocal) => !s.isCurrent);
     if (otherSessions.length === 0) {
       return;
     }
@@ -94,8 +107,9 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
     );
   }
 
-  const otherSessions = sessions.filter((s) => !s.isCurrent);
-  const currentSession = sessions.find((s) => s.isCurrent);
+  const allSessions = sessions as SessionLocal[];
+  const otherSessions: SessionLocal[] = allSessions.filter((s: SessionLocal) => !s.isCurrent);
+  const currentSession: SessionLocal | undefined = allSessions.find((s: SessionLocal) => s.isCurrent);
 
   return (
     <div className="space-y-4">
@@ -130,7 +144,7 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
             </div>
 
             <div className="space-y-3">
-              {otherSessions.map((session) => (
+              {otherSessions.map((session: SessionLocal) => (
                 <SessionCard
                   key={session.id}
                   session={session}

@@ -11,8 +11,16 @@ import { useState } from 'react';
 import { JobDetailsPanel, JobsTable, QueueStatsCard } from '../components';
 import { useJobActions, useJobDetails, useJobsList, useQueueStats } from '../hooks';
 
-import type { JobDetails } from '@abe-stack/contracts';
 import type { JSX } from 'react';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+// Minimal type for job click handler - only needs id
+interface JobClickTarget {
+  id: string;
+}
 
 // ============================================================================
 // Component
@@ -33,7 +41,7 @@ export const JobMonitorPage = (): JSX.Element => {
   // Job actions
   const { retryJob, cancelJob } = useJobActions();
 
-  const handleJobClick = (job: JobDetails): void => {
+  const handleJobClick = (job: JobClickTarget): void => {
     setSelectedJobId(job.id);
   };
 

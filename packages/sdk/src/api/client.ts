@@ -63,7 +63,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
 
     const token = config.getToken?.();
     if (token !== null && token !== undefined) {
-      addAuthHeader(headers, token);
+      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(headers, token);
     }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
@@ -79,7 +79,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       // Network error (offline, DNS failure, etc.)
       const errorMessage = `Failed to fetch ${options?.method ?? 'GET'} ${path}`;
       const originalError = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(errorMessage, originalError);
+      throw new NetworkError(errorMessage, originalError) as Error;
     }
 
     const data = (await response.json().catch((_parseError: unknown) => {
@@ -164,17 +164,20 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     async unlinkOAuthProvider(provider: OAuthProvider): Promise<OAuthUnlinkResponse> {
       // OAuthProvider is already a string literal union type
-      return request<OAuthUnlinkResponse>(`/auth/oauth/${provider}/unlink`, {
+      const providerStr = provider as string;
+      return request<OAuthUnlinkResponse>(`/auth/oauth/${providerStr}/unlink`, {
         method: 'DELETE',
       });
     },
     getOAuthLoginUrl(provider: OAuthProvider): string {
       // This returns a URL the browser should navigate to (redirect)
-      return `${baseUrl}${API_PREFIX}/auth/oauth/${provider}`;
+      const providerStr = provider as string;
+      return `${baseUrl}${API_PREFIX}/auth/oauth/${providerStr}`;
     },
     getOAuthLinkUrl(provider: OAuthProvider): string {
       // This returns the link initiation endpoint - must be called with auth
-      return `${baseUrl}${API_PREFIX}/auth/oauth/${provider}/link`;
+      const providerStr = provider as string;
+      return `${baseUrl}${API_PREFIX}/auth/oauth/${providerStr}/link`;
     },
   };
 }

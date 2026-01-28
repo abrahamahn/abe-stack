@@ -8,7 +8,6 @@ import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/
 import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
-import type { Plan } from '@abe-stack/core';
 import type { ReactElement } from 'react';
 
 // ============================================================================
@@ -21,13 +20,16 @@ export const PricingPage = (): ReactElement => {
 
   const clientConfig: BillingClientConfig = {
     baseUrl: config.apiUrl,
-    getToken: (): string | null => tokenStore.get(),
+    getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
   };
 
-  const { plans, isLoading: plansLoading, error: plansError } = usePlans(clientConfig);
-  const { subscription, createCheckout, isActing } = useSubscription(clientConfig);
+  const plansResult = usePlans(clientConfig);
+  const { plans, isLoading: plansLoading, error: plansError } = plansResult;
 
-  const handleSelectPlan = async (plan: Plan): Promise<void> => {
+  const subscriptionResult = useSubscription(clientConfig);
+  const { subscription, createCheckout, isActing } = subscriptionResult;
+
+  const handleSelectPlan = async (plan: { id: string }): Promise<void> => {
     // If user is already subscribed to this plan, go to billing settings
     if (subscription?.planId === plan.id) {
       navigate('/settings/billing');
@@ -43,13 +45,13 @@ export const PricingPage = (): ReactElement => {
     }
   };
 
-  const getActionLabel = (_plan: Plan, isCurrent: boolean): string => {
+  const getActionLabel = (_plan: { id: string }, isCurrent: boolean): string => {
     if (isCurrent) return 'Current Plan';
     if (subscription === null) return 'Get Started';
     return 'Switch to This Plan';
   };
 
-  const getBadge = (plan: Plan): string | undefined => {
+  const getBadge = (plan: { name: string }): string | undefined => {
     // Example: Mark "Pro" plan as most popular
     if (plan.name.toLowerCase().includes('pro')) {
       return 'Most Popular';

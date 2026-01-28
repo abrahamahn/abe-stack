@@ -24,8 +24,8 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
     if (mainWindow === null) return null;
 
     const result = await dialog.showOpenDialog(mainWindow, {
-      title: options.title,
-      filters: options.filters,
+      ...(options.title !== undefined && { title: options.title }),
+      ...(options.filters !== undefined && { filters: options.filters }),
       properties: options.multiple === true ? ['openFile', 'multiSelections'] : ['openFile'],
     });
 
@@ -38,9 +38,9 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
     if (mainWindow === null) return null;
 
     const result = await dialog.showSaveDialog(mainWindow, {
-      title: options.title,
-      defaultPath: options.defaultPath,
-      filters: options.filters,
+      ...(options.title !== undefined && { title: options.title }),
+      ...(options.defaultPath !== undefined && { defaultPath: options.defaultPath }),
+      ...(options.filters !== undefined && { filters: options.filters }),
     });
 
     return result.canceled ? null : result.filePath;

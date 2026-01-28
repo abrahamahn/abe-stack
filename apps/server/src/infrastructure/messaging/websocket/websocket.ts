@@ -5,7 +5,7 @@
  * Manual WebSocket handling using ws directly. Replaces @fastify/websocket.
  */
 
-import { parseCookies } from '@abe-stack/core/http';
+import { parseCookies } from '@abe-stack/core';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
 import { verifyToken } from '@auth/utils/jwt';
 import { validateCsrfToken } from '@http';

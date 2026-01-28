@@ -110,7 +110,7 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
     headers.set('Content-Type', 'application/json');
 
     if (requiresAuth) {
-      addAuthHeader(headers, config.getToken?.());
+      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(headers, config.getToken?.());
     }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
@@ -124,7 +124,7 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
       });
     } catch (error) {
       const cause = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause);
+      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
     }
 
     const data = (await response.json().catch(() => ({}))) as ApiErrorBody &

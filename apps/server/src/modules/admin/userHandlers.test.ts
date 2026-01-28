@@ -22,14 +22,16 @@ interface AdminUser {
 // Mocks - use relative path to match vitest module resolution
 // ============================================================================
 
-// Create a shared error class that will be used in the mock
-// This must be defined BEFORE vi.mock to ensure hoisting works correctly
-class MockUserNotFoundError extends Error {
-  constructor(message: string = 'User not found') {
-    super(message);
-    this.name = 'UserNotFoundError';
+// Use vi.hoisted to ensure the mock class is defined before vi.mock runs
+const { MockUserNotFoundError } = vi.hoisted(() => {
+  class MockUserNotFoundError extends Error {
+    constructor(message: string = 'User not found') {
+      super(message);
+      this.name = 'UserNotFoundError';
+    }
   }
-}
+  return { MockUserNotFoundError };
+});
 
 // Mock @abe-stack/core to export our MockUserNotFoundError
 // This ensures the handler's instanceof check works with our mock
@@ -204,10 +206,7 @@ describe('Admin User Handlers', () => {
       expect('body' in result && 'id' in result.body).toBe(true);
     });
 
-    test('should return 500 when user not found (instanceof check fails across ESM boundaries)', async () => {
-      // Note: In Vitest 4.x with ESM, instanceof checks across module boundaries fail
-      // The handler catches UserNotFoundError via instanceof, but our mock error doesn't pass that check
-      // So it falls through to the 500 error handler instead of returning 404
+    test('should return 404 when user not found', async () => {
       vi.mocked(userService.getUserById).mockRejectedValue(
         new MockUserNotFoundError('User not found'),
       );
@@ -215,8 +214,7 @@ describe('Admin User Handlers', () => {
       const req = createMockRequest({}, { id: 'nonexistent' });
       const result = await handleGetUser(mockCtx, undefined, req, createMockReply());
 
-      // Due to ESM module boundary issues, instanceof fails and we get 500 instead of 404
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -244,8 +242,7 @@ describe('Admin User Handlers', () => {
       expect('body' in result && 'user' in result.body).toBe(true);
     });
 
-    test('should return 500 when user not found (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 when user not found', async () => {
       vi.mocked(userService.updateUser).mockRejectedValue(
         new MockUserNotFoundError('User not found'),
       );
@@ -253,7 +250,7 @@ describe('Admin User Handlers', () => {
       const req = createMockRequest({}, { id: 'nonexistent' });
       const result = await handleUpdateUser(mockCtx, { name: 'Test' }, req, createMockReply());
 
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -291,8 +288,7 @@ describe('Admin User Handlers', () => {
       expect(result.status).toBe(400);
     });
 
-    test('should return 500 when user not found (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 when user not found', async () => {
       vi.mocked(userService.lockUser).mockRejectedValue(
         new MockUserNotFoundError('User not found'),
       );
@@ -300,7 +296,7 @@ describe('Admin User Handlers', () => {
       const req = createMockRequest({}, { id: 'nonexistent' });
       const result = await handleLockUser(mockCtx, { reason: 'Test' }, req, createMockReply());
 
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -328,8 +324,7 @@ describe('Admin User Handlers', () => {
       expect('body' in result && 'user' in result.body).toBe(true);
     });
 
-    test('should return 500 when user not found (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 when user not found', async () => {
       vi.mocked(userService.unlockUser).mockRejectedValue(
         new MockUserNotFoundError('User not found'),
       );
@@ -342,7 +337,7 @@ describe('Admin User Handlers', () => {
         createMockReply(),
       );
 
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {

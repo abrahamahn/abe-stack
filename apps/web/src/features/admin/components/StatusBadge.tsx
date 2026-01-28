@@ -5,17 +5,23 @@
  * Displays a user's status (active, locked, unverified) with appropriate styling.
  */
 
-import type { AdminUser, UserStatus } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserStatusLocal = 'active' | 'locked' | 'unverified';
+
+interface AdminUserLocal {
+  lockedUntil: string | null;
+  emailVerified: boolean;
+}
+
 export interface StatusBadgeProps {
-  status: UserStatus;
+  status: UserStatusLocal;
 }
 
 /**
  * Determine user status from AdminUser data
  */
-export function getUserStatus(user: AdminUser): UserStatus {
+export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
   const now = new Date();
 
   // Check if locked
@@ -35,7 +41,7 @@ export function getUserStatus(user: AdminUser): UserStatus {
   return 'active';
 }
 
-function getStatusStyles(status: UserStatus): string {
+function getStatusStyles(status: UserStatusLocal): string {
   switch (status) {
     case 'active':
       return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -48,7 +54,7 @@ function getStatusStyles(status: UserStatus): string {
   }
 }
 
-function getStatusLabel(status: UserStatus): string {
+function getStatusLabel(status: UserStatusLocal): string {
   switch (status) {
     case 'active':
       return 'Active';

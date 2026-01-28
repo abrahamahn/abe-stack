@@ -8,12 +8,22 @@
 import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
-import type { AdminUserListFilters, UserRole, UserStatus } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+type UserStatusLocal = 'active' | 'locked' | 'unverified';
+
+interface AdminUserListFiltersLocal {
+  search?: string;
+  role?: UserRoleLocal;
+  status?: UserStatusLocal;
+  sortBy?: 'email' | 'name' | 'createdAt' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface UserFiltersProps {
-  filters: AdminUserListFilters;
-  onFiltersChange: (filters: AdminUserListFilters) => void;
+  filters: AdminUserListFiltersLocal;
+  onFiltersChange: (filters: AdminUserListFiltersLocal) => void;
   isLoading?: boolean;
 }
 
@@ -55,14 +65,14 @@ export const UserFilters = ({
 
   const handleRoleChange = useCallback(
     (value: string) => {
-      onFiltersChange({ ...(value.length > 0 && { role: value as UserRole }) });
+      onFiltersChange({ ...(value.length > 0 && { role: value as UserRoleLocal }) });
     },
     [onFiltersChange],
   );
 
   const handleStatusChange = useCallback(
     (value: string) => {
-      onFiltersChange({ ...(value.length > 0 && { status: value as UserStatus }) });
+      onFiltersChange({ ...(value.length > 0 && { status: value as UserStatusLocal }) });
     },
     [onFiltersChange],
   );
@@ -70,7 +80,7 @@ export const UserFilters = ({
   const handleSortChange = useCallback(
     (value: string) => {
       if (value.length > 0) {
-        const newFilters: AdminUserListFilters = {
+        const newFilters: AdminUserListFiltersLocal = {
           ...filters,
           sortBy: value as 'email' | 'name' | 'createdAt' | 'updatedAt',
         };

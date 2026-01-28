@@ -9,10 +9,39 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { listUsers } from '../api';
 
-import type { AdminUser, AdminUserListFilters } from '@abe-stack/core';
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  lockedUntil: string | null;
+  createdAt: string;
+}
+
+interface AdminUserListFiltersLocal {
+  search?: string;
+  role?: UserRoleLocal;
+  status?: 'active' | 'locked' | 'unverified';
+  sortBy?: 'email' | 'name' | 'createdAt' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+interface AdminUserListResponseLocal {
+  data: AdminUserLocal[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
 
 export interface UseAdminUsersState {
-  users: AdminUser[];
+  users: AdminUserLocal[];
   total: number;
   page: number;
   totalPages: number;
@@ -23,13 +52,13 @@ export interface UseAdminUsersState {
 }
 
 export interface UseAdminUsersActions {
-  setFilters: (filters: AdminUserListFilters) => void;
+  setFilters: (filters: AdminUserListFiltersLocal) => void;
   setPage: (page: number) => void;
   refresh: () => Promise<void>;
 }
 
 export interface UseAdminUsersResult extends UseAdminUsersState, UseAdminUsersActions {
-  filters: AdminUserListFilters;
+  filters: AdminUserListFiltersLocal;
 }
 
 const DEFAULT_LIMIT = 20;
@@ -37,8 +66,8 @@ const DEFAULT_LIMIT = 20;
 /**
  * Hook for managing admin user listing
  */
-export function useAdminUsers(initialFilters: AdminUserListFilters = {}): UseAdminUsersResult {
-  const [filters, setFiltersState] = useState<AdminUserListFilters>({
+export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): UseAdminUsersResult {
+  const [filters, setFiltersState] = useState<AdminUserListFiltersLocal>({
     page: 1,
     limit: DEFAULT_LIMIT,
     sortBy: 'createdAt',
@@ -57,11 +86,11 @@ export function useAdminUsers(initialFilters: AdminUserListFilters = {}): UseAdm
     error: null,
   });
 
-  const fetchUsers = useCallback(async (currentFilters: AdminUserListFilters) => {
+  const fetchUsers = useCallback(async (currentFilters: AdminUserListFiltersLocal) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const result = await listUsers(currentFilters);
+      const result: AdminUserListResponseLocal = await listUsers(currentFilters) as AdminUserListResponseLocal;
       setState({
         users: result.data,
         total: result.total,
@@ -89,7 +118,7 @@ export function useAdminUsers(initialFilters: AdminUserListFilters = {}): UseAdm
     });
   }, [filters, fetchUsers]);
 
-  const setFilters = useCallback((newFilters: AdminUserListFilters) => {
+  const setFilters = useCallback((newFilters: AdminUserListFiltersLocal) => {
     setFiltersState((prev) => ({
       ...prev,
       ...newFilters,

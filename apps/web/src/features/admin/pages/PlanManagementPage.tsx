@@ -31,8 +31,54 @@ import {
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useState, useCallback } from 'react';
 
-import type { AdminPlan, CreatePlanRequest, PlanFeature, UpdatePlanRequest } from '@abe-stack/core';
 import type { ReactElement } from 'react';
+
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface PlanFeatureLocal {
+  name: string;
+  included: boolean;
+}
+
+interface AdminPlanLocal {
+  id: string;
+  name: string;
+  description: string | null;
+  interval: 'month' | 'year';
+  priceInCents: number;
+  currency: string;
+  trialDays: number;
+  isActive: boolean;
+  sortOrder: number;
+  features: PlanFeatureLocal[];
+  stripePriceId: string | null;
+}
+
+interface CreatePlanRequestLocal {
+  name: string;
+  description?: string;
+  interval: 'month' | 'year';
+  priceInCents: number;
+  currency: string;
+  trialDays: number;
+  isActive: boolean;
+  sortOrder: number;
+  features?: PlanFeatureLocal[];
+}
+
+interface UpdatePlanRequestLocal {
+  name?: string;
+  description?: string | null;
+  interval?: 'month' | 'year';
+  priceInCents?: number;
+  currency?: string;
+  trialDays?: number;
+  isActive?: boolean;
+  sortOrder?: number;
+  features?: PlanFeatureLocal[];
+}
 
 // ============================================================================
 // Types
@@ -47,7 +93,7 @@ interface PlanFormData {
   trialDays: number;
   isActive: boolean;
   sortOrder: number;
-  features: PlanFeature[];
+  features: PlanFeatureLocal[];
 }
 
 const defaultFormData: PlanFormData = {
@@ -92,7 +138,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
 
   const handleFeatureChange = (
     index: number,
-    field: keyof PlanFeature,
+    field: keyof PlanFeatureLocal,
     value: string | boolean,
   ): void => {
     const newFeatures = [...data.features];
@@ -275,7 +321,7 @@ export const PlanManagementPage = (): ReactElement => {
   const { config } = useClientEnvironment();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editPlan, setEditPlan] = useState<AdminPlan | null>(null);
+  const [editPlan, setEditPlan] = useState<AdminPlanLocal | null>(null);
   const [formData, setFormData] = useState<PlanFormData>(defaultFormData);
 
   const clientConfig: AdminBillingClientConfig = {
@@ -292,7 +338,7 @@ export const PlanManagementPage = (): ReactElement => {
     setCreateDialogOpen(true);
   }, []);
 
-  const handleOpenEdit = useCallback((plan: AdminPlan): void => {
+  const handleOpenEdit = useCallback((plan: AdminPlanLocal): void => {
     setFormData({
       name: plan.name,
       description: plan.description ?? '',
@@ -308,7 +354,7 @@ export const PlanManagementPage = (): ReactElement => {
   }, []);
 
   const handleCreate = useCallback(async (): Promise<void> => {
-    const request: CreatePlanRequest = {
+    const request: CreatePlanRequestLocal = {
       name: formData.name,
       ...(formData.description !== '' && { description: formData.description }),
       interval: formData.interval,
@@ -325,7 +371,7 @@ export const PlanManagementPage = (): ReactElement => {
 
   const handleUpdate = useCallback(async (): Promise<void> => {
     if (editPlan === null) return;
-    const request: UpdatePlanRequest = {
+    const request: UpdatePlanRequestLocal = {
       name: formData.name,
       description: formData.description !== '' ? formData.description : null,
       interval: formData.interval,
@@ -394,7 +440,7 @@ export const PlanManagementPage = (): ReactElement => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {plans.map((plan: AdminPlan) => (
+              {(plans as AdminPlanLocal[]).map((plan: AdminPlanLocal) => (
                 <TableRow key={plan.id}>
                   <TableCell>
                     <strong>{plan.name}</strong>

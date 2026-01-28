@@ -11,14 +11,35 @@ import { useCallback } from 'react';
 import { UserActionsMenu, UserDetailCard } from '../components';
 import { useAdminUser, useUserActions } from '../hooks';
 
-import type { UserRole } from '@abe-stack/core';
 import type { JSX } from 'react';
+
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
+  lockedUntil: string | null;
+  failedLoginAttempts: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ActionResultLocal {
+  message: string;
+  user: AdminUserLocal;
+}
 
 export const UserDetailPage = (): JSX.Element => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { user, isLoading, error: loadError, refresh, setUser } = useAdminUser(id ?? null);
+  const adminUserResult = useAdminUser(id ?? null);
+  const user = adminUserResult.user as AdminUserLocal | null;
+  const { isLoading, error: loadError, refresh, setUser } = adminUserResult;
   const {
     updateUserAction,
     lockUserAction,
@@ -31,12 +52,12 @@ export const UserDetailPage = (): JSX.Element => {
   } = useUserActions();
 
   const handleUpdate = useCallback(
-    async (data: { name?: string | null; role?: UserRole }) => {
+    async (data: { name?: string | null; role?: UserRoleLocal }) => {
       if (id === undefined || id.length === 0 || user === null) return;
 
       clearError();
-      const result = await updateUserAction(id, data);
-      if (result !== null) {
+      const result = (await updateUserAction(id, data)) as ActionResultLocal | null;
+      if (result?.user !== undefined) {
         setUser(result.user);
       }
     },
@@ -48,11 +69,11 @@ export const UserDetailPage = (): JSX.Element => {
       if (id === undefined || id.length === 0 || user === null) return;
 
       clearError();
-      const result = await lockUserAction(id, {
+      const result = (await lockUserAction(id, {
         reason,
         ...(durationMinutes !== undefined && { durationMinutes }),
-      });
-      if (result !== null) {
+      })) as ActionResultLocal | null;
+      if (result?.user !== undefined) {
         setUser(result.user);
       }
     },
@@ -64,8 +85,8 @@ export const UserDetailPage = (): JSX.Element => {
       if (id === undefined || id.length === 0 || user === null) return;
 
       clearError();
-      const result = await unlockUserAction(id, reason);
-      if (result !== null) {
+      const result = (await unlockUserAction(id, reason)) as ActionResultLocal | null;
+      if (result?.user !== undefined) {
         setUser(result.user);
       }
     },

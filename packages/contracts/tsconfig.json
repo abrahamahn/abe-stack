@@ -2,7 +2,7 @@
   "extends": "../../.config/tsconfig.node.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "types": ["node", "vitest/globals"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.contracts.tsbuildinfo"
   },

@@ -19,7 +19,9 @@ export const DemoPage = (): React.ReactElement => {
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const { user, isAuthenticated, logout } = useAuth();
+  const authResult = useAuth();
+  const user = authResult.user as { id?: string; email?: string; name?: string | null } | null;
+  const { isAuthenticated, logout } = authResult;
   const { isOpen: sidePeekOpen, peekPath: _peekPath, close: closeSidePeek } = useSidePeek();
 
   useDemoKeyboard({
