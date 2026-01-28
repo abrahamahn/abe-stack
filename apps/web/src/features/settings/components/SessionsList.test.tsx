@@ -164,12 +164,18 @@ describe('SessionsList', () => {
     });
 
     it('should refetch after successful revoke', () => {
+      // Capture the onSuccess callback passed to the hook
+      let capturedOnSuccess: (() => void) | undefined;
       vi.mocked(useRevokeSession).mockImplementation(({ onSuccess }) => {
-        if (onSuccess) onSuccess();
+        capturedOnSuccess = onSuccess;
         return { revokeSession: mockRevokeSession, isLoading: false, error: null };
       });
 
       render(<SessionsList />);
+
+      // Simulate successful revoke by calling the captured callback
+      expect(capturedOnSuccess).toBeDefined();
+      capturedOnSuccess?.();
       expect(mockRefetch).toHaveBeenCalled();
     });
   });

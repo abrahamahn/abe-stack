@@ -313,9 +313,7 @@ describe('handleAdminGetPlan', () => {
   });
 
   describe('when plan is not found', () => {
-    test('should return 500 (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
-      // for PlanNotFoundError imported from @abe-stack/core
+    test('should return 404 with not found message', async () => {
       const { getPlanById } = await import('./billingService');
       vi.mocked(getPlanById).mockRejectedValue(new PlanNotFoundError('nonexistent-plan'));
 
@@ -324,8 +322,8 @@ describe('handleAdminGetPlan', () => {
         id: 'nonexistent-plan',
       });
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 404
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
+      expect('body' in result && result.body.message).toBe('Plan not found: nonexistent-plan');
     });
   });
 
@@ -555,8 +553,7 @@ describe('handleAdminUpdatePlan', () => {
   });
 
   describe('when plan is not found', () => {
-    test('should return 500 (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 with not found message', async () => {
       const { updatePlan } = await import('./billingService');
       vi.mocked(updatePlan).mockRejectedValue(new PlanNotFoundError('nonexistent-plan'));
 
@@ -568,8 +565,8 @@ describe('handleAdminUpdatePlan', () => {
         { id: 'nonexistent-plan' },
       );
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 404
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
+      expect('body' in result && result.body.message).toBe('Plan not found: nonexistent-plan');
     });
   });
 
@@ -663,8 +660,7 @@ describe('handleAdminSyncPlanToStripe', () => {
   });
 
   describe('when plan is not found', () => {
-    test('should return 500 (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 with not found message', async () => {
       const { syncPlanToStripe } = await import('./billingService');
       const { createBillingProvider } = await import('../../infrastructure/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
@@ -675,8 +671,8 @@ describe('handleAdminSyncPlanToStripe', () => {
         id: 'plan-123',
       });
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 404
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
+      expect('body' in result && result.body.message).toBe('Plan not found: plan-123');
     });
   });
 
@@ -695,8 +691,7 @@ describe('handleAdminSyncPlanToStripe', () => {
       });
 
       expect(result.status).toBe(500);
-      // Due to ESM issues, the error type isn't recognized and generic error message is returned
-      expect('body' in result && result.body.message).toBe('An error occurred processing your request');
+      expect('body' in result && result.body.message).toBe('Billing service is not configured');
     });
   });
 
@@ -752,8 +747,7 @@ describe('handleAdminDeactivatePlan', () => {
   });
 
   describe('when plan is not found', () => {
-    test('should return 500 (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 404 with not found message', async () => {
       const { deactivatePlan } = await import('./billingService');
       vi.mocked(deactivatePlan).mockRejectedValue(new PlanNotFoundError('nonexistent-plan'));
 
@@ -762,14 +756,13 @@ describe('handleAdminDeactivatePlan', () => {
         id: 'nonexistent-plan',
       });
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 404
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(404);
+      expect('body' in result && result.body.message).toBe('Plan not found: nonexistent-plan');
     });
   });
 
   describe('when plan has active subscriptions', () => {
-    test('should return 500 (instanceof check fails across ESM boundaries)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 400 with error message about active subscriptions', async () => {
       const { deactivatePlan } = await import('./billingService');
       vi.mocked(deactivatePlan).mockRejectedValue(
         new CannotDeactivatePlanWithActiveSubscriptionsError('plan-123', 5),
@@ -778,12 +771,13 @@ describe('handleAdminDeactivatePlan', () => {
       const req = createMockRequest();
       const result = await handleAdminDeactivatePlan(mockCtx, undefined, req, { id: 'plan-123' });
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 400
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(400);
+      expect('body' in result && result.body.message).toBe(
+        'Cannot deactivate plan plan-123: 5 active subscription(s) exist',
+      );
     });
 
-    test('should return 500 for subscription count error (instanceof fails)', async () => {
-      // Note: Due to ESM module boundary issues in Vitest 4.x, instanceof fails
+    test('should return 400 and include subscription count in error message', async () => {
       const { deactivatePlan } = await import('./billingService');
       const error = new CannotDeactivatePlanWithActiveSubscriptionsError('plan-123', 15);
       vi.mocked(deactivatePlan).mockRejectedValue(error);
@@ -791,8 +785,10 @@ describe('handleAdminDeactivatePlan', () => {
       const req = createMockRequest();
       const result = await handleAdminDeactivatePlan(mockCtx, undefined, req, { id: 'plan-123' });
 
-      // Due to ESM issues, instanceof fails and we get 500 instead of 400
-      expect(result.status).toBe(500);
+      expect(result.status).toBe(400);
+      expect('body' in result && result.body.message).toBe(
+        'Cannot deactivate plan plan-123: 15 active subscription(s) exist',
+      );
     });
   });
 
@@ -848,20 +844,18 @@ describe('Error Handling', () => {
       );
     });
 
-    test('should log PlanNotFoundError (instanceof fails across ESM boundaries)', async () => {
-      // Note: Due to ESM issues, instanceof fails so error IS logged
+    test('should not log PlanNotFoundError (handled error)', async () => {
       const { getPlanById } = await import('./billingService');
       vi.mocked(getPlanById).mockRejectedValue(new PlanNotFoundError('plan-123'));
 
       const req = createMockRequest();
       await handleAdminGetPlan(mockCtx, undefined, req, { id: 'plan-123' });
 
-      // ESM issue causes instanceof to fail, so error is logged
-      expect(mockCtx.log.error).toHaveBeenCalled();
+      // Handled errors should not be logged
+      expect(mockCtx.log.error).not.toHaveBeenCalled();
     });
 
-    test('should log CannotDeactivatePlanWithActiveSubscriptionsError (instanceof fails)', async () => {
-      // Note: Due to ESM issues, instanceof fails so error IS logged
+    test('should not log CannotDeactivatePlanWithActiveSubscriptionsError (handled error)', async () => {
       const { deactivatePlan } = await import('./billingService');
       vi.mocked(deactivatePlan).mockRejectedValue(
         new CannotDeactivatePlanWithActiveSubscriptionsError('plan-123', 3),
@@ -870,12 +864,11 @@ describe('Error Handling', () => {
       const req = createMockRequest();
       await handleAdminDeactivatePlan(mockCtx, undefined, req, { id: 'plan-123' });
 
-      // ESM issue causes instanceof to fail, so error is logged
-      expect(mockCtx.log.error).toHaveBeenCalled();
+      // Handled errors should not be logged
+      expect(mockCtx.log.error).not.toHaveBeenCalled();
     });
 
-    test('should log BillingProviderNotConfiguredError (instanceof fails)', async () => {
-      // Note: Due to ESM issues, instanceof fails so error IS logged
+    test('should not log BillingProviderNotConfiguredError (handled error)', async () => {
       const { syncPlanToStripe } = await import('./billingService');
       const { createBillingProvider } = await import('../../infrastructure/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
@@ -886,8 +879,8 @@ describe('Error Handling', () => {
       const req = createMockRequest();
       await handleAdminSyncPlanToStripe(mockCtx, undefined, req, { id: 'plan-123' });
 
-      // ESM issue causes instanceof to fail, so error is logged
-      expect(mockCtx.log.error).toHaveBeenCalled();
+      // Handled errors should not be logged
+      expect(mockCtx.log.error).not.toHaveBeenCalled();
     });
   });
 });

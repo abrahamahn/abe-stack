@@ -133,14 +133,44 @@ describe('AvatarUpload', () => {
     vi.spyOn(window, 'alert').mockImplementation(() => {});
     vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
-    // Mock FileReader
-    const mockFileReader = {
-      readAsDataURL: vi.fn(),
-      onload: null as ((e: ProgressEvent<FileReader>) => void) | null,
-      result: 'data:image/jpeg;base64,mockImageData',
-    };
+    // Mock FileReader - must trigger onload when readAsDataURL is called
+    class MockFileReader {
+      result: string | ArrayBuffer | null = 'data:image/jpeg;base64,mockImageData';
+      onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      onloadend: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      onloadstart: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      onprogress: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      onabort: ((this: FileReader, ev: ProgressEvent<FileReader>) => unknown) | null = null;
+      readyState: number = 0;
+      error: DOMException | null = null;
+      EMPTY = 0;
+      LOADING = 1;
+      DONE = 2;
 
-    vi.spyOn(window as Window, 'FileReader').mockImplementation(() => mockFileReader as FileReader);
+      readAsDataURL(_file: Blob): void {
+        // Simulate async file reading by calling onload in next tick
+        setTimeout(() => {
+          this.readyState = 2;
+          if (this.onload !== null) {
+            const event = { target: { result: this.result } } as ProgressEvent<FileReader>;
+            this.onload.call(this as unknown as FileReader, event);
+          }
+        }, 0);
+      }
+
+      readAsText(): void {}
+      readAsArrayBuffer(): void {}
+      readAsBinaryString(): void {}
+      abort(): void {}
+      addEventListener(): void {}
+      removeEventListener(): void {}
+      dispatchEvent(): boolean {
+        return true;
+      }
+    }
+
+    vi.stubGlobal('FileReader', MockFileReader);
   });
 
   // ============================================================================

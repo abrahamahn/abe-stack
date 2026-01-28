@@ -110,12 +110,6 @@ describe('PasswordChangeForm', () => {
       error: null,
       reset: mockReset,
     });
-
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   // ============================================================================
@@ -535,6 +529,7 @@ describe('PasswordChangeForm', () => {
     });
 
     it('should hide success message after 3 seconds', () => {
+      vi.useFakeTimers();
       vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
         if (onSuccess !== undefined) {
           onSuccess();
@@ -555,6 +550,7 @@ describe('PasswordChangeForm', () => {
       vi.advanceTimersByTime(3000);
 
       expect(screen.queryByText('Password changed successfully')).not.toBeInTheDocument();
+      vi.useRealTimers();
     });
 
     it('should handle undefined onSuccess prop', () => {

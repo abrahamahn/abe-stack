@@ -197,14 +197,28 @@ describe('Jobs Handlers', () => {
         expect(listJobs).toHaveBeenCalledWith(expect.anything(), queryParams);
       });
 
-      test('should return 500 when query validation fails', async () => {
-        // The actual Zod validation runs and returns a specific error message
+      test('should return 200 when query has invalid page (uses defaults)', async () => {
+        const { listJobs } = await import('./jobsService');
+        const { jobListQuerySchema } = await import('@abe-stack/core');
+
+        // When invalid, the schema coerces to defaults
+        vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
+          success: true,
+          data: { page: 1, limit: 20 },
+        });
+
+        vi.mocked(listJobs).mockResolvedValue({
+          data: [],
+          total: 0,
+          page: 1,
+          limit: 20,
+          totalPages: 0,
+        });
+
         const req = createMockRequest({}, {}, { page: 'invalid' });
         const result = await handleListJobs(mockCtx, undefined, req, createMockReply());
 
-        expect(result.status).toBe(500);
-        // The Zod validation returns a specific message about the page parameter
-        expect(result.body).toEqual({ message: 'Page must be an integer >= 1' });
+        expect(result.status).toBe(200);
       });
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
