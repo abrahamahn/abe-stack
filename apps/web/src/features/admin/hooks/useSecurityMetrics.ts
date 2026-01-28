@@ -6,18 +6,28 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { SecurityMetrics } from '@abe-stack/core';
-
 // ============================================================================
 // Types
 // ============================================================================
+
+interface SecurityMetricsLocal {
+  totalEvents: number;
+  criticalEvents: number;
+  highEvents: number;
+  mediumEvents: number;
+  tokenReuseCount: number;
+  accountLockedCount: number;
+  suspiciousLoginCount: number;
+  periodStart: string;
+  periodEnd: string;
+}
 
 export type MetricsPeriod = 'hour' | 'day' | 'week' | 'month';
 
@@ -27,7 +37,7 @@ export interface UseSecurityMetricsOptions {
 }
 
 export interface UseSecurityMetricsResult {
-  data: SecurityMetrics | undefined;
+  data: SecurityMetricsLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -50,17 +60,18 @@ export function useSecurityMetrics(
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
   const queryKey = useMemo(() => ['securityMetrics', period], [period]);
 
-  const queryResult: UseQueryResult<SecurityMetrics> = useQuery({
+  const queryResult = useQuery<SecurityMetricsLocal>({
     queryKey,
-    queryFn: async () => {
-      return adminApi.getSecurityMetrics(period);
+    queryFn: async (): Promise<SecurityMetricsLocal> => {
+      const result = await adminApi.getSecurityMetrics(period);
+      return result as SecurityMetricsLocal;
     },
     enabled: options.enabled !== false,
   });

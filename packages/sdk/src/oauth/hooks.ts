@@ -239,5 +239,6 @@ export function useOAuthConnections(clientConfig: ApiClientConfig): OAuthConnect
  */
 export function getOAuthLoginUrl(baseUrl: string, provider: OAuthProvider): string {
   const normalizedBase = baseUrl.replace(/\/+$/, '');
-  return `${normalizedBase}/api/auth/oauth/${provider}`;
+  const providerStr = provider as string;
+  return `${normalizedBase}/api/auth/oauth/${providerStr}`;
 }

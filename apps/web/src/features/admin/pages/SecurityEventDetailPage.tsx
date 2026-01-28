@@ -16,12 +16,26 @@ import type { JSX } from 'react';
 // Component
 // ============================================================================
 
+interface SecurityEventLocal {
+  id: string;
+  createdAt: string;
+  eventType: string;
+  severity: string;
+  userId?: string | null;
+  email?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
+
 export const SecurityEventDetailPage = (): JSX.Element => {
   const params = useParams();
   const id = params['id'];
   const navigate = useNavigate();
 
-  const { data: event, isLoading, isError, error } = useSecurityEvent(id);
+  const eventResult = useSecurityEvent(id);
+  const event = eventResult.data as SecurityEventLocal | undefined;
+  const { isLoading, isError, error } = eventResult;
 
   const handleBack = (): void => {
     navigate('/admin/security');

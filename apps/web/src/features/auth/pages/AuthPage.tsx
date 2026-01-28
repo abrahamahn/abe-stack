@@ -9,12 +9,21 @@ import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface UserLocal {
+  role?: string;
+}
+
 const VALID_MODES = ['login', 'register', 'forgot-password', 'reset-password'] as const;
 
 export const AuthPage = (): ReactElement => {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
+  const authResult = useAuth();
   const {
     login,
     register,
@@ -22,8 +31,8 @@ export const AuthPage = (): ReactElement => {
     resetPassword,
     resendVerification,
     isAuthenticated,
-    user,
-  } = useAuth();
+  } = authResult;
+  const user = authResult.user as UserLocal | null;
   const { isLoading, error, setError, wrapHandler } = useFormState();
 
   const [mode, setMode] = useState<AuthMode>('login');

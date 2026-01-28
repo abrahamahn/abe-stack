@@ -6,29 +6,44 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useMutation, type UseMutationResult } from '@abe-stack/sdk';
+import { useMutation } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type {
-  SecurityEventsExportRequest,
-  SecurityEventsExportResponse,
-  SecurityEventsFilter,
-} from '@abe-stack/core';
-
 // ============================================================================
 // Types
 // ============================================================================
 
+interface SecurityEventsFilterLocal {
+  eventType?: string;
+  severity?: string;
+  email?: string;
+  ipAddress?: string;
+  startDate?: string;
+  endDate?: string;
+  userId?: string;
+}
+
+interface SecurityEventsExportRequestLocal {
+  format: 'csv' | 'json';
+  filter?: SecurityEventsFilterLocal;
+}
+
+interface SecurityEventsExportResponseLocal {
+  data: string;
+  contentType: string;
+  filename: string;
+}
+
 export interface UseExportEventsResult {
-  exportEvents: (format: 'csv' | 'json', filter?: SecurityEventsFilter) => void;
-  downloadExport: (format: 'csv' | 'json', filter?: SecurityEventsFilter) => void;
+  exportEvents: (format: 'csv' | 'json', filter?: SecurityEventsFilterLocal) => void;
+  downloadExport: (format: 'csv' | 'json', filter?: SecurityEventsFilterLocal) => void;
   isExporting: boolean;
   isError: boolean;
   error: Error | null;
-  data: SecurityEventsExportResponse | null;
+  data: SecurityEventsExportResponseLocal | null;
 }
 
 // ============================================================================
@@ -42,33 +57,30 @@ export function useExportEvents(): UseExportEventsResult {
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
-  const mutation: UseMutationResult<
-    SecurityEventsExportResponse,
-    Error,
-    SecurityEventsExportRequest
-  > = useMutation({
-    mutationFn: async (request: SecurityEventsExportRequest) => {
-      return adminApi.exportSecurityEvents(request);
+  const mutation = useMutation<SecurityEventsExportResponseLocal, Error, SecurityEventsExportRequestLocal>({
+    mutationFn: async (request: SecurityEventsExportRequestLocal): Promise<SecurityEventsExportResponseLocal> => {
+      const result = await adminApi.exportSecurityEvents(request);
+      return result as SecurityEventsExportResponseLocal;
     },
   });
 
   const exportEvents = useCallback(
-    (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
+    (format: 'csv' | 'json', filter?: SecurityEventsFilterLocal) => {
       mutation.mutate({ format, ...(filter !== undefined && { filter }) });
     },
     [mutation],
   );
 
   const downloadExport = useCallback(
-    (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
+    (format: 'csv' | 'json', filter?: SecurityEventsFilterLocal) => {
       void mutation
         .mutateAsync({ format, ...(filter !== undefined && { filter }) })
-        .then((response) => {
+        .then((response: SecurityEventsExportResponseLocal) => {
           // Create a blob and download link
           const blob = new Blob([response.data], { type: response.contentType });
           const url = URL.createObjectURL(blob);

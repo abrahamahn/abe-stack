@@ -13,7 +13,17 @@ import {
 import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
 import { useMemo, useState, type ReactElement } from 'react';
 
-import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+type OAuthProviderLocal = 'google' | 'github' | 'apple';
+
+interface OAuthConnectionLocal {
+  provider: OAuthProviderLocal;
+  providerEmail?: string | null;
+  connectedAt: Date;
+}
 
 // ============================================================================
 // Types
@@ -27,7 +37,7 @@ export interface OAuthConnectionsListProps {
 // Provider Icons and Names
 // ============================================================================
 
-const providerInfo: Record<OAuthProvider, { name: string; icon: string }> = {
+const providerInfo: Record<OAuthProviderLocal, { name: string; icon: string }> = {
   google: { name: 'Google', icon: 'G' },
   github: { name: 'GitHub', icon: 'GH' },
   apple: { name: 'Apple', icon: '' },
@@ -67,12 +77,13 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
     getLinkUrl,
   } = useOAuthConnections(clientConfig);
 
-  const handleConnect = (provider: OAuthProvider): void => {
+  const handleConnect = (provider: OAuthProviderLocal): void => {
     window.location.href = getLinkUrl(provider);
   };
 
-  const handleDisconnect = async (provider: OAuthProvider): Promise<void> => {
-    if (!confirm(`Are you sure you want to disconnect ${providerInfo[provider].name}?`)) {
+  const handleDisconnect = async (provider: OAuthProviderLocal): Promise<void> => {
+    const info = providerInfo[provider];
+    if (!confirm(`Are you sure you want to disconnect ${info.name}?`)) {
       return;
     }
 
@@ -82,7 +93,7 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
       onSuccess?.();
     } catch (err) {
       setUnlinkError(
-        err instanceof Error ? err.message : `Failed to disconnect ${providerInfo[provider].name}`,
+        err instanceof Error ? err.message : `Failed to disconnect ${info.name}`,
       );
     }
   };
@@ -117,8 +128,10 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
   }
 
   // Build provider list with connection status
-  const providerList = enabledProviders.map((provider) => {
-    const connection = connections.find((c) => c.provider === provider);
+  const typedProviders = enabledProviders as OAuthProviderLocal[];
+  const typedConnections = connections as OAuthConnectionLocal[];
+  const providerList = typedProviders.map((provider: OAuthProviderLocal) => {
+    const connection: OAuthConnectionLocal | undefined = typedConnections.find((c: OAuthConnectionLocal) => c.provider === provider);
     return {
       provider,
       connected: connection !== undefined,
@@ -160,9 +173,9 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
 // ============================================================================
 
 interface ProviderCardProps {
-  provider: OAuthProvider;
+  provider: OAuthProviderLocal;
   connected: boolean;
-  connection: OAuthConnection | null;
+  connection: OAuthConnectionLocal | null;
   onConnect: () => void;
   onDisconnect: () => void;
   isDisconnecting: boolean;

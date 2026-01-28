@@ -46,14 +46,16 @@ export interface UseSessionsResult {
 export function useSessions(): UseSessionsResult {
   const query = useQuery<SessionsListResponse>({
     queryKey: ['sessions'],
-    queryFn: async () => {
+    queryFn: async (): Promise<SessionsListResponse> => {
       const api = getSettingsApi();
       return api.listSessions();
     },
   });
 
+  const sessionData = query.data as { sessions?: Session[] } | undefined;
+
   return {
-    sessions: query.data?.sessions ?? [],
+    sessions: sessionData?.sessions ?? [],
     isLoading: query.status === 'pending',
     isError: query.status === 'error',
     error: query.error,
@@ -85,7 +87,7 @@ export function useRevokeSession(options?: UseRevokeSessionOptions): UseRevokeSe
   const queryCache = useQueryCache();
 
   const mutation = useMutation<RevokeSessionResponse, Error, string>({
-    mutationFn: async (sessionId) => {
+    mutationFn: async (sessionId): Promise<RevokeSessionResponse> => {
       const api = getSettingsApi();
       return api.revokeSession(sessionId);
     },
@@ -133,7 +135,7 @@ export function useRevokeAllSessions(
   const queryCache = useQueryCache();
 
   const mutation = useMutation<RevokeAllSessionsResponse>({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<RevokeAllSessionsResponse> => {
       const api = getSettingsApi();
       return api.revokeAllSessions();
     },
@@ -146,6 +148,8 @@ export function useRevokeAllSessions(
     ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
+  const revokeData = mutation.data as { revokedCount?: number } | undefined;
+
   return {
     revokeAllSessions: (): void => {
       mutation.mutate();
@@ -154,7 +158,7 @@ export function useRevokeAllSessions(
     isSuccess: mutation.status === 'success',
     isError: mutation.status === 'error',
     error: mutation.error,
-    revokedCount: mutation.data?.revokedCount ?? null,
+    revokedCount: revokeData?.revokedCount ?? null,
     reset: mutation.reset,
   };
 }

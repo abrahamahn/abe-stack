@@ -6,37 +6,6 @@
  */
 
 import {
-    BillingProviderNotConfiguredError,
-    BillingSubscriptionExistsError,
-    BillingSubscriptionNotFoundError,
-    CannotRemoveDefaultPaymentMethodError,
-    CustomerNotFoundError,
-    PaymentMethodNotFoundError,
-    PlanNotActiveError,
-    PlanNotFoundError,
-    SubscriptionAlreadyCanceledError,
-    SubscriptionNotActiveError,
-    SubscriptionNotCancelingError,
-    type AddPaymentMethodRequest,
-    type CancelSubscriptionRequest,
-    type CheckoutRequest,
-    type CheckoutResponse,
-    type Invoice,
-    type InvoicesListResponse,
-    type PaymentMethod,
-    type PaymentMethodResponse,
-    type PaymentMethodsListResponse,
-    type Plan,
-    type PlansListResponse,
-    type SetupIntentResponse,
-    type Subscription,
-    type SubscriptionActionResponse,
-    type SubscriptionResponse,
-    type UpdateSubscriptionRequest,
-} from '@abe-stack/core';
-
-
-import {
     addPaymentMethod,
     cancelSubscription,
     createCheckoutSession,
@@ -52,6 +21,24 @@ import {
     type BillingRepositories,
 } from './service';
 
+import type {
+    AddPaymentMethodRequest,
+    CancelSubscriptionRequest,
+    CheckoutRequest,
+    CheckoutResponse,
+    Invoice,
+    InvoicesListResponse,
+    PaymentMethod,
+    PaymentMethodResponse,
+    PaymentMethodsListResponse,
+    Plan,
+    PlansListResponse,
+    SetupIntentResponse,
+    Subscription,
+    SubscriptionActionResponse,
+    SubscriptionResponse,
+    UpdateSubscriptionRequest,
+} from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 import { createBillingProvider } from '@/infrastructure/billing';
@@ -80,7 +67,7 @@ function formatPlan(plan: {
   interval: 'month' | 'year';
   priceInCents: number;
   currency: string;
-  features: { name: string; included: boolean; description?: string }[];
+  features: { name: string; included: boolean; description?: string | undefined }[];
   trialDays: number;
   isActive: boolean;
   sortOrder: number;
@@ -126,7 +113,7 @@ function formatSubscription(subscription: {
     interval: 'month' | 'year';
     priceInCents: number;
     currency: string;
-    features: { name: string; included: boolean; description?: string }[];
+    features: { name: string; included: boolean; description?: string | undefined }[];
     trialDays: number;
     isActive: boolean;
     sortOrder: number;

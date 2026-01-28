@@ -48,7 +48,7 @@ export function useAvatarUpload(options?: UseAvatarUploadOptions): UseAvatarUplo
   const queryCache = useQueryCache();
 
   const mutation = useMutation<AvatarUploadResponse, Error, File>({
-    mutationFn: async (file) => {
+    mutationFn: async (file): Promise<AvatarUploadResponse> => {
       const api = getSettingsApi();
       return api.uploadAvatar(file);
     },
@@ -95,7 +95,7 @@ export function useAvatarDelete(options?: UseAvatarDeleteOptions): UseAvatarDele
   const queryCache = useQueryCache();
 
   const mutation = useMutation<AvatarDeleteResponse>({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<AvatarDeleteResponse> => {
       const api = getSettingsApi();
       return api.deleteAvatar();
     },

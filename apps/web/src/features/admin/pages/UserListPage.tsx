@@ -13,20 +13,19 @@ import { useAdminUsers } from '../hooks';
 import type { JSX } from 'react';
 
 export const UserListPage = (): JSX.Element => {
+  const adminUsersResult = useAdminUsers();
   const {
     users,
     total,
     page,
     totalPages,
-    hasNext,
-    hasPrev,
     isLoading,
     error,
-    filters,
     setFilters,
     setPage,
     refresh,
-  } = useAdminUsers();
+    filters,
+  } = adminUsersResult;
 
   return (
     <PageContainer>
@@ -62,11 +61,7 @@ export const UserListPage = (): JSX.Element => {
               ? {
                   data: users,
                   total,
-                  page,
-                  limit: filters.limit ?? 20,
                   totalPages,
-                  hasNext,
-                  hasPrev,
                 }
               : undefined
           }

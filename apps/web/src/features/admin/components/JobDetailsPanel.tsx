@@ -9,15 +9,31 @@ import { Button, Card, Heading, Spinner, Text } from '@abe-stack/ui';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
-import type { JobDetails } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+
+interface JobDetailsLocal {
+  id: string;
+  name: string;
+  status: JobStatusLocal;
+  createdAt: string;
+  scheduledAt: string;
+  completedAt: string | null;
+  durationMs: number | null;
+  attempts: number;
+  maxAttempts: number;
+  args: unknown;
+  error: { name: string; message: string; stack?: string } | null;
+  deadLetterReason?: string | null;
+}
+
 export interface JobDetailsPanelProps {
-  job: JobDetails | undefined;
+  job: JobDetailsLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;

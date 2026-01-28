@@ -43,7 +43,7 @@ const createWindow = async (): Promise<void> => {
     const rendererPortPreference = Number(
       process.env.DESKTOP_RENDERER_PORT ?? process.env.VITE_PORT ?? 5174,
     );
-    const rendererPort = await waitForPort([rendererPortPreference, 5174, 5173, 5175], 'localhost');
+    const rendererPort: number = await (waitForPort as (ports: Array<number | undefined>, host?: string) => Promise<number>)([rendererPortPreference, 5174, 5173, 5175], 'localhost');
 
     const rendererPortString = String(rendererPort);
     await mainWindow.loadURL(`http://localhost:${rendererPortString}`);

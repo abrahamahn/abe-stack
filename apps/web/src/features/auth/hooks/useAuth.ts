@@ -11,30 +11,59 @@
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useEffect, useState } from 'react';
 
-import type {
-  EmailVerificationRequest,
-  ForgotPasswordRequest,
-  LoginRequest,
-  RegisterRequest,
-  RegisterResponse,
-  ResendVerificationRequest,
-  ResetPasswordRequest,
-} from '@abe-stack/core';
 import type { AuthState, User } from '@auth/services/AuthService';
 // Import directly from services to avoid circular dependency through barrel
+
+// ============================================================================
+// Local Type Definitions
+// ============================================================================
+
+interface LoginRequestLocal {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequestLocal {
+  email: string;
+  password: string;
+  name?: string | undefined;
+}
+
+interface RegisterResponseLocal {
+  status: 'pending_verification';
+  message: string;
+  email: string;
+}
+
+interface ForgotPasswordRequestLocal {
+  email: string;
+}
+
+interface ResetPasswordRequestLocal {
+  token: string;
+  password: string;
+}
+
+interface EmailVerificationRequestLocal {
+  token: string;
+}
+
+interface ResendVerificationRequestLocal {
+  email: string;
+}
 
 export type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<RegisterResponse>;
+  login: (credentials: LoginRequestLocal) => Promise<void>;
+  register: (data: RegisterRequestLocal) => Promise<RegisterResponseLocal>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
-  forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
-  resetPassword: (data: ResetPasswordRequest) => Promise<void>;
-  verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
-  resendVerification: (data: ResendVerificationRequest) => Promise<void>;
+  forgotPassword: (data: ForgotPasswordRequestLocal) => Promise<void>;
+  resetPassword: (data: ResetPasswordRequestLocal) => Promise<void>;
+  verifyEmail: (data: EmailVerificationRequestLocal) => Promise<void>;
+  resendVerification: (data: ResendVerificationRequestLocal) => Promise<void>;
 };
 
 /**
@@ -64,15 +93,16 @@ export function useAuth(): AuthContextType {
 
   // Memoized operations
   const login = useCallback(
-    async (credentials: LoginRequest): Promise<void> => {
+    async (credentials: LoginRequestLocal): Promise<void> => {
       await auth.login(credentials);
     },
     [auth],
   );
 
   const register = useCallback(
-    async (data: RegisterRequest): Promise<RegisterResponse> => {
-      return auth.register(data);
+    async (data: RegisterRequestLocal): Promise<RegisterResponseLocal> => {
+      const result = await auth.register(data);
+      return result as RegisterResponseLocal;
     },
     [auth],
   );
@@ -82,32 +112,33 @@ export function useAuth(): AuthContextType {
   }, [auth]);
 
   const refreshToken = useCallback(async (): Promise<boolean> => {
-    return auth.refreshToken();
+    const result = await auth.refreshToken();
+    return result;
   }, [auth]);
 
   const forgotPassword = useCallback(
-    async (data: ForgotPasswordRequest): Promise<void> => {
+    async (data: ForgotPasswordRequestLocal): Promise<void> => {
       await auth.forgotPassword(data);
     },
     [auth],
   );
 
   const resetPassword = useCallback(
-    async (data: ResetPasswordRequest): Promise<void> => {
+    async (data: ResetPasswordRequestLocal): Promise<void> => {
       await auth.resetPassword(data);
     },
     [auth],
   );
 
   const verifyEmail = useCallback(
-    async (data: EmailVerificationRequest): Promise<void> => {
+    async (data: EmailVerificationRequestLocal): Promise<void> => {
       await auth.verifyEmail(data);
     },
     [auth],
   );
 
   const resendVerification = useCallback(
-    async (data: ResendVerificationRequest): Promise<void> => {
+    async (data: ResendVerificationRequestLocal): Promise<void> => {
       await auth.resendVerification(data);
     },
     [auth],

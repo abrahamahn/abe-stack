@@ -21,22 +21,38 @@ import {
 
 import { JobStatusBadge } from './JobStatusBadge';
 
-import type { JobDetails, JobListResponse, JobStatus } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+
+interface JobDetailsLocal {
+  id: string;
+  name: string;
+  status: JobStatusLocal;
+  createdAt: string;
+  attempts: number;
+  maxAttempts: number;
+}
+
+interface JobListResponseLocal {
+  data: JobDetailsLocal[];
+  page: number;
+  totalPages: number;
+}
+
 export interface JobsTableProps {
-  data: JobListResponse | undefined;
+  data: JobListResponseLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  selectedStatus: JobStatus | undefined;
-  onStatusChange: (status: JobStatus | undefined) => void;
+  selectedStatus: JobStatusLocal | undefined;
+  onStatusChange: (status: JobStatusLocal | undefined) => void;
   onPageChange: (page: number) => void;
-  onJobClick: (job: JobDetails) => void;
+  onJobClick: (job: JobDetailsLocal) => void;
   onRetry: (jobId: string) => Promise<void>;
   onCancel: (jobId: string) => Promise<void>;
 }
@@ -45,7 +61,7 @@ export interface JobsTableProps {
 // Status Tabs
 // ============================================================================
 
-const STATUS_TABS: Array<{ id: string; label: string; status: JobStatus | undefined }> = [
+const STATUS_TABS: Array<{ id: string; label: string; status: JobStatusLocal | undefined }> = [
   { id: 'all', label: 'All', status: undefined },
   { id: 'pending', label: 'Pending', status: 'pending' },
   { id: 'processing', label: 'Processing', status: 'processing' },
@@ -145,7 +161,7 @@ export const JobsTable = ({
 // ============================================================================
 
 interface JobRowProps {
-  job: JobDetails;
+  job: JobDetailsLocal;
   onClick: () => void;
   onRetry: (jobId: string) => Promise<void>;
   onCancel: (jobId: string) => Promise<void>;

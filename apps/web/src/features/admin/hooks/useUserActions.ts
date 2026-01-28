@@ -9,12 +9,44 @@ import { useCallback, useState } from 'react';
 
 import { lockUser, unlockUser, updateUser } from '../api';
 
-import type {
-  AdminLockUserRequest,
-  AdminLockUserResponse,
-  AdminUpdateUserRequest,
-  AdminUpdateUserResponse,
-} from '@abe-stack/core';
+// ============================================================================
+// Types
+// ============================================================================
+
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
+  lockedUntil: string | null;
+  failedLoginAttempts: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AdminUpdateUserRequestLocal {
+  name?: string | null;
+  role?: UserRoleLocal;
+}
+
+interface AdminUpdateUserResponseLocal {
+  message: string;
+  user: AdminUserLocal;
+}
+
+interface AdminLockUserRequestLocal {
+  reason: string;
+  durationMinutes?: number;
+}
+
+interface AdminLockUserResponseLocal {
+  message: string;
+  user: AdminUserLocal;
+}
 
 export interface UseUserActionsState {
   isUpdating: boolean;
@@ -27,13 +59,13 @@ export interface UseUserActionsState {
 export interface UseUserActionsResult extends UseUserActionsState {
   updateUserAction: (
     userId: string,
-    data: AdminUpdateUserRequest,
-  ) => Promise<AdminUpdateUserResponse | null>;
+    data: AdminUpdateUserRequestLocal,
+  ) => Promise<AdminUpdateUserResponseLocal | null>;
   lockUserAction: (
     userId: string,
-    data: AdminLockUserRequest,
-  ) => Promise<AdminLockUserResponse | null>;
-  unlockUserAction: (userId: string, reason: string) => Promise<AdminLockUserResponse | null>;
+    data: AdminLockUserRequestLocal,
+  ) => Promise<AdminLockUserResponseLocal | null>;
+  unlockUserAction: (userId: string, reason: string) => Promise<AdminLockUserResponseLocal | null>;
   clearError: () => void;
 }
 
@@ -52,12 +84,12 @@ export function useUserActions(): UseUserActionsResult {
   const updateUserAction = useCallback(
     async (
       userId: string,
-      data: AdminUpdateUserRequest,
-    ): Promise<AdminUpdateUserResponse | null> => {
+      data: AdminUpdateUserRequestLocal,
+    ): Promise<AdminUpdateUserResponseLocal | null> => {
       setState((prev) => ({ ...prev, isUpdating: true, error: null }));
 
       try {
-        const result = await updateUser(userId, data);
+        const result: AdminUpdateUserResponseLocal = await updateUser(userId, data) as AdminUpdateUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isUpdating: false,
@@ -78,11 +110,11 @@ export function useUserActions(): UseUserActionsResult {
   );
 
   const lockUserAction = useCallback(
-    async (userId: string, data: AdminLockUserRequest): Promise<AdminLockUserResponse | null> => {
+    async (userId: string, data: AdminLockUserRequestLocal): Promise<AdminLockUserResponseLocal | null> => {
       setState((prev) => ({ ...prev, isLocking: true, error: null }));
 
       try {
-        const result = await lockUser(userId, data);
+        const result: AdminLockUserResponseLocal = await lockUser(userId, data) as AdminLockUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isLocking: false,
@@ -103,14 +135,14 @@ export function useUserActions(): UseUserActionsResult {
   );
 
   const unlockUserAction = useCallback(
-    async (userId: string, reason: string): Promise<AdminLockUserResponse | null> => {
+    async (userId: string, reason: string): Promise<AdminLockUserResponseLocal | null> => {
       setState((prev) => ({ ...prev, isUnlocking: true, error: null }));
 
       try {
         // The unlock endpoint expects the email in the request body for the legacy endpoint,
         // but the new /users/:id/unlock endpoint needs the email for logging purposes
         // We'll use a placeholder since the backend will look up the user by ID
-        const result = await unlockUser(userId, { email: '', reason });
+        const result: AdminLockUserResponseLocal = await unlockUser(userId, { email: '', reason }) as AdminLockUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isUnlocking: false,

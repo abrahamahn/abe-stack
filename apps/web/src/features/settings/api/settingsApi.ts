@@ -75,7 +75,7 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
         headers,
         credentials: 'include',
       });
-    } catch (error) {
+    } catch (error: unknown) {
       throw new NetworkError(
         `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
         error instanceof Error ? error : undefined,

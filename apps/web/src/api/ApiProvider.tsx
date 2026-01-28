@@ -84,7 +84,7 @@ export const ApiProvider = ({ children }: ApiProviderProps): ReactElement => {
   const api = useMemo<ApiClient>(() => {
     const client = createApiClient({
       baseUrl: config.apiUrl,
-      getToken: () => tokenStore.get(),
+      getToken: (): string | null => tokenStore.get(),
     });
     return client as ApiClient;
   }, [config.apiUrl]);

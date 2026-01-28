@@ -47,7 +47,7 @@ export type PaymentMethodType = (typeof PAYMENT_METHOD_TYPES)[number];
 export interface PlanFeature {
   name: string;
   included: boolean;
-  description?: string;
+  description?: string | undefined;
 }
 
 export interface CardDetails {

@@ -45,7 +45,7 @@ export interface UsePasswordChangeResult {
 
 export function usePasswordChange(options?: UsePasswordChangeOptions): UsePasswordChangeResult {
   const mutation = useMutation<ChangePasswordResponse, Error, ChangePasswordRequest>({
-    mutationFn: async (data) => {
+    mutationFn: async (data): Promise<ChangePasswordResponse> => {
       const api = getSettingsApi();
       return api.changePassword(data);
     },

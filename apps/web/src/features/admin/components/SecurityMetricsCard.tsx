@@ -7,15 +7,26 @@
 
 import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
-import type { SecurityMetrics } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface SecurityMetricsLocal {
+  totalEvents: number;
+  criticalEvents: number;
+  highEvents: number;
+  mediumEvents: number;
+  tokenReuseCount: number;
+  accountLockedCount: number;
+  suspiciousLoginCount: number;
+  periodStart: string;
+  periodEnd: string;
+}
+
 export interface SecurityMetricsCardProps {
-  metrics: SecurityMetrics | undefined;
+  metrics: SecurityMetricsLocal | undefined;
   isLoading: boolean;
 }
 

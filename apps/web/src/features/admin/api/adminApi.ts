@@ -33,7 +33,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = clientConfig.apiUrl.replace(/\/+$/, '');
   const headers = new Headers(options?.headers);
   headers.set('Content-Type', 'application/json');
-  addAuthHeader(headers, tokenStore.get());
+  const token: string | null = tokenStore.get();
+  addAuthHeader(headers, token);
 
   const url = `${baseUrl}${API_PREFIX}${path}`;
 
@@ -44,7 +45,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       headers,
       credentials: 'include',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     throw new NetworkError(
       `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
       error instanceof Error ? error : undefined,

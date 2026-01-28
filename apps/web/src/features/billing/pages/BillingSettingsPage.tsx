@@ -44,17 +44,18 @@ export const BillingSettingsPage = (): ReactElement => {
 
   const clientConfig: BillingClientConfig = {
     baseUrl: config.apiUrl,
-    getToken: (): string | null => tokenStore.get(),
+    getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
   };
 
   // Hooks
+  const subscriptionResult = useSubscription(clientConfig);
+  const subscription = subscriptionResult.subscription;
   const {
-    subscription,
     isLoading: subLoading,
     isActing: subActing,
     cancel: cancelSubscription,
     resume: resumeSubscription,
-  } = useSubscription(clientConfig);
+  } = subscriptionResult;
 
   const {
     paymentMethods,

@@ -10,29 +10,89 @@ import { tokenStore } from '@abe-stack/core';
 import { createApiClient } from '@abe-stack/sdk';
 
 import type { ClientConfig } from '@/config';
-import type {
-  AuthResponse,
-  EmailVerificationRequest,
-  EmailVerificationResponse,
-  ForgotPasswordRequest,
-  ForgotPasswordResponse,
-  LoginRequest,
-  RegisterRequest,
-  RegisterResponse,
-  ResendVerificationRequest,
-  ResendVerificationResponse,
-  ResetPasswordRequest,
-  ResetPasswordResponse,
-  TokenStore,
-  User,
-} from '@abe-stack/core';
 import type { ApiClient } from '@abe-stack/sdk';
+
+// ============================================================================
+// Local Type Definitions
+// ============================================================================
+
+type UserRole = 'user' | 'moderator' | 'admin';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+  avatarUrl: string | null;
+  createdAt: string;
+}
+
+interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  email: string;
+  password: string;
+  name?: string | undefined;
+}
+
+interface RegisterResponse {
+  status: 'pending_verification';
+  message: string;
+  email: string;
+}
+
+interface ForgotPasswordRequest {
+  email: string;
+}
+
+interface ForgotPasswordResponse {
+  message: string;
+}
+
+interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+}
+
+interface EmailVerificationRequest {
+  token: string;
+}
+
+interface EmailVerificationResponse {
+  verified: boolean;
+  token: string;
+  user: User;
+}
+
+interface ResendVerificationRequest {
+  email: string;
+}
+
+interface ResendVerificationResponse {
+  message: string;
+}
+
+interface TokenStore {
+  get: () => string | null;
+  set: (token: string) => void;
+  clear: () => void;
+}
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export type { User } from '@abe-stack/core';
 
 export type AuthState = {
   user: User | null;
@@ -96,21 +156,21 @@ export class AuthService {
   constructor(args: { config: ClientConfig }) {
     this.config = args.config;
 
-    const tokenStoreTyped: TokenStore = tokenStore;
-    const createApiClientTyped: (config: {
-      baseUrl: string;
-      getToken: () => string | null;
-    }) => ApiClient = createApiClient;
-    this.tokenStore = tokenStoreTyped;
+    this.tokenStore = tokenStore as TokenStore;
 
     // Create API client for auth operations
-    this.api = createApiClientTyped({
+    const createApiClientFn = createApiClient as (config: {
+      baseUrl: string;
+      getToken: () => string | null;
+    }) => ApiClient;
+
+    this.api = createApiClientFn({
       baseUrl: this.config.apiUrl,
-      getToken: () => tokenStoreTyped.get(),
+      getToken: (): string | null => this.tokenStore.get(),
     });
 
     // Start refresh interval if we have a token
-    const currentToken = tokenStoreTyped.get();
+    const currentToken: string | null = this.tokenStore.get();
     if (currentToken !== null) {
       this.startRefreshInterval();
     }
@@ -132,7 +192,7 @@ export class AuthService {
     this.initialized = true;
 
     // If we already have a token in memory, fetch the user
-    const existingToken = this.tokenStore.get();
+    const existingToken: string | null = this.tokenStore.get();
     if (existingToken !== null) {
       try {
         return await this.fetchCurrentUser();
@@ -189,13 +249,13 @@ export class AuthService {
 
   /** Login with email/password */
   async login(credentials: LoginRequest): Promise<void> {
-    const response: AuthResponse = await this.api.login(credentials);
+    const response = (await this.api.login(credentials)) as AuthResponse;
     this.handleAuthSuccess(response);
   }
 
   /** Register new account - returns pending status, user must verify email */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    const response: RegisterResponse = await this.api.register(data);
+    const response = (await this.api.register(data)) as RegisterResponse;
     // No auto-login - user must verify email first
     return response;
   }
@@ -236,12 +296,9 @@ export class AuthService {
     try {
       const response = await withTimeout(this.api.refresh(), 'Token refresh');
       // Type guard: ensure response has token property
-      if (
-        typeof response === 'object' &&
-        'token' in response &&
-        typeof response.token === 'string'
-      ) {
-        this.tokenStore.set(response.token);
+      const respObj = response as { token?: string };
+      if (typeof respObj.token === 'string') {
+        this.tokenStore.set(respObj.token);
         this.resetRefreshBackoff();
         this.notifyListeners();
         return true;
@@ -270,7 +327,7 @@ export class AuthService {
 
   /** Fetch current user (call on app load if token exists) */
   async fetchCurrentUser(): Promise<User | null> {
-    const currentToken = this.tokenStore.get();
+    const currentToken: string | null = this.tokenStore.get();
     if (currentToken === null) {
       return null;
     }
@@ -279,12 +336,15 @@ export class AuthService {
     this.notifyListeners();
 
     try {
-      const user = await withTimeout<User>(this.api.getCurrentUser(), 'Fetch current user');
-      if (isUser(user)) {
-        this.user = user;
+      const userResult = await withTimeout<User>(
+        this.api.getCurrentUser() as Promise<User>,
+        'Fetch current user',
+      );
+      if (isUser(userResult)) {
+        this.user = userResult;
         this.isLoadingUser = false;
         this.notifyListeners();
-        return user;
+        return userResult;
       }
       throw new Error('Invalid user data received from API');
     } catch {
@@ -292,11 +352,14 @@ export class AuthService {
       const refreshed = await this.refreshToken();
       if (refreshed) {
         try {
-          const user = await withTimeout<User>(this.api.getCurrentUser(), 'Fetch current user');
-          this.user = user;
+          const refreshedUser = await withTimeout<User>(
+            this.api.getCurrentUser() as Promise<User>,
+            'Fetch current user',
+          );
+          this.user = refreshedUser;
           this.isLoadingUser = false;
           this.notifyListeners();
-          return user;
+          return refreshedUser;
         } catch {
           this.isLoadingUser = false;
           this.clearAuth();
@@ -311,17 +374,17 @@ export class AuthService {
 
   /** Request password reset */
   forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
-    return this.api.forgotPassword(data);
+    return this.api.forgotPassword(data) as Promise<ForgotPasswordResponse>;
   }
 
   /** Reset password with token */
   resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
-    return this.api.resetPassword(data);
+    return this.api.resetPassword(data) as Promise<ResetPasswordResponse>;
   }
 
   /** Verify email with token - auto-logs in user on success */
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
-    const response: EmailVerificationResponse = await this.api.verifyEmail(data);
+    const response = (await this.api.verifyEmail(data)) as EmailVerificationResponse;
     // Auto-login on successful verification
     if (response.verified) {
       this.handleAuthSuccess({ token: response.token, user: response.user });
@@ -331,7 +394,7 @@ export class AuthService {
 
   /** Resend verification email */
   resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
-    return this.api.resendVerification(data);
+    return this.api.resendVerification(data) as Promise<ResendVerificationResponse>;
   }
 
   // ==========================================================================
@@ -380,7 +443,7 @@ export class AuthService {
     } else {
       // On failure, increment backoff and reschedule if we still have a token
       // (refreshToken() calls clearAuth() on failure, but we check anyway)
-      const stillHasToken = this.tokenStore.get();
+      const stillHasToken: string | null = this.tokenStore.get();
       if (stillHasToken !== null) {
         this.incrementRefreshBackoff();
         this.scheduleNextRefresh();

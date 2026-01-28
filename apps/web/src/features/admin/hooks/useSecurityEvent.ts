@@ -6,24 +6,34 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { SecurityEvent } from '@abe-stack/core';
-
 // ============================================================================
 // Types
 // ============================================================================
+
+interface SecurityEventLocal {
+  id: string;
+  createdAt: string;
+  eventType: string;
+  severity: string;
+  userId?: string | null;
+  email?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
 
 export interface UseSecurityEventOptions {
   enabled?: boolean;
 }
 
 export interface UseSecurityEventResult {
-  data: SecurityEvent | undefined;
+  data: SecurityEventLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -44,20 +54,21 @@ export function useSecurityEvent(
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
   const queryKey = useMemo(() => ['securityEvent', id], [id]);
 
-  const queryResult: UseQueryResult<SecurityEvent> = useQuery({
+  const queryResult = useQuery<SecurityEventLocal>({
     queryKey,
-    queryFn: async () => {
+    queryFn: async (): Promise<SecurityEventLocal> => {
       if (id === undefined || id.length === 0) {
         throw new Error('Event ID is required');
       }
-      return adminApi.getSecurityEvent(id);
+      const result = await adminApi.getSecurityEvent(id);
+      return result as SecurityEventLocal;
     },
     enabled: id !== undefined && id.length > 0 && options.enabled !== false,
   });

@@ -6,24 +6,34 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { QueueStats } from '@abe-stack/contracts';
-
 // ============================================================================
 // Types
 // ============================================================================
+
+interface QueueStatsLocal {
+  pending: number;
+  processing: number;
+  completed: number;
+  failed: number;
+  deadLetter: number;
+  total: number;
+  failureRate: number;
+  recentCompleted: number;
+  recentFailed: number;
+}
 
 export interface UseQueueStatsOptions {
   enabled?: boolean;
 }
 
 export interface UseQueueStatsResult {
-  data: QueueStats | undefined;
+  data: QueueStatsLocal | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -41,14 +51,17 @@ export function useQueueStats(options: UseQueueStatsOptions = {}): UseQueueStats
     () =>
       createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: () => tokenStore.get(),
+        getToken: (): string | null => tokenStore.get(),
       }),
     [config.apiUrl],
   );
 
-  const queryResult: UseQueryResult<QueueStats> = useQuery({
+  const queryResult = useQuery<QueueStatsLocal>({
     queryKey: ['queueStats'],
-    queryFn: async () => adminApi.getQueueStats(),
+    queryFn: async (): Promise<QueueStatsLocal> => {
+      const result = await adminApi.getQueueStats();
+      return result as QueueStatsLocal;
+    },
     enabled: options.enabled !== false,
     staleTime: 30000, // Consider data stale after 30 seconds
   });

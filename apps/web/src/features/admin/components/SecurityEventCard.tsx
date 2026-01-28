@@ -7,16 +7,41 @@
 
 import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
-import type { SecurityEvent } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface SecurityEventLocal {
+  id: string;
+  createdAt: string;
+  eventType: string;
+  severity: string;
+  userId?: string | null;
+  email?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
+
 export interface SecurityEventCardProps {
-  event: SecurityEvent | undefined;
+  event: SecurityEventLocal | undefined;
   isLoading: boolean;
+}
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+function hasValidMetadata(
+  event: SecurityEventLocal | undefined
+): event is SecurityEventLocal & { metadata: Record<string, unknown> } {
+  return (
+    event?.metadata !== undefined &&
+    event.metadata !== null &&
+    Object.keys(event.metadata).length > 0
+  );
 }
 
 // ============================================================================
@@ -146,7 +171,7 @@ export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps):
         </div>
       </Card>
 
-      {event !== undefined && event.metadata !== null && Object.keys(event.metadata).length > 0 && (
+      {hasValidMetadata(event) && (
         <Card className="p-6">
           <Heading as="h3" size="md" className="mb-4">
             Additional Metadata

@@ -7,7 +7,7 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import { parseCookies } from '@abe-stack/core/http';
+import { parseCookies } from '@abe-stack/core';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

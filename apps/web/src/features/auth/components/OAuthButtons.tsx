@@ -11,8 +11,13 @@ import { OAuthButton } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
-import type { OAuthProvider } from '@abe-stack/core';
 import type { ReactElement } from 'react';
+
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+type OAuthProviderLocal = 'google' | 'github' | 'apple';
 
 // ============================================================================
 // Provider Icons (inline SVG for reliability)
@@ -55,7 +60,7 @@ const AppleIcon = (): ReactElement => (
 // Provider Config
 // ============================================================================
 
-const PROVIDER_CONFIG: Record<OAuthProvider, { label: string; icon: () => ReactElement }> = {
+const PROVIDER_CONFIG: Record<OAuthProviderLocal, { label: string; icon: () => ReactElement }> = {
   google: { label: 'Google', icon: GoogleIcon },
   github: { label: 'GitHub', icon: GitHubIcon },
   apple: { label: 'Apple', icon: AppleIcon },
@@ -101,7 +106,7 @@ export const OAuthButtons = ({
 
   const actionText = mode === 'register' ? 'Sign up with' : 'Continue with';
 
-  const handleOAuthClick = (provider: OAuthProvider): void => {
+  const handleOAuthClick = (provider: OAuthProviderLocal): void => {
     const url = getOAuthLoginUrl(config.apiUrl, provider);
     window.location.href = url;
   };
@@ -116,8 +121,9 @@ export const OAuthButtons = ({
             Loading providers...
           </OAuthButton>
         ) : (
-          providers.map((provider: OAuthProvider) => {
-            const { label, icon: IconComponent } = PROVIDER_CONFIG[provider];
+          (providers as OAuthProviderLocal[]).map((provider: OAuthProviderLocal) => {
+            const providerConfig: { label: string; icon: () => ReactElement } = PROVIDER_CONFIG[provider];
+            const { label, icon: IconComponent } = providerConfig;
             return (
               <OAuthButton
                 key={provider}

@@ -12,7 +12,7 @@
  * - Extensible hooks for validation and side effects
  */
 
-import { SubKeys } from '@abe-stack/core/pubsub';
+import { SubKeys } from '@abe-stack/core';
 import { escapeIdentifier } from '@abe-stack/db';
 
 
@@ -27,7 +27,7 @@ import type {
     WriteOperation,
     WriteResult,
 } from './types';
-import type { SubscriptionManager } from '@abe-stack/core/pubsub';
+import type { SubscriptionManager } from '@abe-stack/core';
 import type { DbClient } from '@data/database';
 import type { Logger } from '@monitor/logger';
 

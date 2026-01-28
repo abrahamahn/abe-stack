@@ -24,26 +24,26 @@ export interface AdminBillingRepositories {
 
 export interface CreatePlanParams {
   name: string;
-  description?: string;
+  description?: string | undefined;
   interval: 'month' | 'year';
   priceInCents: number;
-  currency?: string;
-  features?: { name: string; included: boolean; description?: string }[];
-  trialDays?: number;
-  isActive?: boolean;
-  sortOrder?: number;
+  currency?: string | undefined;
+  features?: { name: string; included: boolean; description?: string | undefined }[] | undefined;
+  trialDays?: number | undefined;
+  isActive?: boolean | undefined;
+  sortOrder?: number | undefined;
 }
 
 export interface UpdatePlanParams {
-  name?: string;
-  description?: string | null;
-  interval?: 'month' | 'year';
-  priceInCents?: number;
-  currency?: string;
-  features?: { name: string; included: boolean; description?: string }[];
-  trialDays?: number;
-  isActive?: boolean;
-  sortOrder?: number;
+  name?: string | undefined;
+  description?: string | null | undefined;
+  interval?: 'month' | 'year' | undefined;
+  priceInCents?: number | undefined;
+  currency?: string | undefined;
+  features?: { name: string; included: boolean; description?: string | undefined }[] | undefined;
+  trialDays?: number | undefined;
+  isActive?: boolean | undefined;
+  sortOrder?: number | undefined;
 }
 
 // ============================================================================
@@ -114,7 +114,7 @@ export async function updatePlan(
     interval?: 'month' | 'year';
     priceInCents?: number;
     currency?: string;
-    features?: { name: string; included: boolean; description?: string }[];
+    features?: { name: string; included: boolean; description?: string | undefined }[];
     trialDays?: number;
     isActive?: boolean;
     sortOrder?: number;

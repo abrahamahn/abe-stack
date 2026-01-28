@@ -98,7 +98,7 @@ export function createAdminBillingClient(config: AdminBillingClientConfig): Admi
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
     headers.set('Content-Type', 'application/json');
-    addAuthHeader(headers, config.getToken?.());
+    (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(headers, config.getToken?.());
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
 
@@ -111,7 +111,7 @@ export function createAdminBillingClient(config: AdminBillingClientConfig): Admi
       });
     } catch (error) {
       const cause = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause);
+      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
     }
 
     const data = (await response.json().catch(() => ({}))) as ApiErrorBody &

@@ -5,20 +5,43 @@
  * Filter controls for security events list.
  */
 
-import { SECURITY_EVENT_TYPES, SECURITY_SEVERITIES } from '@abe-stack/core';
 import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
-import type { SecurityEventsFilter } from '@abe-stack/core';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
+interface SecurityEventsFilterLocal {
+  eventType?: string;
+  severity?: string;
+  email?: string;
+  ipAddress?: string;
+  startDate?: string;
+  endDate?: string;
+  userId?: string;
+}
+
+const SECURITY_EVENT_TYPES_LOCAL = [
+  'login_success',
+  'login_failure',
+  'logout',
+  'password_change',
+  'password_reset_request',
+  'password_reset_complete',
+  'email_verification',
+  'account_locked',
+  'token_reuse',
+  'suspicious_login',
+] as const;
+
+const SECURITY_SEVERITIES_LOCAL = ['low', 'medium', 'high', 'critical'] as const;
+
 export interface SecurityEventsFiltersProps {
-  filter: SecurityEventsFilter;
-  onFilterChange: (filter: SecurityEventsFilter) => void;
+  filter: SecurityEventsFilterLocal;
+  onFilterChange: (filter: SecurityEventsFilterLocal) => void;
 }
 
 // ============================================================================
@@ -29,9 +52,9 @@ export const SecurityEventsFilters = ({
   filter,
   onFilterChange,
 }: SecurityEventsFiltersProps): JSX.Element => {
-  const [localFilter, setLocalFilter] = useState<SecurityEventsFilter>(filter);
+  const [localFilter, setLocalFilter] = useState<SecurityEventsFilterLocal>(filter);
 
-  const handleInputChange = useCallback((field: keyof SecurityEventsFilter, value: string) => {
+  const handleInputChange = useCallback((field: keyof SecurityEventsFilterLocal, value: string) => {
     setLocalFilter((prev) => ({
       ...prev,
       [field]: value !== '' ? value : undefined,
@@ -43,14 +66,14 @@ export const SecurityEventsFilters = ({
   }, [localFilter, onFilterChange]);
 
   const handleClear = useCallback(() => {
-    const emptyFilter: SecurityEventsFilter = {};
+    const emptyFilter: SecurityEventsFilterLocal = {};
     setLocalFilter(emptyFilter);
     onFilterChange(emptyFilter);
   }, [onFilterChange]);
 
   const eventTypeOptions = [
     { value: '', label: 'All Event Types' },
-    ...SECURITY_EVENT_TYPES.map((type) => ({
+    ...SECURITY_EVENT_TYPES_LOCAL.map((type) => ({
       value: type,
       label: type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
     })),
@@ -58,7 +81,7 @@ export const SecurityEventsFilters = ({
 
   const severityOptions = [
     { value: '', label: 'All Severities' },
-    ...SECURITY_SEVERITIES.map((severity) => ({
+    ...SECURITY_SEVERITIES_LOCAL.map((severity) => ({
       value: severity,
       label: severity.charAt(0).toUpperCase() + severity.slice(1),
     })),

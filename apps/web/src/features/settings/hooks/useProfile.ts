@@ -47,7 +47,7 @@ export function useProfileUpdate(options?: UseProfileUpdateOptions): UseProfileU
   const queryCache = useQueryCache();
 
   const mutation = useMutation<User, Error, UpdateProfileRequest>({
-    mutationFn: async (data) => {
+    mutationFn: async (data): Promise<User> => {
       const api = getSettingsApi();
       return api.updateProfile(data);
     },

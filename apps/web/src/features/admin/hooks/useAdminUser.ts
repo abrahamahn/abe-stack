@@ -9,17 +9,30 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { getUser } from '../api';
 
-import type { AdminUser } from '@abe-stack/core';
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRoleLocal;
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
+  failedLoginAttempts: number;
+  lockedUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface UseAdminUserState {
-  user: AdminUser | null;
+  user: AdminUserLocal | null;
   isLoading: boolean;
   error: string | null;
 }
 
 export interface UseAdminUserResult extends UseAdminUserState {
   refresh: () => Promise<void>;
-  setUser: (user: AdminUser | null) => void;
+  setUser: (user: AdminUserLocal | null) => void;
 }
 
 /**
@@ -36,7 +49,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const result = await getUser(id);
+      const result: AdminUserLocal = await getUser(id) as AdminUserLocal;
       setState({
         user: result,
         isLoading: false,
@@ -69,7 +82,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
     }
   }, [userId, fetchUser]);
 
-  const setUser = useCallback((user: AdminUser | null) => {
+  const setUser = useCallback((user: AdminUserLocal | null) => {
     setState((prev) => ({ ...prev, user }));
   }, []);
 

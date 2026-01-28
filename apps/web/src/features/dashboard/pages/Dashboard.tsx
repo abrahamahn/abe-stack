@@ -1,12 +1,20 @@
 // apps/web/src/features/dashboard/pages/Dashboard.tsx
 import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
-import { useAuth, type User } from '@auth';
+import { useAuth } from '@auth';
 
 import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
 
+interface UserLocal {
+  id?: string;
+  email?: string;
+  name?: string | null;
+}
+
 export const DashboardPage = (): JSX.Element => {
-  const { user, logout }: { user: User | null; logout: () => Promise<void> } = useAuth();
+  const authResult = useAuth();
+  const user = authResult.user as UserLocal | null;
+  const logout = authResult.logout;
   const navigate: NavigateFunction = useNavigate();
 
   const handleLogout = async (): Promise<void> => {

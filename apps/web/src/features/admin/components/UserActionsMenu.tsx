@@ -10,12 +10,20 @@ import { useCallback, useState } from 'react';
 
 import { getUserStatus } from './StatusBadge';
 
-import type { AdminUser, UserRole } from '@abe-stack/core';
 import type { JSX } from 'react';
 
+type UserRoleLocal = 'user' | 'moderator' | 'admin';
+
+interface AdminUserLocal {
+  name: string | null;
+  role: UserRoleLocal;
+  lockedUntil: string | null;
+  emailVerified: boolean;
+}
+
 export interface UserActionsMenuProps {
-  user: AdminUser;
-  onUpdate: (data: { name?: string | null; role?: UserRole }) => Promise<void>;
+  user: AdminUserLocal;
+  onUpdate: (data: { name?: string | null; role?: UserRoleLocal }) => Promise<void>;
   onLock: (reason: string, durationMinutes?: number) => Promise<void>;
   onUnlock: (reason: string) => Promise<void>;
   isUpdating: boolean;
@@ -24,7 +32,7 @@ export interface UserActionsMenuProps {
   error: string | null;
 }
 
-const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+const ROLE_OPTIONS: { value: UserRoleLocal; label: string }[] = [
   { value: 'user', label: 'User' },
   { value: 'moderator', label: 'Moderator' },
   { value: 'admin', label: 'Admin' },
@@ -50,7 +58,7 @@ export const UserActionsMenu = ({
 }: UserActionsMenuProps): JSX.Element => {
   // Edit form state
   const [editName, setEditName] = useState(user.name ?? '');
-  const [editRole, setEditRole] = useState<UserRole>(user.role);
+  const [editRole, setEditRole] = useState<UserRoleLocal>(user.role);
 
   // Lock form state
   const [lockReason, setLockReason] = useState('');
@@ -66,7 +74,7 @@ export const UserActionsMenu = ({
   const handleUpdateSubmit = useCallback(
     async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const updates: { name?: string | null; role?: UserRole } = {};
+      const updates: { name?: string | null; role?: UserRoleLocal } = {};
 
       if (editName !== (user.name ?? '')) {
         updates.name = editName.length > 0 ? editName : null;
@@ -152,7 +160,7 @@ export const UserActionsMenu = ({
                 id="edit-role"
                 value={editRole}
                 onChange={(value) => {
-                  setEditRole(value as UserRole);
+                  setEditRole(value as UserRoleLocal);
                 }}
                 disabled={isAnyLoading}
               >

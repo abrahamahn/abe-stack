@@ -17,10 +17,16 @@ import type { BillingClientConfig } from './client';
 import type {
   CancelSubscriptionRequest,
   CheckoutRequest,
+  CheckoutResponse,
   Invoice,
+  InvoicesListResponse,
   PaymentMethod,
+  PaymentMethodsListResponse,
   Plan,
+  PlansListResponse,
+  SetupIntentResponse,
   Subscription,
+  SubscriptionResponse,
   UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 
@@ -90,7 +96,7 @@ export function usePlans(clientConfig: BillingClientConfig): PlansState {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await client.listPlans();
+      const response: PlansListResponse = await client.listPlans();
       setPlans(response.plans);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch plans'));
@@ -190,7 +196,7 @@ export function useSubscription(clientConfig: BillingClientConfig): Subscription
     try {
       setIsLoading(true);
       setError(null);
-      const response = await client.getSubscription();
+      const response: SubscriptionResponse = await client.getSubscription();
       setSubscription(response.subscription);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch subscription'));
@@ -204,7 +210,7 @@ export function useSubscription(clientConfig: BillingClientConfig): Subscription
       try {
         setIsActing(true);
         setError(null);
-        const response = await client.createCheckout(data);
+        const response: CheckoutResponse = await client.createCheckout(data);
         return response.url;
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to create checkout');
@@ -351,7 +357,7 @@ export function useInvoices(clientConfig: BillingClientConfig): InvoicesState {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await client.listInvoices();
+      const response: InvoicesListResponse = await client.listInvoices();
       setInvoices(response.invoices);
       setHasMore(response.hasMore);
     } catch (err) {
@@ -458,7 +464,7 @@ export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMet
     try {
       setIsLoading(true);
       setError(null);
-      const response = await client.listPaymentMethods();
+      const response: PaymentMethodsListResponse = await client.listPaymentMethods();
       setPaymentMethods(response.paymentMethods);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch payment methods'));
@@ -471,7 +477,7 @@ export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMet
     try {
       setIsActing(true);
       setError(null);
-      const response = await client.createSetupIntent();
+      const response: SetupIntentResponse = await client.createSetupIntent();
       setSetupIntentSecret(response.clientSecret);
       return response.clientSecret;
     } catch (err) {

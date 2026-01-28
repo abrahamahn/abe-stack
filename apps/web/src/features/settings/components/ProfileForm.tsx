@@ -10,14 +10,21 @@ import { useState, type ReactElement } from 'react';
 
 import { useProfileUpdate } from '../hooks';
 
-import type { User } from '../api';
+// ============================================================================
+// Local Types (for ESLint type resolution)
+// ============================================================================
+
+interface UserLocal {
+  email: string;
+  name: string | null;
+}
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface ProfileFormProps {
-  user: User;
+  user: UserLocal;
   onSuccess?: () => void;
 }
 
@@ -26,7 +33,9 @@ export interface ProfileFormProps {
 // ============================================================================
 
 export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement => {
-  const [name, setName] = useState(user.name ?? '');
+  const userName: string | null = user.name;
+  const userEmail: string = user.email;
+  const [name, setName] = useState(userName ?? '');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { updateProfile, isLoading, error, reset } = useProfileUpdate({
@@ -47,7 +56,7 @@ export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement
     updateProfile({ name: name.trim().length > 0 ? name.trim() : null });
   };
 
-  const hasChanges = (name.trim().length > 0 ? name.trim() : null) !== user.name;
+  const hasChanges = (name.trim().length > 0 ? name.trim() : null) !== userName;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,7 +64,7 @@ export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement
         <Input
           id="email"
           type="email"
-          value={user.email}
+          value={userEmail}
           disabled
           className="bg-gray-100 dark:bg-gray-800"
         />
