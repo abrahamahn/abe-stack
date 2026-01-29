@@ -11,7 +11,7 @@ import {
     type RecordStorageErrorType,
     type RecordWithTable,
     type VersionedRecord,
-} from '../RecordStorage';
+} from './RecordStorage';
 
 // ============================================================================
 // Mock IndexedDB
@@ -738,9 +738,9 @@ describe('RecordStorageError', () => {
   });
 
   it('should work without cause', () => {
-    const error = new RecordStorageError('Test error', 'UNKNOWN' as RecordStorageErrorType);
+    const error = new RecordStorageError('Test error', 'UNKNOWN');
     expect(error.message).toBe('Test error');
-    expect(error.type).toBe('NOT_FOUND');
+    expect(error.type).toBe('UNKNOWN');
     expect(error.cause).toBeUndefined();
   });
 });

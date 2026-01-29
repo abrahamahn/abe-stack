@@ -19,14 +19,16 @@ import { describe, expect, it, vi } from 'vitest';
 // ============================================================================
 
 vi.mock('@abe-stack/sdk', () => ({
-  QueryCache: vi.fn(() => ({
-    getQueryData: vi.fn(),
-    setQueryData: vi.fn(),
-    invalidateQueries: vi.fn(),
-    subscribe: vi.fn(),
-    subscribeAll: vi.fn(),
-    getAll: vi.fn(),
-  })),
+  QueryCache: vi.fn(function QueryCache() {
+    return {
+      getQueryData: vi.fn(),
+      setQueryData: vi.fn(),
+      invalidateQueries: vi.fn(),
+      subscribe: vi.fn(),
+      subscribeAll: vi.fn(),
+      getAll: vi.fn(),
+    };
+  }),
   createQueryPersister: vi.fn(() => ({
     persistClient: vi.fn(),
     restoreClient: vi.fn().mockResolvedValue(undefined),

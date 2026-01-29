@@ -64,8 +64,10 @@ describe('SettingsPage', () => {
         refetch: vi.fn(),
       });
 
-      render(<SettingsPage />);
-      expect(screen.getByText('Settings')).toBeInTheDocument();
+      const { container } = render(<SettingsPage />);
+      // The component shows a skeleton loader with animate-pulse class
+      const loadingElement = container.querySelector('.animate-pulse');
+      expect(loadingElement).toBeInTheDocument();
     });
   });
 

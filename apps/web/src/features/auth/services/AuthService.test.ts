@@ -8,10 +8,6 @@
  * - Token refresh and persistence
  * - User data fetching
  *
- * Note: In Vitest 4 with ESM, mocking path-aliased packages like @abe-stack/sdk
- * doesn't work reliably for imports in production code. Instead, we mock the
- * global fetch function that the SDK's ApiClient uses internally.
- *
  * @complexity O(1) - All tests are unit tests with mocked dependencies
  */
 
@@ -34,14 +30,23 @@ const mocks = vi.hoisted(() => ({
     set: vi.fn(),
     clear: vi.fn(),
   },
-  mockFetch: vi.fn(),
+  mockApiClient: {
+    login: vi.fn(),
+    register: vi.fn(),
+    refresh: vi.fn(),
+    logout: vi.fn(),
+    getCurrentUser: vi.fn(),
+    forgotPassword: vi.fn(),
+    resetPassword: vi.fn(),
+    verifyEmail: vi.fn(),
+    resendVerification: vi.fn(),
+    getEnabledOAuthProviders: vi.fn(),
+    getOAuthConnections: vi.fn(),
+    unlinkOAuthProvider: vi.fn(),
+    getOAuthLoginUrl: vi.fn(),
+    getOAuthLinkUrl: vi.fn(),
+  },
 }));
-
-// ============================================================================
-// Stub global fetch BEFORE any imports that might use it
-// ============================================================================
-
-vi.stubGlobal('fetch', mocks.mockFetch);
 
 // ============================================================================
 // Vi.mock calls - these reference hoisted mocks
@@ -52,6 +57,14 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
   return {
     ...actual,
     tokenStore: mocks.mockTokenStore,
+  };
+});
+
+vi.mock('@abe-stack/sdk', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+  return {
+    ...actual,
+    createApiClient: () => mocks.mockApiClient,
   };
 });
 
@@ -98,42 +111,6 @@ function createMockRegisterResponse(email = 'new@example.com'): RegisterResponse
   };
 }
 
-/**
- * Creates a mock Response object for fetch.
- *
- * @param data - The response data
- * @param ok - Whether the response is successful
- * @returns Mock Response object
- */
-function createMockResponse(data: unknown, ok = true): Partial<Response> {
-  return {
-    ok,
-    status: ok ? 200 : 401,
-    json: vi.fn().mockResolvedValue(data),
-    headers: new Headers({ 'content-type': 'application/json' }),
-  };
-}
-
-/**
- * Sets up mock fetch to return different responses based on URL patterns.
- *
- * @param responses - Map of URL patterns to responses
- */
-function setupMockFetch(responses: Record<string, { ok: boolean; data: unknown }>): void {
-  mocks.mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
-    const url = typeof input === 'string' ? input : input.toString();
-
-    for (const [pattern, response] of Object.entries(responses)) {
-      if (url.includes(pattern)) {
-        return createMockResponse(response.data, response.ok);
-      }
-    }
-
-    // Default: return error response
-    return createMockResponse({ message: 'Not found' }, false);
-  });
-}
-
 // ============================================================================
 // Tests
 // ============================================================================
@@ -149,8 +126,12 @@ describe('AuthService', () => {
     // Reset token store mock
     mocks.mockTokenStore.get.mockReturnValue(null);
 
-    // Reset fetch mock
-    mocks.mockFetch.mockReset();
+    // Reset api client mocks
+    Object.values(mocks.mockApiClient).forEach((mock) => {
+      if (typeof mock === 'function' && 'mockReset' in mock) {
+        mock.mockReset();
+      }
+    });
 
     config = createMockConfig();
     authService = new AuthService({ config });
@@ -189,9 +170,7 @@ describe('AuthService', () => {
       const mockUser = createMockUser();
       const mockResponse = createMockAuthResponse(mockUser);
 
-      setupMockFetch({
-        '/auth/login': { ok: true, data: mockResponse },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(mockResponse);
 
       await authService.login({ email: 'test@example.com', password: 'password' });
       const state = authService.getState();
@@ -224,9 +203,7 @@ describe('AuthService', () => {
       const listener = vi.fn();
       authService.subscribe(listener);
 
-      setupMockFetch({
-        '/auth/login': { ok: true, data: createMockAuthResponse() },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
       await authService.login({ email: 'test@example.com', password: 'password' });
 
@@ -239,9 +216,7 @@ describe('AuthService', () => {
 
       unsubscribe();
 
-      setupMockFetch({
-        '/auth/login': { ok: true, data: createMockAuthResponse() },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
       await authService.login({ email: 'test@example.com', password: 'password' });
 
@@ -250,23 +225,20 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should call fetch with credentials', async () => {
-      setupMockFetch({
-        '/auth/login': { ok: true, data: createMockAuthResponse() },
-      });
+    it('should call api client with credentials', async () => {
+      mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
       await authService.login({ email: 'test@example.com', password: 'password123' });
 
-      expect(mocks.mockFetch).toHaveBeenCalled();
-      const [url] = mocks.mockFetch.mock.calls[0] as [string];
-      expect(url).toContain('/auth/login');
+      expect(mocks.mockApiClient.login).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123',
+      });
     });
 
     it('should store token on successful login', async () => {
       const response = createMockAuthResponse();
-      setupMockFetch({
-        '/auth/login': { ok: true, data: response },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(response);
 
       await authService.login({ email: 'test@example.com', password: 'password' });
 
@@ -275,9 +247,7 @@ describe('AuthService', () => {
 
     it('should update state with user', async () => {
       const response = createMockAuthResponse();
-      setupMockFetch({
-        '/auth/login': { ok: true, data: response },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(response);
 
       await authService.login({ email: 'test@example.com', password: 'password' });
 
@@ -285,9 +255,7 @@ describe('AuthService', () => {
     });
 
     it('should throw on login failure', async () => {
-      setupMockFetch({
-        '/auth/login': { ok: false, data: { message: 'Invalid credentials' } },
-      });
+      mocks.mockApiClient.login.mockRejectedValue(new Error('Invalid credentials'));
 
       await expect(
         authService.login({ email: 'test@example.com', password: 'wrong' }),
@@ -296,28 +264,22 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should call fetch with data', async () => {
+    it('should call api client with data', async () => {
       const data = {
         email: 'new@example.com',
         password: 'password123',
         name: 'New User',
       };
-      setupMockFetch({
-        '/auth/register': { ok: true, data: createMockRegisterResponse(data.email) },
-      });
+      mocks.mockApiClient.register.mockResolvedValue(createMockRegisterResponse(data.email));
 
       await authService.register(data);
 
-      expect(mocks.mockFetch).toHaveBeenCalled();
-      const [url] = mocks.mockFetch.mock.calls[0] as [string];
-      expect(url).toContain('/auth/register');
+      expect(mocks.mockApiClient.register).toHaveBeenCalledWith(data);
     });
 
     it('should return pending_verification status without storing token', async () => {
       const response = createMockRegisterResponse('new@example.com');
-      setupMockFetch({
-        '/auth/register': { ok: true, data: response },
-      });
+      mocks.mockApiClient.register.mockResolvedValue(response);
 
       const result = await authService.register({
         email: 'new@example.com',
@@ -331,20 +293,16 @@ describe('AuthService', () => {
   });
 
   describe('logout', () => {
-    it('should call fetch logout', async () => {
-      setupMockFetch({
-        '/auth/logout': { ok: true, data: { success: true } },
-      });
+    it('should call api client logout', async () => {
+      mocks.mockApiClient.logout.mockResolvedValue({ success: true });
 
       await authService.logout();
 
-      expect(mocks.mockFetch).toHaveBeenCalled();
+      expect(mocks.mockApiClient.logout).toHaveBeenCalled();
     });
 
     it('should clear token', async () => {
-      setupMockFetch({
-        '/auth/logout': { ok: true, data: { success: true } },
-      });
+      mocks.mockApiClient.logout.mockResolvedValue({ success: true });
 
       await authService.logout();
 
@@ -353,19 +311,17 @@ describe('AuthService', () => {
 
     it('should remove user from state', async () => {
       // First login to set user
-      setupMockFetch({
-        '/auth/login': { ok: true, data: createMockAuthResponse() },
-        '/auth/logout': { ok: true, data: { success: true } },
-      });
+      mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
       await authService.login({ email: 'test@example.com', password: 'password' });
 
+      mocks.mockApiClient.logout.mockResolvedValue({ success: true });
       await authService.logout();
 
       expect(authService.getState().user).toBeNull();
     });
 
     it('should not throw on logout error', async () => {
-      mocks.mockFetch.mockRejectedValue(new Error('Network error'));
+      mocks.mockApiClient.logout.mockRejectedValue(new Error('Network error'));
 
       await expect(authService.logout()).resolves.not.toThrow();
       expect(mocks.mockTokenStore.clear).toHaveBeenCalled();
@@ -373,20 +329,16 @@ describe('AuthService', () => {
   });
 
   describe('refreshToken', () => {
-    it('should call fetch refresh', async () => {
-      setupMockFetch({
-        '/auth/refresh': { ok: true, data: { token: 'new-token' } },
-      });
+    it('should call api client refresh', async () => {
+      mocks.mockApiClient.refresh.mockResolvedValue({ token: 'new-token' });
 
       await authService.refreshToken();
 
-      expect(mocks.mockFetch).toHaveBeenCalled();
+      expect(mocks.mockApiClient.refresh).toHaveBeenCalled();
     });
 
     it('should update token on success', async () => {
-      setupMockFetch({
-        '/auth/refresh': { ok: true, data: { token: 'refreshed-token' } },
-      });
+      mocks.mockApiClient.refresh.mockResolvedValue({ token: 'refreshed-token' });
 
       const result = await authService.refreshToken();
 
@@ -395,9 +347,7 @@ describe('AuthService', () => {
     });
 
     it('should clear auth on refresh failure', async () => {
-      setupMockFetch({
-        '/auth/refresh': { ok: false, data: { message: 'Token expired' } },
-      });
+      mocks.mockApiClient.refresh.mockRejectedValue(new Error('Token expired'));
 
       const result = await authService.refreshToken();
 
@@ -418,9 +368,7 @@ describe('AuthService', () => {
     it('should fetch and cache user when token exists', async () => {
       mocks.mockTokenStore.get.mockReturnValue('valid-token');
       const mockUser = createMockUser();
-      setupMockFetch({
-        '/users/me': { ok: true, data: mockUser },
-      });
+      mocks.mockApiClient.getCurrentUser.mockResolvedValue(mockUser);
 
       const user = await authService.fetchCurrentUser();
 
@@ -432,23 +380,11 @@ describe('AuthService', () => {
       mocks.mockTokenStore.get.mockReturnValue('expired-token');
       const mockUser = createMockUser();
 
-      // Track call count to return different responses
-      let userCallCount = 0;
-      mocks.mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
-        const url = typeof input === 'string' ? input : input.toString();
-
-        if (url.includes('/users/me')) {
-          userCallCount++;
-          if (userCallCount === 1) {
-            return createMockResponse({ message: 'Unauthorized' }, false);
-          }
-          return createMockResponse(mockUser, true);
-        }
-        if (url.includes('/auth/refresh')) {
-          return createMockResponse({ token: 'new-token' }, true);
-        }
-        return createMockResponse({ message: 'Not found' }, false);
-      });
+      // First call fails, then refresh succeeds, then second call succeeds
+      mocks.mockApiClient.getCurrentUser
+        .mockRejectedValueOnce(new Error('Unauthorized'))
+        .mockResolvedValueOnce(mockUser);
+      mocks.mockApiClient.refresh.mockResolvedValue({ token: 'new-token' });
 
       const user = await authService.fetchCurrentUser();
 
@@ -458,10 +394,8 @@ describe('AuthService', () => {
     it('should clear auth when refresh also fails', async () => {
       mocks.mockTokenStore.get.mockReturnValue('bad-token');
 
-      setupMockFetch({
-        '/users/me': { ok: false, data: { message: 'Unauthorized' } },
-        '/auth/refresh': { ok: false, data: { message: 'Refresh failed' } },
-      });
+      mocks.mockApiClient.getCurrentUser.mockRejectedValue(new Error('Unauthorized'));
+      mocks.mockApiClient.refresh.mockRejectedValue(new Error('Refresh failed'));
 
       const user = await authService.fetchCurrentUser();
 

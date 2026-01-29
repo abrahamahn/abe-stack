@@ -11,7 +11,7 @@
  * - Loading states
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
@@ -131,6 +131,10 @@ describe('ProfileForm', () => {
       error: null,
       reset: mockReset,
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   // ============================================================================
@@ -337,11 +341,10 @@ describe('ProfileForm', () => {
 
     it('should clear success message on new submission', async () => {
       const user = userEvent.setup({ delay: null });
+      let capturedOnSuccess: (() => void) | undefined;
 
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -350,19 +353,14 @@ describe('ProfileForm', () => {
         };
       });
 
-      const { rerender } = render(<ProfileForm {...defaultProps} />);
+      render(<ProfileForm {...defaultProps} />);
 
-      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
-
-      // Reset mock to not auto-trigger success
-      vi.mocked(useProfileUpdate).mockReturnValue({
-        updateProfile: mockUpdateProfile,
-        isLoading: false,
-        error: null,
-        reset: mockReset,
+      // Trigger success to show message
+      await act(async () => {
+        capturedOnSuccess?.();
       });
 
-      rerender(<ProfileForm {...defaultProps} />);
+      expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
 
       const nameInput = screen.getByTestId('input-name');
       await user.clear(nameInput);
@@ -451,11 +449,11 @@ describe('ProfileForm', () => {
   // ============================================================================
 
   describe('success handling', () => {
-    it('should show success message after update', () => {
+    it('should show success message after update', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -465,15 +463,19 @@ describe('ProfileForm', () => {
       });
 
       render(<ProfileForm {...defaultProps} />);
+
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
 
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
     });
 
-    it('should display success alert with correct tone', () => {
+    it('should display success alert with correct tone', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -483,16 +485,20 @@ describe('ProfileForm', () => {
       });
 
       render(<ProfileForm {...defaultProps} />);
+
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
 
       const alert = screen.getByTestId('alert');
       expect(alert).toHaveAttribute('data-tone', 'success');
     });
 
-    it('should call reset on success', () => {
+    it('should call reset on success', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -503,14 +509,18 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} />);
 
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
+
       expect(mockReset).toHaveBeenCalled();
     });
 
-    it('should call onSuccess callback', () => {
+    it('should call onSuccess callback', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -521,14 +531,18 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} onSuccess={mockOnSuccess} />);
 
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
+
       expect(mockOnSuccess).toHaveBeenCalled();
     });
 
-    it('should handle undefined onSuccess prop', () => {
+    it('should handle undefined onSuccess prop', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -539,16 +553,20 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} onSuccess={undefined} />);
 
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
+
       // Should not throw
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
     });
 
-    it('should hide success message after 3 seconds', () => {
+    it('should hide success message after 3 seconds', async () => {
       vi.useFakeTimers();
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -559,21 +577,27 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} />);
 
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
+
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
 
       // Fast-forward time
-      vi.advanceTimersByTime(3000);
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+      });
 
       expect(screen.queryByText('Profile updated successfully')).not.toBeInTheDocument();
       vi.useRealTimers();
     });
 
-    it('should not hide success message before 3 seconds', () => {
+    it('should not hide success message before 3 seconds', async () => {
       vi.useFakeTimers();
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -584,10 +608,16 @@ describe('ProfileForm', () => {
 
       render(<ProfileForm {...defaultProps} />);
 
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
+
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
 
       // Fast-forward time (not enough)
-      vi.advanceTimersByTime(2999);
+      await act(async () => {
+        vi.advanceTimersByTime(2999);
+      });
 
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
       vi.useRealTimers();
@@ -743,11 +773,11 @@ describe('ProfileForm', () => {
       expect(mockUpdateProfile).toHaveBeenCalled();
     });
 
-    it('should not show both error and success simultaneously', () => {
+    it('should not show both error and success simultaneously', async () => {
+      let capturedOnSuccess: (() => void) | undefined;
+
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
-        if (onSuccess !== undefined) {
-          onSuccess();
-        }
+        capturedOnSuccess = onSuccess;
         return {
           updateProfile: mockUpdateProfile,
           isLoading: false,
@@ -757,6 +787,10 @@ describe('ProfileForm', () => {
       });
 
       render(<ProfileForm {...defaultProps} />);
+
+      await act(async () => {
+        capturedOnSuccess?.();
+      });
 
       // Both might be present in different scenarios, but typically one at a time
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();

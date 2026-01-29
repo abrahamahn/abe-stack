@@ -33,7 +33,8 @@ describe('SecurityMetricsCard', () => {
         <SecurityMetricsCard metrics={undefined} isLoading={true} />,
       );
 
-      const skeletons = container.querySelectorAll('[class*="animate"]');
+      // Skeleton elements have .skeleton class
+      const skeletons = container.querySelectorAll('.skeleton');
       expect(skeletons.length).toBeGreaterThan(0);
     });
 
@@ -202,14 +203,16 @@ describe('SecurityMetricsCard', () => {
         ...mockMetrics,
         totalEvents: 5,
         criticalEvents: 1,
-        highEvents: 2,
+        highEvents: 3,
+        tokenReuseCount: 4,
       };
 
       render(<SecurityMetricsCard metrics={metricsWithSmallNumbers} isLoading={false} />);
 
       expect(screen.getByText('5')).toBeInTheDocument();
       expect(screen.getByText('1')).toBeInTheDocument();
-      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
+      expect(screen.getByText('4')).toBeInTheDocument();
     });
   });
 

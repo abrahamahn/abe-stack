@@ -175,11 +175,10 @@ export {
 // WebSocket
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './messaging/websocket';
 
-// Billing
-export { createBillingProvider, isBillingConfigured } from './billing';
-export type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './billing';
-// Note: Core billing types (BillingService, CheckoutParams, etc.) should be
-// imported directly from @abe-stack/core
+// Billing (from @abe-stack/billing package)
+export { createBillingProvider, isBillingConfigured, PayPalProvider, StripeProvider } from '@abe-stack/billing';
+// Note: Billing types (BillingService, CheckoutParams, NormalizedWebhookEvent, etc.)
+// should be imported directly from @abe-stack/core
 
 // Search
 export { SearchProviderFactory, getSearchProviderFactory } from './search';
@@ -401,18 +400,22 @@ export {
   type SubscriptionWithId,
 } from './notifications';
 
-// Cache
+// Cache (from @abe-stack/cache package)
 export {
-  MemoryCacheProvider,
+  createArgIndexKeyGenerator,
   createCache,
   createCacheFromEnv,
   createMemoryCache,
+  createObjectKeyGenerator,
+  LRUCache,
   memoize,
   memoizeMethod,
+  MemoryCacheProvider,
   type BaseCacheConfig,
   type CacheDeleteOptions,
   type CacheEntry,
   type CacheEntryMetadata,
+  type CacheEvictionReason,
   type CacheGetOptions,
   type CacheLogger,
   type CacheOperationResult,
@@ -420,10 +423,11 @@ export {
   type CacheSetOptions,
   type CacheStats,
   type CreateCacheOptions,
+  type EvictionCallback,
   type EvictionReason,
-  type LRUNode,
+  type LRUCacheOptions,
+  type MemoizedFunction,
   type MemoizeOptions,
   type MemoizeStats,
-  type MemoizedFunction,
   type MemoryCacheConfig,
-} from './cache';
+} from '@abe-stack/cache';

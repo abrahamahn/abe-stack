@@ -12,7 +12,7 @@
 
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
-import { PayPalProvider } from '@/infrastructure/billing';
+import { PayPalProvider } from '@abe-stack/billing';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { handlePayPalWebhook } from './paypal-webhook';
@@ -43,7 +43,7 @@ const { MockPayPalProvider } = vi.hoisted(() => {
 });
 
 // Mock the billing infrastructure module
-vi.mock('@/infrastructure/billing', () => ({
+vi.mock('@abe-stack/billing', () => ({
   PayPalProvider: MockPayPalProvider,
   // Re-export other members as-is (they're not used in this test)
   StripeProvider: vi.fn(),

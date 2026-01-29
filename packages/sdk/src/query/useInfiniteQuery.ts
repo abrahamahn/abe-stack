@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
+import { hashQueryKey } from './QueryCache';
 import { useQueryCache } from './QueryCacheProvider';
 
 import type { QueryKey, QueryState } from './QueryCache';
@@ -172,6 +173,15 @@ export function useInfiniteQuery<
 
   const cache = useQueryCache();
 
+  // Stable hash of queryKey for effect dependencies (avoids infinite loop from array recreation)
+  const queryKeyHash = hashQueryKey(queryKey);
+
+  // Keep queryKey in a ref to access current value without adding it as a dependency
+  const queryKeyRef = useRef(queryKey);
+  useEffect(() => {
+    queryKeyRef.current = queryKey;
+  }, [queryKey]);
+
   // Local state for infinite data
   const [infiniteData, setInfiniteData] = useState<InfiniteData<TData, TPageParam> | undefined>(
     undefined,
@@ -180,21 +190,28 @@ export function useInfiniteQuery<
   const [isFetchingPreviousPage, setIsFetchingPreviousPage] = useState(false);
 
   const abortController = useRef<AbortController | null>(null);
+  const infiniteDataRef = useRef<InfiniteData<TData, TPageParam> | undefined>(undefined);
+  const isFetchingRef = useRef(false);
 
-  // Subscribe to cache changes
+  // Keep ref in sync with state
+  useEffect(() => {
+    infiniteDataRef.current = infiniteData;
+  }, [infiniteData]);
+
+  // Subscribe to cache changes (use queryKeyRef to avoid recreating on array reference change)
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
-      return cache.subscribe(queryKey, onStoreChange);
+      return cache.subscribe(queryKeyRef.current, onStoreChange);
     },
-    [cache, queryKey],
+    [cache, queryKeyHash],
   );
 
-  // Get current state snapshot
+  // Get current state snapshot (use queryKeyRef to avoid recreating on array reference change)
   const getSnapshot = useCallback(():
     | QueryState<InfiniteData<TData, TPageParam>, TError>
     | undefined => {
-    return cache.getQueryState<InfiniteData<TData, TPageParam>, TError>(queryKey);
-  }, [cache, queryKey]);
+    return cache.getQueryState<InfiniteData<TData, TPageParam>, TError>(queryKeyRef.current);
+  }, [cache, queryKeyHash]);
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
@@ -230,24 +247,37 @@ export function useInfiniteQuery<
     [queryFn, retry, retryDelay],
   );
 
-  // Fetch initial page
+  // Fetch initial page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchInitialPage = useCallback(async (): Promise<void> => {
     if (!enabled) return;
 
-    // Check if data is fresh
-    if (!cache.isStale(queryKey) && (infiniteData?.pages.length ?? 0) > 0) return;
+    const currentQueryKey = queryKeyRef.current;
+
+    // Check if data is fresh - use cache data directly, not local ref
+    // (local ref may be empty on remount even if cache has fresh data)
+    const cachedData = cache.getQueryData(currentQueryKey) as
+      | InfiniteData<TData, TPageParam>
+      | undefined;
+    if (!cache.isStale(currentQueryKey) && (cachedData?.pages.length ?? 0) > 0) return;
+
+    // Prevent duplicate fetches
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
 
     if (abortController.current !== null) {
       abortController.current.abort();
     }
     abortController.current = new AbortController();
 
-    cache.setFetchStatus(queryKey, 'fetching');
+    cache.setFetchStatus(currentQueryKey, 'fetching');
 
     try {
       const firstPage = await fetchPage(initialPageParam);
 
-      if (abortController.current.signal.aborted) return;
+      if (abortController.current.signal.aborted) {
+        isFetchingRef.current = false;
+        return;
+      }
 
       const newData: InfiniteData<TData, TPageParam> = {
         pages: [firstPage],
@@ -255,23 +285,27 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      cache.setQueryData(currentQueryKey, newData, staleTime !== undefined ? { staleTime } : {});
       if (onSuccess !== undefined) {
         onSuccess(newData);
       }
     } catch (err) {
-      if (abortController.current.signal.aborted) return;
+      if (abortController.current.signal.aborted) {
+        isFetchingRef.current = false;
+        return;
+      }
 
       const error = err instanceof Error ? err : new Error(String(err));
-      cache.setQueryError(queryKey, error);
+      cache.setQueryError(currentQueryKey, error);
       if (onError !== undefined) {
         onError(error as TError);
       }
+    } finally {
+      isFetchingRef.current = false;
     }
   }, [
     enabled,
-    queryKey,
-    infiniteData,
+    queryKeyHash,
     fetchPage,
     initialPageParam,
     staleTime,
@@ -280,10 +314,11 @@ export function useInfiniteQuery<
     cache,
   ]);
 
-  // Fetch next page
+  // Fetch next page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchNextPage = useCallback(async (): Promise<void> => {
     if (!enabled || infiniteData === undefined || infiniteData.pages.length === 0) return;
 
+    const currentQueryKey = queryKeyRef.current;
     const lastPage = infiniteData.pages[infiniteData.pages.length - 1];
     if (lastPage === undefined) return;
     const nextPageParam = getNextPageParam(lastPage, infiniteData.pages);
@@ -291,7 +326,7 @@ export function useInfiniteQuery<
     if (nextPageParam === undefined) return;
 
     setIsFetchingNextPage(true);
-    cache.setFetchStatus(queryKey, 'fetching');
+    cache.setFetchStatus(currentQueryKey, 'fetching');
 
     try {
       const nextPage = await fetchPage(nextPageParam as TPageParam);
@@ -302,13 +337,13 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      cache.setQueryData(currentQueryKey, newData, staleTime !== undefined ? { staleTime } : {});
       if (onSuccess !== undefined) {
         onSuccess(newData);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      cache.setQueryError(queryKey, error);
+      cache.setQueryError(currentQueryKey, error);
       if (onError !== undefined) {
         onError(error as TError);
       }
@@ -324,10 +359,10 @@ export function useInfiniteQuery<
     onSuccess,
     onError,
     cache,
-    queryKey,
+    queryKeyHash,
   ]);
 
-  // Fetch previous page
+  // Fetch previous page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchPreviousPage = useCallback(async (): Promise<void> => {
     if (
       !enabled ||
@@ -337,6 +372,7 @@ export function useInfiniteQuery<
     )
       return;
 
+    const currentQueryKey = queryKeyRef.current;
     const firstPage = infiniteData.pages[0];
     if (firstPage === undefined) return;
     const prevPageParam = getPreviousPageParam(firstPage, infiniteData.pages);
@@ -344,7 +380,7 @@ export function useInfiniteQuery<
     if (prevPageParam === undefined) return;
 
     setIsFetchingPreviousPage(true);
-    cache.setFetchStatus(queryKey, 'fetching');
+    cache.setFetchStatus(currentQueryKey, 'fetching');
 
     try {
       const prevPage = await fetchPage(prevPageParam as TPageParam);
@@ -355,13 +391,13 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      cache.setQueryData(currentQueryKey, newData, staleTime !== undefined ? { staleTime } : {});
       if (onSuccess !== undefined) {
         onSuccess(newData);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      cache.setQueryError(queryKey, error);
+      cache.setQueryError(currentQueryKey, error);
       if (onError !== undefined) {
         onError(error as TError);
       }
@@ -377,36 +413,49 @@ export function useInfiniteQuery<
     onSuccess,
     onError,
     cache,
-    queryKey,
+    queryKeyHash,
   ]);
 
-  // Refetch all pages
+  // Refetch all pages (use queryKeyRef.current to avoid dependency on array reference)
   const refetch = useCallback(async (): Promise<void> => {
     if (!enabled) return;
 
     abortController.current?.abort();
     abortController.current = new AbortController();
 
-    cache.invalidateQuery(queryKey);
+    cache.invalidateQuery(queryKeyRef.current);
     setInfiniteData(undefined);
 
     await fetchInitialPage();
-  }, [enabled, queryKey, fetchInitialPage, cache]);
+  }, [enabled, queryKeyHash, fetchInitialPage, cache]);
 
-  // Initial fetch effect
+  // Keep fetchInitialPage ref in sync
+  const fetchInitialPageRef = useRef(fetchInitialPage);
+  useEffect(() => {
+    fetchInitialPageRef.current = fetchInitialPage;
+  }, [fetchInitialPage]);
+
+  // Initial fetch effect - use refs and queryKeyHash to avoid infinite loop from array reference changes
   useEffect(() => {
     if (!enabled) return;
 
-    if (cache.isStale(queryKey) || (infiniteData?.pages.length ?? 0) === 0) {
-      void fetchInitialPage();
+    // Check cache data directly - local ref may be empty on remount even if cache has fresh data
+    const cachedData = cache.getQueryData(queryKeyRef.current) as
+      | InfiniteData<TData, TPageParam>
+      | undefined;
+    if (cache.isStale(queryKeyRef.current) || (cachedData?.pages.length ?? 0) === 0) {
+      void fetchInitialPageRef.current();
     }
 
     return (): void => {
+      // Reset isFetchingRef before abort to allow StrictMode re-run to proceed
+      isFetchingRef.current = false;
       if (abortController.current !== null) {
         abortController.current.abort();
       }
     };
-  }, [enabled, queryKey, cache, infiniteData, fetchInitialPage]);
+    // Use queryKeyHash instead of queryKey to avoid re-running on array reference change
+  }, [enabled, queryKeyHash, cache]);
 
   // Derive computed values
   const error = (state?.error as TError | null) ?? null;

@@ -5,7 +5,7 @@
  * Provides a shared QueryCache instance to the component tree.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { QueryCache } from './QueryCache';
 
@@ -62,7 +62,15 @@ export function QueryCacheProvider({
   options,
   children,
 }: QueryCacheProviderProps): ReactNode {
-  const cacheInstance = cache ?? new QueryCache(options);
+  // Use useMemo to ensure the cache is only created once per provider instance
+  // This prevents creating a new cache on every render when no cache prop is provided
+  const cacheInstance = useMemo(
+    () => cache ?? new QueryCache(options),
+    // Dependencies: only recreate if cache prop changes
+    // Note: options is intentionally NOT a dependency - options should only affect initial creation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cache],
+  );
 
   return <QueryCacheContext.Provider value={cacheInstance}>{children}</QueryCacheContext.Provider>;
 }

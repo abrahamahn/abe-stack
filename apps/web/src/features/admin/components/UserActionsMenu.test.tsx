@@ -71,7 +71,9 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      expect(screen.getByText('Lock User')).toBeInTheDocument();
+      // Both heading and button have "Lock User" text
+      const lockElements = screen.getAllByText('Lock User');
+      expect(lockElements.length).toBeGreaterThan(0);
     });
 
     it('should render unlock user section for locked user', () => {
@@ -93,7 +95,9 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      expect(screen.getByText('Unlock User')).toBeInTheDocument();
+      // Both heading and button have "Unlock User" text
+      const unlockElements = screen.getAllByText('Unlock User');
+      expect(unlockElements.length).toBeGreaterThan(0);
     });
   });
 
@@ -206,8 +210,8 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const roleSelect = screen.getByLabelText('Role') as HTMLSelectElement;
-      expect(roleSelect.value).toBe('user');
+      // Custom Select displays the current value in a span
+      expect(screen.getByText('User')).toBeInTheDocument();
     });
 
     it('should allow changing name', () => {
@@ -303,8 +307,11 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const roleSelect = screen.getByLabelText('Role');
-      fireEvent.change(roleSelect, { target: { value: 'moderator' } });
+      // Custom Select: click trigger to open, then click option
+      const roleSelectTrigger = screen.getByLabelText('Role');
+      fireEvent.click(roleSelectTrigger);
+      const moderatorOption = screen.getByRole('option', { name: 'Moderator' });
+      fireEvent.click(moderatorOption);
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       expect(updateButton).not.toBeDisabled();
@@ -349,8 +356,11 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const roleSelect = screen.getByLabelText('Role');
-      fireEvent.change(roleSelect, { target: { value: 'admin' } });
+      // Custom Select: click trigger to open, then click option
+      const roleSelectTrigger = screen.getByLabelText('Role');
+      fireEvent.click(roleSelectTrigger);
+      const adminOption = screen.getByRole('option', { name: 'Admin' });
+      fireEvent.click(adminOption);
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       fireEvent.click(updateButton);
@@ -377,8 +387,11 @@ describe('UserActionsMenu', () => {
       const nameInput = screen.getByLabelText('Name');
       fireEvent.change(nameInput, { target: { value: 'Admin User' } });
 
-      const roleSelect = screen.getByLabelText('Role');
-      fireEvent.change(roleSelect, { target: { value: 'admin' } });
+      // Custom Select: click trigger to open, then click option
+      const roleSelectTrigger = screen.getByLabelText('Role');
+      fireEvent.click(roleSelectTrigger);
+      const adminOption = screen.getByRole('option', { name: 'Admin' });
+      fireEvent.click(adminOption);
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       fireEvent.click(updateButton);
@@ -533,8 +546,11 @@ describe('UserActionsMenu', () => {
       const reasonTextarea = screen.getByLabelText('Reason for locking');
       fireEvent.change(reasonTextarea, { target: { value: 'Abuse' } });
 
-      const durationSelect = screen.getByLabelText('Lock Duration');
-      fireEvent.change(durationSelect, { target: { value: '1440' } });
+      // Custom Select: click trigger to open, then click option
+      const durationSelectTrigger = screen.getByLabelText('Lock Duration');
+      fireEvent.click(durationSelectTrigger);
+      const dayOption = screen.getByRole('option', { name: '1 Day' });
+      fireEvent.click(dayOption);
 
       const lockButton = screen.getByRole('button', { name: 'Lock User' });
       fireEvent.click(lockButton);

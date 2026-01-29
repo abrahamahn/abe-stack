@@ -139,12 +139,17 @@ vi.mock('@abe-stack/core/pubsub', () => {
     publishLocal = vi.fn();
   }
   return {
+    SubscriptionManager: MockSubscriptionManager,
+  };
+});
+
+vi.mock('@abe-stack/core/pubsub/postgres', () => {
+  return {
     createPostgresPubSub: vi.fn(() => ({
       start: vi.fn().mockResolvedValue(undefined),
       stop: vi.fn().mockResolvedValue(undefined),
       publish: vi.fn(),
     })),
-    SubscriptionManager: MockSubscriptionManager,
   };
 });
 
@@ -369,7 +374,7 @@ describe('App', () => {
         publish: vi.fn(),
       }));
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub');
+      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockImplementation(mockCreatePostgresPubSub);
 
       const app = new App({ config });
@@ -443,7 +448,7 @@ describe('App', () => {
         publish: vi.fn(),
       };
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub');
+      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockReturnValue(mockPgPubSub);
 
       const mockServer = createMockServer();
@@ -493,7 +498,7 @@ describe('App', () => {
         publish: vi.fn(),
       };
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub');
+      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockReturnValue(mockPgPubSub);
 
       const mockQueue = {

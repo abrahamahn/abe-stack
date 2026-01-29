@@ -11,18 +11,6 @@
       ],
       "@ipc/*": [
             "./src/electron/ipc/*"
-      ],
-      "@abe-stack/ui": [
-            "../../packages/ui/src/index.ts"
-      ],
-      "@abe-stack/ui/*": [
-            "../../packages/ui/src/*"
-      ],
-      "@abe-stack/core": [
-            "../../packages/core/src/index.ts"
-      ],
-      "@abe-stack/core/*": [
-            "../../packages/core/src/*"
       ]
     },
     "outDir": "./dist",

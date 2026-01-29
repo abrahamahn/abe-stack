@@ -17,7 +17,8 @@ import type {
 } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
 
-import { StripeProvider, type NormalizedWebhookEvent } from '@/infrastructure/billing';
+import { StripeProvider } from '@abe-stack/billing';
+import type { NormalizedWebhookEvent } from '@abe-stack/core';
 
 // ============================================================================
 // Types

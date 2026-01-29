@@ -1,7 +1,7 @@
 // packages/sdk/src/cache/RecordCache.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { RecordCache } from '../RecordCache';
+import { RecordCache } from './RecordCache';
 
 // Test type definitions
 interface User {

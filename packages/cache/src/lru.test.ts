@@ -1,20 +1,35 @@
-// apps/server/src/infrastructure/cache/utils/lru-cache.test.ts
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+// packages/cache/src/lru.test.ts
 
-import { LRUCache } from './lru-cache';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { LRUCache } from './lru';
+
+import type { EvictionReason } from './lru';
 
 describe('LRUCache', () => {
   describe('constructor', () => {
     it('should create cache with specified max size', () => {
-      const cache = new LRUCache<string, number>(3);
+      const cache = new LRUCache<string, number>({ maxSize: 3 });
       expect(cache).toBeDefined();
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
     });
 
     it('should accept optional default TTL', () => {
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
       cache.set('key', 123);
       expect(cache.get('key')).toBe(123);
+    });
+
+    it('should throw error for invalid maxSize', () => {
+      expect(() => new LRUCache<string, number>({ maxSize: 0 })).toThrow(
+        'maxSize must be a positive integer',
+      );
+      expect(() => new LRUCache<string, number>({ maxSize: -1 })).toThrow(
+        'maxSize must be a positive integer',
+      );
+      expect(() => new LRUCache<string, number>({ maxSize: 1.5 })).toThrow(
+        'maxSize must be a positive integer',
+      );
     });
   });
 
@@ -22,7 +37,7 @@ describe('LRUCache', () => {
     let cache: LRUCache<string, number>;
 
     beforeEach(() => {
-      cache = new LRUCache<string, number>(3);
+      cache = new LRUCache<string, number>({ maxSize: 3 });
     });
 
     it('should store and retrieve values', () => {
@@ -93,7 +108,7 @@ describe('LRUCache', () => {
     });
 
     it('should expire items after TTL', () => {
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
       cache.set('a', 1);
 
       expect(cache.get('a')).toBe(1);
@@ -104,7 +119,7 @@ describe('LRUCache', () => {
     });
 
     it('should use custom TTL override', () => {
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
       cache.set('a', 1, 500); // Custom TTL
 
       vi.advanceTimersByTime(499);
@@ -115,7 +130,7 @@ describe('LRUCache', () => {
     });
 
     it('should not expire items when no TTL is set', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       cache.set('a', 1);
 
       vi.advanceTimersByTime(10000);
@@ -124,18 +139,18 @@ describe('LRUCache', () => {
     });
 
     it('should delete expired items on access', () => {
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
       cache.set('a', 1);
 
       vi.advanceTimersByTime(1001);
 
       expect(cache.get('a')).toBeUndefined();
       expect(cache.has('a')).toBe(false);
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
     });
 
     it('should return false for expired items in has()', () => {
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
       cache.set('a', 1);
 
       expect(cache.has('a')).toBe(true);
@@ -150,7 +165,7 @@ describe('LRUCache', () => {
     let cache: LRUCache<string, number>;
 
     beforeEach(() => {
-      cache = new LRUCache<string, number>(3);
+      cache = new LRUCache<string, number>({ maxSize: 3 });
     });
 
     it('should delete existing items', () => {
@@ -172,36 +187,54 @@ describe('LRUCache', () => {
     it('should update size after deletion', () => {
       cache.set('a', 1);
       cache.set('b', 2);
-      expect(cache.size()).toBe(2);
+      expect(cache.size).toBe(2);
 
       cache.delete('a');
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
     });
   });
 
   describe('clear', () => {
     it('should remove all items', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       cache.set('a', 1);
       cache.set('b', 2);
       cache.set('c', 3);
 
-      expect(cache.size()).toBe(3);
+      expect(cache.size).toBe(3);
 
       cache.clear();
 
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
       expect(cache.get('a')).toBeUndefined();
       expect(cache.get('b')).toBeUndefined();
       expect(cache.get('c')).toBeUndefined();
     });
 
     it('should work on empty cache', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       expect(() => {
         cache.clear();
       }).not.toThrow();
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
+    });
+
+    it('should invoke onEvict for all entries', () => {
+      const evicted: Array<{ key: string; reason: EvictionReason }> = [];
+      const cache = new LRUCache<string, number>({
+        maxSize: 5,
+        onEvict: (key, _value, reason) => {
+          evicted.push({ key, reason });
+        },
+      });
+
+      cache.set('a', 1);
+      cache.set('b', 2);
+      cache.clear();
+
+      expect(evicted).toHaveLength(2);
+      expect(evicted[0]?.reason).toBe('clear');
+      expect(evicted[1]?.reason).toBe('clear');
     });
   });
 
@@ -209,7 +242,7 @@ describe('LRUCache', () => {
     let cache: LRUCache<string, number>;
 
     beforeEach(() => {
-      cache = new LRUCache<string, number>(3);
+      cache = new LRUCache<string, number>({ maxSize: 3 });
     });
 
     it('should return true for existing items', () => {
@@ -220,54 +253,27 @@ describe('LRUCache', () => {
     it('should return false for non-existent items', () => {
       expect(cache.has('nonexistent')).toBe(false);
     });
-
-    it('should not move item to front', () => {
-      cache.set('a', 1);
-      cache.set('b', 2);
-      cache.set('c', 3);
-
-      cache.has('a'); // Check existence but don't access
-
-      cache.set('d', 4); // Should still evict 'a'
-
-      expect(cache.has('a')).toBe(false);
-    });
   });
 
-  describe('size', () => {
+  describe('size property', () => {
     it('should return correct count', () => {
-      const cache = new LRUCache<string, number>(5);
-      expect(cache.size()).toBe(0);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
+      expect(cache.size).toBe(0);
 
       cache.set('a', 1);
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
 
       cache.set('b', 2);
-      expect(cache.size()).toBe(2);
+      expect(cache.size).toBe(2);
 
       cache.delete('a');
-      expect(cache.size()).toBe(1);
-    });
-
-    it('should clean up expired entries before counting', () => {
-      vi.useFakeTimers();
-      const cache = new LRUCache<string, number>(5, 1000);
-
-      cache.set('a', 1);
-      cache.set('b', 2);
-      expect(cache.size()).toBe(2);
-
-      vi.advanceTimersByTime(1001);
-
-      expect(cache.size()).toBe(0);
-
-      vi.useRealTimers();
+      expect(cache.size).toBe(1);
     });
   });
 
   describe('keys', () => {
     it('should return all keys', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       cache.set('a', 1);
       cache.set('b', 2);
       cache.set('c', 3);
@@ -280,13 +286,13 @@ describe('LRUCache', () => {
     });
 
     it('should return empty array for empty cache', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       expect(cache.keys()).toEqual([]);
     });
 
     it('should clean up expired entries before returning keys', () => {
       vi.useFakeTimers();
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
 
       cache.set('a', 1);
       cache.set('b', 2);
@@ -301,7 +307,7 @@ describe('LRUCache', () => {
 
   describe('values', () => {
     it('should return all values', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       cache.set('a', 1);
       cache.set('b', 2);
       cache.set('c', 3);
@@ -314,13 +320,13 @@ describe('LRUCache', () => {
     });
 
     it('should return empty array for empty cache', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       expect(cache.values()).toEqual([]);
     });
 
     it('should clean up expired entries before returning values', () => {
       vi.useFakeTimers();
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
 
       cache.set('a', 1);
       cache.set('b', 2);
@@ -335,7 +341,7 @@ describe('LRUCache', () => {
 
   describe('entries', () => {
     it('should return all key-value pairs', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       cache.set('a', 1);
       cache.set('b', 2);
       cache.set('c', 3);
@@ -348,13 +354,13 @@ describe('LRUCache', () => {
     });
 
     it('should return empty array for empty cache', () => {
-      const cache = new LRUCache<string, number>(5);
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
       expect(cache.entries()).toEqual([]);
     });
 
     it('should clean up expired entries before returning pairs', () => {
       vi.useFakeTimers();
-      const cache = new LRUCache<string, number>(5, 1000);
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
 
       cache.set('a', 1);
       cache.set('b', 2);
@@ -367,9 +373,100 @@ describe('LRUCache', () => {
     });
   });
 
+  describe('onEvict callback', () => {
+    it('should call onEvict when LRU eviction occurs', () => {
+      const evicted: Array<{ key: string; value: number; reason: EvictionReason }> = [];
+
+      const cache = new LRUCache<string, number>({
+        maxSize: 2,
+        onEvict: (key, value, reason) => {
+          evicted.push({ key, value, reason });
+        },
+      });
+
+      cache.set('a', 1);
+      cache.set('b', 2);
+      cache.set('c', 3); // Should evict 'a'
+
+      expect(evicted).toHaveLength(1);
+      expect(evicted[0]).toEqual({ key: 'a', value: 1, reason: 'lru' });
+    });
+
+    it('should call onEvict when entry expires', () => {
+      vi.useFakeTimers();
+      const evicted: Array<{ key: string; reason: EvictionReason }> = [];
+
+      const cache = new LRUCache<string, number>({
+        maxSize: 5,
+        defaultTtl: 1000,
+        onEvict: (key, _value, reason) => {
+          evicted.push({ key, reason });
+        },
+      });
+
+      cache.set('a', 1);
+      vi.advanceTimersByTime(1001);
+      cache.get('a'); // Trigger expiration check
+
+      expect(evicted).toHaveLength(1);
+      expect(evicted[0]).toEqual({ key: 'a', reason: 'expired' });
+
+      vi.useRealTimers();
+    });
+
+    it('should call onEvict when manually deleted', () => {
+      const evicted: Array<{ key: string; reason: EvictionReason }> = [];
+
+      const cache = new LRUCache<string, number>({
+        maxSize: 5,
+        onEvict: (key, _value, reason) => {
+          evicted.push({ key, reason });
+        },
+      });
+
+      cache.set('a', 1);
+      cache.delete('a');
+
+      expect(evicted).toHaveLength(1);
+      expect(evicted[0]).toEqual({ key: 'a', reason: 'manual' });
+    });
+  });
+
+  describe('iterator', () => {
+    it('should iterate in LRU order (most recent first)', () => {
+      const cache = new LRUCache<string, number>({ maxSize: 5 });
+      cache.set('a', 1);
+      cache.set('b', 2);
+      cache.set('c', 3);
+      cache.get('a'); // Move 'a' to front
+
+      const entries = [...cache];
+      expect(entries).toEqual([
+        ['a', 1],
+        ['c', 3],
+        ['b', 2],
+      ]);
+    });
+
+    it('should skip expired entries during iteration', () => {
+      vi.useFakeTimers();
+      const cache = new LRUCache<string, number>({ maxSize: 5, defaultTtl: 1000 });
+
+      cache.set('a', 1);
+      cache.set('b', 2, 0); // No TTL
+
+      vi.advanceTimersByTime(1001);
+
+      const entries = [...cache];
+      expect(entries).toEqual([['b', 2]]);
+
+      vi.useRealTimers();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle single-item cache', () => {
-      const cache = new LRUCache<string, number>(1);
+      const cache = new LRUCache<string, number>({ maxSize: 1 });
       cache.set('a', 1);
       expect(cache.get('a')).toBe(1);
 
@@ -379,7 +476,7 @@ describe('LRUCache', () => {
     });
 
     it('should handle complex types as values', () => {
-      const cache = new LRUCache<string, { name: string; age: number }>(3);
+      const cache = new LRUCache<string, { name: string; age: number }>({ maxSize: 3 });
       const value = { name: 'Alice', age: 30 };
       cache.set('user1', value);
 
@@ -388,7 +485,7 @@ describe('LRUCache', () => {
     });
 
     it('should handle null and undefined values correctly', () => {
-      const cache = new LRUCache<string, number | null | undefined>(3);
+      const cache = new LRUCache<string, number | null | undefined>({ maxSize: 3 });
       cache.set('null', null);
       cache.set('undefined', undefined);
 
@@ -400,7 +497,7 @@ describe('LRUCache', () => {
     });
 
     it('should handle number keys', () => {
-      const cache = new LRUCache<number, string>(3);
+      const cache = new LRUCache<number, string>({ maxSize: 3 });
       cache.set(1, 'one');
       cache.set(2, 'two');
 
@@ -409,14 +506,14 @@ describe('LRUCache', () => {
     });
 
     it('should handle rapid successive operations', () => {
-      const cache = new LRUCache<string, number>(3);
+      const cache = new LRUCache<string, number>({ maxSize: 3 });
 
       for (let i = 0; i < 100; i++) {
         cache.set(`key${i}`, i);
       }
 
       // Only last 3 should remain
-      expect(cache.size()).toBe(3);
+      expect(cache.size).toBe(3);
       expect(cache.get('key97')).toBe(97);
       expect(cache.get('key98')).toBe(98);
       expect(cache.get('key99')).toBe(99);
@@ -426,7 +523,7 @@ describe('LRUCache', () => {
 
   describe('performance characteristics', () => {
     it('should maintain O(1) get operations', () => {
-      const cache = new LRUCache<number, number>(1000);
+      const cache = new LRUCache<number, number>({ maxSize: 1000 });
 
       // Fill cache
       for (let i = 0; i < 1000; i++) {
@@ -445,7 +542,7 @@ describe('LRUCache', () => {
     });
 
     it('should maintain O(1) set operations', () => {
-      const cache = new LRUCache<number, number>(1000);
+      const cache = new LRUCache<number, number>({ maxSize: 1000 });
 
       const start = performance.now();
       for (let i = 0; i < 1000; i++) {

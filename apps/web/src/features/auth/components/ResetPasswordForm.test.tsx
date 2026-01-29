@@ -61,7 +61,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('renders back to sign in as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={undefined} />);
 
       expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
         'href',
@@ -71,8 +71,10 @@ describe('ResetPasswordForm', () => {
   });
 
   describe('Invalid/Missing Token - Error View', () => {
+    const invalidTokenProps = { ...defaultProps, initialData: {} };
+
     it('shows invalid link message when token is missing', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...invalidTokenProps} />);
 
       expect(screen.getByRole('heading', { name: 'Invalid reset link' })).toBeInTheDocument();
       expect(
@@ -88,14 +90,18 @@ describe('ResetPasswordForm', () => {
 
     it('shows request new link button with onModeChange', () => {
       const mockOnModeChange = vi.fn();
-      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={mockOnModeChange} />);
+      renderWithRouter(
+        <ResetPasswordForm {...invalidTokenProps} onModeChange={mockOnModeChange} />,
+      );
 
       expect(screen.getByRole('button', { name: 'Request a new reset link' })).toBeInTheDocument();
     });
 
     it('calls onModeChange with forgot-password when request new link is clicked', () => {
       const mockOnModeChange = vi.fn();
-      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={mockOnModeChange} />);
+      renderWithRouter(
+        <ResetPasswordForm {...invalidTokenProps} onModeChange={mockOnModeChange} />,
+      );
 
       fireEvent.click(screen.getByRole('button', { name: 'Request a new reset link' }));
 
@@ -103,7 +109,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('shows request new link as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...invalidTokenProps} onModeChange={undefined} />);
 
       expect(screen.getByRole('link', { name: 'Request a new reset link' })).toHaveAttribute(
         'href',
@@ -112,7 +118,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('does not render password form when token is missing', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...invalidTokenProps} />);
 
       expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Update password' })).not.toBeInTheDocument();
@@ -185,7 +191,7 @@ describe('ResetPasswordForm', () => {
     it('does not render form when token is missing', () => {
       // This shouldn't happen in practice since the form isn't rendered without token,
       // but we test that the form handles missing initialData gracefully
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={{}} />);
 
       // The form isn't rendered, so the password field shouldn't be present
       expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
@@ -311,7 +317,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('invalid token view has proper heading', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={{}} />);
 
       const heading = screen.getByRole('heading', { name: 'Invalid reset link' });
       expect(heading).toHaveClass('auth-form-title');

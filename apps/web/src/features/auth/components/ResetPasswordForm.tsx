@@ -24,7 +24,7 @@ export const ResetPasswordForm = ({
   initialData,
 }: ResetPasswordFormProps): ReactElement => {
   const [password, setPassword] = useState('');
-  const token = initialData?.token as string;
+  const token = initialData?.token ?? '';
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -38,7 +38,7 @@ export const ResetPasswordForm = ({
     }
   };
 
-  if (token.length === 0) {
+  if (token === '' || token.length === 0) {
     return (
       <div className="auth-form">
         <div className="auth-form-content text-center">

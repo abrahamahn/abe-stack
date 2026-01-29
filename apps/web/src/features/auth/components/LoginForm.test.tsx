@@ -2,6 +2,21 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Mock SDK hooks before imports
+vi.mock('@abe-stack/sdk', async () => {
+  const actual = await vi.importActual('@abe-stack/sdk');
+  return {
+    ...actual,
+    useEnabledOAuthProviders: () => ({
+      providers: [],
+      isLoading: false,
+      error: null,
+    }),
+    getOAuthLoginUrl: (baseUrl: string, provider: string) => `${baseUrl}/auth/${provider}`,
+  };
+});
+
 import { LoginForm } from './LoginForm';
 
 import { renderWithProviders } from './../../../__tests__/utils';
@@ -73,7 +88,7 @@ describe('LoginForm', () => {
     });
 
     it('renders sign up as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<LoginForm {...defaultProps} />);
+      renderWithRouter(<LoginForm {...defaultProps} onModeChange={undefined} />);
 
       expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute(

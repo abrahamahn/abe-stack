@@ -1,7 +1,7 @@
 // packages/sdk/src/storage/mutationQueue.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMutationQueue, MutationQueue } from '../mutationQueue';
+import { createMutationQueue, MutationQueue } from './mutationQueue';
 
 // Mock localStorage
 const mockLocalStorage = ((): {

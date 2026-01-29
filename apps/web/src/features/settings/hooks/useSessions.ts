@@ -50,6 +50,7 @@ export function useSessions(): UseSessionsResult {
       const api = getSettingsApi();
       return api.listSessions();
     },
+    retry: false,
   });
 
   const sessionData = query.data as { sessions?: Session[] } | undefined;
@@ -93,11 +94,11 @@ export function useRevokeSession(options?: UseRevokeSessionOptions): UseRevokeSe
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['sessions']);
-      if (options?.onSuccess !== undefined) {
-        options.onSuccess(response);
-      }
+      options?.onSuccess?.(response);
     },
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   return {
@@ -141,11 +142,11 @@ export function useRevokeAllSessions(
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['sessions']);
-      if (options?.onSuccess !== undefined) {
-        options.onSuccess(response);
-      }
+      options?.onSuccess?.(response);
     },
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   const revokeData = mutation.data as { revokedCount?: number } | undefined;

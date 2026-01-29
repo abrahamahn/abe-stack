@@ -2,6 +2,20 @@
 import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Mock SDK hooks
+vi.mock('@abe-stack/sdk', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+  return {
+    ...actual,
+    useEnabledOAuthProviders: () => ({
+      providers: [],
+      isLoading: false,
+      error: null,
+    }),
+    getOAuthLoginUrl: (baseUrl: string, provider: string) => `${baseUrl}/auth/${provider}`,
+  };
+});
+
 import { renderWithProviders } from './../../../__tests__/utils';
 import { AuthPage } from './AuthPage';
 
@@ -23,9 +37,13 @@ const mockUseAuth = vi.fn(() => ({
   logout: vi.fn(),
 }));
 
-vi.mock('@auth/hooks', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
+vi.mock('@auth/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@auth/hooks')>();
+  return {
+    ...actual,
+    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+  };
+});
 
 describe('AuthPage', () => {
   beforeEach((): void => {
@@ -64,6 +82,6 @@ describe('AuthPage', () => {
 
   it('should render forgot password form when mode is forgot-password', () => {
     renderAuthPage('/auth?mode=forgot-password');
-    expect(screen.getByRole('heading', { name: /reset your password/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
   });
 });

@@ -73,7 +73,7 @@ export async function handleSetPassword(
   try {
     // User ID comes from the authenticated request
     const userId = req.user?.userId;
-    if (userId === undefined || userId === '') {
+    if (userId === undefined || userId === null || userId === '') {
       return {
         status: 401,
         body: { message: 'Authentication required' },

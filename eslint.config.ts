@@ -152,6 +152,24 @@ export default [
     },
   },
   {
+    files: ['packages/cache/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/cache/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/billing/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/billing/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
     // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     rules: {

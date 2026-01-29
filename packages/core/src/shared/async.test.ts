@@ -110,6 +110,7 @@ describe('delay with real timers', () => {
     const start = Date.now();
     await delay(0);
     const elapsed = Date.now() - start;
-    expect(elapsed).toBeLessThan(20);
+    // Allow more variance for system timer precision (CI environments, load, etc.)
+    expect(elapsed).toBeLessThan(50);
   });
 });

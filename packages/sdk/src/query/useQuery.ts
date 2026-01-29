@@ -152,12 +152,13 @@ export function useQuery<TData = unknown, TError = Error>(
     // Don't fetch if disabled
     if (!enabled) return;
 
-    // Check if data is fresh
+    // Check if data is fresh (use explicit undefined check to allow null values)
     if (!cache.isStale(queryKey) && state?.data !== undefined) return;
 
     // Abort any in-progress fetch
     abortController.current?.abort();
-    abortController.current = new AbortController();
+    const currentController = new AbortController();
+    abortController.current = currentController;
 
     cache.setFetchStatus(queryKey, 'fetching');
 
@@ -168,8 +169,8 @@ export function useQuery<TData = unknown, TError = Error>(
       try {
         const data = await queryFn();
 
-        // Check if aborted
-        if (abortController.current.signal.aborted) return;
+        // Check if THIS fetch was aborted (use captured controller, not current ref)
+        if (currentController.signal.aborted) return;
 
         cache.setQueryData(queryKey, data, staleTime !== undefined ? { staleTime } : {});
         onSuccess?.(data);
@@ -178,8 +179,8 @@ export function useQuery<TData = unknown, TError = Error>(
       } catch (err) {
         lastError = err as TError;
 
-        // Check if aborted
-        if (abortController.current.signal.aborted) return;
+        // Check if THIS fetch was aborted (use captured controller, not current ref)
+        if (currentController.signal.aborted) return;
 
         // Don't retry on abort
         if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -240,7 +241,9 @@ export function useQuery<TData = unknown, TError = Error>(
   }, [enabled, queryKeyHash, initialData]);
 
   // Derive computed values
-  const data = state?.data ?? placeholderData;
+  // Use explicit undefined check to allow null values from queryFn
+  // Only fall back to placeholderData when data is undefined, not when it's null
+  const data = state?.data !== undefined ? state.data : placeholderData;
   const error = (state?.error as TError | null) ?? null;
   const status = state?.status ?? 'pending';
   const fetchStatus = state?.fetchStatus ?? 'idle';

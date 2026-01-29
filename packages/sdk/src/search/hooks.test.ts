@@ -6,8 +6,8 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
-import { QueryCacheProvider } from '../../query/QueryCacheProvider';
-import { useSearch, useInfiniteSearch, useSearchParams, useDebounceSearch } from '../hooks';
+import { QueryCacheProvider } from '../query/QueryCacheProvider';
+import { useSearch, useInfiniteSearch, useSearchParams, useDebounceSearch } from './hooks';
 
 import type { CursorSearchResult, SearchResult } from '@abe-stack/core';
 

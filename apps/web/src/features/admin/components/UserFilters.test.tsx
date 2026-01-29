@@ -105,17 +105,27 @@ describe('UserFilters', () => {
     it('should call onFiltersChange when role is selected', () => {
       render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
 
-      const roleSelect = screen.getByLabelText('Role:') ;
-      fireEvent.change(roleSelect, { target: { value: 'admin' } });
+      // Custom Select: click trigger to open, then click option
+      const roleSelectTrigger = screen.getByLabelText('Role:');
+      fireEvent.click(roleSelectTrigger);
+      const adminOption = screen.getByRole('option', { name: 'Admin' });
+      fireEvent.click(adminOption);
 
       expect(onFiltersChange).toHaveBeenCalledWith({ role: 'admin' });
     });
 
     it('should not include role when empty value is selected', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      const filtersWithRole: AdminUserListFilters = {
+        ...defaultFilters,
+        role: 'admin',
+      };
+      render(<UserFilters filters={filtersWithRole} onFiltersChange={onFiltersChange} />);
 
-      const roleSelect = screen.getByLabelText('Role:') ;
-      fireEvent.change(roleSelect, { target: { value: '' } });
+      // Custom Select: click trigger to open, then click "All Roles" option
+      const roleSelectTrigger = screen.getByLabelText('Role:');
+      fireEvent.click(roleSelectTrigger);
+      const allOption = screen.getByRole('option', { name: 'All Roles' });
+      fireEvent.click(allOption);
 
       expect(onFiltersChange).toHaveBeenCalledWith({});
     });
@@ -128,8 +138,8 @@ describe('UserFilters', () => {
 
       render(<UserFilters filters={filtersWithRole} onFiltersChange={onFiltersChange} />);
 
-      const roleSelect = screen.getByLabelText('Role:');
-      expect(roleSelect).toHaveValue('moderator');
+      // Custom Select displays current value in the trigger
+      expect(screen.getByText('Moderator')).toBeInTheDocument();
     });
   });
 
@@ -137,17 +147,27 @@ describe('UserFilters', () => {
     it('should call onFiltersChange when status is selected', () => {
       render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
 
-      const statusSelect = screen.getByLabelText('Status:') ;
-      fireEvent.change(statusSelect, { target: { value: 'active' } });
+      // Custom Select: click trigger to open, then click option
+      const statusSelectTrigger = screen.getByLabelText('Status:');
+      fireEvent.click(statusSelectTrigger);
+      const activeOption = screen.getByRole('option', { name: 'Active' });
+      fireEvent.click(activeOption);
 
       expect(onFiltersChange).toHaveBeenCalledWith({ status: 'active' });
     });
 
     it('should not include status when empty value is selected', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      const filtersWithStatus: AdminUserListFilters = {
+        ...defaultFilters,
+        status: 'active',
+      };
+      render(<UserFilters filters={filtersWithStatus} onFiltersChange={onFiltersChange} />);
 
-      const statusSelect = screen.getByLabelText('Status:') ;
-      fireEvent.change(statusSelect, { target: { value: '' } });
+      // Custom Select: click trigger to open, then click "All Statuses" option
+      const statusSelectTrigger = screen.getByLabelText('Status:');
+      fireEvent.click(statusSelectTrigger);
+      const allOption = screen.getByRole('option', { name: 'All Statuses' });
+      fireEvent.click(allOption);
 
       expect(onFiltersChange).toHaveBeenCalledWith({});
     });
@@ -160,8 +180,8 @@ describe('UserFilters', () => {
 
       render(<UserFilters filters={filtersWithStatus} onFiltersChange={onFiltersChange} />);
 
-      const statusSelect = screen.getByLabelText('Status:');
-      expect(statusSelect).toHaveValue('locked');
+      // Custom Select displays current value in the trigger
+      expect(screen.getByText('Locked')).toBeInTheDocument();
     });
   });
 
@@ -169,8 +189,11 @@ describe('UserFilters', () => {
     it('should call onFiltersChange when sort by is changed', () => {
       render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
 
-      const sortSelect = screen.getByLabelText('Sort by:') ;
-      fireEvent.change(sortSelect, { target: { value: 'email' } });
+      // Custom Select: click trigger to open, then click option
+      const sortSelectTrigger = screen.getByLabelText('Sort by:');
+      fireEvent.click(sortSelectTrigger);
+      const emailOption = screen.getByRole('option', { name: 'Email' });
+      fireEvent.click(emailOption);
 
       expect(onFiltersChange).toHaveBeenCalledWith({
         ...defaultFilters,

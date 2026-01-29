@@ -27,7 +27,7 @@ import type {
   PlanRepository,
   SubscriptionRepository,
 } from '@abe-stack/db';
-import type { NormalizedWebhookEvent } from '@/infrastructure/billing';
+import type { NormalizedWebhookEvent } from '@abe-stack/core';
 import type { FastifyBaseLogger } from 'fastify';
 
 
@@ -41,7 +41,7 @@ const { MockStripeProvider } = vi.hoisted(() => {
   return { MockStripeProvider: vi.fn() };
 });
 
-vi.mock('@/infrastructure/billing', () => ({
+vi.mock('@abe-stack/billing', () => ({
   StripeProvider: MockStripeProvider,
   // Re-export other members as needed
   PayPalProvider: vi.fn(),

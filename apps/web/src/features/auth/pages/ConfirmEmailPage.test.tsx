@@ -17,9 +17,13 @@ const mockUseAuth = vi.fn(() => ({
   register: vi.fn(),
 }));
 
-vi.mock('@auth/hooks', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
+vi.mock('@auth/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@auth/hooks')>();
+  return {
+    ...actual,
+    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+  };
+});
 
 describe('ConfirmEmailPage', () => {
   const renderConfirmEmailPage = (route = '/confirm-email?token=valid-token') =>
@@ -167,9 +171,9 @@ describe('ConfirmEmailPage', () => {
   });
 
   describe('Navigation after success', () => {
-    it('should navigate to settings after delay', async () => {
-      vi.useFakeTimers();
-      mockVerifyEmail.mockResolvedValueOnce({});
+    it('should show redirecting message after successful verification', async () => {
+      // Set up mock to resolve successfully
+      mockVerifyEmail.mockResolvedValue({});
       mockUseAuth.mockReturnValue({
         verifyEmail: mockVerifyEmail,
         isLoading: false,
@@ -179,17 +183,16 @@ describe('ConfirmEmailPage', () => {
         logout: vi.fn(),
         register: vi.fn(),
       });
+
       renderConfirmEmailPage();
 
-      // Wait for verification to complete
-      await act(async () => {
-        await vi.runAllTimersAsync();
+      // Wait for verification to complete and success state to render
+      await waitFor(() => {
+        expect(screen.getByText(/email verified/i)).toBeInTheDocument();
       });
 
-      // Verify the redirect message appears (navigation happens internally)
+      // Verify the redirect message appears
       expect(screen.getByText(/redirecting to your account/i)).toBeInTheDocument();
-
-      vi.useRealTimers();
     });
   });
 });

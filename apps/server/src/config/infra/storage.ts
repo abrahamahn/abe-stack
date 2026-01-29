@@ -1,5 +1,6 @@
 // apps/server/src/config/infra/storage.ts
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import type {
   FullEnv,
@@ -54,7 +55,8 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
   // Local filesystem storage (development default)
   // Ensure we use an absolute path relative to the specific app root,
   // not the CWD (which might be the monorepo root)
-  const defaultPath = resolve(__dirname, '../../../uploads');
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const defaultPath = resolve(currentDir, '../../../uploads');
 
   const config: LocalStorageConfig = {
     provider: 'local',

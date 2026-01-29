@@ -267,13 +267,6 @@ describe('Notification Handlers', () => {
     });
 
     describe('Error Handling', () => {
-      // Note: AppError handling tests are skipped because Vitest's optimizeDeps pre-bundling
-      // of @abe-stack/core breaks mocking. The handler's AppError handling logic is correct
-      // and works in production. We test the generic error path instead.
-      test.skip('should handle AppError with code', async () => {
-        // This test requires mocking isAppError which doesn't work with pre-bundled deps
-      });
-
       test('should handle unexpected errors', async () => {
         const ctx = createMockContext();
         const req = createMockRequest({
@@ -692,13 +685,6 @@ describe('Notification Handlers', () => {
     });
 
     describe('Error Handling', () => {
-      // Note: AppError handling tests are skipped because Vitest's optimizeDeps pre-bundling
-      // of @abe-stack/core breaks mocking. The handler's AppError handling logic is correct
-      // and works in production. We test the generic error path instead.
-      test.skip('should handle AppError with code', async () => {
-        // This test requires mocking isAppError which doesn't work with pre-bundled deps
-      });
-
       test('should handle unexpected errors', async () => {
         const ctx = createMockContext();
         const req = createMockRequest({

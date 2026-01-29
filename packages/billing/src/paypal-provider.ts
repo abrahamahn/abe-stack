@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/billing/paypal-provider.ts
+// packages/billing/src/paypal-provider.ts
 /**
  * PayPal Payment Provider
  *
@@ -8,17 +8,19 @@
 
 import * as crypto from 'crypto';
 
-import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 import type {
     BillingService,
     CheckoutParams,
     CheckoutResult,
     CreateProductParams,
     CreateProductResult,
+    NormalizedEventType,
+    NormalizedWebhookEvent,
     PayPalProviderConfig as PayPalConfig,
     ProviderInvoice,
     ProviderPaymentMethod,
     ProviderSubscription,
+    SetupIntentResult,
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';
 

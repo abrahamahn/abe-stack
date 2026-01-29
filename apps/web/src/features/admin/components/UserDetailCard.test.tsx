@@ -24,8 +24,8 @@ describe('UserDetailCard', () => {
     it('should render skeleton loaders', () => {
       const { container } = render(<UserDetailCard user={null} isLoading={true} />);
 
-      // Check for skeleton elements
-      const skeletons = container.querySelectorAll('[class*="animate"]');
+      // Skeleton elements have .skeleton class
+      const skeletons = container.querySelectorAll('.skeleton');
       expect(skeletons.length).toBeGreaterThan(0);
     });
 

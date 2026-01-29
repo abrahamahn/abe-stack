@@ -8,7 +8,7 @@ import {
   type ListQueryKey,
   type QueryKeyFactory,
   type QueryKeys,
-} from '../queryKeys';
+} from './queryKeys';
 
 describe('Query Keys', () => {
   describe('createQueryKeys', () => {

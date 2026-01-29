@@ -5,11 +5,11 @@
  * Adopted from Chet-stack's WebSocket subscription pattern.
  * Enables optimistic UI by notifying clients when data changes.
  *
- * Horizontal Scaling:
- * - PostgresPubSub uses Postgres NOTIFY/LISTEN for cross-instance messaging
+ * NOTE: PostgresPubSub (server-only) is exported separately from './postgres-pubsub'
+ * to avoid bundling Node.js dependencies in browser code.
  */
 
-// Types
+// Types (browser-safe)
 export { SubKeys } from './types';
 export type {
   ClientMessage,
@@ -20,13 +20,16 @@ export type {
   WebSocket,
 } from './types';
 
-// Subscription manager
+// Subscription manager (browser-safe - only uses type import from postgres-pubsub)
 export { SubscriptionManager } from './subscription-manager';
 export type { SubscriptionManagerOptions } from './subscription-manager';
 
-// Postgres NOTIFY/LISTEN adapter
-export { PostgresPubSub, createPostgresPubSub } from './postgres-pubsub';
+// Helpers (browser-safe)
+export { publishAfterWrite } from './helpers';
+
+// Re-export types only from postgres-pubsub (no runtime code)
 export type { PostgresPubSubOptions, PubSubMessage } from './postgres-pubsub';
 
-// Helpers
-export { publishAfterWrite } from './helpers';
+// NOTE: For PostgresPubSub and createPostgresPubSub, import directly:
+// import { PostgresPubSub, createPostgresPubSub } from '@abe-stack/core/infrastructure/pubsub/postgres-pubsub';
+// Or use the package subpath: import { ... } from '@abe-stack/core/pubsub';

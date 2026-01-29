@@ -1,5 +1,6 @@
 // apps/server/src/app.ts
-import { BaseError, createConsoleLogger, createPostgresPubSub, SubscriptionManager } from '@abe-stack/core';
+import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
+import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
 import { type AppContext, type IServiceContainer } from '@shared';
 
 import {
@@ -32,7 +33,8 @@ import type {
     StorageProvider,
     WriteService,
 } from './infrastructure/index';
-import type { AppConfig, BillingService, FcmConfig as FcmConfigType, PostgresPubSub } from '@abe-stack/core';
+import type { AppConfig, BillingService, FcmConfig as FcmConfigType } from '@abe-stack/core';
+import type { PostgresPubSub } from '@abe-stack/core/pubsub/postgres';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 import { buildConnectionString } from '@/config';

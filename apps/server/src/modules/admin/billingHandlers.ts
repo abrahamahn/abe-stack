@@ -32,7 +32,7 @@ import {
 import type { Plan as DbPlan } from '@abe-stack/db';
 import type { AppContext, RequestWithCookies } from '@shared';
 
-import { createBillingProvider } from '@/infrastructure/billing';
+import { createBillingProvider } from '@abe-stack/billing';
 
 
 // ============================================================================

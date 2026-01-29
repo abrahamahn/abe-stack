@@ -1,8 +1,8 @@
 # Sync Scripts (DX Automation)
 
-**Last Updated: January 19, 2026**
+**Last Updated: January 30, 2026**
 
-Comprehensive guide to the ABE Stack developer experience automation scripts. These six TypeScript scripts handle repetitive tasks automatically during development.
+Comprehensive guide to the ABE Stack developer experience automation scripts. These TypeScript scripts handle repetitive tasks automatically during development.
 
 > **Related Documentation:**
 >
@@ -16,22 +16,20 @@ Comprehensive guide to the ABE Stack developer experience automation scripts. Th
 1. [Overview](#overview)
 2. [Execution Modes](#execution-modes)
 3. [How Automation Works](#how-automation-works)
-4. [sync-path-aliases.ts](#1-sync-path-aliasests)
-5. [sync-file-headers.ts](#2-sync-file-headersts)
-6. [sync-tsconfig.ts](#3-sync-tsconfigts)
-7. [sync-linting.ts](#4-sync-lintingts)
-8. [sync-css-theme.ts](#5-sync-css-themets)
-9. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
+4. [sync-file-headers.ts](#1-sync-file-headersts)
+5. [sync-tsconfig.ts](#2-sync-tsconfigts)
+6. [sync-linting.ts](#3-sync-lintingts)
+7. [sync-css-theme.ts](#4-sync-css-themets)
+8. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
 
 ---
 
 ## Overview
 
-Five TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
+Four TypeScript sync scripts automate repetitive development tasks. All scripts are located in `tooling/sync/`:
 
 | Script                 | Purpose                                                         |
 | ---------------------- | --------------------------------------------------------------- |
-| `sync-path-aliases.ts` | Auto-generate TypeScript path aliases in `tsconfig.json`        |
 | `sync-file-headers.ts` | Ensure source files have path comment headers                   |
 | `sync-tsconfig.ts`     | Auto-generate TypeScript project references                     |
 | `sync-linting.ts`      | Sync linting config to `package.json` + `.vscode/settings.json` |
@@ -58,15 +56,14 @@ All watcher scripts also support `--quiet` for silent operation (used by `pnpm d
 ### Development (`pnpm dev`)
 
 ```typescript
-// tools/dev/start-dev.ts
+// tooling/scripts/dev/dev.ts
 const watchers = [
-  startConfigGenerator(), // Generates tsconfigs and aliases
-  startWatcher('config/lint/sync-file-headers.ts'),
-  startWatcher('config/lint/sync-css-theme.ts'),
+  startWatcher('tooling/sync/sync-file-headers.ts'),
+  startWatcher('tooling/sync/sync-css-theme.ts'),
 ];
 ```
 
-Three scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
+Two scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
 
 ### Pre-commit Hook
 
@@ -77,83 +74,13 @@ pnpm config:generate && pnpm sync:headers && pnpm sync:theme
 ### CI Pipeline (`.github/workflows/ci.yml`)
 
 ```yaml
-- run: pnpm sync:aliases:check
 - run: pnpm sync:tsconfig:check
 - run: pnpm sync:headers:check
 ```
 
 ---
 
-## 1. sync-path-aliases.ts
-
-**Purpose:** Auto-generate TypeScript path aliases in `tsconfig.json` based on directory structure.
-
-**Commands:**
-
-```bash
-pnpm sync:aliases        # Sync once
-pnpm sync:aliases:check  # Verify (CI mode)
-pnpm sync:aliases:watch  # Watch mode
-```
-
-### Scope Included
-
-| Project        | tsconfig Location            | Scan Directories                                                      |
-| -------------- | ---------------------------- | --------------------------------------------------------------------- |
-| `apps/web`     | `apps/web/tsconfig.json`     | `apps/web/src`, `apps/web/src/features`                               |
-| `apps/server`  | `apps/server/tsconfig.json`  | `apps/server/src`, `apps/server/src/infra`, `apps/server/src/modules` |
-| `apps/desktop` | `apps/desktop/tsconfig.json` | `apps/desktop/src`                                                    |
-
-### Scope Excluded
-
-**Directories skipped entirely:**
-
-- `node_modules`, `__tests__`, `dist`, `.turbo`, `.cache`, `build`, `coverage`, `.git`
-
-**Alias names excluded (too common, use relative imports):**
-
-- `utils`, `helpers`, `types`, `constants`
-
-**Depth limit:** Maximum 3 levels from `src/`
-
-- Level 1: `src/features` → `@features`
-- Level 2: `src/features/auth` → `@auth`
-- Level 3: `src/features/auth/components` → `@components`
-- Level 4+: No alias created
-
-### How It Works
-
-1. **Scans directories** within configured `scanDirs`
-2. **Checks for `index.ts` or `index.tsx`** — only directories with barrel files get aliases
-3. **Sorts by depth** — shallower directories win for duplicate names
-4. **Generates path entries:**
-   ```json
-   {
-     "@auth": ["./src/features/auth"],
-     "@auth/*": ["./src/features/auth/*"]
-   }
-   ```
-5. **Writes to tsconfig.json** if different from current
-
-### Watch Mode
-
-```typescript
-for (const project of PROJECTS) {
-  for (const scanDir of project.scanDirs) {
-    fs.watch(fullPath, { recursive: false }, (event, filename) => {
-      if (!filename.includes('__tests__')) {
-        debounce(); // 300ms debounce
-      }
-    });
-  }
-}
-```
-
-Watches top-level of scan directories (not recursive) with 300ms debounce.
-
----
-
-## 2. sync-file-headers.ts
+## 1. sync-file-headers.ts
 
 **Purpose:** Ensure every source file starts with a path comment header.
 
@@ -204,7 +131,7 @@ Uses `fs.watch` with `recursive: true` on all scan directories. 100ms debounce o
 
 ---
 
-## 3. sync-tsconfig.ts
+## 2. sync-tsconfig.ts
 
 **Purpose:** Auto-generate TypeScript project references based on workspace dependencies.
 
@@ -229,7 +156,7 @@ pnpm sync:tsconfig:check  # Verify (CI mode)
 
 ---
 
-## 4. sync-linting.ts
+## 3. sync-linting.ts
 
 **Purpose:** Sync linting config to `package.json` and `.vscode/settings.json`.
 
@@ -257,7 +184,7 @@ pnpm sync:linting:check  # Verify (CI mode)
 
 ---
 
-## 5. sync-css-theme.ts
+## 4. sync-css-theme.ts
 
 **Purpose:** Generate CSS custom properties from TypeScript theme tokens.
 
@@ -321,7 +248,6 @@ for (const filePath of themeSourceFiles) {
 
 | Script            | `pnpm dev` | Pre-commit | CI Check |
 | ----------------- | ---------- | ---------- | -------- |
-| sync-path-aliases | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-file-headers | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-tsconfig     | ❌         | ✅ Sync    | ✅ Check |
 | sync-linting      | ❌         | ✅ Sync    | ❌ N/A   |

@@ -55,11 +55,11 @@ export function useProfileUpdate(options?: UseProfileUpdateOptions): UseProfileU
       // Invalidate user queries to refresh the cached data
       queryCache.invalidateQuery(['user', 'me']);
       queryCache.invalidateQuery(['users']);
-      if (options?.onSuccess !== undefined) {
-        options.onSuccess(user);
-      }
+      options?.onSuccess?.(user);
     },
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   return {

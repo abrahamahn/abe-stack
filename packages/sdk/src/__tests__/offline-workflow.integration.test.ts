@@ -1,4 +1,4 @@
-// packages/sdk/src/__tests__/integration/offline-workflow.integration.test.ts
+// packages/sdk/src/__tests__/offline-workflow.integration.test.ts
 /**
  * Integration tests for the full offline workflow:
  * RecordCache -> TransactionQueue -> Server Sync
@@ -358,8 +358,12 @@ describe('Offline Workflow Integration', () => {
 
       // Simulate server confirming with new version
       simulateServerConfirm('user', 'u1', {
+        id: 'u1',
+        version: 2,
+        name: 'Alice Updated',
+        email: 'alice@test.com',
         status: 'active',
-      } as User);
+      });
 
       // Optimistic state should be committed
       expect(cache.hasOptimisticUpdate('user', 'u1')).toBe(false);

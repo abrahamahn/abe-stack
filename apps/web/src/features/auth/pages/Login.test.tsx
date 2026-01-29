@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/__tests__/Login.test.tsx
+// apps/web/src/features/auth/pages/Login.test.tsx
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -20,28 +20,30 @@ const mockUseAuth = vi.fn(() => ({
 
 // Mock navigate
 const mockNavigate = vi.fn();
+const mockNavigateToMode = vi.fn();
 
-// Mock the hooks module - useAuth and useAuthModeNavigation
-vi.mock('../hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../hooks')>();
+// Mock @abe-stack/ui for useAuthModeNavigation and useNavigate
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
   return {
     ...actual,
-    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+    useNavigate: () => mockNavigate,
     useAuthModeNavigation: () => ({
-      navigateToMode: (mode: string): void => {
-        const routes: Record<string, string> = {
-          login: '/login',
-          register: '/register',
-          forgotPassword: '/auth?mode=forgot-password',
-          resetPassword: '/auth?mode=reset-password',
-        };
-        mockNavigate(routes[mode], { replace: false });
-      },
+      navigateToMode: mockNavigateToMode,
       navigateToLogin: (): void => mockNavigate('/login', { replace: false }),
       navigateToRegister: (): void => mockNavigate('/register', { replace: false }),
       navigateToForgotPassword: (): void =>
         mockNavigate('/auth?mode=forgot-password', { replace: false }),
     }),
+  };
+});
+
+// Mock the hooks module - useAuth
+vi.mock('../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks')>();
+  return {
+    ...actual,
+    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
   };
 });
 
@@ -150,7 +152,7 @@ describe('LoginPage', () => {
       const signUpButton = screen.getByRole('button', { name: /sign up/i });
       fireEvent.click(signUpButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/register', { replace: false });
+      expect(mockNavigateToMode).toHaveBeenCalledWith('register');
     });
 
     it('should navigate to forgot password page when forgot password is clicked', () => {
@@ -161,7 +163,7 @@ describe('LoginPage', () => {
         fireEvent.click(forgotButton);
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password', { replace: false });
+      expect(mockNavigateToMode).toHaveBeenCalledWith('forgot-password');
     });
   });
 

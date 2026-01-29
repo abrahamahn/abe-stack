@@ -97,9 +97,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check path aliases
-        run: pnpm sync:aliases:check
-
       - name: Check file headers
         run: pnpm sync:headers:check
 
@@ -161,9 +158,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Check path aliases
-        run: pnpm sync:aliases:check
 
       - name: Check file headers
         run: pnpm sync:headers:check

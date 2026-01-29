@@ -73,8 +73,8 @@ describe('JobsTable', () => {
         />,
       );
 
-      // Spinner is rendered
-      expect(container.querySelector('[role="status"]')).toBeInTheDocument();
+      // Spinner is rendered (has .spinner class)
+      expect(container.querySelector('.spinner')).toBeInTheDocument();
     });
 
     it('should not show table when loading', () => {
@@ -593,7 +593,7 @@ describe('JobsTable', () => {
         />,
       );
 
-      const nextButton = screen.getByRole('button', { name: /next/i });
+      const nextButton = screen.getByRole('button', { name: /go to next page/i });
       fireEvent.click(nextButton);
 
       expect(mockOnPageChange).toHaveBeenCalledWith(2);

@@ -1,17 +1,16 @@
-// apps/server/src/infrastructure/cache/cache-factory.ts
+// packages/cache/src/factory.ts
 /**
  * Cache Factory
  *
- * Factory function to create cache providers based on configuration.
+ * Factory functions to create cache providers based on configuration.
  */
 
-import { MemoryCacheProvider } from './memory-provider';
+import { MemoryCacheProvider } from './providers/memory';
 
-import type { CreateCacheOptions } from './types';
-import type { CacheProvider, MemoryCacheConfig } from '@abe-stack/core';
+import type { CacheProvider, CreateCacheOptions, MemoryCacheConfig } from './types';
 
 // ============================================================================
-// Factory Function
+// Factory Functions
 // ============================================================================
 
 /**
@@ -37,15 +36,17 @@ export function createCache(
   return new MemoryCacheProvider(config, options);
 }
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
 /**
  * Create a memory cache with common defaults.
  *
  * @param overrides - Configuration overrides
  * @param options - Additional options
+ * @returns A memory cache provider instance
+ *
+ * @example
+ * ```ts
+ * const cache = createMemoryCache({ maxSize: 500 });
+ * ```
  */
 export function createMemoryCache(
   overrides: Partial<Omit<MemoryCacheConfig, 'provider'>> = {},
@@ -66,8 +67,18 @@ export function createMemoryCache(
 /**
  * Create a cache from environment configuration.
  *
+ * Reads configuration from environment variables:
+ * - CACHE_KEY_PREFIX: Prefix for all cache keys
+ * - CACHE_DEFAULT_TTL: Default TTL in milliseconds (default: 300000)
+ * - CACHE_MAX_SIZE: Maximum number of entries (default: 1000)
+ *
  * @param options - Additional options
  * @returns A memory cache provider configured from environment
+ *
+ * @example
+ * ```ts
+ * const cache = createCacheFromEnv();
+ * ```
  */
 export function createCacheFromEnv(options: CreateCacheOptions = {}): CacheProvider {
   const keyPrefix = process.env['CACHE_KEY_PREFIX'] ?? '';

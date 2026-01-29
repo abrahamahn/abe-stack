@@ -77,22 +77,25 @@ describe('SecurityEventsFilters', () => {
   describe('event type filter', () => {
     it('should display current event type value', () => {
       const filter: SecurityEventsFilter = {
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
       };
 
       render(<SecurityEventsFilters filter={filter} onFilterChange={mockOnFilterChange} />);
 
       const select = screen.getByLabelText('Event Type');
-      expect(select).toHaveValue('login_failed');
+      expect(select).toHaveTextContent('Token Reuse Detected');
     });
 
     it('should update local state when event type is changed', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const select = screen.getByLabelText('Event Type');
-      fireEvent.change(select, { target: { value: 'account_locked' } });
+      // Open the listbox and click an option
+      fireEvent.click(select);
+      const option = screen.getByRole('option', { name: /Account Locked/i });
+      fireEvent.click(option);
 
-      expect(select).toHaveValue('account_locked');
+      expect(select).toHaveTextContent('Account Locked');
     });
   });
 
@@ -105,16 +108,19 @@ describe('SecurityEventsFilters', () => {
       render(<SecurityEventsFilters filter={filter} onFilterChange={mockOnFilterChange} />);
 
       const select = screen.getByLabelText('Severity');
-      expect(select).toHaveValue('high');
+      expect(select).toHaveTextContent('High');
     });
 
     it('should update local state when severity is changed', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const select = screen.getByLabelText('Severity');
-      fireEvent.change(select, { target: { value: 'critical' } });
+      // Open the listbox and click an option
+      fireEvent.click(select);
+      const option = screen.getByRole('option', { name: /Critical/i });
+      fireEvent.click(option);
 
-      expect(select).toHaveValue('critical');
+      expect(select).toHaveTextContent('Critical');
     });
   });
 
@@ -165,42 +171,42 @@ describe('SecurityEventsFilters', () => {
   describe('date filters', () => {
     it('should display current start date value', () => {
       const filter: SecurityEventsFilter = {
-        startDate: '2024-01-01T00:00:00',
+        startDate: '2024-01-01T00:00',
       };
 
       render(<SecurityEventsFilters filter={filter} onFilterChange={mockOnFilterChange} />);
 
       const input = screen.getByLabelText('Start Date');
-      expect(input).toHaveValue('2024-01-01T00:00:00');
+      expect(input).toHaveValue('2024-01-01T00:00');
     });
 
     it('should display current end date value', () => {
       const filter: SecurityEventsFilter = {
-        endDate: '2024-01-31T23:59:59',
+        endDate: '2024-01-31T23:59',
       };
 
       render(<SecurityEventsFilters filter={filter} onFilterChange={mockOnFilterChange} />);
 
       const input = screen.getByLabelText('End Date');
-      expect(input).toHaveValue('2024-01-31T23:59:59');
+      expect(input).toHaveValue('2024-01-31T23:59');
     });
 
     it('should update local state when start date is changed', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const input = screen.getByLabelText('Start Date');
-      fireEvent.change(input, { target: { value: '2024-02-01T00:00:00' } });
+      fireEvent.change(input, { target: { value: '2024-02-01T00:00' } });
 
-      expect(input).toHaveValue('2024-02-01T00:00:00');
+      expect(input).toHaveValue('2024-02-01T00:00');
     });
 
     it('should update local state when end date is changed', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const input = screen.getByLabelText('End Date');
-      fireEvent.change(input, { target: { value: '2024-02-28T23:59:59' } });
+      fireEvent.change(input, { target: { value: '2024-02-28T23:59' } });
 
-      expect(input).toHaveValue('2024-02-28T23:59:59');
+      expect(input).toHaveValue('2024-02-28T23:59');
     });
   });
 
@@ -231,13 +237,15 @@ describe('SecurityEventsFilters', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const eventTypeSelect = screen.getByLabelText('Event Type');
-      fireEvent.change(eventTypeSelect, { target: { value: 'login_failed' } });
+      fireEvent.click(eventTypeSelect);
+      const option = screen.getByRole('option', { name: /Token Reuse Detected/i });
+      fireEvent.click(option);
 
       const applyButton = screen.getByRole('button', { name: 'Apply Filters' });
       fireEvent.click(applyButton);
 
       expect(mockOnFilterChange).toHaveBeenCalledWith({
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
       });
     });
 
@@ -245,10 +253,14 @@ describe('SecurityEventsFilters', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const eventTypeSelect = screen.getByLabelText('Event Type');
-      fireEvent.change(eventTypeSelect, { target: { value: 'account_locked' } });
+      fireEvent.click(eventTypeSelect);
+      const eventTypeOption = screen.getByRole('option', { name: /Account Locked/i });
+      fireEvent.click(eventTypeOption);
 
       const severitySelect = screen.getByLabelText('Severity');
-      fireEvent.change(severitySelect, { target: { value: 'critical' } });
+      fireEvent.click(severitySelect);
+      const severityOption = screen.getByRole('option', { name: /Critical/i });
+      fireEvent.click(severityOption);
 
       const emailInput = screen.getByLabelText('Email');
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -267,13 +279,15 @@ describe('SecurityEventsFilters', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
       const eventTypeSelect = screen.getByLabelText('Event Type');
-      fireEvent.change(eventTypeSelect, { target: { value: 'login_failed' } });
+      fireEvent.click(eventTypeSelect);
+      const option = screen.getByRole('option', { name: /Token Reuse Detected/i });
+      fireEvent.click(option);
 
       const applyButton = screen.getByRole('button', { name: 'Apply Filters' });
       fireEvent.click(applyButton);
 
       expect(mockOnFilterChange).toHaveBeenCalledWith({
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
       });
     });
 
@@ -294,7 +308,7 @@ describe('SecurityEventsFilters', () => {
   describe('clearing filters', () => {
     it('should call onFilterChange with empty filter when clear is clicked', () => {
       const filter: SecurityEventsFilter = {
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
         severity: 'high',
         email: 'test@example.com',
       };
@@ -309,7 +323,7 @@ describe('SecurityEventsFilters', () => {
 
     it('should reset all form inputs when clear is clicked', () => {
       const filter: SecurityEventsFilter = {
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
         severity: 'high',
         email: 'test@example.com',
         ipAddress: '192.168.1.1',
@@ -325,8 +339,8 @@ describe('SecurityEventsFilters', () => {
       const emailInput = screen.getByLabelText('Email');
       const ipInput = screen.getByLabelText('IP Address');
 
-      expect(eventTypeSelect).toHaveValue('');
-      expect(severitySelect).toHaveValue('');
+      expect(eventTypeSelect).toHaveTextContent('All Event Types');
+      expect(severitySelect).toHaveTextContent('All Severities');
       expect(emailInput).toHaveValue('');
       expect(ipInput).toHaveValue('');
     });
@@ -335,29 +349,31 @@ describe('SecurityEventsFilters', () => {
   describe('edge cases', () => {
     it('should handle filter with all fields populated', () => {
       const filter: SecurityEventsFilter = {
-        eventType: 'login_failed',
+        eventType: 'token_reuse_detected',
         severity: 'critical',
         email: 'test@example.com',
         ipAddress: '192.168.1.1',
-        startDate: '2024-01-01T00:00:00',
-        endDate: '2024-01-31T23:59:59',
+        startDate: '2024-01-01T00:00',
+        endDate: '2024-01-31T23:59',
         userId: 'user-123',
       };
 
       render(<SecurityEventsFilters filter={filter} onFilterChange={mockOnFilterChange} />);
 
-      expect(screen.getByLabelText('Event Type')).toHaveValue('login_failed');
-      expect(screen.getByLabelText('Severity')).toHaveValue('critical');
+      expect(screen.getByLabelText('Event Type')).toHaveTextContent('Token Reuse Detected');
+      expect(screen.getByLabelText('Severity')).toHaveTextContent('Critical');
       expect(screen.getByLabelText('Email')).toHaveValue('test@example.com');
       expect(screen.getByLabelText('IP Address')).toHaveValue('192.168.1.1');
+      expect(screen.getByLabelText('Start Date')).toHaveValue('2024-01-01T00:00');
+      expect(screen.getByLabelText('End Date')).toHaveValue('2024-01-31T23:59');
       expect(screen.getByLabelText('User ID')).toHaveValue('user-123');
     });
 
     it('should handle undefined filter values', () => {
       render(<SecurityEventsFilters filter={emptyFilter} onFilterChange={mockOnFilterChange} />);
 
-      expect(screen.getByLabelText('Event Type')).toHaveValue('');
-      expect(screen.getByLabelText('Severity')).toHaveValue('');
+      expect(screen.getByLabelText('Event Type')).toHaveTextContent('All Event Types');
+      expect(screen.getByLabelText('Severity')).toHaveTextContent('All Severities');
       expect(screen.getByLabelText('Email')).toHaveValue('');
     });
   });

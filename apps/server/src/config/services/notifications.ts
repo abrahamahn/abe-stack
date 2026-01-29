@@ -138,17 +138,28 @@ function resolveActiveProvider(
   explicit: NotificationProvider | undefined,
   avail: { onesignal: boolean; fcm: boolean; courier: boolean },
 ): NotificationProvider | null {
+  const isProd = process.env['NODE_ENV'] === 'production';
+
+  // Check if explicit provider has credentials
   if (explicit === 'onesignal' && avail.onesignal) return 'onesignal';
   if (explicit === 'fcm' && avail.fcm) return 'fcm';
   if (explicit === 'courier' && avail.courier) return 'courier';
   if (explicit === 'generic') return 'generic';
 
-  // Auto-detection logic if no explicit provider is set
+  // In production with explicit provider but missing credentials: still return provider
+  // (validation will fail and alert the user)
+  if (isProd && explicit != null) {
+    return explicit;
+  }
+
+  // Auto-detection logic if no explicit provider is set (or dev with missing credentials)
   if (explicit == null) {
     if (avail.onesignal) return 'onesignal';
     if (avail.fcm) return 'fcm';
     if (avail.courier) return 'courier';
   }
+
+  // Development: silently disable if credentials missing
   return null;
 }
 
