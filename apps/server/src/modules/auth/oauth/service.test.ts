@@ -1,7 +1,7 @@
 // apps/server/src/modules/auth/oauth/service.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/oauth/__tests__/service.test.ts
-import { asMockDb, createMockDb } from '../../../infrastructure/data/database/utils/test-utils';
+import { asMockDb, createMockDb } from '@abe-stack/db/testing/mocks';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {

@@ -27,7 +27,7 @@ vi.mock('./service', () => ({
   saveRecords: vi.fn(),
 }));
 
-vi.mock('../../infrastructure/data/database', () => ({
+vi.mock('@abe-stack/db', () => ({
   withTransaction: vi.fn((_db, callback) => callback(_db)),
 }));
 

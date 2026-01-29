@@ -19,7 +19,7 @@
  */
 
 import { hashPassword } from '@auth/utils/password';
-import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@data/database';
+import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@abe-stack/db';
 
 import type { UserRole } from '@abe-stack/core';
 

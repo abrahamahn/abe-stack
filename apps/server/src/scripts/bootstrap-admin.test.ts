@@ -62,8 +62,8 @@ vi.mock('../config/factory', () => ({
   loadConfig: mockLoadConfig,
 }));
 
-// Mock the database module using relative path from test file
-vi.mock('../infrastructure/data/database', () => ({
+// Mock the database module using package path
+vi.mock('@abe-stack/db', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',

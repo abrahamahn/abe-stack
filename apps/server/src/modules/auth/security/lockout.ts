@@ -15,7 +15,7 @@ import {
     selectCount,
     USERS_TABLE,
     type DbClient,
-} from '@data/database';
+} from '@abe-stack/db';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
 
 import { logAccountUnlockedEvent } from './events';

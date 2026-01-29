@@ -7,7 +7,7 @@
  */
 
 import { SubKeys } from '@abe-stack/core';
-import { withTransaction } from '@data/database';
+import { withTransaction } from '@abe-stack/db';
 
 import {
     applyOperations,

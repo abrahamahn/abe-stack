@@ -352,3 +352,37 @@ export async function resolveConnectionStringWithFallback(
 
   throw new Error(`Unable to connect to Postgres on ports: ${uniquePorts.join(', ')}`);
 }
+
+// ============================================================================
+// DbClient type alias and singleton factory
+// ============================================================================
+
+/** Database client type (RawDb from @abe-stack/db) */
+export type DbClient = RawDb;
+
+type GlobalWithDb = typeof globalThis & { rawDb?: RawDb; };
+
+/**
+ * Create a raw SQL database client (singleton in development for HMR)
+ */
+export function createDbClient(connectionString: string): RawDb {
+  if (process.env['NODE_ENV'] !== 'production') {
+    const globalWithDb = globalThis as GlobalWithDb;
+
+    globalWithDb.rawDb ??= createRawDb({
+      connectionString,
+      maxConnections: Number(process.env['DB_MAX_CONNECTIONS'] ?? 10),
+      idleTimeout: Number(process.env['DB_IDLE_TIMEOUT'] ?? 30000),
+      connectTimeout: Number(process.env['DB_CONNECT_TIMEOUT'] ?? 10000),
+    });
+
+    return globalWithDb.rawDb;
+  }
+
+  return createRawDb({
+    connectionString,
+    maxConnections: Number(process.env['DB_MAX_CONNECTIONS'] ?? 10),
+    idleTimeout: Number(process.env['DB_IDLE_TIMEOUT'] ?? 30000),
+    connectTimeout: Number(process.env['DB_CONNECT_TIMEOUT'] ?? 10000),
+  });
+}

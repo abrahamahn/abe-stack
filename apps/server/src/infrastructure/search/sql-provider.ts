@@ -36,7 +36,7 @@ import type {
     SqlSearchProviderConfig,
     SqlTableConfig,
 } from './types';
-import type { RawDb, Repositories } from '@data/database';
+import type { RawDb, Repositories } from '@abe-stack/db';
 
 // ============================================================================
 // Types

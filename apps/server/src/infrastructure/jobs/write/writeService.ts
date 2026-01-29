@@ -13,7 +13,7 @@
  */
 
 import { SubKeys } from '@abe-stack/core';
-import { escapeIdentifier } from '@abe-stack/db';
+import { escapeIdentifier, withTransaction } from '@abe-stack/db';
 
 
 import type {
@@ -28,10 +28,8 @@ import type {
     WriteResult,
 } from './types';
 import type { SubscriptionManager } from '@abe-stack/core';
-import type { DbClient } from '@data/database';
+import type { DbClient } from '@abe-stack/db';
 import type { Logger } from '@monitor/logger';
-
-import { withTransaction } from '@/infrastructure/index';
 
 // ============================================================================
 // Write Service
