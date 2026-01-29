@@ -67,7 +67,7 @@ export {
   type QuietHoursConfig,
   type SecurityEventType,
   type SecurityEventSeverity,
-} from './database';
+} from '@abe-stack/db';
 
 // Database - Client
 export {
@@ -75,7 +75,7 @@ export {
   createDbClient,
   resolveConnectionStringWithFallback,
   type DbClient,
-} from './database';
+} from '@abe-stack/db';
 
 // Database - Utils
 export {
@@ -84,11 +84,11 @@ export {
   OptimisticLockError,
   updateUserWithVersion,
   withTransaction,
-} from './database';
+} from '@abe-stack/db';
 
 // Note: createMockDb and MockDbClient are NOT exported here.
 // They import vitest which cannot be loaded at runtime.
-// Import directly from './database/utils/test-utils' in test files.
+// Import directly from '@abe-stack/db/testing/mocks' in test files.
 
 // Database - Schema Validation
 export {
@@ -99,10 +99,7 @@ export {
   validateSchema,
   type RequiredTable,
   type SchemaValidationResult,
-} from './database';
-
-// Database - JSON (development/testing only)
-export { createJsonDbClient, JsonDatabase, JsonDbClient } from './database';
+} from '@abe-stack/db';
 
 // Storage
 export {
@@ -113,9 +110,9 @@ export {
   parseSignedUrl,
   isUrlExpired,
   getDefaultExpiration,
-  createSignature as createStorageSignature,
-  verifySignature as verifyStorageSignature,
-  normalizeFilename as normalizeStorageFilename,
+  createStorageSignature,
+  verifyStorageSignature,
+  normalizeStorageFilename,
   type SignedUrlData,
   type StorageConfig,
   type StorageProviderName,
@@ -123,14 +120,14 @@ export {
   type S3StorageConfig,
   type UploadParams,
   type StorageProvider,
-} from './storage';
+} from '@abe-stack/storage';
 
 // Files - explicit exports
 export {
   normalizeFilename as normalizeFileFilename,
-  createSignature as createFileSignature,
-  verifySignature as verifyFileSignature,
+  createFileSignature,
+  verifyFileSignature,
   registerFileServer,
   type FileSignatureData,
   type FilesConfig,
-} from './files';
+} from '@abe-stack/storage';

@@ -345,3 +345,35 @@ export {
   type SubscriptionFilters,
   type SubscriptionRepository,
 } from './repositories/index';
+
+// DbClient type and singleton factory
+export { createDbClient, type DbClient } from './client';
+
+// Repository container (factory)
+export {
+  closeRepositories,
+  createRepositories,
+  getRepositoryContext,
+  type Repositories,
+  type RepositoryContext,
+} from './factory';
+
+// Schema validation
+export {
+  getExistingTables,
+  requireValidSchema,
+  REQUIRED_TABLES,
+  SchemaValidationError,
+  validateSchema,
+  type RequiredTable,
+  type SchemaValidationResult,
+} from './validation';
+
+// Transaction and optimistic locking utilities
+export {
+  isInTransaction,
+  isOptimisticLockError,
+  OptimisticLockError,
+  updateUserWithVersion,
+  withTransaction,
+} from './utils/index';

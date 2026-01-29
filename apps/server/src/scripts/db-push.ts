@@ -10,7 +10,7 @@
  */
 /* eslint-disable no-console */
 
-import { buildConnectionString, createDbClient } from '@data/database';
+import { buildConnectionString, createDbClient } from '@abe-stack/db';
 
 const STATEMENTS: string[] = [
   `CREATE EXTENSION IF NOT EXISTS "pgcrypto";`,

@@ -10,7 +10,7 @@ import type {
   SubscriptionManager,
   UserRole as CoreUserRole,
 } from '@abe-stack/core';
-import type { DbClient, Repositories } from '@data/database';
+import type { DbClient, Repositories } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================

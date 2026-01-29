@@ -8,6 +8,7 @@ const cachePkg = path.resolve(__dirname, '../../packages/cache/src');
 const contractsPkg = path.resolve(__dirname, '../../packages/contracts/src');
 const corePkg = path.resolve(__dirname, '../../packages/core/src');
 const dbPkg = path.resolve(__dirname, '../../packages/db/src');
+const storagePkg = path.resolve(__dirname, '../../packages/storage/src');
 
 export default mergeConfig(baseConfig, {
   test: {
@@ -16,7 +17,7 @@ export default mergeConfig(baseConfig, {
     // Inline local modules to ensure mocks work correctly with path aliases
     server: {
       deps: {
-        inline: [/src\//, '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core'],
+        inline: [/src\//, '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/storage'],
       },
     },
   },
@@ -46,7 +47,10 @@ export default mergeConfig(baseConfig, {
       { find: '@abe-stack/cache', replacement: `${cachePkg}/index.ts` },
       { find: '@abe-stack/contracts', replacement: `${contractsPkg}/index.ts` },
       { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
+      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${dbPkg}/$1` },
       { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
+      { find: /^@abe-stack\/storage\/(.*)$/, replacement: `${storagePkg}/$1` },
+      { find: '@abe-stack/storage', replacement: `${storagePkg}/index.ts` },
       // Server-specific aliases
       {
         find: /^@\/(.*)$/,

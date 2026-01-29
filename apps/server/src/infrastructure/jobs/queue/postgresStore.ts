@@ -17,7 +17,7 @@ import type {
     TaskError,
     TaskResult,
 } from './types';
-import type { DbClient } from '@data/database';
+import type { DbClient } from '@abe-stack/db';
 
 // ============================================================================
 // SQL Result Types

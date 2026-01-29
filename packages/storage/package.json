@@ -1,0 +1,31 @@
+{
+  "name": "@abe-stack/storage",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run --reporter=dot --silent=passed-only",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@abe-stack/core": "workspace:*",
+    "@aws-sdk/client-s3": "^3.840.0",
+    "@aws-sdk/credential-providers": "^3.840.0",
+    "@aws-sdk/s3-request-presigner": "^3.840.0"
+  },
+  "peerDependencies": {
+    "fastify": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    }
+  }
+}
