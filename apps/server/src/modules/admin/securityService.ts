@@ -18,11 +18,11 @@ import {
     selectCount,
     toCamelCase,
     toCamelCaseArray,
+    type DbClient,
     type SecurityEvent as DbSecurityEvent,
     type SqlFragment,
 } from '@abe-stack/db';
 
-import type { DbClient } from '@abe-stack/db';
 import type {
     PaginationOptions,
     SecurityEvent,

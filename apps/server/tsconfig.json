@@ -33,6 +33,12 @@
       "@abe-stack/core": [
             "../../packages/core/src/index.ts"
       ],
+      "@abe-stack/core/pubsub/postgres": [
+            "../../packages/core/src/infrastructure/pubsub/postgres-pubsub.ts"
+      ],
+      "@abe-stack/core/pubsub": [
+            "../../packages/core/src/infrastructure/pubsub/index.ts"
+      ],
       "@abe-stack/core/*": [
             "../../packages/core/src/*"
       ],

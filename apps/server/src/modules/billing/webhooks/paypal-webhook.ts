@@ -5,9 +5,14 @@
  * Handles PayPal webhook events for subscription lifecycle.
  */
 
-import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
+import { PayPalProvider } from '@abe-stack/billing';
+import {
+    WebhookEventAlreadyProcessedError,
+    WebhookSignatureError,
+    type NormalizedWebhookEvent,
+    type PayPalProviderConfig as PayPalConfig,
+} from '@abe-stack/core';
 
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/core';
 import type {
     BillingEventRepository,
     CustomerMappingRepository,
@@ -16,9 +21,6 @@ import type {
     SubscriptionRepository,
 } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
-
-import { PayPalProvider } from '@abe-stack/billing';
-import type { NormalizedWebhookEvent } from '@abe-stack/core';
 
 // ============================================================================
 // Types
