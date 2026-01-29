@@ -101,9 +101,6 @@ export {
   type SchemaValidationResult,
 } from '@abe-stack/db';
 
-// Database - JSON (development/testing only)
-export { createJsonDbClient, JsonDatabase, JsonDbClient } from '@abe-stack/db';
-
 // Storage
 export {
   createStorage,
