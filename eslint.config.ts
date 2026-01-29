@@ -170,6 +170,15 @@ export default [
     },
   },
   {
+    files: ['packages/storage/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/storage/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
     // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     rules: {

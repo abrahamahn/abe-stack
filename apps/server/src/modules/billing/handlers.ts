@@ -5,6 +5,8 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
+import { createBillingProvider } from '@abe-stack/billing';
+
 import {
     addPaymentMethod,
     cancelSubscription,
@@ -40,8 +42,6 @@ import type {
     UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
-
-import { createBillingProvider } from '@abe-stack/billing';
 
 
 // ============================================================================

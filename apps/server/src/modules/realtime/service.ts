@@ -6,7 +6,7 @@
  * Handles record loading, operation application, and optimistic locking.
  */
 
-import { and, eq, inArray, insert, select, update, USERS_TABLE, type User } from '@abe-stack/db';
+import { and, eq, inArray, insert, select, update, USERS_TABLE, type DbClient, type User } from '@abe-stack/db';
 
 import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type {
@@ -18,7 +18,7 @@ import type {
     RecordMap,
     RecordPointer,
 } from '@abe-stack/core';
-import type { DbClient } from '@abe-stack/db';
+
 
 // ============================================================================
 // Table Configuration
@@ -363,10 +363,7 @@ export async function saveRecords(
   recordMap: RecordMap,
   originalRecordMap: RecordMap,
 ): Promise<void> {
-  for (const [table, records] of Object.entries(recordMap) as [
-    string,
-    Record<string, RealtimeRecord>,
-  ][]) {
+  for (const [table, records] of Object.entries(recordMap)) {
     for (const [id, record] of Object.entries(records)) {
       const originalRecord = originalRecordMap[table]?.[id] as RealtimeRecord | undefined;
 

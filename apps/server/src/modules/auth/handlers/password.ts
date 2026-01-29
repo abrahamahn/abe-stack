@@ -73,6 +73,7 @@ export async function handleSetPassword(
   try {
     // User ID comes from the authenticated request
     const userId = req.user?.userId;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive: middleware may pass null at runtime
     if (userId === undefined || userId === null || userId === '') {
       return {
         status: 401,
