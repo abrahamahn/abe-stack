@@ -1,11 +1,8 @@
-// apps/server/src/infrastructure/billing/factory.test.ts
-import { BillingProviderNotConfiguredError } from '@abe-stack/core';
+// packages/billing/src/factory.test.ts
 import type { BillingConfig } from '@abe-stack/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createBillingProvider, isBillingConfigured } from './factory';
-import { PayPalProvider } from './paypal-provider';
-import { StripeProvider } from './stripe-provider';
 
 // ============================================================================
 // Mock Dependencies

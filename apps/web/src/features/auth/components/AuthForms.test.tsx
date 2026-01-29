@@ -78,7 +78,10 @@ describe('AuthForms', () => {
     });
 
     it('calls onRegister when form is submitted', async () => {
-      const mockOnRegister = vi.fn();
+      const mockOnRegister = vi.fn().mockResolvedValue({
+        email: 'test@example.com',
+        message: 'Check your email',
+      });
       renderWithRouter(<RegisterForm onRegister={mockOnRegister} />);
 
       fireEvent.change(screen.getByLabelText('Email'), {
@@ -103,7 +106,10 @@ describe('AuthForms', () => {
     });
 
     it('submits without name when optional', async () => {
-      const mockOnRegister = vi.fn();
+      const mockOnRegister = vi.fn().mockResolvedValue({
+        email: 'test@example.com',
+        message: 'Check your email',
+      });
       renderWithRouter(<RegisterForm onRegister={mockOnRegister} />);
 
       fireEvent.change(screen.getByLabelText('Email'), {
@@ -119,7 +125,6 @@ describe('AuthForms', () => {
         expect(mockOnRegister).toHaveBeenCalledWith({
           email: 'test@example.com',
           password: 'password123',
-          name: undefined,
         });
       });
     });

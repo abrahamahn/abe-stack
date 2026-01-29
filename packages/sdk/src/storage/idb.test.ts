@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { createStore } from '../idb';
+import { createStore } from './idb';
 
 // ============================================================================
 // createStore Tests

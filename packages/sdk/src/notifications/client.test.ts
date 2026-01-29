@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createNotificationClient, urlBase64ToUint8Array } from '../client';
+import { createNotificationClient, urlBase64ToUint8Array } from './client';
 
 describe('Notification Client', () => {
   const baseUrl = 'http://localhost:3001';

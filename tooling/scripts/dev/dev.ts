@@ -155,7 +155,6 @@ async function main(): Promise<void> {
   const watchers = [
     startWatcher('tooling/sync/sync-file-headers.ts'),
     startWatcher('tooling/sync/sync-css-theme.ts'),
-    startWatcher('tooling/sync/sync-aliases.ts'),
   ];
 
   logLine('[dev]', 'Watchers running (config, headers, theme)');

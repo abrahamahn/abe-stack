@@ -66,7 +66,7 @@ describe('ForgotPasswordForm', () => {
     });
 
     it('renders sign in as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ForgotPasswordForm {...defaultProps} />);
+      renderWithRouter(<ForgotPasswordForm {...defaultProps} onModeChange={undefined} />);
 
       expect(screen.getByText('Remember your password?')).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute(

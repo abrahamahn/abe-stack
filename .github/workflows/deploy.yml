@@ -46,9 +46,6 @@ jobs:
       - name: Check configuration
         run: pnpm config:generate:check
 
-      - name: Check path aliases
-        run: pnpm sync:aliases:check
-
       - name: Check file headers
         run: pnpm sync:headers:check
 

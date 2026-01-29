@@ -55,11 +55,11 @@ export function useAvatarUpload(options?: UseAvatarUploadOptions): UseAvatarUplo
     onSuccess: (response) => {
       // Invalidate user query to refresh the cached data
       queryCache.invalidateQuery(['user', 'me']);
-      if (options?.onSuccess !== undefined) {
-        options.onSuccess(response);
-      }
+      options?.onSuccess?.(response);
     },
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   return {
@@ -101,11 +101,11 @@ export function useAvatarDelete(options?: UseAvatarDeleteOptions): UseAvatarDele
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['user', 'me']);
-      if (options?.onSuccess !== undefined) {
-        options.onSuccess(response);
-      }
+      options?.onSuccess?.(response);
     },
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   return {

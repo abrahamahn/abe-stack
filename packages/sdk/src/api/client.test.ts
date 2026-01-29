@@ -1,7 +1,7 @@
 // packages/sdk/src/api/client.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { createApiClient } from '../client';
+import { createApiClient } from './client';
 
 describe('createApiClient', () => {
   const mockFetch = vi.fn();

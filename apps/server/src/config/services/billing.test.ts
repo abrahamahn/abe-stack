@@ -147,6 +147,9 @@ describe('Billing Configuration', () => {
     });
 
     it('throws when loading configuration with missing mandatory credentials', () => {
+      // In production mode, explicit provider with incomplete credentials should throw
+      vi.stubEnv('NODE_ENV', 'production');
+
       expect(() => {
         loadBillingConfig(
           createBaseEnv({

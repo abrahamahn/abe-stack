@@ -1,11 +1,12 @@
-// apps/server/src/infrastructure/cache/utils/memoize.test.ts
+// packages/cache/src/memoize.test.ts
+
 import { describe, expect, test } from 'vitest';
 
 import {
-    createArgIndexKeyGenerator,
-    createObjectKeyGenerator,
-    memoize,
-    memoizeMethod,
+  createArgIndexKeyGenerator,
+  createObjectKeyGenerator,
+  memoize,
+  memoizeMethod,
 } from './memoize';
 
 // ============================================================================
@@ -14,10 +15,10 @@ import {
 
 describe('memoize', () => {
   describe('basic memoization', () => {
-    test('should cache function results', async () => { await Promise.resolve();
+    test('should cache function results', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => { await Promise.resolve();
+      const fn = memoize(async (x: number) => {
         callCount++;
         return x * 2;
       });
@@ -27,10 +28,10 @@ describe('memoize', () => {
       expect(callCount).toBe(1);
     });
 
-    test('should cache different arguments separately', async () => { await Promise.resolve();
+    test('should cache different arguments separately', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => { await Promise.resolve();
+      const fn = memoize(async (x: number) => {
         callCount++;
         return x * 2;
       });
@@ -41,10 +42,10 @@ describe('memoize', () => {
       expect(callCount).toBe(2);
     });
 
-    test('should handle multiple arguments', async () => { await Promise.resolve();
+    test('should handle multiple arguments', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (a: number, b: number) => { await Promise.resolve();
+      const fn = memoize(async (a: number, b: number) => {
         await Promise.resolve();
         callCount++;
         return a + b;
@@ -56,10 +57,10 @@ describe('memoize', () => {
       expect(callCount).toBe(2); // Different argument order = different key
     });
 
-    test('should handle object arguments', async () => { await Promise.resolve();
+    test('should handle object arguments', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (obj: { id: number }) => { await Promise.resolve();
+      const fn = memoize(async (obj: { id: number }) => {
         await Promise.resolve();
         callCount++;
         return obj.id * 2;
@@ -70,10 +71,10 @@ describe('memoize', () => {
       expect(callCount).toBe(1);
     });
 
-    test('should handle no arguments', async () => { await Promise.resolve();
+    test('should handle no arguments', async () => {
       let callCount = 0;
 
-      const fn = memoize(async () => { await Promise.resolve();
+      const fn = memoize(async () => {
         await Promise.resolve();
         callCount++;
         return 'result';
@@ -85,12 +86,60 @@ describe('memoize', () => {
     });
   });
 
+  describe('cache stampede prevention', () => {
+    test('should prevent multiple concurrent calls for same key', async () => {
+      let callCount = 0;
+
+      const fn = memoize(async (x: number) => {
+        callCount++;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return x * 2;
+      });
+
+      // Call 3 times concurrently with same args
+      const [result1, result2, result3] = await Promise.all([fn(5), fn(5), fn(5)]);
+
+      expect(result1).toBe(10);
+      expect(result2).toBe(10);
+      expect(result3).toBe(10);
+      expect(callCount).toBe(1); // Only one actual call
+    });
+  });
+
+  describe('error handling', () => {
+    test('should remove failed entries from cache', async () => {
+      let callCount = 0;
+      let shouldFail = true;
+
+      const fn = memoize(async (x: number) => {
+        callCount++;
+        if (shouldFail) {
+          throw new Error('Intentional failure');
+        }
+        return x * 2;
+      });
+
+      // First call should fail
+      await expect(fn(5)).rejects.toThrow('Intentional failure');
+      expect(callCount).toBe(1);
+
+      // Second call should retry (not cached because it failed)
+      shouldFail = false;
+      expect(await fn(5)).toBe(10);
+      expect(callCount).toBe(2);
+
+      // Third call should be cached
+      expect(await fn(5)).toBe(10);
+      expect(callCount).toBe(2);
+    });
+  });
+
   describe('TTL expiration', () => {
-    test('should expire entries after TTL', async () => { await Promise.resolve();
+    test('should expire entries after TTL', async () => {
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => { await Promise.resolve();
+        async (x: number) => {
           callCount++;
           return x * 2;
         },
@@ -106,11 +155,11 @@ describe('memoize', () => {
       expect(callCount).toBe(2);
     });
 
-    test('should support sliding expiration', async () => { await Promise.resolve();
+    test('should support sliding expiration', async () => {
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => { await Promise.resolve();
+        async (x: number) => {
           callCount++;
           return x * 2;
         },
@@ -133,11 +182,11 @@ describe('memoize', () => {
   });
 
   describe('LRU eviction', () => {
-    test('should evict LRU entries when at capacity', async () => { await Promise.resolve();
+    test('should evict LRU entries when at capacity', async () => {
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => { await Promise.resolve();
+        async (x: number) => {
           callCount++;
           return x * 2;
         },
@@ -168,12 +217,12 @@ describe('memoize', () => {
   });
 
   describe('custom key generator', () => {
-    test('should use custom key generator', async () => { await Promise.resolve();
+    test('should use custom key generator', async () => {
       let callCount = 0;
 
       type User = { id: string; name: string };
       const fn = memoize<[User], string>(
-        async (user: User) => { await Promise.resolve();
+        async (user: User) => {
           await Promise.resolve();
           callCount++;
           return user.name.toUpperCase();
@@ -193,10 +242,10 @@ describe('memoize', () => {
   });
 
   describe('cache control methods', () => {
-    test('should clear all cached results', async () => { await Promise.resolve();
+    test('should clear all cached results', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => { await Promise.resolve();
+      const fn = memoize(async (x: number) => {
         callCount++;
         return x * 2;
       });
@@ -212,10 +261,10 @@ describe('memoize', () => {
       expect(callCount).toBe(4);
     });
 
-    test('should invalidate specific entry', async () => { await Promise.resolve();
+    test('should invalidate specific entry', async () => {
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => { await Promise.resolve();
+      const fn = memoize(async (x: number) => {
         callCount++;
         return x * 2;
       });
@@ -231,8 +280,8 @@ describe('memoize', () => {
       expect(callCount).toBe(3); // Only 1 was invalidated
     });
 
-    test('should return statistics', async () => { await Promise.resolve();
-      const fn = memoize(async (x: number) => { await Promise.resolve();
+    test('should return statistics', async () => {
+      const fn = memoize(async (x: number) => {
         await Promise.resolve();
         return x * 2;
       });
@@ -257,10 +306,9 @@ describe('memoize', () => {
 // ============================================================================
 
 describe('memoizeMethod', () => {
-  // Note: Decorator tests are skipped because TypeScript 5.x decorator syntax
+  // Note: Decorator tests are limited because TypeScript 5.x decorator syntax
   // has different runtime behavior. The memoizeMethod decorator is designed
   // for legacy decorator syntax (experimentalDecorators: true).
-  // The decorator functionality is tested manually by users who enable it.
 
   test('memoizeMethod should be a function', () => {
     expect(typeof memoizeMethod).toBe('function');

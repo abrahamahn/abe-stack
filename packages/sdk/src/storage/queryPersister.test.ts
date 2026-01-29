@@ -1,26 +1,43 @@
 // packages/sdk/src/storage/queryPersister.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { clearQueryCache, createQueryPersister } from '../queryPersister';
-import { idbStorage } from '../storage';
+import { clearQueryCache, createQueryPersister } from './queryPersister';
 
-// Mock idbStorage
-vi.mock('../storage', () => ({
-  idbStorage: {
-    getItem: vi.fn().mockResolvedValue(null),
-    setItem: vi.fn().mockResolvedValue(undefined),
-    removeItem: vi.fn().mockResolvedValue(undefined),
-    clear: vi.fn().mockResolvedValue(undefined),
-    keys: vi.fn().mockResolvedValue([]),
-  },
+// Use vi.hoisted to create mock functions that can be referenced in vi.mock
+const { mockGetItem, mockSetItem, mockRemoveItem, mockClear, mockKeys } = vi.hoisted(() => ({
+  mockGetItem: vi.fn<(key: string) => Promise<string | null>>(),
+  mockSetItem: vi.fn<(key: string, value: string) => Promise<void>>(),
+  mockRemoveItem: vi.fn<(key: string) => Promise<void>>(),
+  mockClear: vi.fn<() => Promise<void>>(),
+  mockKeys: vi.fn<() => Promise<string[]>>(),
 }));
 
-const mockIdbStorage = vi.mocked(idbStorage);
+// Mock the storage module
+vi.mock('./storage', () => ({
+  idbStorage: {
+    getItem: mockGetItem,
+    setItem: mockSetItem,
+    removeItem: mockRemoveItem,
+    clear: mockClear,
+    keys: mockKeys,
+  },
+  localStorageQueue: {
+    get: vi.fn(),
+    set: vi.fn(),
+    remove: vi.fn(),
+  },
+}));
 
 describe('createQueryPersister', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    // Set default resolved values
+    mockGetItem.mockResolvedValue(null);
+    mockSetItem.mockResolvedValue(undefined);
+    mockRemoveItem.mockResolvedValue(undefined);
+    mockClear.mockResolvedValue(undefined);
+    mockKeys.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -37,12 +54,12 @@ describe('createQueryPersister', () => {
       persister.persistClient(mockClient as never);
 
       // Should not have been called yet (throttled)
-      expect(mockIdbStorage.setItem).not.toHaveBeenCalled();
+      expect(mockSetItem).not.toHaveBeenCalled();
 
       // Fast forward past throttle time
       vi.advanceTimersByTime(500);
 
-      expect(mockIdbStorage.setItem).toHaveBeenCalledTimes(1);
+      expect(mockSetItem).toHaveBeenCalledTimes(1);
     });
 
     test('should use default key', () => {
@@ -52,10 +69,7 @@ describe('createQueryPersister', () => {
       persister.persistClient(mockClient as never);
       vi.advanceTimersByTime(1000);
 
-      expect(mockIdbStorage.setItem).toHaveBeenCalledWith(
-        'abe-stack-query-cache',
-        expect.any(String),
-      );
+      expect(mockSetItem).toHaveBeenCalledWith('abe-stack-query-cache', expect.any(String));
     });
 
     test('should use custom key', () => {
@@ -65,13 +79,13 @@ describe('createQueryPersister', () => {
       persister.persistClient(mockClient as never);
       vi.advanceTimersByTime(1000);
 
-      expect(mockIdbStorage.setItem).toHaveBeenCalledWith('custom-key', expect.any(String));
+      expect(mockSetItem).toHaveBeenCalledWith('custom-key', expect.any(String));
     });
   });
 
   describe('restoreClient', () => {
     test('should return undefined when no data', async () => {
-      mockIdbStorage.getItem.mockResolvedValue(null);
+      mockGetItem.mockResolvedValue(null);
       const persister = createQueryPersister();
 
       const result = await persister.restoreClient();
@@ -81,7 +95,7 @@ describe('createQueryPersister', () => {
 
     test('should return parsed client data', async () => {
       const mockClient = { timestamp: Date.now(), buster: '', clientState: { queries: [] } };
-      mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+      mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
       const persister = createQueryPersister();
 
       const result = await persister.restoreClient();
@@ -92,17 +106,17 @@ describe('createQueryPersister', () => {
     test('should return undefined for expired data', async () => {
       const oldTimestamp = Date.now() - 1000 * 60 * 60 * 25; // 25 hours ago
       const mockClient = { timestamp: oldTimestamp, buster: '', clientState: {} };
-      mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+      mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
       const persister = createQueryPersister({ maxAge: 1000 * 60 * 60 * 24 }); // 24 hours
 
       const result = await persister.restoreClient();
 
       expect(result).toBeUndefined();
-      expect(mockIdbStorage.removeItem).toHaveBeenCalled();
+      expect(mockRemoveItem).toHaveBeenCalled();
     });
 
     test('should return undefined on parse error', async () => {
-      mockIdbStorage.getItem.mockResolvedValue('invalid-json');
+      mockGetItem.mockResolvedValue('invalid-json');
       const persister = createQueryPersister();
 
       const result = await persister.restoreClient();
@@ -117,7 +131,7 @@ describe('createQueryPersister', () => {
 
       await persister.removeClient();
 
-      expect(mockIdbStorage.removeItem).toHaveBeenCalledWith('abe-stack-query-cache');
+      expect(mockRemoveItem).toHaveBeenCalledWith('abe-stack-query-cache');
     });
 
     test('should use custom key', async () => {
@@ -125,7 +139,7 @@ describe('createQueryPersister', () => {
 
       await persister.removeClient();
 
-      expect(mockIdbStorage.removeItem).toHaveBeenCalledWith('custom-key');
+      expect(mockRemoveItem).toHaveBeenCalledWith('custom-key');
     });
   });
 });
@@ -133,16 +147,17 @@ describe('createQueryPersister', () => {
 describe('clearQueryCache', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRemoveItem.mockResolvedValue(undefined);
   });
 
   test('should remove default key', async () => {
     await clearQueryCache();
-    expect(mockIdbStorage.removeItem).toHaveBeenCalledWith('abe-stack-query-cache');
+    expect(mockRemoveItem).toHaveBeenCalledWith('abe-stack-query-cache');
   });
 
   test('should remove custom key', async () => {
     await clearQueryCache('custom-key');
-    expect(mockIdbStorage.removeItem).toHaveBeenCalledWith('custom-key');
+    expect(mockRemoveItem).toHaveBeenCalledWith('custom-key');
   });
 });
 
@@ -150,6 +165,8 @@ describe('query expiration edge cases', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockGetItem.mockResolvedValue(null);
+    mockRemoveItem.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -161,14 +178,14 @@ describe('query expiration edge cases', () => {
     const maxAge = 1000 * 60 * 60 * 24; // 24 hours
     const exactlyAtBoundary = now - maxAge; // Exactly 24 hours ago
     const mockClient = { timestamp: exactlyAtBoundary, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge });
 
     const result = await persister.restoreClient();
 
     // At exactly the boundary, data is still valid (comparison is strictly greater than)
     expect(result).toEqual(mockClient);
-    expect(mockIdbStorage.removeItem).not.toHaveBeenCalled();
+    expect(mockRemoveItem).not.toHaveBeenCalled();
   });
 
   test('should return data 1ms before maxAge boundary', async () => {
@@ -176,20 +193,20 @@ describe('query expiration edge cases', () => {
     const maxAge = 1000 * 60 * 60 * 24; // 24 hours
     const justBeforeBoundary = now - maxAge + 1; // 1ms before expiry
     const mockClient = { timestamp: justBeforeBoundary, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge });
 
     const result = await persister.restoreClient();
 
     expect(result).toEqual(mockClient);
-    expect(mockIdbStorage.removeItem).not.toHaveBeenCalled();
+    expect(mockRemoveItem).not.toHaveBeenCalled();
   });
 
   test('should handle zero maxAge (boundary case)', async () => {
     const now = Date.now();
     // With 0 maxAge and same timestamp, Date.now() - timestamp = 0, which is NOT > 0
     const mockClient = { timestamp: now, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge: 0 });
 
     const result = await persister.restoreClient();
@@ -203,20 +220,20 @@ describe('query expiration edge cases', () => {
     const maxAge = 1000; // 1 second
     const olderThanMaxAge = now - maxAge - 1; // 1ms older than maxAge
     const mockClient = { timestamp: olderThanMaxAge, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge });
 
     const result = await persister.restoreClient();
 
     expect(result).toBeUndefined();
-    expect(mockIdbStorage.removeItem).toHaveBeenCalled();
+    expect(mockRemoveItem).toHaveBeenCalled();
   });
 
   test('should handle very large maxAge', async () => {
     const now = Date.now();
     const oneYearAgo = now - 1000 * 60 * 60 * 24 * 365; // 1 year ago
     const mockClient = { timestamp: oneYearAgo, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({
       maxAge: 1000 * 60 * 60 * 24 * 365 * 2, // 2 years
     });
@@ -229,7 +246,7 @@ describe('query expiration edge cases', () => {
   test('should handle future timestamp gracefully', async () => {
     const futureTimestamp = Date.now() + 1000 * 60 * 60; // 1 hour in the future
     const mockClient = { timestamp: futureTimestamp, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge: 1000 * 60 * 60 * 24 });
 
     const result = await persister.restoreClient();
@@ -240,19 +257,19 @@ describe('query expiration edge cases', () => {
 
   test('should handle negative timestamp gracefully', async () => {
     const mockClient = { timestamp: -1000, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge: 1000 * 60 * 60 * 24 });
 
     const result = await persister.restoreClient();
 
     // Negative timestamp would be very old, should be expired
     expect(result).toBeUndefined();
-    expect(mockIdbStorage.removeItem).toHaveBeenCalled();
+    expect(mockRemoveItem).toHaveBeenCalled();
   });
 
   test('should handle missing timestamp in stored data', async () => {
     const mockClient = { buster: '', clientState: {} }; // No timestamp
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
     const persister = createQueryPersister({ maxAge: 1000 * 60 * 60 * 24 });
 
     const result = await persister.restoreClient();
@@ -263,7 +280,7 @@ describe('query expiration edge cases', () => {
   });
 
   test('should handle storage error during restore', async () => {
-    mockIdbStorage.getItem.mockRejectedValue(new Error('Storage error'));
+    mockGetItem.mockRejectedValue(new Error('Storage error'));
     const persister = createQueryPersister();
 
     const result = await persister.restoreClient();
@@ -274,8 +291,8 @@ describe('query expiration edge cases', () => {
   test('should handle storage error during removal of expired data', async () => {
     const oldTimestamp = Date.now() - 1000 * 60 * 60 * 25; // 25 hours ago
     const mockClient = { timestamp: oldTimestamp, buster: '', clientState: {} };
-    mockIdbStorage.getItem.mockResolvedValue(JSON.stringify(mockClient));
-    mockIdbStorage.removeItem.mockRejectedValue(new Error('Remove failed'));
+    mockGetItem.mockResolvedValue(JSON.stringify(mockClient));
+    mockRemoveItem.mockRejectedValue(new Error('Remove failed'));
     const persister = createQueryPersister({ maxAge: 1000 * 60 * 60 * 24 }); // 24 hours
 
     // Should not throw even if remove fails

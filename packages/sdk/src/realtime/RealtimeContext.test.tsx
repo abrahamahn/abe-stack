@@ -5,8 +5,8 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { createElement, useEffect, useState } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { RecordCache, type TableMap } from '../../cache/RecordCache';
-import { RealtimeProvider, useRealtime, type RealtimeProviderConfig } from '../RealtimeContext';
+import { RecordCache, type TableMap } from '../cache/RecordCache';
+import { RealtimeProvider, useRealtime, type RealtimeProviderConfig } from './RealtimeContext';
 
 // ============================================================================
 // Mock WebSocket

@@ -11,7 +11,7 @@ import {
   serializeToHash,
   serializeToJSON,
   serializeToURLParams,
-} from '../serialization';
+} from './serialization';
 
 import type { SearchQuery } from '@abe-stack/core';
 

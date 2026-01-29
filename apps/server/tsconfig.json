@@ -12,6 +12,18 @@
       "@/*": [
             "./src/*"
       ],
+      "@abe-stack/billing": [
+            "../../packages/billing/src/index.ts"
+      ],
+      "@abe-stack/billing/*": [
+            "../../packages/billing/src/*"
+      ],
+      "@abe-stack/cache": [
+            "../../packages/cache/src/index.ts"
+      ],
+      "@abe-stack/cache/*": [
+            "../../packages/cache/src/*"
+      ],
       "@abe-stack/contracts": [
             "../../packages/contracts/src/index.ts"
       ],
@@ -53,12 +65,6 @@
       ],
       "@billing/*": [
             "./src/modules/billing/*"
-      ],
-      "@cache": [
-            "./src/infrastructure/cache"
-      ],
-      "@cache/*": [
-            "./src/infrastructure/cache/*"
       ],
       "@config": [
             "./src/config"
@@ -161,6 +167,8 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
+    { "path": "../../packages/billing" },
+    { "path": "../../packages/cache" },
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/media" },

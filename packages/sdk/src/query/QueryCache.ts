@@ -295,6 +295,14 @@ export class QueryCache {
       subscribers: new Set(),
     };
 
+    // Update staleTime and gcTime if provided, even for existing entries
+    if (options?.staleTime !== undefined) {
+      entry.staleTime = options.staleTime;
+    }
+    if (options?.gcTime !== undefined) {
+      entry.gcTime = options.gcTime;
+    }
+
     entry.state = {
       ...entry.state,
       data,

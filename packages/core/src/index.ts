@@ -115,7 +115,8 @@ export type {
   CacheStats,
   MemoryCacheConfig,
 } from './infrastructure/cache';
-export { decode, JwtError, sign, verify } from './infrastructure/crypto';
+// JWT exports removed from main entry - use direct import for server-only code:
+// import { decode, JwtError, sign, verify } from '@abe-stack/core/infrastructure/crypto';
 export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions } from './infrastructure/crypto';
 export {
   AppError,
@@ -148,9 +149,9 @@ export type {
 export { parseCookies } from './infrastructure/http';
 export { LOG_LEVELS, createConsoleLogger } from './infrastructure/logger/console';
 export type { ConsoleLoggerConfig, LogData } from './infrastructure/logger/console';
+// PostgresPubSub exports removed from main entry - use direct import for server-only code:
+// import { createPostgresPubSub, PostgresPubSub } from '@abe-stack/core/pubsub';
 export {
-  createPostgresPubSub,
-  PostgresPubSub,
   publishAfterWrite,
   SubKeys,
   SubscriptionManager,
@@ -158,7 +159,6 @@ export {
 export type {
   ClientMessage,
   ListKey,
-  PostgresPubSubOptions,
   PubSubMessage,
   RecordKey,
   ServerMessage,
@@ -166,6 +166,7 @@ export type {
   SubscriptionManagerOptions,
   WebSocket,
 } from './infrastructure/pubsub';
+// PostgresPubSubOptions type available via: import type { PostgresPubSubOptions } from '@abe-stack/core/pubsub';
 export {
   compoundFilterSchema,
   createSearchQuery,

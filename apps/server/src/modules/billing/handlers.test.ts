@@ -78,7 +78,7 @@ const { mockBillingProvider } = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/infrastructure/billing', () => ({
+vi.mock('@abe-stack/billing', () => ({
   createBillingProvider: vi.fn(() => mockBillingProvider),
 }));
 

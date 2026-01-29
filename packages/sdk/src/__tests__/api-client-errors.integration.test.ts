@@ -260,8 +260,12 @@ describe('API Client Error Handling Integration', () => {
     it('should return default message for non-errors', () => {
       expect(getErrorMessage(null)).toBe('An unexpected error occurred');
       expect(getErrorMessage(undefined)).toBe('An unexpected error occurred');
-      expect(getErrorMessage('string')).toBe('An unexpected error occurred');
       expect(getErrorMessage(123)).toBe('An unexpected error occurred');
+    });
+
+    it('should return the string itself for string errors', () => {
+      expect(getErrorMessage('string')).toBe('string');
+      expect(getErrorMessage('Custom error message')).toBe('Custom error message');
     });
   });
 

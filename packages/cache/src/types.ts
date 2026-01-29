@@ -1,13 +1,18 @@
-// apps/server/src/infrastructure/cache/types.ts
+// packages/cache/src/types.ts
 /**
- * Server Cache Types
+ * Cache Package Types
  *
- * Server-specific cache types extending core cache types.
+ * Re-exports core cache types and defines cache-specific types
+ * for the implementation layer.
  */
 
-// Re-export core cache types
+// ============================================================================
+// Re-export Core Types
+// ============================================================================
+
 export type {
   BaseCacheConfig,
+  CacheConfig,
   CacheDeleteOptions,
   CacheEntry,
   CacheEntryMetadata,
@@ -19,20 +24,25 @@ export type {
 } from '@abe-stack/core';
 
 // ============================================================================
-// Server-Specific Types
+// Eviction Types (from lru.ts)
+// ============================================================================
+
+// Re-export eviction types from lru module
+export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';
+
+// ============================================================================
+// Cache-Specific Types
 // ============================================================================
 
 /**
- * Internal structure for LRU cache nodes.
+ * Minimal logger interface for cache operations.
+ * Compatible with most logging libraries.
  */
-export interface LRUNode<T> {
-  key: string;
-  value: T;
-  prev: LRUNode<T> | null;
-  next: LRUNode<T> | null;
-  expiresAt?: number;
-  tags?: string[];
-  size?: number;
+export interface CacheLogger {
+  debug(message: string, data?: Record<string, unknown>): void;
+  info(message: string, data?: Record<string, unknown>): void;
+  warn(message: string, data?: Record<string, unknown>): void;
+  error(message: string, data?: Record<string, unknown>): void;
 }
 
 /**
@@ -41,24 +51,14 @@ export interface LRUNode<T> {
 export interface CreateCacheOptions {
   /** Logger instance for cache operations */
   logger?: CacheLogger;
-  /** Callback when cache is full and needs eviction */
-  onEviction?: (key: string, reason: EvictionReason) => void;
+  /** Callback when cache entries are evicted */
+  onEviction?: (key: string, reason: CacheEvictionReason) => void;
 }
 
 /**
- * Reason for cache eviction.
+ * Eviction reason for cache provider (includes memory_limit).
  */
-export type EvictionReason = 'expired' | 'lru' | 'manual' | 'memory_limit' | 'clear';
-
-/**
- * Minimal logger interface for cache operations.
- */
-export interface CacheLogger {
-  debug(message: string, data?: Record<string, unknown>): void;
-  info(message: string, data?: Record<string, unknown>): void;
-  warn(message: string, data?: Record<string, unknown>): void;
-  error(message: string, data?: Record<string, unknown>): void;
-}
+export type CacheEvictionReason = 'expired' | 'lru' | 'manual' | 'memory_limit' | 'clear';
 
 /**
  * Result of a cache operation with timing info.
@@ -71,6 +71,10 @@ export interface CacheOperationResult<T> {
   /** Whether the value was from cache */
   fromCache: boolean;
 }
+
+// ============================================================================
+// Memoization Types
+// ============================================================================
 
 /**
  * Options for memoized function.

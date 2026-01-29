@@ -1,7 +1,7 @@
 // packages/sdk/src/realtime/SubscriptionCache.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { SubscriptionCache } from '../SubscriptionCache';
+import { SubscriptionCache } from './SubscriptionCache';
 
 describe('SubscriptionCache', () => {
   beforeEach(() => {

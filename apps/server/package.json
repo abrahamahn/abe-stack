@@ -20,6 +20,8 @@
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-server --report-unused-disable-directives"
   },
   "dependencies": {
+    "@abe-stack/billing": "workspace:*",
+    "@abe-stack/cache": "workspace:*",
     "@abe-stack/core": "workspace:*",
     "@abe-stack/db": "workspace:*",
     "@aws-sdk/client-s3": "^3.971.0",
@@ -27,11 +29,17 @@
     "@aws-sdk/s3-request-presigner": "^3.971.0",
     "argon2": "^0.44.0",
     "fastify": "5.7.1",
+    "inversify": "^7.11.0",
+    "lodash": "^4.17.23",
+    "md5": "^2.3.0",
     "postgres": "^3.4.8",
-    "stripe": "^20.2.0",
+    "uuid": "^13.0.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.23",
+    "@types/md5": "^2.3.6",
+    "@types/uuid": "^11.0.0",
     "@types/ws": "^8.18.1",
     "supertest": "^7.2.2",
     "vite-tsconfig-paths": "^6.0.5"

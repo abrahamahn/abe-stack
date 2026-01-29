@@ -303,7 +303,7 @@ describe('Stripe Webhook Handler', () => {
     test('should return 500 when Stripe is not configured', async () => {
       const { instance, routes } = createMockFastify();
       const ctx = createMockContext(true, {
-        stripe: { secretKey: undefined, publishableKey: 'pk_test', webhookSecret: 'whsec_test' },
+        stripe: { secretKey: '', publishableKey: 'pk_test', webhookSecret: 'whsec_test' },
       });
 
       registerWebhookRoutes(instance, ctx);
@@ -527,7 +527,7 @@ describe('PayPal Webhook Handler', () => {
       const { instance, routes } = createMockFastify();
       const ctx = createMockContext(true, {
         paypal: {
-          clientId: undefined,
+          clientId: '',
           clientSecret: 'secret',
           webhookId: 'webhook_123',
           sandbox: true,

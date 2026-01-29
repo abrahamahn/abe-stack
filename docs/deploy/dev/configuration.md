@@ -221,48 +221,24 @@ Each package stores incremental build info:
 
 ## Path Aliases
 
-### Centralized Alias Definition
-
-All path aliases are defined in `config/aliases.ts` - the single source of truth:
-
-```typescript
-// Package aliases (used across all apps)
-export const packageAliases = {
-  '@abe-stack/core': path.join(coreRoot, 'src'),
-  '@abe-stack/sdk': path.join(sdkRoot, 'src'),
-  '@abe-stack/ui': path.join(uiRoot, 'src'),
-};
-
-// Each package/app also has internal aliases
-export function getWebAliases(): Record<string, string> {
-  return {
-    '@': path.join(webRoot, 'src'),
-    '@features': path.join(webRoot, 'src/features'),
-    '@auth': path.join(webRoot, 'src/features/auth'),
-    // ... more aliases
-    ...packageAliases,
-  };
-}
-```
-
-### Alias Sync Rules
-
-The `sync-path-aliases.ts` script auto-generates aliases based on:
-
-1. **Directory must have `index.ts`** - No index = no alias
-2. **Max depth: 3 levels** from `src/`
-3. **Excluded names**: `utils`, `helpers`, `types`, `constants` (use relative imports)
-4. **Shallower directories win** for duplicate names
-
-See [Sync Scripts](./sync-scripts.md#1-sync-path-aliasests) for detailed behavior.
-
 ### Where Aliases Are Defined
+
+Path aliases are defined in two places that must be kept in sync:
 
 | Location                   | Purpose                  | Format                                  |
 | -------------------------- | ------------------------ | --------------------------------------- |
-| `config/aliases.ts`        | Vite/Vitest resolution   | `Record<string, string>`                |
+| `apps/*/vite.config.ts`    | Vite/Vitest resolution   | `resolve.alias: Record<string, string>` |
 | `apps/*/tsconfig.json`     | TypeScript type checking | `"paths": { "@alias": ["./src/path"] }` |
 | `packages/*/tsconfig.json` | Package internal aliases | `"paths": { ... }`                      |
+
+### Alias Categories
+
+Each app's `vite.config.ts` defines aliases inline:
+
+1. **Package aliases** - `@abe-stack/core`, `@abe-stack/ui`, etc. pointing to source
+2. **UI internal aliases** - `@components`, `@elements`, etc. for UI package internals
+3. **Core internal aliases** - `@contracts`, `@shared` for core package internals
+4. **App-specific aliases** - `@features`, `@auth`, etc. for the specific app
 
 ### Example: Server Aliases
 
@@ -488,7 +464,7 @@ Key features:
 
 - **Relative base path** (`./`) - Required for Electron file:// protocol
 - **Dynamic port discovery** - Finds available port if default is busy
-- **Alias resolution** - Uses `getDesktopAliases()` from `config/aliases.ts`
+- **Alias resolution** - Defines aliases inline for packages, UI, core, and desktop paths
 
 ---
 
@@ -682,9 +658,9 @@ const serverConfigSchema = z.object({
 | React TypeScript config        | `.config/tsconfig.react.json`        |
 | ESLint TypeScript config       | `.config/tsconfig.eslint.json`       |
 | Server build config            | `apps/server/tsconfig.build.json`    |
-| Path aliases (Vite/Vitest)     | `config/aliases.ts`                  |
-| Vite web config                | `config/vite.web.config.ts`          |
-| Vite desktop config            | `config/vite.desktop.config.ts`      |
+| Path aliases (Vite)            | `apps/*/vite.config.ts` (inline)     |
+| Vite web config                | `apps/web/vite.config.ts`            |
+| Vite desktop config            | `apps/desktop/vite.config.ts`        |
 | Vitest configs                 | `config/vitest.config.ts`            |
 | Playwright E2E config          | `config/playwright.config.ts`        |
 | Drizzle ORM config             | `config/drizzle.config.ts`           |

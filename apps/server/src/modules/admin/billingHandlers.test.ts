@@ -40,8 +40,8 @@ vi.mock('./billingService', () => ({
   syncPlanToStripe: vi.fn(),
 }));
 
-// Mock path - use relative path for more reliable mocking
-vi.mock('../../infrastructure/billing', () => ({
+// Mock billing provider from @abe-stack/billing
+vi.mock('@abe-stack/billing', () => ({
   createBillingProvider: vi.fn(),
 }));
 
@@ -601,7 +601,7 @@ describe('handleAdminSyncPlanToStripe', () => {
   describe('when syncing a plan successfully', () => {
     test('should return 200 with Stripe IDs', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       const mockProvider = { updateProduct: vi.fn(), createProduct: vi.fn() };
       vi.mocked(createBillingProvider).mockReturnValue(mockProvider as never);
       vi.mocked(syncPlanToStripe).mockResolvedValue({
@@ -630,7 +630,7 @@ describe('handleAdminSyncPlanToStripe', () => {
 
     test('should create billing provider with correct config', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       const mockProvider = {};
       vi.mocked(createBillingProvider).mockReturnValue(mockProvider as never);
       vi.mocked(syncPlanToStripe).mockResolvedValue({
@@ -662,7 +662,7 @@ describe('handleAdminSyncPlanToStripe', () => {
   describe('when plan is not found', () => {
     test('should return 404 with not found message', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
       vi.mocked(syncPlanToStripe).mockRejectedValue(new PlanNotFoundError('plan-123'));
 
@@ -679,7 +679,7 @@ describe('handleAdminSyncPlanToStripe', () => {
   describe('when billing provider is not configured', () => {
     test('should return 500 with configuration error message', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
       vi.mocked(syncPlanToStripe).mockRejectedValue(
         new BillingProviderNotConfiguredError('stripe'),
@@ -698,7 +698,7 @@ describe('handleAdminSyncPlanToStripe', () => {
   describe('when errors occur', () => {
     test('should return 500 for Stripe API errors', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
       vi.mocked(syncPlanToStripe).mockRejectedValue(new Error('Stripe API error'));
 
@@ -870,7 +870,7 @@ describe('Error Handling', () => {
 
     test('should not log BillingProviderNotConfiguredError (handled error)', async () => {
       const { syncPlanToStripe } = await import('./billingService');
-      const { createBillingProvider } = await import('../../infrastructure/billing');
+      const { createBillingProvider } = await import('@abe-stack/billing');
       vi.mocked(createBillingProvider).mockReturnValue({} as never);
       vi.mocked(syncPlanToStripe).mockRejectedValue(
         new BillingProviderNotConfiguredError('stripe'),

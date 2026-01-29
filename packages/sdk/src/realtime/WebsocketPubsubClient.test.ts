@@ -5,7 +5,7 @@ import {
   WebsocketPubsubClient,
   type ClientPubsubMessage,
   type ServerPubsubMessage,
-} from '../WebsocketPubsubClient';
+} from './WebsocketPubsubClient';
 
 /**
  * Mock WebSocket implementation for testing

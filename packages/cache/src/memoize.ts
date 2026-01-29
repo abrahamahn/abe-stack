@@ -1,11 +1,19 @@
-// apps/server/src/infrastructure/cache/utils/memoize.ts
+// packages/cache/src/memoize.ts
 /**
  * Function Memoization Utilities
  *
  * Provides memoization with TTL, custom key generation, and LRU eviction.
+ * Uses LRUCache internally for O(1) operations (replaces O(n) array-based LRU).
+ *
+ * Key improvements over naive memoization:
+ * 1. O(1) LRU operations via doubly-linked list
+ * 2. Cache stampede prevention (caches Promise, not result)
+ * 3. Sliding expiration support
  */
 
-import type { MemoizedFunction, MemoizeOptions, MemoizeStats } from '../types';
+import { LRUCache } from './lru';
+
+import type { MemoizedFunction, MemoizeOptions, MemoizeStats } from './types';
 
 // ============================================================================
 // Memoize Function
@@ -13,15 +21,20 @@ import type { MemoizedFunction, MemoizeOptions, MemoizeStats } from '../types';
 
 /**
  * Internal cache entry for memoized results.
+ * We store the Promise to prevent cache stampede.
  */
 interface MemoEntry<T> {
-  value: T;
+  /** The cached promise (prevents cache stampede) */
+  promise: Promise<T>;
+  /** Expiration timestamp for sliding expiration */
   expiresAt?: number;
-  lastAccessedAt: number;
 }
 
 /**
  * Memoize an async function with TTL and LRU eviction.
+ *
+ * Uses O(1) LRU cache internally instead of O(n) array operations.
+ * Caches the Promise (not the result) to prevent cache stampede.
  *
  * @param fn - The function to memoize
  * @param options - Memoization options
@@ -52,6 +65,8 @@ interface MemoEntry<T> {
  * // Get statistics
  * console.log(fetchUser.getStats());
  * ```
+ *
+ * @complexity O(1) for get/set operations
  */
 export function memoize<TArgs extends unknown[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
@@ -64,8 +79,12 @@ export function memoize<TArgs extends unknown[], TResult>(
     slidingExpiration = false,
   } = options;
 
-  const cache = new Map<string, MemoEntry<TResult>>();
-  const accessOrder: string[] = []; // For LRU tracking
+  // Use LRU cache for O(1) operations
+  const cache = new LRUCache<string, MemoEntry<TResult>>({
+    maxSize,
+    // Don't use LRU's built-in TTL - we handle it manually for sliding expiration
+  });
+
   let hits = 0;
   let misses = 0;
 
@@ -74,76 +93,51 @@ export function memoize<TArgs extends unknown[], TResult>(
     const key = keyGenerator(...args);
     const now = Date.now();
 
-    // Check cache
+    // Check cache (O(1))
     const entry = cache.get(key);
     if (entry != null) {
       // Check if expired
       if (entry.expiresAt != null && entry.expiresAt <= now) {
         cache.delete(key);
-        removeFromAccessOrder(key);
         misses++;
       } else {
         // Cache hit
         hits++;
 
-        // Update access time for sliding expiration
-        if (slidingExpiration && (ttl != null && ttl > 0)) {
+        // Update expiration for sliding expiration
+        if (slidingExpiration && ttl != null && ttl > 0) {
           entry.expiresAt = now + ttl;
         }
-        entry.lastAccessedAt = now;
 
-        // Move to end of access order (most recently used)
-        moveToEnd(key);
-
-        return entry.value;
+        return entry.promise;
       }
     } else {
       misses++;
     }
 
-    // Cache miss - execute function
-    const result = await fn(...args);
+    // Cache miss - create a new promise
+    // We cache the promise immediately to prevent cache stampede
+    // (multiple concurrent requests for the same key will share the same promise)
+    const promise = fn(...args).catch((error: unknown) => {
+      // On error, remove from cache so next call will retry
+      cache.delete(key);
+      throw error;
+    });
 
-    // Evict if at capacity
-    while (cache.size >= maxSize && accessOrder.length > 0) {
-      const lruKey = accessOrder.shift();
-      if (lruKey != null && lruKey !== '') {
-        cache.delete(lruKey);
-      }
-    }
-
-    // Store result
-    const newEntry: MemoEntry<TResult> = {
-      value: result,
-      lastAccessedAt: now,
-    };
-    if (ttl !== undefined && ttl > 0) {
+    // Conditionally include expiresAt to satisfy exactOptionalPropertyTypes
+    const newEntry: MemoEntry<TResult> = { promise };
+    if (ttl != null && ttl > 0) {
       newEntry.expiresAt = now + ttl;
     }
+
     cache.set(key, newEntry);
-    accessOrder.push(key);
 
-    return result;
+    return promise;
   };
-
-  // Helper to remove key from access order
-  function removeFromAccessOrder(key: string): void {
-    const index = accessOrder.indexOf(key);
-    if (index !== -1) {
-      accessOrder.splice(index, 1);
-    }
-  }
-
-  // Helper to move key to end of access order
-  function moveToEnd(key: string): void {
-    removeFromAccessOrder(key);
-    accessOrder.push(key);
-  }
 
   // Clear all cached results
   memoized.clear = (): void => {
     cache.clear();
-    accessOrder.length = 0;
     hits = 0;
     misses = 0;
   };
@@ -152,7 +146,6 @@ export function memoize<TArgs extends unknown[], TResult>(
   memoized.invalidate = (...args: TArgs): void => {
     const key = keyGenerator(...args);
     cache.delete(key);
-    removeFromAccessOrder(key);
   };
 
   // Get statistics
@@ -211,13 +204,14 @@ export function memoizeMethod(options: MemoizeOptions = {}): MethodDecorator {
         // Create memoized function for this instance
         const boundMethod = originalMethod.bind(this);
 
-        // Include instance identity in key to avoid cross-instance collisions
+        // Include method name in key to avoid collisions
         const userKeyGenerator = options.keyGenerator;
-        const instanceKeyGenerator = userKeyGenerator != null
-          ? (...fnArgs: unknown[]): string =>
-              `${String(propertyKey)}:${userKeyGenerator(...fnArgs)}`
-          : (...fnArgs: unknown[]): string =>
-              `${String(propertyKey)}:${defaultKeyGenerator(...fnArgs)}`;
+        const instanceKeyGenerator =
+          userKeyGenerator != null
+            ? (...fnArgs: unknown[]): string =>
+                `${String(propertyKey)}:${userKeyGenerator(...fnArgs)}`
+            : (...fnArgs: unknown[]): string =>
+                `${String(propertyKey)}:${defaultKeyGenerator(...fnArgs)}`;
 
         memoizedFn = memoize(boundMethod, {
           ...options,
@@ -240,6 +234,12 @@ export function memoizeMethod(options: MemoizeOptions = {}): MethodDecorator {
 
 /**
  * Default key generator using JSON serialization.
+ * Uses fast paths for primitives and single arguments.
+ *
+ * @param args - Function arguments
+ * @returns A string key
+ *
+ * @complexity O(n) where n is the size of serialized arguments
  */
 function defaultKeyGenerator(...args: unknown[]): string {
   if (args.length === 0) {
@@ -274,6 +274,8 @@ function defaultKeyGenerator(...args: unknown[]): string {
  *   keyGenerator: createArgIndexKeyGenerator([0, 2]) // Use 1st and 3rd args
  * });
  * ```
+ *
+ * @complexity O(m) where m is the number of indices
  */
 export function createArgIndexKeyGenerator(indices: number[]): (...args: unknown[]) => string {
   return (...args: unknown[]): string => {
@@ -307,6 +309,8 @@ export function createArgIndexKeyGenerator(indices: number[]): (...args: unknown
  * // Key will be based on arg.userId and arg.type
  * memoizedFn({ userId: '123', type: 'admin', name: 'ignored' });
  * ```
+ *
+ * @complexity O(p) where p is the number of properties
  */
 export function createObjectKeyGenerator(props: string[]): (...args: unknown[]) => string {
   return (...args: unknown[]): string => {

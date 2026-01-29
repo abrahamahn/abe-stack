@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/billing/stripe-provider.ts
+// packages/billing/src/stripe-provider.ts
 /**
  * Stripe Payment Provider
  *
@@ -7,16 +7,18 @@
 
 import stripeDefault from 'stripe';
 
-import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 import type {
     BillingService,
     CheckoutParams,
     CheckoutResult,
     CreateProductParams,
     CreateProductResult,
+    NormalizedEventType,
+    NormalizedWebhookEvent,
     ProviderInvoice,
     ProviderPaymentMethod,
     ProviderSubscription,
+    SetupIntentResult,
     StripeProviderConfig as StripeConfig,
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';

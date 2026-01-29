@@ -41,7 +41,7 @@ import type {
 } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
 
-import { createBillingProvider } from '@/infrastructure/billing';
+import { createBillingProvider } from '@abe-stack/billing';
 
 
 // ============================================================================

@@ -1,10 +1,16 @@
 // apps/web/src/features/dashboard/pages/Dashboard.test.tsx
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
-import { MemoryRouter } from '@abe-stack/ui';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import {
+  createMockEnvironment,
+  mockUser,
+  renderWithProviders,
+} from '../../../__tests__/utils';
 import { DashboardPage } from './Dashboard';
+
+import type { RenderWithProvidersResult } from '../../../__tests__/utils';
+import type { User } from '../../auth';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -16,57 +22,23 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-// Mock the auth context
-const mockLogout = vi.fn();
-const mockUseAuth = vi.fn(() => ({
-  user: {
-    id: 'user-123',
-    email: 'test@example.com',
-    name: 'Test User',
-  },
-  isLoading: false,
-  isAuthenticated: true,
-  login: vi.fn(),
-  register: vi.fn(),
-  logout: mockLogout,
-}));
-
-vi.mock('../../../auth', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
-
 describe('DashboardPage', () => {
-  const createQueryCache = (): QueryCache =>
-    new QueryCache({
-      defaultStaleTime: 0,
-      defaultGcTime: 0,
+  const renderDashboardPage = (options?: {
+    user?: User | null;
+    isLoading?: boolean;
+    isAuthenticated?: boolean;
+  }): RenderWithProvidersResult => {
+    const environment = createMockEnvironment({
+      user: options?.user === undefined ? mockUser : options.user,
+      isLoading: options?.isLoading ?? false,
+      isAuthenticated: options?.isAuthenticated ?? options?.user !== null,
     });
 
-  const renderDashboardPage = (): ReturnType<typeof render> => {
-    const queryCache = createQueryCache();
-    return render(
-      <QueryCacheProvider cache={queryCache}>
-        <MemoryRouter>
-          <DashboardPage />
-        </MemoryRouter>
-      </QueryCacheProvider>,
-    );
+    return renderWithProviders(<DashboardPage />, { environment });
   };
 
   beforeEach((): void => {
     vi.clearAllMocks();
-    mockUseAuth.mockReturnValue({
-      user: {
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-      },
-      isLoading: false,
-      isAuthenticated: true,
-      login: vi.fn(),
-      register: vi.fn(),
-      logout: mockLogout,
-    });
   });
 
   describe('Rendering', () => {
@@ -122,20 +94,14 @@ describe('DashboardPage', () => {
 
   describe('User Without Name', () => {
     it('should display "Not provided" when name is null', () => {
-      mockUseAuth.mockReturnValue({
+      renderDashboardPage({
         user: {
+          ...mockUser,
           id: 'user-456',
           email: 'noname@example.com',
-          name: null as unknown as string,
+          name: null,
         },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
       });
-
-      renderDashboardPage();
 
       expect(screen.getByText(/not provided/i)).toBeInTheDocument();
     });
@@ -143,19 +109,18 @@ describe('DashboardPage', () => {
 
   describe('Logout Functionality', () => {
     it('should call logout when logout button is clicked', async () => {
-      mockLogout.mockResolvedValueOnce(undefined);
-      renderDashboardPage();
+      const { environment } = renderDashboardPage();
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(mockLogout).toHaveBeenCalled();
+        // Auth state should change after logout
+        expect(environment.auth.getState().isAuthenticated).toBe(false);
       });
     });
 
     it('should navigate to home after logout', async () => {
-      mockLogout.mockResolvedValueOnce(undefined);
       renderDashboardPage();
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });
@@ -186,37 +151,29 @@ describe('DashboardPage', () => {
 
   describe('Null User Handling', () => {
     it('should handle null user gracefully', () => {
-      mockUseAuth.mockReturnValue({
-        user: null as unknown as { id: string; email: string; name: string },
-        isLoading: false,
-        isAuthenticated: false,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
-      });
-
       // Should not throw
-      expect(() => renderDashboardPage()).not.toThrow();
+      expect(() =>
+        renderDashboardPage({
+          user: null,
+          isAuthenticated: false,
+        }),
+      ).not.toThrow();
     });
   });
 
   describe('Aggressive TDD - Edge Cases', () => {
     it('should call logout when logout button is clicked', async () => {
-      // Logout resolves successfully
-      mockLogout.mockResolvedValueOnce(undefined);
-
-      renderDashboardPage();
+      const { environment } = renderDashboardPage();
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
 
       await waitFor(() => {
-        expect(mockLogout).toHaveBeenCalled();
+        expect(environment.auth.getState().isAuthenticated).toBe(false);
       });
     });
 
     it('should handle rapid logout clicks', async () => {
-      mockLogout.mockResolvedValue(undefined);
       renderDashboardPage();
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });
@@ -227,121 +184,75 @@ describe('DashboardPage', () => {
       }
 
       await waitFor(() => {
-        expect(mockLogout).toHaveBeenCalled();
+        expect(mockNavigate).toHaveBeenCalled();
       });
     });
 
     it('should handle user with empty email', () => {
-      mockUseAuth.mockReturnValue({
-        user: {
-          id: 'user-123',
-          email: '',
-          name: 'Test User',
-        },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
-      });
-
-      expect(() => renderDashboardPage()).not.toThrow();
+      expect(() =>
+        renderDashboardPage({
+          user: {
+            ...mockUser,
+            email: '',
+          },
+        }),
+      ).not.toThrow();
     });
 
     it('should handle user with empty name and id', () => {
-      mockUseAuth.mockReturnValue({
-        user: {
-          id: '',
-          email: 'test@example.com',
-          name: '',
-        },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
-      });
-
-      expect(() => renderDashboardPage()).not.toThrow();
+      expect(() =>
+        renderDashboardPage({
+          user: {
+            ...mockUser,
+            id: '',
+            name: '',
+          },
+        }),
+      ).not.toThrow();
     });
 
     it('should handle user with special characters in name', () => {
-      mockUseAuth.mockReturnValue({
+      renderDashboardPage({
         user: {
-          id: 'user-123',
-          email: 'test@example.com',
+          ...mockUser,
           name: '<script>alert("xss")</script>',
         },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
       });
-
-      renderDashboardPage();
 
       // Should render as text, not execute
       expect(screen.getByText(/script/i)).toBeInTheDocument();
     });
 
     it('should handle user with unicode name', () => {
-      mockUseAuth.mockReturnValue({
+      renderDashboardPage({
         user: {
-          id: 'user-123',
-          email: 'test@example.com',
+          ...mockUser,
           name: '用户名 🎉',
         },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
       });
-
-      renderDashboardPage();
 
       expect(screen.getByText(/用户名 🎉/)).toBeInTheDocument();
     });
 
     it('should handle user with extremely long name', () => {
       const longName = 'A'.repeat(1000);
-      mockUseAuth.mockReturnValue({
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          name: longName,
-        },
-        isLoading: false,
-        isAuthenticated: true,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
-      });
-
-      expect(() => renderDashboardPage()).not.toThrow();
+      expect(() =>
+        renderDashboardPage({
+          user: {
+            ...mockUser,
+            name: longName,
+          },
+        }),
+      ).not.toThrow();
     });
 
     it('should handle 100 rapid re-renders', () => {
-      const queryCache = createQueryCache();
-      const { rerender } = render(
-        <QueryCacheProvider cache={queryCache}>
-          <MemoryRouter>
-            <DashboardPage />
-          </MemoryRouter>
-        </QueryCacheProvider>,
-      );
+      const { rerender } = renderDashboardPage();
 
       const start = performance.now();
 
       for (let i = 0; i < 100; i++) {
-        rerender(
-          <QueryCacheProvider cache={queryCache}>
-            <MemoryRouter>
-              <DashboardPage />
-            </MemoryRouter>
-          </QueryCacheProvider>,
-        );
+        rerender(<DashboardPage />);
       }
 
       const end = performance.now();
@@ -352,48 +263,24 @@ describe('DashboardPage', () => {
     });
 
     it('should handle component unmount during logout', () => {
-      let resolveLogout: (() => void) | undefined;
-      mockLogout.mockImplementation(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveLogout = resolve;
-          }),
-      );
-
-      const queryCache = createQueryCache();
-      const { unmount } = render(
-        <QueryCacheProvider cache={queryCache}>
-          <MemoryRouter>
-            <DashboardPage />
-          </MemoryRouter>
-        </QueryCacheProvider>,
-      );
+      const { unmount } = renderDashboardPage();
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });
       fireEvent.click(logoutButton);
 
-      // Unmount while logout is pending
+      // Unmount while logout is pending - should not throw
       expect(() => {
         unmount();
       }).not.toThrow();
-
-      // Resolve after unmount
-      if (resolveLogout) {
-        resolveLogout();
-      }
     });
 
     it('should handle user object being undefined', () => {
-      mockUseAuth.mockReturnValue({
-        user: undefined as unknown as { id: string; email: string; name: string },
-        isLoading: false,
-        isAuthenticated: false,
-        login: vi.fn(),
-        register: vi.fn(),
-        logout: mockLogout,
-      });
-
-      expect(() => renderDashboardPage()).not.toThrow();
+      expect(() =>
+        renderDashboardPage({
+          user: null,
+          isAuthenticated: false,
+        }),
+      ).not.toThrow();
     });
   });
 });

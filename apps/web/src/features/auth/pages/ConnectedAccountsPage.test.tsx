@@ -1,23 +1,42 @@
 // apps/web/src/features/auth/pages/ConnectedAccountsPage.test.tsx
-import { render } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { renderWithProviders } from '../../../__tests__/utils';
 import { ConnectedAccountsPage } from './ConnectedAccountsPage';
 
-vi.mock('@abe-stack/ui', () => {
-  const Container = ({ children }: { children: React.ReactNode }): JSX.Element => <div>{children}</div>;
-  const Heading = ({ children }: { children: React.ReactNode }): JSX.Element => <h1>{children}</h1>;
-  return { Container, Heading };
-});
-
-vi.mock('@settings/components', () => {
-  const OAuthConnectionsList = (): JSX.Element => <div>OAuth Connections</div>;
-  return { OAuthConnectionsList };
+// Mock the SDK hooks
+vi.mock('@abe-stack/sdk', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+  return {
+    ...actual,
+    useEnabledOAuthProviders: () => ({
+      providers: [],
+      isLoading: false,
+      error: null,
+    }),
+    useOAuthConnections: () => ({
+      connections: [],
+      isLoading: false,
+      isActing: false,
+      unlink: vi.fn(),
+      refresh: vi.fn(),
+      error: null,
+    }),
+    getOAuthLoginUrl: () => 'http://example.com/oauth',
+  };
 });
 
 describe('ConnectedAccountsPage', () => {
   it('should render', () => {
-    const { container } = render(<ConnectedAccountsPage />);
-    expect(container).toBeInTheDocument();
+    renderWithProviders(<ConnectedAccountsPage />);
+
+    expect(screen.getByRole('heading', { name: /connected accounts/i })).toBeInTheDocument();
+  });
+
+  it('should show no providers message when none are enabled', () => {
+    renderWithProviders(<ConnectedAccountsPage />);
+
+    expect(screen.getByText(/no oauth providers are currently enabled/i)).toBeInTheDocument();
   });
 });

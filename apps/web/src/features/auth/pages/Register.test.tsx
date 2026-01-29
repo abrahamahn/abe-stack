@@ -18,9 +18,27 @@ const mockUseAuth = vi.fn(() => ({
   logout: vi.fn(),
 }));
 
-vi.mock('@auth/hooks', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
+// Mock navigate
+const mockNavigateToMode = vi.fn();
+
+// Mock @abe-stack/ui - only mock useAuthModeNavigation, keep useFormState real
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    useAuthModeNavigation: () => ({
+      navigateToMode: mockNavigateToMode,
+    }),
+  };
+});
+
+vi.mock('../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks')>();
+  return {
+    ...actual,
+    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+  };
+});
 
 describe('RegisterPage', () => {
   const renderRegisterPage = () => renderWithProviders(<RegisterPage />);

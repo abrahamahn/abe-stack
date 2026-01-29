@@ -1,9 +1,10 @@
-// apps/server/src/infrastructure/cache/memory-provider.test.ts
+// packages/cache/src/providers/memory.test.ts
+
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { MemoryCacheProvider } from './memory-provider';
+import { MemoryCacheProvider } from './memory';
 
-import type { EvictionReason } from './types';
+import type { CacheEvictionReason } from '../types';
 
 // ============================================================================
 // Memory Cache Provider Tests
@@ -164,7 +165,7 @@ describe('MemoryCacheProvider', () => {
     });
 
     test('should call onEviction callback', async () => {
-      const evicted: Array<{ key: string; reason: EvictionReason }> = [];
+      const evicted: Array<{ key: string; reason: CacheEvictionReason }> = [];
 
       const smallCache = new MemoryCacheProvider(
         {

@@ -529,7 +529,8 @@ describe('OAuthConnectionsList', () => {
       // Icons are displayed as text content
       expect(screen.getByText('G')).toBeInTheDocument(); // Google
       expect(screen.getByText('GH')).toBeInTheDocument(); // GitHub
-      expect(screen.getByText('')).toBeInTheDocument(); // Apple
+      // Apple has an empty icon, so we just check the provider name exists
+      expect(screen.getByText('Apple')).toBeInTheDocument();
     });
   });
 

@@ -13,7 +13,7 @@ import {
   neq,
   queryToURLSearchParams,
   urlSearchParamsToQuery,
-} from '../query-builder';
+} from './query-builder';
 
 describe('ClientSearchQueryBuilder', () => {
   describe('createClientSearchQuery', () => {

@@ -21,7 +21,7 @@ import {
   isNetworkError,
   isTimeoutError,
   isUnauthorizedError,
-} from '../errors';
+} from './errors';
 
 describe('SDK Errors', () => {
   describe('ApiError', () => {
@@ -209,8 +209,11 @@ describe('SDK Errors', () => {
     it('should return default message for non-Error values', () => {
       expect(getErrorMessage(null)).toBe('An unexpected error occurred');
       expect(getErrorMessage(undefined)).toBe('An unexpected error occurred');
-      expect(getErrorMessage('string error')).toBe('An unexpected error occurred');
       expect(getErrorMessage({ message: 'object' })).toBe('An unexpected error occurred');
+    });
+
+    it('should return the string itself for string errors', () => {
+      expect(getErrorMessage('string error')).toBe('string error');
     });
   });
 });

@@ -414,9 +414,8 @@ jobs:
   build-and-verify:
     needs: setup
     steps:
-      # Check all sync scripts (aliases, headers)
+      # Check all sync scripts (tsconfig, headers)
       - run: pnpm sync:tsconfig:check
-      - run: pnpm sync:aliases:check
       - run: pnpm sync:headers:check
 
       # Full build pipeline
@@ -447,8 +446,8 @@ pnpm build
 
 #### Tests fail with path alias errors
 
-1. Check `config/aliases.ts` matches `tsconfig.json` paths
-2. Run `pnpm sync:aliases` to regenerate
+1. Check `apps/*/vite.config.ts` aliases match `tsconfig.json` paths
+2. Ensure both files define the same aliases for the same paths
 
 #### ESLint can't find tsconfig
 

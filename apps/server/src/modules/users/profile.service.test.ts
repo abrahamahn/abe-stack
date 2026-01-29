@@ -41,9 +41,8 @@ const { mockValidatePassword, mockHashPassword, mockVerifyPassword } = vi.hoiste
 }));
 
 // Mock validatePassword from @abe-stack/core
-// The workspace package resolves to ../../../../packages/core/src/index.ts via tsconfig paths
-vi.mock('../../../../packages/core/src/index.ts', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/core')>('../../../../packages/core/src/index.ts');
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
   return {
     ...actual,
     validatePassword: mockValidatePassword,
@@ -275,10 +274,8 @@ describe('changePassword', () => {
     vi.clearAllMocks();
   });
 
-  // NOTE: These tests are skipped because mocking validatePassword from @abe-stack/core
-  // workspace package doesn't work correctly in Vitest 4.x due to module resolution differences.
   describe('when current password is correct and new password is valid', () => {
-    it.skip('should hash new password and update user', async () => {
+    it('should hash new password and update user', async () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
       mockVerifyPassword.mockResolvedValue(true);
       mockValidatePassword.mockResolvedValue({
@@ -311,7 +308,7 @@ describe('changePassword', () => {
       });
     });
 
-    it.skip('should handle users with null name in validation context', async () => {
+    it('should handle users with null name in validation context', async () => {
       const userWithoutName = { ...mockUser, name: null };
       vi.mocked(mockRepos.users.findById).mockResolvedValue(userWithoutName);
       mockVerifyPassword.mockResolvedValue(true);
@@ -391,8 +388,7 @@ describe('changePassword', () => {
   });
 
   describe('when new password is weak', () => {
-    // NOTE: Skipped because mockValidatePassword doesn't apply correctly for workspace packages
-    it.skip('should throw WeakPasswordError with validation errors', async () => {
+    it('should throw WeakPasswordError with validation errors', async () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
       mockVerifyPassword.mockResolvedValue(true);
       mockValidatePassword.mockResolvedValue({

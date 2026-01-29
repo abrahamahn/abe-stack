@@ -1,19 +1,45 @@
 // apps/web/src/features/admin/layouts/AdminLayout.test.tsx
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
+import {
+  createMockEnvironment,
+  mockAdminUser,
+  renderWithProviders,
+} from '../../../__tests__/utils';
 import { AdminLayout } from './AdminLayout';
-
-vi.mock('@abe-stack/ui', () => {
-  const mockContainer = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-  return {
-    Container: mockContainer,
-  };
-});
 
 describe('AdminLayout', () => {
   it('should render children', () => {
-    const { getByText } = render(<AdminLayout><div>Test Content</div></AdminLayout>);
-    expect(getByText('Test Content')).toBeInTheDocument();
+    const environment = createMockEnvironment({
+      user: mockAdminUser,
+      isAuthenticated: true,
+    });
+
+    renderWithProviders(
+      <AdminLayout>
+        <div>Test Content</div>
+      </AdminLayout>,
+      { environment },
+    );
+
+    expect(screen.getByText('Test Content')).toBeInTheDocument();
+  });
+
+  it('should render navigation', () => {
+    const environment = createMockEnvironment({
+      user: mockAdminUser,
+      isAuthenticated: true,
+    });
+
+    renderWithProviders(
+      <AdminLayout>
+        <div>Content</div>
+      </AdminLayout>,
+      { environment },
+    );
+
+    // The admin layout should have navigation
+    expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 });

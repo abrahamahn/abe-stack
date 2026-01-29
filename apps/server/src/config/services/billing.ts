@@ -102,7 +102,21 @@ function resolveActiveProvider(
   explicit: BillingProvider | undefined,
   avail: { stripe: boolean; paypal: boolean },
 ): BillingProvider | null {
-  if (explicit != null) return explicit;
+  const isProd = process.env['NODE_ENV'] === 'production';
+
+  // In production: If explicit provider is set, use it (validation will fail if credentials missing)
+  // In development: Only use explicit provider if credentials are available
+  if (explicit != null) {
+    if (isProd) {
+      // Production: Always respect explicit provider (will fail validation if misconfigured)
+      return explicit;
+    }
+    // Development: Only enable if credentials are available
+    if (explicit === 'stripe' && avail.stripe) return 'stripe';
+    if (explicit === 'paypal' && avail.paypal) return 'paypal';
+    // Credentials missing in dev - silently disable billing
+    return null;
+  }
 
   // Auto-detection logic if no explicit provider is set
   if (avail.stripe) return 'stripe';

@@ -39,7 +39,7 @@ export interface SessionCardProps {
  * Parse user agent string to get device info
  */
 function parseUserAgent(userAgent: string | null): { browser: string; os: string } {
-  if (userAgent === null) {
+  if (userAgent === null || userAgent === '') {
     return { browser: 'Unknown browser', os: 'Unknown device' };
   }
 
@@ -47,30 +47,30 @@ function parseUserAgent(userAgent: string | null): { browser: string; os: string
   let browser = 'Unknown browser';
   let os = 'Unknown device';
 
-  // Browser detection
-  if (userAgent.includes('Firefox')) {
-    browser = 'Firefox';
+  // Browser detection (order matters - more specific first)
+  if (userAgent.includes('OPR') || userAgent.includes('Opera')) {
+    browser = 'Opera';
   } else if (userAgent.includes('Edg')) {
     browser = 'Edge';
+  } else if (userAgent.includes('Firefox')) {
+    browser = 'Firefox';
   } else if (userAgent.includes('Chrome')) {
     browser = 'Chrome';
   } else if (userAgent.includes('Safari')) {
     browser = 'Safari';
-  } else if (userAgent.includes('Opera')) {
-    browser = 'Opera';
   }
 
-  // OS detection
-  if (userAgent.includes('Windows')) {
+  // OS detection (order matters - more specific first)
+  if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+    os = 'iOS';
+  } else if (userAgent.includes('Android')) {
+    os = 'Android';
+  } else if (userAgent.includes('Windows')) {
     os = 'Windows';
   } else if (userAgent.includes('Mac OS')) {
     os = 'macOS';
   } else if (userAgent.includes('Linux')) {
     os = 'Linux';
-  } else if (userAgent.includes('Android')) {
-    os = 'Android';
-  } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-    os = 'iOS';
   }
 
   return { browser, os };

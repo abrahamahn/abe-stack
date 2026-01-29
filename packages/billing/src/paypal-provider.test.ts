@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/billing/paypal-provider.test.ts
+// packages/billing/src/paypal-provider.test.ts
 import type {
   CheckoutParams,
   CreateProductParams,

@@ -5,7 +5,7 @@ import { render, screen, act } from '@testing-library/react';
 import { createElement, useEffect } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { RecordCache, type TableMap } from '../../cache/RecordCache';
+import { RecordCache, type TableMap } from '../cache/RecordCache';
 import {
   useRecord,
   useRecords,
@@ -14,8 +14,8 @@ import {
   useIsPendingWrite,
   useConnectionState,
   useUndoRedo,
-} from '../hooks';
-import { RealtimeProvider, type RealtimeProviderConfig } from '../RealtimeContext';
+} from './hooks';
+import { RealtimeProvider, type RealtimeProviderConfig } from './RealtimeContext';
 
 // ============================================================================
 // Mock WebSocket

@@ -43,7 +43,7 @@ describe('adminApi', () => {
     const result = await adminApi.listUsers({ page: 1, limit: 10, search: 'test' });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/api/admin/users?search=test&page=1&limit=10',
+      '/api/admin/users?search=test&page=1&limit=10',
       expect.objectContaining({ credentials: 'include' }),
     );
     expect(result).toEqual(response);
@@ -56,7 +56,7 @@ describe('adminApi', () => {
     const result = await adminApi.getUser('user-123');
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/api/admin/users/user-123',
+      '/api/admin/users/user-123',
       expect.objectContaining({ credentials: 'include' }),
     );
     expect(result).toEqual(mockUser);
@@ -70,7 +70,7 @@ describe('adminApi', () => {
     const result = await adminApi.updateUser('user-123', payload);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/api/admin/users/user-123/update',
+      '/api/admin/users/user-123/update',
       expect.objectContaining({ method: 'POST', body: JSON.stringify(payload) }),
     );
     expect(result).toEqual(mockResponse);
@@ -84,7 +84,7 @@ describe('adminApi', () => {
     const result = await adminApi.lockUser('user-123', payload);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/api/admin/users/user-123/lock',
+      '/api/admin/users/user-123/lock',
       expect.objectContaining({ method: 'POST', body: JSON.stringify(payload) }),
     );
     expect(result).toEqual(mockResponse);
@@ -98,7 +98,7 @@ describe('adminApi', () => {
     const result = await adminApi.unlockUser('user-123', payload);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3000/api/admin/users/user-123/unlock',
+      '/api/admin/users/user-123/unlock',
       expect.objectContaining({ method: 'POST', body: JSON.stringify(payload) }),
     );
     expect(result).toEqual(mockResponse);

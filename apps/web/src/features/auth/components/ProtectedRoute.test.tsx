@@ -5,57 +5,17 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-// Mock the useAuth hook
-const mockUseAuth = vi.fn();
-vi.mock('../../hooks/useAuth', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+// Mock the useAuth hook with hoisted variable
+const mockUseAuth = vi.hoisted(() =>
+  vi.fn(() => ({
+    isAuthenticated: false,
+    isLoading: false,
+  })),
+);
+
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: mockUseAuth,
 }));
-
-// Mock UI components - we need to fully mock ProtectedRoute to avoid router context issues
-// between different package instances in the monorepo
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
-  const { Navigate, Outlet } = await importOriginal<typeof import('@abe-stack/ui')>();
-
-  // Re-create ProtectedRoute using the same router instance as the test
-  const ProtectedRoute = ({
-    isAuthenticated,
-    isLoading,
-    redirectTo = '/login',
-    loadingComponent,
-    children,
-  }: {
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    redirectTo?: string;
-    loadingComponent?: React.ReactNode;
-    children?: React.ReactNode;
-  }): React.ReactElement => {
-    if (isLoading) {
-      return (loadingComponent ?? (
-        <div className="loading-container">
-          <div data-testid="spinner">Loading Spinner</div>
-          <span>Loading...</span>
-        </div>
-      )) as React.ReactElement;
-    }
-
-    if (!isAuthenticated) {
-      return <Navigate to={redirectTo} replace />;
-    }
-
-    return children ? <>{children}</> : <Outlet />;
-  };
-
-  return {
-    ...actual,
-    ProtectedRoute,
-    Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,
-    Text: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <span>{children}</span>
-    ),
-  };
-});
 
 describe('ProtectedRoute', () => {
   describe('Loading State', () => {
@@ -65,7 +25,7 @@ describe('ProtectedRoute', () => {
         isLoading: true,
       });
 
-      render(
+      const { container } = render(
         <MemoryRouter>
           <ProtectedRoute>
             <div>Protected Content</div>
@@ -73,17 +33,18 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // LoadingContainer is rendered with empty text, so check for the container
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
-    it('should display loading text with spinner', () => {
+    it('should display loading container with spinner', () => {
       mockUseAuth.mockReturnValue({
         isAuthenticated: false,
         isLoading: true,
       });
 
-      render(
+      const { container } = render(
         <MemoryRouter>
           <ProtectedRoute>
             <div>Protected Content</div>
@@ -91,7 +52,8 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
+      expect(container.querySelector('.spinner')).toBeInTheDocument();
     });
 
     it('should have proper loading container styling', () => {
@@ -110,7 +72,6 @@ describe('ProtectedRoute', () => {
 
       const loadingDiv = container.querySelector('.loading-container');
       expect(loadingDiv).toBeInTheDocument();
-      expect(loadingDiv).toHaveClass('loading-container');
     });
   });
 
@@ -120,8 +81,6 @@ describe('ProtectedRoute', () => {
         isAuthenticated: false,
         isLoading: false,
       });
-
-      let currentLocation = '';
 
       render(
         <MemoryRouter initialEntries={['/protected']}>
@@ -134,25 +93,13 @@ describe('ProtectedRoute', () => {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/login"
-              element={
-                <div
-                  ref={(el): void => {
-                    if (el) currentLocation = '/login';
-                  }}
-                >
-                  Login Page
-                </div>
-              }
-            />
+            <Route path="/login" element={<div>Login Page</div>} />
           </Routes>
         </MemoryRouter>,
       );
 
       expect(screen.getByText('Login Page')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
-      expect(currentLocation).toBe('/login');
     });
 
     it('should not show protected content when unauthenticated', () => {
@@ -292,7 +239,7 @@ describe('ProtectedRoute', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(
+      const { rerender, container } = render(
         <MemoryRouter>
           <ProtectedRoute>
             <div>Protected Content</div>
@@ -300,7 +247,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
 
       // Simulate authentication completing
       mockUseAuth.mockReturnValue({
@@ -316,7 +263,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).not.toBeInTheDocument();
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
@@ -326,7 +273,7 @@ describe('ProtectedRoute', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(
+      const { rerender, container } = render(
         <MemoryRouter>
           <Routes>
             <Route
@@ -342,7 +289,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
 
       // Simulate authentication check completing (not authenticated)
       mockUseAuth.mockReturnValue({
@@ -366,7 +313,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).not.toBeInTheDocument();
       expect(screen.getByText('Login Page')).toBeInTheDocument();
     });
   });
@@ -385,7 +332,7 @@ describe('ProtectedRoute', () => {
       );
 
       // Should not crash
-      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
 
     it('should handle undefined children when authenticated', () => {
@@ -413,7 +360,7 @@ describe('ProtectedRoute', () => {
         isLoading: true,
       });
 
-      render(
+      const { container } = render(
         <MemoryRouter>
           <ProtectedRoute>
             <div>Protected Content</div>
@@ -422,7 +369,7 @@ describe('ProtectedRoute', () => {
       );
 
       // Should show loading even if authenticated is true
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
   });

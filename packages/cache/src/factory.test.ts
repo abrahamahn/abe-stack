@@ -1,8 +1,9 @@
-// apps/server/src/infrastructure/cache/cache-factory.test.ts
+// packages/cache/src/factory.test.ts
+
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { createCache, createCacheFromEnv, createMemoryCache } from './cache-factory';
-import { MemoryCacheProvider } from './memory-provider';
+import { createCache, createCacheFromEnv, createMemoryCache } from './factory';
+import { MemoryCacheProvider } from './providers/memory';
 
 // ============================================================================
 // Cache Factory Tests
@@ -44,10 +45,10 @@ describe('cache factory', () => {
     let cache: MemoryCacheProvider;
 
     afterEach(async () => {
-       if (cache != null) {
-         await cache.close();
-       }
-     });
+      if (cache != null) {
+        await cache.close();
+      }
+    });
 
     test('should create memory cache with defaults', () => {
       cache = createMemoryCache();

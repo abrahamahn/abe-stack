@@ -5,8 +5,13 @@
  * Filter controls for security events list.
  */
 
+import {
+  SECURITY_EVENT_TYPES,
+  SECURITY_SEVERITIES,
+  type SecurityEventsFilter,
+} from '@abe-stack/core';
 import { Button, Input, Select } from '@abe-stack/ui';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { JSX } from 'react';
 
@@ -14,34 +19,9 @@ import type { JSX } from 'react';
 // Types
 // ============================================================================
 
-interface SecurityEventsFilterLocal {
-  eventType?: string;
-  severity?: string;
-  email?: string;
-  ipAddress?: string;
-  startDate?: string;
-  endDate?: string;
-  userId?: string;
-}
-
-const SECURITY_EVENT_TYPES_LOCAL = [
-  'login_success',
-  'login_failure',
-  'logout',
-  'password_change',
-  'password_reset_request',
-  'password_reset_complete',
-  'email_verification',
-  'account_locked',
-  'token_reuse',
-  'suspicious_login',
-] as const;
-
-const SECURITY_SEVERITIES_LOCAL = ['low', 'medium', 'high', 'critical'] as const;
-
 export interface SecurityEventsFiltersProps {
-  filter: SecurityEventsFilterLocal;
-  onFilterChange: (filter: SecurityEventsFilterLocal) => void;
+  filter: SecurityEventsFilter;
+  onFilterChange: (filter: SecurityEventsFilter) => void;
 }
 
 // ============================================================================
@@ -52,9 +32,14 @@ export const SecurityEventsFilters = ({
   filter,
   onFilterChange,
 }: SecurityEventsFiltersProps): JSX.Element => {
-  const [localFilter, setLocalFilter] = useState<SecurityEventsFilterLocal>(filter);
+  const [localFilter, setLocalFilter] = useState<SecurityEventsFilter>(filter);
 
-  const handleInputChange = useCallback((field: keyof SecurityEventsFilterLocal, value: string) => {
+  // Sync local filter with prop changes
+  useEffect(() => {
+    setLocalFilter(filter);
+  }, [filter]);
+
+  const handleInputChange = useCallback((field: keyof SecurityEventsFilter, value: string) => {
     setLocalFilter((prev) => ({
       ...prev,
       [field]: value !== '' ? value : undefined,
@@ -66,14 +51,14 @@ export const SecurityEventsFilters = ({
   }, [localFilter, onFilterChange]);
 
   const handleClear = useCallback(() => {
-    const emptyFilter: SecurityEventsFilterLocal = {};
+    const emptyFilter: SecurityEventsFilter = {};
     setLocalFilter(emptyFilter);
     onFilterChange(emptyFilter);
   }, [onFilterChange]);
 
   const eventTypeOptions = [
     { value: '', label: 'All Event Types' },
-    ...SECURITY_EVENT_TYPES_LOCAL.map((type) => ({
+    ...SECURITY_EVENT_TYPES.map((type) => ({
       value: type,
       label: type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
     })),
@@ -81,7 +66,7 @@ export const SecurityEventsFilters = ({
 
   const severityOptions = [
     { value: '', label: 'All Severities' },
-    ...SECURITY_SEVERITIES_LOCAL.map((severity) => ({
+    ...SECURITY_SEVERITIES.map((severity) => ({
       value: severity,
       label: severity.charAt(0).toUpperCase() + severity.slice(1),
     })),
@@ -91,10 +76,14 @@ export const SecurityEventsFilters = ({
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="event-type-select"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Event Type
           </label>
           <Select
+            id="event-type-select"
             value={localFilter.eventType ?? ''}
             onChange={(value) => {
               handleInputChange('eventType', value);
@@ -109,10 +98,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="severity-select"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Severity
           </label>
           <Select
+            id="severity-select"
             value={localFilter.severity ?? ''}
             onChange={(value) => {
               handleInputChange('severity', value);
@@ -127,10 +120,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="email-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Email
           </label>
           <Input
+            id="email-input"
             type="email"
             placeholder="Search by email..."
             value={localFilter.email ?? ''}
@@ -141,10 +138,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="ip-address-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             IP Address
           </label>
           <Input
+            id="ip-address-input"
             type="text"
             placeholder="Filter by IP..."
             value={localFilter.ipAddress ?? ''}
@@ -155,10 +156,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="start-date-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Start Date
           </label>
           <Input
+            id="start-date-input"
             type="datetime-local"
             value={localFilter.startDate ?? ''}
             onChange={(e) => {
@@ -168,10 +173,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="end-date-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             End Date
           </label>
           <Input
+            id="end-date-input"
             type="datetime-local"
             value={localFilter.endDate ?? ''}
             onChange={(e) => {
@@ -181,10 +190,14 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="user-id-input"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             User ID
           </label>
           <Input
+            id="user-id-input"
             type="text"
             placeholder="Filter by User ID..."
             value={localFilter.userId ?? ''}

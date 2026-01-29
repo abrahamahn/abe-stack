@@ -49,8 +49,12 @@ export function usePasswordChange(options?: UsePasswordChangeOptions): UsePasswo
       const api = getSettingsApi();
       return api.changePassword(data);
     },
-    ...(options?.onSuccess !== undefined && { onSuccess: options.onSuccess }),
-    ...(options?.onError !== undefined && { onError: options.onError }),
+    onSuccess: (data: ChangePasswordResponse): void => {
+      options?.onSuccess?.(data);
+    },
+    onError: (error: Error): void => {
+      options?.onError?.(error);
+    },
   });
 
   return {

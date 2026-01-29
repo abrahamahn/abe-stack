@@ -37,12 +37,10 @@ export const AvatarUpload = ({
     uploadAvatar,
     isLoading: isUploading,
     error: uploadError,
-    reset: resetUpload,
   } = useAvatarUpload({
     onSuccess: () => {
       setPreviewUrl(null);
       setSelectedFile(null);
-      resetUpload();
       onSuccess?.();
     },
   });
@@ -51,10 +49,8 @@ export const AvatarUpload = ({
     deleteAvatar,
     isLoading: isDeleting,
     error: deleteError,
-    reset: resetDelete,
   } = useAvatarDelete({
     onSuccess: () => {
-      resetDelete();
       onSuccess?.();
     },
   });
@@ -111,12 +107,15 @@ export const AvatarUpload = ({
 
   // Get initials from name
   const initials =
-    userName
-      ?.split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) ?? '?';
+    userName !== null && userName !== '' && userName.trim().length > 0
+      ? userName
+          .split(' ')
+          .filter((n) => n.length > 0)
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2)
+      : '?';
 
   return (
     <div className="space-y-4">

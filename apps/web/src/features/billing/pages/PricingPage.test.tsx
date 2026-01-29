@@ -1,19 +1,69 @@
 // apps/web/src/features/billing/pages/PricingPage.test.tsx
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PricingPage } from './PricingPage';
 
-vi.mock('@abe-stack/ui', () => {
-  const Container = ({ children }: { children: React.ReactNode }): JSX.Element => <div>{children}</div>;
-  const Heading = ({ children }: { children: React.ReactNode }): JSX.Element => <h1>{children}</h1>;
-  const PricingTable = (): JSX.Element => <div>Pricing Table</div>;
-  return { Container, Heading, PricingTable };
+// Mock useNavigate from @abe-stack/ui
+const mockNavigate = vi.fn();
+vi.mock('@abe-stack/ui', async () => {
+  const actual = await vi.importActual('@abe-stack/ui');
+  return {
+    ...actual,
+    useNavigate: (): typeof mockNavigate => mockNavigate,
+  };
 });
 
+// Mock @abe-stack/sdk hooks
+vi.mock('@abe-stack/sdk', () => ({
+  usePlans: vi.fn(() => ({
+    plans: [],
+    isLoading: false,
+    error: null,
+  })),
+  useSubscription: vi.fn(() => ({
+    subscription: null,
+    createCheckout: vi.fn(),
+    isActing: false,
+  })),
+}));
+
+// Mock @app/ClientEnvironment
+vi.mock('@app/ClientEnvironment', () => ({
+  useClientEnvironment: vi.fn(() => ({
+    config: {
+      apiUrl: 'http://localhost:3000',
+    },
+  })),
+}));
+
+// Mock @abe-stack/core tokenStore
+vi.mock('@abe-stack/core', () => ({
+  tokenStore: {
+    get: vi.fn(() => 'mock-token'),
+  },
+}));
+
 describe('PricingPage', () => {
-  it('should render', () => {
-    const { container } = render(<PricingPage />);
-    expect(container).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should render the page title', () => {
+    render(<PricingPage />);
+    expect(screen.getByText('Simple, Transparent Pricing')).toBeInTheDocument();
+  });
+
+  it('should render the subtitle', () => {
+    render(<PricingPage />);
+    expect(
+      screen.getByText(/Choose the plan that works best for you/),
+    ).toBeInTheDocument();
+  });
+
+  it('should render the pricing table', () => {
+    render(<PricingPage />);
+    // The PricingTable component should be rendered (comes from the actual @abe-stack/ui)
+    expect(screen.getByText('Simple, Transparent Pricing')).toBeInTheDocument();
   });
 });

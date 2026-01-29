@@ -8,9 +8,9 @@
  * @vitest-environment jsdom
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { type ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryCache } from './QueryCache';
 import { QueryCacheProvider } from './QueryCacheProvider';
@@ -22,11 +22,15 @@ import type { UseMutationOptions } from './useMutation';
 // Test Utilities
 // ============================================================================
 
+/** Track active caches for cleanup */
+const activeCaches: QueryCache[] = [];
+
 /**
  * Create a wrapper component with QueryCacheProvider.
  */
 function createWrapper(cache?: QueryCache) {
   const queryCache = cache ?? new QueryCache();
+  activeCaches.push(queryCache);
   // React component wrapper - PascalCase is correct for component name
   // eslint-disable-next-line @typescript-eslint/naming-convention
   return function Wrapper({ children }: { children: ReactNode }): ReactNode {
@@ -66,8 +70,27 @@ describe('useMutation - Basic Functionality', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    // Destroy any leftover caches
+    while (activeCaches.length > 0) {
+      const c = activeCaches.pop();
+      c?.destroy();
+    }
     cache = new QueryCache();
     vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    vi.clearAllMocks();
+    // Destroy caches after test
+    while (activeCaches.length > 0) {
+      const c = activeCaches.pop();
+      c?.destroy();
+    }
+    cache?.destroy();
+    // Give time for async cleanup
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should initialize with idle state', () => {
@@ -196,7 +219,21 @@ describe('useMutation - mutate vs mutateAsync', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should execute mutation with mutate (fire and forget)', async () => {
@@ -274,7 +311,21 @@ describe('useMutation - Lifecycle Callbacks', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should call onMutate before mutation starts', async () => {
@@ -442,12 +493,21 @@ describe('useMutation - Retry Logic', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
-    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should not retry by default', async () => {
@@ -475,21 +535,17 @@ describe('useMutation - Retry Logic', () => {
     const error = new Error('Mutation failed');
     const mutationFn = vi.fn().mockRejectedValue(error);
 
-    const { result } = renderHook(() => useMutation({ mutationFn, retry: 2, retryDelay: 100 }), {
+    const { result } = renderHook(() => useMutation({ mutationFn, retry: 2, retryDelay: 50 }), {
       wrapper: createWrapper(cache),
     });
 
-    const promise = act(async () => {
+    await act(async () => {
       try {
         await result.current.mutateAsync({ value: 42 });
       } catch {
         // Expected error
       }
     });
-
-    // Fast-forward through retries
-    await vi.runAllTimersAsync();
-    await promise;
 
     // Initial attempt + 2 retries = 3 total
     expect(mutationFn).toHaveBeenCalledTimes(3);
@@ -501,16 +557,13 @@ describe('useMutation - Retry Logic', () => {
       .mockRejectedValueOnce(new Error('First attempt'))
       .mockResolvedValueOnce({ id: '1', value: 42 });
 
-    const { result } = renderHook(() => useMutation({ mutationFn, retry: 2, retryDelay: 100 }), {
+    const { result } = renderHook(() => useMutation({ mutationFn, retry: 2, retryDelay: 50 }), {
       wrapper: createWrapper(cache),
     });
 
-    const promise = act(async () => {
+    await act(async () => {
       await result.current.mutateAsync({ value: 42 });
     });
-
-    await vi.runAllTimersAsync();
-    await promise;
 
     expect(mutationFn).toHaveBeenCalledTimes(2);
     expect(result.current.isSuccess).toBe(true);
@@ -518,6 +571,7 @@ describe('useMutation - Retry Logic', () => {
   });
 
   it('should use exponential backoff for retries', async () => {
+    vi.useFakeTimers();
     const error = new Error('Mutation failed');
     const mutationFn = vi.fn().mockRejectedValue(error);
     const retryDelay = 100;
@@ -543,26 +597,24 @@ describe('useMutation - Retry Logic', () => {
     expect(mutationFn).toHaveBeenCalledTimes(3);
 
     await promise;
+    vi.useRealTimers();
   });
 
   it('should retry 3 times when retry is true', async () => {
     const error = new Error('Mutation failed');
     const mutationFn = vi.fn().mockRejectedValue(error);
 
-    const { result } = renderHook(() => useMutation({ mutationFn, retry: true, retryDelay: 100 }), {
+    const { result } = renderHook(() => useMutation({ mutationFn, retry: true, retryDelay: 50 }), {
       wrapper: createWrapper(cache),
     });
 
-    const promise = act(async () => {
+    await act(async () => {
       try {
         await result.current.mutateAsync({ value: 42 });
       } catch {
         // Expected error
       }
     });
-
-    await vi.runAllTimersAsync();
-    await promise;
 
     // Initial attempt + 3 retries = 4 total
     expect(mutationFn).toHaveBeenCalledTimes(4);
@@ -596,7 +648,21 @@ describe('useMutation - Cache Invalidation', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should invalidate specified queries on success', async () => {
@@ -677,7 +743,21 @@ describe('useMutation - Race Conditions', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should handle superseded mutations', async () => {
@@ -697,27 +777,34 @@ describe('useMutation - Race Conditions', () => {
       },
     );
 
-    // Start first mutation
-    const promise1 = act(() => result.current.mutateAsync({ value: 1 }));
+    // Start first mutation and capture the promise
+    let promise1: Promise<TestData>;
+    await act(async () => {
+      promise1 = result.current.mutateAsync({ value: 1 });
+    });
 
     // Start second mutation immediately (should supersede first)
     await delay(10);
-    const promise2 = act(() => result.current.mutateAsync({ value: 2 }));
+    let promise2: Promise<TestData>;
+    await act(async () => {
+      promise2 = result.current.mutateAsync({ value: 2 });
+    });
 
     // First mutation should be rejected with "Mutation superseded"
-    await expect(promise1).rejects.toThrow('Mutation superseded');
+    await expect(promise1!).rejects.toThrow('Mutation superseded');
 
     // Second mutation should succeed
-    const result2 = await promise2;
+    const result2 = await promise2!;
     expect(result2).toEqual({ id: '1', value: 2 });
   });
 
-  it('should track current mutation ID correctly', async () => {
-    let resolveMutation: ((value: TestData) => void) | null = null;
+  it('should track current mutation ID correctly with manual resolution', async () => {
+    // Track resolvers by call index to avoid race condition
+    const resolvers: Array<(value: TestData) => void> = [];
     const mutationFn = vi.fn().mockImplementation(
-      () =>
+      (vars: TestVariables) =>
         new Promise<TestData>((resolve) => {
-          resolveMutation = resolve;
+          resolvers.push((data: TestData) => resolve({ ...data, value: vars.value }));
         }),
     );
 
@@ -728,30 +815,45 @@ describe('useMutation - Race Conditions', () => {
       },
     );
 
-    // Start first mutation
-    const promise1 = result.current.mutateAsync({ value: 1 });
-
-    await delay(10);
-
-    // Start second mutation
-    const promise2 = result.current.mutateAsync({ value: 2 });
-
-    await delay(10);
-
-    // Resolve first mutation (should be rejected)
-    act(() => {
-      resolveMutation?.({ id: '1', value: 1 });
+    // Start first mutation and attach a catch handler immediately to prevent unhandled rejection
+    let promise1: Promise<TestData>;
+    let promise1Error: Error | null = null;
+    await act(async () => {
+      promise1 = result.current.mutateAsync({ value: 1 });
+      // Attach catch handler immediately to prevent unhandled rejection warning
+      promise1.catch((err: Error) => {
+        promise1Error = err;
+      });
+      await delay(10);
     });
 
-    await expect(promise1).rejects.toThrow('Mutation superseded');
+    // Start second mutation (supersedes first)
+    let promise2: Promise<TestData>;
+    await act(async () => {
+      promise2 = result.current.mutateAsync({ value: 2 });
+      await delay(10);
+    });
+
+    // Resolve first mutation (should be rejected because second superseded it)
+    await act(async () => {
+      resolvers[0]?.({ id: '1', value: 1 });
+      await delay(10);
+    });
+
+    // Wait for the rejection to be handled
+    await delay(20);
+
+    // First mutation should have been rejected
+    expect(promise1Error).not.toBeNull();
+    expect(promise1Error?.message).toBe('Mutation superseded');
 
     // Now resolve second mutation
-    await delay(10);
-    act(() => {
-      resolveMutation?.({ id: '1', value: 2 });
+    await act(async () => {
+      resolvers[1]?.({ id: '1', value: 2 });
+      await delay(10);
     });
 
-    const result2 = await promise2;
+    const result2 = await promise2!;
     expect(result2).toEqual({ id: '1', value: 2 });
   });
 });
@@ -764,7 +866,21 @@ describe('useMutation - Edge Cases', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    while (activeCaches.length > 0) {
+      activeCaches.pop()?.destroy();
+    }
+    cache?.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should handle mutations with undefined variables', async () => {
@@ -812,13 +928,24 @@ describe('useMutation - Edge Cases', () => {
     expect(result.current.error).toBeInstanceOf(Error);
   });
 
-  it('should handle mutations without cache provider', () => {
+  it('should throw error when used without cache provider', () => {
+    // Test that useMutation throws when used outside QueryCacheProvider
+    // We capture the error by suppressing console.error and checking the result
     const mutationFn = vi.fn().mockResolvedValue({ id: '1', value: 42 });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Should throw when used outside provider
-    const { result } = renderHook(() => useMutation({ mutationFn }));
-    expect(result.error).toBeDefined();
-    expect(result.error?.message).toContain('useQueryCache must be used within a QueryCacheProvider');
+    try {
+      const { result } = renderHook(() => useMutation({ mutationFn }));
+      // If we get here, check if the hook returned an error state
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('useQueryCache must be used within a QueryCacheProvider');
+    } catch (error) {
+      // React 18 may throw directly during render
+      expect(error).toBeDefined();
+      expect((error as Error).message).toContain('useQueryCache must be used within a QueryCacheProvider');
+    } finally {
+      consoleSpy.mockRestore();
+    }
   });
 
   it('should preserve variables after mutation completes', async () => {
@@ -889,7 +1016,27 @@ describe('useMutation - Options Updates', () => {
   let cache: QueryCache;
 
   beforeEach(() => {
+    cleanup();
+    // Destroy any leftover caches
+    while (activeCaches.length > 0) {
+      const c = activeCaches.pop();
+      c?.destroy();
+    }
     cache = new QueryCache();
+    vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    vi.clearAllMocks();
+    // Destroy caches after test
+    while (activeCaches.length > 0) {
+      const c = activeCaches.pop();
+      c?.destroy();
+    }
+    cache?.destroy();
+    // Give time for async cleanup
+    await new Promise((resolve) => setTimeout(resolve, 10));
   });
 
   it('should use updated mutationFn', async () => {

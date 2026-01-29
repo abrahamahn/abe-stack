@@ -120,11 +120,14 @@ export const RegisterForm = ({
           </div>
 
           <Text tone="muted" className="text-center">
-            {registrationResult.message}
+            {registrationResult.message.length > 0
+              ? registrationResult.message
+              : 'Please check your email to verify your account.'}
           </Text>
 
           <Text tone="muted" className="text-xs text-center">
-            Sent to: <strong>{registrationResult.email}</strong>
+            Sent to:{' '}
+            <strong>{registrationResult.email.length > 0 ? registrationResult.email : email}</strong>
           </Text>
 
           {resendMessage !== null && resendMessage.length > 0 && (

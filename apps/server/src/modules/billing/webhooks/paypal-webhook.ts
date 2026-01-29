@@ -17,7 +17,8 @@ import type {
 } from '@abe-stack/db';
 import type { FastifyBaseLogger } from 'fastify';
 
-import { PayPalProvider, type NormalizedWebhookEvent } from '@/infrastructure/billing';
+import { PayPalProvider } from '@abe-stack/billing';
+import type { NormalizedWebhookEvent } from '@abe-stack/core';
 
 // ============================================================================
 // Types
