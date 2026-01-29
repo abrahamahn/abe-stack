@@ -18,7 +18,7 @@ import type {
     SqlSearchProviderConfig,
     SqlTableConfig,
 } from './types';
-import type { DbClient, Repositories } from '@data/database';
+import type { DbClient, Repositories } from '@abe-stack/db';
 
 // ============================================================================
 // Factory Types

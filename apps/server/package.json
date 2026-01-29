@@ -24,6 +24,7 @@
     "@abe-stack/cache": "workspace:*",
     "@abe-stack/core": "workspace:*",
     "@abe-stack/db": "workspace:*",
+    "@abe-stack/storage": "workspace:*",
     "@aws-sdk/client-s3": "^3.971.0",
     "@aws-sdk/credential-providers": "^3.971.0",
     "@aws-sdk/s3-request-presigner": "^3.971.0",

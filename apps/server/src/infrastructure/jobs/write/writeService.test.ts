@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WriteService, createWriteService, type WriteServiceOptions } from './writeService';
 import type { WriteBatch, WriteOperation, WriteHooks } from './types';
 import type { SubscriptionManager } from '@abe-stack/core/pubsub';
-import type { DbClient } from '@data/database';
+import type { DbClient } from '@abe-stack/db';
 import type { Logger } from '@monitor/logger';
 
 // ============================================================================
@@ -19,20 +19,16 @@ import type { Logger } from '@monitor/logger';
 
 vi.mock('@abe-stack/db', () => ({
   escapeIdentifier: vi.fn((id: string) => `"${id}"`),
+  withTransaction: vi.fn(async (db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+    return fn(db);
+  }),
+  isInTransaction: vi.fn(() => false),
 }));
 
 vi.mock('@abe-stack/core/pubsub', () => ({
   SubKeys: {
     record: vi.fn((table: string, id: string) => `record:${table}:${id}`),
   },
-}));
-
-// Mock the transaction utility - uses relative path from test location
-vi.mock('../../data/database/utils/transaction', () => ({
-  withTransaction: vi.fn(async (db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
-    return fn(db);
-  }),
-  isInTransaction: vi.fn(() => false),
 }));
 
 // ============================================================================

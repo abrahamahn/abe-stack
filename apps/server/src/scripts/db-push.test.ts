@@ -23,7 +23,7 @@ const { mockBuildConnectionString, mockCreateDbClient, mockRaw, mockClose } = vi
   mockClose: vi.fn(),
 }));
 
-vi.mock('../infrastructure/data/database', () => ({
+vi.mock('@abe-stack/db', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
 }));

@@ -13,12 +13,10 @@ import {
 
 import type { AppContext } from '../../shared/types';
 
-// Mock database schema validation module using relative path for correct interception
+// Mock database schema validation from @abe-stack/db
 const mockValidateSchema = vi.hoisted(() => vi.fn());
-vi.mock('../../data/database/schema/validation', async () => {
-  const actual = await vi.importActual<
-    typeof import('../../data/database/schema/validation')
-  >('../../data/database/schema/validation');
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
   return {
     ...actual,
     validateSchema: mockValidateSchema,

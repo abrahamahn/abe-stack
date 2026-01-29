@@ -2,7 +2,7 @@
 import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '@abe-stack/db';
 import { emailTemplates } from '@messaging/email';
 
-import type { DbClient } from '@data/database';
+import type { DbClient } from '@abe-stack/db';
 import type { EmailService } from '@messaging/email';
 
 /**
