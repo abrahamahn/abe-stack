@@ -12,6 +12,12 @@
       "@/*": [
             "./src/*"
       ],
+      "@abe-stack/auth": [
+            "../../packages/auth/src/index.ts"
+      ],
+      "@abe-stack/auth/*": [
+            "../../packages/auth/src/*"
+      ],
       "@abe-stack/billing": [
             "../../packages/billing/src/index.ts"
       ],
@@ -33,6 +39,15 @@
       "@abe-stack/core": [
             "../../packages/core/src/index.ts"
       ],
+      "@abe-stack/email": [
+            "../../packages/email/src/index.ts"
+      ],
+      "@abe-stack/http": [
+            "../../packages/http/src/index.ts"
+      ],
+      "@abe-stack/http/*": [
+            "../../packages/http/src/*"
+      ],
       "@abe-stack/core/pubsub/postgres": [
             "../../packages/core/src/infrastructure/pubsub/postgres-pubsub.ts"
       ],
@@ -48,11 +63,47 @@
       "@abe-stack/db/*": [
             "../../packages/db/src/*"
       ],
+      "@abe-stack/jobs": [
+            "../../packages/jobs/src/index.ts"
+      ],
+      "@abe-stack/jobs/*": [
+            "../../packages/jobs/src/*"
+      ],
       "@abe-stack/media": [
             "../../packages/media/src/index.ts"
       ],
       "@abe-stack/media/*": [
             "../../packages/media/src/*"
+      ],
+      "@abe-stack/notifications": [
+            "../../packages/notifications/src/index.ts"
+      ],
+      "@abe-stack/notifications/*": [
+            "../../packages/notifications/src/*"
+      ],
+      "@abe-stack/realtime": [
+            "../../packages/realtime/src/index.ts"
+      ],
+      "@abe-stack/realtime/*": [
+            "../../packages/realtime/src/*"
+      ],
+      "@abe-stack/security": [
+            "../../packages/security/src/index.ts"
+      ],
+      "@abe-stack/security/*": [
+            "../../packages/security/src/*"
+      ],
+      "@abe-stack/storage": [
+            "../../packages/storage/src/index.ts"
+      ],
+      "@abe-stack/storage/*": [
+            "../../packages/storage/src/*"
+      ],
+      "@abe-stack/users": [
+            "../../packages/users/src/index.ts"
+      ],
+      "@abe-stack/users/*": [
+            "../../packages/users/src/*"
       ],
       "@admin": [
             "./src/modules/admin"
@@ -77,12 +128,6 @@
       ],
       "@config/*": [
             "./src/config/*"
-      ],
-      "@data": [
-            "./src/infrastructure/data"
-      ],
-      "@data/*": [
-            "./src/infrastructure/data/*"
       ],
       "@http": [
             "./src/infrastructure/http"
@@ -173,11 +218,20 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
+    { "path": "../../packages/auth" },
     { "path": "../../packages/billing" },
     { "path": "../../packages/cache" },
     { "path": "../../packages/core" },
+    { "path": "../../packages/contracts" },
     { "path": "../../packages/db" },
+    { "path": "../../packages/email" },
+    { "path": "../../packages/http" },
+    { "path": "../../packages/jobs" },
     { "path": "../../packages/media" },
-    { "path": "../../packages/contracts" }
+    { "path": "../../packages/notifications" },
+    { "path": "../../packages/realtime" },
+    { "path": "../../packages/security" },
+    { "path": "../../packages/storage" },
+    { "path": "../../packages/users" }
   ]
 }

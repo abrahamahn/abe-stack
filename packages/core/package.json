@@ -59,9 +59,17 @@
       "types": "./dist/infrastructure/transactions/index.d.ts",
       "default": "./dist/infrastructure/transactions/index.js"
     },
+    "./infrastructure/logger": {
+      "types": "./dist/infrastructure/logger/index.d.ts",
+      "default": "./dist/infrastructure/logger/index.js"
+    },
     "./infrastructure/logger/console": {
       "types": "./dist/infrastructure/logger/console.d.ts",
       "default": "./dist/infrastructure/logger/console.js"
+    },
+    "./infrastructure/monitor": {
+      "types": "./dist/infrastructure/monitor/index.d.ts",
+      "default": "./dist/infrastructure/monitor/index.js"
     },
     "./contracts": {
       "types": "./dist/contracts/index.d.ts",

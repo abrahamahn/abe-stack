@@ -5,7 +5,7 @@
  * Handles forgot password, reset password, and set password flows.
  */
 
-import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
+import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { mapErrorToResponse, SUCCESS_MESSAGES, type AppContext, type RequestWithCookies } from '@shared';
 
 export async function handleForgotPassword(

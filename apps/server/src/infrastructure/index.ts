@@ -117,16 +117,16 @@ export {
   type UploadParams,
 } from '@abe-stack/storage';
 
-// Email
+// Email (from @abe-stack/email package)
 export {
   ConsoleEmailService,
   SmtpEmailService,
   createEmailService,
   emailTemplates,
-} from './messaging/email';
-export type { EmailOptions, EmailResult, EmailService } from './messaging/email';
+} from '@abe-stack/email';
+export type { EmailOptions, EmailResult, EmailService } from '@abe-stack/email';
 
-// Login Security (from auth module)
+// Login Security (from @abe-stack/auth package)
 export {
   applyProgressiveDelay,
   clearLoginAttempts,
@@ -137,9 +137,9 @@ export {
   unlockAccount,
   type LockoutConfig,
   type LockoutStatus,
-} from '../modules/auth/security';
+} from '@abe-stack/auth';
 
-// Security Events (from auth module)
+// Security Events (from @abe-stack/auth package)
 export {
   getSecurityEventMetrics,
   getUserSecurityEvents,
@@ -152,7 +152,7 @@ export {
   type SecurityEventMetadata,
   type SecurityEventSeverity,
   type SecurityEventType,
-} from '../modules/auth/security/events';
+} from '@abe-stack/auth';
 
 // HTTP (Security headers, CORS)
 export { applyCors, applySecurityHeaders, handlePreflight, type CorsOptions } from './http';
@@ -173,10 +173,21 @@ export {
 } from './http/middleware';
 
 // WebSocket
+// NOTE: WebSocket exports remain local because:
+// 1. registerWebSocket has a different signature in the package (3 args with injected
+//    TokenVerifier) vs local (2 args with AppContext that verifies tokens internally).
+// 2. getWebSocketStats and registerWebSocket share module-level state (connection
+//    counters), so both must come from the same module to stay consistent.
+// Full rewiring requires updating app.ts to pass the TokenVerifier option.
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './messaging/websocket';
 
 // Billing (from @abe-stack/billing package)
-export { createBillingProvider, isBillingConfigured, PayPalProvider, StripeProvider } from '@abe-stack/billing';
+export {
+  createBillingProvider,
+  isBillingConfigured,
+  PayPalProvider,
+  StripeProvider,
+} from '@abe-stack/billing';
 // Note: Billing types (BillingService, CheckoutParams, NormalizedWebhookEvent, etc.)
 // should be imported directly from @abe-stack/core
 
@@ -184,11 +195,11 @@ export { createBillingProvider, isBillingConfigured, PayPalProvider, StripeProvi
 export { SearchProviderFactory, getSearchProviderFactory } from './search';
 export type { SearchProviderType, SearchResultWithMetrics, ServerSearchProvider } from './search';
 
-// Write Service
-export { WriteService, createWriteService } from './jobs/write';
-export type { OperationResult, WriteBatch, WriteOperation, WriteResult } from './jobs/write';
+// Write Service (from @abe-stack/jobs package)
+export { WriteService, createWriteService } from '@abe-stack/jobs';
+export type { OperationResult, WriteBatch, WriteOperation, WriteResult } from '@abe-stack/jobs';
 
-// Rate Limiting
+// Rate Limiting (from @abe-stack/security package)
 export {
   MemoryStore,
   RateLimitPresets,
@@ -198,7 +209,7 @@ export {
   type RateLimitConfig,
   type RateLimitInfo,
   type RateLimiterStats,
-} from './security/rate-limit';
+} from '@abe-stack/security';
 
 // Crypto (Native JWT) - Base JWT from core, rotation support from local
 export {
@@ -212,7 +223,7 @@ export {
   type SignOptions as JwtSignOptions,
 } from '@abe-stack/core/infrastructure/crypto';
 
-// JWT Rotation Support
+// JWT Rotation Support (from @abe-stack/security package)
 export {
   checkTokenSecret,
   createJwtRotationHandler,
@@ -220,7 +231,7 @@ export {
   verifyWithRotation,
   type JwtRotationConfig,
   type RotatingJwtOptions,
-} from './security/crypto';
+} from '@abe-stack/security';
 
 // Health Checks
 export {
@@ -261,7 +272,7 @@ export {
   type RequestContext,
 } from './monitor/logger';
 
-// Queue (Background Jobs)
+// Queue (Background Jobs - from @abe-stack/jobs package)
 export {
   MemoryQueueStore,
   PostgresQueueStore,
@@ -282,9 +293,9 @@ export {
   type TaskHandler,
   type TaskHandlers,
   type TaskResult,
-} from './jobs/queue';
+} from '@abe-stack/jobs';
 
-// Scheduled Jobs (Cleanup, Maintenance)
+// Scheduled Jobs (Cleanup, Maintenance - from @abe-stack/jobs package)
 export {
   DEFAULT_INACTIVE_DAYS,
   DEFAULT_RETENTION_DAYS,
@@ -304,7 +315,7 @@ export {
   type CleanupResult,
   type PushCleanupOptions,
   type PushCleanupResult,
-} from './jobs/scheduled';
+} from '@abe-stack/jobs';
 
 // Router (Generic Route Registration)
 export {
@@ -332,7 +343,7 @@ export {
   type PaginationRequest,
 } from './http/pagination';
 
-// Permissions (Row-level access control)
+// Permissions (Row-level access control - from @abe-stack/security package)
 export {
   PERMISSION_TYPES,
   PermissionChecker,
@@ -380,7 +391,7 @@ export {
   type RecordPointer,
   type RoleRule,
   type TablePermissionConfig,
-} from './security/permissions';
+} from '@abe-stack/security';
 
 // Media (Processing)
 export { ServerMediaQueue, createServerMediaQueue, type MediaJobData } from './media';

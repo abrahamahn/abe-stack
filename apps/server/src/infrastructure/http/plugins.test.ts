@@ -17,7 +17,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 // Mock Modules
 // ============================================================================
 
-vi.mock('@security/rate-limit', () => ({
+vi.mock('@abe-stack/security', () => ({
   RateLimiter: vi.fn().mockImplementation(() => ({
     check: vi.fn().mockResolvedValue({
       allowed: true,
@@ -48,7 +48,7 @@ vi.mock('./middleware', () => ({
 }));
 
 // Import modules
-import { RateLimiter } from '@security/rate-limit';
+import { RateLimiter } from '@abe-stack/security';
 import * as middleware from './middleware';
 import { AppError } from '@abe-stack/core/infrastructure/errors';
 

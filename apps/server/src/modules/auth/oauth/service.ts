@@ -42,13 +42,9 @@ import type {
 } from './types';
 import type { AuthConfig, OAuthProviderConfig } from '@/config';
 
-import {
-    withTransaction,
-    type DbClient,
-    type OAuthProvider,
-    type Repositories,
-    type UserRole,
-} from '@/infrastructure';
+import { withTransaction, type DbClient, type OAuthProvider, type Repositories } from '@abe-stack/db';
+
+import type { UserRole } from '@abe-stack/core';
 
 // ============================================================================
 // Types

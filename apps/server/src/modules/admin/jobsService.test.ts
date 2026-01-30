@@ -13,7 +13,7 @@ import {
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 
-import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '@/infrastructure';
+import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '@abe-stack/jobs';
 
 // ============================================================================
 // Mock Store Factory

@@ -3,14 +3,13 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { DbClient } from '@abe-stack/db';
 
-// Mock dependencies - use relative path that matches the resolved path
-// service.ts imports from '@/infrastructure' which resolves to '../../infrastructure'
-vi.mock('../../infrastructure', () => ({
+// Mock dependencies - service.ts imports unlockAccount from @abe-stack/auth
+vi.mock('@abe-stack/auth', () => ({
   unlockAccount: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { unlockUserAccount, UserNotFoundError } from './service';
-import * as infra from '../../infrastructure';
+import * as auth from '@abe-stack/auth';
 
 // Create mock db matching RawDb interface
 function createMockDb() {
@@ -75,7 +74,7 @@ describe('Admin Service', () => {
         'Mozilla/5.0',
       );
 
-      expect(infra.unlockAccount).toHaveBeenCalledWith(
+      expect(auth.unlockAccount).toHaveBeenCalledWith(
         asMockDb(mockDb),
         'test@example.com',
         'admin-456',
@@ -106,7 +105,7 @@ describe('Admin Service', () => {
       const customReason = 'User locked out due to forgotten password, verified via email';
       await unlockUserAccount(asMockDb(mockDb), 'test@example.com', 'admin-789', customReason);
 
-      expect(infra.unlockAccount).toHaveBeenCalledWith(
+      expect(auth.unlockAccount).toHaveBeenCalledWith(
         asMockDb(mockDb),
         'test@example.com',
         'admin-789',

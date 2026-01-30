@@ -12,7 +12,7 @@ import {
 } from './lockout';
 
 import type { LockoutConfig, LockoutStatus } from './types';
-import type { DbClient } from '@database';
+import type { DbClient } from '@abe-stack/db';
 
 // Mock constants
 vi.mock('@shared/constants', () => ({

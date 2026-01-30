@@ -8,7 +8,7 @@ import {
 } from './search-factory';
 
 import type { SqlTableConfig } from './types';
-import type { RawDb, Repositories } from '@database';
+import type { RawDb, Repositories } from '@abe-stack/db';
 
 // Mock database
 const mockDb = {

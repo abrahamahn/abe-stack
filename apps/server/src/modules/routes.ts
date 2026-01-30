@@ -4,9 +4,15 @@
  *
  * Uses the generic router pattern for DRY registration.
  * All routes are defined in their respective module route files.
+ *
+ * Note: Route maps and handlers are imported from local module directories
+ * (not from @abe-stack/* packages) because the local modules use the server's
+ * concrete AppContext type, while the packages use generic HandlerContext.
+ * The local modules serve as the adapter layer bridging package logic to the
+ * server's type system.
  */
 
-import { registerRouteMap } from '@http/router';
+import { registerRouteMap } from '@/infrastructure/http/router';
 
 import { adminRoutes } from './admin/routes';
 import { authRoutes } from './auth/routes';
@@ -67,7 +73,7 @@ export {
   type RouteResult,
   type RouterOptions,
   type ValidationSchema,
-} from '@http/router';
+} from '@/infrastructure/http/router';
 
 // Route definitions for external use
 export { adminRoutes } from './admin/routes';

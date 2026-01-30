@@ -60,6 +60,9 @@
       "path": "./packages/db"
     },
     {
+      "path": "./packages/jobs"
+    },
+    {
       "path": "./packages/media"
     },
     {
@@ -70,6 +73,36 @@
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/billing"
+    },
+    {
+      "path": "./packages/cache"
+    },
+    {
+      "path": "./packages/email"
+    },
+    {
+      "path": "./packages/http"
+    },
+    {
+      "path": "./packages/auth"
+    },
+    {
+      "path": "./packages/security"
+    },
+    {
+      "path": "./packages/storage"
+    },
+    {
+      "path": "./packages/notifications"
+    },
+    {
+      "path": "./packages/users"
+    },
+    {
+      "path": "./packages/realtime"
     }
   ]
 }

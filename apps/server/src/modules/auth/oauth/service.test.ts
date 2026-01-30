@@ -24,7 +24,7 @@ import type {
     RefreshTokenRepository,
     UserRepository,
 } from '@abe-stack/db';
-import type { DbClient, Repositories } from '../../../infrastructure';
+import type { DbClient, Repositories } from '@abe-stack/db';
 
 
 
@@ -54,22 +54,14 @@ vi.mock('../utils', () => ({
   createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
 }));
 
-// Mock transaction
-vi.mock('@/infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@/infrastructure')>('@/infrastructure');
+// Mock db and transaction
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => {
       return Promise.resolve(callback(db));
     }),
-  };
-});
-
-// Mock db insert helpers
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
-  return {
-    ...actual,
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
         returningAll: vi.fn(() => ({

@@ -10,6 +10,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@abe-stack/core": "workspace:*",
     "sharp": "^0.33.2"
   },
   "scripts": {

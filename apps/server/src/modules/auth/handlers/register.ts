@@ -5,12 +5,12 @@
  * Handles new user registration.
  */
 
-import { registerUser, type RegisterResult } from '@auth/service';
+import { registerUser, type RegisterResult } from '../service';
 import { mapErrorToResponse, type AppContext, type ReplyWithCookies } from '@shared';
 
 import type { RegisterRequest } from '@abe-stack/core';
 
-export type { RegisterResult } from '@auth/service';
+export type { RegisterResult } from '../service';
 
 export async function handleRegister(
   ctx: AppContext,

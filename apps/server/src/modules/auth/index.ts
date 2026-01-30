@@ -15,19 +15,22 @@ export {
   createRequireRole,
   extractTokenPayload,
   isAdmin,
-} from '@auth/middleware';
+} from './middleware';
 
 // Handlers
 export {
   handleForgotPassword,
   handleLogin,
   handleLogout,
+  handleLogoutAll,
   handleRefresh,
   handleRegister,
   handleResendVerification,
   handleResetPassword,
+  handleSetPassword,
   handleVerifyEmail,
-} from '@auth/handlers';
+  type RegisterResult,
+} from './handlers';
 
 // Magic Link
 export {
@@ -90,7 +93,7 @@ export {
   verifyEmail,
   type AuthResult,
   type RefreshResult,
-} from '@auth/service';
+} from './service';
 
 // Utils (for direct use if needed)
 export {

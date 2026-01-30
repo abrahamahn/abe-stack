@@ -1,9 +1,9 @@
 // apps/server/src/modules/auth/security/events.ts
 import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '@abe-stack/db';
-import { emailTemplates } from '@messaging/email';
+import { emailTemplates } from '@abe-stack/email';
 
 import type { DbClient } from '@abe-stack/db';
-import type { EmailService } from '@messaging/email';
+import type { EmailService } from '@abe-stack/email';
 
 /**
  * Security event types

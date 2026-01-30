@@ -99,15 +99,46 @@ export type InferSchema<S> = S extends Schema<infer T> ? T : never;
 // ============================================================================
 
 /**
- * Generic Logger interface
+ * Generic Logger interface.
+ *
+ * Provides Pino-compatible overloads supporting both `(msg, data?)` and
+ * `(data, msg)` calling conventions. `FastifyBaseLogger` (Pino) structurally
+ * satisfies this contract, so the server can pass its logger directly.
+ *
+ * `trace` and `fatal` are optional because not all logger implementations
+ * provide them. `child` is optional for the same reason.
  */
 export interface Logger {
+  /** Log an info-level message */
   info(msg: string, data?: Record<string, unknown>): void;
+  /** Log an info-level message with structured data first (Pino convention) */
+  info(data: Record<string, unknown>, msg: string): void;
+  /** Log a warn-level message */
   warn(msg: string, data?: Record<string, unknown>): void;
+  /** Log a warn-level message with structured data first (Pino convention) */
+  warn(data: Record<string, unknown>, msg: string): void;
+  /** Log an error-level message */
   error(msg: string | Error, data?: Record<string, unknown>): void;
+  /** Log an error-level message with structured data first (Pino convention) */
+  error(data: unknown, msg?: string): void;
+  /** Log a debug-level message */
   debug(msg: string, data?: Record<string, unknown>): void;
+  /** Log a debug-level message with structured data first (Pino convention) */
+  debug(data: Record<string, unknown>, msg: string): void;
+  /** Log a trace-level message (optional -- not all loggers support trace) */
   trace?(msg: string, data?: Record<string, unknown>): void;
+  /** Log a trace-level message with structured data first (optional) */
+  trace?(data: Record<string, unknown>, msg: string): void;
+  /** Log a fatal-level message (optional -- not all loggers support fatal) */
   fatal?(msg: string | Error, data?: Record<string, unknown>): void;
+  /** Log a fatal-level message with structured data first (optional) */
+  fatal?(data: Record<string, unknown>, msg: string): void;
+  /**
+   * Create a child logger with additional bindings (optional).
+   *
+   * @param bindings - Key-value pairs to attach to all child log entries
+   * @returns A new logger instance with the bindings
+   */
   child?(bindings: Record<string, unknown>): Logger;
 }
 

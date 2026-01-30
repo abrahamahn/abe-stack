@@ -5,8 +5,8 @@
  * Handles token refresh using HTTP-only refresh token cookie.
  */
 
-import { sendTokenReuseAlert } from '@auth/security';
-import { refreshUserTokens } from '@auth/service';
+import { sendTokenReuseAlert } from '../security';
+import { refreshUserTokens } from '../service';
 import {
     ERROR_MESSAGES,
     mapErrorToResponse,

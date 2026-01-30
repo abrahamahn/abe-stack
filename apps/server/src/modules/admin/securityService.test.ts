@@ -8,7 +8,7 @@ import {
 } from './securityService';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { DbClient } from '@database';
+import type { DbClient } from '@abe-stack/db';
 
 // ============================================================================
 // Test Helpers

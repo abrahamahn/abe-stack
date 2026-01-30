@@ -27,5 +27,8 @@
     "fastify": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "fastify": "5.7.1"
   }
 }

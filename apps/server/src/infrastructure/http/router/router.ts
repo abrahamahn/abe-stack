@@ -28,7 +28,7 @@
  * registerRoutes(app, ctx, routes, { prefix: '/api', jwtSecret: config.auth.jwt.secret });
  */
 
-import { createAuthGuard } from '@auth/middleware';
+import { createAuthGuard } from '@abe-stack/auth';
 
 import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions, ValidationSchema } from './types';
 import type { AppContext } from '@shared';

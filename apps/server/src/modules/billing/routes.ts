@@ -20,7 +20,7 @@ import {
   type SubscriptionResponse,
   type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
-import { createRouteMap, protectedRoute, publicRoute, type RouteResult } from '@http/router';
+import { createRouteMap, protectedRoute, publicRoute, type RouteResult } from '@/infrastructure/http/router';
 
 import {
   handleAddPaymentMethod,

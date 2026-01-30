@@ -42,6 +42,25 @@
 
 ---
 
+## High Priority: Eliminate Server Module Duplicates (Phase 4)
+
+Five server modules have complete code duplicates in `packages/*`.
+Now that `BaseContext` is defined and `AppContext` satisfies it (Phases 0-3),
+the server adapter layer is unnecessary.
+
+- [ ] Add `emailTemplates` to server `AppContext` / `IServiceContainer`
+- [ ] Switch `modules/routes.ts` to import route maps from `@abe-stack/auth`, `@abe-stack/realtime`, `@abe-stack/notifications`
+- [ ] Convert module barrel `index.ts` files to re-export from packages
+- [ ] Delete ~40 duplicate source files (auth, users/service, realtime, notifications)
+- [ ] Update ~37 test file imports to use `@abe-stack/*` packages
+- [ ] Verify: `pnpm --filter @abe-stack/server type-check && test`
+
+**Keep local:** admin (no package), billing (incompatible BillingRouteMap), system (server-specific), users handlers/routes (pagination adapter).
+
+**Future:** Migrate test files to packages, align billing route map, switch to package router, rewire WebSocket.
+
+---
+
 ## Medium Priority: User Settings (Remaining)
 
 - [ ] 2FA setup UI (TOTP) + recovery codes

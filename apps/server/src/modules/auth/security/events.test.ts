@@ -13,7 +13,7 @@ import {
     sendTokenReuseAlert,
 } from './events';
 
-import type { DbClient } from '@database';
+import type { DbClient } from '@abe-stack/db';
 import type { EmailService } from '@email';
 
 // Create mock db matching RawDb interface

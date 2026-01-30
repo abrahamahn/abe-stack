@@ -6,7 +6,7 @@
  * All routes require authentication.
  */
 
-import { createRouteMap, protectedRoute, type RouteResult } from '@http/router';
+import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
 
 import { handleListUsers, handleMe } from './handlers';
 

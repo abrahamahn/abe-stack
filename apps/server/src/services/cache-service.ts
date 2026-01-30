@@ -6,7 +6,7 @@
  * Uses a simple in-memory cache with TTL for basic caching needs.
  */
 
-import type { Logger } from '@monitor/logger';
+import type { Logger } from '@abe-stack/core';
 
 export interface CacheOptions {
   ttl?: number; // Time to live in milliseconds (default: 5 minutes)

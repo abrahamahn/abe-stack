@@ -11,9 +11,7 @@
       "@abe-stack/core": ["../core/src/index.ts"],
       "@abe-stack/core/*": ["../core/src/*"],
       "@abe-stack/db": ["../db/src/index.ts"],
-      "@abe-stack/db/*": ["../db/src/*"],
-      "@abe-stack/contracts": ["../contracts/src/index.ts"],
-      "@abe-stack/contracts/*": ["../contracts/src/*"]
+      "@abe-stack/db/*": ["../db/src/*"]
     }
   },
   "include": ["src/**/*"],
@@ -24,9 +22,6 @@
     },
     {
       "path": "../db"
-    },
-    {
-      "path": "../contracts"
     }
   ]
 }

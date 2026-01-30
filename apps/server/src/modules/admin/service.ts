@@ -9,7 +9,9 @@
 import { UserNotFoundError } from '@abe-stack/core';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
 
-import { unlockAccount as infraUnlockAccount, type DbClient } from '@/infrastructure';
+import { unlockAccount as infraUnlockAccount } from '@abe-stack/auth';
+
+import type { DbClient } from '@abe-stack/db';
 
 export { UserNotFoundError };
 

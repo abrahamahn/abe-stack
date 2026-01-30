@@ -17,11 +17,11 @@ import {
   isAccountLocked,
   logAccountLockedEvent,
   logLoginAttempt,
-  type DbClient,
-  type EmailService,
-  type Repositories,
-  type Logger,
-} from '../../infrastructure';
+} from '@abe-stack/auth';
+
+import type { DbClient, Repositories } from '@abe-stack/db';
+import type { EmailService } from '@abe-stack/email';
+import type { Logger } from '../../infrastructure';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -63,8 +63,15 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
   };
 });
 
-vi.mock('../../infrastructure', () => ({
+vi.mock('@abe-stack/auth', () => ({
   applyProgressiveDelay: vi.fn(),
+  getAccountLockoutStatus: vi.fn(),
+  isAccountLocked: vi.fn(),
+  logAccountLockedEvent: vi.fn(),
+  logLoginAttempt: vi.fn(),
+}));
+
+vi.mock('@abe-stack/email', () => ({
   emailTemplates: {
     emailVerification: vi.fn(() => ({
       subject: 'Verify your email',
@@ -82,14 +89,10 @@ vi.mock('../../infrastructure', () => ({
       html: '<p>Click to reset</p>',
     })),
   },
-  getAccountLockoutStatus: vi.fn(),
-  isAccountLocked: vi.fn(),
-  logAccountLockedEvent: vi.fn(),
-  logLoginAttempt: vi.fn(),
-  withTransaction: vi.fn((db, callback) => callback(db)),
 }));
 
 vi.mock('@abe-stack/db', () => ({
+  withTransaction: vi.fn((db, callback) => callback(db)),
   toCamelCase: vi.fn(),
   USERS_TABLE: 'users',
   USER_COLUMNS: [],

@@ -30,7 +30,7 @@ import type { OAuthConnectionInfo } from './types';
 import type { AuthResponse } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { OAUTH_PROVIDERS, type OAuthProvider } from '@/infrastructure';
+import { OAUTH_PROVIDERS, type OAuthProvider } from '@abe-stack/db';
 
 // ============================================================================
 // Types

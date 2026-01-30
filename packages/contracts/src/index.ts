@@ -155,6 +155,15 @@ export type {
   StorageService,
 } from './types';
 
+// Context contracts (shared handler context types)
+export type {
+  AuthenticatedUser,
+  BaseContext,
+  ReplyContext,
+  RequestContext,
+  RequestInfo,
+} from './context';
+
 // Pagination schemas
 export {
   cursorPaginatedResultSchema,

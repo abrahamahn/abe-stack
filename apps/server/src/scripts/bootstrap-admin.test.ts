@@ -72,8 +72,8 @@ vi.mock('@abe-stack/db', () => ({
   eq: mockEq,
 }));
 
-// Mock the password utils using relative path from test file
-vi.mock('../modules/auth/utils/password', () => ({
+// Mock the auth package - bootstrap-admin.ts imports hashPassword from @abe-stack/auth
+vi.mock('@abe-stack/auth', () => ({
   hashPassword: mockHashPassword,
 }));
 

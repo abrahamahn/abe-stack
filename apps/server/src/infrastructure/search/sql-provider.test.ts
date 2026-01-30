@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SqlSearchProvider, createSqlSearchProvider } from './sql-provider';
 
 import type { SqlTableConfig } from './types';
-import type { RawDb, Repositories } from '@database';
+import type { RawDb, Repositories } from '@abe-stack/db';
 
 // Mock RawDb interface
 const mockRaw = vi.fn();

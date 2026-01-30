@@ -7,8 +7,8 @@ const { mockGetUserById, mockListUsers } = vi.hoisted(() => ({
   mockListUsers: vi.fn(),
 }));
 
-// Mock getUserById service function using relative path (Vitest 4.x resolves aliases differently)
-vi.mock('./service', () => ({
+// Mock user service functions - handlers.ts imports from @abe-stack/users
+vi.mock('@abe-stack/users', () => ({
   getUserById: mockGetUserById,
   listUsers: mockListUsers,
 }));

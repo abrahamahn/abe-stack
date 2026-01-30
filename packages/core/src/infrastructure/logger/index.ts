@@ -2,8 +2,33 @@
 /**
  * Logger Module
  *
- * Provides structured logging utilities for the application.
+ * Provides structured logging types, utilities, a console logger,
+ * and a framework-agnostic base logger adapter. No dependency on
+ * Fastify or other HTTP frameworks.
  */
 
-export type { ConsoleLoggerConfig, LogData, LogLevel } from './console';
-export { createConsoleLogger, LOG_LEVELS } from './console';
+// Types
+export type { LogData, Logger, LoggerConfig, LogLevel, RequestContext } from './types';
+
+// Base logger adapter (framework-agnostic wrappers)
+export type { BaseLogger } from './base-logger';
+export {
+  createJobCorrelationId,
+  createJobLogger,
+  createLogger,
+  createRequestLogger,
+} from './base-logger';
+
+// Correlation ID utilities
+export {
+  createRequestContext,
+  generateCorrelationId,
+  getOrCreateCorrelationId,
+} from './correlation';
+
+// Log level utilities
+export { LOG_LEVELS, shouldLog } from './levels';
+
+// Console logger
+export type { ConsoleLogLevel, ConsoleLoggerConfig } from './console';
+export { CONSOLE_LOG_LEVELS, createConsoleLogger } from './console';

@@ -55,7 +55,7 @@ vi.mock('@abe-stack/core', async () => {
   };
 });
 
-vi.mock('@/infrastructure', () => ({
+vi.mock('@abe-stack/jobs', () => ({
   PostgresQueueStore: vi.fn(),
 }));
 

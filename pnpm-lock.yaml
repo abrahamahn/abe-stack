@@ -114,6 +114,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@abe-stack/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@abe-stack/billing':
         specifier: workspace:*
         version: link:../../packages/billing
@@ -126,9 +129,30 @@ importers:
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@abe-stack/email':
+        specifier: workspace:*
+        version: link:../../packages/email
+      '@abe-stack/http':
+        specifier: workspace:*
+        version: link:../../packages/http
+      '@abe-stack/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
+      '@abe-stack/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
+      '@abe-stack/realtime':
+        specifier: workspace:*
+        version: link:../../packages/realtime
+      '@abe-stack/security':
+        specifier: workspace:*
+        version: link:../../packages/security
       '@abe-stack/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@abe-stack/users':
+        specifier: workspace:*
+        version: link:../../packages/users
       '@aws-sdk/client-s3':
         specifier: ^3.971.0
         version: 3.975.0
@@ -207,8 +231,42 @@ importers:
         specifier: ^6.0.5
         version: 6.0.5(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(tsx@4.21.0))
 
+  packages/auth:
+    dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abe-stack/db':
+        specifier: workspace:*
+        version: link:../db
+      '@abe-stack/http':
+        specifier: workspace:*
+        version: link:../http
+      '@abe-stack/security':
+        specifier: workspace:*
+        version: link:../security
+      argon2:
+        specifier: ^0.41.1
+        version: 0.41.1
+    devDependencies:
+      fastify:
+        specifier: ^5.2.0
+        version: 5.7.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@25.0.10)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(tsx@4.21.0)
+
   packages/billing:
     dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../core
@@ -218,6 +276,10 @@ importers:
       stripe:
         specifier: ^20.2.0
         version: 20.2.0(@types/node@25.0.10)
+    devDependencies:
+      fastify:
+        specifier: 5.7.1
+        version: 5.7.1
 
   packages/cache:
     dependencies:
@@ -252,15 +314,98 @@ importers:
 
   packages/db:
     dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
       postgres:
         specifier: ^3.4.8
         version: 3.4.8
 
+  packages/email:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/http:
+    dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      fastify:
+        specifier: '>=5.0.0'
+        version: 5.7.1
+
+  packages/jobs:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abe-stack/db':
+        specifier: workspace:*
+        version: link:../db
+
   packages/media:
     dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
       sharp:
         specifier: ^0.33.2
         version: 0.33.5
+
+  packages/notifications:
+    dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abe-stack/db':
+        specifier: workspace:*
+        version: link:../db
+      '@abe-stack/http':
+        specifier: workspace:*
+        version: link:../http
+    devDependencies:
+      fastify:
+        specifier: 5.7.1
+        version: 5.7.1
+
+  packages/realtime:
+    dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abe-stack/db':
+        specifier: workspace:*
+        version: link:../db
+      '@abe-stack/http':
+        specifier: workspace:*
+        version: link:../http
+    devDependencies:
+      '@types/ws':
+        specifier: ^8.5.13
+        version: 8.18.1
+      fastify:
+        specifier: ^5.2.0
+        version: 5.7.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@25.0.10)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(tsx@4.21.0)
+      ws:
+        specifier: ^8.18.0
+        version: 8.19.0
 
   packages/sdk:
     dependencies:
@@ -270,6 +415,15 @@ importers:
       react:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
+
+  packages/security:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      fastify:
+        specifier: '>=5.0.0'
+        version: 5.7.1
 
   packages/storage:
     dependencies:
@@ -285,8 +439,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.840.0
         version: 3.975.0
+    devDependencies:
       fastify:
-        specifier: ^5.0.0
+        specifier: 5.7.1
         version: 5.7.1
 
   packages/stores:
@@ -316,6 +471,37 @@ importers:
       react-dom:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
+
+  packages/users:
+    dependencies:
+      '@abe-stack/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+      '@abe-stack/db':
+        specifier: workspace:*
+        version: link:../db
+      '@abe-stack/http':
+        specifier: workspace:*
+        version: link:../http
+      '@abe-stack/storage':
+        specifier: workspace:*
+        version: link:../storage
+    devDependencies:
+      fastify:
+        specifier: ^5.2.0
+        version: 5.7.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@25.0.10)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(tsx@4.21.0)
 
 packages:
 
@@ -1897,6 +2083,10 @@ packages:
     peerDependencies:
       dmg-builder: 26.4.0
       electron-builder-squirrel-windows: 26.4.0
+
+  argon2@0.41.1:
+    resolution: {integrity: sha512-dqCW8kJXke8Ik+McUcMDltrbuAWETPyU6iq+4AhxqKphWi7pChB/Zgd/Tp/o8xRLbg8ksMj46F/vph9wnxpTzQ==}
+    engines: {node: '>=16.17.0'}
 
   argon2@0.44.0:
     resolution: {integrity: sha512-zHPGN3S55sihSQo0dBbK0A5qpi2R31z7HZDZnry3ifOyj8bZZnpZND2gpmhnRGO1V/d555RwBqIK5W4Mrmv3ig==}
@@ -6412,6 +6602,12 @@ snapshots:
       which: 5.0.0
     transitivePeerDependencies:
       - supports-color
+
+  argon2@0.41.1:
+    dependencies:
+      '@phc/format': 1.0.0
+      node-addon-api: 8.5.0
+      node-gyp-build: 4.8.4
 
   argon2@0.44.0:
     dependencies:

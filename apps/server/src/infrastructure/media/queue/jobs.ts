@@ -16,7 +16,7 @@ import {
 import { CustomJobQueue } from './queue';
 
 import type { MediaMetadata } from '../types';
-import type { Logger } from '@monitor/logger';
+import type { Logger } from '@abe-stack/core';
 
 export interface MediaJobData {
   fileId: string;

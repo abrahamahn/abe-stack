@@ -6,7 +6,7 @@
  * Provides basic queuing, retry logic, and concurrency control.
  */
 
-import type { Logger } from '@monitor/logger';
+import type { Logger } from '@abe-stack/core';
 
 export interface JobData<T = unknown> {
   id: string;

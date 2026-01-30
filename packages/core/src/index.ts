@@ -147,15 +147,67 @@ export type {
   ZodIssueMinimal,
 } from './infrastructure/errors';
 export { parseCookies } from './infrastructure/http';
-export { LOG_LEVELS, createConsoleLogger } from './infrastructure/logger/console';
-export type { ConsoleLoggerConfig, LogData } from './infrastructure/logger/console';
+export type { RequestInfo, RouteResult, ValidationSchema } from './infrastructure/http';
+
+// Module Registration
+export type { ModuleDeps, ModuleRegistrationOptions } from './infrastructure/module-registration';
+// Logger
+export {
+  CONSOLE_LOG_LEVELS,
+  createConsoleLogger,
+  createJobCorrelationId,
+  createJobLogger,
+  createLogger,
+  createRequestContext,
+  createRequestLogger,
+  generateCorrelationId,
+  getOrCreateCorrelationId,
+  LOG_LEVELS,
+  shouldLog,
+} from './infrastructure/logger';
+export type {
+  BaseLogger,
+  ConsoleLogLevel,
+  ConsoleLoggerConfig,
+  LogData,
+  Logger as CoreLogger,
+  LoggerConfig,
+  LogLevel as CoreLogLevel,
+  RequestContext,
+} from './infrastructure/logger';
+// Monitor (Health Checks)
+export {
+  buildDetailedHealthResponse,
+  checkDatabase,
+  checkEmail,
+  checkPubSub,
+  checkRateLimit,
+  checkSchema,
+  checkStorage,
+  checkWebSocket,
+  determineOverallStatus,
+} from './infrastructure/monitor';
+export type {
+  DetailedHealthResponse,
+  EmailHealthConfig,
+  HealthCheckDatabase,
+  HealthCheckPubSub,
+  LiveResponse,
+  OverallStatus,
+  ReadyResponse,
+  RoutesResponse,
+  SchemaHealth,
+  SchemaValidationResult,
+  SchemaValidator,
+  ServiceHealth,
+  ServiceStatus,
+  StartupSummaryOptions,
+  StorageHealthConfig,
+  WebSocketStats,
+} from './infrastructure/monitor';
 // PostgresPubSub exports removed from main entry - use direct import for server-only code:
 // import { createPostgresPubSub, PostgresPubSub } from '@abe-stack/core/pubsub';
-export {
-  publishAfterWrite,
-  SubKeys,
-  SubscriptionManager,
-} from './infrastructure/pubsub';
+export { publishAfterWrite, SubKeys, SubscriptionManager } from './infrastructure/pubsub';
 export type {
   ClientMessage,
   ListKey,

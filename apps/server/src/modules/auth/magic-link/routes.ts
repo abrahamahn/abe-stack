@@ -13,7 +13,7 @@ import {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
 } from '@abe-stack/core';
-import { createRouteMap, publicRoute, type BaseRouteDefinition, type RouteResult } from '@http/router';
+import { createRouteMap, publicRoute, type BaseRouteDefinition, type RouteResult } from '@/infrastructure/http/router';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 

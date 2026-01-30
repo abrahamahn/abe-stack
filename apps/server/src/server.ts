@@ -12,7 +12,7 @@
  */
 
 import { createConsoleLogger } from '@abe-stack/core';
-import { registerPlugins } from '@http/index';
+import { registerPlugins } from '@/infrastructure/http';
 import fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';

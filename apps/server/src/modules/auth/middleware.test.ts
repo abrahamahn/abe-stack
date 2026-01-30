@@ -6,7 +6,7 @@ import {
   extractTokenPayload,
   isAdmin,
 } from './middleware';
-import { verifyToken } from './utils/jwt';
+import { verifyToken } from '@abe-stack/auth';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { UserRole } from '@abe-stack/core';
@@ -16,8 +16,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 // Mock Dependencies
 // ============================================================================
 
-// Mock the JWT verification module
-vi.mock('./utils/jwt', () => ({
+// Mock the auth package to intercept verifyToken used by middleware.ts
+vi.mock('@abe-stack/auth', () => ({
   verifyToken: vi.fn(),
 }));
 

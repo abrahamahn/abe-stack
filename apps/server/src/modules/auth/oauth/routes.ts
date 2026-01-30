@@ -6,7 +6,7 @@
  * Uses the generic router pattern for DRY registration.
  */
 
-import { createRouteMap, protectedRoute, publicRoute, type BaseRouteDefinition, type RouteResult } from '@http/router';
+import { createRouteMap, protectedRoute, publicRoute, type BaseRouteDefinition, type RouteResult } from '@/infrastructure/http/router';
 
 import {
   handleGetConnections,

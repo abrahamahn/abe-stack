@@ -5,7 +5,7 @@
  * Handles user logout by revoking refresh token and clearing cookie.
  */
 
-import { logoutUser } from '@auth/service';
+import { logoutUser } from '../service';
 import {
   mapErrorToResponse,
   SUCCESS_MESSAGES,

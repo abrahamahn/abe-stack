@@ -12,7 +12,7 @@ import type {
     JobListResult,
     PostgresQueueStore,
     QueueStats,
-} from '@/infrastructure';
+} from '@abe-stack/jobs';
 
 // ============================================================================
 // Sensitive Field Redaction
