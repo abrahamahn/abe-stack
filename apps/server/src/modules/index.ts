@@ -1,50 +1,32 @@
 // apps/server/src/modules/index.ts
 export {
+  registerRoutes,
+  handleAdminUnlock,
+  handleMe,
+} from './routes';
+
+export {
   adminRoutes,
   authRoutes,
-  createAuthGuard,
-  handleAdminUnlock,
-  handleForgotPassword,
-  handleGetPreferences,
-  handleGetRecords,
-  handleGetVapidKey,
-  handleLogin,
-  handleLogout,
-  handleMe,
-  handleRefresh,
-  handleRegister,
-  handleResendVerification,
-  handleResetPassword,
-  handleSendNotification,
-  handleSubscribe,
-  handleTestNotification,
-  handleUnsubscribe,
-  handleUpdatePreferences,
-  handleVerifyEmail,
-  handleWrite,
-  notificationRoutes,
   notificationRoutesConfig,
-  protectedRoute,
-  publicRoute,
   realtimeRoutes,
-  RecordNotFoundError,
-  registerRouteMap,
-  registerRoutes,
-  registerRealtimeTable,
   systemRoutes,
   userRoutes,
-  VersionConflictError,
 } from './routes';
+
+export {
+  protectedRoute,
+  publicRoute,
+  registerRouteMap,
+} from '@/infrastructure/http/router';
 export type {
   HttpMethod,
   ProtectedHandler,
   PublicHandler,
-  ReplyWithCookies,
-  RequestWithCookies,
   RouteDefinition,
   RouteHandler,
   RouteMap,
   RouteResult,
   RouterOptions,
   ValidationSchema,
-} from './routes';
+} from '@/infrastructure/http/router';
