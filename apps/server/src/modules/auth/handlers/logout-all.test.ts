@@ -5,10 +5,10 @@
  * Comprehensive tests for logging out from all devices by revoking all refresh tokens.
  */
 
-import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
+import { clearRefreshTokenCookie, revokeAllUserTokens } from '@abe-stack/auth/utils';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogoutAll } from './logout-all';
+import { handleLogoutAll } from '@abe-stack/auth/handlers/logout-all';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
@@ -16,7 +16,7 @@ import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   clearRefreshTokenCookie: vi.fn(),
   revokeAllUserTokens: vi.fn(),
 }));

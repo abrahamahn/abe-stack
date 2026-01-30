@@ -12,7 +12,7 @@ import {
 } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogin } from './login';
+import { handleLogin } from '@abe-stack/auth/handlers/login';
 
 import type { LoginRequest } from '@abe-stack/core';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
@@ -54,13 +54,13 @@ const { mockAuthenticateUser, mockSetRefreshTokenCookie, mockMapErrorToResponse 
   }),
 );
 
-// Mock the service module - use relative path from this test file
-vi.mock('../service', () => ({
+// Mock the service module
+vi.mock('@abe-stack/auth/service', () => ({
   authenticateUser: mockAuthenticateUser,
 }));
 
 // Mock utils module
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 

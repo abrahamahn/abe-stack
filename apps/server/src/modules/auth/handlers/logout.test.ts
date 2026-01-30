@@ -8,7 +8,7 @@
 import { REFRESH_COOKIE_NAME } from '../../../shared/constants';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleLogout } from './logout';
+import { handleLogout } from '@abe-stack/auth/handlers/logout';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
@@ -27,12 +27,12 @@ const { mockLogoutUser, mockClearRefreshTokenCookie, mockMapErrorToResponse } = 
   }),
 }));
 
-// Mock the service module - use relative path
-vi.mock('../service', () => ({
+// Mock the service module
+vi.mock('@abe-stack/auth/service', () => ({
   logoutUser: mockLogoutUser,
 }));
 
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   clearRefreshTokenCookie: mockClearRefreshTokenCookie,
 }));
 

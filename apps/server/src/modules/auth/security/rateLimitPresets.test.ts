@@ -10,7 +10,7 @@ import {
   authRateLimiters,
   createAuthRateLimitHook,
   type AuthEndpoint,
-} from './rateLimitPresets';
+} from '@abe-stack/auth/security/rateLimitPresets';
 
 describe('AUTH_RATE_LIMITS', () => {
   it('should have login limits of 5 per minute', () => {

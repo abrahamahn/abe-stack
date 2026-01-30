@@ -11,8 +11,9 @@ import {
     logTokenFamilyRevokedEvent,
     logTokenReuseEvent,
     sendTokenReuseAlert,
-} from './events';
+} from '@abe-stack/auth/security/events';
 
+import { emailTemplates } from '@abe-stack/email';
 import type { DbClient } from '@abe-stack/db';
 import type { EmailService } from '@email';
 
@@ -328,7 +329,7 @@ describe('Security Events', () => {
         timestamp: new Date('2026-01-21T15:30:00Z'),
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       expect(mockEmailService.send).toHaveBeenCalledTimes(1);
       expect(mockEmailService.send).toHaveBeenCalledWith(
@@ -347,7 +348,7 @@ describe('Security Events', () => {
         timestamp: new Date(),
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.text).toContain('10.0.0.1');
@@ -362,7 +363,7 @@ describe('Security Events', () => {
         timestamp: new Date(),
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.text).toContain('Safari/537.36');
@@ -377,7 +378,7 @@ describe('Security Events', () => {
         timestamp: new Date(),
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.text).toContain('Unknown');
@@ -395,7 +396,7 @@ describe('Security Events', () => {
         timestamp: new Date(),
       };
 
-      await expect(sendTokenReuseAlert(mockEmailService, params)).rejects.toThrow(
+      await expect(sendTokenReuseAlert(mockEmailService, emailTemplates, params)).rejects.toThrow(
         'SMTP connection failed',
       );
     });
@@ -408,7 +409,7 @@ describe('Security Events', () => {
         timestamp: new Date(),
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.text).toContain('Change your password');
@@ -424,7 +425,7 @@ describe('Security Events', () => {
         timestamp,
       };
 
-      await sendTokenReuseAlert(mockEmailService, params);
+      await sendTokenReuseAlert(mockEmailService, emailTemplates, params);
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.html).toContain('2026-01-21T10:00:00.000Z');

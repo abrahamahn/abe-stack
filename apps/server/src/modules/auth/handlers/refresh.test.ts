@@ -9,7 +9,7 @@ import { InvalidTokenError, TokenReuseError } from '@abe-stack/core';
 import { ERROR_MESSAGES, REFRESH_COOKIE_NAME } from '../../../shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleRefresh } from './refresh';
+import { handleRefresh } from '@abe-stack/auth/handlers/refresh';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
@@ -30,7 +30,7 @@ const {
   mockClearRefreshTokenCookie: vi.fn(),
   mockSendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log: { error: (e: unknown) => void } }) => {
+  mockMapErrorToResponse: vi.fn((error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
     if (error instanceof Error) {
       switch (error.name) {
         case 'InvalidTokenError':
@@ -38,35 +38,35 @@ const {
         case 'TokenReuseError':
           return { status: 401, body: { message: 'Token has already been used' } };
         default:
-          ctx.log.error(error);
+          logger.error(error);
           return { status: 500, body: { message: 'Internal server error' } };
       }
     }
-    ctx.log.error(error);
+    logger.error(error);
     return { status: 500, body: { message: 'Internal server error' } };
   }),
 }));
 
-// Mock the service module - use relative path
-vi.mock('../service', () => ({
+// Mock the service module
+vi.mock('@abe-stack/auth/service', () => ({
   refreshUserTokens: mockRefreshUserTokens,
 }));
 
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
   clearRefreshTokenCookie: mockClearRefreshTokenCookie,
 }));
 
-vi.mock('../security', () => ({
+vi.mock('@abe-stack/auth/security', () => ({
   sendTokenReuseAlert: mockSendTokenReuseAlert,
 }));
 
-// Mock @shared to provide working mapErrorToResponse
-vi.mock('../../../shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../../shared')>();
+// Mock @abe-stack/core to intercept mapErrorToHttpResponse
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@abe-stack/core')>();
   return {
     ...original,
-    mapErrorToResponse: mockMapErrorToResponse,
+    mapErrorToHttpResponse: mockMapErrorToResponse,
   };
 });
 
@@ -79,6 +79,13 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {
+      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
+      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
+      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+    },
     config: {
       auth: {
         jwt: {
@@ -386,7 +393,7 @@ describe('handleRefresh', () => {
       // Wait for fire-and-forget email to be initiated
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, ctx.emailTemplates, {
         email: 'user@example.com',
         ipAddress: '192.168.1.1',
         userAgent: 'Firefox Browser',
@@ -417,7 +424,7 @@ describe('handleRefresh', () => {
       // Wait for fire-and-forget email
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, ctx.emailTemplates, {
         email: 'user@example.com',
         ipAddress: '10.0.0.1',
         userAgent: 'Chrome Browser',

@@ -75,8 +75,8 @@ const {
   }),
 }));
 
-// Mock the service module - use path that handlers use via @auth/service alias
-vi.mock('./service', () => ({
+// Mock the service module
+vi.mock('@abe-stack/auth/service', () => ({
   registerUser: mockRegisterUser,
   authenticateUser: mockAuthenticateUser,
   refreshUserTokens: mockRefreshUserTokens,
@@ -88,7 +88,7 @@ vi.mock('./service', () => ({
 }));
 
 // Mock utilities
-vi.mock('./utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   verifyToken: mockVerifyToken,
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
   clearRefreshTokenCookie: mockClearRefreshTokenCookie,
@@ -119,7 +119,7 @@ import {
   handleRegister,
   handleResetPassword,
   handleVerifyEmail,
-} from './handlers';
+} from '@abe-stack/auth/handlers';
 
 // ============================================================================
 // Test Helpers
@@ -130,6 +130,13 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {
+      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
+      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
+      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+    },
     config: {
       auth: {
         jwt: { secret: 'test-secret-32-characters-long!!' },
@@ -496,6 +503,7 @@ describe('handleForgotPassword', () => {
       ctx.db,
       ctx.repos,
       ctx.email,
+      ctx.emailTemplates,
       'test@example.com',
       'http://localhost:8080',
     );
