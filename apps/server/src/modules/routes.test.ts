@@ -35,21 +35,9 @@ vi.mock('./admin', () => ({
   handleAdminUnlock: vi.fn(),
 }));
 
-vi.mock('./auth/routes', () => ({
+vi.mock('@abe-stack/auth', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   authRoutes: { 'auth/test': { method: 'POST', handler: vi.fn() } },
-}));
-
-vi.mock('./auth', () => ({
-  createAuthGuard: vi.fn(),
-  handleForgotPassword: vi.fn(),
-  handleLogin: vi.fn(),
-  handleLogout: vi.fn(),
-  handleRefresh: vi.fn(),
-  handleRegister: vi.fn(),
-  handleResendVerification: vi.fn(),
-  handleResetPassword: vi.fn(),
-  handleVerifyEmail: vi.fn(),
 }));
 
 vi.mock('./billing', () => ({
@@ -58,34 +46,14 @@ vi.mock('./billing', () => ({
   registerWebhookRoutes: vi.fn(),
 }));
 
-vi.mock('./notifications/routes', () => ({
+vi.mock('@abe-stack/notifications', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   notificationRoutes: { 'notifications/test': { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('./notifications', () => ({
-  handleGetPreferences: vi.fn(),
-  handleGetVapidKey: vi.fn(),
-  handleSendNotification: vi.fn(),
-  handleSubscribe: vi.fn(),
-  handleTestNotification: vi.fn(),
-  handleUnsubscribe: vi.fn(),
-  handleUpdatePreferences: vi.fn(),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  notificationRoutes: { 'notifications/test': { method: 'POST', handler: vi.fn() } },
-}));
-
-vi.mock('./realtime/routes', () => ({
+vi.mock('@abe-stack/realtime', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   realtimeRoutes: { 'realtime/test': { method: 'GET', handler: vi.fn() } },
-}));
-
-vi.mock('./realtime', () => ({
-  handleGetRecords: vi.fn(),
-  handleWrite: vi.fn(),
-  RecordNotFoundError: class RecordNotFoundError extends Error {},
-  registerRealtimeTable: vi.fn(),
-  VersionConflictError: class VersionConflictError extends Error {},
 }));
 
 vi.mock('./system/routes', () => ({
@@ -98,7 +66,7 @@ vi.mock('./users/routes', () => ({
   userRoutes: { 'users/test': { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('./users', () => ({
+vi.mock('./users/handlers', () => ({
   handleMe: vi.fn(),
 }));
 
@@ -199,6 +167,7 @@ function createMockContext(billingEnabled = false): AppContext {
     queue: {} as never,
     write: {} as never,
     search: {} as never,
+    emailTemplates: {} as never,
     log: {
       debug: vi.fn(),
       info: vi.fn(),
@@ -623,46 +592,9 @@ describe('Module Exports', () => {
     expect(module.publicRoute).toBeDefined();
   });
 
-  test('should re-export auth handlers', async () => {
-    const module = await import('./routes');
-    expect(module.createAuthGuard).toBeDefined();
-    expect(module.handleLogin).toBeDefined();
-    expect(module.handleRegister).toBeDefined();
-    expect(module.handleLogout).toBeDefined();
-    expect(module.handleRefresh).toBeDefined();
-    expect(module.handleForgotPassword).toBeDefined();
-    expect(module.handleResetPassword).toBeDefined();
-    expect(module.handleVerifyEmail).toBeDefined();
-    expect(module.handleResendVerification).toBeDefined();
-  });
-
-  test('should re-export notification handlers', async () => {
-    const module = await import('./routes');
-    expect(module.handleSubscribe).toBeDefined();
-    expect(module.handleUnsubscribe).toBeDefined();
-    expect(module.handleSendNotification).toBeDefined();
-    expect(module.handleTestNotification).toBeDefined();
-    expect(module.handleGetVapidKey).toBeDefined();
-    expect(module.handleGetPreferences).toBeDefined();
-    expect(module.handleUpdatePreferences).toBeDefined();
-  });
-
-  test('should re-export realtime handlers and errors', async () => {
-    const module = await import('./routes');
-    expect(module.handleGetRecords).toBeDefined();
-    expect(module.handleWrite).toBeDefined();
-    expect(module.registerRealtimeTable).toBeDefined();
-    expect(module.RecordNotFoundError).toBeDefined();
-    expect(module.VersionConflictError).toBeDefined();
-  });
-
-  test('should re-export user handlers', async () => {
+  test('should re-export server-specific handlers', async () => {
     const module = await import('./routes');
     expect(module.handleMe).toBeDefined();
-  });
-
-  test('should re-export admin handlers', async () => {
-    const module = await import('./routes');
     expect(module.handleAdminUnlock).toBeDefined();
   });
 });

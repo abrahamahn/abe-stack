@@ -21,7 +21,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('./service', () => ({
+vi.mock('@abe-stack/notifications/service', () => ({
   subscribe: vi.fn(),
   unsubscribe: vi.fn(),
   getPreferences: vi.fn(),
@@ -39,8 +39,8 @@ import {
   handleTestNotification,
   handleUnsubscribe,
   handleUpdatePreferences,
-} from './handlers';
-import * as service from './service';
+} from '@abe-stack/notifications/handlers';
+import * as service from '@abe-stack/notifications/service';
 
 import type {
   NotificationPreferences,

@@ -9,9 +9,9 @@
 import { OAuthError } from '@abe-stack/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createGoogleProvider } from './google';
+import { createGoogleProvider } from '@abe-stack/auth/oauth/providers/google';
 
-import type { OAuthProviderClient } from '../types';
+import type { OAuthProviderClient } from '@abe-stack/auth/oauth/types';
 
 // ============================================================================
 // Test Setup

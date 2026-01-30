@@ -21,9 +21,9 @@ import {
   isTableAllowed,
   loadRecords,
   registerRealtimeTable,
-} from './service';
+} from '@abe-stack/realtime/service';
 
-import type { RealtimeRecord } from './types';
+import type { RealtimeRecord } from '@abe-stack/realtime/types';
 import type {
   RealtimeListInsertOperation,
   RealtimeListRemoveOperation,

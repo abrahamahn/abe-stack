@@ -8,11 +8,11 @@
 import { EmailSendError, WeakPasswordError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleRegister } from './register';
+import { handleRegister } from '@abe-stack/auth/handlers/register';
 
 import type { AppConfig } from '@/config';
 import type { RegisterRequest } from '@abe-stack/core';
-import type { RegisterResult } from '../service';
+import type { RegisterResult } from '@abe-stack/auth/service';
 import type { AppContext, ReplyWithCookies } from '../../../shared';
 
 // ============================================================================
@@ -23,7 +23,7 @@ import type { AppContext, ReplyWithCookies } from '../../../shared';
 const { mockRegisterUser, mockMapErrorToResponse } = vi.hoisted(() => ({
   mockRegisterUser: vi.fn(),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log: { error: (e: unknown) => void } }) => {
+  mockMapErrorToResponse: vi.fn((error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
     if (error instanceof Error) {
       switch (error.name) {
         case 'WeakPasswordError':
@@ -32,26 +32,26 @@ const { mockRegisterUser, mockMapErrorToResponse } = vi.hoisted(() => ({
           return { status: 503, body: { message: 'Failed to send email' } };
         default:
           // Log unknown errors like the real implementation does
-          ctx.log.error(error);
+          logger.error(error);
           return { status: 500, body: { message: 'Internal server error' } };
       }
     }
-    ctx.log.error(error);
+    logger.error(error);
     return { status: 500, body: { message: 'Internal server error' } };
   }),
 }));
 
-// Mock the service module - use relative path
-vi.mock('../service', () => ({
+// Mock the service module
+vi.mock('@abe-stack/auth/service', () => ({
   registerUser: mockRegisterUser,
 }));
 
-// Mock @shared to provide working mapErrorToResponse
-vi.mock('../../../shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../../shared')>();
+// Mock @abe-stack/core to intercept mapErrorToHttpResponse
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@abe-stack/core')>();
   return {
     ...original,
-    mapErrorToResponse: mockMapErrorToResponse,
+    mapErrorToHttpResponse: mockMapErrorToResponse,
   };
 });
 
@@ -183,6 +183,13 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {
+      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
+      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
+      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+    },
     config,
     log: {
       info: vi.fn(),
@@ -265,6 +272,7 @@ describe('handleRegister', () => {
         ctx.db,
         ctx.repos,
         ctx.email,
+        ctx.emailTemplates,
         ctx.config.auth,
         'newuser@example.com',
         'SecureP@ssw0rd!123',
@@ -292,6 +300,7 @@ describe('handleRegister', () => {
         ctx.db,
         ctx.repos,
         ctx.email,
+        ctx.emailTemplates,
         ctx.config.auth,
         'newuser@example.com',
         'SecureP@ssw0rd!123',
@@ -326,6 +335,7 @@ describe('handleRegister', () => {
       await handleRegister(ctx, body, reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -516,6 +526,7 @@ describe('handleRegister', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         'NewUser@EXAMPLE.COM',
         expect.anything(),
         expect.anything(),
@@ -539,6 +550,7 @@ describe('handleRegister', () => {
       await handleRegister(ctx, body, reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -573,6 +585,7 @@ describe('handleRegister', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         '',
         expect.anything(),
       );
@@ -595,6 +608,7 @@ describe('handleRegister', () => {
       await handleRegister(ctx, body, reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),

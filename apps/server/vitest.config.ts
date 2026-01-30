@@ -12,6 +12,9 @@ const dbPkg = path.resolve(__dirname, '../../packages/db/src');
 const emailPkg = path.resolve(__dirname, '../../packages/email/src');
 const httpPkg = path.resolve(__dirname, '../../packages/http/src');
 const jobsPkg = path.resolve(__dirname, '../../packages/jobs/src');
+const notificationsPkg = path.resolve(__dirname, '../../packages/notifications/src');
+const realtimePkg = path.resolve(__dirname, '../../packages/realtime/src');
+const securityPkg = path.resolve(__dirname, '../../packages/security/src');
 const storagePkg = path.resolve(__dirname, '../../packages/storage/src');
 const usersPkg = path.resolve(__dirname, '../../packages/users/src');
 
@@ -22,7 +25,7 @@ export default mergeConfig(baseConfig, {
     // Inline local modules to ensure mocks work correctly with path aliases
     server: {
       deps: {
-        inline: [/src\//, '@abe-stack/auth', '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/email', '@abe-stack/http', '@abe-stack/jobs', '@abe-stack/security', '@abe-stack/storage', '@abe-stack/users'],
+        inline: [/src\//, '@abe-stack/auth', '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/email', '@abe-stack/http', '@abe-stack/jobs', '@abe-stack/notifications', '@abe-stack/realtime', '@abe-stack/security', '@abe-stack/storage', '@abe-stack/users'],
       },
     },
   },
@@ -47,6 +50,13 @@ export default mergeConfig(baseConfig, {
         find: /^@abe-stack\/core\/(.*)$/,
         replacement: `${corePkg}/$1`,
       },
+      // Subpath imports for migrated packages (regex must come before exact matches)
+      { find: /^@abe-stack\/auth\/(.*)$/, replacement: `${authPkg}/$1` },
+      { find: /^@abe-stack\/notifications\/(.*)$/, replacement: `${notificationsPkg}/$1` },
+      { find: /^@abe-stack\/realtime\/(.*)$/, replacement: `${realtimePkg}/$1` },
+      { find: /^@abe-stack\/users\/(.*)$/, replacement: `${usersPkg}/$1` },
+      { find: /^@abe-stack\/http\/(.*)$/, replacement: `${httpPkg}/$1` },
+      { find: /^@abe-stack\/security\/(.*)$/, replacement: `${securityPkg}/$1` },
       // Handle main package imports
       { find: '@abe-stack/auth', replacement: `${authPkg}/index.ts` },
       { find: '@abe-stack/billing', replacement: `${billingPkg}/index.ts` },
@@ -58,6 +68,9 @@ export default mergeConfig(baseConfig, {
       { find: '@abe-stack/email', replacement: `${emailPkg}/index.ts` },
       { find: '@abe-stack/http', replacement: `${httpPkg}/index.ts` },
       { find: '@abe-stack/jobs', replacement: `${jobsPkg}/index.ts` },
+      { find: '@abe-stack/notifications', replacement: `${notificationsPkg}/index.ts` },
+      { find: '@abe-stack/realtime', replacement: `${realtimePkg}/index.ts` },
+      { find: '@abe-stack/security', replacement: `${securityPkg}/index.ts` },
       { find: /^@abe-stack\/storage\/(.*)$/, replacement: `${storagePkg}/$1` },
       { find: '@abe-stack/storage', replacement: `${storagePkg}/index.ts` },
       { find: '@abe-stack/users', replacement: `${usersPkg}/index.ts` },

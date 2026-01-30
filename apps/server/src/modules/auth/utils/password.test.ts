@@ -9,7 +9,7 @@ import {
   resetDummyHashPool,
   verifyPassword,
   verifyPasswordSafe,
-} from './password';
+} from '@abe-stack/auth/utils/password';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {

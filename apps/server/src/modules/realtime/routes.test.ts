@@ -16,12 +16,12 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('./handlers', () => ({
+vi.mock('@abe-stack/realtime/handlers', () => ({
   handleWrite: vi.fn(),
   handleGetRecords: vi.fn(),
 }));
 
-import { realtimeRoutes } from './routes';
+import { realtimeRoutes } from '@abe-stack/realtime/routes';
 
 import type { AppContext, RequestWithCookies } from '../../shared';
 import type { FastifyReply } from 'fastify';
@@ -125,7 +125,7 @@ describe('Realtime Routes', () => {
       });
 
       test('should call handleWrite with correct arguments', async () => {
-        const { handleWrite } = await import('./handlers');
+        const { handleWrite } = await import('@abe-stack/realtime/handlers');
         vi.mocked(handleWrite).mockResolvedValue({
           status: 200,
           body: { recordMap: {} },
@@ -160,7 +160,7 @@ describe('Realtime Routes', () => {
       });
 
       test('should return result from handleWrite', async () => {
-        const { handleWrite } = await import('./handlers');
+        const { handleWrite } = await import('@abe-stack/realtime/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -228,7 +228,7 @@ describe('Realtime Routes', () => {
       });
 
       test('should call handleGetRecords with correct arguments', async () => {
-        const { handleGetRecords } = await import('./handlers');
+        const { handleGetRecords } = await import('@abe-stack/realtime/handlers');
         vi.mocked(handleGetRecords).mockResolvedValue({
           status: 200,
           body: { recordMap: {} },
@@ -252,7 +252,7 @@ describe('Realtime Routes', () => {
       });
 
       test('should return result from handleGetRecords', async () => {
-        const { handleGetRecords } = await import('./handlers');
+        const { handleGetRecords } = await import('@abe-stack/realtime/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {

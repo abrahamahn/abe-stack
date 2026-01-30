@@ -17,16 +17,22 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 // Mock Modules
 // ============================================================================
 
-vi.mock('@abe-stack/security', () => ({
-  RateLimiter: vi.fn().mockImplementation(() => ({
-    check: vi.fn().mockResolvedValue({
-      allowed: true,
-      limit: 100,
-      remaining: 99,
-      resetMs: 60000,
+vi.mock('@abe-stack/security', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/security')>();
+  return {
+    ...actual,
+    RateLimiter: vi.fn().mockImplementation(function () {
+      return {
+        check: vi.fn().mockResolvedValue({
+          allowed: true,
+          limit: 100,
+          remaining: 99,
+          resetMs: 60000,
+        }),
+      };
     }),
-  })),
-}));
+  };
+});
 
 // NOTE: We don't mock @abe-stack/core/infrastructure/errors because vitest's module
 // mocking doesn't work reliably with vite-tsconfig-paths for workspaced packages.
@@ -128,14 +134,16 @@ describe('registerPlugins', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset RateLimiter to default mock
-    vi.mocked(RateLimiter).mockImplementation(() => ({
-      check: vi.fn().mockResolvedValue({
-        allowed: true,
-        limit: 100,
-        remaining: 99,
-        resetMs: 60000,
-      }),
-    }) as never);
+    vi.mocked(RateLimiter).mockImplementation(function () {
+      return {
+        check: vi.fn().mockResolvedValue({
+          allowed: true,
+          limit: 100,
+          remaining: 99,
+          resetMs: 60000,
+        }),
+      };
+    } as never);
     mockFastify = createMockFastify();
     mockConfig = createMockConfig();
   });
@@ -260,9 +268,9 @@ describe('registerPlugins', () => {
       vi.mocked(middleware.handlePreflight).mockReturnValueOnce(true);
 
       const mockCheck = vi.fn();
-      vi.mocked(RateLimiter).mockImplementationOnce(() => ({
-        check: mockCheck,
-      }) as never);
+      vi.mocked(RateLimiter).mockImplementationOnce(function () {
+        return { check: mockCheck };
+      } as never);
 
       registerPlugins(mockFastify, mockConfig);
 

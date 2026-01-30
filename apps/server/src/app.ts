@@ -1,6 +1,7 @@
 // apps/server/src/app.ts
 import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
 import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
+import { emailTemplates } from '@abe-stack/email';
 import { type AppContext, type IServiceContainer } from '@shared';
 
 import {
@@ -69,6 +70,7 @@ export class App implements IServiceContainer {
   public readonly write: WriteService;
   public readonly pubsub: SubscriptionManager;
   public readonly cache: CacheService;
+  public readonly emailTemplates: IServiceContainer['emailTemplates'];
 
   private _pgPubSub: PostgresPubSub | null = null;
   private _server: FastifyInstance | null = null;
@@ -139,7 +141,10 @@ export class App implements IServiceContainer {
         handlers: {},
       });
 
-    // 7. Cache
+    // 7. Email Templates (for auth package handlers)
+    this.emailTemplates = emailTemplates;
+
+    // 8. Cache
     this.cache =
       options.cache ??
       createCacheService({
@@ -147,7 +152,7 @@ export class App implements IServiceContainer {
         maxSize: this.config.cache.maxSize,
       });
 
-    // 8. Scaling Adapter
+    // 9. Scaling Adapter
     this.setupPubSub(connectionString);
   }
 
@@ -275,6 +280,7 @@ export class App implements IServiceContainer {
       write: this.write,
       pubsub: this.pubsub,
       cache: this.cache,
+      emailTemplates: this.emailTemplates,
       log: this.log,
     };
   }

@@ -3,61 +3,27 @@
  * Route Registration
  *
  * Uses the generic router pattern for DRY registration.
- * All routes are defined in their respective module route files.
- *
- * Note: Route maps and handlers are imported from local module directories
- * (not from @abe-stack/* packages) because the local modules use the server's
- * concrete AppContext type, while the packages use generic HandlerContext.
- * The local modules serve as the adapter layer bridging package logic to the
- * server's type system.
+ * Route maps are imported directly from @abe-stack/* packages.
+ * Only server-specific modules (admin, billing, system, users)
+ * use local imports.
  */
 
+import { authRoutes } from '@abe-stack/auth';
+import { notificationRoutes } from '@abe-stack/notifications';
+import { realtimeRoutes } from '@abe-stack/realtime';
 import { registerRouteMap } from '@/infrastructure/http/router';
 
 import { adminRoutes } from './admin/routes';
-import { authRoutes } from './auth/routes';
 import { billingRoutes, registerWebhookRoutes } from './billing';
-import { notificationRoutes } from './notifications/routes';
-import { realtimeRoutes } from './realtime/routes';
 import { systemRoutes } from './system/routes';
 import { userRoutes } from './users/routes';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 
-// Re-export modules
+// Re-export server-specific modules only
 export { handleAdminUnlock } from './admin';
-export {
-  createAuthGuard,
-  handleForgotPassword,
-  handleLogin,
-  handleLogout,
-  handleRefresh,
-  handleRegister,
-  handleResendVerification,
-  handleResetPassword,
-  handleVerifyEmail,
-  type ReplyWithCookies,
-  type RequestWithCookies,
-} from './auth';
-export {
-  handleGetPreferences,
-  handleGetVapidKey,
-  handleSendNotification,
-  handleSubscribe,
-  handleTestNotification,
-  handleUnsubscribe,
-  handleUpdatePreferences,
-  notificationRoutes,
-} from './notifications';
-export {
-  handleGetRecords,
-  handleWrite,
-  RecordNotFoundError,
-  registerRealtimeTable,
-  VersionConflictError,
-} from './realtime';
-export { handleMe } from './users';
+export { handleMe } from './users/handlers';
 
 // Generic route registration (Chet-stack pattern)
 export {
@@ -77,9 +43,9 @@ export {
 
 // Route definitions for external use
 export { adminRoutes } from './admin/routes';
-export { authRoutes } from './auth/routes';
-export { notificationRoutes as notificationRoutesConfig } from './notifications/routes';
-export { realtimeRoutes } from './realtime/routes';
+export { authRoutes } from '@abe-stack/auth';
+export { notificationRoutes as notificationRoutesConfig } from '@abe-stack/notifications';
+export { realtimeRoutes } from '@abe-stack/realtime';
 export { systemRoutes } from './system/routes';
 export { userRoutes } from './users/routes';
 

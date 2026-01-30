@@ -13,14 +13,14 @@
  */
 
 import { AccountLockedError, InvalidCredentialsError } from '@abe-stack/core';
-import { authenticateUser, refreshUserTokens, verifyEmail } from './service';
+import { authenticateUser, refreshUserTokens, verifyEmail } from '@abe-stack/auth/service';
 import {
     applyProgressiveDelay,
     getAccountLockoutStatus,
     getProgressiveDelay,
     isAccountLocked,
     logLoginAttempt,
-} from '@abe-stack/auth';
+} from '@abe-stack/auth/security';
 import { withTransaction } from '@abe-stack/db';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -40,7 +40,7 @@ vi.mock('@abe-stack/core', async () => {
   };
 });
 
-vi.mock('@abe-stack/auth', () => ({
+vi.mock('@abe-stack/auth/security', () => ({
   applyProgressiveDelay: vi.fn(),
   getAccountLockoutStatus: vi.fn(),
   getProgressiveDelay: vi.fn(),
@@ -74,7 +74,7 @@ vi.mock('@abe-stack/email', () => ({
   },
 }));
 
-vi.mock('./utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   createAccessToken: vi.fn().mockReturnValue('access-token'),
   createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
     accessToken,
@@ -321,7 +321,7 @@ describe('Account Lockout Expiration', () => {
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -404,7 +404,7 @@ describe('Parallel Login Requests', () => {
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -455,7 +455,7 @@ describe('Parallel Login Requests', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     // Alternate success/failure
     vi.mocked(verifyPasswordSafe)
       .mockResolvedValueOnce(true) // First succeeds
@@ -504,7 +504,7 @@ describe('Parallel Login Requests', () => {
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false);
 
     // Track failed attempts count
@@ -549,7 +549,7 @@ describe('Password Change Session Invalidation', () => {
     const repos = createMockRepos();
     const oldRefreshToken = 'old-refresh-token';
 
-    const { rotateRefreshToken } = await import('./utils');
+    const { rotateRefreshToken } = await import('@abe-stack/auth/utils');
 
     // After password reset, refresh token rotation should fail
     vi.mocked(rotateRefreshToken).mockResolvedValue(null);
@@ -586,7 +586,7 @@ describe('Password Change Session Invalidation', () => {
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -626,7 +626,7 @@ describe('Password Change Session Invalidation', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false); // Old password doesn't match new hash
 
     await expect(
@@ -659,7 +659,7 @@ describe('Login During Active Lockout', () => {
     ).rejects.toMatchObject({ name: 'AccountLockedError' });
 
     // Password verification should NOT be called when account is locked
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     expect(verifyPasswordSafe).not.toHaveBeenCalled();
   });
 
@@ -779,7 +779,7 @@ describe('Progressive Delay Timing', () => {
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -822,7 +822,7 @@ describe('Progressive Delay Timing', () => {
     });
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -873,7 +873,7 @@ describe('Lockout Counter Reset', () => {
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
@@ -912,7 +912,7 @@ describe('Lockout Counter Reset', () => {
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
 
     // After successful login, failed attempts counter should be reset
     // So even if we have more failed attempts, we start fresh
@@ -966,7 +966,7 @@ describe('Email Verification Auto-Login', () => {
     const repos = createMockRepos();
     const token = 'valid-verification-token';
 
-    const { hashPassword } = await import('./utils');
+    const { hashPassword } = await import('@abe-stack/auth/utils');
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
 
     const mockTokenRecord = {
@@ -1037,7 +1037,7 @@ describe('Timing-Safe Operations', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false);
 
     await expect(
@@ -1053,7 +1053,7 @@ describe('Timing-Safe Operations', () => {
     const repos = createMockRepos();
     const logger = createMockLogger();
 
-    const { verifyPasswordSafe } = await import('./utils');
+    const { verifyPasswordSafe } = await import('@abe-stack/auth/utils');
 
     // Mock timing-safe verification that takes same time regardless of user existence
     vi.mocked(verifyPasswordSafe).mockImplementation(async () => {
