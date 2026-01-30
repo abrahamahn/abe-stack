@@ -5,10 +5,10 @@
  * Manual WebSocket handling using ws directly. Replaces @fastify/websocket.
  */
 
+import { verifyToken } from '@abe-stack/auth';
 import { parseCookies } from '@abe-stack/core';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
 import { validateCsrfToken } from '@abe-stack/http';
-import { verifyToken } from '@abe-stack/auth';
 import { WebSocketServer, type WebSocket } from 'ws';
 
 /** Subscription key format: "table:id" */

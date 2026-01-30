@@ -6,12 +6,13 @@
  * All routes require authentication.
  */
 
-import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
 
 import { handleListUsers, handleMe } from './handlers';
 
 import type { CursorPaginatedResult, User } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
+
+import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
 
 // ============================================================================
 // Route Definitions

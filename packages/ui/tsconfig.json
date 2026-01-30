@@ -2,17 +2,35 @@
   "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": "./",
     "types": ["react", "react-dom", "vitest/globals", "@testing-library/jest-dom", "node"],
     "paths": {
+      "@abe-stack/contracts": [
+            "../contracts/src"
+      ],
+      "@abe-stack/contracts/*": [
+            "../contracts/src/*"
+      ],
       "@abe-stack/core": [
             "../core/src"
       ],
       "@abe-stack/core/*": [
             "../core/src/*"
+      ],
+      "@abe-stack/sdk": [
+            "../sdk/src"
+      ],
+      "@abe-stack/sdk/*": [
+            "../sdk/src/*"
+      ],
+      "@abe-stack/stores": [
+            "../stores/src"
+      ],
+      "@abe-stack/stores/*": [
+            "../stores/src/*"
       ],
       "@components": [
             "./src/components"
