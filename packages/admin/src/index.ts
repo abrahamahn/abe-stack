@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/index.ts
+// packages/admin/src/index.ts
 /**
  * Admin Module
  *

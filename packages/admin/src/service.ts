@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/service.ts
+// packages/admin/src/service.ts
 /**
  * Admin Service
  *

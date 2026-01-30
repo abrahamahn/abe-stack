@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/securityHandlers.ts
+// packages/admin/src/securityHandlers.ts
 /**
  * Security Handlers
  *
@@ -6,15 +6,17 @@
  * Thin layer that calls services and formats responses.
  */
 
+import { ERROR_MESSAGES } from '@abe-stack/auth';
+
 import {
     exportSecurityEvents,
     getSecurityEvent,
     getSecurityMetrics,
     listSecurityEvents,
     SecurityEventNotFoundError,
-} from '@admin/securityService';
-import { ERROR_MESSAGES, type AppContext } from '@shared';
+} from './securityService';
 
+import type { AdminAppContext } from './types';
 import type {
     SecurityEvent,
     SecurityEventsExportRequest,
@@ -30,12 +32,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 // ============================================================================
 
 export async function handleListSecurityEvents(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: SecurityEventsListRequest,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEventsListResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -61,12 +63,12 @@ export async function handleListSecurityEvents(
 // ============================================================================
 
 export async function handleGetSecurityEvent(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEvent | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -94,12 +96,12 @@ export async function handleGetSecurityEvent(
 // ============================================================================
 
 export async function handleGetSecurityMetrics(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityMetrics | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -129,12 +131,12 @@ export async function handleGetSecurityMetrics(
 // ============================================================================
 
 export async function handleExportSecurityEvents(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: SecurityEventsExportRequest,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEventsExportResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }

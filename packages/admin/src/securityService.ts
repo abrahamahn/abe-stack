@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/securityService.ts
+// packages/admin/src/securityService.ts
 /**
  * Security Service
  *
@@ -232,7 +232,7 @@ export async function getSecurityMetrics(
   );
 
   interface EventInfo { eventType: string; severity: string }
-  const events: EventInfo[] = rows.map((row) => ({
+  const events: EventInfo[] = rows.map((row: Record<string, unknown>) => ({
     eventType: row['event_type'] as string,
     severity: row['severity'] as string,
   }));

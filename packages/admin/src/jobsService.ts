@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/jobsService.ts
+// packages/admin/src/jobsService.ts
 /**
  * Jobs Service
  *

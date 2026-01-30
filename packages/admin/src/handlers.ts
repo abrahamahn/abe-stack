@@ -1,27 +1,24 @@
-// apps/server/src/modules/admin/handlers.ts
+// packages/admin/src/handlers.ts
 /**
  * Admin Handlers
  *
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { unlockUserAccount, UserNotFoundError } from '@admin/service';
-import {
-    ERROR_MESSAGES,
-    SUCCESS_MESSAGES,
-    type AppContext,
-    type RequestWithCookies,
-} from '@shared';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@abe-stack/auth';
 
+import { unlockUserAccount, UserNotFoundError } from './service';
+
+import type { AdminAppContext, AdminRequest } from './types';
 import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
 
 /**
  * Unlock a user account (admin only)
  */
 export async function handleAdminUnlock(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: UnlockAccountRequest,
-  request: RequestWithCookies,
+  request: AdminRequest,
 ): Promise<
   | { status: 200; body: UnlockAccountResponse }
   | { status: 401 | 403 | 404 | 500; body: { message: string } }

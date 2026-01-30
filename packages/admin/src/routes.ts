@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/routes.ts
+// packages/admin/src/routes.ts
 /**
  * Admin Routes
  *
@@ -23,7 +23,14 @@ import {
   type UnlockAccountResponse,
   type UpdatePlanRequest,
 } from '@abe-stack/core';
-
+import {
+  createRouteMap,
+  protectedRoute,
+  type BaseRouteDefinition,
+  type RouteHandler,
+  type RouteResult,
+  type ValidationSchema,
+} from '@abe-stack/http';
 
 import {
   handleAdminCreatePlan,
@@ -55,10 +62,37 @@ import {
   handleUpdateUser,
 } from './userHandlers';
 
-import type { AppContext, RequestWithCookies } from '@shared';
-import type { FastifyRequest } from 'fastify';
+import type { AdminAppContext, AdminRequest } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
-import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
+// ============================================================================
+// Admin Route Helper
+// ============================================================================
+
+/**
+ * Helper that wraps protectedRoute for admin-only routes.
+ *
+ * Admin handlers use `AdminAppContext` (a narrowed BaseContext) for type-safe
+ * access to db, repos, and config. The server's full AppContext structurally
+ * satisfies AdminAppContext, so the cast is safe at runtime.
+ */
+function adminProtectedRoute<TBody, TResult>(
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  handler: (
+    ctx: AdminAppContext,
+    body: TBody,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => Promise<RouteResult<TResult>>,
+  schema?: ValidationSchema<TBody>,
+): BaseRouteDefinition {
+  return protectedRoute<TBody, TResult>(
+    method,
+    handler as unknown as RouteHandler<TBody, TResult>,
+    'admin',
+    schema,
+  );
+}
 
 // ============================================================================
 // Route Definitions
@@ -70,28 +104,19 @@ export const adminRoutes = createRouteMap([
   // ============================================================================
 
   // List users with filtering and pagination
-  ['admin/users', protectedRoute('GET', handleListUsers, 'admin')],
+  ['admin/users', adminProtectedRoute('GET', handleListUsers)],
 
   // Get single user
-  ['admin/users/:id', protectedRoute('GET', handleGetUser, 'admin')],
+  ['admin/users/:id', adminProtectedRoute('GET', handleGetUser)],
 
   // Update user
-  [
-    'admin/users/:id/update',
-    protectedRoute('POST', handleUpdateUser, 'admin', adminUpdateUserRequestSchema),
-  ],
+  ['admin/users/:id/update', adminProtectedRoute('POST', handleUpdateUser, adminUpdateUserRequestSchema)],
 
   // Lock user account
-  [
-    'admin/users/:id/lock',
-    protectedRoute('POST', handleLockUser, 'admin', adminLockUserRequestSchema),
-  ],
+  ['admin/users/:id/lock', adminProtectedRoute('POST', handleLockUser, adminLockUserRequestSchema)],
 
   // Unlock user account
-  [
-    'admin/users/:id/unlock',
-    protectedRoute('POST', handleUnlockUser, 'admin', unlockAccountRequestSchema),
-  ],
+  ['admin/users/:id/unlock', adminProtectedRoute('POST', handleUnlockUser, unlockAccountRequestSchema)],
 
   // ============================================================================
   // Auth Admin Routes (legacy)
@@ -100,41 +125,46 @@ export const adminRoutes = createRouteMap([
   // Legacy unlock by email
   [
     'admin/auth/unlock',
-    protectedRoute<UnlockAccountRequest, UnlockAccountResponse | { message: string }>(
+    adminProtectedRoute<UnlockAccountRequest, UnlockAccountResponse | { message: string }>(
       'POST',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         body: UnlockAccountRequest,
-        req: RequestWithCookies,
+        req: FastifyRequest,
       ): Promise<RouteResult<UnlockAccountResponse | { message: string }>> => {
-        return handleAdminUnlock(ctx, body, req);
+        return handleAdminUnlock(ctx, body, req as unknown as AdminRequest);
       },
-      'admin',
       unlockAccountRequestSchema,
     ),
   ],
 
-  // Security audit routes
+  // ============================================================================
+  // Security Audit Routes
+  // ============================================================================
+
   [
     'admin/security/events',
-    protectedRoute('POST', handleListSecurityEvents, 'admin', securityEventsListRequestSchema),
+    adminProtectedRoute('POST', handleListSecurityEvents, securityEventsListRequestSchema),
   ],
 
-  ['admin/security/events/:id', protectedRoute('GET', handleGetSecurityEvent, 'admin')],
+  ['admin/security/events/:id', adminProtectedRoute('GET', handleGetSecurityEvent)],
 
-  ['admin/security/metrics', protectedRoute('GET', handleGetSecurityMetrics, 'admin')],
+  ['admin/security/metrics', adminProtectedRoute('GET', handleGetSecurityMetrics)],
 
   [
     'admin/security/export',
-    protectedRoute('POST', handleExportSecurityEvents, 'admin', securityEventsExportRequestSchema),
+    adminProtectedRoute('POST', handleExportSecurityEvents, securityEventsExportRequestSchema),
   ],
 
-  // Job monitoring routes
-  ['admin/jobs', protectedRoute('GET', handleListJobs, 'admin')],
-  ['admin/jobs/stats', protectedRoute('GET', handleGetQueueStats, 'admin')],
-  ['admin/jobs/:jobId', protectedRoute('GET', handleGetJobDetails, 'admin')],
-  ['admin/jobs/:jobId/retry', protectedRoute('POST', handleRetryJob, 'admin')],
-  ['admin/jobs/:jobId/cancel', protectedRoute('POST', handleCancelJob, 'admin')],
+  // ============================================================================
+  // Job Monitoring Routes
+  // ============================================================================
+
+  ['admin/jobs', adminProtectedRoute('GET', handleListJobs)],
+  ['admin/jobs/stats', adminProtectedRoute('GET', handleGetQueueStats)],
+  ['admin/jobs/:jobId', adminProtectedRoute('GET', handleGetJobDetails)],
+  ['admin/jobs/:jobId/retry', adminProtectedRoute('POST', handleRetryJob)],
+  ['admin/jobs/:jobId/cancel', adminProtectedRoute('POST', handleCancelJob)],
 
   // ============================================================================
   // Billing Admin Routes
@@ -143,32 +173,30 @@ export const adminRoutes = createRouteMap([
   // List all plans (including inactive)
   [
     'admin/billing/plans',
-    protectedRoute(
+    adminProtectedRoute(
       'GET',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         _body: undefined,
         req: FastifyRequest,
       ): Promise<RouteResult<AdminPlansListResponse | { message: string }>> => {
-        return handleAdminListPlans(ctx, _body, req as unknown as RequestWithCookies);
+        return handleAdminListPlans(ctx, _body, req as unknown as AdminRequest);
       },
-      'admin',
     ),
   ],
 
   // Create new plan
   [
     'admin/billing/plans/create',
-    protectedRoute(
+    adminProtectedRoute<CreatePlanRequest, AdminPlanResponse | { message: string }>(
       'POST',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         body: CreatePlanRequest,
         req: FastifyRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
-        return handleAdminCreatePlan(ctx, body, req as unknown as RequestWithCookies);
+        return handleAdminCreatePlan(ctx, body, req as unknown as AdminRequest);
       },
-      'admin',
       createPlanRequestSchema,
     ),
   ],
@@ -176,36 +204,34 @@ export const adminRoutes = createRouteMap([
   // Get single plan
   [
     'admin/billing/plans/:id',
-    protectedRoute(
+    adminProtectedRoute(
       'GET',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         _body: undefined,
         req: FastifyRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
-        return handleAdminGetPlan(ctx, _body, req as unknown as RequestWithCookies, {
+        return handleAdminGetPlan(ctx, _body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
         });
       },
-      'admin',
     ),
   ],
 
   // Update plan
   [
     'admin/billing/plans/:id/update',
-    protectedRoute(
+    adminProtectedRoute<UpdatePlanRequest, AdminPlanResponse | { message: string }>(
       'POST',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         body: UpdatePlanRequest,
         req: FastifyRequest,
       ): Promise<RouteResult<AdminPlanResponse | { message: string }>> => {
-        return handleAdminUpdatePlan(ctx, body, req as unknown as RequestWithCookies, {
+        return handleAdminUpdatePlan(ctx, body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
         });
       },
-      'admin',
       updatePlanRequestSchema,
     ),
   ],
@@ -213,36 +239,34 @@ export const adminRoutes = createRouteMap([
   // Sync plan to Stripe
   [
     'admin/billing/plans/:id/sync-stripe',
-    protectedRoute(
+    adminProtectedRoute(
       'POST',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         _body: undefined,
         req: FastifyRequest,
       ): Promise<RouteResult<SyncStripeResponse | { message: string }>> => {
-        return handleAdminSyncPlanToStripe(ctx, _body, req as unknown as RequestWithCookies, {
+        return handleAdminSyncPlanToStripe(ctx, _body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
         });
       },
-      'admin',
     ),
   ],
 
   // Deactivate plan
   [
     'admin/billing/plans/:id/deactivate',
-    protectedRoute(
+    adminProtectedRoute(
       'POST',
       async (
-        ctx: AppContext,
+        ctx: AdminAppContext,
         _body: undefined,
         req: FastifyRequest,
       ): Promise<RouteResult<SubscriptionActionResponse | { message: string }>> => {
-        return handleAdminDeactivatePlan(ctx, _body, req as unknown as RequestWithCookies, {
+        return handleAdminDeactivatePlan(ctx, _body, req as unknown as AdminRequest, {
           id: (req.params as { id: string }).id,
         });
       },
-      'admin',
     ),
   ],
 ]);

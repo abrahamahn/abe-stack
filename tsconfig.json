@@ -103,6 +103,9 @@
     },
     {
       "path": "./packages/realtime"
+    },
+    {
+      "path": "./packages/admin"
     }
   ]
 }

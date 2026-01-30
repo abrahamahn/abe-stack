@@ -12,6 +12,12 @@
       "@/*": [
             "./src/*"
       ],
+      "@abe-stack/admin": [
+            "../../packages/admin/src/index.ts"
+      ],
+      "@abe-stack/admin/*": [
+            "../../packages/admin/src/*"
+      ],
       "@abe-stack/auth": [
             "../../packages/auth/src/index.ts"
       ],
@@ -105,18 +111,6 @@
       "@abe-stack/users/*": [
             "../../packages/users/src/*"
       ],
-      "@admin": [
-            "./src/modules/admin"
-      ],
-      "@admin/*": [
-            "./src/modules/admin/*"
-      ],
-      "@billing": [
-            "./src/modules/billing"
-      ],
-      "@billing/*": [
-            "./src/modules/billing/*"
-      ],
       "@config": [
             "./src/config"
       ],
@@ -183,12 +177,6 @@
       "@types/*": [
             "./src/types/*"
       ],
-      "@users": [
-            "./src/modules/users"
-      ],
-      "@users/*": [
-            "./src/modules/users/*"
-      ],
       "@utils": [
             "./src/utils"
       ],
@@ -200,6 +188,7 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
+    { "path": "../../packages/admin" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/billing" },
     { "path": "../../packages/cache" },

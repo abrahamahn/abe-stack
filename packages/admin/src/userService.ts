@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/userService.ts
+// packages/admin/src/userService.ts
 /**
  * Admin User Service
  *
