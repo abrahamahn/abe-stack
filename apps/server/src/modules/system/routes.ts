@@ -1,6 +1,4 @@
 // apps/server/src/modules/system/routes.ts
-import { createRouteMap, protectedRoute, publicRoute } from '@/infrastructure/http/router';
-
 import {
   handleApiInfo,
   handleHealth,
@@ -10,6 +8,9 @@ import {
   handleRoot,
   handleSystemStatus,
 } from './handlers';
+
+import { createRouteMap, protectedRoute, publicRoute } from '@/infrastructure/http/router';
+
 
 export const systemRoutes = createRouteMap([
   // Root Routes

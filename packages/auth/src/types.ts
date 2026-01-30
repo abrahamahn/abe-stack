@@ -59,9 +59,9 @@ export interface AuthEmailOptions {
   /** Email subject line */
   readonly subject: string;
   /** HTML body content */
-  readonly html?: string;
+  readonly html?: string | undefined;
   /** Plain text body content */
-  readonly text?: string;
+  readonly text?: string | undefined;
 }
 
 /**
@@ -91,8 +91,8 @@ export interface AuthEmailService {
  */
 export interface EmailTemplateResult {
   readonly subject: string;
-  readonly html?: string;
-  readonly text?: string;
+  readonly html?: string | undefined;
+  readonly text?: string | undefined;
   readonly to: string;
 }
 

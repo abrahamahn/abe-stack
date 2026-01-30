@@ -12,13 +12,14 @@
  */
 
 import { createConsoleLogger } from '@abe-stack/core';
-import { registerPlugins } from '@/infrastructure/http';
 import fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';
 import type { DbClient } from '@/infrastructure/index';
 import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
 import type { FastifyInstance } from 'fastify';
+
+import { registerPlugins } from '@/infrastructure/http';
 
 // ============================================================================
 // Types

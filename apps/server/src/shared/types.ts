@@ -1,6 +1,7 @@
 // apps/server/src/shared/types.ts
 
 import type { QueueServer, ServerSearchProvider, WriteService } from '@/infrastructure/index';
+import type { AuthEmailTemplates } from '@abe-stack/auth';
 import type { BaseContext } from '@abe-stack/contracts';
 import type {
   AppConfig,
@@ -12,7 +13,6 @@ import type {
   UserRole as CoreUserRole,
 } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { AuthEmailTemplates } from '@abe-stack/auth';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================

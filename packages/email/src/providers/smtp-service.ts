@@ -7,8 +7,8 @@
 
 import { SmtpClient } from '../smtp';
 
-import type { EmailOptions, EmailResult, EmailService } from '../types';
 import type { SmtpConfig, SmtpMessage } from '../smtp';
+import type { EmailOptions, EmailResult, EmailService } from '../types';
 import type { EmailConfig } from '@abe-stack/core/config';
 
 
