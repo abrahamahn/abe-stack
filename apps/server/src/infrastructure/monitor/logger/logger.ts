@@ -7,9 +7,9 @@
  * functions live here; pure utilities are in @abe-stack/core.
  */
 
+import type { LogData, Logger, RequestContext } from './types';
 import type { FastifyBaseLogger } from 'fastify';
 
-import type { LogData, Logger, RequestContext } from './types';
 
 // Re-export pure functions from core (preserved for backward compat)
 export {

@@ -1,4 +1,5 @@
 // packages/sdk/src/realtime/WebsocketPubsubClient.test.ts
+/** @vitest-environment jsdom */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import {

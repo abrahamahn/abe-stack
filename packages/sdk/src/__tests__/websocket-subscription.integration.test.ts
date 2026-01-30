@@ -1,4 +1,5 @@
 // packages/sdk/src/__tests__/integration/websocket-subscription.integration.test.ts
+/** @vitest-environment jsdom */
 /**
  * Integration tests for WebsocketPubsubClient + SubscriptionCache working together.
  *

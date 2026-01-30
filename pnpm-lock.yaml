@@ -123,6 +123,9 @@ importers:
       '@abe-stack/cache':
         specifier: workspace:*
         version: link:../../packages/cache
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../../packages/core

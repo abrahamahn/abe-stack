@@ -2,7 +2,7 @@
   "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "baseUrl": "./",
     "types": ["node", "vitest/globals"],
     "paths": {

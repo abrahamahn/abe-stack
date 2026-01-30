@@ -5,11 +5,11 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { ERROR_MESSAGES, type AppContext, type RequestWithCookies } from '@shared';
 import { getUserById, listUsers } from '@abe-stack/users';
+import { ERROR_MESSAGES, type AppContext, type RequestWithCookies } from '@shared';
 
-import type { CursorPaginatedResult, User } from '@abe-stack/core';
 import type { PaginationRequest } from '@/infrastructure/http/pagination';
+import type { CursorPaginatedResult, User } from '@abe-stack/core';
 
 /**
  * Get current authenticated user's profile

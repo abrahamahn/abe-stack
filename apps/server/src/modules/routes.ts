@@ -11,7 +11,7 @@
 import { authRoutes } from '@abe-stack/auth';
 import { notificationRoutes } from '@abe-stack/notifications';
 import { realtimeRoutes } from '@abe-stack/realtime';
-import { registerRouteMap } from '@/infrastructure/http/router';
+
 
 import { adminRoutes } from './admin/routes';
 import { billingRoutes, registerWebhookRoutes } from './billing';
@@ -20,6 +20,8 @@ import { userRoutes } from './users/routes';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
+
+import { registerRouteMap } from '@/infrastructure/http/router';
 
 // Re-export server-specific modules only
 export { handleAdminUnlock } from './admin';

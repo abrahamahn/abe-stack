@@ -6,10 +6,10 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
+import { unlockAccount as infraUnlockAccount } from '@abe-stack/auth';
 import { UserNotFoundError } from '@abe-stack/core';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
 
-import { unlockAccount as infraUnlockAccount } from '@abe-stack/auth';
 
 import type { DbClient } from '@abe-stack/db';
 

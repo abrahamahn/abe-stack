@@ -2,14 +2,21 @@
   "extends": "../../.config/tsconfig.node.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "baseUrl": "./",
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@abe-stack/core": ["../core/src"],
+      "@abe-stack/core/*": ["../core/src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.media.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+  "references": [
+    {
+      "path": "../core"
+    }
+  ]
 }

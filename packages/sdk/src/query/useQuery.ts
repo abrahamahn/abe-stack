@@ -243,6 +243,7 @@ export function useQuery<TData = unknown, TError = Error>(
   // Derive computed values
   // Use explicit undefined check to allow null values from queryFn
   // Only fall back to placeholderData when data is undefined, not when it's null
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- intentional: ?? would coalesce null, but we only want to fall back on undefined
   const data = state?.data !== undefined ? state.data : placeholderData;
   const error = (state?.error as TError | null) ?? null;
   const status = state?.status ?? 'pending';
