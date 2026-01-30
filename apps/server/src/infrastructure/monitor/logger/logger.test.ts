@@ -1,15 +1,13 @@
 // apps/server/src/infrastructure/monitor/logger/logger.test.ts
+/**
+ * Logger Service Tests
+ *
+ * Tests for the Fastify-specific logger wrappers (createLogger, createRequestLogger).
+ * Pure utility tests (correlation ID, log levels, shouldLog) are in packages/core.
+ */
 import { describe, expect, test, vi, type Mock } from 'vitest';
 
-import {
-    createLogger,
-    createRequestContext,
-    createRequestLogger,
-    generateCorrelationId,
-    getOrCreateCorrelationId,
-    LOG_LEVELS,
-    shouldLog,
-} from './logger';
+import { createLogger, createRequestLogger } from './logger';
 
 interface MockBaseLogger {
   trace: Mock;
@@ -106,94 +104,39 @@ describe('Logger', () => {
       expect(baseLogger.error).toHaveBeenCalled();
       expect(baseLogger.fatal).toHaveBeenCalled();
     });
-  });
 
-  describe('generateCorrelationId', () => {
-    test('should generate unique UUID', () => {
-      const id1 = generateCorrelationId();
-      const id2 = generateCorrelationId();
+    test('should merge additional data with Error object', () => {
+      const baseLogger = createMockBaseLogger();
+      const logger = createLogger(baseLogger as never);
+      const error = new Error('Failure');
 
-      expect(id1).toMatch(/^[0-9a-f-]{36}$/);
-      expect(id2).toMatch(/^[0-9a-f-]{36}$/);
-      expect(id1).not.toBe(id2);
-    });
-  });
+      logger.error(error, { requestId: 'req-1' });
 
-  describe('getOrCreateCorrelationId', () => {
-    test('should use x-correlation-id header if present', () => {
-      const headers = { 'x-correlation-id': 'existing-id' };
-      const result = getOrCreateCorrelationId(headers);
-
-      expect(result).toBe('existing-id');
-    });
-
-    test('should use x-request-id header if present', () => {
-      const headers = { 'x-request-id': 'request-id' };
-      const result = getOrCreateCorrelationId(headers);
-
-      expect(result).toBe('request-id');
-    });
-
-    test('should extract trace-id from traceparent header', () => {
-      const headers = { traceparent: '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01' };
-      const result = getOrCreateCorrelationId(headers);
-
-      expect(result).toBe('0af7651916cd43dd8448eb211c80319c');
-    });
-
-    test('should generate new ID if no header present', () => {
-      const headers = {};
-      const result = getOrCreateCorrelationId(headers);
-
-      expect(result).toMatch(/^[0-9a-f-]{36}$/);
-    });
-
-    test('should prioritize x-correlation-id over x-request-id', () => {
-      const headers = {
-        'x-correlation-id': 'correlation-id',
-        'x-request-id': 'request-id',
-      };
-      const result = getOrCreateCorrelationId(headers);
-
-      expect(result).toBe('correlation-id');
-    });
-  });
-
-  describe('createRequestContext', () => {
-    test('should create context with all fields', () => {
-      const context = createRequestContext(
-        'correlation-123',
-        {
-          id: 'req-456',
-          method: 'POST',
-          url: '/api/users',
-          ip: '192.168.1.1',
-          headers: { 'user-agent': 'TestAgent/1.0' },
-        },
-        'user-789',
+      expect(baseLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Failure',
+          errorName: 'Error',
+          requestId: 'req-1',
+        }),
+        'Failure',
       );
-
-      expect(context).toEqual({
-        correlationId: 'correlation-123',
-        requestId: 'req-456',
-        method: 'POST',
-        path: '/api/users',
-        ip: '192.168.1.1',
-        userAgent: 'TestAgent/1.0',
-        userId: 'user-789',
-      });
     });
 
-    test('should handle missing user agent', () => {
-      const context = createRequestContext('correlation-123', {
-        id: 'req-456',
-        method: 'GET',
-        url: '/health',
-        ip: '127.0.0.1',
-        headers: {},
-      });
+    test('should handle fatal with Error object', () => {
+      const baseLogger = createMockBaseLogger();
+      const logger = createLogger(baseLogger as never);
+      const error = new Error('Critical');
 
-      expect(context.userAgent).toBeUndefined();
+      logger.fatal(error, { component: 'db' });
+
+      expect(baseLogger.fatal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Critical',
+          errorName: 'Error',
+          component: 'db',
+        }),
+        'Critical',
+      );
     });
   });
 
@@ -219,29 +162,24 @@ describe('Logger', () => {
         'Test message',
       );
     });
-  });
 
-  describe('shouldLog', () => {
-    test('should return true when message level is higher or equal', () => {
-      expect(shouldLog('error', 'info')).toBe(true);
-      expect(shouldLog('warn', 'warn')).toBe(true);
-      expect(shouldLog('fatal', 'trace')).toBe(true);
-    });
+    test('should create logger that supports child creation', () => {
+      const baseLogger = createMockBaseLogger();
+      const childBaseLogger = createMockBaseLogger();
+      baseLogger.child.mockReturnValue(childBaseLogger);
 
-    test('should return false when message level is lower', () => {
-      expect(shouldLog('debug', 'info')).toBe(false);
-      expect(shouldLog('trace', 'warn')).toBe(false);
-      expect(shouldLog('info', 'error')).toBe(false);
-    });
-  });
+      const logger = createRequestLogger(baseLogger as never, {
+        correlationId: 'corr-123',
+        requestId: 'req-456',
+        method: 'GET',
+        path: '/test',
+        ip: '127.0.0.1',
+      });
 
-  describe('LOG_LEVELS', () => {
-    test('should have correct ordering', () => {
-      expect(LOG_LEVELS.trace).toBeLessThan(LOG_LEVELS.debug);
-      expect(LOG_LEVELS.debug).toBeLessThan(LOG_LEVELS.info);
-      expect(LOG_LEVELS.info).toBeLessThan(LOG_LEVELS.warn);
-      expect(LOG_LEVELS.warn).toBeLessThan(LOG_LEVELS.error);
-      expect(LOG_LEVELS.error).toBeLessThan(LOG_LEVELS.fatal);
+      const childLogger = logger.child({ module: 'auth' });
+      childLogger.info('Child message');
+
+      expect(baseLogger.child).toHaveBeenCalledWith({ module: 'auth' });
     });
   });
 });

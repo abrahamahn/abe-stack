@@ -6,7 +6,7 @@
  * reliable media processing with automatic failure recovery.
  */
 
-import type { Logger } from '@monitor/logger';
+import type { Logger } from '@abe-stack/core';
 
 export interface RetryOptions {
   maxRetries: number;

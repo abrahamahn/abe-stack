@@ -1,0 +1,34 @@
+{
+  "extends": "../../.config/tsconfig.node.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
+    "paths": {
+      "@abe-stack/core": ["../../packages/core/src/index.ts"],
+      "@abe-stack/core/*": ["../../packages/core/src/*"],
+      "@abe-stack/db": ["../../packages/db/src/index.ts"],
+      "@abe-stack/db/*": ["../../packages/db/src/*"],
+      "@abe-stack/http": ["../../packages/http/src/index.ts"],
+      "@abe-stack/http/*": ["../../packages/http/src/*"],
+      "@abe-stack/auth": ["../../packages/auth/src/index.ts"],
+      "@abe-stack/auth/*": ["../../packages/auth/src/*"],
+      "@abe-stack/storage": ["../../packages/storage/src/index.ts"],
+      "@abe-stack/storage/*": ["../../packages/storage/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/db" },
+    { "path": "../../packages/http" },
+    { "path": "../../packages/auth" },
+    { "path": "../../packages/storage" }
+  ]
+}

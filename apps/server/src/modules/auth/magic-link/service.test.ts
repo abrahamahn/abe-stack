@@ -12,7 +12,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
-import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index';
+import type { DbClient, Repositories } from '@abe-stack/db';
+import type { EmailService } from '@abe-stack/email';
 import type { AuthConfig } from '@/config';
 import type { MagicLinkToken, RawDb, User } from '@abe-stack/db';
 
@@ -57,19 +58,20 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-vi.mock('@/infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@/infrastructure')>(
-    '@/infrastructure',
-  );
+vi.mock('@abe-stack/email', () => ({
+  emailTemplates: {
+    magicLink: vi.fn((url: string, expiryMinutes: number) => ({
+      subject: 'Your Magic Link',
+      text: `Click here: ${url}. Expires in ${expiryMinutes} minutes.`,
+      html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
+    })),
+  },
+}));
+
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
   return {
     ...actual,
-    emailTemplates: {
-      magicLink: vi.fn((url: string, expiryMinutes: number) => ({
-        subject: 'Your Magic Link',
-        text: `Click here: ${url}. Expires in ${expiryMinutes} minutes.`,
-        html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
-      })),
-    },
     withTransaction: vi.fn(async (_db: DbClient, callback: TransactionCallback) => {
       // Mock transaction executor
       const mockTx = createMockRawDb();

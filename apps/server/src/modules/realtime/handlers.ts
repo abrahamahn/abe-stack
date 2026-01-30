@@ -19,7 +19,7 @@ import {
 } from './service';
 
 import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
-import type { RouteResult } from '@http/router';
+import type { RouteResult } from '@/infrastructure/http/router';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================

@@ -1,8 +1,7 @@
 // packages/core/src/infrastructure/logger/console.test.ts
-/* eslint-disable no-console */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createConsoleLogger, LOG_LEVELS, type LogLevel } from './console';
+import { CONSOLE_LOG_LEVELS, createConsoleLogger, type ConsoleLogLevel } from './console';
 
 describe('Console Logger', () => {
   beforeEach(() => {
@@ -23,7 +22,15 @@ describe('Console Logger', () => {
     });
 
     it('should accept all log levels', () => {
-      const levels: LogLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'];
+      const levels: ConsoleLogLevel[] = [
+        'trace',
+        'debug',
+        'info',
+        'warn',
+        'error',
+        'fatal',
+        'silent',
+      ];
 
       for (const level of levels) {
         const logger = createConsoleLogger(level);
@@ -40,7 +47,7 @@ describe('Console Logger', () => {
       logger.stream.write(logData);
 
       expect(process.stdout.write).toHaveBeenCalled();
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('INFO');
       expect(output).toContain('Test message');
       expect(output).toContain('server:');
@@ -57,7 +64,7 @@ describe('Console Logger', () => {
 
       logger.stream.write(logData);
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('userId=123');
       expect(output).toContain('action=login');
     });
@@ -77,7 +84,7 @@ describe('Console Logger', () => {
       for (const { level, expected } of testCases) {
         vi.clearAllMocks();
         logger.stream.write(JSON.stringify({ level, msg: 'test' }));
-        const output = (process.stdout.write as any).mock.calls[0][0];
+        const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
         expect(output).toContain(expected);
       }
     });
@@ -86,7 +93,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'test' }));
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       // Should have timestamp format [HH:MM:SS]
       expect(output).toMatch(/\[\d{2}:\d{2}:\d{2}\]/);
     });
@@ -105,7 +112,7 @@ describe('Console Logger', () => {
 
       logger.stream.write(logData);
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('customField=value');
       expect(output).not.toContain('time=');
       expect(output).not.toContain('pid=');
@@ -125,7 +132,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('text="hello world"');
     });
 
@@ -139,7 +146,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('status=active');
     });
 
@@ -154,7 +161,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('count=42');
       expect(output).toContain('enabled=true');
     });
@@ -169,7 +176,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('nullValue=null');
     });
 
@@ -183,7 +190,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('data=');
       expect(output).toContain('"id":1');
     });
@@ -200,7 +207,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('...');
       // Output should be much shorter than the full object
       const fullJsonLength = JSON.stringify(longObject).length;
@@ -218,7 +225,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('Test error');
     });
   });
@@ -244,7 +251,7 @@ describe('Console Logger', () => {
       logger.stream.write(JSON.stringify({ level: 30 }));
 
       expect(process.stdout.write).toHaveBeenCalled();
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('INFO');
     });
 
@@ -253,7 +260,7 @@ describe('Console Logger', () => {
       logger.stream.write(JSON.stringify({ msg: 'test' }));
 
       expect(process.stdout.write).toHaveBeenCalled();
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('INFO'); // Defaults to INFO (level 30)
     });
 
@@ -268,21 +275,21 @@ describe('Console Logger', () => {
         }),
       );
 
-      const output = (process.stdout.write as any).mock.calls[0][0];
+      const output = vi.mocked(process.stdout.write).mock.calls[0][0] as string;
       expect(output).toContain('defined=value');
       expect(output).not.toContain('undefined');
     });
   });
 
-  describe('LOG_LEVELS constant', () => {
+  describe('CONSOLE_LOG_LEVELS constant', () => {
     it('should have correct level values', () => {
-      expect(LOG_LEVELS.trace).toBe(10);
-      expect(LOG_LEVELS.debug).toBe(20);
-      expect(LOG_LEVELS.info).toBe(30);
-      expect(LOG_LEVELS.warn).toBe(40);
-      expect(LOG_LEVELS.error).toBe(50);
-      expect(LOG_LEVELS.fatal).toBe(60);
-      expect(LOG_LEVELS.silent).toBe(100);
+      expect(CONSOLE_LOG_LEVELS.trace).toBe(10);
+      expect(CONSOLE_LOG_LEVELS.debug).toBe(20);
+      expect(CONSOLE_LOG_LEVELS.info).toBe(30);
+      expect(CONSOLE_LOG_LEVELS.warn).toBe(40);
+      expect(CONSOLE_LOG_LEVELS.error).toBe(50);
+      expect(CONSOLE_LOG_LEVELS.fatal).toBe(60);
+      expect(CONSOLE_LOG_LEVELS.silent).toBe(100);
     });
   });
 });

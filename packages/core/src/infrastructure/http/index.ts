@@ -2,7 +2,8 @@
 /**
  * HTTP Utilities
  *
- * Cookie parsing and HTTP-related utilities.
+ * Cookie parsing, HTTP types, and framework-agnostic HTTP utilities.
  */
 
 export { parseCookies } from './cookie';
+export type { RequestInfo, RouteResult, ValidationSchema } from './types';

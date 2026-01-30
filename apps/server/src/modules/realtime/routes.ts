@@ -7,7 +7,7 @@
  */
 
 import { getRecordsRequestSchema, transactionSchema } from '@abe-stack/core';
-import { createRouteMap, protectedRoute, type RouteResult } from '@http/router';
+import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
 
 import {
   handleGetRecords,

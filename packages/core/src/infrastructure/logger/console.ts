@@ -6,20 +6,40 @@
  * Produces compact single-line logs similar to "server: ..." style.
  */
 
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'silent';
+import type { LogLevel } from './types';
 
-export interface LogData {
+/**
+ * Console-specific log level that extends the base LogLevel
+ * with a 'silent' option for suppressing all output.
+ */
+export type ConsoleLogLevel = LogLevel | 'silent';
+
+/**
+ * Structured log data used internally by the console logger's write function.
+ */
+interface LogData {
   [key: string]: unknown;
 }
 
+/**
+ * Configuration for the console logger stream.
+ *
+ * @property level - The minimum log level to output (includes 'silent')
+ * @property stream - A writable stream that receives formatted log lines
+ */
 export interface ConsoleLoggerConfig {
-  level: LogLevel;
+  level: ConsoleLogLevel;
   stream: {
     write: (chunk: string) => void;
   };
 }
 
-export const LOG_LEVELS: Record<LogLevel, number> = {
+/**
+ * Extended log levels for the console logger, including 'silent' (severity 100).
+ * Use this when you need the console-specific levels that include 'silent'.
+ * For standard log levels without 'silent', use `LOG_LEVELS` from `./levels`.
+ */
+export const CONSOLE_LOG_LEVELS: Record<ConsoleLogLevel, number> = {
   trace: 10,
   debug: 20,
   info: 30,
@@ -29,10 +49,23 @@ export const LOG_LEVELS: Record<LogLevel, number> = {
   silent: 100,
 };
 
+/**
+ * Format the current time as HH:MM:SS.
+ *
+ * @returns Formatted timestamp string
+ */
 function formatTimestamp(): string {
   return new Date().toISOString().slice(11, 19);
 }
 
+/**
+ * Format a single value for log output.
+ * Strings with spaces are JSON-quoted, primitives are stringified,
+ * objects are JSON-serialized (truncated at 200 chars).
+ *
+ * @param value - The value to format
+ * @returns Formatted string representation
+ */
 function formatValue(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
@@ -53,6 +86,14 @@ function formatValue(value: unknown): string {
   }
 }
 
+/**
+ * Format structured log data as key=value pairs.
+ * Filters out undefined values and internal pino fields
+ * (msg, level, time, pid, hostname, v).
+ *
+ * @param data - Optional log data to format
+ * @returns Formatted key=value string, or empty string if no data
+ */
 function formatData(data?: LogData): string {
   if (data === undefined) return '';
   const entries = Object.entries(data)
@@ -62,6 +103,12 @@ function formatData(data?: LogData): string {
   return entries.map(([key, value]) => `${key}=${formatValue(value)}`).join(' ');
 }
 
+/**
+ * Convert a numeric pino log level to a string label.
+ *
+ * @param level - Numeric log level (10-60)
+ * @returns The string label for the level
+ */
 function levelLabel(level: number): LogLevel {
   if (level >= 60) return 'fatal';
   if (level >= 50) return 'error';
@@ -71,7 +118,22 @@ function levelLabel(level: number): LogLevel {
   return 'trace';
 }
 
-export function createConsoleLogger(level: LogLevel): ConsoleLoggerConfig {
+/**
+ * Create a console logger configuration for pino.
+ * The returned config provides a custom stream that formats pino's
+ * JSON output into compact, human-readable single-line logs.
+ *
+ * @param level - The minimum log level to configure
+ * @returns A ConsoleLoggerConfig with level and formatted stream
+ *
+ * @example
+ * ```typescript
+ * const loggerConfig = createConsoleLogger('info');
+ * // Use with pino/Fastify:
+ * // const server = fastify({ logger: { level: loggerConfig.level, stream: loggerConfig.stream } });
+ * ```
+ */
+export function createConsoleLogger(level: ConsoleLogLevel): ConsoleLoggerConfig {
   return {
     level,
     stream: {

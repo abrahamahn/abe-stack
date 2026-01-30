@@ -38,7 +38,7 @@ import type {
     UpdatePreferencesRequest,
 } from '@abe-stack/core';
 
-import { type DbClient, type QuietHoursConfig, type TypePreferences } from '@/infrastructure';
+import type { DbClient, QuietHoursConfig, TypePreferences } from '@abe-stack/db';
 
 
 // ============================================================================

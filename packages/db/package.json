@@ -39,6 +39,7 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@abe-stack/core": "workspace:*",
     "postgres": "^3.4.8"
   }
 }

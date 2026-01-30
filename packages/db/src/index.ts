@@ -377,3 +377,62 @@ export {
   updateUserWithVersion,
   withTransaction,
 } from './utils/index';
+
+// Testing: JSON Database (development/testing only)
+export {
+  createJsonDbClient,
+  JsonDatabase,
+  JsonDbClient,
+  type JsonDatabaseConfig,
+} from './testing/index';
+
+// Database configuration
+export {
+  buildConfigConnectionString,
+  getSafeConnectionString,
+  isJsonDatabase,
+  isPostgres,
+  loadDatabaseConfig,
+} from './config/index';
+
+// Scripts (CLI database management)
+export {
+  bootstrapAdmin,
+  getSchemaStatements,
+  pushSchema,
+  seed,
+  TEST_USERS,
+  type PasswordHasher,
+  type SeedUser,
+} from './scripts/index';
+
+// Search (SQL + Elasticsearch providers and factory)
+export {
+  createElasticsearchProvider,
+  createSqlSearchProvider,
+  ElasticsearchProvider,
+  getSearchProviderFactory,
+  resetSearchProviderFactory,
+  SearchProviderFactory,
+  SqlSearchProvider,
+  type ElasticsearchProviderConfig,
+  type ElasticsearchProviderOptions,
+  type IndexHint,
+  type ProviderOptions,
+  type SearchContext,
+  type SearchMetrics,
+  type SearchProviderConfig,
+  type SearchProviderFactoryOptions,
+  type SearchProviderType,
+  type SearchResultWithMetrics,
+  type ServerSearchProvider,
+  type SqlColumnMapping,
+  type SqlCursorData,
+  type SqlFilterResult,
+  type SqlOperatorMap,
+  type SqlOperatorTranslator,
+  type SqlQueryOptions,
+  type SqlSearchProviderConfig,
+  type SqlSearchProviderOptions,
+  type SqlTableConfig,
+} from './search/index';

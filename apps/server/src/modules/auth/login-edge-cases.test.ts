@@ -20,13 +20,13 @@ import {
     getProgressiveDelay,
     isAccountLocked,
     logLoginAttempt,
-    withTransaction,
-} from '../../infrastructure';
+} from '@abe-stack/auth';
+import { withTransaction } from '@abe-stack/db';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@/config/index';
-import type { RawDb } from '@abe-stack/db';
-import type { Logger, Repositories } from '../../infrastructure';
+import type { RawDb, Repositories } from '@abe-stack/db';
+import type { Logger } from '../../infrastructure';
 
 // ============================================================================
 // Mock Dependencies
@@ -40,14 +40,24 @@ vi.mock('@abe-stack/core', async () => {
   };
 });
 
-vi.mock('../../infrastructure', () => ({
+vi.mock('@abe-stack/auth', () => ({
   applyProgressiveDelay: vi.fn(),
   getAccountLockoutStatus: vi.fn(),
   getProgressiveDelay: vi.fn(),
   isAccountLocked: vi.fn(),
   logAccountLockedEvent: vi.fn(),
   logLoginAttempt: vi.fn(),
-  withTransaction: vi.fn((db, callback) => callback(db)),
+}));
+
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
+  return {
+    ...actual,
+    withTransaction: vi.fn((db, callback) => callback(db)),
+  };
+});
+
+vi.mock('@abe-stack/email', () => ({
   emailTemplates: {
     emailVerification: vi.fn((url: string) => ({
       to: '',

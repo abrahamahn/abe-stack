@@ -23,9 +23,8 @@ const { mockGetUserById, mockListUsers } = vi.hoisted(() => ({
   mockListUsers: vi.fn(),
 }));
 
-// Mock the service module so real handlers can run with mocked DB calls
-// Use relative path since Vitest 4.x resolves aliases differently
-vi.mock('./service', () => ({
+// Mock the users package - handlers.ts imports from @abe-stack/users
+vi.mock('@abe-stack/users', () => ({
   getUserById: mockGetUserById,
   listUsers: mockListUsers,
 }));

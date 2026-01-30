@@ -33,19 +33,15 @@ vi.mock('ws', () => {
   };
 });
 
-// Mock the JWT verification module at the source path
-vi.mock('../../../modules/auth/utils/jwt', () => ({
+// Mock the auth package - websocket.ts imports verifyToken from @abe-stack/auth
+vi.mock('@abe-stack/auth', () => ({
   verifyToken: mockVerifyToken,
 }));
 
-// Mock the CSRF module at the source path where it's defined
-vi.mock('../../http/middleware/csrf', async (importOriginal) => {
-  const actual = await importOriginal<object>();
-  return {
-    ...actual,
-    validateCsrfToken: mockValidateCsrfToken,
-  };
-});
+// Mock the HTTP package for validateCsrfToken
+vi.mock('@abe-stack/http', () => ({
+  validateCsrfToken: mockValidateCsrfToken,
+}));
 
 vi.mock('@abe-stack/core/http', () => ({
   parseCookies: mockParseCookies,

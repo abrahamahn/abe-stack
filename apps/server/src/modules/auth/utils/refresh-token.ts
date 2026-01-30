@@ -30,13 +30,10 @@ import {
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 
-import {
-    logTokenFamilyRevokedEvent,
-    logTokenReuseEvent,
-    withTransaction,
-    type DbClient,
-    type UserRole,
-} from '@/infrastructure';
+import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '@abe-stack/auth';
+import { withTransaction, type DbClient } from '@abe-stack/db';
+
+import type { UserRole } from '@abe-stack/core';
 
 
 // ============================================================================

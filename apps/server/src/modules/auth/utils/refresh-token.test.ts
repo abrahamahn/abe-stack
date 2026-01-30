@@ -8,7 +8,8 @@
  * and token reuse attack detection with proper database mocking.
  */
 
-import { logTokenFamilyRevokedEvent, logTokenReuseEvent, withTransaction } from '@/infrastructure';
+import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '@abe-stack/auth';
+import { withTransaction } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
@@ -21,7 +22,7 @@ import {
 } from './refresh-token';
 
 import type { RefreshToken, RefreshTokenFamily, User } from '@abe-stack/db';
-import type { DbClient } from '../../../infrastructure';
+import type { DbClient } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Dependencies
@@ -32,13 +33,16 @@ vi.mock('./jwt', () => ({
   getRefreshTokenExpiry: vi.fn(),
 }));
 
-vi.mock('@/infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@/infrastructure')>('@/infrastructure');
+vi.mock('@abe-stack/auth', () => ({
+  logTokenReuseEvent: vi.fn(),
+  logTokenFamilyRevokedEvent: vi.fn(),
+}));
+
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => callback(db)),
-    logTokenReuseEvent: vi.fn(),
-    logTokenFamilyRevokedEvent: vi.fn(),
   };
 });
 

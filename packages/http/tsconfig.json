@@ -1,0 +1,12 @@
+{
+  "extends": "../../.config/tsconfig.node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "types": ["node", "vitest/globals"],
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.http.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"]
+}

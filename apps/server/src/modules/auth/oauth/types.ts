@@ -5,7 +5,7 @@
  * Shared type definitions for OAuth authentication flows.
  */
 
-import type { OAuthProvider } from '@/infrastructure';
+import type { OAuthProvider } from '@abe-stack/db';
 
 // Re-export OAuthProvider for convenience
 export type { OAuthProvider };

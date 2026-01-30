@@ -1,5 +1,5 @@
 // apps/server/src/modules/system/routes.ts
-import { createRouteMap, protectedRoute, publicRoute } from '@http/router';
+import { createRouteMap, protectedRoute, publicRoute } from '@/infrastructure/http/router';
 
 import {
   handleApiInfo,

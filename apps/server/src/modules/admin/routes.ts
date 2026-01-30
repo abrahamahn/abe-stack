@@ -23,7 +23,7 @@ import {
   type UnlockAccountResponse,
   type UpdatePlanRequest,
 } from '@abe-stack/core';
-import { createRouteMap, protectedRoute, type RouteResult } from '@http/router';
+import { createRouteMap, protectedRoute, type RouteResult } from '@/infrastructure/http/router';
 
 import {
   handleAdminCreatePlan,

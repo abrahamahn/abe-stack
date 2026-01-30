@@ -55,18 +55,13 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
   };
 });
 
-// Mock the http index - using both alias and relative paths to ensure coverage
-vi.mock('@http/index', () => ({
+// Mock the http infrastructure - server.ts imports from @/infrastructure/http
+vi.mock('./infrastructure/http', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 
-// Also mock the plugins module directly in case the barrel re-export doesn't work
+// Also mock the plugins module directly
 vi.mock('./infrastructure/http/plugins', () => ({
-  registerPlugins: mockRegisterPlugins,
-}));
-
-// Also mock with relative path from server.ts perspective
-vi.mock('../infrastructure/http/index', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 

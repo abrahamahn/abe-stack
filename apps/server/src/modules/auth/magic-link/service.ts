@@ -28,13 +28,8 @@ import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from 
 
 import type { AuthConfig } from '@/config';
 
-import {
-    emailTemplates,
-    withTransaction,
-    type DbClient,
-    type EmailService,
-    type Repositories,
-} from '@/infrastructure';
+import { withTransaction, type DbClient, type Repositories } from '@abe-stack/db';
+import { emailTemplates, type EmailService } from '@abe-stack/email';
 
 // ============================================================================
 // Constants

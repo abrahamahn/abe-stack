@@ -11,6 +11,7 @@ export default mergeConfig(baseConfig, {
   },
   resolve: {
     alias: [
+      { find: /^@abe-stack\/core\/(.*)$/, replacement: `${corePkg}/$1` },
       { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
       { find: /^@\/(.*)$/, replacement: path.resolve(__dirname, 'src/$1') },
     ],

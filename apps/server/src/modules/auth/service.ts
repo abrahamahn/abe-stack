@@ -47,17 +47,15 @@ import type { AuthConfig } from '@/config';
 
 import {
     applyProgressiveDelay,
-    emailTemplates,
     getAccountLockoutStatus,
     isAccountLocked,
     logAccountLockedEvent,
     logLoginAttempt,
-    withTransaction,
-    type DbClient,
-    type EmailService,
-    type Logger,
-    type Repositories,
-} from '@/infrastructure';
+} from '@abe-stack/auth';
+import { withTransaction, type DbClient, type Repositories } from '@abe-stack/db';
+import { emailTemplates, type EmailService } from '@abe-stack/email';
+
+import type { Logger } from '@/infrastructure';
 
 // ============================================================================
 // Types

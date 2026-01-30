@@ -11,7 +11,7 @@
 
 
 
-import { OAUTH_PROVIDERS } from '../../../infrastructure';
+import { OAUTH_PROVIDERS } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 
@@ -45,9 +45,9 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: vi.fn(),
 }));
 
-// Mock infrastructure
-vi.mock('../../../infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('../../../infrastructure')>('../../../infrastructure');
+// Mock @abe-stack/db for OAUTH_PROVIDERS
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
   return {
     ...actual,
     OAUTH_PROVIDERS: ['google', 'github', 'apple'] as const,

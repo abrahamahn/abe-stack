@@ -179,6 +179,78 @@ export default [
     },
   },
   {
+    files: ['packages/jobs/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/jobs/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/security/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/security/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/http/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/http/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/email/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/email/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/notifications/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/notifications/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/auth/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/auth/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/users/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/users/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/realtime/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/realtime/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
     // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     rules: {

@@ -33,9 +33,20 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@abe-stack/contracts": "workspace:*",
     "@abe-stack/core": "workspace:*",
     "@abe-stack/db": "workspace:*",
     "stripe": "^20.2.0"
   },
-  "devDependencies": {}
+  "peerDependencies": {
+    "fastify": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "fastify": "5.7.1"
+  }
 }

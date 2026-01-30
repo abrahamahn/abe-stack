@@ -6,7 +6,7 @@
  * They are consumed by the server's config loaders and validated at startup.
  */
 
-import type { LogLevel as ConsoleLogLevel } from '../../infrastructure/logger/console';
+import type { ConsoleLogLevel } from '../../infrastructure/logger/console';
 
 // ============================================================================
 // Primitive Types

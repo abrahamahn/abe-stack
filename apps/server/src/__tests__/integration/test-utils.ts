@@ -14,8 +14,8 @@ import {
   registerCsrf,
   registerPrototypePollutionProtection,
   registerRequestInfoHook,
-} from '@http/index';
-import { RateLimiter } from '@security/rate-limit';
+} from '@abe-stack/http';
+import { RateLimiter } from '@abe-stack/security';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 

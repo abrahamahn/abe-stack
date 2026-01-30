@@ -5,7 +5,7 @@
  * Handles email verification and resend verification flows.
  */
 
-import { resendVerificationEmail, verifyEmail } from '@auth/service';
+import { resendVerificationEmail, verifyEmail } from '../service';
 import {
   mapErrorToResponse,
   SUCCESS_MESSAGES,

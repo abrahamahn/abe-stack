@@ -1,6 +1,7 @@
 // apps/server/src/shared/types.ts
 
 import type { QueueServer, ServerSearchProvider, WriteService } from '@/infrastructure/index';
+import type { BaseContext } from '@abe-stack/contracts';
 import type {
   AppConfig,
   BillingService,
@@ -190,11 +191,36 @@ export interface HasContext {
 // ============================================================================
 
 /**
- * Application context passed to all handlers
- * This is what handlers receive - a clean interface to all services.
- * Extends IServiceContainer with runtime-specific dependencies (logger).
+ * Application context passed to all handlers.
+ *
+ * Extends `IServiceContainer` with runtime-specific dependencies (logger).
+ * Structurally satisfies `BaseContext` from `@abe-stack/contracts` --
+ * verified at compile time via `AppContextSatisfiesBaseContext` below.
+ *
+ * Package handlers accept `BaseContext` (or module-specific extensions);
+ * the server passes `AppContext` which structurally satisfies all of them
+ * -- no casting needed.
+ *
+ * Note: Cannot use `extends BaseContext` directly because TypeScript's
+ * interface `extends` requires identically-typed properties across parents.
+ * `IServiceContainer.db` is `DbClient` while `BaseContext.db` is `unknown`.
+ * These are compatible (DbClient assignable to unknown) but not identical.
+ *
+ * @see {@link BaseContext} from `@abe-stack/contracts`
  */
 export interface AppContext extends IServiceContainer {
-  /** Logger instance (from Fastify) */
+  /** Logger instance (from Fastify's Pino logger) */
   log: FastifyBaseLogger;
 }
+
+/**
+ * Compile-time verification: AppContext structurally satisfies BaseContext.
+ *
+ * If `AppContext` ever stops satisfying `BaseContext` (e.g., a required
+ * property is removed or becomes incompatible), this line produces:
+ * "Type 'AppContext' does not satisfy the constraint 'BaseContext'."
+ *
+ * @internal
+ */
+type VerifyBaseContext<T extends BaseContext> = T;
+export type AppContextSatisfiesBaseContext = VerifyBaseContext<AppContext>;

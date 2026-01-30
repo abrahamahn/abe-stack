@@ -3,7 +3,7 @@
 import path from 'node:path';
 
 import { isAppError, type ApiErrorResponse } from '@abe-stack/core/infrastructure/errors';
-import { RateLimiter } from '@security/rate-limit';
+import { RateLimiter } from '@abe-stack/security';
 
 import {
     applyCors,

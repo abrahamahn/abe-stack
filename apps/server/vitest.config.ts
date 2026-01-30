@@ -3,12 +3,17 @@ import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';
 
+const authPkg = path.resolve(__dirname, '../../packages/auth/src');
 const billingPkg = path.resolve(__dirname, '../../packages/billing/src');
 const cachePkg = path.resolve(__dirname, '../../packages/cache/src');
 const contractsPkg = path.resolve(__dirname, '../../packages/contracts/src');
 const corePkg = path.resolve(__dirname, '../../packages/core/src');
 const dbPkg = path.resolve(__dirname, '../../packages/db/src');
+const emailPkg = path.resolve(__dirname, '../../packages/email/src');
+const httpPkg = path.resolve(__dirname, '../../packages/http/src');
+const jobsPkg = path.resolve(__dirname, '../../packages/jobs/src');
 const storagePkg = path.resolve(__dirname, '../../packages/storage/src');
+const usersPkg = path.resolve(__dirname, '../../packages/users/src');
 
 export default mergeConfig(baseConfig, {
   test: {
@@ -17,7 +22,7 @@ export default mergeConfig(baseConfig, {
     // Inline local modules to ensure mocks work correctly with path aliases
     server: {
       deps: {
-        inline: [/src\//, '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/storage'],
+        inline: [/src\//, '@abe-stack/auth', '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/email', '@abe-stack/http', '@abe-stack/jobs', '@abe-stack/security', '@abe-stack/storage', '@abe-stack/users'],
       },
     },
   },
@@ -43,14 +48,19 @@ export default mergeConfig(baseConfig, {
         replacement: `${corePkg}/$1`,
       },
       // Handle main package imports
+      { find: '@abe-stack/auth', replacement: `${authPkg}/index.ts` },
       { find: '@abe-stack/billing', replacement: `${billingPkg}/index.ts` },
       { find: '@abe-stack/cache', replacement: `${cachePkg}/index.ts` },
       { find: '@abe-stack/contracts', replacement: `${contractsPkg}/index.ts` },
       { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
       { find: /^@abe-stack\/db\/(.*)$/, replacement: `${dbPkg}/$1` },
       { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
+      { find: '@abe-stack/email', replacement: `${emailPkg}/index.ts` },
+      { find: '@abe-stack/http', replacement: `${httpPkg}/index.ts` },
+      { find: '@abe-stack/jobs', replacement: `${jobsPkg}/index.ts` },
       { find: /^@abe-stack\/storage\/(.*)$/, replacement: `${storagePkg}/$1` },
       { find: '@abe-stack/storage', replacement: `${storagePkg}/index.ts` },
+      { find: '@abe-stack/users', replacement: `${usersPkg}/index.ts` },
       // Server-specific aliases
       {
         find: /^@\/(.*)$/,

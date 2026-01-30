@@ -5,7 +5,7 @@
  * Handles user authentication via email/password.
  */
 
-import { authenticateUser } from '@auth/service';
+import { authenticateUser } from '../service';
 import {
   mapErrorToResponse,
   type AppContext,
