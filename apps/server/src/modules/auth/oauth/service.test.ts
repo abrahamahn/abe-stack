@@ -15,9 +15,9 @@ import {
     handleOAuthCallback,
     linkOAuthAccount,
     unlinkOAuthAccount,
-} from './service';
+} from '@abe-stack/auth/oauth/service';
 
-import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
+import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '@abe-stack/auth/oauth/types';
 import type { AuthConfig } from '@/config';
 import type {
     OAuthConnectionRepository,
@@ -41,7 +41,7 @@ vi.mock('node:crypto', async () => {
 });
 
 // Mock provider factories
-vi.mock('./providers', () => ({
+vi.mock('@abe-stack/auth/oauth/providers', () => ({
   createGoogleProvider: vi.fn(),
   createGitHubProvider: vi.fn(),
   createAppleProvider: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock('./providers', () => ({
 }));
 
 // Mock auth utils
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   createAccessToken: vi.fn(() => 'mock-access-token'),
   createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
 }));
@@ -231,7 +231,7 @@ describe('OAuth Service', () => {
 
   describe('getProviderClient', () => {
     test('should create Google provider client', async () => {
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
 
       getProviderClient('google', mockConfig);
 
@@ -239,7 +239,7 @@ describe('OAuth Service', () => {
     });
 
     test('should create GitHub provider client', async () => {
-      const { createGitHubProvider } = await import('./providers');
+      const { createGitHubProvider } = await import('@abe-stack/auth/oauth/providers');
 
       getProviderClient('github', mockConfig);
 
@@ -247,7 +247,7 @@ describe('OAuth Service', () => {
     });
 
     test('should create Apple provider client with additional config', async () => {
-      const { createAppleProvider } = await import('./providers');
+      const { createAppleProvider } = await import('@abe-stack/auth/oauth/providers');
 
       getProviderClient('apple', mockConfig);
 
@@ -294,7 +294,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn(),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       const result = getAuthorizationUrl(
@@ -323,7 +323,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn(),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       const result = getAuthorizationUrl(
@@ -364,7 +364,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       const existingConnection = {
@@ -434,7 +434,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
@@ -485,7 +485,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
@@ -529,7 +529,7 @@ describe('OAuth Service', () => {
         getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
       };
 
-      const { createGoogleProvider } = await import('./providers');
+      const { createGoogleProvider } = await import('@abe-stack/auth/oauth/providers');
       vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
 
       vi.mocked(mockRepos.users.findById).mockResolvedValue({

@@ -12,6 +12,7 @@ import type {
   UserRole as CoreUserRole,
 } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@abe-stack/db';
+import type { AuthEmailTemplates } from '@abe-stack/auth';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================
@@ -177,6 +178,9 @@ export interface IServiceContainer {
 
   /** Server-side search provider */
   readonly search: ServerSearchProvider;
+
+  /** Auth email templates (used by auth package handlers) */
+  readonly emailTemplates: AuthEmailTemplates;
 }
 
 /**

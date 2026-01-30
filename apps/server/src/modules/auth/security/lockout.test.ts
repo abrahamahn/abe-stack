@@ -9,19 +9,13 @@ import {
   isAccountLocked,
   logLoginAttempt,
   unlockAccount,
-} from './lockout';
+} from '@abe-stack/auth/security/lockout';
 
-import type { LockoutConfig, LockoutStatus } from './types';
+import type { LockoutConfig, LockoutStatus } from '@abe-stack/auth/security/types';
 import type { DbClient } from '@abe-stack/db';
 
-// Mock constants
-vi.mock('@shared/constants', () => ({
-  PROGRESSIVE_DELAY_WINDOW_MS: 5 * 60 * 1000, // 5 minutes
-  MAX_PROGRESSIVE_DELAY_MS: 30 * 1000, // 30 seconds
-}));
-
 // Mock security events to avoid circular dependency issues
-vi.mock('@security/events', () => ({
+vi.mock('@abe-stack/auth/security/events', () => ({
   logAccountUnlockedEvent: vi.fn().mockResolvedValue(undefined),
 }));
 

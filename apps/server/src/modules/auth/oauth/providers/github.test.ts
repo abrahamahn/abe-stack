@@ -9,9 +9,9 @@
 import { OAuthError } from '@abe-stack/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createGitHubProvider } from './github';
+import { createGitHubProvider } from '@abe-stack/auth/oauth/providers/github';
 
-import type { OAuthProviderClient } from '../types';
+import type { OAuthProviderClient } from '@abe-stack/auth/oauth/types';
 
 // ============================================================================
 // Test Setup

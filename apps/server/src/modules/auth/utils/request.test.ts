@@ -1,5 +1,5 @@
 // apps/server/src/modules/auth/utils/request.test.ts
-import { extractRequestInfo } from './request';
+import { extractRequestInfo } from '@abe-stack/auth/utils/request';
 import { describe, expect, test } from 'vitest';
 
 describe('Request Utilities', () => {

@@ -111,12 +111,6 @@
       "@admin/*": [
             "./src/modules/admin/*"
       ],
-      "@auth": [
-            "./src/modules/auth"
-      ],
-      "@auth/*": [
-            "./src/modules/auth/*"
-      ],
       "@billing": [
             "./src/modules/billing"
       ],
@@ -158,18 +152,6 @@
       ],
       "@monitor/*": [
             "./src/infrastructure/monitor/*"
-      ],
-      "@notifications": [
-            "./src/modules/notifications"
-      ],
-      "@notifications/*": [
-            "./src/modules/notifications/*"
-      ],
-      "@realtime": [
-            "./src/modules/realtime"
-      ],
-      "@realtime/*": [
-            "./src/modules/realtime/*"
       ],
       "@search": [
             "./src/infrastructure/search"

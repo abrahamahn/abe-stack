@@ -9,35 +9,35 @@
 import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
-import { requestMagicLink, verifyMagicLink } from './service';
+import { handleMagicLinkRequest, handleMagicLinkVerify } from '@abe-stack/auth/magic-link/handlers';
+import { requestMagicLink, verifyMagicLink } from '@abe-stack/auth/magic-link/service';
 
-import type { MagicLinkResult, RequestMagicLinkResult } from './service';
+import type { MagicLinkResult, RequestMagicLinkResult } from '@abe-stack/auth/magic-link/service';
 import type { AppConfig } from '@/config';
 import type { MagicLinkRequest } from '@abe-stack/core';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@abe-stack/auth';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('./service', () => ({
+vi.mock('@abe-stack/auth/magic-link/service', () => ({
   requestMagicLink: vi.fn(),
   verifyMagicLink: vi.fn(),
 }));
 
-vi.mock('../security', () => ({
+vi.mock('@abe-stack/auth/security', () => ({
   logMagicLinkRequestEvent: vi.fn(),
   logMagicLinkVerifiedEvent: vi.fn(),
   logMagicLinkFailedEvent: vi.fn(),
 }));
 
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   setRefreshTokenCookie: vi.fn(),
 }));
 
-vi.mock('@/config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/config')>();
+vi.mock('@abe-stack/auth/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/auth/config')>();
   return {
     ...actual,
     isStrategyEnabled: vi.fn(),
@@ -172,6 +172,13 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {
+      emailVerification: vi.fn(() => ({ subject: 'Verify', text: 'verify', html: '<p>verify</p>' })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Reg', text: 'reg', html: '<p>reg</p>' })),
+      passwordReset: vi.fn(() => ({ subject: 'Reset', text: 'reset', html: '<p>reset</p>' })),
+      magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
+      accountLocked: vi.fn(() => ({ subject: 'Locked', text: 'locked', html: '<p>locked</p>' })),
+    },
     config,
     log: {
       info: vi.fn(),
@@ -220,7 +227,7 @@ function createMagicLinkRequestBody(overrides?: Partial<MagicLinkRequest>): Magi
 describe('handleMagicLinkRequest', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/auth/config'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -266,6 +273,7 @@ describe('handleMagicLinkRequest', () => {
         ctx.db,
         ctx.repos,
         ctx.email,
+        ctx.emailTemplates,
         'test@example.com',
         'http://localhost:3000',
         '10.0.0.1',
@@ -312,6 +320,7 @@ describe('handleMagicLinkRequest', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         expect.objectContaining({
           tokenExpiryMinutes: 30,
           maxAttemptsPerEmail: 5,
@@ -336,7 +345,7 @@ describe('handleMagicLinkRequest', () => {
 
       vi.mocked(requestMagicLink).mockResolvedValue(mockResult);
 
-      const { logMagicLinkRequestEvent } = await import('../security');
+      const { logMagicLinkRequestEvent } = await import('@abe-stack/auth/security');
 
       await handleMagicLinkRequest(ctx, body, request);
 
@@ -351,7 +360,7 @@ describe('handleMagicLinkRequest', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/auth/config'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();
@@ -483,6 +492,7 @@ describe('handleMagicLinkRequest', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         '',
         expect.anything(),
         expect.anything(),
@@ -515,6 +525,7 @@ describe('handleMagicLinkRequest', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         '',
         expect.anything(),
       );
@@ -529,7 +540,7 @@ describe('handleMagicLinkRequest', () => {
 describe('handleMagicLinkVerify', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/auth/config'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -616,7 +627,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockResolvedValue(mockResult);
 
-      const { setRefreshTokenCookie } = await import('../utils');
+      const { setRefreshTokenCookie } = await import('@abe-stack/auth/utils');
 
       await handleMagicLinkVerify(ctx, body, request, reply);
 
@@ -653,7 +664,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockResolvedValue(mockResult);
 
-      const { logMagicLinkVerifiedEvent } = await import('../security');
+      const { logMagicLinkVerifiedEvent } = await import('@abe-stack/auth/security');
 
       await handleMagicLinkVerify(ctx, body, request, reply);
 
@@ -693,7 +704,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockResolvedValue(mockResult);
 
-      const { logMagicLinkVerifiedEvent } = await import('../security');
+      const { logMagicLinkVerifiedEvent } = await import('@abe-stack/auth/security');
 
       await handleMagicLinkVerify(ctx, body, request, reply);
 
@@ -710,7 +721,7 @@ describe('handleMagicLinkVerify', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/auth/config'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();
@@ -745,7 +756,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockRejectedValue(tokenError);
 
-      const { logMagicLinkFailedEvent } = await import('../security');
+      const { logMagicLinkFailedEvent } = await import('@abe-stack/auth/security');
 
       const result = await handleMagicLinkVerify(ctx, body, request, reply);
 
@@ -773,7 +784,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockRejectedValue(tokenError);
 
-      const { setRefreshTokenCookie } = await import('../utils');
+      const { setRefreshTokenCookie } = await import('@abe-stack/auth/utils');
 
       await handleMagicLinkVerify(ctx, body, request, reply);
 
@@ -819,7 +830,7 @@ describe('handleMagicLinkVerify', () => {
 
       vi.mocked(verifyMagicLink).mockResolvedValue(mockResult);
 
-      const { logMagicLinkVerifiedEvent } = await import('../security');
+      const { logMagicLinkVerifiedEvent } = await import('@abe-stack/auth/security');
 
       await handleMagicLinkVerify(ctx, body, request, reply);
 

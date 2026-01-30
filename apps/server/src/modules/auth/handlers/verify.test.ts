@@ -1,7 +1,7 @@
 // apps/server/src/modules/auth/handlers/verify.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleResendVerification, handleVerifyEmail } from './verify';
+import { handleResendVerification, handleVerifyEmail } from '@abe-stack/auth/handlers/verify';
 
 // Use vi.hoisted to create mock functions before vi.mock hoisting
 const { mockVerifyEmail, mockResendVerificationEmail, mockSetRefreshTokenCookie } = vi.hoisted(
@@ -28,23 +28,23 @@ const mockMapErrorToResponse = vi.hoisted(() =>
   }),
 );
 
-// Mock auth service - use relative path for proper module resolution
-vi.mock('../service', () => ({
+// Mock auth service
+vi.mock('@abe-stack/auth/service', () => ({
   verifyEmail: mockVerifyEmail,
   resendVerificationEmail: mockResendVerificationEmail,
 }));
 
-// Mock the auth utils module (used by the handler as ../utils which resolves to auth/utils)
-vi.mock('../utils', () => ({
+// Mock the auth utils module
+vi.mock('@abe-stack/auth/utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-// Mock @shared - use relative path for proper module resolution
-vi.mock('../../../shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('../../../shared')>();
+// Mock @abe-stack/core to intercept mapErrorToHttpResponse
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@abe-stack/core')>();
   return {
     ...original,
-    mapErrorToResponse: mockMapErrorToResponse,
+    mapErrorToHttpResponse: mockMapErrorToResponse,
   };
 });
 
@@ -58,6 +58,13 @@ describe('Email Verification Handlers', () => {
       },
     },
     email: {},
+    emailTemplates: {
+      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
+      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
+      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+    },
     config: {
       auth: {
         jwt: { secret: 'test-secret', accessTokenExpiry: '15m' },
@@ -247,7 +254,7 @@ describe('Email Verification Handlers', () => {
 
         await handleVerifyEmail(mockCtx as never, { token: validToken }, mockReply as never);
 
-        expect(mockMapErrorToResponse).toHaveBeenCalledWith(error, mockCtx);
+        expect(mockMapErrorToResponse).toHaveBeenCalledWith(error, expect.anything());
       });
 
       test('should not set cookie when verification fails', async () => {
@@ -329,6 +336,7 @@ describe('Email Verification Handlers', () => {
           mockCtx.db,
           mockCtx.repos,
           mockCtx.email,
+          mockCtx.emailTemplates,
           validEmail,
           mockCtx.config.server.appBaseUrl,
         );
@@ -375,6 +383,7 @@ describe('Email Verification Handlers', () => {
           customCtx.db,
           customCtx.repos,
           customCtx.email,
+          customCtx.emailTemplates,
           validEmail,
           'https://production.example.com',
         );
@@ -408,7 +417,7 @@ describe('Email Verification Handlers', () => {
 
         await handleResendVerification(mockCtx as never, { email: validEmail });
 
-        expect(mockMapErrorToResponse).toHaveBeenCalledWith(error, mockCtx);
+        expect(mockMapErrorToResponse).toHaveBeenCalledWith(error, expect.anything());
       });
     });
 
@@ -422,6 +431,7 @@ describe('Email Verification Handlers', () => {
           mockCtx.db,
           mockCtx.repos,
           mockCtx.email,
+          mockCtx.emailTemplates,
           'USER@EXAMPLE.COM',
           expect.anything(),
         );
@@ -437,6 +447,7 @@ describe('Email Verification Handlers', () => {
           mockCtx.db,
           mockCtx.repos,
           mockCtx.email,
+          mockCtx.emailTemplates,
           emailWithPlus,
           expect.anything(),
         );
@@ -453,6 +464,7 @@ describe('Email Verification Handlers', () => {
           mockCtx.db,
           mockCtx.repos,
           mockCtx.email,
+          mockCtx.emailTemplates,
           intlEmail,
           expect.anything(),
         );

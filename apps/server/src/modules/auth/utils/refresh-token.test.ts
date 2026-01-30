@@ -8,18 +8,18 @@
  * and token reuse attack detection with proper database mocking.
  */
 
-import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '@abe-stack/auth';
+import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '@abe-stack/auth/security/events';
 import { withTransaction } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
+import { createRefreshToken, getRefreshTokenExpiry } from '@abe-stack/auth/utils/jwt';
 import {
   cleanupExpiredTokens,
   createRefreshTokenFamily,
   revokeAllUserTokens,
   revokeTokenFamily,
   rotateRefreshToken,
-} from './refresh-token';
+} from '@abe-stack/auth/utils/refresh-token';
 
 import type { RefreshToken, RefreshTokenFamily, User } from '@abe-stack/db';
 import type { DbClient } from '@abe-stack/db';
@@ -28,12 +28,12 @@ import type { DbClient } from '@abe-stack/db';
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('./jwt', () => ({
+vi.mock('@abe-stack/auth/utils/jwt', () => ({
   createRefreshToken: vi.fn(),
   getRefreshTokenExpiry: vi.fn(),
 }));
 
-vi.mock('@abe-stack/auth', () => ({
+vi.mock('@abe-stack/auth/security/events', () => ({
   logTokenReuseEvent: vi.fn(),
   logTokenFamilyRevokedEvent: vi.fn(),
 }));

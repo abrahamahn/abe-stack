@@ -14,7 +14,7 @@ import {
     getRefreshTokenExpiry,
     JwtError,
     verifyToken,
-} from './jwt';
+} from '@abe-stack/auth/utils/jwt';
 
 describe('JWT Utilities', () => {
   const validSecret = 'this-is-a-very-long-secret-for-testing-purposes';

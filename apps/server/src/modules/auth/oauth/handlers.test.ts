@@ -21,7 +21,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // ============================================================================
 
 // Mock security module
-vi.mock('../security', () => ({
+vi.mock('@abe-stack/auth/security', () => ({
   authRateLimiters: {
     check: vi.fn(),
   },
@@ -33,7 +33,7 @@ vi.mock('../security', () => ({
 }));
 
 // Mock service functions
-vi.mock('./service', () => ({
+vi.mock('@abe-stack/auth/oauth/service', () => ({
   getAuthorizationUrl: vi.fn(),
   handleOAuthCallback: vi.fn(),
   unlinkOAuthAccount: vi.fn(),
@@ -41,7 +41,7 @@ vi.mock('./service', () => ({
 }));
 
 // Mock cookie utilities
-vi.mock('../utils', () => ({
+vi.mock('@abe-stack/auth/utils', () => ({
   setRefreshTokenCookie: vi.fn(),
 }));
 
@@ -62,8 +62,8 @@ import {
   logOAuthLoginSuccessEvent,
   logOAuthUnlinkFailureEvent,
   logOAuthUnlinkSuccessEvent,
-} from '../security';
-import { setRefreshTokenCookie } from '../utils';
+} from '@abe-stack/auth/security';
+import { setRefreshTokenCookie } from '@abe-stack/auth/utils';
 
 import {
   handleGetConnections,
@@ -71,16 +71,16 @@ import {
   handleOAuthInitiate,
   handleOAuthLink,
   handleOAuthUnlink,
-} from './handlers';
+} from '@abe-stack/auth/oauth/handlers';
 import {
   getAuthorizationUrl,
   getConnectedProviders,
   handleOAuthCallback,
   unlinkOAuthAccount,
-} from './service';
+} from '@abe-stack/auth/oauth/service';
 
-import type { OAuthConnectionInfo } from './types';
-import type { AppContext } from '../../shared/types';
+import type { OAuthConnectionInfo } from '@abe-stack/auth/oauth/types';
+import type { AppContext } from '@abe-stack/auth';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
