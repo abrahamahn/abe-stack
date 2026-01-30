@@ -56,9 +56,9 @@ import {
   clearAppleKeysCache,
   createAppleProvider,
   extractAppleUserFromIdToken,
-} from './apple';
+} from '@abe-stack/auth/oauth/providers/apple';
 
-import type { AppleProviderConfig } from './apple';
+import type { AppleProviderConfig } from '@abe-stack/auth/oauth/providers/apple';
 
 // ============================================================================
 // Test Helpers

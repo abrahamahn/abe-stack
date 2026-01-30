@@ -26,14 +26,14 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('./handlers', () => ({
+vi.mock('@abe-stack/auth/magic-link/handlers', () => ({
   handleMagicLinkRequest: vi.fn(),
   handleMagicLinkVerify: vi.fn(),
 }));
 
-import { magicLinkRoutes } from './routes';
+import { magicLinkRoutes } from '@abe-stack/auth/magic-link/routes';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@abe-stack/auth';
 
 // ============================================================================
 // Test Helpers
@@ -162,7 +162,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should call handleMagicLinkRequest with correct arguments', async () => {
-        const { handleMagicLinkRequest } = await import('./handlers');
+        const { handleMagicLinkRequest } = await import('@abe-stack/auth/magic-link/handlers');
         vi.mocked(handleMagicLinkRequest).mockResolvedValue({
           status: 200,
           body: {
@@ -186,7 +186,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should return result from handleMagicLinkRequest', async () => {
-        const { handleMagicLinkRequest } = await import('./handlers');
+        const { handleMagicLinkRequest } = await import('@abe-stack/auth/magic-link/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -210,7 +210,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should handle error response from handler', async () => {
-        const { handleMagicLinkRequest } = await import('./handlers');
+        const { handleMagicLinkRequest } = await import('@abe-stack/auth/magic-link/handlers');
         const errorResult = {
           status: 429,
           body: {
@@ -260,7 +260,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should call handleMagicLinkVerify with correct arguments', async () => {
-        const { handleMagicLinkVerify } = await import('./handlers');
+        const { handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
         vi.mocked(handleMagicLinkVerify).mockResolvedValue({
           status: 200,
           body: {
@@ -291,7 +291,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should return result from handleMagicLinkVerify', async () => {
-        const { handleMagicLinkVerify } = await import('./handlers');
+        const { handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -322,7 +322,7 @@ describe('Magic Link Routes', () => {
       });
 
       test('should handle error response from handler', async () => {
-        const { handleMagicLinkVerify } = await import('./handlers');
+        const { handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
         const errorResult = {
           status: 401,
           body: {
@@ -646,7 +646,7 @@ describe('Route Methods', () => {
 
 describe('Route Integration', () => {
   test('request route should integrate with verify route workflow', async () => {
-    const { handleMagicLinkRequest, handleMagicLinkVerify } = await import('./handlers');
+    const { handleMagicLinkRequest, handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
 
     // Step 1: Request magic link
     vi.mocked(handleMagicLinkRequest).mockResolvedValue({
@@ -726,7 +726,7 @@ describe('Route Integration', () => {
 describe('Edge Cases', () => {
   describe('Handler Error Propagation', () => {
     test('should propagate errors from handleMagicLinkRequest', async () => {
-      const { handleMagicLinkRequest } = await import('./handlers');
+      const { handleMagicLinkRequest } = await import('@abe-stack/auth/magic-link/handlers');
       const error = new Error('Database connection failed');
       vi.mocked(handleMagicLinkRequest).mockRejectedValue(error);
 
@@ -744,7 +744,7 @@ describe('Edge Cases', () => {
     });
 
     test('should propagate errors from handleMagicLinkVerify', async () => {
-      const { handleMagicLinkVerify } = await import('./handlers');
+      const { handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
       const error = new Error('Token verification failed');
       vi.mocked(handleMagicLinkVerify).mockRejectedValue(error);
 
@@ -785,7 +785,7 @@ describe('Edge Cases', () => {
 
   describe('Request Context Edge Cases', () => {
     test('should handle request with missing requestInfo', async () => {
-      const { handleMagicLinkRequest } = await import('./handlers');
+      const { handleMagicLinkRequest } = await import('@abe-stack/auth/magic-link/handlers');
       vi.mocked(handleMagicLinkRequest).mockResolvedValue({
         status: 200,
         body: {
@@ -815,7 +815,7 @@ describe('Edge Cases', () => {
     });
 
     test('should handle reply with all cookie methods', async () => {
-      const { handleMagicLinkVerify } = await import('./handlers');
+      const { handleMagicLinkVerify } = await import('@abe-stack/auth/magic-link/handlers');
       vi.mocked(handleMagicLinkVerify).mockResolvedValue({
         status: 200,
         body: {
