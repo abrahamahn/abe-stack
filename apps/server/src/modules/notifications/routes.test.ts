@@ -25,7 +25,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('./handlers', () => ({
+vi.mock('@abe-stack/notifications/handlers', () => ({
   handleGetPreferences: vi.fn(),
   handleGetVapidKey: vi.fn(),
   handleSendNotification: vi.fn(),
@@ -35,7 +35,7 @@ vi.mock('./handlers', () => ({
   handleUpdatePreferences: vi.fn(),
 }));
 
-import { notificationRoutes } from './routes';
+import { notificationRoutes } from '@abe-stack/notifications/routes';
 
 import type { BaseRouteDefinition } from '@router';
 import type { AppContext, RequestWithCookies } from '../../shared';
@@ -150,7 +150,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleGetVapidKey with correct arguments', async () => {
-        const { handleGetVapidKey } = await import('./handlers');
+        const { handleGetVapidKey } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleGetVapidKey).mockReturnValue({
           status: 200,
           body: {
@@ -168,7 +168,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleGetVapidKey', async () => {
-        const { handleGetVapidKey } = await import('./handlers');
+        const { handleGetVapidKey } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -187,7 +187,7 @@ describe('Notification Routes', () => {
       });
 
       test('should handle disabled notifications gracefully', async () => {
-        const { handleGetVapidKey } = await import('./handlers');
+        const { handleGetVapidKey } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleGetVapidKey).mockReturnValue({
           status: 200,
           body: {
@@ -238,7 +238,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleSubscribe with correct arguments', async () => {
-        const { handleSubscribe } = await import('./handlers');
+        const { handleSubscribe } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleSubscribe).mockResolvedValue({
           status: 200,
           body: {
@@ -274,7 +274,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleSubscribe', async () => {
-        const { handleSubscribe } = await import('./handlers');
+        const { handleSubscribe } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -339,7 +339,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleUnsubscribe with correct arguments', async () => {
-        const { handleUnsubscribe } = await import('./handlers');
+        const { handleUnsubscribe } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleUnsubscribe).mockResolvedValue({
           status: 200,
           body: {
@@ -365,7 +365,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleUnsubscribe', async () => {
-        const { handleUnsubscribe } = await import('./handlers');
+        const { handleUnsubscribe } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -418,7 +418,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleGetPreferences with correct arguments', async () => {
-        const { handleGetPreferences } = await import('./handlers');
+        const { handleGetPreferences } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleGetPreferences).mockResolvedValue({
           status: 200,
           body: {
@@ -444,7 +444,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleGetPreferences', async () => {
-        const { handleGetPreferences } = await import('./handlers');
+        const { handleGetPreferences } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -499,7 +499,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleUpdatePreferences with correct arguments', async () => {
-        const { handleUpdatePreferences } = await import('./handlers');
+        const { handleUpdatePreferences } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleUpdatePreferences).mockResolvedValue({
           status: 200,
           body: {
@@ -534,7 +534,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleUpdatePreferences', async () => {
-        const { handleUpdatePreferences } = await import('./handlers');
+        const { handleUpdatePreferences } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -600,7 +600,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleTestNotification with correct arguments', async () => {
-        const { handleTestNotification } = await import('./handlers');
+        const { handleTestNotification } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleTestNotification).mockReturnValue({
           status: 200,
           body: {
@@ -623,7 +623,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleTestNotification', async () => {
-        const { handleTestNotification } = await import('./handlers');
+        const { handleTestNotification } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {
@@ -679,7 +679,7 @@ describe('Notification Routes', () => {
       });
 
       test('should call handleSendNotification with correct arguments', async () => {
-        const { handleSendNotification } = await import('./handlers');
+        const { handleSendNotification } = await import('@abe-stack/notifications/handlers');
         vi.mocked(handleSendNotification).mockReturnValue({
           status: 200,
           body: {
@@ -716,7 +716,7 @@ describe('Notification Routes', () => {
       });
 
       test('should return result from handleSendNotification', async () => {
-        const { handleSendNotification } = await import('./handlers');
+        const { handleSendNotification } = await import('@abe-stack/notifications/handlers');
         const expectedResult = {
           status: 200 as const,
           body: {

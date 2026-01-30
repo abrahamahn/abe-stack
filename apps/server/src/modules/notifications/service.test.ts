@@ -44,7 +44,7 @@ describe('Notification Service', { timeout: 30000 }, () => {
 
   it('should export subscription management functions', async () => {
     const { subscribe, unsubscribe, getUserSubscriptions, getSubscriptionById } =
-      await import('./service');
+      await import('@abe-stack/notifications/service');
     expect(typeof subscribe).toBe('function');
     expect(typeof unsubscribe).toBe('function');
     expect(typeof getUserSubscriptions).toBe('function');
@@ -53,7 +53,7 @@ describe('Notification Service', { timeout: 30000 }, () => {
 
   it('should export preference management functions', async () => {
     const { getPreferences, updatePreferences, shouldSendNotification } =
-      await import('./service');
+      await import('@abe-stack/notifications/service');
     expect(typeof getPreferences).toBe('function');
     expect(typeof updatePreferences).toBe('function');
     expect(typeof shouldSendNotification).toBe('function');
@@ -61,7 +61,7 @@ describe('Notification Service', { timeout: 30000 }, () => {
 
   it('should export cleanup and stats functions', async () => {
     const { cleanupExpiredSubscriptions, getSubscriptionStats, clearAllData } =
-      await import('./service');
+      await import('@abe-stack/notifications/service');
     expect(typeof cleanupExpiredSubscriptions).toBe('function');
     expect(typeof getSubscriptionStats).toBe('function');
     expect(typeof clearAllData).toBe('function');
