@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/userHandlers.ts
+// packages/admin/src/userHandlers.ts
 /**
  * Admin User Handlers
  *
@@ -6,10 +6,12 @@
  * All handlers expect admin role (enforced by route middleware).
  */
 
+import { ERROR_MESSAGES } from '@abe-stack/auth';
 import { UserNotFoundError } from '@abe-stack/core';
-import { getUserById, listUsers, lockUser, unlockUser, updateUser } from '@admin/userService';
-import { ERROR_MESSAGES, type AppContext } from '@shared';
 
+import { getUserById, listUsers, lockUser, unlockUser, updateUser } from './userService';
+
+import type { AdminAppContext } from './types';
 import type {
     AdminLockUserRequest,
     AdminLockUserResponse,
@@ -30,12 +32,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  * Handle GET /api/admin/users
  */
 export async function handleListUsers(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUserListResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -89,12 +91,12 @@ export async function handleListUsers(
  * Handle GET /api/admin/users/:id
  */
 export async function handleGetUser(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUser | { message: string } }> {
-  const authUser = request.user as { userId: string; role: string } | undefined;
+  const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -131,12 +133,12 @@ export async function handleGetUser(
  * Handle PATCH /api/admin/users/:id
  */
 export async function handleUpdateUser(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: AdminUpdateUserRequest,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUpdateUserResponse | { message: string } }> {
-  const authUser = request.user as { userId: string; role: string } | undefined;
+  const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -182,12 +184,12 @@ export async function handleUpdateUser(
  * Handle POST /api/admin/users/:id/lock
  */
 export async function handleLockUser(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: AdminLockUserRequest,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
-  const authUser = request.user as { userId: string; role: string } | undefined;
+  const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -243,12 +245,12 @@ export async function handleLockUser(
  * Handle POST /api/admin/users/:id/unlock
  */
 export async function handleUnlockUser(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: UnlockAccountRequest,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
-  const authUser = request.user as { userId: string; role: string } | undefined;
+  const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }

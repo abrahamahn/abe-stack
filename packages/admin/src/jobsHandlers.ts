@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/jobsHandlers.ts
+// packages/admin/src/jobsHandlers.ts
 /**
  * Jobs Handlers
  *
@@ -6,9 +6,9 @@
  * All handlers require admin role (enforced by route definitions).
  */
 
+import { ERROR_MESSAGES } from '@abe-stack/auth';
 import { jobListQuerySchema } from '@abe-stack/core';
 import { PostgresQueueStore, type JobListOptions } from '@abe-stack/jobs';
-import { ERROR_MESSAGES, type AppContext } from '@shared';
 
 import {
     cancelJob,
@@ -20,6 +20,7 @@ import {
     retryJob,
 } from './jobsService';
 
+import type { AdminAppContext } from './types';
 import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -32,7 +33,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  * Get the PostgresQueueStore from the app context.
  * The queue server stores the queue store reference.
  */
-function getQueueStore(ctx: AppContext): PostgresQueueStore {
+function getQueueStore(ctx: AdminAppContext): PostgresQueueStore {
   // Create a new store instance with the same db client
   return new PostgresQueueStore(ctx.db);
 }
@@ -45,12 +46,12 @@ function getQueueStore(ctx: AppContext): PostgresQueueStore {
  * List jobs with filtering and pagination
  */
 export async function handleListJobs(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobListResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -103,12 +104,12 @@ export async function handleListJobs(
  * Get detailed job information
  */
 export async function handleGetJobDetails(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobDetails | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -138,12 +139,12 @@ export async function handleGetJobDetails(
  * Get queue statistics
  */
 export async function handleGetQueueStats(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: QueueStats | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -166,12 +167,12 @@ export async function handleGetQueueStats(
  * Retry a failed job
  */
 export async function handleRetryJob(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -204,12 +205,12 @@ export async function handleRetryJob(
  * Cancel a pending or processing job
  */
 export async function handleCancelJob(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
-  const user = request.user as { userId: string; role: string } | undefined;
+  const user = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }

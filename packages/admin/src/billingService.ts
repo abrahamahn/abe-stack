@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/billingService.ts
+// packages/admin/src/billingService.ts
 /**
  * Admin Billing Service
  *

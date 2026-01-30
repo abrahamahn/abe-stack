@@ -2,54 +2,25 @@
 /**
  * Route Registration
  *
- * Uses the generic router pattern for DRY registration.
- * Route maps are imported directly from @abe-stack/* packages.
- * Only server-specific modules (admin, billing, system, users)
- * use local imports.
+ * Wires all route maps from @abe-stack/* packages into the Fastify server.
+ * Only the system module remains local (deployment-specific health checks).
+ *
+ * No re-exports — consumers import directly from source packages.
  */
 
 import { authRoutes } from '@abe-stack/auth';
+import { billingRoutes, registerWebhookRoutes } from '@abe-stack/billing';
 import { notificationRoutes } from '@abe-stack/notifications';
 import { realtimeRoutes } from '@abe-stack/realtime';
+import { userRoutes } from '@abe-stack/users';
 
-
-import { adminRoutes } from './admin/routes';
-import { billingRoutes, registerWebhookRoutes } from './billing';
+import { adminRoutes } from '@abe-stack/admin';
 import { systemRoutes } from './system/routes';
-import { userRoutes } from './users/routes';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 
 import { registerRouteMap } from '@/infrastructure/http/router';
-
-// Re-export server-specific modules only
-export { handleAdminUnlock } from './admin';
-export { handleMe } from './users/handlers';
-
-// Generic route registration (Chet-stack pattern)
-export {
-  protectedRoute,
-  publicRoute,
-  registerRouteMap,
-  type HttpMethod,
-  type ProtectedHandler,
-  type PublicHandler,
-  type RouteDefinition,
-  type RouteHandler,
-  type RouteMap,
-  type RouteResult,
-  type RouterOptions,
-  type ValidationSchema,
-} from '@/infrastructure/http/router';
-
-// Route definitions for external use
-export { adminRoutes } from './admin/routes';
-export { authRoutes } from '@abe-stack/auth';
-export { notificationRoutes as notificationRoutesConfig } from '@abe-stack/notifications';
-export { realtimeRoutes } from '@abe-stack/realtime';
-export { systemRoutes } from './system/routes';
-export { userRoutes } from './users/routes';
 
 /**
  * Register all application routes

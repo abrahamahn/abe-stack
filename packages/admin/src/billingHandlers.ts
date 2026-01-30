@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/billingHandlers.ts
+// packages/admin/src/billingHandlers.ts
 /**
  * Admin Billing Handlers
  *
@@ -29,15 +29,15 @@ import {
   type AdminBillingRepositories,
 } from './billingService';
 
+import type { AdminAppContext, AdminRequest } from './types';
 import type { Plan as DbPlan } from '@abe-stack/db';
-import type { AppContext, RequestWithCookies } from '@shared';
 
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-function getAdminBillingRepos(ctx: AppContext): AdminBillingRepositories {
+function getAdminBillingRepos(ctx: AdminAppContext): AdminBillingRepositories {
   return {
     plans: ctx.repos.plans,
     subscriptions: ctx.repos.subscriptions,
@@ -66,7 +66,7 @@ function formatAdminPlan(plan: DbPlan): AdminPlan {
 
 function handleError(
   error: unknown,
-  ctx: AppContext,
+  ctx: AdminAppContext,
 ): { status: 400 | 404 | 500; body: { message: string } } {
   if (error instanceof PlanNotFoundError) {
     return { status: 404, body: { message: error.message } };
@@ -90,9 +90,9 @@ function handleError(
  * List all plans (including inactive) - Admin only
  */
 export async function handleAdminListPlans(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
 ): Promise<
   | { status: 200; body: AdminPlansListResponse }
   | { status: 400 | 404 | 500; body: { message: string } }
@@ -116,9 +116,9 @@ export async function handleAdminListPlans(
  * Get a single plan by ID - Admin only
  */
 export async function handleAdminGetPlan(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
   params: { id: string },
 ): Promise<
   { status: 200; body: AdminPlanResponse } | { status: 400 | 404 | 500; body: { message: string } }
@@ -142,9 +142,9 @@ export async function handleAdminGetPlan(
  * Create a new plan - Admin only
  */
 export async function handleAdminCreatePlan(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: CreatePlanRequest,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
 ): Promise<
   { status: 201; body: AdminPlanResponse } | { status: 400 | 404 | 500; body: { message: string } }
 > {
@@ -167,9 +167,9 @@ export async function handleAdminCreatePlan(
  * Update a plan - Admin only
  */
 export async function handleAdminUpdatePlan(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   body: UpdatePlanRequest,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
   params: { id: string },
 ): Promise<
   { status: 200; body: AdminPlanResponse } | { status: 400 | 404 | 500; body: { message: string } }
@@ -193,9 +193,9 @@ export async function handleAdminUpdatePlan(
  * Sync a plan to Stripe - Admin only
  */
 export async function handleAdminSyncPlanToStripe(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
   params: { id: string },
 ): Promise<
   { status: 200; body: SyncStripeResponse } | { status: 400 | 404 | 500; body: { message: string } }
@@ -227,9 +227,9 @@ export async function handleAdminSyncPlanToStripe(
  * Deactivate a plan - Admin only
  */
 export async function handleAdminDeactivatePlan(
-  ctx: AppContext,
+  ctx: AdminAppContext,
   _body: undefined,
-  _request: RequestWithCookies,
+  _request: AdminRequest,
   params: { id: string },
 ): Promise<
   | { status: 200; body: SubscriptionActionResponse }

@@ -251,6 +251,15 @@ export default [
     },
   },
   {
+    files: ['packages/admin/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/admin/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
     // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     rules: {

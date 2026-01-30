@@ -20,6 +20,7 @@
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-server --report-unused-disable-directives"
   },
   "dependencies": {
+    "@abe-stack/admin": "workspace:*",
     "@abe-stack/auth": "workspace:*",
     "@abe-stack/billing": "workspace:*",
     "@abe-stack/cache": "workspace:*",
