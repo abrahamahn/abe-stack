@@ -116,11 +116,13 @@ pnpm health-check       # Project health audit
 ## Architecture
 
 ```
-apps/              → Deployable applications
-packages/          → Shared libraries (ui, sdk, auth, db, etc.)
+apps/              → Deployable applications (Tier 4 — thin wiring only)
+packages/          → Shared libraries (Tiers 1–3 — all business logic)
 tooling/           → Build scripts, sync automation
 infra/             → Terraform, Docker configs
 docs/              → Specs, principles, deployment guides
 ```
 
 Server follows hexagonal architecture: `apps/server/src/modules/` (business logic) + `apps/server/src/infra/` (adapters).
+
+**Package boundary details:** See [`docs/dev/packages.md`](docs/dev/packages.md) for the full server/package boundary spec, 4-tier architecture, litmus tests, and current codebase evaluation.
