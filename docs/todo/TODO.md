@@ -70,7 +70,7 @@ the server adapter layer is unnecessary.
 - [x] Quickstart guides per app (see `docs/quickstart/`)
 
 - [ ] `docs/deploy/` folder (DO + GCP guides)
-- [ ] `docs/OPERATIONS.md` (migrations, backups, restore drills, incident basics)
+- [x] `docs/OPERATIONS.md` (migrations, backups, restore drills, incident basics)
 
 ---
 
