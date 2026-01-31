@@ -14,34 +14,6 @@
 
 ---
 
-## High Priority: Codebase Consistency
-
-### File Naming Conventions
-
-- [ ] Standardize file naming across the entire codebase (kebab-case for server/core, decide convention for UI)
-  - `packages/core` - converted to kebab-case ✅
-  - `packages/db` - needs audit
-  - `packages/sdk` - needs audit
-  - `apps/server` - needs audit
-  - `apps/web` - needs audit
-  - `packages/ui` - needs audit
-
-### UI Documentation Strategy
-
-- [ ] Remove or convert `packages/ui/docs/` folder - current approach is outdated
-- [ ] Render `.tsx` files as "live markdown" with JSDoc included (self-documenting components)
-- [ ] Ensure all public component exports have comprehensive JSDoc comments
-
-### UI Hooks Consistency
-
-- [ ] Audit `packages/ui/src/hooks/` for file extension consistency (`.ts` vs `.tsx`)
-  - Hooks that return JSX or use React types → `.tsx`
-  - Pure logic hooks → `.ts`
-- [ ] Clean up and consolidate hook tests
-- [ ] Ensure consistent naming pattern (`use[Feature].ts` + `use[Feature].test.ts`)
-
----
-
 ## High Priority: Eliminate Server Module Duplicates (Phase 4)
 
 Five server modules have complete code duplicates in `packages/*`.
@@ -80,11 +52,6 @@ the server adapter layer is unnecessary.
 
 ## Medium Priority: Infrastructure
 
-### Frontend
-
-- [ ] Error boundary + toasts for API errors :contentReference[oaicite:14]{index=14}
-- [ ] Focus management improvements :contentReference[oaicite:15]{index=15}
-
 ### Backend
 
 - [ ] Production Postgres settings (connection pooling, SSL) :contentReference[oaicite:16]{index=16}
@@ -100,14 +67,10 @@ the server adapter layer is unnecessary.
 ### Documentation
 
 - [ ] Security decision documentation (why Argon2id params, grace periods, etc.) :contentReference[oaicite:22]{index=22}
-- [ ] Quickstart guides per app :contentReference[oaicite:23]{index=23}
-- [ ] Release checklist :contentReference[oaicite:24]{index=24}
-- [ ] Consolidate and organize `docs/log/` files (merge duplicate date sections, use tables) :contentReference[oaicite:25]{index=25}
+- [x] Quickstart guides per app (see `docs/quickstart/`)
 
 - [ ] `docs/deploy/` folder (DO + GCP guides)
 - [ ] `docs/OPERATIONS.md` (migrations, backups, restore drills, incident basics)
-- [ ] “Minimal Profile Quickstart” + “Full Profile Quickstart”
-- [ ] “SaaS Profile Quickstart” + “Admin Profile Quickstart”
 
 ---
 
@@ -146,47 +109,6 @@ the server adapter layer is unnecessary.
   - `USE_RAW_SQL` - Toggle between drizzle-orm and raw SQL query builder for A/B testing
 - [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
 
-## Unused Code to Integrate
-
-Code that exists but isn't used anywhere. Integrate when implementing related tasks. :contentReference[oaicite:29]{index=29}
-
-| Unused Code                            | Package         | Related Task           |
-| -------------------------------------- | --------------- | ---------------------- |
-| `MutationQueue`, `createMutationQueue` | sdk/persistence | Offline mutations      |
-| `localStorageQueue`                    | sdk/persistence | IndexedDB fallback     |
-| `useOnScreen`                          | ui/hooks        | Lazy loading           |
-| `useCopyToClipboard`                   | ui/hooks        | Demo copy button       |
-| `usePanelConfig`                       | ui/hooks        | ResizablePanel layouts |
-
----
-
-## Success Metrics
-
-### Seed Stage
-
-- [ ] First paying customers :contentReference[oaicite:30]{index=30}
-- [ ] <100ms P95 latency on critical paths :contentReference[oaicite:31]{index=31}
-- [ ] Zero security incidents :contentReference[oaicite:32]{index=32}
-
-### Series A
-
-- [ ] Multi-product architecture working :contentReference[oaicite:33]{index=33}
-- [ ] Team of 3-5 engineers productive :contentReference[oaicite:34]{index=34}
-- [ ] 99.9% uptime :contentReference[oaicite:35]{index=35}
-- [ ] Cache layer reducing DB load by 30%+ :contentReference[oaicite:36]{index=36}
-
----
-
-## The Rule
-
-**Before adding to this TODO, ask:** :contentReference[oaicite:37]{index=37}
-
-1. Does a user need this to give me money?
-2. Will this unblock a product feature?
-3. Is this a security/legal requirement?
-
-If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{index=38}
-
 ---
 
 ## References
@@ -197,22 +119,6 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 - [ ] React Query cache invalidation on WebSocket events :contentReference[oaicite:40]{index=40}
 - [ ] Presence tracking (online/offline/away, last seen) :contentReference[oaicite:41]{index=41}
 - [ ] Typing indicators via WebSocket events :contentReference[oaicite:42]{index=42}
-
-### Remove @testing-library
-
-Once unit tests are trimmed to 50-100 high-value tests, evaluate removing `@testing-library/*`:
-
-- [ ] Audit remaining tests - how many use `@testing-library/react`?
-- [ ] Convert critical component tests to Playwright E2E or simple `vitest` + `jsdom`
-- [ ] Remove packages from root `package.json`:
-  - `@testing-library/jest-dom`
-  - `@testing-library/react`
-  - `@testing-library/user-event`
-- [ ] Update test patterns documentation
-
-**Rationale:** Testing-library encourages many granular unit tests. After trimdown, if most value comes from E2E tests (Playwright) and integration tests (vitest + fastify inject), these packages become unnecessary weight.
-
-**Keep if:** Component-level testing remains valuable after trimdown.
 
 ---
 

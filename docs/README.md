@@ -8,17 +8,18 @@ Central index for ABE Stack documentation.
 
 ## Quick Navigation
 
-| Area          | Entry Point           | Purpose                          |
-| ------------- | --------------------- | -------------------------------- |
-| Overview      | Root `README.md`      | Project overview and quick start |
-| Agent Guide   | `AGENTS.md`           | AI agent behavioral rules        |
-| Specs         | `specs/README.md`     | Architecture and principles      |
-| Dev Guides    | `dev/README.md`       | Workflow, testing, tooling       |
-| Reference     | `reference/README.md` | Legacy patterns and migration    |
-| What to Build | `todo/TODO.md`        | Active tasks and priorities      |
-| Deferred      | `todo/ROADMAP.md`     | Future features (not now)        |
-| Deployment    | `deploy/README.md`    | Production deployment guides     |
-| Weekly Logs   | `log/`                | Development changelog            |
+| Area          | Entry Point               | Purpose                          |
+| ------------- | ------------------------- | -------------------------------- |
+| Overview      | Root `README.md`          | Project overview and quick start |
+| Quickstart    | `quickstart/README.md`    | Per-app getting started guides   |
+| Agent Guide   | `AGENTS.md`               | AI agent behavioral rules        |
+| Specs         | `specs/README.md`         | Architecture and principles      |
+| Dev Guides    | `dev/README.md`           | Workflow, testing, tooling       |
+| Reference     | `reference/README.md`     | Legacy patterns and migration    |
+| What to Build | `todo/TODO.md`            | Active tasks and priorities      |
+| Deferred      | `todo/ROADMAP.md`         | Future features (not now)        |
+| Deployment    | `deploy/README.md`        | Production deployment guides     |
+| Weekly Logs   | `log/`                    | Development changelog            |
 
 ---
 
@@ -28,6 +29,13 @@ Central index for ABE Stack documentation.
 docs/
 ├── README.md           # This file - documentation index
 ├── AGENTS.md           # Agent behavioral rules (symlink to .claude/CLAUDE.md)
+│
+├── quickstart/         # Per-app getting started guides
+│   ├── README.md       # Quickstart index
+│   ├── monorepo.md     # Full stack setup
+│   ├── web.md          # Web app (Vite + React)
+│   ├── server.md       # Server (Fastify + PostgreSQL)
+│   └── desktop.md      # Desktop (Electron)
 │
 ├── specs/              # Specifications (architecture & design)
 │   ├── README.md       # Specs index
@@ -78,7 +86,7 @@ docs/
 
 ### New to the Codebase
 
-1. Root `README.md` - Project overview
+1. `quickstart/monorepo.md` - Get running in 5 steps
 2. `specs/architecture.md` - Understand structure
 3. `specs/principles.md` - Coding standards
 4. `dev/workflow.md` - Set up workflow
@@ -101,6 +109,7 @@ docs/
 
 | Keyword                            | Document                  |
 | ---------------------------------- | ------------------------- |
+| quickstart, getting started, setup | `quickstart/README.md`    |
 | architecture, layers, hexagonal    | `specs/architecture.md`   |
 | patterns, anti-patterns, standards | `specs/principles.md`     |
 | testing, TDD, vitest               | `dev/testing.md`          |
