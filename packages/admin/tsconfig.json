@@ -23,7 +23,9 @@
       "@abe-stack/http": ["../../packages/http/src/index.ts"],
       "@abe-stack/http/*": ["../../packages/http/src/*"],
       "@abe-stack/jobs": ["../../packages/jobs/src/index.ts"],
-      "@abe-stack/jobs/*": ["../../packages/jobs/src/*"]
+      "@abe-stack/jobs/*": ["../../packages/jobs/src/*"],
+      "@abe-stack/security": ["../../packages/security/src/index.ts"],
+      "@abe-stack/security/*": ["../../packages/security/src/*"]
     }
   },
   "include": ["src/**/*"],
@@ -35,6 +37,7 @@
     { "path": "../../packages/core" },
     { "path": "../../packages/db" },
     { "path": "../../packages/http" },
-    { "path": "../../packages/jobs" }
+    { "path": "../../packages/jobs" },
+    { "path": "../../packages/security" }
   ]
 }

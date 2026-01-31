@@ -1,36 +1,33 @@
 // packages/admin/vitest.config.ts
 import path from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { mergeConfig } from 'vitest/config';
+import { baseConfig } from '../../vitest.config';
 
-export default defineConfig({
+const pkg = (name: string) => path.resolve(__dirname, `../${name}/src`);
+
+export default mergeConfig(baseConfig, {
   resolve: {
-    alias: {
-      // Sub-path aliases MUST come before root aliases (Vite resolves in order)
-      '@abe-stack/core/infrastructure/crypto': path.resolve(
-        __dirname,
-        '../core/src/infrastructure/crypto/index.ts',
-      ),
-      '@abe-stack/core/config': path.resolve(
-        __dirname,
-        '../core/src/config/index.ts',
-      ),
-      '@abe-stack/core': path.resolve(__dirname, '../core/src/index.ts'),
-      '@abe-stack/db': path.resolve(__dirname, '../db/src/index.ts'),
-      '@abe-stack/http': path.resolve(__dirname, '../http/src/index.ts'),
-      '@abe-stack/security/rate-limit': path.resolve(
-        __dirname,
-        '../security/src/rate-limit/index.ts',
-      ),
-      '@abe-stack/security': path.resolve(__dirname, '../security/src/index.ts'),
-      '@abe-stack/auth': path.resolve(__dirname, '../auth/src/index.ts'),
-      '@abe-stack/billing': path.resolve(__dirname, '../billing/src/index.ts'),
-      '@abe-stack/contracts': path.resolve(__dirname, '../contracts/src/index.ts'),
-      '@abe-stack/jobs': path.resolve(__dirname, '../jobs/src/index.ts'),
-      '@abe-stack/storage': path.resolve(__dirname, '../storage/src/index.ts'),
-    },
+    alias: [
+      { find: /^@abe-stack\/core\/(.*)$/, replacement: `${pkg('core')}/$1` },
+      { find: '@abe-stack/core', replacement: `${pkg('core')}/index.ts` },
+      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${pkg('db')}/$1` },
+      { find: '@abe-stack/db', replacement: `${pkg('db')}/index.ts` },
+      { find: /^@abe-stack\/auth\/(.*)$/, replacement: `${pkg('auth')}/$1` },
+      { find: '@abe-stack/auth', replacement: `${pkg('auth')}/index.ts` },
+      { find: /^@abe-stack\/billing\/(.*)$/, replacement: `${pkg('billing')}/$1` },
+      { find: '@abe-stack/billing', replacement: `${pkg('billing')}/index.ts` },
+      { find: /^@abe-stack\/http\/(.*)$/, replacement: `${pkg('http')}/$1` },
+      { find: '@abe-stack/http', replacement: `${pkg('http')}/index.ts` },
+      { find: /^@abe-stack\/contracts\/(.*)$/, replacement: `${pkg('contracts')}/$1` },
+      { find: '@abe-stack/contracts', replacement: `${pkg('contracts')}/index.ts` },
+      { find: /^@abe-stack\/jobs\/(.*)$/, replacement: `${pkg('jobs')}/$1` },
+      { find: '@abe-stack/jobs', replacement: `${pkg('jobs')}/index.ts` },
+      { find: /^@abe-stack\/security\/(.*)$/, replacement: `${pkg('security')}/$1` },
+      { find: '@abe-stack/security', replacement: `${pkg('security')}/index.ts` },
+    ],
   },
   test: {
-    globals: false,
+    name: 'admin',
     environment: 'node',
     include: ['src/**/*.test.ts'],
     reporters: ['dot'],

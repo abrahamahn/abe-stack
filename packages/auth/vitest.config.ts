@@ -1,29 +1,29 @@
 // packages/auth/vitest.config.ts
 import path from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { mergeConfig } from 'vitest/config';
+import { baseConfig } from '../../vitest.config';
 
-export default defineConfig({
+const pkg = (name: string) => path.resolve(__dirname, `../${name}/src`);
+
+export default mergeConfig(baseConfig, {
   resolve: {
-    alias: {
-      '@abe-stack/core': path.resolve(__dirname, '../core/src/index.ts'),
-      '@abe-stack/core/infrastructure/crypto': path.resolve(
-        __dirname,
-        '../core/src/infrastructure/crypto/index.ts',
-      ),
-      '@abe-stack/core/config': path.resolve(
-        __dirname,
-        '../core/src/config/index.ts',
-      ),
-      '@abe-stack/db': path.resolve(__dirname, '../db/src/index.ts'),
-      '@abe-stack/security': path.resolve(__dirname, '../security/src/index.ts'),
-      '@abe-stack/security/rate-limit': path.resolve(
-        __dirname,
-        '../security/src/rate-limit/index.ts',
-      ),
-    },
+    alias: [
+      { find: /^@abe-stack\/core\/(.*)$/, replacement: `${pkg('core')}/$1` },
+      { find: '@abe-stack/core', replacement: `${pkg('core')}/index.ts` },
+      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${pkg('db')}/$1` },
+      { find: '@abe-stack/db', replacement: `${pkg('db')}/index.ts` },
+      { find: /^@abe-stack\/security\/(.*)$/, replacement: `${pkg('security')}/$1` },
+      { find: '@abe-stack/security', replacement: `${pkg('security')}/index.ts` },
+      { find: /^@abe-stack\/http\/(.*)$/, replacement: `${pkg('http')}/$1` },
+      { find: '@abe-stack/http', replacement: `${pkg('http')}/index.ts` },
+      { find: /^@abe-stack\/email\/(.*)$/, replacement: `${pkg('email')}/$1` },
+      { find: '@abe-stack/email', replacement: `${pkg('email')}/index.ts` },
+      { find: /^@abe-stack\/contracts\/(.*)$/, replacement: `${pkg('contracts')}/$1` },
+      { find: '@abe-stack/contracts', replacement: `${pkg('contracts')}/index.ts` },
+    ],
   },
   test: {
-    globals: false,
+    name: 'auth',
     environment: 'node',
     include: ['src/**/*.test.ts'],
     reporters: ['dot'],
