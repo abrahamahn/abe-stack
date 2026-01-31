@@ -326,7 +326,10 @@ infra/
 
 ## Related Documentation
 
+- [Production PostgreSQL](./production-postgres.md) - Connection pooling, SSL, server tuning, managed databases
+- [Secrets Checklist](./secrets-checklist.md) - Required secrets and security setup
 - [DigitalOcean Deployment](./digitalocean.md) - Step-by-step Droplet deployment
 - [GCP Deployment](./gcp.md) - Compute Engine VM deployment
 - [Reverse Proxy Configuration](./reverse-proxy.md) - Detailed Caddy setup, routing, WebSocket
 - [Trusted Proxy Setup](./trusted-proxy-setup.md) - IP extraction, security configuration
+- [Operations Manual](../OPERATIONS.md) - Backups, restore drills, incident response
