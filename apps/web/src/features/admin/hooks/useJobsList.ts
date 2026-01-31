@@ -5,8 +5,8 @@
  * Fetch paginated jobs list with filtering support.
  */
 
+import { useQuery } from '@abe-stack/client';
 import { tokenStore } from '@abe-stack/core';
-import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 

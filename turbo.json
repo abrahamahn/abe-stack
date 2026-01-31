@@ -6,8 +6,8 @@
   "tasks": {
     "build:theme": {
       "cache": true,
-      "inputs": ["tooling/lint/sync-css-theme.ts", "packages/ui/src/theme/**"],
-      "outputs": ["packages/ui/src/generated/**"]
+      "inputs": ["tools/sync/sync-css-theme.ts", "shared/ui/src/theme/**"],
+      "outputs": ["shared/ui/src/generated/**"]
     },
     "build": {
       "dependsOn": ["^build", "build:theme"],

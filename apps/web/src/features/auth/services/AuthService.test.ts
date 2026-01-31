@@ -60,8 +60,8 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/sdk', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+vi.mock('@abe-stack/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/client')>();
   return {
     ...actual,
     createApiClient: () => mocks.mockApiClient,

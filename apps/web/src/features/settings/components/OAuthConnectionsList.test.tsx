@@ -19,7 +19,7 @@ import type { OAuthConnectionsListProps } from './OAuthConnectionsList';
 import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
 
 // Mock the SDK hooks
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useEnabledOAuthProviders: vi.fn(),
   useOAuthConnections: vi.fn(),
 }));
@@ -71,7 +71,7 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/sdk';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/client';
 
 describe('OAuthConnectionsList', () => {
   let mockGetLinkUrl: ReturnType<typeof vi.fn>;

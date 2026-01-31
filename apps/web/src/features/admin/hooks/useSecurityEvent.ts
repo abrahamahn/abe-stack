@@ -5,8 +5,8 @@
  * Fetch a single security event by ID.
  */
 
+import { useQuery } from '@abe-stack/client';
 import { tokenStore } from '@abe-stack/core';
-import { useQuery } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 

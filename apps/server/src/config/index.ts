@@ -8,41 +8,41 @@ export { load, load as loadConfig } from './factory';
 
 /**
  * 2. AUTHENTICATION & SECURITY
- * Only export the utilities and types the server-side logic needs.
+ * Re-exported from @abe-stack/auth for convenience.
  */
 export {
   AuthValidationError,
   getRefreshCookieOptions,
   isStrategyEnabled,
   loadAuthConfig,
+  loadJwtRotationConfig,
+  loadRateLimitConfig,
   validateAuthConfig,
-} from './auth/auth';
-
-export { loadJwtRotationConfig } from './auth/jwt';
-export { loadRateLimitConfig } from './auth/rate-limit';
+} from '@abe-stack/auth';
 
 /**
  * 3. INFRASTRUCTURE
- * Selective helpers for DB connections and Storage handling.
+ * Re-exported from external packages for convenience.
  */
-export { loadCacheConfig } from './infra/cache';
+export { loadCacheConfig } from '@abe-stack/cache';
 export {
-  buildConnectionString,
+  buildConfigConnectionString as buildConnectionString,
+  DEFAULT_SEARCH_SCHEMAS,
   getSafeConnectionString,
   loadDatabaseConfig,
-} from './infra/database';
-export { loadServerConfig } from './infra/server';
-export { loadStorageConfig } from './infra/storage';
+  loadElasticsearchConfig,
+  loadSqlSearchConfig,
+} from '@abe-stack/db';
+export { loadServerConfig } from '@abe-stack/http';
+export { loadStorageConfig } from '@abe-stack/storage';
 
 /**
  * 4. SERVICES
  * Domain-specific loaders.
  */
-export { loadPackageManagerConfig } from './infra/package';
-export { loadBillingConfig, validateBillingConfig } from './services/billing';
-export { loadEmailConfig } from './services/email';
-export { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
-export { loadElasticsearchConfig, loadSqlSearchConfig } from './services/search';
+export { loadBillingConfig, validateBillingConfig } from '@abe-stack/billing';
+export { loadEmailConfig } from '@abe-stack/email';
+export { loadNotificationsConfig, validateNotificationsConfig } from '@abe-stack/notifications';
 
 /**
  * 5. THE CONTRACTS (Type Aliases)

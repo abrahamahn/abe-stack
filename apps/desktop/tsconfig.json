@@ -23,10 +23,10 @@
   "exclude": ["node_modules", "src/electron", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
     {
-      "path": "../../packages/core"
+      "path": "../../shared/core"
     },
     {
-      "path": "../../packages/ui"
+      "path": "../../shared/ui"
     },
     {
       "path": "./src/electron"

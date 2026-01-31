@@ -59,41 +59,15 @@ const {
 
 vi.mock('@/config', () => ({
   buildConnectionString: vi.fn(() => 'postgresql://test:test@localhost:5432/test'),
+  DEFAULT_SEARCH_SCHEMAS: {
+    users: { fields: [] },
+  },
 }));
 
-// Mock @/server with hoisted factories
-vi.mock('@/server', () => ({
-  createServer: mockServerFactory,
-  listen: mockListenFactory,
-}));
-
-// Mock infrastructure using the relative path that app.ts actually uses
-vi.mock('./infrastructure/index', () => ({
-  createBillingProvider: vi.fn(() => ({
-    createCheckoutSession: vi.fn(),
-  })),
+vi.mock('@abe-stack/db', () => ({
   createDbClient: vi.fn(() => ({
     query: vi.fn(),
     execute: vi.fn(),
-  })),
-  createEmailService: vi.fn(() => ({
-    send: vi.fn(),
-  })),
-  createNotificationService: vi.fn(() => ({
-    send: vi.fn(),
-  })),
-  createPostgresQueueStore: vi.fn(() => ({
-    enqueue: vi.fn(),
-  })),
-  createQueueServer: vi.fn(() => ({
-    start: vi.fn(),
-    stop: vi.fn(),
-  })),
-  createStorage: vi.fn(() => ({
-    put: vi.fn(),
-  })),
-  createWriteService: vi.fn(() => ({
-    write: vi.fn(),
   })),
   getRepositoryContext: vi.fn(() => ({
     repos: {
@@ -106,27 +80,61 @@ vi.mock('./infrastructure/index', () => ({
       search: vi.fn(),
     })),
   })),
-  logStartupSummary: vi.fn().mockResolvedValue(undefined),
-  registerWebSocket: vi.fn(),
   requireValidSchema: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('./modules/index', () => ({
-  registerRoutes: vi.fn(),
+// Mock @/server with hoisted factories
+vi.mock('@/server', () => ({
+  createServer: mockServerFactory,
+  listen: mockListenFactory,
 }));
 
-vi.mock('./services/cache-service', () => ({
-  createCacheService: vi.fn(() => ({
-    get: vi.fn(),
-    set: vi.fn(),
-    cleanup: vi.fn(),
+// Mock @abe-stack/auth for verifyToken (used by app.ts for WebSocket DI)
+vi.mock('@abe-stack/auth', () => ({
+  verifyToken: vi.fn(),
+  createAuthGuard: vi.fn(),
+}));
+
+// Mock @abe-stack/realtime for WebSocket registration
+vi.mock('@abe-stack/realtime', () => ({
+  registerWebSocket: vi.fn(),
+}));
+
+// Mock @abe-stack/notifications for notification provider service
+vi.mock('@abe-stack/notifications', () => ({
+  createNotificationProviderService: vi.fn(() => ({
+    send: vi.fn(),
+    isConfigured: vi.fn(() => false),
+    getFcmProvider: vi.fn(),
   })),
 }));
 
-vi.mock('@/config/services/search', () => ({
-  DEFAULT_SEARCH_SCHEMAS: {
-    users: { fields: [] },
-  },
+// Mock health module (logStartupSummary used by app.ts)
+vi.mock('@health', () => ({
+  logStartupSummary: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Mock routes module
+vi.mock('@routes', () => ({
+  registerRoutes: vi.fn(),
+}));
+
+vi.mock('@abe-stack/cache', () => ({
+  createMemoryCache: vi.fn(() => ({
+    name: 'memory',
+    get: vi.fn(),
+    set: vi.fn(),
+    has: vi.fn(),
+    delete: vi.fn(),
+    getMultiple: vi.fn(),
+    setMultiple: vi.fn(),
+    deleteMultiple: vi.fn(),
+    clear: vi.fn(),
+    getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+    resetStats: vi.fn(),
+    healthCheck: vi.fn().mockResolvedValue(true),
+    close: vi.fn().mockResolvedValue(undefined),
+  })),
 }));
 
 // Note: We don't mock @abe-stack/core because vite-tsconfig-paths resolves it
@@ -296,12 +304,14 @@ describe('App', () => {
     mockServerFactory.mockReset();
     mockListenFactory.mockReset();
     mockListenFactory.mockResolvedValue(undefined);
-    // Reset infrastructure mocks
-    const infra = await import('./infrastructure/index');
-    vi.mocked(infra.requireValidSchema).mockReset();
-    vi.mocked(infra.requireValidSchema).mockResolvedValue(undefined);
-    vi.mocked(infra.logStartupSummary).mockReset();
-    vi.mocked(infra.logStartupSummary).mockResolvedValue(undefined);
+    // Reset @abe-stack/db mocks
+    const db = await import('@abe-stack/db');
+    vi.mocked(db.requireValidSchema).mockReset();
+    vi.mocked(db.requireValidSchema).mockResolvedValue(undefined);
+    // Reset health mocks
+    const health = await import('@health');
+    vi.mocked(health.logStartupSummary).mockReset();
+    vi.mocked(health.logStartupSummary).mockResolvedValue(undefined);
   });
 
   describe('constructor', () => {
@@ -334,7 +344,21 @@ describe('App', () => {
       const mockSearch = { search: vi.fn() };
       const mockQueue = { start: vi.fn(), stop: vi.fn() };
       const mockWrite = { write: vi.fn() };
-      const mockCache = { get: vi.fn(), set: vi.fn(), cleanup: vi.fn() };
+      const mockCache = {
+        name: 'memory',
+        get: vi.fn(),
+        set: vi.fn(),
+        has: vi.fn(),
+        delete: vi.fn(),
+        getMultiple: vi.fn(),
+        setMultiple: vi.fn(),
+        deleteMultiple: vi.fn(),
+        clear: vi.fn(),
+        getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+        resetStats: vi.fn(),
+        healthCheck: vi.fn().mockResolvedValue(true),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
 
       const options: AppOptions = {
         config,
@@ -414,8 +438,9 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const { requireValidSchema, logStartupSummary } = await import('./infrastructure/index');
+      const { requireValidSchema } = await import('@abe-stack/db');
       vi.mocked(requireValidSchema).mockResolvedValue(undefined);
+      const { logStartupSummary } = await import('@health');
       vi.mocked(logStartupSummary).mockResolvedValue(undefined);
 
       const app = new App({ config });
@@ -470,7 +495,7 @@ describe('App', () => {
 
       mockServerFactory.mockResolvedValue(mockServer);
 
-      const { requireValidSchema } = await import('./infrastructure/index');
+      const { requireValidSchema } = await import('@abe-stack/db');
       vi.mocked(requireValidSchema).mockRejectedValue(new Error('Invalid schema'));
 
       const app = new App({ config });
@@ -507,9 +532,19 @@ describe('App', () => {
       };
 
       const mockCache = {
+        name: 'memory',
         get: vi.fn(),
         set: vi.fn(),
-        cleanup: vi.fn(),
+        has: vi.fn(),
+        delete: vi.fn(),
+        getMultiple: vi.fn(),
+        setMultiple: vi.fn(),
+        deleteMultiple: vi.fn(),
+        clear: vi.fn(),
+        getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+        resetStats: vi.fn(),
+        healthCheck: vi.fn().mockResolvedValue(true),
+        close: vi.fn().mockResolvedValue(undefined),
       };
 
       const mockServer = createMockServer();
@@ -529,7 +564,7 @@ describe('App', () => {
 
       expect((mockPgPubSub.stop as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
       expect((mockQueue.stop as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
-      expect((mockCache.cleanup as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
+      expect((mockCache.close as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
       expect((mockServer.close as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
     });
 

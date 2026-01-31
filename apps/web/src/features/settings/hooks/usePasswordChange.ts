@@ -5,7 +5,7 @@
  * Hook for changing user password.
  */
 
-import { useMutation } from '@abe-stack/sdk';
+import { useMutation } from '@abe-stack/client';
 
 import { createSettingsApi, type ChangePasswordRequest, type ChangePasswordResponse } from '../api';
 

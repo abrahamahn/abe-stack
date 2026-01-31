@@ -1,5 +1,5 @@
 // apps/web/src/features/auth/hooks/useAuth.test.ts
-import { QueryCache } from '@abe-stack/sdk';
+import { QueryCache } from '@abe-stack/client';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { renderHook } from '@testing-library/react';
 import React from 'react';

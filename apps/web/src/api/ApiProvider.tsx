@@ -6,8 +6,8 @@
  * Creates a standalone API client with navigation callbacks.
  */
 
+import { createApiClient } from '@abe-stack/client';
 import { tokenStore } from '@abe-stack/core';
-import { createApiClient } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
 
@@ -35,7 +35,7 @@ import type {
 import type { ReactElement, ReactNode } from 'react';
 
 /**
- * API Client interface - mirrors @abe-stack/sdk ApiClient
+ * API Client interface - mirrors @abe-stack/client ApiClient
  * Defined inline due to SDK type resolution issues.
  */
 interface ApiClient {
@@ -75,7 +75,7 @@ type ApiProviderProps = {
  * Must be used within ClientEnvironmentProvider.
  *
  * Note: Error handling (unauthorized, server errors) should be done at the
- * call site using try-catch. Use isUnauthorizedError() from @abe-stack/sdk
+ * call site using try-catch. Use isUnauthorizedError() from @abe-stack/client
  * to check for 401 errors.
  */
 export const ApiProvider = ({ children }: ApiProviderProps): ReactElement => {

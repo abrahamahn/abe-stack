@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock SDK hooks before imports
-vi.mock('@abe-stack/sdk', async () => {
-  const actual = await vi.importActual('@abe-stack/sdk');
+vi.mock('@abe-stack/client', async () => {
+  const actual = await vi.importActual('@abe-stack/client');
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({

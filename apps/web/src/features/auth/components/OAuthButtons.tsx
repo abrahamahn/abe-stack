@@ -6,7 +6,7 @@
  * Only shows buttons for enabled providers.
  */
 
-import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@abe-stack/sdk';
+import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@abe-stack/client';
 import { OAuthButton } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';

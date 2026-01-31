@@ -11,15 +11,18 @@
  * to the modules registered in the App lifecycle.
  */
 
-import { createConsoleLogger } from '@abe-stack/core';
+import path from 'node:path';
+
+import { createConsoleLogger, isAppError } from '@abe-stack/core';
+import { registerPlugins } from '@abe-stack/http';
+import { RateLimiter } from '@abe-stack/security';
 import fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';
 import type { DbClient } from '@abe-stack/db';
+import type { AppErrorInfo } from '@abe-stack/http';
 import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
 import type { FastifyInstance } from 'fastify';
-
-import { registerPlugins } from '@/infrastructure/http';
 
 // ============================================================================
 // Types
@@ -74,8 +77,31 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     });
   }
 
-  // Register plugins
-  registerPlugins(server, config);
+  // Register plugins (dependency-injected — server owns the config mapping)
+  registerPlugins(server, {
+    env: config.env,
+    corsOrigin: config.server.cors.origin.join(','),
+    corsCredentials: config.server.cors.credentials,
+    corsMethods: config.server.cors.methods,
+    cookieSecret: config.auth.cookie.secret,
+    rateLimiter: new RateLimiter({ windowMs: 60_000, max: 100 }),
+    isAppError: (err: unknown) => isAppError(err),
+    getErrorInfo: (err: unknown): AppErrorInfo => {
+      const e = err as { statusCode: number; code?: string; message: string; details?: Record<string, unknown> };
+      const info: AppErrorInfo = {
+        statusCode: e.statusCode,
+        code: e.code ?? 'INTERNAL_ERROR',
+        message: e.message,
+      };
+      if (e.details !== undefined) {
+        info.details = e.details;
+      }
+      return info;
+    },
+    ...(config.storage.provider === 'local'
+      ? { staticServe: { root: path.resolve(config.storage.rootPath), prefix: '/uploads/' } }
+      : {}),
+  });
 
   return server;
 }

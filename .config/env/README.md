@@ -136,7 +136,7 @@ NODE_ENV=test pnpm test
 
 **To change the directory:**
 
-1. Modify `packages/core/src/config/env.loader.ts`
+1. Modify `shared/core/src/config/env.loader.ts`
 2. Update the `configDir` path in the `initEnv()` function
 3. Or use `ENV_FILE` to point to a specific file anywhere
 
@@ -172,9 +172,9 @@ ENV_FILE=.env pnpm dev
 
 ## 📚 Related Documentation
 
-- **Configuration System:** [packages/core/src/config/README.md](/packages/core/src/config/README.md)
+- **Configuration System:** [shared/core/src/config/README.md](/shared/core/src/config/README.md)
 - **Server Config:** [apps/server/src/config/README.md](/apps/server/src/config/README.md)
-- **Environment Variables:** [docs/deploy/env.md](/docs/deploy/env.md)
+- **Environment Variables:** [apps/docs/deploy/env.md](/apps/docs/deploy/env.md)
 
 ## 🛠 Troubleshooting
 

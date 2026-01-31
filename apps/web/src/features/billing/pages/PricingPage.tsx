@@ -3,8 +3,8 @@
  * PricingPage - Public pricing page with plan selection.
  */
 
+import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/client';
 import { tokenStore } from '@abe-stack/core';
-import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/sdk';
 import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 

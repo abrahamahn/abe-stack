@@ -110,7 +110,7 @@ apps/desktop/
 
 To add a new IPC-based feature:
 
-1. **Define the contract** in `packages/core/src/contracts/native.ts`:
+1. **Define the contract** in `shared/core/src/contracts/native.ts`:
 
    ```typescript
    export interface NativeBridge {

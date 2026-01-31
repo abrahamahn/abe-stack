@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { SecurityEventsExportResponse } from '@abe-stack/core';
-import type { UseMutationResult } from '@abe-stack/sdk';
+import type { UseMutationResult } from '@abe-stack/client';
 
 // Create hoisted mocks for ESM module compatibility
 const mocks = vi.hoisted(() => ({
@@ -12,8 +12,8 @@ const mocks = vi.hoisted(() => ({
   mockExportSecurityEvents: vi.fn(),
 }));
 
-vi.mock('@abe-stack/sdk', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+vi.mock('@abe-stack/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/client')>();
   return {
     ...actual,
     useMutation: mocks.mockUseMutation,

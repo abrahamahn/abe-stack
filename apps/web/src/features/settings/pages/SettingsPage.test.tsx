@@ -6,7 +6,7 @@ import { SettingsPage } from './SettingsPage';
 
 import type { User } from '../api';
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -37,7 +37,7 @@ vi.mock('@abe-stack/ui', () => ({
   ),
 }));
 
-import { useQuery } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/client';
 
 describe('SettingsPage', () => {
   const mockUser: User = {

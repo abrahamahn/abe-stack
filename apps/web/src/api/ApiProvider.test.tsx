@@ -1,5 +1,5 @@
 // apps/web/src/api/ApiProvider.test.tsx
-import { QueryCache } from '@abe-stack/sdk';
+import { QueryCache } from '@abe-stack/client';
 import { MemoryRouter } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,8 +16,8 @@ const { mockTokenGet } = vi.hoisted(() => ({
 }));
 
 // Mock dependencies - use importOriginal for partial mocking
-vi.mock('@abe-stack/sdk', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+vi.mock('@abe-stack/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/client')>();
   return {
     ...actual,
     createApiClient: vi.fn(() => ({

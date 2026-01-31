@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 // @ts-ignore - Resolving from monorepo source without build
-import { initEnv } from '../packages/core/src/config/env.loader';
+import { initEnv } from '../shared/core/src/config/env.loader';
 
 // Initialize environment variables using the custom monorepo loader
 initEnv();

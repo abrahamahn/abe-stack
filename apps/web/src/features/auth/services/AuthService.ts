@@ -6,11 +6,11 @@
  * Uses internal state management for user data, token store for persistence.
  */
 
+import { createApiClient } from '@abe-stack/client';
 import { tokenStore } from '@abe-stack/core';
-import { createApiClient } from '@abe-stack/sdk';
 
 import type { ClientConfig } from '@/config';
-import type { ApiClient } from '@abe-stack/sdk';
+import type { ApiClient } from '@abe-stack/client';
 
 // ============================================================================
 // Local Type Definitions

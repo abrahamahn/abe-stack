@@ -5,7 +5,7 @@
  * These tests verify that the test infrastructure (providers, mocks, etc.)
  * is working correctly before running more complex integration tests.
  */
-import { QueryCache, QueryCacheProvider, useQuery } from '@abe-stack/sdk';
+import { QueryCache, QueryCacheProvider, useQuery } from '@abe-stack/client';
 import { MemoryRouter, useAuthModeNavigation, useNavigate } from '@abe-stack/ui';
 import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import React from 'react';

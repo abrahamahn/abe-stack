@@ -12,7 +12,7 @@ vi.mock('@abe-stack/core', () => ({
   tokenStore: { get: vi.fn().mockReturnValue(null) },
 }));
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   createApiError: vi.fn((status: number, data: unknown) => new Error(`API Error ${status}: ${JSON.stringify(data)}`)),
   NetworkError: class NetworkError extends Error {
     constructor(message: string) {

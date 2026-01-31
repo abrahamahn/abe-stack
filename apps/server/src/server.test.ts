@@ -55,14 +55,17 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
   };
 });
 
-// Mock the http infrastructure - server.ts imports from @/infrastructure/http
-vi.mock('./infrastructure/http', () => ({
+// Mock the http package - server.ts imports from @abe-stack/http
+vi.mock('@abe-stack/http', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 
-// Also mock the plugins module directly
-vi.mock('./infrastructure/http/plugins', () => ({
-  registerPlugins: mockRegisterPlugins,
+// Mock security package for RateLimiter
+vi.mock('@abe-stack/security', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  RateLimiter: class {
+    check = vi.fn();
+  },
 }));
 
 // Import after mocks are set up
@@ -99,6 +102,20 @@ function createMockConfig(overrides?: Partial<AppConfig>): AppConfig {
       password: 'test',
       ssl: false,
       maxConnections: 10,
+    },
+    auth: {
+      cookie: {
+        name: 'test_cookie',
+        secret: 'test_secret_min_32_chars_long_!',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+      },
+    },
+    storage: {
+      provider: 'local',
+      rootPath: '/tmp/test-uploads',
     },
     ...overrides,
   } as AppConfig;
@@ -323,7 +340,20 @@ describe('createServer', () => {
 
       await createServer({ config, db });
 
-      expect(mockRegisterPlugins).toHaveBeenCalledWith(mockFastifyInstance, config);
+      expect(mockRegisterPlugins).toHaveBeenCalledWith(
+        mockFastifyInstance,
+        expect.objectContaining({
+          env: config.env,
+          corsOrigin: config.server.cors.origin.join(','),
+          corsCredentials: config.server.cors.credentials,
+          corsMethods: config.server.cors.methods,
+          cookieSecret: config.auth.cookie.secret,
+          staticServe: expect.objectContaining({
+            root: expect.any(String) as string,
+            prefix: '/uploads/',
+          }) as Record<string, unknown>,
+        }),
+      );
     });
   });
 

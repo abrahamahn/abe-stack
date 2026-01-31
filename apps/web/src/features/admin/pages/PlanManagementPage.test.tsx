@@ -87,8 +87,8 @@ vi.mock('@abe-stack/core', () => ({
   },
 }));
 
-// Mock @abe-stack/sdk
-vi.mock('@abe-stack/sdk', () => ({
+// Mock @abe-stack/client
+vi.mock('@abe-stack/client', () => ({
   useAdminPlans: () => ({
     plans: [],
     isLoading: false,
