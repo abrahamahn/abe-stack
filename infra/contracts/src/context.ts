@@ -16,7 +16,8 @@
  * @module context
  */
 
-import type { Logger } from './types';
+import type { BillingService } from './billing/service';
+import type { EmailService, Logger, NotificationService, StorageService } from './types';
 
 // ============================================================================
 // Base Context
@@ -151,4 +152,81 @@ export interface ReplyContext {
    * @param options - Cookie options (path, etc.)
    */
   clearCookie: (name: string, options: Record<string, unknown>) => void;
+}
+
+// ============================================================================
+// Capability Interfaces (Context Composition Pattern)
+// ============================================================================
+
+/**
+ * Capability interfaces for composing module-specific contexts.
+ *
+ * Instead of each module independently defining its full context type,
+ * modules compose BaseContext with only the capabilities they need:
+ *
+ * @example
+ * ```typescript
+ * // Auth needs email + cookie support
+ * type AuthContext = BaseContext & HasEmail & {
+ *   readonly emailTemplates: AuthEmailTemplates;
+ *   readonly config: { readonly auth: AuthConfig };
+ * };
+ *
+ * // Users needs storage for avatars
+ * type UsersContext = BaseContext & HasStorage & {
+ *   readonly config: { readonly auth: UsersAuthConfig };
+ * };
+ *
+ * // Server's AppContext implements all capabilities:
+ * // AppContext extends IServiceContainer (which has email, storage, billing, etc.)
+ * // → structurally satisfies any module context without casting
+ * ```
+ */
+
+/** Email sending capability */
+export interface HasEmail {
+  readonly email: EmailService;
+}
+
+/** File storage capability */
+export interface HasStorage {
+  readonly storage: StorageService;
+}
+
+/** Push notification capability */
+export interface HasNotifications {
+  readonly notifications: NotificationService;
+}
+
+/**
+ * Billing/payment capability.
+ *
+ * Uses the `BillingService` interface from contracts (re-exported from
+ * `@abe-stack/core`). The server provides the concrete implementation
+ * via Stripe/PayPal providers.
+ */
+export interface HasBilling {
+  readonly billing: BillingService;
+}
+
+/**
+ * Pub/sub subscription capability.
+ *
+ * Typed as `unknown` because `SubscriptionManager` lives in `@abe-stack/core`
+ * which contracts cannot import (circular dependency). Modules that need
+ * pubsub narrow this to the concrete type from `@abe-stack/core`.
+ */
+export interface HasPubSub {
+  readonly pubsub: unknown;
+}
+
+/**
+ * Cache provider capability.
+ *
+ * Typed as `unknown` because `CacheProvider` lives in `@abe-stack/cache`
+ * (Tier 2), which contracts (Tier 1) cannot import. Modules that need
+ * caching narrow this to the concrete type from `@abe-stack/cache`.
+ */
+export interface HasCache {
+  readonly cache: unknown;
 }

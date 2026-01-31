@@ -1,7 +1,7 @@
 // apps/server/src/types/context.ts
 
 import type { AuthEmailTemplates } from '@abe-stack/auth';
-import type { BaseContext } from '@abe-stack/contracts';
+import type { BaseContext, ReplyContext, RequestInfo } from '@abe-stack/contracts';
 import type {
     AppConfig,
     BillingService,
@@ -15,24 +15,24 @@ import type { QueueServer, WriteService } from '@abe-stack/jobs';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================
-// Request Context
-// ============================================================================
-
-export interface RequestInfo {
-  ipAddress: string;
-  userAgent: string | undefined;
-  deviceId?: string;
-}
-
-// ============================================================================
 // Fastify Request/Reply Extensions
 // ============================================================================
 
-export interface ReplyWithCookies {
-  setCookie: (name: string, value: string, options: Record<string, unknown>) => void;
-  clearCookie: (name: string, options: Record<string, unknown>) => void;
-}
+/**
+ * Fastify-specific reply augmentation.
+ *
+ * Structurally identical to `ReplyContext` from `@abe-stack/contracts`,
+ * but kept as a distinct type alias for Fastify's `declare module` augmentation.
+ */
+export type ReplyWithCookies = ReplyContext;
 
+/**
+ * Fastify-specific request augmentation.
+ *
+ * Uses `RequestInfo` from `@abe-stack/contracts` for client metadata.
+ * Extends the framework-agnostic `RequestContext` with Fastify-specific
+ * properties (ip, requestStart, context).
+ */
 export interface RequestWithCookies {
   cookies: Record<string, string | undefined>;
   headers: {

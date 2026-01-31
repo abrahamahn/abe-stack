@@ -19,7 +19,7 @@ import { RateLimiter } from '@abe-stack/security';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
-import type { AppConfig } from '@/config';
+import type { AppConfig } from '@abe-stack/core/config';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 
 // Mock function type that is callable

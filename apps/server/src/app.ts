@@ -1,10 +1,11 @@
 // apps/server/src/app.ts
 
 import { verifyToken } from '@abe-stack/auth';
+import { createBillingProvider } from '@abe-stack/billing';
 import { createMemoryCache } from '@abe-stack/cache';
 import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
 import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import { createDbClient, getRepositoryContext, getSearchProviderFactory, requireValidSchema } from '@abe-stack/db';
+import { buildConfigConnectionString as buildConnectionString, createDbClient, DEFAULT_SEARCH_SCHEMAS, getRepositoryContext, getSearchProviderFactory, requireValidSchema } from '@abe-stack/db';
 import { createEmailService, emailTemplates } from '@abe-stack/email';
 import { createPostgresQueueStore, createQueueServer, createWriteService } from '@abe-stack/jobs';
 import { createNotificationProviderService } from '@abe-stack/notifications';
@@ -13,8 +14,6 @@ import { createStorage } from '@abe-stack/storage';
 import { logStartupSummary } from '@health';
 import { registerRoutes } from '@routes';
 import { type AppContext, type IServiceContainer } from '@shared';
-
-import { createBillingProvider } from '../../../modules/billing/src';
 
 import type { CacheProvider } from '@abe-stack/cache';
 import type { AppConfig, BillingService, EmailService, NotificationService } from '@abe-stack/core';
@@ -25,7 +24,6 @@ import type { FcmConfig, NotificationFactoryOptions } from '@abe-stack/notificat
 import type { StorageProvider } from '@abe-stack/storage';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
-import { buildConnectionString, DEFAULT_SEARCH_SCHEMAS } from '@/config';
 import { createServer, listen } from '@/server';
 
 export interface AppOptions {

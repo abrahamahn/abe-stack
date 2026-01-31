@@ -164,6 +164,16 @@ export type {
   RequestInfo,
 } from './context';
 
+// Capability interfaces (Context Composition pattern)
+export type {
+  HasBilling,
+  HasCache,
+  HasEmail,
+  HasNotifications,
+  HasPubSub,
+  HasStorage,
+} from './context';
+
 // Pagination schemas
 export {
   cursorPaginatedResultSchema,

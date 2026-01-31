@@ -14,7 +14,7 @@ import {
 
 import { createRequestLogger } from './logger';
 
-import type { Logger, RequestContext } from './types';
+import type { Logger, RequestContext } from '@abe-stack/core/infrastructure/logger';
 import type { FastifyInstance } from 'fastify';
 
 // Extend Fastify request with our custom properties
