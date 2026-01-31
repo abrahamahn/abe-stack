@@ -8,13 +8,13 @@
  * No re-exports — consumers import directly from source packages.
  */
 
+import { adminRoutes } from '@abe-stack/admin';
 import { authRoutes } from '@abe-stack/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/billing';
 import { notificationRoutes } from '@abe-stack/notifications';
 import { realtimeRoutes } from '@abe-stack/realtime';
 import { userRoutes } from '@abe-stack/users';
 
-import { adminRoutes } from '@abe-stack/admin';
 import { systemRoutes } from './system/routes';
 
 import type { AppContext } from '@shared';

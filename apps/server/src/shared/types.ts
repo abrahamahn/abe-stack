@@ -1,6 +1,6 @@
 // apps/server/src/shared/types.ts
 
-import type { QueueServer, ServerSearchProvider, WriteService } from '@/infrastructure/index';
+import type { ServerSearchProvider } from '@/infrastructure/index';
 import type { AuthEmailTemplates } from '@abe-stack/auth';
 import type { BaseContext } from '@abe-stack/contracts';
 import type {
@@ -10,80 +10,10 @@ import type {
   NotificationService,
   StorageService as StorageProvider,
   SubscriptionManager,
-  UserRole as CoreUserRole,
 } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@abe-stack/db';
+import type { QueueServer, WriteService } from '@abe-stack/jobs';
 import type { FastifyBaseLogger } from 'fastify';
-
-// ============================================================================
-// User Types
-// ============================================================================
-
-export type UserRole = CoreUserRole;
-
-export interface User {
-  id: string;
-  email: string;
-  name: string | null;
-  avatarUrl: string | null;
-  role: UserRole;
-  createdAt: Date;
-}
-
-export interface UserWithPassword extends User {
-  passwordHash: string;
-}
-
-// ============================================================================
-// Token Types
-// ============================================================================
-
-export interface TokenPayload {
-  userId: string;
-  email: string;
-  role: UserRole;
-  iat?: number;
-  exp?: number;
-}
-
-export interface RefreshTokenData {
-  token: string;
-  userId: string;
-  familyId: string;
-  expiresAt: Date;
-}
-
-// ============================================================================
-// Auth Types
-// ============================================================================
-
-export interface AuthResult {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface OAuthUserInfo {
-  provider: string;
-  providerId: string;
-  email: string;
-  name?: string;
-  picture?: string;
-  emailVerified?: boolean;
-}
-
-export interface MagicLinkData {
-  token: string;
-  email: string;
-  expiresAt: Date;
-  used: boolean;
-}
-
-export interface TotpSecret {
-  secret: string;
-  uri: string;
-  qrCode?: string;
-}
 
 // ============================================================================
 // Request Context
@@ -121,15 +51,6 @@ export interface RequestWithCookies {
   /** Application Context (Hybrid Pattern) - Available on request via hook */
   context?: AppContext | undefined;
 }
-
-// ============================================================================
-// Service Interfaces (Ports)
-// ============================================================================
-
-/**
- * Storage provider interface (Alias for core StorageService)
- */
-export type { StorageProvider };
 
 // ============================================================================
 // Service Container Interface (Composition Root)

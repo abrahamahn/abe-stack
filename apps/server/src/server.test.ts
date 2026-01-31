@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { AppConfig } from '@/config/index';
-import type { DbClient } from '@/infrastructure/index';
+import type { DbClient } from '@abe-stack/db';
 import type { HasContext, IServiceContainer } from '@shared/index';
 import type { FastifyInstance } from 'fastify';
 

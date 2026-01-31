@@ -1,163 +1,15 @@
 // apps/server/src/infrastructure/index.ts
 /**
- * Infrastructure Layer
+ * Infrastructure Layer — Local Adapters Only
  *
- * Technical capabilities organized by concern:
- * - database: Database client, schema, transactions
- * - storage: File storage providers (local, S3)
- * - email: Email sending services
- * - pubsub: Real-time subscription management (with Postgres NOTIFY/LISTEN)
- * - queue: Background job processing (Chet-stack pattern)
- * - rbac: Role/attribute-based access control (custom Ability system)
- * - security: Login tracking, lockout, audit logging
- * - http: Security headers, CORS middleware
- * - rate-limit: Token Bucket rate limiter
- * - crypto: Native JWT implementation (HS256)
- * - search: Elasticsearch/SQL search providers
- * - billing: Stripe/PayPal payment providers
- * - media: Video/Image processing queue
+ * Server-specific infrastructure wiring.
+ * Package code should be imported directly from @abe-stack/* packages.
  */
 
-// Database
-export {
-  EMAIL_VERIFICATION_TOKENS_TABLE,
-  EMAIL_VERIFICATION_TOKEN_COLUMNS,
-  LOGIN_ATTEMPTS_TABLE,
-  LOGIN_ATTEMPT_COLUMNS,
-  MAGIC_LINK_TOKENS_TABLE,
-  MAGIC_LINK_TOKEN_COLUMNS,
-  NOTIFICATION_PREFERENCES_TABLE,
-  NOTIFICATION_PREFERENCE_COLUMNS,
-  OAUTH_CONNECTIONS_TABLE,
-  OAUTH_CONNECTION_COLUMNS,
-  OAUTH_PROVIDERS,
-  // Optimistic locking
-  OptimisticLockError,
-  PASSWORD_RESET_TOKENS_TABLE,
-  PASSWORD_RESET_TOKEN_COLUMNS,
-  PUSH_SUBSCRIPTIONS_TABLE,
-  PUSH_SUBSCRIPTION_COLUMNS,
-  REFRESH_TOKENS_TABLE,
-  REFRESH_TOKEN_COLUMNS,
-  REFRESH_TOKEN_FAMILIES_TABLE,
-  REFRESH_TOKEN_FAMILY_COLUMNS,
-  // Schema validation
-  REQUIRED_TABLES,
-  SECURITY_EVENTS_TABLE,
-  SECURITY_EVENT_COLUMNS,
-  SchemaValidationError,
-  // Table constants
-  USERS_TABLE,
-  USER_COLUMNS,
-  // Client
-  buildConnectionString,
-  closeRepositories,
-  createDbClient,
-  // Repository layer (raw SQL query builder)
-  createRepositories,
-  getExistingTables,
-  getRepositoryContext,
-  isInTransaction,
-  isOptimisticLockError,
-  requireValidSchema,
-  resolveConnectionStringWithFallback,
-  updateUserWithVersion,
-  validateSchema,
-  // Transaction
-  withTransaction,
-  type DbClient,
-  type NotificationChannel as DbNotificationChannel,
-  type NotificationPreference as DbNotificationPreference,
-  type NotificationType as DbNotificationType,
-  type PushSubscription as DbPushSubscription,
-  type EmailVerificationToken,
-  type LoginAttempt,
-  type MagicLinkToken,
-  type NewEmailVerificationToken,
-  type NewLoginAttempt,
-  type NewMagicLinkToken,
-  type NewNotificationPreference,
-  type NewOAuthConnection,
-  type NewPasswordResetToken,
-  type NewPushSubscription,
-  type NewRefreshToken,
-  type NewRefreshTokenFamily,
-  type NewSecurityEvent,
-  type NewUser,
-  type OAuthConnection,
-  type OAuthProvider,
-  type PasswordResetToken,
-  type QuietHoursConfig,
-  type RefreshToken,
-  type RefreshTokenFamily,
-  type Repositories,
-  type RepositoryContext,
-  type RequiredTable,
-  type SchemaValidationResult,
-  type SecurityEvent,
-  type TypePreferences,
-  type UpdateOAuthConnection,
-  type UpdateUser,
-  // Types
-  type User,
-  type UserRole,
-} from '@abe-stack/db';
-
-// Storage
-export {
-  LocalStorageProvider,
-  S3StorageProvider,
-  createStorage,
-  normalizeStorageKey,
-  type LocalStorageConfig,
-  type S3StorageConfig,
-  type StorageConfig,
-  type StorageProvider,
-  type StorageProviderName,
-  type UploadParams,
-} from '@abe-stack/storage';
-
-// Email (from @abe-stack/email package)
-export {
-  ConsoleEmailService,
-  SmtpEmailService,
-  createEmailService,
-  emailTemplates,
-} from '@abe-stack/email';
-export type { EmailOptions, EmailResult, EmailService } from '@abe-stack/email';
-
-// Login Security (from @abe-stack/auth package)
-export {
-  applyProgressiveDelay,
-  clearLoginAttempts,
-  getAccountLockoutStatus,
-  getProgressiveDelay,
-  isAccountLocked,
-  logLoginAttempt,
-  unlockAccount,
-  type LockoutConfig,
-  type LockoutStatus,
-} from '@abe-stack/auth';
-
-// Security Events (from @abe-stack/auth package)
-export {
-  getSecurityEventMetrics,
-  getUserSecurityEvents,
-  logAccountLockedEvent,
-  logAccountUnlockedEvent,
-  logSecurityEvent,
-  logTokenFamilyRevokedEvent,
-  logTokenReuseEvent,
-  type LogSecurityEventParams,
-  type SecurityEventMetadata,
-  type SecurityEventSeverity,
-  type SecurityEventType,
-} from '@abe-stack/auth';
-
-// HTTP (Security headers, CORS)
+// HTTP (Security headers, CORS — local middleware wrappers)
 export { applyCors, applySecurityHeaders, handlePreflight, type CorsOptions } from './http';
 
-// Proxy Validation (IP address validation with CIDR support)
+// Proxy Validation (IP address validation with CIDR support — local wrappers)
 export {
   getValidatedClientIp,
   ipMatchesCidr,
@@ -172,68 +24,42 @@ export {
   type ProxyValidationConfig,
 } from './http/middleware';
 
-// WebSocket
-// NOTE: WebSocket exports remain local because:
-// 1. registerWebSocket has a different signature in the package (3 args with injected
-//    TokenVerifier) vs local (2 args with AppContext that verifies tokens internally).
-// 2. getWebSocketStats and registerWebSocket share module-level state (connection
-//    counters), so both must come from the same module to stay consistent.
-// Full rewiring requires updating app.ts to pass the TokenVerifier option.
+// Router (Local router with AppContext handler signatures)
+export {
+  createRouteMap,
+  protectedRoute,
+  publicRoute,
+  registerRouteMap,
+  type BaseRouteDefinition,
+  type HttpMethod,
+  type ProtectedHandler,
+  type PublicHandler,
+  type RouteDefinition,
+  type RouteHandler,
+  type RouteMap,
+  type RouteResult,
+  type RouterOptions,
+  type ValidationSchema,
+} from './http/router';
+
+// Pagination (local wrappers)
+export {
+  createPaginationHelpers,
+  createPaginationMiddleware,
+  type PaginationContext,
+  type PaginationHelpers,
+  type PaginationMiddlewareOptions,
+  type PaginationRequest,
+} from './http/pagination';
+
+// WebSocket (local — shares module-level state between register and getStats)
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './messaging/websocket';
 
-// Billing (from @abe-stack/billing package)
-export {
-  createBillingProvider,
-  isBillingConfigured,
-  PayPalProvider,
-  StripeProvider,
-} from '@abe-stack/billing';
-// Note: Billing types (BillingService, CheckoutParams, NormalizedWebhookEvent, etc.)
-// should be imported directly from @abe-stack/core
-
-// Search
+// Search (local — server-specific SQL/Elasticsearch adapters)
 export { SearchProviderFactory, getSearchProviderFactory } from './search';
 export type { SearchProviderType, SearchResultWithMetrics, ServerSearchProvider } from './search';
 
-// Write Service (from @abe-stack/jobs package)
-export { WriteService, createWriteService } from '@abe-stack/jobs';
-export type { OperationResult, WriteBatch, WriteOperation, WriteResult } from '@abe-stack/jobs';
-
-// Rate Limiting (from @abe-stack/security package)
-export {
-  MemoryStore,
-  RateLimitPresets,
-  RateLimiter,
-  createRateLimiter,
-  type MemoryStoreStats,
-  type RateLimitConfig,
-  type RateLimitInfo,
-  type RateLimiterStats,
-} from '@abe-stack/security';
-
-// Crypto (Native JWT) - Base JWT from core, rotation support from local
-export {
-  decode as jwtDecode,
-  JwtError,
-  sign as jwtSign,
-  verify as jwtVerify,
-  type JwtErrorCode,
-  type JwtHeader,
-  type JwtPayload,
-  type SignOptions as JwtSignOptions,
-} from '@abe-stack/core/infrastructure/crypto';
-
-// JWT Rotation Support (from @abe-stack/security package)
-export {
-  checkTokenSecret,
-  createJwtRotationHandler,
-  signWithRotation,
-  verifyWithRotation,
-  type JwtRotationConfig,
-  type RotatingJwtOptions,
-} from '@abe-stack/security';
-
-// Health Checks
+// Health Checks (local — integrates all infrastructure components)
 export {
   checkDatabase,
   checkEmail,
@@ -253,7 +79,7 @@ export {
   type StartupSummaryOptions,
 } from './monitor/health';
 
-// Logger
+// Logger (local — server-specific logging middleware and context)
 export {
   LOG_LEVELS,
   createJobCorrelationId,
@@ -272,131 +98,7 @@ export {
   type RequestContext,
 } from './monitor/logger';
 
-// Queue (Background Jobs - from @abe-stack/jobs package)
-export {
-  MemoryQueueStore,
-  PostgresQueueStore,
-  QueueServer,
-  createMemoryQueueStore,
-  createPostgresQueueStore,
-  createQueueServer,
-  type JobDetails,
-  type JobListOptions,
-  type JobListResult,
-  type JobStatus,
-  type QueueConfig,
-  type QueueServerOptions,
-  type QueueStats,
-  type QueueStore,
-  type Task,
-  type TaskError,
-  type TaskHandler,
-  type TaskHandlers,
-  type TaskResult,
-} from '@abe-stack/jobs';
-
-// Scheduled Jobs (Cleanup, Maintenance - from @abe-stack/jobs package)
-export {
-  DEFAULT_INACTIVE_DAYS,
-  DEFAULT_RETENTION_DAYS,
-  MAX_BATCH_SIZE,
-  MIN_RETENTION_DAYS,
-  PUSH_MAX_BATCH_SIZE,
-  // Login Cleanup
-  cleanupOldLoginAttempts,
-  // Push Subscription Cleanup
-  cleanupPushSubscriptions,
-  countOldLoginAttempts,
-  countPushCleanupCandidates,
-  getLoginAttemptStats,
-  getPushSubscriptionStats,
-  getTotalLoginAttemptCount,
-  type CleanupOptions,
-  type CleanupResult,
-  type PushCleanupOptions,
-  type PushCleanupResult,
-} from '@abe-stack/jobs';
-
-// Router (Generic Route Registration)
-export {
-  protectedRoute,
-  publicRoute,
-  registerRouteMap,
-  type HttpMethod,
-  type ProtectedHandler,
-  type PublicHandler,
-  type RouteDefinition,
-  type RouteHandler,
-  type RouteMap,
-  type RouteResult,
-  type RouterOptions,
-  type ValidationSchema,
-} from './http/router';
-
-// Pagination
-export {
-  createPaginationHelpers,
-  createPaginationMiddleware,
-  type PaginationContext,
-  type PaginationHelpers,
-  type PaginationMiddlewareOptions,
-  type PaginationRequest,
-} from './http/pagination';
-
-// Permissions (Row-level access control - from @abe-stack/security package)
-export {
-  PERMISSION_TYPES,
-  PermissionChecker,
-  // Types and helpers
-  allowed,
-  // Checker
-  createAdminRule,
-  createCustomRule,
-  createDefaultPermissionConfig,
-  createMemberRule,
-  createOwnerRule,
-  createPermissionChecker,
-  // Middleware
-  createPermissionMiddleware,
-  createStandalonePermissionGuard,
-  denied,
-  getPermissionDenialReason,
-  getRecordIdFromParams,
-  getRecordKey,
-  hasPermission,
-  isAllowed,
-  isDenied,
-  parseRecordKey,
-  // Types
-  type BatchRecordLoader,
-  type CustomRule,
-  type MembershipRule,
-  type OwnershipRule,
-  type PermissionAllowed,
-  type PermissionCheck,
-  type PermissionCheckerOptions,
-  type PermissionConfig,
-  type PermissionContext,
-  type PermissionDenied,
-  type PermissionGuardOptions,
-  type PermissionMiddlewareOptions,
-  type PermissionRecord,
-  type PermissionResult,
-  type PermissionRule,
-  type PermissionRuleBase,
-  type PermissionRuleType,
-  type PermissionType,
-  type PreHandlerHook,
-  type RecordLoader,
-  type RecordPointer,
-  type RoleRule,
-  type TablePermissionConfig,
-} from '@abe-stack/security';
-
-// Media (Processing)
-export { ServerMediaQueue, createServerMediaQueue, type MediaJobData } from './media';
-
-// Notifications (Push)
+// Notifications (local factory — thin adapter over @abe-stack/notifications)
 export {
   FcmProvider,
   createFcmProvider,
@@ -410,35 +112,3 @@ export {
   type SendOptions,
   type SubscriptionWithId,
 } from './notifications';
-
-// Cache (from @abe-stack/cache package)
-export {
-  createArgIndexKeyGenerator,
-  createCache,
-  createCacheFromEnv,
-  createMemoryCache,
-  createObjectKeyGenerator,
-  LRUCache,
-  memoize,
-  memoizeMethod,
-  MemoryCacheProvider,
-  type BaseCacheConfig,
-  type CacheDeleteOptions,
-  type CacheEntry,
-  type CacheEntryMetadata,
-  type CacheEvictionReason,
-  type CacheGetOptions,
-  type CacheLogger,
-  type CacheOperationResult,
-  type CacheProvider,
-  type CacheSetOptions,
-  type CacheStats,
-  type CreateCacheOptions,
-  type EvictionCallback,
-  type EvictionReason,
-  type LRUCacheOptions,
-  type MemoizedFunction,
-  type MemoizeOptions,
-  type MemoizeStats,
-  type MemoryCacheConfig,
-} from '@abe-stack/cache';
