@@ -211,9 +211,9 @@ You can only import from tiers **BELOW** you.
 
 ## Appendix: Current Code Evaluation
 
-*Audit date: January 2025*
+*Last updated: January 2026*
 
-This section evaluates the current state of the codebase against the architecture defined above. It covers import direction compliance, responsibility boundary adherence, and identifies what needs to migrate.
+This section evaluates the current state of the codebase against the architecture defined above. It covers import direction compliance, responsibility boundary adherence, and migration progress.
 
 ---
 
@@ -221,7 +221,7 @@ This section evaluates the current state of the codebase against the architectur
 
 **Result: CLEAN — 0 violations.**
 
-Scanned 848 source files across all 18 packages, checking 2,859 import statements.
+All cross-package imports flow in the correct direction (same-tier or downward). No packages import from apps.
 
 | Check | Status |
 |---|---|
@@ -231,139 +231,98 @@ Scanned 848 source files across all 18 packages, checking 2,859 import statement
 | Tier 3 (Modules) importing Tier 4 | **CLEAN** |
 | `package.json` dependency direction | **CLEAN** |
 
-All cross-package imports flow in the correct direction (same-tier or downward).
-
 **Current dependency map (all valid):**
 
 - **Tier 1:** `core` imports from `contracts` (same tier)
 - **Tier 2:** `cache`, `db`, `email`, `storage` import from `core` (T1). `http` imports from `contracts`, `core` (T1). `jobs` imports from `core` (T1), `db` (T2 same tier).
-- **Tier 3:** `auth` imports from `contracts`, `core` (T1), `db`, `http` (T2), `security` (T3 same tier). `billing` imports from `contracts`, `core` (T1), `db` (T2). `users` imports from `auth` (T3 same tier), `contracts`, `core` (T1), `db`, `http`, `storage` (T2). `notifications` imports from `contracts`, `core` (T1), `db`, `http` (T2). `realtime` imports from `contracts`, `core` (T1), `db`, `http` (T2).
+- **Tier 3:** `auth` imports from `contracts`, `core` (T1), `db`, `http` (T2), `security` (T3 same tier). `billing` imports from `contracts`, `core` (T1), `db` (T2). `users` imports from `auth` (T3 same tier), `contracts`, `core` (T1), `db`, `http`, `storage` (T2). `notifications` imports from `contracts`, `core` (T1), `db`, `http` (T2). `realtime` imports from `contracts`, `core` (T1), `db`, `http` (T2). `admin` imports from `auth`, `billing` (T3 same tier), `contracts`, `core` (T1), `db`, `http`, `jobs` (T2).
 
 ---
 
 ### B. Responsibility Boundary — `apps/server` Size
 
-**Target:** ~10–15 files.
-**Actual:** ~116 non-test source files (approximately 8x the target).
+**Target:** ~10–15 core files + config.
+**Current:** ~76 non-test source files (down from ~116 before migration).
 
 ```
 apps/server/src/
-├── main.ts              ← GOOD (thin entry point, 60 lines)
-├── app.ts               ← ACCEPTABLE (composition root, 304 lines — slightly thick)
+├── main.ts              ← GOOD (thin entry point)
+├── app.ts               ← GOOD (composition root — imports from source packages directly)
 ├── server.ts            ← GOOD (Fastify factory)
-├── config/              ← GOOD (18 files — env config loading)
-├── infrastructure/      ← MIXED (~42 files — some belong in packages)
-│   ├── http/            ← Middleware, pagination, router
-│   ├── media/           ← Full media processing pipeline
-│   ├── messaging/       ← WebSocket adapter
-│   ├── monitor/         ← Health checks, logging
-│   ├── notifications/   ← FCM provider, notification factory
+├── config/              ← GOOD (18 files — env config loading, server's job)
+├── infrastructure/      ← ACCEPTABLE (37 files — local server-specific adapters)
+│   ├── http/            ← Local router (AppContext-typed), middleware, pagination, plugins
+│   ├── messaging/       ← WebSocket adapter (module-level state)
+│   ├── monitor/         ← Health checks, logging middleware
+│   ├── notifications/   ← FCM provider factory (thin adapter)
 │   └── search/          ← Elasticsearch/SQL search providers
-├── modules/             ← VIOLATION (~33 files — business logic)
-│   ├── admin/           ← 12 files: services, handlers, routes
-│   ├── billing/         ← 7 files: service, handlers, webhooks
-│   ├── users/           ← 2 files: handlers, routes
-│   └── system/          ← 3 files: handlers, routes
-├── services/            ← VIOLATION (cache service)
-├── shared/              ← VIOLATION (types, constants, error mapper)
-├── scripts/             ← OK (seed, bootstrap, db-push)
-├── types/               ← OK (declaration files)
-└── utils/               ← OK (request utils)
+├── modules/             ← GOOD (5 files — system module + route wiring)
+│   ├── routes.ts        ← Route wiring only (imports from @abe-stack/* packages)
+│   ├── index.ts         ← Barrel (exports registerRoutes only)
+│   └── system/          ← System routes/handlers (deployment-specific: health, uptime)
+├── services/            ← OK (2 files — cache service)
+├── shared/              ← GOOD (2 files — AppContext, IServiceContainer, HasContext only)
+├── scripts/             ← OK (3 files — seed, bootstrap, db-push)
+├── types/               ← OK (2 files — declaration files)
+└── utils/               ← OK (2 files — request utils)
 ```
+
+**No re-exports:** `infrastructure/index.ts` only exports local server-specific code. All package code is imported directly from `@abe-stack/*` packages by consumers.
 
 ---
 
-### C. Business Logic Violations in `apps/server`
+### C. Migration Progress
 
-These files contain business logic that should live in packages.
+#### Completed
 
-#### C.1 — Service Classes (should be in packages)
-
-| File | Lines | Business Logic |
+| Phase | What | Result |
 |---|---|---|
-| `modules/admin/billingService.ts` | 231 | Plan CRUD, plan-to-Stripe sync, "cannot deactivate plan with active subs" guard |
-| `modules/admin/userService.ts` | 223 | User listing, locking/unlocking, lock duration calculation, data mapping |
-| `modules/admin/securityService.ts` | 345 | Security event queries, metrics aggregation, CSV export generation |
-| `modules/admin/jobsService.ts` | 205 | Job listing, queue stats, retry/cancel, sensitive field redaction |
-| `modules/admin/service.ts` | 43 | Direct DB queries to unlock user accounts |
-| `modules/billing/service.ts` | 451 | Full subscription lifecycle, checkout sessions, payment methods, invoices |
+| **P0** | Admin services + handlers + routes → `packages/admin` (new) | ✅ Created package with `AdminAppContext`, `adminProtectedRoute` helper |
+| **P0** | Billing duplicate modules deleted (code in `packages/billing`) | ✅ Deleted `modules/billing/` (8 files) |
+| **P0** | Users duplicate modules deleted (code in `packages/users`) | ✅ Deleted `modules/users/` (5 files) |
+| **P0** | Route wiring rewritten — no re-exports | ✅ `modules/routes.ts` imports directly from `@abe-stack/*` |
+| **P1** | Dead auth types removed from `shared/types.ts` | ✅ Removed 12 unused type exports |
+| **P1** | `shared/constants.ts` + `shared/errorMapper.ts` deleted | ✅ Zero remaining consumers |
+| **P2** | `infrastructure/media/` deleted (unused, 29 files) | ✅ Completely unused code |
+| **P2** | Package re-exports removed from `infrastructure/index.ts` | ✅ Consumers import from source packages |
 
-#### C.2 — Route Handlers (should be in packages)
+**Lines removed from server:** ~25,000+ (across P0, P1, P2)
 
-| File | Lines | Handlers |
+#### Remaining (Optional)
+
+| Phase | What | Notes |
 |---|---|---|
-| `modules/admin/handlers.ts` | 67 | `handleAdminUnlock` |
-| `modules/admin/userHandlers.ts` | 287 | 5 user admin handlers |
-| `modules/admin/billingHandlers.ts` | 252 | 6 billing admin handlers |
-| `modules/admin/securityHandlers.ts` | ~200 | 4 security handlers |
-| `modules/admin/jobsHandlers.ts` | ~150 | 5 job handlers |
-| `modules/billing/handlers.ts` | 651 | 12 billing handlers |
-| `modules/users/handlers.ts` | 94 | 2 user handlers |
-| `modules/system/handlers.ts` | 159 | 7 system handlers |
-
-#### C.3 — Route Definitions (should be in packages)
-
-| File | Lines | Currently | Should Be |
-|---|---|---|---|
-| `modules/admin/routes.ts` | 248 | `apps/server` | `packages/admin` (new) |
-| `modules/billing/routes.ts` | 199 | `apps/server` | `packages/billing` |
-| `modules/users/routes.ts` | 52 | `apps/server` | `packages/users` |
-| `modules/system/routes.ts` | 34 | `apps/server` | `packages/core` or new `packages/system` |
-
-**Already correct (routes in packages):**
-- `authRoutes` — imported from `@abe-stack/auth`
-- `notificationRoutes` — imported from `@abe-stack/notifications`
-- `realtimeRoutes` — imported from `@abe-stack/realtime`
-
-#### C.4 — Types That Should Be in Packages
-
-| File | Lines | Types to Move | Destination |
-|---|---|---|---|
-| `shared/types.ts` | 230 | `TokenPayload`, `RefreshTokenData`, `AuthResult`, `OAuthUserInfo`, `MagicLinkData`, `TotpSecret` | `packages/auth` or `packages/contracts` |
-| `shared/constants.ts` | 127 | `ERROR_MESSAGES`, `REFRESH_COOKIE_NAME`, `CSRF_COOKIE_NAME`, `MIN_JWT_SECRET_LENGTH` | `packages/contracts` / `packages/auth` |
-| `infrastructure/search/types.ts` | 265 | `ServerSearchProvider`, `SearchContext`, provider configs | New `packages/search` |
-| `infrastructure/http/router/types.ts` | 123 | `RouteMap`, `RouteDefinition`, `RouterOptions` | `packages/http` |
+| **P3** | Replace `services/cache-service.ts` with `@abe-stack/cache` | Local is basic TTL; package has full LRU. Low priority — functional. |
+| **P3** | Unify local HTTP router with `@abe-stack/http` | Local uses `AppContext`; package uses `HandlerContext`. Requires system module handler updates. |
+| **P3** | Migrate notification factory to `@abe-stack/notifications` | Local is thin adapter. Low impact. |
+| **Known** | Fix billing `BillingRouteMap` type incompatibility | Pre-existing: billing uses custom route system divergent from `@abe-stack/http`. |
 
 ---
 
 ### D. What Is Correctly Placed
 
-| File | Why It's Correct |
+| File/Directory | Why It's Correct |
 |---|---|
 | `main.ts` | Thin entry point — config, create, start, shutdown. No business logic. |
-| `app.ts` | Composition root — DI wiring, plugin registration. (Slightly thick but acceptable.) |
+| `app.ts` | Composition root — DI wiring. Imports directly from source packages. |
 | `server.ts` | Fastify factory with plugin registration. |
-| `config/` | Environment variable loading — this is the server's job. |
-| Auth/Notification/Realtime routes | Imported from packages, registered with `app.register()`. |
+| `config/` | Environment variable loading — server's job. |
+| `modules/routes.ts` | Route wiring only — `registerRouteMap` calls importing from `@abe-stack/*` packages. |
+| `modules/system/` | Deployment-specific: health checks, uptime, route listing. |
+| `infrastructure/http/` | Local router with `AppContext` handler signatures (bridges packages to server). |
+| `infrastructure/monitor/` | Health checks integrate all infrastructure components. |
+| `infrastructure/messaging/` | WebSocket adapter with module-level connection state. |
+| `infrastructure/search/` | SQL/Elasticsearch adapters — server-specific provider selection. |
+| `shared/types.ts` | `AppContext`, `IServiceContainer`, `HasContext` — pure server DI types. |
 
 ---
 
-### E. Migration Roadmap
+### E. Architecture Patterns Established
 
-To reach the ~10–15 file target for `apps/server`, these migrations are needed:
+1. **Package context narrowing:** Each package defines a narrow `XxxAppContext extends BaseContext` (e.g., `AdminAppContext`). The server's full `AppContext` structurally satisfies all of them — no casting needed at the boundary.
 
-| Priority | What to Move | From | To |
-|---|---|---|---|
-| **P0** | Admin services + handlers + routes | `modules/admin/` (12 files) | New `packages/admin` |
-| **P0** | Billing service + handlers + webhooks | `modules/billing/` (7 files) | `packages/billing` (already exists) |
-| **P0** | User handlers + routes | `modules/users/` (2 files) | `packages/users` (already exists) |
-| **P1** | Auth-domain types | `shared/types.ts` | `packages/contracts` or `packages/auth` |
-| **P1** | Shared constants | `shared/constants.ts` | `packages/contracts` / `packages/auth` |
-| **P1** | Router contract types | `infrastructure/http/router/types.ts` | `packages/http` |
-| **P2** | Media processing pipeline | `infrastructure/media/` (15+ files) | `packages/media` (already exists) |
-| **P2** | Search providers | `infrastructure/search/` (5 files) | New `packages/search` |
-| **P2** | Notification providers | `infrastructure/notifications/` (4 files) | `packages/notifications` (already exists) |
-| **P2** | System handlers + routes | `modules/system/` (3 files) | `packages/core` or new `packages/system` |
-| **P3** | Cache service | `services/cache-service.ts` | `packages/cache` (already exists) |
-| **P3** | Error mapper | `shared/errorMapper.ts` | `packages/http` or `packages/core` |
+2. **Route helper pattern:** Packages that need specific context types define a module-specific `xxxProtectedRoute` helper (e.g., `adminProtectedRoute`) that wraps `protectedRoute` from `@abe-stack/http` and casts the handler context. This keeps route definitions clean while maintaining type safety in handlers.
 
-**After full migration, `apps/server/src/` would contain approximately:**
-- `main.ts` — entry point
-- `app.ts` — composition root
-- `server.ts` — Fastify factory
-- `config/index.ts` — config loading (+ config sub-modules)
-- `modules/routes.ts` — route wiring (`registerRouteMap` calls only)
-- `infrastructure/http/plugins.ts` — plugin registration
-- A few index/barrel files
+3. **No re-exports:** Consumers import directly from source packages. The `infrastructure/index.ts` barrel only exports local server-specific infrastructure code.
 
-**Estimated: ~6–10 core files + config files = within the 10–15 target.**
+4. **System module stays in server:** Health checks, uptime, route listing are deployment-specific and correctly remain in `apps/server/src/modules/system/`.
