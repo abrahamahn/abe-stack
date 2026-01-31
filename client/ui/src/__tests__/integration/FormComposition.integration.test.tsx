@@ -183,7 +183,7 @@ const RegistrationForm = ({
         label="Message"
         htmlFor="message"
         {...(fieldErrors.message !== undefined && { error: fieldErrors.message })}
-        helperText="Tell us about yourself"
+        description="Tell us about yourself"
         required
       >
         <TextArea

@@ -13,6 +13,8 @@
  */
 
 import {
+  changeEmailRequestSchema,
+  confirmEmailChangeRequestSchema,
   emailVerificationRequestSchema,
   forgotPasswordRequestSchema,
   loginRequestSchema,
@@ -20,6 +22,7 @@ import {
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
   setPasswordRequestSchema,
+  totpVerifyRequestSchema,
 } from '@abe-stack/core';
 import {
   createRouteMap,
@@ -30,6 +33,8 @@ import {
 } from '@abe-stack/http';
 
 import {
+  handleChangeEmail,
+  handleConfirmEmailChange,
   handleForgotPassword,
   handleLogin,
   handleLogout,
@@ -39,6 +44,10 @@ import {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleTotpDisable,
+  handleTotpEnable,
+  handleTotpSetup,
+  handleTotpStatus,
   handleVerifyEmail,
   type RegisterResult,
 } from './handlers';
@@ -48,6 +57,8 @@ import { oauthRouteEntries } from './oauth';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
 import type {
   AuthResponse,
+  ChangeEmailRequest,
+  ConfirmEmailChangeRequest,
   EmailVerificationRequest,
   ForgotPasswordRequest,
   LoginRequest,
@@ -55,6 +66,12 @@ import type {
   ResendVerificationRequest,
   ResetPasswordRequest,
   SetPasswordRequest,
+  TotpSetupResponse,
+  TotpStatusResponse,
+  TotpVerifyRequest,
+  TotpVerifyResponse,
+  ChangeEmailResponse,
+  ConfirmEmailChangeResponse,
 } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -246,6 +263,98 @@ export const authRoutes = createRouteMap([
         return handleResendVerification(asAppContext(ctx), body);
       },
       resendVerificationRequestSchema,
+    ),
+  ],
+
+  // TOTP (2FA) routes
+  [
+    'auth/totp/setup',
+    protectedRoute<undefined, TotpSetupResponse | { message: string }>(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        _body: undefined,
+        req: FastifyRequest,
+      ): Promise<RouteResult<TotpSetupResponse | { message: string }>> => {
+        return handleTotpSetup(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+      },
+    ),
+  ],
+
+  [
+    'auth/totp/enable',
+    protectedRoute<TotpVerifyRequest, TotpVerifyResponse | { message: string }>(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        body: TotpVerifyRequest,
+        req: FastifyRequest,
+      ): Promise<RouteResult<TotpVerifyResponse | { message: string }>> => {
+        return handleTotpEnable(asAppContext(ctx), body, req as unknown as RequestWithCookies);
+      },
+      'user',
+      totpVerifyRequestSchema,
+    ),
+  ],
+
+  [
+    'auth/totp/disable',
+    protectedRoute<TotpVerifyRequest, TotpVerifyResponse | { message: string }>(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        body: TotpVerifyRequest,
+        req: FastifyRequest,
+      ): Promise<RouteResult<TotpVerifyResponse | { message: string }>> => {
+        return handleTotpDisable(asAppContext(ctx), body, req as unknown as RequestWithCookies);
+      },
+      'user',
+      totpVerifyRequestSchema,
+    ),
+  ],
+
+  [
+    'auth/totp/status',
+    protectedRoute<undefined, TotpStatusResponse | { message: string }>(
+      'GET',
+      async (
+        ctx: HandlerContext,
+        _body: undefined,
+        req: FastifyRequest,
+      ): Promise<RouteResult<TotpStatusResponse | { message: string }>> => {
+        return handleTotpStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+      },
+    ),
+  ],
+
+  // Email change routes
+  [
+    'auth/change-email',
+    protectedRoute<ChangeEmailRequest, ChangeEmailResponse | { message: string }>(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        body: ChangeEmailRequest,
+        req: FastifyRequest,
+      ): Promise<RouteResult<ChangeEmailResponse | { message: string }>> => {
+        return handleChangeEmail(asAppContext(ctx), body, req as unknown as RequestWithCookies);
+      },
+      'user',
+      changeEmailRequestSchema,
+    ),
+  ],
+
+  [
+    'auth/change-email/confirm',
+    publicRoute<ConfirmEmailChangeRequest, ConfirmEmailChangeResponse | { message: string }>(
+      'POST',
+      async (
+        ctx: HandlerContext,
+        body: ConfirmEmailChangeRequest,
+      ): Promise<RouteResult<ConfirmEmailChangeResponse | { message: string }>> => {
+        return handleConfirmEmailChange(asAppContext(ctx), body);
+      },
+      confirmEmailChangeRequestSchema,
     ),
   ],
 

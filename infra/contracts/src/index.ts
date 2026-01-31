@@ -83,6 +83,10 @@ export type {
 export {
   authContract,
   authResponseSchema,
+  changeEmailRequestSchema,
+  changeEmailResponseSchema,
+  confirmEmailChangeRequestSchema,
+  confirmEmailChangeResponseSchema,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
   emptyBodySchema,
@@ -103,9 +107,17 @@ export {
   resetPasswordResponseSchema,
   setPasswordRequestSchema,
   setPasswordResponseSchema,
+  totpSetupResponseSchema,
+  totpStatusResponseSchema,
+  totpVerifyRequestSchema,
+  totpVerifyResponseSchema,
 } from './auth';
 export type {
   AuthResponse,
+  ChangeEmailRequest,
+  ChangeEmailResponse,
+  ConfirmEmailChangeRequest,
+  ConfirmEmailChangeResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
   EmptyBody,
@@ -126,6 +138,10 @@ export type {
   ResetPasswordResponse,
   SetPasswordRequest,
   SetPasswordResponse,
+  TotpSetupResponse,
+  TotpStatusResponse,
+  TotpVerifyRequest,
+  TotpVerifyResponse,
 } from './auth';
 
 // Common schemas
