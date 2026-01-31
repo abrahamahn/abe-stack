@@ -376,6 +376,156 @@ export const magicLinkVerifyResponseSchema: Schema<MagicLinkVerifyResponse> = cr
 );
 
 // ============================================================================
+// TOTP (2FA) Schemas
+// ============================================================================
+
+export interface TotpSetupResponse {
+  secret: string;
+  otpauthUrl: string;
+  backupCodes: string[];
+}
+
+export const totpSetupResponseSchema: Schema<TotpSetupResponse> = createSchema((data: unknown) => {
+  if (data === null || data === undefined || typeof data !== 'object') {
+    throw new Error('Invalid TOTP setup response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj['secret'] !== 'string') throw new Error('Secret must be a string');
+  if (typeof obj['otpauthUrl'] !== 'string') throw new Error('otpauthUrl must be a string');
+  if (!Array.isArray(obj['backupCodes'])) throw new Error('backupCodes must be an array');
+  return {
+    secret: obj['secret'],
+    otpauthUrl: obj['otpauthUrl'],
+    backupCodes: obj['backupCodes'] as string[],
+  };
+});
+
+export interface TotpVerifyRequest {
+  code: string;
+}
+
+export const totpVerifyRequestSchema: Schema<TotpVerifyRequest> = createSchema((data: unknown) => {
+  if (data === null || data === undefined || typeof data !== 'object') {
+    throw new Error('Invalid TOTP verify request');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj['code'] !== 'string' || obj['code'].length < 6) {
+    throw new Error('Code must be a string of at least 6 characters');
+  }
+  return { code: obj['code'] };
+});
+
+export interface TotpVerifyResponse {
+  success: boolean;
+  message: string;
+}
+
+export const totpVerifyResponseSchema: Schema<TotpVerifyResponse> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid TOTP verify response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj['success'] !== 'boolean') throw new Error('Success must be a boolean');
+    if (typeof obj['message'] !== 'string') throw new Error('Message must be a string');
+    return { success: obj['success'], message: obj['message'] };
+  },
+);
+
+export interface TotpStatusResponse {
+  enabled: boolean;
+}
+
+export const totpStatusResponseSchema: Schema<TotpStatusResponse> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid TOTP status response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj['enabled'] !== 'boolean') throw new Error('Enabled must be a boolean');
+    return { enabled: obj['enabled'] };
+  },
+);
+
+// ============================================================================
+// Email Change Schemas
+// ============================================================================
+
+export interface ChangeEmailRequest {
+  newEmail: string;
+  password: string;
+}
+
+export const changeEmailRequestSchema: Schema<ChangeEmailRequest> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid change email request');
+    }
+    const obj = data as Record<string, unknown>;
+    return {
+      newEmail: emailSchema.parse(obj['newEmail']),
+      password: passwordSchema.parse(obj['password']),
+    };
+  },
+);
+
+export interface ChangeEmailResponse {
+  success: boolean;
+  message: string;
+}
+
+export const changeEmailResponseSchema: Schema<ChangeEmailResponse> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid change email response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj['success'] !== 'boolean') throw new Error('Success must be a boolean');
+    if (typeof obj['message'] !== 'string') throw new Error('Message must be a string');
+    return { success: obj['success'], message: obj['message'] };
+  },
+);
+
+export interface ConfirmEmailChangeRequest {
+  token: string;
+}
+
+export const confirmEmailChangeRequestSchema: Schema<ConfirmEmailChangeRequest> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid confirm email change request');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj['token'] !== 'string' || obj['token'].length < 1) {
+      throw new Error('Token is required');
+    }
+    return { token: obj['token'] };
+  },
+);
+
+export interface ConfirmEmailChangeResponse {
+  success: boolean;
+  message: string;
+  email: string;
+}
+
+export const confirmEmailChangeResponseSchema: Schema<ConfirmEmailChangeResponse> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid confirm email change response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj['success'] !== 'boolean') throw new Error('Success must be a boolean');
+    if (typeof obj['message'] !== 'string') throw new Error('Message must be a string');
+    return {
+      success: obj['success'],
+      message: obj['message'],
+      email: emailSchema.parse(obj['email']),
+    };
+  },
+);
+
+// ============================================================================
 // Empty Body Schema (for endpoints with no body)
 // ============================================================================
 
@@ -510,5 +660,72 @@ export const authContract = {
       401: errorResponseSchema,
     },
     summary: 'Verify magic link token and login',
+  },
+  // TOTP (2FA) endpoints
+  totpSetup: {
+    method: 'POST' as const,
+    path: '/api/auth/totp/setup',
+    body: emptyBodySchema,
+    responses: {
+      200: totpSetupResponseSchema,
+      401: errorResponseSchema,
+      409: errorResponseSchema,
+    },
+    summary: 'Generate TOTP secret and backup codes for 2FA setup',
+  },
+  totpEnable: {
+    method: 'POST' as const,
+    path: '/api/auth/totp/enable',
+    body: totpVerifyRequestSchema,
+    responses: {
+      200: totpVerifyResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Verify TOTP code and enable 2FA',
+  },
+  totpDisable: {
+    method: 'POST' as const,
+    path: '/api/auth/totp/disable',
+    body: totpVerifyRequestSchema,
+    responses: {
+      200: totpVerifyResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Disable 2FA by verifying current TOTP code',
+  },
+  totpStatus: {
+    method: 'GET' as const,
+    path: '/api/auth/totp/status',
+    responses: {
+      200: totpStatusResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Check if 2FA is enabled for current user',
+  },
+  // Email change endpoints
+  changeEmail: {
+    method: 'POST' as const,
+    path: '/api/auth/change-email',
+    body: changeEmailRequestSchema,
+    responses: {
+      200: changeEmailResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      409: errorResponseSchema,
+    },
+    summary: 'Initiate email change - sends verification to new email',
+  },
+  confirmEmailChange: {
+    method: 'POST' as const,
+    path: '/api/auth/change-email/confirm',
+    body: confirmEmailChangeRequestSchema,
+    responses: {
+      200: confirmEmailChangeResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Confirm email change with verification token',
   },
 } satisfies Contract;
