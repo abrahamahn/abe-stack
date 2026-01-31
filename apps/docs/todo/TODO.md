@@ -611,20 +611,20 @@ the server adapter layer is unnecessary.
 
 ---
 
-## Medium Priority: User Settings (Remaining)
+## ~~Medium Priority: User Settings (Remaining)~~ ✅ DONE
 
-- [ ] 2FA setup UI (TOTP) + recovery codes
-- [ ] Email change flow with verification
+- [x] 2FA setup UI (TOTP) + recovery codes — see `modules/auth/src/totp.ts`, handlers, routes, DB schema
+- [x] Email change flow with verification — see `modules/auth/src/email-change.ts`, handlers, routes, DB schema
 
 ---
 
-## Medium Priority: UI Package
+## ~~Medium Priority: UI Package~~ ✅ DONE
 
 ### Code Quality (Frontend)
 
-- [ ] Standardize arrow functions with forwardRef
-- [ ] Consistent prop naming across components
-- [ ] JSDoc comments on public APIs
+- [x] Standardize arrow functions with forwardRef — Box, CloseButton, Container, LoadingContainer
+- [x] Consistent prop naming across components — `helperText` → `description` in FormField
+- [x] JSDoc comments on public APIs — already 100% coverage (verified via audit)
 
 ---
 
@@ -639,7 +639,7 @@ the server adapter layer is unnecessary.
 
 ### Testing
 
-- [ ] Integration tests for API routes (vitest + fastify inject)
+- [x] Integration tests for API routes (vitest + fastify inject) — see `apps/server/src/__tests__/integration/auth.integration.test.ts`
 - [ ] Playwright E2E for auth flows
 - [ ] Security audit: OWASP testing guide
 
@@ -694,4 +694,4 @@ the server adapter layer is unnecessary.
 
 ---
 
-_Last Updated: 2026-01-31 (Profile quickstart guides, production Postgres docs, infrastructure docs. All migration phases P0–P7 complete.)_
+_Last Updated: 2026-01-31 (2FA/TOTP + email change, UI package fixes, integration tests, profile quickstart guides, production Postgres docs. All migration phases P0–P7 complete.)_
