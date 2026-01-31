@@ -11,12 +11,14 @@
 1. [Executive Summary](#1-executive-summary)
 2. [Architectural Principles (from Gemini Conversations)](#2-architectural-principles)
 3. [Current State Assessment](#3-current-state-assessment)
-4. [File-by-File Classification](#4-file-by-file-classification)
-5. [Migration Plan — Phased Approach](#5-migration-plan)
-6. [Package Enhancement Details](#6-package-enhancement-details)
-7. [Risk Assessment & Mitigations](#7-risk-assessment--mitigations)
-8. [Success Criteria](#8-success-criteria)
-9. [Appendix: Trinity Repository Strategy](#9-appendix-trinity-repository-strategy)
+4. [Audit Findings — Gaps & Issues](#4-audit-findings)
+5. [File-by-File Classification](#5-file-by-file-classification)
+6. [Migration Plan — Phased Approach](#6-migration-plan)
+7. [Package Enhancement Details](#7-package-enhancement-details)
+8. [Risk Assessment & Mitigations](#8-risk-assessment--mitigations)
+9. [Success Criteria](#9-success-criteria)
+10. [Future Considerations](#10-future-considerations)
+11. [Appendix: Trinity Repository Strategy](#11-appendix-trinity-repository-strategy)
 
 ---
 
@@ -33,8 +35,12 @@
 **What remains:**
 - ~1,320 lines of generic HTTP middleware, router helpers, pagination, cache, and utilities still live in `apps/server/infrastructure/` but have zero app-specific logic
 - These should move to their respective packages (`@abe-stack/http`, `@abe-stack/cache`)
+- 34 orphaned test files for already-migrated modules need cleanup
+- Type system duplication across packages (AppContext redefined in 6+ packages) needs unification
+- Router type divergence between server and `@abe-stack/http` needs alignment
+- Tier 3 cross-dependencies (admin → auth + billing, users → auth) need documentation
 
-**Estimated scope:** 5 phases, ~20 files to migrate, ~46 files remaining in server after completion.
+**Estimated scope:** 7 phases (P0–P6), ~20 files to migrate, ~34 orphaned tests to clean up, ~46 source files remaining in server after completion.
 
 ---
 
@@ -186,9 +192,145 @@ These files integrate multiple services and are deployment-specific:
 
 ---
 
-## 4. File-by-File Classification
+## 4. Audit Findings — Gaps & Issues
 
-### 4.1 Entry Points & Core — KEEP (5 files)
+A secondary audit uncovered these issues that the initial plan did not address. They are now incorporated into the migration phases below.
+
+### 4.1 Orphaned Test Files (34 files) — HIGH PRIORITY
+
+When business modules were migrated to packages, their **test files were left behind** in `apps/server/src/__tests__/` and `apps/server/src/modules/`:
+
+| Directory | Orphaned Tests | Source Status |
+|---|---|---|
+| `modules/auth/` | 28 test files | **Zero source files** — all migrated to `@abe-stack/auth` |
+| `modules/notifications/` | 3 test files | **Zero source files** — migrated to `@abe-stack/notifications` |
+| `modules/realtime/` | 3 test files | **Zero source files** — migrated to `@abe-stack/realtime` |
+| **Total** | **34 files** | |
+
+Additionally, `__tests__/integration/test-utils.ts` is a 584-line monolithic test utility file (19 exported functions) that may reference migrated code paths.
+
+**Action:** These orphaned tests must be either:
+- Deleted (if equivalent tests exist in the target packages)
+- Migrated to the target packages (if they provide unique coverage)
+- Updated to import from `@abe-stack/*` (if they test integration patterns)
+
+### 4.2 Type System Duplication — HIGH PRIORITY
+
+Each Tier 3 package independently redefines its own `AppContext` variant instead of composing from a shared base:
+
+| Package | Type Defined | Extends |
+|---|---|---|
+| `packages/contracts` | `BaseContext` | (root — `db`, `repos`, `log`) |
+| `packages/auth` | `AppContext` | `BaseContext` + email, templates, config |
+| `packages/admin` | `AdminAppContext` | `BaseContext` + narrowed repos, config |
+| `packages/billing` | `BillingAppContext` | `BaseContext` + billing config |
+| `packages/users` | `UserAppContext` | `BaseContext` + user config |
+| `apps/server` | `AppContext` | Full superset (IServiceContainer) |
+
+**Problem:** 21+ package files define or reference `AppContext` variants. The server's `AppContext` (in `shared/types.ts`) satisfies all of them structurally (duck typing), but:
+- There's no single source of truth for "what a handler can depend on"
+- If a handler needs both auth and admin capabilities, there's no clear composition pattern
+- `RequestWithCookies` and `ReplyWithCookies` are redefined in multiple packages
+
+**Action:** Establish a formal context composition pattern in `packages/contracts`:
+- [ ] Define narrow capability interfaces (`HasEmail`, `HasBilling`, `HasStorage`, etc.)
+- [ ] Packages compose what they need: `type AuthContext = BaseContext & HasEmail & HasCookies`
+- [ ] Server's `AppContext` implements all capability interfaces
+- [ ] Document the pattern so new packages follow it
+
+### 4.3 Router Type Architecture Divergence — HIGH PRIORITY
+
+The server and `@abe-stack/http` define **incompatible** router type systems:
+
+**Server** (`infrastructure/http/router/types.ts`):
+```typescript
+type PublicHandler<TBody, TResult> = (
+  ctx: AppContext,          // ← Concrete server type
+  body: TBody,
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => Promise<RouteResult<TResult>>;
+```
+
+**Package** (`packages/http/src/router/types.ts`):
+```typescript
+type HandlerContext = BaseContext;  // ← Generic, framework-agnostic
+type PublicHandler<TBody, TResult> = (
+  ctx: HandlerContext,              // ← Generic BaseContext
+  body: TBody,
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => Promise<RouteResult<TResult>>;
+```
+
+**Additional divergences:**
+- Server's `RouterOptions` hardcodes `createAuthGuard` import from `@abe-stack/auth`
+- Package's `RouterOptions` accepts `authGuardFactory` as a parameter (dependency injection)
+- 18 package files currently use the generic router types
+
+**Action:** The package version is architecturally correct (generic, injectable). Phase 4 must align the server to use the package's router, not the other way around.
+
+### 4.4 Barrel Export Coupling — MEDIUM PRIORITY
+
+`apps/server/src/infrastructure/index.ts` re-exports local implementations of router, pagination, and middleware instead of from `@abe-stack/http`. This means:
+- `modules/routes.ts` imports `registerRouteMap` from `@/infrastructure/http/router` (local)
+- It should import from `@abe-stack/http` (package)
+
+**Action:** After migrating infrastructure code to packages, update all server imports to use `@abe-stack/http` as the canonical source. The local `infrastructure/index.ts` should only export server-specific adapters.
+
+### 4.5 Tier 3 Cross-Dependencies — MEDIUM PRIORITY (Documentation)
+
+Tier 3 packages have same-tier dependencies that create an implicit hierarchy:
+
+```
+Tier 3 (Module Layer):
+├── auth          (no Tier 3 deps) ← Base module
+├── billing       (no Tier 3 deps) ← Base module
+├── realtime      (no Tier 3 deps) ← Base module
+├── notifications (no Tier 3 deps) ← Base module
+├── media         (no Tier 3 deps) ← Base module
+├── users         → depends on auth              ← Mid-layer
+└── admin         → depends on auth + billing    ← Orchestration layer
+```
+
+**Impact:** If individual modules should be independently publishable/licensable, `admin` cannot ship without `auth` and `billing`. `users` cannot ship without `auth`.
+
+**Action:** Document whether this is intentional:
+- [ ] If coupling is intentional (bundled product tiers): document the assumption
+- [ ] If modules must be independent: extract admin orchestration to a separate concern
+
+### 4.6 Cache Service API Incompatibility — LOW PRIORITY
+
+The server's `CacheService` and `@abe-stack/cache`'s `LRUCache` have completely different APIs:
+
+| Feature | Server's CacheService | Package's LRUCache |
+|---|---|---|
+| Get/Set | `get(key)`, `set(key, value, ttl)` | `get(key, options)`, `set(key, value, options)` |
+| Memoization | No | Yes (with stampede prevention) |
+| Tags | No | Yes (tag-based invalidation) |
+| Eviction | TTL-based expiry | LRU eviction + callbacks |
+| Stats | Basic (size, hits, misses) | Memory tracking |
+
+**Action:** Phase 1 must reconcile these. The package version is strictly more capable. The migration path should:
+- [ ] Map server's simple API to package's richer API
+- [ ] Ensure `IServiceContainer.cache` type references the package type
+- [ ] Update `app.ts` to construct `LRUCache` instead of `CacheService`
+
+### 4.7 Search Provider Encapsulation — LOW PRIORITY
+
+`ServerSearchProvider` is defined in server infrastructure and referenced by `IServiceContainer`. No packages currently import search types directly, but if they need search in the future:
+- They can't import from server (violates Golden Rule)
+- They'd need search interfaces in `packages/contracts`
+
+**Action:** No immediate change needed, but if search is ever used in packages:
+- [ ] Extract `SearchProvider` interface to `packages/contracts`
+- [ ] Keep concrete implementations (SQL/Elasticsearch) in server
+
+---
+
+## 5. File-by-File Classification
+
+### 5.1 Entry Points & Core — KEEP (5 files)
 
 ```
 apps/server/src/
@@ -199,7 +341,7 @@ apps/server/src/
 └── shared/index.ts      → KEEP (barrel export)
 ```
 
-### 4.2 Config Layer — KEEP (18 files)
+### 5.2 Config Layer — KEEP (18 files)
 
 All config files are correctly placed. They load `process.env` values and validate them — this is the server's primary job.
 
@@ -225,7 +367,7 @@ config/
     └── search.ts        → KEEP (Elasticsearch/SQL selection)
 ```
 
-### 4.3 Modules — KEEP (5 files)
+### 5.3 Modules — KEEP (5 files)
 
 ```
 modules/
@@ -237,7 +379,7 @@ modules/
     └── index.ts         → KEEP (barrel export)
 ```
 
-### 4.4 HTTP Middleware — MIGRATE to `@abe-stack/http` (9 files)
+### 5.4 HTTP Middleware — MIGRATE to `@abe-stack/http` (9 files)
 
 These are all pure, generic utilities with zero app-specific logic:
 
@@ -259,7 +401,7 @@ infrastructure/http/middleware/
 - Deployment-specific? No — generic HTTP middleware
 - Has Zod schemas? No — pure functions
 
-### 4.5 HTTP Pagination — MIGRATE to `@abe-stack/http` (4 files)
+### 5.5 HTTP Pagination — MIGRATE to `@abe-stack/http` (4 files)
 
 ```
 infrastructure/http/pagination/
@@ -269,7 +411,7 @@ infrastructure/http/pagination/
 └── index.ts             → MIGRATE (barrel export)
 ```
 
-### 4.6 HTTP Router — PARTIAL MIGRATE (3 files)
+### 5.6 HTTP Router — PARTIAL MIGRATE (3 files)
 
 ```
 infrastructure/http/router/
@@ -282,14 +424,14 @@ infrastructure/http/router/
 └── index.ts             → KEEP (barrel export, re-export from package)
 ```
 
-### 4.7 HTTP Plugins & Index — KEEP (2 files)
+### 5.7 HTTP Plugins & Index — KEEP (2 files)
 
 ```
 infrastructure/http/plugins.ts  → KEEP (app-specific middleware orchestration)
 infrastructure/http/index.ts    → KEEP (will re-export from package + local)
 ```
 
-### 4.8 Monitor — KEEP (6 files)
+### 5.8 Monitor — KEEP (6 files)
 
 ```
 infrastructure/monitor/
@@ -303,7 +445,7 @@ infrastructure/monitor/
     └── index.ts         → KEEP
 ```
 
-### 4.9 Messaging — KEEP (2 files)
+### 5.9 Messaging — KEEP (2 files)
 
 ```
 infrastructure/messaging/websocket/
@@ -311,7 +453,7 @@ infrastructure/messaging/websocket/
 └── index.ts             → KEEP
 ```
 
-### 4.10 Search — KEEP (6 files)
+### 5.10 Search — KEEP (6 files)
 
 ```
 infrastructure/search/
@@ -322,7 +464,7 @@ infrastructure/search/
 └── index.ts             → KEEP
 ```
 
-### 4.11 Notifications — KEEP (4 files)
+### 5.11 Notifications — KEEP (4 files)
 
 ```
 infrastructure/notifications/
@@ -332,7 +474,7 @@ infrastructure/notifications/
 └── index.ts             → KEEP
 ```
 
-### 4.12 Services — MIGRATE (1 file)
+### 5.12 Services — MIGRATE (1 file)
 
 ```
 services/
@@ -340,7 +482,7 @@ services/
 └── index.ts             → KEEP (will re-export from package)
 ```
 
-### 4.13 Utils — MIGRATE (1 file)
+### 5.13 Utils — MIGRATE (1 file)
 
 ```
 utils/
@@ -348,7 +490,7 @@ utils/
 └── index.ts             → KEEP (will re-export from package)
 ```
 
-### 4.14 Types — KEEP (2 files)
+### 5.14 Types — KEEP (2 files)
 
 ```
 types/
@@ -356,7 +498,7 @@ types/
 └── media-deps.d.ts      → KEEP (third-party stubs)
 ```
 
-### 4.15 Scripts — KEEP (3 files)
+### 5.15 Scripts — KEEP (3 files)
 
 ```
 scripts/
@@ -367,7 +509,29 @@ scripts/
 
 ---
 
-## 5. Migration Plan
+## 6. Migration Plan
+
+### Phase 0: Clean Up Orphaned Tests (Low Risk)
+
+**What:** Remove or relocate 34 orphaned test files left behind after module migrations.
+
+**Context:** When auth, notifications, and realtime modules were migrated to packages, their test files remained in `apps/server/src/modules/`. These tests reference code paths that no longer exist in the server.
+
+**Actions:**
+- [ ] Inventory all test files under `apps/server/src/modules/auth/` (28 files)
+- [ ] Inventory test files under `apps/server/src/modules/notifications/` (3 files)
+- [ ] Inventory test files under `apps/server/src/modules/realtime/` (3 files)
+- [ ] For each test file, check if equivalent tests exist in the target package
+- [ ] Delete tests that duplicate package-level coverage
+- [ ] Migrate tests with unique integration coverage to the target packages
+- [ ] Audit `__tests__/integration/test-utils.ts` (584 LOC, 19 exports) — remove functions that reference deleted modules
+- [ ] Run `pnpm test` to verify no test regressions
+
+**Files removed:** ~34 test files + cleanup of test-utils.ts
+
+**Risk:** Low — removing tests cannot break production code. Only risk is losing unique test coverage.
+
+---
 
 ### Phase 1: Enhance `@abe-stack/cache` (Low Risk)
 
@@ -469,24 +633,86 @@ scripts/
 
 ---
 
-### Phase Summary
+### Phase 6: Unify Type System & Context Composition (Medium Risk)
 
-| Phase | Target Package | Files Moved | Lines | Risk | Dependencies |
-|---|---|---|---|---|---|
-| P1 | `@abe-stack/cache` | 1 | ~130 | Low | None |
-| P2 | `@abe-stack/http` | 9 | ~800 | Medium | None |
-| P3 | `@abe-stack/http` | 4 | ~200 | Low | P2 (same package) |
-| P4 | `@abe-stack/http` | 2 (partial) | ~100 | Med-High | P2, P3 |
-| P5 | `@abe-stack/http` | 1 | ~90 | Low | P2 |
-| **Total** | | **~17** | **~1,320** | | |
+**What:** Establish a formal context composition pattern in `packages/contracts` to eliminate type duplication across packages.
 
-**Post-migration server file count:** ~46 files (down from ~76)
+**Current problem:** Each Tier 3 package independently redefines its own `AppContext` variant (see [Audit Finding 4.2](#42-type-system-duplication--high-priority)). This creates:
+- No single source of truth for handler dependencies
+- No composition pattern when a handler needs capabilities from multiple domains
+- Duplicated `RequestWithCookies` / `ReplyWithCookies` definitions
+
+**Actions:**
+- [ ] Define narrow capability interfaces in `packages/contracts`:
+  ```typescript
+  // packages/contracts/src/context.ts
+  interface HasEmail { email: EmailService; templates: EmailTemplates; }
+  interface HasBilling { billing: BillingService; }
+  interface HasStorage { storage: StorageService; }
+  interface HasCookies { cookies: CookieManager; }
+  // etc.
+  ```
+- [ ] Update each package to compose its context from capabilities:
+  ```typescript
+  // packages/auth/src/types.ts
+  type AuthContext = BaseContext & HasEmail & HasCookies & HasAuthConfig;
+  ```
+- [ ] Update `apps/server/src/shared/types.ts` — `AppContext` implements all capabilities:
+  ```typescript
+  type AppContext = BaseContext & HasEmail & HasBilling & HasStorage & HasCookies & ...;
+  ```
+- [ ] Unify `RequestWithCookies` and `ReplyWithCookies` into `packages/contracts`
+- [ ] Update all 21+ affected files across packages
+- [ ] Run `pnpm type-check` and `pnpm test` after each package update
+
+**Files touched:** ~25 files across contracts, auth, admin, billing, users, server
+**Risk:** Medium — type changes propagate across the entire codebase. Use structural typing to maintain backward compatibility during transition.
 
 ---
 
-## 6. Package Enhancement Details
+### Phase 7: Update Server Imports & Barrel Exports (Low Risk)
 
-### 6.1 `@abe-stack/http` — After Migration
+**What:** After Phases 2–5 migrate code to packages, update all server imports to use `@abe-stack/http` as the canonical source instead of local `@/infrastructure/` paths.
+
+**Actions:**
+- [ ] Update `modules/routes.ts` to import `registerRouteMap` from `@abe-stack/http` instead of `@/infrastructure/http/router`
+- [ ] Update `infrastructure/http/plugins.ts` to import middleware from `@abe-stack/http`
+- [ ] Slim down `infrastructure/index.ts` to only export server-specific adapters (monitor, search, notifications, messaging)
+- [ ] Remove empty directories left behind after file migrations
+- [ ] Run `pnpm build && pnpm type-check && pnpm test`
+
+**Risk:** Low — import path changes only; no logic changes.
+
+---
+
+### Phase Summary
+
+| Phase | Description | Target | Files Affected | Risk | Dependencies |
+|---|---|---|---|---|---|
+| **P0** | Clean up orphaned tests | `apps/server` | ~34 deleted | Low | None |
+| **P1** | Cache service → package | `@abe-stack/cache` | 1 migrated | Low | None |
+| **P2** | HTTP middleware → package | `@abe-stack/http` | 9 migrated (~800 LOC) | Medium | None |
+| **P3** | Pagination → package | `@abe-stack/http` | 4 migrated (~200 LOC) | Low | P2 |
+| **P4** | Router types → package | `@abe-stack/http` | 2 partial (~100 LOC) | Med-High | P2, P3 |
+| **P5** | Request utils → package | `@abe-stack/http` | 1 migrated (~90 LOC) | Low | P2 |
+| **P6** | Type system unification | `@abe-stack/contracts` | ~25 updated | Medium | P4 |
+| **P7** | Server import cleanup | `apps/server` | ~10 updated | Low | P2–P5 |
+
+**Recommended execution order:**
+1. P0 (cleanup) — can be done independently, immediately
+2. P1 (cache) — independent, low risk
+3. P2 → P3 → P5 (HTTP migrations) — sequential, same package
+4. P4 (router) — after P2/P3, highest risk
+5. P6 (types) — after P4, cross-cutting
+6. P7 (import cleanup) — final sweep after all migrations
+
+**Post-migration server file count:** ~46 source files (down from ~76), ~48 test files (down from ~82)
+
+---
+
+## 7. Package Enhancement Details
+
+### 7.1 `@abe-stack/http` — After Migration
 
 ```
 packages/http/src/
@@ -536,7 +762,7 @@ export type { PaginationOptions, PaginatedResponse } from './pagination/types';
 export { getPathParam, getQueryParam, getValidatedPathParam } from './utils/request-utils';
 ```
 
-### 6.2 `@abe-stack/cache` — After Migration
+### 7.2 `@abe-stack/cache` — After Migration
 
 ```
 packages/cache/src/
@@ -547,7 +773,7 @@ packages/cache/src/
 └── index.ts
 ```
 
-### 6.3 `apps/server` — After Migration
+### 7.3 `apps/server` — After Migration
 
 ```
 apps/server/src/                   (~46 files)
@@ -578,9 +804,9 @@ apps/server/src/                   (~46 files)
 
 ---
 
-## 7. Risk Assessment & Mitigations
+## 8. Risk Assessment & Mitigations
 
-### 7.1 Breaking Package Consumers
+### 8.1 Breaking Package Consumers
 
 **Risk:** Moving router types could break `@abe-stack/auth`, `@abe-stack/users`, etc.
 
@@ -590,7 +816,7 @@ apps/server/src/                   (~46 files)
 - Consider a transition period with type aliases in the old location
 - Run full type-check after every change: `pnpm type-check`
 
-### 7.2 Middleware Runtime Behavior
+### 8.2 Middleware Runtime Behavior
 
 **Risk:** Middleware import order or initialization could change subtly when moved to a package.
 
@@ -599,7 +825,7 @@ apps/server/src/                   (~46 files)
 - Only the middleware _implementations_ move — the _composition_ stays
 - Write integration tests for the middleware registration pipeline before migrating
 
-### 7.3 Circular Dependencies
+### 8.3 Circular Dependencies
 
 **Risk:** Moving code between packages could introduce circular dependencies.
 
@@ -608,7 +834,7 @@ apps/server/src/                   (~46 files)
 - No package-to-package moves in this plan
 - Run `pnpm build` after each phase to catch circular imports
 
-### 7.4 Test Coverage Gaps
+### 8.4 Test Coverage Gaps
 
 **Risk:** Server middleware may not have dedicated tests; moving them to packages requires new tests.
 
@@ -617,29 +843,55 @@ apps/server/src/                   (~46 files)
 - Write package-level unit tests for each migrated module
 - Run full test suite after each phase: `pnpm test`
 
+### 8.5 Type System Unification (Phase 6)
+
+**Risk:** Changing context type definitions could break handler signatures across 21+ files in 6 packages.
+
+**Mitigation:**
+- TypeScript's structural typing means existing code will continue to work as long as the shape matches
+- Introduce capability interfaces (`HasEmail`, `HasBilling`, etc.) as additive — don't remove existing types initially
+- Use intersection types for composition — existing `AppContext extends BaseContext` patterns remain valid
+- Migrate one package at a time; run `pnpm type-check` after each
+- If a package's types can't be easily migrated, leave it with a `// TODO: migrate to capability pattern` comment
+
+### 8.6 Orphaned Test Cleanup (Phase 0)
+
+**Risk:** Deleting test files could lose unique integration coverage not replicated in packages.
+
+**Mitigation:**
+- Before deleting any test file, check if the target package has equivalent tests
+- For auth (28 test files): compare with `packages/auth/src/**/*.test.ts`
+- For notifications (3 test files): compare with `packages/notifications/src/**/*.test.ts`
+- For realtime (3 test files): compare with `packages/realtime/src/**/*.test.ts`
+- Any test with unique coverage should be migrated to the package, not deleted
+
 ---
 
-## 8. Success Criteria
+## 9. Success Criteria
 
-### 8.1 Quantitative
+### 9.1 Quantitative
 
 | Metric | Current | Target | Validation |
 |---|---|---|---|
 | Server source files | ~76 | ≤50 | `find apps/server/src -name '*.ts' ! -name '*.test.*' \| wc -l` |
+| Orphaned test files | 34 | 0 | `find apps/server/src/modules -name '*.test.*' \| wc -l` |
 | Import violations | 0 | 0 | `pnpm build` passes |
 | Business logic in server | Minimal | Zero | Manual audit |
 | `@abe-stack/http` exports | ~15 | ~35 | Package API surface |
+| AppContext variants | 6+ independent | 1 base + composition | Type audit |
 | Test suite | Passing | Passing | `pnpm test` green |
 | Type check | Passing | Passing | `pnpm type-check` green |
 
-### 8.2 Qualitative
+### 9.2 Qualitative
 
 - [ ] Every file in `apps/server/src/` passes the "Could I use this in a CLI script?" test with "No" (it's server-specific) or is config/wiring
 - [ ] `@abe-stack/http` is a self-contained, reusable HTTP framework package
 - [ ] A new app (e.g., `apps/admin-api`) could be built using only `packages/*` imports with minimal boilerplate
 - [ ] The architecture matches the "Motherboard & Components" mental model
+- [ ] Context types follow a composition pattern (capabilities, not monolithic interfaces)
+- [ ] No orphaned test files remain in the server
 
-### 8.3 Validation Checklist (Run After Each Phase)
+### 9.3 Validation Checklist (Run After Each Phase)
 
 ```bash
 # 1. Build passes (no circular deps, no missing exports)
@@ -657,15 +909,73 @@ pnpm lint
 # 5. No import violations (packages never import apps)
 grep -r "from.*apps/server" packages/ --include="*.ts" | grep -v node_modules
 # Should return 0 results
+
+# 6. No orphaned test files (after P0)
+find apps/server/src/modules -name "*.test.*" -not -path "*/system/*" | wc -l
+# Should return 0
 ```
 
 ---
 
-## 9. Appendix: Trinity Repository Strategy
+## 10. Future Considerations
+
+These items are out of scope for the current refactoring plan but should be tracked for future work.
+
+### 10.1 Tier 3 Module Independence
+
+**Decision needed:** Should Tier 3 modules be independently publishable as npm packages?
+
+- Currently `admin` depends on `auth` + `billing`, and `users` depends on `auth`
+- This is fine for a monorepo but prevents independent distribution
+- If the Standard/Pro licensing model (see [Appendix](#11-appendix-trinity-repository-strategy)) requires independent modules, this coupling must be addressed
+- **Recommendation:** Document as intentional for now. Revisit when/if module-level licensing becomes a product requirement
+
+### 10.2 Contracts Validation Strategy
+
+The `packages/contracts` package uses a custom lightweight validation system instead of Zod:
+- **Pro:** Zero runtime dependencies for frontend consumers
+- **Con:** Non-standard, unfamiliar to new developers
+- **Action:** Document the design decision in `packages/contracts/README.md`. Consider adding optional Zod schemas for backend-only validation if complexity grows
+
+### 10.3 Test Utilities Package
+
+`apps/server/src/__tests__/integration/test-utils.ts` is a 584-line file with 19 exports (mock factories, test server setup). If other apps (`apps/desktop`, future `apps/worker`) need similar test infrastructure:
+- [ ] Extract to `@abe-stack/test-utils` (private package, `devDependencies` only)
+- [ ] Include mock factories for db, cache, auth, storage
+- **Recommendation:** Defer until a second app needs integration tests
+
+### 10.4 SDK/UI Package Complexity
+
+Both frontend packages have grown to ~15-20 submodules each:
+- `packages/sdk`: api, billing, cache, notifications, oauth, offline, query, realtime, search, storage, undo, errors, hooks
+- `packages/ui`: components, layouts, router, hooks, theme, types, utils, elements, providers
+
+This isn't a violation, but monitor for:
+- Component discoverability issues
+- Feature creep across module boundaries
+- Multiple teams needing to work on different UI areas
+
+### 10.5 Search Provider Abstraction
+
+If packages ever need to perform search queries directly (not via server handlers):
+- [ ] Extract `SearchProvider` interface to `packages/contracts`
+- [ ] Keep concrete implementations (SQL/Elasticsearch) in `apps/server`
+- [ ] Provide search via dependency injection in handler context
+
+### 10.6 Database Migration Strategy
+
+Verify that Drizzle migrations are properly tracked:
+- [ ] Are migrations versioned in `packages/db`?
+- [ ] Can schema changes be applied independently of app deployment?
+- [ ] Should there be a dedicated `migrations/` directory in `packages/db`?
+
+---
+
+## 11. Appendix: Trinity Repository Strategy
 
 > This section preserves the original product architecture plan for the multi-repository distribution strategy.
 
-### 9.1 The Three Repositories
+### 11.1 The Three Repositories
 
 | Repo | Visibility | Purpose |
 |---|---|---|
@@ -673,7 +983,7 @@ grep -r "from.*apps/server" packages/ --include="*.ts" | grep -v node_modules
 | `abe-stack-core` | Private | The actual product — ALL code (OSS + Standard + Pro + Max) |
 | `abe-stack-lite` | Public | "Read-Only Mirror" of core minus Pro features |
 
-### 9.2 How Tiers Enable Product Distribution
+### 11.2 How Tiers Enable Product Distribution
 
 The 4-tier architecture directly enables the business model:
 
@@ -692,13 +1002,13 @@ Pro License ($999):
 
 Because modules are physically separate packages, creating license tiers is as simple as including or excluding directories from the build.
 
-### 9.3 Sync Strategy
+### 11.3 Sync Strategy
 
 - **Stripper Script** (`scripts/build-oss.js`): Copies core, removes Pro folders, scrubs `// @feature-start: PRO` blocks
 - **GitHub Action** (`sync-oss.yml`): Runs stripper on push to `main`, force-pushes to `abe-stack-lite`
 - **Contribution Policy:** "Shadow Workflow" — PRs to lite are ported manually to core
 
-### 9.4 Demo Mode
+### 11.4 Demo Mode
 
 The same core repo deployed with `IS_DEMO_MODE=true` serves as the product demo. Critical mutations (DELETE, password changes) return `403` in demo mode.
 
@@ -709,3 +1019,4 @@ The same core repo deployed with `IS_DEMO_MODE=true` serves as the product demo.
 | Date | Change |
 |---|---|
 | Jan 2026 | Initial draft — Gemini architecture conversations + full codebase audit |
+| Jan 2026 | Audit pass — Added P0 (orphaned tests), P6 (type unification), P7 (import cleanup), 7 audit findings, future considerations |
