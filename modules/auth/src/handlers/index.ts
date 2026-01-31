@@ -14,3 +14,5 @@ export { handleLogout } from './logout';
 export { handleLogoutAll } from './logout-all';
 export { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 export { handleVerifyEmail, handleResendVerification } from './verify';
+export { handleTotpSetup, handleTotpEnable, handleTotpDisable, handleTotpStatus } from './totp';
+export { handleChangeEmail, handleConfirmEmailChange } from './email-change';
