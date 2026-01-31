@@ -29,7 +29,7 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-client --report-unused-disable-directives"
+    "lint": "eslint . --cache --cache-location ../node_modules/.cache/eslint/.eslintcache-abe-stack-client --report-unused-disable-directives"
   },
   "author": "",
   "license": "ISC",

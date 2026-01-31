@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/audit/dependency-audit.ts
+// tools/scripts/audit/dependency-audit.ts
 /**
  * Dependency Audit Tool
  *

@@ -1,4 +1,4 @@
-// apps/server/src/scripts/seed.test.ts
+// tools/scripts/db/seed.test.ts
 /* eslint-disable no-console, @typescript-eslint/unbound-method */
 /**
  * Tests for Database Seed Script
@@ -13,7 +13,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted() to ensure mock functions are available when vi.mock factory runs
 const {
-  mockLoadConfig,
   mockBuildConnectionString,
   mockCreateDbClient,
   mockExecute,
@@ -23,7 +22,6 @@ const {
   mockOnConflictDoNothing,
   mockToSql,
 } = vi.hoisted(() => ({
-  mockLoadConfig: vi.fn(),
   mockBuildConnectionString: vi.fn(),
   mockCreateDbClient: vi.fn(),
   mockExecute: vi.fn(),
@@ -34,13 +32,6 @@ const {
   mockToSql: vi.fn(),
 }));
 
-// Mock the config factory module directly using relative path from test file
-// In Vitest 4.x, vi.mock paths are resolved relative to the test file
-vi.mock('../config/factory', () => ({
-  load: mockLoadConfig,
-  loadConfig: mockLoadConfig,
-}));
-
 // Mock the database module using package path
 vi.mock('@abe-stack/db', () => ({
   buildConnectionString: mockBuildConnectionString,
@@ -49,7 +40,7 @@ vi.mock('@abe-stack/db', () => ({
   insert: mockInsert,
 }));
 
-// Mock the auth package - seed.ts imports hashPassword from @abe-stack/auth
+// Mock the auth package — hashPassword uses DEFAULT_ARGON2_CONFIG when called without config arg
 vi.mock('@abe-stack/auth', () => ({
   hashPassword: mockHashPassword,
 }));
@@ -90,17 +81,6 @@ describe('seed script', () => {
     }) as never;
 
     // Setup default mocks
-    mockLoadConfig.mockReturnValue({
-      auth: {
-        argon2: {
-          type: 2,
-          memoryCost: 19456,
-          timeCost: 2,
-          parallelism: 1,
-        },
-      },
-    });
-
     mockBuildConnectionString.mockReturnValue('postgresql://localhost:5432/test');
 
     // Mock the query builder chain for insert()
@@ -160,7 +140,6 @@ describe('seed script', () => {
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
       expect(exitCode).toBe(0);
-      expect(mockLoadConfig).toHaveBeenCalled();
       expect(mockBuildConnectionString).toHaveBeenCalled();
       expect(mockExecute).toHaveBeenCalled();
     });
@@ -176,7 +155,7 @@ describe('seed script', () => {
       expect(mockExecute).toHaveBeenCalledTimes(3);
     });
 
-    it('should hash passwords with argon2 config', async () => {
+    it('should hash passwords using default argon2 config', async () => {
       process.env.NODE_ENV = 'development';
 
       const { seed } = await import('./seed');
@@ -184,12 +163,8 @@ describe('seed script', () => {
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
       expect(mockHashPassword).toHaveBeenCalledTimes(3);
-      expect(mockHashPassword).toHaveBeenCalledWith('password123', {
-        type: 2,
-        memoryCost: 19456,
-        timeCost: 2,
-        parallelism: 1,
-      });
+      // After decoupling, hashPassword is called with only the password (no config arg)
+      expect(mockHashPassword).toHaveBeenCalledWith('password123');
     });
 
     it('should seed admin user with admin role', async () => {
@@ -320,18 +295,6 @@ describe('seed script', () => {
       await expect(seed()).rejects.toThrow('Cannot connect to database');
     });
 
-    it('should handle config loading errors', async () => {
-      process.env.NODE_ENV = 'development';
-
-      mockLoadConfig.mockImplementation(() => {
-        throw new Error('Invalid config');
-      });
-
-      const { seed } = await import('./seed');
-
-      await expect(seed()).rejects.toThrow('Invalid config');
-    });
-
     it('should handle password hashing errors', async () => {
       process.env.NODE_ENV = 'development';
 
@@ -383,10 +346,10 @@ describe('seed script', () => {
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      // All calls should use 'password123'
-      expect(mockHashPassword).toHaveBeenNthCalledWith(1, 'password123', expect.any(Object));
-      expect(mockHashPassword).toHaveBeenNthCalledWith(2, 'password123', expect.any(Object));
-      expect(mockHashPassword).toHaveBeenNthCalledWith(3, 'password123', expect.any(Object));
+      // All calls should use 'password123' (no config arg after decoupling)
+      expect(mockHashPassword).toHaveBeenNthCalledWith(1, 'password123');
+      expect(mockHashPassword).toHaveBeenNthCalledWith(2, 'password123');
+      expect(mockHashPassword).toHaveBeenNthCalledWith(3, 'password123');
     });
   });
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/dev/start-dev.ts
+// tools/scripts/dev/dev.ts
 /**
  * Development server startup script.
  *

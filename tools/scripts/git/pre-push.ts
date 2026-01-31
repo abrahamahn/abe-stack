@@ -1,4 +1,4 @@
-// tools/git/pre-push.ts
+// tools/scripts/git/pre-push.ts
 /**
  * Manual pre-push hook script.
  *

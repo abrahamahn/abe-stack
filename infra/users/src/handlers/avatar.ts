@@ -14,12 +14,13 @@ import {
     validatePassword,
     WeakPasswordError,
 } from '@abe-stack/core';
+
 import { hashPassword, verifyPassword } from '../../../../modules/auth/src';
 
+import type { UsersAuthConfig } from '../types';
 import type { UserRole } from '@abe-stack/core';
 import type { Repositories } from '@abe-stack/db';
 import type { StorageProvider } from '@abe-stack/storage';
-import type { UsersAuthConfig } from '../types';
 
 // ============================================================================
 // Types

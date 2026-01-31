@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/audit/bundle-monitor.ts
+// tools/scripts/audit/bundle-monitor.ts
 /**
  * Bundle Size Monitor
  *

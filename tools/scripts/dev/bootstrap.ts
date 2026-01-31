@@ -1,4 +1,4 @@
-// tools/dev/bootstrap.ts
+// tools/scripts/dev/bootstrap.ts
 /**
  * Database Bootstrap Script
  *
@@ -54,10 +54,9 @@ export function bootstrap(): void {
   const envVars = parseEnv(envPath);
   console.log('✅ Loaded environment variables\n');
 
-  // Run seed script from server directory (so path aliases work)
+  // Run seed script from root (scripts are now in tools/scripts/db/)
   console.log('🌱 Seeding database with initial data...');
-  const serverDir = resolve(process.cwd(), 'apps/server');
-  const success = run('pnpm', ['db:seed'], envVars, serverDir);
+  const success = run('pnpm', ['db:seed'], envVars);
 
   if (!success) {
     console.error('❌ Bootstrap failed!');

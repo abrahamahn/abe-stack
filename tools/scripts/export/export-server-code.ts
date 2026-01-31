@@ -1,4 +1,4 @@
-// tools/export/export-server-code.ts
+// tools/scripts/export/export-server-code.ts
 /**
  * Export Server Code
  *

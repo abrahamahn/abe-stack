@@ -1,4 +1,4 @@
-// tools/dev/setup.ts
+// tools/scripts/dev/setup.ts
 /**
  * ABE Stack Interactive Setup Script
  *

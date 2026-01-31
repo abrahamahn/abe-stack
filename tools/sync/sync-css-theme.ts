@@ -1,4 +1,4 @@
-// config/lint/sync-css-theme.ts
+// tools/sync/sync-css-theme.ts
 /**
  * Build theme.css from TypeScript theme source files
  *

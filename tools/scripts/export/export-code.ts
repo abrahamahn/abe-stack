@@ -1,4 +1,4 @@
-// tools/export/export-code.ts
+// tools/scripts/export/export-code.ts
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';

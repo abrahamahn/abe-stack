@@ -1,3 +1,4 @@
+// tools/scripts/audit/health-check.ts
 
 import { spawn } from 'child_process';
 

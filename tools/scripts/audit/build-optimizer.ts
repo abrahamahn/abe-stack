@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/audit/build-optimizer.ts
+// tools/scripts/audit/build-optimizer.ts
 /**
  * Build Performance Optimizer
  *

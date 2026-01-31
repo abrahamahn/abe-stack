@@ -1,4 +1,4 @@
-// apps/server/src/scripts/bootstrap-admin.test.ts
+// tools/scripts/db/bootstrap-admin.test.ts
 /* eslint-disable no-console, @typescript-eslint/unbound-method */
 /**
  * Tests for Production Admin Bootstrap Script
@@ -18,7 +18,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted to ensure mock functions are defined before vi.mock hoisting
 const {
-  mockLoadConfig,
   mockBuildConnectionString,
   mockCreateDbClient,
   mockQuery,
@@ -32,7 +31,6 @@ const {
   mockValues,
   mockEq,
 } = vi.hoisted(() => ({
-  mockLoadConfig: vi.fn(),
   mockBuildConnectionString: vi.fn(),
   mockCreateDbClient: vi.fn(),
   mockQuery: vi.fn(),
@@ -55,13 +53,6 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-// Mock the config factory module directly using relative path from test file
-// In Vitest 4.x, vi.mock paths are resolved relative to the test file
-vi.mock('../config/factory', () => ({
-  load: mockLoadConfig,
-  loadConfig: mockLoadConfig,
-}));
-
 // Mock the database module using package path
 vi.mock('@abe-stack/db', () => ({
   buildConnectionString: mockBuildConnectionString,
@@ -72,7 +63,7 @@ vi.mock('@abe-stack/db', () => ({
   eq: mockEq,
 }));
 
-// Mock the auth package - bootstrap-admin.ts imports hashPassword from @abe-stack/auth
+// Mock the auth package — hashPassword uses DEFAULT_ARGON2_CONFIG when called without config arg
 vi.mock('@abe-stack/auth', () => ({
   hashPassword: mockHashPassword,
 }));
@@ -111,17 +102,6 @@ describe('bootstrap-admin script', () => {
     }) as never;
 
     // Setup default mocks
-    mockLoadConfig.mockReturnValue({
-      auth: {
-        argon2: {
-          type: 2,
-          memoryCost: 19456,
-          timeCost: 2,
-          parallelism: 1,
-        },
-      },
-    });
-
     mockBuildConnectionString.mockReturnValue('postgresql://localhost:5432/test');
 
     // Mock the query builder chain for select()
@@ -214,17 +194,13 @@ describe('bootstrap-admin script', () => {
         expect(randomBytes).toHaveBeenCalledWith(24);
       });
 
-      it('should hash the password with argon2 config', async () => {
+      it('should hash the password using default argon2 config', async () => {
         const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
-        expect(mockHashPassword).toHaveBeenCalledWith(expect.any(String), {
-          type: 2,
-          memoryCost: 19456,
-          timeCost: 2,
-          parallelism: 1,
-        });
+        // After decoupling, hashPassword is called with only the password (no config arg)
+        expect(mockHashPassword).toHaveBeenCalledWith(expect.any(String));
       });
 
       it('should insert admin user with correct fields', async () => {
@@ -282,14 +258,6 @@ describe('bootstrap-admin script', () => {
         await bootstrapAdmin();
 
         expect(mockBuildConnectionString).toHaveBeenCalled();
-      });
-
-      it('should load config from process.env', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin');
-
-        await bootstrapAdmin();
-
-        expect(mockLoadConfig).toHaveBeenCalledWith(process.env);
       });
 
       it('should query for existing admin user', async () => {
@@ -430,16 +398,6 @@ describe('bootstrap-admin script', () => {
     });
 
     describe('error handling', () => {
-      it('should throw error if config loading fails', async () => {
-        mockLoadConfig.mockImplementation(() => {
-          throw new Error('Invalid configuration');
-        });
-
-        const { bootstrapAdmin } = await import('./bootstrap-admin');
-
-        await expect(bootstrapAdmin()).rejects.toThrow('Invalid configuration');
-      });
-
       it('should throw error if database connection fails', async () => {
         mockBuildConnectionString.mockImplementation(() => {
           throw new Error('Cannot build connection string');

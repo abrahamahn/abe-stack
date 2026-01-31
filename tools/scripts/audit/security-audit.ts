@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/audit/security-audit.ts
+// tools/scripts/audit/security-audit.ts
 /**
  * Security Vulnerability Scanner
  *

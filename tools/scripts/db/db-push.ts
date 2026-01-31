@@ -1,4 +1,4 @@
-// apps/server/src/scripts/db-push.ts
+// tools/scripts/db/db-push.ts
 /**
  * Database Schema Push (Development)
  *
@@ -6,7 +6,7 @@
  * Intended for development only.
  *
  * Usage:
- *   pnpm --filter @abe-stack/server db:push
+ *   pnpm db:push
  */
 /* eslint-disable no-console */
 
@@ -161,6 +161,12 @@ const STATEMENTS: string[] = [
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user ON notification_preferences (user_id);`,
 ];
 
+/**
+ * Push the database schema by executing all DDL statements sequentially.
+ *
+ * @throws {Error} If any SQL statement fails or the connection cannot be established
+ * @complexity O(n) where n = number of SQL statements
+ */
 export async function pushSchema(): Promise<void> {
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);

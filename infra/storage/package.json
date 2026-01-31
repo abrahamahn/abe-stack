@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-storage --report-unused-disable-directives",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "type-check": "tsc --noEmit"
   },

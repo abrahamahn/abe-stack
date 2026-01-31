@@ -1,4 +1,4 @@
-// tools/git/pre-commit.ts
+// tools/scripts/git/pre-commit.ts
 /**
  * Manual pre-commit hook script.
  * Replaces lint-staged + simple-git-hooks with ~50 lines of code.

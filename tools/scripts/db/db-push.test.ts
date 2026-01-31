@@ -1,4 +1,4 @@
-// apps/server/src/scripts/db-push.test.ts
+// tools/scripts/db/db-push.test.ts
 /* eslint-disable no-console, @typescript-eslint/unbound-method */
 /**
  * Tests for Database Schema Push Script

@@ -14,9 +14,6 @@
     "test:unit": "vitest run --reporter=dot --test-name-pattern '(unit|fast)'",
     "test:integration": "vitest run --reporter=dot --test-name-pattern '(integration|critical)'",
     "test:full": "vitest run --reporter=verbose",
-    "db:push": "tsx --env-file=../../.config/env/.env.development src/scripts/db-push.ts",
-    "db:seed": "tsx --env-file=../../.config/env/.env.development src/scripts/seed.ts",
-    "db:bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-server --report-unused-disable-directives"
   },
   "dependencies": {

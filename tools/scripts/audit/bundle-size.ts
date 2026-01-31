@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/export/bundle-size.ts
+// tools/scripts/audit/bundle-size.ts
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
