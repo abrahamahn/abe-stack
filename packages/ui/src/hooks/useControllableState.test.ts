@@ -1,76 +1,67 @@
-// packages/ui/src/hooks/useControllableState.test.tsx
+// packages/ui/src/hooks/useControllableState.test.ts
 /** @vitest-environment jsdom */
+import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useControllableState } from './useControllableState';
 
-import type { ReactElement } from 'react';
-
 const ControllableStateHarness = (props: {
   value?: number;
   defaultValue?: number;
   onChange?: (value: number) => void;
-}): ReactElement => {
+}): React.ReactElement => {
   const { value, defaultValue, onChange } = props;
   const [state, setState] = useControllableState<number>({
     ...(value !== undefined && { value }),
     ...(defaultValue !== undefined && { defaultValue }),
     ...(onChange !== undefined && { onChange }),
   });
-
-  return (
-    <div>
-      <span data-testid="value">{String(state)}</span>
-      <button
-        type="button"
-        onClick={() => {
+  return React.createElement(
+    'div',
+    null,
+    React.createElement('span', { 'data-testid': 'value' }, String(state)),
+    React.createElement(
+      'button',
+      {
+        type: 'button',
+        onClick: () => {
           const currentValue: number = state ?? 0;
           setState(currentValue + 1);
-        }}
-      >
-        Increment
-      </button>
-    </div>
+        },
+      },
+      'Increment',
+    ),
   );
 };
-
 describe('useControllableState', () => {
   it('uses defaultValue when uncontrolled', () => {
-    render(<ControllableStateHarness defaultValue={2} />);
+    render(React.createElement(ControllableStateHarness, { defaultValue: 2 }));
     expect(screen.getByTestId('value')).toHaveTextContent('2');
   });
-
   it('updates internal state when uncontrolled', () => {
     const onChange = vi.fn();
-    render(<ControllableStateHarness defaultValue={0} onChange={onChange} />);
-
+    render(React.createElement(ControllableStateHarness, { defaultValue: 0, onChange: onChange }));
     fireEvent.click(screen.getByText('Increment'));
     expect(screen.getByTestId('value')).toHaveTextContent('1');
     expect(onChange).toHaveBeenCalledWith(1);
   });
-
   it('does not mutate internal state when controlled', () => {
     const onChange = vi.fn();
-    render(<ControllableStateHarness value={5} onChange={onChange} />);
-
+    render(React.createElement(ControllableStateHarness, { value: 5, onChange: onChange }));
     fireEvent.click(screen.getByText('Increment'));
     expect(screen.getByTestId('value')).toHaveTextContent('5');
     expect(onChange).toHaveBeenCalledWith(6);
   });
-
   it('reflects controlled value changes from the parent', () => {
-    const { rerender } = render(<ControllableStateHarness value={1} />);
+    const { rerender } = render(React.createElement(ControllableStateHarness, { value: 1 }));
     expect(screen.getByTestId('value')).toHaveTextContent('1');
-
-    rerender(<ControllableStateHarness value={9} />);
+    rerender(React.createElement(ControllableStateHarness, { value: 9 }));
     expect(screen.getByTestId('value')).toHaveTextContent('9');
   });
-
   it('updates with undefined default value', () => {
-    render(<ControllableStateHarness />);
+    render(React.createElement(ControllableStateHarness, null));
     expect(screen.getByTestId('value')).toHaveTextContent('undefined');
-
     fireEvent.click(screen.getByText('Increment'));
     expect(screen.getByTestId('value')).toHaveTextContent('1');
   });
