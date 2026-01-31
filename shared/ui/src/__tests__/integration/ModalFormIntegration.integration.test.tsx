@@ -179,7 +179,7 @@ const CreateUserModal = ({
             </Select>
           </FormField>
 
-          <FormField label="Bio" htmlFor="modal-bio" helperText="Optional">
+          <FormField label="Bio" htmlFor="modal-bio" description="Optional">
             <TextArea
               id="modal-bio"
               data-testid="modal-bio"

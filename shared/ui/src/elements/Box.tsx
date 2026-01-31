@@ -1,7 +1,7 @@
 // shared/ui/src/elements/Box.tsx
 import { cn } from '@utils/cn';
 
-import type { CSSProperties, ReactElement, ReactNode } from 'react';
+import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 import '../styles/elements.css';
 
 export type BoxProps = {
@@ -28,13 +28,8 @@ export type BoxProps = {
  * </Box>
  * ```
  */
-export const Box = ({
-  children,
-  style,
-  className,
-  padding,
-  flexDirection,
-}: BoxProps): ReactElement => {
+const Box = forwardRef<HTMLDivElement, BoxProps>((props, ref) => {
+  const { children, style, className, padding, flexDirection } = props;
   const boxPadding = typeof padding === 'number' ? `${String(padding)}px` : padding;
   const combinedStyle: CSSProperties = {
     ...(flexDirection != null ? { ['--ui-box-direction']: flexDirection } : {}),
@@ -43,8 +38,12 @@ export const Box = ({
   };
 
   return (
-    <div className={cn('box', className)} style={combinedStyle}>
+    <div ref={ref} className={cn('box', className)} style={combinedStyle}>
       {children}
     </div>
   );
-};
+});
+
+Box.displayName = 'Box';
+
+export { Box };

@@ -252,9 +252,9 @@ export const componentCatalog: Record<string, ComponentDemo> = {
       {
         name: 'With Description',
         description: 'Form field with description',
-        code: '<FormField label="Username" htmlFor="username" helperText="Choose a unique username"><Input id="username" /></FormField>',
+        code: '<FormField label="Username" htmlFor="username" description="Choose a unique username"><Input id="username" /></FormField>',
         render: () => (
-          <FormField label="Username" htmlFor="username-demo" helperText="Choose a unique username">
+          <FormField label="Username" htmlFor="username-demo" description="Choose a unique username">
             <Input id="username-demo" placeholder="Enter username" />
           </FormField>
         ),

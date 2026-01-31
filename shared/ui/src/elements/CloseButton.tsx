@@ -1,5 +1,5 @@
 // shared/ui/src/elements/CloseButton.tsx
-import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/elements.css';
 
 type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
@@ -11,14 +11,11 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
  * A minimal close button for panels, cards, and overlays.
  * Positioned for top-right corner placement in flex containers.
  */
-export const CloseButton = ({
-  children,
-  className = '',
-  'aria-label': ariaLabel = 'Close',
-  ...rest
-}: CloseButtonProps): ReactElement => {
+const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>((props, ref) => {
+  const { children, className = '', 'aria-label': ariaLabel = 'Close', ...rest } = props;
   return (
     <button
+      ref={ref}
       type="button"
       aria-label={ariaLabel}
       className={`close-btn ${className}`.trim()}
@@ -27,4 +24,9 @@ export const CloseButton = ({
       {children ?? '✕'}
     </button>
   );
-};
+});
+
+CloseButton.displayName = 'CloseButton';
+
+export { CloseButton };
+export type { CloseButtonProps };

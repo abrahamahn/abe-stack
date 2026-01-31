@@ -17,7 +17,7 @@ import { FormField } from '@abe-stack/ui';
 | label      | `string`    | -       | Label text for the form field (required) |
 | htmlFor    | `string`    | -       | ID of the input element (required)       |
 | error      | `string`    | -       | Error message to display                 |
-| helperText | `string`    | -       | Helper text shown below input            |
+| description | `string`    | -       | Helper text shown below input            |
 | required   | `boolean`   | `false` | Shows required indicator (\*)            |
 | children   | `ReactNode` | -       | The form input element(s)                |
 | className  | `string`    | `''`    | Additional CSS classes                   |
@@ -51,7 +51,7 @@ import { FormField } from '@abe-stack/ui';
 ### With Helper Text
 
 ```tsx
-<FormField label="Bio" htmlFor="bio" helperText="Max 500 characters">
+<FormField label="Bio" htmlFor="bio" description="Max 500 characters">
   <TextArea id="bio" />
 </FormField>
 ```
@@ -69,7 +69,7 @@ import { FormField } from '@abe-stack/ui';
     htmlFor="password"
     required
     error={errors.password}
-    helperText="At least 8 characters"
+    description="At least 8 characters"
   >
     <Input id="password" type="password" />
   </FormField>
