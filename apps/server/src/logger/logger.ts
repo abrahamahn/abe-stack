@@ -7,18 +7,9 @@
  * functions live here; pure utilities are in @abe-stack/core.
  */
 
-import type { LogData, Logger, RequestContext } from './types';
+import type { LogData, Logger, RequestContext } from '@abe-stack/core/infrastructure/logger';
 import type { FastifyBaseLogger } from 'fastify';
 
-
-// Re-export pure functions from core (preserved for backward compat)
-export {
-  createRequestContext,
-  generateCorrelationId,
-  getOrCreateCorrelationId,
-  LOG_LEVELS,
-  shouldLog,
-} from '@abe-stack/core/infrastructure/logger';
 
 /**
  * Create a logger that wraps Fastify's pino logger.
