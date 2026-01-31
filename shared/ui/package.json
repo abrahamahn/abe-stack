@@ -67,7 +67,7 @@
   "sideEffects": false,
   "dependencies": {
     "@abe-stack/core": "workspace:*",
-    "@abe-stack/sdk": "workspace:*",
+    "@abe-stack/client": "workspace:*",
     "@abe-stack/stores": "workspace:*"
   },
   "peerDependencies": {

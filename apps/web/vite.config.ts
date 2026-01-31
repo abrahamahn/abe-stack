@@ -20,9 +20,9 @@ export default defineConfig({
       // Monorepo packages → source files (not dist/)
       '@abe-stack/core': resolveAlias('shared/core/src'),
       '@abe-stack/ui': resolveAlias('shared/ui/src'),
-      '@abe-stack/sdk': resolveAlias('sdk/src'),
+      '@abe-stack/client': resolveAlias('client/src'),
       '@abe-stack/contracts': resolveAlias('infra/contracts/src'),
-      '@abe-stack/stores': resolveAlias('infra/stores/src'),
+      '@abe-stack/stores': resolveAlias('client/stores/src'),
       '@abe-stack/db': resolveAlias('infra/db/src'),
       '@abe-stack/media': resolveAlias('infra/media/src'),
       // UI package internal aliases

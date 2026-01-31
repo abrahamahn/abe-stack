@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",
-    "@abe-stack/sdk": "workspace:*",
+    "@abe-stack/client": "workspace:*",
     "@abe-stack/stores": "workspace:*",
     "@abe-stack/ui": "workspace:*",
     "react": "^19.2.3",

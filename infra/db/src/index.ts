@@ -389,10 +389,17 @@ export {
 // Database configuration
 export {
   buildConfigConnectionString,
+  DEFAULT_ELASTICSEARCH_CONFIG,
+  DEFAULT_SEARCH_SCHEMAS,
+  DEFAULT_SQL_SEARCH_CONFIG,
   getSafeConnectionString,
   isJsonDatabase,
   isPostgres,
   loadDatabaseConfig,
+  loadElasticsearchConfig,
+  loadSqlSearchConfig,
+  validateElasticsearchConfig,
+  validateSqlSearchConfig,
 } from './config/index';
 
 // Scripts (CLI database management)

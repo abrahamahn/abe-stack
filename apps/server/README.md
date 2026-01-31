@@ -147,12 +147,12 @@ const results = await provider.search({ filters: { role: 'admin' }, limit: 20 })
 - SQL: Full-text search with Postgres
 - Elasticsearch: Stub implementation ready for future integration
 
-### WebSocket (`src/infrastructure/messaging/websocket/`)
+### WebSocket (`@abe-stack/realtime`)
 
-Authenticated WebSocket connections with CSRF protection.
+Authenticated WebSocket connections with CSRF protection. Provided by the `@abe-stack/realtime` package.
 
 ```typescript
-registerWebSocket(server, ctx); // handles /ws endpoint
+registerWebSocket(server, ctx, { verifyToken }); // handles /ws endpoint
 // clients connect with token in Sec-WebSocket-Protocol header
 ```
 
@@ -433,10 +433,6 @@ apps/server/src/
 │   │   ├── database/          # Drizzle + schemas
 │   │   ├── storage/           # file storage
 │   │   └── files/             # file helpers
-│   ├── messaging/
-│   │   ├── email/             # email service
-│   │   ├── pubsub/            # real-time
-│   │   └── websocket/         # WebSocket
 │   ├── http/                  # middleware, router, pagination
 │   ├── cache/                 # caching with LRU
 │   ├── search/                # search providers

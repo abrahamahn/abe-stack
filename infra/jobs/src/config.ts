@@ -1,0 +1,41 @@
+// infra/jobs/src/config.ts
+import type { FullEnv, QueueConfig } from '@abe-stack/core/config';
+
+/**
+ * Load Job Queue Configuration.
+ *
+ * Defines behavior for background processing.
+ * - **Local**: In-memory or simple database polling.
+ * - **Redis**: Enterprise-grade distributed queue (if enabled).
+ *
+ * Configures concurrency, polling intervals, and exponential backoff strategies for retries.
+ *
+ * @param env - Environment variable map
+ * @returns Complete queue configuration
+ * @complexity O(1)
+ */
+export function loadQueueConfig(env: FullEnv): QueueConfig {
+  return {
+    // Infrastructure settings
+    pollIntervalMs: env.QUEUE_POLL_INTERVAL_MS,
+    concurrency: env.QUEUE_CONCURRENCY,
+
+    // Retry & Resilience logic
+    defaultMaxAttempts: env.QUEUE_MAX_ATTEMPTS,
+    backoffBaseMs: env.QUEUE_BACKOFF_BASE_MS,
+    maxBackoffMs: env.QUEUE_MAX_BACKOFF_MS,
+
+    // Placeholder for Enterprise scaling (Redis support)
+    provider: env.QUEUE_PROVIDER,
+  };
+}
+
+/** Default queue configuration */
+export const DEFAULT_QUEUE_CONFIG: Required<QueueConfig> = {
+  provider: 'local',
+  pollIntervalMs: 1000,
+  concurrency: 5,
+  defaultMaxAttempts: 3,
+  backoffBaseMs: 1000,
+  maxBackoffMs: 300000,
+};

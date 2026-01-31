@@ -26,6 +26,13 @@
  * ```
  */
 
+// Configuration
+export {
+  DEFAULT_NOTIFICATION_CONFIG,
+  loadNotificationsConfig,
+  validateNotificationsConfig,
+} from './config';
+
 // Module types
 export type { NotificationLogger, NotificationModuleDeps, NotificationRequest } from './types';
 

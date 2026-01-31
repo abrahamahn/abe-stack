@@ -7,6 +7,9 @@
  * In production, sends via SMTP.
  */
 
+// Configuration
+export { DEFAULT_SMTP_CONFIG, loadEmailConfig, loadSmtpConfig } from './config';
+
 // Types
 export type { EmailService, EmailOptions, EmailResult } from './types';
 

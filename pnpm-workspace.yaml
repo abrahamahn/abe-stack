@@ -7,5 +7,6 @@ packages:
   - 'modules/*'
   # Shared packages
   - 'shared/*'
-  # SDK
-  - 'sdk'
+  # Client
+  - 'client'
+  - 'client/*'

@@ -5,6 +5,9 @@
  * Storage providers (Local, S3) and HTTP file server.
  */
 
+// Configuration
+export { loadStorageConfig, validateStorage } from './config';
+
 // Types
 export type {
   StorageProvider,

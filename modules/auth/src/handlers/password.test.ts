@@ -172,7 +172,6 @@ const baseConfig: AppConfig = {
     config: { credentials: '', projectId: '' },
   },
   search: { provider: 'sql', config: { defaultPageSize: 20, maxPageSize: 100 } },
-  packageManager: { provider: 'pnpm', strictPeerDeps: true, frozenLockfile: true },
 };
 
 type AppContextOverrides = Partial<AppContext> & {

@@ -10,7 +10,7 @@ TypeScript monorepo (pnpm + Turborepo) with three apps and 18 shared packages.
 - **infra/** — Infrastructure packages (cache, db, email, http, jobs, media, etc.)
 - **modules/** — Business modules (admin, auth, billing)
 - **shared/** — Shared libraries (core, ui)
-- **sdk/** — Type-safe API client + React Query hooks
+- **client/** — Type-safe API client + React Query hooks
 
 ## Task Delegation — Reduce Context Usage
 
@@ -114,7 +114,7 @@ pnpm health-check       # Project health audit
 - **Import order** — External deps → `@abe-stack/*` → relative imports.
 - **Naming** — PascalCase (components/types), camelCase (functions/hooks), kebab-case (configs).
 - **Tests colocated** — `*.test.ts` / `*.spec.ts` next to source files.
-- **One-way dependency flow** — `apps → infra/modules/shared/sdk → shared/core → external`.
+- **One-way dependency flow** — `apps → infra/modules/shared/client → shared/core → external`.
 
 ## Architecture
 
@@ -123,7 +123,7 @@ apps/              → Deployable applications (Tier 4 — thin wiring only)
 infra/             → Infrastructure packages (cache, db, http, storage, etc.)
 modules/           → Business modules (admin, auth, billing)
 shared/            → Shared libraries (core, ui)
-sdk/               → Type-safe API client + React Query hooks
+client/            → Type-safe API client + React Query hooks
 tools/             → Build scripts, sync automation
 ops/               → Terraform, Docker configs
 apps/docs/         → Specs, principles, deployment guides

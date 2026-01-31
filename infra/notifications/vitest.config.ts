@@ -2,7 +2,7 @@ import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import baseConfig from '../../vitest.config';
 
-const corePkg = path.resolve(__dirname, '../core/src');
+const corePkg = path.resolve(__dirname, '../../shared/core/src');
 const dbPkg = path.resolve(__dirname, '../db/src');
 const httpPkg = path.resolve(__dirname, '../http/src');
 

@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useSecurityEvent.test.ts
-import { useQuery } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/client';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -8,10 +8,10 @@ import { createAdminApiClient } from '../services/adminApi';
 import { useSecurityEvent } from './useSecurityEvent';
 
 import type { SecurityEvent } from '@abe-stack/core';
-import type { UseQueryResult } from '@abe-stack/sdk';
+import type { UseQueryResult } from '@abe-stack/client';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useQuery: vi.fn(),
 }));
 

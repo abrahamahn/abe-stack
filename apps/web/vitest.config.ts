@@ -30,12 +30,12 @@ export default mergeConfig(baseConfig, {
         replacement: path.resolve(__dirname, '../../shared/ui/src/$1'),
       },
       {
-        find: /^@abe-stack\/sdk\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../sdk/src/$1'),
+        find: /^@abe-stack\/client\/(.*)$/,
+        replacement: path.resolve(__dirname, '../../client/src/$1'),
       },
       {
         find: /^@abe-stack\/stores\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../infra/stores/src/$1'),
+        replacement: path.resolve(__dirname, '../../client/stores/src/$1'),
       },
       // Handle main package imports
       {
@@ -51,12 +51,12 @@ export default mergeConfig(baseConfig, {
         replacement: path.resolve(__dirname, '../../shared/ui/src/index.ts'),
       },
       {
-        find: '@abe-stack/sdk',
-        replacement: path.resolve(__dirname, '../../sdk/src/index.ts'),
+        find: '@abe-stack/client',
+        replacement: path.resolve(__dirname, '../../client/src/index.ts'),
       },
       {
         find: '@abe-stack/stores',
-        replacement: path.resolve(__dirname, '../../infra/stores/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../client/stores/src/index.ts'),
       },
       // Web app feature module aliases - must match tsconfig.json paths
       { find: '@app', replacement: path.resolve(__dirname, './src/app') },

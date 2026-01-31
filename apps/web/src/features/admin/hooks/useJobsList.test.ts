@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useJobsList.test.ts
-import { useQuery } from '@abe-stack/sdk';
+import { useQuery } from '@abe-stack/client';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -8,10 +8,10 @@ import { createAdminApiClient } from '../services/adminApi';
 import { useJobsList } from './useJobsList';
 
 import type { JobListResponse } from '@abe-stack/core';
-import type { UseQueryResult } from '@abe-stack/sdk';
+import type { UseQueryResult } from '@abe-stack/client';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useQuery: vi.fn(),
 }));
 

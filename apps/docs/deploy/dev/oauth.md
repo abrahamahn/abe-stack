@@ -264,6 +264,6 @@ await unlink('google');
 - Server OAuth routes: `apps/server/src/modules/auth/oauth/`
 - Server OAuth providers: `apps/server/src/modules/auth/oauth/providers/`
 - Auth config: `apps/server/src/config/auth.config.ts`
-- SDK OAuth hooks: `sdk/src/oauth/`
+- SDK OAuth hooks: `client/src/oauth/`
 - Frontend OAuth buttons: `apps/web/src/features/auth/components/OAuthButtons.tsx`
 - Connected accounts page: `apps/web/src/features/auth/pages/ConnectedAccountsPage.tsx`

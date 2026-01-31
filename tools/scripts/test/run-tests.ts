@@ -24,7 +24,8 @@ interface PackageResult {
  */
 const PACKAGES: Array<[string, string]> = [
   ['core', 'shared/core'],
-  ['sdk', 'sdk'],
+  ['client', 'client'],
+  ['stores', 'client/stores'],
   ['server', 'apps/server'],
   ['web', 'apps/web'],
 ];

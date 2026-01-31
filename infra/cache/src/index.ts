@@ -51,10 +51,36 @@ export { MemoryCacheProvider } from './providers';
 export { createCache, createCacheFromEnv, createMemoryCache } from './factory';
 
 // ============================================================================
+// Errors
+// ============================================================================
+
+export {
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  toCacheError,
+} from './errors';
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+export { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './config';
+
+// ============================================================================
 // Types
 // ============================================================================
 
-// Re-export core types
 export type {
   BaseCacheConfig,
   CacheConfig,

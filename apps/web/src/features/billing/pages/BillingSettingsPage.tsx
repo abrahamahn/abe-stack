@@ -8,13 +8,13 @@
  * - Invoice history
  */
 
-import { tokenStore } from '@abe-stack/core';
 import {
   useInvoices,
   usePaymentMethods,
   useSubscription,
   type BillingClientConfig,
-} from '@abe-stack/sdk';
+} from '@abe-stack/client';
+import { tokenStore } from '@abe-stack/core';
 import {
   Button,
   Card,

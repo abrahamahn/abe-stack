@@ -1,39 +1,31 @@
 // apps/server/src/app.ts
 
+import { verifyToken } from '@abe-stack/auth';
+import { createMemoryCache } from '@abe-stack/cache';
 import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
 import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import { createDbClient, getRepositoryContext, requireValidSchema } from '@abe-stack/db';
+import { createDbClient, getRepositoryContext, getSearchProviderFactory, requireValidSchema } from '@abe-stack/db';
 import { createEmailService, emailTemplates } from '@abe-stack/email';
 import { createPostgresQueueStore, createQueueServer, createWriteService } from '@abe-stack/jobs';
+import { createNotificationProviderService } from '@abe-stack/notifications';
+import { registerWebSocket } from '@abe-stack/realtime';
 import { createStorage } from '@abe-stack/storage';
+import { logStartupSummary } from '@health';
+import { registerRoutes } from '@routes';
 import { type AppContext, type IServiceContainer } from '@shared';
+
 import { createBillingProvider } from '../../../modules/billing/src';
 
-import {
-    createNotificationService,
-    getSearchProviderFactory,
-    logStartupSummary,
-    registerWebSocket,
-} from './infrastructure/index';
-import { registerRoutes } from './modules/index';
-import { createCacheService, type CacheService } from './services/cache-service';
-
-
-import type { AppConfig, BillingService, EmailService, FcmConfig as FcmConfigType } from '@abe-stack/core';
+import type { CacheProvider } from '@abe-stack/cache';
+import type { AppConfig, BillingService, EmailService, NotificationService } from '@abe-stack/core';
 import type { PostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import type { DbClient, Repositories } from '@abe-stack/db';
+import type { DbClient, Repositories, ServerSearchProvider } from '@abe-stack/db';
 import type { QueueServer, WriteService } from '@abe-stack/jobs';
+import type { FcmConfig, NotificationFactoryOptions } from '@abe-stack/notifications';
 import type { StorageProvider } from '@abe-stack/storage';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
-import type {
-    FcmConfig,
-    NotificationFactoryOptions,
-    NotificationService,
-    ServerSearchProvider,
-} from './infrastructure/index';
 
-import { buildConnectionString } from '@/config';
-import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';
+import { buildConnectionString, DEFAULT_SEARCH_SCHEMAS } from '@/config';
 import { createServer, listen } from '@/server';
 
 export interface AppOptions {
@@ -47,7 +39,7 @@ export interface AppOptions {
   search?: ServerSearchProvider;
   queue?: QueueServer;
   write?: WriteService;
-  cache?: CacheService;
+  cache?: CacheProvider;
 }
 
 export class App implements IServiceContainer {
@@ -63,7 +55,7 @@ export class App implements IServiceContainer {
   public readonly queue: QueueServer;
   public readonly write: WriteService;
   public readonly pubsub: SubscriptionManager;
-  public readonly cache: CacheService;
+  public readonly cache: CacheProvider;
   public readonly emailTemplates: IServiceContainer['emailTemplates'];
 
   private _pgPubSub: PostgresPubSub | null = null;
@@ -96,9 +88,9 @@ export class App implements IServiceContainer {
     } else {
       const notificationOptions: NotificationFactoryOptions = {};
       if (this.config.notifications.provider === 'fcm') {
-        notificationOptions.fcm = this.config.notifications.config as FcmConfig as FcmConfigType;
+        notificationOptions.fcm = this.config.notifications.config as FcmConfig;
       }
-      this.notifications = createNotificationService(notificationOptions);
+      this.notifications = createNotificationProviderService(notificationOptions);
     }
 
     // 4. Billing
@@ -116,7 +108,9 @@ export class App implements IServiceContainer {
 
     // 5. Search
     const userSearchSchema = DEFAULT_SEARCH_SCHEMAS['users'];
-    if (userSearchSchema === undefined) throw new Error('User search schema not found');
+    if (userSearchSchema === undefined) {
+      throw new Error('User search schema not found');
+    }
 
     this.search =
       options.search ??
@@ -141,8 +135,8 @@ export class App implements IServiceContainer {
     // 8. Cache
     this.cache =
       options.cache ??
-      createCacheService({
-        ttl: this.config.cache.ttl,
+      createMemoryCache({
+        defaultTtl: this.config.cache.ttl,
         maxSize: this.config.cache.maxSize,
       });
 
@@ -226,7 +220,7 @@ export class App implements IServiceContainer {
       this.setupErrorHandler(this._server);
 
       registerRoutes(this._server, this.context);
-      registerWebSocket(this._server, this.context);
+      registerWebSocket(this._server, this.context, { verifyToken });
 
       await listen(this._server, this.config);
 
@@ -248,8 +242,8 @@ export class App implements IServiceContainer {
     if (this._pgPubSub !== null) await this._pgPubSub.stop();
     await this.queue.stop();
 
-    // 2. Clear volatile data
-    this.cache.cleanup();
+    // 2. Close cache provider
+    await this.cache.close();
 
     // 3. Stop receiving HTTP traffic
     if (this._server !== null) {

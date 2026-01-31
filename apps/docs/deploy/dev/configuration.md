@@ -67,7 +67,7 @@ packages:
   - 'infra/*'
   - 'modules/*'
   - 'shared/*'
-  - 'sdk'
+  - 'client'
 ```
 
 - Store location configured in `.pnpmrc`:
@@ -117,7 +117,7 @@ The root `tsconfig.json` only defines project references for the monorepo:
     { "path": "./apps/desktop" },
     { "path": "./apps/server" },
     { "path": "./shared/core" },
-    { "path": "./sdk" },
+    { "path": "./client" },
     { "path": "./shared/ui" }
   ]
 }
@@ -206,7 +206,7 @@ Packages use TypeScript project references for incremental builds:
 // apps/web/tsconfig.json
 {
   "references": [
-    { "path": "../../sdk" },
+    { "path": "../../client" },
     { "path": "../../shared/core" },
     { "path": "../../shared/ui" }
   ]
@@ -694,7 +694,7 @@ Use with `turbo run` or `pnpm --filter`:
 | `@abe-stack/desktop` | `apps/desktop`  |
 | `@abe-stack/ui`      | `shared/ui`   |
 | `@abe-stack/core`    | `shared/core` |
-| `@abe-stack/sdk`     | `sdk`  |
+| `@abe-stack/client`     | `sdk`  |
 
 ### Related Documentation
 

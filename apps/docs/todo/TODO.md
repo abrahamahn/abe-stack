@@ -45,7 +45,7 @@ root/
 │   ├── core/            # Config, AppError, Constants
 │   ├── contracts/       # Zod Schemas, API Types
 │   ├── ui/              # React Design System
-│   └── sdk/             # API Client (React Query)
+│   └── client/          # API Client (React Query)
 │
 ├── ops/                 # CLOUD INFRASTRUCTURE
 │   ├── docker/

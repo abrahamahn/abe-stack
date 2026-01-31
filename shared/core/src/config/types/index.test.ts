@@ -184,11 +184,6 @@ function createMinimalAppConfig(): AppConfig {
         maxPageSize: 100,
       },
     },
-    packageManager: {
-      provider: 'pnpm',
-      strictPeerDeps: true,
-      frozenLockfile: true,
-    },
   };
 }
 
@@ -540,7 +535,6 @@ describe('AppConfig', () => {
       expect(config.queue).toBeDefined();
       expect(config.notifications).toBeDefined();
       expect(config.search).toBeDefined();
-      expect(config.packageManager).toBeDefined();
     });
 
     it('should accept development environment', () => {
@@ -702,47 +696,6 @@ describe('AppConfig', () => {
       };
 
       expect(config.storage.provider).toBe('s3');
-    });
-  });
-
-  describe('package manager variations', () => {
-    it('should accept npm package manager config', () => {
-      const config: AppConfig = {
-        ...createMinimalAppConfig(),
-        packageManager: {
-          provider: 'npm',
-          audit: true,
-          legacyPeerDeps: false,
-        },
-      };
-
-      expect(config.packageManager.provider).toBe('npm');
-    });
-
-    it('should accept pnpm package manager config', () => {
-      const config: AppConfig = {
-        ...createMinimalAppConfig(),
-        packageManager: {
-          provider: 'pnpm',
-          strictPeerDeps: true,
-          frozenLockfile: true,
-        },
-      };
-
-      expect(config.packageManager.provider).toBe('pnpm');
-    });
-
-    it('should accept yarn package manager config', () => {
-      const config: AppConfig = {
-        ...createMinimalAppConfig(),
-        packageManager: {
-          provider: 'yarn',
-          audit: true,
-          frozenLockfile: true,
-        },
-      };
-
-      expect(config.packageManager.provider).toBe('yarn');
     });
   });
 
@@ -977,7 +930,6 @@ describe('AppConfig', () => {
         'queue',
         'notifications',
         'search',
-        'packageManager',
       ];
 
       requiredKeys.forEach((key) => {

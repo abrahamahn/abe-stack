@@ -24,7 +24,8 @@
 import { randomBytes } from 'node:crypto';
 
 import { buildConnectionString, createDbClient, eq, insert, select, USERS_TABLE } from '@abe-stack/db';
-import { hashPassword } from '../../../../modules/auth/src';
+
+import { hashPassword } from '@abe-stack/auth';
 
 import { loadConfig } from '@/config';
 

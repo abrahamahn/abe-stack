@@ -110,7 +110,6 @@ function createMockConfig(): AppConfig {
     queue: {} as AppConfig['queue'],
     notifications: {} as AppConfig['notifications'],
     search: {} as AppConfig['search'],
-    packageManager: {} as AppConfig['packageManager'],
   } as AppConfig;
 }
 

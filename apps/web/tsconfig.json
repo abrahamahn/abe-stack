@@ -6,10 +6,10 @@
       "@/*": ["./src/*"],
       "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
       "@abe-stack/contracts/*": ["../../infra/contracts/src/*"],
-      "@abe-stack/sdk": ["../../sdk/src/index.ts"],
-      "@abe-stack/sdk/*": ["../../sdk/src/*"],
-      "@abe-stack/stores": ["../../infra/stores/src/index.ts"],
-      "@abe-stack/stores/*": ["../../infra/stores/src/*"],
+      "@abe-stack/client": ["../../client/src/index.ts"],
+      "@abe-stack/client/*": ["../../client/src/*"],
+      "@abe-stack/stores": ["../../client/stores/src/index.ts"],
+      "@abe-stack/stores/*": ["../../client/stores/src/*"],
       "@abe-stack/ui": ["../../shared/ui/src/index.ts"],
       "@abe-stack/ui/*": ["../../shared/ui/src/*"],
       "@admin": ["./src/features/admin"],
@@ -67,10 +67,10 @@
       "path": "../../infra/media"
     },
     {
-      "path": "../../sdk"
+      "path": "../../client"
     },
     {
-      "path": "../../infra/stores"
+      "path": "../../client/stores"
     },
     {
       "path": "../../shared/ui"

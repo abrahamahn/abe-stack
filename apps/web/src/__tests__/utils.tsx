@@ -11,7 +11,7 @@
  * @module test-utils
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
+import { QueryCache, QueryCacheProvider } from '@abe-stack/client';
 import { MemoryRouter } from '@abe-stack/ui';
 import { render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -14,8 +14,8 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-// Mock @abe-stack/sdk hooks
-vi.mock('@abe-stack/sdk', () => ({
+// Mock @abe-stack/client hooks
+vi.mock('@abe-stack/client', () => ({
   useSubscription: vi.fn(() => ({
     subscription: null,
     isLoading: false,

@@ -17,9 +17,9 @@ const CONFIG_DIRECTORIES = [
 const PACKAGE_ALIASES: Record<string, string> = {
   '@abe-stack/core': 'shared/core/src',
   '@abe-stack/contracts': 'infra/contracts/src',
-  '@abe-stack/sdk': 'sdk/src',
+  '@abe-stack/client': 'client/src',
   '@abe-stack/ui': 'shared/ui/src',
-  '@abe-stack/stores': 'infra/stores/src',
+  '@abe-stack/stores': 'client/stores/src',
   '@abe-stack/media': 'infra/media/src',
   '@abe-stack/db': 'infra/db/src',
 };

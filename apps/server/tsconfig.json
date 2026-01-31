@@ -117,59 +117,29 @@
       "@config/*": [
             "./src/config/*"
       ],
-      "@http": [
-            "./src/infrastructure/http"
+      "@health": [
+            "./src/health"
       ],
-      "@http/*": [
-            "./src/infrastructure/http/*"
+      "@health/*": [
+            "./src/health/*"
       ],
-      "@jobs": [
-            "./src/infrastructure/jobs"
+      "@logger": [
+            "./src/logger"
       ],
-      "@jobs/*": [
-            "./src/infrastructure/jobs/*"
+      "@logger/*": [
+            "./src/logger/*"
       ],
-      "@media": [
-            "./src/infrastructure/media"
+      "@routes": [
+            "./src/routes"
       ],
-      "@media/*": [
-            "./src/infrastructure/media/*"
-      ],
-      "@messaging": [
-            "./src/infrastructure/messaging"
-      ],
-      "@messaging/*": [
-            "./src/infrastructure/messaging/*"
-      ],
-      "@monitor": [
-            "./src/infrastructure/monitor"
-      ],
-      "@monitor/*": [
-            "./src/infrastructure/monitor/*"
-      ],
-      "@search": [
-            "./src/infrastructure/search"
-      ],
-      "@search/*": [
-            "./src/infrastructure/search/*"
-      ],
-      "@security": [
-            "./src/infrastructure/security"
-      ],
-      "@security/*": [
-            "./src/infrastructure/security/*"
+      "@routes/*": [
+            "./src/routes/*"
       ],
       "@shared": [
-            "./src/shared"
+            "./src/types/context"
       ],
       "@shared/*": [
-            "./src/shared/*"
-      ],
-      "@system": [
-            "./src/modules/system"
-      ],
-      "@system/*": [
-            "./src/modules/system/*"
+            "./src/types/*"
       ],
       "@types": [
             "./src/types"
@@ -177,12 +147,6 @@
       "@types/*": [
             "./src/types/*"
       ],
-      "@utils": [
-            "./src/utils"
-      ],
-      "@utils/*": [
-            "./src/utils/*"
-      ]
     }
   },
   "include": ["src/**/*"],

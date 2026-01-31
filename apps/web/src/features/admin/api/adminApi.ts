@@ -5,10 +5,11 @@
  * Type-safe API calls for admin user management.
  */
 
+import { createApiError, NetworkError } from '@abe-stack/client';
 import { addAuthHeader, tokenStore } from '@abe-stack/core';
-import { createApiError, NetworkError } from '@abe-stack/sdk';
 
 
+import type { ApiErrorBody } from '@abe-stack/client';
 import type {
   AdminLockUserRequest,
   AdminLockUserResponse,
@@ -19,7 +20,6 @@ import type {
   AdminUserListResponse,
   UnlockAccountRequest,
 } from '@abe-stack/core';
-import type { ApiErrorBody } from '@abe-stack/sdk';
 
 import { clientConfig } from '@/config';
 

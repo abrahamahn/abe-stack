@@ -77,7 +77,7 @@ abe-stack/
 | `apps/server/src/infra`   | Infrastructure (database, storage, security) |
 | `shared/core/src`       | Shared contracts, validation, stores         |
 | `shared/ui/src`         | Reusable UI components                       |
-| `sdk/src`        | Type-safe API client + React Query hooks     |
+| `client/src`        | Type-safe API client + React Query hooks     |
 | `infra/*/src`             | Infrastructure package source code           |
 
 ---
@@ -151,7 +151,7 @@ apps/server/src/infra/*
 | ------------------ | ------------------ |
 | `@abe-stack/core`  | External deps only |
 | `@abe-stack/ui`    | `@abe-stack/core`  |
-| `@abe-stack/sdk`   | `@abe-stack/core`  |
+| `@abe-stack/client`   | `@abe-stack/core`  |
 | `@abe-stack/tests` | `@abe-stack/core`  |
 | `apps/web`         | All packages       |
 | `apps/server`      | `@abe-stack/core`  |
@@ -215,8 +215,8 @@ The server implements **hexagonal architecture** (ports & adapters) to isolate b
 
 ### API Client Split
 
-- Framework-agnostic client: `sdk/src/client.ts`
-- React Query hooks: `sdk/src/react-query.ts`
+- Framework-agnostic client: `client/src/client.ts`
+- React Query hooks: `client/src/react-query.ts`
 
 ### Environment Configuration
 

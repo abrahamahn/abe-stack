@@ -15,7 +15,6 @@ import type { ConsoleLogLevel } from '../../infrastructure/logger/console';
 export type DatabaseProvider = 'postgresql' | 'sqlite' | 'mongodb' | 'json';
 export type StorageProviderName = 'local' | 's3';
 export type QueueProvider = 'local' | 'redis';
-export type PackageManagerProvider = 'npm' | 'pnpm' | 'yarn';
 export type LogLevel = ConsoleLogLevel;
 
 // ============================================================================
@@ -126,51 +125,6 @@ export interface MongoConfig {
 }
 
 export type DatabaseConfig = PostgresConfig | JsonDatabaseConfig | SqliteConfig | MongoConfig;
-
-// ============================================================================
-// Package Manager Configuration
-// ============================================================================
-
-/**
- * NPM package manager configuration.
- */
-export interface NpmConfig {
-  provider: 'npm';
-  /** Enable audit checks during installation */
-  audit: boolean;
-  /** Use legacy peer dependencies behavior */
-  legacyPeerDeps: boolean;
-  /** Registry URL to use */
-  registry?: string;
-}
-
-/**
- * PNPM package manager configuration.
- */
-export interface PnpmConfig {
-  provider: 'pnpm';
-  /** Enable strict peer dependencies */
-  strictPeerDeps: boolean;
-  /** Use frozen lockfile (fail if lockfile is out of sync) */
-  frozenLockfile: boolean;
-  /** Registry URL to use */
-  registry?: string;
-}
-
-/**
- * Yarn package manager configuration.
- */
-export interface YarnConfig {
-  provider: 'yarn';
-  /** Enable audit checks during installation */
-  audit: boolean;
-  /** Use frozen lockfile (fail if lockfile is out of sync) */
-  frozenLockfile: boolean;
-  /** Registry URL to use */
-  registry?: string;
-}
-
-export type PackageManagerConfig = NpmConfig | PnpmConfig | YarnConfig;
 
 // ============================================================================
 // Cache Configuration

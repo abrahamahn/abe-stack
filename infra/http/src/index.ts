@@ -9,6 +9,9 @@
  * - plugins: Composable plugin registration with dependency injection
  */
 
+// Configuration
+export { loadServerConfig } from './config';
+
 // Middleware - Cookies
 export {
   parseCookies,

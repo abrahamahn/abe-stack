@@ -18,7 +18,7 @@ import { describe, expect, it, vi } from 'vitest';
 // Vi.mock calls - these must come before any imports that use them
 // ============================================================================
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   QueryCache: vi.fn(function QueryCache() {
     return {
       getQueryData: vi.fn(),
@@ -124,13 +124,13 @@ describe('main.tsx', () => {
 
     it('should import mocked SDK dependencies', async () => {
       // Verify mocks are in place via dynamic import
-      const sdk = await import('@abe-stack/sdk');
+      const sdk = await import('@abe-stack/client');
       expect(sdk.QueryCache).toBeDefined();
       expect(sdk.QueryCacheProvider).toBeDefined();
     });
 
     it('should have QueryCache constructor mocked', async () => {
-      const sdk = await import('@abe-stack/sdk');
+      const sdk = await import('@abe-stack/client');
       expect(typeof sdk.QueryCache).toBe('function');
     });
   });

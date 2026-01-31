@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useJobActions.test.ts
-import { useMutation } from '@abe-stack/sdk';
+import { useMutation } from '@abe-stack/client';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -8,10 +8,10 @@ import { createAdminApiClient } from '../services/adminApi';
 import { useJobActions } from './useJobActions';
 
 import type { JobActionResponse } from '@abe-stack/core';
-import type { UseMutationResult } from '@abe-stack/sdk';
+import type { UseMutationResult } from '@abe-stack/client';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useMutation: vi.fn(),
 }));
 

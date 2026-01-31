@@ -200,7 +200,7 @@ abe-stack/
 ├── shared/               # Shared Libraries
 │   ├── core/             # Contracts, validation, stores, errors
 │   └── ui/               # 16 components, 25 elements, 13 hooks, 14 layouts
-├── sdk/                  # Type-safe API client + React Query + offline support
+├── client/               # Type-safe API client + React Query + offline support
 ├── tools/                # Meta Development Tools
 │   ├── scripts/          # Dev, audit, export, git hooks, path utils, test runner
 │   └── sync/             # Sync scripts (file headers, CSS theme, TS references)
@@ -222,14 +222,14 @@ apps/*           → Thin renderers (just UI)
 infra/*          → Infrastructure packages (cache, db, http, storage, etc.)
 modules/*        → Business modules (admin, auth, billing)
 shared/*         → Shared libraries (core, ui)
-sdk/             → Type-safe API client
+client/          → Type-safe API client
 ```
 
 **Dependency rule:** Apps import packages. Packages never import apps. Change your mind about React later? Only touch `apps/`. Everything else stays.
 
 ---
 
-## SDK Features
+## Client Features
 
 _Inspired by [chet-stack](https://github.com/ccorcos/chet-stack) — particularly the offline-first data layer, real-time sync, and undo/redo patterns._
 

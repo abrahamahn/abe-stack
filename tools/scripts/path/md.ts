@@ -114,7 +114,7 @@ function exportMarkdownFiles(): void {
     'infra',
     'infra/contracts',
     'shared/core',
-    'sdk',
+    'client',
     'shared/ui/docs',
     'shared/ui',
     'tools',

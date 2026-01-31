@@ -9,8 +9,8 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../modules/auth/src';
 
 import { unlockUserAccount, UserNotFoundError } from './service';
 
-import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
 import type { AdminAppContext, AdminRequest } from './types';
+import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
 
 /**
  * Unlock a user account (admin only)

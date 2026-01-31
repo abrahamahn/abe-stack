@@ -5,7 +5,7 @@
  * Validates security metrics fetching with period selection and state management.
  */
 
-import * as sdk from '@abe-stack/sdk';
+import * as sdk from '@abe-stack/client';
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -19,7 +19,7 @@ import type { SecurityMetrics } from '@abe-stack/core';
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/sdk', () => ({
+vi.mock('@abe-stack/client', () => ({
   useQuery: vi.fn(),
 }));
 

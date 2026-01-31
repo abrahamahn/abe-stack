@@ -8,7 +8,7 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { createQueryPersister, QueryCacheProvider } from '@abe-stack/sdk';
+import { createQueryPersister, QueryCacheProvider } from '@abe-stack/client';
 import { toastStore } from '@abe-stack/stores';
 import {
   BrowserRouter,

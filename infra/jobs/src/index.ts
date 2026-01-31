@@ -8,6 +8,9 @@
  * - scheduled: Maintenance and cleanup tasks
  */
 
+// Configuration
+export { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './config';
+
 // Queue
 export {
   createMemoryQueueStore,

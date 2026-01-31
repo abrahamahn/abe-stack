@@ -9,6 +9,9 @@
  * should be imported directly from @abe-stack/core.
  */
 
+// Configuration
+export { loadBillingConfig, validateBillingConfig } from './config';
+
 // Factory (existing)
 export { createBillingProvider, isBillingConfigured } from './factory';
 

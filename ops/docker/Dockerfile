@@ -31,7 +31,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/server/package.json apps/server/
 COPY packages/core/package.json packages/core/
 COPY packages/ui/package.json packages/ui/
-COPY packages/sdk/package.json packages/sdk/
+COPY packages/client/package.json client/
 
 # Fetch production dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \

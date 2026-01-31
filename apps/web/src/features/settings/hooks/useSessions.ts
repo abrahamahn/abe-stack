@@ -5,7 +5,7 @@
  * Hook for managing user sessions.
  */
 
-import { useMutation, useQuery, useQueryCache } from '@abe-stack/sdk';
+import { useMutation, useQuery, useQueryCache } from '@abe-stack/client';
 
 import {
   createSettingsApi,

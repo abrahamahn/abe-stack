@@ -37,8 +37,8 @@ vi.mock('../../../../shared/core/README.md?raw', () => ({
   default: `# @abe-stack/core\n\nCore package documentation.`,
 }));
 
-vi.mock('../../../../sdk/README.md?raw', () => ({
-  default: `# @abe-stack/sdk\n\nSDK package documentation.`,
+vi.mock('../../../../client/README.md?raw', () => ({
+  default: `# @abe-stack/client\n\nSDK package documentation.`,
 }));
 
 vi.mock('../../../../shared/ui/docs/README.md?raw', () => ({
@@ -172,7 +172,7 @@ describe('HomePage', () => {
       expect(screen.getByRole('button', { name: 'README' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Core' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'UI' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'SDK' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Client' })).toBeInTheDocument();
     });
 
     it('should render apps navigation buttons', () => {

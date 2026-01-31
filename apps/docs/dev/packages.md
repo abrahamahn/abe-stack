@@ -12,8 +12,8 @@ In a **SaaS Engine** architecture (Modular Monolith), the boundary is simple:
 
 This is the only hard technical rule you need to follow.
 
-- `apps/server` **can** import `infra/*`, `modules/*`, `shared/*`, `sdk/`.
-- `infra/*`, `modules/*`, `shared/*`, `sdk/` can **NEVER** import `apps/server`.
+- `apps/server` **can** import `infra/*`, `modules/*`, `shared/*`, `client/`.
+- `infra/*`, `modules/*`, `shared/*`, `client/` can **NEVER** import `apps/server`.
 - `infra/A` **can** import `infra/B` (if B is a lower tier — e.g., Auth imports DB).
 
 **If you find yourself in `modules/auth` trying to import a type from `apps/server/src/types.ts`, you have broken the architecture.** Move that type to `infra/contracts` immediately.
@@ -22,7 +22,7 @@ This is the only hard technical rule you need to follow.
 
 ## 2. The Responsibility Boundary (Capability vs. Composition)
 
-### `infra/*`, `modules/*`, `shared/*`, `sdk/` — The Capabilities
+### `infra/*`, `modules/*`, `shared/*`, `client/` — The Capabilities
 
 | Aspect | Description |
 |---|---|
@@ -98,7 +98,7 @@ As you migrate files, ask these 3 questions for each one.
 
 ## 5. The Final Boundary — Summary Table
 
-| Concept | `infra/*`, `modules/*`, `shared/*`, `sdk/` (Modules) | `apps/server` (Application) |
+| Concept | `infra/*`, `modules/*`, `shared/*`, `client/` (Modules) | `apps/server` (Application) |
 |---|---|---|
 | **Logic** | 100% (All Business Rules) | 0% (Only wiring) |
 | **State** | Stateless (Classes/Functions) | Stateful (Instances/Env Vars) |
@@ -225,7 +225,7 @@ All cross-package imports flow in the correct direction (same-tier or downward).
 
 | Check | Status |
 |---|---|
-| `infra/*`, `modules/*`, `shared/*`, `sdk/` importing from `apps/*` (Critical) | **CLEAN** |
+| `infra/*`, `modules/*`, `shared/*`, `client/` importing from `apps/*` (Critical) | **CLEAN** |
 | Tier 1 (Kernel) importing Tier 2 or 3 | **CLEAN** |
 | Tier 2 (Infrastructure) importing Tier 3 | **CLEAN** |
 | Tier 3 (Modules) importing Tier 4 | **CLEAN** |

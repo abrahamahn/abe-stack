@@ -22,7 +22,6 @@ export {
   initEnv,
   loadServerEnv,
   NotificationEnvSchema,
-  PackageManagerEnvSchema,
   QueueEnvSchema,
   SearchEnvSchema,
   ServerEnvSchema,
@@ -56,13 +55,9 @@ export type {
   MySqlConfig,
   NotificationConfig,
   NotificationProvider,
-  NpmConfig,
   OAuthProviderConfig,
   OneSignalConfig,
-  PackageManagerConfig,
-  PackageManagerProvider,
   PayPalProviderConfig,
-  PnpmConfig,
   PostgresConfig,
   QueueConfig,
   QueueProvider,
@@ -80,7 +75,6 @@ export type {
   StorageConfigBase,
   StorageProviderName,
   StripeProviderConfig,
-  YarnConfig,
 } from './config';
 
 // ============================================================================
@@ -88,33 +82,7 @@ export type {
 // ============================================================================
 export { BatchedQueue, DeferredPromise, ReactiveMap } from './infrastructure/async';
 export type { BatchedQueueOptions } from './infrastructure/async';
-export {
-  CacheCapacityError,
-  CacheConnectionError,
-  CacheDeserializationError,
-  CacheError,
-  CacheInvalidKeyError,
-  CacheMemoryLimitError,
-  CacheNotInitializedError,
-  CacheProviderNotFoundError,
-  CacheSerializationError,
-  CacheTimeoutError,
-  isCacheConnectionError,
-  isCacheError,
-  isCacheTimeoutError,
-  toCacheError,
-} from './infrastructure/cache';
-export type {
-  BaseCacheConfig,
-  CacheDeleteOptions,
-  CacheEntry,
-  CacheEntryMetadata,
-  CacheGetOptions,
-  CacheProvider,
-  CacheSetOptions,
-  CacheStats,
-  MemoryCacheConfig,
-} from './infrastructure/cache';
+// Cache errors and types consolidated into @abe-stack/cache
 // JWT exports removed from main entry - use direct import for server-only code:
 // import { decode, JwtError, sign, verify } from '@abe-stack/core/infrastructure/crypto';
 export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions } from './infrastructure/crypto';

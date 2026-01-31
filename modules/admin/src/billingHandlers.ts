@@ -5,7 +5,6 @@
  * HTTP handlers for admin billing operations (plan management).
  */
 
-import { createBillingProvider } from '../../../modules/billing/src';
 import {
   BillingProviderNotConfiguredError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
@@ -18,6 +17,8 @@ import {
   type SyncStripeResponse,
   type UpdatePlanRequest,
 } from '@abe-stack/core';
+
+import { createBillingProvider } from '../../../modules/billing/src';
 
 import {
   createPlan,

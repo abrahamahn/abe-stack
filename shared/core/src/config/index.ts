@@ -39,13 +39,9 @@ export type {
     MySqlConfig,
     NotificationConfig,
     NotificationProvider,
-    NpmConfig,
     OAuthProviderConfig,
     OneSignalConfig,
-    PackageManagerConfig,
-    PackageManagerProvider,
     PayPalProviderConfig,
-    PnpmConfig,
     PostgresConfig,
     QueueConfig,
     QueueProvider,
@@ -62,8 +58,7 @@ export type {
     StorageConfig,
     StorageConfigBase,
     StorageProviderName,
-    StripeProviderConfig,
-    YarnConfig
+    StripeProviderConfig
 } from './types/index';
 
 // ============================================================================
@@ -82,7 +77,6 @@ export {
     EmailEnvSchema,
     EnvSchema,
     NotificationEnvSchema,
-    PackageManagerEnvSchema,
     QueueEnvSchema,
     SearchEnvSchema,
     ServerEnvSchema,

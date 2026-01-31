@@ -1,7 +1,7 @@
 // tools/scripts/path/all.ts
 /**
  * Exports ALL project files to .tmp/PATH-all.md in a categorized format
- * Categories: Root, tools, ops, .config, .github, apps/*, infra/*, modules/*, shared/*, sdk, Styles, Barrel Exports, Documentation
+ * Categories: Root, tools, ops, .config, .github, apps/*, infra/*, modules/*, shared/*, client, Styles, Barrel Exports, Documentation
  * @module tools/scripts/path/all
  */
 import fs from 'node:fs';
@@ -143,10 +143,10 @@ function categorizeFiles(allFiles: string[]): {
         result.packages.set(pkgName, existingPkg);
         break;
       }
-      case 'sdk': {
-        const existingSdk = result.packages.get('sdk') ?? [];
+      case 'client': {
+        const existingSdk = result.packages.get('client') ?? [];
         existingSdk.push(file);
-        result.packages.set('sdk', existingSdk);
+        result.packages.set('client', existingSdk);
         break;
       }
       case 'ops':
@@ -265,13 +265,13 @@ function exportAllFiles(): void {
     'infra/realtime',
     'infra/security',
     'infra/storage',
-    'infra/stores',
+    'client/stores',
     'infra/users',
     'modules/admin',
     'modules/auth',
     'modules/billing',
     'shared/ui',
-    'sdk',
+    'client',
   ];
   for (const pkg of pkgOrder) {
     const files = categorized.packages.get(pkg);

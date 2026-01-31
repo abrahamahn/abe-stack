@@ -6,7 +6,7 @@
  * of the settings API.
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
+import { QueryCache, QueryCacheProvider } from '@abe-stack/client';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React, { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';

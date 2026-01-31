@@ -5,7 +5,7 @@
  * Hook for uploading and deleting user avatar.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/sdk';
+import { useMutation, useQueryCache } from '@abe-stack/client';
 
 import { createSettingsApi, type AvatarDeleteResponse, type AvatarUploadResponse } from '../api';
 

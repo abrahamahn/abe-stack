@@ -23,7 +23,6 @@ describe('Configuration Factory', () => {
     JWT_SECRET: 'a-very-secure-secret-key-32-chars-long!',
     DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
     SEARCH_PROVIDER: 'sql' as const,
-    PACKAGE_MANAGER_PROVIDER: 'pnpm' as const,
   };
 
   beforeEach(() => {
@@ -66,7 +65,6 @@ describe('Configuration Factory', () => {
 
       expect(config.env).toBe('test');
       expect(config.auth.jwt.secret).toBe(validEnv.JWT_SECRET);
-      expect(config.packageManager.provider).toBe('pnpm');
       expect(config.search.provider).toBe('sql');
     });
 

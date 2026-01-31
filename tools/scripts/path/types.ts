@@ -104,8 +104,8 @@ function exportTypeFiles(): void {
     'shared/core',
     'infra/db',
     'infra/media',
-    'sdk',
-    'infra/stores',
+    'client',
+    'client/stores',
     'shared/ui',
   ];
 

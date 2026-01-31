@@ -10,10 +10,6 @@ import type {
   LogLevel,
   MongoConfig,
   MySqlConfig,
-  NpmConfig,
-  PackageManagerConfig,
-  PackageManagerProvider,
-  PnpmConfig,
   PostgresConfig,
   QueueConfig,
   QueueProvider,
@@ -23,7 +19,6 @@ import type {
   StorageConfig,
   StorageConfigBase,
   StorageProviderName,
-  YarnConfig,
 } from './infra.js';
 
 describe('infra.ts - Infrastructure Configuration Types', () => {
@@ -74,23 +69,6 @@ describe('infra.ts - Infrastructure Configuration Types', () => {
 
         assertType<QueueProvider>(local);
         assertType<QueueProvider>(redis);
-      });
-    });
-
-    describe('PackageManagerProvider', () => {
-      it('should accept valid package manager values', () => {
-        const providers: PackageManagerProvider[] = ['npm', 'pnpm', 'yarn'];
-        expect(providers).toHaveLength(3);
-      });
-
-      it('should be type-safe at compile time', () => {
-        const npm: PackageManagerProvider = 'npm';
-        const pnpm: PackageManagerProvider = 'pnpm';
-        const yarn: PackageManagerProvider = 'yarn';
-
-        assertType<PackageManagerProvider>(npm);
-        assertType<PackageManagerProvider>(pnpm);
-        assertType<PackageManagerProvider>(yarn);
       });
     });
 
@@ -415,143 +393,6 @@ describe('infra.ts - Infrastructure Configuration Types', () => {
         expect(configs[1]?.provider).toBe('json');
         expect(configs[2]?.provider).toBe('sqlite');
         expect(configs[3]?.provider).toBe('mongodb');
-      });
-    });
-  });
-
-  describe('Package Manager Configuration', () => {
-    describe('NpmConfig', () => {
-      it('should accept valid NPM configuration', () => {
-        const config: NpmConfig = {
-          provider: 'npm',
-          audit: true,
-          legacyPeerDeps: false,
-        };
-
-        expect(config.provider).toBe('npm');
-        expect(config.audit).toBe(true);
-        expect(config.legacyPeerDeps).toBe(false);
-      });
-
-      it('should accept optional registry', () => {
-        const config: NpmConfig = {
-          provider: 'npm',
-          audit: false,
-          legacyPeerDeps: true,
-          registry: 'https://registry.npmjs.org',
-        };
-
-        expect(config.registry).toBe('https://registry.npmjs.org');
-      });
-
-      it('should be assignable to PackageManagerConfig union', () => {
-        const config: NpmConfig = {
-          provider: 'npm',
-          audit: true,
-          legacyPeerDeps: false,
-        };
-
-        const pmConfig: PackageManagerConfig = config;
-        assertType<PackageManagerConfig>(pmConfig);
-      });
-    });
-
-    describe('PnpmConfig', () => {
-      it('should accept valid PNPM configuration', () => {
-        const config: PnpmConfig = {
-          provider: 'pnpm',
-          strictPeerDeps: true,
-          frozenLockfile: true,
-        };
-
-        expect(config.provider).toBe('pnpm');
-        expect(config.strictPeerDeps).toBe(true);
-        expect(config.frozenLockfile).toBe(true);
-      });
-
-      it('should accept optional registry', () => {
-        const config: PnpmConfig = {
-          provider: 'pnpm',
-          strictPeerDeps: false,
-          frozenLockfile: false,
-          registry: 'https://custom-registry.example.com',
-        };
-
-        expect(config.registry).toBe('https://custom-registry.example.com');
-      });
-
-      it('should be assignable to PackageManagerConfig union', () => {
-        const config: PnpmConfig = {
-          provider: 'pnpm',
-          strictPeerDeps: true,
-          frozenLockfile: true,
-        };
-
-        const pmConfig: PackageManagerConfig = config;
-        assertType<PackageManagerConfig>(pmConfig);
-      });
-    });
-
-    describe('YarnConfig', () => {
-      it('should accept valid Yarn configuration', () => {
-        const config: YarnConfig = {
-          provider: 'yarn',
-          audit: true,
-          frozenLockfile: true,
-        };
-
-        expect(config.provider).toBe('yarn');
-        expect(config.audit).toBe(true);
-        expect(config.frozenLockfile).toBe(true);
-      });
-
-      it('should accept optional registry', () => {
-        const config: YarnConfig = {
-          provider: 'yarn',
-          audit: false,
-          frozenLockfile: false,
-          registry: 'https://registry.yarnpkg.com',
-        };
-
-        expect(config.registry).toBe('https://registry.yarnpkg.com');
-      });
-
-      it('should be assignable to PackageManagerConfig union', () => {
-        const config: YarnConfig = {
-          provider: 'yarn',
-          audit: true,
-          frozenLockfile: true,
-        };
-
-        const pmConfig: PackageManagerConfig = config;
-        assertType<PackageManagerConfig>(pmConfig);
-      });
-    });
-
-    describe('PackageManagerConfig union', () => {
-      it('should be discriminable by provider field', () => {
-        const configs: PackageManagerConfig[] = [
-          {
-            provider: 'npm',
-            audit: true,
-            legacyPeerDeps: false,
-          },
-          {
-            provider: 'pnpm',
-            strictPeerDeps: true,
-            frozenLockfile: true,
-          },
-          {
-            provider: 'yarn',
-            audit: true,
-            frozenLockfile: true,
-          },
-        ];
-
-        expect(configs).toHaveLength(3);
-        expect(configs[0]?.provider).toBe('npm');
-        expect(configs[1]?.provider).toBe('pnpm');
-        expect(configs[2]?.provider).toBe('yarn');
       });
     });
   });
@@ -1144,33 +985,6 @@ describe('infra.ts - Infrastructure Configuration Types', () => {
       };
 
       expect(testDiscrimination(pgConfig)).toBe('PostgreSQL on localhost:5432');
-    });
-
-    it('should discriminate PackageManagerConfig by provider', () => {
-      const testDiscrimination = (config: PackageManagerConfig): string => {
-        switch (config.provider) {
-          case 'npm':
-            assertType<NpmConfig>(config);
-            return `NPM with audit=${String(config.audit)}`;
-          case 'pnpm':
-            assertType<PnpmConfig>(config);
-            return `PNPM with strict=${String(config.strictPeerDeps)}`;
-          case 'yarn':
-            assertType<YarnConfig>(config);
-            return `Yarn with frozen=${String(config.frozenLockfile)}`;
-          default:
-            config satisfies never;
-            throw new Error(`Unknown package manager: ${(config as PackageManagerConfig).provider}`);
-        }
-      };
-
-      const pnpmConfig: PackageManagerConfig = {
-        provider: 'pnpm',
-        strictPeerDeps: true,
-        frozenLockfile: true,
-      };
-
-      expect(testDiscrimination(pnpmConfig)).toBe('PNPM with strict=true');
     });
 
     it('should discriminate StorageConfig by provider', () => {

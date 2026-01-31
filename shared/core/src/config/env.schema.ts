@@ -290,28 +290,6 @@ export const SearchEnvSchema = z.object({
 });
 
 /**
- * Zod schema for package manager-related environment variables
- */
-export const PackageManagerEnvSchema = z.object({
-  PACKAGE_MANAGER_PROVIDER: z.enum(['npm', 'pnpm', 'yarn']).default('pnpm'),
-
-  // NPM
-  NPM_AUDIT: z.enum(['true', 'false']).default('true'),
-  NPM_LEGACY_PEER_DEPS: z.enum(['true', 'false']).default('false'),
-  NPM_REGISTRY: z.string().optional(),
-
-  // PNPM
-  PNPM_STRICT_PEER_DEPS: z.enum(['true', 'false']).default('true'),
-  PNPM_FROZEN_LOCKFILE: z.enum(['true', 'false']).default('true'),
-  PNPM_REGISTRY: z.string().optional(),
-
-  // YARN
-  YARN_AUDIT: z.enum(['true', 'false']).default('true'),
-  YARN_FROZEN_LOCKFILE: z.enum(['true', 'false']).default('true'),
-  YARN_REGISTRY: z.string().optional(),
-});
-
-/**
  * Zod schema for frontend-related environment variables
  */
 export const FrontendEnvSchema = z.object({
@@ -334,7 +312,6 @@ export const EnvSchema = BaseEnvSchema.extend({
   ...QueueEnvSchema.shape,
   ...ServerEnvSchema.shape,
   ...SearchEnvSchema.shape,
-  ...PackageManagerEnvSchema.shape,
   ...NotificationEnvSchema.shape,
   ...FrontendEnvSchema.shape,
 }).superRefine((data, ctx) => {

@@ -35,11 +35,6 @@ export type {
   LogLevel,
   MongoConfig,
   MySqlConfig,
-  NpmConfig,
-  // Package Manager
-  PackageManagerConfig,
-  PackageManagerProvider,
-  PnpmConfig,
   PostgresConfig,
   // Queue
   QueueConfig,
@@ -50,7 +45,6 @@ export type {
   StorageConfig,
   StorageConfigBase,
   StorageProviderName,
-  YarnConfig,
 } from './infra';
 
 // ============================================================================
@@ -93,7 +87,6 @@ import type { AuthConfig } from './auth';
 import type {
   CacheConfig,
   DatabaseConfig,
-  PackageManagerConfig,
   QueueConfig,
   ServerConfig,
   StorageConfig,
@@ -152,5 +145,4 @@ export interface AppConfig {
   queue: QueueConfig;
   notifications: NotificationConfig;
   search: SearchConfig;
-  packageManager: PackageManagerConfig;
 }

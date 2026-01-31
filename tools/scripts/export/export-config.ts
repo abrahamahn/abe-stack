@@ -68,15 +68,15 @@ const FILES_TO_EXPORT = [
   'infra/media/tsconfig.json',
   'infra/media/vitest.config.ts',
 
-  // sdk
-  'sdk/package.json',
-  'sdk/tsconfig.json',
-  'sdk/vitest.config.ts',
+  // client
+  'client/package.json',
+  'client/tsconfig.json',
+  'client/vitest.config.ts',
 
-  // infra/stores
-  'infra/stores/package.json',
-  'infra/stores/tsconfig.json',
-  'infra/stores/vitest.config.ts',
+  // client/stores
+  'client/stores/package.json',
+  'client/stores/tsconfig.json',
+  'client/stores/vitest.config.ts',
 
   // shared/ui
   'shared/ui/package.json',

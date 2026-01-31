@@ -10,12 +10,12 @@ export default mergeConfig(baseConfig, {
       // Handle subpath imports first (e.g., @abe-stack/contracts/auth)
       {
         find: /^@abe-stack\/contracts\/(.*)$/,
-        replacement: path.resolve(__dirname, '../contracts/src/$1'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/$1'),
       },
       // Handle main package import
       {
         find: '@abe-stack/contracts',
-        replacement: path.resolve(__dirname, '../contracts/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/index.ts'),
       },
     ],
   },

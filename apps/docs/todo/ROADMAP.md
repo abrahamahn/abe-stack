@@ -71,42 +71,42 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 - [ ] Add `version` field to all syncable database tables
 - [ ] Create `infra/realtime` with transaction types
-- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/sdk/cache`
+- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/client/cache`
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
-> **Implementation:** `RecordCache` in `sdk/src/cache/RecordCache.ts` (69 tests)
+> **Implementation:** `RecordCache` in `client/src/cache/RecordCache.ts` (69 tests)
 > **Partial progress:** WriteService (`apps/server/src/infra/write/`) provides transaction handling, version bumping, and auto-pubsub
 > **Legacy:** See [Database Utilities](./reference/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
 
 ### Phase 2: Real-Time Sync
 
 - [x] Implement `WebSocketServer` (ws package) → `apps/server/src/infra/websocket/`
-- [x] Implement `WebSocketPubSubClient` → `@abe-stack/sdk/pubsub` (20 tests)
+- [x] Implement `WebSocketPubSubClient` → `@abe-stack/client/pubsub` (20 tests)
 - [ ] Create `RealtimeContext` and `RealtimeProvider`
 - [x] Add subscription management (subscribe/unsubscribe by key) → `SubscriptionCache` (20 tests)
 - [ ] Version-based update notifications
 
-> **Implementation:** Client in `sdk/src/pubsub/`, Server in `apps/server/src/infra/websocket/`
+> **Implementation:** Client in `client/src/pubsub/`, Server in `apps/server/src/infra/websocket/`
 
 ### Phase 3: Offline Support
 
-- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/sdk/cache` (31 tests)
-- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/sdk/offline` (26 tests)
+- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/client/cache` (31 tests)
+- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/client/offline` (26 tests)
 - [x] Add stale-while-revalidate loaders → `LoaderCache` with TTL (57 tests)
 - [ ] Service worker for asset caching
 - [x] Conflict resolution (last-write-wins) → Built into RecordCache/RecordStorage
 
-> **Implementation:** `sdk/src/cache/RecordStorage.ts`, `sdk/src/offline/TransactionQueue.ts`, `sdk/src/cache/LoaderCache.ts`
+> **Implementation:** `client/src/cache/RecordStorage.ts`, `client/src/offline/TransactionQueue.ts`, `client/src/cache/LoaderCache.ts`
 
 ### Phase 4: Undo/Redo
 
-- [x] Implement `UndoRedoStack` → `@abe-stack/sdk/undo` (38 tests)
+- [x] Implement `UndoRedoStack` → `@abe-stack/client/undo` (38 tests)
 - [x] Operation inversion logic → Built into UndoRedoStack with grouping support
 - [ ] Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z)
 - [ ] UI indicators for undo/redo availability (use `onStateChange` callback)
 
-> **Implementation:** `sdk/src/undo/UndoRedoStack.ts`
+> **Implementation:** `client/src/undo/UndoRedoStack.ts`
 > **Legacy:** See [Frontend Hooks](./reference/legacy.md#frontend-hooks) → `useShortcut` hook
 
 ### Phase 5: Permissions
@@ -206,10 +206,10 @@ These are specific to product types, not boilerplate infrastructure.
 - [ ] Message reactions
 - [ ] Channel/room management
 - [ ] Message acknowledgments (delivery confirmation)
-- [x] `SubscriptionCache` for ref-counted record subscriptions → `@abe-stack/sdk/subscriptions`
-- [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/sdk/cache`
+- [x] `SubscriptionCache` for ref-counted record subscriptions → `@abe-stack/client/subscriptions`
+- [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/client/cache`
 
-> **Implementation:** `sdk/src/subscriptions/SubscriptionCache.ts`, `sdk/src/cache/LoaderCache.ts`
+> **Implementation:** `client/src/subscriptions/SubscriptionCache.ts`, `client/src/cache/LoaderCache.ts`
 > **Legacy:** See [Frontend Components](./reference/legacy.md#frontend-components) → Social components
 
 ### For Music Streaming / Marketplace

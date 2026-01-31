@@ -7,10 +7,12 @@
  */
 
 import { UserNotFoundError } from '@abe-stack/core';
+
 import { ERROR_MESSAGES } from '../../../modules/auth/src';
 
 import { getUserById, listUsers, lockUser, unlockUser, updateUser } from './userService';
 
+import type { AdminAppContext } from './types';
 import type {
     AdminLockUserRequest,
     AdminLockUserResponse,
@@ -22,7 +24,6 @@ import type {
     UnlockAccountRequest,
 } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { AdminAppContext } from './types';
 
 // ============================================================================
 // List Users Handler

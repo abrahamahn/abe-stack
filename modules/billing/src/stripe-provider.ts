@@ -91,7 +91,7 @@ export class StripeProvider implements BillingService {
 
   constructor(config: StripeConfig) {
     this.stripe = new stripeDefault(config.secretKey, {
-      apiVersion: '2025-12-15.clover',
+      apiVersion: '2026-01-28.clover',
       typescript: true,
     });
     this.webhookSecret = config.webhookSecret;

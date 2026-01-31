@@ -66,10 +66,10 @@
       "path": "./infra/media"
     },
     {
-      "path": "./sdk"
+      "path": "./client"
     },
     {
-      "path": "./infra/stores"
+      "path": "./client/stores"
     },
     {
       "path": "./shared/ui"

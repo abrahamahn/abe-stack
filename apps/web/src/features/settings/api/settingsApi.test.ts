@@ -11,7 +11,7 @@
  * - Authentication header handling
  */
 
-import { NetworkError } from '@abe-stack/sdk';
+import { NetworkError } from '@abe-stack/client';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 

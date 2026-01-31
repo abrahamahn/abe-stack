@@ -77,7 +77,18 @@ export default mergeConfig(baseConfig, {
       { find: /^@abe-stack\/storage\/(.*)$/, replacement: `${storagePkg}/$1` },
       { find: '@abe-stack/storage', replacement: `${storagePkg}/index.ts` },
       { find: '@abe-stack/users', replacement: `${usersPkg}/index.ts` },
-      // Server-specific aliases
+      // Server-specific local aliases
+      { find: /^@health\/(.*)$/, replacement: path.resolve(__dirname, 'src/health/$1') },
+      { find: '@health', replacement: path.resolve(__dirname, 'src/health/index.ts') },
+      { find: /^@logger\/(.*)$/, replacement: path.resolve(__dirname, 'src/logger/$1') },
+      { find: '@logger', replacement: path.resolve(__dirname, 'src/logger/index.ts') },
+      { find: /^@routes\/(.*)$/, replacement: path.resolve(__dirname, 'src/routes/$1') },
+      { find: '@routes', replacement: path.resolve(__dirname, 'src/routes/index.ts') },
+      { find: /^@shared\/(.*)$/, replacement: path.resolve(__dirname, 'src/types/$1') },
+      { find: '@shared', replacement: path.resolve(__dirname, 'src/types/context.ts') },
+      { find: /^@config\/(.*)$/, replacement: path.resolve(__dirname, 'src/config/$1') },
+      { find: '@config', replacement: path.resolve(__dirname, 'src/config/index.ts') },
+      // Catch-all for @/ prefix
       {
         find: /^@\/(.*)$/,
         replacement: path.resolve(__dirname, 'src/$1'),

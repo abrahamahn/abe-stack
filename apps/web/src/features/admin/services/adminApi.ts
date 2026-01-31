@@ -5,10 +5,10 @@
  * API client methods for admin security audit operations.
  */
 
+import { createApiError, NetworkError } from '@abe-stack/client';
 import { addAuthHeader } from '@abe-stack/core';
-import { createApiError, NetworkError } from '@abe-stack/sdk';
 
-import type { ApiErrorBody } from '@abe-stack/sdk';
+import type { ApiErrorBody } from '@abe-stack/client';
 
 // ============================================================================
 // Local Type Definitions

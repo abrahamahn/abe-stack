@@ -84,7 +84,7 @@ function estimateImportSize(importSource: string): number {
     'react-dom': 1200,
     '@abe-stack/ui': 200,
     '@abe-stack/core': 150,
-    '@abe-stack/sdk': 100,
+    '@abe-stack/client': 100,
     zod: 80,
     'date-fns': 300,
     lodash: 100,
@@ -126,7 +126,7 @@ function analyzeBuildPerformance(): BuildAnalysis {
   const sourceDirs = [
     path.join(rootDir, 'apps', 'web', 'src'),
     path.join(rootDir, 'packages', 'ui', 'src'),
-    path.join(rootDir, 'packages', 'sdk', 'src'),
+    path.join(rootDir, 'client', 'src'),
     path.join(rootDir, 'packages', 'core', 'src'),
   ];
 

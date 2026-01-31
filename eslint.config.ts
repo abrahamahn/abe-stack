@@ -125,19 +125,19 @@ export default [
     },
   },
   {
-    files: ['sdk/**/*.{ts,tsx,cts,mts}'],
+    files: ['client/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./sdk/tsconfig.json'],
+        project: ['./client/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['infra/stores/**/*.{ts,tsx,cts,mts}'],
+    files: ['client/stores/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./infra/stores/tsconfig.json'],
+        project: ['./client/stores/tsconfig.json'],
         tsconfigRootDir,
       },
     },

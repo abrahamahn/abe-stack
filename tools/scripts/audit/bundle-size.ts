@@ -269,9 +269,9 @@ function main(): void {
       name: '@abe-stack/core',
       distPath: path.join(ROOT_DIR, 'shared/core/dist'),
     },
-    sdk: {
-      name: '@abe-stack/sdk',
-      distPath: path.join(ROOT_DIR, 'sdk/dist'),
+    client: {
+      name: '@abe-stack/client',
+      distPath: path.join(ROOT_DIR, 'client/dist'),
     },
     web: {
       name: '@abe-stack/web',

@@ -25,7 +25,7 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/web/package.json apps/web/
 COPY packages/core/package.json packages/core/
 COPY packages/ui/package.json packages/ui/
-COPY packages/sdk/package.json packages/sdk/
+COPY packages/client/package.json client/
 
 # Fetch all dependencies (including dev deps for build)
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
@@ -56,7 +56,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
     pnpm --filter @abe-stack/core build && \
     pnpm --filter @abe-stack/ui build && \
-    pnpm --filter @abe-stack/sdk build && \
+    pnpm --filter @abe-stack/client build && \
     pnpm --filter @abe-stack/web build
 
 # =============================================================================
