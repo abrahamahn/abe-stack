@@ -35,22 +35,23 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
     authGuardFactory: createAuthGuard as AuthGuardFactory,
   };
 
-  // Register all route maps - validation and auth guards are handled automatically
+  // Core routes — always active
   registerRouteMap(app, ctx, authRoutes, routerOptions);
   registerRouteMap(app, ctx, userRoutes, routerOptions);
-  registerRouteMap(app, ctx, adminRoutes, routerOptions);
-  registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
   registerRouteMap(app, ctx, notificationRoutes, routerOptions);
-  registerRouteMap(app, ctx, systemRoutes, { ...routerOptions, prefix: '' }); // System routes handle their own prefixes (some are /, some /api)
+  registerRouteMap(app, ctx, systemRoutes, { ...routerOptions, prefix: '' });
 
-  // Billing routes (only if billing is enabled)
-  if (ctx.config.billing.enabled) {
-    // Billing uses its own narrower type system (BillingRouteMap). The router
-    // already calls handlers via `as never` casts (router.ts L120/124), so the
-    // runtime contract is satisfied. Cast at the type boundary is intentional.
-    registerRouteMap(app, ctx, billingRoutes as unknown as RouteMap, routerOptions);
+  // Feature-gated routes (see apps/docs/profiles.md)
+  if (ctx.config.features.admin) {
+    registerRouteMap(app, ctx, adminRoutes, routerOptions);
   }
 
-  // Webhook routes (registered separately for raw body access)
-  registerWebhookRoutes(app, ctx);
+  if (ctx.config.features.realtime) {
+    registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
+  }
+
+  if (ctx.config.billing.enabled) {
+    registerRouteMap(app, ctx, billingRoutes as unknown as RouteMap, routerOptions);
+    registerWebhookRoutes(app, ctx);
+  }
 }

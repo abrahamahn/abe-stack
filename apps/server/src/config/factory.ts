@@ -61,6 +61,8 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
 
   const searchProvider = env.SEARCH_PROVIDER;
 
+  const billingConfig = loadBillingConfig(env, server.appBaseUrl);
+
   const config: AppConfig = {
     env: nodeEnv,
     server,
@@ -68,7 +70,7 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
     auth: loadAuthConfig(env, server.apiBaseUrl),
     email: loadEmailConfig(env),
     storage: loadStorageConfig(env),
-    billing: loadBillingConfig(env, server.appBaseUrl),
+    billing: billingConfig,
     cache: loadCacheConfig(env),
     queue: loadQueueConfig(env),
     notifications: loadNotificationsConfig(env),
@@ -82,6 +84,10 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
             provider: 'sql' as const,
             config: loadSqlSearchConfig(env),
           },
+    features: {
+      admin: env.ENABLE_ADMIN !== 'false',
+      realtime: env.ENABLE_REALTIME !== 'false',
+    },
   };
 
   validate(config);
