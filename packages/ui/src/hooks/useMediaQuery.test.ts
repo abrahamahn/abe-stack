@@ -1,14 +1,12 @@
-// packages/ui/src/hooks/useMediaQuery.test.tsx
+// packages/ui/src/hooks/useMediaQuery.test.ts
 /** @vitest-environment jsdom */
+import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useMediaQuery } from './useMediaQuery';
 
-import type { ReactElement } from 'react';
-
 type MatchMediaListener = () => void;
-
 function createMatchMedia(initialMatches: boolean): {
   matchMedia: (query: string) => MediaQueryList;
   setMatches: (next: boolean) => void;
@@ -39,7 +37,6 @@ function createMatchMedia(initialMatches: boolean): {
     addListener: () => {},
     removeListener: () => {},
   } as unknown as MediaQueryList;
-
   return {
     matchMedia: () => mql,
     setMatches: (next: boolean): void => {
@@ -52,45 +49,39 @@ function createMatchMedia(initialMatches: boolean): {
     removeEventListener,
   };
 }
-
-const MediaQueryHarness = (props: { query: string }): ReactElement => {
+const MediaQueryHarness = (props: { query: string }): React.ReactElement => {
   const matches = useMediaQuery(props.query);
-  return <span data-testid="matches">{String(matches)}</span>;
+  return React.createElement('span', { 'data-testid': 'matches' }, String(matches));
 };
-
 describe('useMediaQuery', () => {
   it('reflects matchMedia results and updates on change', () => {
     const originalMatchMedia = window.matchMedia;
     const media = createMatchMedia(false);
     window.matchMedia = media.matchMedia;
-
-    const { rerender } = render(<MediaQueryHarness query="(min-width: 600px)" />);
+    const { rerender } = render(
+      React.createElement(MediaQueryHarness, { query: '(min-width: 600px)' }),
+    );
     expect(screen.getByTestId('matches')).toHaveTextContent('false');
-
     media.setMatches(true);
     act(() => {
       media.fireChange();
     });
-    rerender(<MediaQueryHarness query="(min-width: 600px)" />);
+    rerender(React.createElement(MediaQueryHarness, { query: '(min-width: 600px)' }));
     expect(screen.getByTestId('matches')).toHaveTextContent('true');
-
     window.matchMedia = originalMatchMedia;
   });
-
   it('cleans up event listeners on unmount and query change', () => {
     const originalMatchMedia = window.matchMedia;
     const media = createMatchMedia(true);
     window.matchMedia = media.matchMedia;
-
-    const { rerender, unmount } = render(<MediaQueryHarness query="(min-width: 600px)" />);
+    const { rerender, unmount } = render(
+      React.createElement(MediaQueryHarness, { query: '(min-width: 600px)' }),
+    );
     expect(media.addEventListener).toHaveBeenCalledTimes(1);
-
-    rerender(<MediaQueryHarness query="(max-width: 800px)" />);
+    rerender(React.createElement(MediaQueryHarness, { query: '(max-width: 800px)' }));
     expect(media.removeEventListener).toHaveBeenCalledTimes(1);
-
     unmount();
     expect(media.removeEventListener).toHaveBeenCalledTimes(2);
-
     window.matchMedia = originalMatchMedia;
   });
 });

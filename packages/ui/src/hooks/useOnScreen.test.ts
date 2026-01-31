@@ -1,13 +1,12 @@
-// packages/ui/src/hooks/useOnScreen.test.tsx
+// packages/ui/src/hooks/useOnScreen.test.ts
 /** @vitest-environment jsdom */
+import React, { useRef } from 'react';
 import { render, screen } from '@testing-library/react';
-import { useRef, type ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { useOnScreen } from './useOnScreen';
 
 type ObserverCallback = (entries: Array<Partial<IntersectionObserverEntry>>) => void;
-
 class FakeIntersectionObserver {
   private callback: ObserverCallback;
   constructor(callback: ObserverCallback) {
@@ -18,30 +17,25 @@ class FakeIntersectionObserver {
   }
   disconnect(): void {}
 }
-
-const OnScreenHarness = (): ReactElement => {
+const OnScreenHarness = (): React.ReactElement => {
   const ref = useRef<HTMLDivElement | null>(null);
   const isVisible = useOnScreen(ref);
-  return (
-    <div>
-      <div ref={ref} data-testid="target" />
-      <span data-testid="visible">{String(isVisible)}</span>
-    </div>
+  return React.createElement(
+    'div',
+    null,
+    React.createElement('div', { ref: ref, 'data-testid': 'target' }),
+    React.createElement('span', { 'data-testid': 'visible' }, String(isVisible)),
   );
 };
-
 describe('useOnScreen', () => {
   it('sets visible when intersection observer reports visibility', () => {
     const originalObserver = window.IntersectionObserver;
     // @ts-expect-error intersection observer is stubbed for unit tests
     window.IntersectionObserver = FakeIntersectionObserver;
-
-    render(<OnScreenHarness />);
+    render(React.createElement(OnScreenHarness, null));
     expect(screen.getByTestId('visible')).toHaveTextContent('true');
-
     window.IntersectionObserver = originalObserver;
   });
-
   it('stays false when intersection observer reports not visible', () => {
     const originalObserver = window.IntersectionObserver;
     class HiddenIntersectionObserver {
@@ -56,21 +50,16 @@ describe('useOnScreen', () => {
     }
     // @ts-expect-error intersection observer is stubbed for unit tests
     window.IntersectionObserver = HiddenIntersectionObserver;
-
-    render(<OnScreenHarness />);
+    render(React.createElement(OnScreenHarness, null));
     expect(screen.getByTestId('visible')).toHaveTextContent('false');
-
     window.IntersectionObserver = originalObserver;
   });
-
   it('remains false when IntersectionObserver is unavailable', () => {
     const originalObserver = window.IntersectionObserver;
     // @ts-expect-error simulate missing observer
     window.IntersectionObserver = undefined;
-
-    render(<OnScreenHarness />);
+    render(React.createElement(OnScreenHarness, null));
     expect(screen.getByTestId('visible')).toHaveTextContent('false');
-
     window.IntersectionObserver = originalObserver;
   });
 });
