@@ -15,7 +15,7 @@ import { createConsoleLogger } from '@abe-stack/core';
 import fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';
-import type { DbClient } from '@/infrastructure/index';
+import type { DbClient } from '@abe-stack/db';
 import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
 import type { FastifyInstance } from 'fastify';
 

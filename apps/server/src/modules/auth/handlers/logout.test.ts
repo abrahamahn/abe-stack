@@ -5,7 +5,7 @@
  * Comprehensive tests for user logout via HTTP-only refresh token cookie.
  */
 
-import { REFRESH_COOKIE_NAME } from '../../../shared/constants';
+import { REFRESH_COOKIE_NAME } from '@abe-stack/auth';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleLogout } from '@abe-stack/auth/handlers/logout';
