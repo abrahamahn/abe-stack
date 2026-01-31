@@ -246,6 +246,16 @@ importers:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
 
+  client/stores:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../../shared/core
+    devDependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.2.4
+
   infra/cache:
     dependencies:
       '@abe-stack/core':
@@ -473,6 +483,9 @@ importers:
       argon2:
         specifier: ^0.41.1
         version: 0.41.1
+      otpauth:
+        specifier: ^9.4.1
+        version: 9.4.1
     devDependencies:
       fastify:
         specifier: ^5.2.0
@@ -502,16 +515,6 @@ importers:
       fastify:
         specifier: 5.7.1
         version: 5.7.1
-
-  client/stores:
-    dependencies:
-      '@abe-stack/core':
-        specifier: workspace:*
-        version: link:../../shared/core
-    devDependencies:
-      react:
-        specifier: ^19.1.0
-        version: 19.2.4
 
   shared/core:
     dependencies:
@@ -3530,6 +3533,9 @@ packages:
   ora@5.4.1:
     resolution: {integrity: sha512-5b6Y85tPxZZ7QytO+BQzysW31HJku27cRIlkbAXaNx+BdcVi+LlRFmVXzeF6a7JCwJpyw5c4b+YSVImQIrBpuQ==}
     engines: {node: '>=10'}
+
+  otpauth@9.4.1:
+    resolution: {integrity: sha512-+iVvys36CFsyXEqfNftQm1II7SW23W1wx9RwNk0Cd97lbvorqAhBDksb/0bYry087QMxjiuBS0wokdoZ0iUeAw==}
 
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
@@ -8316,6 +8322,10 @@ snapshots:
       log-symbols: 4.1.0
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
+
+  otpauth@9.4.1:
+    dependencies:
+      '@noble/hashes': 1.8.0
 
   own-keys@1.0.1:
     dependencies:

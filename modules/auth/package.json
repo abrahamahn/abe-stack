@@ -28,7 +28,8 @@
     "@abe-stack/db": "workspace:*",
     "@abe-stack/http": "workspace:*",
     "@abe-stack/security": "workspace:*",
-    "argon2": "^0.41.1"
+    "argon2": "^0.41.1",
+    "otpauth": "^9.4.1"
   },
   "peerDependencies": {
     "fastify": "^5.0.0"

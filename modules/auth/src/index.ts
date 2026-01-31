@@ -22,6 +22,8 @@ export {
 
 // Handlers
 export {
+  handleChangeEmail,
+  handleConfirmEmailChange,
   handleForgotPassword,
   handleLogin,
   handleLogout,
@@ -31,6 +33,10 @@ export {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleTotpDisable,
+  handleTotpEnable,
+  handleTotpSetup,
+  handleTotpStatus,
   handleVerifyEmail,
 } from './handlers';
 
@@ -120,6 +126,25 @@ export {
   type RefreshResult,
   type RegisterResult,
 } from './service';
+
+// TOTP (2FA)
+export {
+  disableTotp,
+  enableTotp,
+  getTotpStatus,
+  setupTotp,
+  verifyTotpForLogin,
+  type TotpSetupResult,
+  type TotpVerifyResult,
+} from './totp';
+
+// Email Change
+export {
+  confirmEmailChange,
+  initiateEmailChange,
+  type EmailChangeConfirmResult,
+  type EmailChangeResult,
+} from './email-change';
 
 // Utils (for direct use if needed)
 export {
