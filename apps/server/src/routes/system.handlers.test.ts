@@ -424,7 +424,9 @@ describe('System Handlers', () => {
 
         const result = await handleListModules(ctx, {}, req, reply);
 
-        const billingModule = result.body.modules.find((m: { name: string }) => m.name === 'billing');
+        const billingModule = result.body.modules.find(
+          (m: { name: string }) => m.name === 'billing',
+        );
         expect(billingModule?.enabled).toBe(false);
       });
 
@@ -458,7 +460,9 @@ describe('System Handlers', () => {
 
         const result = await handleListModules(ctx, {}, req, reply);
 
-        const billingModule = result.body.modules.find((m: { name: string }) => m.name === 'billing');
+        const billingModule = result.body.modules.find(
+          (m: { name: string }) => m.name === 'billing',
+        );
         const notificationsModule = result.body.modules.find(
           (m: { name: string }) => m.name === 'notifications',
         );

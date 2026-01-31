@@ -192,11 +192,7 @@ describe('cleanupPushSubscriptions', () => {
 
       expect(mockDb.execute).toHaveBeenCalledWith({
         text: expect.any(String),
-        values: expect.arrayContaining([
-          expect.any(Date),
-          expect.any(Date),
-          500,
-        ]),
+        values: expect.arrayContaining([expect.any(Date), expect.any(Date), 500]),
       });
     });
 

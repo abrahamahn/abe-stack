@@ -15,7 +15,6 @@
 import { createApp } from '@/app';
 import { loadConfig } from '@/config/index';
 
-
 /**
  * Bootstraps the application.
  */

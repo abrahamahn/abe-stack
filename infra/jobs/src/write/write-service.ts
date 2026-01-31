@@ -15,17 +15,16 @@
 import { SubKeys } from '@abe-stack/core';
 import { escapeIdentifier, withTransaction } from '@abe-stack/db';
 
-
 import type {
-    AfterWriteHook,
-    BeforeValidateHook,
-    OperationResult,
-    WriteBatch,
-    WriteContext,
-    WriteError,
-    WriteHooks,
-    WriteOperation,
-    WriteResult,
+  AfterWriteHook,
+  BeforeValidateHook,
+  OperationResult,
+  WriteBatch,
+  WriteContext,
+  WriteError,
+  WriteHooks,
+  WriteOperation,
+  WriteResult,
 } from './types';
 import type { SubscriptionManager } from '@abe-stack/core';
 import type { DbClient } from '@abe-stack/db';

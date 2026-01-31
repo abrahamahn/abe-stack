@@ -34,14 +34,16 @@ const originalFetch = global.fetch;
 /**
  * Create a successful token exchange response
  */
-function createMockTokenResponse(overrides?: Partial<{
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  token_type: string;
-  scope: string;
-  id_token: string;
-}>) {
+function createMockTokenResponse(
+  overrides?: Partial<{
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+    scope: string;
+    id_token: string;
+  }>,
+) {
   return {
     access_token: 'mock-access-token',
     refresh_token: 'mock-refresh-token',
@@ -56,15 +58,17 @@ function createMockTokenResponse(overrides?: Partial<{
 /**
  * Create a successful user info response
  */
-function createMockUserInfo(overrides?: Partial<{
-  id: string;
-  email: string;
-  verified_email: boolean;
-  name: string;
-  given_name: string;
-  family_name: string;
-  picture: string;
-}>) {
+function createMockUserInfo(
+  overrides?: Partial<{
+    id: string;
+    email: string;
+    verified_email: boolean;
+    name: string;
+    given_name: string;
+    family_name: string;
+    picture: string;
+  }>,
+) {
   return {
     id: '123456789012345678901',
     email: 'test.user@gmail.com',
@@ -80,7 +84,10 @@ function createMockUserInfo(overrides?: Partial<{
 /**
  * Create a mock fetch Response
  */
-function createMockResponse(data: unknown, options: { ok: boolean; status?: number } = { ok: true }) {
+function createMockResponse(
+  data: unknown,
+  options: { ok: boolean; status?: number } = { ok: true },
+) {
   return {
     ok: options.ok,
     status: options.status ?? (options.ok ? 200 : 400),
@@ -454,7 +461,9 @@ describe('exchangeCode', () => {
       const result = await provider.exchangeCode(TEST_AUTH_CODE, TEST_REDIRECT_URI);
 
       expect(result.expiresAt).toBeDefined();
-      expect(result.expiresAt!.getTime()).toBeGreaterThan(Date.now() + largeExpiresIn * 1000 - 1000);
+      expect(result.expiresAt!.getTime()).toBeGreaterThan(
+        Date.now() + largeExpiresIn * 1000 - 1000,
+      );
     });
   });
 });

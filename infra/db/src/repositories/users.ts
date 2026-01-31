@@ -325,7 +325,10 @@ export function createUserRepository(db: RawDb): UserRepository {
 
     async lockAccount(id: string, until: Date): Promise<void> {
       await db.execute(
-        update(USERS_TABLE).set({ ['locked_until']: until }).where(eq('id', id)).toSql(),
+        update(USERS_TABLE)
+          .set({ ['locked_until']: until })
+          .where(eq('id', id))
+          .toSql(),
       );
     },
 

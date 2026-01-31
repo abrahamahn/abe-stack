@@ -38,15 +38,20 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
 
   // 1. Check which provider keys are present
   const availability = {
-    stripe: (env.STRIPE_SECRET_KEY != null && env.STRIPE_SECRET_KEY !== '') && (env.STRIPE_PUBLISHABLE_KEY != null && env.STRIPE_PUBLISHABLE_KEY !== ''),
-    paypal: (env.PAYPAL_CLIENT_ID != null && env.PAYPAL_CLIENT_ID !== '') && (env.PAYPAL_CLIENT_SECRET != null && env.PAYPAL_CLIENT_SECRET !== ''),
+    stripe:
+      env.STRIPE_SECRET_KEY != null &&
+      env.STRIPE_SECRET_KEY !== '' &&
+      env.STRIPE_PUBLISHABLE_KEY != null &&
+      env.STRIPE_PUBLISHABLE_KEY !== '',
+    paypal:
+      env.PAYPAL_CLIENT_ID != null &&
+      env.PAYPAL_CLIENT_ID !== '' &&
+      env.PAYPAL_CLIENT_SECRET != null &&
+      env.PAYPAL_CLIENT_SECRET !== '',
   };
 
   // 2. Resolve active provider (Explicit Choice > Stripe > PayPal)
-  const provider = resolveActiveProvider(
-    env.BILLING_PROVIDER,
-    availability,
-  );
+  const provider = resolveActiveProvider(env.BILLING_PROVIDER, availability);
 
   const config: BillingConfig = {
     enabled: Boolean(provider),

@@ -29,9 +29,7 @@ const mockMetrics: SecurityMetrics = {
 describe('SecurityMetricsCard', () => {
   describe('loading state', () => {
     it('should show skeletons when loading', () => {
-      const { container } = render(
-        <SecurityMetricsCard metrics={undefined} isLoading={true} />,
-      );
+      const { container } = render(<SecurityMetricsCard metrics={undefined} isLoading={true} />);
 
       // Skeleton elements have .skeleton class
       const skeletons = container.querySelectorAll('.skeleton');

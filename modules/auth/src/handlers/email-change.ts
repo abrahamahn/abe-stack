@@ -13,13 +13,13 @@ import { confirmEmailChange, initiateEmailChange } from '../email-change';
 import { createErrorMapperLogger } from '../types';
 
 import type { AppContext, RequestWithCookies } from '../types';
-import type { HttpErrorResponse } from '@abe-stack/core';
 import type {
   ChangeEmailRequest,
   ChangeEmailResponse,
   ConfirmEmailChangeRequest,
   ConfirmEmailChangeResponse,
 } from '@abe-stack/contracts';
+import type { HttpErrorResponse } from '@abe-stack/core';
 
 /**
  * Handle email change initiation.

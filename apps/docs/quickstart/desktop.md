@@ -81,12 +81,12 @@ Main Process (Node.js)          Renderer (Chromium + React)
 
 ### IPC Channels
 
-| Channel              | Direction    | Purpose                     |
-| -------------------- | ------------ | --------------------------- |
-| `get-app-version`    | renderer->main | Returns app version string  |
-| `show-open-dialog`   | renderer->main | Native file picker          |
-| `show-save-dialog`   | renderer->main | Native save dialog          |
-| `show-notification`  | renderer->main | System notification (fire-and-forget) |
+| Channel             | Direction      | Purpose                               |
+| ------------------- | -------------- | ------------------------------------- |
+| `get-app-version`   | renderer->main | Returns app version string            |
+| `show-open-dialog`  | renderer->main | Native file picker                    |
+| `show-save-dialog`  | renderer->main | Native save dialog                    |
+| `show-notification` | renderer->main | System notification (fire-and-forget) |
 
 ### Adding a New Native Feature
 
@@ -130,10 +130,10 @@ pnpm --filter @abe-stack/desktop package
 
 Output in `apps/desktop/release/`:
 
-| Platform | Format   |
-| -------- | -------- |
-| Windows  | `.exe`   |
-| macOS    | `.dmg`   |
+| Platform | Format      |
+| -------- | ----------- |
+| Windows  | `.exe`      |
+| macOS    | `.dmg`      |
 | Linux    | `.AppImage` |
 
 ---

@@ -445,10 +445,7 @@ describe('Service Worker (sw.js)', () => {
 
         // Pre-cache the response
         const cache = await mockCaches.open('api-v1');
-        const cachedResponse = new Response(
-          JSON.stringify({ data: 'cached' }),
-          { status: 200 }
-        );
+        const cachedResponse = new Response(JSON.stringify({ data: 'cached' }), { status: 200 });
         await cache.put(request, cachedResponse);
 
         // Simulate network failure
@@ -474,7 +471,7 @@ describe('Service Worker (sw.js)', () => {
             status: 503,
             statusText: 'Service Unavailable',
             headers: { 'Content-Type': 'application/json' },
-          }
+          },
         );
 
         expect(errorResponse.status).toBe(503);
@@ -572,12 +569,7 @@ describe('Service Worker (sw.js)', () => {
     describe('install event', () => {
       it('should pre-cache static assets', async () => {
         const event = new MockExtendableEvent('install');
-        const precacheAssets = [
-          '/',
-          '/index.html',
-          '/manifest.json',
-          '/favicon.ico',
-        ];
+        const precacheAssets = ['/', '/index.html', '/manifest.json', '/favicon.ico'];
 
         // Simulate install event handler
         const installPromise = (async () => {
@@ -618,11 +610,9 @@ describe('Service Worker (sw.js)', () => {
         // Simulate cache failure
         mockCaches.open.mockRejectedValueOnce(new Error('Cache error'));
 
-        const installPromise = mockCaches
-          .open('static-v1')
-          .catch(() => {
-            // Silent fail - service worker will retry
-          });
+        const installPromise = mockCaches.open('static-v1').catch(() => {
+          // Silent fail - service worker will retry
+        });
 
         event.waitUntil(installPromise);
         await event._waitForAll();
@@ -681,11 +671,9 @@ describe('Service Worker (sw.js)', () => {
         // Simulate cleanup failure
         mockCaches.keys.mockRejectedValueOnce(new Error('Cleanup error'));
 
-        const activatePromise = mockCaches
-          .keys()
-          .catch(() => {
-            // Silent fail
-          });
+        const activatePromise = mockCaches.keys().catch(() => {
+          // Silent fail
+        });
 
         event.waitUntil(activatePromise);
         await event._waitForAll();
@@ -739,8 +727,7 @@ describe('Service Worker (sw.js)', () => {
 
         // Cross-origin, non-API requests should be ignored
         const shouldHandle =
-          url.origin === mockSelf.location.origin ||
-          /\/api\//.test(url.pathname);
+          url.origin === mockSelf.location.origin || /\/api\//.test(url.pathname);
         expect(shouldHandle).toBe(false);
       });
     });
@@ -836,7 +823,7 @@ describe('Service Worker (sw.js)', () => {
           expect.objectContaining({
             body: 'Test message',
             icon: '/icon.png',
-          })
+          }),
         );
       });
 
@@ -867,7 +854,7 @@ describe('Service Worker (sw.js)', () => {
           'New Notification',
           expect.objectContaining({
             body: 'Simple text',
-          })
+          }),
         );
       });
 
@@ -897,7 +884,7 @@ describe('Service Worker (sw.js)', () => {
           expect.objectContaining({
             icon: '/icons/logo192.png',
             badge: '/icons/badge72.png',
-          })
+          }),
         );
       });
 
@@ -929,7 +916,7 @@ describe('Service Worker (sw.js)', () => {
           'Action Test',
           expect.objectContaining({
             actions: payload.actions,
-          })
+          }),
         );
       });
 
@@ -1016,9 +1003,7 @@ describe('Service Worker (sw.js)', () => {
         event.waitUntil(clickPromise);
         await event._waitForAll();
 
-        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith(
-          'https://example.com/dashboard'
-        );
+        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith('https://example.com/dashboard');
       });
 
       it('should focus existing window if available', async () => {
@@ -1133,9 +1118,7 @@ describe('Service Worker (sw.js)', () => {
         event.waitUntil(clickPromise);
         await event._waitForAll();
 
-        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith(
-          'https://example.com/view'
-        );
+        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith('https://example.com/view');
       });
 
       it('should handle absolute URLs', async () => {
@@ -1159,9 +1142,7 @@ describe('Service Worker (sw.js)', () => {
         event.waitUntil(clickPromise);
         await event._waitForAll();
 
-        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith(
-          'https://external.com/page'
-        );
+        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith('https://external.com/page');
       });
 
       it('should default to root URL when no URL provided', async () => {
@@ -1180,9 +1161,7 @@ describe('Service Worker (sw.js)', () => {
         event.waitUntil(clickPromise);
         await event._waitForAll();
 
-        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith(
-          'https://example.com/'
-        );
+        expect(mockSelf.clients.openWindow).toHaveBeenCalledWith('https://example.com/');
       });
     });
 

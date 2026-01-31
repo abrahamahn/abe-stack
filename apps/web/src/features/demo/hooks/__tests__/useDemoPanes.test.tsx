@@ -14,7 +14,6 @@ const defaultPaneConfig: DemoPaneConfig = {
   bottom: { visible: true, size: 8 },
 };
 
-
 // Create a mock function for useMediaQuery
 const mockUseMediaQuery = vi.fn();
 

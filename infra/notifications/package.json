@@ -23,7 +23,12 @@
     "test:watch": "vitest",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-notifications --report-unused-disable-directives"
   },
-  "keywords": ["abe-stack", "notifications", "push", "fcm"],
+  "keywords": [
+    "abe-stack",
+    "notifications",
+    "push",
+    "fcm"
+  ],
   "author": "",
   "license": "ISC",
   "repository": {
@@ -31,9 +36,14 @@
     "url": "https://github.com/abrahamahn/abe-stack.git",
     "directory": "infra/notifications"
   },
-  "bugs": { "url": "https://github.com/abrahamahn/abe-stack/issues" },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
   "homepage": "https://github.com/abrahamahn/abe-stack#readme",
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "dependencies": {
     "@abe-stack/contracts": "workspace:*",

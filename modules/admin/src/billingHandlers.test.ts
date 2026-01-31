@@ -79,7 +79,9 @@ function createMockDbPlan(overrides: Partial<DbPlan> = {}): DbPlan {
 /**
  * Creates a mock app context with all required services
  */
-function createMockContext(configOverrides: Partial<AdminAppContext['config']> = {}): AdminAppContext {
+function createMockContext(
+  configOverrides: Partial<AdminAppContext['config']> = {},
+): AdminAppContext {
   return {
     config: {
       billing: {
@@ -155,7 +157,6 @@ function createValidPlanRequest(overrides: Partial<CreatePlanRequest> = {}): Cre
   };
 }
 
-
 // ============================================================================
 // Tests: handleAdminListPlans
 // ============================================================================
@@ -216,12 +217,8 @@ describe('handleAdminListPlans', () => {
       const req = createMockRequest();
       const result = await handleAdminListPlans(mockCtx, undefined, req);
 
-      expect('body' in result && result.body.plans[0].createdAt).toBe(
-        '2024-06-15T12:30:00.000Z',
-      );
-      expect('body' in result && result.body.plans[0].updatedAt).toBe(
-        '2024-06-20T08:15:00.000Z',
-      );
+      expect('body' in result && result.body.plans[0].createdAt).toBe('2024-06-15T12:30:00.000Z');
+      expect('body' in result && result.body.plans[0].updatedAt).toBe('2024-06-20T08:15:00.000Z');
     });
   });
 
@@ -420,9 +417,7 @@ describe('handleAdminCreatePlan', () => {
 
       expect(result.status).toBe(201);
       expect('body' in result && result.body.plan.features).toHaveLength(3);
-      expect('body' in result && result.body.plan.features[2].description).toBe(
-        'Advanced feature',
-      );
+      expect('body' in result && result.body.plan.features[2].description).toBe('Advanced feature');
     });
 
     test('should handle yearly billing interval', async () => {
@@ -534,9 +529,7 @@ describe('handleAdminUpdatePlan', () => {
       const result = await handleAdminUpdatePlan(mockCtx, updateRequest, req, { id: 'plan-123' });
 
       expect('body' in result && result.body.plan.features).toHaveLength(2);
-      expect('body' in result && result.body.plan.features[1].description).toBe(
-        'Premium feature',
-      );
+      expect('body' in result && result.body.plan.features[1].description).toBe('Premium feature');
     });
 
     test('should handle deactivating a plan via update', async () => {
@@ -558,12 +551,9 @@ describe('handleAdminUpdatePlan', () => {
       vi.mocked(updatePlan).mockRejectedValue(new PlanNotFoundError('nonexistent-plan'));
 
       const req = createMockRequest();
-      const result = await handleAdminUpdatePlan(
-        mockCtx,
-        { name: 'Test' },
-        req,
-        { id: 'nonexistent-plan' },
-      );
+      const result = await handleAdminUpdatePlan(mockCtx, { name: 'Test' }, req, {
+        id: 'nonexistent-plan',
+      });
 
       expect(result.status).toBe(404);
       expect('body' in result && result.body.message).toBe('Plan not found: nonexistent-plan');

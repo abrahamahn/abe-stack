@@ -750,9 +750,7 @@ describe('System Routes', () => {
 
       // Public health routes (3)
       const publicHealthRoutes = routeKeys.filter(
-        (key) =>
-          key.startsWith('api/health') &&
-          systemRoutes[key]!.auth === undefined,
+        (key) => key.startsWith('api/health') && systemRoutes[key]!.auth === undefined,
       );
       expect(publicHealthRoutes).toHaveLength(3);
 
@@ -762,9 +760,7 @@ describe('System Routes', () => {
 
       // Legacy routes (2) - admin-protected health routes
       const legacyRoutes = routeKeys.filter(
-        (key) =>
-          key.startsWith('api/health') &&
-          systemRoutes[key]!.auth === 'admin',
+        (key) => key.startsWith('api/health') && systemRoutes[key]!.auth === 'admin',
       );
       expect(legacyRoutes).toHaveLength(2);
     });

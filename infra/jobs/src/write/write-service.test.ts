@@ -184,9 +184,7 @@ describe('WriteService', () => {
     it('should update existing record and bump version', async () => {
       vi.mocked(mockDb.raw)
         .mockResolvedValueOnce([{ version: 1 }]) // SELECT current version
-        .mockResolvedValueOnce([
-          { id: 'user-1', name: 'Jane Updated', version: 2 },
-        ]); // UPDATE RETURNING
+        .mockResolvedValueOnce([{ id: 'user-1', name: 'Jane Updated', version: 2 }]); // UPDATE RETURNING
 
       const operation: WriteOperation = {
         type: 'update',

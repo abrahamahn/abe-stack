@@ -9,11 +9,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    createAccessToken,
-    createRefreshToken,
-    getRefreshTokenExpiry,
-    JwtError,
-    verifyToken,
+  createAccessToken,
+  createRefreshToken,
+  getRefreshTokenExpiry,
+  JwtError,
+  verifyToken,
 } from './jwt';
 
 describe('JWT Utilities', () => {

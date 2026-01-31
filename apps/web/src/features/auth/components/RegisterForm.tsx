@@ -127,7 +127,9 @@ export const RegisterForm = ({
 
           <Text tone="muted" className="text-xs text-center">
             Sent to:{' '}
-            <strong>{registrationResult.email.length > 0 ? registrationResult.email : email}</strong>
+            <strong>
+              {registrationResult.email.length > 0 ? registrationResult.email : email}
+            </strong>
           </Text>
 
           {resendMessage !== null && resendMessage.length > 0 && (

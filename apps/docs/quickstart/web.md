@@ -65,9 +65,9 @@ No context nesting. One provider. Token refresh starts at boot, not on mount.
 Auto-generated. No `../../../` imports:
 
 ```typescript
-import { useAuth } from '@hooks';          // src/features/auth/hooks
-import { LoginForm } from '@components';   // src/features/auth/components
-import { clientConfig } from '@config';    // src/config
+import { useAuth } from '@hooks'; // src/features/auth/hooks
+import { LoginForm } from '@components'; // src/features/auth/components
+import { clientConfig } from '@config'; // src/config
 ```
 
 New aliases are auto-created when you add directories with `index.ts` (max 3 levels from `src/`).
@@ -92,16 +92,16 @@ Both are type-safe via ts-rest contracts from `@abe-stack/core`.
 
 All routes are lazy-loaded (automatic code splitting):
 
-| Route                   | Page              | Auth Required |
-| ----------------------- | ----------------- | ------------- |
-| `/`                     | HomePage          | No            |
-| `/login`                | LoginPage         | No            |
-| `/register`             | RegisterPage      | No            |
-| `/auth`                 | AuthPage          | No            |
-| `/auth/reset-password`  | ResetPasswordPage | No            |
-| `/auth/confirm-email`   | ConfirmEmailPage  | No            |
-| `/demo`                 | DemoPage          | No            |
-| `/dashboard`            | DashboardPage     | Yes           |
+| Route                  | Page              | Auth Required |
+| ---------------------- | ----------------- | ------------- |
+| `/`                    | HomePage          | No            |
+| `/login`               | LoginPage         | No            |
+| `/register`            | RegisterPage      | No            |
+| `/auth`                | AuthPage          | No            |
+| `/auth/reset-password` | ResetPasswordPage | No            |
+| `/auth/confirm-email`  | ConfirmEmailPage  | No            |
+| `/demo`                | DemoPage          | No            |
+| `/dashboard`           | DashboardPage     | Yes           |
 
 ---
 
@@ -129,9 +129,9 @@ Organized by **feature**, not by type.
 
 Only one env var matters for the frontend:
 
-| Variable       | Default        | Purpose              |
-| -------------- | -------------- | -------------------- |
-| `VITE_API_URL` | (empty/proxy)  | API URL override     |
+| Variable       | Default       | Purpose          |
+| -------------- | ------------- | ---------------- |
+| `VITE_API_URL` | (empty/proxy) | API URL override |
 
 Empty means Vite's dev proxy handles API routing to `localhost:8080`.
 
@@ -139,11 +139,11 @@ Empty means Vite's dev proxy handles API routing to `localhost:8080`.
 
 ## Dependencies
 
-| Package            | Role                          |
-| ------------------ | ----------------------------- |
-| `@abe-stack/core`  | Types, validation, stores     |
-| `@abe-stack/ui`    | React components              |
-| `@abe-stack/client`   | API client + React Query      |
+| Package             | Role                      |
+| ------------------- | ------------------------- |
+| `@abe-stack/core`   | Types, validation, stores |
+| `@abe-stack/ui`     | React components          |
+| `@abe-stack/client` | API client + React Query  |
 
 The web app is a thin rendering layer. Business logic lives in packages.
 

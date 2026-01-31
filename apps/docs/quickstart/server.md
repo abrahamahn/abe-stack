@@ -140,14 +140,14 @@ apps/server/src/
 
 Infrastructure components are pluggable via provider switches:
 
-| Component  | Default (Dev)  | Production Options        |
-| ---------- | -------------- | ------------------------- |
-| Database   | PostgreSQL     | PostgreSQL                |
-| Email      | Console        | SMTP                      |
-| Storage    | Local files    | S3 / compatible           |
-| Cache      | In-memory      | Redis (interface ready)   |
-| Queue      | In-memory      | PostgreSQL-backed          |
-| Search     | SQL            | Elasticsearch (stub ready)|
+| Component | Default (Dev) | Production Options         |
+| --------- | ------------- | -------------------------- |
+| Database  | PostgreSQL    | PostgreSQL                 |
+| Email     | Console       | SMTP                       |
+| Storage   | Local files   | S3 / compatible            |
+| Cache     | In-memory     | Redis (interface ready)    |
+| Queue     | In-memory     | PostgreSQL-backed          |
+| Search    | SQL           | Elasticsearch (stub ready) |
 
 ---
 

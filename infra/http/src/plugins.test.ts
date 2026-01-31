@@ -99,14 +99,16 @@ function createMockOptions(overrides: Partial<PluginOptions> = {}): PluginOption
     rateLimiter: createMockRateLimiter(),
     isAppError: (error: unknown) => {
       return (
-        typeof error === 'object' &&
-        error !== null &&
-        'statusCode' in error &&
-        'code' in error
+        typeof error === 'object' && error !== null && 'statusCode' in error && 'code' in error
       );
     },
     getErrorInfo: (error: unknown) => {
-      const err = error as { statusCode: number; code: string; message: string; details?: Record<string, unknown> };
+      const err = error as {
+        statusCode: number;
+        code: string;
+        message: string;
+        details?: Record<string, unknown>;
+      };
       return {
         statusCode: err.statusCode,
         code: err.code,
@@ -214,7 +216,10 @@ describe('registerPlugins', () => {
       } as unknown as FastifyReply;
 
       // In production, there's only the security/rate limit hook (first one)
-      const onRequestHandler = onRequestCalls[0]?.[1] as (req: FastifyRequest, res: FastifyReply) => Promise<void>;
+      const onRequestHandler = onRequestCalls[0]?.[1] as (
+        req: FastifyRequest,
+        res: FastifyReply,
+      ) => Promise<void>;
       await onRequestHandler(mockReq, mockRes);
 
       expect(middleware.getProductionSecurityDefaults).toHaveBeenCalled();
@@ -238,7 +243,10 @@ describe('registerPlugins', () => {
       // In development, the first hook is timing (sync), the second is security/rate limit (async)
       // Get the last onRequest hook which is the security/rate limit async hook
       const securityHookIndex = onRequestCalls.length - 1;
-      const onRequestHandler = onRequestCalls[securityHookIndex]?.[1] as (req: FastifyRequest, res: FastifyReply) => Promise<void>;
+      const onRequestHandler = onRequestCalls[securityHookIndex]?.[1] as (
+        req: FastifyRequest,
+        res: FastifyReply,
+      ) => Promise<void>;
       await onRequestHandler(mockReq, mockRes);
 
       expect(middleware.applyCors).toHaveBeenCalledWith(mockReq, mockRes, {
@@ -267,7 +275,10 @@ describe('registerPlugins', () => {
 
       // In development, get the last onRequest hook (the async security/rate limit one)
       const securityHookIndex = onRequestCalls.length - 1;
-      const onRequestHandler = onRequestCalls[securityHookIndex]?.[1] as (req: FastifyRequest, res: FastifyReply) => Promise<void>;
+      const onRequestHandler = onRequestCalls[securityHookIndex]?.[1] as (
+        req: FastifyRequest,
+        res: FastifyReply,
+      ) => Promise<void>;
       await onRequestHandler(mockReq, mockRes);
 
       expect(mockRateLimiter.check).not.toHaveBeenCalled();

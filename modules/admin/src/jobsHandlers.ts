@@ -12,19 +12,18 @@ import { PostgresQueueStore, type JobListOptions } from '@abe-stack/jobs';
 import { ERROR_MESSAGES } from '../../../modules/auth/src';
 
 import {
-    cancelJob,
-    getJobDetails,
-    getQueueStats,
-    JobNotFoundError,
-    listJobs,
-    QueueStoreNotAvailableError,
-    retryJob,
+  cancelJob,
+  getJobDetails,
+  getQueueStats,
+  JobNotFoundError,
+  listJobs,
+  QueueStoreNotAvailableError,
+  retryJob,
 } from './jobsService';
 
 import type { AdminAppContext } from './types';
 import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-
 
 // ============================================================================
 // Helper to get queue store

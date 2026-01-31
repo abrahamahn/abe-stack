@@ -63,7 +63,10 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
 
     const token = config.getToken?.();
     if (token !== null && token !== undefined) {
-      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(headers, token);
+      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
+        headers,
+        token,
+      );
     }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;

@@ -3,13 +3,13 @@ import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    applyCors,
-    applySecurityHeaders,
-    getProductionSecurityDefaults,
-    handlePreflight,
-    hasDangerousKeys,
-    registerPrototypePollutionProtection,
-    sanitizeObject,
+  applyCors,
+  applySecurityHeaders,
+  getProductionSecurityDefaults,
+  handlePreflight,
+  hasDangerousKeys,
+  registerPrototypePollutionProtection,
+  sanitizeObject,
 } from './security';
 
 import type { FastifyInstance } from 'fastify';

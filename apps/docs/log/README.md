@@ -8,13 +8,13 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 ## 2026
 
-| Week                 | Dates      | Highlights                                                                            |
-| -------------------- | ---------- | ------------------------------------------------------------------------------------- |
-| [W05](./2026-W05.md) | Jan 26-31  | Hexagonal package extraction (18 packages), BaseContext contract, server decomposition |
-| [W04](./2026-W04.md) | Jan 20-25  | Billing (Stripe/PayPal), admin center, 73% bundle reduction, IaC, 7,517 tests        |
-| [W03](./2026-W03.md) | Jan 13-19  | Pagination system, domain architecture, RecordCache, TransactionQueue                 |
-| [W02](./2026-W02.md) | Jan 6-12   | Build tooling, codebase simplification                                                |
-| [W01](./2026-W01.md) | Jan 1-5    | File reorganization, initial setup                                                    |
+| Week                 | Dates     | Highlights                                                                             |
+| -------------------- | --------- | -------------------------------------------------------------------------------------- |
+| [W05](./2026-W05.md) | Jan 26-31 | Hexagonal package extraction (18 packages), BaseContext contract, server decomposition |
+| [W04](./2026-W04.md) | Jan 20-25 | Billing (Stripe/PayPal), admin center, 73% bundle reduction, IaC, 7,517 tests          |
+| [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue                  |
+| [W02](./2026-W02.md) | Jan 6-12  | Build tooling, codebase simplification                                                 |
+| [W01](./2026-W01.md) | Jan 1-5   | File reorganization, initial setup                                                     |
 
 ---
 

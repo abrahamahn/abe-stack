@@ -33,7 +33,7 @@ vi.mock('../../../../apps/desktop/README.md?raw', () => ({
 }));
 
 // Package READMEs
-vi.mock('../../../../shared/core/README.md?raw', () => ({
+vi.mock('../../../../core/README.md?raw', () => ({
   default: `# @abe-stack/core\n\nCore package documentation.`,
 }));
 
@@ -41,7 +41,7 @@ vi.mock('../../../../client/README.md?raw', () => ({
   default: `# @abe-stack/client\n\nSDK package documentation.`,
 }));
 
-vi.mock('../../../../shared/ui/docs/README.md?raw', () => ({
+vi.mock('../../../../client/ui/docs/README.md?raw', () => ({
   default: `# @abe-stack/ui\n\nUI package documentation.`,
 }));
 
@@ -190,7 +190,6 @@ describe('HomePage', () => {
       expect(screen.getByRole('button', { name: 'Week 03' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Week 04' })).toBeInTheDocument();
     });
-
   });
 
   describe('README Content', () => {

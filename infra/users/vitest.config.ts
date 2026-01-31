@@ -8,13 +8,10 @@ export default defineConfig({
       // Sub-path aliases MUST come before root aliases (Vite resolves in order)
       '@abe-stack/core/infrastructure/crypto': path.resolve(
         __dirname,
-        '../core/src/infrastructure/crypto/index.ts',
+        '../../core/src/infrastructure/crypto/index.ts',
       ),
-      '@abe-stack/core/config': path.resolve(
-        __dirname,
-        '../core/src/config/index.ts',
-      ),
-      '@abe-stack/core': path.resolve(__dirname, '../core/src/index.ts'),
+      '@abe-stack/core/config': path.resolve(__dirname, '../../core/src/config/index.ts'),
+      '@abe-stack/core': path.resolve(__dirname, '../../core/src/index.ts'),
       '@abe-stack/db': path.resolve(__dirname, '../db/src/index.ts'),
       '@abe-stack/http': path.resolve(__dirname, '../http/src/index.ts'),
       '@abe-stack/security/rate-limit': path.resolve(

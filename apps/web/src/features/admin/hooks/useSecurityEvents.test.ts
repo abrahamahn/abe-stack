@@ -11,7 +11,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { useSecurityEvents } from './useSecurityEvents';
 
-
 import type { SecurityEventsListResponse, SecurityEventsFilter } from '@abe-stack/core';
 
 // ============================================================================
@@ -169,11 +168,7 @@ describe('useSecurityEvents', () => {
 
       expect(sdk.useQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          queryKey: expect.arrayContaining([
-            'securityEvents',
-            filter,
-            expect.any(Object),
-          ]),
+          queryKey: expect.arrayContaining(['securityEvents', filter, expect.any(Object)]),
         }),
       );
     });

@@ -938,11 +938,15 @@ describe('useMutation - Edge Cases', () => {
       const { result } = renderHook(() => useMutation({ mutationFn }));
       // If we get here, check if the hook returned an error state
       expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain('useQueryCache must be used within a QueryCacheProvider');
+      expect(result.error?.message).toContain(
+        'useQueryCache must be used within a QueryCacheProvider',
+      );
     } catch (error) {
       // React 18 may throw directly during render
       expect(error).toBeDefined();
-      expect((error as Error).message).toContain('useQueryCache must be used within a QueryCacheProvider');
+      expect((error as Error).message).toContain(
+        'useQueryCache must be used within a QueryCacheProvider',
+      );
     } finally {
       consoleSpy.mockRestore();
     }

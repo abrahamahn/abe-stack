@@ -49,7 +49,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const result: AdminUserLocal = await getUser(id) as AdminUserLocal;
+      const result: AdminUserLocal = (await getUser(id)) as AdminUserLocal;
       setState({
         user: result,
         isLoading: false,

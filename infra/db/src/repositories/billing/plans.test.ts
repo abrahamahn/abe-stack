@@ -725,9 +725,7 @@ describe('createPlanRepository', () => {
     });
 
     it('should handle features without optional description', async () => {
-      const minimalFeatures: PlanFeature[] = [
-        { name: 'Minimal Feature', included: false },
-      ];
+      const minimalFeatures: PlanFeature[] = [{ name: 'Minimal Feature', included: false }];
 
       const rowWithMinimalFeatures = {
         ...mockDbRow,

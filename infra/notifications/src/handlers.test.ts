@@ -60,7 +60,9 @@ import type { NotificationModuleDeps, NotificationRequest } from './types';
 /**
  * Create a mock NotificationModuleDeps for testing
  */
-function createMockContext(overrides: Partial<NotificationModuleDeps> = {}): NotificationModuleDeps {
+function createMockContext(
+  overrides: Partial<NotificationModuleDeps> = {},
+): NotificationModuleDeps {
   return {
     db: {} as never,
     repos: {} as never,
@@ -87,9 +89,11 @@ function createMockContext(overrides: Partial<NotificationModuleDeps> = {}): Not
 /**
  * Create a mock authenticated request
  */
-function createMockRequest(
-  user?: { userId: string; email: string; role: string },
-): NotificationRequest {
+function createMockRequest(user?: {
+  userId: string;
+  email: string;
+  role: string;
+}): NotificationRequest {
   return {
     user,
     cookies: {},
@@ -109,7 +113,8 @@ function createValidPushSubscription() {
     endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
     expirationTime: null,
     keys: {
-      p256dh: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM',
+      p256dh:
+        'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM',
       auth: 'tBHItJI5svbpez7KI4CCXg',
     },
   };
@@ -839,7 +844,13 @@ describe('Notification Handlers', () => {
       const result = await handleSubscribe(ctx, body, req);
 
       expect(result.status).toBe(201);
-      expect(vi.mocked(service.subscribe)).toHaveBeenCalledWith(ctx.db, 'user-123', body.subscription, 'device-123', '');
+      expect(vi.mocked(service.subscribe)).toHaveBeenCalledWith(
+        ctx.db,
+        'user-123',
+        body.subscription,
+        'device-123',
+        '',
+      );
     });
 
     test('handleUnsubscribe should handle missing both subscriptionId and endpoint', async () => {

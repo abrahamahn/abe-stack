@@ -8,8 +8,8 @@
     "types": ["vitest/globals", "node"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.billing.tsbuildinfo",
     "paths": {
-      "@abe-stack/core": ["../../shared/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../shared/core/src/*"],
+      "@abe-stack/core": ["../../core/src/index.ts"],
+      "@abe-stack/core/*": ["../../core/src/*"],
       "@abe-stack/db": ["../../infra/db/src/index.ts"],
       "@abe-stack/db/*": ["../../infra/db/src/*"]
     }
@@ -18,7 +18,7 @@
   "exclude": ["node_modules", "dist", "vitest.config.ts", "**/*.test.ts", "**/__tests__/**"],
   "references": [
     {
-      "path": "../../shared/core"
+      "path": "../../core"
     },
     {
       "path": "../../infra/db"

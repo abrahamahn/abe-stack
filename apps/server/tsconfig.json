@@ -9,144 +9,54 @@
     "noEmit": false,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.server.tsbuildinfo",
     "paths": {
-      "@/*": [
-            "./src/*"
-      ],
-      "@abe-stack/admin": [
-            "../../modules/admin/src/index.ts"
-      ],
-      "@abe-stack/admin/*": [
-            "../../modules/admin/src/*"
-      ],
-      "@abe-stack/auth": [
-            "../../modules/auth/src/index.ts"
-      ],
-      "@abe-stack/auth/*": [
-            "../../modules/auth/src/*"
-      ],
-      "@abe-stack/billing": [
-            "../../modules/billing/src/index.ts"
-      ],
-      "@abe-stack/billing/*": [
-            "../../modules/billing/src/*"
-      ],
-      "@abe-stack/cache": [
-            "../../infra/cache/src/index.ts"
-      ],
-      "@abe-stack/cache/*": [
-            "../../infra/cache/src/*"
-      ],
-      "@abe-stack/contracts": [
-            "../../infra/contracts/src/index.ts"
-      ],
-      "@abe-stack/contracts/*": [
-            "../../infra/contracts/src/*"
-      ],
-      "@abe-stack/core": [
-            "../../shared/core/src/index.ts"
-      ],
-      "@abe-stack/email": [
-            "../../infra/email/src/index.ts"
-      ],
-      "@abe-stack/http": [
-            "../../infra/http/src/index.ts"
-      ],
-      "@abe-stack/http/*": [
-            "../../infra/http/src/*"
-      ],
+      "@/*": ["./src/*"],
+      "@abe-stack/admin": ["../../modules/admin/src/index.ts"],
+      "@abe-stack/admin/*": ["../../modules/admin/src/*"],
+      "@abe-stack/auth": ["../../modules/auth/src/index.ts"],
+      "@abe-stack/auth/*": ["../../modules/auth/src/*"],
+      "@abe-stack/billing": ["../../modules/billing/src/index.ts"],
+      "@abe-stack/billing/*": ["../../modules/billing/src/*"],
+      "@abe-stack/cache": ["../../infra/cache/src/index.ts"],
+      "@abe-stack/cache/*": ["../../infra/cache/src/*"],
+      "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
+      "@abe-stack/contracts/*": ["../../infra/contracts/src/*"],
+      "@abe-stack/core": ["../../core/src/index.ts"],
+      "@abe-stack/email": ["../../infra/email/src/index.ts"],
+      "@abe-stack/http": ["../../infra/http/src/index.ts"],
+      "@abe-stack/http/*": ["../../infra/http/src/*"],
       "@abe-stack/core/pubsub/postgres": [
-            "../../shared/core/src/infrastructure/pubsub/postgres-pubsub.ts"
+        "../../core/src/infrastructure/pubsub/postgres-pubsub.ts"
       ],
-      "@abe-stack/core/pubsub": [
-            "../../shared/core/src/infrastructure/pubsub/index.ts"
-      ],
-      "@abe-stack/core/*": [
-            "../../shared/core/src/*"
-      ],
-      "@abe-stack/db": [
-            "../../infra/db/src/index.ts"
-      ],
-      "@abe-stack/db/*": [
-            "../../infra/db/src/*"
-      ],
-      "@abe-stack/jobs": [
-            "../../infra/jobs/src/index.ts"
-      ],
-      "@abe-stack/jobs/*": [
-            "../../infra/jobs/src/*"
-      ],
-      "@abe-stack/media": [
-            "../../infra/media/src/index.ts"
-      ],
-      "@abe-stack/media/*": [
-            "../../infra/media/src/*"
-      ],
-      "@abe-stack/notifications": [
-            "../../infra/notifications/src/index.ts"
-      ],
-      "@abe-stack/notifications/*": [
-            "../../infra/notifications/src/*"
-      ],
-      "@abe-stack/realtime": [
-            "../../infra/realtime/src/index.ts"
-      ],
-      "@abe-stack/realtime/*": [
-            "../../infra/realtime/src/*"
-      ],
-      "@abe-stack/security": [
-            "../../infra/security/src/index.ts"
-      ],
-      "@abe-stack/security/*": [
-            "../../infra/security/src/*"
-      ],
-      "@abe-stack/storage": [
-            "../../infra/storage/src/index.ts"
-      ],
-      "@abe-stack/storage/*": [
-            "../../infra/storage/src/*"
-      ],
-      "@abe-stack/users": [
-            "../../infra/users/src/index.ts"
-      ],
-      "@abe-stack/users/*": [
-            "../../infra/users/src/*"
-      ],
-      "@config": [
-            "./src/config"
-      ],
-      "@config/*": [
-            "./src/config/*"
-      ],
-      "@health": [
-            "./src/health"
-      ],
-      "@health/*": [
-            "./src/health/*"
-      ],
-      "@logger": [
-            "./src/logger"
-      ],
-      "@logger/*": [
-            "./src/logger/*"
-      ],
-      "@routes": [
-            "./src/routes"
-      ],
-      "@routes/*": [
-            "./src/routes/*"
-      ],
-      "@shared": [
-            "./src/types/context"
-      ],
-      "@shared/*": [
-            "./src/types/*"
-      ],
-      "@types": [
-            "./src/types"
-      ],
-      "@types/*": [
-            "./src/types/*"
-      ],
+      "@abe-stack/core/pubsub": ["../../core/src/infrastructure/pubsub/index.ts"],
+      "@abe-stack/core/*": ["../../core/src/*"],
+      "@abe-stack/db": ["../../infra/db/src/index.ts"],
+      "@abe-stack/db/*": ["../../infra/db/src/*"],
+      "@abe-stack/jobs": ["../../infra/jobs/src/index.ts"],
+      "@abe-stack/jobs/*": ["../../infra/jobs/src/*"],
+      "@abe-stack/media": ["../../infra/media/src/index.ts"],
+      "@abe-stack/media/*": ["../../infra/media/src/*"],
+      "@abe-stack/notifications": ["../../infra/notifications/src/index.ts"],
+      "@abe-stack/notifications/*": ["../../infra/notifications/src/*"],
+      "@abe-stack/realtime": ["../../infra/realtime/src/index.ts"],
+      "@abe-stack/realtime/*": ["../../infra/realtime/src/*"],
+      "@abe-stack/security": ["../../infra/security/src/index.ts"],
+      "@abe-stack/security/*": ["../../infra/security/src/*"],
+      "@abe-stack/storage": ["../../infra/storage/src/index.ts"],
+      "@abe-stack/storage/*": ["../../infra/storage/src/*"],
+      "@abe-stack/users": ["../../infra/users/src/index.ts"],
+      "@abe-stack/users/*": ["../../infra/users/src/*"],
+      "@config": ["./src/config"],
+      "@config/*": ["./src/config/*"],
+      "@health": ["./src/health"],
+      "@health/*": ["./src/health/*"],
+      "@logger": ["./src/logger"],
+      "@logger/*": ["./src/logger/*"],
+      "@routes": ["./src/routes"],
+      "@routes/*": ["./src/routes/*"],
+      "@shared": ["./src/types/context"],
+      "@shared/*": ["./src/types/*"],
+      "@types": ["./src/types"],
+      "@types/*": ["./src/types/*"]
     }
   },
   "include": ["src/**/*"],
@@ -156,7 +66,7 @@
     { "path": "../../modules/auth" },
     { "path": "../../modules/billing" },
     { "path": "../../infra/cache" },
-    { "path": "../../shared/core" },
+    { "path": "../../core" },
     { "path": "../../infra/contracts" },
     { "path": "../../infra/db" },
     { "path": "../../infra/email" },

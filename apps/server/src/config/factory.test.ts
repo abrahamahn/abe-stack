@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { load } from './factory';
 
-
 // Mock filesystem for consistent testing
 vi.mock('node:fs');
 vi.mock('node:path', async () => {

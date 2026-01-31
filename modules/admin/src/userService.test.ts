@@ -1,11 +1,11 @@
 // modules/admin/src/userService.test.ts
 import {
-    getUserById,
-    getUserStatus,
-    listUsers,
-    lockUser,
-    unlockUser,
-    updateUser,
+  getUserById,
+  getUserStatus,
+  listUsers,
+  lockUser,
+  unlockUser,
+  updateUser,
 } from './userService';
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';

@@ -4,7 +4,7 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { pickAvailablePort } from '../../shared/core/src/shared/port';
+import { pickAvailablePort } from '../../core/src/shared/port';
 
 const repoRoot = path.resolve(__dirname, '../../');
 const desktopRoot = path.join(repoRoot, 'apps/desktop');
@@ -28,29 +28,29 @@ export default defineConfig(async ({ command }) => {
     resolve: {
       alias: {
         // Monorepo packages → source files
-        '@abe-stack/core': resolveAlias('shared/core/src'),
-        '@abe-stack/ui': resolveAlias('shared/ui/src'),
+        '@abe-stack/core': resolveAlias('core/src'),
+        '@abe-stack/ui': resolveAlias('client/ui/src'),
         '@abe-stack/client': resolveAlias('client/src'),
         '@abe-stack/contracts': resolveAlias('infra/contracts/src'),
         '@abe-stack/stores': resolveAlias('client/stores/src'),
         '@abe-stack/db': resolveAlias('infra/db/src'),
         '@abe-stack/media': resolveAlias('infra/media/src'),
         // UI package internal aliases
-        '@components': resolveAlias('shared/ui/src/components'),
-        '@containers': resolveAlias('shared/ui/src/layouts/containers'),
-        '@elements': resolveAlias('shared/ui/src/elements'),
-        '@hooks': resolveAlias('shared/ui/src/hooks'),
-        '@layers': resolveAlias('shared/ui/src/layouts/layers'),
-        '@layouts': resolveAlias('shared/ui/src/layouts'),
-        '@providers': resolveAlias('shared/ui/src/providers'),
-        '@router': resolveAlias('shared/ui/src/router'),
-        '@shells': resolveAlias('shared/ui/src/layouts/shells'),
-        '@theme': resolveAlias('shared/ui/src/theme'),
-        '@types': resolveAlias('shared/ui/src/types'),
-        '@utils': resolveAlias('shared/ui/src/utils'),
+        '@components': resolveAlias('client/ui/src/components'),
+        '@containers': resolveAlias('client/ui/src/layouts/containers'),
+        '@elements': resolveAlias('client/ui/src/elements'),
+        '@hooks': resolveAlias('client/ui/src/hooks'),
+        '@layers': resolveAlias('client/ui/src/layouts/layers'),
+        '@layouts': resolveAlias('client/ui/src/layouts'),
+        '@providers': resolveAlias('client/ui/src/providers'),
+        '@router': resolveAlias('client/ui/src/router'),
+        '@shells': resolveAlias('client/ui/src/layouts/shells'),
+        '@theme': resolveAlias('client/ui/src/theme'),
+        '@types': resolveAlias('client/ui/src/types'),
+        '@utils': resolveAlias('client/ui/src/utils'),
         // Core package internal aliases
-        '@contracts': resolveAlias('shared/core/src/contracts'),
-        '@shared': resolveAlias('shared/core/src/shared'),
+        '@contracts': resolveAlias('core/src/contracts'),
+        '@shared': resolveAlias('core/src/shared'),
         // Desktop app aliases
         '@': resolveAlias('apps/desktop/src'),
         '@ipc': resolveAlias('apps/desktop/src/electron/ipc'),

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 // @ts-ignore - Resolving from monorepo source without build
-import { initEnv } from '../shared/core/src/config/env.loader';
+import { initEnv } from '../core/src/config/env.loader';
 
 // Initialize environment variables using the custom monorepo loader
 initEnv();
@@ -12,9 +12,7 @@ const PORT = 5173;
 export default defineConfig({
   testDir: '../apps/web/src/__tests__/e2e',
   testMatch: /.*\.e2e\.(ts|tsx)/,
-  reporter: CI
-    ? [['github'], ['blob']]
-    : [['list'], ['html', { open: 'on-failure' }]],
+  reporter: CI ? [['github'], ['blob']] : [['list'], ['html', { open: 'on-failure' }]],
   fullyParallel: !CI,
   forbidOnly: CI,
   retries: CI ? 2 : 0,

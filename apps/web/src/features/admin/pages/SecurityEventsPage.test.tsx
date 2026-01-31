@@ -6,30 +6,45 @@ import { SecurityEventsPage } from './SecurityEventsPage';
 
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => ({
-  Button: ({ children, onClick, variant }: { children: React.ReactNode; onClick?: () => void; variant?: string }) => (
-    <button onClick={onClick} data-variant={variant}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    variant,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    variant?: string;
+  }) => (
+    <button onClick={onClick} data-variant={variant}>
+      {children}
+    </button>
   ),
   Heading: ({ children, as, size }: { children: React.ReactNode; as?: string; size?: string }) => {
     const Tag = (as ?? 'h1') as keyof JSX.IntrinsicElements;
     return <Tag data-size={size}>{children}</Tag>;
   },
-  PageContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="page-container">{children}</div>,
-  Select: ({ children, value, onChange, className }: {
+  PageContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="page-container">{children}</div>
+  ),
+  Select: ({
+    children,
+    value,
+    onChange,
+    className,
+  }: {
     children: React.ReactNode;
     value?: string;
     onChange?: (value: string) => void;
     className?: string;
   }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange?.(e.target.value)}
-      className={className}
-    >
+    <select value={value} onChange={(e) => onChange?.(e.target.value)} className={className}>
       {children}
     </select>
   ),
   Text: ({ children, tone, size }: { children: React.ReactNode; tone?: string; size?: string }) => (
-    <span data-tone={tone} data-size={size}>{children}</span>
+    <span data-tone={tone} data-size={size}>
+      {children}
+    </span>
   ),
 }));
 

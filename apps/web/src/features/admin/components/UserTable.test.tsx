@@ -26,10 +26,17 @@ const createMockUser = (overrides: Partial<AdminUser> = {}): AdminUser => ({
   ...overrides,
 });
 
-const createMockResponse = (overrides: Partial<AdminUserListResponse> = {}): AdminUserListResponse => ({
+const createMockResponse = (
+  overrides: Partial<AdminUserListResponse> = {},
+): AdminUserListResponse => ({
   data: [
     createMockUser({ id: 'user-1', email: 'user1@example.com', name: 'User One', role: 'admin' }),
-    createMockUser({ id: 'user-2', email: 'user2@example.com', name: 'User Two', role: 'moderator' }),
+    createMockUser({
+      id: 'user-2',
+      email: 'user2@example.com',
+      name: 'User Two',
+      role: 'moderator',
+    }),
     createMockUser({ id: 'user-3', email: 'user3@example.com', name: 'User Three', role: 'user' }),
   ],
   total: 3,

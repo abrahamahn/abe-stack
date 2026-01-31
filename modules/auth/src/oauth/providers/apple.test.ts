@@ -52,11 +52,7 @@ vi.mock('node:crypto', async (importOriginal) => {
   };
 });
 
-import {
-  clearAppleKeysCache,
-  createAppleProvider,
-  extractAppleUserFromIdToken,
-} from './apple';
+import { clearAppleKeysCache, createAppleProvider, extractAppleUserFromIdToken } from './apple';
 
 import type { AppleProviderConfig } from './apple';
 
@@ -378,7 +374,9 @@ describe('createAppleProvider', () => {
       const provider = createAppleProvider(MOCK_CONFIG);
       const invalidToken = 'not.a.valid.jwt.token';
 
-      await expect(provider.getUserInfo(invalidToken)).rejects.toMatchObject({ name: 'OAuthError' });
+      await expect(provider.getUserInfo(invalidToken)).rejects.toMatchObject({
+        name: 'OAuthError',
+      });
       await expect(provider.getUserInfo(invalidToken)).rejects.toThrow(/Invalid.*format/);
     });
   });
@@ -433,13 +431,13 @@ describe('extractAppleUserFromIdToken', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/No email found/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /No email found/,
+    );
   });
 
   it('should validate issuer matches Apple', async () => {
@@ -454,13 +452,13 @@ describe('extractAppleUserFromIdToken', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Invalid issuer/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Invalid issuer/,
+    );
   });
 
   it('should validate audience matches client ID', async () => {
@@ -475,13 +473,13 @@ describe('extractAppleUserFromIdToken', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Invalid audience/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Invalid audience/,
+    );
   });
 
   it('should throw OAuthError when token is expired', async () => {
@@ -497,13 +495,13 @@ describe('extractAppleUserFromIdToken', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/expired/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /expired/,
+    );
   });
 
   it('should throw OAuthError when issued-at is in the future', async () => {
@@ -519,13 +517,13 @@ describe('extractAppleUserFromIdToken', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/issued in the future/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /issued in the future/,
+    );
   });
 
   it('should allow issued-at within 5 minute clock skew tolerance', async () => {
@@ -542,9 +540,7 @@ describe('extractAppleUserFromIdToken', () => {
     });
 
     // Should not throw
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).resolves.toBeDefined();
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).resolves.toBeDefined();
   });
 });
 
@@ -622,16 +618,16 @@ describe('Apple Public Key Management', () => {
         status: 500,
       });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
     // Clear cache so second call also fetches
     clearAppleKeysCache();
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Failed to fetch Apple public keys/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Failed to fetch Apple public keys/,
+    );
   });
 
   it('should throw OAuthError when key ID not found in Apple keys', async () => {
@@ -648,13 +644,13 @@ describe('Apple Public Key Management', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/No matching public key found/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /No matching public key found/,
+    );
   });
 
   it('should throw OAuthError for unsupported algorithm', async () => {
@@ -683,13 +679,13 @@ describe('Apple Public Key Management', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Unsupported algorithm.*Expected RS256/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Unsupported algorithm.*Expected RS256/,
+    );
   });
 
   it('should throw OAuthError when kid is missing from JWT header', async () => {
@@ -717,13 +713,13 @@ describe('Apple Public Key Management', () => {
       json: () => mockJsonResponse({ keys: [MOCK_APPLE_JWK] }),
     });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toMatchObject({ name: 'OAuthError' });
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toMatchObject({
+      name: 'OAuthError',
+    });
 
-    await expect(
-      extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Missing kid/);
+    await expect(extractAppleUserFromIdToken(idToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Missing kid/,
+    );
   });
 });
 
@@ -735,9 +731,9 @@ describe('JWT Parsing Edge Cases', () => {
       extractAppleUserFromIdToken(invalidToken, MOCK_CONFIG.clientId),
     ).rejects.toMatchObject({ name: 'OAuthError' });
 
-    await expect(
-      extractAppleUserFromIdToken(invalidToken, MOCK_CONFIG.clientId),
-    ).rejects.toThrow(/Invalid.*format/);
+    await expect(extractAppleUserFromIdToken(invalidToken, MOCK_CONFIG.clientId)).rejects.toThrow(
+      /Invalid.*format/,
+    );
   });
 
   it('should throw OAuthError for JWT with invalid base64 encoding', async () => {

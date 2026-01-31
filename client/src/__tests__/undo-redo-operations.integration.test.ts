@@ -8,11 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { RecordCache, type TableMap } from '../cache/RecordCache';
-import {
-  UndoRedoStack,
-  type UndoableOperation,
-  type UndoRedoState,
-} from '../undo/UndoRedoStack';
+import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
 
 // ============================================================================
 // Test Types

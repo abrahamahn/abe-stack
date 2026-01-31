@@ -19,7 +19,13 @@
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-http --report-unused-disable-directives"
   },
-  "keywords": ["abe-stack", "http", "middleware", "router", "fastify"],
+  "keywords": [
+    "abe-stack",
+    "http",
+    "middleware",
+    "router",
+    "fastify"
+  ],
   "author": "",
   "license": "ISC",
   "repository": {
@@ -27,9 +33,14 @@
     "url": "https://github.com/abrahamahn/abe-stack.git",
     "directory": "infra/http"
   },
-  "bugs": { "url": "https://github.com/abrahamahn/abe-stack/issues" },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
   "homepage": "https://github.com/abrahamahn/abe-stack#readme",
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "dependencies": {
     "@abe-stack/contracts": "workspace:*",
@@ -39,6 +50,8 @@
     "fastify": ">=5.0.0"
   },
   "peerDependenciesMeta": {
-    "fastify": { "optional": true }
+    "fastify": {
+      "optional": true
+    }
   }
 }

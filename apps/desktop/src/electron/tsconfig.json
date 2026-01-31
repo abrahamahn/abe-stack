@@ -12,11 +12,6 @@
     "declarationMap": true,
     "tsBuildInfoFile": "../../../node_modules/.cache/typescript/tsconfig.electron.tsbuildinfo"
   },
-  "include": [
-    "*.ts",
-    "ipc/**/*.ts",
-    "types/**/*.ts",
-    "utils/**/*.ts"
-  ],
+  "include": ["*.ts", "ipc/**/*.ts", "types/**/*.ts", "utils/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts", "**/__tests__/**"]
 }

@@ -15,11 +15,11 @@
 import { AccountLockedError, InvalidCredentialsError } from '@abe-stack/core';
 import { authenticateUser, refreshUserTokens, verifyEmail } from './service';
 import {
-    applyProgressiveDelay,
-    getAccountLockoutStatus,
-    getProgressiveDelay,
-    isAccountLocked,
-    logLoginAttempt,
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  getProgressiveDelay,
+  isAccountLocked,
+  logLoginAttempt,
 } from './security';
 import { withTransaction } from '@abe-stack/db';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -309,7 +309,9 @@ describe('Account Lockout Expiration', () => {
     // First attempt: account is locked
     vi.mocked(isAccountLocked).mockResolvedValueOnce(true);
 
-    await expect(authenticateUser(db, repos, TEST_CONFIG, email, password, logger)).rejects.toMatchObject({
+    await expect(
+      authenticateUser(db, repos, TEST_CONFIG, email, password, logger),
+    ).rejects.toMatchObject({
       name: 'AccountLockedError',
     });
 
@@ -346,7 +348,9 @@ describe('Account Lockout Expiration', () => {
     // Advance time by half the lockout duration (15 minutes)
     vi.advanceTimersByTime(15 * 60 * 1000);
 
-    await expect(authenticateUser(db, repos, TEST_CONFIG, email, password, logger)).rejects.toMatchObject({
+    await expect(
+      authenticateUser(db, repos, TEST_CONFIG, email, password, logger),
+    ).rejects.toMatchObject({
       name: 'AccountLockedError',
     });
 

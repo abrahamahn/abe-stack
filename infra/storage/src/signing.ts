@@ -77,7 +77,12 @@ export function parseSignedUrl(url: string, secret: string): SignedUrlData | nul
     }
 
     const [, encodedFileId, encodedFilename] = match;
-    if (encodedFileId == null || encodedFileId === '' || encodedFilename == null || encodedFilename === '') {
+    if (
+      encodedFileId == null ||
+      encodedFileId === '' ||
+      encodedFilename == null ||
+      encodedFilename === ''
+    ) {
       return null;
     }
 
@@ -88,7 +93,13 @@ export function parseSignedUrl(url: string, secret: string): SignedUrlData | nul
     const expirationStr = urlObj.searchParams.get('expiration');
     const method = urlObj.searchParams.get('method') as 'get' | 'put' | null;
 
-    if (signature == null || signature === '' || expirationStr == null || expirationStr === '' || method == null) {
+    if (
+      signature == null ||
+      signature === '' ||
+      expirationStr == null ||
+      expirationStr === '' ||
+      method == null
+    ) {
       return null;
     }
 

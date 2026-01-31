@@ -122,7 +122,8 @@ export const OAuthButtons = ({
           </OAuthButton>
         ) : (
           (providers as OAuthProviderLocal[]).map((provider: OAuthProviderLocal) => {
-            const providerConfig: { label: string; icon: () => ReactElement } = PROVIDER_CONFIG[provider];
+            const providerConfig: { label: string; icon: () => ReactElement } =
+              PROVIDER_CONFIG[provider];
             const { label, icon: IconComponent } = providerConfig;
             return (
               <OAuthButton

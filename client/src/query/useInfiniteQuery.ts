@@ -303,16 +303,7 @@ export function useInfiniteQuery<
     } finally {
       isFetchingRef.current = false;
     }
-  }, [
-    enabled,
-    queryKeyHash,
-    fetchPage,
-    initialPageParam,
-    staleTime,
-    onSuccess,
-    onError,
-    cache,
-  ]);
+  }, [enabled, queryKeyHash, fetchPage, initialPageParam, staleTime, onSuccess, onError, cache]);
 
   // Fetch next page (use queryKeyRef.current to avoid dependency on array reference)
   const fetchNextPage = useCallback(async (): Promise<void> => {

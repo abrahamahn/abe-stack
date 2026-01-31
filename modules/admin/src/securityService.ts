@@ -7,28 +7,28 @@
  */
 
 import {
-    SECURITY_EVENTS_TABLE,
-    SECURITY_EVENT_COLUMNS,
-    and,
-    eq,
-    gte,
-    ilike,
-    lte,
-    select,
-    selectCount,
-    toCamelCase,
-    toCamelCaseArray,
-    type DbClient,
-    type SecurityEvent as DbSecurityEvent,
-    type SqlFragment,
+  SECURITY_EVENTS_TABLE,
+  SECURITY_EVENT_COLUMNS,
+  and,
+  eq,
+  gte,
+  ilike,
+  lte,
+  select,
+  selectCount,
+  toCamelCase,
+  toCamelCaseArray,
+  type DbClient,
+  type SecurityEvent as DbSecurityEvent,
+  type SqlFragment,
 } from '@abe-stack/db';
 
 import type {
-    PaginationOptions,
-    SecurityEvent,
-    SecurityEventsFilter,
-    SecurityEventsListResponse,
-    SecurityMetrics,
+  PaginationOptions,
+  SecurityEvent,
+  SecurityEventsFilter,
+  SecurityEventsListResponse,
+  SecurityMetrics,
 } from '@abe-stack/core';
 
 // ============================================================================
@@ -58,7 +58,8 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
     severity: event.severity,
     ipAddress: event.ipAddress,
     userAgent: event.userAgent,
-    metadata: event.metadata !== null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
+    metadata:
+      event.metadata !== null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
     createdAt: event.createdAt.toISOString(),
   };
 }
@@ -231,7 +232,10 @@ export async function getSecurityMetrics(
       .toSql(),
   );
 
-  interface EventInfo { eventType: string; severity: string }
+  interface EventInfo {
+    eventType: string;
+    severity: string;
+  }
   const events: EventInfo[] = rows.map((row: Record<string, unknown>) => ({
     eventType: row['event_type'] as string,
     severity: row['severity'] as string,
@@ -244,9 +248,15 @@ export async function getSecurityMetrics(
   const mediumEvents = events.filter((e: EventInfo) => e.severity === 'medium').length;
   const lowEvents = events.filter((e: EventInfo) => e.severity === 'low').length;
 
-  const tokenReuseCount = events.filter((e: EventInfo) => e.eventType === 'token_reuse_detected').length;
-  const accountLockedCount = events.filter((e: EventInfo) => e.eventType === 'account_locked').length;
-  const suspiciousLoginCount = events.filter((e: EventInfo) => e.eventType === 'suspicious_login').length;
+  const tokenReuseCount = events.filter(
+    (e: EventInfo) => e.eventType === 'token_reuse_detected',
+  ).length;
+  const accountLockedCount = events.filter(
+    (e: EventInfo) => e.eventType === 'account_locked',
+  ).length;
+  const suspiciousLoginCount = events.filter(
+    (e: EventInfo) => e.eventType === 'suspicious_login',
+  ).length;
 
   // Count by event type
   const eventsByType: Record<string, number> = {};

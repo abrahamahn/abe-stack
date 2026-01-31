@@ -94,7 +94,15 @@ describe('Auth Schema - Refresh Token Family Columns', () => {
   });
 
   test('should have all required columns', () => {
-    const requiredColumns = ['id', 'userId', 'ipAddress', 'userAgent', 'createdAt', 'revokedAt', 'revokeReason'];
+    const requiredColumns = [
+      'id',
+      'userId',
+      'ipAddress',
+      'userAgent',
+      'createdAt',
+      'revokedAt',
+      'revokeReason',
+    ];
     const actualColumns = Object.keys(REFRESH_TOKEN_FAMILY_COLUMNS);
 
     expect(actualColumns).toEqual(requiredColumns);
@@ -148,7 +156,15 @@ describe('Auth Schema - Login Attempt Columns', () => {
   });
 
   test('should have all required columns', () => {
-    const requiredColumns = ['id', 'email', 'ipAddress', 'userAgent', 'success', 'failureReason', 'createdAt'];
+    const requiredColumns = [
+      'id',
+      'email',
+      'ipAddress',
+      'userAgent',
+      'success',
+      'failureReason',
+      'createdAt',
+    ];
     const actualColumns = Object.keys(LOGIN_ATTEMPT_COLUMNS);
 
     expect(actualColumns).toEqual(requiredColumns);
@@ -239,7 +255,9 @@ describe('Auth Schema - Email Verification Token Columns', () => {
 
   test('should have same structure as password reset token columns', () => {
     // Both email verification and password reset tokens should have identical structure
-    expect(Object.keys(EMAIL_VERIFICATION_TOKEN_COLUMNS)).toEqual(Object.keys(PASSWORD_RESET_TOKEN_COLUMNS));
+    expect(Object.keys(EMAIL_VERIFICATION_TOKEN_COLUMNS)).toEqual(
+      Object.keys(PASSWORD_RESET_TOKEN_COLUMNS),
+    );
   });
 });
 
@@ -267,7 +285,17 @@ describe('Auth Schema - Security Event Columns', () => {
   });
 
   test('should have all required columns', () => {
-    const requiredColumns = ['id', 'userId', 'email', 'eventType', 'severity', 'ipAddress', 'userAgent', 'metadata', 'createdAt'];
+    const requiredColumns = [
+      'id',
+      'userId',
+      'email',
+      'eventType',
+      'severity',
+      'ipAddress',
+      'userAgent',
+      'metadata',
+      'createdAt',
+    ];
     const actualColumns = Object.keys(SECURITY_EVENT_COLUMNS);
 
     expect(actualColumns).toEqual(requiredColumns);

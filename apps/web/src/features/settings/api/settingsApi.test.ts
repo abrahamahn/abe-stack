@@ -14,7 +14,6 @@
 import { NetworkError } from '@abe-stack/client';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-
 import { createSettingsApi } from './settingsApi';
 
 import type { SettingsApiConfig } from './settingsApi';
@@ -65,9 +64,7 @@ describe('createSettingsApi', () => {
 
     it('should strip trailing slashes from baseUrl', async () => {
       config.baseUrl = 'https://api.example.com///';
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ success: true }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -92,9 +89,7 @@ describe('createSettingsApi', () => {
         fetchImpl: mockFetch as typeof fetch,
       };
 
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(configWithoutToken);
       await api.listSessions();
@@ -222,10 +217,9 @@ describe('createSettingsApi', () => {
       };
 
       mockFetch.mockResolvedValue(
-        new Response(
-          JSON.stringify({ message: 'Password too weak', code: 'WEAK_PASSWORD' }),
-          { status: 400 },
-        ),
+        new Response(JSON.stringify({ message: 'Password too weak', code: 'WEAK_PASSWORD' }), {
+          status: 400,
+        }),
       );
 
       const api = createSettingsApi(config);
@@ -291,10 +285,9 @@ describe('createSettingsApi', () => {
     it('should handle invalid file type', async () => {
       const mockFile = new File(['content'], 'document.pdf', { type: 'application/pdf' });
       mockFetch.mockResolvedValue(
-        new Response(
-          JSON.stringify({ message: 'Invalid file type', code: 'INVALID_FILE_TYPE' }),
-          { status: 400 },
-        ),
+        new Response(JSON.stringify({ message: 'Invalid file type', code: 'INVALID_FILE_TYPE' }), {
+          status: 400,
+        }),
       );
 
       const api = createSettingsApi(config);
@@ -409,9 +402,7 @@ describe('createSettingsApi', () => {
     });
 
     it('should include authorization header for listing sessions', async () => {
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -522,9 +513,7 @@ describe('createSettingsApi', () => {
 
       const api = createSettingsApi(config);
       await expect(api.listSessions()).rejects.toThrow(NetworkError);
-      await expect(api.listSessions()).rejects.toThrow(
-        'Failed to fetch GET /users/me/sessions',
-      );
+      await expect(api.listSessions()).rejects.toThrow('Failed to fetch GET /users/me/sessions');
     });
 
     it('should handle non-Error fetch rejections', async () => {
@@ -621,9 +610,7 @@ describe('createSettingsApi', () => {
   describe('authentication', () => {
     it('should include Bearer token when token is available', async () => {
       mockToken = 'valid-token-456';
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -634,9 +621,7 @@ describe('createSettingsApi', () => {
 
     it('should not include Authorization header when token is null', async () => {
       mockToken = null;
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -647,9 +632,7 @@ describe('createSettingsApi', () => {
 
     it('should not include Authorization header when token is empty string', async () => {
       config.getToken = () => '';
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -660,9 +643,7 @@ describe('createSettingsApi', () => {
 
     it('should not include Authorization header when token is undefined', async () => {
       config.getToken = () => undefined;
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
@@ -709,9 +690,7 @@ describe('createSettingsApi', () => {
 
     it('should handle special characters in session ID', async () => {
       const sessionId = 'session-with-special-chars-!@#$%';
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ success: true }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.revokeSession(sessionId);
@@ -723,9 +702,7 @@ describe('createSettingsApi', () => {
     });
 
     it('should always include credentials: include', async () => {
-      mockFetch.mockResolvedValue(
-        new Response(JSON.stringify({ sessions: [] }), { status: 200 }),
-      );
+      mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();

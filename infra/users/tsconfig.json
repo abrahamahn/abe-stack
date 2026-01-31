@@ -10,8 +10,8 @@
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
     "paths": {
-      "@abe-stack/core": ["../../shared/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../shared/core/src/*"],
+      "@abe-stack/core": ["../../core/src/index.ts"],
+      "@abe-stack/core/*": ["../../core/src/*"],
       "@abe-stack/db": ["../../infra/db/src/index.ts"],
       "@abe-stack/db/*": ["../../infra/db/src/*"],
       "@abe-stack/http": ["../../infra/http/src/index.ts"],
@@ -25,7 +25,7 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"],
   "references": [
-    { "path": "../../shared/core" },
+    { "path": "../../core" },
     { "path": "../../infra/db" },
     { "path": "../../infra/http" },
     { "path": "../../modules/auth" },

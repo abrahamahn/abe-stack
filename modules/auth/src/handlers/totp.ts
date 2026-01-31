@@ -13,13 +13,13 @@ import { disableTotp, enableTotp, getTotpStatus, setupTotp } from '../totp';
 import { createErrorMapperLogger } from '../types';
 
 import type { AppContext, RequestWithCookies } from '../types';
-import type { HttpErrorResponse } from '@abe-stack/core';
 import type {
   TotpSetupResponse,
   TotpStatusResponse,
   TotpVerifyRequest,
   TotpVerifyResponse,
 } from '@abe-stack/contracts';
+import type { HttpErrorResponse } from '@abe-stack/core';
 
 /**
  * Handle TOTP setup — generate secret and backup codes.

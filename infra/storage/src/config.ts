@@ -48,7 +48,10 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
 
   const config: LocalStorageConfig = {
     provider: 'local',
-    rootPath: env.STORAGE_ROOT_PATH != null && env.STORAGE_ROOT_PATH !== '' ? resolve(process.cwd(), env.STORAGE_ROOT_PATH) : defaultPath,
+    rootPath:
+      env.STORAGE_ROOT_PATH != null && env.STORAGE_ROOT_PATH !== ''
+        ? resolve(process.cwd(), env.STORAGE_ROOT_PATH)
+        : defaultPath,
   };
   // Public URL for serving files (e.g., http://localhost:8080/uploads)
   if (env.STORAGE_PUBLIC_BASE_URL !== undefined) {

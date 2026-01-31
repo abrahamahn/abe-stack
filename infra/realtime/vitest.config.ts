@@ -7,9 +7,9 @@ export default defineConfig({
     alias: {
       '@abe-stack/core/infrastructure/pubsub': path.resolve(
         __dirname,
-        '../core/src/infrastructure/pubsub/index.ts',
+        '../../core/src/infrastructure/pubsub/index.ts',
       ),
-      '@abe-stack/core': path.resolve(__dirname, '../core/src/index.ts'),
+      '@abe-stack/core': path.resolve(__dirname, '../../core/src/index.ts'),
       '@abe-stack/db': path.resolve(__dirname, '../db/src/index.ts'),
       '@abe-stack/http': path.resolve(__dirname, '../http/src/index.ts'),
     },

@@ -275,7 +275,8 @@ describe('main.tsx', () => {
                     <ul className="list-disc ml-6 mt-2 space-y-1">
                       <li>
                         <Text as="span">
-                          Shared UI from <code className="bg-subtle px-1 rounded">@abe-stack/ui</code>
+                          Shared UI from{' '}
+                          <code className="bg-subtle px-1 rounded">@abe-stack/ui</code>
                         </Text>
                       </li>
                     </ul>
@@ -340,7 +341,9 @@ describe('main.tsx', () => {
           expect(screen.getByText('Running in Electron')).toBeInTheDocument();
         });
 
-        expect(screen.getByText('Access to native desktop features available!')).toBeInTheDocument();
+        expect(
+          screen.getByText('Access to native desktop features available!'),
+        ).toBeInTheDocument();
 
         root.unmount();
       }

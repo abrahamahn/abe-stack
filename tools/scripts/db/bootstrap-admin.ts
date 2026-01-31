@@ -21,7 +21,14 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { buildConnectionString, createDbClient, eq, insert, select, USERS_TABLE } from '@abe-stack/db';
+import {
+  buildConnectionString,
+  createDbClient,
+  eq,
+  insert,
+  select,
+  USERS_TABLE,
+} from '@abe-stack/db';
 
 import { hashPassword } from '@abe-stack/auth';
 
@@ -64,9 +71,9 @@ function generateSecurePassword(length = 24): string {
  */
 export async function bootstrapAdmin(): Promise<BootstrapResult> {
   const envEmail = process.env['ADMIN_EMAIL'];
-  const email = (envEmail !== undefined && envEmail !== '') ? envEmail : 'admin@localhost';
+  const email = envEmail !== undefined && envEmail !== '' ? envEmail : 'admin@localhost';
   const envName = process.env['ADMIN_NAME'];
-  const name = (envName !== undefined && envName !== '') ? envName : 'Administrator';
+  const name = envName !== undefined && envName !== '' ? envName : 'Administrator';
 
   console.log('🔐 Production Admin Bootstrap\n');
   console.log('Creating initial admin user...\n');

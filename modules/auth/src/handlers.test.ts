@@ -131,11 +131,27 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
-      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify your email',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Registration attempt',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
+      passwordReset: vi.fn(() => ({
+        subject: 'Reset your password',
+        text: 'reset',
+        html: '<p>reset</p>',
+      })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
-      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+      accountLocked: vi.fn(() => ({
+        subject: 'Account locked',
+        text: 'locked',
+        html: '<p>locked</p>',
+      })),
     },
     config: {
       auth: {
@@ -290,11 +306,7 @@ describe('handleLogin', () => {
       token: 'access-token',
       user: mockResult.user,
     });
-    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
-      reply,
-      'refresh-token',
-      ctx.config.auth,
-    );
+    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
     expect(mockAuthenticateUser).toHaveBeenCalledWith(
       ctx.db,
       ctx.repos,
@@ -634,11 +646,7 @@ describe('handleVerifyEmail', () => {
       ctx.config.auth,
       'verify-token',
     );
-    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
-      reply,
-      'refresh-token',
-      ctx.config.auth,
-    );
+    expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
   });
 
   test('should return bad request for invalid token', async () => {

@@ -5,18 +5,7 @@
  * Data access layer for magic link authentication tokens.
  */
 
-import {
-  and,
-  deleteFrom,
-  eq,
-  gt,
-  insert,
-  isNull,
-  lt,
-  raw,
-  select,
-  update,
-} from '../builder/index';
+import { and, deleteFrom, eq, gt, insert, isNull, lt, raw, select, update } from '../builder/index';
 import {
   MAGIC_LINK_TOKEN_COLUMNS,
   MAGIC_LINK_TOKENS_TABLE,

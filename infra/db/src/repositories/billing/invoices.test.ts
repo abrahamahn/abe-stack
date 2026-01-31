@@ -449,9 +449,7 @@ describe('createInvoiceRepository', () => {
       });
 
       it('should handle exactly limit items (no more pages)', async () => {
-        const items = Array.from({ length: 20 }, (_, i) =>
-          createMockDbRow({ id: `inv-${i}` }),
-        );
+        const items = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${i}` }));
         vi.mocked(mockDb.query).mockResolvedValue(items);
 
         const repo = createInvoiceRepository(mockDb);
@@ -532,8 +530,6 @@ describe('createInvoiceRepository', () => {
         periodStart: new Date('2024-02-01T00:00:00Z'),
         periodEnd: new Date('2024-03-01T00:00:00Z'),
         subscriptionId: 'sub-789',
-        
-        
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(
@@ -655,8 +651,6 @@ describe('createInvoiceRepository', () => {
         status: 'void',
         amountDue: 0,
         amountPaid: 0,
-        
-        
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(

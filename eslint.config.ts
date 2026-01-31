@@ -1,4 +1,3 @@
-
 import { includeIgnoreFile } from '@eslint/compat';
 import type { Linter } from 'eslint';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
@@ -101,10 +100,10 @@ export default [
     },
   },
   {
-    files: ['shared/core/**/*.{ts,tsx,cts,mts}'],
+    files: ['core/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./shared/core/tsconfig.json'],
+        project: ['./core/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -146,10 +145,10 @@ export default [
     },
   },
   {
-    files: ['shared/ui/**/*.{ts,tsx,cts,mts}'],
+    files: ['client/ui/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./shared/ui/tsconfig.json'],
+        project: ['./client/ui/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -406,7 +405,16 @@ export default [
       'import-x/order': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type',
+          ],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
@@ -481,7 +489,7 @@ export default [
   },
   {
     // Allow console in logger implementations and console-based dev services
-    files: ['shared/core/src/config/*'],
+    files: ['core/src/config/*'],
     rules: {
       'no-console': 'off',
     },
@@ -507,7 +515,6 @@ export default [
 
       // Relax other test-specific strictness
       '@typescript-eslint/no-unnecessary-condition': 'off',
-
 
       // KEEP STRICT: You MUST handle promises in tests
       '@typescript-eslint/no-floating-promises': 'error',

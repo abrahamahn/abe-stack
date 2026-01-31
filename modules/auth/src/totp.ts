@@ -10,7 +10,7 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { eq, update, type DbClient } from '@abe-stack/db';
+import { type DbClient } from '@abe-stack/db';
 import * as OTPAuth from 'otpauth';
 
 import { hashPassword, verifyPasswordSafe } from './utils';

@@ -360,7 +360,7 @@ export async function resolveConnectionStringWithFallback(
 /** Database client type (RawDb from @abe-stack/db) */
 export type DbClient = RawDb;
 
-type GlobalWithDb = typeof globalThis & { rawDb?: RawDb; };
+type GlobalWithDb = typeof globalThis & { rawDb?: RawDb };
 
 /**
  * Create a raw SQL database client (singleton in development for HMR)

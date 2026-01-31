@@ -233,7 +233,13 @@ describe('Push Subscriptions Schema', () => {
     });
 
     it('should support all valid types in array', () => {
-      const types: NotificationType[] = ['system', 'security', 'marketing', 'social', 'transactional'];
+      const types: NotificationType[] = [
+        'system',
+        'security',
+        'marketing',
+        'social',
+        'transactional',
+      ];
 
       expect(types).toHaveLength(5);
       expect(types).toContain('system');

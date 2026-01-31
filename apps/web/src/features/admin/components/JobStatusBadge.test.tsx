@@ -55,11 +55,14 @@ describe('JobStatusBadge', () => {
       { status: 'cancelled', expectedLabel: 'Cancelled' },
     ];
 
-    it.each(statusTests)('should display correct label for $status', ({ status, expectedLabel }) => {
-      render(<JobStatusBadge status={status} />);
+    it.each(statusTests)(
+      'should display correct label for $status',
+      ({ status, expectedLabel }) => {
+        render(<JobStatusBadge status={status} />);
 
-      expect(screen.getByText(expectedLabel)).toBeInTheDocument();
-    });
+        expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+      },
+    );
   });
 
   describe('badge component integration', () => {

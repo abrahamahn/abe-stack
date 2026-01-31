@@ -263,11 +263,11 @@ function main(): void {
   const packages: Record<string, { name: string; distPath: string }> = {
     ui: {
       name: '@abe-stack/ui',
-      distPath: path.join(ROOT_DIR, 'shared/ui/dist'),
+      distPath: path.join(ROOT_DIR, 'client/ui/dist'),
     },
     core: {
       name: '@abe-stack/core',
-      distPath: path.join(ROOT_DIR, 'shared/core/dist'),
+      distPath: path.join(ROOT_DIR, 'core/dist'),
     },
     client: {
       name: '@abe-stack/client',

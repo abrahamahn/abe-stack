@@ -27,7 +27,7 @@ vi.mock('@abe-stack/ui', () => ({
   Heading: ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>,
   Tabs: ({ items }: { items: Array<{ id: string; label: string; content: React.ReactNode }> }) => (
     <div data-testid="tabs">
-      {items.map(item => (
+      {items.map((item) => (
         <div key={item.id} data-testid={`tab-${item.id}`}>
           {item.label}
           {item.content}

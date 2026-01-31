@@ -59,11 +59,27 @@ describe('Email Verification Handlers', () => {
     },
     email: {},
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
-      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify your email',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Registration attempt',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
+      passwordReset: vi.fn(() => ({
+        subject: 'Reset your password',
+        text: 'reset',
+        html: '<p>reset</p>',
+      })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
-      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+      accountLocked: vi.fn(() => ({
+        subject: 'Account locked',
+        text: 'locked',
+        html: '<p>locked</p>',
+      })),
     },
     config: {
       auth: {
@@ -330,7 +346,8 @@ describe('Email Verification Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual({
-          message: 'Verification email sent. Please check your inbox and click the confirmation link.',
+          message:
+            'Verification email sent. Please check your inbox and click the confirmation link.',
         });
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
@@ -351,7 +368,8 @@ describe('Email Verification Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual({
-          message: 'Verification email sent. Please check your inbox and click the confirmation link.',
+          message:
+            'Verification email sent. Please check your inbox and click the confirmation link.',
         });
       });
 

@@ -699,8 +699,7 @@ describe('BillingService interface', () => {
       cancelSubscription: async (_subscriptionId: string, _immediately?: boolean) =>
         Promise.resolve(),
       resumeSubscription: async (_subscriptionId: string) => Promise.resolve(),
-      updateSubscription: async (_subscriptionId: string, _newPriceId: string) =>
-        Promise.resolve(),
+      updateSubscription: async (_subscriptionId: string, _newPriceId: string) => Promise.resolve(),
       getSubscription: async (_subscriptionId: string) =>
         Promise.resolve({
           id: 'sub_123',

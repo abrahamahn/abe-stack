@@ -193,9 +193,7 @@ describe('createAdminBillingClient', () => {
 
       const client = createClient('admin-token');
       await expect(client.listPlans()).rejects.toThrow(NetworkError);
-      await expect(client.listPlans()).rejects.toThrow(
-        'Failed to fetch GET /admin/billing/plans',
-      );
+      await expect(client.listPlans()).rejects.toThrow('Failed to fetch GET /admin/billing/plans');
     });
 
     it('should handle non-Error rejection', async () => {
@@ -440,9 +438,7 @@ describe('createAdminBillingClient', () => {
       });
 
       const client = createClient('admin-token');
-      await expect(client.updatePlan('nonexistent', updateRequest)).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(client.updatePlan('nonexistent', updateRequest)).rejects.toThrow(NotFoundError);
     });
   });
 

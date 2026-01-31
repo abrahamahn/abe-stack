@@ -423,7 +423,10 @@ function deserializeSort<T>(sortStr: string): SortConfig<T>[] {
     const sortOrder = order === 'desc' ? SORT_ORDER : SORT_ORDER;
     const result = {
       field: field as keyof T,
-      order: order === 'desc' ? (sortOrder as { DESC: string }).DESC : (sortOrder as { ASC: string }).ASC,
+      order:
+        order === 'desc'
+          ? (sortOrder as { DESC: string }).DESC
+          : (sortOrder as { ASC: string }).ASC,
     };
     return result as unknown as SortConfig<T>;
   });

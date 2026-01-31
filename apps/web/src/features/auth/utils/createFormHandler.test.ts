@@ -5,7 +5,6 @@ import { createFormHandler } from './createFormHandler';
 
 import type { Mock } from 'vitest';
 
-
 describe('createFormHandler', () => {
   let mockSubmitFn: Mock;
   let mockSetErrors: Mock;
@@ -145,7 +144,9 @@ describe('createFormHandler', () => {
     mockSubmitFn.mockImplementation(
       (data: { email: string }) =>
         new Promise((resolve) => {
-          setTimeout(() => { resolve({ success: true, data }); }, 10);
+          setTimeout(() => {
+            resolve({ success: true, data });
+          }, 10);
         }),
     );
 

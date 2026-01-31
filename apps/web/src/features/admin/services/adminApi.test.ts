@@ -17,9 +17,7 @@ describe('createAdminApiClient', () => {
 
   it('should handle security event operations', async () => {
     const mockFetch = vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify({ events: [], total: 0 }), { status: 200 })
-      )
+      Promise.resolve(new Response(JSON.stringify({ events: [], total: 0 }), { status: 200 })),
     );
     const api = createAdminApiClient({
       baseUrl: 'https://api.example.com',

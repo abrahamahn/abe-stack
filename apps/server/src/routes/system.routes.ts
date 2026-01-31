@@ -28,14 +28,22 @@ function asAppContext(ctx: HandlerContext): AppContext {
 }
 
 /** Typed wrapper for public/protected route handler parameters */
-type H = (ctx: HandlerContext, data: unknown, req: FastifyRequest, reply: FastifyReply) => Promise<RouteResult>;
+type H = (
+  ctx: HandlerContext,
+  data: unknown,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) => Promise<RouteResult>;
 
 const root: H = (ctx, data, req, reply) => handleRoot(asAppContext(ctx), data, req, reply);
 const apiInfo: H = (ctx, data, req, reply) => handleApiInfo(asAppContext(ctx), data, req, reply);
 const health: H = (ctx, data, req, reply) => handleHealth(asAppContext(ctx), data, req, reply);
-const systemStatus: H = (ctx, data, req, reply) => handleSystemStatus(asAppContext(ctx), data, req, reply);
-const listModules: H = (ctx, data, req, reply) => handleListModules(asAppContext(ctx), data, req, reply);
-const listRoutes: H = (ctx, data, req, reply) => handleListRoutes(asAppContext(ctx), data, req, reply);
+const systemStatus: H = (ctx, data, req, reply) =>
+  handleSystemStatus(asAppContext(ctx), data, req, reply);
+const listModules: H = (ctx, data, req, reply) =>
+  handleListModules(asAppContext(ctx), data, req, reply);
+const listRoutes: H = (ctx, data, req, reply) =>
+  handleListRoutes(asAppContext(ctx), data, req, reply);
 const live: H = (ctx, data, req, reply) => handleLive(asAppContext(ctx), data, req, reply);
 
 export const systemRoutes = createRouteMap([

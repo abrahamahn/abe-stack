@@ -373,7 +373,17 @@ describe('registerUser', () => {
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
 
       await expect(
-        registerUser(db, repos, emailService, templates, config, email, password, undefined, baseUrl),
+        registerUser(
+          db,
+          repos,
+          emailService,
+          templates,
+          config,
+          email,
+          password,
+          undefined,
+          baseUrl,
+        ),
       ).rejects.toMatchObject({
         name: 'EmailSendError',
       });
@@ -389,9 +399,9 @@ describe('registerUser', () => {
       vi.mocked(toCamelCase).mockReturnValue(createMockUser({ email, emailVerified: false }));
       vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email }]);
 
-      await expect(registerUser(db, repos, emailService, templates, config, email, password)).rejects.toThrow(
-        'baseUrl is required',
-      );
+      await expect(
+        registerUser(db, repos, emailService, templates, config, email, password),
+      ).rejects.toThrow('baseUrl is required');
     });
   });
 
@@ -403,7 +413,15 @@ describe('registerUser', () => {
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
 
-      const result = await registerUser(db, repos, emailService, templates, config, email, password);
+      const result = await registerUser(
+        db,
+        repos,
+        emailService,
+        templates,
+        config,
+        email,
+        password,
+      );
 
       expect(result).toEqual({
         status: 'pending_verification',
@@ -426,7 +444,15 @@ describe('registerUser', () => {
       vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
 
-      const result = await registerUser(db, repos, emailService, templates, config, email, password);
+      const result = await registerUser(
+        db,
+        repos,
+        emailService,
+        templates,
+        config,
+        email,
+        password,
+      );
 
       expect(result).toEqual({
         status: 'pending_verification',
@@ -608,7 +634,9 @@ describe('authenticateUser', () => {
         lockedUntil: undefined,
       });
 
-      await expect(authenticateUser(db, repos, config, email, password, logger)).rejects.toMatchObject({
+      await expect(
+        authenticateUser(db, repos, config, email, password, logger),
+      ).rejects.toMatchObject({
         name: 'InvalidCredentialsError',
       });
       expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -635,7 +663,9 @@ describe('authenticateUser', () => {
         lockedUntil: undefined,
       });
 
-      await expect(authenticateUser(db, repos, config, email, password, logger)).rejects.toMatchObject({
+      await expect(
+        authenticateUser(db, repos, config, email, password, logger),
+      ).rejects.toMatchObject({
         name: 'InvalidCredentialsError',
       });
       expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -657,7 +687,9 @@ describe('authenticateUser', () => {
       vi.mocked(repos.users.findByEmail).mockResolvedValue(user);
       vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
 
-      await expect(authenticateUser(db, repos, config, email, password, logger)).rejects.toMatchObject({
+      await expect(
+        authenticateUser(db, repos, config, email, password, logger),
+      ).rejects.toMatchObject({
         name: 'EmailNotVerifiedError',
       });
       expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -684,7 +716,9 @@ describe('authenticateUser', () => {
         lockedUntil: new Date(),
       });
 
-      await expect(authenticateUser(db, repos, config, email, password, logger)).rejects.toMatchObject({
+      await expect(
+        authenticateUser(db, repos, config, email, password, logger),
+      ).rejects.toMatchObject({
         name: 'InvalidCredentialsError',
       });
       expect(logAccountLockedEvent).toHaveBeenCalledWith(db, email, 5, undefined, undefined);
@@ -874,7 +908,9 @@ describe('requestPasswordReset', () => {
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
     vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
 
-    await expect(requestPasswordReset(db, repos, emailService, templates, email, baseUrl)).rejects.toMatchObject({
+    await expect(
+      requestPasswordReset(db, repos, emailService, templates, email, baseUrl),
+    ).rejects.toMatchObject({
       name: 'EmailSendError',
     });
   });
@@ -1051,7 +1087,9 @@ describe('verifyEmail', () => {
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
     vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(null);
 
-    await expect(verifyEmail(db, repos, config, token)).rejects.toMatchObject({ name: 'InvalidTokenError' });
+    await expect(verifyEmail(db, repos, config, token)).rejects.toMatchObject({
+      name: 'InvalidTokenError',
+    });
   });
 });
 
@@ -1126,7 +1164,9 @@ describe('resendVerificationEmail', () => {
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
     vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
 
-    await expect(resendVerificationEmail(db, repos, emailService, templates, email, baseUrl)).rejects.toMatchObject({
+    await expect(
+      resendVerificationEmail(db, repos, emailService, templates, email, baseUrl),
+    ).rejects.toMatchObject({
       name: 'EmailSendError',
     });
   });

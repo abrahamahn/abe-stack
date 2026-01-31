@@ -122,7 +122,9 @@ describe('SecurityEventCard', () => {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       };
 
-      const { container } = render(<SecurityEventCard event={eventWithUserAgent} isLoading={false} />);
+      const { container } = render(
+        <SecurityEventCard event={eventWithUserAgent} isLoading={false} />,
+      );
 
       expect(screen.getByText('User Agent')).toBeInTheDocument();
       // Use container query to avoid nested <p> tag test error

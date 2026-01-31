@@ -29,10 +29,10 @@ DB_SSL=true
 
 ABE Stack uses Drizzle with `node-postgres` (`pg`), which maintains a client-side connection pool.
 
-| Setting              | Dev Default | Production Recommendation | Notes |
-|----------------------|-------------|---------------------------|-------|
+| Setting              | Dev Default | Production Recommendation | Notes                                                                        |
+| -------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------------- |
 | `DB_MAX_CONNECTIONS` | 10          | 20–50                     | Match to your Postgres `max_connections` minus headroom for admin/monitoring |
-| Idle timeout         | 10s         | 30s (pg default)          | Configured in `pg` pool options |
+| Idle timeout         | 10s         | 30s (pg default)          | Configured in `pg` pool options                                              |
 
 **Sizing guideline:** For a single API server instance, start with `DB_MAX_CONNECTIONS=20`. If running multiple replicas behind a load balancer, divide the total Postgres `max_connections` across instances — e.g., 100 max connections with 4 replicas = 25 per instance.
 
@@ -74,28 +74,28 @@ These settings go in `postgresql.conf` or are set via your managed database prov
 
 ### Memory
 
-| Setting               | Default | Recommendation (4GB RAM server) | Notes |
-|-----------------------|---------|----------------------------------|-------|
-| `shared_buffers`      | 128MB   | 1GB (25% of RAM)                | Main cache for hot data |
-| `effective_cache_size` | 4GB    | 3GB (75% of RAM)                | Query planner hint — not an allocation |
-| `work_mem`            | 4MB     | 16–32MB                         | Per-sort/hash operation. Multiply by `max_connections` for worst case |
-| `maintenance_work_mem`| 64MB    | 256MB                           | For VACUUM, CREATE INDEX, etc. |
+| Setting                | Default | Recommendation (4GB RAM server) | Notes                                                                 |
+| ---------------------- | ------- | ------------------------------- | --------------------------------------------------------------------- |
+| `shared_buffers`       | 128MB   | 1GB (25% of RAM)                | Main cache for hot data                                               |
+| `effective_cache_size` | 4GB     | 3GB (75% of RAM)                | Query planner hint — not an allocation                                |
+| `work_mem`             | 4MB     | 16–32MB                         | Per-sort/hash operation. Multiply by `max_connections` for worst case |
+| `maintenance_work_mem` | 64MB    | 256MB                           | For VACUUM, CREATE INDEX, etc.                                        |
 
 ### Write Performance
 
-| Setting                    | Default | Recommendation | Notes |
-|----------------------------|---------|----------------|-------|
-| `wal_buffers`              | -1      | 16MB           | Auto-tuned from `shared_buffers` in modern PG |
-| `checkpoint_completion_target` | 0.9 | 0.9            | Spread checkpoint writes |
-| `max_wal_size`             | 1GB     | 2GB            | Increase if frequent checkpoints in logs |
+| Setting                        | Default | Recommendation | Notes                                         |
+| ------------------------------ | ------- | -------------- | --------------------------------------------- |
+| `wal_buffers`                  | -1      | 16MB           | Auto-tuned from `shared_buffers` in modern PG |
+| `checkpoint_completion_target` | 0.9     | 0.9            | Spread checkpoint writes                      |
+| `max_wal_size`                 | 1GB     | 2GB            | Increase if frequent checkpoints in logs      |
 
 ### Connections
 
-| Setting            | Default | Recommendation | Notes |
-|--------------------|---------|----------------|-------|
-| `max_connections`  | 100     | 100–200        | With PgBouncer, can stay at 100 and pool externally |
-| `idle_in_transaction_session_timeout` | 0 | 30s | Kill idle-in-transaction sessions |
-| `statement_timeout` | 0      | 30s            | Prevent runaway queries |
+| Setting                               | Default | Recommendation | Notes                                               |
+| ------------------------------------- | ------- | -------------- | --------------------------------------------------- |
+| `max_connections`                     | 100     | 100–200        | With PgBouncer, can stay at 100 and pool externally |
+| `idle_in_transaction_session_timeout` | 0       | 30s            | Kill idle-in-transaction sessions                   |
+| `statement_timeout`                   | 0       | 30s            | Prevent runaway queries                             |
 
 ### Logging (for debugging)
 
@@ -173,11 +173,11 @@ For managed databases, enable the provider's automated backup feature in additio
 
 ABE Stack checks database connectivity at multiple levels:
 
-| Endpoint            | What It Checks                          |
-|---------------------|----------------------------------------|
-| `/health`           | Basic `SELECT 1` — DB reachable       |
-| `/health/ready`     | DB connected and schema version valid  |
-| `/api/system/status`| Detailed latency and connection status |
+| Endpoint             | What It Checks                         |
+| -------------------- | -------------------------------------- |
+| `/health`            | Basic `SELECT 1` — DB reachable        |
+| `/health/ready`      | DB connected and schema version valid  |
+| `/api/system/status` | Detailed latency and connection status |
 
 Configure your monitoring to poll `/health/ready` every 30 seconds. Alert on consecutive failures.
 

@@ -14,10 +14,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from './AuthService';
-import type {
-  AuthResponse,
-  RegisterResponse,
-} from '@abe-stack/core';
+import type { AuthResponse, RegisterResponse } from '@abe-stack/core';
 import type { ClientConfig } from '../../../config';
 
 // ============================================================================
@@ -418,7 +415,9 @@ describe('AuthService', () => {
     it('should not throw when called multiple times', () => {
       authService.destroy();
 
-      expect(() => { authService.destroy(); }).not.toThrow();
+      expect(() => {
+        authService.destroy();
+      }).not.toThrow();
     });
   });
 

@@ -71,7 +71,9 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
           .where(and(eq('user_id', userId), eq('provider', provider)))
           .toSql(),
       );
-      return result !== null ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS)
+        : null;
     },
 
     async findByProviderCustomerId(
@@ -83,7 +85,9 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
           .where(and(eq('provider', provider), eq('provider_customer_id', providerCustomerId)))
           .toSql(),
       );
-      return result !== null ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS)
+        : null;
     },
 
     async findByUserId(userId: string): Promise<CustomerMapping[]> {

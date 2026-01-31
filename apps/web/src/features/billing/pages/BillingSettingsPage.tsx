@@ -191,7 +191,7 @@ export const BillingSettingsPage = (): ReactElement => {
                 onSetDefault={(pm: PaymentMethod) => {
                   void handleSetDefault(pm);
                 }}
-                removeDisabled={pm.isDefault && (hasActiveSubscription)}
+                removeDisabled={pm.isDefault && hasActiveSubscription}
               />
             ))}
           </div>

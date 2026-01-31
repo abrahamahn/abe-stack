@@ -23,11 +23,11 @@ export default mergeConfig(baseConfig, {
       },
       {
         find: /^@abe-stack\/core\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/core/src/$1'),
+        replacement: path.resolve(__dirname, '../../core/src/$1'),
       },
       {
         find: /^@abe-stack\/ui\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/ui/src/$1'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/$1'),
       },
       {
         find: /^@abe-stack\/client\/(.*)$/,
@@ -44,11 +44,11 @@ export default mergeConfig(baseConfig, {
       },
       {
         find: '@abe-stack/core',
-        replacement: path.resolve(__dirname, '../../shared/core/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../core/src/index.ts'),
       },
       {
         find: '@abe-stack/ui',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/index.ts'),
       },
       {
         find: '@abe-stack/client',
@@ -72,30 +72,30 @@ export default mergeConfig(baseConfig, {
       { find: '@pages', replacement: path.resolve(__dirname, './src/pages') },
       { find: '@settings', replacement: path.resolve(__dirname, './src/features/settings') },
       // UI package internal aliases - for tests that import UI components
-      { find: '@utils', replacement: path.resolve(__dirname, '../../shared/ui/src/utils') },
-      { find: '@elements', replacement: path.resolve(__dirname, '../../shared/ui/src/elements') },
+      { find: '@utils', replacement: path.resolve(__dirname, '../../client/ui/src/utils') },
+      { find: '@elements', replacement: path.resolve(__dirname, '../../client/ui/src/elements') },
       {
         find: '@components',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/components'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/components'),
       },
-      { find: '@hooks', replacement: path.resolve(__dirname, '../../shared/ui/src/hooks') },
-      { find: '@theme', replacement: path.resolve(__dirname, '../../shared/ui/src/theme') },
-      { find: '@layouts', replacement: path.resolve(__dirname, '../../shared/ui/src/layouts') },
+      { find: '@hooks', replacement: path.resolve(__dirname, '../../client/ui/src/hooks') },
+      { find: '@theme', replacement: path.resolve(__dirname, '../../client/ui/src/theme') },
+      { find: '@layouts', replacement: path.resolve(__dirname, '../../client/ui/src/layouts') },
       {
         find: '@providers',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/providers'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/providers'),
       },
       {
         find: '@shells',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/shells'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/layouts/shells'),
       },
       {
         find: '@layers',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/layers'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/layouts/layers'),
       },
       {
         find: '@containers',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/containers'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/layouts/containers'),
       },
     ],
   },

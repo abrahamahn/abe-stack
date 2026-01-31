@@ -10,7 +10,7 @@ export default mergeConfig(baseConfig, {
       // Handle subpath imports first
       {
         find: /^@abe-stack\/core\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/core/src/$1'),
+        replacement: path.resolve(__dirname, '../../core/src/$1'),
       },
       {
         find: /^@abe-stack\/contracts\/(.*)$/,
@@ -19,7 +19,7 @@ export default mergeConfig(baseConfig, {
       // Handle main package imports
       {
         find: '@abe-stack/core',
-        replacement: path.resolve(__dirname, '../../shared/core/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../core/src/index.ts'),
       },
       {
         find: '@abe-stack/contracts',

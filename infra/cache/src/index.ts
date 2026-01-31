@@ -36,7 +36,12 @@ export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';
 // Memoization
 // ============================================================================
 
-export { createArgIndexKeyGenerator, createObjectKeyGenerator, memoize, memoizeMethod } from './memoize';
+export {
+  createArgIndexKeyGenerator,
+  createObjectKeyGenerator,
+  memoize,
+  memoizeMethod,
+} from './memoize';
 
 // ============================================================================
 // Providers

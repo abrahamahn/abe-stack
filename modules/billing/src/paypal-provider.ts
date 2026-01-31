@@ -9,22 +9,20 @@
 import * as crypto from 'crypto';
 
 import type {
-    BillingService,
-    CheckoutParams,
-    CheckoutResult,
-    CreateProductParams,
-    CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
-    PayPalProviderConfig as PayPalConfig,
-    ProviderInvoice,
-    ProviderPaymentMethod,
-    ProviderSubscription,
-    SetupIntentResult,
+  BillingService,
+  CheckoutParams,
+  CheckoutResult,
+  CreateProductParams,
+  CreateProductResult,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  PayPalProviderConfig as PayPalConfig,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResult,
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';
-
-
 
 // ============================================================================
 // PayPal API Types
@@ -327,18 +325,25 @@ export class PayPalProvider implements BillingService {
 
     // Calculate period dates
     const now = new Date();
-    const nextBilling = (subscription.billing_info.next_billing_time !== undefined && subscription.billing_info.next_billing_time !== '')
-      ? new Date(subscription.billing_info.next_billing_time)
-      : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
+    const nextBilling =
+      subscription.billing_info.next_billing_time !== undefined &&
+      subscription.billing_info.next_billing_time !== ''
+        ? new Date(subscription.billing_info.next_billing_time)
+        : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
 
     // Calculate period start (last payment or creation)
-    const periodStart = (subscription.billing_info.last_payment?.time !== undefined && subscription.billing_info.last_payment.time !== '')
-      ? new Date(subscription.billing_info.last_payment.time)
-      : new Date(subscription.start_time);
+    const periodStart =
+      subscription.billing_info.last_payment?.time !== undefined &&
+      subscription.billing_info.last_payment.time !== ''
+        ? new Date(subscription.billing_info.last_payment.time)
+        : new Date(subscription.start_time);
 
     return {
       id: subscription.id,
-      customerId: subscription.subscriber.payer_id !== '' ? subscription.subscriber.payer_id : `paypal_${metadata['userId'] ?? 'unknown'}`,
+      customerId:
+        subscription.subscriber.payer_id !== ''
+          ? subscription.subscriber.payer_id
+          : `paypal_${metadata['userId'] ?? 'unknown'}`,
       status: mapPayPalStatus(subscription.status),
       priceId: subscription.plan_id,
       currentPeriodStart: periodStart,
@@ -443,7 +448,10 @@ export class PayPalProvider implements BillingService {
     // Step 1: Create the product
     const product = await this.request<PayPalProduct>('POST', '/v1/catalogs/products', {
       name: params.name,
-      description: (params.description !== undefined && params.description !== '') ? params.description : params.name,
+      description:
+        params.description !== undefined && params.description !== ''
+          ? params.description
+          : params.name,
       type: 'SERVICE',
       category: 'SOFTWARE',
     });
@@ -452,7 +460,10 @@ export class PayPalProvider implements BillingService {
     const plan = await this.request<PayPalPlan>('POST', '/v1/billing/plans', {
       product_id: product.id,
       name: `${params.name} - ${params.interval === 'month' ? 'Monthly' : 'Yearly'}`,
-      description: (params.description !== undefined && params.description !== '') ? params.description : params.name,
+      description:
+        params.description !== undefined && params.description !== ''
+          ? params.description
+          : params.name,
       status: 'ACTIVE',
       billing_cycles: [
         {
@@ -523,7 +534,12 @@ export class PayPalProvider implements BillingService {
       }, {});
 
       // Basic validation that required parts exist
-      if (parts['transmission_id'] === undefined || parts['transmission_id'] === '' || parts['timestamp'] === undefined || parts['timestamp'] === '') {
+      if (
+        parts['transmission_id'] === undefined ||
+        parts['transmission_id'] === '' ||
+        parts['timestamp'] === undefined ||
+        parts['timestamp'] === ''
+      ) {
         return false;
       }
 

@@ -7,7 +7,10 @@
  */
 
 export {
-    UndoRedoStack,
-    createUndoRedoStack, type OperationGroup, type UndoRedoStackOptions, type UndoRedoState, type UndoableOperation
+  UndoRedoStack,
+  createUndoRedoStack,
+  type OperationGroup,
+  type UndoRedoStackOptions,
+  type UndoRedoState,
+  type UndoableOperation,
 } from './UndoRedoStack';
-

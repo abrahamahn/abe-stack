@@ -1,9 +1,9 @@
 // infra/db/src/config/search.ts
 import type {
-    ElasticsearchProviderConfig,
-    FullEnv,
-    SqlSearchProviderConfig,
-    SqlTableConfig,
+  ElasticsearchProviderConfig,
+  FullEnv,
+  SqlSearchProviderConfig,
+  SqlTableConfig,
 } from '@abe-stack/core/config';
 
 /**
@@ -52,7 +52,12 @@ export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConf
     tls: env.ELASTICSEARCH_TLS === 'true',
   };
 
-  if ((env.ELASTICSEARCH_USERNAME != null && env.ELASTICSEARCH_USERNAME !== '') && (env.ELASTICSEARCH_PASSWORD != null && env.ELASTICSEARCH_PASSWORD !== '')) {
+  if (
+    env.ELASTICSEARCH_USERNAME != null &&
+    env.ELASTICSEARCH_USERNAME !== '' &&
+    env.ELASTICSEARCH_PASSWORD != null &&
+    env.ELASTICSEARCH_PASSWORD !== ''
+  ) {
     config.auth = {
       username: env.ELASTICSEARCH_USERNAME,
       password: env.ELASTICSEARCH_PASSWORD,

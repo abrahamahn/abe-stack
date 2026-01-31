@@ -8,8 +8,18 @@ import type { DemoMainLayoutProps } from './DemoMainLayout';
 import type { ComponentDemo, DemoPaneConfig } from '@demo/types';
 
 vi.mock('@abe-stack/ui', () => ({
-  Button: ({ children, onClick, variant }: { children: React.ReactNode; onClick?: () => void; variant?: string }) => (
-    <button onClick={onClick} data-variant={variant}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    variant,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    variant?: string;
+  }) => (
+    <button onClick={onClick} data-variant={variant}>
+      {children}
+    </button>
   ),
   CloseButton: ({ onClick }: { onClick: () => void }) => <button onClick={onClick}>X</button>,
   Heading: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,

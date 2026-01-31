@@ -122,12 +122,14 @@ function createBaseOptions(
  * Mock OAuth connection row from database
  * Token format is salt:iv:tag:encrypted (4 parts, base64 encoded)
  */
-function createMockConnection(overrides: Partial<{
-  id: string;
-  provider: string;
-  refresh_token: string | null;
-  expires_at: Date | null;
-}> = {}) {
+function createMockConnection(
+  overrides: Partial<{
+    id: string;
+    provider: string;
+    refresh_token: string | null;
+    expires_at: Date | null;
+  }> = {},
+) {
   return {
     id: 'conn-123',
     provider: 'google',
@@ -141,11 +143,13 @@ function createMockConnection(overrides: Partial<{
 /**
  * Mock successful token response from OAuth provider
  */
-function mockSuccessfulTokenResponse(overrides: Partial<{
-  access_token: string;
-  refresh_token?: string;
-  expires_in?: number;
-}> = {}) {
+function mockSuccessfulTokenResponse(
+  overrides: Partial<{
+    access_token: string;
+    refresh_token?: string;
+    expires_in?: number;
+  }> = {},
+) {
   return {
     access_token: 'new_access_token',
     refresh_token: 'new_refresh_token',
@@ -216,9 +220,7 @@ describe('refreshExpiringOAuthTokens', () => {
 
   describe('successful token refresh', () => {
     it('should refresh Google OAuth token successfully', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ provider: 'google' }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ provider: 'google' })]);
 
       vi.mocked(global.fetch).mockResolvedValue({
         ok: true,
@@ -244,9 +246,7 @@ describe('refreshExpiringOAuthTokens', () => {
     });
 
     it('should refresh GitHub OAuth token with Accept header', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ provider: 'github' }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ provider: 'github' })]);
 
       vi.mocked(global.fetch).mockResolvedValue({
         ok: true,
@@ -260,16 +260,14 @@ describe('refreshExpiringOAuthTokens', () => {
         'https://github.com/login/oauth/access_token',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Accept': 'application/json',
+            Accept: 'application/json',
           }),
         }),
       );
     });
 
     it('should update database with new tokens', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ id: 'conn-789' }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ id: 'conn-789' })]);
 
       vi.mocked(global.fetch).mockResolvedValue({
         ok: true,
@@ -342,9 +340,7 @@ describe('refreshExpiringOAuthTokens', () => {
 
   describe('error handling', () => {
     it('should handle missing provider configuration', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ provider: 'apple' }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ provider: 'apple' })]);
 
       const options = createBaseOptions({
         providerConfigs: {
@@ -363,9 +359,7 @@ describe('refreshExpiringOAuthTokens', () => {
     });
 
     it('should handle null refresh token', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ refresh_token: null }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ refresh_token: null })]);
 
       const options = createBaseOptions();
       const result = await refreshExpiringOAuthTokens(mockDb, options);
@@ -375,9 +369,7 @@ describe('refreshExpiringOAuthTokens', () => {
     });
 
     it('should handle empty refresh token', async () => {
-      vi.mocked(mockDb.query).mockResolvedValue([
-        createMockConnection({ refresh_token: '' }),
-      ]);
+      vi.mocked(mockDb.query).mockResolvedValue([createMockConnection({ refresh_token: '' })]);
 
       const options = createBaseOptions();
       const result = await refreshExpiringOAuthTokens(mockDb, options);

@@ -46,7 +46,9 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         select(OAUTH_CONNECTIONS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS)
+        : null;
     },
 
     async findByUserIdAndProvider(
@@ -58,7 +60,9 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
           .where(and(eq('user_id', userId), eq('provider', provider)))
           .toSql(),
       );
-      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS)
+        : null;
     },
 
     async findByProviderUserId(
@@ -70,7 +74,9 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
           .where(and(eq('provider', provider), eq('provider_user_id', providerUserId)))
           .toSql(),
       );
-      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS)
+        : null;
     },
 
     async findByUserId(userId: string): Promise<OAuthConnection[]> {
@@ -105,7 +111,9 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         update(OAUTH_CONNECTIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS)
+        : null;
     },
 
     async delete(id: string): Promise<boolean> {

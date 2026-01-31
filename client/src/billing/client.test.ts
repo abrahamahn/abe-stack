@@ -24,7 +24,6 @@ import type {
   UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 
-
 describe('createBillingClient', () => {
   const baseUrl = 'http://localhost:3001';
   let mockFetch: ReturnType<typeof vi.fn>;

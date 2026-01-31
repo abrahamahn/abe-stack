@@ -206,7 +206,8 @@ export const subscriptionResponseSchema: Schema<SubscriptionResponse> = createSc
     }
     const obj = data as Record<string, unknown>;
     return {
-      subscription: obj['subscription'] === null ? null : subscriptionSchema.parse(obj['subscription']),
+      subscription:
+        obj['subscription'] === null ? null : subscriptionSchema.parse(obj['subscription']),
     };
   },
 );

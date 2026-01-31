@@ -8,18 +8,18 @@ Central index for ABE Stack documentation.
 
 ## Quick Navigation
 
-| Area          | Entry Point               | Purpose                          |
-| ------------- | ------------------------- | -------------------------------- |
-| Overview      | Root `README.md`          | Project overview and quick start |
-| Quickstart    | `quickstart/README.md`    | Per-app getting started guides   |
-| Agent Guide   | `AGENTS.md`               | AI agent behavioral rules        |
-| Specs         | `specs/README.md`         | Architecture and principles      |
-| Dev Guides    | `dev/README.md`           | Workflow, testing, tooling       |
-| Reference     | `reference/README.md`     | Legacy patterns and migration    |
-| What to Build | `todo/TODO.md`            | Active tasks and priorities      |
-| Deferred      | `todo/ROADMAP.md`         | Future features (not now)        |
-| Deployment    | `deploy/README.md`        | Production deployment guides     |
-| Weekly Logs   | `log/`                    | Development changelog            |
+| Area          | Entry Point            | Purpose                          |
+| ------------- | ---------------------- | -------------------------------- |
+| Overview      | Root `README.md`       | Project overview and quick start |
+| Quickstart    | `quickstart/README.md` | Per-app getting started guides   |
+| Agent Guide   | `AGENTS.md`            | AI agent behavioral rules        |
+| Specs         | `specs/README.md`      | Architecture and principles      |
+| Dev Guides    | `dev/README.md`        | Workflow, testing, tooling       |
+| Reference     | `reference/README.md`  | Legacy patterns and migration    |
+| What to Build | `todo/TODO.md`         | Active tasks and priorities      |
+| Deferred      | `todo/ROADMAP.md`      | Future features (not now)        |
+| Deployment    | `deploy/README.md`     | Production deployment guides     |
+| Weekly Logs   | `log/`                 | Development changelog            |
 
 ---
 

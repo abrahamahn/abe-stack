@@ -6,11 +6,11 @@ Get all three apps running locally with one command.
 
 ## Prerequisites
 
-| Tool       | Version  | Check                |
-| ---------- | -------- | -------------------- |
-| Node.js    | 20+      | `node --version`     |
-| pnpm       | 10+      | `pnpm --version`     |
-| PostgreSQL | 14+      | `pg_isready`         |
+| Tool       | Version | Check            |
+| ---------- | ------- | ---------------- |
+| Node.js    | 20+     | `node --version` |
+| pnpm       | 10+     | `pnpm --version` |
+| PostgreSQL | 14+     | `pg_isready`     |
 
 **Install pnpm** (if missing):
 
@@ -74,12 +74,12 @@ pnpm dev
 
 This starts:
 
-| Service     | URL                           | Description                    |
-| ----------- | ----------------------------- | ------------------------------ |
-| Web app     | http://localhost:5173         | Vite + React frontend          |
-| API server  | http://localhost:8080         | Fastify backend                |
-| Desktop     | Electron window               | Native desktop app (optional)  |
-| Sync tools  | Background                    | Path aliases, headers, theme   |
+| Service    | URL                   | Description                   |
+| ---------- | --------------------- | ----------------------------- |
+| Web app    | http://localhost:5173 | Vite + React frontend         |
+| API server | http://localhost:8080 | Fastify backend               |
+| Desktop    | Electron window       | Native desktop app (optional) |
+| Sync tools | Background            | Path aliases, headers, theme  |
 
 ### 5. Verify
 
@@ -123,18 +123,18 @@ Runs PostgreSQL, API server, and web frontend in containers.
 
 ## Common Commands
 
-| Command              | Description                         |
-| -------------------- | ----------------------------------- |
-| `pnpm dev`           | Start all apps + sync watchers      |
-| `pnpm build`         | Full build with lint, types, tests  |
-| `pnpm test`          | Run all tests                       |
-| `pnpm lint`          | Lint all packages                   |
-| `pnpm type-check`    | TypeScript type checking            |
-| `pnpm format`        | Prettier format all files           |
-| `pnpm db:bootstrap`  | Initialize database with seed data  |
-| `pnpm db:push`       | Push Drizzle schema to PostgreSQL   |
-| `pnpm clean`         | Remove dist, .turbo, caches        |
-| `pnpm health-check`  | Project health audit                |
+| Command             | Description                        |
+| ------------------- | ---------------------------------- |
+| `pnpm dev`          | Start all apps + sync watchers     |
+| `pnpm build`        | Full build with lint, types, tests |
+| `pnpm test`         | Run all tests                      |
+| `pnpm lint`         | Lint all packages                  |
+| `pnpm type-check`   | TypeScript type checking           |
+| `pnpm format`       | Prettier format all files          |
+| `pnpm db:bootstrap` | Initialize database with seed data |
+| `pnpm db:push`      | Push Drizzle schema to PostgreSQL  |
+| `pnpm clean`        | Remove dist, .turbo, caches        |
+| `pnpm health-check` | Project health audit               |
 
 ---
 

@@ -5,28 +5,26 @@ import { asMockDb, createMockDb } from '@abe-stack/db/testing/mocks';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    createOAuthState,
-    decodeOAuthState,
-    encodeOAuthState,
-    findUserByOAuthProvider,
-    getAuthorizationUrl,
-    getConnectedProviders,
-    getProviderClient,
-    handleOAuthCallback,
-    linkOAuthAccount,
-    unlinkOAuthAccount,
+  createOAuthState,
+  decodeOAuthState,
+  encodeOAuthState,
+  findUserByOAuthProvider,
+  getAuthorizationUrl,
+  getConnectedProviders,
+  getProviderClient,
+  handleOAuthCallback,
+  linkOAuthAccount,
+  unlinkOAuthAccount,
 } from './service';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
 import type { AuthConfig } from '@abe-stack/core';
 import type {
-    OAuthConnectionRepository,
-    RefreshTokenRepository,
-    UserRepository,
+  OAuthConnectionRepository,
+  RefreshTokenRepository,
+  UserRepository,
 } from '@abe-stack/db';
 import type { DbClient, Repositories } from '@abe-stack/db';
-
-
 
 // Mock the crypto module for consistent state generation in tests
 vi.mock('node:crypto', async () => {

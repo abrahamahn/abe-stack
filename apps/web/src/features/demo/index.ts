@@ -3,7 +3,7 @@ export {
   componentCatalog,
   getAllCategories,
   getComponentsByCategory,
-  getTotalComponentCount
+  getTotalComponentCount,
 } from './catalog';
 export { DemoPage, SidePeekDemoPage } from './pages';
 export type { ComponentCategory, ComponentDemo, ComponentVariant, DemoPaneConfig } from './types';

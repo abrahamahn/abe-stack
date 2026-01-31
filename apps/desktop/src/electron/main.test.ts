@@ -140,10 +140,7 @@ describe('main', () => {
 
       // The code builds array as [rendererPortPreference, 5174, 5173, 5175]
       // where rendererPortPreference defaults to 5174, resulting in [5174, 5174, 5173, 5175]
-      expect(mocks.mockWaitForPort).toHaveBeenCalledWith(
-        [5174, 5174, 5173, 5175],
-        'localhost',
-      );
+      expect(mocks.mockWaitForPort).toHaveBeenCalledWith([5174, 5174, 5173, 5175], 'localhost');
     });
 
     it('should call window.on when window is created', async () => {

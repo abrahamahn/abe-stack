@@ -30,21 +30,23 @@ const {
   mockClearRefreshTokenCookie: vi.fn(),
   mockSendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-  mockMapErrorToResponse: vi.fn((error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
-    if (error instanceof Error) {
-      switch (error.name) {
-        case 'InvalidTokenError':
-          return { status: 401, body: { message: error.message || 'Invalid or expired token' } };
-        case 'TokenReuseError':
-          return { status: 401, body: { message: 'Token has already been used' } };
-        default:
-          logger.error(error);
-          return { status: 500, body: { message: 'Internal server error' } };
+  mockMapErrorToResponse: vi.fn(
+    (error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case 'InvalidTokenError':
+            return { status: 401, body: { message: error.message || 'Invalid or expired token' } };
+          case 'TokenReuseError':
+            return { status: 401, body: { message: 'Token has already been used' } };
+          default:
+            logger.error(error);
+            return { status: 500, body: { message: 'Internal server error' } };
+        }
       }
-    }
-    logger.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
-  }),
+      logger.error(error);
+      return { status: 500, body: { message: 'Internal server error' } };
+    },
+  ),
 }));
 
 // Mock the service module
@@ -80,11 +82,27 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
-      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify your email',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Registration attempt',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
+      passwordReset: vi.fn(() => ({
+        subject: 'Reset your password',
+        text: 'reset',
+        html: '<p>reset</p>',
+      })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
-      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+      accountLocked: vi.fn(() => ({
+        subject: 'Account locked',
+        text: 'locked',
+        html: '<p>locked</p>',
+      })),
     },
     config: {
       auth: {

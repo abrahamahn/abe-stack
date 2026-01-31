@@ -4,7 +4,13 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { protectedRoute, publicRoute, registerRouteMap } from './router';
 
-import type { HandlerContext, RouteMap, RouteResult, RouterOptions, ValidationSchema } from './types';
+import type {
+  HandlerContext,
+  RouteMap,
+  RouteResult,
+  RouterOptions,
+  ValidationSchema,
+} from './types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

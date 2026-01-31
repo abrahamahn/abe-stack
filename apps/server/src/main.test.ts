@@ -128,7 +128,7 @@ async function simulateMain(
   loadConfigFn: (env: Record<string, string | undefined>) => AppConfig,
   createAppFn: (config: AppConfig) => App,
   processEnv: Record<string, string | undefined>,
-  processHandlers: ProcessEventHandlers
+  processHandlers: ProcessEventHandlers,
 ): Promise<void> {
   try {
     // Load and validate configuration
@@ -256,7 +256,7 @@ describe('main', () => {
       await simulateMain(failingLoadConfig, mockCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed: Error: Invalid configuration')
+        expect.stringContaining('Server startup failed: Error: Invalid configuration'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
       expect(mockCreateApp).not.toHaveBeenCalled();
@@ -274,10 +274,10 @@ describe('main', () => {
       await simulateMain(failingLoadConfig, mockCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed:')
+        expect.stringContaining('Server startup failed:'),
       );
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Missing required environment variable')
+        expect.stringContaining('Missing required environment variable'),
       );
     });
   });
@@ -295,7 +295,7 @@ describe('main', () => {
       await simulateMain(mockLoadConfig, failingCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed: Error: Failed to initialize database')
+        expect.stringContaining('Server startup failed: Error: Failed to initialize database'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
       // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -317,7 +317,7 @@ describe('main', () => {
       await simulateMain(mockLoadConfig, failingCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed: Error: Port already in use')
+        expect.stringContaining('Server startup failed: Error: Port already in use'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
@@ -330,7 +330,7 @@ describe('main', () => {
       await simulateMain(mockLoadConfig, failingCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed: String error')
+        expect.stringContaining('Server startup failed: String error'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
@@ -353,7 +353,7 @@ describe('main', () => {
         // Wait for async shutdown to complete
         await vi.waitFor(() => {
           expect(mockApp.log.info).toHaveBeenCalledWith(
-            'Received SIGTERM, shutting down gracefully...'
+            'Received SIGTERM, shutting down gracefully...',
           );
         });
 
@@ -395,12 +395,8 @@ describe('main', () => {
         processHandlers.sigterm();
 
         await vi.waitFor(() => {
-           
           const errorMock = vi.mocked(failingApp.log.error);
-          expect(errorMock).toHaveBeenCalledWith(
-            { err: shutdownError },
-            'Error during shutdown'
-          );
+          expect(errorMock).toHaveBeenCalledWith({ err: shutdownError }, 'Error during shutdown');
         });
 
         await vi.waitFor(() => {
@@ -426,7 +422,7 @@ describe('main', () => {
 
         await vi.waitFor(() => {
           expect(mockApp.log.info).toHaveBeenCalledWith(
-            'Received SIGINT, shutting down gracefully...'
+            'Received SIGINT, shutting down gracefully...',
           );
         });
 
@@ -468,12 +464,8 @@ describe('main', () => {
         processHandlers.sigint();
 
         await vi.waitFor(() => {
-           
           const errorMock = vi.mocked(failingApp.log.error);
-          expect(errorMock).toHaveBeenCalledWith(
-            { err: shutdownError },
-            'Error during shutdown'
-          );
+          expect(errorMock).toHaveBeenCalledWith({ err: shutdownError }, 'Error during shutdown');
         });
 
         await vi.waitFor(() => {
@@ -496,7 +488,6 @@ describe('main', () => {
         processHandlers.sigterm();
 
         await vi.waitFor(() => {
-           
           const infoMock = vi.mocked(mockApp.log.info);
           expect(infoMock).toHaveBeenCalled();
         });
@@ -512,11 +503,9 @@ describe('main', () => {
       await simulateMain(mockLoadConfig, failingCreateApp, process.env, processHandlers);
 
       expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Server startup failed:')
+        expect.stringContaining('Server startup failed:'),
       );
-      expect(stderrWriteSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[object Object]')
-      );
+      expect(stderrWriteSpy).toHaveBeenCalledWith(expect.stringContaining('[object Object]'));
     });
 
     it('should handle null error gracefully', async () => {

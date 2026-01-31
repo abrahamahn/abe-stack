@@ -7,14 +7,12 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/core": ["../../shared/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../shared/core/src/*"]
+      "@abe-stack/core": ["../../core/src/index.ts"],
+      "@abe-stack/core/*": ["../../core/src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.storage.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
-  "references": [
-    { "path": "../../shared/core" }
-  ]
+  "references": [{ "path": "../../core" }]
 }

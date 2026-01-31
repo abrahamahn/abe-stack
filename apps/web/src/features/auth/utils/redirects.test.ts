@@ -11,7 +11,6 @@ import { getPostLoginRedirect } from './redirects';
 
 import type { User } from '@features/auth';
 
-
 describe('getPostLoginRedirect', () => {
   const createUser = (role: string): User => ({
     id: 'user_123',

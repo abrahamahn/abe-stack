@@ -31,9 +31,7 @@ describe('CheckoutSuccessPage', () => {
 
   it('should render the success message', () => {
     render(<CheckoutSuccessPage />);
-    expect(
-      screen.getByText(/Thank you for subscribing/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Thank you for subscribing/)).toBeInTheDocument();
   });
 
   it('should render Go to Billing Settings button', () => {

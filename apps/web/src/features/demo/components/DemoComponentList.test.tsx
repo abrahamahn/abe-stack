@@ -9,8 +9,18 @@ import type { ComponentDemo } from '@demo/types';
 vi.mock('@abe-stack/ui', () => ({
   CloseButton: ({ onClick }: { onClick: () => void }) => <button onClick={onClick}>Close</button>,
   Heading: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
-  MenuItem: ({ children, onClick, 'data-selected': selected }: { children: React.ReactNode; onClick: () => void; 'data-selected': boolean }) => (
-    <div onClick={onClick} data-selected={selected}>{children}</div>
+  MenuItem: ({
+    children,
+    onClick,
+    'data-selected': selected,
+  }: {
+    children: React.ReactNode;
+    onClick: () => void;
+    'data-selected': boolean;
+  }) => (
+    <div onClick={onClick} data-selected={selected}>
+      {children}
+    </div>
   ),
   ScrollArea: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,

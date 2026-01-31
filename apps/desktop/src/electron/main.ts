@@ -4,7 +4,6 @@ import * as path from 'path';
 import { waitForPort } from '@abe-stack/core';
 import { app, BrowserWindow } from 'electron';
 
-
 import { registerIPCHandlers } from './ipc';
 
 let mainWindow: BrowserWindow | null = null;
@@ -43,7 +42,9 @@ const createWindow = async (): Promise<void> => {
     const rendererPortPreference = Number(
       process.env.DESKTOP_RENDERER_PORT ?? process.env.VITE_PORT ?? 5174,
     );
-    const rendererPort: number = await (waitForPort as (ports: Array<number | undefined>, host?: string) => Promise<number>)([rendererPortPreference, 5174, 5173, 5175], 'localhost');
+    const rendererPort: number = await (
+      waitForPort as (ports: Array<number | undefined>, host?: string) => Promise<number>
+    )([rendererPortPreference, 5174, 5173, 5175], 'localhost');
 
     const rendererPortString = String(rendererPort);
     await mainWindow.loadURL(`http://localhost:${rendererPortString}`);

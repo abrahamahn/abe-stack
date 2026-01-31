@@ -54,7 +54,7 @@
       "path": "./infra/contracts"
     },
     {
-      "path": "./shared/core"
+      "path": "./core"
     },
     {
       "path": "./infra/db"
@@ -72,7 +72,7 @@
       "path": "./client/stores"
     },
     {
-      "path": "./shared/ui"
+      "path": "./client/ui"
     },
     {
       "path": "./modules/billing"

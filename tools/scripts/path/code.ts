@@ -33,7 +33,7 @@ const EXCLUDED_DIRS = new Set([
 
 /** Paths to exclude (relative to REPO_ROOT) */
 const EXCLUDED_PATHS = new Set([
-  'shared/ui/src/styles', // CSS files go to config
+  'client/ui/src/styles', // CSS files go to config
 ]);
 
 /** File extensions to include (source code only) */
@@ -188,12 +188,12 @@ function exportCodeFiles(): void {
     'apps/server',
     'apps/web',
     'infra/contracts',
-    'shared/core',
+    'core',
     'infra/db',
     'infra/media',
     'client',
     'client/stores',
-    'shared/ui',
+    'client/ui',
   ];
 
   let output = '# Source Code Files\n';

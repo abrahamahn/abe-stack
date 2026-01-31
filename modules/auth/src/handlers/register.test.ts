@@ -23,22 +23,24 @@ import type { AppContext, ReplyWithCookies } from '../types';
 const { mockRegisterUser, mockMapErrorToResponse } = vi.hoisted(() => ({
   mockRegisterUser: vi.fn(),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-  mockMapErrorToResponse: vi.fn((error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
-    if (error instanceof Error) {
-      switch (error.name) {
-        case 'WeakPasswordError':
-          return { status: 400, body: { message: 'Password is too weak' } };
-        case 'EmailSendError':
-          return { status: 503, body: { message: 'Failed to send email' } };
-        default:
-          // Log unknown errors like the real implementation does
-          logger.error(error);
-          return { status: 500, body: { message: 'Internal server error' } };
+  mockMapErrorToResponse: vi.fn(
+    (error: unknown, logger: { error: (context: unknown, message?: string) => void }) => {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case 'WeakPasswordError':
+            return { status: 400, body: { message: 'Password is too weak' } };
+          case 'EmailSendError':
+            return { status: 503, body: { message: 'Failed to send email' } };
+          default:
+            // Log unknown errors like the real implementation does
+            logger.error(error);
+            return { status: 500, body: { message: 'Internal server error' } };
+        }
       }
-    }
-    logger.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
-  }),
+      logger.error(error);
+      return { status: 500, body: { message: 'Internal server error' } };
+    },
+  ),
 }));
 
 // Mock the service module
@@ -183,11 +185,27 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
-      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify your email',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Registration attempt',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
+      passwordReset: vi.fn(() => ({
+        subject: 'Reset your password',
+        text: 'reset',
+        html: '<p>reset</p>',
+      })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
-      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+      accountLocked: vi.fn(() => ({
+        subject: 'Account locked',
+        text: 'locked',
+        html: '<p>locked</p>',
+      })),
     },
     config,
     log: {
@@ -372,9 +390,7 @@ describe('handleRegister', () => {
       const body = createRegisterBody();
 
       const originalError = new Error('SMTP connection timeout');
-      mockRegisterUser.mockRejectedValue(
-        new EmailSendError('Failed to send', originalError),
-      );
+      mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send', originalError));
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -394,9 +410,7 @@ describe('handleRegister', () => {
       const body = createRegisterBody({ email: 'test@example.com' });
 
       const originalError = new Error('Email service unavailable');
-      mockRegisterUser.mockRejectedValue(
-        new EmailSendError('Failed to send', originalError),
-      );
+      mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send', originalError));
 
       await handleRegister(ctx, body, reply);
 

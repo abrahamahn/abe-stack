@@ -7,14 +7,26 @@ import { PlanManagementPage } from './PlanManagementPage';
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => ({
   Badge: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <span data-testid="badge" data-tone={tone}>{children}</span>
+    <span data-testid="badge" data-tone={tone}>
+      {children}
+    </span>
   ),
-  Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
-    <button onClick={onClick} disabled={disabled}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
   ),
   Card: Object.assign(
     ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
-    { Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }
+    { Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div> },
   ),
   Dialog: {
     Root: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
@@ -26,7 +38,14 @@ vi.mock('@abe-stack/ui', () => ({
       </div>
     ),
   },
-  Input: ({ id, value, onChange, placeholder, disabled, type }: {
+  Input: ({
+    id,
+    value,
+    onChange,
+    placeholder,
+    disabled,
+    type,
+  }: {
     id?: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -43,22 +62,30 @@ vi.mock('@abe-stack/ui', () => ({
       type={type}
     />
   ),
-  PageContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="page-container">{children}</div>,
-  Select: ({ children, value, onChange, disabled }: {
+  PageContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="page-container">{children}</div>
+  ),
+  Select: ({
+    children,
+    value,
+    onChange,
+    disabled,
+  }: {
     children: React.ReactNode;
     value?: string;
     onChange?: (value: string) => void;
     disabled?: boolean;
   }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange?.(e.target.value)}
-      disabled={disabled}
-    >
+    <select value={value} onChange={(e) => onChange?.(e.target.value)} disabled={disabled}>
       {children}
     </select>
   ),
-  Switch: ({ id, checked, onChange, disabled }: {
+  Switch: ({
+    id,
+    checked,
+    onChange,
+    disabled,
+  }: {
     id?: string;
     checked?: boolean;
     onChange?: (checked: boolean) => void;

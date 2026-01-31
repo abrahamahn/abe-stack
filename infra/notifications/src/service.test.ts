@@ -52,8 +52,7 @@ describe('Notification Service', { timeout: 30000 }, () => {
   });
 
   it('should export preference management functions', async () => {
-    const { getPreferences, updatePreferences, shouldSendNotification } =
-      await import('./service');
+    const { getPreferences, updatePreferences, shouldSendNotification } = await import('./service');
     expect(typeof getPreferences).toBe('function');
     expect(typeof updatePreferences).toBe('function');
     expect(typeof shouldSendNotification).toBe('function');

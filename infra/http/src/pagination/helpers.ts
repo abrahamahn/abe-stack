@@ -7,15 +7,15 @@
 import { buildCursorPaginationQuery, calculateCursorPaginationMetadata } from '@abe-stack/core';
 
 import type {
-    CursorPaginationQueryBuilder,
-    OffsetPaginationQueryBuilder,
-    PaginationHelpers,
+  CursorPaginationQueryBuilder,
+  OffsetPaginationQueryBuilder,
+  PaginationHelpers,
 } from './types';
 import type {
-    CursorPaginatedResult,
-    CursorPaginationOptions,
-    PaginatedResult,
-    PaginationOptions,
+  CursorPaginatedResult,
+  CursorPaginationOptions,
+  PaginatedResult,
+  PaginationOptions,
 } from '@abe-stack/core';
 
 /**

@@ -15,7 +15,13 @@ import type { JSX } from 'react';
 // Types
 // ============================================================================
 
-type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+type JobStatusLocal =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled';
 
 interface JobDetailsLocal {
   id: string;
@@ -115,7 +121,9 @@ export const JobDetailsPanel = ({
           />
           <DetailItem
             label="Duration"
-            value={job.durationMs !== null && job.durationMs !== 0 ? `${String(job.durationMs)}ms` : '-'}
+            value={
+              job.durationMs !== null && job.durationMs !== 0 ? `${String(job.durationMs)}ms` : '-'
+            }
           />
         </div>
       </Card>
@@ -156,14 +164,16 @@ export const JobDetailsPanel = ({
       )}
 
       {/* Dead Letter Reason (if any) */}
-      {job.deadLetterReason !== undefined && job.deadLetterReason !== null && job.deadLetterReason !== '' && (
-        <Card className="p-3 border-red-200 dark:border-red-800">
-          <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
-            Dead Letter Reason
-          </Text>
-          <Text tone="danger">{job.deadLetterReason}</Text>
-        </Card>
-      )}
+      {job.deadLetterReason !== undefined &&
+        job.deadLetterReason !== null &&
+        job.deadLetterReason !== '' && (
+          <Card className="p-3 border-red-200 dark:border-red-800">
+            <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
+              Dead Letter Reason
+            </Text>
+            <Text tone="danger">{job.deadLetterReason}</Text>
+          </Card>
+        )}
 
       {/* Actions */}
       {(canRetry || canCancel) && (

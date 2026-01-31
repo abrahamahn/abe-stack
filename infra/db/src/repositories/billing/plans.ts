@@ -150,14 +150,22 @@ export function createPlanRepository(db: RawDb): PlanRepository {
 
     async deactivate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE).set({ ['is_active']: false }).where(eq('id', id)).returningAll().toSql(),
+        update(PLANS_TABLE)
+          .set({ ['is_active']: false })
+          .where(eq('id', id))
+          .returningAll()
+          .toSql(),
       );
       return result !== null ? transformPlan(result) : null;
     },
 
     async activate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE).set({ ['is_active']: true }).where(eq('id', id)).returningAll().toSql(),
+        update(PLANS_TABLE)
+          .set({ ['is_active']: true })
+          .where(eq('id', id))
+          .returningAll()
+          .toSql(),
       );
       return result !== null ? transformPlan(result) : null;
     },

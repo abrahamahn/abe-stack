@@ -6,16 +6,30 @@ import { SecurityEventDetailPage } from './SecurityEventDetailPage';
 
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => ({
-  Button: ({ children, onClick, variant }: { children: React.ReactNode; onClick?: () => void; variant?: string }) => (
-    <button onClick={onClick} data-variant={variant}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    variant,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    variant?: string;
+  }) => (
+    <button onClick={onClick} data-variant={variant}>
+      {children}
+    </button>
   ),
   Heading: ({ children, as, size }: { children: React.ReactNode; as?: string; size?: string }) => {
     const Tag = (as ?? 'h1') as keyof JSX.IntrinsicElements;
     return <Tag data-size={size}>{children}</Tag>;
   },
-  PageContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="page-container">{children}</div>,
+  PageContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="page-container">{children}</div>
+  ),
   Text: ({ children, tone, size }: { children: React.ReactNode; tone?: string; size?: string }) => (
-    <span data-tone={tone} data-size={size}>{children}</span>
+    <span data-tone={tone} data-size={size}>
+      {children}
+    </span>
   ),
   useNavigate: () => vi.fn(),
   useParams: () => ({ id: 'test-event-id' }),

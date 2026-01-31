@@ -14,16 +14,16 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
 import {
-    and,
-    eq,
-    isNotNull,
-    lt,
-    OAUTH_CONNECTIONS_TABLE,
-    select,
-    selectCount,
-    update,
-    type OAuthProvider,
-    type RawDb,
+  and,
+  eq,
+  isNotNull,
+  lt,
+  OAUTH_CONNECTIONS_TABLE,
+  select,
+  selectCount,
+  update,
+  type OAuthProvider,
+  type RawDb,
 } from '@abe-stack/db';
 
 // ============================================================================
@@ -117,7 +117,12 @@ function encryptToken(token: string, encryptionKey: string): string {
 function decryptToken(encryptedData: string, encryptionKey: string): string {
   const [saltB64, ivB64, tagB64, encryptedB64] = encryptedData.split(':');
 
-  if ((saltB64 ?? '') === '' || (ivB64 ?? '') === '' || (tagB64 ?? '') === '' || (encryptedB64 ?? '') === '') {
+  if (
+    (saltB64 ?? '') === '' ||
+    (ivB64 ?? '') === '' ||
+    (tagB64 ?? '') === '' ||
+    (encryptedB64 ?? '') === ''
+  ) {
     throw new Error('Invalid encrypted token format');
   }
 
@@ -298,18 +303,20 @@ export async function refreshExpiringOAuthTokens(
       );
 
       // Calculate new expiry
-      const expiresAt = tokenResponse.expires_in != null
-        ? new Date(Date.now() + tokenResponse.expires_in * 1000)
-        : null;
+      const expiresAt =
+        tokenResponse.expires_in != null
+          ? new Date(Date.now() + tokenResponse.expires_in * 1000)
+          : null;
 
       // Update the connection with new tokens
       await db.execute(
         update(OAUTH_CONNECTIONS_TABLE)
           .set({
             access_token: encryptToken(tokenResponse.access_token, encryptionKey),
-            refresh_token: tokenResponse.refresh_token != null && tokenResponse.refresh_token !== ''
-              ? encryptToken(tokenResponse.refresh_token, encryptionKey)
-              : connection.refresh_token, // Keep old if not returned
+            refresh_token:
+              tokenResponse.refresh_token != null && tokenResponse.refresh_token !== ''
+                ? encryptToken(tokenResponse.refresh_token, encryptionKey)
+                : connection.refresh_token, // Keep old if not returned
             expires_at: expiresAt,
             updated_at: new Date(),
           })

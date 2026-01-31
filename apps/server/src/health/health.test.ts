@@ -2,13 +2,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    checkDatabase,
-    checkEmail,
-    checkPubSub,
-    checkRateLimit,
-    checkStorage,
-    checkWebSocket,
-    getDetailedHealth,
+  checkDatabase,
+  checkEmail,
+  checkPubSub,
+  checkRateLimit,
+  checkStorage,
+  checkWebSocket,
+  getDetailedHealth,
 } from './index';
 
 import type { AppContext } from '@shared';

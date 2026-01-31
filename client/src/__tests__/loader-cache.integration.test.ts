@@ -385,7 +385,8 @@ describe('LoaderCache Integration', () => {
   describe('Integration with API calls', () => {
     it('should coordinate cache with batch loading', async () => {
       const userCache = new LoaderCache<User>();
-      const batchFetch = vi.fn<(ids: string[]) => Promise<Map<string, User>>>()
+      const batchFetch = vi
+        .fn<(ids: string[]) => Promise<Map<string, User>>>()
         .mockImplementation((ids: string[]) => {
           const users = new Map<string, User>();
           for (const id of ids) {

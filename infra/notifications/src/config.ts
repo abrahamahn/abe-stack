@@ -1,11 +1,11 @@
 // infra/notifications/src/config.ts
 import type {
-    CourierConfig,
-    FcmConfig,
-    FullEnv,
-    NotificationConfig,
-    NotificationProvider,
-    OneSignalConfig,
+  CourierConfig,
+  FcmConfig,
+  FullEnv,
+  NotificationConfig,
+  NotificationProvider,
+  OneSignalConfig,
 } from '@abe-stack/core/config';
 
 /**
@@ -41,16 +41,23 @@ import type {
 export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   // Check which provider keys are present
   const availability = {
-    onesignal: (env.ONESIGNAL_REST_API_KEY != null && env.ONESIGNAL_REST_API_KEY !== '') && (env.ONESIGNAL_USER_AUTH_KEY != null && env.ONESIGNAL_USER_AUTH_KEY !== '') && (env.ONESIGNAL_APP_ID != null && env.ONESIGNAL_APP_ID !== ''),
-    fcm: (env.FCM_PROJECT_ID != null && env.FCM_PROJECT_ID !== '') && (env.FCM_CREDENTIALS != null && env.FCM_CREDENTIALS !== ''),
-    courier: (env.COURIER_API_KEY != null && env.COURIER_API_KEY !== ''),
+    onesignal:
+      env.ONESIGNAL_REST_API_KEY != null &&
+      env.ONESIGNAL_REST_API_KEY !== '' &&
+      env.ONESIGNAL_USER_AUTH_KEY != null &&
+      env.ONESIGNAL_USER_AUTH_KEY !== '' &&
+      env.ONESIGNAL_APP_ID != null &&
+      env.ONESIGNAL_APP_ID !== '',
+    fcm:
+      env.FCM_PROJECT_ID != null &&
+      env.FCM_PROJECT_ID !== '' &&
+      env.FCM_CREDENTIALS != null &&
+      env.FCM_CREDENTIALS !== '',
+    courier: env.COURIER_API_KEY != null && env.COURIER_API_KEY !== '',
   };
 
   // Resolve active provider (Explicit Choice > OneSignal > FCM > Courier)
-  const provider = resolveActiveProvider(
-    env.NOTIFICATIONS_PROVIDER,
-    availability,
-  );
+  const provider = resolveActiveProvider(env.NOTIFICATIONS_PROVIDER, availability);
 
   // Determine if notifications should be enabled based on valid credentials
   const isEnabled = provider != null;

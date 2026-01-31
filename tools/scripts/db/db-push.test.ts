@@ -128,7 +128,7 @@ describe('db-push script', () => {
       expect(sql).toContain('id uuid PRIMARY KEY DEFAULT gen_random_uuid()');
       expect(sql).toContain('email text NOT NULL UNIQUE');
       expect(sql).toContain('password_hash text NOT NULL');
-      expect(sql).toContain('role text NOT NULL DEFAULT \'user\'');
+      expect(sql).toContain("role text NOT NULL DEFAULT 'user'");
       expect(sql).toContain('email_verified boolean NOT NULL DEFAULT false');
       expect(sql).toContain('version integer NOT NULL DEFAULT 1');
     });
@@ -162,7 +162,9 @@ describe('db-push script', () => {
 
       const sql = tableCall?.[0] as string;
       expect(sql).toContain('user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE');
-      expect(sql).toContain('family_id uuid REFERENCES refresh_token_families(id) ON DELETE SET NULL');
+      expect(sql).toContain(
+        'family_id uuid REFERENCES refresh_token_families(id) ON DELETE SET NULL',
+      );
       expect(sql).toContain('token text NOT NULL');
       expect(sql).toContain('expires_at timestamptz NOT NULL');
     });
@@ -299,8 +301,8 @@ describe('db-push script', () => {
       const sql = tableCall?.[0] as string;
       expect(sql).toContain('user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE');
       expect(sql).toContain('global_enabled boolean NOT NULL DEFAULT true');
-      expect(sql).toContain('quiet_hours jsonb NOT NULL DEFAULT \'{}\'::jsonb');
-      expect(sql).toContain('types jsonb NOT NULL DEFAULT \'{}\'::jsonb');
+      expect(sql).toContain("quiet_hours jsonb NOT NULL DEFAULT '{}'::jsonb");
+      expect(sql).toContain("types jsonb NOT NULL DEFAULT '{}'::jsonb");
     });
 
     it('should create all required indexes', async () => {
@@ -308,8 +310,10 @@ describe('db-push script', () => {
 
       await pushSchema();
 
-      const indexCalls = mockRaw.mock.calls.filter((call) =>
-        (call[0] as string).includes('CREATE INDEX') || (call[0] as string).includes('CREATE UNIQUE INDEX'),
+      const indexCalls = mockRaw.mock.calls.filter(
+        (call) =>
+          (call[0] as string).includes('CREATE INDEX') ||
+          (call[0] as string).includes('CREATE UNIQUE INDEX'),
       );
 
       // Should create 12 indexes
@@ -333,7 +337,9 @@ describe('db-push script', () => {
       await pushSchema();
 
       const uniqueIndexCall = mockRaw.mock.calls.find((call) =>
-        (call[0] as string).includes('CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user'),
+        (call[0] as string).includes(
+          'CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user',
+        ),
       );
 
       expect(uniqueIndexCall).toBeDefined();
@@ -372,7 +378,10 @@ describe('db-push script', () => {
       // Tables should come before indexes
       const firstIndexPosition = calls.findIndex((sql) => sql.includes('CREATE INDEX'));
       const lastTablePosition = calls.findIndex(
-        (sql, i) => i > 0 && sql.includes('CREATE TABLE') && (calls[i + 1]?.includes('CREATE INDEX') ?? false),
+        (sql, i) =>
+          i > 0 &&
+          sql.includes('CREATE TABLE') &&
+          (calls[i + 1]?.includes('CREATE INDEX') ?? false),
       );
 
       expect(firstIndexPosition).toBeGreaterThan(lastTablePosition);
@@ -467,7 +476,6 @@ describe('db-push script', () => {
     });
   });
 
-
   describe('SQL statement validation', () => {
     it('should use IF NOT EXISTS for all CREATE statements', async () => {
       const { pushSchema } = await import('./db-push');
@@ -501,7 +509,9 @@ describe('db-push script', () => {
       ];
 
       for (const tableName of cascadeTables) {
-        const tableStmt = allCalls.find((sql) => sql.includes(`CREATE TABLE IF NOT EXISTS ${tableName}`));
+        const tableStmt = allCalls.find((sql) =>
+          sql.includes(`CREATE TABLE IF NOT EXISTS ${tableName}`),
+        );
         expect(tableStmt).toBeDefined();
         expect(tableStmt).toContain('ON DELETE CASCADE');
       }

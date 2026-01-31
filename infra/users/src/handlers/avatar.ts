@@ -9,10 +9,10 @@
  */
 
 import {
-    BadRequestError,
-    NotFoundError,
-    validatePassword,
-    WeakPasswordError,
+  BadRequestError,
+  NotFoundError,
+  validatePassword,
+  WeakPasswordError,
 } from '@abe-stack/core';
 
 import { hashPassword, verifyPassword } from '../../../../modules/auth/src';

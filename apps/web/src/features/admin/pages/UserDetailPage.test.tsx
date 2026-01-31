@@ -7,21 +7,32 @@ import { UserDetailPage } from './UserDetailPage';
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
-    <div role="alert" data-tone={tone}>{children}</div>
+    <div role="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
-  Button: ({ children, onClick, disabled, variant }: {
+  Button: ({
+    children,
+    onClick,
+    disabled,
+    variant,
+  }: {
     children: React.ReactNode;
     onClick?: () => void;
     disabled?: boolean;
     variant?: string;
   }) => (
-    <button onClick={onClick} disabled={disabled} data-variant={variant}>{children}</button>
+    <button onClick={onClick} disabled={disabled} data-variant={variant}>
+      {children}
+    </button>
   ),
   Heading: ({ children, as, size }: { children: React.ReactNode; as?: string; size?: string }) => {
     const Tag = (as ?? 'h1') as keyof JSX.IntrinsicElements;
     return <Tag data-size={size}>{children}</Tag>;
   },
-  PageContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="page-container">{children}</div>,
+  PageContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="page-container">{children}</div>
+  ),
   useNavigate: () => vi.fn(),
   useParams: () => ({ id: 'test-user-id' }),
 }));

@@ -13,7 +13,9 @@ vi.mock('@abe-stack/core', () => ({
 }));
 
 vi.mock('@abe-stack/client', () => ({
-  createApiError: vi.fn((status: number, data: unknown) => new Error(`API Error ${status}: ${JSON.stringify(data)}`)),
+  createApiError: vi.fn(
+    (status: number, data: unknown) => new Error(`API Error ${status}: ${JSON.stringify(data)}`),
+  ),
   NetworkError: class NetworkError extends Error {
     constructor(message: string) {
       super(message);

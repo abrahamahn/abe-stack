@@ -26,16 +26,22 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
 
   // URL resolution (flexible naming support)
   const appBaseUrl =
-    (env.PUBLIC_APP_URL != null && env.PUBLIC_APP_URL !== '') ? env.PUBLIC_APP_URL :
-    (env.APP_URL != null && env.APP_URL !== '') ? env.APP_URL :
-    (env.APP_BASE_URL != null && env.APP_BASE_URL !== '') ? env.APP_BASE_URL :
-    `http://localhost:${String(appPort)}`;
+    env.PUBLIC_APP_URL != null && env.PUBLIC_APP_URL !== ''
+      ? env.PUBLIC_APP_URL
+      : env.APP_URL != null && env.APP_URL !== ''
+        ? env.APP_URL
+        : env.APP_BASE_URL != null && env.APP_BASE_URL !== ''
+          ? env.APP_BASE_URL
+          : `http://localhost:${String(appPort)}`;
 
   const apiBaseUrl =
-    (env.PUBLIC_API_URL !== undefined && env.PUBLIC_API_URL !== '') ? env.PUBLIC_API_URL :
-    (env.VITE_API_URL !== undefined && env.VITE_API_URL !== '') ? env.VITE_API_URL :
-    (env.API_BASE_URL !== undefined && env.API_BASE_URL !== '') ? env.API_BASE_URL :
-    `http://localhost:${port}`;
+    env.PUBLIC_API_URL !== undefined && env.PUBLIC_API_URL !== ''
+      ? env.PUBLIC_API_URL
+      : env.VITE_API_URL !== undefined && env.VITE_API_URL !== ''
+        ? env.VITE_API_URL
+        : env.API_BASE_URL !== undefined && env.API_BASE_URL !== ''
+          ? env.API_BASE_URL
+          : `http://localhost:${port}`;
 
   return {
     host: env.HOST !== '' ? env.HOST : '0.0.0.0',
@@ -45,11 +51,12 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
 
     cors: {
       // Support multiple origins (e.g., Web + Desktop + Admin)
-      origin: env.CORS_ORIGINS !== undefined && env.CORS_ORIGINS !== ''
-        ? getList(env.CORS_ORIGINS)
-        : env.CORS_ORIGIN !== undefined && env.CORS_ORIGIN !== ''
-          ? getList(env.CORS_ORIGIN)
-          : [appBaseUrl],
+      origin:
+        env.CORS_ORIGINS !== undefined && env.CORS_ORIGINS !== ''
+          ? getList(env.CORS_ORIGINS)
+          : env.CORS_ORIGIN !== undefined && env.CORS_ORIGIN !== ''
+            ? getList(env.CORS_ORIGIN)
+            : [appBaseUrl],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },

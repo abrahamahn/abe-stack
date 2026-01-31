@@ -172,8 +172,16 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Reg', text: 'reg', html: '<p>reg</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Reg',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
       passwordReset: vi.fn(() => ({ subject: 'Reset', text: 'reset', html: '<p>reset</p>' })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
       accountLocked: vi.fn(() => ({ subject: 'Locked', text: 'locked', html: '<p>locked</p>' })),

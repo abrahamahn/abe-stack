@@ -55,7 +55,9 @@ function createMockDbClient(): DbClient {
     query: vi.fn(),
     queryOne: vi.fn(),
     execute: vi.fn(),
-    transaction: vi.fn((callback) => callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() })),
+    transaction: vi.fn((callback) =>
+      callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() }),
+    ),
   } as unknown as DbClient;
 }
 
@@ -236,7 +238,9 @@ describe('rotateRefreshToken', () => {
       });
 
       vi.mocked(createRefreshToken).mockReturnValue(newToken);
-      vi.mocked(getRefreshTokenExpiry).mockReturnValue(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      vi.mocked(getRefreshTokenExpiry).mockReturnValue(
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      );
 
       const result = await rotateRefreshToken(db, 'old-token-abc123', '127.0.0.1', 'Mozilla/5.0');
 
@@ -375,9 +379,9 @@ describe('rotateRefreshToken', () => {
           created_at: mockFamily.createdAt,
         });
 
-      await expect(
-        rotateRefreshToken(db, 'old-token', '127.0.0.1', 'Mozilla/5.0'),
-      ).rejects.toThrow('Token has already been used');
+      await expect(rotateRefreshToken(db, 'old-token', '127.0.0.1', 'Mozilla/5.0')).rejects.toThrow(
+        'Token has already been used',
+      );
 
       expect(logTokenReuseEvent).toHaveBeenCalledWith(
         db,
@@ -488,7 +492,14 @@ describe('rotateRefreshToken', () => {
           created_at: newerToken.createdAt,
         });
 
-      const result = await rotateRefreshToken(db, mockToken.token, '127.0.0.1', 'Mozilla/5.0', 7, 30);
+      const result = await rotateRefreshToken(
+        db,
+        mockToken.token,
+        '127.0.0.1',
+        'Mozilla/5.0',
+        7,
+        30,
+      );
 
       expect(result).toEqual({
         token: newerToken.token,
