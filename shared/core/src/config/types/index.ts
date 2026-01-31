@@ -122,6 +122,22 @@ export interface ElasticsearchSearchConfig {
 export type SearchConfig = SqlSearchConfig | ElasticsearchSearchConfig;
 
 /**
+ * Feature flags controlling which modules are active at runtime.
+ *
+ * When a feature is disabled, its routes are not registered and its
+ * service is replaced with a no-op implementation. This removes runtime
+ * wiring, not just config values.
+ *
+ * @see apps/docs/profiles.md for profile definitions
+ */
+export interface FeatureFlags {
+  /** Enable admin dashboard routes (user management, security events, jobs) */
+  admin: boolean;
+  /** Enable real-time WebSocket server (CRDT sync, pub/sub) */
+  realtime: boolean;
+}
+
+/**
  * Complete application configuration.
  *
  * This is the single source of truth for all server settings.
@@ -145,4 +161,5 @@ export interface AppConfig {
   queue: QueueConfig;
   notifications: NotificationConfig;
   search: SearchConfig;
+  features: FeatureFlags;
 }

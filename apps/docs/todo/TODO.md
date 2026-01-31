@@ -306,7 +306,7 @@ Server's router uses concrete `AppContext`; package's router uses generic `BaseC
 - [x] After migrations, update all server imports to use `@abe-stack/http` as canonical source
 - [x] `infrastructure/index.ts` should only export server-specific adapters
 
-#### 7.5 Tier 3 Cross-Dependencies — MEDIUM (Documentation)
+#### 7.5 ~~Tier 3 Cross-Dependencies~~ ✅ RESOLVED
 
 ```
 auth, billing, realtime, notifications, media  → No Tier 3 deps (base modules)
@@ -314,8 +314,8 @@ users                                          → depends on auth (mid-layer)
 admin                                          → depends on auth + billing (orchestration)
 ```
 
-- [ ] If coupling is intentional (bundled product tiers): document the assumption
-- [ ] If modules must be independent: extract admin orchestration to a separate concern
+- [x] Coupling is intentional (bundled product tiers): documented in `apps/docs/profiles.md`
+- [x] Admin depends on auth+billing for subscription management — gracefully degrades when billing disabled
 
 #### 7.6 ~~Cache Service API Incompatibility~~ ✅ RESOLVED
 
@@ -633,9 +633,9 @@ the server adapter layer is unnecessary.
 
 ### Backend
 
-- [ ] Production Postgres settings (connection pooling, SSL)
-- [ ] Secrets management documentation
-- [ ] Database backup/retention plan
+- [x] Production Postgres settings (connection pooling, SSL) — see `apps/docs/deploy/production-postgres.md`
+- [x] Secrets management documentation — see `apps/docs/deploy/secrets-checklist.md`
+- [x] Database backup/retention plan — see `apps/docs/OPERATIONS.md` (Section 2: Backups)
 
 ### Testing
 
@@ -650,8 +650,8 @@ the server adapter layer is unnecessary.
 
 - [x] `apps/docs/deploy/` folder (DO + GCP guides) — paths fixed to match actual `infra/` structure
 - [x] `apps/docs/OPERATIONS.md` (migrations, backups, restore drills, incident basics)
-- [ ] "Minimal Profile Quickstart" + "Full Profile Quickstart"
-- [ ] "SaaS Profile Quickstart" + "Admin Profile Quickstart"
+- [x] "Minimal Profile Quickstart" + "Full Profile Quickstart" — see `apps/docs/quickstart/profiles.md`
+- [x] "SaaS Profile Quickstart" + "Admin Profile Quickstart" — see `apps/docs/quickstart/profiles.md`
 
 ---
 
@@ -666,29 +666,20 @@ the server adapter layer is unnecessary.
 
 ---
 
-## High Priority: Lean-Down / Strip Unnecessary Code (Without Losing Power)
+## ~~High Priority: Lean-Down / Strip Unnecessary Code~~ ✅ DONE
 
 **Goal:** keep your "everything stack", but ship as a **minimal default**.
 
-### 1) Define the "Minimal Profile" explicitly
+### 1) ~~Define the "Minimal Profile" explicitly~~ ✅ DONE
 
-- [ ] Write `apps/docs/profiles.md` defining:
-  - **Minimal** includes: web + server + postgres, auth, core UI kit, basic logging, basic tests
-  - **SaaS** includes: billing + subscriptions + portal + quotas
-  - **Admin** includes: command center dashboards
-  - **Advanced** includes: realtime/offline, push, search, cache desktop, heavy media
-- [ ] Add `FEATURE_FLAGS.md` or `config/features.ts`:
-  - `ENABLE_ADMIN`
-  - `ENABLE_BILLING`
-  - `ENABLE_REALTIME`
-  - `ENABLE_OFFLINE_QUEUE`
-  - `ENABLE_PUSH`
-  - `ENABLE_SEARCH`
-  - `ENABLE_CACHE`
-  - `ENABLE_MEDIA_PIPELINE`
-  - `ENABLE_DESKTOP`
-  - `USE_RAW_SQL` - Toggle between drizzle-orm and raw SQL query builder for A/B testing
-- [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
+- [x] Write `apps/docs/profiles.md` defining Minimal, SaaS, Admin, Advanced profiles
+- [x] Add `FeatureFlags` type to `shared/core/src/config/types/index.ts`
+- [x] Add `FeaturesEnvSchema` to `shared/core/src/config/env.schema.ts` (`ENABLE_ADMIN`, `ENABLE_REALTIME`)
+- [x] Wire feature flags in config factory (`apps/server/src/config/factory.ts`)
+- [x] Gate admin routes behind `features.admin` flag
+- [x] Gate realtime WebSocket behind `features.realtime` flag
+- [x] Gate billing routes behind existing `billing.enabled` flag
+- [x] Ensure disabling a feature removes runtime wiring (routes not registered, WebSocket not started)
 
 ---
 
@@ -703,4 +694,4 @@ the server adapter layer is unnecessary.
 
 ---
 
-_Last Updated: 2026-01-31 (All migration phases P0–P7 complete. Re-exports removed. Capability interfaces added. Type system unified.)_
+_Last Updated: 2026-01-31 (Profile quickstart guides, production Postgres docs, infrastructure docs. All migration phases P0–P7 complete.)_

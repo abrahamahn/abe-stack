@@ -290,6 +290,18 @@ export const SearchEnvSchema = z.object({
 });
 
 /**
+ * Zod schema for feature flag environment variables
+ *
+ * Controls which modules are active at runtime.
+ * See apps/docs/profiles.md for profile definitions.
+ */
+export const FeaturesEnvSchema = z.object({
+  ENABLE_ADMIN: z.enum(['true', 'false']).default('true'),
+  ENABLE_REALTIME: z.enum(['true', 'false']).default('true'),
+  BILLING_ENABLED: z.enum(['true', 'false']).optional(),
+});
+
+/**
  * Zod schema for frontend-related environment variables
  */
 export const FrontendEnvSchema = z.object({
@@ -313,6 +325,7 @@ export const EnvSchema = BaseEnvSchema.extend({
   ...ServerEnvSchema.shape,
   ...SearchEnvSchema.shape,
   ...NotificationEnvSchema.shape,
+  ...FeaturesEnvSchema.shape,
   ...FrontendEnvSchema.shape,
 }).superRefine((data, ctx) => {
   const isProd = data.NODE_ENV === 'production';

@@ -218,7 +218,10 @@ export class App implements IServiceContainer {
       this.setupErrorHandler(this._server);
 
       registerRoutes(this._server, this.context);
-      registerWebSocket(this._server, this.context, { verifyToken });
+
+      if (this.config.features.realtime) {
+        registerWebSocket(this._server, this.context, { verifyToken });
+      }
 
       await listen(this._server, this.config);
 
