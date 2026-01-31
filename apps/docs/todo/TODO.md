@@ -1,3 +1,19 @@
+## Refactoring TODO
+
+### 1. Audit TODO.md against completed refactoring work
+
+Review what has already been done from the TODO items related to the `packages/` → `infra/`, `modules/`, `shared/`, `sdk/` restructure. Mark completed items, remove stale entries, and identify any remaining gaps.
+
+### 2. Identify and remove re-exports from `apps/` folder
+
+The `apps/` layer should import directly from packages — no barrel re-exports that proxy other packages. For example, `apps/server/src/config/index.ts` re-exports from `@abe-stack/auth`, `@abe-stack/billing`, `@abe-stack/cache`, `@abe-stack/db`, `@abe-stack/email`, `@abe-stack/http`, `@abe-stack/notifications`, `@abe-stack/storage`, and `@abe-stack/core/config`. Audit all `apps/` barrel files (`index.ts`) for re-exports from external packages and eliminate them.
+
+### 3. Update all imports from re-exports with direct package imports
+
+After removing re-export barrels, update every file that imported through the barrel to import directly from the source package (e.g., `import { loadAuthConfig } from '@abe-stack/auth'` instead of `import { loadAuthConfig } from '@/config'`).
+
+---
+
 Here is the definitive **Architecture Manifesto** for your project. This summarizes every decision, pattern, and structural choice we have made to build a "Series A Ready" SaaS Engine.
 
 ### 1. The Core Philosophy
