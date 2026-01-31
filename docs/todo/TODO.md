@@ -52,6 +52,7 @@ the server adapter layer is unnecessary.
 
 ## Medium Priority: Infrastructure
 
+
 ### Backend
 
 - [ ] Production Postgres settings (connection pooling, SSL) :contentReference[oaicite:16]{index=16}
