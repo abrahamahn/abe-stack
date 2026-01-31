@@ -2,7 +2,7 @@
 import { cn } from '@utils/cn';
 import '../../styles/layouts.css';
 
-import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 type ContainerProps = ComponentPropsWithoutRef<'div'> & {
   size?: 'sm' | 'md' | 'lg';
@@ -14,7 +14,13 @@ const sizeClasses: Record<NonNullable<ContainerProps['size']>, string> = {
   lg: 'container--lg',
 };
 
-export const Container = ({ size = 'md', className, ...rest }: ContainerProps): ReactElement => {
+const Container = forwardRef<HTMLDivElement, ContainerProps>((props, ref) => {
+  const { size = 'md', className, ...rest } = props;
   const sizeClass = size in sizeClasses ? sizeClasses[size] : undefined;
-  return <div className={cn('container', sizeClass, className)} {...rest} />;
-};
+  return <div ref={ref} className={cn('container', sizeClass, className)} {...rest} />;
+});
+
+Container.displayName = 'Container';
+
+export { Container };
+export type { ContainerProps };

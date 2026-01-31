@@ -3,7 +3,7 @@ import { Spinner } from '@elements/Spinner';
 import { Text } from '@elements/Text';
 import '../styles/components.css';
 
-import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 type LoadingContainerProps = ComponentPropsWithoutRef<'div'> & {
   /**
@@ -34,16 +34,17 @@ const spinnerSizes = {
  * <LoadingContainer size="lg" text="Please wait..." />
  * ```
  */
-export const LoadingContainer = ({
-  text = 'Loading...',
-  size = 'md',
-  className = '',
-  ...rest
-}: LoadingContainerProps): ReactElement => {
+const LoadingContainer = forwardRef<HTMLDivElement, LoadingContainerProps>((props, ref) => {
+  const { text = 'Loading...', size = 'md', className = '', ...rest } = props;
   return (
-    <div className={`loading-container ${className}`.trim()} {...rest}>
+    <div ref={ref} className={`loading-container ${className}`.trim()} {...rest}>
       <Spinner size={spinnerSizes[size]} />
       {text !== '' ? <Text tone="muted">{text}</Text> : null}
     </div>
   );
-};
+});
+
+LoadingContainer.displayName = 'LoadingContainer';
+
+export { LoadingContainer };
+export type { LoadingContainerProps };

@@ -48,7 +48,7 @@ describe('FormField', () => {
 
   it('displays helper text when no error', () => {
     render(
-      <FormField label="Email" htmlFor="email" helperText="We'll never share your email">
+      <FormField label="Email" htmlFor="email" description="We'll never share your email">
         <input id="email" />
       </FormField>,
     );
@@ -62,7 +62,7 @@ describe('FormField', () => {
         label="Email"
         htmlFor="email"
         error="Invalid email"
-        helperText="We'll never share your email"
+        description="We'll never share your email"
       >
         <input id="email" />
       </FormField>,

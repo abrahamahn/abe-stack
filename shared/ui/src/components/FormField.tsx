@@ -16,9 +16,9 @@ type FormFieldProps = ComponentPropsWithoutRef<'div'> & {
    */
   error?: string;
   /**
-   * Helper text to display below the input
+   * Description text to display below the input (hidden when error is shown)
    */
-  helperText?: string;
+  description?: string;
   /**
    * Whether the field is required
    */
@@ -48,7 +48,7 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>((props, ref)
     label,
     htmlFor,
     error,
-    helperText,
+    description,
     required = false,
     children,
     className = '',
@@ -67,7 +67,7 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>((props, ref)
            {error}
          </span>
        ) : null}
-       {(helperText != null && helperText !== '') && (error == null || error === '') ? <span className="form-field-helper">{helperText}</span> : null}
+       {(description != null && description !== '') && (error == null || error === '') ? <span className="form-field-helper">{description}</span> : null}
     </div>
   );
 });
