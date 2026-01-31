@@ -26,6 +26,8 @@ const STATEMENTS: string[] = [
     email_verified_at timestamptz,
     locked_until timestamptz,
     failed_login_attempts integer NOT NULL DEFAULT 0,
+    totp_secret text,
+    totp_enabled boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     version integer NOT NULL DEFAULT 1
@@ -147,6 +149,26 @@ const STATEMENTS: string[] = [
     updated_at timestamptz NOT NULL DEFAULT now()
   );
   `,
+  `
+  CREATE TABLE IF NOT EXISTS totp_backup_codes (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code_hash text NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `
+  CREATE TABLE IF NOT EXISTS email_change_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    new_email text NOT NULL,
+    token_hash text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
   `CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_expires ON refresh_tokens (token, expires_at);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens (user_id);`,
@@ -159,6 +181,9 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_oauth_connections_user ON oauth_connections (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions (user_id);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user ON notification_preferences (user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_totp_backup_codes_user ON totp_backup_codes (user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_user ON email_change_tokens (user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_hash ON email_change_tokens (token_hash);`,
 ];
 
 /**
