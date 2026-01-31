@@ -24,14 +24,8 @@ export const AuthPage = (): ReactElement => {
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
   const authResult = useAuth();
-  const {
-    login,
-    register,
-    forgotPassword,
-    resetPassword,
-    resendVerification,
-    isAuthenticated,
-  } = authResult;
+  const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated } =
+    authResult;
   const user = authResult.user as UserLocal | null;
   const { isLoading, error, setError, wrapHandler } = useFormState();
 

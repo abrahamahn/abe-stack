@@ -9,13 +9,17 @@
 import { UserNotFoundError } from '@abe-stack/core';
 
 import type {
-    AdminUser,
-    AdminUserListFilters,
-    AdminUserListResponse,
-    UserRole,
-    UserStatus,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UserRole,
+  UserStatus,
 } from '@abe-stack/core';
-import type { AdminUserListFilters as DbAdminUserListFilters, User as DbUser, UserRepository } from '@abe-stack/db';
+import type {
+  AdminUserListFilters as DbAdminUserListFilters,
+  User as DbUser,
+  UserRepository,
+} from '@abe-stack/db';
 
 // ============================================================================
 // Type Conversion Helpers

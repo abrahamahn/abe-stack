@@ -8,22 +8,21 @@
 import stripeDefault from 'stripe';
 
 import type {
-    BillingService,
-    CheckoutParams,
-    CheckoutResult,
-    CreateProductParams,
-    CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
-    ProviderInvoice,
-    ProviderPaymentMethod,
-    ProviderSubscription,
-    SetupIntentResult,
-    StripeProviderConfig as StripeConfig,
+  BillingService,
+  CheckoutParams,
+  CheckoutResult,
+  CreateProductParams,
+  CreateProductResult,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResult,
+  StripeProviderConfig as StripeConfig,
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';
 import type stripeLib from 'stripe';
-
 
 // ============================================================================
 // Stripe Status Mapping
@@ -216,7 +215,8 @@ export class StripeProvider implements BillingService {
       currentPeriodStart: new Date(periodStart * 1000),
       currentPeriodEnd: new Date(periodEnd * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at != null ? new Date(subscription.canceled_at * 1000) : null,
+      canceledAt:
+        subscription.canceled_at != null ? new Date(subscription.canceled_at * 1000) : null,
       trialEnd: subscription.trial_end != null ? new Date(subscription.trial_end * 1000) : null,
       metadata: subscription.metadata as Record<string, string>,
     };
@@ -251,11 +251,12 @@ export class StripeProvider implements BillingService {
     const customer = await this.stripe.customers.retrieve(customerId);
     const defaultPaymentMethod =
       customer.deleted !== true ? customer.invoice_settings.default_payment_method : null;
-    const defaultPaymentMethodId = defaultPaymentMethod != null
-      ? typeof defaultPaymentMethod === 'string'
-        ? defaultPaymentMethod
-        : defaultPaymentMethod.id
-      : null;
+    const defaultPaymentMethodId =
+      defaultPaymentMethod != null
+        ? typeof defaultPaymentMethod === 'string'
+          ? defaultPaymentMethod
+          : defaultPaymentMethod.id
+        : null;
 
     return paymentMethods.data.map((pm: stripeLib.PaymentMethod) => {
       const method: ProviderPaymentMethod = {
@@ -318,7 +319,7 @@ export class StripeProvider implements BillingService {
       return {
         id: invoice.id,
         customerId:
-          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? '',
+          typeof invoice.customer === 'string' ? invoice.customer : (invoice.customer?.id ?? ''),
         subscriptionId,
         status: mapStripeInvoiceStatus(invoice.status),
         amountDue: invoice.amount_due,
@@ -326,9 +327,10 @@ export class StripeProvider implements BillingService {
         currency: invoice.currency,
         periodStart: new Date(invoice.period_start * 1000),
         periodEnd: new Date(invoice.period_end * 1000),
-        paidAt: invoice.status_transitions.paid_at != null
-          ? new Date(invoice.status_transitions.paid_at * 1000)
-          : null,
+        paidAt:
+          invoice.status_transitions.paid_at != null
+            ? new Date(invoice.status_transitions.paid_at * 1000)
+            : null,
         invoicePdfUrl: invoice.invoice_pdf ?? null,
       };
     });

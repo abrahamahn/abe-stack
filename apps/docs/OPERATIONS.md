@@ -67,11 +67,11 @@ $COMPOSE exec api pnpm db:bootstrap:admin
 
 For schema changes that could break running code:
 
-| Deploy | Action                                         |
-| ------ | ---------------------------------------------- |
-| 1      | Add new column (nullable) or new table         |
+| Deploy | Action                                          |
+| ------ | ----------------------------------------------- |
+| 1      | Add new column (nullable) or new table          |
 | 2      | Deploy code that uses new column, backfill data |
-| 3      | Add NOT NULL constraint, drop old column       |
+| 3      | Add NOT NULL constraint, drop old column        |
 
 ### Pre-Migration Checklist
 
@@ -336,12 +336,12 @@ Record in `apps/docs/log/` or your team wiki:
 
 ### Drill Failure Actions
 
-| Issue                     | Action                                                        |
-| ------------------------- | ------------------------------------------------------------- |
-| Backup file corrupt       | Check disk health, re-run backup, verify gzip integrity       |
+| Issue                     | Action                                                         |
+| ------------------------- | -------------------------------------------------------------- |
+| Backup file corrupt       | Check disk health, re-run backup, verify gzip integrity        |
 | Backup is empty (0 bytes) | Check cron job logs, verify Postgres is running at backup time |
-| Missing tables            | Schema changed after backup — verify `db:push`/`db:migrate`   |
-| Row counts off            | Check if backup runs during high-write period; adjust timing  |
+| Missing tables            | Schema changed after backup — verify `db:push`/`db:migrate`    |
+| Row counts off            | Check if backup runs during high-write period; adjust timing   |
 
 ---
 
@@ -349,12 +349,12 @@ Record in `apps/docs/log/` or your team wiki:
 
 ### Severity Levels
 
-| Level | Name     | Definition                                    | Response Time | Examples                            |
-| ----- | -------- | --------------------------------------------- | ------------- | ----------------------------------- |
-| S1    | Critical | Service fully down, data loss risk            | Immediate     | Database crash, API unresponsive    |
-| S2    | Major    | Core feature broken, significant user impact  | < 1 hour      | Auth broken, WebSocket down         |
-| S3    | Minor    | Non-critical feature degraded, workaround exists | < 4 hours  | Email delivery delayed, slow queries |
-| S4    | Low      | Cosmetic or minor inconvenience               | Next business day | UI glitch, log noise             |
+| Level | Name     | Definition                                       | Response Time     | Examples                             |
+| ----- | -------- | ------------------------------------------------ | ----------------- | ------------------------------------ |
+| S1    | Critical | Service fully down, data loss risk               | Immediate         | Database crash, API unresponsive     |
+| S2    | Major    | Core feature broken, significant user impact     | < 1 hour          | Auth broken, WebSocket down          |
+| S3    | Minor    | Non-critical feature degraded, workaround exists | < 4 hours         | Email delivery delayed, slow queries |
+| S4    | Low      | Cosmetic or minor inconvenience                  | Next business day | UI glitch, log noise                 |
 
 ### Incident Response Steps
 
@@ -381,13 +381,13 @@ $COMPOSE logs --tail=200 caddy
 
 #### 3. Mitigate
 
-| Situation                | Action                                              |
-| ------------------------ | --------------------------------------------------- |
-| API crash-looping        | `$COMPOSE restart api`                              |
+| Situation                | Action                                                   |
+| ------------------------ | -------------------------------------------------------- |
+| API crash-looping        | `$COMPOSE restart api`                                   |
 | Database connection lost | `$COMPOSE restart postgres`, then `$COMPOSE restart api` |
-| Bad deploy               | Rollback (see below)                                |
-| Disk full                | `docker system prune -a --volumes` (careful!)       |
-| Memory exhaustion        | `$COMPOSE restart` — investigate resource limits    |
+| Bad deploy               | Rollback (see below)                                     |
+| Disk full                | `docker system prune -a --volumes` (careful!)            |
+| Memory exhaustion        | `$COMPOSE restart` — investigate resource limits         |
 
 #### 4. Rollback a Bad Deploy
 
@@ -569,12 +569,12 @@ du -sh /home/deploy/backups/
 
 ## Health Endpoints Reference
 
-| Endpoint            | Purpose                             | Expected Response |
-| ------------------- | ----------------------------------- | ----------------- |
-| `/health`           | Basic check — DB reachable          | `200` or `503`    |
-| `/health/live`      | Liveness — process alive            | `200` with uptime |
-| `/health/ready`     | Readiness — DB connected and schema valid | `200` or `503` |
-| `/api/system/status`| Detailed — all services with latency | JSON with per-service status |
+| Endpoint             | Purpose                                   | Expected Response            |
+| -------------------- | ----------------------------------------- | ---------------------------- |
+| `/health`            | Basic check — DB reachable                | `200` or `503`               |
+| `/health/live`       | Liveness — process alive                  | `200` with uptime            |
+| `/health/ready`      | Readiness — DB connected and schema valid | `200` or `503`               |
+| `/api/system/status` | Detailed — all services with latency      | JSON with per-service status |
 
 **Service statuses:** `up`, `down`, `degraded`
 **Overall statuses:** `healthy`, `degraded`, `down`

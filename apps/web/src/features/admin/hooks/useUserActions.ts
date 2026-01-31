@@ -89,7 +89,10 @@ export function useUserActions(): UseUserActionsResult {
       setState((prev) => ({ ...prev, isUpdating: true, error: null }));
 
       try {
-        const result: AdminUpdateUserResponseLocal = await updateUser(userId, data) as AdminUpdateUserResponseLocal;
+        const result: AdminUpdateUserResponseLocal = (await updateUser(
+          userId,
+          data,
+        )) as AdminUpdateUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isUpdating: false,
@@ -110,11 +113,17 @@ export function useUserActions(): UseUserActionsResult {
   );
 
   const lockUserAction = useCallback(
-    async (userId: string, data: AdminLockUserRequestLocal): Promise<AdminLockUserResponseLocal | null> => {
+    async (
+      userId: string,
+      data: AdminLockUserRequestLocal,
+    ): Promise<AdminLockUserResponseLocal | null> => {
       setState((prev) => ({ ...prev, isLocking: true, error: null }));
 
       try {
-        const result: AdminLockUserResponseLocal = await lockUser(userId, data) as AdminLockUserResponseLocal;
+        const result: AdminLockUserResponseLocal = (await lockUser(
+          userId,
+          data,
+        )) as AdminLockUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isLocking: false,
@@ -142,7 +151,10 @@ export function useUserActions(): UseUserActionsResult {
         // The unlock endpoint expects the email in the request body for the legacy endpoint,
         // but the new /users/:id/unlock endpoint needs the email for logging purposes
         // We'll use a placeholder since the backend will look up the user by ID
-        const result: AdminLockUserResponseLocal = await unlockUser(userId, { email: '', reason }) as AdminLockUserResponseLocal;
+        const result: AdminLockUserResponseLocal = (await unlockUser(userId, {
+          email: '',
+          reason,
+        })) as AdminLockUserResponseLocal;
         setState((prev) => ({
           ...prev,
           isUnlocking: false,

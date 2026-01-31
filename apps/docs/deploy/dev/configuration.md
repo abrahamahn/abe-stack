@@ -228,10 +228,10 @@ Each package stores incremental build info:
 
 Path aliases are defined in two places that must be kept in sync:
 
-| Location                   | Purpose                  | Format                                  |
-| -------------------------- | ------------------------ | --------------------------------------- |
-| `apps/*/vite.config.ts`    | Vite/Vitest resolution   | `resolve.alias: Record<string, string>` |
-| `apps/*/tsconfig.json`     | TypeScript type checking | `"paths": { "@alias": ["./src/path"] }` |
+| Location                                          | Purpose                  | Format                                  |
+| ------------------------------------------------- | ------------------------ | --------------------------------------- |
+| `apps/*/vite.config.ts`                           | Vite/Vitest resolution   | `resolve.alias: Record<string, string>` |
+| `apps/*/tsconfig.json`                            | TypeScript type checking | `"paths": { "@alias": ["./src/path"] }` |
 | `infra/*/tsconfig.json (and modules/*, shared/*)` | Package internal aliases | `"paths": { ... }`                      |
 
 ### Alias Categories
@@ -323,14 +323,14 @@ This prevents stale builds when `dist` is deleted but `tsconfig.tsbuildinfo` rem
 
 ### Build Output
 
-| Package         | Output Dir | Contents                  |
-| --------------- | ---------- | ------------------------- |
-| `shared/core` | `dist/`    | `.js`, `.d.ts`, `.js.map` |
-| `sdk`  | `dist/`    | `.js`, `.d.ts`, `.js.map` |
-| `shared/ui`   | `dist/`    | `.js`, `.d.ts`, `.js.map` |
-| `apps/server`   | `dist/`    | `.js`, `.js.map`          |
-| `apps/web`      | `build/`   | Bundled production assets |
-| `apps/desktop`  | `build/`   | Electron packaged app     |
+| Package        | Output Dir | Contents                  |
+| -------------- | ---------- | ------------------------- |
+| `shared/core`  | `dist/`    | `.js`, `.d.ts`, `.js.map` |
+| `sdk`          | `dist/`    | `.js`, `.d.ts`, `.js.map` |
+| `shared/ui`    | `dist/`    | `.js`, `.d.ts`, `.js.map` |
+| `apps/server`  | `dist/`    | `.js`, `.js.map`          |
+| `apps/web`     | `build/`   | Bundled production assets |
+| `apps/desktop` | `build/`   | Electron packaged app     |
 
 ### Test File Exclusion
 
@@ -653,48 +653,48 @@ const serverConfigSchema = z.object({
 
 ### File Locations
 
-| Purpose                        | Location                             |
-| ------------------------------ | ------------------------------------ |
-| Root TypeScript config         | `tsconfig.json`                      |
-| Base TypeScript config         | `.config/tsconfig.base.json`         |
-| Node.js TypeScript config      | `.config/tsconfig.node.json`         |
-| React TypeScript config        | `.config/tsconfig.react.json`        |
-| ESLint TypeScript config       | `.config/tsconfig.eslint.json`       |
-| Server build config            | `apps/server/tsconfig.build.json`    |
-| Path aliases (Vite)            | `apps/*/vite.config.ts` (inline)     |
-| Vite web config                | `apps/web/vite.config.ts`            |
-| Vite desktop config            | `apps/desktop/vite.config.ts`        |
-| Vitest configs                 | `config/vitest.config.ts`            |
-| Playwright E2E config          | `config/playwright.config.ts`        |
-| Drizzle ORM config             | `config/drizzle.config.ts`           |
-| Linting config source of truth | `config/linting.json`                |
-| ESLint config                  | `eslint.config.ts`                   |
-| Prettier config                | `config/.prettierrc`                 |
-| Prettier ignore                | `config/.prettierignore`             |
-| Turbo config                   | `turbo.json`                         |
-| pnpm workspace                 | `pnpm-workspace.yaml`                |
-| pnpm config                    | `.pnpmrc`                            |
-| Environment files              | `.env.*`                             |
+| Purpose                        | Location                                      |
+| ------------------------------ | --------------------------------------------- |
+| Root TypeScript config         | `tsconfig.json`                               |
+| Base TypeScript config         | `.config/tsconfig.base.json`                  |
+| Node.js TypeScript config      | `.config/tsconfig.node.json`                  |
+| React TypeScript config        | `.config/tsconfig.react.json`                 |
+| ESLint TypeScript config       | `.config/tsconfig.eslint.json`                |
+| Server build config            | `apps/server/tsconfig.build.json`             |
+| Path aliases (Vite)            | `apps/*/vite.config.ts` (inline)              |
+| Vite web config                | `apps/web/vite.config.ts`                     |
+| Vite desktop config            | `apps/desktop/vite.config.ts`                 |
+| Vitest configs                 | `config/vitest.config.ts`                     |
+| Playwright E2E config          | `config/playwright.config.ts`                 |
+| Drizzle ORM config             | `config/drizzle.config.ts`                    |
+| Linting config source of truth | `config/linting.json`                         |
+| ESLint config                  | `eslint.config.ts`                            |
+| Prettier config                | `config/.prettierrc`                          |
+| Prettier ignore                | `config/.prettierignore`                      |
+| Turbo config                   | `turbo.json`                                  |
+| pnpm workspace                 | `pnpm-workspace.yaml`                         |
+| pnpm config                    | `.pnpmrc`                                     |
+| Environment files              | `.env.*`                                      |
 | Docker compose                 | `infra/docker/development/docker-compose.yml` |
-| Dockerfile                     | `infra/docker/Dockerfile`            |
-| Server domain configs          | `apps/server/src/config/*.config.ts` |
-| CI/CD workflows                | `.github/workflows/*.yml`            |
-| Git ignore patterns            | `.gitignore`                         |
-| Sync scripts                   | `tools/sync/*.ts`                    |
-| Dev scripts                    | `tools/dev/*.ts`                     |
+| Dockerfile                     | `infra/docker/Dockerfile`                     |
+| Server domain configs          | `apps/server/src/config/*.config.ts`          |
+| CI/CD workflows                | `.github/workflows/*.yml`                     |
+| Git ignore patterns            | `.gitignore`                                  |
+| Sync scripts                   | `tools/sync/*.ts`                             |
+| Dev scripts                    | `tools/dev/*.ts`                              |
 
 ### Package Filters
 
 Use with `turbo run` or `pnpm --filter`:
 
-| Filter               | Package         |
-| -------------------- | --------------- |
-| `@abe-stack/web`     | `apps/web`      |
-| `@abe-stack/server`  | `apps/server`   |
-| `@abe-stack/desktop` | `apps/desktop`  |
-| `@abe-stack/ui`      | `shared/ui`   |
-| `@abe-stack/core`    | `shared/core` |
-| `@abe-stack/client`     | `sdk`  |
+| Filter               | Package        |
+| -------------------- | -------------- |
+| `@abe-stack/web`     | `apps/web`     |
+| `@abe-stack/server`  | `apps/server`  |
+| `@abe-stack/desktop` | `apps/desktop` |
+| `@abe-stack/ui`      | `shared/ui`    |
+| `@abe-stack/core`    | `shared/core`  |
+| `@abe-stack/client`  | `sdk`          |
 
 ### Related Documentation
 

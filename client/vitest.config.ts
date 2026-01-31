@@ -4,14 +4,14 @@ import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../vitest.config';
 
-const corePkg = path.resolve(__dirname, '../shared/core/src');
+const corePkg = path.resolve(__dirname, '../core/src');
 const contractsPkg = path.resolve(__dirname, '../infra/contracts/src');
 
 export default mergeConfig(baseConfig, {
   test: {
     name: 'client',
     environment: 'node',
-    exclude: ['**/node_modules/**', '**/dist/**', 'stores/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'stores/**', 'ui/**'],
     server: {
       deps: {
         inline: ['@abe-stack/core', '@abe-stack/contracts'],

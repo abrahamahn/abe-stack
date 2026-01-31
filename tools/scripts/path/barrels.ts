@@ -101,12 +101,12 @@ function exportBarrelFiles(): void {
     'apps/server',
     'apps/web',
     'infra/contracts',
-    'shared/core',
+    'core',
     'infra/db',
     'infra/media',
     'client',
     'client/stores',
-    'shared/ui',
+    'client/ui',
   ];
 
   let output = '# Barrel Exports (index.ts)\n';

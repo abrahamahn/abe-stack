@@ -2,11 +2,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  createMockEnvironment,
-  mockUser,
-  renderWithProviders,
-} from '../../../__tests__/utils';
+import { createMockEnvironment, mockUser, renderWithProviders } from '../../../__tests__/utils';
 import { DashboardPage } from './Dashboard';
 
 import type { RenderWithProvidersResult } from '../../../__tests__/utils';

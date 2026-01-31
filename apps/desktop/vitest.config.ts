@@ -15,11 +15,11 @@ export default mergeConfig(baseConfig, {
       },
       {
         find: /^@abe-stack\/core\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/core/src/$1'),
+        replacement: path.resolve(__dirname, '../../core/src/$1'),
       },
       {
         find: /^@abe-stack\/ui\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/ui/src/$1'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/$1'),
       },
       {
         find: /^@abe-stack\/client\/(.*)$/,
@@ -36,11 +36,11 @@ export default mergeConfig(baseConfig, {
       },
       {
         find: '@abe-stack/core',
-        replacement: path.resolve(__dirname, '../../shared/core/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../core/src/index.ts'),
       },
       {
         find: '@abe-stack/ui',
-        replacement: path.resolve(__dirname, '../../shared/ui/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../client/ui/src/index.ts'),
       },
       {
         find: '@abe-stack/client',

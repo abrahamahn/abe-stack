@@ -106,7 +106,7 @@ describe('CSRF Protection', () => {
       const cookies = tokenResponse.headers['set-cookie'];
       const csrfCookie = Array.isArray(cookies)
         ? cookies.find((c) => c.startsWith('_csrf='))
-        : (cookies !== undefined && cookies.startsWith('_csrf='))
+        : cookies !== undefined && cookies.startsWith('_csrf=')
           ? cookies
           : undefined;
 
@@ -236,7 +236,7 @@ describe('CSRF Protection', () => {
 
       const csrfCookie = Array.isArray(cookies)
         ? cookies.find((c) => c.startsWith('_csrf='))
-        : (cookies !== undefined && cookies.startsWith('_csrf='))
+        : cookies !== undefined && cookies.startsWith('_csrf=')
           ? cookies
           : undefined;
 

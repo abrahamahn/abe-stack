@@ -136,7 +136,15 @@ function createPubsubSystem(): PubsubSystem {
     onMessage: (key: string, value: unknown) => {
       // Parse key: "table:id"
       const [table, id] = key.split(':');
-      if (table === null || table === undefined || table === '' || id === null || id === undefined || id === '') return;
+      if (
+        table === null ||
+        table === undefined ||
+        table === '' ||
+        id === null ||
+        id === undefined ||
+        id === ''
+      )
+        return;
 
       // Validate value
       if (typeof value !== 'object' || value === null) return;

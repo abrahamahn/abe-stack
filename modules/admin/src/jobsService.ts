@@ -7,11 +7,11 @@
  */
 
 import type {
-    JobDetails,
-    JobListOptions,
-    JobListResult,
-    PostgresQueueStore,
-    QueueStats,
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  PostgresQueueStore,
+  QueueStats,
 } from '@abe-stack/jobs';
 
 // ============================================================================

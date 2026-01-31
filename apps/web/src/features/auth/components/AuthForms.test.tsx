@@ -1,13 +1,7 @@
 // apps/web/src/features/auth/components/AuthForms.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import {
-    AuthForm,
-    ForgotPasswordForm,
-    LoginForm,
-    RegisterForm,
-    ResetPasswordForm,
-} from './';
+import { AuthForm, ForgotPasswordForm, LoginForm, RegisterForm, ResetPasswordForm } from './';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 

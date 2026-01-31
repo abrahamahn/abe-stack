@@ -391,9 +391,7 @@ describe('PasswordChangeForm', () => {
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(
-        screen.queryByText('Password must be at least 8 characters'),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Password must be at least 8 characters')).not.toBeInTheDocument();
     });
   });
 

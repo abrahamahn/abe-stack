@@ -62,8 +62,14 @@ export function useExportEvents(): UseExportEventsResult {
     [config.apiUrl],
   );
 
-  const mutation = useMutation<SecurityEventsExportResponseLocal, Error, SecurityEventsExportRequestLocal>({
-    mutationFn: async (request: SecurityEventsExportRequestLocal): Promise<SecurityEventsExportResponseLocal> => {
+  const mutation = useMutation<
+    SecurityEventsExportResponseLocal,
+    Error,
+    SecurityEventsExportRequestLocal
+  >({
+    mutationFn: async (
+      request: SecurityEventsExportRequestLocal,
+    ): Promise<SecurityEventsExportResponseLocal> => {
       const result = await adminApi.exportSecurityEvents(request);
       return result as SecurityEventsExportResponseLocal;
     },

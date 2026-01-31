@@ -8,7 +8,12 @@
 
 import type { BaseContext, RequestContext } from '@abe-stack/contracts';
 import type { BillingConfig } from '@abe-stack/core';
-import type { DbClient, PlanRepository, SubscriptionRepository, UserRepository } from '@abe-stack/db';
+import type {
+  DbClient,
+  PlanRepository,
+  SubscriptionRepository,
+  UserRepository,
+} from '@abe-stack/db';
 
 /**
  * Application context narrowed for the admin module.

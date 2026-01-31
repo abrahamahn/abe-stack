@@ -16,7 +16,13 @@ import { createAdminApiClient } from '../services/adminApi';
 // Types
 // ============================================================================
 
-type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+type JobStatusLocal =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled';
 
 interface JobDetailsLocal {
   id: string;

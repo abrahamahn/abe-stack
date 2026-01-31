@@ -10,18 +10,7 @@
  * - security_events
  */
 
-import {
-  and,
-  deleteFrom,
-  eq,
-  gt,
-  insert,
-  isNull,
-  lt,
-  raw,
-  select,
-  update,
-} from '../builder/index';
+import { and, deleteFrom, eq, gt, insert, isNull, lt, raw, select, update } from '../builder/index';
 import {
   EMAIL_VERIFICATION_TOKEN_COLUMNS,
   EMAIL_VERIFICATION_TOKENS_TABLE,

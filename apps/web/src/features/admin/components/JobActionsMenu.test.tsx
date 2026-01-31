@@ -459,12 +459,7 @@ describe('JobActionsMenu', () => {
 
     it('should handle empty jobId string', async () => {
       render(
-        <JobActionsMenu
-          jobId=""
-          status="failed"
-          onRetry={mockOnRetry}
-          onCancel={mockOnCancel}
-        />,
+        <JobActionsMenu jobId="" status="failed" onRetry={mockOnRetry} onCancel={mockOnCancel} />,
       );
 
       const actionsButton = screen.getByText('Actions');

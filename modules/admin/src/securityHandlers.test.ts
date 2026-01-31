@@ -259,11 +259,7 @@ describe('Security Handlers', () => {
 
         await handleListSecurityEvents(mockCtx, body, req, createMockReply());
 
-        expect(listSecurityEvents).toHaveBeenCalledWith(
-          mockCtx.db,
-          { page: 1, limit: 20 },
-          filter,
-        );
+        expect(listSecurityEvents).toHaveBeenCalledWith(mockCtx.db, { page: 1, limit: 20 }, filter);
       });
 
       test('should handle empty results', async () => {
@@ -363,12 +359,8 @@ describe('Security Handlers', () => {
 
     describe('error handling', () => {
       test('should return 404 when event not found', async () => {
-        const { getSecurityEvent, SecurityEventNotFoundError } = await import(
-          './securityService'
-        );
-        vi.mocked(getSecurityEvent).mockRejectedValue(
-          new SecurityEventNotFoundError('event-999'),
-        );
+        const { getSecurityEvent, SecurityEventNotFoundError } = await import('./securityService');
+        vi.mocked(getSecurityEvent).mockRejectedValue(new SecurityEventNotFoundError('event-999'));
 
         const req = createMockRequest({}, { id: 'event-999' });
         const result = await handleGetSecurityEvent(mockCtx, undefined, req, createMockReply());

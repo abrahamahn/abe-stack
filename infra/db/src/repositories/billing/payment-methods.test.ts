@@ -11,22 +11,28 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createPaymentMethodRepository } from './payment-methods.js';
 
 import type { RawDb } from '../../client.js';
-import type { PaymentMethod, NewPaymentMethod, UpdatePaymentMethod, CardDetails } from '../../schema/index.js';
+import type {
+  PaymentMethod,
+  NewPaymentMethod,
+  UpdatePaymentMethod,
+  CardDetails,
+} from '../../schema/index.js';
 
 // ============================================================================
 // Mock Database
 // ============================================================================
 
-const createMockDb = (): RawDb => ({
-  query: vi.fn(),
-  queryOne: vi.fn(),
-  execute: vi.fn(),
-  raw: vi.fn(),
-  transaction: vi.fn(),
-  healthCheck: vi.fn(),
-  close: vi.fn(),
-  getClient: vi.fn(),
-} as unknown as RawDb);
+const createMockDb = (): RawDb =>
+  ({
+    query: vi.fn(),
+    queryOne: vi.fn(),
+    execute: vi.fn(),
+    raw: vi.fn(),
+    transaction: vi.fn(),
+    healthCheck: vi.fn(),
+    close: vi.fn(),
+    getClient: vi.fn(),
+  }) as unknown as RawDb;
 
 // ============================================================================
 // Test Data
@@ -102,7 +108,12 @@ describe('createPaymentMethodRepository', () => {
     it('should parse card details JSONB correctly', async () => {
       const rowWithCardDetails = {
         ...mockDbRow,
-        card_details: JSON.stringify({ brand: 'mastercard', last4: '5555', expMonth: 6, expYear: 2026 }),
+        card_details: JSON.stringify({
+          brand: 'mastercard',
+          last4: '5555',
+          expMonth: 6,
+          expYear: 2026,
+        }),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(rowWithCardDetails);
 
@@ -180,10 +191,7 @@ describe('createPaymentMethodRepository', () => {
 
   describe('findByUserId', () => {
     it('should return all payment methods for user', async () => {
-      const methods = [
-        mockDbRow,
-        { ...mockDbRow, id: 'pm-456', is_default: false },
-      ];
+      const methods = [mockDbRow, { ...mockDbRow, id: 'pm-456', is_default: false }];
       vi.mocked(mockDb.query).mockResolvedValue(methods);
 
       const repo = createPaymentMethodRepository(mockDb);
@@ -220,8 +228,25 @@ describe('createPaymentMethodRepository', () => {
 
     it('should parse card details for all returned methods', async () => {
       const methods = [
-        { ...mockDbRow, card_details: JSON.stringify({ brand: 'visa', last4: '1111', expMonth: 1, expYear: 2025 }) },
-        { ...mockDbRow, id: 'pm-456', card_details: JSON.stringify({ brand: 'amex', last4: '9999', expMonth: 12, expYear: 2026 }) },
+        {
+          ...mockDbRow,
+          card_details: JSON.stringify({
+            brand: 'visa',
+            last4: '1111',
+            expMonth: 1,
+            expYear: 2025,
+          }),
+        },
+        {
+          ...mockDbRow,
+          id: 'pm-456',
+          card_details: JSON.stringify({
+            brand: 'amex',
+            last4: '9999',
+            expMonth: 12,
+            expYear: 2026,
+          }),
+        },
       ];
       vi.mocked(mockDb.query).mockResolvedValue(methods);
 
@@ -322,7 +347,12 @@ describe('createPaymentMethodRepository', () => {
       const repo = createPaymentMethodRepository(mockDb);
       const result = await repo.create(newMethod);
 
-      expect(result.cardDetails).toEqual({ brand: 'amex', last4: '3456', expMonth: 3, expYear: 2027 });
+      expect(result.cardDetails).toEqual({
+        brand: 'amex',
+        last4: '3456',
+        expMonth: 3,
+        expYear: 2027,
+      });
     });
 
     it('should create payment method without card details', async () => {
@@ -412,14 +442,24 @@ describe('createPaymentMethodRepository', () => {
       vi.mocked(mockDb.queryOne).mockResolvedValue({
         ...mockDbRow,
         is_default: true,
-        card_details: JSON.stringify({ brand: 'discover', last4: '6789', expMonth: 8, expYear: 2028 }),
+        card_details: JSON.stringify({
+          brand: 'discover',
+          last4: '6789',
+          expMonth: 8,
+          expYear: 2028,
+        }),
       });
 
       const repo = createPaymentMethodRepository(mockDb);
       const result = await repo.update('pm-123', updateData);
 
       expect(result?.isDefault).toBe(true);
-      expect(result?.cardDetails).toEqual({ brand: 'discover', last4: '6789', expMonth: 8, expYear: 2028 });
+      expect(result?.cardDetails).toEqual({
+        brand: 'discover',
+        last4: '6789',
+        expMonth: 8,
+        expYear: 2028,
+      });
     });
 
     it('should stringify card details when updating', async () => {

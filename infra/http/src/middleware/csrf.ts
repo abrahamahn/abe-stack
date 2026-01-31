@@ -7,11 +7,11 @@
  */
 
 import {
-    createCipheriv,
-    createDecipheriv,
-    createHmac,
-    randomBytes,
-    timingSafeEqual,
+  createCipheriv,
+  createDecipheriv,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
 } from 'node:crypto';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -197,7 +197,14 @@ function decryptToken(encryptedToken: string, secret: string): string | null {
     const encryptedPart = parts[1];
     const authTagStr = parts[2];
 
-    if (ivStr == null || ivStr === '' || encryptedPart == null || encryptedPart === '' || authTagStr == null || authTagStr === '') {
+    if (
+      ivStr == null ||
+      ivStr === '' ||
+      encryptedPart == null ||
+      encryptedPart === '' ||
+      authTagStr == null ||
+      authTagStr === ''
+    ) {
       return null;
     }
 

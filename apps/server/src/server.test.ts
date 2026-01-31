@@ -283,17 +283,12 @@ describe('createServer', () => {
 
       await createServer({ config, db, app });
 
-      expect(mockFastifyInstance.addHook).toHaveBeenCalledWith(
-        'onRequest',
-        expect.any(Function),
-      );
+      expect(mockFastifyInstance.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
 
       // Test the hook implementation
       const addHookFn = mockFastifyInstance.addHook as ReturnType<typeof vi.fn>;
       const hookCalls = addHookFn.mock.calls;
-      const onRequestHook = hookCalls.find(
-        (call: [string, unknown]) => call[0] === 'onRequest',
-      );
+      const onRequestHook = hookCalls.find((call: [string, unknown]) => call[0] === 'onRequest');
       expect(onRequestHook).toBeDefined();
 
       if (onRequestHook !== undefined) {
@@ -392,9 +387,7 @@ describe('listen', () => {
         port: 3000,
         host: 'localhost',
       });
-      expect(mockServer.log.info).toHaveBeenCalledWith(
-        'Server listening on http://localhost:3000',
-      );
+      expect(mockServer.log.info).toHaveBeenCalledWith('Server listening on http://localhost:3000');
       expect(mockServer.log.warn).not.toHaveBeenCalled();
     });
 
@@ -407,9 +400,7 @@ describe('listen', () => {
 
       await listen(mockServer, config);
 
-      expect(mockServer.log.info).toHaveBeenCalledWith(
-        'Server listening on http://localhost:3000',
-      );
+      expect(mockServer.log.info).toHaveBeenCalledWith('Server listening on http://localhost:3000');
     });
   });
 
@@ -420,9 +411,7 @@ describe('listen', () => {
 
       // First call fails with EADDRINUSE, second succeeds
       const listenFn = mockServer.listen as ReturnType<typeof vi.fn>;
-      listenFn
-        .mockRejectedValueOnce({ code: 'EADDRINUSE' })
-        .mockResolvedValueOnce(undefined);
+      listenFn.mockRejectedValueOnce({ code: 'EADDRINUSE' }).mockResolvedValueOnce(undefined);
 
       await listen(mockServer, config);
 
@@ -435,9 +424,7 @@ describe('listen', () => {
         port: 3001,
         host: 'localhost',
       });
-      expect(mockServer.log.warn).toHaveBeenCalledWith(
-        'Port 3000 is in use, trying next...',
-      );
+      expect(mockServer.log.warn).toHaveBeenCalledWith('Port 3000 is in use, trying next...');
       expect(mockServer.log.warn).toHaveBeenCalledWith(
         'Default port 3000 in use. Using fallback port 3001.',
       );
@@ -461,9 +448,7 @@ describe('listen', () => {
         port: 3002,
         host: 'localhost',
       });
-      expect(mockServer.log.info).toHaveBeenCalledWith(
-        'Server listening on http://localhost:3002',
-      );
+      expect(mockServer.log.info).toHaveBeenCalledWith('Server listening on http://localhost:3002');
     });
 
     it('should handle duplicate ports in configuration', async () => {
@@ -485,9 +470,7 @@ describe('listen', () => {
       const mockServer = createMockFastifyInstance();
 
       const listenFn = mockServer.listen as ReturnType<typeof vi.fn>;
-      listenFn
-        .mockRejectedValueOnce({ code: 'EADDRINUSE' })
-        .mockResolvedValueOnce(undefined);
+      listenFn.mockRejectedValueOnce({ code: 'EADDRINUSE' }).mockResolvedValueOnce(undefined);
 
       await listen(mockServer, config);
 
@@ -575,9 +558,7 @@ describe('listen', () => {
         port: 3000,
         host: '0.0.0.0',
       });
-      expect(mockServer.log.info).toHaveBeenCalledWith(
-        'Server listening on http://0.0.0.0:3000',
-      );
+      expect(mockServer.log.info).toHaveBeenCalledWith('Server listening on http://0.0.0.0:3000');
     });
 
     it('should handle high port numbers', async () => {

@@ -15,11 +15,22 @@ export function loadSmtpConfig(env: FullEnv): SmtpConfig {
     host: env.SMTP_HOST ?? 'localhost',
     port: getInt(env.SMTP_PORT != null ? String(env.SMTP_PORT) : undefined, 587),
     secure: env.SMTP_SECURE === 'true',
-    connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT != null ? String(env.SMTP_CONNECTION_TIMEOUT) : undefined, 5000),
-    socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT != null ? String(env.SMTP_SOCKET_TIMEOUT) : undefined, 30000),
+    connectionTimeout: getInt(
+      env.SMTP_CONNECTION_TIMEOUT != null ? String(env.SMTP_CONNECTION_TIMEOUT) : undefined,
+      5000,
+    ),
+    socketTimeout: getInt(
+      env.SMTP_SOCKET_TIMEOUT != null ? String(env.SMTP_SOCKET_TIMEOUT) : undefined,
+      30000,
+    ),
   };
 
-  if ((env.SMTP_USER != null && env.SMTP_USER !== '') && (env.SMTP_PASS != null && env.SMTP_PASS !== '')) {
+  if (
+    env.SMTP_USER != null &&
+    env.SMTP_USER !== '' &&
+    env.SMTP_PASS != null &&
+    env.SMTP_PASS !== ''
+  ) {
     config.auth = { user: env.SMTP_USER, pass: env.SMTP_PASS };
   }
 

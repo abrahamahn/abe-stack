@@ -1,0 +1,51 @@
+// client/ui/src/components/LoadingContainer.tsx
+import { Spinner } from '@elements/Spinner';
+import { Text } from '@elements/Text';
+import '../styles/components.css';
+
+import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+
+type LoadingContainerProps = ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Loading text to display
+   * @default 'Loading...'
+   */
+  text?: string;
+  /**
+   * Spinner size
+   * @default 'md'
+   */
+  size?: 'sm' | 'md' | 'lg';
+};
+
+const spinnerSizes = {
+  sm: '1rem',
+  md: '1.5rem',
+  lg: '2rem',
+};
+
+/**
+ * Centered loading container with spinner and optional text
+ *
+ * @example
+ * ```tsx
+ * <LoadingContainer />
+ * <LoadingContainer text="Fetching data..." />
+ * <LoadingContainer size="lg" text="Please wait..." />
+ * ```
+ */
+export const LoadingContainer = ({
+  text = 'Loading...',
+  size = 'md',
+  className = '',
+  ...rest
+}: LoadingContainerProps): ReactElement => {
+  const spinnerClass = size === 'sm' ? 'spinner-small' : size === 'lg' ? 'spinner-large' : '';
+
+  return (
+    <div className={`loading-container ${className}`.trim()} {...rest}>
+      <Spinner size={spinnerSizes[size]} className={spinnerClass} />
+      {text !== '' ? <Text tone="muted">{text}</Text> : null}
+    </div>
+  );
+};

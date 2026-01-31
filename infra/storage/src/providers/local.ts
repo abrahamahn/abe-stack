@@ -20,7 +20,7 @@ export class LocalStorageProvider implements StorageProvider {
     data: Buffer | Uint8Array | string,
     _contentType: string,
   ): Promise<string> {
-    const finalKey = (key !== '') ? key : randomUUID();
+    const finalKey = key !== '' ? key : randomUUID();
     const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
     await writeFile(filePath, data);
@@ -37,7 +37,12 @@ export class LocalStorageProvider implements StorageProvider {
     try {
       await unlink(filePath);
     } catch (error: unknown) {
-      if (error != null && typeof error === 'object' && 'code' in error && error.code !== 'ENOENT') {
+      if (
+        error != null &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code !== 'ENOENT'
+      ) {
         throw error;
       }
     }

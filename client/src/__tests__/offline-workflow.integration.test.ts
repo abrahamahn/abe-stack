@@ -134,7 +134,9 @@ interface OfflineSystem {
   cache: RecordCache<TestTables>;
   storage: RecordStorage<TestTableNames>;
   queue: TransactionQueue;
-  mockSubmit: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>>;
+  mockSubmit: ReturnType<
+    typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>
+  >;
   mockRollback: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<void>>>;
   applyOptimisticUpdate: (
     operations: Array<{
@@ -158,7 +160,9 @@ function createOfflineSystem(): OfflineSystem {
     .fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>()
     .mockResolvedValue({ status: 200 });
 
-  const mockRollback = vi.fn<(transaction: QueuedTransaction) => Promise<void>>().mockResolvedValue(undefined);
+  const mockRollback = vi
+    .fn<(transaction: QueuedTransaction) => Promise<void>>()
+    .mockResolvedValue(undefined);
 
   const queue = new TransactionQueue({
     submitTransaction: mockSubmit,

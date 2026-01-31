@@ -25,7 +25,9 @@ const createMockEvent = (overrides: Partial<SecurityEvent> = {}): SecurityEvent 
   ...overrides,
 });
 
-const createMockResponse = (overrides: Partial<SecurityEventsListResponse> = {}): SecurityEventsListResponse => ({
+const createMockResponse = (
+  overrides: Partial<SecurityEventsListResponse> = {},
+): SecurityEventsListResponse => ({
   data: [
     createMockEvent({ id: 'event-1', severity: 'critical' }),
     createMockEvent({ id: 'event-2', severity: 'high' }),

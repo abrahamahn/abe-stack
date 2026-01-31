@@ -109,7 +109,9 @@ describe('bootstrap-admin script', () => {
     mockLimit.mockReturnValue({ toSql: mockToSql });
     mockWhere.mockReturnValue({ limit: mockLimit });
     mockSelect.mockReturnValue({ where: mockWhere });
-    mockEq.mockImplementation((field: unknown, value: unknown) => `${String(field)} = ${String(value)}`);
+    mockEq.mockImplementation(
+      (field: unknown, value: unknown) => `${String(field)} = ${String(value)}`,
+    );
 
     // Mock the query builder chain for insert()
     const insertToSql = vi.fn().mockReturnValue({ text: 'INSERT INTO users...', values: [] });
@@ -247,9 +249,9 @@ describe('bootstrap-admin script', () => {
         expect(consoleOutput.some((msg) => msg.includes(`Password: ${result.password}`))).toBe(
           true,
         );
-        expect(
-          consoleOutput.some((msg) => msg.includes('Change this password immediately')),
-        ).toBe(true);
+        expect(consoleOutput.some((msg) => msg.includes('Change this password immediately'))).toBe(
+          true,
+        );
       });
 
       it('should build connection string from process.env', async () => {
@@ -499,11 +501,12 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should map bytes to valid charset characters', async () => {
-        const charset =
-          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
 
         // Generate password with all possible byte values
-        vi.mocked(randomBytes).mockReturnValue(Buffer.from(Array.from({ length: 24 }, (_, i) => i)));
+        vi.mocked(randomBytes).mockReturnValue(
+          Buffer.from(Array.from({ length: 24 }, (_, i) => i)),
+        );
 
         const { bootstrapAdmin } = await import('./bootstrap-admin');
 
@@ -523,9 +526,7 @@ describe('bootstrap-admin script', () => {
         await bootstrapAdmin();
 
         expect(consoleOutput.some((msg) => msg.includes('Production Admin Bootstrap'))).toBe(true);
-        expect(consoleOutput.some((msg) => msg.includes('Creating initial admin user'))).toBe(
-          true,
-        );
+        expect(consoleOutput.some((msg) => msg.includes('Creating initial admin user'))).toBe(true);
       });
 
       it('should display credentials with separators', async () => {

@@ -19,7 +19,12 @@
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-jobs --report-unused-disable-directives"
   },
-  "keywords": ["abe-stack", "jobs", "queue", "background-tasks"],
+  "keywords": [
+    "abe-stack",
+    "jobs",
+    "queue",
+    "background-tasks"
+  ],
   "author": "",
   "license": "ISC",
   "repository": {
@@ -27,9 +32,14 @@
     "url": "https://github.com/abrahamahn/abe-stack.git",
     "directory": "infra/jobs"
   },
-  "bugs": { "url": "https://github.com/abrahamahn/abe-stack/issues" },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
   "homepage": "https://github.com/abrahamahn/abe-stack#readme",
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "dependencies": {
     "@abe-stack/core": "workspace:*",

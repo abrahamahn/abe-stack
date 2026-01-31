@@ -23,8 +23,9 @@ interface PackageResult {
  * Packages to test in order (dependencies first).
  */
 const PACKAGES: Array<[string, string]> = [
-  ['core', 'shared/core'],
+  ['core', 'core'],
   ['client', 'client'],
+  ['ui', 'client/ui'],
   ['stores', 'client/stores'],
   ['server', 'apps/server'],
   ['web', 'apps/web'],
@@ -63,7 +64,9 @@ function parseVitestOutput(output: string): Omit<PackageResult, 'name' | 'succes
     ? parseInt(testFilesMatch[2] ?? '0', 10) + parseInt(testFilesMatch[1] ?? '0', 10)
     : 0;
 
-  const testsMatch = clean.match(/Tests\s+(?:(\d+) failed\s*\|\s*)?(\d+) passed(?:\s*\|\s*(\d+) skipped)?/);
+  const testsMatch = clean.match(
+    /Tests\s+(?:(\d+) failed\s*\|\s*)?(\d+) passed(?:\s*\|\s*(\d+) skipped)?/,
+  );
   const failed = testsMatch ? parseInt(testsMatch[1] ?? '0', 10) : 0;
   const passed = testsMatch ? parseInt(testsMatch[2] ?? '0', 10) : 0;
   const skipped = testsMatch ? parseInt(testsMatch[3] ?? '0', 10) : 0;
@@ -85,16 +88,26 @@ function runPackageTests(name: string, packagePath: string, verbose: boolean): P
   let success = true;
 
   try {
-    output = execSync('npx vitest run --reporter=dot --silent=passed-only', {
+    const result = execSync('npx vitest run --reporter=dot --silent=passed-only', {
       cwd: pkgDir,
       encoding: 'utf8',
-      stdio: verbose ? 'inherit' : 'pipe',
+      stdio: 'pipe',
       env: { ...process.env, FORCE_COLOR: '1' },
     });
+    output = typeof result === 'string' ? result : '';
+    if (verbose) {
+      if (output) process.stdout.write(output);
+    }
   } catch (err) {
     success = false;
     if (err && typeof err === 'object' && 'stdout' in err) {
-      output = String(err.stdout ?? '');
+      const stdout = String(err.stdout ?? '');
+      const stderr = 'stderr' in err ? String((err as { stderr?: unknown }).stderr ?? '') : '';
+      output = `${stdout}${stderr}`;
+      if (verbose) {
+        if (stdout) process.stdout.write(stdout);
+        if (stderr) process.stderr.write(stderr);
+      }
     }
   }
 
@@ -107,7 +120,9 @@ function runPackageTests(name: string, packagePath: string, verbose: boolean): P
     : `${c.red}${parsed.failed} failed${c.reset}, ${c.green}${parsed.passed} passed${c.reset}`;
   const skipStr = parsed.skipped > 0 ? `, ${c.yellow}${parsed.skipped} skipped${c.reset}` : '';
 
-  console.log(`  ${icon} ${c.bold}${name.padEnd(8)}${c.reset} ${stats}${skipStr} ${c.dim}(${parsed.duration})${c.reset}`);
+  console.log(
+    `  ${icon} ${c.bold}${name.padEnd(8)}${c.reset} ${stats}${skipStr} ${c.dim}(${parsed.duration})${c.reset}`,
+  );
 
   return { name, ...parsed, success };
 }
@@ -135,7 +150,9 @@ function printSummary(results: PackageResult[]): void {
   console.log(`${c.bold}${'═'.repeat(60)}${c.reset}`);
   console.log('');
 
-  console.log(`  ${c.dim}Package${c.reset}       ${c.dim}Files${c.reset}    ${c.dim}Passed${c.reset}    ${c.dim}Failed${c.reset}   ${c.dim}Skipped${c.reset}`);
+  console.log(
+    `  ${c.dim}Package${c.reset}       ${c.dim}Files${c.reset}    ${c.dim}Passed${c.reset}    ${c.dim}Failed${c.reset}   ${c.dim}Skipped${c.reset}`,
+  );
   console.log(`  ${c.dim}${'─'.repeat(54)}${c.reset}`);
 
   for (const r of results) {
@@ -159,7 +176,9 @@ function printSummary(results: PackageResult[]): void {
     console.log(`  ${c.green}${c.bold}✓ All ${totalTests} tests passed${c.reset}`);
   } else {
     const failedPackages = results.filter((r) => !r.success).map((r) => r.name);
-    console.log(`  ${c.red}${c.bold}✗ ${totals.failed} tests failed${c.reset} in: ${failedPackages.join(', ')}`);
+    console.log(
+      `  ${c.red}${c.bold}✗ ${totals.failed} tests failed${c.reset} in: ${failedPackages.join(', ')}`,
+    );
   }
 
   console.log('');

@@ -23,7 +23,9 @@ const TestConsumer = (): ReactNode => {
     <div>
       <span data-testid="cache-exists">{cache !== null ? 'true' : 'false'}</span>
       <span data-testid="cache-size">{cache.size}</span>
-      <span data-testid="query-data">{queryData !== null && queryData !== undefined ? String(queryData) : 'undefined'}</span>
+      <span data-testid="query-data">
+        {queryData !== null && queryData !== undefined ? String(queryData) : 'undefined'}
+      </span>
     </div>
   );
 };
@@ -180,7 +182,9 @@ describe('QueryCacheProvider', () => {
 
         return (
           <div>
-            <span data-testid="has-query">{cache.hasQuery(['users', 1]) === true ? 'true' : 'false'}</span>
+            <span data-testid="has-query">
+              {cache.hasQuery(['users', 1]) === true ? 'true' : 'false'}
+            </span>
             <span data-testid="user-name">{data?.name ?? 'not found'}</span>
           </div>
         );
@@ -456,7 +460,11 @@ describe('QueryCacheProvider', () => {
         cache.setQueryData(['invalidate-test'], 'data');
         cache.invalidateQuery(['invalidate-test']);
         const state = cache.getQueryState(['invalidate-test']);
-        return <span data-testid="is-invalidated">{state?.isInvalidated === true ? 'true' : 'false'}</span>;
+        return (
+          <span data-testid="is-invalidated">
+            {state?.isInvalidated === true ? 'true' : 'false'}
+          </span>
+        );
       };
 
       render(

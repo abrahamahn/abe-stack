@@ -1,10 +1,10 @@
 // modules/admin/src/securityService.test.ts
 import {
-    exportSecurityEvents,
-    getSecurityEvent,
-    getSecurityMetrics,
-    listSecurityEvents,
-    SecurityEventNotFoundError,
+  exportSecurityEvents,
+  getSecurityEvent,
+  getSecurityMetrics,
+  listSecurityEvents,
+  SecurityEventNotFoundError,
 } from './securityService';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

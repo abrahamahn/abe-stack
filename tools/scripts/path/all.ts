@@ -118,7 +118,7 @@ function categorizeFiles(allFiles: string[]): {
     }
 
     // CSS/Styles
-    if (file.endsWith('.css') || file.startsWith('shared/ui/src/styles/')) {
+    if (file.endsWith('.css') || file.startsWith('client/ui/src/styles/')) {
       result.styles.push(file);
       continue;
     }
@@ -254,7 +254,7 @@ function exportAllFiles(): void {
   // Packages
   const pkgOrder = [
     'infra/contracts',
-    'shared/core',
+    'core',
     'infra/db',
     'infra/cache',
     'infra/email',
@@ -270,7 +270,7 @@ function exportAllFiles(): void {
     'modules/admin',
     'modules/auth',
     'modules/billing',
-    'shared/ui',
+    'client/ui',
     'client',
   ];
   for (const pkg of pkgOrder) {

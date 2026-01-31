@@ -205,9 +205,7 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     server.addHook('onResponse', (request, reply, done) => {
       const start = (request as { _startAt?: bigint })._startAt;
       const durationMs =
-        start != null
-          ? Number(process.hrtime.bigint() - start) / 1_000_000
-          : reply.elapsedTime;
+        start != null ? Number(process.hrtime.bigint() - start) / 1_000_000 : reply.elapsedTime;
       server.log.info(
         {
           method: request.method,

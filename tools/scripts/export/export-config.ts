@@ -53,10 +53,10 @@ const FILES_TO_EXPORT = [
   'infra/contracts/tsconfig.json',
   'infra/contracts/vitest.config.ts',
 
-  // shared/core
-  'shared/core/package.json',
-  'shared/core/tsconfig.json',
-  'shared/core/vitest.config.ts',
+  // core
+  'core/package.json',
+  'core/tsconfig.json',
+  'core/vitest.config.ts',
 
   // infra/db
   'infra/db/package.json',
@@ -78,10 +78,10 @@ const FILES_TO_EXPORT = [
   'client/stores/tsconfig.json',
   'client/stores/vitest.config.ts',
 
-  // shared/ui
-  'shared/ui/package.json',
-  'shared/ui/tsconfig.json',
-  'shared/ui/vitest.config.ts',
+  // client/ui
+  'client/ui/package.json',
+  'client/ui/tsconfig.json',
+  'client/ui/vitest.config.ts',
 ];
 
 function exportConfig() {

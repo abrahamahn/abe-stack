@@ -616,7 +616,9 @@ describe('Route Methods', () => {
   });
 
   test('should not have any GET routes', () => {
-    const getRoutes = Object.entries(magicLinkRoutes).filter(([_, route]) => route.method === 'GET');
+    const getRoutes = Object.entries(magicLinkRoutes).filter(
+      ([_, route]) => route.method === 'GET',
+    );
     expect(getRoutes).toHaveLength(0);
   });
 
@@ -628,7 +630,9 @@ describe('Route Methods', () => {
   });
 
   test('should not have any PUT routes', () => {
-    const putRoutes = Object.entries(magicLinkRoutes).filter(([_, route]) => route.method === 'PUT');
+    const putRoutes = Object.entries(magicLinkRoutes).filter(
+      ([_, route]) => route.method === 'PUT',
+    );
     expect(putRoutes).toHaveLength(0);
   });
 
@@ -739,7 +743,12 @@ describe('Edge Cases', () => {
       };
 
       await expect(
-        magicLinkRoutes['auth/magic-link/request']!.handler(ctx, body, req as never, reply as never),
+        magicLinkRoutes['auth/magic-link/request']!.handler(
+          ctx,
+          body,
+          req as never,
+          reply as never,
+        ),
       ).rejects.toThrow('Database connection failed');
     });
 
@@ -810,7 +819,12 @@ describe('Edge Cases', () => {
       };
 
       await expect(
-        magicLinkRoutes['auth/magic-link/request']!.handler(ctx, body, req as never, reply as never),
+        magicLinkRoutes['auth/magic-link/request']!.handler(
+          ctx,
+          body,
+          req as never,
+          reply as never,
+        ),
       ).resolves.toBeDefined();
     });
 

@@ -101,8 +101,6 @@ function startWatcher(script: string): ChildProcess {
   return watcher;
 }
 
-
-
 function startTurboDev(filter?: string): ChildProcess {
   const args = ['turbo', 'run', 'dev', '--log-order=stream', '--log-prefix=task'];
   if (filter) {

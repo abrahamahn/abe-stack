@@ -20,7 +20,11 @@
       "persistent": true
     },
     "lint": {
-      "inputs": ["**/*.{ts,tsx,js,jsx,cjs,mjs}", "eslint.config.ts", ".config/tsconfig.eslint.json"],
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx,cjs,mjs}",
+        "eslint.config.ts",
+        ".config/tsconfig.eslint.json"
+      ],
       "cache": true
     },
     "type-check": {

@@ -11,10 +11,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { format } from 'prettier';
-import { generateThemeCss } from '../../shared/ui/src/theme/buildThemeCss';
+import { generateThemeCss } from '../../client/ui/src/theme/buildThemeCss';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../shared/ui/src/styles/theme.css');
+const themeCssPath = path.resolve(__dirname, '../../client/ui/src/styles/theme.css');
 const cacheDir = path.resolve(__dirname, '../../.cache');
 const themeHashPath = path.join(cacheDir, 'theme-css.hash');
 
@@ -24,12 +24,12 @@ function log(message: string): void {
 }
 
 const themeSourceFiles = [
-  path.resolve(__dirname, '../../shared/ui/src/theme/colors.ts'),
-  path.resolve(__dirname, '../../shared/ui/src/theme/motion.ts'),
-  path.resolve(__dirname, '../../shared/ui/src/theme/radius.ts'),
-  path.resolve(__dirname, '../../shared/ui/src/theme/spacing.ts'),
-  path.resolve(__dirname, '../../shared/ui/src/theme/typography.ts'),
-  path.resolve(__dirname, '../../shared/ui/src/theme/buildThemeCss.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/colors.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/motion.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/radius.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/spacing.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/typography.ts'),
+  path.resolve(__dirname, '../../client/ui/src/theme/buildThemeCss.ts'),
 ];
 
 async function computeInputHash(paths: string[]): Promise<string> {

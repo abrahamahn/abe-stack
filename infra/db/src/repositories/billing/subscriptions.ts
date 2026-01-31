@@ -108,7 +108,10 @@ export interface SubscriptionRepository {
 function transformSubscription(row: Record<string, unknown>): Subscription {
   const subscription = toCamelCase<Subscription>(row, SUBSCRIPTION_COLUMNS);
   // Parse JSONB metadata
-  const parsedMetadata = parseJsonb(row['metadata'] as string | null) as Record<string, unknown> | null;
+  const parsedMetadata = parseJsonb(row['metadata'] as string | null) as Record<
+    string,
+    unknown
+  > | null;
   subscription.metadata = parsedMetadata ?? {};
   return subscription;
 }
@@ -251,7 +254,9 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
       const lastItem = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem !== undefined ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
+        hasMore && lastItem !== undefined
+          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
+          : null;
 
       return { items, nextCursor };
     },

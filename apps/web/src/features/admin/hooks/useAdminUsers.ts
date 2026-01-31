@@ -90,7 +90,9 @@ export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): U
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const result: AdminUserListResponseLocal = await listUsers(currentFilters) as AdminUserListResponseLocal;
+      const result: AdminUserListResponseLocal = (await listUsers(
+        currentFilters,
+      )) as AdminUserListResponseLocal;
       setState({
         users: result.data,
         total: result.total,

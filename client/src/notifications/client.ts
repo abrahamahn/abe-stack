@@ -110,7 +110,10 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
     headers.set('Content-Type', 'application/json');
 
     if (requiresAuth) {
-      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(headers, config.getToken?.());
+      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
+        headers,
+        config.getToken?.(),
+      );
     }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;

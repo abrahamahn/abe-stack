@@ -5,8 +5,8 @@ packages:
   - 'infra/*'
   # Business modules
   - 'modules/*'
-  # Shared packages
-  - 'shared/*'
+  # Core
+  - 'core'
   # Client
   - 'client'
   - 'client/*'

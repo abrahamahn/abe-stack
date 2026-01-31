@@ -2,13 +2,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    cleanupOldLoginAttempts,
-    countOldLoginAttempts,
-    DEFAULT_RETENTION_DAYS,
-    getLoginAttemptStats,
-    getTotalLoginAttemptCount,
-    MAX_BATCH_SIZE,
-    MIN_RETENTION_DAYS,
+  cleanupOldLoginAttempts,
+  countOldLoginAttempts,
+  DEFAULT_RETENTION_DAYS,
+  getLoginAttemptStats,
+  getTotalLoginAttemptCount,
+  MAX_BATCH_SIZE,
+  MIN_RETENTION_DAYS,
 } from './login-cleanup';
 
 import type { CleanupOptions } from './login-cleanup';

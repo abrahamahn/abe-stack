@@ -130,7 +130,15 @@ vi.mock('@abe-stack/cache', () => ({
     setMultiple: vi.fn(),
     deleteMultiple: vi.fn(),
     clear: vi.fn(),
-    getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+    getStats: vi.fn(() => ({
+      hits: 0,
+      misses: 0,
+      hitRate: 0,
+      size: 0,
+      sets: 0,
+      deletes: 0,
+      evictions: 0,
+    })),
     resetStats: vi.fn(),
     healthCheck: vi.fn().mockResolvedValue(true),
     close: vi.fn().mockResolvedValue(undefined),
@@ -282,7 +290,9 @@ function createMockServer(): FastifyInstance {
  */
 function spyOnAppLog(app: App): Record<string, ReturnType<typeof vi.fn>> {
   const mockLog = createMockLogger();
-  vi.spyOn(app, 'log', 'get').mockReturnValue(mockLog as unknown as import('fastify').FastifyBaseLogger);
+  vi.spyOn(app, 'log', 'get').mockReturnValue(
+    mockLog as unknown as import('fastify').FastifyBaseLogger,
+  );
   return mockLog;
 }
 
@@ -354,7 +364,15 @@ describe('App', () => {
         setMultiple: vi.fn(),
         deleteMultiple: vi.fn(),
         clear: vi.fn(),
-        getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+        getStats: vi.fn(() => ({
+          hits: 0,
+          misses: 0,
+          hitRate: 0,
+          size: 0,
+          sets: 0,
+          deletes: 0,
+          evictions: 0,
+        })),
         resetStats: vi.fn(),
         healthCheck: vi.fn().mockResolvedValue(true),
         close: vi.fn().mockResolvedValue(undefined),
@@ -458,7 +476,9 @@ describe('App', () => {
         }),
       );
       expect(mockServer).toHaveProperty('setErrorHandler');
-      expect((mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0);
+      expect(
+        (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls.length,
+      ).toBeGreaterThan(0);
       expect(mockListenFactory).toHaveBeenCalledWith(mockServer, config);
       expect(logStartupSummary).toHaveBeenCalled();
     });
@@ -541,7 +561,15 @@ describe('App', () => {
         setMultiple: vi.fn(),
         deleteMultiple: vi.fn(),
         clear: vi.fn(),
-        getStats: vi.fn(() => ({ hits: 0, misses: 0, hitRate: 0, size: 0, sets: 0, deletes: 0, evictions: 0 })),
+        getStats: vi.fn(() => ({
+          hits: 0,
+          misses: 0,
+          hitRate: 0,
+          size: 0,
+          sets: 0,
+          deletes: 0,
+          evictions: 0,
+        })),
         resetStats: vi.fn(),
         healthCheck: vi.fn().mockResolvedValue(true),
         close: vi.fn().mockResolvedValue(undefined),
@@ -603,7 +631,8 @@ describe('App', () => {
 
       // Verify error handler was registered
       expect(mockServer.setErrorHandler).toHaveBeenCalledTimes(1);
-      const errorHandler = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+      const errorHandler = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock
+        .calls[0]?.[0];
       expect(errorHandler).toBeDefined();
       expect(typeof errorHandler).toBe('function');
     });

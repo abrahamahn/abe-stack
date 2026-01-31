@@ -7,15 +7,15 @@
  */
 
 import type {
-    JobDetails,
-    JobListOptions,
-    JobListResult,
-    JobStatus,
-    QueueStats,
-    QueueStore,
-    Task,
-    TaskError,
-    TaskResult,
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  JobStatus,
+  QueueStats,
+  QueueStore,
+  Task,
+  TaskError,
+  TaskResult,
 } from './types';
 import type { DbClient } from '@abe-stack/db';
 
@@ -338,8 +338,10 @@ export class PostgresQueueStore implements QueueStore {
       [],
     );
 
-    const recentCompleted = recentRows[0] !== undefined ? parseInt(recentRows[0].recent_completed, 10) : 0;
-    const recentFailed = recentRows[0] !== undefined ? parseInt(recentRows[0].recent_failed, 10) : 0;
+    const recentCompleted =
+      recentRows[0] !== undefined ? parseInt(recentRows[0].recent_completed, 10) : 0;
+    const recentFailed =
+      recentRows[0] !== undefined ? parseInt(recentRows[0].recent_failed, 10) : 0;
 
     const total = pending + processing + completed + failed + deadLetter + cancelled;
     const completedTotal = completed + failed;

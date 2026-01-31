@@ -183,9 +183,7 @@ describe('useAdminUsers', () => {
     it('should preserve existing filters not being changed', async () => {
       mockListUsers.mockResolvedValue(mockResponse);
 
-      const { result } = renderHook(() =>
-        useAdminUsers({ sortBy: 'email', sortOrder: 'asc' }),
-      );
+      const { result } = renderHook(() => useAdminUsers({ sortBy: 'email', sortOrder: 'asc' }));
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);

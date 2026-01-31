@@ -6,8 +6,8 @@
     "baseUrl": "./",
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@abe-stack/core": ["../../shared/core/src"],
-      "@abe-stack/core/*": ["../../shared/core/src/*"]
+      "@abe-stack/core": ["../../core/src"],
+      "@abe-stack/core/*": ["../../core/src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.stores.tsbuildinfo"
   },
@@ -15,7 +15,7 @@
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
     {
-      "path": "../../shared/core"
+      "path": "../../core"
     }
   ]
 }

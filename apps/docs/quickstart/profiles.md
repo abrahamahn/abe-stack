@@ -13,7 +13,7 @@ For full profile documentation, see [`apps/docs/profiles.md`](../profiles.md).
 All profiles share the same prerequisites:
 
 | Tool       | Version | Check            |
-|------------|---------|------------------|
+| ---------- | ------- | ---------------- |
 | Node.js    | 20+     | `node --version` |
 | pnpm       | 10+     | `pnpm --version` |
 | PostgreSQL | 14+     | `pg_isready`     |
@@ -57,10 +57,10 @@ pnpm db:bootstrap
 pnpm dev
 ```
 
-| Service    | URL                    |
-|------------|------------------------|
-| Web app    | http://localhost:5173  |
-| API server | http://localhost:8080  |
+| Service    | URL                   |
+| ---------- | --------------------- |
+| Web app    | http://localhost:5173 |
+| API server | http://localhost:8080 |
 
 ### 3. Verify
 
@@ -147,6 +147,7 @@ pnpm dev
 ### What's running
 
 Everything from Minimal, plus:
+
 - **Routes:** admin (user management, security events, job monitoring), billing (checkout, subscriptions, invoices, payment methods, webhooks)
 - **Services:** Stripe SDK, webhook handler
 
@@ -201,6 +202,7 @@ pnpm dev
 ### What's running
 
 Everything from Minimal, plus:
+
 - **Routes:** admin (user management, security events, job monitoring)
 - **Not running:** billing, real-time WebSocket
 
@@ -291,6 +293,7 @@ pnpm dev
 ### What's running
 
 Everything from SaaS, plus:
+
 - **Routes:** realtime (CRDT sync, record operations)
 - **Services:** WebSocket server, Redis cache, Redis queue, Elasticsearch, pub/sub (PostgreSQL LISTEN/NOTIFY)
 
@@ -298,17 +301,17 @@ Everything from SaaS, plus:
 
 ## Profile Comparison
 
-| Feature                | Minimal | Admin | SaaS | Advanced |
-|------------------------|---------|-------|------|----------|
-| Auth (local/OAuth)     | Yes     | Yes   | Yes  | Yes      |
-| User management        | Yes     | Yes   | Yes  | Yes      |
-| Admin dashboard        | No      | Yes   | Yes  | Yes      |
-| Billing/subscriptions  | No      | No    | Yes  | Yes      |
-| Real-time WebSocket    | No      | No    | No   | Yes      |
-| Push notifications     | No      | No    | No   | Optional |
-| Elasticsearch          | No      | No    | No   | Optional |
-| Redis                  | No      | No    | No   | Yes      |
-| External services      | 1 (PG)  | 1 (PG) | 2 (PG + Stripe) | 4+ (PG + Stripe + Redis + ES) |
+| Feature               | Minimal | Admin  | SaaS            | Advanced                      |
+| --------------------- | ------- | ------ | --------------- | ----------------------------- |
+| Auth (local/OAuth)    | Yes     | Yes    | Yes             | Yes                           |
+| User management       | Yes     | Yes    | Yes             | Yes                           |
+| Admin dashboard       | No      | Yes    | Yes             | Yes                           |
+| Billing/subscriptions | No      | No     | Yes             | Yes                           |
+| Real-time WebSocket   | No      | No     | No              | Yes                           |
+| Push notifications    | No      | No     | No              | Optional                      |
+| Elasticsearch         | No      | No     | No              | Optional                      |
+| Redis                 | No      | No     | No              | Yes                           |
+| External services     | 1 (PG)  | 1 (PG) | 2 (PG + Stripe) | 4+ (PG + Stripe + Redis + ES) |
 
 ---
 
@@ -322,6 +325,7 @@ When deploying any profile to production, you must additionally configure:
 4. **CORS and proxy:** `CORS_ORIGIN=https://yourdomain.com`, `TRUST_PROXY=true`
 
 See:
+
 - [Secrets Checklist](../deploy/secrets-checklist.md)
 - [Operations Manual](../OPERATIONS.md)
 - [Production Postgres](../deploy/production-postgres.md)

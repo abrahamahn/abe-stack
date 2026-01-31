@@ -13,7 +13,13 @@ import type { JSX } from 'react';
 // Types
 // ============================================================================
 
-type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+type JobStatusLocal =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled';
 
 export interface JobStatusBadgeProps {
   status: JobStatusLocal;

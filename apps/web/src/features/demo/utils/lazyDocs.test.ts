@@ -13,6 +13,8 @@ describe('lazyDocs utilities', () => {
   });
 
   test('should clear docs cache without throwing', () => {
-    expect(() => { clearDocsCache(); }).not.toThrow();
+    expect(() => {
+      clearDocsCache();
+    }).not.toThrow();
   });
 });

@@ -26,7 +26,9 @@ describe('InsertBuilder', () => {
 
     it('handles Date values', () => {
       const date = new Date('2024-01-01');
-      const query = insert('users').values({ email: 'user@example.com', ['created_at']: date }).toSql();
+      const query = insert('users')
+        .values({ email: 'user@example.com', ['created_at']: date })
+        .toSql();
       expect(query.values).toContain(date);
     });
 

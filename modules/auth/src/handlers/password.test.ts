@@ -5,7 +5,12 @@
  * Comprehensive tests for password reset and set password flows.
  */
 
-import { EmailSendError, InvalidCredentialsError, InvalidTokenError, WeakPasswordError } from '@abe-stack/core';
+import {
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  WeakPasswordError,
+} from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
@@ -18,34 +23,30 @@ import type { AppContext, RequestWithCookies } from '../types';
 // ============================================================================
 
 // Create mock functions via vi.hoisted to be available before vi.mock hoisting
-const {
-  mockRequestPasswordReset,
-  mockResetPassword,
-  mockSetPassword,
-  mockMapErrorToResponse,
-} = vi.hoisted(() => ({
-  mockRequestPasswordReset: vi.fn(),
-  mockResetPassword: vi.fn(),
-  mockSetPassword: vi.fn(),
-  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-  mockMapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
-    if (error instanceof Error) {
-      switch (error.name) {
-        case 'InvalidTokenError':
-          return { status: 400, body: { message: error.message || 'Invalid or expired token' } };
-        case 'WeakPasswordError':
-          return { status: 400, body: { message: 'Password is too weak' } };
-        case 'InvalidCredentialsError':
-          return { status: 401, body: { message: 'Invalid email or password' } };
-        case 'EmailSendError':
-          return { status: 503, body: { message: 'Failed to send email' } };
-        default:
-          return { status: 500, body: { message: 'Internal server error' } };
+const { mockRequestPasswordReset, mockResetPassword, mockSetPassword, mockMapErrorToResponse } =
+  vi.hoisted(() => ({
+    mockRequestPasswordReset: vi.fn(),
+    mockResetPassword: vi.fn(),
+    mockSetPassword: vi.fn(),
+    // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+    mockMapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
+      if (error instanceof Error) {
+        switch (error.name) {
+          case 'InvalidTokenError':
+            return { status: 400, body: { message: error.message || 'Invalid or expired token' } };
+          case 'WeakPasswordError':
+            return { status: 400, body: { message: 'Password is too weak' } };
+          case 'InvalidCredentialsError':
+            return { status: 401, body: { message: 'Invalid email or password' } };
+          case 'EmailSendError':
+            return { status: 503, body: { message: 'Failed to send email' } };
+          default:
+            return { status: 500, body: { message: 'Internal server error' } };
+        }
       }
-    }
-    return { status: 500, body: { message: 'Internal server error' } };
-  }),
-}));
+      return { status: 500, body: { message: 'Internal server error' } };
+    }),
+  }));
 
 // Mock the service module
 vi.mock('../service', () => ({
@@ -62,7 +63,6 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
     mapErrorToHttpResponse: mockMapErrorToResponse,
   };
 });
-
 
 // ============================================================================
 // Test Helpers
@@ -192,11 +192,27 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
-      emailVerification: vi.fn(() => ({ subject: 'Verify your email', text: 'verify', html: '<p>verify</p>' })),
-      existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Registration attempt', text: 'reg', html: '<p>reg</p>' })),
-      passwordReset: vi.fn(() => ({ subject: 'Reset your password', text: 'reset', html: '<p>reset</p>' })),
+      emailVerification: vi.fn(() => ({
+        subject: 'Verify your email',
+        text: 'verify',
+        html: '<p>verify</p>',
+      })),
+      existingAccountRegistrationAttempt: vi.fn(() => ({
+        subject: 'Registration attempt',
+        text: 'reg',
+        html: '<p>reg</p>',
+      })),
+      passwordReset: vi.fn(() => ({
+        subject: 'Reset your password',
+        text: 'reset',
+        html: '<p>reset</p>',
+      })),
       magicLink: vi.fn(() => ({ subject: 'Login link', text: 'login', html: '<p>login</p>' })),
-      accountLocked: vi.fn(() => ({ subject: 'Account locked', text: 'locked', html: '<p>locked</p>' })),
+      accountLocked: vi.fn(() => ({
+        subject: 'Account locked',
+        text: 'locked',
+        html: '<p>locked</p>',
+      })),
     },
     config,
     log: {
@@ -224,7 +240,10 @@ function createMockRequest(userId?: string): RequestWithCookies {
       ipAddress: '127.0.0.1',
       userAgent: 'Test Browser',
     },
-    user: userId != null && userId !== '' ? { userId, email: 'test@example.com', role: 'user' as const } : undefined,
+    user:
+      userId != null && userId !== ''
+        ? { userId, email: 'test@example.com', role: 'user' as const }
+        : undefined,
   };
 }
 

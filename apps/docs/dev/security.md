@@ -32,12 +32,12 @@
 
 **Source:** `modules/auth/src/utils/password.ts`, `modules/auth/src/config/auth.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Algorithm | Argon2id (type `2`) | OWASP first recommendation. Hybrid of Argon2i (side-channel resistant) and Argon2d (GPU-resistant). Chosen over bcrypt/scrypt per OWASP Password Storage Cheat Sheet 2024. |
+| Parameter   | Value                | Rationale                                                                                                                                                                                                                                                        |
+| ----------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Algorithm   | Argon2id (type `2`)  | OWASP first recommendation. Hybrid of Argon2i (side-channel resistant) and Argon2d (GPU-resistant). Chosen over bcrypt/scrypt per OWASP Password Storage Cheat Sheet 2024.                                                                                       |
 | Memory cost | `19456` KiB (19 MiB) | OWASP first-choice recommendation for Argon2id. Balances server RAM with brute-force resistance. At 19 MiB per hash, a 32-core server can handle ~50 concurrent login hashes within 1 GB, while forcing attackers to provision proportional memory per GPU core. |
-| Time cost | `2` iterations | OWASP minimum. Two passes over memory doubles the computation time without increasing memory usage. Keeps p99 latency under 500ms on commodity hardware. |
-| Parallelism | `1` | Single-threaded hashing ensures deterministic execution time, preventing timing side-channels. Multi-threaded hashing is unnecessary when memory cost is the primary defense. |
+| Time cost   | `2` iterations       | OWASP minimum. Two passes over memory doubles the computation time without increasing memory usage. Keeps p99 latency under 500ms on commodity hardware.                                                                                                         |
+| Parallelism | `1`                  | Single-threaded hashing ensures deterministic execution time, preventing timing side-channels. Multi-threaded hashing is unnecessary when memory cost is the primary defense.                                                                                    |
 
 ### Why not bcrypt?
 
@@ -61,13 +61,13 @@ The pool of 10 pre-computed hashes (initialized at startup) uses random selectio
 
 **Source:** `shared/core/src/infrastructure/crypto/jwt.ts`, `modules/auth/src/utils/jwt.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Algorithm | HS256 (HMAC-SHA256) | Symmetric signing. Simpler key management than RS256 for a single-service architecture. No public/private key infrastructure needed. Zero external dependencies (native `node:crypto`). |
-| Default expiry | `15m` | Short-lived to limit damage from token theft. Most SPAs refresh tokens transparently. 15 minutes is the OWASP-recommended maximum for high-security applications. |
-| Min secret length | `32` chars (256 bits) | Matches HS256 key size requirement. NIST SP 800-107 recommends key length >= hash output size (256 bits for SHA-256). |
-| Payload | `userId`, `email`, `role` | Minimal claim set. No sensitive data in the payload. Enough for authorization checks without a database round-trip. |
-| Storage | Memory only | Access tokens are never written to localStorage (XSS-accessible). Stored in JavaScript memory and sent via Authorization header. |
+| Parameter         | Value                     | Rationale                                                                                                                                                                               |
+| ----------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Algorithm         | HS256 (HMAC-SHA256)       | Symmetric signing. Simpler key management than RS256 for a single-service architecture. No public/private key infrastructure needed. Zero external dependencies (native `node:crypto`). |
+| Default expiry    | `15m`                     | Short-lived to limit damage from token theft. Most SPAs refresh tokens transparently. 15 minutes is the OWASP-recommended maximum for high-security applications.                       |
+| Min secret length | `32` chars (256 bits)     | Matches HS256 key size requirement. NIST SP 800-107 recommends key length >= hash output size (256 bits for SHA-256).                                                                   |
+| Payload           | `userId`, `email`, `role` | Minimal claim set. No sensitive data in the payload. Enough for authorization checks without a database round-trip.                                                                     |
+| Storage           | Memory only               | Access tokens are never written to localStorage (XSS-accessible). Stored in JavaScript memory and sent via Authorization header.                                                        |
 
 ### Algorithm safety
 
@@ -83,13 +83,13 @@ RS256 (RSA) is appropriate when multiple services need to verify tokens independ
 
 **Source:** `modules/auth/src/utils/refresh-token.ts`, `modules/auth/src/utils/jwt.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Token size | 64 bytes (512 bits) | `crypto.randomBytes(64)`. Far exceeds the 128-bit minimum for unguessable tokens (OWASP Session Management Cheat Sheet). 512 bits provides a collision probability of ~10^-77 even at scale. |
-| Encoding | Hex | 128-character hex string. URL-safe, no encoding issues in cookies. |
-| Default expiry | `7` days | Balances UX (users don't re-authenticate daily) with security (limits window for stolen refresh tokens). Configurable via `REFRESH_TOKEN_EXPIRY_DAYS` (validated: 1-30 days). |
-| Storage | Database (hashed family) | Server-side storage enables immediate revocation. Token families enable reuse detection. |
-| Rotation | Full rotation per use | Every refresh request invalidates the old token and issues a new one (atomic transaction). Limits the window during which a stolen token is valid. |
+| Parameter      | Value                    | Rationale                                                                                                                                                                                    |
+| -------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Token size     | 64 bytes (512 bits)      | `crypto.randomBytes(64)`. Far exceeds the 128-bit minimum for unguessable tokens (OWASP Session Management Cheat Sheet). 512 bits provides a collision probability of ~10^-77 even at scale. |
+| Encoding       | Hex                      | 128-character hex string. URL-safe, no encoding issues in cookies.                                                                                                                           |
+| Default expiry | `7` days                 | Balances UX (users don't re-authenticate daily) with security (limits window for stolen refresh tokens). Configurable via `REFRESH_TOKEN_EXPIRY_DAYS` (validated: 1-30 days).                |
+| Storage        | Database (hashed family) | Server-side storage enables immediate revocation. Token families enable reuse detection.                                                                                                     |
+| Rotation       | Full rotation per use    | Every refresh request invalidates the old token and issues a new one (atomic transaction). Limits the window during which a stolen token is valid.                                           |
 
 ### Token family tracking
 
@@ -107,8 +107,8 @@ Atomic rotation (delete old + insert new in a single transaction) prevents race 
 
 **Source:** `modules/auth/src/utils/refresh-token.ts:109-241`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
+| Parameter    | Value        | Rationale                                              |
+| ------------ | ------------ | ------------------------------------------------------ |
 | Grace period | `30` seconds | Configurable via `REFRESH_TOKEN_GRACE_PERIOD` env var. |
 
 ### Why a grace period?
@@ -134,14 +134,14 @@ When a refresh request arrives with a token that differs from the most recent to
 
 **Source:** `modules/auth/src/security/lockout.ts`, `modules/auth/src/security/types.ts`, `modules/auth/src/types.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Max attempts | `10` (default) | Configurable via `LOCKOUT_MAX_ATTEMPTS` (validated: 3-20). 10 attempts allows for legitimate typos while stopping brute force. |
-| Lockout duration | `1,800,000` ms (30 min) | Configurable via `LOCKOUT_DURATION_MS` (validated: >= 60s). 30 minutes deters automated attacks while not permanently locking out legitimate users. |
-| Progressive delay | Enabled | Exponential backoff: `baseDelay * 2^(attempts - 1)`. |
-| Base delay | `1,000` ms | 1 second after first failure. Imperceptible to legitimate users. |
-| Max delay | `30,000` ms (30s) | Cap prevents extreme delays. After 5 failures: 1s, 2s, 4s, 8s, 16s. After 6: capped at 30s. |
-| Delay window | `5` minutes | Failed attempts older than 5 minutes don't count toward progressive delay. Prevents permanent degradation from old failures. |
+| Parameter         | Value                   | Rationale                                                                                                                                           |
+| ----------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Max attempts      | `10` (default)          | Configurable via `LOCKOUT_MAX_ATTEMPTS` (validated: 3-20). 10 attempts allows for legitimate typos while stopping brute force.                      |
+| Lockout duration  | `1,800,000` ms (30 min) | Configurable via `LOCKOUT_DURATION_MS` (validated: >= 60s). 30 minutes deters automated attacks while not permanently locking out legitimate users. |
+| Progressive delay | Enabled                 | Exponential backoff: `baseDelay * 2^(attempts - 1)`.                                                                                                |
+| Base delay        | `1,000` ms              | 1 second after first failure. Imperceptible to legitimate users.                                                                                    |
+| Max delay         | `30,000` ms (30s)       | Cap prevents extreme delays. After 5 failures: 1s, 2s, 4s, 8s, 16s. After 6: capped at 30s.                                                         |
+| Delay window      | `5` minutes             | Failed attempts older than 5 minutes don't count toward progressive delay. Prevents permanent degradation from old failures.                        |
 
 ### Why progressive delays AND lockout?
 
@@ -165,18 +165,18 @@ Token bucket was chosen over sliding window or fixed window because it handles b
 
 ### Per-endpoint limits
 
-| Endpoint | Limit | Window | Why |
-|----------|-------|--------|-----|
-| Login | 5/min | 60s | Prevents credential stuffing. Combined with lockout for defense in depth. |
-| Register | 3/hr | 1 hr | Prevents mass account creation (spam). Users register once. |
-| Forgot password | 3/hr | 1 hr | Prevents email bombing and enumeration via response timing. |
-| Reset password | 5/hr | 1 hr | Allows typo retries. Protected by one-time token expiration. |
-| Verify email | 5/hr | 1 hr | Allows retries for token input errors. |
-| Resend verification | 3/hr | 1 hr | Prevents email bombing. |
-| Refresh | 30/min | 60s | More lenient: called automatically by clients every 15 minutes. Still blocks token grinding. |
-| OAuth initiate | 10/min | 60s | Prevents state exhaustion attacks while allowing navigation retries. |
-| OAuth callback | 20/min | 60s | More lenient: redirect from external provider may have latency. |
-| OAuth link/unlink | 5/hr | 1 hr | Infrequent operations. Prevents linking abuse. |
+| Endpoint            | Limit  | Window | Why                                                                                          |
+| ------------------- | ------ | ------ | -------------------------------------------------------------------------------------------- |
+| Login               | 5/min  | 60s    | Prevents credential stuffing. Combined with lockout for defense in depth.                    |
+| Register            | 3/hr   | 1 hr   | Prevents mass account creation (spam). Users register once.                                  |
+| Forgot password     | 3/hr   | 1 hr   | Prevents email bombing and enumeration via response timing.                                  |
+| Reset password      | 5/hr   | 1 hr   | Allows typo retries. Protected by one-time token expiration.                                 |
+| Verify email        | 5/hr   | 1 hr   | Allows retries for token input errors.                                                       |
+| Resend verification | 3/hr   | 1 hr   | Prevents email bombing.                                                                      |
+| Refresh             | 30/min | 60s    | More lenient: called automatically by clients every 15 minutes. Still blocks token grinding. |
+| OAuth initiate      | 10/min | 60s    | Prevents state exhaustion attacks while allowing navigation retries.                         |
+| OAuth callback      | 20/min | 60s    | More lenient: redirect from external provider may have latency.                              |
+| OAuth link/unlink   | 5/hr   | 1 hr   | Infrequent operations. Prevents linking abuse.                                               |
 
 ### Progressive delay on rate limit
 
@@ -192,14 +192,14 @@ All auth rate limiters include progressive delay (`baseDelay: 1000ms`, `maxDelay
 
 **Source:** `infra/http/src/middleware/csrf.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Pattern | Double-submit cookie | Stateless CSRF protection. No server-side token storage needed. |
-| Token size | 32 bytes (`randomBytes(32)`) | 256 bits of entropy. Exceeds OWASP minimum of 128 bits. |
-| Signing | HMAC-SHA256 | Prevents token forgery. Attacker cannot craft a valid cookie without the secret. |
-| Encryption | AES-256-GCM (production) | Encrypts token value in the cookie to prevent BREACH-style attacks that leak cookie contents via compression side-channels. |
-| Cookie | httpOnly, secure, sameSite=strict | httpOnly prevents JavaScript access. strict sameSite prevents cross-origin cookie attachment. |
-| Comparison | `crypto.timingSafeEqual` | Prevents timing attacks on token comparison. |
+| Parameter  | Value                             | Rationale                                                                                                                   |
+| ---------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Pattern    | Double-submit cookie              | Stateless CSRF protection. No server-side token storage needed.                                                             |
+| Token size | 32 bytes (`randomBytes(32)`)      | 256 bits of entropy. Exceeds OWASP minimum of 128 bits.                                                                     |
+| Signing    | HMAC-SHA256                       | Prevents token forgery. Attacker cannot craft a valid cookie without the secret.                                            |
+| Encryption | AES-256-GCM (production)          | Encrypts token value in the cookie to prevent BREACH-style attacks that leak cookie contents via compression side-channels. |
+| Cookie     | httpOnly, secure, sameSite=strict | httpOnly prevents JavaScript access. strict sameSite prevents cross-origin cookie attachment.                               |
+| Comparison | `crypto.timingSafeEqual`          | Prevents timing attacks on token comparison.                                                                                |
 
 ### Exempt endpoints
 
@@ -217,16 +217,16 @@ Six auth endpoints are exempt from CSRF validation, each for a specific reason:
 
 **Source:** `infra/http/src/middleware/security.ts`
 
-| Header | Value | Why |
-|--------|-------|-----|
-| `X-Frame-Options` | `DENY` | Prevents clickjacking by blocking all framing. `DENY` over `SAMEORIGIN` because the app has no legitimate framing use case. |
-| `X-Content-Type-Options` | `nosniff` | Prevents MIME-type sniffing attacks where browsers interpret uploaded files as executable content. |
-| `X-XSS-Protection` | `1; mode=block` | Legacy XSS filter for older browsers. Modern browsers use CSP instead, but this provides defense in depth. |
-| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | Enforces HTTPS for 1 year. `includeSubDomains` prevents protocol downgrade on any subdomain. |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Sends full URL to same-origin, only origin to cross-origin. Prevents leaking URL paths (which may contain tokens) to third parties. |
-| `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` | Disables browser APIs the application doesn't use. Reduces attack surface from compromised third-party scripts. |
-| `X-Powered-By` | Removed | Hides technology stack from fingerprinting. |
-| `Server` | Removed | Hides server software version. |
+| Header                      | Value                                      | Why                                                                                                                                 |
+| --------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `X-Frame-Options`           | `DENY`                                     | Prevents clickjacking by blocking all framing. `DENY` over `SAMEORIGIN` because the app has no legitimate framing use case.         |
+| `X-Content-Type-Options`    | `nosniff`                                  | Prevents MIME-type sniffing attacks where browsers interpret uploaded files as executable content.                                  |
+| `X-XSS-Protection`          | `1; mode=block`                            | Legacy XSS filter for older browsers. Modern browsers use CSP instead, but this provides defense in depth.                          |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains`      | Enforces HTTPS for 1 year. `includeSubDomains` prevents protocol downgrade on any subdomain.                                        |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`          | Sends full URL to same-origin, only origin to cross-origin. Prevents leaking URL paths (which may contain tokens) to third parties. |
+| `Permissions-Policy`        | `geolocation=(), microphone=(), camera=()` | Disables browser APIs the application doesn't use. Reduces attack surface from compromised third-party scripts.                     |
+| `X-Powered-By`              | Removed                                    | Hides technology stack from fingerprinting.                                                                                         |
+| `Server`                    | Removed                                    | Hides server software version.                                                                                                      |
 
 ### Content Security Policy (production)
 
@@ -249,21 +249,22 @@ A custom JSON content-type parser recursively strips `__proto__`, `constructor`,
 
 **Source:** `infra/http/src/middleware/validation.ts`
 
-| Protection | Method | Why |
-|------------|--------|-----|
-| Null bytes | Stripped from all strings | Prevents null byte injection in file paths and database queries. |
-| Script tags | Regex removal | Defense-in-depth against XSS (primary defense is output encoding). |
-| Event handlers | `on*=` patterns removed | Prevents inline event handler injection. |
-| `javascript:` URLs | Stripped | Prevents URL-scheme-based XSS. |
-| Max object depth | 10 levels | Prevents stack overflow from deeply nested JSON (DoS vector). |
-| Max array length | 1,000 elements | Prevents memory exhaustion from large arrays. |
-| Max string length | 10,000 characters | Prevents oversized string processing. |
-| SQL injection | Pattern detection | Detects common SQL syntax patterns as a secondary defense (primary: parameterized queries). |
-| NoSQL injection | MongoDB operator detection | Detects `$gt`, `$ne`, `$where` and similar operators in input. |
+| Protection         | Method                     | Why                                                                                         |
+| ------------------ | -------------------------- | ------------------------------------------------------------------------------------------- |
+| Null bytes         | Stripped from all strings  | Prevents null byte injection in file paths and database queries.                            |
+| Script tags        | Regex removal              | Defense-in-depth against XSS (primary defense is output encoding).                          |
+| Event handlers     | `on*=` patterns removed    | Prevents inline event handler injection.                                                    |
+| `javascript:` URLs | Stripped                   | Prevents URL-scheme-based XSS.                                                              |
+| Max object depth   | 10 levels                  | Prevents stack overflow from deeply nested JSON (DoS vector).                               |
+| Max array length   | 1,000 elements             | Prevents memory exhaustion from large arrays.                                               |
+| Max string length  | 10,000 characters          | Prevents oversized string processing.                                                       |
+| SQL injection      | Pattern detection          | Detects common SQL syntax patterns as a secondary defense (primary: parameterized queries). |
+| NoSQL injection    | MongoDB operator detection | Detects `$gt`, `$ne`, `$where` and similar operators in input.                              |
 
 ### Defense in depth philosophy
 
 Input sanitization is a secondary defense layer. The primary defenses are:
+
 - **XSS:** Output encoding (React's default behavior) + CSP.
 - **SQL injection:** Parameterized queries via the query builder.
 - **NoSQL injection:** Zod schema validation at contract boundaries.
@@ -278,12 +279,12 @@ Sanitization catches cases where primary defenses have gaps (e.g., raw HTML rend
 
 ### Refresh token cookie
 
-| Setting | Production | Development | Why |
-|---------|-----------|-------------|-----|
-| httpOnly | `true` | `true` | Prevents JavaScript access. Mitigates XSS-based token theft. Never relaxed, even in development. |
-| secure | `true` | `false` | Requires HTTPS in production. Disabled in development for `localhost` without TLS. |
-| sameSite | `strict` | `lax` | `strict` prevents the cookie from being sent on any cross-origin request (even top-level navigation). `lax` in development allows OAuth redirects on localhost. |
-| path | `/` | `/` | Available to all routes. Restricting to `/api/auth/refresh` would be more precise but breaks if route paths change. |
+| Setting  | Production | Development | Why                                                                                                                                                             |
+| -------- | ---------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| httpOnly | `true`     | `true`      | Prevents JavaScript access. Mitigates XSS-based token theft. Never relaxed, even in development.                                                                |
+| secure   | `true`     | `false`     | Requires HTTPS in production. Disabled in development for `localhost` without TLS.                                                                              |
+| sameSite | `strict`   | `lax`       | `strict` prevents the cookie from being sent on any cross-origin request (even top-level navigation). `lax` in development allows OAuth redirects on localhost. |
+| path     | `/`        | `/`         | Available to all routes. Restricting to `/api/auth/refresh` would be more precise but breaks if route paths change.                                             |
 
 ### Cookie signing
 
@@ -292,6 +293,7 @@ Manual HMAC-SHA256 signing replaces `@fastify/cookie`. Timing-safe comparison (`
 ### Why manual cookie implementation?
 
 Replacing `@fastify/cookie` with a manual implementation provides:
+
 1. **Full audit control:** Every line of cookie handling is visible in the codebase.
 2. **Zero hidden behavior:** No plugin defaults that might weaken security.
 3. **Reduced dependency surface:** One fewer npm package in the supply chain.
@@ -322,23 +324,23 @@ If the email doesn't exist, the endpoint returns silently with the same response
 
 **Source:** `shared/core/src/modules/auth/password-scoring.ts`
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Min length | `8` characters | NIST SP 800-63B minimum. Shorter passwords have insufficient entropy regardless of composition. |
-| Max length | `64` characters | Prevents DoS via extremely long passwords that consume excessive Argon2 computation. |
-| Min score | `3` (default) | Entropy >= 50 bits. Configurable via `PASSWORD_MIN_SCORE`. |
-| Scoring model | Custom entropy + penalty system | Inspired by zxcvbn but zero-dependency. |
-| Crack time assumption | 10,000 guesses/second | Models offline attack against Argon2id with OWASP-recommended parameters. Conservative estimate. |
+| Parameter             | Value                           | Rationale                                                                                        |
+| --------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Min length            | `8` characters                  | NIST SP 800-63B minimum. Shorter passwords have insufficient entropy regardless of composition.  |
+| Max length            | `64` characters                 | Prevents DoS via extremely long passwords that consume excessive Argon2 computation.             |
+| Min score             | `3` (default)                   | Entropy >= 50 bits. Configurable via `PASSWORD_MIN_SCORE`.                                       |
+| Scoring model         | Custom entropy + penalty system | Inspired by zxcvbn but zero-dependency.                                                          |
+| Crack time assumption | 10,000 guesses/second           | Models offline attack against Argon2id with OWASP-recommended parameters. Conservative estimate. |
 
 ### Score thresholds
 
-| Score | Entropy | Approximate crack time |
-|-------|---------|----------------------|
-| 0 | < 20 bits | Seconds |
-| 1 | < 35 bits | Minutes to hours |
-| 2 | < 50 bits | Days |
-| 3 | < 65 bits | Years |
-| 4 | >= 65 bits | Centuries |
+| Score | Entropy    | Approximate crack time |
+| ----- | ---------- | ---------------------- |
+| 0     | < 20 bits  | Seconds                |
+| 1     | < 35 bits  | Minutes to hours       |
+| 2     | < 50 bits  | Days                   |
+| 3     | < 65 bits  | Years                  |
+| 4     | >= 65 bits | Centuries              |
 
 ### Penalties applied
 
@@ -386,16 +388,16 @@ An expired token should remain expired regardless of which secret signed it. Ret
 
 ### Tracked events
 
-| Event | Severity | Why tracked |
-|-------|----------|-------------|
-| `token_reuse_detected` | Critical | Indicates active session hijacking attempt. |
-| `token_family_revoked` | High | Mass revocation triggered by reuse detection. |
-| `account_locked` | Medium | May indicate brute force attack in progress. |
-| `account_unlocked` | Low | Admin action for audit trail. |
-| `suspicious_login` | High | Anomalous login pattern detected. |
-| `password_changed` | Medium | Potential account takeover indicator. |
-| `email_changed` | High | Account takeover persistence technique. |
-| `oauth_*` | Varies | OAuth flow anomalies for supply chain monitoring. |
+| Event                  | Severity | Why tracked                                       |
+| ---------------------- | -------- | ------------------------------------------------- |
+| `token_reuse_detected` | Critical | Indicates active session hijacking attempt.       |
+| `token_family_revoked` | High     | Mass revocation triggered by reuse detection.     |
+| `account_locked`       | Medium   | May indicate brute force attack in progress.      |
+| `account_unlocked`     | Low      | Admin action for audit trail.                     |
+| `suspicious_login`     | High     | Anomalous login pattern detected.                 |
+| `password_changed`     | Medium   | Potential account takeover indicator.             |
+| `email_changed`        | High     | Account takeover persistence technique.           |
+| `oauth_*`              | Varies   | OAuth flow anomalies for supply chain monitoring. |
 
 ### Forensic data captured
 
@@ -411,11 +413,11 @@ Security events are stored in the `security_events` table with full metadata. Th
 
 **Source:** `infra/media/src/security.ts`
 
-| Control | Value | Why |
-|---------|-------|-----|
-| Max file size | 100 MB | Prevents storage exhaustion DoS. |
-| MIME type | Whitelist-only | Only known-safe media types accepted. Prevents executable upload. |
-| Content scanning | Script/PHP/ASP detection | Detects embedded server-side code in uploaded files (polyglot attacks). |
+| Control          | Value                       | Why                                                                                     |
+| ---------------- | --------------------------- | --------------------------------------------------------------------------------------- |
+| Max file size    | 100 MB                      | Prevents storage exhaustion DoS.                                                        |
+| MIME type        | Whitelist-only              | Only known-safe media types accepted. Prevents executable upload.                       |
+| Content scanning | Script/PHP/ASP detection    | Detects embedded server-side code in uploaded files (polyglot attacks).                 |
 | Entropy analysis | Shannon entropy calculation | Detects encrypted/obfuscated content that may indicate packed malware or steganography. |
 
 ---
@@ -426,15 +428,15 @@ Security events are stored in the `security_events` table with full metadata. Th
 
 All security-critical configuration is validated at server startup. The server refuses to start if any constraint fails.
 
-| Constraint | Validation | Why |
-|------------|-----------|-----|
-| JWT secret length | >= 32 chars | Matches HS256 key size requirement (256 bits). |
-| JWT secret strength | Not in weak set, no repeating patterns | Prevents default/placeholder secrets in production. |
-| Cookie secret length | >= 32 chars | Same rationale as JWT secret. |
-| Lockout attempts | 3-20 range | < 3 causes false lockouts; > 20 is ineffective against brute force. |
-| Lockout duration | >= 60 seconds | Shorter durations don't meaningfully deter automated attacks. |
-| Refresh token expiry | 1-30 days | < 1 day destroys UX; > 30 days extends the theft window unacceptably. |
-| Password min length | >= 8 | NIST SP 800-63B minimum. |
+| Constraint           | Validation                             | Why                                                                   |
+| -------------------- | -------------------------------------- | --------------------------------------------------------------------- |
+| JWT secret length    | >= 32 chars                            | Matches HS256 key size requirement (256 bits).                        |
+| JWT secret strength  | Not in weak set, no repeating patterns | Prevents default/placeholder secrets in production.                   |
+| Cookie secret length | >= 32 chars                            | Same rationale as JWT secret.                                         |
+| Lockout attempts     | 3-20 range                             | < 3 causes false lockouts; > 20 is ineffective against brute force.   |
+| Lockout duration     | >= 60 seconds                          | Shorter durations don't meaningfully deter automated attacks.         |
+| Refresh token expiry | 1-30 days                              | < 1 day destroys UX; > 30 days extends the theft window unacceptably. |
+| Password min length  | >= 8                                   | NIST SP 800-63B minimum.                                              |
 
 ### Weak secret detection
 

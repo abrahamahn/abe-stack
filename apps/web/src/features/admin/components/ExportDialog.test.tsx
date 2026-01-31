@@ -2,7 +2,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-
 import { useExportEvents } from '../hooks/useExportEvents';
 
 import { ExportDialog } from './ExportDialog';
@@ -51,74 +50,58 @@ describe('ExportDialog', () => {
 
   describe('rendering', () => {
     it('should not render when isOpen is false', () => {
-      render(
-        <ExportDialog isOpen={false} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={false} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.queryByText('Export Security Events')).not.toBeInTheDocument();
     });
 
     it('should render when isOpen is true', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByText('Export Security Events')).toBeInTheDocument();
     });
 
     it('should render modal description', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
-      expect(screen.getByText('Export security events matching the current filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Export security events matching the current filters.'),
+      ).toBeInTheDocument();
     });
 
     it('should render CSV radio option', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByLabelText('CSV')).toBeInTheDocument();
     });
 
     it('should render JSON radio option', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByLabelText('JSON')).toBeInTheDocument();
     });
 
     it('should have CSV selected by default', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const csvRadio = screen.getByLabelText('CSV');
       expect(csvRadio).toHaveProperty('checked', true);
     });
 
     it('should render cancel button', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     });
 
     it('should render export button', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
     });
 
     it('should render note about export limit', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByText(/Exports are limited to 10,000 events maximum/i)).toBeInTheDocument();
     });
@@ -126,9 +109,7 @@ describe('ExportDialog', () => {
 
   describe('format selection', () => {
     it('should allow selecting JSON format', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const jsonRadio = screen.getByLabelText('JSON');
       fireEvent.click(jsonRadio);
@@ -137,9 +118,7 @@ describe('ExportDialog', () => {
     });
 
     it('should allow switching between formats', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const csvRadio = screen.getByLabelText('CSV');
       const jsonRadio = screen.getByLabelText('JSON');
@@ -156,27 +135,23 @@ describe('ExportDialog', () => {
 
   describe('filter notification', () => {
     it('should show active filters notice when filters are present', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={mockFilter} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={mockFilter} />);
 
       expect(screen.getByText('Active filters will be applied to the export.')).toBeInTheDocument();
     });
 
     it('should not show active filters notice when no filters', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
-      expect(screen.queryByText('Active filters will be applied to the export.')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Active filters will be applied to the export.'),
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('export functionality', () => {
     it('should call downloadExport with CSV format when export button is clicked', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const exportButton = screen.getByRole('button', { name: 'Export' });
       fireEvent.click(exportButton);
@@ -185,9 +160,7 @@ describe('ExportDialog', () => {
     });
 
     it('should call downloadExport with JSON format when selected', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const jsonRadio = screen.getByLabelText('JSON');
       fireEvent.click(jsonRadio);
@@ -199,9 +172,7 @@ describe('ExportDialog', () => {
     });
 
     it('should pass filters to downloadExport', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={mockFilter} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={mockFilter} />);
 
       const exportButton = screen.getByRole('button', { name: 'Export' });
       fireEvent.click(exportButton);
@@ -210,9 +181,7 @@ describe('ExportDialog', () => {
     });
 
     it('should close dialog after export', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const exportButton = screen.getByRole('button', { name: 'Export' });
       fireEvent.click(exportButton);
@@ -223,9 +192,7 @@ describe('ExportDialog', () => {
 
   describe('cancel functionality', () => {
     it('should close dialog when cancel button is clicked', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
       fireEvent.click(cancelButton);
@@ -234,9 +201,7 @@ describe('ExportDialog', () => {
     });
 
     it('should not call downloadExport when canceled', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
       fireEvent.click(cancelButton);
@@ -247,38 +212,26 @@ describe('ExportDialog', () => {
 
   describe('loading state', () => {
     it('should disable export button when isExporting is true', () => {
-      vi.mocked(useExportEvents).mockReturnValue(
-        createMockHookReturn({ isExporting: true }),
-      );
+      vi.mocked(useExportEvents).mockReturnValue(createMockHookReturn({ isExporting: true }));
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const exportButton = screen.getByRole('button', { name: /Exporting/i });
       expect(exportButton).toBeDisabled();
     });
 
     it('should show "Exporting..." text when exporting', () => {
-      vi.mocked(useExportEvents).mockReturnValue(
-        createMockHookReturn({ isExporting: true }),
-      );
+      vi.mocked(useExportEvents).mockReturnValue(createMockHookReturn({ isExporting: true }));
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByText('Exporting...')).toBeInTheDocument();
     });
 
     it('should not disable cancel button when exporting', () => {
-      vi.mocked(useExportEvents).mockReturnValue(
-        createMockHookReturn({ isExporting: true }),
-      );
+      vi.mocked(useExportEvents).mockReturnValue(createMockHookReturn({ isExporting: true }));
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
       expect(cancelButton).not.toBeDisabled();
@@ -294,9 +247,7 @@ describe('ExportDialog', () => {
         }),
       );
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByText(/Export failed: Export failed/i)).toBeInTheDocument();
     });
@@ -309,17 +260,13 @@ describe('ExportDialog', () => {
         }),
       );
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.getByText(/Export failed: Unknown error/i)).toBeInTheDocument();
     });
 
     it('should not display error message when isError is false', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       expect(screen.queryByText(/Export failed/i)).not.toBeInTheDocument();
     });
@@ -327,9 +274,7 @@ describe('ExportDialog', () => {
 
   describe('edge cases', () => {
     it('should handle empty filter object', () => {
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={{}} />);
 
       const exportButton = screen.getByRole('button', { name: 'Export' });
       fireEvent.click(exportButton);
@@ -347,9 +292,7 @@ describe('ExportDialog', () => {
         endDate: '2024-01-31T23:59:59Z',
       };
 
-      render(
-        <ExportDialog isOpen={true} onClose={mockOnClose} filter={complexFilter} />,
-      );
+      render(<ExportDialog isOpen={true} onClose={mockOnClose} filter={complexFilter} />);
 
       const exportButton = screen.getByRole('button', { name: 'Export' });
       fireEvent.click(exportButton);

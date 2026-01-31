@@ -207,12 +207,7 @@ describe('OAuth Routes', () => {
 
             await route.handler(ctx, undefined, req, reply);
 
-            expect(handleOAuthInitiate).toHaveBeenCalledWith(
-              ctx,
-              { provider },
-              req,
-              reply,
-            );
+            expect(handleOAuthInitiate).toHaveBeenCalledWith(ctx, { provider }, req, reply);
           });
 
           test('should return result from handleOAuthInitiate', async () => {
@@ -432,12 +427,7 @@ describe('OAuth Routes', () => {
 
             await route.handler(ctx, undefined, req, reply);
 
-            expect(handleOAuthLink).toHaveBeenCalledWith(
-              ctx,
-              { provider },
-              req,
-              reply,
-            );
+            expect(handleOAuthLink).toHaveBeenCalledWith(ctx, { provider }, req, reply);
           });
 
           test('should return result from handleOAuthLink', async () => {
@@ -516,12 +506,7 @@ describe('OAuth Routes', () => {
 
             await route.handler(ctx, undefined, req, reply);
 
-            expect(handleOAuthUnlink).toHaveBeenCalledWith(
-              ctx,
-              { provider },
-              req,
-              reply,
-            );
+            expect(handleOAuthUnlink).toHaveBeenCalledWith(ctx, { provider }, req, reply);
           });
 
           test('should return result from handleOAuthUnlink', async () => {
@@ -685,11 +670,7 @@ describe('OAuth Routes', () => {
 
   describe('Route Methods', () => {
     test('initiate routes should use GET method', () => {
-      const initiateRoutes = [
-        'auth/oauth/google',
-        'auth/oauth/github',
-        'auth/oauth/apple',
-      ];
+      const initiateRoutes = ['auth/oauth/google', 'auth/oauth/github', 'auth/oauth/apple'];
 
       for (const routeName of initiateRoutes) {
         const route = oauthRoutes[routeName];

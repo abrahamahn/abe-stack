@@ -38,9 +38,7 @@ describe('QueueStatsCard', () => {
     });
 
     it('should not show stats when loading', () => {
-      render(
-        <QueueStatsCard stats={undefined} isLoading={true} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={undefined} isLoading={true} isError={false} error={null} />);
 
       expect(screen.queryByText('Queue Statistics')).not.toBeInTheDocument();
     });
@@ -61,17 +59,13 @@ describe('QueueStatsCard', () => {
     });
 
     it('should show default error message when error is null', () => {
-      render(
-        <QueueStatsCard stats={undefined} isLoading={false} isError={true} error={null} />,
-      );
+      render(<QueueStatsCard stats={undefined} isLoading={false} isError={true} error={null} />);
 
       expect(screen.getByText('Failed to load queue statistics')).toBeInTheDocument();
     });
 
     it('should show error message when stats is undefined', () => {
-      render(
-        <QueueStatsCard stats={undefined} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={undefined} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Failed to load queue statistics')).toBeInTheDocument();
     });
@@ -79,80 +73,62 @@ describe('QueueStatsCard', () => {
 
   describe('stats display', () => {
     it('should render heading', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Queue Statistics')).toBeInTheDocument();
     });
 
     it('should render pending count', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Pending')).toBeInTheDocument();
       expect(screen.getByText('10')).toBeInTheDocument();
     });
 
     it('should render processing count', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Processing')).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
     });
 
     it('should render completed count', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Completed')).toBeInTheDocument();
       expect(screen.getByText('100')).toBeInTheDocument();
     });
 
     it('should render failed count', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Failed')).toBeInTheDocument();
       expect(screen.getByText('3')).toBeInTheDocument();
     });
 
     it('should render dead letter count', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Dead Letter')).toBeInTheDocument();
       expect(screen.getByText('0')).toBeInTheDocument();
     });
 
     it('should render total jobs', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Total Jobs')).toBeInTheDocument();
       expect(screen.getByText('118')).toBeInTheDocument();
     });
 
     it('should render failure rate', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Failure Rate')).toBeInTheDocument();
       expect(screen.getByText('2.5%')).toBeInTheDocument();
     });
 
     it('should render recent statistics', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Recent (1h)')).toBeInTheDocument();
       expect(screen.getByText('50 OK / 1 fail')).toBeInTheDocument();
@@ -179,9 +155,7 @@ describe('QueueStatsCard', () => {
     });
 
     it('should not show high failure rate alert when rate <= 10%', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.queryByText(/High failure rate detected/i)).not.toBeInTheDocument();
     });
@@ -201,13 +175,13 @@ describe('QueueStatsCard', () => {
         />,
       );
 
-      expect(screen.getByText(/5 job\(s\) in dead letter queue require attention/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/5 job\(s\) in dead letter queue require attention/i),
+      ).toBeInTheDocument();
     });
 
     it('should not show dead letter alert when dead letter is 0', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.queryByText(/dead letter queue/i)).not.toBeInTheDocument();
     });
@@ -235,9 +209,7 @@ describe('QueueStatsCard', () => {
 
   describe('styling for metrics', () => {
     it('should apply danger styling to failed count when > 0', () => {
-      render(
-        <QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       const failedText = screen.getByText('3');
       expect(failedText.className).toContain('red');
@@ -296,9 +268,7 @@ describe('QueueStatsCard', () => {
         recentFailed: 0,
       };
 
-      render(
-        <QueueStatsCard stats={emptyStats} isLoading={false} isError={false} error={null} />,
-      );
+      render(<QueueStatsCard stats={emptyStats} isLoading={false} isError={false} error={null} />);
 
       expect(screen.getByText('Total Jobs')).toBeInTheDocument();
       expect(screen.getByText('0.0%')).toBeInTheDocument();

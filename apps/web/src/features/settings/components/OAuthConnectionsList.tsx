@@ -92,9 +92,7 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
       await unlink(provider);
       onSuccess?.();
     } catch (err) {
-      setUnlinkError(
-        err instanceof Error ? err.message : `Failed to disconnect ${info.name}`,
-      );
+      setUnlinkError(err instanceof Error ? err.message : `Failed to disconnect ${info.name}`);
     }
   };
 
@@ -131,7 +129,9 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
   const typedProviders = enabledProviders as OAuthProviderLocal[];
   const typedConnections = connections as OAuthConnectionLocal[];
   const providerList = typedProviders.map((provider: OAuthProviderLocal) => {
-    const connection: OAuthConnectionLocal | undefined = typedConnections.find((c: OAuthConnectionLocal) => c.provider === provider);
+    const connection: OAuthConnectionLocal | undefined = typedConnections.find(
+      (c: OAuthConnectionLocal) => c.provider === provider,
+    );
     return {
       provider,
       connected: connection !== undefined,

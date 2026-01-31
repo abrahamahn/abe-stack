@@ -6,9 +6,9 @@
  */
 
 import {
-    AccountLockedError,
-    EmailNotVerifiedError,
-    InvalidCredentialsError,
+  AccountLockedError,
+  EmailNotVerifiedError,
+  InvalidCredentialsError,
 } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -39,7 +39,8 @@ const { mockAuthenticateUser, mockSetRefreshTokenCookie, mockMapErrorToResponse 
             return {
               status: 401,
               body: {
-                message: (error as Error & { email?: string }).message || 'Please verify your email',
+                message:
+                  (error as Error & { email?: string }).message || 'Please verify your email',
                 code: 'EMAIL_NOT_VERIFIED',
               },
             };

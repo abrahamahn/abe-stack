@@ -3,14 +3,14 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    getSecurityEventMetrics,
-    getUserSecurityEvents,
-    logAccountLockedEvent,
-    logAccountUnlockedEvent,
-    logSecurityEvent,
-    logTokenFamilyRevokedEvent,
-    logTokenReuseEvent,
-    sendTokenReuseAlert,
+  getSecurityEventMetrics,
+  getUserSecurityEvents,
+  logAccountLockedEvent,
+  logAccountUnlockedEvent,
+  logSecurityEvent,
+  logTokenFamilyRevokedEvent,
+  logTokenReuseEvent,
+  sendTokenReuseAlert,
 } from './events';
 
 import { emailTemplates } from '@abe-stack/email';

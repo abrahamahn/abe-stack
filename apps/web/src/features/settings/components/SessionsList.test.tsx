@@ -23,10 +23,22 @@ vi.mock('./SessionCard', () => ({
 
 vi.mock('@abe-stack/ui', () => ({
   Alert: ({ children, tone }: { children: React.ReactNode; tone: string }) => (
-    <div data-testid="alert" data-tone={tone}>{children}</div>
+    <div data-testid="alert" data-tone={tone}>
+      {children}
+    </div>
   ),
-  Button: ({ children, onClick, disabled }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean }) => (
-    <button data-testid="revoke-all-button" onClick={onClick} disabled={disabled}>{children}</button>
+  Button: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button data-testid="revoke-all-button" onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
   ),
   Skeleton: () => <div data-testid="skeleton" />,
 }));

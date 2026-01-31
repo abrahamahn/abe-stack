@@ -171,8 +171,8 @@ The production compose includes Caddy as a reverse proxy with:
 
 ### Configuration Files
 
-| File                         | Purpose                  |
-| ---------------------------- | ------------------------ |
+| File                                | Purpose                  |
+| ----------------------------------- | ------------------------ |
 | `infra/runtime/caddy/Caddyfile`     | Production configuration |
 | `infra/runtime/caddy/Caddyfile.dev` | Development (HTTP only)  |
 

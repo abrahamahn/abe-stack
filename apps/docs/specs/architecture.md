@@ -75,9 +75,9 @@ abe-stack/
 | `apps/web/src/pages`      | Standalone pages                             |
 | `apps/server/src/modules` | API feature modules                          |
 | `apps/server/src/infra`   | Infrastructure (database, storage, security) |
-| `shared/core/src`       | Shared contracts, validation, stores         |
-| `shared/ui/src`         | Reusable UI components                       |
-| `client/src`        | Type-safe API client + React Query hooks     |
+| `shared/core/src`         | Shared contracts, validation, stores         |
+| `shared/ui/src`           | Reusable UI components                       |
+| `client/src`              | Type-safe API client + React Query hooks     |
 | `infra/*/src`             | Infrastructure package source code           |
 
 ---
@@ -137,24 +137,24 @@ apps/server/src/infra/*
 
 ### Rules
 
-| Rule                    | Description                                      |
-| ----------------------- | ------------------------------------------------ |
-| No reverse deps         | `infra/*`, `modules/*`, `shared/*`, `sdk/` cannot import from `apps`           |
-| No cross-app imports    | `web` cannot import from `server`                |
-| Shared in `core`        | Contracts and validation live in `shared/core` |
-| Server infra internal   | `infra/*` modules are internal to `apps/server`  |
-| Framework-agnostic core | `shared/core` has no React imports             |
+| Rule                    | Description                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| No reverse deps         | `infra/*`, `modules/*`, `shared/*`, `sdk/` cannot import from `apps` |
+| No cross-app imports    | `web` cannot import from `server`                                    |
+| Shared in `core`        | Contracts and validation live in `shared/core`                       |
+| Server infra internal   | `infra/*` modules are internal to `apps/server`                      |
+| Framework-agnostic core | `shared/core` has no React imports                                   |
 
 ### Package Dependencies
 
-| Package            | Can Import From    |
-| ------------------ | ------------------ |
-| `@abe-stack/core`  | External deps only |
-| `@abe-stack/ui`    | `@abe-stack/core`  |
-| `@abe-stack/client`   | `@abe-stack/core`  |
-| `@abe-stack/tests` | `@abe-stack/core`  |
-| `apps/web`         | All packages       |
-| `apps/server`      | `@abe-stack/core`  |
+| Package             | Can Import From    |
+| ------------------- | ------------------ |
+| `@abe-stack/core`   | External deps only |
+| `@abe-stack/ui`     | `@abe-stack/core`  |
+| `@abe-stack/client` | `@abe-stack/core`  |
+| `@abe-stack/tests`  | `@abe-stack/core`  |
+| `apps/web`          | All packages       |
+| `apps/server`       | `@abe-stack/core`  |
 
 ---
 

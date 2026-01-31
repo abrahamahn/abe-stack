@@ -14,14 +14,14 @@ import { getUserById, listUsers, lockUser, unlockUser, updateUser } from './user
 
 import type { AdminAppContext } from './types';
 import type {
-    AdminLockUserRequest,
-    AdminLockUserResponse,
-    AdminUpdateUserRequest,
-    AdminUpdateUserResponse,
-    AdminUser,
-    AdminUserListFilters,
-    AdminUserListResponse,
-    UnlockAccountRequest,
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UnlockAccountRequest,
 } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

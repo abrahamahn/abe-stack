@@ -8,17 +8,14 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 
 /** Directories to scan for config files */
-const CONFIG_DIRECTORIES = [
-  'apps/server/src/config',
-  'shared/core/src/config',
-];
+const CONFIG_DIRECTORIES = ['apps/server/src/config', 'core/src/config'];
 
 /** Package alias mappings to source directories */
 const PACKAGE_ALIASES: Record<string, string> = {
-  '@abe-stack/core': 'shared/core/src',
+  '@abe-stack/core': 'core/src',
   '@abe-stack/contracts': 'infra/contracts/src',
   '@abe-stack/client': 'client/src',
-  '@abe-stack/ui': 'shared/ui/src',
+  '@abe-stack/ui': 'client/ui/src',
   '@abe-stack/stores': 'client/stores/src',
   '@abe-stack/media': 'infra/media/src',
   '@abe-stack/db': 'infra/db/src',
@@ -74,9 +71,7 @@ function isExternalPackage(importPath: string): boolean {
   // Check if it's a bare module specifier (not starting with . or /)
   // but also not a known package alias
   if (!importPath.startsWith('.') && !importPath.startsWith('/')) {
-    const isKnownAlias = Object.keys(PACKAGE_ALIASES).some((alias) =>
-      importPath.startsWith(alias)
-    );
+    const isKnownAlias = Object.keys(PACKAGE_ALIASES).some((alias) => importPath.startsWith(alias));
     return !isKnownAlias;
   }
   return false;
@@ -101,12 +96,12 @@ function resolveImportPath(importPath: string, fromFile: string): string | null 
   // Handle package aliases
   for (const [alias, srcPath] of Object.entries(PACKAGE_ALIASES)) {
     if (importPath === alias) {
-      // Direct package import: @abe-stack/core -> shared/core/src/index.ts
+      // Direct package import: @abe-stack/core -> core/src/index.ts
       resolvedPath = path.join(REPO_ROOT, srcPath, 'index.ts');
       return fs.existsSync(resolvedPath) ? resolvedPath : null;
     }
     if (importPath.startsWith(`${alias}/`)) {
-      // Subpath import: @abe-stack/core/config -> shared/core/src/config/index.ts
+      // Subpath import: @abe-stack/core/config -> core/src/config/index.ts
       const subPath = importPath.slice(alias.length + 1);
       const basePath = path.join(REPO_ROOT, srcPath, subPath);
 
@@ -278,14 +273,14 @@ function exportServerConfig(): void {
   console.log(`\n✅ Successfully exported ${count} files to ${outputPath}`);
 
   // Summary by directory
-  const byCoreConfig = sortedFiles.filter((f) => f.startsWith('shared/core/src/config'));
+  const byCoreConfig = sortedFiles.filter((f) => f.startsWith('core/src/config'));
   const byServerConfig = sortedFiles.filter((f) => f.startsWith('apps/server/src/config'));
   const byDependencies = sortedFiles.filter(
-    (f) => !f.startsWith('shared/core/src/config') && !f.startsWith('apps/server/src/config')
+    (f) => !f.startsWith('core/src/config') && !f.startsWith('apps/server/src/config'),
   );
 
   console.log(`\n📊 Summary:`);
-  console.log(`   - shared/core/src/config: ${byCoreConfig.length} files`);
+  console.log(`   - core/src/config: ${byCoreConfig.length} files`);
   console.log(`   - apps/server/src/config: ${byServerConfig.length} files`);
   console.log(`   - Dependencies: ${byDependencies.length} files`);
 }

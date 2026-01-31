@@ -110,13 +110,19 @@ export const adminRoutes = createRouteMap([
   ['admin/users/:id', adminProtectedRoute('GET', handleGetUser)],
 
   // Update user
-  ['admin/users/:id/update', adminProtectedRoute('POST', handleUpdateUser, adminUpdateUserRequestSchema)],
+  [
+    'admin/users/:id/update',
+    adminProtectedRoute('POST', handleUpdateUser, adminUpdateUserRequestSchema),
+  ],
 
   // Lock user account
   ['admin/users/:id/lock', adminProtectedRoute('POST', handleLockUser, adminLockUserRequestSchema)],
 
   // Unlock user account
-  ['admin/users/:id/unlock', adminProtectedRoute('POST', handleUnlockUser, unlockAccountRequestSchema)],
+  [
+    'admin/users/:id/unlock',
+    adminProtectedRoute('POST', handleUnlockUser, unlockAccountRequestSchema),
+  ],
 
   // ============================================================================
   // Auth Admin Routes (legacy)

@@ -4,11 +4,11 @@ import { loadBillingConfig, validateBillingConfig } from '@abe-stack/billing';
 import { loadCacheConfig } from '@abe-stack/cache';
 import { EnvSchema, initEnv } from '@abe-stack/core/config';
 import {
-    loadDatabaseConfig,
-    loadElasticsearchConfig,
-    loadSqlSearchConfig,
-    validateElasticsearchConfig,
-    validateSqlSearchConfig,
+  loadDatabaseConfig,
+  loadElasticsearchConfig,
+  loadSqlSearchConfig,
+  validateElasticsearchConfig,
+  validateSqlSearchConfig,
 } from '@abe-stack/db';
 import { loadEmailConfig } from '@abe-stack/email';
 import { loadServerConfig } from '@abe-stack/http';
@@ -16,10 +16,7 @@ import { loadQueueConfig } from '@abe-stack/jobs';
 import { loadNotificationsConfig, validateNotificationsConfig } from '@abe-stack/notifications';
 import { loadStorageConfig } from '@abe-stack/storage';
 
-import type {
-    AppConfig,
-    FullEnv,
-} from '@abe-stack/core/config';
+import type { AppConfig, FullEnv } from '@abe-stack/core/config';
 
 /**
  * Config Factory
@@ -116,9 +113,7 @@ function validate(config: AppConfig): void {
 
   // Search Domain - Using clean Type Predicates
   if (config.search.provider === 'elasticsearch') {
-    errors.push(
-      ...validateElasticsearchConfig(config.search.config),
-    );
+    errors.push(...validateElasticsearchConfig(config.search.config));
   } else {
     errors.push(...validateSqlSearchConfig(config.search.config));
   }

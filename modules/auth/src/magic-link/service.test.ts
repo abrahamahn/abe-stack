@@ -1,5 +1,5 @@
 // modules/auth/src/magic-link/service.test.ts
- 
+
 // modules/auth/src/magic-link/__tests__/service.test.ts
 /**
  * Magic Link Service Tests
@@ -17,7 +17,6 @@ import type { DbClient, Repositories } from '@abe-stack/db';
 import type { EmailService } from '@abe-stack/email';
 import type { AuthConfig } from '@abe-stack/core';
 import type { MagicLinkToken, RawDb, User } from '@abe-stack/db';
-
 
 // ============================================================================
 // Mock Dependencies
@@ -38,8 +37,8 @@ function createMockRawDb(): RawDb {
   } as RawDb;
 
   tx.transaction = vi.fn((callback) => {
-     return Promise.resolve(callback(tx));
-   });
+    return Promise.resolve(callback(tx));
+  });
 
   return tx;
 }
@@ -124,7 +123,11 @@ function createMockEmailTemplates(): AuthEmailTemplates {
       html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
     })),
     emailVerification: vi.fn(() => ({ subject: 'Verify', text: 'v', html: '<p>v</p>' })),
-    existingAccountRegistrationAttempt: vi.fn(() => ({ subject: 'Reg', text: 'r', html: '<p>r</p>' })),
+    existingAccountRegistrationAttempt: vi.fn(() => ({
+      subject: 'Reg',
+      text: 'r',
+      html: '<p>r</p>',
+    })),
     passwordReset: vi.fn(() => ({ subject: 'Reset', text: 'r', html: '<p>r</p>' })),
     accountLocked: vi.fn(() => ({ subject: 'Locked', text: 'l', html: '<p>l</p>' })),
   } as unknown as AuthEmailTemplates;
@@ -260,7 +263,14 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      const result = await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
+      const result = await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+      );
 
       expect(result.success).toBe(true);
       expect(result.message).toBe(
@@ -319,9 +329,19 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
       const now = Date.now();
-      await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, undefined, undefined, {
-        tokenExpiryMinutes: 20,
-      });
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+        undefined,
+        undefined,
+        {
+          tokenExpiryMinutes: 20,
+        },
+      );
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -350,7 +370,15 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, ipAddress);
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+        ipAddress,
+      );
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -370,7 +398,16 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, undefined, userAgent);
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+        undefined,
+        userAgent,
+      );
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -410,9 +447,9 @@ describe('requestMagicLink', () => {
 
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(3);
 
-      await expect(requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl)).rejects.toThrow(
-        'Too many magic link requests',
-      );
+      await expect(
+        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl),
+      ).rejects.toThrow('Too many magic link requests');
     });
 
     test('should throw TooManyRequestsError when IP rate limit exceeded', async () => {
@@ -427,7 +464,15 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(10);
 
       await expect(
-        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, ipAddress),
+        requestMagicLink(
+          db,
+          repos,
+          emailService,
+          createMockEmailTemplates(),
+          email,
+          baseUrl,
+          ipAddress,
+        ),
       ).rejects.toThrow('Too many requests from this location');
     });
 
@@ -441,9 +486,19 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(5);
 
       await expect(
-        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, undefined, undefined, {
-          maxAttemptsPerEmail: 5,
-        }),
+        requestMagicLink(
+          db,
+          repos,
+          emailService,
+          createMockEmailTemplates(),
+          email,
+          baseUrl,
+          undefined,
+          undefined,
+          {
+            maxAttemptsPerEmail: 5,
+          },
+        ),
       ).rejects.toThrow('Too many magic link requests');
     });
 
@@ -459,9 +514,19 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(20);
 
       await expect(
-        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, ipAddress, undefined, {
-          maxAttemptsPerIp: 20,
-        }),
+        requestMagicLink(
+          db,
+          repos,
+          emailService,
+          createMockEmailTemplates(),
+          email,
+          baseUrl,
+          ipAddress,
+          undefined,
+          {
+            maxAttemptsPerIp: 20,
+          },
+        ),
       ).rejects.toThrow('Too many requests from this location');
     });
 
@@ -493,9 +558,9 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP server unavailable'));
 
-      await expect(requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl)).rejects.toThrow(
-        'Failed to send magic link email',
-      );
+      await expect(
+        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl),
+      ).rejects.toThrow('Failed to send magic link email');
     });
 
     test('should handle non-Error email failures', async () => {
@@ -509,9 +574,9 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
       vi.mocked(emailService.send).mockRejectedValue('String error');
 
-      await expect(requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl)).rejects.toThrow(
-        'Failed to send magic link email',
-      );
+      await expect(
+        requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl),
+      ).rejects.toThrow('Failed to send magic link email');
     });
   });
 
@@ -526,7 +591,15 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, undefined);
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+        undefined,
+      );
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -545,7 +618,16 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl, undefined, undefined);
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        createMockEmailTemplates(),
+        email,
+        baseUrl,
+        undefined,
+        undefined,
+      );
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({

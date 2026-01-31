@@ -8,7 +8,7 @@ const authPkg = path.resolve(__dirname, '../../modules/auth/src');
 const billingPkg = path.resolve(__dirname, '../../modules/billing/src');
 const cachePkg = path.resolve(__dirname, '../../infra/cache/src');
 const contractsPkg = path.resolve(__dirname, '../../infra/contracts/src');
-const corePkg = path.resolve(__dirname, '../../shared/core/src');
+const corePkg = path.resolve(__dirname, '../../core/src');
 const dbPkg = path.resolve(__dirname, '../../infra/db/src');
 const emailPkg = path.resolve(__dirname, '../../infra/email/src');
 const httpPkg = path.resolve(__dirname, '../../infra/http/src');
@@ -26,7 +26,23 @@ export default mergeConfig(baseConfig, {
     // Inline local modules to ensure mocks work correctly with path aliases
     server: {
       deps: {
-        inline: [/src\//, '@abe-stack/admin', '@abe-stack/auth', '@abe-stack/billing', '@abe-stack/cache', '@abe-stack/core', '@abe-stack/db', '@abe-stack/email', '@abe-stack/http', '@abe-stack/jobs', '@abe-stack/notifications', '@abe-stack/realtime', '@abe-stack/security', '@abe-stack/storage', '@abe-stack/users'],
+        inline: [
+          /src\//,
+          '@abe-stack/admin',
+          '@abe-stack/auth',
+          '@abe-stack/billing',
+          '@abe-stack/cache',
+          '@abe-stack/core',
+          '@abe-stack/db',
+          '@abe-stack/email',
+          '@abe-stack/http',
+          '@abe-stack/jobs',
+          '@abe-stack/notifications',
+          '@abe-stack/realtime',
+          '@abe-stack/security',
+          '@abe-stack/storage',
+          '@abe-stack/users',
+        ],
       },
     },
   },
@@ -39,7 +55,10 @@ export default mergeConfig(baseConfig, {
       { find: '@abe-stack/core/shared', replacement: `${corePkg}/shared/index.ts` },
       { find: '@abe-stack/core/utils', replacement: `${corePkg}/utils/index.ts` },
       { find: '@abe-stack/core/env', replacement: `${corePkg}/config/index.ts` },
-      { find: '@abe-stack/core/pubsub/postgres', replacement: `${corePkg}/infrastructure/pubsub/postgres-pubsub.ts` },
+      {
+        find: '@abe-stack/core/pubsub/postgres',
+        replacement: `${corePkg}/infrastructure/pubsub/postgres-pubsub.ts`,
+      },
       { find: '@abe-stack/core/pubsub', replacement: `${corePkg}/infrastructure/pubsub/index.ts` },
       { find: '@abe-stack/core/config', replacement: `${corePkg}/config/index.ts` },
       // Handle subpath imports with regex

@@ -9,12 +9,8 @@
  * account linking/unlinking, and security event logging.
  */
 
-
-
 import { OAUTH_PROVIDERS } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-
 
 // ============================================================================
 // Mock Dependencies
@@ -171,7 +167,10 @@ function createMockReply(): FastifyReply {
   } as unknown as FastifyReply;
 }
 
-function createAuthenticatedRequest(userId: string, role: 'user' | 'admin' | 'moderator' = 'user'): FastifyRequest {
+function createAuthenticatedRequest(
+  userId: string,
+  role: 'user' | 'admin' | 'moderator' = 'user',
+): FastifyRequest {
   const request = createMockRequest();
   (request as { user?: { userId: string; role: string } }).user = { userId, role };
   return request;
@@ -202,12 +201,7 @@ describe('handleOAuthInitiate', () => {
         state: 'encrypted-state',
       });
 
-      const result = await handleOAuthInitiate(
-        ctx,
-        { provider: 'google' },
-        request,
-        reply,
-      );
+      const result = await handleOAuthInitiate(ctx, { provider: 'google' }, request, reply);
 
       expect(result.status).toBe(302);
       expect(result.body).toEqual({
@@ -331,12 +325,7 @@ describe('handleOAuthInitiate', () => {
       const request = createMockRequest();
       const reply = createMockReply();
 
-      await handleOAuthInitiate(
-        ctx,
-        { provider: 'invalid-provider' },
-        request,
-        reply,
-      );
+      await handleOAuthInitiate(ctx, { provider: 'invalid-provider' }, request, reply);
 
       expect(getAuthorizationUrl).not.toHaveBeenCalled();
     });
@@ -1062,12 +1051,7 @@ describe('handleOAuthLink', () => {
       const request = createAuthenticatedRequest('user-123');
       const reply = createMockReply();
 
-      const result = await handleOAuthLink(
-        ctx,
-        { provider: 'invalid-provider' },
-        request,
-        reply,
-      );
+      const result = await handleOAuthLink(ctx, { provider: 'invalid-provider' }, request, reply);
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
@@ -1115,12 +1099,7 @@ describe('handleOAuthUnlink', () => {
 
       await handleOAuthUnlink(ctx, { provider: 'github' }, request, reply);
 
-      expect(unlinkOAuthAccount).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.repos,
-        'user-456',
-        'github',
-      );
+      expect(unlinkOAuthAccount).toHaveBeenCalledWith(ctx.db, ctx.repos, 'user-456', 'github');
     });
 
     test('should log successful unlink event', async () => {
@@ -1264,12 +1243,7 @@ describe('handleOAuthUnlink', () => {
       const request = createAuthenticatedRequest('user-123');
       const reply = createMockReply();
 
-      const result = await handleOAuthUnlink(
-        ctx,
-        { provider: 'invalid-provider' },
-        request,
-        reply,
-      );
+      const result = await handleOAuthUnlink(ctx, { provider: 'invalid-provider' }, request, reply);
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');

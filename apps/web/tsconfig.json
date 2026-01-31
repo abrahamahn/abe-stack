@@ -10,8 +10,8 @@
       "@abe-stack/client/*": ["../../client/src/*"],
       "@abe-stack/stores": ["../../client/stores/src/index.ts"],
       "@abe-stack/stores/*": ["../../client/stores/src/*"],
-      "@abe-stack/ui": ["../../shared/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["../../shared/ui/src/*"],
+      "@abe-stack/ui": ["../../client/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["../../client/ui/src/*"],
       "@admin": ["./src/features/admin"],
       "@admin/*": ["./src/features/admin/*"],
       "@api": ["./src/api"],
@@ -52,13 +52,19 @@
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.web.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+  "exclude": [
+    "node_modules",
+    "vitest.config.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
+  ],
   "references": [
     {
       "path": "../../infra/contracts"
     },
     {
-      "path": "../../shared/core"
+      "path": "../../core"
     },
     {
       "path": "../../infra/db"
@@ -73,7 +79,7 @@
       "path": "../../client/stores"
     },
     {
-      "path": "../../shared/ui"
+      "path": "../../client/ui"
     }
   ]
 }

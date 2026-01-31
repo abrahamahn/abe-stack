@@ -109,7 +109,9 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
 
   const allSessions = sessions as SessionLocal[];
   const otherSessions: SessionLocal[] = allSessions.filter((s: SessionLocal) => !s.isCurrent);
-  const currentSession: SessionLocal | undefined = allSessions.find((s: SessionLocal) => s.isCurrent);
+  const currentSession: SessionLocal | undefined = allSessions.find(
+    (s: SessionLocal) => s.isCurrent,
+  );
 
   return (
     <div className="space-y-4">

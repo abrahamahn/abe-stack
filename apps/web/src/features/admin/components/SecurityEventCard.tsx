@@ -35,7 +35,7 @@ export interface SecurityEventCardProps {
 // ============================================================================
 
 function hasValidMetadata(
-  event: SecurityEventLocal | undefined
+  event: SecurityEventLocal | undefined,
 ): event is SecurityEventLocal & { metadata: Record<string, unknown> } {
   return (
     event?.metadata !== undefined &&

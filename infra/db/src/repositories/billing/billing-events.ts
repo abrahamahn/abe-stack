@@ -54,7 +54,10 @@ export interface BillingEventRepository {
 function transformBillingEvent(row: Record<string, unknown>): BillingEvent {
   const event = toCamelCase<BillingEvent>(row, BILLING_EVENT_COLUMNS);
   // Parse JSONB payload
-  const parsedPayload = parseJsonb(row['payload'] as string | null) as Record<string, unknown> | null;
+  const parsedPayload = parseJsonb(row['payload'] as string | null) as Record<
+    string,
+    unknown
+  > | null;
   event.payload = parsedPayload ?? {};
   return event;
 }

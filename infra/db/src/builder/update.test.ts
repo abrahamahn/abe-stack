@@ -22,13 +22,19 @@ describe('UpdateBuilder', () => {
     });
 
     it('handles null values', () => {
-      const query = update('users').set({ ['deleted_at']: null }).where(eq('id', 'user-123')).toSql();
+      const query = update('users')
+        .set({ ['deleted_at']: null })
+        .where(eq('id', 'user-123'))
+        .toSql();
       expect(query.values).toContain(null);
     });
 
     it('handles Date values', () => {
       const date = new Date('2024-01-01');
-      const query = update('users').set({ ['updated_at']: date }).where(eq('id', 'user-123')).toSql();
+      const query = update('users')
+        .set({ ['updated_at']: date })
+        .where(eq('id', 'user-123'))
+        .toSql();
       expect(query.values).toContain(date);
     });
 

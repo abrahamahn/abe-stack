@@ -53,12 +53,12 @@ function ensureHeader(content: string, header: string): { updated: boolean; next
   const lines = content.split('\n');
   const headerLine = `// ${header}`;
 
-  if ((lines[0]?.startsWith('#!')) ?? false) {
+  if (lines[0]?.startsWith('#!') ?? false) {
     if (lines[1] === headerLine) {
       return { updated: false, next: content };
     }
     const nextLines = [...lines];
-    if ((lines[1]?.startsWith('//')) ?? false) {
+    if (lines[1]?.startsWith('//') ?? false) {
       nextLines[1] = headerLine;
     } else {
       nextLines.splice(1, 0, headerLine);
@@ -71,7 +71,7 @@ function ensureHeader(content: string, header: string): { updated: boolean; next
   }
 
   const nextLines = [...lines];
-  if ((lines[0]?.startsWith('//')) ?? false) {
+  if (lines[0]?.startsWith('//') ?? false) {
     nextLines[0] = headerLine;
   } else {
     nextLines.unshift(headerLine);
@@ -105,9 +105,9 @@ function collectFiles(dirPath: string): string[] {
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
       if (entry.isDirectory()) {
-         stack.push(fullPath);
+        stack.push(fullPath);
       } else if (entry.isFile()) {
-         files.push(fullPath);
+        files.push(fullPath);
       }
     }
   }

@@ -11,7 +11,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { useSecurityMetrics } from './useSecurityMetrics';
 
-
 import type { MetricsPeriod } from './useSecurityMetrics';
 import type { SecurityMetrics } from '@abe-stack/core';
 

@@ -88,10 +88,10 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/ui':
         specifier: workspace:*
-        version: link:../../shared/ui
+        version: link:../../client/ui
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -131,7 +131,7 @@ importers:
         version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../../infra/db
@@ -219,13 +219,13 @@ importers:
         version: link:../../client
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/stores':
         specifier: workspace:*
         version: link:../../client/stores
       '@abe-stack/ui':
         specifier: workspace:*
-        version: link:../../shared/ui
+        version: link:../../client/ui
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -241,16 +241,56 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../shared/core
+        version: link:../core
       react:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
+
+  client/stores:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../../core
+    devDependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.2.4
+
+  client/ui:
+    dependencies:
+      '@abe-stack/client':
+        specifier: workspace:*
+        version: link:..
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@abe-stack/stores':
+        specifier: workspace:*
+        version: link:../stores
+      react:
+        specifier: ^19.2.3
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.4(react@19.2.4)
+
+  core:
+    dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../infra/contracts
+      postgres:
+        specifier: ^3.4.8
+        version: 3.4.8
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
   infra/cache:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
 
   infra/contracts:
     dependencies:
@@ -269,7 +309,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       postgres:
         specifier: ^3.4.8
         version: 3.4.8
@@ -278,7 +318,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
 
   infra/http:
     dependencies:
@@ -287,7 +327,7 @@ importers:
         version: link:../contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       fastify:
         specifier: '>=5.0.0'
         version: 5.7.1
@@ -296,7 +336,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../db
@@ -305,7 +345,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       sharp:
         specifier: ^0.33.2
         version: 0.33.5
@@ -317,7 +357,7 @@ importers:
         version: link:../contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../db
@@ -336,7 +376,7 @@ importers:
         version: link:../contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../db
@@ -364,7 +404,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       fastify:
         specifier: '>=5.0.0'
         version: 5.7.1
@@ -373,7 +413,7 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@aws-sdk/client-s3':
         specifier: ^3.840.0
         version: 3.980.0
@@ -398,7 +438,7 @@ importers:
         version: link:../contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../db
@@ -432,7 +472,7 @@ importers:
         version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../../infra/db
@@ -460,7 +500,7 @@ importers:
         version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../../infra/db
@@ -491,7 +531,7 @@ importers:
         version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../shared/core
+        version: link:../../core
       '@abe-stack/db':
         specifier: workspace:*
         version: link:../../infra/db
@@ -502,46 +542,6 @@ importers:
       fastify:
         specifier: 5.7.1
         version: 5.7.1
-
-  client/stores:
-    dependencies:
-      '@abe-stack/core':
-        specifier: workspace:*
-        version: link:../../shared/core
-    devDependencies:
-      react:
-        specifier: ^19.1.0
-        version: 19.2.4
-
-  shared/core:
-    dependencies:
-      '@abe-stack/contracts':
-        specifier: workspace:*
-        version: link:../../infra/contracts
-      postgres:
-        specifier: ^3.4.8
-        version: 3.4.8
-      zod:
-        specifier: ^4.3.6
-        version: 4.3.6
-
-  shared/ui:
-    dependencies:
-      '@abe-stack/client':
-        specifier: workspace:*
-        version: link:../../client
-      '@abe-stack/core':
-        specifier: workspace:*
-        version: link:../core
-      '@abe-stack/stores':
-        specifier: workspace:*
-        version: link:../../client/stores
-      react:
-        specifier: ^19.2.3
-        version: 19.2.4
-      react-dom:
-        specifier: ^19.2.3
-        version: 19.2.4(react@19.2.4)
 
 packages:
 

@@ -4,16 +4,16 @@
  */
 
 import {
-    USERS_TABLE,
-    USER_COLUMNS,
-    and,
-    eq,
-    select,
-    toCamelCase,
-    toSnakeCase,
-    update,
-    type RawDb,
-    type User,
+  USERS_TABLE,
+  USER_COLUMNS,
+  and,
+  eq,
+  select,
+  toCamelCase,
+  toSnakeCase,
+  update,
+  type RawDb,
+  type User,
 } from '../index';
 
 /**

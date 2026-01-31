@@ -1015,7 +1015,11 @@ describe('useInfiniteQuery', () => {
       ];
 
       const queryFn = vi.fn(
-        async ({ pageParam }: { pageParam: string | undefined }): Promise<{
+        async ({
+          pageParam,
+        }: {
+          pageParam: string | undefined;
+        }): Promise<{
           items: string[];
           next: string | undefined;
         }> => {
@@ -1049,14 +1053,12 @@ describe('useInfiniteQuery', () => {
     });
 
     it('should handle null as page param', async () => {
-      const queryFn = vi.fn(
-        ({ pageParam }: { pageParam: number | null }): Promise<PageData> => {
-          if (pageParam === null) {
-            return Promise.resolve(mockPages[0]);
-          }
-          return Promise.resolve(mockPages[pageParam]);
-        },
-      );
+      const queryFn = vi.fn(({ pageParam }: { pageParam: number | null }): Promise<PageData> => {
+        if (pageParam === null) {
+          return Promise.resolve(mockPages[0]);
+        }
+        return Promise.resolve(mockPages[pageParam]);
+      });
 
       const { result } = renderHook(
         () =>

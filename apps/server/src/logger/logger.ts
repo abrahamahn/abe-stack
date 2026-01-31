@@ -10,7 +10,6 @@
 import type { LogData, Logger, RequestContext } from '@abe-stack/core/infrastructure/logger';
 import type { FastifyBaseLogger } from 'fastify';
 
-
 /**
  * Create a logger that wraps Fastify's pino logger.
  * Merges optional context data into every log call for structured logging.

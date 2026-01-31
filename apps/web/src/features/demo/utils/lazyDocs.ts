@@ -13,7 +13,7 @@ const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a
 // Lazy glob imports - these will be code-split and loaded on demand
 // Note: Using relative paths because package exports don't include docs folder
 const elementDocsModules: DocsModules = import.meta.glob(
-  '../../../../../../shared/ui/docs/elements/*.md',
+  '../../../../../../client/ui/docs/elements/*.md',
   {
     query: '?raw',
     import: 'default',
@@ -21,7 +21,7 @@ const elementDocsModules: DocsModules = import.meta.glob(
 ) as DocsModules;
 
 const componentDocsModules: DocsModules = import.meta.glob(
-  '../../../../../../shared/ui/docs/components/*.md',
+  '../../../../../../client/ui/docs/components/*.md',
   {
     query: '?raw',
     import: 'default',
@@ -29,7 +29,7 @@ const componentDocsModules: DocsModules = import.meta.glob(
 ) as DocsModules;
 
 const layoutDocsModules: DocsModules = import.meta.glob(
-  '../../../../../../shared/ui/docs/layouts/**/*.md',
+  '../../../../../../client/ui/docs/layouts/**/*.md',
   {
     query: '?raw',
     import: 'default',

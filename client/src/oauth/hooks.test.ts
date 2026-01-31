@@ -13,7 +13,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 import { createApiClient } from '../api/client';
 
 import {
@@ -40,9 +39,7 @@ const mockCreateApiClient = vi.mocked(createApiClient);
 // Test Data Factories
 // ============================================================================
 
-const createMockOAuthConnection = (
-  overrides?: Partial<OAuthConnection>,
-): OAuthConnection => ({
+const createMockOAuthConnection = (overrides?: Partial<OAuthConnection>): OAuthConnection => ({
   id: '123e4567-e89b-12d3-a456-426614174000',
   provider: 'google' as OAuthProvider,
   providerEmail: 'user@example.com',
@@ -63,8 +60,12 @@ const createMockApiClient = (overrides?: Partial<ApiClient>): ApiClient => ({
   getEnabledOAuthProviders: vi.fn().mockResolvedValue({ providers: [] }),
   getOAuthConnections: vi.fn().mockResolvedValue({ connections: [] }),
   unlinkOAuthProvider: vi.fn().mockResolvedValue({ message: 'Unlinked' }),
-  getOAuthLoginUrl: vi.fn((provider: OAuthProvider) => `http://localhost/api/auth/oauth/${String(provider)}`),
-  getOAuthLinkUrl: vi.fn((provider: OAuthProvider) => `http://localhost/api/auth/oauth/${String(provider)}/link`),
+  getOAuthLoginUrl: vi.fn(
+    (provider: OAuthProvider) => `http://localhost/api/auth/oauth/${String(provider)}`,
+  ),
+  getOAuthLinkUrl: vi.fn(
+    (provider: OAuthProvider) => `http://localhost/api/auth/oauth/${String(provider)}/link`,
+  ),
   ...overrides,
 });
 
@@ -131,10 +132,9 @@ describe('useEnabledOAuthProviders', () => {
       const config1 = { baseUrl: 'http://localhost:3001' };
       const config2 = { baseUrl: 'http://localhost:3002' };
 
-      const { rerender } = renderHook(
-        ({ config }) => useEnabledOAuthProviders(config),
-        { initialProps: { config: config1 } },
-      );
+      const { rerender } = renderHook(({ config }) => useEnabledOAuthProviders(config), {
+        initialProps: { config: config1 },
+      });
 
       expect(mockCreateApiClient).toHaveBeenCalledWith(config1);
 
@@ -372,9 +372,7 @@ describe('useEnabledOAuthProviders', () => {
       });
       mockCreateApiClient.mockReturnValue(mockClient);
 
-      const { result, rerender } = renderHook(() =>
-        useEnabledOAuthProviders(defaultClientConfig),
-      );
+      const { result, rerender } = renderHook(() => useEnabledOAuthProviders(defaultClientConfig));
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -426,7 +424,10 @@ describe('useOAuthConnections', () => {
     it('should fetch connections automatically on mount', async () => {
       const mockConnections = [
         createMockOAuthConnection({ provider: 'google' }),
-        createMockOAuthConnection({ provider: 'github', id: '123e4567-e89b-12d3-a456-426614174001' }),
+        createMockOAuthConnection({
+          provider: 'github',
+          id: '123e4567-e89b-12d3-a456-426614174001',
+        }),
       ];
 
       const mockGetConnections = vi.fn().mockResolvedValue({
@@ -540,7 +541,10 @@ describe('useOAuthConnections', () => {
     it('should successfully unlink a provider', async () => {
       const mockConnections = [
         createMockOAuthConnection({ provider: 'google' }),
-        createMockOAuthConnection({ provider: 'github', id: '123e4567-e89b-12d3-a456-426614174001' }),
+        createMockOAuthConnection({
+          provider: 'github',
+          id: '123e4567-e89b-12d3-a456-426614174001',
+        }),
       ];
 
       const mockGetConnections = vi
@@ -621,7 +625,9 @@ describe('useOAuthConnections', () => {
       });
 
       await act(async () => {
-        await expect(result.current.unlink('google')).rejects.toThrow('Cannot unlink last provider');
+        await expect(result.current.unlink('google')).rejects.toThrow(
+          'Cannot unlink last provider',
+        );
       });
 
       expect(result.current.error).toBe(testError);
@@ -696,8 +702,9 @@ describe('useOAuthConnections', () => {
     });
 
     it('should return correct link URL for provider', async () => {
-      const mockGetLinkUrl = vi.fn((provider: OAuthProvider) =>
-        `http://localhost:3001/api/auth/oauth/${String(provider)}/link`,
+      const mockGetLinkUrl = vi.fn(
+        (provider: OAuthProvider) =>
+          `http://localhost:3001/api/auth/oauth/${String(provider)}/link`,
       );
 
       mockClient = createMockApiClient({
@@ -721,8 +728,9 @@ describe('useOAuthConnections', () => {
     });
 
     it('should support all OAuth providers', async () => {
-      const mockGetLinkUrl = vi.fn((provider: OAuthProvider) =>
-        `http://localhost:3001/api/auth/oauth/${String(provider)}/link`,
+      const mockGetLinkUrl = vi.fn(
+        (provider: OAuthProvider) =>
+          `http://localhost:3001/api/auth/oauth/${String(provider)}/link`,
       );
 
       mockClient = createMockApiClient({
@@ -846,9 +854,7 @@ describe('useOAuthConnections', () => {
       });
       mockCreateApiClient.mockReturnValue(mockClient);
 
-      const { result, rerender } = renderHook(() =>
-        useOAuthConnections(defaultClientConfig),
-      );
+      const { result, rerender } = renderHook(() => useOAuthConnections(defaultClientConfig));
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);

@@ -19,12 +19,7 @@ import {
   useSubscription,
 } from './hooks';
 
-import type {
-  Invoice,
-  PaymentMethod,
-  Plan,
-  Subscription,
-} from '@abe-stack/core';
+import type { Invoice, PaymentMethod, Plan, Subscription } from '@abe-stack/core';
 
 // ============================================================================
 // Test Data Factories
@@ -265,12 +260,9 @@ describe('usePlans', () => {
 
   describe('client configuration changes', () => {
     it('should recreate client when config changes', async () => {
-      const { result, rerender } = renderHook(
-        ({ config }) => usePlans(config),
-        {
-          initialProps: { config: clientConfig },
-        },
-      );
+      const { result, rerender } = renderHook(({ config }) => usePlans(config), {
+        initialProps: { config: clientConfig },
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);

@@ -116,11 +116,13 @@ describe('createBillingProvider', () => {
 
       createBillingProvider(config);
 
-      expect(MockStripeProvider.mock.calls[0]).toEqual([{
-        secretKey: 'sk_live_different',
-        publishableKey: 'pk_live_different',
-        webhookSecret: 'whsec_live_different',
-      }]);
+      expect(MockStripeProvider.mock.calls[0]).toEqual([
+        {
+          secretKey: 'sk_live_different',
+          publishableKey: 'pk_live_different',
+          webhookSecret: 'whsec_live_different',
+        },
+      ]);
     });
   });
 
@@ -143,11 +145,13 @@ describe('createBillingProvider', () => {
 
       createBillingProvider(config);
 
-      expect(MockPayPalProvider.mock.calls[0]).toEqual([{
-        clientId: 'different_client_id',
-        clientSecret: 'different_client_secret',
-        webhookId: 'different_webhook_id',
-      }]);
+      expect(MockPayPalProvider.mock.calls[0]).toEqual([
+        {
+          clientId: 'different_client_id',
+          clientSecret: 'different_client_secret',
+          webhookId: 'different_webhook_id',
+        },
+      ]);
     });
   });
 

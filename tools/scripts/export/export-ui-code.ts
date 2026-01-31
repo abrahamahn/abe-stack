@@ -15,8 +15,8 @@ interface ExportOptions {
  * Usage:
  *   tsx tools/dev/export-ui-code.ts                          # Export all (no tests)
  *   tsx tools/dev/export-ui-code.ts --include-tests          # Export all with tests
- *   tsx tools/dev/export-ui-code.ts --path shared/ui/src/elements/Button.tsx
- *   tsx tools/dev/export-ui-code.ts --path shared/ui/src/elements --with-tests
+ *   tsx tools/dev/export-ui-code.ts --path client/ui/src/elements/Button.tsx
+ *   tsx tools/dev/export-ui-code.ts --path client/ui/src/elements --with-tests
  */
 async function main(): Promise<void> {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
       }
     }
   } else {
-    // Default behavior: export shared/ui and apps/web/src/features/demo
+    // Default behavior: export client/ui and apps/web/src/features/demo
     const uiDir = path.resolve(repoRoot, 'packages', 'ui');
     const demoDir = path.resolve(repoRoot, 'apps', 'web', 'src', 'features', 'demo');
     await collectFiles(uiDir, files, options);

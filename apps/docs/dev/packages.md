@@ -24,9 +24,9 @@ This is the only hard technical rule you need to follow.
 
 ### `infra/*`, `modules/*`, `shared/*`, `client/` — The Capabilities
 
-| Aspect | Description |
-|---|---|
-| **Role** | Defines **"HOW"** things work. |
+| Aspect           | Description                           |
+| ---------------- | ------------------------------------- |
+| **Role**         | Defines **"HOW"** things work.        |
 | **Mental Model** | The Engine, Transmission, and Wheels. |
 
 **Contents:**
@@ -38,9 +38,9 @@ This is the only hard technical rule you need to follow.
 
 ### `apps/server` — The Composition
 
-| Aspect | Description |
-|---|---|
-| **Role** | Defines **"WHAT"** is running. |
+| Aspect           | Description                         |
+| ---------------- | ----------------------------------- |
+| **Role**         | Defines **"WHAT"** is running.      |
 | **Mental Model** | The Mechanic who assembles the car. |
 
 **Contents:**
@@ -98,13 +98,13 @@ As you migrate files, ask these 3 questions for each one.
 
 ## 5. The Final Boundary — Summary Table
 
-| Concept | `infra/*`, `modules/*`, `shared/*`, `client/` (Modules) | `apps/server` (Application) |
-|---|---|---|
-| **Logic** | 100% (All Business Rules) | 0% (Only wiring) |
-| **State** | Stateless (Classes/Functions) | Stateful (Instances/Env Vars) |
-| **Database** | Definitions (Schema/Repo) | Connection (Pool Instance) |
-| **Config** | Validation Schemas (Zod) | Actual Values (`process.env`) |
-| **Knowledge** | Knows nothing about the App | Knows everything about Packages |
+| Concept       | `infra/*`, `modules/*`, `shared/*`, `client/` (Modules) | `apps/server` (Application)     |
+| ------------- | ------------------------------------------------------- | ------------------------------- |
+| **Logic**     | 100% (All Business Rules)                               | 0% (Only wiring)                |
+| **State**     | Stateless (Classes/Functions)                           | Stateful (Instances/Env Vars)   |
+| **Database**  | Definitions (Schema/Repo)                               | Connection (Pool Instance)      |
+| **Config**    | Validation Schemas (Zod)                                | Actual Values (`process.env`)   |
+| **Knowledge** | Knows nothing about the App                             | Knows everything about Packages |
 
 If you follow this, your `apps/server` will naturally shrink to about **10–15 files**, which is the goal.
 
@@ -169,8 +169,8 @@ These are the products you sell. They consume Tier 2 and Tier 1.
   - `modules/billing` — Subscriptions, Invoices, Webhooks. (Uses `db` and `http`).
   - `modules/media` — Transcoding, Image optimization. (Uses `storage` and `jobs`).
 - **Why it matters:** This is your **Money Maker**.
-  - *Standard License ($399):* Ship the code without `modules/billing` and `modules/media`.
-  - *Pro License ($999):* Ship the full `modules/` folder.
+  - _Standard License ($399):_ Ship the code without `modules/billing` and `modules/media`.
+  - _Pro License ($999):_ Ship the full `modules/` folder.
 
 ---
 
@@ -191,11 +191,11 @@ These are the deployable units. They wire everything together.
 
 You can only import from tiers **BELOW** you.
 
-| Import | Allowed? | Why |
-|---|---|---|
-| `modules/auth` → `infra/db` | **Yes** (Tier 3 → Tier 2) | Auth needs data access. |
-| `infra/db` → `modules/auth` | **No** (Tier 2 → Tier 3) | Database client shouldn't care about login logic. |
-| `modules/billing` → `apps/server` | **No** (Tier 3 → Tier 4) | Billing logic shouldn't care if it's running in an API server or a CLI script. |
+| Import                            | Allowed?                  | Why                                                                            |
+| --------------------------------- | ------------------------- | ------------------------------------------------------------------------------ |
+| `modules/auth` → `infra/db`       | **Yes** (Tier 3 → Tier 2) | Auth needs data access.                                                        |
+| `infra/db` → `modules/auth`       | **No** (Tier 2 → Tier 3)  | Database client shouldn't care about login logic.                              |
+| `modules/billing` → `apps/server` | **No** (Tier 3 → Tier 4)  | Billing logic shouldn't care if it's running in an API server or a CLI script. |
 
 ---
 
@@ -211,7 +211,7 @@ You can only import from tiers **BELOW** you.
 
 ## Appendix: Current Code Evaluation
 
-*Last updated: January 2026*
+_Last updated: January 2026_
 
 This section evaluates the current state of the codebase against the architecture defined above. It covers import direction compliance, responsibility boundary adherence, and migration progress.
 
@@ -223,13 +223,13 @@ This section evaluates the current state of the codebase against the architectur
 
 All cross-package imports flow in the correct direction (same-tier or downward). No packages import from apps.
 
-| Check | Status |
-|---|---|
+| Check                                                                            | Status    |
+| -------------------------------------------------------------------------------- | --------- |
 | `infra/*`, `modules/*`, `shared/*`, `client/` importing from `apps/*` (Critical) | **CLEAN** |
-| Tier 1 (Kernel) importing Tier 2 or 3 | **CLEAN** |
-| Tier 2 (Infrastructure) importing Tier 3 | **CLEAN** |
-| Tier 3 (Modules) importing Tier 4 | **CLEAN** |
-| `package.json` dependency direction | **CLEAN** |
+| Tier 1 (Kernel) importing Tier 2 or 3                                            | **CLEAN** |
+| Tier 2 (Infrastructure) importing Tier 3                                         | **CLEAN** |
+| Tier 3 (Modules) importing Tier 4                                                | **CLEAN** |
+| `package.json` dependency direction                                              | **CLEAN** |
 
 **Current dependency map (all valid):**
 
@@ -275,45 +275,45 @@ apps/server/src/
 
 #### Completed
 
-| Phase | What | Result |
-|---|---|---|
-| **P0** | Admin services + handlers + routes → `modules/admin` (new) | ✅ Created package with `AdminAppContext`, `adminProtectedRoute` helper |
-| **P0** | Billing duplicate modules deleted (code in `modules/billing`) | ✅ Deleted `modules/billing/` (8 files) |
-| **P0** | Users duplicate modules deleted (code in `infra/users`) | ✅ Deleted `modules/users/` (5 files) |
-| **P0** | Route wiring rewritten — no re-exports | ✅ `modules/routes.ts` imports directly from `@abe-stack/*` |
-| **P1** | Dead auth types removed from `shared/types.ts` | ✅ Removed 12 unused type exports |
-| **P1** | `shared/constants.ts` + `shared/errorMapper.ts` deleted | ✅ Zero remaining consumers |
-| **P2** | `infrastructure/media/` deleted (unused, 29 files) | ✅ Completely unused code |
-| **P2** | Package re-exports removed from `infrastructure/index.ts` | ✅ Consumers import from source packages |
+| Phase  | What                                                          | Result                                                                  |
+| ------ | ------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **P0** | Admin services + handlers + routes → `modules/admin` (new)    | ✅ Created package with `AdminAppContext`, `adminProtectedRoute` helper |
+| **P0** | Billing duplicate modules deleted (code in `modules/billing`) | ✅ Deleted `modules/billing/` (8 files)                                 |
+| **P0** | Users duplicate modules deleted (code in `infra/users`)       | ✅ Deleted `modules/users/` (5 files)                                   |
+| **P0** | Route wiring rewritten — no re-exports                        | ✅ `modules/routes.ts` imports directly from `@abe-stack/*`             |
+| **P1** | Dead auth types removed from `shared/types.ts`                | ✅ Removed 12 unused type exports                                       |
+| **P1** | `shared/constants.ts` + `shared/errorMapper.ts` deleted       | ✅ Zero remaining consumers                                             |
+| **P2** | `infrastructure/media/` deleted (unused, 29 files)            | ✅ Completely unused code                                               |
+| **P2** | Package re-exports removed from `infrastructure/index.ts`     | ✅ Consumers import from source packages                                |
 
 **Lines removed from server:** ~25,000+ (across P0, P1, P2)
 
 #### Remaining (Optional)
 
-| Phase | What | Notes |
-|---|---|---|
-| **P3** | Replace `services/cache-service.ts` with `@abe-stack/cache` | Local is basic TTL; package has full LRU. Low priority — functional. |
-| **P3** | Unify local HTTP router with `@abe-stack/http` | Local uses `AppContext`; package uses `HandlerContext`. Requires system module handler updates. |
-| **P3** | Migrate notification factory to `@abe-stack/notifications` | Local is thin adapter. Low impact. |
-| **Known** | Fix billing `BillingRouteMap` type incompatibility | Pre-existing: billing uses custom route system divergent from `@abe-stack/http`. |
+| Phase     | What                                                        | Notes                                                                                           |
+| --------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **P3**    | Replace `services/cache-service.ts` with `@abe-stack/cache` | Local is basic TTL; package has full LRU. Low priority — functional.                            |
+| **P3**    | Unify local HTTP router with `@abe-stack/http`              | Local uses `AppContext`; package uses `HandlerContext`. Requires system module handler updates. |
+| **P3**    | Migrate notification factory to `@abe-stack/notifications`  | Local is thin adapter. Low impact.                                                              |
+| **Known** | Fix billing `BillingRouteMap` type incompatibility          | Pre-existing: billing uses custom route system divergent from `@abe-stack/http`.                |
 
 ---
 
 ### D. What Is Correctly Placed
 
-| File/Directory | Why It's Correct |
-|---|---|
-| `main.ts` | Thin entry point — config, create, start, shutdown. No business logic. |
-| `app.ts` | Composition root — DI wiring. Imports directly from source packages. |
-| `server.ts` | Fastify factory with plugin registration. |
-| `config/` | Environment variable loading — server's job. |
-| `modules/routes.ts` | Route wiring only — `registerRouteMap` calls importing from `@abe-stack/*` packages. |
-| `modules/system/` | Deployment-specific: health checks, uptime, route listing. |
-| `infrastructure/http/` | Local router with `AppContext` handler signatures (bridges packages to server). |
-| `infrastructure/monitor/` | Health checks integrate all infrastructure components. |
-| `infrastructure/messaging/` | WebSocket adapter with module-level connection state. |
-| `infrastructure/search/` | SQL/Elasticsearch adapters — server-specific provider selection. |
-| `shared/types.ts` | `AppContext`, `IServiceContainer`, `HasContext` — pure server DI types. |
+| File/Directory              | Why It's Correct                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `main.ts`                   | Thin entry point — config, create, start, shutdown. No business logic.               |
+| `app.ts`                    | Composition root — DI wiring. Imports directly from source packages.                 |
+| `server.ts`                 | Fastify factory with plugin registration.                                            |
+| `config/`                   | Environment variable loading — server's job.                                         |
+| `modules/routes.ts`         | Route wiring only — `registerRouteMap` calls importing from `@abe-stack/*` packages. |
+| `modules/system/`           | Deployment-specific: health checks, uptime, route listing.                           |
+| `infrastructure/http/`      | Local router with `AppContext` handler signatures (bridges packages to server).      |
+| `infrastructure/monitor/`   | Health checks integrate all infrastructure components.                               |
+| `infrastructure/messaging/` | WebSocket adapter with module-level connection state.                                |
+| `infrastructure/search/`    | SQL/Elasticsearch adapters — server-specific provider selection.                     |
+| `shared/types.ts`           | `AppContext`, `IServiceContainer`, `HasContext` — pure server DI types.              |
 
 ---
 

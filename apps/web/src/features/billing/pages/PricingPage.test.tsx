@@ -56,9 +56,7 @@ describe('PricingPage', () => {
 
   it('should render the subtitle', () => {
     render(<PricingPage />);
-    expect(
-      screen.getByText(/Choose the plan that works best for you/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Choose the plan that works best for you/)).toBeInTheDocument();
   });
 
   it('should render the pricing table', () => {

@@ -2,10 +2,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    createTransactionQueue,
-    TransactionQueue,
-    type QueuedTransaction,
-    type TransactionResponse,
+  createTransactionQueue,
+  TransactionQueue,
+  type QueuedTransaction,
+  type TransactionResponse,
 } from './TransactionQueue';
 
 // Mock localStorage
@@ -110,7 +110,9 @@ function createTestTransaction(
 
 describe('TransactionQueue', () => {
   let queue: TransactionQueue;
-  let mockSubmit: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>>;
+  let mockSubmit: ReturnType<
+    typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>
+  >;
   let mockRollback: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<void>>>;
 
   beforeEach(() => {
@@ -120,7 +122,9 @@ describe('TransactionQueue', () => {
     mockSubmit = vi
       .fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>()
       .mockResolvedValue({ status: 200 });
-    mockRollback = vi.fn<(transaction: QueuedTransaction) => Promise<void>>().mockResolvedValue(undefined);
+    mockRollback = vi
+      .fn<(transaction: QueuedTransaction) => Promise<void>>()
+      .mockResolvedValue(undefined);
   });
 
   afterEach(() => {

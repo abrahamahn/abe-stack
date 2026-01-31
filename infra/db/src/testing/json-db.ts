@@ -329,7 +329,7 @@ export class JsonDatabase {
     data: Omit<T, 'id'> & { id?: string },
   ): Promise<T> {
     return this.writeMutex.withLock(() => {
-      const id = (data.id != null && data.id !== '') ? data.id : this.generateId();
+      const id = data.id != null && data.id !== '' ? data.id : this.generateId();
       const record = { ...data, id } as T;
 
       this.data[table] ??= [];
@@ -355,7 +355,7 @@ export class JsonDatabase {
     return this.writeMutex.withLock(() => {
       const inserted: T[] = [];
       for (const data of records) {
-        const id = (data.id != null && data.id !== '') ? data.id : this.generateId();
+        const id = data.id != null && data.id !== '' ? data.id : this.generateId();
         const record = { ...data, id } as T;
 
         this.data[table] ??= [];
@@ -390,7 +390,9 @@ export class JsonDatabase {
         const matches =
           typeof where === 'function'
             ? where(typedRecord)
-            : Object.entries(where as object).every(([key, value]) => typedRecord[key as keyof T] === value);
+            : Object.entries(where as object).every(
+                ([key, value]) => typedRecord[key as keyof T] === value,
+              );
 
         if (matches) {
           const updatedRecord = { ...typedRecord, ...data } as T;

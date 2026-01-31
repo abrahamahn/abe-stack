@@ -147,10 +147,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn('test-data', 500);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       // All assertions must be inside waitFor to avoid race with fast fetch completion
       await waitFor(() => {
@@ -171,10 +170,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn({ id: 1, name: 'Test' });
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['user', 1], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['user', 1], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -194,10 +192,9 @@ describe('useQuery', () => {
       const queryFn = createMockQueryFn(data);
       const onSuccess = vi.fn();
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, onSuccess }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, onSuccess }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalledWith(data);
@@ -212,10 +209,9 @@ describe('useQuery', () => {
       const queryFn = createMockQueryFn(data);
       const onSettled = vi.fn();
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, onSettled }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, onSettled }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(onSettled).toHaveBeenCalledWith(data, null);
@@ -228,10 +224,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn({ id: 1, name: 'Test' });
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['user', 1], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['user', 1], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -275,10 +270,9 @@ describe('useQuery', () => {
       const error = new Error('Fetch failed');
       const queryFn = createMockErrorFn(error);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -296,10 +290,9 @@ describe('useQuery', () => {
       const queryFn = createMockErrorFn(error);
       const onError = vi.fn();
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false, onError }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false, onError }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(onError).toHaveBeenCalledWith(error);
@@ -314,10 +307,9 @@ describe('useQuery', () => {
       const queryFn = createMockErrorFn(error);
       const onSettled = vi.fn();
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false, onSettled }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false, onSettled }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(onSettled).toHaveBeenCalledWith(undefined, error);
@@ -331,10 +323,9 @@ describe('useQuery', () => {
       const error = new Error('Fetch failed');
       const queryFn = createMockErrorFn(error);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -403,10 +394,9 @@ describe('useQuery', () => {
       const error = new Error('No retry');
       const queryFn = vi.fn().mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
@@ -493,8 +483,7 @@ describe('useQuery', () => {
       const queryFn = vi.fn().mockResolvedValue('data');
 
       const { result, rerender } = renderHook(
-        ({ enabled }: { enabled: boolean }) =>
-          useQuery({ queryKey: ['test'], queryFn, enabled }),
+        ({ enabled }: { enabled: boolean }) => useQuery({ queryKey: ['test'], queryFn, enabled }),
         { wrapper: createWrapper(cache), initialProps: { enabled: false } },
       );
 
@@ -518,8 +507,7 @@ describe('useQuery', () => {
       const queryFn = vi.fn().mockResolvedValue('data');
 
       const { result, rerender } = renderHook(
-        ({ enabled }: { enabled: boolean }) =>
-          useQuery({ queryKey: ['test'], queryFn, enabled }),
+        ({ enabled }: { enabled: boolean }) => useQuery({ queryKey: ['test'], queryFn, enabled }),
         { wrapper: createWrapper(cache), initialProps: { enabled: true } },
       );
 
@@ -554,10 +542,9 @@ describe('useQuery', () => {
       const fetchedData = { id: 1, name: 'Fetched' };
       const queryFn = createMockQueryFn(fetchedData, 50);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, initialData }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn, initialData }), {
+        wrapper: createWrapper(cache),
+      });
 
       // Should have initial data immediately
       expect(result.current.data).toEqual(initialData);
@@ -624,10 +611,9 @@ describe('useQuery', () => {
       const placeholderData = { id: 0, name: 'Placeholder' };
       const queryFn = createMockQueryFn({ id: 1, name: 'Fetched' });
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, placeholderData }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, placeholderData }), {
+        wrapper: createWrapper(cache),
+      });
 
       // Placeholder should not be in cache
       const cachedData = cache.getQueryData(['test']);
@@ -668,10 +654,7 @@ describe('useQuery', () => {
     it('should refetch stale data on remount', async () => {
       const cache = new QueryCache();
       const key = uniqueKey('stale-remount');
-      const queryFn = vi
-        .fn()
-        .mockResolvedValueOnce('first')
-        .mockResolvedValueOnce('second');
+      const queryFn = vi.fn().mockResolvedValueOnce('first').mockResolvedValueOnce('second');
 
       // Create wrapper once for both hooks to share the same cache
       const wrapper = createWrapper(cache);
@@ -714,15 +697,11 @@ describe('useQuery', () => {
   describe('refetch', () => {
     it('should refetch data when refetch is called', async () => {
       const cache = new QueryCache();
-      const queryFn = vi
-        .fn()
-        .mockResolvedValueOnce('first')
-        .mockResolvedValueOnce('second');
+      const queryFn = vi.fn().mockResolvedValueOnce('first').mockResolvedValueOnce('second');
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBe('first');
@@ -779,10 +758,9 @@ describe('useQuery', () => {
           }),
       );
 
-      const { unmount } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { unmount } = renderHook(() => useQuery({ queryKey: ['test'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       // Wait for fetch to start
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -808,15 +786,11 @@ describe('useQuery', () => {
         resolveFirst = resolve;
       });
 
-      const queryFn = vi
-        .fn()
-        .mockReturnValueOnce(firstPromise)
-        .mockResolvedValueOnce('second');
+      const queryFn = vi.fn().mockReturnValueOnce(firstPromise).mockResolvedValueOnce('second');
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: key, queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: key, queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       // Wait for first query to start
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -852,10 +826,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn('initial');
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBe('initial');
@@ -876,15 +849,13 @@ describe('useQuery', () => {
       // Use the same cache wrapper for both hooks
       const wrapper = createWrapper(cache);
 
-      const { result: result1 } = renderHook(
-        () => useQuery({ queryKey: ['shared'], queryFn }),
-        { wrapper },
-      );
+      const { result: result1 } = renderHook(() => useQuery({ queryKey: ['shared'], queryFn }), {
+        wrapper,
+      });
 
-      const { result: result2 } = renderHook(
-        () => useQuery({ queryKey: ['shared'], queryFn }),
-        { wrapper },
-      );
+      const { result: result2 } = renderHook(() => useQuery({ queryKey: ['shared'], queryFn }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result1.current.isSuccess).toBe(true);
@@ -907,10 +878,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn('data');
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: [], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: [], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -921,16 +891,12 @@ describe('useQuery', () => {
 
     it('should handle query key with complex objects', async () => {
       const cache = new QueryCache();
-      const queryKey = [
-        'users',
-        { id: 1, filters: { status: 'active' }, sort: 'name' },
-      ] as const;
+      const queryKey = ['users', { id: 1, filters: { status: 'active' }, sort: 'name' }] as const;
       const queryFn = createMockQueryFn('complex-key-data');
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey, queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey, queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -945,10 +911,9 @@ describe('useQuery', () => {
       const queryFn = vi.fn().mockRejectedValue(abortError);
       const onError = vi.fn();
 
-      renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn, retry: false, onError }),
-        { wrapper: createWrapper(cache) },
-      );
+      renderHook(() => useQuery({ queryKey: ['test'], queryFn, retry: false, onError }), {
+        wrapper: createWrapper(cache),
+      });
 
       // Wait for potential error callback
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -963,10 +928,9 @@ describe('useQuery', () => {
       // Create a mock function that returns null (TypeScript needs explicit typing)
       const queryFn = (() => Promise.resolve(null)) as () => Promise<null>;
 
-      const { result } = renderHook(
-        () => useQuery<null>({ queryKey: key, queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery<null>({ queryKey: key, queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -980,10 +944,9 @@ describe('useQuery', () => {
       const cache = new QueryCache();
       const queryFn = createMockQueryFn(undefined);
 
-      const { result } = renderHook(
-        () => useQuery({ queryKey: ['test'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery({ queryKey: ['test'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -1027,10 +990,7 @@ describe('useQuery', () => {
 
     it('should handle zero staleTime correctly', async () => {
       const cache = new QueryCache({ defaultStaleTime: 0 });
-      const queryFn = vi
-        .fn()
-        .mockResolvedValueOnce('first')
-        .mockResolvedValueOnce('second');
+      const queryFn = vi.fn().mockResolvedValueOnce('first').mockResolvedValueOnce('second');
 
       const { result, unmount } = renderHook(
         () => useQuery({ queryKey: ['test'], queryFn, staleTime: 0 }),
@@ -1078,10 +1038,9 @@ describe('useQuery', () => {
 
       const queryFn = createMockQueryFn<User>({ id: 1, name: 'Test' });
 
-      const { result } = renderHook(
-        () => useQuery<User>({ queryKey: ['user'], queryFn }),
-        { wrapper: createWrapper(cache) },
-      );
+      const { result } = renderHook(() => useQuery<User>({ queryKey: ['user'], queryFn }), {
+        wrapper: createWrapper(cache),
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);

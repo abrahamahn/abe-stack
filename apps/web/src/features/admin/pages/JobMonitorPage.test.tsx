@@ -7,7 +7,9 @@ import { JobMonitorPage } from './JobMonitorPage';
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => ({
   Heading: ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>,
-  PageContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="page-container">{children}</div>,
+  PageContainer: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="page-container">{children}</div>
+  ),
   SidePeek: {
     Root: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
       open ? <div data-testid="side-peek">{children}</div> : null,

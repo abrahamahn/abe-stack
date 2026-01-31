@@ -97,7 +97,10 @@ export const adminUserSchema: Schema<AdminUser> = createSchema((data: unknown) =
   }
 
   // Number fields
-  if (typeof obj['failedLoginAttempts'] !== 'number' || !Number.isInteger(obj['failedLoginAttempts'])) {
+  if (
+    typeof obj['failedLoginAttempts'] !== 'number' ||
+    !Number.isInteger(obj['failedLoginAttempts'])
+  ) {
     throw new Error('failedLoginAttempts must be an integer');
   }
 

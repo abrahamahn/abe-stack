@@ -99,18 +99,18 @@ function parseOutput(fullLog: string) {
     // TSC output is often multi-line, but the summary "Found X errors" is usually printed at the end of that package's stream.
     const tscMatch = new RegExp(/Found (\d+) error/).exec(line);
     if (tscMatch) {
-       const errors = parseInt(tscMatch[1], 10);
-       totalTypeErrors += errors;
+      const errors = parseInt(tscMatch[1], 10);
+      totalTypeErrors += errors;
 
-       if (!packageStats[currentPackage]) packageStats[currentPackage] = { lint: 0, type: 0 };
-       packageStats[currentPackage].type += errors;
+      if (!packageStats[currentPackage]) packageStats[currentPackage] = { lint: 0, type: 0 };
+      packageStats[currentPackage].type += errors;
     } else {
-       // Fallback: Count individual "error TS..." lines if no summary found
-       if (line.includes(': error TS')) {
-          totalTypeErrors++;
-           if (!packageStats[currentPackage]) packageStats[currentPackage] = { lint: 0, type: 0 };
-           packageStats[currentPackage].type++;
-       }
+      // Fallback: Count individual "error TS..." lines if no summary found
+      if (line.includes(': error TS')) {
+        totalTypeErrors++;
+        if (!packageStats[currentPackage]) packageStats[currentPackage] = { lint: 0, type: 0 };
+        packageStats[currentPackage].type++;
+      }
     }
   }
 
@@ -121,15 +121,18 @@ function parseOutput(fullLog: string) {
 
   console.log('\n📋 Breakdown by Package (Top Offenders):');
 
-  const sortedStats = Object.entries(packageStats)
-    .sort(([, a], [, b]) => (b.lint + b.type) - (a.lint + a.type));
+  const sortedStats = Object.entries(packageStats).sort(
+    ([, a], [, b]) => b.lint + b.type - (a.lint + a.type),
+  );
 
   if (sortedStats.length === 0) {
-     console.log('   (No explicit summary lines found - check output details above)');
+    console.log('   (No explicit summary lines found - check output details above)');
   } else {
     sortedStats.forEach(([pkg, stats]) => {
       const total = stats.lint + stats.type;
-      console.log(`   - ${pkg.padEnd(30)}: ${total.toString().padEnd(5)} (Lint: ${stats.lint}, Type: ${stats.type})`);
+      console.log(
+        `   - ${pkg.padEnd(30)}: ${total.toString().padEnd(5)} (Lint: ${stats.lint}, Type: ${stats.type})`,
+      );
     });
   }
   console.log('──────────────────────────────────────────────────────────────────────────────\n');

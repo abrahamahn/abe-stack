@@ -87,7 +87,12 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     rateLimiter: new RateLimiter({ windowMs: 60_000, max: 100 }),
     isAppError: (err: unknown) => isAppError(err),
     getErrorInfo: (err: unknown): AppErrorInfo => {
-      const e = err as { statusCode: number; code?: string; message: string; details?: Record<string, unknown> };
+      const e = err as {
+        statusCode: number;
+        code?: string;
+        message: string;
+        details?: Record<string, unknown>;
+      };
       const info: AppErrorInfo = {
         statusCode: e.statusCode,
         code: e.code ?? 'INTERNAL_ERROR',

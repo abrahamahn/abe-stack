@@ -48,7 +48,9 @@ export function useJobActions(): UseJobActionsResult {
 
   const invalidateJobs = useCallback(() => {
     // Invalidate jobs list and stats queries
-    queryCache.invalidateQueries((key: readonly unknown[]) => key[0] === 'jobs' || key[0] === 'queueStats');
+    queryCache.invalidateQueries(
+      (key: readonly unknown[]) => key[0] === 'jobs' || key[0] === 'queueStats',
+    );
   }, [queryCache]);
 
   const retryMutation = useMutation<JobActionResponseLocal, Error, string>({

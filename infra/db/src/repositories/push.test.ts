@@ -1,15 +1,9 @@
 // infra/db/src/repositories/push.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import {
-  DEFAULT_QUIET_HOURS,
-  DEFAULT_TYPE_PREFERENCES,
-} from '../schema/index';
+import { DEFAULT_QUIET_HOURS, DEFAULT_TYPE_PREFERENCES } from '../schema/index';
 
-import {
-  createNotificationPreferenceRepository,
-  createPushSubscriptionRepository,
-} from './push';
+import { createNotificationPreferenceRepository, createPushSubscriptionRepository } from './push';
 
 import type { RawDb } from '../client';
 import type {
@@ -17,7 +11,6 @@ import type {
   NewPushSubscription,
   NotificationPreference,
 } from '../schema/index';
-
 
 // ============================================================================
 // Mock Database
@@ -483,7 +476,12 @@ describe('NotificationPreferenceRepository', () => {
     });
 
     test('should parse JSONB fields correctly', async () => {
-      const customQuietHours = { enabled: true, startHour: 23, endHour: 7, timezone: 'America/New_York' };
+      const customQuietHours = {
+        enabled: true,
+        startHour: 23,
+        endHour: 7,
+        timezone: 'America/New_York',
+      };
       const customTypes = {
         ...DEFAULT_TYPE_PREFERENCES,
         marketing: { enabled: true, channels: ['email' as const] },

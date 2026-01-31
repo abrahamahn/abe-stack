@@ -5,7 +5,14 @@ import { createBillingProvider } from '@abe-stack/billing';
 import { createMemoryCache } from '@abe-stack/cache';
 import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
 import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import { buildConfigConnectionString as buildConnectionString, createDbClient, DEFAULT_SEARCH_SCHEMAS, getRepositoryContext, getSearchProviderFactory, requireValidSchema } from '@abe-stack/db';
+import {
+  buildConfigConnectionString as buildConnectionString,
+  createDbClient,
+  DEFAULT_SEARCH_SCHEMAS,
+  getRepositoryContext,
+  getSearchProviderFactory,
+  requireValidSchema,
+} from '@abe-stack/db';
 import { createEmailService, emailTemplates } from '@abe-stack/email';
 import { createPostgresQueueStore, createQueueServer, createWriteService } from '@abe-stack/jobs';
 import { createNotificationProviderService } from '@abe-stack/notifications';
@@ -182,7 +189,12 @@ export class App implements IServiceContainer {
       }
 
       // 2. Handle Schema Validation Errors (Fastify native)
-      if (error !== null && typeof error === 'object' && 'validation' in error && (error as { validation?: unknown }).validation !== undefined) {
+      if (
+        error !== null &&
+        typeof error === 'object' &&
+        'validation' in error &&
+        (error as { validation?: unknown }).validation !== undefined
+      ) {
         return reply.status(400).send({
           error: 'ValidationError',
           message: 'Invalid request data',

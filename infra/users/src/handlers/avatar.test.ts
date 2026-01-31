@@ -226,18 +226,12 @@ describe('changePassword', () => {
       );
 
       expect(mockRepos.users.findById).toHaveBeenCalledWith(mockUser.id);
-      expect(mockVerifyPassword).toHaveBeenCalledWith(
-        'currentPassword123',
-        mockUser.passwordHash,
-      );
+      expect(mockVerifyPassword).toHaveBeenCalledWith('currentPassword123', mockUser.passwordHash);
       expect(mockValidatePassword).toHaveBeenCalledWith('newStrongPassword456!', [
         mockUser.email,
         mockUser.name,
       ]);
-      expect(mockHashPassword).toHaveBeenCalledWith(
-        'newStrongPassword456!',
-        mockAuthConfig.argon2,
-      );
+      expect(mockHashPassword).toHaveBeenCalledWith('newStrongPassword456!', mockAuthConfig.argon2);
       expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, {
         passwordHash: '$argon2id$new-hash',
       });
@@ -362,9 +356,7 @@ describe('uploadAvatar', () => {
 
     vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
 
-    await expect(
-      uploadAvatar(mockRepos, mockStorage, 'non-existent', file),
-    ).rejects.toMatchObject({
+    await expect(uploadAvatar(mockRepos, mockStorage, 'non-existent', file)).rejects.toMatchObject({
       name: 'NotFoundError',
       statusCode: 404,
     });
@@ -379,9 +371,7 @@ describe('uploadAvatar', () => {
 
     vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
 
-    await expect(
-      uploadAvatar(mockRepos, mockStorage, mockUser.id, file),
-    ).rejects.toMatchObject({
+    await expect(uploadAvatar(mockRepos, mockStorage, mockUser.id, file)).rejects.toMatchObject({
       name: 'BadRequestError',
       statusCode: 400,
     });
@@ -396,9 +386,7 @@ describe('uploadAvatar', () => {
 
     vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
 
-    await expect(
-      uploadAvatar(mockRepos, mockStorage, mockUser.id, file),
-    ).rejects.toMatchObject({
+    await expect(uploadAvatar(mockRepos, mockStorage, mockUser.id, file)).rejects.toMatchObject({
       name: 'BadRequestError',
       statusCode: 400,
     });
@@ -471,9 +459,7 @@ describe('getAvatarUrl', () => {
     const result = await getAvatarUrl(mockRepos, mockStorage, mockUser.id);
 
     expect(mockStorage.getSignedUrl).toHaveBeenCalledWith('avatars/user-123/avatar.jpg');
-    expect(result).toBe(
-      'https://storage.example.com/avatars/user-123/avatar.jpg?signature=xyz',
-    );
+    expect(result).toBe('https://storage.example.com/avatars/user-123/avatar.jpg?signature=xyz');
   });
 
   it('should return external URL as-is', async () => {

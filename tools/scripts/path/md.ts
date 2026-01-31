@@ -35,7 +35,7 @@ const EXCLUDED_DIRS = new Set([
 function walkDir(
   dir: string,
   filter: (filePath: string) => boolean,
-  files: string[] = []
+  files: string[] = [],
 ): string[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
@@ -113,10 +113,10 @@ function exportMarkdownFiles(): void {
     'apps/web',
     'infra',
     'infra/contracts',
-    'shared/core',
+    'core',
     'client',
-    'shared/ui/docs',
-    'shared/ui',
+    'client/ui/docs',
+    'client/ui',
     'tools',
   ];
 

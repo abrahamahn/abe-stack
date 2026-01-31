@@ -6,8 +6,8 @@
  */
 
 import {
-    CannotDeactivatePlanWithActiveSubscriptionsError,
-    PlanNotFoundError,
+  CannotDeactivatePlanWithActiveSubscriptionsError,
+  PlanNotFoundError,
 } from '@abe-stack/core';
 
 import type { BillingService, CreateProductParams } from '@abe-stack/core';

@@ -12,7 +12,7 @@ import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../vitest.config';
 
 const authPkg = path.resolve(__dirname, '../modules/auth/src');
-const corePkg = path.resolve(__dirname, '../shared/core/src');
+const corePkg = path.resolve(__dirname, '../core/src');
 const dbPkg = path.resolve(__dirname, '../infra/db/src');
 
 export default mergeConfig(baseConfig, {

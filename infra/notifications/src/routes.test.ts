@@ -694,10 +694,7 @@ describe('Notification Routes', () => {
             body: 'Important update available',
             data: { type: 'system', priority: 'high' },
           },
-          userIds: [
-            '550e8400-e29b-41d4-a716-446655440001',
-            '550e8400-e29b-41d4-a716-446655440002',
-          ],
+          userIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
         };
 
         await sendRoute.handler(ctx, body, req as never, reply);
@@ -731,10 +728,7 @@ describe('Notification Routes', () => {
             title: 'Maintenance Notice',
             body: 'Scheduled maintenance tonight',
           },
-          userIds: [
-            '550e8400-e29b-41d4-a716-446655440001',
-            '550e8400-e29b-41d4-a716-446655440002',
-          ],
+          userIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
         };
 
         const result = await sendRoute.handler(ctx, body, req as never, reply);
@@ -1013,10 +1007,7 @@ describe('Schema Validation', () => {
           title: 'System Notification',
           body: 'Important update available',
         },
-        userIds: [
-          '550e8400-e29b-41d4-a716-446655440001',
-          '550e8400-e29b-41d4-a716-446655440002',
-        ],
+        userIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
       };
 
       const result = sendNotificationRequestSchema.safeParse(validRequest);

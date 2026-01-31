@@ -7,6 +7,7 @@ Completed 2026-01-31. Audit found P0–P7 were already complete. Remaining work 
 ### 2. ~~Identify and remove re-exports from `apps/` folder~~ ✅ DONE
 
 Completed 2026-01-31. Removed all re-exports from:
+
 - `config/index.ts` — stripped to local factory export only
 - `logger/logger.ts` — removed 5 re-exported core functions
 - `logger/types.ts` — deleted (consumers import directly from `@abe-stack/core/infrastructure/logger`)
@@ -16,6 +17,7 @@ Completed 2026-01-31. Removed all re-exports from:
 ### 3. ~~Update all imports from re-exports with direct package imports~~ ✅ DONE
 
 Completed 2026-01-31. Updated:
+
 - `app.ts` — `AppConfig` from `@abe-stack/core`, `buildConnectionString` from `@abe-stack/db`, billing from `@abe-stack/billing`
 - `server.ts` — `AppConfig` from `@abe-stack/core/config`
 - `server.test.ts` — `AppConfig` from `@abe-stack/core/config`
@@ -30,14 +32,12 @@ Here is the definitive **Architecture Manifesto** for your project. This summari
 
 You are not building a simple boilerplate; you are building a **Modular Monolith (SaaS Engine)**.
 
-* **Goal:** To sell a "Product Line" (Standard vs. Pro tiers).
-* **Strategy:** Strict physical separation between "Technical Plumbing" and "Business Features."
-* **Mental Model:**
-* **Apps** are the Car (The finished product).
-* **Modules** are the Engine (The valuable parts).
-* **Infra** is the Chassis (The rigid base).
-
-
+- **Goal:** To sell a "Product Line" (Standard vs. Pro tiers).
+- **Strategy:** Strict physical separation between "Technical Plumbing" and "Business Features."
+- **Mental Model:**
+- **Apps** are the Car (The finished product).
+- **Modules** are the Engine (The valuable parts).
+- **Infra** is the Chassis (The rigid base).
 
 ---
 
@@ -118,29 +118,31 @@ infra/A      CAN import  infra/B  (if B is lower tier)
 
 > **The Server is the "Motherboard." The Packages are the "Components."**
 
-| Aspect | `infra/*`, `modules/*`, `shared/*`, `sdk/` (Components) | `apps/server` (Motherboard) |
-|---|---|---|
-| **Role** | Defines **HOW** things work | Defines **WHAT** is running |
-| **Mental Model** | Engine, Transmission, Wheels | Mechanic who assembles the car |
-| **Logic** | 100% of all business rules | 0% — only wiring |
-| **State** | Stateless (classes/functions) | Stateful (instances/env vars) |
-| **Database** | Definitions (schema/repo) | Connection (pool instance) |
-| **Config** | Validation schemas (Zod) | Actual values (`process.env`) |
-| **Knowledge** | Knows nothing about the App | Knows everything about Packages |
+| Aspect           | `infra/*`, `modules/*`, `shared/*`, `sdk/` (Components) | `apps/server` (Motherboard)     |
+| ---------------- | ------------------------------------------------------- | ------------------------------- |
+| **Role**         | Defines **HOW** things work                             | Defines **WHAT** is running     |
+| **Mental Model** | Engine, Transmission, Wheels                            | Mechanic who assembles the car  |
+| **Logic**        | 100% of all business rules                              | 0% — only wiring                |
+| **State**        | Stateless (classes/functions)                           | Stateful (instances/env vars)   |
+| **Database**     | Definitions (schema/repo)                               | Connection (pool instance)      |
+| **Config**       | Validation schemas (Zod)                                | Actual values (`process.env`)   |
+| **Knowledge**    | Knows nothing about the App                             | Knows everything about Packages |
 
 #### The Responsibility Boundary
 
 **`infra/*`, `modules/*`, `shared/*`, `sdk/` — The Capabilities:**
-* Business Logic: "How do we calculate a refund?" → `modules/billing`
-* Data Access: "How do we query the users table?" → `infra/db`
-* Route Handlers: "What happens when `POST /login` is called?" → `modules/auth`
-* Internal Config: "I need a `STRIPE_KEY` to work."
+
+- Business Logic: "How do we calculate a refund?" → `modules/billing`
+- Data Access: "How do we query the users table?" → `infra/db`
+- Route Handlers: "What happens when `POST /login` is called?" → `modules/auth`
+- Internal Config: "I need a `STRIPE_KEY` to work."
 
 **`apps/server` — The Composition:**
-* Wiring: `app.register(authPlugin)`
-* Configuration: "Here is the `STRIPE_KEY` from `process.env`."
-* Lifecycle: "Start the server on port 3000."
-* Dependency Injection: "Here is the Database instance you asked for."
+
+- Wiring: `app.register(authPlugin)`
+- Configuration: "Here is the `STRIPE_KEY` from `process.env`."
+- Lifecycle: "Start the server on port 3000."
+- Dependency Injection: "Here is the Database instance you asked for."
 
 #### The Three Litmus Tests
 
@@ -158,15 +160,16 @@ For every file you touch, ask:
 
 #### The "Tri-State" Separation
 
-* **`shared/`**: Code that runs everywhere (Browser + Server). **Never import `fs` or `db` here.**
-* **`infra/`**: Code that runs on the Server (Node.js). Generic tech adapters.
-* **`modules/`**: Code that represents Business Value.
+- **`shared/`**: Code that runs everywhere (Browser + Server). **Never import `fs` or `db` here.**
+- **`infra/`**: Code that runs on the Server (Node.js). Generic tech adapters.
+- **`modules/`**: Code that represents Business Value.
 
 #### The "Sheriff" (Enforcement)
 
 We use `eslint-plugin-boundaries` to physically prevent:
-* Frontend importing Backend code.
-* `infra/db` importing `modules/auth` (Circular dependency).
+
+- Frontend importing Backend code.
+- `infra/db` importing `modules/auth` (Circular dependency).
 
 ---
 
@@ -174,29 +177,30 @@ We use `eslint-plugin-boundaries` to physically prevent:
 
 #### A. The "Tenant Firewall" (Multi-Tenancy)
 
-* **Where:** `infra/db`
-* **How:** We do not export a raw DB client. We export a factory `getDb(tenantId)` that automatically applies `WHERE tenant_id = X` to every query via Row Level Security (RLS) or Drizzle middleware.
-* **Why:** Prevents data leaks at the foundation level.
+- **Where:** `infra/db`
+- **How:** We do not export a raw DB client. We export a factory `getDb(tenantId)` that automatically applies `WHERE tenant_id = X` to every query via Row Level Security (RLS) or Drizzle middleware.
+- **Why:** Prevents data leaks at the foundation level.
 
 #### B. The "Error Highway" (End-to-End Safety)
 
-* **Shared:** Define `AppError` in `shared/core`.
-* **Infra:** `infra/http` catches these errors and formats the API response.
-* **Frontend:** `shared/sdk` catches the API response and re-throws typed errors for the UI.
+- **Shared:** Define `AppError` in `shared/core`.
+- **Infra:** `infra/http` catches these errors and formats the API response.
+- **Frontend:** `shared/sdk` catches the API response and re-throws typed errors for the UI.
 
 #### C. The "Event Bus" (Decoupling)
 
-* **Where:** `infra/events`
-* **How:** `modules/auth` emits `user.created`. `modules/billing` listens to it.
-* **Why:** Allows you to delete the Billing module without breaking the Auth module.
+- **Where:** `infra/events`
+- **How:** `modules/auth` emits `user.created`. `modules/billing` listens to it.
+- **Why:** Allows you to delete the Billing module without breaking the Auth module.
 
 #### D. The "Fractal" Module Standard
 
 Every module inside `modules/` follows the exact same internal structure:
-* `domain/` (Pure logic)
-* `infra/` (Adapters)
-* `http/` (Routes)
-* `jobs/` (Workers)
+
+- `domain/` (Pure logic)
+- `infra/` (Adapters)
+- `http/` (Routes)
+- `jobs/` (Workers)
 
 #### E. The "Context Composition" Pattern
 
@@ -216,8 +220,8 @@ type AuthContext = BaseContext & HasEmail & HasCookies & HasAuthConfig;
 type AppContext = BaseContext & HasEmail & HasBilling & HasStorage & HasCookies & ...;
 ```
 
-* **Why:** Eliminates the 6+ independent `AppContext` variants across packages.
-* **Benefit:** If a handler needs both auth and billing, the type is `BaseContext & HasEmail & HasBilling`.
+- **Why:** Eliminates the 6+ independent `AppContext` variants across packages.
+- **Benefit:** If a handler needs both auth and billing, the type is `BaseContext & HasEmail & HasBilling`.
 
 ---
 
@@ -225,50 +229,51 @@ type AppContext = BaseContext & HasEmail & HasBilling & HasStorage & HasCookies 
 
 #### Why `infra/` instead of `infra/`, `modules/`, `shared/`, `sdk/`?
 
-* **`infra/`, `modules/`, `shared/`, `sdk/`** implies generic npm libraries.
-* **`infra/`** correctly identifies it as Server-Side Infrastructure (Database, Queues, Storage).
+- **`infra/`, `modules/`, `shared/`, `sdk/`** implies generic npm libraries.
+- **`infra/`** correctly identifies it as Server-Side Infrastructure (Database, Queues, Storage).
 
 #### Why `modules/` instead of `services/`?
 
-* **`services/`** implies Microservices (Deployables).
-* **`modules/`** implies Plug-and-Play Business Logic libraries. This aligns with your "Standard vs. Pro" sales strategy.
+- **`services/`** implies Microservices (Deployables).
+- **`modules/`** implies Plug-and-Play Business Logic libraries. This aligns with your "Standard vs. Pro" sales strategy.
 
 ---
 
 ### 6. Current State & What Remains
 
 **Already done:**
-* Business modules (auth, billing, users, admin) fully migrated to packages.
-* Route wiring rewritten with no re-exports. ~25,000 lines removed. 0 import violations.
+
+- Business modules (auth, billing, users, admin) fully migrated to packages.
+- Route wiring rewritten with no re-exports. ~25,000 lines removed. 0 import violations.
 
 **Completed (2026-01-31):**
 
-| Category | Status |
-|---|---|
-| Generic HTTP middleware/pagination/utils → `@abe-stack/http` | ✅ Done |
-| Cache service → `@abe-stack/cache` | ✅ Done |
-| Orphaned test files (34 files) | ✅ Done (directory removed) |
-| Router types → `@abe-stack/http` | ✅ Done |
-| Request utils → `@abe-stack/http` | ✅ Done |
-| Server module duplicates eliminated | ✅ Done |
-| Re-exports removed from apps/server | ✅ Done |
-| Capability interfaces added to contracts | ✅ Done (HasEmail, HasStorage, HasBilling, HasNotifications, HasPubSub, HasCache) |
-| Type unification (RequestInfo, ReplyWithCookies) | ✅ Done (server uses contracts types) |
+| Category                                                     | Status                                                                            |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Generic HTTP middleware/pagination/utils → `@abe-stack/http` | ✅ Done                                                                           |
+| Cache service → `@abe-stack/cache`                           | ✅ Done                                                                           |
+| Orphaned test files (34 files)                               | ✅ Done (directory removed)                                                       |
+| Router types → `@abe-stack/http`                             | ✅ Done                                                                           |
+| Request utils → `@abe-stack/http`                            | ✅ Done                                                                           |
+| Server module duplicates eliminated                          | ✅ Done                                                                           |
+| Re-exports removed from apps/server                          | ✅ Done                                                                           |
+| Capability interfaces added to contracts                     | ✅ Done (HasEmail, HasStorage, HasBilling, HasNotifications, HasPubSub, HasCache) |
+| Type unification (RequestInfo, ReplyWithCookies)             | ✅ Done (server uses contracts types)                                             |
 
 **Remaining (non-migration work):**
 
-| Category | Scope |
-|---|---|
+| Category                                     | Scope                                                |
+| -------------------------------------------- | ---------------------------------------------------- |
 | Update packages to use capability interfaces | Low priority — compose `BaseContext & HasEmail` etc. |
-| Feature profiles documentation | Medium priority — profiles.md + feature flags |
+| Feature profiles documentation               | Medium priority — profiles.md + feature flags        |
 
-| Metric | Before | Final |
-|---|---|---|
-| Server source files | ~116 | ~30 |
-| Lines removed | — | ~26,000+ |
-| Import violations | 0 | 0 |
-| Business logic in server | Some | Zero |
-| Re-exports from packages | 50+ | 0 |
+| Metric                   | Before | Final    |
+| ------------------------ | ------ | -------- |
+| Server source files      | ~116   | ~30      |
+| Lines removed            | —      | ~26,000+ |
+| Import violations        | 0      | 0        |
+| Business logic in server | Some   | Zero     |
+| Re-exports from packages | 50+    | 0        |
 
 ---
 
@@ -405,16 +410,16 @@ Establish Context Composition pattern (see Pattern E above).
 
 #### Phase Summary
 
-| Phase | What | Files | Risk | Depends On |
-|---|---|---|---|---|
-| P0 | Orphaned test cleanup | ~34 deleted | Low | — |
-| P1 | Cache → package | 1 migrated | Low | — |
-| P2 | Middleware → package | 9 migrated (~800 LOC) | Medium | — |
-| P3 | Pagination → package | 4 migrated (~200 LOC) | Low | P2 |
-| P4 | Router types → package | 2 partial (~100 LOC) | Med-High | P2, P3 |
-| P5 | Request utils → package | 1 migrated (~90 LOC) | Low | P2 |
-| P6 | Type unification | ~25 updated | Medium | P4 |
-| P7 | Import cleanup | ~10 updated | Low | P2–P5 |
+| Phase | What                    | Files                 | Risk     | Depends On |
+| ----- | ----------------------- | --------------------- | -------- | ---------- |
+| P0    | Orphaned test cleanup   | ~34 deleted           | Low      | —          |
+| P1    | Cache → package         | 1 migrated            | Low      | —          |
+| P2    | Middleware → package    | 9 migrated (~800 LOC) | Medium   | —          |
+| P3    | Pagination → package    | 4 migrated (~200 LOC) | Low      | P2         |
+| P4    | Router types → package  | 2 partial (~100 LOC)  | Med-High | P2, P3     |
+| P5    | Request utils → package | 1 migrated (~90 LOC)  | Low      | P2         |
+| P6    | Type unification        | ~25 updated           | Medium   | P4         |
+| P7    | Import cleanup          | ~10 updated           | Low      | P2–P5      |
 
 ---
 
@@ -477,33 +482,35 @@ apps/server/src/
 
 ### 10. Risk Mitigations
 
-* **Breaking package consumers (P4):** Use generic type parameters so existing types remain compatible. Consider type aliases during transition.
-* **Middleware runtime behavior (P2):** Only _implementations_ move; `plugins.ts` (composition/ordering) stays in server.
-* **Circular dependencies:** All migrations flow downward (server → packages). No package-to-package moves.
-* **Test coverage gaps:** Audit coverage before each phase. Write package-level unit tests for migrated modules.
-* **Type unification (P6):** TypeScript structural typing keeps existing code working. Introduce capability interfaces additively.
-* **Orphaned test cleanup (P0):** Compare with package tests before deleting. Migrate unique coverage.
+- **Breaking package consumers (P4):** Use generic type parameters so existing types remain compatible. Consider type aliases during transition.
+- **Middleware runtime behavior (P2):** Only _implementations_ move; `plugins.ts` (composition/ordering) stays in server.
+- **Circular dependencies:** All migrations flow downward (server → packages). No package-to-package moves.
+- **Test coverage gaps:** Audit coverage before each phase. Write package-level unit tests for migrated modules.
+- **Type unification (P6):** TypeScript structural typing keeps existing code working. Introduce capability interfaces additively.
+- **Orphaned test cleanup (P0):** Compare with package tests before deleting. Migrate unique coverage.
 
 ---
 
 ### 11. Success Criteria
 
-| Metric | Current | Target |
-|---|---|---|
-| Server source files | ~76 → ~30 | ≤50 ✅ |
-| Orphaned test files | 34 → 0 | 0 ✅ |
-| Import violations | 0 | 0 |
-| `@abe-stack/http` exports | ~15 → ~35 | ~35 ✅ |
-| AppContext variants | 6+ independent → 1 base + capabilities | 1 base + composition ✅ |
-| Business logic in server | Minimal → Zero | Zero ✅ |
+| Metric                    | Current                                | Target                  |
+| ------------------------- | -------------------------------------- | ----------------------- |
+| Server source files       | ~76 → ~30                              | ≤50 ✅                  |
+| Orphaned test files       | 34 → 0                                 | 0 ✅                    |
+| Import violations         | 0                                      | 0                       |
+| `@abe-stack/http` exports | ~15 → ~35                              | ~35 ✅                  |
+| AppContext variants       | 6+ independent → 1 base + capabilities | 1 base + composition ✅ |
+| Business logic in server  | Minimal → Zero                         | Zero ✅                 |
 
 **Qualitative:**
+
 - [x] Every file in `apps/server/src/` is either config, wiring, or deployment-specific
 - [x] `@abe-stack/http` is a self-contained, reusable HTTP framework package
 - [x] A new app could be built using only `infra/*`, `modules/*`, `shared/*`, `sdk/` imports
 - [x] Context types follow the composition pattern
 
 **Validation (run after each phase):**
+
 ```bash
 pnpm build            # No circular deps, no missing exports
 pnpm type-check       # No broken imports
@@ -517,12 +524,12 @@ grep -r "from.*apps/server" infra/ modules/ shared/ sdk/ --include="*.ts" | grep
 
 ### 12. Future Considerations
 
-* **Module independence:** `admin` depends on `auth + billing`, `users` depends on `auth`. Fine for monorepo; revisit if module-level licensing is needed.
-* **Contracts validation:** Custom lightweight validation (zero deps for frontend). Document decision; consider optional Zod for backend if complexity grows.
-* **Test utilities package:** `test-utils.ts` (584 LOC). Extract to `@abe-stack/test-utils` when a second app needs integration tests.
-* **SDK/UI growth:** Both at ~15-20 submodules. Monitor for discoverability issues.
-* **Search abstraction:** Extract `SearchProvider` interface to `infra/contracts` if packages ever need direct search.
-* **DB migrations:** Verify Drizzle migrations are versioned in `infra/db` and can be applied independently.
+- **Module independence:** `admin` depends on `auth + billing`, `users` depends on `auth`. Fine for monorepo; revisit if module-level licensing is needed.
+- **Contracts validation:** Custom lightweight validation (zero deps for frontend). Document decision; consider optional Zod for backend if complexity grows.
+- **Test utilities package:** `test-utils.ts` (584 LOC). Extract to `@abe-stack/test-utils` when a second app needs integration tests.
+- **SDK/UI growth:** Both at ~15-20 submodules. Monitor for discoverability issues.
+- **Search abstraction:** Extract `SearchProvider` interface to `infra/contracts` if packages ever need direct search.
+- **DB migrations:** Verify Drizzle migrations are versioned in `infra/db` and can be applied independently.
 
 ---
 
@@ -530,11 +537,11 @@ grep -r "from.*apps/server" infra/ modules/ shared/ sdk/ --include="*.ts" | grep
 
 #### The Three Repositories
 
-| Repo | Visibility | Purpose |
-|---|---|---|
-| `abe-stack-marketing` | Public | Landing pages, SEO, conversion funnel (Vanilla Vite + TS) |
-| `abe-stack-core` | Private | The actual product — ALL code (OSS + Standard + Pro + Max) |
-| `abe-stack-lite` | Public | "Read-Only Mirror" of core minus Pro features |
+| Repo                  | Visibility | Purpose                                                    |
+| --------------------- | ---------- | ---------------------------------------------------------- |
+| `abe-stack-marketing` | Public     | Landing pages, SEO, conversion funnel (Vanilla Vite + TS)  |
+| `abe-stack-core`      | Private    | The actual product — ALL code (OSS + Standard + Pro + Max) |
+| `abe-stack-lite`      | Public     | "Read-Only Mirror" of core minus Pro features              |
 
 #### How Tiers Enable Distribution
 
@@ -555,9 +562,9 @@ Because modules are physically separate packages, creating license tiers is as s
 
 #### Sync Strategy
 
-* **Stripper Script** (`scripts/build-oss.js`): Copies core, removes Pro folders, scrubs `// @feature-start: PRO` blocks.
-* **GitHub Action** (`sync-oss.yml`): Runs stripper on push to `main`, force-pushes to `abe-stack-lite`.
-* **Demo Mode:** Same repo deployed with `IS_DEMO_MODE=true`. Critical mutations return `403`.
+- **Stripper Script** (`scripts/build-oss.js`): Copies core, removes Pro folders, scrubs `// @feature-start: PRO` blocks.
+- **GitHub Action** (`sync-oss.yml`): Runs stripper on push to `main`, force-pushes to `abe-stack-lite`.
+- **Demo Mode:** Same repo deployed with `IS_DEMO_MODE=true`. Critical mutations return `403`.
 
 ---
 
@@ -574,6 +581,7 @@ You must build from the bottom up:
 **Final Verdict:** You are building a high-performance Ferrari. You have designed the chassis (`infra`), the engine (`modules`), and the body (`apps`). Now, go assemble the parts.
 
 ---
+
 ---
 
 # ABE Stack - TODO
@@ -629,7 +637,6 @@ the server adapter layer is unnecessary.
 ---
 
 ## Medium Priority: Infrastructure
-
 
 ### Backend
 

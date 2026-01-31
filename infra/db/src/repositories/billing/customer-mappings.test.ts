@@ -187,9 +187,7 @@ describe('createCustomerMappingRepository', () => {
     });
 
     it('should differentiate between providers with same-looking IDs', async () => {
-      vi.mocked(mockDb.queryOne)
-        .mockResolvedValueOnce(mockDbRow)
-        .mockResolvedValueOnce(null);
+      vi.mocked(mockDb.queryOne).mockResolvedValueOnce(mockDbRow).mockResolvedValueOnce(null);
 
       const repo = createCustomerMappingRepository(mockDb);
 
@@ -333,9 +331,7 @@ describe('createCustomerMappingRepository', () => {
         providerCustomerId: 'cus_fail',
       };
 
-      await expect(repo.create(newMapping)).rejects.toThrow(
-        'Failed to create customer mapping',
-      );
+      await expect(repo.create(newMapping)).rejects.toThrow('Failed to create customer mapping');
     });
 
     it('should accept optional id field', async () => {
@@ -490,7 +486,8 @@ describe('createCustomerMappingRepository', () => {
     it('should create new mapping when not found', async () => {
       vi.mocked(mockDb.queryOne)
         .mockResolvedValueOnce(null) // findByUserIdAndProvider returns null
-        .mockResolvedValueOnce({ // create returns new mapping
+        .mockResolvedValueOnce({
+          // create returns new mapping
           id: 'mapping-new',
           user_id: 'user-new',
           provider: 'stripe',
@@ -508,15 +505,13 @@ describe('createCustomerMappingRepository', () => {
     });
 
     it('should call createCustomerId only once', async () => {
-      vi.mocked(mockDb.queryOne)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 'mapping-new',
-          user_id: 'user-new',
-          provider: 'paypal',
-          provider_customer_id: 'PAYPAL_CREATED',
-          created_at: new Date(),
-        });
+      vi.mocked(mockDb.queryOne).mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: 'mapping-new',
+        user_id: 'user-new',
+        provider: 'paypal',
+        provider_customer_id: 'PAYPAL_CREATED',
+        created_at: new Date(),
+      });
 
       const createCustomerId = vi.fn().mockResolvedValue('PAYPAL_CREATED');
       const repo = createCustomerMappingRepository(mockDb);
@@ -526,15 +521,13 @@ describe('createCustomerMappingRepository', () => {
     });
 
     it('should handle stripe provider creation', async () => {
-      vi.mocked(mockDb.queryOne)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 'mapping-stripe',
-          user_id: 'user-stripe',
-          provider: 'stripe',
-          provider_customer_id: 'cus_new_stripe',
-          created_at: new Date(),
-        });
+      vi.mocked(mockDb.queryOne).mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: 'mapping-stripe',
+        user_id: 'user-stripe',
+        provider: 'stripe',
+        provider_customer_id: 'cus_new_stripe',
+        created_at: new Date(),
+      });
 
       const createCustomerId = vi.fn().mockResolvedValue('cus_new_stripe');
       const repo = createCustomerMappingRepository(mockDb);
@@ -545,15 +538,13 @@ describe('createCustomerMappingRepository', () => {
     });
 
     it('should handle paypal provider creation', async () => {
-      vi.mocked(mockDb.queryOne)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 'mapping-paypal',
-          user_id: 'user-paypal',
-          provider: 'paypal',
-          provider_customer_id: 'PAYPAL_NEW',
-          created_at: new Date(),
-        });
+      vi.mocked(mockDb.queryOne).mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: 'mapping-paypal',
+        user_id: 'user-paypal',
+        provider: 'paypal',
+        provider_customer_id: 'PAYPAL_NEW',
+        created_at: new Date(),
+      });
 
       const createCustomerId = vi.fn().mockResolvedValue('PAYPAL_NEW');
       const repo = createCustomerMappingRepository(mockDb);
@@ -569,9 +560,9 @@ describe('createCustomerMappingRepository', () => {
       const createCustomerId = vi.fn().mockRejectedValue(new Error('Stripe API error'));
       const repo = createCustomerMappingRepository(mockDb);
 
-      await expect(
-        repo.getOrCreate('user-error', 'stripe', createCustomerId),
-      ).rejects.toThrow('Stripe API error');
+      await expect(repo.getOrCreate('user-error', 'stripe', createCustomerId)).rejects.toThrow(
+        'Stripe API error',
+      );
     });
 
     it('should be idempotent - multiple calls return same mapping', async () => {
@@ -590,7 +581,8 @@ describe('createCustomerMappingRepository', () => {
     it('should create separate mappings for different providers', async () => {
       vi.mocked(mockDb.queryOne)
         .mockResolvedValueOnce(null) // No Stripe mapping
-        .mockResolvedValueOnce({ // Create Stripe mapping
+        .mockResolvedValueOnce({
+          // Create Stripe mapping
           id: 'mapping-stripe',
           user_id: 'user-multi',
           provider: 'stripe',
@@ -598,7 +590,8 @@ describe('createCustomerMappingRepository', () => {
           created_at: new Date(),
         })
         .mockResolvedValueOnce(null) // No PayPal mapping
-        .mockResolvedValueOnce({ // Create PayPal mapping
+        .mockResolvedValueOnce({
+          // Create PayPal mapping
           id: 'mapping-paypal',
           user_id: 'user-multi',
           provider: 'paypal',
@@ -667,14 +660,16 @@ describe('createCustomerMappingRepository', () => {
     it('should handle concurrent getOrCreate calls correctly', async () => {
       vi.mocked(mockDb.queryOne)
         .mockResolvedValueOnce(null) // First call: not found
-        .mockResolvedValueOnce({ // First call: create succeeds
+        .mockResolvedValueOnce({
+          // First call: create succeeds
           id: 'mapping-concurrent',
           user_id: 'user-concurrent',
           provider: 'stripe',
           provider_customer_id: 'cus_concurrent',
           created_at: new Date(),
         })
-        .mockResolvedValueOnce({ // Second call: now found
+        .mockResolvedValueOnce({
+          // Second call: now found
           id: 'mapping-concurrent',
           user_id: 'user-concurrent',
           provider: 'stripe',

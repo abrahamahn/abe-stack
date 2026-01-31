@@ -352,9 +352,7 @@ describe('revokeAllSessions', () => {
       const mockFamilies = [createMockFamily({ id: 'family-1' })];
 
       vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
-      vi.mocked(repos.refreshTokenFamilies.revoke).mockRejectedValue(
-        new Error('Database error'),
-      );
+      vi.mocked(repos.refreshTokenFamilies.revoke).mockRejectedValue(new Error('Database error'));
 
       await expect(revokeAllSessions(repos, 'user-1')).rejects.toThrow('Database error');
     });

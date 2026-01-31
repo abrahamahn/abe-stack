@@ -2,15 +2,15 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-    RecordStorage,
-    RecordStorageError,
-    createRecordMap,
-    createRecordStorage,
-    iterateRecordMap,
-    type RecordMap,
-    type RecordStorageErrorType,
-    type RecordWithTable,
-    type VersionedRecord,
+  RecordStorage,
+  RecordStorageError,
+  createRecordMap,
+  createRecordStorage,
+  iterateRecordMap,
+  type RecordMap,
+  type RecordStorageErrorType,
+  type RecordWithTable,
+  type VersionedRecord,
 } from './RecordStorage';
 
 // ============================================================================

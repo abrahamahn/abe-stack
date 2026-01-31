@@ -14,7 +14,13 @@ import type { ApiErrorBody } from '@abe-stack/client';
 // Local Type Definitions
 // ============================================================================
 
-type JobStatusLocal = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+type JobStatusLocal =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled';
 
 interface JobDetailsLocal {
   id: string;
@@ -134,7 +140,9 @@ export interface AdminApiConfig {
 
 export interface AdminApiClient {
   // Security events
-  listSecurityEvents: (request: SecurityEventsListRequestLocal) => Promise<SecurityEventsListResponseLocal>;
+  listSecurityEvents: (
+    request: SecurityEventsListRequestLocal,
+  ) => Promise<SecurityEventsListResponseLocal>;
   getSecurityEvent: (id: string) => Promise<SecurityEventLocal>;
   getSecurityMetrics: (period?: 'hour' | 'day' | 'week' | 'month') => Promise<SecurityMetricsLocal>;
   exportSecurityEvents: (
@@ -205,7 +213,9 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
       return request<SecurityEventLocal>(`/admin/security/events/${id}`);
     },
 
-    async getSecurityMetrics(period?: 'hour' | 'day' | 'week' | 'month'): Promise<SecurityMetricsLocal> {
+    async getSecurityMetrics(
+      period?: 'hour' | 'day' | 'week' | 'month',
+    ): Promise<SecurityMetricsLocal> {
       const queryString = period !== undefined ? `?period=${period}` : '';
       return request<SecurityMetricsLocal>(`/admin/security/metrics${queryString}`);
     },

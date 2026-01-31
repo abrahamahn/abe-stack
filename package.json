@@ -36,7 +36,7 @@
     "docker:dev:down": "docker compose -f infra/docker/development/docker-compose.dev.yml down",
     "docker:prod": "docker compose --env-file .config/env/.env.production -f infra/docker/production/docker-compose.prod.yml up -d --build",
     "docker:prod:down": "docker compose -f infra/docker/production/docker-compose.prod.yml down",
-    "pre-commit": "pnpm theme:build && pnpm format && pnpm lint && pnpm type-check"
+    "pre-commit": "pnpm build:theme && pnpm format && pnpm lint && pnpm type-check"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.1",

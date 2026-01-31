@@ -4,18 +4,19 @@ ABE Stack supports four deployment profiles, from a lightweight starter to a ful
 
 ## Profile Summary
 
-| Profile | Use Case | Packages Active | Approx. Services |
-|---------|----------|-----------------|------------------|
-| **Minimal** | MVP, prototyping, learning | core + auth + db + email(console) | 6 |
-| **SaaS** | Paid product with subscriptions | Minimal + billing + admin | 8 |
-| **Admin** | Internal tools, back-office | Minimal + admin | 7 |
-| **Advanced** | Real-time apps, mobile, scale | SaaS + realtime + push + elasticsearch + redis | 12 |
+| Profile      | Use Case                        | Packages Active                                | Approx. Services |
+| ------------ | ------------------------------- | ---------------------------------------------- | ---------------- |
+| **Minimal**  | MVP, prototyping, learning      | core + auth + db + email(console)              | 6                |
+| **SaaS**     | Paid product with subscriptions | Minimal + billing + admin                      | 8                |
+| **Admin**    | Internal tools, back-office     | Minimal + admin                                | 7                |
+| **Advanced** | Real-time apps, mobile, scale   | SaaS + realtime + push + elasticsearch + redis | 12               |
 
 ## Minimal Profile (Default)
 
 The smallest deployable configuration. Suitable for MVPs, internal tools, and learning the stack.
 
 **Includes:**
+
 - Web app + API server
 - PostgreSQL database
 - Auth (local email/password, magic link)
@@ -27,6 +28,7 @@ The smallest deployable configuration. Suitable for MVPs, internal tools, and le
 - SQL-based search
 
 **Excludes:**
+
 - Billing/subscriptions
 - Admin dashboard
 - Real-time/WebSocket
@@ -65,6 +67,7 @@ All other env vars use sensible defaults (console email, local storage, memory c
 For products that charge customers. Adds Stripe/PayPal billing with subscription management and an admin dashboard for customer oversight.
 
 **Adds to Minimal:**
+
 - Stripe or PayPal billing provider
 - Subscription management (plans, invoices, payment methods)
 - Admin dashboard (user management, billing overview, security events)
@@ -96,6 +99,7 @@ ENABLE_ADMIN=true
 For internal tools and back-office applications that need user management and monitoring but no billing.
 
 **Adds to Minimal:**
+
 - Admin dashboard (user management, security events, job monitoring)
 - User lock/unlock, role management
 
@@ -113,6 +117,7 @@ ENABLE_ADMIN=true
 Full-featured deployment for real-time applications, mobile apps, and production scale.
 
 **Adds to SaaS:**
+
 - WebSocket real-time sync (CRDT-based)
 - Push notifications (FCM, OneSignal, or other providers)
 - Elasticsearch for advanced search
@@ -161,17 +166,17 @@ S3_SECRET_ACCESS_KEY=...
 
 ## Feature Flag Reference
 
-| Flag | Default | Controls |
-|------|---------|----------|
-| `BILLING_ENABLED` | `false` | Billing provider, billing routes, webhook handler |
-| `ENABLE_ADMIN` | `true` | Admin dashboard routes (user mgmt, security, jobs) |
-| `ENABLE_REALTIME` | `true` | WebSocket server, CRDT sync, pub/sub |
-| `NOTIFICATIONS_PROVIDER` | (none) | Push notification provider (FCM, OneSignal, etc.) |
-| `SEARCH_PROVIDER` | `sql` | Search backend (`sql` or `elasticsearch`) |
-| `CACHE_USE_REDIS` | `false` | Redis vs. in-memory cache |
-| `QUEUE_PROVIDER` | `local` | Redis vs. in-memory job queue |
-| `STORAGE_PROVIDER` | `local` | S3 vs. local file storage |
-| `EMAIL_PROVIDER` | `console` | SMTP vs. console logging |
+| Flag                     | Default   | Controls                                           |
+| ------------------------ | --------- | -------------------------------------------------- |
+| `BILLING_ENABLED`        | `false`   | Billing provider, billing routes, webhook handler  |
+| `ENABLE_ADMIN`           | `true`    | Admin dashboard routes (user mgmt, security, jobs) |
+| `ENABLE_REALTIME`        | `true`    | WebSocket server, CRDT sync, pub/sub               |
+| `NOTIFICATIONS_PROVIDER` | (none)    | Push notification provider (FCM, OneSignal, etc.)  |
+| `SEARCH_PROVIDER`        | `sql`     | Search backend (`sql` or `elasticsearch`)          |
+| `CACHE_USE_REDIS`        | `false`   | Redis vs. in-memory cache                          |
+| `QUEUE_PROVIDER`         | `local`   | Redis vs. in-memory job queue                      |
+| `STORAGE_PROVIDER`       | `local`   | S3 vs. local file storage                          |
+| `EMAIL_PROVIDER`         | `console` | SMTP vs. console logging                           |
 
 ### How Flags Work
 

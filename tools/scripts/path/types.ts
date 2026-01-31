@@ -101,12 +101,12 @@ function exportTypeFiles(): void {
     'apps/server',
     'apps/web',
     'infra/contracts',
-    'shared/core',
+    'core',
     'infra/db',
     'infra/media',
     'client',
     'client/stores',
-    'shared/ui',
+    'client/ui',
   ];
 
   let output = '# Type Definitions (types.ts)\n';
