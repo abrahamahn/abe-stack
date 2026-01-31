@@ -432,7 +432,6 @@ apps/server/src/
 ├── modules/                       (5 files — route wiring + system module)
 ├── shared/                        (2 files — AppContext, IServiceContainer)
 ├── services/                      (1 file — barrel, re-exports from package)
-├── scripts/                       (3 files — seed, bootstrap, db-push)
 ├── types/                         (2 files — Fastify augmentations)
 └── utils/                         (1 file — barrel, re-exports from package)
 ```
