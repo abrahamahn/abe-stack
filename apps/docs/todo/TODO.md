@@ -633,9 +633,9 @@ the server adapter layer is unnecessary.
 
 ### Backend
 
-- [ ] Production Postgres settings (connection pooling, SSL)
-- [ ] Secrets management documentation
-- [ ] Database backup/retention plan
+- [x] Production Postgres settings (connection pooling, SSL) — see `apps/docs/deploy/production-postgres.md`
+- [x] Secrets management documentation — see `apps/docs/deploy/secrets-checklist.md`
+- [x] Database backup/retention plan — see `apps/docs/OPERATIONS.md` (Section 2: Backups)
 
 ### Testing
 
@@ -650,8 +650,8 @@ the server adapter layer is unnecessary.
 
 - [x] `apps/docs/deploy/` folder (DO + GCP guides) — paths fixed to match actual `infra/` structure
 - [x] `apps/docs/OPERATIONS.md` (migrations, backups, restore drills, incident basics)
-- [ ] "Minimal Profile Quickstart" + "Full Profile Quickstart"
-- [ ] "SaaS Profile Quickstart" + "Admin Profile Quickstart"
+- [x] "Minimal Profile Quickstart" + "Full Profile Quickstart" — see `apps/docs/quickstart/profiles.md`
+- [x] "SaaS Profile Quickstart" + "Admin Profile Quickstart" — see `apps/docs/quickstart/profiles.md`
 
 ---
 
@@ -694,4 +694,4 @@ the server adapter layer is unnecessary.
 
 ---
 
-_Last Updated: 2026-01-31 (Feature flags + deployment profiles added. All migration phases P0–P7 complete.)_
+_Last Updated: 2026-01-31 (Profile quickstart guides, production Postgres docs, infrastructure docs. All migration phases P0–P7 complete.)_
