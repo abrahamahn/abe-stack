@@ -1,6 +1,6 @@
 # Development Log
 
-**Last Updated: January 25, 2026**
+**Last Updated: January 31, 2026**
 
 Weekly changelog files for the ABE Stack project. This replaces the previous monolithic `CHANGELOG.md`.
 
@@ -8,41 +8,37 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 ## 2026
 
-| Week                 | Dates     | Highlights                                                                            |
-| -------------------- | --------- | ------------------------------------------------------------------------------------- |
-| [W04](./2026-W04.md) | Jan 20-26 | Architectural decoupling, 70+ lint fixes, env reorganization, billing (Stripe/PayPal) |
-| [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue                 |
-| [W02](./2026-W02.md) | Jan 6-12  | Build tooling, codebase simplification                                                |
-| [W01](./2026-W01.md) | Jan 1-5   | File reorganization, initial setup                                                    |
+| Week                 | Dates      | Highlights                                                                            |
+| -------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| [W05](./2026-W05.md) | Jan 26-31  | Hexagonal package extraction (18 packages), BaseContext contract, server decomposition |
+| [W04](./2026-W04.md) | Jan 20-25  | Billing (Stripe/PayPal), admin center, 73% bundle reduction, IaC, 7,517 tests        |
+| [W03](./2026-W03.md) | Jan 13-19  | Pagination system, domain architecture, RecordCache, TransactionQueue                 |
+| [W02](./2026-W02.md) | Jan 6-12   | Build tooling, codebase simplification                                                |
+| [W01](./2026-W01.md) | Jan 1-5    | File reorganization, initial setup                                                    |
 
 ---
 
 ## Recent Changes (This Week)
 
-### 2026-01-25
+### 2026-01-31
 
-- **Architecture**: Decoupled server infrastructure from core to fix client-side leaks
-- **Build System**: Established strict segregation; resolved 150+ "rootDir" build errors
-- **Maintenance**: Resolved 70+ lint/type errors; repaired corrupted legacy tests
-- **Configuration**: Unified environment management in `.config/env` with improved root resolution
+- **Contracts**: Shared `BaseContext` contract in `packages/contracts` — eliminates 5+ duplicate Logger/context definitions
+- **Architecture**: Server decomposition complete — all feature modules extracted to packages with hexagonal boundaries
+- **Cleanup**: Dead code removal (-69 source files, -22 test files) from `apps/server` post-migration
 
-### 2026-01-21
+### 2026-01-30
 
-- **Documentation**: Comprehensive README files for all apps and packages
-- **Testing**: Integration tests bringing total to ~5,000+ tests
-- **Docs**: Consolidated TODO files, cleaned up redundant documentation
-- **UI**: Auth UI consistency refactor using shared AuthLayout + AuthForm
+- **Packages**: Extracted `packages/auth`, `packages/users`, `packages/realtime`, `packages/notifications` (Phase 2-3)
+- **Infrastructure**: Extracted `packages/http`, `packages/email`, `packages/security`, `packages/jobs` (Phase 1)
+- **Media**: Full media infrastructure migrated to `packages/media` (287 tests)
+- **Server**: Phase 4 import rewiring — server imports from `@abe-stack/*` packages instead of local infrastructure
 
-### 2026-01-20
+### 2026-01-28
 
-- **SDK**: Migrated auth navigation hook, query key factory, error handling improvements
-- **Security**: Rate limit presets for auth endpoints, correlation IDs, CSRF documentation
-- **Architecture**: Domain-based reorganization of `packages/core`
-- **Cache**: RecordStorage, RecordCache, LoaderCache, UndoRedoStack
-- **Offline**: TransactionQueue for offline-first mutations
-- **Real-time**: WebsocketPubsubClient, SubscriptionCache
+- **Testing**: Comprehensive test creation across all packages (3,000+ new tests)
+- **Config**: TypeScript module resolution fixes, file naming standardization, barrel export cleanup
 
-See [Week 4 log](./2026-W04.md) for full details.
+See [Week 5 log](./2026-W05.md) for full details.
 
 ---
 
