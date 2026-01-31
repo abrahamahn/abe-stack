@@ -18,7 +18,7 @@ import { registerPlugins } from '@abe-stack/http';
 import { RateLimiter } from '@abe-stack/security';
 import fastify from 'fastify';
 
-import type { AppConfig } from '@/config/index';
+import type { AppConfig } from '@abe-stack/core/config';
 import type { DbClient } from '@abe-stack/db';
 import type { AppErrorInfo } from '@abe-stack/http';
 import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
