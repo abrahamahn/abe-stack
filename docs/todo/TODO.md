@@ -66,7 +66,7 @@ the server adapter layer is unnecessary.
 
 ### Documentation
 
-- [ ] Security decision documentation (why Argon2id params, grace periods, etc.) :contentReference[oaicite:22]{index=22}
+- [x] Security decision documentation (why Argon2id params, grace periods, etc.) — see `docs/dev/security.md`
 - [x] Quickstart guides per app (see `docs/quickstart/`)
 
 - [ ] `docs/deploy/` folder (DO + GCP guides)
