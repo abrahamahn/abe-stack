@@ -28,11 +28,11 @@
  * registerRoutes(app, ctx, routes, { prefix: '/api', jwtSecret: config.auth.jwt.secret });
  */
 
-import { createAuthGuard } from '@abe-stack/auth';
+import { createAuthGuard } from '../../../../../../modules/auth/src';
 
-import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions, ValidationSchema } from './types';
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions, ValidationSchema } from './types';
 
 // ============================================================================
 // Route Registration

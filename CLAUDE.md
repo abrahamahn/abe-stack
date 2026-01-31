@@ -7,7 +7,10 @@ TypeScript monorepo (pnpm + Turborepo) with three apps and 18 shared packages.
 - **apps/web** — Vite + React 19 frontend
 - **apps/server** — Fastify 5 backend
 - **apps/desktop** — Electron desktop app
-- **packages/** — Shared libraries (`@abe-stack/*`)
+- **infra/** — Infrastructure packages (cache, db, email, http, jobs, media, etc.)
+- **modules/** — Business modules (admin, auth, billing)
+- **shared/** — Shared libraries (core, ui)
+- **sdk/** — Type-safe API client + React Query hooks
 
 ## Task Delegation — Reduce Context Usage
 
@@ -111,18 +114,21 @@ pnpm health-check       # Project health audit
 - **Import order** — External deps → `@abe-stack/*` → relative imports.
 - **Naming** — PascalCase (components/types), camelCase (functions/hooks), kebab-case (configs).
 - **Tests colocated** — `*.test.ts` / `*.spec.ts` next to source files.
-- **One-way dependency flow** — `apps → packages → packages/core → external`.
+- **One-way dependency flow** — `apps → infra/modules/shared/sdk → shared/core → external`.
 
 ## Architecture
 
 ```
 apps/              → Deployable applications (Tier 4 — thin wiring only)
-packages/          → Shared libraries (Tiers 1–3 — all business logic)
-tooling/           → Build scripts, sync automation
-infra/             → Terraform, Docker configs
-docs/              → Specs, principles, deployment guides
+infra/             → Infrastructure packages (cache, db, http, storage, etc.)
+modules/           → Business modules (admin, auth, billing)
+shared/            → Shared libraries (core, ui)
+sdk/               → Type-safe API client + React Query hooks
+tools/             → Build scripts, sync automation
+ops/               → Terraform, Docker configs
+apps/docs/         → Specs, principles, deployment guides
 ```
 
 Server follows hexagonal architecture: `apps/server/src/modules/` (business logic) + `apps/server/src/infra/` (adapters).
 
-**Package boundary details:** See [`docs/dev/packages.md`](docs/dev/packages.md) for the full server/package boundary spec, 4-tier architecture, litmus tests, and current codebase evaluation.
+**Package boundary details:** See [`apps/docs/dev/packages.md`](apps/docs/dev/packages.md) for the full server/package boundary spec, 4-tier architecture, litmus tests, and current codebase evaluation.

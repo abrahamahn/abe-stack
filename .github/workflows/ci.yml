@@ -63,7 +63,10 @@ jobs:
           path: |
             node_modules
             apps/*/node_modules
-            packages/*/node_modules
+            infra/*/node_modules
+            modules/*/node_modules
+            shared/*/node_modules
+            sdk/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
   # Fast sanity checks for PRs
@@ -91,7 +94,10 @@ jobs:
           path: |
             node_modules
             apps/*/node_modules
-            packages/*/node_modules
+            infra/*/node_modules
+            modules/*/node_modules
+            shared/*/node_modules
+            sdk/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
@@ -153,7 +159,10 @@ jobs:
           path: |
             node_modules
             apps/*/node_modules
-            packages/*/node_modules
+            infra/*/node_modules
+            modules/*/node_modules
+            shared/*/node_modules
+            sdk/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
@@ -180,7 +189,10 @@ jobs:
           name: dist
           path: |
             apps/*/dist
-            packages/*/dist
+            infra/*/dist
+            modules/*/dist
+            shared/*/dist
+            sdk/dist
           retention-days: 7
 
       - name: Full Build Summary

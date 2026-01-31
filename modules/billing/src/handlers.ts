@@ -1,0 +1,767 @@
+// modules/billing/src/handlers.ts
+/**
+ * Billing Handlers
+ *
+ * Thin HTTP layer that calls services and formats responses.
+ * Framework-agnostic: uses narrow interfaces from types.ts instead
+ * of binding to Fastify or any specific HTTP framework.
+ */
+
+import { createBillingProvider } from './factory';
+import {
+  addPaymentMethod,
+  cancelSubscription,
+  createCheckoutSession,
+  createSetupIntent,
+  getActivePlans,
+  getUserInvoices,
+  getUserPaymentMethods,
+  getUserSubscription,
+  removePaymentMethod,
+  resumeSubscription,
+  setDefaultPaymentMethod,
+  updateSubscription,
+} from './service';
+
+import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
+import type {
+  AddPaymentMethodRequest,
+  CancelSubscriptionRequest,
+  CheckoutRequest,
+  CheckoutResponse,
+  Invoice,
+  InvoicesListResponse,
+  PaymentMethod,
+  PaymentMethodResponse,
+  PaymentMethodsListResponse,
+  Plan,
+  PlansListResponse,
+  SetupIntentResponse,
+  Subscription,
+  SubscriptionActionResponse,
+  SubscriptionResponse,
+  UpdateSubscriptionRequest,
+} from '@abe-stack/core';
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Extract billing repositories from the application context.
+ *
+ * @param ctx - Application context containing repository instances
+ * @returns Billing repositories subset
+ * @complexity O(1)
+ */
+function getBillingRepos(ctx: BillingAppContext): BillingRepositories {
+  return {
+    plans: ctx.repos.plans,
+    subscriptions: ctx.repos.subscriptions,
+    customerMappings: ctx.repos.customerMappings,
+    invoices: ctx.repos.invoices,
+    paymentMethods: ctx.repos.paymentMethods,
+  };
+}
+
+/**
+ * Format a database plan record into an API response plan.
+ *
+ * @param plan - Database plan record with all fields
+ * @returns Formatted plan for API response
+ * @complexity O(1)
+ */
+function formatPlan(plan: {
+  id: string;
+  name: string;
+  description: string | null;
+  interval: 'month' | 'year';
+  priceInCents: number;
+  currency: string;
+  features: { name: string; included: boolean; description?: string | undefined }[];
+  trialDays: number;
+  isActive: boolean;
+  sortOrder: number;
+}): Plan {
+  return {
+    id: plan.id,
+    name: plan.name,
+    description: plan.description,
+    interval: plan.interval,
+    priceInCents: plan.priceInCents,
+    currency: plan.currency,
+    features: plan.features,
+    trialDays: plan.trialDays,
+    isActive: plan.isActive,
+    sortOrder: plan.sortOrder,
+  };
+}
+
+/**
+ * Format a database subscription record (with plan) into an API response subscription.
+ * Converts Date objects to ISO strings for JSON serialization.
+ *
+ * @param subscription - Database subscription record joined with plan
+ * @returns Formatted subscription for API response
+ * @complexity O(1)
+ */
+function formatSubscription(subscription: {
+  id: string;
+  userId: string;
+  planId: string;
+  provider: 'stripe' | 'paypal';
+  status:
+    | 'active'
+    | 'canceled'
+    | 'incomplete'
+    | 'incomplete_expired'
+    | 'past_due'
+    | 'paused'
+    | 'trialing'
+    | 'unpaid';
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  cancelAtPeriodEnd: boolean;
+  canceledAt: Date | null;
+  trialEnd: Date | null;
+  createdAt: Date;
+  plan: {
+    id: string;
+    name: string;
+    description: string | null;
+    interval: 'month' | 'year';
+    priceInCents: number;
+    currency: string;
+    features: { name: string; included: boolean; description?: string | undefined }[];
+    trialDays: number;
+    isActive: boolean;
+    sortOrder: number;
+  };
+}): Subscription {
+  return {
+    id: subscription.id,
+    userId: subscription.userId,
+    planId: subscription.planId,
+    plan: formatPlan(subscription.plan),
+    provider: subscription.provider,
+    status: subscription.status,
+    currentPeriodStart: subscription.currentPeriodStart.toISOString(),
+    currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
+    cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+    canceledAt: subscription.canceledAt?.toISOString() ?? null,
+    trialEnd: subscription.trialEnd?.toISOString() ?? null,
+    createdAt: subscription.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Format a database invoice record into an API response invoice.
+ * Converts Date objects to ISO strings for JSON serialization.
+ *
+ * @param invoice - Database invoice record
+ * @returns Formatted invoice for API response
+ * @complexity O(1)
+ */
+function formatInvoice(invoice: {
+  id: string;
+  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+  amountDue: number;
+  amountPaid: number;
+  currency: string;
+  periodStart: Date;
+  periodEnd: Date;
+  paidAt: Date | null;
+  invoicePdfUrl: string | null;
+  createdAt: Date;
+}): Invoice {
+  return {
+    id: invoice.id,
+    status: invoice.status,
+    amountDue: invoice.amountDue,
+    amountPaid: invoice.amountPaid,
+    currency: invoice.currency,
+    periodStart: invoice.periodStart.toISOString(),
+    periodEnd: invoice.periodEnd.toISOString(),
+    paidAt: invoice.paidAt?.toISOString() ?? null,
+    invoicePdfUrl: invoice.invoicePdfUrl,
+    createdAt: invoice.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Format a database payment method record into an API response payment method.
+ * Converts Date objects to ISO strings for JSON serialization.
+ *
+ * @param pm - Database payment method record
+ * @returns Formatted payment method for API response
+ * @complexity O(1)
+ */
+function formatPaymentMethod(pm: {
+  id: string;
+  type: 'card' | 'bank_account' | 'paypal';
+  isDefault: boolean;
+  cardDetails: { brand: string; last4: string; expMonth: number; expYear: number } | null;
+  createdAt: Date;
+}): PaymentMethod {
+  return {
+    id: pm.id,
+    type: pm.type,
+    isDefault: pm.isDefault,
+    cardDetails: pm.cardDetails,
+    createdAt: pm.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Map billing errors to appropriate HTTP status codes and messages.
+ * Uses error.name matching for reliability across module boundaries.
+ *
+ * @param error - The caught error from a billing operation
+ * @param ctx - Application context for logging
+ * @returns Object with HTTP status code and error message body
+ * @complexity O(1)
+ */
+function handleError(
+  error: unknown,
+  ctx: BillingAppContext,
+): { status: 400 | 404 | 409 | 500; body: { message: string } } {
+  // Use error.name checking for reliability across module boundaries in monorepo setup
+  // Note: Error class names are the original class names, not aliases
+  // (e.g., SubscriptionNotFoundError, not BillingSubscriptionNotFoundError)
+  if (error instanceof Error) {
+    const notFoundErrors = [
+      'PlanNotFoundError',
+      'SubscriptionNotFoundError',
+      'PaymentMethodNotFoundError',
+      'CustomerNotFoundError',
+    ];
+    if (notFoundErrors.includes(error.name)) {
+      return { status: 404, body: { message: error.message } };
+    }
+
+    if (error.name === 'SubscriptionExistsError') {
+      return { status: 409, body: { message: error.message } };
+    }
+
+    const badRequestErrors = [
+      'PlanNotActiveError',
+      'SubscriptionAlreadyCanceledError',
+      'SubscriptionNotCancelingError',
+      'SubscriptionNotActiveError',
+      'CannotRemoveDefaultPaymentMethodError',
+    ];
+    if (badRequestErrors.includes(error.name)) {
+      return { status: 400, body: { message: error.message } };
+    }
+
+    if (error.name === 'ProviderNotConfiguredError') {
+      return { status: 500, body: { message: 'Billing service is not configured' } };
+    }
+  }
+
+  ctx.log.error(error instanceof Error ? error : new Error(String(error)));
+  return { status: 500, body: { message: 'An error occurred processing your request' } };
+}
+
+// ============================================================================
+// Plan Handlers
+// ============================================================================
+
+/**
+ * List all active billing plans (public endpoint).
+ *
+ * @param ctx - Application context with repositories
+ * @returns 200 response with array of active plans
+ * @complexity O(n) where n is the number of active plans
+ */
+export async function handleListPlans(
+  ctx: BillingAppContext,
+): Promise<{ status: 200; body: PlansListResponse }> {
+  const repos = getBillingRepos(ctx);
+  const plans = await getActivePlans(repos);
+
+  return {
+    status: 200,
+    body: {
+      plans: plans.map(formatPlan),
+    },
+  };
+}
+
+// ============================================================================
+// Subscription Handlers
+// ============================================================================
+
+/**
+ * Get the current user's subscription.
+ *
+ * @param ctx - Application context with repositories
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with subscription data, or error response
+ * @complexity O(1) - database lookups
+ */
+export async function handleGetSubscription(
+  ctx: BillingAppContext,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SubscriptionResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const subscription = await getUserSubscription(repos, request.user.userId);
+
+    return {
+      status: 200,
+      body: {
+        subscription: subscription !== null ? formatSubscription(subscription) : null,
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Create a checkout session for a new subscription.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param body - Checkout request containing plan ID and optional redirect URLs
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with checkout session data, or error response
+ * @complexity O(1) - sequential lookups and provider API call
+ */
+export async function handleCreateCheckout(
+  ctx: BillingAppContext,
+  body: CheckoutRequest,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: CheckoutResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    const session = await createCheckoutSession(repos, provider, {
+      userId: request.user.userId,
+      email: request.user.email,
+      planId: body.planId,
+      successUrl:
+        typeof body.successUrl === 'string' && body.successUrl !== ''
+          ? body.successUrl
+          : ctx.config.billing.urls.checkoutSuccessUrl,
+      cancelUrl:
+        typeof body.cancelUrl === 'string' && body.cancelUrl !== ''
+          ? body.cancelUrl
+          : ctx.config.billing.urls.checkoutCancelUrl,
+    });
+
+    return {
+      status: 200,
+      body: session,
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Cancel the current user's subscription.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param body - Cancellation request with optional immediately flag
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with success message, or error response
+ * @complexity O(1) - database lookup, provider API call, database update
+ */
+export async function handleCancelSubscription(
+  ctx: BillingAppContext,
+  body: CancelSubscriptionRequest,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SubscriptionActionResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    await cancelSubscription(repos, provider, request.user.userId, body.immediately);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message:
+          body.immediately === true
+            ? 'Subscription canceled immediately'
+            : 'Subscription will be canceled at the end of the billing period',
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Resume a subscription that was set to cancel at period end.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with success message, or error response
+ * @complexity O(1) - database lookup, provider API call, database update
+ */
+export async function handleResumeSubscription(
+  ctx: BillingAppContext,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SubscriptionActionResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    await resumeSubscription(repos, provider, request.user.userId);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Subscription resumed',
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Update subscription to a new plan.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param body - Update request containing the new plan ID
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with success message, or error response
+ * @complexity O(1) - sequential lookups, provider API call, database update
+ */
+export async function handleUpdateSubscription(
+  ctx: BillingAppContext,
+  body: UpdateSubscriptionRequest,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SubscriptionActionResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    await updateSubscription(repos, provider, request.user.userId, body.planId);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Subscription updated',
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+// ============================================================================
+// Invoice Handlers
+// ============================================================================
+
+/**
+ * List the current user's invoices.
+ *
+ * @param ctx - Application context with repositories
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with invoices array and pagination flag, or error response
+ * @complexity O(n) where n is the invoice limit
+ */
+export async function handleListInvoices(
+  ctx: BillingAppContext,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: InvoicesListResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const { invoices, hasMore } = await getUserInvoices(repos, request.user.userId);
+
+    return {
+      status: 200,
+      body: {
+        invoices: invoices.map(formatInvoice),
+        hasMore,
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+// ============================================================================
+// Payment Method Handlers
+// ============================================================================
+
+/**
+ * List the current user's payment methods.
+ *
+ * @param ctx - Application context with repositories
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with payment methods array, or error response
+ * @complexity O(n) where n is the number of payment methods
+ */
+export async function handleListPaymentMethods(
+  ctx: BillingAppContext,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: PaymentMethodsListResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const paymentMethods = await getUserPaymentMethods(repos, request.user.userId);
+
+    return {
+      status: 200,
+      body: {
+        paymentMethods: paymentMethods.map(formatPaymentMethod),
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Add a new payment method to the current user's account.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param body - Request containing the provider payment method ID
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with the created payment method, or error response
+ * @complexity O(n) where n is the number of existing payment methods
+ */
+export async function handleAddPaymentMethod(
+  ctx: BillingAppContext,
+  body: AddPaymentMethodRequest,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: PaymentMethodResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    const paymentMethod = await addPaymentMethod(
+      repos,
+      provider,
+      request.user.userId,
+      request.user.email,
+      body.paymentMethodId,
+    );
+
+    return {
+      status: 200,
+      body: {
+        paymentMethod: formatPaymentMethod(paymentMethod),
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Remove a payment method from the current user's account.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param paymentMethodId - Database identifier of the payment method to remove
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with success message, or error response
+ * @complexity O(1) - database lookups and provider API call
+ */
+export async function handleRemovePaymentMethod(
+  ctx: BillingAppContext,
+  paymentMethodId: string,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SubscriptionActionResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    await removePaymentMethod(repos, provider, request.user.userId, paymentMethodId);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Payment method removed',
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Set a payment method as the default for the current user.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param paymentMethodId - Database identifier of the payment method to set as default
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with the updated payment method, or error response
+ * @complexity O(1) - database lookups and provider API call
+ */
+export async function handleSetDefaultPaymentMethod(
+  ctx: BillingAppContext,
+  paymentMethodId: string,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: PaymentMethodResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    const paymentMethod = await setDefaultPaymentMethod(
+      repos,
+      provider,
+      request.user.userId,
+      paymentMethodId,
+    );
+
+    return {
+      status: 200,
+      body: {
+        paymentMethod: formatPaymentMethod(paymentMethod),
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Create a setup intent for adding a new payment method.
+ *
+ * @param ctx - Application context with configuration and repositories
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with client secret for frontend setup, or error response
+ * @complexity O(1) - customer lookup/creation and provider API call
+ */
+export async function handleCreateSetupIntent(
+  ctx: BillingAppContext,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: SetupIntentResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  if (request.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  if (!ctx.config.billing.enabled) {
+    return { status: 500, body: { message: 'Billing is not enabled' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const provider = createBillingProvider(ctx.config.billing);
+
+    const result = await createSetupIntent(
+      repos,
+      provider,
+      request.user.userId,
+      request.user.email,
+    );
+
+    return {
+      status: 200,
+      body: result,
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}

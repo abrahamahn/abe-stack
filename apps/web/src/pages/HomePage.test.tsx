@@ -33,73 +33,73 @@ vi.mock('../../../../apps/desktop/README.md?raw', () => ({
 }));
 
 // Package READMEs
-vi.mock('../../../../packages/core/README.md?raw', () => ({
+vi.mock('../../../../shared/core/README.md?raw', () => ({
   default: `# @abe-stack/core\n\nCore package documentation.`,
 }));
 
-vi.mock('../../../../packages/sdk/README.md?raw', () => ({
+vi.mock('../../../../sdk/README.md?raw', () => ({
   default: `# @abe-stack/sdk\n\nSDK package documentation.`,
 }));
 
-vi.mock('../../../../packages/ui/docs/README.md?raw', () => ({
+vi.mock('../../../../shared/ui/docs/README.md?raw', () => ({
   default: `# @abe-stack/ui\n\nUI package documentation.`,
 }));
 
 // Dev docs - paths match actual imports in HomePage.tsx
-vi.mock('../../../../docs/todo/api-test-plan.md?raw', () => ({
+vi.mock('../../../docs/todo/api-test-plan.md?raw', () => ({
   default: `# API Test Plan\n\nAPI test plan documentation.`,
 }));
 
-vi.mock('../../../../docs/specs/architecture.md?raw', () => ({
+vi.mock('../../../docs/specs/architecture.md?raw', () => ({
   default: `# Architecture\n\nArchitecture documentation.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/configuration.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/configuration.md?raw', () => ({
   default: `# Config Setup\n\nConfiguration setup documentation.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/workflow.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/workflow.md?raw', () => ({
   default: `# Dev Environment\n\nDevelopment environment setup.`,
 }));
 
-vi.mock('../../../../docs/reference/legacy.md?raw', () => ({
+vi.mock('../../../docs/reference/legacy.md?raw', () => ({
   default: `# Legacy\n\nLegacy documentation.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/performance.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/performance.md?raw', () => ({
   default: `# Performance\n\nPerformance documentation.`,
 }));
 
-vi.mock('../../../../docs/specs/principles.md?raw', () => ({
+vi.mock('../../../docs/specs/principles.md?raw', () => ({
   default: `# Principles\n\nDesign principles.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/security.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/security.md?raw', () => ({
   default: `# Security\n\nSecurity documentation.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/sync-scripts.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/sync-scripts.md?raw', () => ({
   default: `# Sync Scripts\n\nSync scripts documentation.`,
 }));
 
-vi.mock('../../../../docs/deploy/dev/testing.md?raw', () => ({
+vi.mock('../../../docs/deploy/dev/testing.md?raw', () => ({
   default: `# Testing\n\nTesting documentation.`,
 }));
 
 // Weekly logs
-vi.mock('../../../../docs/log/2026-W01.md?raw', () => ({
+vi.mock('../../../docs/log/2026-W01.md?raw', () => ({
   default: `# Week 01\n\nWeekly log.`,
 }));
 
-vi.mock('../../../../docs/log/2026-W02.md?raw', () => ({
+vi.mock('../../../docs/log/2026-W02.md?raw', () => ({
   default: `# Week 02\n\nWeekly log.`,
 }));
 
-vi.mock('../../../../docs/log/2026-W03.md?raw', () => ({
+vi.mock('../../../docs/log/2026-W03.md?raw', () => ({
   default: `# Week 03\n\nWeekly log.`,
 }));
 
-vi.mock('../../../../docs/log/2026-W04.md?raw', () => ({
+vi.mock('../../../docs/log/2026-W04.md?raw', () => ({
   default: `# Week 04\n\nWeekly log.`,
 }));
 

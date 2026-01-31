@@ -1,19 +1,19 @@
 // apps/server/src/shared/types.ts
 
 import type { ServerSearchProvider } from '@/infrastructure/index';
-import type { AuthEmailTemplates } from '@abe-stack/auth';
 import type { BaseContext } from '@abe-stack/contracts';
 import type {
-  AppConfig,
-  BillingService,
-  EmailService,
-  NotificationService,
-  StorageService as StorageProvider,
-  SubscriptionManager,
+    AppConfig,
+    BillingService,
+    EmailService,
+    NotificationService,
+    StorageService as StorageProvider,
+    SubscriptionManager,
 } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { QueueServer, WriteService } from '@abe-stack/jobs';
 import type { FastifyBaseLogger } from 'fastify';
+import type { AuthEmailTemplates } from '../../../../modules/auth/src';
 
 // ============================================================================
 // Request Context

@@ -9,14 +9,15 @@
  */
 
 import { adminRoutes } from '@abe-stack/admin';
-import { authRoutes } from '@abe-stack/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/billing';
 import { notificationRoutes } from '@abe-stack/notifications';
 import { realtimeRoutes } from '@abe-stack/realtime';
 import { userRoutes } from '@abe-stack/users';
+import { authRoutes } from '../../../../modules/auth/src';
 
 import { systemRoutes } from './system/routes';
 
+import type { RouteMap } from '@/infrastructure/http/router';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 
@@ -44,7 +45,10 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   // Billing routes (only if billing is enabled)
   if (ctx.config.billing.enabled) {
-    registerRouteMap(app, ctx, billingRoutes, routerOptions);
+    // Billing uses its own narrower type system (BillingRouteMap). The router
+    // already calls handlers via `as never` casts (router.ts L120/124), so the
+    // runtime contract is satisfied. Cast at the type boundary is intentional.
+    registerRouteMap(app, ctx, billingRoutes as unknown as RouteMap, routerOptions);
   }
 
   // Webhook routes (registered separately for raw body access)

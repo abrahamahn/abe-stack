@@ -29,12 +29,12 @@ The source of truth for all environment variables.
 **Purpose:** Store environment-specific values  
 **Documentation:** [.config/env/README.md](/.config/env/README.md)
 
-### 2. **`packages/core/src/config/`** - Core System
+### 2. **`shared/core/src/config/`** - Core System
 
 The foundational, reusable configuration infrastructure.
 
 ```
-packages/core/src/config/
+shared/core/src/config/
 ├── loaders/             # Environment file loading
 ├── schema/              # Zod validation schemas
 ├── contracts/           # TypeScript type definitions
@@ -42,7 +42,7 @@ packages/core/src/config/
 ```
 
 **Purpose:** Load, validate, and provide types  
-**Documentation:** [packages/core/src/config/README.md](../../../../packages/core/src/config/README.md)
+**Documentation:** [shared/core/src/config/README.md](../../../../shared/core/src/config/README.md)
 
 ### 3. **`apps/server/src/config/`** - Server Config (This Directory)
 
@@ -64,9 +64,9 @@ apps/server/src/config/
 ```
 1. .config/env/*.env files
          ↓
-2. packages/core/src/config/env.loader.ts (loads)
+2. shared/core/src/config/env.loader.ts (loads)
          ↓
-3. packages/core/src/config/env.schema.ts (validates)
+3. shared/core/src/config/env.schema.ts (validates)
          ↓
 4. apps/server/src/config/factory.ts (transforms)
          ↓
@@ -202,7 +202,7 @@ if (config.storage.provider === 's3') {
 
 To add a new variable, follow the **Triple-Point Update**:
 
-1. **Schema:** Add the variable and Zod rules to `packages/core/src/config/env.schema.ts`.
+1. **Schema:** Add the variable and Zod rules to `shared/core/src/config/env.schema.ts`.
 2. **Factory:** Update the relevant loader in `apps/server/src/config/` (e.g., `infra/database.ts`) to map the new variable.
 3. **Template:** Add the variable with documentation to `.config/env/.env.*.example` files.
 

@@ -88,10 +88,10 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../shared/core
       '@abe-stack/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../shared/ui
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -116,49 +116,49 @@ importers:
     dependencies:
       '@abe-stack/admin':
         specifier: workspace:*
-        version: link:../../packages/admin
+        version: link:../../modules/admin
       '@abe-stack/auth':
         specifier: workspace:*
-        version: link:../../packages/auth
+        version: link:../../modules/auth
       '@abe-stack/billing':
         specifier: workspace:*
-        version: link:../../packages/billing
+        version: link:../../modules/billing
       '@abe-stack/cache':
         specifier: workspace:*
-        version: link:../../packages/cache
+        version: link:../../infra/cache
       '@abe-stack/contracts':
         specifier: workspace:*
-        version: link:../../packages/contracts
+        version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../shared/core
       '@abe-stack/db':
         specifier: workspace:*
-        version: link:../../packages/db
+        version: link:../../infra/db
       '@abe-stack/email':
         specifier: workspace:*
-        version: link:../../packages/email
+        version: link:../../infra/email
       '@abe-stack/http':
         specifier: workspace:*
-        version: link:../../packages/http
+        version: link:../../infra/http
       '@abe-stack/jobs':
         specifier: workspace:*
-        version: link:../../packages/jobs
+        version: link:../../infra/jobs
       '@abe-stack/notifications':
         specifier: workspace:*
-        version: link:../../packages/notifications
+        version: link:../../infra/notifications
       '@abe-stack/realtime':
         specifier: workspace:*
-        version: link:../../packages/realtime
+        version: link:../../infra/realtime
       '@abe-stack/security':
         specifier: workspace:*
-        version: link:../../packages/security
+        version: link:../../infra/security
       '@abe-stack/storage':
         specifier: workspace:*
-        version: link:../../packages/storage
+        version: link:../../infra/storage
       '@abe-stack/users':
         specifier: workspace:*
-        version: link:../../packages/users
+        version: link:../../infra/users
       '@aws-sdk/client-s3':
         specifier: ^3.971.0
         version: 3.975.0
@@ -216,16 +216,16 @@ importers:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../shared/core
       '@abe-stack/sdk':
         specifier: workspace:*
-        version: link:../../packages/sdk
+        version: link:../../sdk
       '@abe-stack/stores':
         specifier: workspace:*
-        version: link:../../packages/stores
+        version: link:../../infra/stores
       '@abe-stack/ui':
         specifier: workspace:*
-        version: link:../../packages/ui
+        version: link:../../shared/ui
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -237,7 +237,7 @@ importers:
         specifier: ^6.0.5
         version: 6.0.5(typescript@5.9.3)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(tsx@4.21.0))
 
-  packages/admin:
+  modules/admin:
     dependencies:
       '@abe-stack/auth':
         specifier: workspace:*
@@ -271,7 +271,7 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@types/node@25.0.10)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(tsx@4.21.0)
 
-  packages/auth:
+  modules/auth:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -302,7 +302,7 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@types/node@25.0.10)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(tsx@4.21.0)
 
-  packages/billing:
+  modules/billing:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -321,13 +321,13 @@ importers:
         specifier: 5.7.1
         version: 5.7.1
 
-  packages/cache:
+  infra/cache:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../core
 
-  packages/contracts:
+  infra/contracts:
     dependencies:
       zod:
         specifier: ^3.23.8
@@ -340,7 +340,7 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
-  packages/core:
+  shared/core:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -352,7 +352,7 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
-  packages/db:
+  infra/db:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -361,13 +361,13 @@ importers:
         specifier: ^3.4.8
         version: 3.4.8
 
-  packages/email:
+  infra/email:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../core
 
-  packages/http:
+  infra/http:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -379,7 +379,7 @@ importers:
         specifier: '>=5.0.0'
         version: 5.7.1
 
-  packages/jobs:
+  infra/jobs:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -388,7 +388,7 @@ importers:
         specifier: workspace:*
         version: link:../db
 
-  packages/media:
+  infra/media:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -397,7 +397,7 @@ importers:
         specifier: ^0.33.2
         version: 0.33.5
 
-  packages/notifications:
+  infra/notifications:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -416,7 +416,7 @@ importers:
         specifier: 5.7.1
         version: 5.7.1
 
-  packages/realtime:
+  infra/realtime:
     dependencies:
       '@abe-stack/contracts':
         specifier: workspace:*
@@ -447,7 +447,7 @@ importers:
         specifier: ^8.18.0
         version: 8.19.0
 
-  packages/sdk:
+  sdk:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -456,7 +456,7 @@ importers:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
 
-  packages/security:
+  infra/security:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -465,7 +465,7 @@ importers:
         specifier: '>=5.0.0'
         version: 5.7.1
 
-  packages/storage:
+  infra/storage:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -484,7 +484,7 @@ importers:
         specifier: 5.7.1
         version: 5.7.1
 
-  packages/stores:
+  infra/stores:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -494,7 +494,7 @@ importers:
         specifier: ^19.1.0
         version: 19.2.4
 
-  packages/ui:
+  shared/ui:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
@@ -512,7 +512,7 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
 
-  packages/users:
+  infra/users:
     dependencies:
       '@abe-stack/auth':
         specifier: workspace:*

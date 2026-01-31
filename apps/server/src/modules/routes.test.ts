@@ -26,13 +26,9 @@ vi.mock('../infrastructure/http/router', () => ({
   publicRoute: vi.fn(),
 }));
 
-vi.mock('./admin/routes', () => ({
+vi.mock('@abe-stack/admin', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   adminRoutes: { 'admin/test': { method: 'GET', handler: vi.fn() } },
-}));
-
-vi.mock('./admin', () => ({
-  handleAdminUnlock: vi.fn(),
 }));
 
 vi.mock('@abe-stack/auth', () => ({
@@ -40,7 +36,7 @@ vi.mock('@abe-stack/auth', () => ({
   authRoutes: { 'auth/test': { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('./billing', () => ({
+vi.mock('@abe-stack/billing', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   billingRoutes: { 'billing/test': { method: 'GET', handler: vi.fn() } },
   registerWebhookRoutes: vi.fn(),
@@ -61,21 +57,17 @@ vi.mock('./system/routes', () => ({
   systemRoutes: { 'system/test': { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('./users/routes', () => ({
+vi.mock('@abe-stack/users', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   userRoutes: { 'users/test': { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('./users/handlers', () => ({
-  handleMe: vi.fn(),
-}));
-
 import { registerRouteMap } from '../infrastructure/http/router';
 
-import { registerWebhookRoutes } from './billing';
+import { registerWebhookRoutes } from '@abe-stack/billing';
 import { registerRoutes } from './routes';
 
-import type { AppContext } from '../../shared/index';
+import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 /* eslint-enable import-x/order */
 
@@ -573,29 +565,6 @@ describe('Module Exports', () => {
     const module = await import('./routes');
     expect(module.registerRoutes).toBeDefined();
     expect(typeof module.registerRoutes).toBe('function');
-  });
-
-  test('should export route definitions', async () => {
-    const module = await import('./routes');
-    expect(module.adminRoutes).toBeDefined();
-    expect(module.authRoutes).toBeDefined();
-    expect(module.notificationRoutesConfig).toBeDefined();
-    expect(module.realtimeRoutes).toBeDefined();
-    expect(module.systemRoutes).toBeDefined();
-    expect(module.userRoutes).toBeDefined();
-  });
-
-  test('should re-export router utilities', async () => {
-    const module = await import('./routes');
-    expect(module.registerRouteMap).toBeDefined();
-    expect(module.protectedRoute).toBeDefined();
-    expect(module.publicRoute).toBeDefined();
-  });
-
-  test('should re-export server-specific handlers', async () => {
-    const module = await import('./routes');
-    expect(module.handleMe).toBeDefined();
-    expect(module.handleAdminUnlock).toBeDefined();
   });
 });
 

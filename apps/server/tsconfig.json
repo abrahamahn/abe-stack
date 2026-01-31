@@ -13,103 +13,103 @@
             "./src/*"
       ],
       "@abe-stack/admin": [
-            "../../packages/admin/src/index.ts"
+            "../../modules/admin/src/index.ts"
       ],
       "@abe-stack/admin/*": [
-            "../../packages/admin/src/*"
+            "../../modules/admin/src/*"
       ],
       "@abe-stack/auth": [
-            "../../packages/auth/src/index.ts"
+            "../../modules/auth/src/index.ts"
       ],
       "@abe-stack/auth/*": [
-            "../../packages/auth/src/*"
+            "../../modules/auth/src/*"
       ],
       "@abe-stack/billing": [
-            "../../packages/billing/src/index.ts"
+            "../../modules/billing/src/index.ts"
       ],
       "@abe-stack/billing/*": [
-            "../../packages/billing/src/*"
+            "../../modules/billing/src/*"
       ],
       "@abe-stack/cache": [
-            "../../packages/cache/src/index.ts"
+            "../../infra/cache/src/index.ts"
       ],
       "@abe-stack/cache/*": [
-            "../../packages/cache/src/*"
+            "../../infra/cache/src/*"
       ],
       "@abe-stack/contracts": [
-            "../../packages/contracts/src/index.ts"
+            "../../infra/contracts/src/index.ts"
       ],
       "@abe-stack/contracts/*": [
-            "../../packages/contracts/src/*"
+            "../../infra/contracts/src/*"
       ],
       "@abe-stack/core": [
-            "../../packages/core/src/index.ts"
+            "../../shared/core/src/index.ts"
       ],
       "@abe-stack/email": [
-            "../../packages/email/src/index.ts"
+            "../../infra/email/src/index.ts"
       ],
       "@abe-stack/http": [
-            "../../packages/http/src/index.ts"
+            "../../infra/http/src/index.ts"
       ],
       "@abe-stack/http/*": [
-            "../../packages/http/src/*"
+            "../../infra/http/src/*"
       ],
       "@abe-stack/core/pubsub/postgres": [
-            "../../packages/core/src/infrastructure/pubsub/postgres-pubsub.ts"
+            "../../shared/core/src/infrastructure/pubsub/postgres-pubsub.ts"
       ],
       "@abe-stack/core/pubsub": [
-            "../../packages/core/src/infrastructure/pubsub/index.ts"
+            "../../shared/core/src/infrastructure/pubsub/index.ts"
       ],
       "@abe-stack/core/*": [
-            "../../packages/core/src/*"
+            "../../shared/core/src/*"
       ],
       "@abe-stack/db": [
-            "../../packages/db/src/index.ts"
+            "../../infra/db/src/index.ts"
       ],
       "@abe-stack/db/*": [
-            "../../packages/db/src/*"
+            "../../infra/db/src/*"
       ],
       "@abe-stack/jobs": [
-            "../../packages/jobs/src/index.ts"
+            "../../infra/jobs/src/index.ts"
       ],
       "@abe-stack/jobs/*": [
-            "../../packages/jobs/src/*"
+            "../../infra/jobs/src/*"
       ],
       "@abe-stack/media": [
-            "../../packages/media/src/index.ts"
+            "../../infra/media/src/index.ts"
       ],
       "@abe-stack/media/*": [
-            "../../packages/media/src/*"
+            "../../infra/media/src/*"
       ],
       "@abe-stack/notifications": [
-            "../../packages/notifications/src/index.ts"
+            "../../infra/notifications/src/index.ts"
       ],
       "@abe-stack/notifications/*": [
-            "../../packages/notifications/src/*"
+            "../../infra/notifications/src/*"
       ],
       "@abe-stack/realtime": [
-            "../../packages/realtime/src/index.ts"
+            "../../infra/realtime/src/index.ts"
       ],
       "@abe-stack/realtime/*": [
-            "../../packages/realtime/src/*"
+            "../../infra/realtime/src/*"
       ],
       "@abe-stack/security": [
-            "../../packages/security/src/index.ts"
+            "../../infra/security/src/index.ts"
       ],
       "@abe-stack/security/*": [
-            "../../packages/security/src/*"
+            "../../infra/security/src/*"
       ],
       "@abe-stack/storage": [
-            "../../packages/storage/src/index.ts"
+            "../../infra/storage/src/index.ts"
       ],
       "@abe-stack/storage/*": [
-            "../../packages/storage/src/*"
+            "../../infra/storage/src/*"
       ],
       "@abe-stack/users": [
-            "../../packages/users/src/index.ts"
+            "../../infra/users/src/index.ts"
       ],
       "@abe-stack/users/*": [
-            "../../packages/users/src/*"
+            "../../infra/users/src/*"
       ],
       "@config": [
             "./src/config"
@@ -188,21 +188,21 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
-    { "path": "../../packages/admin" },
-    { "path": "../../packages/auth" },
-    { "path": "../../packages/billing" },
-    { "path": "../../packages/cache" },
-    { "path": "../../packages/core" },
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/db" },
-    { "path": "../../packages/email" },
-    { "path": "../../packages/http" },
-    { "path": "../../packages/jobs" },
-    { "path": "../../packages/media" },
-    { "path": "../../packages/notifications" },
-    { "path": "../../packages/realtime" },
-    { "path": "../../packages/security" },
-    { "path": "../../packages/storage" },
-    { "path": "../../packages/users" }
+    { "path": "../../modules/admin" },
+    { "path": "../../modules/auth" },
+    { "path": "../../modules/billing" },
+    { "path": "../../infra/cache" },
+    { "path": "../../shared/core" },
+    { "path": "../../infra/contracts" },
+    { "path": "../../infra/db" },
+    { "path": "../../infra/email" },
+    { "path": "../../infra/http" },
+    { "path": "../../infra/jobs" },
+    { "path": "../../infra/media" },
+    { "path": "../../infra/notifications" },
+    { "path": "../../infra/realtime" },
+    { "path": "../../infra/security" },
+    { "path": "../../infra/storage" },
+    { "path": "../../infra/users" }
   ]
 }

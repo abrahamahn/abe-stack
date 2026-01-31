@@ -1,13 +1,13 @@
 // apps/server/src/app.ts
 
-import { createBillingProvider } from '@abe-stack/billing';
 import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
 import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
 import { createDbClient, getRepositoryContext, requireValidSchema } from '@abe-stack/db';
-import { emailTemplates, createEmailService  } from '@abe-stack/email';
+import { createEmailService, emailTemplates } from '@abe-stack/email';
 import { createPostgresQueueStore, createQueueServer, createWriteService } from '@abe-stack/jobs';
 import { createStorage } from '@abe-stack/storage';
 import { type AppContext, type IServiceContainer } from '@shared';
+import { createBillingProvider } from '../../../modules/billing/src';
 
 import {
     createNotificationService,
@@ -19,18 +19,18 @@ import { registerRoutes } from './modules/index';
 import { createCacheService, type CacheService } from './services/cache-service';
 
 
+import type { AppConfig, BillingService, EmailService, FcmConfig as FcmConfigType } from '@abe-stack/core';
+import type { PostgresPubSub } from '@abe-stack/core/pubsub/postgres';
+import type { DbClient, Repositories } from '@abe-stack/db';
+import type { QueueServer, WriteService } from '@abe-stack/jobs';
+import type { StorageProvider } from '@abe-stack/storage';
+import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import type {
     FcmConfig,
     NotificationFactoryOptions,
     NotificationService,
     ServerSearchProvider,
 } from './infrastructure/index';
-import type { EmailService, AppConfig, BillingService, FcmConfig as FcmConfigType  } from '@abe-stack/core';
-import type { PostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import type { DbClient, Repositories } from '@abe-stack/db';
-import type { QueueServer, WriteService } from '@abe-stack/jobs';
-import type { StorageProvider } from '@abe-stack/storage';
-import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 import { buildConnectionString } from '@/config';
 import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';

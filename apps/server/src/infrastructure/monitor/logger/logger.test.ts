@@ -3,7 +3,7 @@
  * Logger Service Tests
  *
  * Tests for the Fastify-specific logger wrappers (createLogger, createRequestLogger).
- * Pure utility tests (correlation ID, log levels, shouldLog) are in packages/core.
+ * Pure utility tests (correlation ID, log levels, shouldLog) are in shared/core.
  */
 import { describe, expect, test, vi, type Mock } from 'vitest';
 

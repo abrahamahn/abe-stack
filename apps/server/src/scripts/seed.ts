@@ -18,8 +18,8 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { hashPassword } from '@abe-stack/auth';
 import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@abe-stack/db';
+import { hashPassword } from '../../../../modules/auth/src';
 
 import type { UserRole } from '@abe-stack/core';
 

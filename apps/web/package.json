@@ -4,7 +4,7 @@
   "description": "React web application for abe-stack",
   "type": "module",
   "scripts": {
-    "dev": "tsx ../../tooling/scripts/dev/kill-port.ts 5173 && vite --open",
+    "dev": "tsx ../../tools/scripts/dev/kill-port.ts 5173 && vite --open",
     "build": "vite build",
     "start": "vite preview --open",
     "type-check": "tsc --noEmit",

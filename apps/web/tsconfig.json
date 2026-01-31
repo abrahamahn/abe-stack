@@ -4,14 +4,14 @@
     "types": ["vite/client", "react", "react-dom", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/contracts": ["../../packages/contracts/src/index.ts"],
-      "@abe-stack/contracts/*": ["../../packages/contracts/src/*"],
-      "@abe-stack/sdk": ["../../packages/sdk/src/index.ts"],
-      "@abe-stack/sdk/*": ["../../packages/sdk/src/*"],
-      "@abe-stack/stores": ["../../packages/stores/src/index.ts"],
-      "@abe-stack/stores/*": ["../../packages/stores/src/*"],
-      "@abe-stack/ui": ["../../packages/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["../../packages/ui/src/*"],
+      "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
+      "@abe-stack/contracts/*": ["../../infra/contracts/src/*"],
+      "@abe-stack/sdk": ["../../sdk/src/index.ts"],
+      "@abe-stack/sdk/*": ["../../sdk/src/*"],
+      "@abe-stack/stores": ["../../infra/stores/src/index.ts"],
+      "@abe-stack/stores/*": ["../../infra/stores/src/*"],
+      "@abe-stack/ui": ["../../shared/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["../../shared/ui/src/*"],
       "@admin": ["./src/features/admin"],
       "@admin/*": ["./src/features/admin/*"],
       "@api": ["./src/api"],
@@ -55,25 +55,25 @@
   "exclude": ["node_modules", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
   "references": [
     {
-      "path": "../../packages/contracts"
+      "path": "../../infra/contracts"
     },
     {
-      "path": "../../packages/core"
+      "path": "../../shared/core"
     },
     {
-      "path": "../../packages/db"
+      "path": "../../infra/db"
     },
     {
-      "path": "../../packages/media"
+      "path": "../../infra/media"
     },
     {
-      "path": "../../packages/sdk"
+      "path": "../../sdk"
     },
     {
-      "path": "../../packages/stores"
+      "path": "../../infra/stores"
     },
     {
-      "path": "../../packages/ui"
+      "path": "../../shared/ui"
     }
   ]
 }

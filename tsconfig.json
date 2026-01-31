@@ -51,61 +51,61 @@
       "path": "./apps/web"
     },
     {
-      "path": "./packages/contracts"
+      "path": "./infra/contracts"
     },
     {
-      "path": "./packages/core"
+      "path": "./shared/core"
     },
     {
-      "path": "./packages/db"
+      "path": "./infra/db"
     },
     {
-      "path": "./packages/jobs"
+      "path": "./infra/jobs"
     },
     {
-      "path": "./packages/media"
+      "path": "./infra/media"
     },
     {
-      "path": "./packages/sdk"
+      "path": "./sdk"
     },
     {
-      "path": "./packages/stores"
+      "path": "./infra/stores"
     },
     {
-      "path": "./packages/ui"
+      "path": "./shared/ui"
     },
     {
-      "path": "./packages/billing"
+      "path": "./modules/billing"
     },
     {
-      "path": "./packages/cache"
+      "path": "./infra/cache"
     },
     {
-      "path": "./packages/email"
+      "path": "./infra/email"
     },
     {
-      "path": "./packages/http"
+      "path": "./infra/http"
     },
     {
-      "path": "./packages/auth"
+      "path": "./modules/auth"
     },
     {
-      "path": "./packages/security"
+      "path": "./infra/security"
     },
     {
-      "path": "./packages/storage"
+      "path": "./infra/storage"
     },
     {
-      "path": "./packages/notifications"
+      "path": "./infra/notifications"
     },
     {
-      "path": "./packages/users"
+      "path": "./infra/users"
     },
     {
-      "path": "./packages/realtime"
+      "path": "./infra/realtime"
     },
     {
-      "path": "./packages/admin"
+      "path": "./modules/admin"
     }
   ]
 }

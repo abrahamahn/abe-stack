@@ -30,8 +30,8 @@ export default [
   {
     ignores: [
       '**/.github/**',
-      '**/tooling/scripts/**',
-      '**/tooling/lint/**',
+      '**/tools/scripts/**',
+      '**/tools/sync/**',
       '**/__tests__/**',
       '**/*.test.ts',
       '**/*.test.tsx',
@@ -89,172 +89,172 @@ export default [
     },
   },
   {
-    files: ['packages/contracts/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/contracts/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/contracts/tsconfig.json'],
+        project: ['./infra/contracts/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/core/**/*.{ts,tsx,cts,mts}'],
+    files: ['shared/core/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/core/tsconfig.json'],
+        project: ['./shared/core/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/db/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/db/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/db/tsconfig.json'],
+        project: ['./infra/db/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/media/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/media/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/media/tsconfig.json'],
+        project: ['./infra/media/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/sdk/**/*.{ts,tsx,cts,mts}'],
+    files: ['sdk/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/sdk/tsconfig.json'],
+        project: ['./sdk/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/stores/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/stores/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/stores/tsconfig.json'],
+        project: ['./infra/stores/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/ui/**/*.{ts,tsx,cts,mts}'],
+    files: ['shared/ui/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/ui/tsconfig.json'],
+        project: ['./shared/ui/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/cache/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/cache/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/cache/tsconfig.json'],
+        project: ['./infra/cache/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/billing/**/*.{ts,tsx,cts,mts}'],
+    files: ['modules/billing/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/billing/tsconfig.json'],
+        project: ['./modules/billing/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/storage/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/storage/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/storage/tsconfig.json'],
+        project: ['./infra/storage/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/jobs/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/jobs/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/jobs/tsconfig.json'],
+        project: ['./infra/jobs/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/security/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/security/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/security/tsconfig.json'],
+        project: ['./infra/security/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/http/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/http/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/http/tsconfig.json'],
+        project: ['./infra/http/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/email/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/email/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/email/tsconfig.json'],
+        project: ['./infra/email/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/notifications/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/notifications/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/notifications/tsconfig.json'],
+        project: ['./infra/notifications/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/auth/**/*.{ts,tsx,cts,mts}'],
+    files: ['modules/auth/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/auth/tsconfig.json'],
+        project: ['./modules/auth/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/users/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/users/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/users/tsconfig.json'],
+        project: ['./infra/users/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/realtime/**/*.{ts,tsx,cts,mts}'],
+    files: ['infra/realtime/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/realtime/tsconfig.json'],
+        project: ['./infra/realtime/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/admin/**/*.{ts,tsx,cts,mts}'],
+    files: ['modules/admin/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/admin/tsconfig.json'],
+        project: ['./modules/admin/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -471,14 +471,14 @@ export default [
     },
   },
   {
-    files: ['tooling/**/*.{ts,tsx,cts,mts}'],
+    files: ['tools/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
     },
   },
   {
     // Allow console in logger implementations and console-based dev services
-    files: ['packages/core/src/config/*'],
+    files: ['shared/core/src/config/*'],
     rules: {
       'no-console': 'off',
     },

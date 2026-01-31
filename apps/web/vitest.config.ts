@@ -19,44 +19,44 @@ export default mergeConfig(baseConfig, {
       // Handle subpath imports first (regex patterns must come before exact matches)
       {
         find: /^@abe-stack\/contracts\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/contracts/src/$1'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/$1'),
       },
       {
         find: /^@abe-stack\/core\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/core/src/$1'),
+        replacement: path.resolve(__dirname, '../../shared/core/src/$1'),
       },
       {
         find: /^@abe-stack\/ui\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/ui/src/$1'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/$1'),
       },
       {
         find: /^@abe-stack\/sdk\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/sdk/src/$1'),
+        replacement: path.resolve(__dirname, '../../sdk/src/$1'),
       },
       {
         find: /^@abe-stack\/stores\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/stores/src/$1'),
+        replacement: path.resolve(__dirname, '../../infra/stores/src/$1'),
       },
       // Handle main package imports
       {
         find: '@abe-stack/contracts',
-        replacement: path.resolve(__dirname, '../../packages/contracts/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/index.ts'),
       },
       {
         find: '@abe-stack/core',
-        replacement: path.resolve(__dirname, '../../packages/core/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../shared/core/src/index.ts'),
       },
       {
         find: '@abe-stack/ui',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/index.ts'),
       },
       {
         find: '@abe-stack/sdk',
-        replacement: path.resolve(__dirname, '../../packages/sdk/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../sdk/src/index.ts'),
       },
       {
         find: '@abe-stack/stores',
-        replacement: path.resolve(__dirname, '../../packages/stores/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../infra/stores/src/index.ts'),
       },
       // Web app feature module aliases - must match tsconfig.json paths
       { find: '@app', replacement: path.resolve(__dirname, './src/app') },
@@ -72,30 +72,30 @@ export default mergeConfig(baseConfig, {
       { find: '@pages', replacement: path.resolve(__dirname, './src/pages') },
       { find: '@settings', replacement: path.resolve(__dirname, './src/features/settings') },
       // UI package internal aliases - for tests that import UI components
-      { find: '@utils', replacement: path.resolve(__dirname, '../../packages/ui/src/utils') },
-      { find: '@elements', replacement: path.resolve(__dirname, '../../packages/ui/src/elements') },
+      { find: '@utils', replacement: path.resolve(__dirname, '../../shared/ui/src/utils') },
+      { find: '@elements', replacement: path.resolve(__dirname, '../../shared/ui/src/elements') },
       {
         find: '@components',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/components'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/components'),
       },
-      { find: '@hooks', replacement: path.resolve(__dirname, '../../packages/ui/src/hooks') },
-      { find: '@theme', replacement: path.resolve(__dirname, '../../packages/ui/src/theme') },
-      { find: '@layouts', replacement: path.resolve(__dirname, '../../packages/ui/src/layouts') },
+      { find: '@hooks', replacement: path.resolve(__dirname, '../../shared/ui/src/hooks') },
+      { find: '@theme', replacement: path.resolve(__dirname, '../../shared/ui/src/theme') },
+      { find: '@layouts', replacement: path.resolve(__dirname, '../../shared/ui/src/layouts') },
       {
         find: '@providers',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/providers'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/providers'),
       },
       {
         find: '@shells',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/layouts/shells'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/shells'),
       },
       {
         find: '@layers',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/layouts/layers'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/layers'),
       },
       {
         find: '@containers',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/layouts/containers'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/layouts/containers'),
       },
     ],
   },

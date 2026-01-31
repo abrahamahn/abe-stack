@@ -10,7 +10,18 @@
 
 import { createQueryPersister, QueryCacheProvider } from '@abe-stack/sdk';
 import { toastStore } from '@abe-stack/stores';
-import { BrowserRouter, HistoryProvider, Route, Routes, ScrollArea, Toaster } from '@abe-stack/ui';
+import {
+  BrowserRouter,
+  ErrorBoundary,
+  HistoryProvider,
+  LiveRegion,
+  Route,
+  Routes,
+  ScrollArea,
+  SkipLink,
+  Toaster,
+  useRouteFocusAnnounce,
+} from '@abe-stack/ui';
 import { DemoPage, SidePeekDemoPage } from '@demo';
 import {
   AdminLayout,
@@ -72,6 +83,12 @@ interface AppProps {
 const AppToaster = (): ReactElement => {
   const { messages, dismiss } = toastStore();
   return <Toaster messages={messages} onDismiss={dismiss} />;
+};
+
+/** Announces route changes to screen readers via the LiveRegion provider */
+const RouteFocusAnnouncer = (): null => {
+  useRouteFocusAnnounce();
+  return null;
 };
 
 const AppRoutes = (): ReactElement => {
@@ -227,11 +244,12 @@ function useQueryPersistence(environment: ClientEnvironment): void {
  * Root component that sets up all application infrastructure.
  *
  * Provider stack (outer to inner):
- * - Suspense: Loading fallback
+ * - ErrorBoundary: Catches unhandled render errors
  * - QueryCacheProvider: Custom query cache infrastructure
  * - BrowserRouter: React Router infrastructure
  * - ClientEnvironmentProvider: Our unified service context
  * - HistoryProvider: Navigation history tracking
+ * - LiveRegion: Screen reader announcement support
  *
  * Query persistence is handled manually via useQueryPersistence hook,
  * which restores from and persists to IndexedDB.
@@ -241,19 +259,27 @@ export const App = ({ environment }: AppProps): ReactElement => {
   useQueryPersistence(environment);
 
   return (
-    <QueryCacheProvider cache={environment.queryCache}>
-      <BrowserRouter>
-        <ClientEnvironmentProvider value={environment}>
-          <HistoryProvider>
-            <div className="theme h-screen">
-              <ScrollArea className="h-full">
-                <AppRoutes />
-              </ScrollArea>
-              <AppToaster />
-            </div>
-          </HistoryProvider>
-        </ClientEnvironmentProvider>
-      </BrowserRouter>
-    </QueryCacheProvider>
+    <ErrorBoundary>
+      <QueryCacheProvider cache={environment.queryCache}>
+        <BrowserRouter>
+          <ClientEnvironmentProvider value={environment}>
+            <HistoryProvider>
+              <LiveRegion>
+                <div className="theme h-screen">
+                  <SkipLink />
+                  <ScrollArea className="h-full">
+                    <div id="main-content">
+                      <RouteFocusAnnouncer />
+                      <AppRoutes />
+                    </div>
+                  </ScrollArea>
+                  <AppToaster />
+                </div>
+              </LiveRegion>
+            </HistoryProvider>
+          </ClientEnvironmentProvider>
+        </BrowserRouter>
+      </QueryCacheProvider>
+    </ErrorBoundary>
   );
 };

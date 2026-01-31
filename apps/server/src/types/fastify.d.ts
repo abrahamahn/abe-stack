@@ -9,7 +9,7 @@ import 'fastify';
 
 // TODO: Restore RBAC when implementation is ready
 // import type { Ability } from '../infrastructure/rbac';
-import type { TokenPayload } from '@abe-stack/auth';
+import type { TokenPayload } from '../../../../modules/auth/src';
 
 declare module 'fastify' {
   interface FastifyRequest {

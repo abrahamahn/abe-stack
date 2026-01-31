@@ -35,7 +35,7 @@ Files located at the repository root that manage the workspace.
 | File | Purpose | Major Tweaks |
 | :--- | :--- | :--- |
 | **`package.json`** | Workspace definition | scripts: `type-check` uses `tsc --build` for speed; `build:headers` syncs file headers. |
-| **`pnpm-workspace.yaml`** | Package linking | Defines `apps/*`, `packages/*`, and `tooling/*` as members. |
+| **`pnpm-workspace.yaml`** | Package linking | Defines `apps/*`, `infra/*`, `modules/*`, `shared/*`, and `sdk` as members. |
 | **`turbo.json`** | Build Pipeline | Configured dependencies (`^build`), output caching (`dist/**`, `.next/**`), and env vars. |
 | **`eslint.config.ts`** | Linting Rules (Flat Config) | Uses `@eslint/compat` to respect `.gitignore`. Strict TS rules enabled. |
 | **`vitest.config.ts`** | Test Defaults | Minimal root config that delegates to the workspace file. |
@@ -53,7 +53,7 @@ Each application extends the base configs and adds domain-specific settings.
 | **`apps/web`** | `vite.web.config.ts` | (Referenced via root .config). Scripts run `vite preview` for production start. |
 | **`apps/desktop`** | `vite.desktop.config.ts` | (Referenced via root .config). Handles Electron main/renderer split. |
 
-### 4. **Package Configs** (`packages/*/`)
+### 4. **Package Configs** (`infra/*`, `modules/*`, `shared/*`, `sdk/`)
 
 Reusable libraries with strict build outputs.
 
@@ -87,7 +87,7 @@ includeIgnoreFile(gitignorePath)
 We strictly separate dependencies:
 - **`devDependencies` (Root):** Tooling only (ESLint, Vitest, Turbo).
 - **`dependencies` (App/Package):** Runtime code (Postgres, React, Fastify).
-**Why?** Docker builds often run `pnpm install --prod`. If `postgres` is in `devDependencies`, your production container will crash because the driver is missing. We've audited `apps/server` and `packages/db` to ensure they own their deps.
+**Why?** Docker builds often run `pnpm install --prod`. If `postgres` is in `devDependencies`, your production container will crash because the driver is missing. We've audited `apps/server` and `infra/db` to ensure they own their deps.
 
 ---
 
@@ -134,7 +134,7 @@ Edit [.pnpmrc](file:///home/abe/projects/main/abe-stack/abe-stack-main/.pnpmrc):
 
 ## 📂 Full Directory Breakdown
 
-This manual covers the following files (exported via `tooling/scripts/export/export-config.js`):
+This manual covers the following files (exported via `tools/scripts/export/export-config.js`):
 
 **Root:**
 - `.gitignore`, `.prettierignore`, `.prettierrc`
@@ -152,10 +152,10 @@ This manual covers the following files (exported via `tooling/scripts/export/exp
 - `apps/web/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
 
 **Packages:**
-- `packages/contracts/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
-- `packages/core/`: `package.json`, `vitest.config.ts`
-- `packages/db/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
-- `packages/media/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
-- `packages/sdk/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
-- `packages/stores/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
-- `packages/ui/`: `tsconfig.json`, `vitest.config.ts`
+- `infra/contracts/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
+- `shared/core/`: `package.json`, `vitest.config.ts`
+- `infra/db/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
+- `infra/media/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
+- `sdk/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
+- `infra/stores/`: `package.json`, `tsconfig.json`, `vitest.config.ts`
+- `shared/ui/`: `tsconfig.json`, `vitest.config.ts`

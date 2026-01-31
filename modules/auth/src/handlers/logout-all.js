@@ -1,0 +1,42 @@
+// modules/auth/src/handlers/logout-all.ts
+/**
+ * Logout All Devices Handler
+ *
+ * Revokes all refresh tokens for a user, logging them out of all devices.
+ *
+ * @module handlers/logout-all
+ */
+import { mapErrorToHttpResponse } from '@abe-stack/core';
+import { createErrorMapperLogger } from '../types';
+import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
+/**
+ * Handle logout from all devices.
+ * Revokes all user tokens and clears the current cookie.
+ *
+ * @param ctx - Application context
+ * @param request - Request with cookies and auth info
+ * @param reply - Reply with cookie support
+ * @returns Success response or error
+ * @complexity O(1)
+ */
+export async function handleLogoutAll(ctx, request, reply) {
+    try {
+        const userId = request.user?.userId;
+        if (userId === undefined || userId === '') {
+            return {
+                status: 401,
+                body: { message: 'Unauthorized' },
+            };
+        }
+        await revokeAllUserTokens(ctx.db, userId);
+        clearRefreshTokenCookie(reply);
+        return {
+            status: 200,
+            body: { message: 'Logged out from all devices' },
+        };
+    }
+    catch (error) {
+        return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
+    }
+}
+//# sourceMappingURL=logout-all.js.map

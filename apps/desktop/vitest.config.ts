@@ -11,44 +11,44 @@ export default mergeConfig(baseConfig, {
       // Handle subpath imports first
       {
         find: /^@abe-stack\/contracts\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/contracts/src/$1'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/$1'),
       },
       {
         find: /^@abe-stack\/core\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/core/src/$1'),
+        replacement: path.resolve(__dirname, '../../shared/core/src/$1'),
       },
       {
         find: /^@abe-stack\/ui\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/ui/src/$1'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/$1'),
       },
       {
         find: /^@abe-stack\/sdk\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/sdk/src/$1'),
+        replacement: path.resolve(__dirname, '../../sdk/src/$1'),
       },
       {
         find: /^@abe-stack\/stores\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../packages/stores/src/$1'),
+        replacement: path.resolve(__dirname, '../../infra/stores/src/$1'),
       },
       // Handle main package imports
       {
         find: '@abe-stack/contracts',
-        replacement: path.resolve(__dirname, '../../packages/contracts/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../infra/contracts/src/index.ts'),
       },
       {
         find: '@abe-stack/core',
-        replacement: path.resolve(__dirname, '../../packages/core/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../shared/core/src/index.ts'),
       },
       {
         find: '@abe-stack/ui',
-        replacement: path.resolve(__dirname, '../../packages/ui/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../shared/ui/src/index.ts'),
       },
       {
         find: '@abe-stack/sdk',
-        replacement: path.resolve(__dirname, '../../packages/sdk/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../sdk/src/index.ts'),
       },
       {
         find: '@abe-stack/stores',
-        replacement: path.resolve(__dirname, '../../packages/stores/src/index.ts'),
+        replacement: path.resolve(__dirname, '../../infra/stores/src/index.ts'),
       },
     ],
   },

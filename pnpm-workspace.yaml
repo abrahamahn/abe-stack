@@ -1,5 +1,11 @@
 packages:
   # Applications
   - 'apps/*'
+  # Infrastructure packages
+  - 'infra/*'
+  # Business modules
+  - 'modules/*'
   # Shared packages
-  - 'packages/*'
+  - 'shared/*'
+  # SDK
+  - 'sdk'

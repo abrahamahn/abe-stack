@@ -29,7 +29,6 @@ type DocKey =
   | 'ui'
   | 'sdk'
   // Dev docs
-  | 'apiTestPlan'
   | 'architecture'
   | 'configSetup'
   | 'devEnvironment'
@@ -71,7 +70,6 @@ const docsMeta: Record<DocKey, DocMeta> = {
   configSetup: { label: 'Config Setup', category: 'dev' },
   testing: { label: 'Testing', category: 'dev' },
   security: { label: 'Security', category: 'dev' },
-  apiTestPlan: { label: 'API Test Plan', category: 'dev' },
   syncScripts: { label: 'Sync Scripts', category: 'dev' },
   performance: { label: 'Performance', category: 'dev' },
   legacy: { label: 'Legacy', category: 'dev' },
@@ -89,23 +87,22 @@ async function loadDocContent(key: DocKey): Promise<string> {
     readme: () => import('../../../../README.md?raw'),
     web: () => import('../../../../apps/web/README.md?raw'),
     desktop: () => import('../../../../apps/desktop/README.md?raw'),
-    core: () => import('../../../../packages/core/README.md?raw'),
-    ui: () => import('../../../../packages/ui/docs/README.md?raw'),
-    sdk: () => import('../../../../packages/sdk/README.md?raw'),
-    architecture: () => import('../../../../docs/specs/architecture.md?raw'),
-    principles: () => import('../../../../docs/specs/principles.md?raw'),
-    devEnvironment: () => import('../../../../docs/deploy/dev/workflow.md?raw'),
-    configSetup: () => import('../../../../docs/deploy/dev/configuration.md?raw'),
-    testing: () => import('../../../../docs/deploy/dev/testing.md?raw'),
-    security: () => import('../../../../docs/deploy/dev/security.md?raw'),
-    apiTestPlan: () => import('../../../../docs/todo/api-test-plan.md?raw'),
-    syncScripts: () => import('../../../../docs/deploy/dev/sync-scripts.md?raw'),
-    performance: () => import('../../../../docs/deploy/dev/performance.md?raw'),
-    legacy: () => import('../../../../docs/reference/legacy.md?raw'),
-    logW01: () => import('../../../../docs/log/2026-W01.md?raw'),
-    logW02: () => import('../../../../docs/log/2026-W02.md?raw'),
-    logW03: () => import('../../../../docs/log/2026-W03.md?raw'),
-    logW04: () => import('../../../../docs/log/2026-W04.md?raw'),
+    core: () => import('../../../../shared/core/README.md?raw'),
+    ui: () => import('../../../../shared/ui/docs/README.md?raw'),
+    sdk: () => import('../../../../sdk/README.md?raw'),
+    architecture: () => import('../../../../apps/docs/specs/architecture.md?raw'),
+    principles: () => import('../../../../apps/docs/specs/principles.md?raw'),
+    devEnvironment: () => import('../../../../apps/docs/deploy/dev/workflow.md?raw'),
+    configSetup: () => import('../../../../apps/docs/deploy/dev/configuration.md?raw'),
+    testing: () => import('../../../../apps/docs/deploy/dev/testing.md?raw'),
+    security: () => import('../../../../apps/docs/deploy/dev/security.md?raw'),
+    syncScripts: () => import('../../../../apps/docs/deploy/dev/sync-scripts.md?raw'),
+    performance: () => import('../../../../apps/docs/deploy/dev/performance.md?raw'),
+    legacy: () => import('../../../../apps/docs/reference/legacy.md?raw'),
+    logW01: () => import('../../../../apps/docs/log/2026-W01.md?raw'),
+    logW02: () => import('../../../../apps/docs/log/2026-W02.md?raw'),
+    logW03: () => import('../../../../apps/docs/log/2026-W03.md?raw'),
+    logW04: () => import('../../../../apps/docs/log/2026-W04.md?raw'),
   };
 
   const module = await loaders[key]();

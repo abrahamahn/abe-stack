@@ -174,31 +174,42 @@ pnpm dev
 
 ```
 abe-stack/
-├── apps/                 # Applications (Web, Server, Desktop)
+├── apps/                 # Applications (Web, Server, Desktop, Docs)
 │   ├── web/              # Vite + React web app
 │   ├── desktop/          # Electron app (shares code with web)
-│   └── server/           # Fastify API (enterprise security, audit logging)
-├── packages/             # Shared Logic & Contracts
-│   ├── core/             # Contracts, validation, stores, errors, media
-│   ├── ui/               # 16 components, 25 elements, 13 hooks, 14 layouts
-│   ├── sdk/              # Type-safe API client + React Query + offline support
-│   └── tests/            # Shared test utilities and mocks
-├── infra/                # Deployment & Orchestration
-│   ├── docker/           # Dockerfiles & Compose
-│   ├── caddy/            # Caddy reverse proxy configs
-│   └── nginx/            # Nginx configs
-├── tooling/              # Meta Development Tools
-│   ├── generators/       # Code scaffolding utilities
-│   ├── lint/             # Linting & formatting configs
-│   └── schema/           # Build-time schemas
+│   ├── server/           # Fastify API (enterprise security, audit logging)
+│   └── docs/             # Documentation (specs, guides, logs)
+├── infra/                # Infrastructure Packages
+│   ├── cache/            # Caching providers (LRU, memoize)
+│   ├── contracts/        # API contracts (ts-rest + Zod)
+│   ├── db/               # Database (Drizzle ORM + PostgreSQL)
+│   ├── email/            # Email service
+│   ├── http/             # HTTP utilities
+│   ├── jobs/             # Background jobs
+│   ├── media/            # Media processing
+│   ├── notifications/    # Notification system
+│   ├── realtime/         # WebSocket / real-time
+│   ├── security/         # Security utilities
+│   ├── storage/          # File storage
+│   ├── stores/           # Framework-agnostic stores
+│   └── users/            # User management
+├── modules/              # Business Modules
+│   ├── admin/            # Admin module
+│   ├── auth/             # Authentication module
+│   └── billing/          # Billing module
+├── shared/               # Shared Libraries
+│   ├── core/             # Contracts, validation, stores, errors
+│   └── ui/               # 16 components, 25 elements, 13 hooks, 14 layouts
+├── sdk/                  # Type-safe API client + React Query + offline support
+├── tools/                # Meta Development Tools
+│   ├── scripts/          # Dev, audit, export, git hooks, path utils, test runner
+│   └── sync/             # Sync scripts (file headers, CSS theme, TS references)
 ├── .config/              # Tooling Configurations (hidden)
 │   ├── tsconfig*.json    # TypeScript configurations
 │   ├── vite.config.ts    # Vite build config
 │   ├── vitest.config.ts  # Testing framework config
 │   └── ...               # Other tool configs
-├── .env*                 # Environment configuration files
-├── tools/                # Dev scripts (sync watchers, audit tools)
-└── docs/                 # Documentation
+└── .env*                 # Environment configuration files
 ```
 
 ---
@@ -208,7 +219,10 @@ abe-stack/
 ```
 apps/*           → Thin renderers (just UI)
                  ↓
-packages/*       → Where the real logic lives (shared, framework-agnostic)
+infra/*          → Infrastructure packages (cache, db, http, storage, etc.)
+modules/*        → Business modules (admin, auth, billing)
+shared/*         → Shared libraries (core, ui)
+sdk/             → Type-safe API client
 ```
 
 **Dependency rule:** Apps import packages. Packages never import apps. Change your mind about React later? Only touch `apps/`. Everything else stays.
@@ -321,7 +335,7 @@ pnpm audit:all       # Run all audit tools
 
 ## Roadmap
 
-See [`docs/todo/ROADMAP.md`](docs/todo/ROADMAP.md) for planned features:
+See [`apps/docs/todo/ROADMAP.md`](apps/docs/todo/ROADMAP.md) for planned features:
 
 - **MFA** — TOTP support with authenticator apps
 - **Data handling templates** — GDPR/HIPAA patterns
