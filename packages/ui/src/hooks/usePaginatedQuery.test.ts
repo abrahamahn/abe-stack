@@ -1,8 +1,10 @@
-// packages/ui/src/hooks/usePaginatedQuery.test.tsx
+// packages/ui/src/hooks/usePaginatedQuery.test.ts
 /** @vitest-environment jsdom */
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
+import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 
 import { useOffsetPaginatedQuery, usePaginatedQuery } from './usePaginatedQuery';
 
@@ -13,7 +15,6 @@ import type {
   UsePaginatedQueryResult,
 } from './usePaginatedQuery';
 import type { ReactNode } from 'react';
-
 const createWrapper = () => {
   const queryCache = new QueryCache({
     defaultStaleTime: 0,
@@ -21,24 +22,23 @@ const createWrapper = () => {
   });
   // eslint-disable-next-line @typescript-eslint/naming-convention
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryCacheProvider cache={queryCache}>{children}</QueryCacheProvider>;
+    return React.createElement(QueryCacheProvider, { cache: queryCache }, children);
   };
 };
-
 describe('usePaginatedQuery', () => {
   describe('type definitions', () => {
     it('should export usePaginatedQuery hook', () => {
       expect(usePaginatedQuery).toBeDefined();
       expect(typeof usePaginatedQuery).toBe('function');
     });
-
     it('should export useOffsetPaginatedQuery hook', () => {
       expect(useOffsetPaginatedQuery).toBeDefined();
       expect(typeof useOffsetPaginatedQuery).toBe('function');
     });
-
     it('should have correct type definitions for UsePaginatedQueryOptions', () => {
-      const options: UsePaginatedQueryOptions<{ id: string }> = {
+      const options: UsePaginatedQueryOptions<{
+        id: string;
+      }> = {
         queryKey: ['test'],
         queryFn: () =>
           Promise.resolve({
@@ -55,13 +55,13 @@ describe('usePaginatedQuery', () => {
         refetchInterval: 10000,
         keepPreviousData: true,
       };
-
       expect(options.queryKey).toEqual(['test']);
       expect(options.enabled).toBe(true);
     });
-
     it('should have correct type definitions for UsePaginatedQueryResult', () => {
-      const result: UsePaginatedQueryResult<{ id: string }> = {
+      const result: UsePaginatedQueryResult<{
+        id: string;
+      }> = {
         data: [{ id: '1' }],
         isLoading: false,
         isFetchingNextPage: false,
@@ -76,15 +76,15 @@ describe('usePaginatedQuery', () => {
         itemCount: 1,
         isEnabled: true,
       };
-
       expect(result.data).toHaveLength(1);
       expect(result.isLoading).toBe(false);
       expect(result.hasNextPage).toBe(true);
       expect(result.isEnabled).toBe(true);
     });
-
     it('should have correct type definitions for UseOffsetPaginatedQueryOptions', () => {
-      const options: UseOffsetPaginatedQueryOptions<{ id: string }> = {
+      const options: UseOffsetPaginatedQueryOptions<{
+        id: string;
+      }> = {
         queryKey: ['test'],
         queryFn: () =>
           Promise.resolve({
@@ -98,12 +98,12 @@ describe('usePaginatedQuery', () => {
           }),
         enabled: true,
       };
-
       expect(options.queryKey).toEqual(['test']);
     });
-
     it('should have correct type definitions for UseOffsetPaginatedQueryResult', () => {
-      const result: UseOffsetPaginatedQueryResult<{ id: string }> = {
+      const result: UseOffsetPaginatedQueryResult<{
+        id: string;
+      }> = {
         data: [{ id: '1' }],
         isLoading: false,
         isError: false,
@@ -117,13 +117,11 @@ describe('usePaginatedQuery', () => {
         refetch: () => {},
         isEnabled: true,
       };
-
       expect(result.data).toHaveLength(1);
       expect(result.currentPage).toBe(1);
       expect(result.totalPages).toBe(10);
     });
   });
-
   describe('usePaginatedQuery hook', () => {
     it('should fetch initial data', async () => {
       const queryFn = vi.fn().mockResolvedValue({
@@ -132,7 +130,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         limit: 10,
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -141,19 +138,15 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       expect(result.current.isLoading).toBe(true);
       expect(result.current.isEnabled).toBe(true);
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(result.current.data).toHaveLength(2);
       expect(result.current.hasNextPage).toBe(false);
       expect(result.current.itemCount).toBe(2);
     });
-
     it('should not fetch when disabled', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [],
@@ -161,7 +154,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         limit: 10,
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -171,21 +163,17 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(queryFn).not.toHaveBeenCalled();
       expect(result.current.data).toHaveLength(0);
       expect(result.current.isEnabled).toBe(false);
     });
-
     it('should handle errors', async () => {
       const error = new Error('Test error');
       const queryFn = vi.fn().mockRejectedValue(error);
       const onError = vi.fn();
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -196,15 +184,12 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
       });
-
       expect(result.current.error).toBe(error);
       expect(onError).toHaveBeenCalledWith(error);
     });
-
     it('should call onDataReceived callback', async () => {
       const onDataReceived = vi.fn();
       const queryFn = vi.fn().mockResolvedValue({
@@ -213,7 +198,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         limit: 10,
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -223,14 +207,11 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(onDataReceived).toHaveBeenCalled();
     });
-
     it('should provide fetchNextPage function', async () => {
       let callCount = 0;
       const queryFn = vi.fn().mockImplementation(() => {
@@ -242,7 +223,6 @@ describe('usePaginatedQuery', () => {
           limit: 10,
         });
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -251,15 +231,12 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(result.current.hasNextPage).toBe(true);
       expect(typeof result.current.fetchNextPage).toBe('function');
     });
-
     it('should provide refetch function', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [{ id: '1' }],
@@ -267,7 +244,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         limit: 10,
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -276,20 +252,15 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(typeof result.current.refetch).toBe('function');
-
       act(() => {
         result.current.refetch();
       });
-
       expect(queryFn.mock.calls.length).toBeGreaterThanOrEqual(1);
     });
-
     it('should provide reset function', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [{ id: '1' }],
@@ -297,7 +268,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         limit: 10,
       });
-
       const { result } = renderHook(
         () =>
           usePaginatedQuery({
@@ -306,15 +276,12 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(typeof result.current.reset).toBe('function');
     });
   });
-
   describe('useOffsetPaginatedQuery hook', () => {
     it('should fetch initial data', async () => {
       const queryFn = vi.fn().mockResolvedValue({
@@ -326,7 +293,6 @@ describe('usePaginatedQuery', () => {
         hasNext: true,
         hasPrev: false,
       });
-
       const { result } = renderHook(
         () =>
           useOffsetPaginatedQuery({
@@ -335,13 +301,10 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       expect(result.current.isLoading).toBe(true);
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(result.current.data).toHaveLength(1);
       expect(result.current.currentPage).toBe(1);
       expect(result.current.totalPages).toBe(10);
@@ -349,7 +312,6 @@ describe('usePaginatedQuery', () => {
       expect(result.current.hasNextPage).toBe(true);
       expect(result.current.hasPrevPage).toBe(false);
     });
-
     it('should not fetch when disabled', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [],
@@ -360,7 +322,6 @@ describe('usePaginatedQuery', () => {
         hasNext: false,
         hasPrev: false,
       });
-
       const { result } = renderHook(
         () =>
           useOffsetPaginatedQuery({
@@ -370,20 +331,16 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(queryFn).not.toHaveBeenCalled();
       expect(result.current.isEnabled).toBe(false);
     });
-
     it('should handle errors', async () => {
       const error = new Error('Offset query error');
       const queryFn = vi.fn().mockRejectedValue(error);
       const onError = vi.fn();
-
       const { result } = renderHook(
         () =>
           useOffsetPaginatedQuery({
@@ -394,15 +351,12 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isError).toBe(true);
       });
-
       expect(result.current.error).toBe(error);
       expect(onError).toHaveBeenCalledWith(error);
     });
-
     it('should provide fetchPage function', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [{ id: '1' }],
@@ -413,7 +367,6 @@ describe('usePaginatedQuery', () => {
         hasNext: true,
         hasPrev: false,
       });
-
       const { result } = renderHook(
         () =>
           useOffsetPaginatedQuery({
@@ -422,14 +375,11 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(typeof result.current.fetchPage).toBe('function');
     });
-
     it('should provide refetch function', async () => {
       const queryFn = vi.fn().mockResolvedValue({
         data: [{ id: '1' }],
@@ -440,7 +390,6 @@ describe('usePaginatedQuery', () => {
         hasNext: true,
         hasPrev: false,
       });
-
       const { result } = renderHook(
         () =>
           useOffsetPaginatedQuery({
@@ -449,11 +398,9 @@ describe('usePaginatedQuery', () => {
           }),
         { wrapper: createWrapper() },
       );
-
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
-
       expect(typeof result.current.refetch).toBe('function');
     });
   });
