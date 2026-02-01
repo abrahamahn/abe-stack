@@ -6,6 +6,8 @@
       "@/*": ["./src/*"],
       "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
       "@abe-stack/contracts/*": ["../../infra/contracts/src/*"],
+      "@abe-stack/core": ["../../core/src/index.ts"],
+      "@abe-stack/core/*": ["../../core/src/*"],
       "@abe-stack/client": ["../../client/src/index.ts"],
       "@abe-stack/client/*": ["../../client/src/*"],
       "@abe-stack/stores": ["../../client/stores/src/index.ts"],

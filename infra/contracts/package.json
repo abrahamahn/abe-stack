@@ -75,7 +75,7 @@
     }
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "type-check": "tsc --noEmit",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-contracts --report-unused-disable-directives"
   },

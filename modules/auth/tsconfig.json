@@ -17,7 +17,9 @@
       "@abe-stack/http": ["../../infra/http/src/index.ts"],
       "@abe-stack/http/*": ["../../infra/http/src/*"],
       "@abe-stack/security": ["../../infra/security/src/index.ts"],
-      "@abe-stack/security/*": ["../../infra/security/src/*"]
+      "@abe-stack/security/*": ["../../infra/security/src/*"],
+      "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
+      "@abe-stack/contracts/*": ["../../infra/contracts/src/*"]
     }
   },
   "include": ["src/**/*"],
@@ -26,6 +28,7 @@
     { "path": "../../core" },
     { "path": "../../infra/db" },
     { "path": "../../infra/http" },
-    { "path": "../../infra/security" }
+    { "path": "../../infra/security" },
+    { "path": "../../infra/contracts" }
   ]
 }

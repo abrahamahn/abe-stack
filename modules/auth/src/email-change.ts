@@ -1,4 +1,5 @@
 // modules/auth/src/email-change.ts
+
 /**
  * Email Change Service
  *
@@ -88,12 +89,12 @@ export async function initiateEmailChange(
   // 1. Get user and verify password
   const user = await repos.users.findById(userId);
   if (user === null) {
-    throw new InvalidCredentialsError('User not found');
+    throw new InvalidCredentialsError();
   }
 
   const passwordValid = await verifyPasswordSafe(password, user.passwordHash);
   if (!passwordValid) {
-    throw new InvalidCredentialsError('Invalid password');
+    throw new InvalidCredentialsError();
   }
 
   // 2. Check if new email is already taken
@@ -128,11 +129,10 @@ export async function initiateEmailChange(
   const verifyUrl = `${baseUrl ?? config.jwt.issuer}/api/auth/change-email/confirm?token=${plain}`;
 
   try {
-    const html = emailTemplates.emailVerification({
+    const html = emailTemplates.emailVerification(
       verifyUrl,
-      email: newEmail,
-      expiresInHours: EMAIL_CHANGE_TOKEN_EXPIRY_HOURS,
-    });
+      EMAIL_CHANGE_TOKEN_EXPIRY_HOURS * 60,
+    );
 
     await emailService.send({
       to: newEmail,
@@ -182,7 +182,7 @@ export async function confirmEmailChange(
     [tokenHash],
   );
 
-  const tokenRecord = result.rows[0];
+  const tokenRecord = result[0];
 
   if (tokenRecord === undefined) {
     throw new InvalidTokenError('Invalid or expired token');

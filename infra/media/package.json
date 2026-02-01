@@ -17,8 +17,8 @@
     "sharp": "^0.33.2"
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-media --report-unused-disable-directives"

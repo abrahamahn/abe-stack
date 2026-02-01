@@ -28,14 +28,17 @@ export function useCopyToClipboard(): CopyToClipboardResult {
   }, []);
 
   const copy = async (text: string): Promise<void> => {
-    if (typeof navigator === 'undefined' || !('clipboard' in navigator)) {
+    const runtimeNavigator = (globalThis as { navigator?: Navigator }).navigator;
+    const clipboard = runtimeNavigator?.clipboard;
+
+    if (clipboard?.writeText == null) {
       const clipboardError = new Error('Clipboard API not available');
       setError(clipboardError);
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(text);
+      await clipboard.writeText(text);
       setCopied(true);
       setError(null);
 

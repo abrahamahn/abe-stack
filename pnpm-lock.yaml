@@ -217,21 +217,24 @@ importers:
       '@abe-stack/client':
         specifier: workspace:*
         version: link:../../client
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../../core
       '@abe-stack/stores':
         specifier: workspace:*
         version: link:../../client/stores
-      '@abe-stack/ui':
-        specifier: workspace:*
-        version: link:../../client/ui
       react:
         specifier: ^19.2.3
         version: 19.2.4
       react-dom:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       vite-tsconfig-paths:
         specifier: ^6.0.5
@@ -239,6 +242,9 @@ importers:
 
   client:
     dependencies:
+      '@abe-stack/contracts':
+        specifier: workspace:*
+        version: link:../infra/contracts
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../core
@@ -520,6 +526,9 @@ importers:
       fastify:
         specifier: ^5.2.0
         version: 5.7.1
+      postgres:
+        specifier: ^3.4.8
+        version: 3.4.8
       typescript:
         specifier: ^5.7.2
         version: 5.9.3

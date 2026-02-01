@@ -17,7 +17,7 @@
     }
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "test:watch": "vitest",

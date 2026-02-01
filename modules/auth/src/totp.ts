@@ -1,4 +1,5 @@
 // modules/auth/src/totp.ts
+
 /**
  * TOTP (2FA) Service
  *
@@ -11,7 +12,7 @@
 import { randomBytes } from 'node:crypto';
 
 import { type DbClient } from '@abe-stack/db';
-import * as OTPAuth from 'otpauth';
+import * as otpAuth from 'otpauth';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
 
@@ -80,9 +81,9 @@ export async function setupTotp(
   config: AuthConfig,
 ): Promise<TotpSetupResult> {
   // Generate a new TOTP secret
-  const secret = new OTPAuth.Secret({ size: 20 });
+  const secret = new otpAuth.Secret({ size: 20 });
 
-  const totp = new OTPAuth.TOTP({
+  const totp = new otpAuth.TOTP({
     issuer: config.totp.issuer,
     label: userEmail,
     algorithm: TOTP_ALGORITHM,
@@ -148,9 +149,9 @@ export async function enableTotp(
     `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
     [userId],
   );
-  const user = result.rows[0];
+  const user = result[0];
 
-  if (user === undefined || user.totp_secret === null) {
+  if (user?.totp_secret == null) {
     return { success: false, message: 'TOTP not set up. Call setup first.' };
   }
 
@@ -192,7 +193,7 @@ export async function disableTotp(
     `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
     [userId],
   );
-  const user = result.rows[0];
+  const user = result[0];
 
   if (user === undefined || !user.totp_enabled || user.totp_secret === null) {
     return { success: false, message: '2FA is not enabled.' };
@@ -229,7 +230,7 @@ export async function getTotpStatus(
     `SELECT totp_enabled FROM users WHERE id = $1`,
     [userId],
   );
-  const user = result.rows[0];
+  const user = result[0];
   return { enabled: user?.totp_enabled === true };
 }
 
@@ -254,7 +255,7 @@ export async function verifyTotpForLogin(
     `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
     [userId],
   );
-  const user = result.rows[0];
+  const user = result[0];
 
   if (user === undefined || !user.totp_enabled || user.totp_secret === null) {
     return false;
@@ -277,11 +278,11 @@ export async function verifyTotpForLogin(
  * Verify a TOTP code against a secret.
  */
 function verifyTotpCode(secretBase32: string, code: string, window: number): boolean {
-  const totp = new OTPAuth.TOTP({
+  const totp = new otpAuth.TOTP({
     algorithm: TOTP_ALGORITHM,
     digits: TOTP_DIGITS,
     period: TOTP_PERIOD,
-    secret: OTPAuth.Secret.fromBase32(secretBase32),
+    secret: otpAuth.Secret.fromBase32(secretBase32),
   });
 
   const delta = totp.validate({ token: code, window });
@@ -302,7 +303,7 @@ async function verifyBackupCode(
     [userId],
   );
 
-  for (const row of result.rows) {
+  for (const row of result) {
     const matches = await verifyPasswordSafe(code, row.code_hash);
     if (matches) {
       // Mark as used

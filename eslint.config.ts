@@ -82,7 +82,7 @@ export default [
     },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx,cts,mts}'],
+    files: ['apps/web/**/*.{ts,tsx,cts,mts}', 'modules/auth/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
         project: ['./apps/web/tsconfig.json'],
@@ -522,4 +522,5 @@ export default [
       '@typescript-eslint/no-misused-promises': 'error',
     },
   },
+
 ] satisfies Linter.Config[];

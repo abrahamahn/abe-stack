@@ -78,9 +78,7 @@ describe('useCopyToClipboard', () => {
         vi.advanceTimersByTime(2000);
       });
 
-      await waitFor(() => {
-        expect(result.current.copied).toBe(false);
-      });
+      expect(result.current.copied).toBe(false);
     });
 
     it('should handle empty string', async () => {
@@ -187,9 +185,7 @@ describe('useCopyToClipboard', () => {
         vi.advanceTimersByTime(500);
       });
 
-      await waitFor(() => {
-        expect(result.current.copied).toBe(false);
-      });
+      expect(result.current.copied).toBe(false);
     });
 
     it('should update copied state for each copy', async () => {
@@ -205,9 +201,7 @@ describe('useCopyToClipboard', () => {
       act(() => {
         vi.advanceTimersByTime(2000);
       });
-      await waitFor(() => {
-        expect(result.current.copied).toBe(false);
-      });
+      expect(result.current.copied).toBe(false);
 
       await act(async () => {
         await result.current.copy('text2');
@@ -413,9 +407,7 @@ describe('useCopyToClipboard', () => {
         vi.advanceTimersByTime(2000);
       });
 
-      await waitFor(() => {
-        expect(result.current.copied).toBe(false);
-      });
+      expect(result.current.copied).toBe(false);
     });
 
     it('should remain false after reset', async () => {
@@ -431,9 +423,7 @@ describe('useCopyToClipboard', () => {
         vi.advanceTimersByTime(3000);
       });
 
-      await waitFor(() => {
-        expect(result.current.copied).toBe(false);
-      });
+      expect(result.current.copied).toBe(false);
 
       act(() => {
         vi.advanceTimersByTime(1000);

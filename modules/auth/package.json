@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-auth --report-unused-disable-directives",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "fastify": "^5.2.0",
+    "postgres": "^3.4.8",
     "typescript": "^5.7.2",
     "vitest": "^4.0.0"
   }

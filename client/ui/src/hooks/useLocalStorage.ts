@@ -13,7 +13,7 @@ export function useLocalStorage<T>(
   key: string,
   initialValue: T,
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const canUseStorage = typeof window !== 'undefined' && window.localStorage != null;
+  const canUseStorage = typeof window !== 'undefined';
   const initialValueRef = useRef(initialValue);
   initialValueRef.current = initialValue;
 
