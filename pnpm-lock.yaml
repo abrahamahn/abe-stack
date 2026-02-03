@@ -172,8 +172,8 @@ importers:
         specifier: ^0.44.0
         version: 0.44.0
       fastify:
-        specifier: 5.7.1
-        version: 5.7.1
+        specifier: 5.7.3
+        version: 5.7.3
       inversify:
         specifier: ^7.11.0
         version: 7.11.0(reflect-metadata@0.2.2)
@@ -366,8 +366,8 @@ importers:
         version: link:../http
     devDependencies:
       fastify:
-        specifier: 5.7.1
-        version: 5.7.1
+        specifier: 5.7.3
+        version: 5.7.3
 
   infra/realtime:
     dependencies:
@@ -388,8 +388,8 @@ importers:
         specifier: ^8.5.13
         version: 8.18.1
       fastify:
-        specifier: ^5.2.0
-        version: 5.7.1
+        specifier: ^5.7.3
+        version: 5.7.3
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -425,8 +425,8 @@ importers:
         version: 3.980.0
     devDependencies:
       fastify:
-        specifier: 5.7.1
-        version: 5.7.1
+        specifier: 5.7.3
+        version: 5.7.3
 
   infra/users:
     dependencies:
@@ -450,8 +450,8 @@ importers:
         version: link:../storage
     devDependencies:
       fastify:
-        specifier: ^5.2.0
-        version: 5.7.1
+        specifier: ^5.7.3
+        version: 5.7.3
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -484,8 +484,8 @@ importers:
         version: link:../../infra/jobs
     devDependencies:
       fastify:
-        specifier: ^5.2.0
-        version: 5.7.1
+        specifier: ^5.7.3
+        version: 5.7.3
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -518,8 +518,8 @@ importers:
         version: 9.4.1
     devDependencies:
       fastify:
-        specifier: ^5.2.0
-        version: 5.7.1
+        specifier: ^5.7.3
+        version: 5.7.3
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -543,8 +543,8 @@ importers:
         version: 20.3.0(@types/node@25.1.0)
     devDependencies:
       fastify:
-        specifier: 5.7.1
-        version: 5.7.1
+        specifier: 5.7.3
+        version: 5.7.3
 
 packages:
 
@@ -751,6 +751,10 @@ packages:
 
   '@babel/code-frame@7.28.6':
     resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/code-frame@7.29.0':
+    resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/compat-data@7.28.6':
@@ -2766,6 +2770,9 @@ packages:
 
   fastify@5.7.1:
     resolution: {integrity: sha512-ZW7S4fxlZhE+tYWVokFzjh+i56R+buYKNGhrVl6DtN8sxkyMEzpJnzvO8A/ZZrsg5w6X37u6I4EOQikYS5DXpA==}
+
+  fastify@5.7.3:
+    resolution: {integrity: sha512-QHzWSmTNUg9Ba8tNXzb92FTH77K+c8yeQPH80EeSIc9wyZj85jbPisMP0rwmyKv8oJwUFPe1UpN8HkNIXwCnUQ==}
 
   fastq@1.20.1:
     resolution: {integrity: sha512-GGToxJ/w1x32s/D2EKND7kTil4n8OVk/9mycTc4VDza13lOvpUZTGX3mFSCtV9ksdGBVzvsyAVLM6mHFThxXxw==}
@@ -5120,6 +5127,12 @@ snapshots:
       js-tokens: 4.0.0
       picocolors: 1.1.1
 
+  '@babel/code-frame@7.29.0':
+    dependencies:
+      '@babel/helper-validator-identifier': 7.28.5
+      js-tokens: 4.0.0
+      picocolors: 1.1.1
+
   '@babel/compat-data@7.28.6': {}
 
   '@babel/core@7.28.6':
@@ -6149,7 +6162,7 @@ snapshots:
 
   '@testing-library/dom@10.4.1':
     dependencies:
-      '@babel/code-frame': 7.28.6
+      '@babel/code-frame': 7.29.0
       '@babel/runtime': 7.28.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
@@ -7473,6 +7486,24 @@ snapshots:
       strnum: 2.1.2
 
   fastify@5.7.1:
+    dependencies:
+      '@fastify/ajv-compiler': 4.0.5
+      '@fastify/error': 4.2.0
+      '@fastify/fast-json-stringify-compiler': 5.0.3
+      '@fastify/proxy-addr': 5.1.0
+      abstract-logging: 2.0.1
+      avvio: 9.1.0
+      fast-json-stringify: 6.2.0
+      find-my-way: 9.4.0
+      light-my-request: 6.6.0
+      pino: 10.3.0
+      process-warning: 5.0.0
+      rfdc: 1.4.1
+      secure-json-parse: 4.1.0
+      semver: 7.7.3
+      toad-cache: 3.7.0
+
+  fastify@5.7.3:
     dependencies:
       '@fastify/ajv-compiler': 4.0.5
       '@fastify/error': 4.2.0
