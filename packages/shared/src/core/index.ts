@@ -1,4 +1,4 @@
-// shared/src/core/index.ts
+// packages/shared/src/core/index.ts
 
 export {
   errorCodeSchema,
@@ -11,7 +11,7 @@ export {
   type StatusCode,
 } from './api';
 
-export { ERROR_CODES, HTTP_STATUS, type ErrorCode } from './constants';
+export { ERROR_CODES, HTTP_STATUS, type ErrorCode, type HttpStatusCode } from './constants';
 
 export {
   AppError,
@@ -22,26 +22,28 @@ export {
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
   ForbiddenError,
-  formatValidationErrors,
-  getErrorStatusCode,
-  getSafeErrorMessage,
+  InternalError,
   InternalServerError,
   InvalidCredentialsError,
   InvalidTokenError,
-  isAppError,
   NotFoundError,
   OAuthError,
   OAuthStateMismatchError,
   ResourceNotFoundError,
-  toAppError,
   TokenReuseError,
   TooManyRequestsError,
   TotpInvalidError,
   TotpRequiredError,
   UnauthorizedError,
+  UnprocessableError,
   UserNotFoundError,
   ValidationError,
   WeakPasswordError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  isAppError,
+  toAppError,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
 } from './errors';
@@ -112,4 +114,20 @@ export {
 
 export type { ModuleDeps, ModuleRegistrationOptions } from './module-registration';
 
-export * from './transactions';
+export {
+  createListInsertOperation,
+  createListRemoveOperation,
+  createSetOperation,
+  createTransaction,
+  invertOperation,
+  invertTransaction,
+  isListInsertOperation,
+  isListRemoveOperation,
+  isSetOperation,
+  mergeTransactions,
+  type ListInsertOperation,
+  type ListRemoveOperation,
+  type Operation,
+  type SetOperation,
+  type Transaction,
+} from './transactions';

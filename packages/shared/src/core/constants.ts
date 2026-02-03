@@ -1,4 +1,4 @@
-// shared/src/core/constants.ts
+// packages/shared/src/core/constants.ts
 /**
  * Global Constants
  *
@@ -28,6 +28,11 @@ export const HTTP_STATUS = {
   SERVICE_UNAVAILABLE: 503,
   GATEWAY_TIMEOUT: 504,
 } as const;
+
+/**
+ * Union type of all HTTP status code values
+ */
+export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
 
 /**
  * Application Limits
@@ -78,7 +83,6 @@ export const ERROR_CODES = {
 
   // Rate Limit
   RATE_LIMITED: 'RATE_LIMITED',
-
 } as const;
 
 /**

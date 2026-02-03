@@ -1,9 +1,10 @@
-// core/src/shared/pagination/helpers.ts
+// packages/shared/src/utils/pagination/helpers.ts
+import { PaginationError } from '../pagination';
+
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
-import { PaginationError } from './error';
 
 import type { CursorData } from './cursor';
-import type { CursorPaginationOptions, SortOrder } from '@abe-stack/contracts';
+import type { CursorPaginationOptions, SortOrder } from '../../contracts';
 
 /**
  * Builds SQL WHERE clause and ORDER BY for cursor-based pagination

@@ -1,4 +1,4 @@
-// shared/src/core/schemas.ts
+// packages/shared/src/core/schemas.ts
 /**
  * @file Common Schemas
  * @description Reusable Zod schemas and types for use across all domains.
@@ -7,10 +7,33 @@
 
 import { z } from 'zod';
 
-import { validatePassword } from '../utils/password';
+import { estimatePasswordStrength } from '../domain/auth/auth.password-strength';
 
 import { ERROR_CODES } from './constants';
 
+// ============================================================================
+// Internal Helpers
+// ============================================================================
+
+/**
+ * Synchronous password validation for Zod schema use.
+ * Checks minimum length, character diversity, and strength score.
+ *
+ * @param password - Password to validate
+ * @returns Validation result with errors array
+ * @complexity O(n) where n is password length
+ */
+function validatePasswordSync(password: string): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (password.length < 8) errors.push('Password must be at least 8 characters long');
+  if (!/[a-z]/.test(password)) errors.push('Password must contain at least one lowercase letter');
+  if (!/[A-Z]/.test(password)) errors.push('Password must contain at least one uppercase letter');
+
+  const strength = estimatePasswordStrength(password);
+  if (strength.score < 2) errors.push('Password is too weak');
+
+  return { isValid: errors.length === 0, errors };
+}
 
 // ============================================================================
 // Primitives & Formats
@@ -42,7 +65,7 @@ export const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
   .superRefine((val, ctx) => {
-    const { isValid, errors } = validatePassword(val);
+    const { isValid, errors } = validatePasswordSync(val);
     if (!isValid) {
       errors.forEach((message) => {
         ctx.addIssue({

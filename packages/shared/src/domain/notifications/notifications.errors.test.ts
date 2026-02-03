@@ -1,4 +1,4 @@
-// core/src/modules/notifications/errors.test.ts
+// packages/shared/src/domain/notifications/notifications.errors.test.ts
 /**
  * Notification Error Tests
  *
@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { HTTP_STATUS } from '../../shared/constants/http';
+import { HTTP_STATUS } from '../../core/constants';
 
 import {
   InvalidPreferencesError,
@@ -24,7 +24,7 @@ import {
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
   VapidNotConfiguredError,
-} from './errors';
+} from './notifications.errors';
 
 describe('Notification Errors', () => {
   describe('SubscriptionNotFoundError', () => {

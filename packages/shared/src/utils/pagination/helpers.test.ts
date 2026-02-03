@@ -1,8 +1,9 @@
-// core/src/shared/pagination/helpers.test.ts
+// packages/shared/src/utils/pagination/helpers.test.ts
 import { describe, expect, it } from 'vitest';
 
+import { PaginationError } from '../pagination';
+
 import { encodeCursor } from './cursor';
-import { PAGINATION_ERROR_TYPES, PaginationError } from './error';
 import {
   buildCursorPaginationQuery,
   calculateCursorPaginationMetadata,
@@ -44,7 +45,7 @@ describe('Cursor Pagination Query Building', () => {
       buildCursorPaginationQuery('invalid-cursor', 'createdAt', 'desc');
     } catch (error) {
       if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_CURSOR);
+        expect(error.type).toBe('INVALID_CURSOR');
       } else {
         throw error;
       }
@@ -67,7 +68,7 @@ describe('Cursor Pagination Query Building', () => {
       buildCursorPaginationQuery(cursor, 'createdAt', 'desc');
     } catch (error) {
       if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.CURSOR_SORT_MISMATCH);
+        expect(error.type).toBe('CURSOR_SORT_MISMATCH');
       } else {
         throw error;
       }

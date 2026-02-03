@@ -1,4 +1,4 @@
-// core/src/__tests__/integration/errors.integration.test.ts
+// packages/shared/src/__tests__/errors.integration.test.ts
 /**
  * Integration tests for error handling infrastructure
  *
@@ -7,28 +7,26 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { HTTP_STATUS } from '../core/constants';
 import {
   AppError,
   getErrorStatusCode,
   getSafeErrorMessage,
   isAppError,
   toAppError,
-} from '../infrastructure/errors/base';
-import {
   BadRequestError,
   ConflictError,
   ForbiddenError,
-  InternalError,
+  InternalServerError,
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,
-} from '../infrastructure/errors/http';
-import { isErrorResponse } from '../infrastructure/errors/response';
-import { ValidationError } from '../infrastructure/errors/validation';
-import { HTTP_STATUS } from '../shared/constants/http';
+  ValidationError,
+} from '../core/errors';
+import { isErrorResponse } from '../core/response';
 
-import type { ApiErrorResponse, ApiResponse } from '../infrastructure/errors/response';
+import type { ApiErrorResponse, ApiResponse } from '../core/response';
 
 describe('Error Infrastructure Integration', () => {
   describe('Error class hierarchy', () => {
@@ -41,7 +39,7 @@ describe('Error Infrastructure Integration', () => {
         new ConflictError(),
         new UnprocessableError(),
         new TooManyRequestsError(),
-        new InternalError(),
+        new InternalServerError(),
       ];
 
       errors.forEach((error) => {
@@ -59,7 +57,7 @@ describe('Error Infrastructure Integration', () => {
       expect(new ConflictError().statusCode).toBe(HTTP_STATUS.CONFLICT);
       expect(new UnprocessableError().statusCode).toBe(HTTP_STATUS.UNPROCESSABLE_ENTITY);
       expect(new TooManyRequestsError().statusCode).toBe(HTTP_STATUS.TOO_MANY_REQUESTS);
-      expect(new InternalError().statusCode).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      expect(new InternalServerError().statusCode).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR);
     });
   });
 
@@ -69,26 +67,30 @@ describe('Error Infrastructure Integration', () => {
       const json = error.toJSON();
 
       expect(json).toEqual({
-        error: 'AppError',
-        message: 'Test error',
-        code: 'TEST_ERROR',
-        details: { field: 'value' },
+        ok: false,
+        error: {
+          code: 'TEST_ERROR',
+          message: 'Test error',
+          details: { field: 'value' },
+        },
       });
     });
 
-    it('should include constructor name in serialization', () => {
+    it('should include error code in serialization', () => {
       const error = new NotFoundError('Resource not found', 'RESOURCE_NOT_FOUND');
       const json = error.toJSON();
 
-      expect(json.error).toBe('NotFoundError');
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('RESOURCE_NOT_FOUND');
     });
 
     it('should handle missing optional fields', () => {
       const error = new AppError('Simple error');
       const json = error.toJSON();
 
-      expect(json.code).toBeUndefined();
-      expect(json.details).toBeUndefined();
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('INTERNAL_ERROR');
+      expect(json.error.details).toBeUndefined();
     });
   });
 
@@ -126,7 +128,7 @@ describe('Error Infrastructure Integration', () => {
       it('should return status code from AppError', () => {
         expect(getErrorStatusCode(new BadRequestError())).toBe(400);
         expect(getErrorStatusCode(new NotFoundError())).toBe(404);
-        expect(getErrorStatusCode(new InternalError())).toBe(500);
+        expect(getErrorStatusCode(new InternalServerError())).toBe(500);
       });
 
       it('should return 500 for non-AppError', () => {
@@ -173,7 +175,7 @@ describe('Error Infrastructure Integration', () => {
       const error = new ValidationError('Validation failed', fieldErrors);
 
       expect(error.message).toBe('Validation failed');
-      expect(error.statusCode).toBe(HTTP_STATUS.BAD_REQUEST);
+      expect(error.statusCode).toBe(HTTP_STATUS.UNPROCESSABLE_ENTITY);
       expect(error.code).toBe('VALIDATION_ERROR');
       expect(error.fields).toEqual(fieldErrors);
     });
@@ -185,7 +187,8 @@ describe('Error Infrastructure Integration', () => {
 
       const json = error.toJSON();
 
-      expect(json.details).toEqual({
+      expect(json.ok).toBe(false);
+      expect(json.error.details).toEqual({
         fields: {
           name: ['Name is required'],
         },
@@ -210,9 +213,9 @@ describe('Error Infrastructure Integration', () => {
       const error = new BadRequestError('Invalid input', 'INVALID_INPUT');
       const json = error.toJSON();
 
-      expect(json.error).toBe('BadRequestError');
-      expect(json.message).toBe('Invalid input');
-      expect(json.code).toBe('INVALID_INPUT');
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('INVALID_INPUT');
+      expect(json.error.message).toBe('Invalid input');
     });
 
     it('should include details in JSON', () => {
@@ -222,7 +225,8 @@ describe('Error Infrastructure Integration', () => {
       });
       const json = error.toJSON();
 
-      expect(json.details).toEqual({
+      expect(json.ok).toBe(false);
+      expect(json.error.details).toEqual({
         field: 'amount',
         reason: 'Exceeds limit',
       });
@@ -265,19 +269,20 @@ describe('Error Infrastructure Integration', () => {
     });
   });
 
-  describe('TooManyRequestsError with retry-after', () => {
-    it('should include retryAfter property', () => {
-      const error = new TooManyRequestsError('Rate limited', 60);
+  describe('TooManyRequestsError', () => {
+    it('should have correct status code and default code', () => {
+      const error = new TooManyRequestsError('Rate limited');
 
-      expect(error.retryAfter).toBe(60);
       expect(error.statusCode).toBe(429);
       expect(error.code).toBe('RATE_LIMITED');
+      expect(error.message).toBe('Rate limited');
     });
 
-    it('should work without retryAfter', () => {
-      const error = new TooManyRequestsError();
+    it('should accept custom code', () => {
+      const error = new TooManyRequestsError('Too many attempts', 'ACCOUNT_LOCKED');
 
-      expect(error.retryAfter).toBeUndefined();
+      expect(error.statusCode).toBe(429);
+      expect(error.code).toBe('ACCOUNT_LOCKED');
     });
   });
 
@@ -293,12 +298,13 @@ describe('Error Infrastructure Integration', () => {
 
       // Get status code for HTTP response
       const statusCode = getErrorStatusCode(error);
-      expect(statusCode).toBe(400);
+      expect(statusCode).toBe(422);
 
       // Convert to JSON for response body
       const json = error.toJSON();
-      expect(json.message).toBe('Request validation failed');
-      expect(json.details).toEqual({ fields: validationErrors });
+      expect(json.ok).toBe(false);
+      expect(json.error.message).toBe('Request validation failed');
+      expect(json.error.details).toEqual({ fields: validationErrors });
     });
 
     it('should handle authentication error flow', () => {
@@ -311,7 +317,8 @@ describe('Error Infrastructure Integration', () => {
       expect(safeMessage).toBe('Invalid token');
 
       const json = error.toJSON();
-      expect(json.code).toBe('TOKEN_EXPIRED');
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('TOKEN_EXPIRED');
     });
 
     it('should handle resource not found flow', () => {
@@ -321,8 +328,9 @@ describe('Error Infrastructure Integration', () => {
       expect(statusCode).toBe(404);
 
       const json = error.toJSON();
-      expect(json.error).toBe('NotFoundError');
-      expect(json.code).toBe('USER_NOT_FOUND');
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('USER_NOT_FOUND');
+      expect(json.error.message).toBe('User not found');
     });
 
     it('should handle conflict error for duplicate resources', () => {
@@ -331,8 +339,9 @@ describe('Error Infrastructure Integration', () => {
       expect(error.statusCode).toBe(409);
 
       const json = error.toJSON();
-      expect(json.message).toBe('Email already exists');
-      expect(json.code).toBe('DUPLICATE_EMAIL');
+      expect(json.ok).toBe(false);
+      expect(json.error.message).toBe('Email already exists');
+      expect(json.error.code).toBe('DUPLICATE_EMAIL');
     });
 
     it('should handle business logic error', () => {
@@ -361,13 +370,14 @@ describe('Error Infrastructure Integration', () => {
     });
 
     it('should handle rate limiting scenario', () => {
-      const error = new TooManyRequestsError('Too many login attempts', 300);
+      const error = new TooManyRequestsError('Too many login attempts');
 
       expect(error.statusCode).toBe(429);
-      expect(error.retryAfter).toBe(300);
 
       const json = error.toJSON();
-      expect(json.error).toBe('TooManyRequestsError');
+      expect(json.ok).toBe(false);
+      expect(json.error.code).toBe('RATE_LIMITED');
+      expect(json.error.message).toBe('Too many login attempts');
     });
   });
 
@@ -390,7 +400,8 @@ describe('Error Infrastructure Integration', () => {
 
       // Convert to JSON
       const json = appError.toJSON();
-      expect(json.message).toBe('An unexpected error occurred');
+      expect(json.ok).toBe(false);
+      expect(json.error.message).toBe('An unexpected error occurred');
     });
 
     it('should preserve error details through conversion', () => {
