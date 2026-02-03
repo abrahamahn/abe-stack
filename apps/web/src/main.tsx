@@ -7,7 +7,7 @@
  * - Environment assembled inline and passed to App
  */
 
-import { QueryCache } from '@abe-stack/client';
+import { QueryCache } from '@abe-stack/engine';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

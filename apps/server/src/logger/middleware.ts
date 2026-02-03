@@ -3,19 +3,19 @@
  * Logging Middleware
  *
  * Fastify hooks for request logging with correlation IDs.
- * Pure correlation utilities imported from @abe-stack/core.
+ * Pure correlation utilities imported from @abe-stack/shared.
  */
 
 import {
-  createRequestContext,
-  generateCorrelationId,
-  getOrCreateCorrelationId,
-} from '@abe-stack/core/infrastructure/logger';
+    createRequestContext,
+    generateCorrelationId,
+    getOrCreateCorrelationId,
+} from '../../../../shared/src/infrastructure/http/logger';
 
 import { createRequestLogger } from './logger';
 
-import type { Logger, RequestContext } from '@abe-stack/core/infrastructure/logger';
 import type { FastifyInstance } from 'fastify';
+import type { Logger, RequestContext } from '../../../../shared/src/infrastructure/http/logger';
 
 // Extend Fastify request with our custom properties
 declare module 'fastify' {

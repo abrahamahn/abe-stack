@@ -16,7 +16,7 @@
 import { createContext, useContext } from 'react';
 
 import type { ClientConfig } from '@/config';
-import type { QueryCache } from '@abe-stack/client';
+import type { QueryCache } from '@abe-stack/engine';
 import type { AuthService } from '@auth/services/AuthService';
 import type { ReactElement, ReactNode } from 'react';
 

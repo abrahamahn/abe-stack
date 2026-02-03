@@ -70,7 +70,7 @@ function groupByPackage(files: string[]): Map<string, string[]> {
     const parts = file.split('/');
     let groupKey: string;
 
-    if (parts[0] === 'apps' || parts[0] === 'packages') {
+    if (['apps', 'infra', 'modules', 'client', 'premium'].includes(parts[0])) {
       groupKey = `${parts[0]}/${parts[1]}`;
     } else {
       groupKey = 'Other';
@@ -101,11 +101,13 @@ function exportBarrelFiles(): void {
     'apps/server',
     'apps/web',
     'infra/contracts',
-    'core',
-    'infra/db',
-    'infra/media',
+    'kernel',
+    'infra/src',
+    'premium/media',
+    'premium/websocket',
+    'premium/client',
     'client',
-    'client/stores',
+    'client/react',
     'client/ui',
   ];
 

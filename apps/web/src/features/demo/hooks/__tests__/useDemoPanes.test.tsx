@@ -1,6 +1,4 @@
-// apps/web/src/features/demo/hooks/__tests__/useDemoPanes.test.tsx
-import { renderHook, act } from '@testing-library/react';
-import { useState } from 'react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useDemoPanes } from '../useDemoPanes';
@@ -19,7 +17,7 @@ const mockUseMediaQuery = vi.fn();
 
 // Mock @abe-stack/ui
 vi.mock('@abe-stack/ui', () => ({
-  useLocalStorage: vi.fn((key: string, defaultValue: unknown) => {
+  useLocalStorage: vi.fn((_key: string, defaultValue: unknown) => {
     // Use actual React.useState from the runtime
     const React = require('react');
     const [value, setValue] = React.useState(defaultValue);

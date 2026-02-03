@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer, shell } from 'electron';
 import { IPC_CHANNELS } from './types';
 
 import type { IPCChannel, IPCChannelMap, OpenDialogOptions, SaveDialogOptions } from './types';
-import type { NativeBridge } from '@abe-stack/core';
+import type { NativeBridge } from '@abe-stack/shared';
 
 /**
  * Type-safe IPC invoke function.

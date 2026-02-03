@@ -107,15 +107,15 @@ vi.mock('@abe-stack/ui', () => ({
   TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
 }));
 
-// Mock @abe-stack/core
-vi.mock('@abe-stack/core', () => ({
+// Mock @abe-stack/shared
+vi.mock('@abe-stack/shared', () => ({
   tokenStore: {
     get: () => 'mock-token',
   },
 }));
 
-// Mock @abe-stack/client
-vi.mock('@abe-stack/client', () => ({
+// Mock @abe-stack/engine
+vi.mock('@abe-stack/engine', () => ({
   useAdminPlans: () => ({
     plans: [],
     isLoading: false,

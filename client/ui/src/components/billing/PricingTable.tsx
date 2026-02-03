@@ -17,7 +17,7 @@ import { cn } from '../../utils/cn';
 
 import { PlanCard } from './PlanCard';
 
-import type { Plan, PlanFeature, PlanInterval } from '@abe-stack/core';
+import type { Plan, PlanFeature, PlanInterval } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

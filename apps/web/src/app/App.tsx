@@ -8,17 +8,19 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { createQueryPersister, QueryCacheProvider } from '@abe-stack/client';
-import { toastStore } from '@abe-stack/stores';
+import { createQueryPersister, QueryCacheProvider } from '@abe-stack/engine';
+import { toastStore } from '@abe-stack/react';
 import {
   BrowserRouter,
   ErrorBoundary,
   HistoryProvider,
   LiveRegion,
+  ProtectedRoute,
   Route,
   Routes,
   ScrollArea,
   SkipLink,
+  ThemeProvider,
   Toaster,
   useRouteFocusAnnounce,
 } from '@abe-stack/ui';
@@ -37,9 +39,9 @@ import {
   ConfirmEmailPage,
   ConnectedAccountsPage,
   LoginPage,
-  ProtectedRoute,
   RegisterPage,
   ResetPasswordPage,
+  useAuth,
 } from '@features/auth';
 import {
   BillingSettingsPage,
@@ -50,12 +52,9 @@ import {
 import { DashboardPage } from '@features/dashboard';
 import { SettingsPage } from '@features/settings';
 import { HomePage } from '@pages/HomePage';
-import { useEffect } from 'react';
+import { useEffect, type ReactElement } from 'react';
 
-import { ClientEnvironmentProvider } from './ClientEnvironment';
-
-import type { ClientEnvironment } from './ClientEnvironment';
-import type { ReactElement } from 'react';
+import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
 
 // ============================================================================
 // Persistence Configuration
@@ -63,10 +62,44 @@ import type { ReactElement } from 'react';
 
 const PERSIST_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
+type PersistedQuery = {
+  queryKey: readonly unknown[];
+  queryHash: string;
+  state: {
+    data: unknown;
+    dataUpdatedAt: number;
+    error: unknown;
+    errorUpdatedAt: number;
+    fetchFailureCount: number;
+    fetchFailureReason: unknown;
+    fetchMeta: unknown;
+    fetchStatus: string;
+    isInvalidated: boolean;
+    status: string;
+  };
+};
+
+type PersistedClientState = {
+  queries: PersistedQuery[];
+  mutations: unknown[];
+};
+
+type PersistedClient = {
+  timestamp: number;
+  buster: string;
+  clientState: PersistedClientState;
+};
+
+type QueryPersister = {
+  persistClient: (client: PersistedClient) => void;
+  restoreClient: () => Promise<PersistedClient | undefined>;
+  removeClient: () => Promise<void>;
+};
+
 const persister = createQueryPersister({
   maxAge: PERSIST_MAX_AGE,
   throttleTime: 1000, // 1 second
-});
+}) as QueryPersister;
 
 // ============================================================================
 // Types
@@ -92,6 +125,8 @@ const RouteFocusAnnouncer = (): null => {
 };
 
 const AppRoutes = (): ReactElement => {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -106,7 +141,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <DashboardPage />
           </ProtectedRoute>
         }
@@ -116,7 +151,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/settings"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <SettingsPage />
           </ProtectedRoute>
         }
@@ -124,7 +159,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/settings/accounts"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <ConnectedAccountsPage />
           </ProtectedRoute>
         }
@@ -135,7 +170,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/settings/billing"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <BillingSettingsPage />
           </ProtectedRoute>
         }
@@ -143,7 +178,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/billing/success"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <CheckoutSuccessPage />
           </ProtectedRoute>
         }
@@ -151,7 +186,7 @@ const AppRoutes = (): ReactElement => {
       <Route
         path="/billing/cancel"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <CheckoutCancelPage />
           </ProtectedRoute>
         }
@@ -261,24 +296,26 @@ export const App = ({ environment }: AppProps): ReactElement => {
   return (
     <ErrorBoundary>
       <QueryCacheProvider cache={environment.queryCache}>
-        <BrowserRouter>
-          <ClientEnvironmentProvider value={environment}>
-            <HistoryProvider>
-              <LiveRegion>
-                <div className="theme h-screen">
-                  <SkipLink />
-                  <ScrollArea className="h-full">
-                    <div id="main-content">
-                      <RouteFocusAnnouncer />
-                      <AppRoutes />
-                    </div>
-                  </ScrollArea>
-                  <AppToaster />
-                </div>
-              </LiveRegion>
-            </HistoryProvider>
-          </ClientEnvironmentProvider>
-        </BrowserRouter>
+        <ThemeProvider>
+          <BrowserRouter>
+            <ClientEnvironmentProvider value={environment}>
+              <HistoryProvider>
+                <LiveRegion>
+                  <div className="h-screen">
+                    <SkipLink />
+                    <ScrollArea className="h-full">
+                      <div id="main-content">
+                        <RouteFocusAnnouncer />
+                        <AppRoutes />
+                      </div>
+                    </ScrollArea>
+                    <AppToaster />
+                  </div>
+                </LiveRegion>
+              </HistoryProvider>
+            </ClientEnvironmentProvider>
+          </BrowserRouter>
+        </ThemeProvider>
       </QueryCacheProvider>
     </ErrorBoundary>
   );

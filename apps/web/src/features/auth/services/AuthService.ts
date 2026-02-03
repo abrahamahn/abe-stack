@@ -6,83 +6,26 @@
  * Uses internal state management for user data, token store for persistence.
  */
 
-import { createApiClient } from '@abe-stack/client';
-import { tokenStore } from '@abe-stack/core';
+import { getApiClient } from '@abe-stack/api';
+import { tokenStore } from '@abe-stack/shared';
 
 import type { ClientConfig } from '@/config';
-import type { ApiClient } from '@abe-stack/client';
-
-// ============================================================================
-// Local Type Definitions
-// ============================================================================
-
-type UserRole = 'user' | 'moderator' | 'admin';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRole;
-  avatarUrl: string | null;
-  createdAt: string;
-}
-
-interface AuthResponse {
-  token: string;
-  user: User;
-}
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequest {
-  email: string;
-  password: string;
-  name?: string | undefined;
-}
-
-interface RegisterResponse {
-  status: 'pending_verification';
-  message: string;
-  email: string;
-}
-
-interface ForgotPasswordRequest {
-  email: string;
-}
-
-interface ForgotPasswordResponse {
-  message: string;
-}
-
-interface ResetPasswordRequest {
-  token: string;
-  password: string;
-}
-
-interface ResetPasswordResponse {
-  message: string;
-}
-
-interface EmailVerificationRequest {
-  token: string;
-}
-
-interface EmailVerificationResponse {
-  verified: boolean;
-  token: string;
-  user: User;
-}
-
-interface ResendVerificationRequest {
-  email: string;
-}
-
-interface ResendVerificationResponse {
-  message: string;
-}
+import type {
+    ApiClient,
+    AuthResponse,
+    EmailVerificationRequest,
+    EmailVerificationResponse,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    LoginRequest,
+    RegisterRequest,
+    RegisterResponse,
+    ResendVerificationRequest,
+    ResendVerificationResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
+    User,
+} from '@abe-stack/api';
 
 interface TokenStore {
   get: () => string | null;
@@ -158,13 +101,8 @@ export class AuthService {
 
     this.tokenStore = tokenStore as TokenStore;
 
-    // Create API client for auth operations
-    const createApiClientFn = createApiClient as (config: {
-      baseUrl: string;
-      getToken: () => string | null;
-    }) => ApiClient;
-
-    this.api = createApiClientFn({
+    // Use singleton API client
+    this.api = getApiClient({
       baseUrl: this.config.apiUrl,
       getToken: (): string | null => this.tokenStore.get(),
     });
@@ -249,13 +187,13 @@ export class AuthService {
 
   /** Login with email/password */
   async login(credentials: LoginRequest): Promise<void> {
-    const response = (await this.api.login(credentials)) as AuthResponse;
+    const response = (await this.api.login(credentials));
     this.handleAuthSuccess(response);
   }
 
   /** Register new account - returns pending status, user must verify email */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    const response = (await this.api.register(data)) as RegisterResponse;
+    const response = (await this.api.register(data));
     // No auto-login - user must verify email first
     return response;
   }
@@ -337,7 +275,7 @@ export class AuthService {
 
     try {
       const userResult = await withTimeout<User>(
-        this.api.getCurrentUser() as Promise<User>,
+        this.api.getCurrentUser(),
         'Fetch current user',
       );
       if (isUser(userResult)) {
@@ -353,7 +291,7 @@ export class AuthService {
       if (refreshed) {
         try {
           const refreshedUser = await withTimeout<User>(
-            this.api.getCurrentUser() as Promise<User>,
+            this.api.getCurrentUser(),
             'Fetch current user',
           );
           this.user = refreshedUser;
@@ -374,17 +312,17 @@ export class AuthService {
 
   /** Request password reset */
   forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
-    return this.api.forgotPassword(data) as Promise<ForgotPasswordResponse>;
+    return this.api.forgotPassword(data);
   }
 
   /** Reset password with token */
   resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
-    return this.api.resetPassword(data) as Promise<ResetPasswordResponse>;
+    return this.api.resetPassword(data);
   }
 
   /** Verify email with token - auto-logs in user on success */
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
-    const response = (await this.api.verifyEmail(data)) as EmailVerificationResponse;
+    const response = (await this.api.verifyEmail(data));
     // Auto-login on successful verification
     if (response.verified) {
       this.handleAuthSuccess({ token: response.token, user: response.user });
@@ -394,7 +332,7 @@ export class AuthService {
 
   /** Resend verification email */
   resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
-    return this.api.resendVerification(data) as Promise<ResendVerificationResponse>;
+    return this.api.resendVerification(data);
   }
 
   // ==========================================================================

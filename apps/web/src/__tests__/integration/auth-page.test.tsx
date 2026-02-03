@@ -15,8 +15,8 @@ import { AuthPage } from '../../features/auth';
 import { renderWithProviders } from '../utils';
 
 // Mock the toastStore - use importOriginal to keep other exports
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     toastStore: {
@@ -52,12 +52,19 @@ vi.mock('../../features/auth/hooks', () => ({
     navigateToMode: mockNavigateToMode,
     navigateToLogin: mockNavigateToLogin,
   }),
-  useResendCooldown: () => ({
-    cooldown: 0,
-    isOnCooldown: false,
-    startCooldown: mockStartCooldown,
-  }),
 }));
+
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    useResendCooldown: () => ({
+      cooldown: 0,
+      isOnCooldown: false,
+      startCooldown: mockStartCooldown,
+    }),
+  };
+});
 
 describe('AuthPage Integration', () => {
   beforeEach(() => {

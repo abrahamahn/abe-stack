@@ -238,7 +238,7 @@ Path aliases are defined in two places that must be kept in sync:
 
 Each app's `vite.config.ts` defines aliases inline:
 
-1. **Package aliases** - `@abe-stack/core`, `@abe-stack/ui`, etc. pointing to source
+1. **Package aliases** - `@abe-stack/shared`, `@abe-stack/ui`, etc. pointing to source
 2. **UI internal aliases** - `@components`, `@elements`, etc. for UI package internals
 3. **Core internal aliases** - `@contracts`, `@shared` for core package internals
 4. **App-specific aliases** - `@features`, `@auth`, etc. for the specific app
@@ -382,8 +382,8 @@ Packages use the `exports` field for granular imports and tree-shaking:
 This enables:
 
 ```typescript
-import { apiContract } from '@abe-stack/core/contracts';
-import { toastStore } from '@abe-stack/core/stores';
+import { apiContract } from '@abe-stack/shared';
+import { toastStore } from '@abe-stack/shared/stores';
 ```
 
 ### tsc-alias
@@ -693,8 +693,8 @@ Use with `turbo run` or `pnpm --filter`:
 | `@abe-stack/server`  | `apps/server`  |
 | `@abe-stack/desktop` | `apps/desktop` |
 | `@abe-stack/ui`      | `shared/ui`    |
-| `@abe-stack/core`    | `shared/core`  |
-| `@abe-stack/client`  | `sdk`          |
+| `@abe-stack/shared`    | `shared/core`  |
+| `@abe-stack/engine`  | `sdk`          |
 
 ### Related Documentation
 

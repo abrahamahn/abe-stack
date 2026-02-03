@@ -1,0 +1,54 @@
+{
+  "name": "@abe-stack/websocket",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-websocket --report-unused-disable-directives",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
+  },
+  "dependencies": {
+    "@abe-stack/backend-core": "workspace:*",
+    "@abe-stack/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "fastify": "^5.0.0",
+    "ws": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    },
+    "ws": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "fastify": "^5.2.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.0",
+    "ws": "^8.18.0",
+    "@types/ws": "^8.5.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "premium/websocket"
+  }
+}

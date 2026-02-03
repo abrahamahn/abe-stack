@@ -1,7 +1,7 @@
 // apps/server/src/types/context.ts
 
 import type { AuthEmailTemplates } from '@abe-stack/auth';
-import type { BaseContext, ReplyContext, RequestInfo } from '@abe-stack/contracts';
+import type { DbClient, Repositories, ServerSearchProvider, QueueServer, WriteService  } from '@abe-stack/db';
 import type {
   AppConfig,
   BillingService,
@@ -9,9 +9,8 @@ import type {
   NotificationService,
   StorageService as StorageProvider,
   SubscriptionManager,
-} from '@abe-stack/core';
-import type { DbClient, Repositories, ServerSearchProvider } from '@abe-stack/db';
-import type { QueueServer, WriteService } from '@abe-stack/jobs';
+} from '@abe-stack/shared';
+import type { BaseContext, ReplyContext, RequestInfo } from '@abe-stack/shared';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================
@@ -21,7 +20,7 @@ import type { FastifyBaseLogger } from 'fastify';
 /**
  * Fastify-specific reply augmentation.
  *
- * Structurally identical to `ReplyContext` from `@abe-stack/contracts`,
+ * Structurally identical to `ReplyContext` from `@abe-stack/shared`,
  * but kept as a distinct type alias for Fastify's `declare module` augmentation.
  */
 export type ReplyWithCookies = ReplyContext;
@@ -29,7 +28,7 @@ export type ReplyWithCookies = ReplyContext;
 /**
  * Fastify-specific request augmentation.
  *
- * Uses `RequestInfo` from `@abe-stack/contracts` for client metadata.
+ * Uses `RequestInfo` from `@abe-stack/shared` for client metadata.
  * Extends the framework-agnostic `RequestContext` with Fastify-specific
  * properties (ip, requestStart, context).
  */
@@ -82,7 +81,7 @@ export interface IServiceContainer {
   readonly pubsub: SubscriptionManager;
 
   /** Cache provider for performance optimization */
-  readonly cache: import('@abe-stack/cache').CacheProvider;
+  readonly cache: import('@abe-stack/db').CacheProvider;
 
   /** Billing provider for payments/subscriptions */
   readonly billing: BillingService;
@@ -118,7 +117,7 @@ export interface HasContext {
  * Application context passed to all handlers.
  *
  * Extends `IServiceContainer` with runtime-specific dependencies (logger).
- * Structurally satisfies `BaseContext` from `@abe-stack/contracts` --
+ * Structurally satisfies `BaseContext` from `@abe-stack/shared` --
  * verified at compile time via `AppContextSatisfiesBaseContext` below.
  *
  * Package handlers accept `BaseContext` (or module-specific extensions);
@@ -130,7 +129,7 @@ export interface HasContext {
  * `IServiceContainer.db` is `DbClient` while `BaseContext.db` is `unknown`.
  * These are compatible (DbClient assignable to unknown) but not identical.
  *
- * @see {@link BaseContext} from `@abe-stack/contracts`
+ * @see {@link BaseContext} from `@abe-stack/shared`
  */
 export interface AppContext extends IServiceContainer {
   /** Logger instance (from Fastify's Pino logger) */

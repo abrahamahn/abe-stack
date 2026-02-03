@@ -40,7 +40,7 @@ export {
 } from './billing';
 
 // Re-export providers for backwards compatibility
-// Prefer importing directly from '@abe-stack/ui/providers' or '@abe-stack/ui'
+// Prefer importing directly from '@abe-stack/react/providers'
 export {
   createMemoizedContext,
   createSelectiveContext,
@@ -53,4 +53,4 @@ export {
   type ThemeContextValue,
   type UserState,
   type UserAction,
-} from '../providers';
+} from '@abe-stack/react/providers';

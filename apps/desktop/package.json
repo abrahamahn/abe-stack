@@ -7,21 +7,24 @@
     "dev": "concurrently \"pnpm run dev:renderer\" \"pnpm run dev:electron\"",
     "dev:standalone": "turbo run dev --filter @abe-stack/desktop",
     "dev:renderer": "vite --port 5174",
-    "dev:electron": "NODE_ENV=development pnpm run build:electron && NODE_ENV=development electron --disable-features=SystemdIntegration dist/electron/main.js",
+    "dev:electron": "NODE_ENV=development pnpm run build:electron && NODE_ENV=development electron --no-sandbox --disable-features=SystemdIntegration dist/electron/main.js",
     "build": "pnpm run build:renderer && pnpm run build:electron",
     "build:renderer": "vite build",
     "build:electron": "esbuild src/electron/main.ts src/electron/preload.ts --bundle --platform=node --target=node20 --outdir=dist/electron --external:electron --format=cjs",
-    "start": "electron --disable-features=SystemdIntegration dist/electron/main.js",
+    "start": "electron --no-sandbox --disable-features=SystemdIntegration dist/electron/main.js",
     "package": "electron-builder",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-desktop --report-unused-disable-directives"
   },
   "dependencies": {
-    "@abe-stack/core": "workspace:*",
+    "@abe-stack/api": "workspace:*",
+    "@abe-stack/engine": "workspace:*",
     "@abe-stack/ui": "workspace:*",
+    "@abe-stack/react": "workspace:*",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "@abe-stack/shared": "workspace:*"
   },
   "devDependencies": {
     "electron": "^40.0.0",

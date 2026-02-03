@@ -13,8 +13,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { User } from './AuthService';
-import type { AuthResponse, RegisterResponse } from '@abe-stack/core';
+import type { AuthResponse, RegisterResponse, User } from '@abe-stack/api';
 import type { ClientConfig } from '../../../config';
 
 // ============================================================================
@@ -49,19 +48,20 @@ const mocks = vi.hoisted(() => ({
 // Vi.mock calls - these reference hoisted mocks
 // ============================================================================
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     tokenStore: mocks.mockTokenStore,
   };
 });
 
-vi.mock('@abe-stack/client', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client')>();
+vi.mock('@abe-stack/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/api')>();
   return {
     ...actual,
-    createApiClient: () => mocks.mockApiClient,
+    getApiClient: () => mocks.mockApiClient,
+    createApiClient: () => mocks.mockApiClient, // fallback if needed by other internals, but usage is blocked
   };
 });
 
@@ -89,7 +89,9 @@ function createMockUser(): User {
     name: 'Test User',
     avatarUrl: null,
     role: 'user',
+    isVerified: true,
     createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
   };
 }
 

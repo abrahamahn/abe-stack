@@ -1,12 +1,12 @@
 // apps/server/src/app.test.ts
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { AppConfig } from '@abe-stack/core';
+import type { AppConfig } from '@abe-stack/shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // AppError is imported after mocks are set up (AppError extends BaseError)
 // We use AppError because BaseError is abstract and cannot be instantiated directly
-let AppError: typeof import('@abe-stack/core').AppError;
+let AppError: typeof import('@abe-stack/shared').AppError;
 
 // ============================================================================
 // Mock Dependencies - Hoisted factories
@@ -119,7 +119,7 @@ vi.mock('@routes', () => ({
   registerRoutes: vi.fn(),
 }));
 
-vi.mock('@abe-stack/cache', () => ({
+vi.mock('@abe-stack/db', () => ({
   createMemoryCache: vi.fn(() => ({
     name: 'memory',
     get: vi.fn(),
@@ -145,10 +145,10 @@ vi.mock('@abe-stack/cache', () => ({
   })),
 }));
 
-// Note: We don't mock @abe-stack/core because vite-tsconfig-paths resolves it
+// Note: We don't mock @abe-stack/shared because vite-tsconfig-paths resolves it
 // differently than the mock path. Instead, we spy on the App.log getter in tests.
 
-vi.mock('@abe-stack/core/pubsub', () => {
+vi.mock('@abe-stack/shared/pubsub', () => {
   // Mock class that can be instantiated with `new`
   class MockSubscriptionManager {
     setAdapter = vi.fn();
@@ -159,7 +159,7 @@ vi.mock('@abe-stack/core/pubsub', () => {
   };
 });
 
-vi.mock('@abe-stack/core/pubsub/postgres', () => {
+vi.mock('@abe-stack/shared/pubsub/postgres', () => {
   return {
     createPostgresPubSub: vi.fn(() => ({
       start: vi.fn().mockResolvedValue(undefined),
@@ -304,7 +304,7 @@ describe('App', () => {
   beforeAll(async () => {
     // Import AppError after mocks are applied
     // AppError extends BaseError, so `instanceof BaseError` will still work
-    const core = await import('@abe-stack/core');
+    const core = await import('@abe-stack/shared');
     AppError = core.AppError;
   });
 
@@ -416,7 +416,7 @@ describe('App', () => {
         publish: vi.fn(),
       }));
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
+      const { createPostgresPubSub } = await import('@abe-stack/shared/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockImplementation(mockCreatePostgresPubSub);
 
       const app = new App({ config });
@@ -493,7 +493,7 @@ describe('App', () => {
         publish: vi.fn(),
       };
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
+      const { createPostgresPubSub } = await import('@abe-stack/shared/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockReturnValue(mockPgPubSub);
 
       const mockServer = createMockServer();
@@ -543,7 +543,7 @@ describe('App', () => {
         publish: vi.fn(),
       };
 
-      const { createPostgresPubSub } = await import('@abe-stack/core/pubsub/postgres');
+      const { createPostgresPubSub } = await import('@abe-stack/shared/pubsub/postgres');
       vi.mocked(createPostgresPubSub).mockReturnValue(mockPgPubSub);
 
       const mockQueue = {
@@ -612,7 +612,7 @@ describe('App', () => {
 
   describe('error handler', () => {
     // Note: The BaseError instanceof check in app.ts cannot be tested directly due to
-    // Vitest module identity issues with vite-tsconfig-paths. The @abe-stack/core module
+    // Vitest module identity issues with vite-tsconfig-paths. The @abe-stack/shared module
     // gets resolved differently in the test context vs. when app.ts imports it, causing
     // `error instanceof BaseError` to return false even for valid AppError instances.
     // These tests verify the error handler setup and fallback behavior instead.

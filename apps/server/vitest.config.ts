@@ -6,18 +6,13 @@ import { baseConfig } from '../../vitest.config';
 const adminPkg = path.resolve(__dirname, '../../modules/admin/src');
 const authPkg = path.resolve(__dirname, '../../modules/auth/src');
 const billingPkg = path.resolve(__dirname, '../../modules/billing/src');
-const cachePkg = path.resolve(__dirname, '../../infra/cache/src');
-const contractsPkg = path.resolve(__dirname, '../../infra/contracts/src');
-const corePkg = path.resolve(__dirname, '../../core/src');
-const dbPkg = path.resolve(__dirname, '../../infra/db/src');
-const emailPkg = path.resolve(__dirname, '../../infra/email/src');
-const httpPkg = path.resolve(__dirname, '../../infra/http/src');
-const jobsPkg = path.resolve(__dirname, '../../infra/jobs/src');
-const notificationsPkg = path.resolve(__dirname, '../../infra/notifications/src');
-const realtimePkg = path.resolve(__dirname, '../../infra/realtime/src');
-const securityPkg = path.resolve(__dirname, '../../infra/security/src');
-const storagePkg = path.resolve(__dirname, '../../infra/storage/src');
-const usersPkg = path.resolve(__dirname, '../../infra/users/src');
+const infraPkg = path.resolve(__dirname, '../../packages/backend-core/src');
+const contractsPkg = path.resolve(__dirname, '../../packages/shared/src/contracts');
+const corePkg = path.resolve(__dirname, '../../packages/shared/src');
+const notificationsPkg = path.resolve(__dirname, '../../modules/notifications/src');
+const realtimePkg = path.resolve(__dirname, '../../modules/realtime/src');
+const usersPkg = path.resolve(__dirname, '../../modules/users/src');
+const websocketPkg = path.resolve(__dirname, '../../premium/websocket/src');
 
 export default mergeConfig(baseConfig, {
   test: {
@@ -31,17 +26,12 @@ export default mergeConfig(baseConfig, {
           '@abe-stack/admin',
           '@abe-stack/auth',
           '@abe-stack/billing',
-          '@abe-stack/cache',
-          '@abe-stack/core',
           '@abe-stack/db',
-          '@abe-stack/email',
-          '@abe-stack/http',
-          '@abe-stack/jobs',
+          '@abe-stack/shared',
           '@abe-stack/notifications',
           '@abe-stack/realtime',
-          '@abe-stack/security',
-          '@abe-stack/storage',
           '@abe-stack/users',
+          '@abe-stack/websocket',
         ],
       },
     },
@@ -49,18 +39,18 @@ export default mergeConfig(baseConfig, {
   resolve: {
     alias: [
       // Core package shortcut exports (must come before regex)
-      { find: '@abe-stack/core/http', replacement: `${corePkg}/infrastructure/http/index.ts` },
-      { find: '@abe-stack/core/crypto', replacement: `${corePkg}/infrastructure/crypto/index.ts` },
-      { find: '@abe-stack/core/errors', replacement: `${corePkg}/infrastructure/errors/index.ts` },
-      { find: '@abe-stack/core/shared', replacement: `${corePkg}/shared/index.ts` },
-      { find: '@abe-stack/core/utils', replacement: `${corePkg}/utils/index.ts` },
-      { find: '@abe-stack/core/env', replacement: `${corePkg}/config/index.ts` },
+      { find: '@abe-stack/packages/shared/http', replacement: `${corePkg}/infrastructure/http/index.ts` },
+      { find: '@abe-stack/packages/shared/crypto', replacement: `${corePkg}/infrastructure/crypto/index.ts` },
+      { find: '@abe-stack/packages/shared/errors', replacement: `${corePkg}/infrastructure/errors/index.ts` },
+      { find: '@abe-stack/packages/shared/shared', replacement: `${corePkg}/packages/shared/index.ts` },
+      { find: '@abe-stack/packages/shared/utils', replacement: `${corePkg}/utils/index.ts` },
+      { find: '@abe-stack/packages/shared/env', replacement: `${corePkg}/config/index.ts` },
       {
-        find: '@abe-stack/core/pubsub/postgres',
+        find: '@abe-stack/packages/shared/pubsub/postgres',
         replacement: `${corePkg}/infrastructure/pubsub/postgres-pubsub.ts`,
       },
-      { find: '@abe-stack/core/pubsub', replacement: `${corePkg}/infrastructure/pubsub/index.ts` },
-      { find: '@abe-stack/core/config', replacement: `${corePkg}/config/index.ts` },
+      { find: '@abe-stack/packages/shared/pubsub', replacement: `${corePkg}/infrastructure/pubsub/index.ts` },
+      { find: '@abe-stack/packages/shared/config', replacement: `${corePkg}/config/index.ts` },
       // Handle subpath imports with regex
       {
         find: /^@abe-stack\/contracts\/(.*)$/,
@@ -76,26 +66,17 @@ export default mergeConfig(baseConfig, {
       { find: /^@abe-stack\/notifications\/(.*)$/, replacement: `${notificationsPkg}/$1` },
       { find: /^@abe-stack\/realtime\/(.*)$/, replacement: `${realtimePkg}/$1` },
       { find: /^@abe-stack\/users\/(.*)$/, replacement: `${usersPkg}/$1` },
-      { find: /^@abe-stack\/http\/(.*)$/, replacement: `${httpPkg}/$1` },
-      { find: /^@abe-stack\/security\/(.*)$/, replacement: `${securityPkg}/$1` },
       // Handle main package imports
       { find: '@abe-stack/admin', replacement: `${adminPkg}/index.ts` },
       { find: '@abe-stack/auth', replacement: `${authPkg}/index.ts` },
       { find: '@abe-stack/billing', replacement: `${billingPkg}/index.ts` },
-      { find: '@abe-stack/cache', replacement: `${cachePkg}/index.ts` },
-      { find: '@abe-stack/contracts', replacement: `${contractsPkg}/index.ts` },
-      { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
-      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${dbPkg}/$1` },
-      { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
-      { find: '@abe-stack/email', replacement: `${emailPkg}/index.ts` },
-      { find: '@abe-stack/http', replacement: `${httpPkg}/index.ts` },
-      { find: '@abe-stack/jobs', replacement: `${jobsPkg}/index.ts` },
+      { find: '@abe-stack/db', replacement: `${infraPkg}/index.ts` },
+      { find: '@abe-stack/shared', replacement: `${contractsPkg}/index.ts` },
+      { find: '@abe-stack/shared', replacement: `${corePkg}/index.ts` },
       { find: '@abe-stack/notifications', replacement: `${notificationsPkg}/index.ts` },
       { find: '@abe-stack/realtime', replacement: `${realtimePkg}/index.ts` },
-      { find: '@abe-stack/security', replacement: `${securityPkg}/index.ts` },
-      { find: /^@abe-stack\/storage\/(.*)$/, replacement: `${storagePkg}/$1` },
-      { find: '@abe-stack/storage', replacement: `${storagePkg}/index.ts` },
       { find: '@abe-stack/users', replacement: `${usersPkg}/index.ts` },
+      { find: '@abe-stack/websocket', replacement: `${websocketPkg}/index.ts` },
       // Server-specific local aliases
       { find: /^@health\/(.*)$/, replacement: path.resolve(__dirname, 'src/health/$1') },
       { find: '@health', replacement: path.resolve(__dirname, 'src/health/index.ts') },

@@ -1,12 +1,12 @@
 // apps/web/src/features/admin/components/ExportDialog.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useExportEvents } from '../hooks/useExportEvents';
 
 import { ExportDialog } from './ExportDialog';
 
-import type { SecurityEventsFilter } from '@abe-stack/core';
+import type { SecurityEventsFilter } from '@abe-stack/shared';
 
 // ============================================================================
 // Mocks
@@ -128,8 +128,8 @@ describe('ExportDialog', () => {
       expect(csvRadio).toHaveProperty('checked', false);
 
       fireEvent.click(csvRadio);
-      expect(csvRadio.checked).toBe(true);
-      expect(jsonRadio.checked).toBe(false);
+      expect((csvRadio as HTMLInputElement).checked).toBe(true);
+      expect((jsonRadio as HTMLInputElement).checked).toBe(false);
     });
   });
 

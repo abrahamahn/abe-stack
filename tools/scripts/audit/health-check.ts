@@ -71,7 +71,6 @@ function parseOutput(fullLog: string) {
 
   for (const rawLine of lines) {
     // Strip ANSI codes for accurate regex matching
-    // eslint-disable-next-line no-control-regex
     const line = rawLine.replace(/\x1B\[\d+m/g, '');
 
     // Attempt to detect package from turbo prefix
@@ -118,6 +117,13 @@ function parseOutput(fullLog: string) {
   console.log(`🟡 Total Lint Warnings: ${totalLintWarnings}`);
   console.log(`🔵 Total Type Errors:   ${totalTypeErrors}`);
   console.log(`💥 GRAND TOTAL ISSUES:  ${totalLintErrors + totalTypeErrors}`);
+
+  // If exit code was failure but we found 0 errors, likely a crash or config error
+  if ((totalLintErrors + totalTypeErrors === 0) && fullLog.includes('Exit code:')) {
+     console.log('\n⚠️  WARNING: Command failed but zero standard errors were parsed.');
+     console.log('   This usually indicates a configuration error, crash, or non-standard output.');
+     console.log('   Check the raw output above for details.');
+  }
 
   console.log('\n📋 Breakdown by Package (Top Offenders):');
 

@@ -71,7 +71,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 - [ ] Add `version` field to all syncable database tables
 - [ ] Create `infra/realtime` with transaction types
-- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/client/cache`
+- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/engine/cache`
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
@@ -82,7 +82,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 ### Phase 2: Real-Time Sync
 
 - [x] Implement `WebSocketServer` (ws package) → `apps/server/src/infra/websocket/`
-- [x] Implement `WebSocketPubSubClient` → `@abe-stack/client/pubsub` (20 tests)
+- [x] Implement `WebSocketPubSubClient` → `@abe-stack/engine/pubsub` (20 tests)
 - [ ] Create `RealtimeContext` and `RealtimeProvider`
 - [x] Add subscription management (subscribe/unsubscribe by key) → `SubscriptionCache` (20 tests)
 - [ ] Version-based update notifications
@@ -91,8 +91,8 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 ### Phase 3: Offline Support
 
-- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/client/cache` (31 tests)
-- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/client/offline` (26 tests)
+- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/engine/cache` (31 tests)
+- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/engine/offline` (26 tests)
 - [x] Add stale-while-revalidate loaders → `LoaderCache` with TTL (57 tests)
 - [ ] Service worker for asset caching
 - [x] Conflict resolution (last-write-wins) → Built into RecordCache/RecordStorage
@@ -101,7 +101,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 ### Phase 4: Undo/Redo
 
-- [x] Implement `UndoRedoStack` → `@abe-stack/client/undo` (38 tests)
+- [x] Implement `UndoRedoStack` → `@abe-stack/engine/undo` (38 tests)
 - [x] Operation inversion logic → Built into UndoRedoStack with grouping support
 - [ ] Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z)
 - [ ] UI indicators for undo/redo availability (use `onStateChange` callback)
@@ -206,8 +206,8 @@ These are specific to product types, not boilerplate infrastructure.
 - [ ] Message reactions
 - [ ] Channel/room management
 - [ ] Message acknowledgments (delivery confirmation)
-- [x] `SubscriptionCache` for ref-counted record subscriptions → `@abe-stack/client/subscriptions`
-- [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/client/cache`
+- [x] `SubscriptionCache` for ref-counted record subscriptions → `@abe-stack/engine/subscriptions`
+- [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/engine/cache`
 
 > **Implementation:** `client/src/subscriptions/SubscriptionCache.ts`, `client/src/cache/LoaderCache.ts`
 > **Legacy:** See [Frontend Components](./reference/legacy.md#frontend-components) → Social components
@@ -288,7 +288,7 @@ For critical infrastructure, define interfaces.
 Better debugging in production.
 
 - [ ] Request context logging (IP, method, path, user agent)
-- [x] Error serialization with `.toJSON()` - AppError in `@abe-stack/core/errors`
+- [x] Error serialization with `.toJSON()` - AppError in `@abe-stack/shared/errors`
 - [x] Correlation IDs for tracing requests - `apps/server/src/infra/logger/`
 - [ ] Conditional logging by severity (500+ vs client errors)
 

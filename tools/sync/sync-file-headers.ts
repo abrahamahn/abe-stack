@@ -141,7 +141,6 @@ function watchFiles(): void {
     const fullPath = path.join(ROOT, dir);
     if (!fs.existsSync(fullPath)) continue;
     const watcher = fs.watch(fullPath, { recursive: true }, (_event, filename) => {
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (typeof filename !== 'string' || filename === '') return;
       if (syncTimeout) clearTimeout(syncTimeout);
       syncTimeout = setTimeout(() => {

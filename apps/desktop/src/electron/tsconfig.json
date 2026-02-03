@@ -5,13 +5,23 @@
     "rootDir": ".",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["node"],
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
     "noEmit": false,
     "composite": true,
     "declaration": true,
     "declarationMap": true,
     "tsBuildInfoFile": "../../../node_modules/.cache/typescript/tsconfig.electron.tsbuildinfo"
   },
-  "include": ["*.ts", "ipc/**/*.ts", "types/**/*.ts", "utils/**/*.ts"],
-  "exclude": ["node_modules", "**/*.test.ts", "**/__tests__/**"]
+  "include": [
+    "*.ts",
+    "ipc/**/*.ts",
+    "types/**/*.ts",
+    "utils/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

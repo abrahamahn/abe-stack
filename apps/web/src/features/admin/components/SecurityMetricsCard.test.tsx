@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SecurityMetricsCard } from './SecurityMetricsCard';
 
-import type { SecurityMetrics } from '@abe-stack/core';
+import type { SecurityMetrics } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data
@@ -18,6 +18,14 @@ const mockMetrics: SecurityMetrics = {
   tokenReuseCount: 2,
   accountLockedCount: 8,
   suspiciousLoginCount: 12,
+  lowEvents: 100,
+  eventsByType: {
+    login_failed: 20,
+    token_reuse: 2,
+    account_locked: 8,
+    suspicious_login: 12,
+  },
+  period: 'day',
   periodStart: '2024-01-01T00:00:00Z',
   periodEnd: '2024-01-31T23:59:59Z',
 };
@@ -127,6 +135,9 @@ describe('SecurityMetricsCard', () => {
         tokenReuseCount: 0,
         accountLockedCount: 0,
         suspiciousLoginCount: 0,
+        lowEvents: 0,
+        eventsByType: {},
+        period: 'day',
         periodStart: '2024-01-01T00:00:00Z',
         periodEnd: '2024-01-31T23:59:59Z',
       };
@@ -250,6 +261,9 @@ describe('SecurityMetricsCard', () => {
         suspiciousLoginCount: 0,
         periodStart: '2024-01-01T00:00:00Z',
         periodEnd: '2024-01-31T23:59:59Z',
+        lowEvents: 0,
+        eventsByType: {},
+        period: 'day',
       };
 
       render(<SecurityMetricsCard metrics={allZeroMetrics} isLoading={false} />);

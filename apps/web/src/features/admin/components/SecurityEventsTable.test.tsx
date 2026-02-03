@@ -1,12 +1,12 @@
 // apps/web/src/features/admin/components/SecurityEventsTable.test.tsx
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 
 import { SecurityEventsTable } from './SecurityEventsTable';
 
-import type { PaginationOptions, SecurityEvent, SecurityEventsListResponse } from '@abe-stack/core';
+import type { PaginationOptions, SecurityEvent, SecurityEventsListResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data
@@ -37,12 +37,15 @@ const createMockResponse = (
   page: 1,
   limit: 20,
   totalPages: 1,
+  hasNext: false,
+  hasPrev: false,
   ...overrides,
 });
 
 const mockPagination: PaginationOptions = {
   page: 1,
   limit: 20,
+  sortOrder: 'desc',
 };
 
 const mockOnPageChange = vi.fn();
@@ -290,7 +293,10 @@ describe('SecurityEventsTable', () => {
       );
 
       const viewButtons = screen.getAllByRole('button', { name: 'View' });
-      fireEvent.click(viewButtons[0]);
+      const viewButton = viewButtons[0];
+      if (viewButton) {
+        fireEvent.click(viewButton);
+      }
 
       // View button should not propagate click to row
       expect(viewButtons[0]).toBeInTheDocument();

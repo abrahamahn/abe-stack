@@ -54,7 +54,7 @@ COPY . .
 # Install dependencies and build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
-    pnpm --filter @abe-stack/core build && \
+    pnpm --filter @abe-stack/shared build && \
     pnpm --filter @abe-stack/ui build && \
     pnpm --filter @abe-stack/client build && \
     pnpm --filter @abe-stack/web build

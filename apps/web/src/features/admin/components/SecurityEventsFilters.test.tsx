@@ -4,7 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { SecurityEventsFilters } from './SecurityEventsFilters';
 
-import type { SecurityEventsFilter } from '@abe-stack/core';
+import type { SecurityEventsFilter } from '@abe-stack/shared';
 
 // ============================================================================
 // Tests

@@ -27,7 +27,6 @@ type DocKey =
   // Packages
   | 'core'
   | 'ui'
-  | 'client'
   // Dev docs
   | 'architecture'
   | 'configSetup'
@@ -61,7 +60,6 @@ const docsMeta: Record<DocKey, DocMeta> = {
   // Packages
   core: { label: 'Core', category: 'packages' },
   ui: { label: 'UI', category: 'packages' },
-  client: { label: 'Client', category: 'packages' },
 
   // Dev docs
   architecture: { label: 'Architecture', category: 'dev' },
@@ -87,9 +85,8 @@ async function loadDocContent(key: DocKey): Promise<string> {
     readme: () => import('../../../../README.md?raw'),
     web: () => import('../../../../apps/web/README.md?raw'),
     desktop: () => import('../../../../apps/desktop/README.md?raw'),
-    core: () => import('../../../../core/README.md?raw'),
+    core: () => import('../../../../kernel/README.md?raw'),
     ui: () => import('../../../../client/ui/docs/README.md?raw'),
-    client: () => import('../../../../client/README.md?raw'),
     architecture: () => import('../../../../apps/docs/specs/architecture.md?raw'),
     principles: () => import('../../../../apps/docs/specs/principles.md?raw'),
     devEnvironment: () => import('../../../../apps/docs/deploy/dev/workflow.md?raw'),

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { UserFilters } from './UserFilters';
 
-import type { AdminUserListFilters } from '@abe-stack/core';
+import type { AdminUserListFilters } from '@abe-stack/shared';
 
 describe('UserFilters', () => {
   const defaultFilters: AdminUserListFilters = {
@@ -20,38 +20,38 @@ describe('UserFilters', () => {
 
   describe('rendering', () => {
     it('should render search input', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByPlaceholderText('Search by email or name...')).toBeInTheDocument();
     });
 
     it('should render role filter dropdown', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByLabelText('Role:')).toBeInTheDocument();
     });
 
     it('should render status filter dropdown', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByLabelText('Status:')).toBeInTheDocument();
     });
 
     it('should render sort by dropdown', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByLabelText('Sort by:')).toBeInTheDocument();
     });
 
     it('should render sort order toggle button', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const sortButton = screen.getByTitle('Descending');
       expect(sortButton).toBeInTheDocument();
     });
 
     it('should render search button', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
     });
@@ -59,7 +59,7 @@ describe('UserFilters', () => {
 
   describe('search functionality', () => {
     it('should update search value when typing', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
       fireEvent.change(searchInput, { target: { value: 'test search' } });
@@ -68,7 +68,7 @@ describe('UserFilters', () => {
     });
 
     it('should call onFiltersChange when search form is submitted', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
       fireEvent.change(searchInput, { target: { value: 'john' } });
@@ -80,7 +80,7 @@ describe('UserFilters', () => {
     });
 
     it('should not include search in filter when empty', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const searchButton = screen.getByRole('button', { name: 'Search' });
       fireEvent.click(searchButton);
@@ -94,7 +94,7 @@ describe('UserFilters', () => {
         search: 'initial search',
       };
 
-      render(<UserFilters filters={filtersWithSearch} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithSearch as any} onFiltersChange={onFiltersChange} />);
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
       expect(searchInput).toHaveValue('initial search');
@@ -103,7 +103,7 @@ describe('UserFilters', () => {
 
   describe('role filter', () => {
     it('should call onFiltersChange when role is selected', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select: click trigger to open, then click option
       const roleSelectTrigger = screen.getByLabelText('Role:');
@@ -119,7 +119,7 @@ describe('UserFilters', () => {
         ...defaultFilters,
         role: 'admin',
       };
-      render(<UserFilters filters={filtersWithRole} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithRole as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select: click trigger to open, then click "All Roles" option
       const roleSelectTrigger = screen.getByLabelText('Role:');
@@ -136,7 +136,7 @@ describe('UserFilters', () => {
         role: 'moderator',
       };
 
-      render(<UserFilters filters={filtersWithRole} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithRole as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select displays current value in the trigger
       expect(screen.getByText('Moderator')).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('UserFilters', () => {
 
   describe('status filter', () => {
     it('should call onFiltersChange when status is selected', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select: click trigger to open, then click option
       const statusSelectTrigger = screen.getByLabelText('Status:');
@@ -161,7 +161,7 @@ describe('UserFilters', () => {
         ...defaultFilters,
         status: 'active',
       };
-      render(<UserFilters filters={filtersWithStatus} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithStatus as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select: click trigger to open, then click "All Statuses" option
       const statusSelectTrigger = screen.getByLabelText('Status:');
@@ -178,7 +178,7 @@ describe('UserFilters', () => {
         status: 'locked',
       };
 
-      render(<UserFilters filters={filtersWithStatus} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithStatus as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select displays current value in the trigger
       expect(screen.getByText('Locked')).toBeInTheDocument();
@@ -187,7 +187,7 @@ describe('UserFilters', () => {
 
   describe('sort functionality', () => {
     it('should call onFiltersChange when sort by is changed', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       // Custom Select: click trigger to open, then click option
       const sortSelectTrigger = screen.getByLabelText('Sort by:');
@@ -202,7 +202,7 @@ describe('UserFilters', () => {
     });
 
     it('should toggle sort order when button is clicked', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const sortOrderButton = screen.getByTitle('Descending');
       fireEvent.click(sortOrderButton);
@@ -219,14 +219,14 @@ describe('UserFilters', () => {
         sortOrder: 'asc',
       };
 
-      render(<UserFilters filters={ascFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={ascFilters as any} onFiltersChange={onFiltersChange} />);
 
       const sortOrderButton = screen.getByTitle('Ascending');
       expect(sortOrderButton).toHaveTextContent('↑');
     });
 
     it('should display descending arrow when sort order is desc', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const sortOrderButton = screen.getByTitle('Descending');
       expect(sortOrderButton).toHaveTextContent('↓');
@@ -241,13 +241,13 @@ describe('UserFilters', () => {
         role: 'admin',
       };
 
-      render(<UserFilters filters={activeFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={activeFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.getByRole('button', { name: 'Clear Filters' })).toBeInTheDocument();
     });
 
     it('should not show clear filters button when no active filters', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       expect(screen.queryByRole('button', { name: 'Clear Filters' })).not.toBeInTheDocument();
     });
@@ -260,7 +260,7 @@ describe('UserFilters', () => {
         status: 'active',
       };
 
-      render(<UserFilters filters={activeFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={activeFilters as any} onFiltersChange={onFiltersChange} />);
 
       const clearButton = screen.getByRole('button', { name: 'Clear Filters' });
       fireEvent.click(clearButton);
@@ -277,7 +277,7 @@ describe('UserFilters', () => {
         search: 'test search',
       };
 
-      render(<UserFilters filters={activeFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={activeFilters as any} onFiltersChange={onFiltersChange} />);
 
       const clearButton = screen.getByRole('button', { name: 'Clear Filters' });
       fireEvent.click(clearButton);
@@ -290,7 +290,7 @@ describe('UserFilters', () => {
   describe('loading state', () => {
     it('should disable search input when loading', () => {
       render(
-        <UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} isLoading={true} />,
+        <UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} isLoading={true} />,
       );
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
@@ -299,7 +299,7 @@ describe('UserFilters', () => {
 
     it('should disable all buttons when loading', () => {
       render(
-        <UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} isLoading={true} />,
+        <UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} isLoading={true} />,
       );
 
       const buttons = screen.getAllByRole('button');
@@ -310,7 +310,7 @@ describe('UserFilters', () => {
 
     it('should disable select dropdowns when loading', () => {
       render(
-        <UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} isLoading={true} />,
+        <UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} isLoading={true} />,
       );
 
       const roleSelect = screen.getByLabelText('Role:');
@@ -330,14 +330,14 @@ describe('UserFilters', () => {
         sortOrder: 'desc',
       };
 
-      render(<UserFilters filters={filtersWithoutSearch} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={filtersWithoutSearch as any} onFiltersChange={onFiltersChange} />);
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
       expect(searchInput).toHaveValue('');
     });
 
     it('should handle form submission with Enter key', () => {
-      render(<UserFilters filters={defaultFilters} onFiltersChange={onFiltersChange} />);
+      render(<UserFilters filters={defaultFilters as any} onFiltersChange={onFiltersChange} />);
 
       const searchInput = screen.getByPlaceholderText('Search by email or name...');
       fireEvent.change(searchInput, { target: { value: 'search term' } });

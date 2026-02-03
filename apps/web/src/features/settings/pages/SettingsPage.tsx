@@ -5,7 +5,7 @@
  * Main settings page with tabs for Profile, Security, Sessions, and Billing.
  */
 
-import { useQuery } from '@abe-stack/client';
+import { useQuery } from '@abe-stack/engine';
 import { Button, Card, Container, Heading, Tabs } from '@abe-stack/ui';
 import { useMemo, type ReactElement } from 'react';
 

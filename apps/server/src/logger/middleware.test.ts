@@ -1,5 +1,4 @@
 // apps/server/src/logger/middleware.test.ts
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/logger/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

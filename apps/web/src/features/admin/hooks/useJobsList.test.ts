@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useJobsList.test.ts
-import { useQuery } from '@abe-stack/client';
+import { useQuery } from '@abe-stack/engine';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -7,11 +7,11 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobsList } from './useJobsList';
 
-import type { JobListResponse } from '@abe-stack/core';
-import type { UseQueryResult } from '@abe-stack/client';
+import type { UseQueryResult } from '@abe-stack/engine';
+import type { JobListResponse } from '@abe-stack/shared';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -23,8 +23,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     tokenStore: {
@@ -35,16 +35,42 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
 
 describe('useJobsList', () => {
   const mockJobsResponse: JobListResponse = {
-    jobs: [
-      { id: 'job-1', name: 'test-job', status: 'completed', createdAt: new Date().toISOString() },
-      { id: 'job-2', name: 'test-job-2', status: 'failed', createdAt: new Date().toISOString() },
+    data: [
+      {
+        id: 'job-1',
+        name: 'test-job',
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+        args: {},
+        attempts: 0,
+        maxAttempts: 5,
+        scheduledAt: new Date().toISOString(),
+        completedAt: null,
+        durationMs: null,
+        error: null,
+        deadLetterReason: null,
+      },
+      {
+        id: 'job-2',
+        name: 'test-job-2',
+        status: 'failed',
+        createdAt: new Date().toISOString(),
+        args: {},
+        attempts: 1,
+        maxAttempts: 5,
+        scheduledAt: new Date().toISOString(),
+        completedAt: null,
+        durationMs: null,
+        error: null,
+        deadLetterReason: null,
+      },
     ],
-    pagination: {
-      page: 1,
-      limit: 50,
-      total: 2,
-      totalPages: 1,
-    },
+    total: 2,
+    page: 1,
+    limit: 50,
+    hasNext: false,
+    hasPrev: false,
+    totalPages: 1,
   };
 
   beforeEach(() => {

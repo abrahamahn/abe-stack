@@ -1,34 +1,19 @@
 // apps/server/src/app.ts
 
 import { verifyToken } from '@abe-stack/auth';
-import { createBillingProvider } from '@abe-stack/billing';
-import { createMemoryCache } from '@abe-stack/cache';
-import { BaseError, createConsoleLogger, SubscriptionManager } from '@abe-stack/core';
-import { createPostgresPubSub } from '@abe-stack/core/pubsub/postgres';
 import {
-  buildConfigConnectionString as buildConnectionString,
-  createDbClient,
-  DEFAULT_SEARCH_SCHEMAS,
-  getRepositoryContext,
-  getSearchProviderFactory,
-  requireValidSchema,
+  createConsoleLogger,
+  createInfrastructure, requireValidSchema
 } from '@abe-stack/db';
-import { createEmailService, emailTemplates } from '@abe-stack/email';
-import { createPostgresQueueStore, createQueueServer, createWriteService } from '@abe-stack/jobs';
-import { createNotificationProviderService } from '@abe-stack/notifications';
-import { registerWebSocket } from '@abe-stack/realtime';
-import { createStorage } from '@abe-stack/storage';
-import { logStartupSummary } from '@health';
+import { BaseError, SubscriptionManager } from '@abe-stack/shared';
+
+import { logStartupSummary } from '@abe-stack/system';
+import { registerWebSocket } from '@abe-stack/websocket';
 import { registerRoutes } from '@routes';
 import { type AppContext, type IServiceContainer } from '@shared';
 
-import type { CacheProvider } from '@abe-stack/cache';
-import type { AppConfig, BillingService, EmailService, NotificationService } from '@abe-stack/core';
-import type { PostgresPubSub } from '@abe-stack/core/pubsub/postgres';
-import type { DbClient, Repositories, ServerSearchProvider } from '@abe-stack/db';
-import type { QueueServer, WriteService } from '@abe-stack/jobs';
-import type { FcmConfig, NotificationFactoryOptions } from '@abe-stack/notifications';
-import type { StorageProvider } from '@abe-stack/storage';
+import type { CacheProvider, DbClient, PostgresPubSub, QueueServer, Repositories, ServerSearchProvider, StorageProvider, WriteService } from '@abe-stack/db';
+import type { AppConfig, BillingService, EmailService, NotificationService } from '@abe-stack/shared';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 import { createServer, listen } from '@/server';
@@ -76,99 +61,33 @@ export class App implements IServiceContainer {
 
   constructor(options: AppOptions) {
     this.config = options.config;
-    const connectionString = buildConnectionString(this.config.database);
 
-    // 1. Data Persistence
-    this.db = options.db ?? createDbClient(connectionString);
-    const repoCtx = getRepositoryContext(connectionString);
-    this.repos = options.repos ?? repoCtx.repos;
+    // Setup Logger immediately
+    this._fallbackLogger = createConsoleLogger(this.config.server.logLevel) as unknown as FastifyBaseLogger;
 
-    // 2. Storage & Messaging
-    this.storage = options.storage ?? createStorage(this.config.storage);
-    this.email = options.email ?? createEmailService(this.config.email);
-
-    // 3. Notifications
-    if (options.notifications !== undefined) {
-      this.notifications = options.notifications;
-    } else {
-      const notificationOptions: NotificationFactoryOptions = {};
-      if (this.config.notifications.provider === 'fcm') {
-        notificationOptions.fcm = this.config.notifications.config as FcmConfig;
-      }
-      this.notifications = createNotificationProviderService(notificationOptions);
-    }
-
-    // 4. Billing
-    this.billing =
-      options.billing ??
-      createBillingProvider({
-        enabled: this.config.billing.enabled,
-        currency: this.config.billing.currency,
-        plans: this.config.billing.plans,
-        provider: this.config.billing.provider,
-        stripe: this.config.billing.stripe,
-        paypal: this.config.billing.paypal,
-        urls: this.config.billing.urls,
-      });
-
-    // 5. Search
-    const userSearchSchema = DEFAULT_SEARCH_SCHEMAS['users'];
-    if (userSearchSchema === undefined) {
-      throw new Error('User search schema not found');
-    }
-
-    this.search =
-      options.search ??
-      getSearchProviderFactory().createSqlProvider(this.db, this.repos, userSearchSchema);
-
-    // 6. Async Patterns (Write & Queue)
+    // Setup PubSub Manager (Kernel)
     this.pubsub = new SubscriptionManager();
-    this.write = options.write ?? createWriteService({ db: this.db, pubsub: this.pubsub });
 
-    this.queue =
-      options.queue ??
-      createQueueServer({
-        store: createPostgresQueueStore(this.db),
-        config: this.config.queue,
-        log: this.log,
-        handlers: {},
-      });
+    // Initialize Infrastructure via Container
+    const infra = createInfrastructure(this.config, this.log, this.pubsub);
 
-    // 7. Email Templates (for auth package handlers)
-    this.emailTemplates = emailTemplates;
+    // Assign Services (allow overrides from options for testing)
+    this.db = options.db ?? infra.db;
+    this.repos = options.repos ?? infra.repos;
+    this.email = options.email ?? infra.email;
+    this.storage = options.storage ?? infra.storage;
+    this.notifications = options.notifications ?? infra.notifications;
+    this.billing = options.billing ?? infra.billing;
+    this.search = options.search ?? infra.search;
+    this.queue = options.queue ?? infra.queue;
+    this.write = options.write ?? infra.write;
+    this.cache = options.cache ?? infra.cache;
+    this.emailTemplates = infra.emailTemplates;
 
-    // 8. Cache
-    this.cache =
-      options.cache ??
-      createMemoryCache({
-        defaultTtl: this.config.cache.ttl,
-        maxSize: this.config.cache.maxSize,
-      });
-
-    // 9. Scaling Adapter
-    this.setupPubSub(connectionString);
+    this._pgPubSub = infra.pgPubSub;
   }
 
-  private setupPubSub(connectionString: string): void {
-    const pubsubConnString =
-      this.config.database.provider === 'postgresql'
-        ? (this.config.database.connectionString ?? connectionString)
-        : null;
 
-    if (pubsubConnString !== null && pubsubConnString !== '' && this.config.env !== 'test') {
-      this._pgPubSub = createPostgresPubSub({
-        connectionString: pubsubConnString,
-        onMessage: (key, version) => {
-          this.pubsub.publishLocal(key, version);
-        },
-        onError: (err: Error) => {
-          this.log.error({ err }, 'PostgresPubSub error');
-        },
-      });
-      // Do not start() here, wait for app.start()
-      this.pubsub.setAdapter(this._pgPubSub);
-    }
-  }
 
   private setupErrorHandler(server: FastifyInstance): void {
     server.setErrorHandler((error, request, reply) => {

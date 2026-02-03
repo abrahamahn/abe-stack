@@ -149,12 +149,12 @@ apps/server/src/infra/*
 
 | Package             | Can Import From    |
 | ------------------- | ------------------ |
-| `@abe-stack/core`   | External deps only |
-| `@abe-stack/ui`     | `@abe-stack/core`  |
-| `@abe-stack/client` | `@abe-stack/core`  |
-| `@abe-stack/tests`  | `@abe-stack/core`  |
+| `@abe-stack/shared`   | External deps only |
+| `@abe-stack/ui`     | `@abe-stack/shared`  |
+| `@abe-stack/engine` | `@abe-stack/shared`  |
+| `@abe-stack/tests`  | `@abe-stack/shared`  |
 | `apps/web`          | All packages       |
-| `apps/server`       | `@abe-stack/core`  |
+| `apps/server`       | `@abe-stack/shared`  |
 
 ---
 

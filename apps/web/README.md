@@ -325,9 +325,9 @@ React Query cache persisted to IndexedDB (24-hour max age):
 
 **Internal:**
 
-- `@abe-stack/core` - types, validation, stores
+- `@abe-stack/shared` - types, validation, stores
 - `@abe-stack/ui` - React components
-- `@abe-stack/client` - API client + React Query hooks
+- `@abe-stack/engine` - API client + React Query hooks
 
 **External:**
 

@@ -7,7 +7,7 @@
 
 import { Button, Dropdown, MenuItem, Text } from '@abe-stack/ui';
 
-import type { JobStatus } from '@abe-stack/core';
+import type { JobStatus } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

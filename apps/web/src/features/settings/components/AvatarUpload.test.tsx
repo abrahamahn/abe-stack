@@ -11,8 +11,8 @@
  * - Preview functionality
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AvatarUpload } from './AvatarUpload';
 
@@ -48,8 +48,8 @@ vi.mock('@abe-stack/ui', async () => {
       children: React.ReactNode;
       onClick?: () => void;
       disabled?: boolean;
-      variant?: string;
-      type?: string;
+      variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'text' | 'danger' | 'link';
+      type?: 'submit' | 'reset' | 'button';
       className?: string;
     }) => (
       <button
@@ -93,19 +93,18 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-import { useAvatarUpload, useAvatarDelete } from '../hooks';
+import { useAvatarDelete, useAvatarUpload } from '../hooks';
 
 describe('AvatarUpload', () => {
   let mockUploadAvatar: ReturnType<typeof vi.fn>;
   let mockDeleteAvatar: ReturnType<typeof vi.fn>;
   let mockResetUpload: ReturnType<typeof vi.fn>;
   let mockResetDelete: ReturnType<typeof vi.fn>;
-  let mockOnSuccess: ReturnType<typeof vi.fn>;
+  let mockOnSuccess: any;
 
   const defaultProps: AvatarUploadProps = {
     currentAvatarUrl: null,
     userName: 'John Doe',
-    onSuccess: undefined,
   };
 
   beforeEach(() => {
@@ -118,21 +117,23 @@ describe('AvatarUpload', () => {
     vi.mocked(useAvatarUpload).mockReturnValue({
       uploadAvatar: mockUploadAvatar,
       isLoading: false,
+      isFetching: false,
       isSuccess: false,
       isError: false,
       error: null,
       avatarUrl: null,
       reset: mockResetUpload,
-    });
+    } as any);
 
     vi.mocked(useAvatarDelete).mockReturnValue({
       deleteAvatar: mockDeleteAvatar,
       isLoading: false,
+      isFetching: false,
       isSuccess: false,
       isError: false,
       error: null,
       reset: mockResetDelete,
-    });
+    } as any);
 
     // Mock window.alert and window.confirm
     vi.spyOn(window, 'alert').mockImplementation(() => {});
@@ -420,14 +421,15 @@ describe('AvatarUpload', () => {
 
     it('should show uploading state on button', async () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} />);
 
@@ -442,14 +444,15 @@ describe('AvatarUpload', () => {
 
     it('should disable buttons during upload', async () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} currentAvatarUrl="https://example.com/avatar.jpg" />);
 
@@ -462,14 +465,15 @@ describe('AvatarUpload', () => {
 
     it('should show spinner overlay during upload', () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} currentAvatarUrl="https://example.com/avatar.jpg" />);
 
@@ -477,42 +481,45 @@ describe('AvatarUpload', () => {
     });
 
     it('should call onSuccess after successful upload', () => {
-      const onSuccessMock = vi.fn();
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: ((response: any) => void) | undefined;
 
-      vi.mocked(useAvatarUpload).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(useAvatarUpload).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          uploadAvatar: mockUploadAvatar,
+          uploadAvatar: mockUploadAvatar as any,
           isLoading: false,
+          isFetching: false,
           isSuccess: false,
           isError: false,
           error: null,
           avatarUrl: null,
-          reset: mockResetUpload,
-        };
+          reset: mockResetUpload as any,
+        } as any;
       });
 
-      render(<AvatarUpload {...defaultProps} onSuccess={onSuccessMock} />);
+      render(<AvatarUpload {...defaultProps} onSuccess={mockOnSuccess} />);
 
       // Simulate successful upload by calling the captured callback
       if (capturedOnSuccess !== undefined) {
-        capturedOnSuccess();
+        capturedOnSuccess({
+          avatarUrl: 'https://example.com/new-avatar.jpg',
+        });
       }
 
-      expect(onSuccessMock).toHaveBeenCalled();
+      expect(mockOnSuccess).toHaveBeenCalled();
     });
 
     it('should display upload error', () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: false,
+        isFetching: false,
         isSuccess: false,
         isError: true,
         error: new Error('Upload failed'),
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} />);
 
@@ -552,11 +559,12 @@ describe('AvatarUpload', () => {
       vi.mocked(useAvatarDelete).mockReturnValue({
         deleteAvatar: mockDeleteAvatar,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         reset: mockResetDelete,
-      });
+      } as any);
 
       render(<AvatarUpload {...defaultProps} currentAvatarUrl="https://example.com/avatar.jpg" />);
 
@@ -571,11 +579,12 @@ describe('AvatarUpload', () => {
       vi.mocked(useAvatarDelete).mockReturnValue({
         deleteAvatar: mockDeleteAvatar,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         reset: mockResetDelete,
-      });
+      } as any);
 
       render(<AvatarUpload {...defaultProps} currentAvatarUrl="https://example.com/avatar.jpg" />);
 
@@ -583,40 +592,41 @@ describe('AvatarUpload', () => {
     });
 
     it('should call onSuccess after successful delete', () => {
-      const onSuccessMock = vi.fn();
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: ((response: any) => void) | undefined;
 
-      vi.mocked(useAvatarDelete).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(useAvatarDelete).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          deleteAvatar: mockDeleteAvatar,
+          deleteAvatar: mockDeleteAvatar as any,
           isLoading: false,
+          isFetching: false,
           isSuccess: false,
           isError: false,
           error: null,
-          reset: mockResetDelete,
-        };
+          reset: mockResetDelete as any,
+        } as any;
       });
 
-      render(<AvatarUpload {...defaultProps} onSuccess={onSuccessMock} />);
+      render(<AvatarUpload {...defaultProps} onSuccess={mockOnSuccess} />);
 
       // Simulate successful delete by calling the captured callback
       if (capturedOnSuccess !== undefined) {
-        capturedOnSuccess();
+        capturedOnSuccess({ success: true });
       }
 
-      expect(onSuccessMock).toHaveBeenCalled();
+      expect(mockOnSuccess).toHaveBeenCalled();
     });
 
     it('should display delete error', () => {
       vi.mocked(useAvatarDelete).mockReturnValue({
-        deleteAvatar: mockDeleteAvatar,
+        deleteAvatar: mockDeleteAvatar as any,
         isLoading: false,
+        isFetching: false,
         isSuccess: false,
         isError: true,
         error: new Error('Delete failed'),
-        reset: mockResetDelete,
-      });
+        reset: mockResetDelete as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} />);
 
@@ -675,23 +685,25 @@ describe('AvatarUpload', () => {
   describe('error display', () => {
     it('should prioritize upload error over delete error', () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: false,
+        isFetching: false,
         isSuccess: false,
         isError: true,
         error: new Error('Upload error'),
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       vi.mocked(useAvatarDelete).mockReturnValue({
-        deleteAvatar: mockDeleteAvatar,
+        deleteAvatar: mockDeleteAvatar as any,
         isLoading: false,
+        isFetching: false,
         isSuccess: false,
         isError: true,
         error: new Error('Delete error'),
-        reset: mockResetDelete,
-      });
+        reset: mockResetDelete as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} />);
 
@@ -723,23 +735,25 @@ describe('AvatarUpload', () => {
 
     it('should handle combined loading states', () => {
       vi.mocked(useAvatarUpload).mockReturnValue({
-        uploadAvatar: mockUploadAvatar,
+        uploadAvatar: mockUploadAvatar as any,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
         avatarUrl: null,
-        reset: mockResetUpload,
-      });
+        reset: mockResetUpload as any,
+      } as any);
 
       vi.mocked(useAvatarDelete).mockReturnValue({
-        deleteAvatar: mockDeleteAvatar,
+        deleteAvatar: mockDeleteAvatar as any,
         isLoading: true,
+        isFetching: true,
         isSuccess: false,
         isError: false,
         error: null,
-        reset: mockResetDelete,
-      });
+        reset: mockResetDelete as any,
+      } as any);
 
       render(<AvatarUpload {...defaultProps} />);
 
@@ -755,26 +769,29 @@ describe('AvatarUpload', () => {
     });
 
     it('should handle onSuccess prop being undefined', () => {
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: ((response: any) => void) | undefined;
 
-      vi.mocked(useAvatarUpload).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(useAvatarUpload).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          uploadAvatar: mockUploadAvatar,
+          uploadAvatar: mockUploadAvatar as any,
           isLoading: false,
+          isFetching: false,
           isSuccess: false,
           isError: false,
           error: null,
           avatarUrl: null,
-          reset: mockResetUpload,
-        };
+          reset: mockResetUpload as any,
+        } as any;
       });
 
-      render(<AvatarUpload {...defaultProps} onSuccess={undefined} />);
+      render(<AvatarUpload {...defaultProps} />);
 
       // Call the captured callback - should not throw
       if (capturedOnSuccess !== undefined) {
-        capturedOnSuccess();
+        capturedOnSuccess({
+          avatarUrl: 'https://example.com/new-avatar.jpg',
+        });
       }
 
       // No assertions needed - just verify it doesn't throw

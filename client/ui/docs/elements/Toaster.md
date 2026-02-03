@@ -48,7 +48,7 @@ const handleDismiss = (id) => {
 
 ```tsx
 import { Toaster } from '@abe-stack/ui';
-import { toastStore } from '@abe-stack/core';
+import { toastStore } from '@abe-stack/shared';
 
 const MyToaster = () => {
   const { messages, dismiss } = toastStore();
@@ -87,7 +87,7 @@ export const Toaster = () => {
 ### Showing Toasts
 
 ```tsx
-import { toastStore } from '@abe-stack/core';
+import { toastStore } from '@abe-stack/shared';
 
 // Show a toast with title only
 toastStore.getState().show({ title: 'Changes saved' });

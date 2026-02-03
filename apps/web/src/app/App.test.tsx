@@ -22,7 +22,7 @@ import type { ClientEnvironment } from './ClientEnvironment';
 // Mock stores - this is needed for toastStore hook
 // ============================================================================
 
-vi.mock('@abe-stack/stores', () => ({
+vi.mock('@abe-stack/react', () => ({
   toastStore: (): { messages: never[]; dismiss: () => void } => ({
     messages: [],
     dismiss: vi.fn(),

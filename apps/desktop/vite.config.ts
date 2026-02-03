@@ -4,7 +4,7 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { pickAvailablePort } from '../../core/src/shared/port';
+import { pickAvailablePort } from '@abe-stack/shared/shared';
 
 const repoRoot = path.resolve(__dirname, '../../');
 const desktopRoot = path.join(repoRoot, 'apps/desktop');
@@ -28,31 +28,46 @@ export default defineConfig(async ({ command }) => {
     resolve: {
       alias: {
         // Monorepo packages → source files
-        '@abe-stack/core': resolveAlias('core/src'),
+        '@abe-stack/shared': resolveAlias('kernel/src'),
         '@abe-stack/ui': resolveAlias('client/ui/src'),
-        '@abe-stack/client': resolveAlias('client/src'),
-        '@abe-stack/contracts': resolveAlias('infra/contracts/src'),
-        '@abe-stack/stores': resolveAlias('client/stores/src'),
-        '@abe-stack/db': resolveAlias('infra/db/src'),
-        '@abe-stack/media': resolveAlias('infra/media/src'),
+        '@abe-stack/api': resolveAlias('client/api/src'),
+        '@abe-stack/engine': resolveAlias('premium/client/engine/src'),
+        '@abe-stack/shared': resolveAlias('kernel/src/contracts'),
+        '@abe-stack/react': resolveAlias('client/react/src'),
+        '@abe-stack/db': resolveAlias('infra/src'),
+        '@abe-stack/media': resolveAlias('premium/media/src'),
         // UI package internal aliases
         '@components': resolveAlias('client/ui/src/components'),
         '@containers': resolveAlias('client/ui/src/layouts/containers'),
         '@elements': resolveAlias('client/ui/src/elements'),
-        '@hooks': resolveAlias('client/ui/src/hooks'),
+        '@hooks': resolveAlias('client/react/src/hooks'),
         '@layers': resolveAlias('client/ui/src/layouts/layers'),
         '@layouts': resolveAlias('client/ui/src/layouts'),
-        '@providers': resolveAlias('client/ui/src/providers'),
-        '@router': resolveAlias('client/ui/src/router'),
+        '@providers': resolveAlias('client/react/src/providers'),
+        '@router': resolveAlias('client/react/src/router'),
         '@shells': resolveAlias('client/ui/src/layouts/shells'),
         '@theme': resolveAlias('client/ui/src/theme'),
         '@types': resolveAlias('client/ui/src/types'),
         '@utils': resolveAlias('client/ui/src/utils'),
         // Core package internal aliases
-        '@contracts': resolveAlias('core/src/contracts'),
-        '@shared': resolveAlias('core/src/shared'),
-        // Desktop app aliases
-        '@': resolveAlias('apps/desktop/src'),
+        '@contracts': resolveAlias('kernel/src/contracts'),
+        '@shared': resolveAlias('kernel/src/shared'),
+        // Web app aliases (Shared with Desktop)
+        '@': resolveAlias('apps/web/src'),
+        '@admin': resolveAlias('apps/web/src/features/admin'),
+        '@api': resolveAlias('apps/web/src/api'),
+        '@app': resolveAlias('apps/web/src/app'),
+        '@auth': resolveAlias('apps/web/src/features/auth'),
+        '@billing': resolveAlias('apps/web/src/features/billing'),
+        '@catalog': resolveAlias('apps/web/src/features/demo/catalog'),
+        '@config': resolveAlias('apps/web/src/config'),
+        '@dashboard': resolveAlias('apps/web/src/features/dashboard'),
+        '@demo': resolveAlias('apps/web/src/features/demo'),
+        '@features': resolveAlias('apps/web/src/features'),
+        '@pages': resolveAlias('apps/web/src/pages'),
+        '@settings': resolveAlias('apps/web/src/features/settings'),
+        // Desktop specific aliases
+        '@desktop': resolveAlias('apps/desktop/src'),
         '@ipc': resolveAlias('apps/desktop/src/electron/ipc'),
       },
     },
@@ -73,6 +88,9 @@ export default defineConfig(async ({ command }) => {
       host,
       port: rendererPort,
       strictPort: true,
+      fs: {
+        allow: [repoRoot],
+      },
     },
   };
 });

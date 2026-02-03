@@ -2,18 +2,33 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as adminApi from '../api/adminApi';
+import { createAdminApiClient } from '../services/adminApi';
 
 import { useAdminUsers } from './useAdminUsers';
 
-import type { AdminUserListFilters, AdminUserListResponse } from '@abe-stack/core';
+import type { AdminUserListFilters, AdminUserListResponse } from '@abe-stack/shared';
+import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('../api/adminApi', () => ({
-  listUsers: vi.fn(),
+vi.mock('../services/adminApi', () => ({
+  createAdminApiClient: vi.fn(),
 }));
 
+vi.mock('@app/ClientEnvironment', () => ({
+  useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
+}));
+
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: vi.fn().mockReturnValue('mock-token'),
+    },
+  };
+});
+
 describe('useAdminUsers', () => {
-  const mockListUsers = vi.mocked(adminApi.listUsers);
+  const mockListUsers = vi.fn();
 
   const mockResponse: AdminUserListResponse = {
     data: [
@@ -44,6 +59,7 @@ describe('useAdminUsers', () => {
     ],
     total: 2,
     page: 1,
+    limit: 20,
     totalPages: 1,
     hasNext: false,
     hasPrev: false,
@@ -51,6 +67,9 @@ describe('useAdminUsers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(createAdminApiClient).mockReturnValue({
+      listUsers: mockListUsers,
+    } as unknown as AdminApiClient);
   });
 
   describe('when initialized', () => {
@@ -89,7 +108,7 @@ describe('useAdminUsers', () => {
         search: 'test',
       };
 
-      renderHook(() => useAdminUsers(initialFilters));
+      renderHook(() => useAdminUsers(initialFilters as any));
 
       await waitFor(() => {
         expect(mockListUsers).toHaveBeenCalledWith({
@@ -167,7 +186,7 @@ describe('useAdminUsers', () => {
         status: 'active',
       };
 
-      result.current.setFilters(newFilters);
+      result.current.setFilters(newFilters as any);
 
       await waitFor(() => {
         expect(mockListUsers).toHaveBeenCalledWith(
@@ -275,6 +294,7 @@ describe('useAdminUsers', () => {
         data: [],
         total: 0,
         page: 1,
+        limit: 20,
         totalPages: 0,
         hasNext: false,
         hasPrev: false,

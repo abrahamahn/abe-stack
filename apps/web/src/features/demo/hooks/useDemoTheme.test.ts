@@ -20,7 +20,7 @@ describe('useDemoTheme', () => {
       mode: 'light',
       cycleMode: vi.fn(),
       resolvedTheme: 'light',
-    });
+    } as any);
     const { result } = renderHook(() => useDemoTheme());
     expect(result.current.getThemeIcon()).toBe('☀️');
     expect(result.current.getThemeLabel()).toBe('Light');
@@ -31,7 +31,7 @@ describe('useDemoTheme', () => {
       mode: 'dark',
       cycleMode: vi.fn(),
       resolvedTheme: 'dark',
-    });
+    } as any);
     const { result } = renderHook(() => useDemoTheme());
     expect(result.current.getThemeIcon()).toBe('🌙');
     expect(result.current.getThemeLabel()).toBe('Dark');
@@ -42,7 +42,7 @@ describe('useDemoTheme', () => {
       mode: 'system',
       cycleMode: vi.fn(),
       resolvedTheme: 'light',
-    });
+    } as any);
     const { result } = renderHook(() => useDemoTheme());
     expect(result.current.getThemeIcon()).toBe('💻');
     expect(result.current.getThemeLabel()).toBe('System');

@@ -10,16 +10,16 @@
  * - User confirmations and error handling
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { OAuthConnectionsList } from './OAuthConnectionsList';
 
+import type { OAuthConnection, OAuthProvider } from '@abe-stack/shared';
 import type { OAuthConnectionsListProps } from './OAuthConnectionsList';
-import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
 
 // Mock the SDK hooks
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useEnabledOAuthProviders: vi.fn(),
   useOAuthConnections: vi.fn(),
 }));
@@ -45,8 +45,8 @@ vi.mock('@abe-stack/ui', async () => {
       children: React.ReactNode;
       onClick?: () => void;
       disabled?: boolean;
-      variant?: string;
-      size?: string;
+      variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'text' | 'danger' | 'link';
+      size?: 'small' | 'medium' | 'large';
       className?: string;
     }) => (
       <button
@@ -71,36 +71,29 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/client';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/engine';
 
 describe('OAuthConnectionsList', () => {
   let mockGetLinkUrl: ReturnType<typeof vi.fn>;
   let mockUnlink: ReturnType<typeof vi.fn>;
-  let mockOnSuccess: ReturnType<typeof vi.fn>;
+  let mockOnSuccess: any;
 
   const mockConnections: OAuthConnection[] = [
     {
       id: 'conn-1',
-      userId: 'user-123',
       provider: 'google',
-      providerId: 'google-user-123',
       providerEmail: 'user@gmail.com',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      connectedAt: new Date(),
     },
     {
       id: 'conn-2',
-      userId: 'user-123',
       provider: 'github',
-      providerId: 'github-user-456',
       providerEmail: 'user@github.com',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      connectedAt: new Date(),
     },
   ];
 
   const defaultProps: OAuthConnectionsListProps = {
-    onSuccess: undefined,
   };
 
   beforeEach(() => {
@@ -122,17 +115,25 @@ describe('OAuthConnectionsList', () => {
     vi.mocked(useEnabledOAuthProviders).mockReturnValue({
       providers: ['google', 'github', 'apple'] as OAuthProvider[],
       isLoading: false,
+      isFetching: false,
+      isSuccess: true,
+      isError: false,
       error: null,
-    });
+      refetch: vi.fn() as any,
+    } as any);
 
     vi.mocked(useOAuthConnections).mockReturnValue({
       connections: mockConnections,
       isLoading: false,
+      isFetching: false,
+      isSuccess: true,
+      isError: false,
       isActing: false,
       error: null,
-      unlink: mockUnlink,
-      getLinkUrl: mockGetLinkUrl,
-    });
+      unlink: mockUnlink as any,
+      getLinkUrl: mockGetLinkUrl as any,
+      refetch: vi.fn() as any,
+    } as any);
   });
 
   // ============================================================================
@@ -144,8 +145,12 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useEnabledOAuthProviders).mockReturnValue({
         providers: [],
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
+        isError: false,
         error: null,
-      });
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -157,11 +162,15 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: [],
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
+        isError: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -173,17 +182,25 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useEnabledOAuthProviders).mockReturnValue({
         providers: [],
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
+        isError: false,
         error: null,
-      });
+        refetch: vi.fn() as any,
+      } as any);
 
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: [],
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
+        isError: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -200,8 +217,12 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useEnabledOAuthProviders).mockReturnValue({
         providers: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         error: new Error('Failed to load providers'),
-      });
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -214,11 +235,15 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         isActing: false,
         error: new Error('Failed to load connections'),
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -230,17 +255,25 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useEnabledOAuthProviders).mockReturnValue({
         providers: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         error: new Error('Providers error'),
-      });
+        refetch: vi.fn() as any,
+      } as any);
 
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         isActing: false,
         error: new Error('Connections error'),
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -258,8 +291,12 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useEnabledOAuthProviders).mockReturnValue({
         providers: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         error: null,
-      });
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -274,9 +311,9 @@ describe('OAuthConnectionsList', () => {
         isLoading: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -344,9 +381,9 @@ describe('OAuthConnectionsList', () => {
     it('should generate correct link URLs for different providers', () => {
       render(<OAuthConnectionsList {...defaultProps} />);
 
-      expect(mockGetLinkUrl('google')).toBe('/auth/oauth/google');
-      expect(mockGetLinkUrl('github')).toBe('/auth/oauth/github');
-      expect(mockGetLinkUrl('apple')).toBe('/auth/oauth/apple');
+      expect((mockGetLinkUrl as any)('google')).toBe('/auth/oauth/google');
+      expect((mockGetLinkUrl as any)('github')).toBe('/auth/oauth/github');
+      expect((mockGetLinkUrl as any)('apple')).toBe('/auth/oauth/apple');
     });
   });
 
@@ -360,7 +397,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to disconnect Google?');
@@ -372,7 +409,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} onSuccess={mockOnSuccess} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -386,7 +423,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       expect(mockUnlink).not.toHaveBeenCalled();
@@ -396,11 +433,15 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: mockConnections,
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         isActing: true,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -411,11 +452,15 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: mockConnections,
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         isActing: true,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -431,7 +476,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -446,7 +491,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -461,7 +506,7 @@ describe('OAuthConnectionsList', () => {
       const { rerender } = render(<OAuthConnectionsList {...defaultProps} />);
 
       // First disconnect - should fail
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -470,7 +515,7 @@ describe('OAuthConnectionsList', () => {
 
       // Second disconnect - should succeed and clear error
       rerender(<OAuthConnectionsList {...defaultProps} />);
-      const secondDisconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const secondDisconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(secondDisconnectButton);
 
       await waitFor(() => {
@@ -484,7 +529,7 @@ describe('OAuthConnectionsList', () => {
 
       render(<OAuthConnectionsList {...defaultProps} onSuccess={mockOnSuccess} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -553,15 +598,14 @@ describe('OAuthConnectionsList', () => {
       // The component creates a getToken function that calls localStorage
       const calls = vi.mocked(useEnabledOAuthProviders).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
-      const config = calls[0][0];
-      expect(config.getToken()).toBe('mock-token');
+      const config = calls[0]![0]!;
+      expect(config.getToken!()).toBe('mock-token');
     });
 
     it('should handle missing API URL', () => {
       // Set VITE_API_URL to undefined
       const originalEnv = import.meta.env['VITE_API_URL'];
-      // @ts-expect-error - testing undefined case
-      import.meta.env['VITE_API_URL'] = undefined;
+      (import.meta.env as any)['VITE_API_URL'] = undefined as unknown as string;
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -582,11 +626,15 @@ describe('OAuthConnectionsList', () => {
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -597,23 +645,24 @@ describe('OAuthConnectionsList', () => {
       const partialConnections: OAuthConnection[] = [
         {
           id: 'conn-1',
-          userId: 'user-123',
           provider: 'google',
-          providerId: 'google-user-123',
           providerEmail: 'user@gmail.com',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          connectedAt: new Date(),
         },
       ];
 
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: partialConnections,
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 
@@ -630,9 +679,9 @@ describe('OAuthConnectionsList', () => {
     it('should handle undefined onSuccess prop', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-      render(<OAuthConnectionsList {...defaultProps} onSuccess={undefined} />);
+      render(<OAuthConnectionsList {...defaultProps} />);
 
-      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0];
+      const disconnectButton = screen.getAllByTestId('button-Disconnect')[0]!;
       fireEvent.click(disconnectButton);
 
       await waitFor(() => {
@@ -654,23 +703,24 @@ describe('OAuthConnectionsList', () => {
       const connectionNoEmail: OAuthConnection[] = [
         {
           id: 'conn-1',
-          userId: 'user-123',
           provider: 'google',
-          providerId: 'google-user-123',
           providerEmail: '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          connectedAt: new Date(),
         },
       ];
 
       vi.mocked(useOAuthConnections).mockReturnValue({
         connections: connectionNoEmail,
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         isActing: false,
         error: null,
-        unlink: mockUnlink,
-        getLinkUrl: mockGetLinkUrl,
-      });
+        unlink: mockUnlink as any,
+        getLinkUrl: mockGetLinkUrl as any,
+        refetch: vi.fn() as any,
+      } as any);
 
       render(<OAuthConnectionsList {...defaultProps} />);
 

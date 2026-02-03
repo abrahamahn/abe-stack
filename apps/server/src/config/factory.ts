@@ -1,22 +1,27 @@
 // apps/server/src/config/factory.ts
-import { loadAuthConfig, validateAuthConfig } from '@abe-stack/auth';
-import { loadBillingConfig, validateBillingConfig } from '@abe-stack/billing';
-import { loadCacheConfig } from '@abe-stack/cache';
-import { EnvSchema, initEnv } from '@abe-stack/core/config';
-import {
-  loadDatabaseConfig,
-  loadElasticsearchConfig,
-  loadSqlSearchConfig,
-  validateElasticsearchConfig,
-  validateSqlSearchConfig,
-} from '@abe-stack/db';
-import { loadEmailConfig } from '@abe-stack/email';
-import { loadServerConfig } from '@abe-stack/http';
-import { loadQueueConfig } from '@abe-stack/jobs';
-import { loadNotificationsConfig, validateNotificationsConfig } from '@abe-stack/notifications';
-import { loadStorageConfig } from '@abe-stack/storage';
+import { EnvSchema, initEnv } from '@abe-stack/backend-core/config';
 
-import type { AppConfig, FullEnv } from '@abe-stack/core/config';
+import { loadAuthConfig, validateAuthConfig } from './auth/auth';
+import { loadCacheConfig } from './infra/cache';
+import { loadDatabaseConfig } from './infra/database';
+import { loadPackageManagerConfig } from './infra/package';
+import { loadQueueConfig } from './infra/queue';
+import { loadServerConfig } from './infra/server';
+import { loadStorageConfig } from './infra/storage';
+import { loadBillingConfig, validateBillingConfig } from './services/billing';
+import { loadEmailConfig } from './services/email';
+import { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
+import {
+    loadElasticsearchConfig,
+    loadSqlSearchConfig,
+    validateElasticsearchConfig,
+    validateSqlSearchConfig,
+} from './services/search';
+
+import type {
+    AppConfig,
+    FullEnv,
+} from '@abe-stack/backend-core/config';
 
 /**
  * Config Factory
@@ -58,8 +63,6 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
 
   const searchProvider = env.SEARCH_PROVIDER;
 
-  const billingConfig = loadBillingConfig(env, server.appBaseUrl);
-
   const config: AppConfig = {
     env: nodeEnv,
     server,
@@ -67,7 +70,7 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
     auth: loadAuthConfig(env, server.apiBaseUrl),
     email: loadEmailConfig(env),
     storage: loadStorageConfig(env),
-    billing: billingConfig,
+    billing: loadBillingConfig(env, server.appBaseUrl),
     cache: loadCacheConfig(env),
     queue: loadQueueConfig(env),
     notifications: loadNotificationsConfig(env),
@@ -81,10 +84,7 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
             provider: 'sql' as const,
             config: loadSqlSearchConfig(env),
           },
-    features: {
-      admin: env.ENABLE_ADMIN !== 'false',
-      realtime: env.ENABLE_REALTIME !== 'false',
-    },
+    packageManager: loadPackageManagerConfig(env),
   };
 
   validate(config);
@@ -113,7 +113,9 @@ function validate(config: AppConfig): void {
 
   // Search Domain - Using clean Type Predicates
   if (config.search.provider === 'elasticsearch') {
-    errors.push(...validateElasticsearchConfig(config.search.config));
+    errors.push(
+      ...validateElasticsearchConfig(config.search.config),
+    );
   } else {
     errors.push(...validateSqlSearchConfig(config.search.config));
   }

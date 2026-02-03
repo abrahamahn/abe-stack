@@ -6,7 +6,7 @@
  * of the settings API and query cache invalidation.
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/client';
+import { QueryCache, QueryCacheProvider } from '@abe-stack/engine';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React, { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
@@ -34,9 +34,8 @@ const mockUpdateProfile = vi.fn();
 const createWrapper = (
   cache: QueryCache,
 ): ((props: { children: ReactNode }) => React.ReactElement) => {
-  // eslint-disable-next-line react/no-multi-comp, react/display-name
   return ({ children }: { children: ReactNode }): React.ReactElement => {
-    return React.createElement(QueryCacheProvider, { cache: cache }, children);
+    return React.createElement(QueryCacheProvider, { cache: cache, children }, children);
   };
 };
 
@@ -46,7 +45,9 @@ const mockUser: User = {
   name: 'Test User',
   avatarUrl: null,
   role: 'user',
+  isVerified: true,
   createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 describe('useProfileUpdate', () => {

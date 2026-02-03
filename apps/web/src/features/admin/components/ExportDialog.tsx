@@ -10,7 +10,7 @@ import { useCallback, useState } from 'react';
 
 import { useExportEvents } from '../hooks/useExportEvents';
 
-import type { SecurityEventsFilter } from '@abe-stack/core';
+import type { SecurityEventsFilter } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

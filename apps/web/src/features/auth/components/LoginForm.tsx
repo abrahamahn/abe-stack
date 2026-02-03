@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { OAuthButtons } from './OAuthButtons';
 
 import type { AuthMode } from './AuthForms';
-import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/core';
+import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface LoginFormProps {

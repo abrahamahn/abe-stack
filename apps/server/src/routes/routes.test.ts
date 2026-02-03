@@ -12,7 +12,6 @@
  * @complexity O(1) - Route registration is a constant-time operation
  */
 
-/* eslint-disable import-x/order -- vi.mock hoisting requires vitest import first */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================
@@ -20,7 +19,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // ============================================================================
 
 // Mock dependencies
-vi.mock('@abe-stack/http', () => ({
+vi.mock('@abe-stack/db', () => ({
   registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),
@@ -28,43 +27,36 @@ vi.mock('@abe-stack/http', () => ({
 }));
 
 vi.mock('@abe-stack/admin', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   adminRoutes: { 'admin/test': { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/auth', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   authRoutes: { 'auth/test': { method: 'POST', handler: vi.fn() } },
   createAuthGuard: vi.fn(),
 }));
 
 vi.mock('@abe-stack/billing', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   billingRoutes: { 'billing/test': { method: 'GET', handler: vi.fn() } },
   registerWebhookRoutes: vi.fn(),
 }));
 
 vi.mock('@abe-stack/notifications', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   notificationRoutes: { 'notifications/test': { method: 'POST', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/realtime', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   realtimeRoutes: { 'realtime/test': { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('./system.routes', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   systemRoutes: { 'system/test': { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/users', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   userRoutes: { 'users/test': { method: 'GET', handler: vi.fn() } },
 }));
 
-import { registerRouteMap } from '@abe-stack/http';
+import { registerRouteMap } from '@abe-stack/db';
 
 import { registerWebhookRoutes } from '@abe-stack/billing';
 import { registerRoutes } from './routes';
@@ -315,8 +307,7 @@ describe('registerRoutes', () => {
     test('should handle missing billing configuration as disabled', () => {
       const app = createMockFastify();
       const ctx = createMockContext(false);
-      // @ts-expect-error - Testing runtime behavior with malformed config
-      ctx.config.billing = undefined;
+      (ctx.config.billing as unknown) = undefined;
 
       // Will throw because code expects billing config to be defined
       // This documents expected behavior - billing config must be present

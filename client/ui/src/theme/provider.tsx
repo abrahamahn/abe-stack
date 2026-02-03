@@ -90,7 +90,6 @@ export type ThemeProviderProps = {
  * }
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function ThemeProvider({
   children,
   storageKey = 'theme-mode',

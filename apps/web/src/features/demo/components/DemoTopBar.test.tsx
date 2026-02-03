@@ -18,9 +18,9 @@ const mockUseSidePeek = vi.fn().mockReturnValue({
   toggle: mockToggle,
 });
 
-// Mock @abe-stack/core
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+// Mock @abe-stack/shared
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     toastStore: {
@@ -203,7 +203,7 @@ describe('DemoTopBar', () => {
     });
 
     it('handles user without email gracefully', () => {
-      render(<DemoTopBar {...authenticatedProps} user={{ email: undefined }} />);
+      render(<DemoTopBar {...authenticatedProps} user={{ email: undefined } as any} />);
       // Should not throw and should render Logout
       expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
     });

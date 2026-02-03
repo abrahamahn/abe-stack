@@ -5,20 +5,20 @@
  * Validates security metrics fetching with period selection and state management.
  */
 
-import * as sdk from '@abe-stack/client';
+import * as sdk from '@abe-stack/engine';
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSecurityMetrics } from './useSecurityMetrics';
 
+import type { SecurityMetrics } from '@abe-stack/shared';
 import type { MetricsPeriod } from './useSecurityMetrics';
-import type { SecurityMetrics } from '@abe-stack/core';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -34,8 +34,8 @@ vi.mock('../services/adminApi', () => ({
   })),
 }));
 
-vi.mock('@abe-stack/core', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/core')>('@abe-stack/core');
+vi.mock('@abe-stack/shared', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
   return {
     ...actual,
     tokenStore: {
@@ -66,8 +66,9 @@ const mockMetrics: SecurityMetrics = {
     { userId: 'user-2', count: 40 },
   ],
   period: 'day',
-  generatedAt: new Date('2024-01-01'),
-};
+  periodStart: '2024-01-01T00:00:00Z',
+  periodEnd: '2024-01-01T23:59:59Z',
+} as any;
 
 // ============================================================================
 // Tests
@@ -86,7 +87,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 
@@ -101,7 +102,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics({ period: 'week' }));
 
@@ -115,7 +116,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       renderHook(() => useSecurityMetrics());
 
@@ -135,7 +136,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 
@@ -150,7 +151,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       renderHook(() => useSecurityMetrics({ period: 'month' }));
 
@@ -168,7 +169,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       renderHook(() => useSecurityMetrics({ enabled: false }));
 
@@ -189,7 +190,7 @@ describe('useSecurityMetrics', () => {
         isError: true,
         error,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 
@@ -206,7 +207,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result, rerender } = renderHook(() => useSecurityMetrics());
 
@@ -225,7 +226,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const periods: MetricsPeriod[] = ['hour', 'day', 'week', 'month'];
       const { result, rerender } = renderHook(() => useSecurityMetrics());
@@ -250,7 +251,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: refetchFn,
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 
@@ -274,7 +275,7 @@ describe('useSecurityMetrics', () => {
           isError: false,
           error: null,
           refetch: vi.fn().mockResolvedValue(undefined),
-        };
+        } as any;
       });
 
       const { result, rerender } = renderHook(() => useSecurityMetrics());
@@ -300,7 +301,7 @@ describe('useSecurityMetrics', () => {
           isError: false,
           error: null,
           refetch: vi.fn().mockResolvedValue(undefined),
-        };
+        } as any;
       });
 
       renderHook(() => useSecurityMetrics({ period: 'hour' }));
@@ -317,7 +318,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 
@@ -332,7 +333,7 @@ describe('useSecurityMetrics', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityMetrics());
 

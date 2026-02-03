@@ -11,7 +11,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { InvoiceList, InvoiceRow } from './InvoiceRow';
 
-import type { Invoice } from '@abe-stack/core';
+import type { Invoice } from '@abe-stack/shared';
 
 const mockInvoice: Invoice = {
   id: 'inv_123',

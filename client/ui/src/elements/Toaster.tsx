@@ -2,7 +2,7 @@
 import '../styles/elements.css';
 import { ToastContainer } from '@components/Toast';
 
-import type { ToastMessage } from '@abe-stack/stores';
+import type { ToastMessage } from '@abe-stack/react';
 import type { ReactElement } from 'react';
 
 /** Position options for the fixed-position toast container */

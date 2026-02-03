@@ -1,8 +1,7 @@
 // apps/server/src/server.test.ts
-/* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { AppConfig } from '@abe-stack/core/config';
+import type { AppConfig } from '@abe-stack/shared/config';
 import type { DbClient } from '@abe-stack/db';
 import type { HasContext, IServiceContainer } from '@shared/index';
 import type { FastifyInstance } from 'fastify';
@@ -47,22 +46,21 @@ vi.mock('fastify', () => ({
   default: vi.fn(() => mockFastifyInstance),
 }));
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     createConsoleLogger: mockCreateConsoleLogger,
   };
 });
 
-// Mock the http package - server.ts imports from @abe-stack/http
-vi.mock('@abe-stack/http', () => ({
+// Mock the http package - server.ts imports from @abe-stack/db
+vi.mock('@abe-stack/db', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 
 // Mock security package for RateLimiter
-vi.mock('@abe-stack/security', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+vi.mock('@abe-stack/db', () => ({
   RateLimiter: class {
     check = vi.fn();
   },

@@ -48,35 +48,45 @@ const FILES_TO_EXPORT = [
   'apps/server/tsconfig.json',
   'apps/server/vitest.config.ts',
 
+  // infra (consolidated)
+  'infra/package.json',
+  'infra/tsconfig.json',
+  'infra/vitest.config.ts',
+
   // infra/contracts
   'infra/contracts/package.json',
   'infra/contracts/tsconfig.json',
   'infra/contracts/vitest.config.ts',
 
-  // core
-  'core/package.json',
-  'core/tsconfig.json',
-  'core/vitest.config.ts',
+  // kernel
+  'kernel/package.json',
+  'kernel/tsconfig.json',
+  'kernel/vitest.config.ts',
 
-  // infra/db
-  'infra/db/package.json',
-  'infra/db/tsconfig.json',
-  'infra/db/vitest.config.ts',
+  // premium/media
+  'premium/media/package.json',
+  'premium/media/tsconfig.json',
+  'premium/media/vitest.config.ts',
 
-  // infra/media
-  'infra/media/package.json',
-  'infra/media/tsconfig.json',
-  'infra/media/vitest.config.ts',
+  // premium/websocket
+  'premium/websocket/package.json',
+  'premium/websocket/tsconfig.json',
+  'premium/websocket/vitest.config.ts',
+
+  // premium/client/engine
+  'premium/client/engine/package.json',
+  'premium/client/engine/tsconfig.json',
+  'premium/client/engine/vitest.config.ts',
 
   // client
   'client/package.json',
   'client/tsconfig.json',
   'client/vitest.config.ts',
 
-  // client/stores
-  'client/stores/package.json',
-  'client/stores/tsconfig.json',
-  'client/stores/vitest.config.ts',
+  // client/react
+  'client/react/package.json',
+  'client/react/tsconfig.json',
+  'client/react/vitest.config.ts',
 
   // client/ui
   'client/ui/package.json',

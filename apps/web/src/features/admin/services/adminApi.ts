@@ -5,10 +5,20 @@
  * API client methods for admin security audit operations.
  */
 
-import { createApiError, NetworkError } from '@abe-stack/client';
-import { addAuthHeader } from '@abe-stack/core';
+import { createApiError, NetworkError } from '@abe-stack/engine';
+import { addAuthHeader } from '@abe-stack/shared';
 
-import type { ApiErrorBody } from '@abe-stack/client';
+import type { ApiErrorBody } from '@abe-stack/engine';
+import type {
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UnlockAccountRequest,
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Local Type Definitions
@@ -139,6 +149,13 @@ export interface AdminApiConfig {
 }
 
 export interface AdminApiClient {
+  // User management
+  listUsers: (filters?: AdminUserListFilters) => Promise<AdminUserListResponse>;
+  getUser: (userId: string) => Promise<AdminUser>;
+  updateUser: (userId: string, data: AdminUpdateUserRequest) => Promise<AdminUpdateUserResponse>;
+  lockUser: (userId: string, data: AdminLockUserRequest) => Promise<AdminLockUserResponse>;
+  unlockUser: (userId: string, data: UnlockAccountRequest) => Promise<AdminLockUserResponse>;
+
   // Security events
   listSecurityEvents: (
     request: SecurityEventsListRequestLocal,
@@ -200,6 +217,59 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
   };
 
   return {
+    async listUsers(filters?: AdminUserListFilters): Promise<AdminUserListResponse> {
+      const params = new URLSearchParams();
+
+      if (filters !== undefined) {
+        if (filters.search !== undefined) params.set('search', filters.search);
+        if (filters.role !== undefined) params.set('role', filters.role);
+        if (filters.status !== undefined) params.set('status', filters.status);
+        if (filters.sortBy !== undefined) params.set('sortBy', filters.sortBy);
+        if (filters.sortOrder !== undefined) params.set('sortOrder', filters.sortOrder);
+        if (filters.page !== undefined) params.set('page', String(filters.page));
+        if (filters.limit !== undefined) params.set('limit', String(filters.limit));
+      }
+
+      const queryString = params.toString();
+      const url = queryString.length > 0 ? `/admin/users?${queryString}` : '/admin/users';
+
+      return request<AdminUserListResponse>(url);
+    },
+
+    async getUser(userId: string): Promise<AdminUser> {
+      return request<AdminUser>(`/admin/users/${userId}`);
+    },
+
+    async updateUser(
+      userId: string,
+      data: AdminUpdateUserRequest,
+    ): Promise<AdminUpdateUserResponse> {
+      return request<AdminUpdateUserResponse>(`/admin/users/${userId}/update`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async lockUser(
+      userId: string,
+      data: AdminLockUserRequest,
+    ): Promise<AdminLockUserResponse> {
+      return request<AdminLockUserResponse>(`/admin/users/${userId}/lock`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async unlockUser(
+      userId: string,
+      data: UnlockAccountRequest,
+    ): Promise<AdminLockUserResponse> {
+      return request<AdminLockUserResponse>(`/admin/users/${userId}/unlock`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
     async listSecurityEvents(
       requestBody: SecurityEventsListRequestLocal,
     ): Promise<SecurityEventsListResponseLocal> {

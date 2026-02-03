@@ -37,8 +37,7 @@ describe('Container', () => {
   it('handles invalid size without crashing', () => {
     expect(() => {
       render(
-        // @ts-expect-error testing invalid size
-        <Container size="xl">Invalid</Container>,
+        <Container size={"xl" as unknown as "md"}>Invalid</Container>,
       );
     }).not.toThrow();
   });

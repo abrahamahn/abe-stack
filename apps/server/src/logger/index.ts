@@ -4,7 +4,7 @@
  *
  * Fastify-specific logging wrappers with correlation ID support.
  * Pure utilities and types should be imported directly from
- * @abe-stack/core/infrastructure/logger.
+ * @abe-stack/shared.
  */
 
 // Fastify-specific logger wrappers

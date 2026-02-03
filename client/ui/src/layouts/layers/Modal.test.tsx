@@ -120,8 +120,7 @@ describe('Modal', () => {
       const user = userEvent.setup();
 
       render(
-        // @ts-expect-error Testing invalid prop
-        <Modal.Root open onClose={null}>
+        <Modal.Root open onClose={null as unknown as () => void}>
           <Modal.Body>Content</Modal.Body>
         </Modal.Root>,
       );

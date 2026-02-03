@@ -4,7 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { UserActionsMenu } from './UserActionsMenu';
 
-import type { AdminUser, UserRole } from '@abe-stack/core';
+import type { AdminUser, UserRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data

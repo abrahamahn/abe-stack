@@ -64,8 +64,7 @@ describe('Button', () => {
     expect(() => {
       render(
         <Button
-          // @ts-expect-error testing invalid variant
-          variant="mystery"
+          variant={"mystery" as unknown as "primary"}
         >
           Mystery
         </Button>,

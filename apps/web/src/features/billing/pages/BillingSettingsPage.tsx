@@ -9,26 +9,26 @@
  */
 
 import {
-  useInvoices,
-  usePaymentMethods,
-  useSubscription,
-  type BillingClientConfig,
-} from '@abe-stack/client';
-import { tokenStore } from '@abe-stack/core';
+    useInvoices,
+    usePaymentMethods,
+    useSubscription,
+    type BillingClientConfig,
+} from '@abe-stack/api';
+import { tokenStore } from '@abe-stack/shared';
 import {
-  Button,
-  Card,
-  Dialog,
-  InvoiceList,
-  PageContainer,
-  PaymentMethodCard,
-  SubscriptionStatus,
-  useNavigate,
+    Button,
+    Card,
+    Dialog,
+    InvoiceList,
+    PageContainer,
+    PaymentMethodCard,
+    SubscriptionStatus,
+    useNavigate,
 } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
-import type { PaymentMethod } from '@abe-stack/core';
+import type { PaymentMethod } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

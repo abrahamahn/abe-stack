@@ -3,25 +3,30 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "baseUrl": "./",
-    "types": ["vitest/globals", "node"],
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.billing.tsbuildinfo",
-    "paths": {
-      "@abe-stack/core": ["../../core/src/index.ts"],
-      "@abe-stack/core/*": ["../../core/src/*"],
-      "@abe-stack/db": ["../../infra/db/src/index.ts"],
-      "@abe-stack/db/*": ["../../infra/db/src/*"]
-    }
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.billing.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "vitest.config.ts", "**/*.test.ts", "**/__tests__/**"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "vitest.config.ts"
+  ],
   "references": [
     {
-      "path": "../../core"
+      "path": "../../packages/shared"
     },
     {
-      "path": "../../infra/db"
+      "path": "../../packages/backend-core"
     }
   ]
 }

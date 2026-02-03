@@ -190,7 +190,7 @@ All auth rate limiters include progressive delay (`baseDelay: 1000ms`, `maxDelay
 
 ## 7. CSRF Protection
 
-**Source:** `infra/http/src/middleware/csrf.ts`
+**Source:** `infra/src/http/middleware/csrf.ts`
 
 | Parameter  | Value                             | Rationale                                                                                                                   |
 | ---------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -215,7 +215,7 @@ Six auth endpoints are exempt from CSRF validation, each for a specific reason:
 
 ## 8. Security Headers
 
-**Source:** `infra/http/src/middleware/security.ts`
+**Source:** `infra/src/http/middleware/security.ts`
 
 | Header                      | Value                                      | Why                                                                                                                                 |
 | --------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -247,7 +247,7 @@ A custom JSON content-type parser recursively strips `__proto__`, `constructor`,
 
 ## 9. Input Sanitization
 
-**Source:** `infra/http/src/middleware/validation.ts`
+**Source:** `infra/src/http/middleware/validation.ts`
 
 | Protection         | Method                     | Why                                                                                         |
 | ------------------ | -------------------------- | ------------------------------------------------------------------------------------------- |
@@ -275,7 +275,7 @@ Sanitization catches cases where primary defenses have gaps (e.g., raw HTML rend
 
 ## 10. Cookie Security
 
-**Source:** `modules/auth/src/config/auth.ts`, `modules/auth/src/utils/cookies.ts`, `infra/http/src/middleware/cookie.ts`
+**Source:** `modules/auth/src/config/auth.ts`, `modules/auth/src/utils/cookies.ts`, `infra/src/http/middleware/cookie.ts`
 
 ### Refresh token cookie
 
@@ -358,7 +358,7 @@ NIST SP 800-63B explicitly recommends against composition rules (uppercase + num
 
 ## 13. JWT Secret Rotation
 
-**Source:** `infra/security/src/crypto/jwt-rotation.ts`
+**Source:** `infra/src/security/crypto/jwt-rotation.ts`
 
 ### Dual-secret verification strategy
 
@@ -446,7 +446,7 @@ Rejects: `secret`, `password`, `jwt_secret`, `changeme`, `test`, `dev`, `prod`, 
 
 ## Plugin Registration Order
 
-**Source:** `infra/http/src/plugins.ts`
+**Source:** `infra/src/http/plugins.ts`
 
 Security middleware is registered in a specific order. Misordering can create vulnerabilities:
 

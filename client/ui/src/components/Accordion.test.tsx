@@ -110,8 +110,7 @@ describe('Accordion', () => {
       const invalidItems = [{ title: 'No ID', content: 'Content' }];
 
       expect(() => {
-        // @ts-expect-error Testing invalid data
-        render(<Accordion items={invalidItems} />);
+        render(<Accordion items={invalidItems as unknown as Array<{ id: string; title: string; content: string }>} />);
       }).not.toThrow();
     });
 
@@ -150,8 +149,7 @@ describe('Accordion', () => {
     it('handles null onChange gracefully', async () => {
       const user = userEvent.setup();
 
-      // @ts-expect-error Testing invalid prop
-      render(<Accordion items={items} onChange={null} />);
+      render(<Accordion items={items} onChange={null as unknown as (id: string) => void} />);
 
       const headerOne = screen.getByRole('button', { name: /section one/i });
       await user.click(headerOne);

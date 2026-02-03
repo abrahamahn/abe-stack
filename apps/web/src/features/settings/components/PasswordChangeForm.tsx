@@ -126,7 +126,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="currentPassword"
           value={currentPassword}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setCurrentPassword(e.target.value);
           }}
           placeholder="Enter current password"
@@ -138,7 +138,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="newPassword"
           value={newPassword}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setNewPassword(e.target.value);
           }}
           placeholder="Enter new password"
@@ -151,7 +151,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="confirmPassword"
           value={confirmPassword}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setConfirmPassword(e.target.value);
           }}
           placeholder="Confirm new password"

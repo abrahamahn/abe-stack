@@ -4,8 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock SDK hooks before imports
-vi.mock('@abe-stack/client', async () => {
-  const actual = await vi.importActual('@abe-stack/client');
+vi.mock('@abe-stack/engine', async () => {
+  const actual = await vi.importActual('@abe-stack/engine');
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({
@@ -88,7 +88,7 @@ describe('LoginForm', () => {
     });
 
     it('renders sign up as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<LoginForm {...defaultProps} onModeChange={undefined} />);
+      renderWithRouter(<LoginForm {...defaultProps} onModeChange={undefined as any} />);
 
       expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute(

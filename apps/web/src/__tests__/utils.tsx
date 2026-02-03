@@ -11,9 +11,9 @@
  * @module test-utils
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/client';
+import { QueryCache, QueryCacheProvider } from '@abe-stack/engine';
 import { MemoryRouter } from '@abe-stack/ui';
-import { render, act } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ClientEnvironmentProvider } from '../app/ClientEnvironment';
@@ -37,7 +37,9 @@ export const mockUser: User = {
   name: 'Test User',
   avatarUrl: null,
   role: 'user',
+  isVerified: true,
   createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 /**
@@ -49,7 +51,9 @@ export const mockAdminUser: User = {
   name: 'Admin User',
   avatarUrl: null,
   role: 'admin',
+  isVerified: true,
   createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 // ============================================================================

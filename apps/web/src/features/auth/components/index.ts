@@ -12,4 +12,3 @@ export type { RegisterFormProps } from './RegisterForm';
 export { ResetPasswordForm } from './ResetPasswordForm';
 export type { ResetPasswordFormProps } from './ResetPasswordForm';
 export { AuthModal } from './AuthModal';
-export { ProtectedRoute } from './ProtectedRoute';

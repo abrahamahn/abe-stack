@@ -65,7 +65,7 @@ function estimatePackageBundleSize(packageName: string, packagePath: string): Bu
 
     // UI Libraries
     '@abe-stack/ui': { size: 200, gzipSize: 60 }, // Our custom UI
-    '@abe-stack/core': { size: 150, gzipSize: 40 }, // Our core utilities
+    '@abe-stack/shared': { size: 150, gzipSize: 40 }, // Our core utilities
 
     // Database (runtime only, not in client bundle)
     '@abe-stack/db': { size: 0, gzipSize: 0 },

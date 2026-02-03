@@ -21,16 +21,14 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-admin --report-unused-disable-directives"
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-admin --report-unused-disable-directives",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
     "@abe-stack/auth": "workspace:*",
     "@abe-stack/billing": "workspace:*",
-    "@abe-stack/contracts": "workspace:*",
-    "@abe-stack/core": "workspace:*",
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/http": "workspace:*",
-    "@abe-stack/jobs": "workspace:*"
+    "@abe-stack/backend-core": "workspace:*",
+    "@abe-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "fastify": "^5.0.0"

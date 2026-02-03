@@ -9,26 +9,26 @@
     "declaration": true,
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
-    "paths": {
-      "@abe-stack/core": ["../../core/src/index.ts"],
-      "@abe-stack/core/*": ["../../core/src/*"],
-      "@abe-stack/db": ["../../infra/db/src/index.ts"],
-      "@abe-stack/db/*": ["../../infra/db/src/*"],
-      "@abe-stack/http": ["../../infra/http/src/index.ts"],
-      "@abe-stack/http/*": ["../../infra/http/src/*"],
-      "@abe-stack/security": ["../../infra/security/src/index.ts"],
-      "@abe-stack/security/*": ["../../infra/security/src/*"],
-      "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
-      "@abe-stack/contracts/*": ["../../infra/contracts/src/*"]
-    }
+    "paths": {},
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "references": [
-    { "path": "../../core" },
-    { "path": "../../infra/db" },
-    { "path": "../../infra/http" },
-    { "path": "../../infra/security" },
-    { "path": "../../infra/contracts" }
+    {
+      "path": "../../packages/packages/shared"
+    },
+
+    {
+      "path": "../../packages/backend-core"
+    }
   ]
 }

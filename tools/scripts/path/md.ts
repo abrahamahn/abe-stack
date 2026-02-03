@@ -113,7 +113,7 @@ function exportMarkdownFiles(): void {
     'apps/web',
     'infra',
     'infra/contracts',
-    'core',
+    'kernel',
     'client',
     'client/ui/docs',
     'client/ui',

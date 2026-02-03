@@ -14,8 +14,8 @@ vi.mock('@abe-stack/ui', async () => {
   };
 });
 
-// Mock @abe-stack/client hooks
-vi.mock('@abe-stack/client', () => ({
+// Mock @abe-stack/engine hooks
+vi.mock('@abe-stack/engine', () => ({
   useSubscription: vi.fn(() => ({
     subscription: null,
     isLoading: false,
@@ -48,8 +48,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   })),
 }));
 
-// Mock @abe-stack/core tokenStore
-vi.mock('@abe-stack/core', () => ({
+// Mock @abe-stack/shared tokenStore
+vi.mock('@abe-stack/shared', () => ({
   tokenStore: {
     get: vi.fn(() => 'mock-token'),
   },

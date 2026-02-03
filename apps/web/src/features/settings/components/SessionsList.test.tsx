@@ -1,6 +1,6 @@
 // apps/web/src/features/settings/components/SessionsList.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SessionsList } from './SessionsList';
 
@@ -43,32 +43,32 @@ vi.mock('@abe-stack/ui', () => ({
   Skeleton: () => <div data-testid="skeleton" />,
 }));
 
-import { useSessions, useRevokeSession, useRevokeAllSessions } from '../hooks';
+import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
 
 describe('SessionsList', () => {
-  let mockRefetch: ReturnType<typeof vi.fn>;
-  let mockRevokeSession: ReturnType<typeof vi.fn>;
-  let mockRevokeAllSessions: ReturnType<typeof vi.fn>;
+  let mockRefetch: any;
+  let mockRevokeSession: any;
+  let mockRevokeAllSessions: any;
 
   const mockSessions: Session[] = [
     {
       id: 'session-1',
-      userId: 'user-123',
       device: 'Chrome on Windows',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
       createdAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
+      expiresAt: new Date().toISOString(),
+      lastUsedAt: new Date().toISOString(),
       isCurrent: true,
     },
     {
       id: 'session-2',
-      userId: 'user-123',
       device: 'Firefox on macOS',
       ipAddress: '192.168.1.2',
       userAgent: 'Mozilla/5.0',
       createdAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
+      expiresAt: new Date().toISOString(),
+      lastUsedAt: new Date().toISOString(),
       isCurrent: false,
     },
   ];
@@ -82,23 +82,32 @@ describe('SessionsList', () => {
     vi.mocked(useSessions).mockReturnValue({
       sessions: mockSessions,
       isLoading: false,
+      isFetching: false,
+      isSuccess: true,
       isError: false,
       error: null,
-      refetch: mockRefetch,
-    });
+      refetch: mockRefetch as any,
+    } as any);
 
     vi.mocked(useRevokeSession).mockReturnValue({
-      revokeSession: mockRevokeSession,
+      revokeSession: mockRevokeSession as any,
       isLoading: false,
+      isFetching: false,
+      isSuccess: false,
+      isError: false,
       error: null,
-    });
+      reset: vi.fn() as any,
+    } as any);
 
     vi.mocked(useRevokeAllSessions).mockReturnValue({
       revokeAllSessions: mockRevokeAllSessions,
       isLoading: false,
+      isSuccess: false,
+      isError: false,
       error: null,
       revokedCount: null,
-    });
+      reset: vi.fn(),
+    } as any);
   });
 
   describe('loading state', () => {
@@ -106,10 +115,12 @@ describe('SessionsList', () => {
       vi.mocked(useSessions).mockReturnValue({
         sessions: [],
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
         isError: false,
         error: null,
         refetch: mockRefetch,
-      });
+      } as any);
 
       render(<SessionsList />);
       expect(screen.getAllByTestId('skeleton')).toHaveLength(3);
@@ -121,10 +132,12 @@ describe('SessionsList', () => {
       vi.mocked(useSessions).mockReturnValue({
         sessions: [],
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
         isError: true,
         error: new Error('Network error'),
         refetch: mockRefetch,
-      });
+      } as any);
 
       render(<SessionsList />);
       expect(screen.getByText(/Failed to load sessions/)).toBeInTheDocument();
@@ -149,12 +162,14 @@ describe('SessionsList', () => {
 
     it('should show message when only one session', () => {
       vi.mocked(useSessions).mockReturnValue({
-        sessions: [mockSessions[0]],
+        sessions: [mockSessions[0] as Session],
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
         isError: false,
         error: null,
-        refetch: mockRefetch,
-      });
+        refetch: mockRefetch as any,
+      } as any);
 
       render(<SessionsList />);
       expect(screen.getByText('This is your only active session.')).toBeInTheDocument();
@@ -177,17 +192,25 @@ describe('SessionsList', () => {
 
     it('should refetch after successful revoke', () => {
       // Capture the onSuccess callback passed to the hook
-      let capturedOnSuccess: (() => void) | undefined;
-      vi.mocked(useRevokeSession).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
-        return { revokeSession: mockRevokeSession, isLoading: false, error: null };
+      let capturedOnSuccess: ((response: any) => void) | undefined;
+      vi.mocked(useRevokeSession).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
+        return {
+          revokeSession: mockRevokeSession as any,
+          isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
+          error: null,
+          reset: vi.fn() as any,
+        } as any;
       });
 
       render(<SessionsList />);
 
       // Simulate successful revoke by calling the captured callback
       expect(capturedOnSuccess).toBeDefined();
-      capturedOnSuccess?.();
+      capturedOnSuccess?.({ success: true });
       expect(mockRefetch).toHaveBeenCalled();
     });
   });
@@ -208,12 +231,14 @@ describe('SessionsList', () => {
 
     it('should not allow revoking when no other sessions', () => {
       vi.mocked(useSessions).mockReturnValue({
-        sessions: [mockSessions[0]],
+        sessions: [mockSessions[0] as Session],
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
         isError: false,
         error: null,
-        refetch: mockRefetch,
-      });
+        refetch: mockRefetch as any,
+      } as any);
 
       render(<SessionsList />);
       expect(screen.queryByTestId('revoke-all-button')).not.toBeInTheDocument();
@@ -221,11 +246,15 @@ describe('SessionsList', () => {
 
     it('should show success message after revoking all', () => {
       vi.mocked(useRevokeAllSessions).mockReturnValue({
-        revokeAllSessions: mockRevokeAllSessions,
+        revokeAllSessions: mockRevokeAllSessions as any,
         isLoading: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
         error: null,
         revokedCount: 2,
-      });
+        reset: vi.fn() as any,
+      } as any);
 
       render(<SessionsList />);
       expect(screen.getByText(/Successfully logged out from 2 devices/)).toBeInTheDocument();

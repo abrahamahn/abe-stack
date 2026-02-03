@@ -1,0 +1,188 @@
+// shared/src/utils/string.ts
+/**
+ * String Utilities
+ *
+ * Pure string manipulation utilities (formatting, case conversion, etc.).
+ * Security-sensitive ID generation has been moved to ./crypto/random.ts
+ */
+
+/**
+ * Converts a string to a URL-friendly slug.
+ *
+ * @param str - Input string to slugify
+ * @returns Slugified string
+ */
+export function slugify(str: string): string {
+  if (str === '') return '';
+
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove non-word characters
+    .replace(/[\s_-]+/g, '-') // Replace spaces, underscores, and multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+}
+
+/**
+ * Capitalizes the first letter of a string.
+ *
+ * @param str - Input string to capitalize
+ * @returns Capitalized string
+ */
+export function capitalize(str: string): string {
+  if (str === '') return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+/**
+ * Capitalizes the first letter of each word in a string.
+ *
+ * @param str - Input string to title case
+ * @returns Title-cased string
+ */
+export function titleCase(str: string): string {
+  if (str === '') return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Truncates a string to a specified length and adds an ellipsis.
+ *
+ * @param str - Input string to truncate
+ * @param maxLength - Maximum length of the string (default: 100)
+ * @param suffix - Suffix to add (default: '...')
+ * @returns Truncated string
+ */
+export function truncate(str: string, maxLength: number = 100, suffix: string = '...'): string {
+  if (str === '' || str.length <= maxLength) return str;
+  return str.substring(0, maxLength - suffix.length) + suffix;
+}
+
+/**
+ * Removes extra whitespace from a string.
+ *
+ * @param str - Input string to trim
+ * @returns String with normalized whitespace
+ */
+export function normalizeWhitespace(str: string): string {
+  if (str === '') return '';
+  return str.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Strips control characters and null bytes from a string.
+ * This is a basic safety measure but DOES NOT provide full HTML/XSS sanitization.
+ *
+ * @param input - Input string to process
+ * @returns Cleaned string
+ */
+export function stripControlChars(input: string): string {
+  if (typeof input !== 'string') {
+    return '';
+  }
+
+  // Remove null bytes
+  let sanitized = input.replace(/\0/g, '');
+
+  // Remove control characters (except tab, newline, carriage return)
+  // eslint-disable-next-line no-control-regex
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+  return sanitized;
+}
+
+/**
+ * Escapes HTML entities in a string.
+ *
+ * @param str - Input string to escape
+ * @returns String with HTML entities escaped
+ */
+export function escapeHtml(str: string): string {
+  if (str === '') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+/**
+ * Converts a string to camelCase.
+ *
+ * @param str - Input string to convert
+ * @returns camelCase string
+ */
+export function toCamelCase(str: string): string {
+  if (str === '') return '';
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, '');
+}
+
+/**
+ * Converts a string to kebab-case.
+ *
+ * @param str - Input string to convert
+ * @returns kebab-case string
+ */
+export function toKebabCase(str: string): string {
+  if (str === '') return '';
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase();
+}
+
+/**
+ * Converts a string to PascalCase.
+ *
+ * @param str - Input string to convert
+ * @returns PascalCase string
+ */
+export function toPascalCase(str: string): string {
+  if (str === '') return '';
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word) => word.toUpperCase()).replace(/\s+/g, '');
+}
+
+/**
+ * Pads a string to a specified length with a character.
+ *
+ * @param str - Input string to pad
+ * @param length - Target length
+ * @param padChar - Character to pad with (default: ' ')
+ * @returns Padded string
+ */
+export function padLeft(str: string, length: number, padChar: string = ' '): string {
+  if (str === '') str = '';
+  if (str.length >= length) return str;
+  return padChar.repeat(length - str.length) + str;
+}
+
+/**
+ * Counts the number of words in a string.
+ *
+ * @param str - Input string to count words in
+ * @returns Number of words
+ */
+export function countWords(str: string): number {
+  if (str === '') return 0;
+  return str.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/**
+ * Counts the number of characters in a string (excluding whitespace).
+ *
+ * @param str - Input string to count characters in
+ * @returns Number of characters excluding whitespace
+ */
+export function countCharactersNoWhitespace(str: string): number {
+  if (str === '') return 0;
+  return str.replace(/\s/g, '').length;
+}

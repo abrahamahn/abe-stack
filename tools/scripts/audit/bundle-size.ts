@@ -266,11 +266,11 @@ function main(): void {
       distPath: path.join(ROOT_DIR, 'client/ui/dist'),
     },
     core: {
-      name: '@abe-stack/core',
+      name: '@abe-stack/shared',
       distPath: path.join(ROOT_DIR, 'core/dist'),
     },
     client: {
-      name: '@abe-stack/client',
+      name: '@abe-stack/engine',
       distPath: path.join(ROOT_DIR, 'client/dist'),
     },
     web: {

@@ -3,7 +3,7 @@ import { Button, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
 
 import type { AuthMode } from './AuthForms';
-import type { ResetPasswordRequest } from '@abe-stack/core';
+import type { ResetPasswordRequest } from '@abe-stack/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface ResetPasswordFormProps {

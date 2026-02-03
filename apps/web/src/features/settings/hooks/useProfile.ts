@@ -5,7 +5,7 @@
  * Hook for managing user profile updates.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/client';
+import { useMutation, useQueryCache } from '@abe-stack/engine';
 
 import { createSettingsApi, type UpdateProfileRequest, type User } from '../api';
 

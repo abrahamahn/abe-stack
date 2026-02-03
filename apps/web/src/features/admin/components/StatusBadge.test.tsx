@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
-import type { AdminUser, UserStatus } from '@abe-stack/core';
+import type { AdminUser, UserStatus } from '@abe-stack/shared';
 
 describe('StatusBadge', () => {
   describe('rendering', () => {

@@ -2,8 +2,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { SecurityEventsExportResponse } from '@abe-stack/core';
-import type { UseMutationResult } from '@abe-stack/client';
+import type { SecurityEventsExportResponse } from '@abe-stack/shared';
+import type { UseMutationResult } from '@abe-stack/engine';
 
 // Create hoisted mocks for ESM module compatibility
 const mocks = vi.hoisted(() => ({
@@ -12,8 +12,8 @@ const mocks = vi.hoisted(() => ({
   mockExportSecurityEvents: vi.fn(),
 }));
 
-vi.mock('@abe-stack/client', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client')>();
+vi.mock('@abe-stack/engine', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/engine')>();
   return {
     ...actual,
     useMutation: mocks.mockUseMutation,
@@ -28,8 +28,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     tokenStore: {

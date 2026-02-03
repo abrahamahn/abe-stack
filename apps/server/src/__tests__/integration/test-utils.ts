@@ -14,12 +14,12 @@ import {
   registerCsrf,
   registerPrototypePollutionProtection,
   registerRequestInfoHook,
-} from '@abe-stack/http';
-import { RateLimiter } from '@abe-stack/security';
+} from '@abe-stack/db';
+import { RateLimiter } from '@abe-stack/db';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
-import type { AppConfig } from '@abe-stack/core/config';
+import type { AppConfig } from '@abe-stack/shared/config';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 
 // Mock function type that is callable

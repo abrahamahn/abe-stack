@@ -7,12 +7,12 @@
  */
 
 import { authRoutes, createAuthGuard } from '@abe-stack/auth';
-import { registerRouteMap } from '@abe-stack/http';
+import { registerRouteMap } from '@abe-stack/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/http';
+import type { AuthGuardFactory } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Repositories

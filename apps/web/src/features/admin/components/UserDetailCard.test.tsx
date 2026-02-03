@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { UserDetailCard } from './UserDetailCard';
 
-import type { AdminUser } from '@abe-stack/core';
+import type { AdminUser } from '@abe-stack/shared';
 
 describe('UserDetailCard', () => {
   const mockUser: AdminUser = {

@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/components/DemoBottomBar.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DemoBottomBar } from './DemoBottomBar';
@@ -66,21 +66,28 @@ describe('DemoBottomBar', () => {
   it('should call cycleTheme when theme button clicked', () => {
     render(<DemoBottomBar {...defaultProps} />);
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[buttons.length - 1]);
+    const lastButton = buttons[buttons.length - 1];
+    if (lastButton) {
+      fireEvent.click(lastButton);
+    }
     expect(defaultProps.cycleTheme).toHaveBeenCalled();
   });
 
   it('should call cycleDensity when density button clicked', () => {
     render(<DemoBottomBar {...defaultProps} />);
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]);
+    if (buttons[0]) {
+      fireEvent.click(buttons[0]);
+    }
     expect(defaultProps.cycleDensity).toHaveBeenCalled();
   });
 
   it('should call cycleContrast when contrast button clicked', () => {
     render(<DemoBottomBar {...defaultProps} />);
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[1]);
+    if (buttons[1]) {
+      fireEvent.click(buttons[1]);
+    }
     expect(defaultProps.cycleContrast).toHaveBeenCalled();
   });
 

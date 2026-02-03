@@ -18,7 +18,7 @@ import { describe, expect, it, vi } from 'vitest';
 // Vi.mock calls - these must come before any imports that use them
 // ============================================================================
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   QueryCache: vi.fn(function QueryCache() {
     return {
       getQueryData: vi.fn(),
@@ -66,8 +66,8 @@ vi.mock('./utils/registerServiceWorker', () => ({
   }),
 }));
 
-// Mock @abe-stack/stores
-vi.mock('@abe-stack/stores', () => ({
+// Mock @abe-stack/react
+vi.mock('@abe-stack/react', () => ({
   toastStore: vi.fn(() => ({
     messages: [],
     dismiss: vi.fn(),
@@ -124,13 +124,13 @@ describe('main.tsx', () => {
 
     it('should import mocked SDK dependencies', async () => {
       // Verify mocks are in place via dynamic import
-      const sdk = await import('@abe-stack/client');
+      const sdk = await import('@abe-stack/engine');
       expect(sdk.QueryCache).toBeDefined();
       expect(sdk.QueryCacheProvider).toBeDefined();
     });
 
     it('should have QueryCache constructor mocked', async () => {
-      const sdk = await import('@abe-stack/client');
+      const sdk = await import('@abe-stack/engine');
       expect(typeof sdk.QueryCache).toBe('function');
     });
   });

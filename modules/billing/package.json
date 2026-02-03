@@ -14,7 +14,8 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-billing --report-unused-disable-directives"
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-billing --report-unused-disable-directives",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "author": "",
   "license": "ISC",
@@ -33,10 +34,9 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/contracts": "workspace:*",
-    "@abe-stack/core": "workspace:*",
-    "@abe-stack/db": "workspace:*",
-    "stripe": "^20.2.0"
+    "@abe-stack/backend-core": "workspace:*",
+    "stripe": "^20.2.0",
+    "@abe-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "fastify": ">=5.0.0"

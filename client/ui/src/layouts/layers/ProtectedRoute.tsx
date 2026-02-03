@@ -1,6 +1,7 @@
 // client/ui/src/layouts/layers/ProtectedRoute.tsx
+import { Navigate, Outlet } from '@abe-stack/react/router';
+
 import { LoadingContainer } from '../../components/LoadingContainer';
-import { Navigate, Outlet } from '../../router';
 import '../../styles/components.css';
 
 import type { ReactElement, ReactNode } from 'react';

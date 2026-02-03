@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/components/DemoComponentList.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DemoComponentList } from './DemoComponentList';
@@ -40,7 +40,7 @@ describe('DemoComponentList', () => {
       category: 'Elements',
       variants: [{ name: 'Default' }],
     },
-  ] as ComponentDemo[];
+  ] as any as ComponentDemo[];
 
   const defaultProps = {
     components: mockComponents,
@@ -74,8 +74,8 @@ describe('DemoComponentList', () => {
   });
 
   it('should mark selected component', () => {
-    render(<DemoComponentList {...defaultProps} selectedComponent={mockComponents[0]} />);
+    render(<DemoComponentList {...defaultProps} selectedComponent={mockComponents[0] ?? null} />);
     const buttons = screen.getAllByText('Button');
-    expect(buttons[0].parentElement).toHaveAttribute('data-selected', 'true');
+    expect(buttons[0]?.parentElement).toHaveAttribute('data-selected', 'true');
   });
 });

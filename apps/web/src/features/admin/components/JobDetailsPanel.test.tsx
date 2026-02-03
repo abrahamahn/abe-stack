@@ -1,10 +1,10 @@
 // apps/web/src/features/admin/components/JobDetailsPanel.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobDetailsPanel } from './JobDetailsPanel';
 
-import type { JobDetails } from '@abe-stack/core';
+import type { JobDetails } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data
@@ -526,7 +526,7 @@ describe('JobDetailsPanel', () => {
     it('should not render dead letter section when reason is undefined', () => {
       const jobWithUndefinedReason: JobDetails = {
         ...mockJob,
-        deadLetterReason: undefined,
+        deadLetterReason: undefined as any,
       };
 
       render(

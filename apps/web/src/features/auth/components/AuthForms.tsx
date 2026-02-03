@@ -11,7 +11,7 @@ import type {
   RegisterResponse,
   ResendVerificationRequest,
   ResetPasswordRequest,
-} from '@abe-stack/core';
+} from '@abe-stack/shared';
 import type { AuthMode } from '@abe-stack/ui';
 import type { ReactElement } from 'react';
 

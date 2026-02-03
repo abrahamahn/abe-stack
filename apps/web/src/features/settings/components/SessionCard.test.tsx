@@ -11,13 +11,13 @@
  * - Loading/revoking states
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SessionCard } from './SessionCard';
 
-import type { SessionCardProps } from './SessionCard';
 import type { Session } from '../api';
+import type { SessionCardProps } from './SessionCard';
 
 // Mock UI components
 vi.mock('@abe-stack/ui', async () => {
@@ -68,13 +68,13 @@ describe('SessionCard', () => {
 
   const baseSession: Session = {
     id: 'session-123',
-    userId: 'user-123',
     device: 'Chrome on Windows',
     ipAddress: '192.168.1.1',
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    lastActivityAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+    lastUsedAt: new Date().toISOString(),
     isCurrent: false,
   };
 
@@ -475,7 +475,7 @@ describe('SessionCard', () => {
 
   describe('revoke functionality', () => {
     it('should call onRevoke when revoke button is clicked', () => {
-      render(<SessionCard {...defaultProps} onRevoke={mockOnRevoke} />);
+      render(<SessionCard {...defaultProps} onRevoke={mockOnRevoke as any} />);
 
       const revokeButton = screen.getByTestId('revoke-button');
       fireEvent.click(revokeButton);

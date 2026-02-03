@@ -1,6 +1,6 @@
 // apps/web/src/pages/HomePage.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { HomePage } from './HomePage';
 
@@ -33,12 +33,8 @@ vi.mock('../../../../apps/desktop/README.md?raw', () => ({
 }));
 
 // Package READMEs
-vi.mock('../../../../core/README.md?raw', () => ({
-  default: `# @abe-stack/core\n\nCore package documentation.`,
-}));
-
-vi.mock('../../../../client/README.md?raw', () => ({
-  default: `# @abe-stack/client\n\nSDK package documentation.`,
+vi.mock('../../../../kernel/README.md?raw', () => ({
+  default: `# @abe-stack/shared\n\nCore package documentation.`,
 }));
 
 vi.mock('../../../../client/ui/docs/README.md?raw', () => ({

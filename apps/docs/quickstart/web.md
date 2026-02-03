@@ -84,7 +84,7 @@ import { useApi } from '@api/ApiProvider';
 const api = useApi();
 ```
 
-Both are type-safe via ts-rest contracts from `@abe-stack/core`.
+Both are type-safe via ts-rest contracts from `@abe-stack/shared`.
 
 ---
 
@@ -141,9 +141,9 @@ Empty means Vite's dev proxy handles API routing to `localhost:8080`.
 
 | Package             | Role                      |
 | ------------------- | ------------------------- |
-| `@abe-stack/core`   | Types, validation, stores |
+| `@abe-stack/shared`   | Types, validation, stores |
 | `@abe-stack/ui`     | React components          |
-| `@abe-stack/client` | API client + React Query  |
+| `@abe-stack/engine` | API client + React Query  |
 
 The web app is a thin rendering layer. Business logic lives in packages.
 

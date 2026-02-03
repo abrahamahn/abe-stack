@@ -15,6 +15,7 @@
  * </PeekLink>
  */
 
+import { useSidePeek } from '@abe-stack/react/hooks';
 import {
   useCallback,
   type ComponentPropsWithoutRef,
@@ -22,7 +23,6 @@ import {
   type ReactNode,
 } from 'react';
 
-import { useSidePeek } from '../hooks/useSidePeek';
 
 export interface PeekLinkProps extends Omit<ComponentPropsWithoutRef<'a'>, 'href'> {
   /** The path to open in the side peek */

@@ -6,7 +6,7 @@
  * of the settings API.
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/client';
+import { QueryCache, QueryCacheProvider } from '@abe-stack/engine';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React, { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
@@ -34,9 +34,8 @@ const mockChangePassword = vi.fn();
 const createWrapper = (
   cache: QueryCache,
 ): ((props: { children: ReactNode }) => React.ReactElement) => {
-  // eslint-disable-next-line react/no-multi-comp, react/display-name
   return ({ children }: { children: ReactNode }): React.ReactElement => {
-    return React.createElement(QueryCacheProvider, { cache: cache }, children);
+    return React.createElement(QueryCacheProvider, { cache: cache, children }, children);
   };
 };
 

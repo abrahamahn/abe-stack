@@ -1,170 +1,196 @@
-# Refactor TODO (Architectural Plan)
 
-This TODO is the working plan derived from `apps/docs/todo/refactor.md`, `apps/docs/todo/NOTE.md`, and the current repo tree. It focuses on boundary enforcement, duplication removal, and making apps thin composition layers for a premium SaaS boilerplate (solo founders → small teams, up to ~100k users).
+## 0. packages/db: Fix Legacy Module Imports (Phase 4)
 
-## At-a-Glance Review (Premium SaaS Fit)
+The functional repository refactor (Phases 1–3, 5) is complete. Phase 4 fixes broken imports in legacy/recovered modules that depend on `@abe-stack/shared/config` or `@abe-stack/infra` (which no longer exist). These will resolve naturally when P0–P2 code restoration below is completed.
 
-- **Core posture:** Strong architecture and modules exist; risk is **duplication + blurred ownership** more than missing features.
-- **Not overengineered yet**, but **too many packages** and **duplicate sources of truth** create drag and confusion.
-- **Essentials still missing (per NOTE):** multi-tenant orgs, entitlements, general audit log, data deletion workflow, subscription lifecycle completeness.
-- **Refactor plan quality:** Good direction; needs clearer “phase order” and “definition of done” for each phase.
+- [ ] `packages/db/src/config/database.ts` — fix `@abe-stack/shared/config` import
+- [ ] `packages/db/src/config/search.ts` — fix `@abe-stack/shared/config` import
+- [ ] `packages/db/src/write/write-service.ts` — fix `@abe-stack/infra` imports
+- [ ] `packages/db/src/write/postgres-store.ts` — fix circular `@abe-stack/db` import
+- [ ] `packages/db/src/pubsub/postgres-pubsub.ts` — fix missing `./types` module
+- [ ] `packages/db/src/repositories/*-legacy.ts` — fix stale schema type references (`UserInsert`, `UserUpdate`, `EmailVerificationTokenInsert`, etc.)
 
-## Definition of Done (Global)
+---
 
-- **Boundary rules enforced** (lint fails on layer leaks).
-- **Single source of truth** per feature/type/schema.
-- **Apps are composition-only**, packages own logic.
-- **Premium modules isolated** under `premium/`.
-- **Docs align** with actual package layout.
+## 1. Restore Missing Code to `packages/shared/src/`
 
-## 0) Before “Next Package”: Rewrite Rules (Guardrails)
+Code scattered across deleted directories (`core/src/`, `infra/contracts/src/`, `kernel/src/contracts/`) needs to be restored into `packages/shared/src/`. Files marked with `[verify]` may overlap with existing code and need deduplication.
 
-These are non-negotiable. Set them before any file-by-file refactor to prevent rework.
+### P0: Search Types & Operators (breaks `packages/db` imports)
 
-- **Dependency direction (enforce it):**
-  - `apps/server` → `modules/*`, `infra/*`, `kernel/*`
-  - `modules/*` → `infra/*`, `kernel/*`
-  - `infra/*` → `kernel/*`
-  - `kernel/*` → nothing (or only internal kernel)
-- **One public entry per package:** `src/index.ts` is the only import target.
-- **No app-level re-implementations:** if it’s shared, it lives in a package, period.
-- **Tests first:** add 3–5 “golden path” tests per package for behavior you don’t want to change.
-- **Import boundary enforcement:** keep a simple rule (eslint no-restricted-imports or boundaries) so layer leaks can’t creep back in.
+Source: `core/src/infrastructure/search/`
 
-## 1) Snapshot (Current Tree Reality)
+- [ ] `errors.ts` + `errors.test.ts` → `packages/shared/src/utils/search/errors.ts`
+- [ ] `operators.ts` + `operators.test.ts` → `packages/shared/src/utils/search/operators.ts`
+- [ ] `query-builder.ts` + `query-builder.test.ts` → `packages/shared/src/utils/search/query-builder.ts`
+- [ ] `schemas.ts` + `schemas.test.ts` → `packages/shared/src/utils/search/schemas.ts`
+- [ ] `types.ts` → `packages/shared/src/utils/search/types.ts`
+- [ ] `index.ts` → `packages/shared/src/utils/search/index.ts`
 
-Top-level folders: `apps/`, `modules/`, `infra/`, `kernel/`, `client/`, `tools/`, `ops/`.
+### P0: API Contracts (shared types for server + client)
 
-Confirmed duplication/boundary smells (originally found; some now resolved):
+Source: `infra/contracts/src/`
 
-- **API client duplicated** (resolved)
-- **Hook duplicated** (`useResendCooldown`) (resolved)
-- **ProtectedRoute duplicated** (resolved)
-- **createFormHandler duplicated** (resolved)
-- **Admin API split in app** (resolved)
-- **Server vs kernel overlap**
-  - `apps/server/src/logger/*` vs `kernel/src/infrastructure/logger/*`
-  - `apps/server/src/health/*` vs `kernel/src/infrastructure/monitor/health.ts`
-  - `apps/server/src/routes/*` vs `infra/src/http/router/*`
-- **Kernel contains domain module**
-  - `kernel/src/modules/notifications/*` (should not be in kernel)
+- [ ] `admin.ts` + `admin.test.ts` → `packages/shared/src/contracts/admin.ts`
+- [ ] `api.ts` + `api.test.ts` → `packages/shared/src/contracts/api.ts`
+- [ ] `auth.ts` + `auth.test.ts` → `packages/shared/src/contracts/auth.ts` `[verify]` vs `domain/auth/auth.contracts.ts`
+- [ ] `billing/billing.ts` + `billing.test.ts` → `packages/shared/src/contracts/billing/billing.ts` `[verify]` vs `domain/billing/billing.contracts.ts`
+- [ ] `billing/service.ts` + `billing/service.test.ts` → `packages/shared/src/contracts/billing/service.ts`
+- [ ] `billing/index.ts` → `packages/shared/src/contracts/billing/index.ts`
+- [ ] `common.ts` + `common.test.ts` → `packages/shared/src/contracts/common.ts`
+- [ ] `context.ts` → `packages/shared/src/contracts/context.ts`
+- [ ] `environment.ts` + `environment.test.ts` → `packages/shared/src/contracts/environment.ts`
+- [ ] `jobs.ts` + `jobs.test.ts` → `packages/shared/src/contracts/jobs.ts`
+- [ ] `native.ts` + `native.test.ts` → `packages/shared/src/contracts/native.ts`
+- [ ] `oauth.ts` + `oauth.test.ts` → `packages/shared/src/contracts/oauth.ts`
+- [ ] `pagination.ts` + `pagination.test.ts` → `packages/shared/src/contracts/pagination.ts` `[verify]` vs `utils/pagination.ts`
+- [ ] `realtime.ts` + `realtime.test.ts` → `packages/shared/src/contracts/realtime.ts`
+- [ ] `schema.ts` → `packages/shared/src/contracts/schema.ts`
+- [ ] `security.ts` + `security.test.ts` → `packages/shared/src/contracts/security.ts`
+- [ ] `types.ts` → `packages/shared/src/contracts/types.ts`
+- [ ] `users.ts` + `users.test.ts` → `packages/shared/src/contracts/users.ts` `[verify]` vs `domain/users/users.contracts.ts`
+- [ ] `index.ts` → `packages/shared/src/contracts/index.ts`
 
-Likely duplicate/misplaced areas to audit next (not exhaustive):
+### P1: Kernel Contracts (workspace, entitlements, audit, deletion)
 
-- **Server-owned logic in kernel or infra** (logger, health, router)
-- **Frontend app wrappers around package utilities** (watch `apps/web/src/**` re-exports)
-- **Schema/type duplication** between `infra/db` and `kernel/contracts`
-- **Feature/UI duplication** between `apps/web/src/features/*` and `modules/*` (types should flow from modules/contracts)
+Source: `kernel/src/contracts/`
 
-## 2) Architectural Decisions (Confirm + Lock)
+- [ ] `workspace.ts` → `packages/shared/src/contracts/workspace.ts`
+- [ ] `entitlements.ts` → `packages/shared/src/contracts/entitlements.ts`
+- [ ] `audit.ts` → `packages/shared/src/contracts/audit.ts`
+- [ ] `deletion.ts` → `packages/shared/src/contracts/deletion.ts`
+- [ ] `schema.test.ts` → `packages/shared/src/contracts/schema.test.ts`
 
-- [x] Decide **package admission rule**: keep package if reusable across 2+ apps or replaceable subsystem.
-- [x] Decide **optional/premium modules**: where to place realtime/media/offline/search (e.g. keep in `infra/` + `modules/` but mark optional, or create a `premium/` or `optional/` root). All optional features moved to `premium/`.
-- [x] Decide **client consolidation**: merge `client/stores` into `client/react` (or rename `client/react` to `client/appkit`).
-- [x] Confirm **infra consolidation**: merge infra packages into `@abe-stack/infra`, but move `websocket` + `media` into `premium/` packages.
-- [x] Confirm **kernel consolidation**: merge `kernel/contracts` + `kernel/primitives` into a single `@abe-stack/kernel` package.
-- [x] Confirm **client re-org**: merge `client/stores` into `client/react`.
-- [x] Decide **API client ownership**: package exports initialized client/hook; apps must only consume it.
-- [x] Decide **schema source-of-truth**: derive types from `infra/db` schemas (`zod`/`Drizzle`) and export from `kernel/contracts` (no duplicate shape definitions).
-- [x] Decide **admin feature boundary**: `modules/admin` owns backend logic + shared types; `apps/web/features/admin` consumes those types only.
+### P1: Logger Types & Implementations
 
-## 3) Enforce Boundaries (Strict Layering)
+Source: `core/src/infrastructure/logger/`
 
-Goal: apps are composition only, packages own logic. Layer flow: `apps → modules → infra → kernel`, client can depend on kernel but not server/modules.
+- [ ] `base-logger.ts` + `base-logger.test.ts` → `packages/shared/src/utils/logger/base-logger.ts`
+- [ ] `console.ts` + `console.test.ts` → `packages/shared/src/utils/logger/console.ts`
+- [ ] `correlation.ts` + `correlation.test.ts` → `packages/shared/src/utils/logger/correlation.ts`
+- [ ] `levels.ts` + `levels.test.ts` → `packages/shared/src/utils/logger/levels.ts`
+- [ ] `types.ts` → `packages/shared/src/utils/logger/types.ts`
+- [ ] `index.ts` → `packages/shared/src/utils/logger/index.ts`
 
-- [x] Add strict boundary rules (eslint-plugin-boundaries) in `eslint.config.ts`.
-- [x] Add `boundaries/no-unknown` (or `boundaries/no-unknown-files`) once element coverage is confirmed.
-- [x] Enforce **entry-point-only imports** (`src/index.ts` only) via lint rule or path restrictions (now that infra is unified).
-- [x] Audit imports to ensure **no package imports from `apps/`**.
-- [x] Remove all `@ts-ignore` / `@ts-expect-error` directives project-wide (eslint disables already removed).
-- [x] Sweep for any remaining infra duplicates or path alias drift.
+### P1: Domain Module Errors
 
-## 4) Dedupe: Make Packages the Source of Truth
+Source: `core/src/modules/`
 
-### 4.1 Web app → Client package adoption
+- [ ] `auth/errors.ts` + `auth/errors.test.ts` → `packages/shared/src/domain/auth/auth.errors.ts` (AccountLockedError, EmailSendError, etc.)
+- [ ] `auth/http-mapper.ts` + `auth/http-mapper.test.ts` → `packages/shared/src/domain/auth/auth.http-mapper.ts`
+- [ ] `billing/errors.ts` + `billing/errors.test.ts` → `packages/shared/src/domain/billing/billing.errors.ts`
+- [ ] `billing/index.ts` → merge into `packages/shared/src/domain/billing/index.ts`
+- [ ] `notifications/errors.ts` + `notifications/errors.test.ts` → `packages/shared/src/domain/notifications/notifications.errors.ts`
+- [ ] `notifications/types.ts` → `packages/shared/src/domain/notifications/notifications.types.ts`
+- [ ] `notifications/schemas.ts` + `notifications/schemas.test.ts` → `packages/shared/src/domain/notifications/` `[verify]` vs existing `notifications.schemas.ts`
 
-- [x] Replace `apps/web/src/api/client.ts` with `client/api/src/api/client.ts`.
-- [x] Replace `apps/web/src/features/auth/hooks/useResendCooldown.ts` with `client/react` hook.
-- [x] Replace `apps/web/src/features/auth/components/ProtectedRoute.tsx` with `client/ui` layout.
-- [x] Replace `apps/web/src/features/auth/utils/createFormHandler.ts` with `client/ui` util.
-- [x] Collapse `apps/web/src/features/admin/api/adminApi.ts` and `services/adminApi.ts` into a single source of truth (prefer `client/api` if reusable).
+### P1: Monitor / Health Check Types
 
-### 4.2 Remove/relocate duplicates (tests included)
+Source: `core/src/infrastructure/monitor/`
 
-- [x] Delete duplicate app files after swapping imports.
-- [x] Move/merge duplicate tests into the package that becomes canonical.
+- [ ] `health.ts` + `health.test.ts` → `packages/shared/src/utils/monitor/health.ts`
+- [ ] `types.ts` → `packages/shared/src/utils/monitor/types.ts`
+- [ ] `index.ts` → `packages/shared/src/utils/monitor/index.ts`
 
-### 4.3 Dedupe rules (add guards)
+### P1: Infrastructure Errors (base error classes)
 
-- [x] Enforce **API client single source**: remove any app-level re-instantiation; export initialized client/hook from `client/api`.
-- [x] Enforce **schema single source**: no parallel interfaces in `kernel/contracts` when `infra/db` has canonical schemas.
-- [x] Enforce **feature/module split**: UI feature uses types from `modules/*` (or `kernel/contracts`) only; no logic duplication.
+Source: `core/src/infrastructure/errors/`
 
-### 4.4 Phase Order (to avoid rework)
+- [ ] `base.ts` + `base.test.ts` → `[verify]` vs `packages/shared/src/core/errors.ts`
+- [ ] `http.ts` + `http.test.ts` → `[verify]` vs `packages/shared/src/core/errors.ts`
+- [ ] `response.ts` + `response.test.ts` → `packages/shared/src/core/` `[verify]`
+- [ ] `validation-error.ts` + `validation-error.test.ts` → `[verify]` vs `packages/shared/src/core/errors.ts`
+- [ ] `validation.ts` + `validation.test.ts` → `[verify]` vs `packages/shared/src/core/errors.ts`
+- [ ] `index.ts` → merge exports if missing
 
-1. Enforce lint boundaries + entry-point rules  
-2. Consolidate duplicates + delete app wrappers  
-3. Purify kernel + decide infra/server ownership  
-4. Premium packaging moves  
-5. Final validation
+### P2: Config System (env loading, schema, types)
 
-## 5) Make `apps/server` Thin (Composition Only)
+Source: `core/src/config/` (also duplicated in `packages/backend-core/src/config/`)
 
-- [x] Decide canonical logger: keep kernel logger and adapt server to it, or remove kernel logger and keep server-only (prefer kernel as the base).
-- [x] Decide canonical health check: move server health to kernel monitor OR move kernel to infra/http (pick one).
-- [x] Route ownership: routes should live in modules + infra/http. `apps/server` should only register routes and start Fastify.
-- [x] Resolve logger/health/routes overlaps between `apps/server` and `kernel/infra`.
+- [ ] `env.loader.ts` + `env.loader.test.ts` → `packages/shared/src/config/env.loader.ts`
+- [ ] `env.parsers.ts` + `env.parsers.test.ts` → `packages/shared/src/config/env.parsers.ts`
+- [ ] `env.schema.ts` + `env.schema.test.ts` → `packages/shared/src/config/env.schema.ts`
+- [ ] `index.ts` → `packages/shared/src/config/index.ts`
+- [ ] `types/auth.ts` + `types/auth.test.ts` → `packages/shared/src/config/types/auth.ts`
+- [ ] `types/index.ts` + `types/index.test.ts` → `packages/shared/src/config/types/index.ts`
+- [ ] `types/infra.ts` + `types/infra.test.ts` → `packages/shared/src/config/types/infra.ts`
+- [ ] `types/notification.ts` + `types/notification.test.ts` → `packages/shared/src/config/types/notification.ts`
+- [ ] `types/services.ts` + `types/services.test.ts` → `packages/shared/src/config/types/services.ts`
 
-## 6) Kernel Purity
+### P2: Shared Utilities (constants, token, cookie, jwt)
 
-- [x] Move `kernel/src/modules/notifications/*` to:
-  - `kernel/src/contracts/notifications/*` (shared schemas/types), and
-  - `modules/notifications/src/errors.ts` (server-only errors).
-- [x] Verify kernel contains only domain-agnostic primitives/contracts.
+Source: `core/src/shared/` and `core/src/infrastructure/`
 
-## 7) Optional Modules (Explicitly Optional)
+- [ ] `shared/constants/time.ts` + `time.test.ts` → `packages/shared/src/utils/constants/time.ts`
+- [ ] `shared/constants/http.ts` + `http.test.ts` → `[verify]` vs `packages/shared/src/utils/http.ts`
+- [ ] `shared/constants/index.ts` → `packages/shared/src/utils/constants/index.ts`
+- [ ] `shared/token.ts` + `token.test.ts` → `packages/shared/src/utils/token.ts`
+- [ ] `shared/port.ts` + `port.test.ts` → `[verify]` vs `packages/shared/src/core/ports.ts`
+- [ ] `shared/utils.ts` + `utils.test.ts` → `[verify]` vs existing utils
+- [ ] `shared/async.ts` + `async.test.ts` → `[verify]` vs `packages/shared/src/utils/async/`
+- [ ] `shared/storage.ts` + `storage.test.ts` → `[verify]` vs `packages/shared/src/utils/storage.ts`
+- [ ] `infrastructure/http/cookie.ts` + `cookie.test.ts` → `packages/shared/src/utils/cookie.ts`
+- [ ] `infrastructure/http/types.ts` → merge into `packages/shared/src/utils/http.ts`
+- [ ] `infrastructure/crypto/jwt.ts` + `jwt.test.ts` → `packages/shared/src/utils/jwt.ts` `[verify]` vs `utils/crypto.ts`
+- [ ] `infrastructure/crypto/index.ts` → merge into utils
 
-- [ ] Tag optional infra/modules (realtime/websocket/media/offline/search) in docs and configs.
-- [ ] Ensure optional modules are gated by config features and do not run by default.
-- [x] Create `premium/` root and move `infra/websocket`, `infra/media`, and `client/engine` under it as separate packages.
+### P2: Cache Types & Errors
 
-## 8) Hygiene & Cleanups
+Source: `core/src/infrastructure/cache/`
 
-- [x] Consolidate any `contracts/src/jobs` dual structure if still present.
-- [x] Add missing test for `contracts/src/schema.ts` (if still missing).
-- [x] Ensure `client` only depends on `kernel/contracts` or safe primitives.
-- [x] Move common helpers (pagination, validation, optimistic lock) to `kernel/primitives` if not infra-specific.
-- [x] Add workspace/tenant scoping guardrails (require workspaceId in repo functions).
-- [x] Add entitlements resolver + `assertEntitled()` helper (single access gate).
-- [x] Add subscription lifecycle state handling (trialing/active/past_due/canceled) tied to entitlements.
-- [x] Add general audit log (not just security events).
-- [x] Add data deletion workflow (soft delete + async hard delete + storage cleanup).
+- [ ] `errors.ts` + `errors.test.ts` → `packages/shared/src/utils/cache/errors.ts`
+- [ ] `types.ts` → `packages/shared/src/utils/cache/types.ts`
+- [ ] `index.ts` → merge into `packages/shared/src/utils/cache/index.ts`
 
-## 9) Package Consolidation Plan
+### P2: PubSub Types & Helpers (non-DB parts)
 
-### 9.1 Infra → `@abe-stack/infra` (exclude websocket/media)
+Source: `core/src/infrastructure/pubsub/`
 
-- [x] Create `infra` root package with name `@abe-stack/infra`.
-- [x] Merge infra packages into `@abe-stack/infra`: `cache` (done), `db` (done), `email` (done), `http` (done), `jobs` (done), `security` (done), `storage` (done).
-- [x] Move `infra/websocket` → `premium/websocket` (keep package name `@abe-stack/websocket`).
-- [x] Move `infra/media` → `premium/media` (keep package name `@abe-stack/media`).
-- [x] Update root/workspace references, tsconfigs, and any imports to use `@abe-stack/infra` for consolidated modules.
-- [x] Remove old infra package directories once imports/builds are clean.
+- [ ] `helpers.ts` + `helpers.test.ts` → `packages/shared/src/utils/pubsub/helpers.ts`
+- [ ] `subscription-manager.ts` + `subscription-manager.test.ts` → `packages/shared/src/utils/pubsub/subscription-manager.ts`
+- [ ] `types.ts` → `packages/shared/src/utils/pubsub/types.ts`
+- [ ] `index.ts` → `packages/shared/src/utils/pubsub/index.ts`
 
-### 9.2 Kernel → single package
+### P2: Module Registration
 
-- [x] Merge `kernel/contracts` + `kernel/primitives` into `kernel/` with package name `@abe-stack/kernel`.
-- [x] Update import paths across repo to point at `@abe-stack/kernel` (no cross-package references).
-- [x] Delete old sub-packages and update tsconfig references + lint config.
+Source: `core/src/infrastructure/`
 
-### 9.3 Client → consolidate + premium engine
+- [ ] `module-registration.ts` → `packages/shared/src/core/module-registration.ts`
 
-- [x] Move `client/engine` → `premium/client/engine` (keep package name `@abe-stack/engine`).
-- [x] Merge `client/stores` into `client/react` (single package, keep name `@abe-stack/react`).
-- [x] Update imports and tests to use the consolidated client packages.
+### P3: Advanced Password Logic
 
+Source: `core/src/modules/auth/`
 
-## 8.1 Essential Features Audit (Verify vs Add)
+- [ ] `password-patterns.ts` + `password-patterns.test.ts` → `[verify]` vs `packages/shared/src/utils/password.ts`
+- [ ] `password-scoring.ts` + `password-scoring.test.ts` → `[verify]` vs `packages/shared/src/utils/password.ts`
+- [ ] `password-strength.ts` + `password-strength.test.ts` → `[verify]` vs `packages/shared/src/utils/password.ts`
+- [ ] `password.ts` + `password.test.ts` → `[verify]` vs `packages/shared/src/utils/password.ts`
+- [ ] `index.ts` → merge into `packages/shared/src/domain/auth/index.ts`
+
+### P3: Shared Pagination (cursor-based, separate from offset)
+
+Source: `core/src/shared/pagination/`
+
+- [ ] `cursor.ts` + `cursor.test.ts` → `[verify]` vs `packages/shared/src/utils/pagination.ts`
+- [ ] `error.ts` + `error.test.ts` → `[verify]` vs `packages/shared/src/utils/pagination.ts`
+- [ ] `helpers.ts` + `helpers.test.ts` → `[verify]` vs `packages/shared/src/utils/pagination.ts`
+- [ ] `index.ts` → merge if needed
+
+### P3: Integration Tests
+
+Source: `core/src/__tests__/`
+
+- [ ] `async-utilities.integration.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `auth-domain.integration.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `contracts.integration.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `domain-structure.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `errors.integration.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `jwt.integration.test.ts` → `packages/shared/src/__tests__/`
+- [ ] `pagination.integration.test.ts` → `packages/shared/src/__tests__/`
+
+---
+
+## 2. Essential Features Audit (Verify vs Add)
 
 - [ ] Multi-tenant workspaces + membership roles + invites
   - [ ] Memberships (role per workspace)
@@ -213,15 +239,15 @@ Goal: apps are composition only, packages own logic. Layer flow: `apps → modul
 - Applications must consume the exported client/hooks and avoid re-implementing API calling logic.
 
 ### Schema Source-of-Truth
-- Database schemas (Drizzle/Zod) defined in `@abe-stack/infra` (db) are the source of truth.
-- `@abe-stack/kernel` (contracts) re-exports these types to maintain a clean dependency flow without shape duplication.
+- Database schemas (Zod) defined in `@abe-stack/db` are the source of truth.
+- `@abe-stack/shared` (contracts) re-exports these types to maintain a clean dependency flow without shape duplication.
 
 ### Admin Feature Boundary
 - `modules/admin` owns all backend logic, routes, and services for administration.
 - `apps/web/src/features/admin` is a UI-only layer that consumes the backend services via shared types.
 
 - Apps should contain pages + wiring only. Reusable logic belongs to packages.
-- If a type is needed by multiple layers, move it to `kernel/contracts`.
+- If a type is needed by multiple layers, move it to `packages/shared/src/contracts`.
 - Keep boundary rules strict; fix violations instead of suppressing.
 - Avoid overengineering: only add new packages/features if they reduce complexity or remove duplication.
 
@@ -229,14 +255,14 @@ Goal: apps are composition only, packages own logic. Layer flow: `apps → modul
 
 ## SaaS Expectations (Appendix)
 
-### 1) SaaS “core loops” people expect
+### 1) SaaS "core loops" people expect
 
 - **Subscription lifecycle completeness**
-  - Trials: trial start/end, “trialing → active” transitions
+  - Trials: trial start/end, "trialing → active" transitions
   - Seat-based billing support (minimum): quantity + proration handling rules
   - Plan changes: upgrade/downgrade scheduling, proration previews
-  - Dunning / failed payment flow: retries, “past_due” states, user messaging
-- **Entitlements**: single place that answers what a user/team can do right now  
+  - Dunning / failed payment flow: retries, "past_due" states, user messaging
+- **Entitlements**: single place that answers what a user/team can do right now
   - Minimum: `entitlements` service resolving features from subscription + role
 
 ### 2) Multi-tenant & team support (big one)
@@ -245,12 +271,12 @@ Goal: apps are composition only, packages own logic. Layer flow: `apps → modul
 - Memberships (roles per org)
 - Invites (email invite accept flow)
 - Role/permission model per org (not just global roles)
-- Minimum: orgs table, memberships, invites, roles (owner/admin/member), per‑org scoping in DB + request context
+- Minimum: orgs table, memberships, invites, roles (owner/admin/member), per-org scoping in DB + request context
 
 ### 3) Auditability & compliance-lite
 
-- Audit log (general) separate from security events  
-  e.g., “billing plan changed”, “user role changed”, “project deleted”
+- Audit log (general) separate from security events
+  e.g., "billing plan changed", "user role changed", "project deleted"
 - Data export (GDPR-ish): export user/org data
 - Data deletion: soft delete + retention windows, hard delete jobs
 - Minimum: audit log table + `audit.record(event)` helper with typed events
@@ -277,7 +303,7 @@ Goal: apps are composition only, packages own logic. Layer flow: `apps → modul
 - One-command setup: `pnpm dev` starts server + web + workers
 - Reset dev DB path
 - CLI/scaffolding: create-module, migration scaffolding
-- Env validation output (“you’re missing X vars”)
+- Env validation output ("you're missing X vars")
 - Storybook/UI catalog (demo catalog already covers this)
 
 ### 7) Security essentials that might still be missing
@@ -287,11 +313,11 @@ Goal: apps are composition only, packages own logic. Layer flow: `apps → modul
 - File upload validation + scanning hooks
 - Secret rotation guidelines (docs + env patterns)
 
-### 8) “SaaS product” surface area (UI)
+### 8) "SaaS product" surface area (UI)
 
 - Onboarding flow
 - Create workspace
 - Invite teammate
 - Pick plan
-- First success moment (“project created”)
-- Usage/limits UI (“you’re on free plan; 80% of X used”)
+- First success moment ("project created")
+- Usage/limits UI ("you're on free plan; 80% of X used")

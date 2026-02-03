@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useJobActions.test.ts
-import { useMutation } from '@abe-stack/client';
+import { useMutation } from '@abe-stack/engine';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -7,11 +7,10 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobActions } from './useJobActions';
 
-import type { JobActionResponse } from '@abe-stack/core';
-import type { UseMutationResult } from '@abe-stack/client';
+import type { JobActionResponse } from '@abe-stack/shared';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useMutation: vi.fn(),
 }));
 
@@ -28,8 +27,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     tokenStore: {
@@ -41,7 +40,6 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
 describe('useJobActions', () => {
   const mockJobActionResponse: JobActionResponse = {
     success: true,
-    jobId: 'job-123',
     message: 'Job action successful',
   };
 
@@ -69,7 +67,7 @@ describe('useJobActions', () => {
         isSuccess: false,
         failureCount: 0,
         reset: vi.fn(),
-      } as unknown as UseMutationResult;
+      } as any;
     });
 
     vi.mocked(createAdminApiClient).mockReturnValue({
@@ -105,7 +103,7 @@ describe('useJobActions', () => {
         isSuccess: false,
         failureCount: 0,
         reset: vi.fn(),
-      } as unknown as UseMutationResult;
+      } as any;
     });
 
     vi.mocked(createAdminApiClient).mockReturnValue({
@@ -133,7 +131,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(useMutation).mockReturnValueOnce({
       mutate: vi.fn(),
@@ -146,7 +144,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(createAdminApiClient).mockReturnValue({
       retryJob: vi.fn(),
@@ -171,7 +169,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(useMutation).mockReturnValueOnce({
       mutate: vi.fn(),
@@ -184,7 +182,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(createAdminApiClient).mockReturnValue({
       retryJob: vi.fn(),
@@ -210,7 +208,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 1,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(useMutation).mockReturnValueOnce({
       mutate: vi.fn(),
@@ -223,7 +221,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(createAdminApiClient).mockReturnValue({
       retryJob: vi.fn(),
@@ -249,7 +247,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 0,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(useMutation).mockReturnValueOnce({
       mutate: vi.fn(),
@@ -262,7 +260,7 @@ describe('useJobActions', () => {
       isSuccess: false,
       failureCount: 1,
       reset: vi.fn(),
-    } as unknown as UseMutationResult);
+    } as any);
 
     vi.mocked(createAdminApiClient).mockReturnValue({
       retryJob: vi.fn(),
@@ -283,7 +281,7 @@ describe('useJobActions', () => {
       // Immediately invoke onSuccess for testing
       if (config?.onSuccess) {
         void Promise.resolve(mockJobActionResponse).then(() => {
-          config.onSuccess(mockJobActionResponse, 'job-123', undefined);
+          config.onSuccess?.(mockJobActionResponse, 'job-123', undefined);
         });
       }
       return {
@@ -297,7 +295,7 @@ describe('useJobActions', () => {
         isSuccess: false,
         failureCount: 0,
         reset: vi.fn(),
-      } as unknown as UseMutationResult;
+      } as any;
     });
 
     vi.mocked(createAdminApiClient).mockReturnValue({
@@ -323,7 +321,6 @@ describe('useJobActions', () => {
   });
 
   test('should invalidate queries on cancel success', async () => {
-    const mockInvalidate = vi.fn();
     const retryMutateAsync = vi.fn();
     const cancelMutateAsync = vi.fn().mockResolvedValue(mockJobActionResponse);
 
@@ -335,7 +332,7 @@ describe('useJobActions', () => {
       // Immediately invoke onSuccess for cancel mutation (second call)
       if (callCount === 2 && config?.onSuccess) {
         void Promise.resolve(mockJobActionResponse).then(() => {
-          config.onSuccess(mockJobActionResponse, 'job-123', undefined);
+          config.onSuccess?.(mockJobActionResponse, 'job-123', undefined);
         });
       }
 
@@ -350,7 +347,7 @@ describe('useJobActions', () => {
         isSuccess: false,
         failureCount: 0,
         reset: vi.fn(),
-      } as unknown as UseMutationResult;
+      } as any;
     });
 
     vi.mocked(createAdminApiClient).mockReturnValue({

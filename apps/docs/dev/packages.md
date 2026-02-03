@@ -293,9 +293,9 @@ apps/server/src/
 | Phase     | What                                                        | Notes                                                                                           |
 | --------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | **P3**    | Replace `services/cache-service.ts` with `@abe-stack/cache` | Local is basic TTL; package has full LRU. Low priority — functional.                            |
-| **P3**    | Unify local HTTP router with `@abe-stack/http`              | Local uses `AppContext`; package uses `HandlerContext`. Requires system module handler updates. |
+| **P3**    | Unify local HTTP router with `@abe-stack/infra`              | Local uses `AppContext`; package uses `HandlerContext`. Requires system module handler updates. |
 | **P3**    | Migrate notification factory to `@abe-stack/notifications`  | Local is thin adapter. Low impact.                                                              |
-| **Known** | Fix billing `BillingRouteMap` type incompatibility          | Pre-existing: billing uses custom route system divergent from `@abe-stack/http`.                |
+| **Known** | Fix billing `BillingRouteMap` type incompatibility          | Pre-existing: billing uses custom route system divergent from `@abe-stack/infra`.                |
 
 ---
 
@@ -321,7 +321,7 @@ apps/server/src/
 
 1. **Package context narrowing:** Each package defines a narrow `XxxAppContext extends BaseContext` (e.g., `AdminAppContext`). The server's full `AppContext` structurally satisfies all of them — no casting needed at the boundary.
 
-2. **Route helper pattern:** Packages that need specific context types define a module-specific `xxxProtectedRoute` helper (e.g., `adminProtectedRoute`) that wraps `protectedRoute` from `@abe-stack/http` and casts the handler context. This keeps route definitions clean while maintaining type safety in handlers.
+2. **Route helper pattern:** Packages that need specific context types define a module-specific `xxxProtectedRoute` helper (e.g., `adminProtectedRoute`) that wraps `protectedRoute` from `@abe-stack/infra` and casts the handler context. This keeps route definitions clean while maintaining type safety in handlers.
 
 3. **No re-exports:** Consumers import directly from source packages. The `infrastructure/index.ts` barrel only exports local server-specific infrastructure code.
 

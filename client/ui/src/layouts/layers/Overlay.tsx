@@ -15,7 +15,6 @@ type OverlayProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 export const Overlay = forwardRef<HTMLDivElement, OverlayProps>(
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Overlay(props, ref): ReactElement | null {
     const { open, className = '', onClick, ...rest } = props;
     const [mounted, setMounted] = useState(false);

@@ -8,8 +8,8 @@
  * - Disconnect existing OAuth providers
  */
 
-import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/client';
-import { OAUTH_PROVIDERS, tokenStore } from '@abe-stack/core';
+import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/api';
+import { OAUTH_PROVIDERS, tokenStore } from '@abe-stack/shared';
 import { Button, Card, Dialog, PageContainer } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';

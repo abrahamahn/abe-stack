@@ -9,7 +9,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 're
 
 import { cn } from '../../utils/cn';
 
-import type { Invoice, InvoiceStatus } from '@abe-stack/core';
+import type { Invoice, InvoiceStatus } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

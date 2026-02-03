@@ -1,10 +1,10 @@
 // apps/web/src/features/admin/components/JobsTable.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobsTable } from './JobsTable';
 
-import type { JobDetails, JobListResponse, JobStatus } from '@abe-stack/core';
+import type { JobDetails, JobListResponse, JobStatus } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data
@@ -36,6 +36,8 @@ const createMockResponse = (overrides: Partial<JobListResponse> = {}): JobListRe
   limit: 20,
   totalPages: 1,
   total: 3,
+  hasNext: false,
+  hasPrev: false,
   ...overrides,
 });
 
@@ -371,7 +373,6 @@ describe('JobsTable', () => {
         />,
       );
 
-      const table = screen.getByRole('table');
       const rows = screen.getAllByRole('row');
       // Header + 3 data rows
       expect(rows.length).toBe(4);
@@ -397,7 +398,10 @@ describe('JobsTable', () => {
 
       const rows = screen.getAllByRole('row');
       // Click first data row (skip header)
-      fireEvent.click(rows[1]);
+      const row = rows[1];
+      if (row) {
+        fireEvent.click(row);
+      }
 
       expect(mockOnJobClick).toHaveBeenCalledTimes(1);
       expect(mockOnJobClick).toHaveBeenCalledWith(
@@ -488,7 +492,10 @@ describe('JobsTable', () => {
       );
 
       const retryButtons = screen.getAllByRole('button', { name: 'Retry' });
-      fireEvent.click(retryButtons[0]);
+      const retryButton = retryButtons[0];
+      if (retryButton) {
+        fireEvent.click(retryButton);
+      }
 
       expect(mockOnRetry).toHaveBeenCalledWith('job-2');
     });
@@ -510,7 +517,10 @@ describe('JobsTable', () => {
       );
 
       const cancelButtons = screen.getAllByRole('button', { name: 'Cancel' });
-      fireEvent.click(cancelButtons[0]);
+      const cancelButton = cancelButtons[0];
+      if (cancelButton) {
+        fireEvent.click(cancelButton);
+      }
 
       expect(mockOnCancel).toHaveBeenCalledWith('job-3');
     });
@@ -532,7 +542,10 @@ describe('JobsTable', () => {
       );
 
       const retryButtons = screen.getAllByRole('button', { name: 'Retry' });
-      fireEvent.click(retryButtons[0]);
+      const retryButton = retryButtons[0];
+      if (retryButton) {
+        fireEvent.click(retryButton);
+      }
 
       expect(mockOnJobClick).not.toHaveBeenCalled();
     });

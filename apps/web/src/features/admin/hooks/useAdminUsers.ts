@@ -5,9 +5,11 @@
  * Manage admin user listing with filtering and pagination.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { tokenStore } from '@abe-stack/shared';
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { listUsers } from '../api';
+import { createAdminApiClient } from '../services/adminApi';
 
 type UserRoleLocal = 'user' | 'moderator' | 'admin';
 
@@ -67,6 +69,7 @@ const DEFAULT_LIMIT = 20;
  * Hook for managing admin user listing
  */
 export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): UseAdminUsersResult {
+  const { config } = useClientEnvironment();
   const [filters, setFiltersState] = useState<AdminUserListFiltersLocal>({
     page: 1,
     limit: DEFAULT_LIMIT,
@@ -86,11 +89,21 @@ export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): U
     error: null,
   });
 
-  const fetchUsers = useCallback(async (currentFilters: AdminUserListFiltersLocal) => {
+  const adminApi = useMemo(
+    () =>
+      createAdminApiClient({
+        baseUrl: config.apiUrl,
+        getToken: (): string | null => tokenStore.get(),
+      }),
+    [config.apiUrl],
+  );
+
+  const fetchUsers = useCallback(
+    async (currentFilters: AdminUserListFiltersLocal) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const result: AdminUserListResponseLocal = (await listUsers(
+      const result: AdminUserListResponseLocal = (await adminApi.listUsers(
         currentFilters,
       )) as AdminUserListResponseLocal;
       setState({
@@ -111,7 +124,9 @@ export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): U
         error: errorMessage,
       }));
     }
-  }, []);
+  },
+    [adminApi],
+  );
 
   // Fetch users when filters change
   useEffect(() => {

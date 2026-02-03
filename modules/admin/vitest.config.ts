@@ -4,26 +4,21 @@ import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';
 
 const pkg = (name: string) => path.resolve(__dirname, `../${name}/src`);
+const infraPkg = path.resolve(__dirname, '../../packages/backend-core/src');
+const contractsPkg = path.resolve(__dirname, '../../packages/shared/src/contracts');
 
 export default mergeConfig(baseConfig, {
   resolve: {
     alias: [
       { find: /^@abe-stack\/core\/(.*)$/, replacement: `${pkg('core')}/$1` },
-      { find: '@abe-stack/core', replacement: `${pkg('core')}/index.ts` },
-      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${pkg('db')}/$1` },
-      { find: '@abe-stack/db', replacement: `${pkg('db')}/index.ts` },
+      { find: '@abe-stack/shared', replacement: `${pkg('core')}/index.ts` },
+      { find: '@abe-stack/db', replacement: `${infraPkg}/index.ts` },
       { find: /^@abe-stack\/auth\/(.*)$/, replacement: `${pkg('auth')}/$1` },
       { find: '@abe-stack/auth', replacement: `${pkg('auth')}/index.ts` },
       { find: /^@abe-stack\/billing\/(.*)$/, replacement: `${pkg('billing')}/$1` },
       { find: '@abe-stack/billing', replacement: `${pkg('billing')}/index.ts` },
-      { find: /^@abe-stack\/http\/(.*)$/, replacement: `${pkg('http')}/$1` },
-      { find: '@abe-stack/http', replacement: `${pkg('http')}/index.ts` },
-      { find: /^@abe-stack\/contracts\/(.*)$/, replacement: `${pkg('contracts')}/$1` },
-      { find: '@abe-stack/contracts', replacement: `${pkg('contracts')}/index.ts` },
-      { find: /^@abe-stack\/jobs\/(.*)$/, replacement: `${pkg('jobs')}/$1` },
-      { find: '@abe-stack/jobs', replacement: `${pkg('jobs')}/index.ts` },
-      { find: /^@abe-stack\/security\/(.*)$/, replacement: `${pkg('security')}/$1` },
-      { find: '@abe-stack/security', replacement: `${pkg('security')}/index.ts` },
+      { find: /^@abe-stack\/kernel\/contracts\/(.*)$/, replacement: `${contractsPkg}/$1` },
+      { find: '@abe-stack/shared', replacement: `${contractsPkg}/index.ts` },
     ],
   },
   test: {

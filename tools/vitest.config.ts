@@ -12,8 +12,8 @@ import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../vitest.config';
 
 const authPkg = path.resolve(__dirname, '../modules/auth/src');
-const corePkg = path.resolve(__dirname, '../core/src');
-const dbPkg = path.resolve(__dirname, '../infra/db/src');
+const corePkg = path.resolve(__dirname, '../kernel/src');
+const infraPkg = path.resolve(__dirname, '../packages/backend-core/src');
 
 export default mergeConfig(baseConfig, {
   test: {
@@ -22,16 +22,15 @@ export default mergeConfig(baseConfig, {
     include: ['tools/scripts/**/*.test.ts'],
     server: {
       deps: {
-        inline: ['@abe-stack/auth', '@abe-stack/core', '@abe-stack/db'],
+        inline: ['@abe-stack/auth', '@abe-stack/shared', '@abe-stack/db'],
       },
     },
   },
   resolve: {
     alias: [
       { find: '@abe-stack/auth', replacement: `${authPkg}/index.ts` },
-      { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
-      { find: /^@abe-stack\/db\/(.*)$/, replacement: `${dbPkg}/$1` },
-      { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
+      { find: '@abe-stack/shared', replacement: `${corePkg}/index.ts` },
+      { find: '@abe-stack/db', replacement: `${infraPkg}/index.ts` },
     ],
   },
 });

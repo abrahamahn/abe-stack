@@ -136,7 +136,8 @@ function categorizeFiles(allFiles: string[]): {
         break;
       case 'infra':
       case 'modules':
-      case 'shared': {
+      case 'shared':
+      case 'premium': {
         const pkgName = `${parts[0]}/${parts[1]}`;
         const existingPkg = result.packages.get(pkgName) ?? [];
         existingPkg.push(file);
@@ -254,18 +255,14 @@ function exportAllFiles(): void {
   // Packages
   const pkgOrder = [
     'infra/contracts',
-    'core',
-    'infra/db',
-    'infra/cache',
-    'infra/email',
-    'infra/http',
-    'infra/jobs',
-    'infra/media',
+    'kernel',
+    'infra/src',
+    'premium/media',
+    'premium/websocket',
+    'premium/client',
     'infra/notifications',
     'infra/realtime',
-    'infra/security',
-    'infra/storage',
-    'client/stores',
+    'client/react',
     'infra/users',
     'modules/admin',
     'modules/auth',

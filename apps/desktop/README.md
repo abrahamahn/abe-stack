@@ -92,7 +92,7 @@ apps/desktop/
 │   │   │   ├── ipc.ts       # IPCChannelMap, type-safe channel definitions
 │   │   │   └── index.ts
 │   │   ├── utils/
-│   │   │   └── index.ts     # re-exports port utils from @abe-stack/core
+│   │   │   └── index.ts     # re-exports port utils from @abe-stack/shared
 │   │   └── __tests__/       # main process tests
 │   ├── main.tsx             # renderer entry (React app)
 │   ├── types.d.ts           # window.electronAPI type declarations
@@ -246,7 +246,7 @@ Tests use mocked Electron APIs and verify IPC type safety.
 **Type errors on `window.electronAPI`?**
 
 - Ensure `src/types.d.ts` is included in your tsconfig
-- Check that `@abe-stack/core` types are accessible
+- Check that `@abe-stack/shared` types are accessible
 
 ---
 

@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SubscriptionStatus } from './SubscriptionStatus';
 
-import type { Subscription } from '@abe-stack/core';
+import type { Subscription } from '@abe-stack/shared';
 
 const createMockSubscription = (overrides?: Partial<Subscription>): Subscription => ({
   id: 'sub_123',

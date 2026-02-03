@@ -34,8 +34,8 @@ interface JobDetailsLocal {
   attempts: number;
   maxAttempts: number;
   args: unknown;
-  error: { name: string; message: string; stack?: string } | null;
-  deadLetterReason?: string | null;
+  error: { name: string; message: string; stack?: string | undefined } | null;
+  deadLetterReason?: string | null | undefined;
 }
 
 export interface JobDetailsPanelProps {

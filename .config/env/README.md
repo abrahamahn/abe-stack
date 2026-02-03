@@ -197,7 +197,7 @@ Check the priority order above. Higher priority sources override lower ones. Deb
 
 ```javascript
 // Add after imports in your entry file
-import { initEnv } from '@abe-stack/core/config';
+import { initEnv } from '@abe-stack/shared/config';
 initEnv();
 console.log('MY_VAR:', process.env.MY_VAR);
 ```

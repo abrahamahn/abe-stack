@@ -27,7 +27,7 @@ vi.mock('@abe-stack/ui', () => ({
     </button>
   ),
   Heading: ({ children, as, size }: { children: React.ReactNode; as?: string; size?: string }) => {
-    const Tag = (as ?? 'h1') as keyof JSX.IntrinsicElements;
+    const Tag = (as ?? 'h1') as any;
     return <Tag data-size={size}>{children}</Tag>;
   },
   PageContainer: ({ children }: { children: React.ReactNode }) => (

@@ -5,9 +5,11 @@
  * Fetch and manage a single user for admin purposes.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { tokenStore } from '@abe-stack/shared';
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getUser } from '../api';
+import { createAdminApiClient } from '../services/adminApi';
 
 type UserRoleLocal = 'user' | 'moderator' | 'admin';
 
@@ -39,31 +41,44 @@ export interface UseAdminUserResult extends UseAdminUserState {
  * Hook for fetching and managing a single admin user
  */
 export function useAdminUser(userId: string | null): UseAdminUserResult {
+  const { config } = useClientEnvironment();
   const [state, setState] = useState<UseAdminUserState>({
     user: null,
     isLoading: false,
     error: null,
   });
 
-  const fetchUser = useCallback(async (id: string) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+  const adminApi = useMemo(
+    () =>
+      createAdminApiClient({
+        baseUrl: config.apiUrl,
+        getToken: (): string | null => tokenStore.get(),
+      }),
+    [config.apiUrl],
+  );
 
-    try {
-      const result: AdminUserLocal = (await getUser(id)) as AdminUserLocal;
-      setState({
-        user: result,
-        isLoading: false,
-        error: null,
-      });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load user';
-      setState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: errorMessage,
-      }));
-    }
-  }, []);
+  const fetchUser = useCallback(
+    async (id: string) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const result: AdminUserLocal = (await adminApi.getUser(id)) as AdminUserLocal;
+        setState({
+          user: result,
+          isLoading: false,
+          error: null,
+        });
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load user';
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+      }
+    },
+    [adminApi],
+  );
 
   // Fetch user when userId changes
   useEffect(() => {

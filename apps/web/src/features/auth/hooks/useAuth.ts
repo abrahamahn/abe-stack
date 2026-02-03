@@ -11,59 +11,33 @@
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { AuthState, User } from '@auth/services/AuthService';
+import type {
+    EmailVerificationRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    RegisterResponse,
+    ResendVerificationRequest,
+    ResetPasswordRequest,
+    User,
+} from '@abe-stack/api';
+import type { AuthState } from '@auth/services';
+
 // Import directly from services to avoid circular dependency through barrel
 
-// ============================================================================
-// Local Type Definitions
-// ============================================================================
-
-interface LoginRequestLocal {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequestLocal {
-  email: string;
-  password: string;
-  name?: string | undefined;
-}
-
-interface RegisterResponseLocal {
-  status: 'pending_verification';
-  message: string;
-  email: string;
-}
-
-interface ForgotPasswordRequestLocal {
-  email: string;
-}
-
-interface ResetPasswordRequestLocal {
-  token: string;
-  password: string;
-}
-
-interface EmailVerificationRequestLocal {
-  token: string;
-}
-
-interface ResendVerificationRequestLocal {
-  email: string;
-}
 
 export type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginRequestLocal) => Promise<void>;
-  register: (data: RegisterRequestLocal) => Promise<RegisterResponseLocal>;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
-  forgotPassword: (data: ForgotPasswordRequestLocal) => Promise<void>;
-  resetPassword: (data: ResetPasswordRequestLocal) => Promise<void>;
-  verifyEmail: (data: EmailVerificationRequestLocal) => Promise<void>;
-  resendVerification: (data: ResendVerificationRequestLocal) => Promise<void>;
+  forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
+  resetPassword: (data: ResetPasswordRequest) => Promise<void>;
+  verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
+  resendVerification: (data: ResendVerificationRequest) => Promise<void>;
 };
 
 /**
@@ -93,16 +67,16 @@ export function useAuth(): AuthContextType {
 
   // Memoized operations
   const login = useCallback(
-    async (credentials: LoginRequestLocal): Promise<void> => {
+    async (credentials: LoginRequest): Promise<void> => {
       await auth.login(credentials);
     },
     [auth],
   );
 
   const register = useCallback(
-    async (data: RegisterRequestLocal): Promise<RegisterResponseLocal> => {
+    async (data: RegisterRequest): Promise<RegisterResponse> => {
       const result = await auth.register(data);
-      return result as RegisterResponseLocal;
+      return result;
     },
     [auth],
   );
@@ -117,28 +91,28 @@ export function useAuth(): AuthContextType {
   }, [auth]);
 
   const forgotPassword = useCallback(
-    async (data: ForgotPasswordRequestLocal): Promise<void> => {
+    async (data: ForgotPasswordRequest): Promise<void> => {
       await auth.forgotPassword(data);
     },
     [auth],
   );
 
   const resetPassword = useCallback(
-    async (data: ResetPasswordRequestLocal): Promise<void> => {
+    async (data: ResetPasswordRequest): Promise<void> => {
       await auth.resetPassword(data);
     },
     [auth],
   );
 
   const verifyEmail = useCallback(
-    async (data: EmailVerificationRequestLocal): Promise<void> => {
+    async (data: EmailVerificationRequest): Promise<void> => {
       await auth.verifyEmail(data);
     },
     [auth],
   );
 
   const resendVerification = useCallback(
-    async (data: ResendVerificationRequestLocal): Promise<void> => {
+    async (data: ResendVerificationRequest): Promise<void> => {
       await auth.resendVerification(data);
     },
     [auth],

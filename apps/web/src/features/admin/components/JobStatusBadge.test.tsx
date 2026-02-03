@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
-import type { JobStatus } from '@abe-stack/core';
+import type { JobStatus } from '@abe-stack/shared';
 
 describe('JobStatusBadge', () => {
   describe('rendering different statuses', () => {

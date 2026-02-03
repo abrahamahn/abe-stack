@@ -1,8 +1,8 @@
 // apps/web/src/features/auth/pages/ConfirmEmailPage.test.tsx
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithProviders, mockUser } from './../../../__tests__/utils';
+import { mockUser, renderWithProviders } from './../../../__tests__/utils';
 import { ConfirmEmailPage } from './ConfirmEmailPage';
 
 // Mock the auth hook
@@ -15,7 +15,7 @@ const mockUseAuth = vi.fn(() => ({
   login: vi.fn(),
   logout: vi.fn(),
   register: vi.fn(),
-}));
+})) as any;
 
 vi.mock('@auth/hooks', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@auth/hooks')>();

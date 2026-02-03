@@ -51,25 +51,22 @@
       "path": "./apps/web"
     },
     {
-      "path": "./infra/contracts"
+      "path": "./packages/shared"
     },
     {
-      "path": "./core"
+      "path": "./packages/backend-core"
     },
     {
-      "path": "./infra/db"
+      "path": "./premium/media"
     },
     {
-      "path": "./infra/jobs"
+      "path": "./premium/client/engine"
     },
     {
-      "path": "./infra/media"
+      "path": "./client/api"
     },
     {
-      "path": "./client"
-    },
-    {
-      "path": "./client/stores"
+      "path": "./client/react"
     },
     {
       "path": "./client/ui"
@@ -78,34 +75,28 @@
       "path": "./modules/billing"
     },
     {
-      "path": "./infra/cache"
-    },
-    {
-      "path": "./infra/email"
-    },
-    {
-      "path": "./infra/http"
-    },
-    {
       "path": "./modules/auth"
     },
     {
-      "path": "./infra/security"
+      "path": "./modules/system"
     },
     {
-      "path": "./infra/storage"
+      "path": "./modules/notifications"
     },
     {
-      "path": "./infra/notifications"
+      "path": "./modules/users"
     },
     {
-      "path": "./infra/users"
+      "path": "./premium/websocket"
     },
     {
-      "path": "./infra/realtime"
+      "path": "./premium/realtime"
     },
     {
       "path": "./modules/admin"
+    },
+    {
+      "path": "./packages/db"
     }
   ]
 }

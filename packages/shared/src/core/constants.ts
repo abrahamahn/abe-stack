@@ -1,0 +1,96 @@
+// shared/src/core/constants.ts
+/**
+ * Global Constants
+ *
+ * Centralized constants for the entire application, including HTTP status codes,
+ * application-wide limits, and standard error codes.
+ */
+export const HTTP_STATUS = {
+  // Success
+  OK: 200,
+  CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
+
+  // Client Errors (4xx)
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+
+  // Server Errors (5xx)
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+} as const;
+
+/**
+ * Application Limits
+ */
+export const LIMITS = {
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  MAX_UPLOAD_FILES: 10,
+  MAX_LOGIN_ATTEMPTS: 5,
+  LOCKOUT_DURATION_MINUTES: 15,
+} as const;
+
+/**
+ * Application Error Codes
+ */
+export const ERROR_CODES = {
+  // Generic
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  CONFIGURATION_ERROR: 'CONFIGURATION_ERROR',
+  CONFLICT: 'CONFLICT',
+
+  // Auth
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  TOKEN_REUSED: 'TOKEN_REUSED',
+  INVALID_TOKEN: 'INVALID_TOKEN',
+  EMAIL_ALREADY_EXISTS: 'EMAIL_ALREADY_EXISTS',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  WEAK_PASSWORD: 'WEAK_PASSWORD',
+
+  // OAuth
+  OAUTH_ERROR: 'OAUTH_ERROR',
+  OAUTH_STATE_MISMATCH: 'OAUTH_STATE_MISMATCH',
+
+  // 2FA
+  TOTP_REQUIRED: 'TOTP_REQUIRED',
+  TOTP_INVALID: 'TOTP_INVALID',
+
+  // Billing
+  PAYMENT_FAILED: 'PAYMENT_FAILED',
+  SUBSCRIPTION_EXPIRED: 'SUBSCRIPTION_EXPIRED',
+  INSUFFICIENT_ENTITLEMENTS: 'INSUFFICIENT_ENTITLEMENTS',
+
+  // Rate Limit
+  RATE_LIMITED: 'RATE_LIMITED',
+
+} as const;
+
+/**
+ * Union type for all application error codes
+ */
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+
+/**
+ * Default pagination settings
+ */
+export const DEFAULT_PAGINATION = {
+  PAGE: 1,
+  LIMIT: 50,
+  MAX_LIMIT: 1000,
+} as const;

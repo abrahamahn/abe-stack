@@ -12,14 +12,14 @@
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-web --report-unused-disable-directives"
   },
   "dependencies": {
-    "@abe-stack/contracts": "workspace:*",
-    "@abe-stack/core": "workspace:*",
-    "@abe-stack/client": "workspace:*",
-    "@abe-stack/stores": "workspace:*",
-    "@abe-stack/client": "workspace:*",
+    "@abe-stack/api": "workspace:*",
+    "@abe-stack/engine": "workspace:*",
+    "@abe-stack/ui": "workspace:*",
+    "@abe-stack/react": "workspace:*",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@abe-stack/shared": "workspace:*"
   },
   "devDependencies": {
     "vite-tsconfig-paths": "^6.0.5"

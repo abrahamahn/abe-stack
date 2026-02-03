@@ -12,12 +12,13 @@ import { getPostLoginRedirect } from './redirects';
 import type { User } from '@features/auth';
 
 describe('getPostLoginRedirect', () => {
-  const createUser = (role: string): User => ({
+  const createUser = (role: any): User => ({
     id: 'user_123',
     email: 'user@example.com',
     name: 'Test User',
+    avatarUrl: null,
     role,
-    emailVerified: true,
+    isVerified: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   });

@@ -41,7 +41,8 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-ui --report-unused-disable-directives"
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-ui --report-unused-disable-directives",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "keywords": [
     "abe-stack",
@@ -66,9 +67,9 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/core": "workspace:*",
-    "@abe-stack/client": "workspace:*",
-    "@abe-stack/stores": "workspace:*"
+    "@abe-stack/engine": "workspace:*",
+    "@abe-stack/react": "workspace:*",
+    "@abe-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",

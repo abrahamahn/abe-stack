@@ -11,14 +11,13 @@
 import { adminRoutes } from '@abe-stack/admin';
 import { authRoutes, createAuthGuard } from '@abe-stack/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/billing';
-import { registerRouteMap } from '@abe-stack/http';
+import { registerRouteMap } from '@abe-stack/db';
 import { notificationRoutes } from '@abe-stack/notifications';
 import { realtimeRoutes } from '@abe-stack/realtime';
+import { systemRoutes } from '@abe-stack/system';
 import { userRoutes } from '@abe-stack/users';
 
-import { systemRoutes } from './system.routes';
-
-import type { AuthGuardFactory, RouteMap } from '@abe-stack/http';
+import type { AuthGuardFactory, RouteMap } from '@abe-stack/db';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 

@@ -8,7 +8,6 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { ReactElement } from 'react';
 
 // Helper component to access theme context
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function ThemeConsumer(): ReactElement {
   const { mode, cycleMode, isDark, isLight, resolvedTheme, setMode } = useTheme();
   return (

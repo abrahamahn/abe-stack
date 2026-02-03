@@ -10,9 +10,9 @@
  * - Loading states and button disabling
  */
 
-import { act, render, screen, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PasswordChangeForm } from './PasswordChangeForm';
 
@@ -42,7 +42,7 @@ vi.mock('@abe-stack/ui', async () => {
       children: React.ReactNode;
       onClick?: () => void;
       disabled?: boolean;
-      type?: string;
+      type?: 'submit' | 'reset' | 'button';
     }) => (
       <button data-testid="submit-button" onClick={onClick} disabled={disabled} type={type}>
         {children}
@@ -91,12 +91,11 @@ vi.mock('@abe-stack/ui', async () => {
 import { usePasswordChange } from '../hooks';
 
 describe('PasswordChangeForm', () => {
-  let mockChangePassword: ReturnType<typeof vi.fn>;
-  let mockReset: ReturnType<typeof vi.fn>;
-  let mockOnSuccess: ReturnType<typeof vi.fn>;
+  let mockChangePassword: any;
+  let mockReset: any;
+  let mockOnSuccess: any;
 
   const defaultProps: PasswordChangeFormProps = {
-    onSuccess: undefined,
   };
 
   beforeEach(() => {
@@ -105,11 +104,14 @@ describe('PasswordChangeForm', () => {
     mockOnSuccess = vi.fn();
 
     vi.mocked(usePasswordChange).mockReturnValue({
-      changePassword: mockChangePassword,
+      changePassword: mockChangePassword as any,
       isLoading: false,
+      isFetching: false,
+      isSuccess: false,
+      isError: false,
       error: null,
-      reset: mockReset,
-    });
+      reset: mockReset as any,
+    } as any);
   });
 
   afterEach(() => {
@@ -418,11 +420,14 @@ describe('PasswordChangeForm', () => {
 
     it('should show loading state during submission', () => {
       vi.mocked(usePasswordChange).mockReturnValue({
-        changePassword: mockChangePassword,
+        changePassword: mockChangePassword as any,
         isLoading: true,
+        isFetching: true,
+        isSuccess: false,
+        isError: false,
         error: null,
-        reset: mockReset,
-      });
+        reset: mockReset as any,
+      } as any);
 
       render(<PasswordChangeForm {...defaultProps} />);
 
@@ -432,11 +437,14 @@ describe('PasswordChangeForm', () => {
 
     it('should display error from hook', () => {
       vi.mocked(usePasswordChange).mockReturnValue({
-        changePassword: mockChangePassword,
+        changePassword: mockChangePassword as any,
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         error: new Error('Current password is incorrect'),
-        reset: mockReset,
-      });
+        reset: mockReset as any,
+      } as any);
 
       render(<PasswordChangeForm {...defaultProps} />);
 
@@ -447,11 +455,14 @@ describe('PasswordChangeForm', () => {
       const user = userEvent.setup({ delay: null });
 
       vi.mocked(usePasswordChange).mockReturnValue({
-        changePassword: mockChangePassword,
+        changePassword: mockChangePassword as any,
         isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: true,
         error: new Error('Hook error'),
-        reset: mockReset,
-      });
+        reset: mockReset as any,
+      } as any);
 
       render(<PasswordChangeForm {...defaultProps} />);
 
@@ -472,23 +483,26 @@ describe('PasswordChangeForm', () => {
 
   describe('success handling', () => {
     it('should show success message after password change', async () => {
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
       render(<PasswordChangeForm {...defaultProps} />);
 
       // Trigger the success callback
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       expect(screen.getByText('Password changed successfully')).toBeInTheDocument();
@@ -497,16 +511,19 @@ describe('PasswordChangeForm', () => {
 
     it('should clear form fields on success', async () => {
       const user = userEvent.setup({ delay: null });
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
       render(<PasswordChangeForm {...defaultProps} />);
@@ -518,7 +535,7 @@ describe('PasswordChangeForm', () => {
 
       // Trigger success callback
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       // Check that inputs are cleared
@@ -528,23 +545,26 @@ describe('PasswordChangeForm', () => {
     });
 
     it('should call onSuccess callback', async () => {
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
       render(<PasswordChangeForm {...defaultProps} onSuccess={mockOnSuccess} />);
 
       // Trigger success callback
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       expect(mockOnSuccess).toHaveBeenCalled();
@@ -552,23 +572,26 @@ describe('PasswordChangeForm', () => {
 
     it('should hide success message after 3 seconds', async () => {
       vi.useFakeTimers();
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
       render(<PasswordChangeForm {...defaultProps} />);
 
       // Trigger success callback
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       expect(screen.getByText('Password changed successfully')).toBeInTheDocument();
@@ -583,23 +606,26 @@ describe('PasswordChangeForm', () => {
     });
 
     it('should handle undefined onSuccess prop', async () => {
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
-      render(<PasswordChangeForm {...defaultProps} onSuccess={undefined} />);
+      render(<PasswordChangeForm {...defaultProps} />);
 
       // Trigger success callback - should not throw even with undefined prop
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       expect(screen.getByText('Password changed successfully')).toBeInTheDocument();
@@ -607,23 +633,26 @@ describe('PasswordChangeForm', () => {
 
     it('should clear success message when submitting again', async () => {
       const user = userEvent.setup({ delay: null });
-      let capturedOnSuccess: (() => void) | undefined;
+      let capturedOnSuccess: any;
 
-      vi.mocked(usePasswordChange).mockImplementation(({ onSuccess }) => {
-        capturedOnSuccess = onSuccess;
+      vi.mocked(usePasswordChange).mockImplementation((options) => {
+        capturedOnSuccess = options?.onSuccess;
         return {
-          changePassword: mockChangePassword,
+          changePassword: mockChangePassword as any,
           isLoading: false,
+          isFetching: false,
+          isSuccess: false,
+          isError: false,
           error: null,
-          reset: mockReset,
-        };
+          reset: mockReset as any,
+        } as any;
       });
 
       render(<PasswordChangeForm {...defaultProps} />);
 
       // Trigger success to show message
       await act(async () => {
-        capturedOnSuccess?.();
+        capturedOnSuccess?.({ success: true });
       });
 
       expect(screen.getByText('Password changed successfully')).toBeInTheDocument();

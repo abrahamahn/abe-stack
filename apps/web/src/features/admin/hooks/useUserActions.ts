@@ -5,9 +5,11 @@
  * Actions for admin user management (update, lock, unlock).
  */
 
-import { useCallback, useState } from 'react';
+import { tokenStore } from '@abe-stack/shared';
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useCallback, useMemo, useState } from 'react';
 
-import { lockUser, unlockUser, updateUser } from '../api';
+import { createAdminApiClient } from '../services/adminApi';
 
 // ============================================================================
 // Types
@@ -73,6 +75,7 @@ export interface UseUserActionsResult extends UseUserActionsState {
  * Hook for admin user actions
  */
 export function useUserActions(): UseUserActionsResult {
+  const { config } = useClientEnvironment();
   const [state, setState] = useState<UseUserActionsState>({
     isUpdating: false,
     isLocking: false,
@@ -80,6 +83,15 @@ export function useUserActions(): UseUserActionsResult {
     error: null,
     lastAction: null,
   });
+
+  const adminApi = useMemo(
+    () =>
+      createAdminApiClient({
+        baseUrl: config.apiUrl,
+        getToken: (): string | null => tokenStore.get(),
+      }),
+    [config.apiUrl],
+  );
 
   const updateUserAction = useCallback(
     async (
@@ -89,7 +101,7 @@ export function useUserActions(): UseUserActionsResult {
       setState((prev) => ({ ...prev, isUpdating: true, error: null }));
 
       try {
-        const result: AdminUpdateUserResponseLocal = (await updateUser(
+        const result: AdminUpdateUserResponseLocal = (await adminApi.updateUser(
           userId,
           data,
         )) as AdminUpdateUserResponseLocal;
@@ -109,7 +121,7 @@ export function useUserActions(): UseUserActionsResult {
         return null;
       }
     },
-    [],
+    [adminApi],
   );
 
   const lockUserAction = useCallback(
@@ -120,7 +132,7 @@ export function useUserActions(): UseUserActionsResult {
       setState((prev) => ({ ...prev, isLocking: true, error: null }));
 
       try {
-        const result: AdminLockUserResponseLocal = (await lockUser(
+        const result: AdminLockUserResponseLocal = (await adminApi.lockUser(
           userId,
           data,
         )) as AdminLockUserResponseLocal;
@@ -140,7 +152,7 @@ export function useUserActions(): UseUserActionsResult {
         return null;
       }
     },
-    [],
+    [adminApi],
   );
 
   const unlockUserAction = useCallback(
@@ -151,7 +163,7 @@ export function useUserActions(): UseUserActionsResult {
         // The unlock endpoint expects the email in the request body for the legacy endpoint,
         // but the new /users/:id/unlock endpoint needs the email for logging purposes
         // We'll use a placeholder since the backend will look up the user by ID
-        const result: AdminLockUserResponseLocal = (await unlockUser(userId, {
+        const result: AdminLockUserResponseLocal = (await adminApi.unlockUser(userId, {
           email: '',
           reason,
         })) as AdminLockUserResponseLocal;
@@ -171,7 +183,7 @@ export function useUserActions(): UseUserActionsResult {
         return null;
       }
     },
-    [],
+    [adminApi],
   );
 
   const clearError = useCallback(() => {

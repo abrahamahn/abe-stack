@@ -1,12 +1,12 @@
 // apps/web/src/features/settings/pages/SettingsPage.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SettingsPage } from './SettingsPage';
 
 import type { User } from '../api';
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -37,7 +37,7 @@ vi.mock('@abe-stack/ui', () => ({
   ),
 }));
 
-import { useQuery } from '@abe-stack/client';
+import { useQuery } from '@abe-stack/engine';
 
 describe('SettingsPage', () => {
   const mockUser: User = {
@@ -62,7 +62,11 @@ describe('SettingsPage', () => {
         status: 'pending',
         error: null,
         refetch: vi.fn(),
-      });
+        isLoading: true,
+        isFetching: true,
+        isError: false,
+        isSuccess: false,
+      } as any);
 
       const { container } = render(<SettingsPage />);
       // The component shows a skeleton loader with animate-pulse class
@@ -78,7 +82,11 @@ describe('SettingsPage', () => {
         status: 'error',
         error: new Error('Failed to load'),
         refetch: vi.fn(),
-      });
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+        isSuccess: false,
+      } as any);
 
       render(<SettingsPage />);
       expect(screen.getByText(/Unable to Load Settings/)).toBeInTheDocument();
@@ -91,7 +99,11 @@ describe('SettingsPage', () => {
         status: 'error',
         error: new Error('Failed'),
         refetch: mockRefetch,
-      });
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+        isSuccess: false,
+      } as any);
 
       render(<SettingsPage />);
       fireEvent.click(screen.getByText('Try Again'));
@@ -106,7 +118,11 @@ describe('SettingsPage', () => {
         status: 'success',
         error: null,
         refetch: vi.fn(),
-      });
+        isLoading: false,
+        isFetching: false,
+        isError: false,
+        isSuccess: true,
+      } as any);
     });
 
     it('should render all tabs', () => {

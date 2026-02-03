@@ -40,12 +40,19 @@ vi.mock('../../features/auth/hooks', () => ({
     navigateToMode: mockNavigateToMode,
     navigateToLogin: mockNavigateToLogin,
   }),
-  useResendCooldown: () => ({
-    cooldown: 0,
-    isOnCooldown: false,
-    startCooldown: mockStartCooldown,
-  }),
 }));
+
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    useResendCooldown: () => ({
+      cooldown: 0,
+      isOnCooldown: false,
+      startCooldown: mockStartCooldown,
+    }),
+  };
+});
 
 describe('AuthModal Integration', () => {
   beforeEach(() => {

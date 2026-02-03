@@ -11,24 +11,24 @@
  * - Authentication header handling
  */
 
-import { NetworkError } from '@abe-stack/client';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { NetworkError } from '@abe-stack/engine';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSettingsApi } from './settingsApi';
 
-import type { SettingsApiConfig } from './settingsApi';
 import type {
-  AvatarDeleteResponse,
-  AvatarUploadResponse,
-  ChangePasswordRequest,
-  ChangePasswordResponse,
-  RevokeAllSessionsResponse,
-  RevokeSessionResponse,
-  Session,
-  SessionsListResponse,
-  UpdateProfileRequest,
-  User,
-} from '@abe-stack/core';
+    AvatarDeleteResponse,
+    AvatarUploadResponse,
+    ChangePasswordRequest,
+    ChangePasswordResponse,
+    RevokeAllSessionsResponse,
+    RevokeSessionResponse,
+    Session,
+    SessionsListResponse,
+    UpdateProfileRequest,
+    User,
+} from '@abe-stack/shared';
+import type { SettingsApiConfig } from './settingsApi';
 
 describe('createSettingsApi', () => {
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -69,7 +69,7 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const callUrl = mockFetch.mock.calls[0][0] as string;
+      const callUrl = mockFetch.mock.calls[0]?.[0] as string;
       expect(callUrl).toBe('https://api.example.com/api/users/me/sessions');
     });
 
@@ -94,8 +94,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(configWithoutToken);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.has('Authorization')).toBe(false);
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.has('Authorization')).toBe(false);
     });
   });
 
@@ -114,6 +114,7 @@ describe('createSettingsApi', () => {
         id: 'user-123',
         email: 'john@example.com',
         name: 'John Doe',
+        avatarUrl: null,
         role: 'user',
         isVerified: true,
         createdAt: new Date().toISOString(),
@@ -143,9 +144,9 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.updateProfile(request);
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
-      expect(headers.get('Content-Type')).toBe('application/json');
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
+      expect(headers?.get('Content-Type')).toBe('application/json');
     });
 
     it('should handle profile update errors', async () => {
@@ -236,7 +237,6 @@ describe('createSettingsApi', () => {
       const mockFile = new File(['avatar-content'], 'avatar.jpg', { type: 'image/jpeg' });
 
       const mockResponse: AvatarUploadResponse = {
-        success: true,
         avatarUrl: 'https://cdn.example.com/avatars/user-123.jpg',
       };
 
@@ -255,7 +255,7 @@ describe('createSettingsApi', () => {
       );
 
       // Verify FormData was used
-      const body = mockFetch.mock.calls[0][1]?.body;
+      const body = (mockFetch.mock.calls[0]?.[1] as any)?.body;
       expect(body).toBeInstanceOf(FormData);
     });
 
@@ -266,9 +266,9 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.uploadAvatar(mockFile);
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
       // Content-Type should not be set (browser will add with boundary)
-      expect(headers.has('Content-Type')).toBe(false);
+      expect(headers?.has('Content-Type')).toBe(false);
     });
 
     it('should include authorization header for avatar upload', async () => {
@@ -278,8 +278,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.uploadAvatar(mockFile);
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
     });
 
     it('should handle invalid file type', async () => {
@@ -311,7 +311,6 @@ describe('createSettingsApi', () => {
     it('should delete avatar successfully', async () => {
       const mockResponse: AvatarDeleteResponse = {
         success: true,
-        message: 'Avatar deleted successfully',
       };
 
       mockFetch.mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }));
@@ -356,7 +355,7 @@ describe('createSettingsApi', () => {
           createdAt: new Date().toISOString(),
           lastActivityAt: new Date().toISOString(),
           isCurrent: true,
-        },
+        } as any,
         {
           id: 'session-2',
           userId: 'user-123',
@@ -365,7 +364,7 @@ describe('createSettingsApi', () => {
           createdAt: new Date(Date.now() - 86400000).toISOString(),
           lastActivityAt: new Date(Date.now() - 3600000).toISOString(),
           isCurrent: false,
-        },
+        } as any,
       ];
 
       const mockResponse: SessionsListResponse = {
@@ -407,8 +406,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.get('Authorization')).toBe('Bearer test-token-123');
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.get('Authorization')).toBe('Bearer test-token-123');
     });
   });
 
@@ -417,7 +416,6 @@ describe('createSettingsApi', () => {
       const sessionId = 'session-123';
       const mockResponse: RevokeSessionResponse = {
         success: true,
-        message: 'Session revoked successfully',
       };
 
       mockFetch.mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }));
@@ -451,7 +449,6 @@ describe('createSettingsApi', () => {
       const sessionId = 'current-session';
       const mockResponse: RevokeSessionResponse = {
         success: true,
-        message: 'Current session revoked',
       };
 
       mockFetch.mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }));
@@ -468,7 +465,6 @@ describe('createSettingsApi', () => {
       const mockResponse: RevokeAllSessionsResponse = {
         success: true,
         revokedCount: 5,
-        message: 'All sessions revoked successfully',
       };
 
       mockFetch.mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }));
@@ -491,7 +487,6 @@ describe('createSettingsApi', () => {
       const mockResponse: RevokeAllSessionsResponse = {
         success: true,
         revokedCount: 0,
-        message: 'No other sessions to revoke',
       };
 
       mockFetch.mockResolvedValue(new Response(JSON.stringify(mockResponse), { status: 200 }));
@@ -615,8 +610,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.get('Authorization')).toBe('Bearer valid-token-456');
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.get('Authorization')).toBe('Bearer valid-token-456');
     });
 
     it('should not include Authorization header when token is null', async () => {
@@ -626,8 +621,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.has('Authorization')).toBe(false);
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.has('Authorization')).toBe(false);
     });
 
     it('should not include Authorization header when token is empty string', async () => {
@@ -637,19 +632,19 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.has('Authorization')).toBe(false);
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.has('Authorization')).toBe(false);
     });
 
     it('should not include Authorization header when token is undefined', async () => {
-      config.getToken = () => undefined;
+      config.getToken = () => undefined as any;
       mockFetch.mockResolvedValue(new Response(JSON.stringify({ sessions: [] }), { status: 200 }));
 
       const api = createSettingsApi(config);
       await api.listSessions();
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.has('Authorization')).toBe(false);
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.has('Authorization')).toBe(false);
     });
   });
 
@@ -676,7 +671,7 @@ describe('createSettingsApi', () => {
         createdAt: new Date().toISOString(),
         lastActivityAt: new Date().toISOString(),
         isCurrent: i === 0,
-      }));
+      } as any));
 
       mockFetch.mockResolvedValue(
         new Response(JSON.stringify({ sessions: largeSessions }), { status: 200 }),
@@ -722,8 +717,8 @@ describe('createSettingsApi', () => {
       const api = createSettingsApi(config);
       await api.updateProfile(request);
 
-      const headers = mockFetch.mock.calls[0][1]?.headers as Headers;
-      expect(headers.get('Content-Type')).toBe('application/json');
+      const headers = (mockFetch.mock.calls[0]?.[1] as any)?.headers as Headers;
+      expect(headers?.get('Content-Type')).toBe('application/json');
     });
   });
 });

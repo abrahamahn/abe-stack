@@ -175,8 +175,7 @@ describe('Dialog', () => {
       const user = userEvent.setup();
 
       render(
-        // @ts-expect-error Testing invalid prop
-        <Dialog.Root onChange={null}>
+        <Dialog.Root onChange={null as unknown as (open: boolean) => void}>
           <Dialog.Trigger>Open</Dialog.Trigger>
           <Dialog.Content title="Test">Content</Dialog.Content>
         </Dialog.Root>,

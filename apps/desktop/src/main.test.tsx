@@ -6,33 +6,39 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock @abe-stack/ui components before any imports that use them
 vi.mock('@abe-stack/ui', () => ({
-  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  ['Card']: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>
       {children}
     </div>
   ),
-  Heading: ({
+  ['Heading']: ({
     children,
-    as: Component = 'h1',
+    as: component = 'h1',
     size,
   }: {
     children: React.ReactNode;
     as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
     size?: string;
-  }) => <Component data-size={size}>{children}</Component>,
-  PageContainer: ({ children }: { children: React.ReactNode }) => (
+  }) => {
+    const Component = component;
+    return <Component data-size={size}>{children}</Component>;
+  },
+  ['PageContainer']: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="page-container">{children}</div>
   ),
-  Text: ({
+  ['Text']: ({
     children,
-    as: Component = 'p',
+    as: component = 'p',
     className,
   }: {
     children: React.ReactNode;
     as?: 'p' | 'span';
     className?: string;
-  }) => <Component className={className}>{children}</Component>,
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
+  }) => {
+    const Component = component;
+    return <Component className={className}>{children}</Component>;
+  },
+  ['ThemeProvider']: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="theme-provider">{children}</div>
   ),
 }));
@@ -89,7 +95,7 @@ describe('main.tsx', () => {
       expect(mockCreateRoot).toHaveBeenCalledWith(rootElement);
     }, 30000);
 
-    it('should throw error when root container is not found', async () => {
+    it('should throw error when root container is not found', () => {
       // Remove the root element
       if (rootElement !== null) {
         document.body.removeChild(rootElement);
@@ -212,7 +218,7 @@ describe('main.tsx', () => {
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
-        await act(async () => {
+        act(() => {
           root.render(
             <StrictMode>
               <ThemeProvider>
@@ -263,7 +269,7 @@ describe('main.tsx', () => {
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
-        await act(async () => {
+        act(() => {
           root.render(
             <StrictMode>
               <ThemeProvider>
@@ -315,7 +321,7 @@ describe('main.tsx', () => {
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
-        await act(async () => {
+        act(() => {
           root.render(
             <StrictMode>
               <ThemeProvider>
@@ -364,7 +370,7 @@ describe('main.tsx', () => {
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
-        await act(async () => {
+        act(() => {
           root.render(
             <StrictMode>
               <ThemeProvider>

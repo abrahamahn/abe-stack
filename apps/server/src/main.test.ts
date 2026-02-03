@@ -19,7 +19,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { AppConfig } from '@abe-stack/core';
+import type { AppConfig } from '@abe-stack/shared';
 import type { FastifyBaseLogger } from 'fastify';
 
 import type { App } from './app';
@@ -222,7 +222,6 @@ describe('main', () => {
     it('should start the app', async () => {
       await simulateMain(mockLoadConfig, mockCreateApp, process.env, processHandlers);
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       const startMock = vi.mocked(mockApp.start);
       expect(startMock).toHaveBeenCalledTimes(1);
       expect(exitSpy).not.toHaveBeenCalled();
@@ -260,7 +259,6 @@ describe('main', () => {
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
       expect(mockCreateApp).not.toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       const startMock = vi.mocked(mockApp.start);
       expect(startMock).not.toHaveBeenCalled();
     });
@@ -298,7 +296,6 @@ describe('main', () => {
         expect.stringContaining('Server startup failed: Error: Failed to initialize database'),
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       const startMock = vi.mocked(mockApp.start);
       expect(startMock).not.toHaveBeenCalled();
     });
@@ -358,7 +355,6 @@ describe('main', () => {
         });
 
         await vi.waitFor(() => {
-          // eslint-disable-next-line @typescript-eslint/unbound-method
           const stopMock = vi.mocked(mockApp.stop);
           expect(stopMock).toHaveBeenCalledTimes(1);
         });
@@ -427,7 +423,6 @@ describe('main', () => {
         });
 
         await vi.waitFor(() => {
-          // eslint-disable-next-line @typescript-eslint/unbound-method
           const stopMock = vi.mocked(mockApp.stop);
           expect(stopMock).toHaveBeenCalledTimes(1);
         });
@@ -557,7 +552,6 @@ describe('main', () => {
         processHandlers.sigterm();
 
         await vi.waitFor(() => {
-          // eslint-disable-next-line @typescript-eslint/unbound-method
           expect(appWithStopTracking.stop).toHaveBeenCalledTimes(1);
         });
       }
@@ -568,7 +562,6 @@ describe('main', () => {
         processHandlers.sigint();
 
         await vi.waitFor(() => {
-          // eslint-disable-next-line @typescript-eslint/unbound-method
           expect(appWithStopTracking.stop).toHaveBeenCalledTimes(1);
         });
       }

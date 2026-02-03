@@ -26,7 +26,7 @@ const PACKAGES: Array<[string, string]> = [
   ['core', 'core'],
   ['client', 'client'],
   ['ui', 'client/ui'],
-  ['stores', 'client/stores'],
+  ['react', 'client/react'],
   ['server', 'apps/server'],
   ['web', 'apps/web'],
 ];
@@ -49,7 +49,6 @@ const c = {
  * Strip ANSI color codes from string.
  */
 function stripAnsi(str: string): string {
-  // eslint-disable-next-line no-control-regex
   return str.replace(/\x1b\[[0-9;]*m/g, '');
 }
 

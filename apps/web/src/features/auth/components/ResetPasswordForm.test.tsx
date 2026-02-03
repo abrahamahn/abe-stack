@@ -1,9 +1,9 @@
 // apps/web/src/features/auth/components/ResetPasswordForm.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
 import { ResetPasswordForm } from '@auth/components/ResetPasswordForm';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ResetPasswordFormProps } from '@auth/components/ResetPasswordForm';
 import type { ReactElement, ReactNode } from 'react';
@@ -61,7 +61,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('renders back to sign in as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={undefined as any} />);
 
       expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
         'href',
@@ -109,7 +109,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('shows request new link as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ResetPasswordForm {...invalidTokenProps} onModeChange={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...invalidTokenProps} onModeChange={undefined as any} />);
 
       expect(screen.getByRole('link', { name: 'Request a new reset link' })).toHaveAttribute(
         'href',

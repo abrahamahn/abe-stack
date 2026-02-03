@@ -139,8 +139,7 @@ describe('Dropdown', () => {
       const user = userEvent.setup();
 
       render(
-        // @ts-expect-error Testing invalid prop
-        <Dropdown trigger={<span>Open</span>} onChange={null}>
+        <Dropdown trigger={<span>Open</span>} onChange={null as unknown as (open: boolean) => void}>
           <MenuItem>Item 1</MenuItem>
         </Dropdown>,
       );

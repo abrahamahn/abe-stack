@@ -5,48 +5,64 @@
  * Validates admin user action operations (update, lock, unlock) and error handling.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createAdminApiClient } from '../services/adminApi';
 import { useUserActions } from './useUserActions';
-import * as adminApi from '../api';
 
 import type {
-  AdminUpdateUserRequest,
-  AdminUpdateUserResponse,
-  AdminLockUserRequest,
-  AdminLockUserResponse,
-} from '@abe-stack/core';
+    AdminLockUserRequest,
+    AdminLockUserResponse,
+    AdminUpdateUserRequest,
+    AdminUpdateUserResponse,
+} from '@abe-stack/shared';
+import type { AdminApiClient } from '../services/adminApi';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('../api', () => ({
-  updateUser: vi.fn(),
-  lockUser: vi.fn(),
-  unlockUser: vi.fn(),
+vi.mock('../services/adminApi', () => ({
+  createAdminApiClient: vi.fn(),
 }));
+
+vi.mock('@app/ClientEnvironment', () => ({
+  useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
+}));
+
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: vi.fn().mockReturnValue('mock-token'),
+    },
+  };
+});
 
 // ============================================================================
 // Test Data
 // ============================================================================
 
 const mockUpdateResponse: AdminUpdateUserResponse = {
+  message: 'User updated successfully',
   user: {
     id: 'user-123',
     email: 'updated@example.com',
     name: 'Updated Name',
     role: 'admin',
     emailVerified: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-02'),
-    version: 2,
+    emailVerifiedAt: '2024-01-01T00:00:00Z',
+    lockedUntil: null,
+    failedLoginAttempts: 0,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
   },
 };
 
 const mockLockResponse: AdminLockUserResponse = {
-  success: true,
   message: 'User locked successfully',
+  user: mockUpdateResponse.user,
 };
 
 // ============================================================================
@@ -54,8 +70,17 @@ const mockLockResponse: AdminLockUserResponse = {
 // ============================================================================
 
 describe('useUserActions', () => {
+  const mockUpdateUser = vi.fn();
+  const mockLockUser = vi.fn();
+  const mockUnlockUser = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(createAdminApiClient).mockReturnValue({
+      updateUser: mockUpdateUser,
+      lockUser: mockLockUser,
+      unlockUser: mockUnlockUser,
+    } as unknown as AdminApiClient);
   });
 
   afterEach(() => {
@@ -76,7 +101,7 @@ describe('useUserActions', () => {
 
   describe('updateUserAction', () => {
     it('should update user successfully', async () => {
-      vi.mocked(adminApi.updateUser).mockResolvedValue(mockUpdateResponse);
+      mockUpdateUser.mockResolvedValue(mockUpdateResponse);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -91,7 +116,7 @@ describe('useUserActions', () => {
       expect(result.current.isUpdating).toBe(false);
       expect(result.current.lastAction).toBe('update');
       expect(result.current.error).toBeNull();
-      expect(adminApi.updateUser).toHaveBeenCalledWith('user-123', updateData);
+      expect(mockUpdateUser).toHaveBeenCalledWith('user-123', updateData);
     });
 
     it('should set isUpdating to true during operation', async () => {
@@ -99,7 +124,7 @@ describe('useUserActions', () => {
       const promise = new Promise<AdminUpdateUserResponse>((resolve) => {
         resolvePromise = resolve;
       });
-      vi.mocked(adminApi.updateUser).mockReturnValue(promise);
+      mockUpdateUser.mockReturnValue(promise);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -121,7 +146,7 @@ describe('useUserActions', () => {
 
     it('should handle update errors', async () => {
       const error = new Error('Update failed');
-      vi.mocked(adminApi.updateUser).mockRejectedValue(error);
+      mockUpdateUser.mockRejectedValue(error);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -137,7 +162,7 @@ describe('useUserActions', () => {
     });
 
     it('should handle non-Error exceptions', async () => {
-      vi.mocked(adminApi.updateUser).mockRejectedValue('String error');
+      mockUpdateUser.mockRejectedValue('String error');
 
       const { result } = renderHook(() => useUserActions());
 
@@ -149,7 +174,7 @@ describe('useUserActions', () => {
     });
 
     it('should clear error on successful update after failure', async () => {
-      vi.mocked(adminApi.updateUser).mockRejectedValueOnce(new Error('First error'));
+      mockUpdateUser.mockRejectedValueOnce(new Error('First error'));
 
       const { result } = renderHook(() => useUserActions());
 
@@ -159,7 +184,7 @@ describe('useUserActions', () => {
 
       expect(result.current.error).toBe('First error');
 
-      vi.mocked(adminApi.updateUser).mockResolvedValue(mockUpdateResponse);
+      mockUpdateUser.mockResolvedValue(mockUpdateResponse);
 
       await act(async () => {
         await result.current.updateUserAction('user-123', { name: 'Test 2' });
@@ -171,7 +196,7 @@ describe('useUserActions', () => {
 
   describe('lockUserAction', () => {
     it('should lock user successfully', async () => {
-      vi.mocked(adminApi.lockUser).mockResolvedValue(mockLockResponse);
+      mockLockUser.mockResolvedValue(mockLockResponse);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -186,7 +211,7 @@ describe('useUserActions', () => {
       expect(result.current.isLocking).toBe(false);
       expect(result.current.lastAction).toBe('lock');
       expect(result.current.error).toBeNull();
-      expect(adminApi.lockUser).toHaveBeenCalledWith('user-123', lockData);
+      expect(mockLockUser).toHaveBeenCalledWith('user-123', lockData);
     });
 
     it('should set isLocking to true during operation', async () => {
@@ -194,7 +219,7 @@ describe('useUserActions', () => {
       const promise = new Promise<AdminLockUserResponse>((resolve) => {
         resolvePromise = resolve;
       });
-      vi.mocked(adminApi.lockUser).mockReturnValue(promise);
+      mockLockUser.mockReturnValue(promise);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -216,7 +241,7 @@ describe('useUserActions', () => {
 
     it('should handle lock errors', async () => {
       const error = new Error('Lock failed');
-      vi.mocked(adminApi.lockUser).mockRejectedValue(error);
+      mockLockUser.mockRejectedValue(error);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -232,7 +257,7 @@ describe('useUserActions', () => {
     });
 
     it('should handle non-Error exceptions', async () => {
-      vi.mocked(adminApi.lockUser).mockRejectedValue('String error');
+      mockLockUser.mockRejectedValue('String error');
 
       const { result } = renderHook(() => useUserActions());
 
@@ -246,7 +271,7 @@ describe('useUserActions', () => {
 
   describe('unlockUserAction', () => {
     it('should unlock user successfully', async () => {
-      vi.mocked(adminApi.unlockUser).mockResolvedValue(mockLockResponse);
+      mockUnlockUser.mockResolvedValue(mockLockResponse);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -260,7 +285,7 @@ describe('useUserActions', () => {
       expect(result.current.isUnlocking).toBe(false);
       expect(result.current.lastAction).toBe('unlock');
       expect(result.current.error).toBeNull();
-      expect(adminApi.unlockUser).toHaveBeenCalledWith('user-123', {
+      expect(mockUnlockUser).toHaveBeenCalledWith('user-123', {
         email: '',
         reason: 'Account reviewed',
       });
@@ -271,7 +296,7 @@ describe('useUserActions', () => {
       const promise = new Promise<AdminLockUserResponse>((resolve) => {
         resolvePromise = resolve;
       });
-      vi.mocked(adminApi.unlockUser).mockReturnValue(promise);
+      mockUnlockUser.mockReturnValue(promise);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -293,7 +318,7 @@ describe('useUserActions', () => {
 
     it('should handle unlock errors', async () => {
       const error = new Error('Unlock failed');
-      vi.mocked(adminApi.unlockUser).mockRejectedValue(error);
+      mockUnlockUser.mockRejectedValue(error);
 
       const { result } = renderHook(() => useUserActions());
 
@@ -309,7 +334,7 @@ describe('useUserActions', () => {
     });
 
     it('should handle non-Error exceptions', async () => {
-      vi.mocked(adminApi.unlockUser).mockRejectedValue('String error');
+      mockUnlockUser.mockRejectedValue('String error');
 
       const { result } = renderHook(() => useUserActions());
 
@@ -323,7 +348,7 @@ describe('useUserActions', () => {
 
   describe('clearError', () => {
     it('should clear error state', async () => {
-      vi.mocked(adminApi.updateUser).mockRejectedValue(new Error('Test error'));
+      mockUpdateUser.mockRejectedValue(new Error('Test error'));
 
       const { result } = renderHook(() => useUserActions());
 
@@ -343,8 +368,8 @@ describe('useUserActions', () => {
 
   describe('concurrent operations', () => {
     it('should not interfere between different action types', async () => {
-      vi.mocked(adminApi.updateUser).mockResolvedValue(mockUpdateResponse);
-      vi.mocked(adminApi.lockUser).mockResolvedValue(mockLockResponse);
+      mockUpdateUser.mockResolvedValue(mockUpdateResponse);
+      mockLockUser.mockResolvedValue(mockLockResponse);
 
       const { result } = renderHook(() => useUserActions());
 

@@ -334,7 +334,7 @@ utilities.css (composition layer)
 ## Quick Start
 
 ```bash
-pnpm add @abe-stack/ui @abe-stack/core
+pnpm add @abe-stack/ui @abe-stack/shared
 ```
 
 ```tsx

@@ -20,16 +20,14 @@
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-auth --report-unused-disable-directives",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
-    "@abe-stack/contracts": "workspace:*",
-    "@abe-stack/core": "workspace:*",
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/http": "workspace:*",
-    "@abe-stack/security": "workspace:*",
+    "@abe-stack/backend-core": "workspace:*",
     "argon2": "^0.41.1",
-    "otpauth": "^9.4.1"
+    "otpauth": "^9.4.1",
+    "@abe-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "fastify": "^5.0.0"

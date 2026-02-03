@@ -12,7 +12,7 @@ vi.mock('@abe-stack/ui', () => {
   };
 });
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useEnabledOAuthProviders: () => ({
     providers: [],
     isLoading: false,

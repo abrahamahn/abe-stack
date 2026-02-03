@@ -9,10 +9,9 @@
  * - Route guards and loading states
  */
 
-import { Navigate, Outlet, Route, Routes, useLocation } from '@abe-stack/ui';
+import { Navigate, Outlet, ProtectedRoute, Route, Routes, useLocation } from '@abe-stack/ui';
 import { screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProtectedRoute } from '../../features/auth';
 import { DashboardPage } from '../../features/dashboard';
 import { HomePage } from '../../pages';
 
@@ -26,11 +25,8 @@ const LocationDisplay = (): ReactElement => {
   return <div data-testid="location-display">{location.pathname}</div>;
 };
 
-// Mock useAuth hook for ProtectedRoute tests
-const mockUseAuth = vi.fn();
-vi.mock('../../features/auth/hooks/useAuth', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
+let isAuthenticated = false;
+let isLoading = false;
 
 // Mock the @abe-stack/ui ProtectedRoute component for testing
 vi.mock('@abe-stack/ui', async (importOriginal) => {
@@ -78,14 +74,14 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
 describe('Navigation Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    isAuthenticated = false;
+    isLoading = false;
   });
 
   describe('Protected Routes', () => {
     it('should redirect to login when not authenticated and verify location', () => {
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        isLoading: false,
-      });
+      isAuthenticated = false;
+      isLoading = false;
 
       renderWithProviders(
         <>
@@ -94,7 +90,7 @@ describe('Navigation Integration', () => {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                   <div>Dashboard Content</div>
                 </ProtectedRoute>
               }
@@ -112,17 +108,15 @@ describe('Navigation Integration', () => {
     });
 
     it('should show loading state while checking authentication', () => {
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        isLoading: true,
-      });
+      isAuthenticated = false;
+      isLoading = true;
 
       renderWithProviders(
         <Routes>
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                 <div>Dashboard Content</div>
               </ProtectedRoute>
             }
@@ -136,11 +130,8 @@ describe('Navigation Integration', () => {
     });
 
     it('should render protected content when authenticated', () => {
-      mockUseAuth.mockReturnValue({
-        user: mockUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      isAuthenticated = true;
+      isLoading = false;
 
       const environment = createMockEnvironment({
         user: mockUser,
@@ -152,7 +143,7 @@ describe('Navigation Integration', () => {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -166,17 +157,15 @@ describe('Navigation Integration', () => {
 
     it('should transition from loading to authenticated', () => {
       // Start with loading state
-      mockUseAuth.mockReturnValue({
-        isAuthenticated: false,
-        isLoading: true,
-      });
+      isAuthenticated = false;
+      isLoading = true;
 
       const { rerender } = renderWithProviders(
         <Routes>
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                 <div data-testid="protected-content">Protected</div>
               </ProtectedRoute>
             }
@@ -188,18 +177,15 @@ describe('Navigation Integration', () => {
       expect(screen.getByText('Loading...')).toBeInTheDocument();
 
       // Simulate auth completing
-      mockUseAuth.mockReturnValue({
-        user: mockUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
+      isAuthenticated = true;
+      isLoading = false;
 
       rerender(
         <Routes>
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                 <div data-testid="protected-content">Protected</div>
               </ProtectedRoute>
             }
@@ -303,7 +289,7 @@ describe('Navigation Integration', () => {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -350,7 +336,7 @@ describe('Navigation Integration', () => {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -390,7 +376,7 @@ describe('Navigation Integration', () => {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -446,7 +432,7 @@ describe('Navigation Integration', () => {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -474,7 +460,7 @@ describe('Navigation Integration', () => {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
                   <div>Dashboard Content</div>
                 </ProtectedRoute>
               }

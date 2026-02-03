@@ -9,7 +9,7 @@ import {
   SECURITY_EVENT_TYPES,
   SECURITY_SEVERITIES,
   type SecurityEventsFilter,
-} from '@abe-stack/core';
+} from '@abe-stack/shared';
 import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 

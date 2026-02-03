@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { RoleBadge } from './RoleBadge';
 
-import type { UserRole } from '@abe-stack/core';
+import type { UserRole } from '@abe-stack/shared';
 
 describe('RoleBadge', () => {
   describe('rendering different roles', () => {

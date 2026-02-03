@@ -50,8 +50,8 @@ vi.mock('./ipc', () => ({
   registerIPCHandlers: mocks.mockRegisterIPCHandlers,
 }));
 
-// Mock @abe-stack/core which exports waitForPort
-vi.mock('@abe-stack/core', () => ({
+// Mock @abe-stack/shared which exports waitForPort
+vi.mock('@abe-stack/shared', () => ({
   waitForPort: mocks.mockWaitForPort,
 }));
 

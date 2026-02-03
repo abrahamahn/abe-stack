@@ -1,51 +1,124 @@
 {
   "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
-    "types": ["vite/client", "react", "react-dom", "vitest/globals"],
+    "types": [
+      "vite/client",
+      "react",
+      "react-dom",
+      "vitest/globals"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@abe-stack/contracts": ["../../infra/contracts/src/index.ts"],
-      "@abe-stack/contracts/*": ["../../infra/contracts/src/*"],
-      "@abe-stack/core": ["../../core/src/index.ts"],
-      "@abe-stack/core/*": ["../../core/src/*"],
-      "@abe-stack/client": ["../../client/src/index.ts"],
-      "@abe-stack/client/*": ["../../client/src/*"],
-      "@abe-stack/stores": ["../../client/stores/src/index.ts"],
-      "@abe-stack/stores/*": ["../../client/stores/src/*"],
-      "@abe-stack/ui": ["../../client/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["../../client/ui/src/*"],
-      "@admin": ["./src/features/admin"],
-      "@admin/*": ["./src/features/admin/*"],
-      "@api": ["./src/api"],
-      "@api/*": ["./src/api/*"],
-      "@app": ["./src/app"],
-      "@app/*": ["./src/app/*"],
-      "@auth": ["./src/features/auth"],
-      "@auth/*": ["./src/features/auth/*"],
-      "@billing": ["./src/features/billing"],
-      "@billing/*": ["./src/features/billing/*"],
-      "@catalog": ["./src/features/demo/catalog"],
-      "@catalog/*": ["./src/features/demo/catalog/*"],
-      "@components": ["./src/features/admin/components"],
-      "@components/*": ["./src/features/admin/components/*"],
-      "@config": ["./src/config"],
-      "@config/*": ["./src/config/*"],
-      "@dashboard": ["./src/features/dashboard"],
-      "@dashboard/*": ["./src/features/dashboard/*"],
-      "@demo": ["./src/features/demo"],
-      "@demo/*": ["./src/features/demo/*"],
-      "@features": ["./src/features"],
-      "@features/*": ["./src/features/*"],
-      "@hooks": ["./src/features/admin/hooks"],
-      "@hooks/*": ["./src/features/admin/hooks/*"],
-      "@layouts": ["./src/features/admin/layouts"],
-      "@layouts/*": ["./src/features/admin/layouts/*"],
-      "@pages": ["./src/pages"],
-      "@pages/*": ["./src/pages/*"],
-      "@services": ["./src/features/admin/services"],
-      "@services/*": ["./src/features/admin/services/*"],
-      "@settings": ["./src/features/settings"],
-      "@settings/*": ["./src/features/settings/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@admin": [
+        "./src/features/admin"
+      ],
+      "@admin/*": [
+        "./src/features/admin/*"
+      ],
+      "@api": [
+        "./src/api"
+      ],
+      "@api/*": [
+        "./src/api/*"
+      ],
+      "@app": [
+        "./src/app"
+      ],
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@auth": [
+        "./src/features/auth"
+      ],
+      "@auth/*": [
+        "./src/features/auth/*"
+      ],
+      "@billing": [
+        "./src/features/billing"
+      ],
+      "@billing/*": [
+        "./src/features/billing/*"
+      ],
+      "@catalog": [
+        "./src/features/demo/catalog"
+      ],
+      "@catalog/*": [
+        "./src/features/demo/catalog/*"
+      ],
+      "@components": [
+        "./src/features/admin/components"
+      ],
+      "@components/*": [
+        "./src/features/admin/components/*"
+      ],
+      "@config": [
+        "./src/config"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@dashboard": [
+        "./src/features/dashboard"
+      ],
+      "@dashboard/*": [
+        "./src/features/dashboard/*"
+      ],
+      "@demo": [
+        "./src/features/demo"
+      ],
+      "@demo/*": [
+        "./src/features/demo/*"
+      ],
+      "@features": [
+        "./src/features"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@hooks": [
+        "../../client/react/src/hooks"
+      ],
+      "@hooks/*": [
+        "../../client/react/src/hooks/*"
+      ],
+      "@providers": [
+        "../../client/react/src/providers"
+      ],
+      "@providers/*": [
+        "../../client/react/src/providers/*"
+      ],
+      "@router": [
+        "../../client/react/src/router"
+      ],
+      "@router/*": [
+        "../../client/react/src/router/*"
+      ],
+      "@layouts": [
+        "./src/features/admin/layouts"
+      ],
+      "@layouts/*": [
+        "./src/features/admin/layouts/*"
+      ],
+      "@pages": [
+        "./src/pages"
+      ],
+      "@pages/*": [
+        "./src/pages/*"
+      ],
+      "@services": [
+        "./src/features/admin/services"
+      ],
+      "@services/*": [
+        "./src/features/admin/services/*"
+      ],
+      "@settings": [
+        "./src/features/settings"
+      ],
+      "@settings/*": [
+        "./src/features/settings/*"
+      ]
     },
     "outDir": "./dist",
     "rootDir": "./",
@@ -53,35 +126,34 @@
     "noEmit": false,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.web.tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
-    "vitest.config.ts",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/__tests__/**"
+    "vitest.config.ts"
   ],
   "references": [
     {
-      "path": "../../infra/contracts"
+      "path": "../../packages/shared"
     },
     {
-      "path": "../../core"
+      "path": "../../packages/backend-core"
     },
     {
-      "path": "../../infra/db"
+      "path": "../../premium/media"
     },
     {
-      "path": "../../infra/media"
+      "path": "../../premium/client/engine"
     },
     {
-      "path": "../../client"
-    },
-    {
-      "path": "../../client/stores"
+      "path": "../../client/api"
     },
     {
       "path": "../../client/ui"
+    },
+    {
+      "path": "../../client/react"
     }
   ]
 }

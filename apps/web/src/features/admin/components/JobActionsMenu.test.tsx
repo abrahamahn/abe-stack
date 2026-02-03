@@ -4,7 +4,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { JobActionsMenu } from './JobActionsMenu';
 
-import type { JobStatus } from '@abe-stack/core';
+import type { JobStatus } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data

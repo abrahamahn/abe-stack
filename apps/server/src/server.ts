@@ -13,14 +13,12 @@
 
 import path from 'node:path';
 
-import { createConsoleLogger, isAppError } from '@abe-stack/core';
-import { registerPlugins } from '@abe-stack/http';
-import { RateLimiter } from '@abe-stack/security';
+import { registerPlugins, RateLimiter  } from '@abe-stack/db';
+import { createConsoleLogger, isAppError } from '@abe-stack/shared';
 import fastify from 'fastify';
 
-import type { AppConfig } from '@abe-stack/core/config';
-import type { DbClient } from '@abe-stack/db';
-import type { AppErrorInfo } from '@abe-stack/http';
+import type { DbClient, AppErrorInfo  } from '@abe-stack/db';
+import type { AppConfig } from '@abe-stack/shared/config';
 import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared';
 import type { FastifyInstance } from 'fastify';
 

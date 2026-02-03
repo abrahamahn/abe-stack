@@ -1,5 +1,5 @@
 // apps/web/src/features/auth/hooks/useAuth.test.ts
-import { QueryCache } from '@abe-stack/client';
+import { QueryCache } from '@abe-stack/engine';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
@@ -7,8 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useAuth } from './useAuth';
 
-import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { ClientConfig } from '@/config';
+import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { AuthService } from '@auth/services/AuthService';
 import type { ReactNode } from 'react';
 
@@ -83,12 +83,14 @@ describe('useAuth', () => {
     name: 'Test User',
     avatarUrl: null,
     role: 'user' as const,
+    isVerified: true,
     createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
   };
 
   const createWrapper = (env: ClientEnvironment) => {
     return function Wrapper({ children }: { children: ReactNode }) {
-      return React.createElement(ClientEnvironmentProvider, { value: env }, children);
+      return React.createElement(ClientEnvironmentProvider, { value: env, children });
     };
   };
 

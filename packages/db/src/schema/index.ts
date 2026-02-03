@@ -1,0 +1,259 @@
+// packages/db/src/schema/index.ts
+/**
+ * Schema Type Exports
+ *
+ * Explicit TypeScript interfaces for all database tables.
+ * These replace Drizzle's $inferSelect/$inferInsert with explicit definitions.
+ */
+
+// Users & Refresh Tokens
+export {
+  type NewRefreshToken,
+  type NewUser,
+  REFRESH_TOKEN_COLUMNS,
+  REFRESH_TOKENS_TABLE,
+  type RefreshToken,
+  type UpdateUser,
+  USER_COLUMNS,
+  type User,
+  type UserRole,
+  USERS_TABLE,
+} from './users';
+
+// Auth (token families, login attempts, password reset, email verification, security events)
+export {
+  EMAIL_VERIFICATION_TOKEN_COLUMNS,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
+  type EmailVerificationToken,
+  LOGIN_ATTEMPT_COLUMNS,
+  LOGIN_ATTEMPTS_TABLE,
+  type LoginAttempt,
+  type NewEmailVerificationToken,
+  type NewLoginAttempt,
+  type NewPasswordResetToken,
+  type NewRefreshTokenFamily,
+  type NewSecurityEvent,
+  PASSWORD_RESET_TOKEN_COLUMNS,
+  PASSWORD_RESET_TOKENS_TABLE,
+  type PasswordResetToken,
+  REFRESH_TOKEN_FAMILIES_TABLE,
+  REFRESH_TOKEN_FAMILY_COLUMNS,
+  type RefreshTokenFamily,
+  SECURITY_EVENT_COLUMNS,
+  SECURITY_EVENTS_TABLE,
+  type SecurityEvent,
+  type SecurityEventSeverity,
+  type SecurityEventType,
+} from './auth';
+
+// Magic Link
+export {
+  MAGIC_LINK_TOKEN_COLUMNS,
+  MAGIC_LINK_TOKENS_TABLE,
+  type MagicLinkToken,
+  type NewMagicLinkToken,
+} from './magic-link';
+
+// OAuth
+export {
+  type NewOAuthConnection,
+  OAUTH_CONNECTION_COLUMNS,
+  OAUTH_CONNECTIONS_TABLE,
+  OAUTH_PROVIDERS,
+  type OAuthConnection,
+  type OAuthProvider,
+  type UpdateOAuthConnection,
+} from './oauth';
+
+// Push Subscriptions & Notification Preferences
+export {
+  DEFAULT_QUIET_HOURS,
+  DEFAULT_TYPE_PREFERENCES,
+  type NewNotificationPreference,
+  type NewPushSubscription,
+  NOTIFICATION_PREFERENCE_COLUMNS,
+  NOTIFICATION_PREFERENCES_TABLE,
+  type NotificationChannel,
+  type NotificationPreference,
+  type NotificationType,
+  PUSH_SUBSCRIPTION_COLUMNS,
+  PUSH_SUBSCRIPTIONS_TABLE,
+  type PushSubscription,
+  type QuietHoursConfig,
+  type TypePreferences,
+} from './push';
+
+// Billing
+export {
+  // Table names
+  BILLING_EVENTS_TABLE,
+  CUSTOMER_MAPPINGS_TABLE,
+  INVOICES_TABLE,
+  PAYMENT_METHODS_TABLE,
+  PLANS_TABLE,
+  SUBSCRIPTIONS_TABLE,
+  // Column mappings
+  BILLING_EVENT_COLUMNS,
+  CUSTOMER_MAPPING_COLUMNS,
+  INVOICE_COLUMNS,
+  PAYMENT_METHOD_COLUMNS,
+  PLAN_COLUMNS,
+  SUBSCRIPTION_COLUMNS,
+  // Constants
+  BILLING_EVENT_TYPES,
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+  // Types
+  type BillingEvent,
+  type BillingEventType,
+  type BillingProvider,
+  type CardDetails,
+  type CustomerMapping,
+  type Invoice,
+  type InvoiceStatus,
+  type NewBillingEvent,
+  type NewCustomerMapping,
+  type NewInvoice,
+  type NewPaymentMethod,
+  type NewPlan,
+  type NewSubscription,
+  type PaymentMethod,
+  type PaymentMethodType,
+  type Plan,
+  type PlanFeature,
+  type PlanInterval,
+  type Subscription,
+  type SubscriptionStatus,
+  type UpdateInvoice,
+  type UpdatePaymentMethod,
+  type UpdatePlan,
+  type UpdateSubscription,
+} from './billing';
+
+// Tenants, Memberships & Invitations
+export {
+  INVITATION_COLUMNS,
+  INVITATION_STATUSES,
+  INVITATIONS_TABLE,
+  type Invitation,
+  type InvitationStatus,
+  MEMBERSHIP_COLUMNS,
+  MEMBERSHIPS_TABLE,
+  type Membership,
+  type NewInvitation,
+  type NewMembership,
+  type NewTenant,
+  TENANT_COLUMNS,
+  TENANT_ROLES,
+  TENANTS_TABLE,
+  type Tenant,
+  type TenantRole,
+  type UpdateInvitation,
+  type UpdateMembership,
+  type UpdateTenant,
+} from './tenant';
+
+// User Sessions
+export {
+  type NewUserSession,
+  USER_SESSION_COLUMNS,
+  USER_SESSIONS_TABLE,
+  type UpdateUserSession,
+  type UserSession,
+} from './sessions';
+
+// In-App Notifications
+export {
+  type NewNotification,
+  NOTIFICATION_COLUMNS,
+  NOTIFICATION_LEVELS,
+  NOTIFICATIONS_TABLE,
+  type Notification,
+  type NotificationLevel,
+  type UpdateNotification,
+} from './notifications';
+
+// System Infrastructure (Jobs, Audit, Webhooks)
+export {
+  // Table names
+  AUDIT_EVENTS_TABLE,
+  JOBS_TABLE,
+  WEBHOOK_DELIVERIES_TABLE,
+  WEBHOOKS_TABLE,
+  // Column mappings
+  AUDIT_EVENT_COLUMNS,
+  JOB_COLUMNS,
+  WEBHOOK_COLUMNS,
+  WEBHOOK_DELIVERY_COLUMNS,
+  // Constants
+  AUDIT_CATEGORIES,
+  AUDIT_SEVERITIES,
+  JOB_STATUSES,
+  WEBHOOK_DELIVERY_STATUSES,
+  // Types
+  type AuditCategory,
+  type AuditEvent,
+  type AuditSeverity,
+  type Job,
+  type JobStatus,
+  type NewAuditEvent,
+  type NewJob,
+  type NewWebhook,
+  type NewWebhookDelivery,
+  type UpdateJob,
+  type UpdateWebhook,
+  type UpdateWebhookDelivery,
+  type Webhook,
+  type WebhookDelivery,
+  type WebhookDeliveryStatus,
+} from './system';
+
+// Feature Flags & Tenant Overrides
+export {
+  FEATURE_FLAG_COLUMNS,
+  FEATURE_FLAGS_TABLE,
+  type FeatureFlag,
+  type NewFeatureFlag,
+  type NewTenantFeatureOverride,
+  TENANT_FEATURE_OVERRIDE_COLUMNS,
+  TENANT_FEATURE_OVERRIDES_TABLE,
+  type TenantFeatureOverride,
+  type UpdateFeatureFlag,
+  type UpdateTenantFeatureOverride,
+} from './features';
+
+// Usage Metering
+export {
+  AGGREGATION_TYPES,
+  type AggregationType,
+  type NewUsageMetric,
+  type NewUsageSnapshot,
+  type UpdateUsageMetric,
+  type UpdateUsageSnapshot,
+  USAGE_METRIC_COLUMNS,
+  USAGE_METRICS_TABLE,
+  type UsageMetric,
+  USAGE_SNAPSHOT_COLUMNS,
+  USAGE_SNAPSHOTS_TABLE,
+  type UsageSnapshot,
+} from './metering';
+
+// Compliance (Legal Documents, User Agreements, Consent Logs)
+export {
+  CONSENT_LOG_COLUMNS,
+  CONSENT_LOGS_TABLE,
+  type ConsentLog,
+  LEGAL_DOCUMENT_COLUMNS,
+  LEGAL_DOCUMENTS_TABLE,
+  type LegalDocument,
+  type NewConsentLog,
+  type NewLegalDocument,
+  type NewUserAgreement,
+  type UpdateLegalDocument,
+  USER_AGREEMENT_COLUMNS,
+  USER_AGREEMENTS_TABLE,
+  type UserAgreement,
+} from './compliance';

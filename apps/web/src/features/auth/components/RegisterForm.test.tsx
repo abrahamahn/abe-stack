@@ -6,8 +6,8 @@ import { renderWithProviders } from './../../../__tests__/utils';
 import { RegisterForm } from './RegisterForm';
 
 // Mock SDK hooks
-vi.mock('@abe-stack/client', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client')>();
+vi.mock('@abe-stack/engine', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/engine')>();
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({
@@ -20,8 +20,8 @@ vi.mock('@abe-stack/client', async (importOriginal) => {
 });
 
 // Mock the useResendCooldown hook
-vi.mock('@auth/hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@auth/hooks')>();
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
   return {
     ...actual,
     useResendCooldown: () => ({

@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/hooks/useSecurityEvent.test.ts
-import { useQuery } from '@abe-stack/client';
+import { useQuery } from '@abe-stack/engine';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -7,11 +7,11 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useSecurityEvent } from './useSecurityEvent';
 
-import type { SecurityEvent } from '@abe-stack/core';
-import type { UseQueryResult } from '@abe-stack/client';
+import type { UseQueryResult } from '@abe-stack/engine';
+import type { SecurityEvent } from '@abe-stack/shared';
 import type { AdminApiClient } from '../services/adminApi';
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -23,8 +23,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/core', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
     tokenStore: {
@@ -36,8 +36,10 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
 describe('useSecurityEvent', () => {
   const mockSecurityEvent: SecurityEvent = {
     id: 'event-123',
-    type: 'login_failed',
+    eventType: 'login_failed',
+    severity: 'medium',
     userId: 'user-123',
+    email: 'user@example.com',
     ipAddress: '192.168.1.1',
     userAgent: 'Mozilla/5.0',
     createdAt: new Date().toISOString(),

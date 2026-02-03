@@ -4,14 +4,12 @@ export {
   AuthForm,
   AuthModal,
   LoginForm,
-  ProtectedRoute,
   RegisterForm,
   ForgotPasswordForm,
   ResetPasswordForm,
 } from './components';
-export { useAuth, useResendCooldown, type AuthContextType } from './hooks';
-// Note: useAuthModeNavigation, AuthMode should be imported directly from @abe-stack/ui
-export { createFormHandler, type FormHandlerOptions } from './utils';
+export { useAuth, type AuthContextType } from './hooks';
+// Note: useAuthModeNavigation, AuthMode, createFormHandler should be imported directly from @abe-stack/ui
 export {
   AuthPage,
   ConfirmEmailPage,

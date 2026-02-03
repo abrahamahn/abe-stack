@@ -401,8 +401,7 @@ describe('SidePeek', () => {
       const user = userEvent.setup();
 
       render(
-        // @ts-expect-error Testing invalid prop
-        <SidePeek.Root open onClose={null}>
+        <SidePeek.Root open onClose={null as unknown as () => void}>
           <SidePeek.Content>Content</SidePeek.Content>
         </SidePeek.Root>,
       );

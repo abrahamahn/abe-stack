@@ -128,7 +128,7 @@ function startTurboDev(filter?: string): ChildProcess {
 
 function runBuilds(): void {
   logLine('[build]', 'Building core/db packages');
-  execSync('pnpm --filter @abe-stack/core build', { stdio: 'inherit', cwd: ROOT });
+  execSync('pnpm --filter @abe-stack/shared build', { stdio: 'inherit', cwd: ROOT });
   execSync('pnpm --filter @abe-stack/db build', { stdio: 'inherit', cwd: ROOT });
 }
 

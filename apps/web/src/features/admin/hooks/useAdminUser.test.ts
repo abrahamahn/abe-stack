@@ -2,18 +2,33 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as adminApi from '../api/adminApi';
+import { createAdminApiClient } from '../services/adminApi';
 
 import { useAdminUser } from './useAdminUser';
 
-import type { AdminUser } from '@abe-stack/core';
+import type { AdminApiClient } from '../services/adminApi';
+import type { AdminUser } from '@abe-stack/shared';
 
-vi.mock('../api/adminApi', () => ({
-  getUser: vi.fn(),
+vi.mock('../services/adminApi', () => ({
+  createAdminApiClient: vi.fn(),
 }));
 
+vi.mock('@app/ClientEnvironment', () => ({
+  useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
+}));
+
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: vi.fn().mockReturnValue('mock-token'),
+    },
+  };
+});
+
 describe('useAdminUser', () => {
-  const mockGetUser = vi.mocked(adminApi.getUser);
+  const mockGetUser = vi.fn();
 
   const mockUser: AdminUser = {
     id: 'user-123',
@@ -30,6 +45,9 @@ describe('useAdminUser', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(createAdminApiClient).mockReturnValue({
+      getUser: mockGetUser,
+    } as unknown as AdminApiClient);
   });
 
   describe('when userId is null', () => {

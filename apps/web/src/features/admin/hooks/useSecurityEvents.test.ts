@@ -5,19 +5,19 @@
  * Validates security events listing with filters, pagination, and state management.
  */
 
-import * as sdk from '@abe-stack/client';
+import * as sdk from '@abe-stack/engine';
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSecurityEvents } from './useSecurityEvents';
 
-import type { SecurityEventsListResponse, SecurityEventsFilter } from '@abe-stack/core';
+import type { SecurityEventsFilter, SecurityEventsListResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/client', () => ({
+vi.mock('@abe-stack/engine', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -33,8 +33,8 @@ vi.mock('../services/adminApi', () => ({
   })),
 }));
 
-vi.mock('@abe-stack/core', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/core')>('@abe-stack/core');
+vi.mock('@abe-stack/shared', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
   return {
     ...actual,
     tokenStore: {
@@ -48,27 +48,36 @@ vi.mock('@abe-stack/core', async () => {
 // ============================================================================
 
 const mockResponse: SecurityEventsListResponse = {
-  events: [
+  data: [
     {
       id: 'event-1',
       userId: 'user-1',
+      email: 'user1@example.com',
       eventType: 'login_failed',
+      severity: 'medium',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
       metadata: {},
-      createdAt: new Date('2024-01-01'),
+      createdAt: '2024-01-01T00:00:00Z',
     },
     {
       id: 'event-2',
       userId: 'user-2',
+      email: 'user2@example.com',
       eventType: 'password_changed',
+      severity: 'low',
       ipAddress: '192.168.1.2',
       userAgent: 'Chrome',
       metadata: {},
-      createdAt: new Date('2024-01-02'),
+      createdAt: '2024-01-02T00:00:00Z',
     },
   ],
-  nextCursor: 'cursor-123',
+  total: 2,
+  page: 1,
+  limit: 50,
+  hasNext: false,
+  hasPrev: false,
+  totalPages: 1,
 };
 
 // ============================================================================
@@ -88,7 +97,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityEvents());
 
@@ -111,7 +120,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityEvents({ filter }));
 
@@ -125,7 +134,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() =>
         useSecurityEvents({
@@ -146,7 +155,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityEvents());
 
@@ -161,7 +170,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const filter: SecurityEventsFilter = { userId: 'user-1' };
       renderHook(() => useSecurityEvents({ filter }));
@@ -180,7 +189,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       renderHook(() => useSecurityEvents({ enabled: false }));
 
@@ -201,7 +210,7 @@ describe('useSecurityEvents', () => {
         isError: true,
         error,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityEvents());
 
@@ -213,19 +222,15 @@ describe('useSecurityEvents', () => {
   describe('setFilter', () => {
     it('should update filter and reset page to 1', async () => {
       const queryFn = vi.fn();
-      let capturedQueryKey: unknown[] = [];
 
-      vi.mocked(sdk.useQuery).mockImplementation((options) => {
-        if (typeof options.queryKey === 'object' && Array.isArray(options.queryKey)) {
-          capturedQueryKey = options.queryKey;
-        }
+      vi.mocked(sdk.useQuery).mockImplementation(() => {
         return {
           data: mockResponse,
           isLoading: false,
           isError: false,
           error: null,
           refetch: queryFn,
-        };
+        } as any;
       });
 
       const { result, rerender } = renderHook(() => useSecurityEvents());
@@ -250,7 +255,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: vi.fn().mockResolvedValue(undefined),
-      });
+      } as any);
 
       const { result, rerender } = renderHook(() => useSecurityEvents());
 
@@ -272,7 +277,7 @@ describe('useSecurityEvents', () => {
         isError: false,
         error: null,
         refetch: refetchFn,
-      });
+      } as any);
 
       const { result } = renderHook(() => useSecurityEvents());
 
@@ -296,7 +301,7 @@ describe('useSecurityEvents', () => {
           isError: false,
           error: null,
           refetch: vi.fn().mockResolvedValue(undefined),
-        };
+        } as any;
       });
 
       const { result, rerender } = renderHook(() => useSecurityEvents());
@@ -320,7 +325,7 @@ describe('useSecurityEvents', () => {
           isError: false,
           error: null,
           refetch: vi.fn().mockResolvedValue(undefined),
-        };
+        } as any;
       });
 
       const { result, rerender } = renderHook(() => useSecurityEvents());

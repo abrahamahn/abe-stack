@@ -9,7 +9,7 @@ import {
   useEnabledOAuthProviders,
   useOAuthConnections,
   type ApiClientConfig,
-} from '@abe-stack/client';
+} from '@abe-stack/engine';
 import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
 import { useMemo, useState, type ReactElement } from 'react';
 

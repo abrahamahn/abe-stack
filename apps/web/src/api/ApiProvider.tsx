@@ -1,58 +1,11 @@
-// apps/web/src/api/ApiProvider.tsx
-/**
- * ApiProvider - Provides API client to components.
- *
- * Uses ClientEnvironment's config for base URL and token management.
- * Creates a standalone API client with navigation callbacks.
- */
-
-import { createApiClient } from '@abe-stack/client';
-import { tokenStore } from '@abe-stack/core';
+import { getApiClient, type ApiClient } from '@abe-stack/api';
+import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
 
-import type {
-  AuthResponse,
-  EmailVerificationRequest,
-  EmailVerificationResponse,
-  ForgotPasswordRequest,
-  ForgotPasswordResponse,
-  LoginRequest,
-  LogoutResponse,
-  OAuthConnectionsResponse,
-  OAuthEnabledProvidersResponse,
-  OAuthProvider,
-  OAuthUnlinkResponse,
-  RefreshResponse,
-  RegisterRequest,
-  RegisterResponse,
-  ResendVerificationRequest,
-  ResendVerificationResponse,
-  ResetPasswordRequest,
-  ResetPasswordResponse,
-  User,
-} from '@abe-stack/core';
 import type { ReactElement, ReactNode } from 'react';
 
-/**
- * API Client interface - mirrors @abe-stack/client ApiClient
- * Defined inline due to SDK type resolution issues.
- */
-interface ApiClient {
-  login: (data: LoginRequest) => Promise<AuthResponse>;
-  register: (data: RegisterRequest) => Promise<RegisterResponse>;
-  refresh: () => Promise<RefreshResponse>;
-  logout: () => Promise<LogoutResponse>;
-  getCurrentUser: () => Promise<User>;
-  forgotPassword: (data: ForgotPasswordRequest) => Promise<ForgotPasswordResponse>;
-  resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
-  verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
-  resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
-  getEnabledOAuthProviders: () => Promise<OAuthEnabledProvidersResponse>;
-  getOAuthConnections: () => Promise<OAuthConnectionsResponse>;
-  unlinkOAuthProvider: (provider: OAuthProvider) => Promise<OAuthUnlinkResponse>;
-  getOAuthLoginUrl: (provider: OAuthProvider) => string;
-}
+
 
 const ApiContext = createContext<ApiClient | null>(null);
 
@@ -75,18 +28,17 @@ type ApiProviderProps = {
  * Must be used within ClientEnvironmentProvider.
  *
  * Note: Error handling (unauthorized, server errors) should be done at the
- * call site using try-catch. Use isUnauthorizedError() from @abe-stack/client
+ * call site using try-catch. Use isUnauthorizedError() from @abe-stack/api
  * to check for 401 errors.
  */
 export const ApiProvider = ({ children }: ApiProviderProps): ReactElement => {
   const { config } = useClientEnvironment();
 
   const api = useMemo<ApiClient>(() => {
-    const client = createApiClient({
+    return getApiClient({
       baseUrl: config.apiUrl,
       getToken: (): string | null => tokenStore.get(),
     });
-    return client as ApiClient;
   }, [config.apiUrl]);
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

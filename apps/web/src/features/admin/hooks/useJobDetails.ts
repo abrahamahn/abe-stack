@@ -5,8 +5,8 @@
  * Fetch detailed information for a single job.
  */
 
-import { useQuery } from '@abe-stack/client';
-import { tokenStore } from '@abe-stack/core';
+import { useQuery } from '@abe-stack/engine';
+import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 

@@ -1,6 +1,5 @@
 // apps/web/src/features/auth/components/RegisterForm.tsx
-import { Button, Input, Link, PasswordInput, Text } from '@abe-stack/ui';
-import { useResendCooldown } from '@auth/hooks';
+import { Button, Input, Link, PasswordInput, Text, useResendCooldown } from '@abe-stack/ui';
 import { useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';

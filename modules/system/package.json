@@ -1,0 +1,30 @@
+{
+  "name": "@abe-stack/system",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-modules-system",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
+  },
+  "dependencies": {
+    "@abe-stack/backend-core": "workspace:*",
+    "@abe-stack/realtime": "workspace:*",
+    "fastify": "^5.0.0",
+    "@abe-stack/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.0"
+  }
+}

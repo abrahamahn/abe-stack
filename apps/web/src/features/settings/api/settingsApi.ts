@@ -5,7 +5,7 @@
  * API functions for user profile and settings operations.
  */
 
-import { createApiError, NetworkError } from '@abe-stack/client';
+import { createApiError, NetworkError } from '@abe-stack/engine';
 import {
   type AvatarDeleteResponse,
   type AvatarUploadResponse,
@@ -16,7 +16,7 @@ import {
   type SessionsListResponse,
   type UpdateProfileRequest,
   type User,
-} from '@abe-stack/core';
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Settings API Client
@@ -150,7 +150,7 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
 // Type Re-exports for Convenience
 // ============================================================================
 
-export type { ApiError } from '@abe-stack/client';
+export type { ApiError } from '@abe-stack/engine';
 export type {
   AvatarDeleteResponse,
   AvatarUploadResponse,
@@ -162,4 +162,4 @@ export type {
   SessionsListResponse,
   UpdateProfileRequest,
   User,
-} from '@abe-stack/core';
+} from '@abe-stack/shared';

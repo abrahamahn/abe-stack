@@ -14,7 +14,7 @@ import {
 
 import { cn } from '../../utils/cn';
 
-import type { Plan, PlanFeature } from '@abe-stack/core';
+import type { Plan, PlanFeature } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

@@ -21,10 +21,10 @@ vi.mock('@auth/hooks', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock toastStore from @abe-stack/stores
+// Mock toastStore from @abe-stack/react
 const mockToastShow = vi.fn();
-vi.mock('@abe-stack/stores', async () => {
-  const actual = await vi.importActual('@abe-stack/stores');
+vi.mock('@abe-stack/react', async () => {
+  const actual = await vi.importActual('@abe-stack/react');
   return {
     ...actual,
     toastStore: {

@@ -9,7 +9,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 're
 
 import { cn } from '../../utils/cn';
 
-import type { Subscription, SubscriptionStatus as SubscriptionStatusType } from '@abe-stack/core';
+import type { Subscription, SubscriptionStatus as SubscriptionStatusType } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

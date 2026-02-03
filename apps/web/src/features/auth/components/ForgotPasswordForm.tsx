@@ -3,7 +3,7 @@ import { Button, Input, Link } from '@abe-stack/ui';
 import { useState } from 'react';
 
 import type { AuthMode } from './AuthForms';
-import type { ForgotPasswordRequest } from '@abe-stack/core';
+import type { ForgotPasswordRequest } from '@abe-stack/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface ForgotPasswordFormProps {

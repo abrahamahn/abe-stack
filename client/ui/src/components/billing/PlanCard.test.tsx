@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PlanCard } from './PlanCard';
 
-import type { Plan } from '@abe-stack/core';
+import type { Plan } from '@abe-stack/shared';
 
 const createMockPlan = (overrides?: Partial<Plan>): Plan => ({
   id: 'basic',

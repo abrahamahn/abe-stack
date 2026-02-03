@@ -214,8 +214,7 @@ describe('Image', () => {
     });
 
     it('handles null onLoad gracefully', () => {
-      // @ts-expect-error Testing invalid prop
-      render(<Image src="/test.jpg" alt="Test" onLoad={null} />);
+      render(<Image src="/test.jpg" alt="Test" onLoad={null as unknown as () => void} />);
 
       const img = screen.getByRole('img', { hidden: true });
 
@@ -225,8 +224,7 @@ describe('Image', () => {
     });
 
     it('handles null onError gracefully', () => {
-      // @ts-expect-error Testing invalid prop
-      render(<Image src="/test.jpg" alt="Test" onError={null} />);
+      render(<Image src="/test.jpg" alt="Test" onError={null as unknown as () => void} />);
 
       const img = screen.getByRole('img', { hidden: true });
 
