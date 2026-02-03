@@ -1,4 +1,4 @@
-// infra/contracts/src/index.ts
+// packages/shared/src/contracts/index.ts
 /**
  * API Contracts
  *
@@ -328,7 +328,81 @@ export type {
 } from './security';
 
 // Billing contract
-export * from './billing/index';
+export {
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+  addPaymentMethodRequestSchema,
+  adminPlanResponseSchema,
+  adminPlanSchema,
+  adminPlansListResponseSchema,
+  cancelSubscriptionRequestSchema,
+  checkoutRequestSchema,
+  checkoutResponseSchema,
+  createPlanRequestSchema,
+  emptyBillingBodySchema,
+  invoiceSchema,
+  invoicesListResponseSchema,
+  paymentMethodResponseSchema,
+  paymentMethodSchema,
+  paymentMethodsListResponseSchema,
+  planSchema,
+  plansListResponseSchema,
+  setupIntentResponseSchema,
+  subscriptionActionResponseSchema,
+  subscriptionResponseSchema,
+  subscriptionSchema,
+  syncStripeResponseSchema,
+  updatePlanRequestSchema,
+  updateSubscriptionRequestSchema,
+  adminBillingContract,
+  billingContract,
+} from './billing/index';
+export type {
+  AddPaymentMethodRequest,
+  AdminPlan,
+  AdminPlanResponse,
+  AdminPlansListResponse,
+  BillingProvider,
+  BillingService,
+  CancelSubscriptionRequest,
+  CardDetails,
+  CheckoutParams,
+  CheckoutRequest,
+  CheckoutResponse,
+  CheckoutResult,
+  CreatePlanRequest,
+  CreateProductParams,
+  CreateProductResult,
+  EmptyBillingBody,
+  Invoice,
+  InvoiceStatus,
+  InvoicesListResponse,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  PaymentMethod,
+  PaymentMethodResponse,
+  PaymentMethodsListResponse,
+  PaymentMethodType,
+  Plan,
+  PlanFeature,
+  PlanInterval,
+  PlansListResponse,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResponse,
+  SetupIntentResult,
+  Subscription,
+  SubscriptionActionResponse,
+  SubscriptionResponse,
+  SubscriptionStatus,
+  SyncStripeResponse,
+  UpdatePlanRequest,
+  UpdateSubscriptionRequest,
+} from './billing/index';
 
 // Workspace scoping
 export {

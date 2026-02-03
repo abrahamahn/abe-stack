@@ -1,4 +1,4 @@
-// shared/src/utils/index.ts
+// packages/shared/src/utils/index.ts
 
 export * as Async from './async';
 export * as Cache from './cache';
@@ -59,14 +59,12 @@ export {
   paginationOptionsSchema,
   PaginationError,
   PAGINATION_ERROR_TYPES,
-  SORT_ORDER,
   sortOrderSchema,
   type CursorPaginatedResult,
   type CursorPaginationOptions,
   type PaginatedResult,
   type PaginationErrorType,
   type PaginationOptions,
-  type SortOrder,
 } from './pagination';
 
 export { createRateLimiter } from './rate-limit';
@@ -83,26 +81,18 @@ export {
   slugify,
   stripControlChars,
   titleCase,
-  toCamelCase,
   toKebabCase,
   toPascalCase,
   truncate,
 } from './string';
 
 export {
-  calculateEntropy,
-  calculateScore,
-  containsUserInput,
-  estimateCrackTime,
-  estimatePasswordStrength,
-  generateFeedback,
-  hasKeyboardPattern,
-  hasRepeatedChars,
-  hasSequentialChars,
-  isCommonPassword,
-  validatePassword,
-  type PasswordPenalties,
-  type StrengthResult,
-} from './password';
-
-export * from './casing';
+  camelToSnake,
+  snakeToCamel,
+  toSnakeCase,
+  toCamelCase,
+  toCamelCaseArray,
+  snakeifyKeys,
+  camelizeKeys,
+  type KeyMapping,
+} from './casing';

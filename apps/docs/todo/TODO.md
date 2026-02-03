@@ -1,14 +1,48 @@
 
-## 0. packages/db: Fix Legacy Module Imports (Phase 4)
+## Completed: Config Consolidation (2026-02-03)
 
-The functional repository refactor (Phases 1–3, 5) is complete. Phase 4 fixes broken imports in legacy/recovered modules that depend on `@abe-stack/shared/config` or `@abe-stack/infra` (which no longer exist). These will resolve naturally when P0–P2 code restoration below is completed.
+- [x] Add `./config` subpath export to `@abe-stack/backend-core`
+- [x] Rewire ~60 files from `@abe-stack/shared/config` to `@abe-stack/backend-core/config`
+- [x] Extract `isStrategyEnabled` and `getRefreshCookieOptions` to `modules/auth/src/utils/config-helpers.ts`
+- [x] Delete scattered config duplicates (~30 files across 6 locations)
+- [x] Fix `AppConfig`, `AuthConfig`, `BillingConfig`, `Argon2Config`, `StripeProviderConfig`, `PayPalProviderConfig` imports
+- [x] Remove `packages/shared/src/config/` directory and `"./config"` export
 
-- [ ] `packages/db/src/config/database.ts` — fix `@abe-stack/shared/config` import
-- [ ] `packages/db/src/config/search.ts` — fix `@abe-stack/shared/config` import
+### Discovered Debt (Config-Related)
+
+- [ ] `modules/billing/src/factory.test.ts` — test fixtures missing `sandbox` on `PayPalProviderConfig`, `BillingPlansConfig` wrong shape, `BillingUrlsConfig` wrong shape
+- [ ] `modules/billing/src/stripe-provider.test.ts` — test fixture missing `publishableKey` on `StripeProviderConfig`
+- [ ] `@abe-stack/shared` barrel — `BillingService`, `NormalizedWebhookEvent`, and other billing domain types declared locally but not properly exported
+- [ ] `apps/server/src/modules/auth/security/rateLimitPresets.ts` — imports `RateLimitConfig` from `@abe-stack/db` (should be from `@abe-stack/backend-core/config`)
+
+---
+
+## 0. packages/db: Remaining Debt
+
+### Phase 4: Fix Legacy Module Imports
+
+The functional repository refactor (Phases 1–5), post-refactor improvement loop, and Phase 2 repository expansion (16 new repos, 33 total keys, 615 tests) are complete. Phase 4 fixes broken imports in legacy/recovered modules.
+
+- [ ] `packages/db/src/config/database.ts` — fix `@abe-stack/shared/config` import (now `@abe-stack/backend-core/config`)
+- [ ] `packages/db/src/config/search.ts` — fix `@abe-stack/shared/config` import (now `@abe-stack/backend-core/config`)
 - [ ] `packages/db/src/write/write-service.ts` — fix `@abe-stack/infra` imports
 - [ ] `packages/db/src/write/postgres-store.ts` — fix circular `@abe-stack/db` import
 - [ ] `packages/db/src/pubsub/postgres-pubsub.ts` — fix missing `./types` module
 - [ ] `packages/db/src/repositories/*-legacy.ts` — fix stale schema type references (`UserInsert`, `UserUpdate`, `EmailVerificationTokenInsert`, etc.)
+
+### Quality Debt (from improvement audit)
+
+- [ ] Stale file path comments in ~48 legacy files (e.g., `// infra/src/db/...` instead of `// packages/db/src/...`)
+- [ ] Billing repos have minimal JSDoc compared to new repos
+- [ ] `isInTransaction` stub always returns `true` in transaction utilities
+
+### packages/shared Barrel Export Debt
+
+- [x] `packages/shared/src/index.ts` — converted to explicit named exports (2026-02-04)
+- [x] `packages/shared/src/domain/index.ts` — converted 13 wildcards to explicit named exports (2026-02-04)
+- [x] `packages/shared/src/contracts/index.ts` — converted billing wildcard to explicit exports (2026-02-04)
+- [x] `packages/shared/src/utils/index.ts` — converted casing wildcard to explicit exports (2026-02-04)
+- [ ] Restored files retain old path comments (e.g., `// core/src/infrastructure/...`) — need header updates
 
 ---
 
@@ -304,7 +338,7 @@ Source: `core/src/__tests__/`
 - Reset dev DB path
 - CLI/scaffolding: create-module, migration scaffolding
 - Env validation output ("you're missing X vars")
-- Storybook/UI catalog (demo catalog already covers this)
+- Storybook/UI catalog (UI library catalog at `/ui-library` already covers this)
 
 ### 7) Security essentials that might still be missing
 
