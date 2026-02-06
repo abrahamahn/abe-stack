@@ -76,6 +76,43 @@ export function generateUniqueFilename(filename: string, appendTimestamp: boolea
 }
 
 /**
+ * Match a MIME type against a wildcard pattern iteratively (no regex).
+ * Supports `*` as a segment wildcard, e.g. `image/*` matches `image/png`.
+ *
+ * @param mime - The MIME type to check (lowercase)
+ * @param pattern - The wildcard pattern (lowercase, e.g. `image/*`)
+ * @returns true if the MIME type matches the pattern
+ * @complexity O(n) where n = max(mime.length, pattern.length)
+ */
+function matchMimeWildcard(mime: string, pattern: string): boolean {
+  let mi = 0;
+  let pi = 0;
+
+  while (mi < mime.length && pi < pattern.length) {
+    if (pattern[pi] === '*') {
+      // '*' matches the rest of the current segment (up to '/' or end)
+      pi++;
+      // Consume remaining mime chars until '/' or end
+      while (mi < mime.length && mime[mi] !== '/') {
+        mi++;
+      }
+    } else if (pattern[pi] === mime[mi]) {
+      pi++;
+      mi++;
+    } else {
+      return false;
+    }
+  }
+
+  // Both must be fully consumed (allow trailing '*' in pattern)
+  while (pi < pattern.length && pattern[pi] === '*') {
+    pi++;
+  }
+
+  return mi === mime.length && pi === pattern.length;
+}
+
+/**
  * Validate a file type based on extension or MIME type.
  *
  * @param fileNameOrType - Filename or MIME type to validate
@@ -91,12 +128,14 @@ export function validateFileType(fileNameOrType: string, allowedTypes: string[])
 
   // Check if it's a MIME type (contains slash)
   if (lowerFileNameOrType.includes('/')) {
-    return allowedTypes.some(
-      (type) =>
-        type.toLowerCase() === lowerFileNameOrType ||
-        (type.includes('*') &&
-          new RegExp(`^${type.replace(/\*/g, '.*')}$`).test(lowerFileNameOrType)),
-    );
+    return allowedTypes.some((type) => {
+      const lowerType = type.toLowerCase();
+      if (!lowerType.includes('*')) {
+        return lowerType === lowerFileNameOrType;
+      }
+      // Wildcard MIME matching (e.g., "image/*") — iterative, no regex
+      return matchMimeWildcard(lowerFileNameOrType, lowerType);
+    });
   }
 
   // Otherwise treat as filename and check extension

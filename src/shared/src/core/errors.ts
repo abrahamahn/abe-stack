@@ -438,12 +438,14 @@ export function formatValidationErrors(
   issues: readonly ValidationIssue[],
 ): ValidationErrorResponse {
   const fields: Record<string, string[]> = {};
+  const detailIssues: ValidationErrorDetail[] = [];
 
   for (const issue of issues) {
-    const path =
-      issue.path.map(String).join('.') === '' ? '_root' : issue.path.map(String).join('.');
-    fields[path] ??= [];
-    fields[path].push(issue.message);
+    const joined = issue.path.map(String).join('.');
+    const field = joined === '' ? '_root' : joined;
+    fields[field] ??= [];
+    fields[field].push(issue.message);
+    detailIssues.push({ field, message: issue.message, code: issue.code });
   }
 
   return {
@@ -453,12 +455,7 @@ export function formatValidationErrors(
       message: 'Request validation failed',
       details: {
         fields,
-        issues: issues.map((issue) => ({
-          field:
-            issue.path.map(String).join('.') === '' ? '_root' : issue.path.map(String).join('.'),
-          message: issue.message,
-          code: issue.code,
-        })),
+        issues: detailIssues,
       },
     },
   };

@@ -43,34 +43,40 @@ function isSortOrder(value: unknown): value is SortOrder {
   return value === 'asc' || value === 'desc';
 }
 
+/**
+ * Decode and validate an optional additionalValues array.
+ * Returns undefined if rawValues is undefined, null if invalid,
+ * or the decoded array on success.
+ *
+ * @param rawValues - The raw additionalValues from the parsed cursor
+ * @returns Decoded values, undefined (absent), or null (invalid)
+ * @complexity O(n) where n is the number of additional values
+ */
+function decodeAdditionalValues(
+  rawValues: unknown,
+): Array<string | number | Date> | undefined | null {
+  if (rawValues === undefined) return undefined;
+  if (!Array.isArray(rawValues)) return null;
+  const decoded: Array<string | number | Date> = [];
+  for (const entry of rawValues) {
+    const value = decodeCursorValue(entry);
+    if (value === null) return null;
+    decoded.push(value);
+  }
+  return decoded;
+}
+
 function parseCursorData(parsed: unknown): CursorData | null {
   if (Array.isArray(parsed)) {
-    const parsedArray = parsed as unknown[];
-    const value = decodeCursorValue(parsedArray[0]);
-    const tieBreaker = parsedArray[1];
-    const sortOrder = parsedArray[2];
-    const additionalValues = parsedArray[3];
+    const value = decodeCursorValue(parsed[0]);
+    const tieBreaker: unknown = parsed[1];
+    const sortOrder: unknown = parsed[2];
     if (value === null) return null;
     if (typeof tieBreaker !== 'string' || tieBreaker.trim() === '') return null;
     if (!isSortOrder(sortOrder)) return null;
-    if (typeof additionalValues !== 'undefined') {
-      if (!Array.isArray(additionalValues)) return null;
-      const decodedAdditionalValues = additionalValues
-        .map((entry) => decodeCursorValue(entry))
-        .filter((entry): entry is CursorValue => entry !== null);
-      if (decodedAdditionalValues.length !== additionalValues.length) return null;
-    }
-    const extraValues = Array.isArray(additionalValues)
-      ? additionalValues
-          .map((entry) => decodeCursorValue(entry))
-          .filter((entry): entry is CursorValue => entry !== null)
-      : undefined;
-    return {
-      value,
-      tieBreaker,
-      sortOrder,
-      additionalValues: extraValues,
-    };
+    const extraValues = decodeAdditionalValues(parsed[3]);
+    if (extraValues === null) return null;
+    return { value, tieBreaker, sortOrder, additionalValues: extraValues };
   }
 
   if (parsed === null || parsed === undefined || typeof parsed !== 'object') return null;
@@ -81,29 +87,9 @@ function parseCursorData(parsed: unknown): CursorData | null {
   if (typeof tieBreaker !== 'string' || tieBreaker.trim() === '') return null;
   const sortOrder = record['sortOrder'];
   if (!isSortOrder(sortOrder)) return null;
-  const recordAdditionalValues = record['additionalValues'];
-  if (typeof recordAdditionalValues !== 'undefined') {
-    if (!Array.isArray(recordAdditionalValues)) return null;
-    const decodedAdditionalValues = recordAdditionalValues
-      .map((entry) => decodeCursorValue(entry))
-      .filter((entry): entry is CursorValue => entry !== null);
-    if (decodedAdditionalValues.length !== recordAdditionalValues.length) return null;
-  }
-
-  const extraValues: Array<string | number | Date> | undefined = Array.isArray(
-    recordAdditionalValues,
-  )
-    ? recordAdditionalValues
-        .map((entry) => decodeCursorValue(entry))
-        .filter((entry): entry is CursorValue => entry !== null)
-    : undefined;
-
-  return {
-    value,
-    tieBreaker,
-    sortOrder,
-    additionalValues: extraValues,
-  };
+  const extraValues = decodeAdditionalValues(record['additionalValues']);
+  if (extraValues === null) return null;
+  return { value, tieBreaker, sortOrder, additionalValues: extraValues };
 }
 
 /**

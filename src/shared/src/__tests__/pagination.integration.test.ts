@@ -264,7 +264,7 @@ describe('Pagination Integration', () => {
       const result = buildCursorPaginationQuery(undefined, 'created_at', 'desc');
 
       expect(result.whereClause).toBe('');
-      expect(result.orderByClause).toBe('created_at DESC, id DESC');
+      expect(result.orderByClause).toBe('"created_at" DESC, "id" DESC');
       expect(result.params).toHaveLength(0);
     });
 
@@ -278,9 +278,9 @@ describe('Pagination Integration', () => {
 
       const result = buildCursorPaginationQuery(cursor, 'created_at', 'asc');
 
-      expect(result.whereClause).toContain('created_at > $1');
-      expect(result.whereClause).toContain('id > $2');
-      expect(result.orderByClause).toBe('created_at ASC, id ASC');
+      expect(result.whereClause).toContain('"created_at" > $1');
+      expect(result.whereClause).toContain('"id" > $2');
+      expect(result.orderByClause).toBe('"created_at" ASC, "id" ASC');
       expect(result.params).toEqual(['2024-01-01T00:00:00Z', 'abc123']);
     });
 
@@ -294,9 +294,9 @@ describe('Pagination Integration', () => {
 
       const result = buildCursorPaginationQuery(cursor, 'score', 'desc');
 
-      expect(result.whereClause).toContain('score < $1');
-      expect(result.whereClause).toContain('id < $2');
-      expect(result.orderByClause).toBe('score DESC, id DESC');
+      expect(result.whereClause).toContain('"score" < $1');
+      expect(result.whereClause).toContain('"id" < $2');
+      expect(result.orderByClause).toBe('"score" DESC, "id" DESC');
       expect(result.params).toEqual([1000, 'xyz789']);
     });
 
@@ -310,8 +310,8 @@ describe('Pagination Integration', () => {
 
       const result = buildCursorPaginationQuery(cursor, 'name', 'asc', 'uuid');
 
-      expect(result.whereClause).toContain('uuid > $2');
-      expect(result.orderByClause).toBe('name ASC, uuid ASC');
+      expect(result.whereClause).toContain('"uuid" > $2');
+      expect(result.orderByClause).toBe('"name" ASC, "uuid" ASC');
     });
 
     it('should throw on invalid cursor', () => {

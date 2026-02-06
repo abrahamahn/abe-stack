@@ -295,7 +295,7 @@ export const recordMapSchema: Schema<RecordMap> = createSchema((data: unknown) =
   const outer = data as Record<string, unknown>;
 
   for (const [table, records] of Object.entries(outer)) {
-    if (records === null || records === undefined || typeof records !== 'object') {
+    if (records === null || records === undefined || typeof records !== 'object' || Array.isArray(records)) {
       throw new Error(`Invalid records for table ${table}`);
     }
     result[table] = {};

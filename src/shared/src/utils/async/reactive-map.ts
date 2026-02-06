@@ -91,12 +91,18 @@ export class ReactiveMap<K = string, V = unknown> {
       }
     }
 
-    // Then notify all listeners
+    // Then notify all listeners.
+    // Wrap each callback in try-catch to ensure one listener's error
+    // does not prevent remaining listeners from being notified.
     for (const { key, value } of entries) {
       const listenerSet = this.listeners.get(key);
       if (listenerSet !== undefined) {
         for (const fn of listenerSet) {
-          fn(value);
+          try {
+            fn(value);
+          } catch {
+            // Listener errors must not break atomicity of notifications.
+          }
         }
       }
     }

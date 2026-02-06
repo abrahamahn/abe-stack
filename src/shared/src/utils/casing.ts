@@ -119,13 +119,9 @@ export function toCamelCaseArray<T = Record<string, unknown>>(
   records: Record<string, unknown>[],
   mapping?: KeyMapping,
 ): T[] {
-  return records.map((r) => {
-    const result = toCamelCase<T>(r, mapping);
-    if (typeof result === 'string') {
-      throw new Error('Unexpected string result from toCamelCase');
-    }
-    return result;
-  });
+  // toCamelCase<T>(Record, ...) always returns T (never string)
+  // because the input is Record<string, unknown>, not string.
+  return records.map((r) => toCamelCase<T>(r, mapping));
 }
 
 /**

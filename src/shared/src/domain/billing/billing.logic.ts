@@ -52,32 +52,52 @@ export const PLAN_FEES: Record<string, number> = {
  */
 export function getEntitlements(plan: Plan): Entitlements {
   return {
-    maxProjects: getFeatureValue<number>(plan, FEATURE_KEYS.PROJECTS, 5),
-    maxStorageGb: getFeatureValue<number>(plan, FEATURE_KEYS.STORAGE, 10),
-    canInviteMembers: getFeatureValue<boolean>(plan, FEATURE_KEYS.TEAM_MEMBERS, false),
-    canUseApi: getFeatureValue<boolean>(plan, FEATURE_KEYS.API_ACCESS, false),
-    canRemoveBranding: getFeatureValue<boolean>(plan, FEATURE_KEYS.CUSTOM_BRANDING, false),
+    maxProjects: getFeatureValue(plan, FEATURE_KEYS.PROJECTS, 5),
+    maxStorageGb: getFeatureValue(plan, FEATURE_KEYS.STORAGE, 10),
+    canInviteMembers: getFeatureValue(plan, FEATURE_KEYS.TEAM_MEMBERS, false),
+    canUseApi: getFeatureValue(plan, FEATURE_KEYS.API_ACCESS, false),
+    canRemoveBranding: getFeatureValue(plan, FEATURE_KEYS.CUSTOM_BRANDING, false),
   };
 }
 
 /**
- * Gets the value of a feature from a plan.
+ * Gets the numeric value of a feature from a plan.
+ *
+ * @param plan - The pricing plan
+ * @param key - The feature key to look up
+ * @param defaultValue - Default numeric value if feature is not included
+ * @returns The feature's numeric value or the default
  */
-export function getFeatureValue<T>(plan: Plan, key: FeatureKey, defaultValue: T): T {
+export function getFeatureValue(plan: Plan, key: FeatureKey, defaultValue: number): number;
+/**
+ * Gets the boolean value of a feature from a plan.
+ *
+ * @param plan - The pricing plan
+ * @param key - The feature key to look up
+ * @param defaultValue - Default boolean value if feature is not included
+ * @returns The feature's boolean value or the default
+ */
+export function getFeatureValue(plan: Plan, key: FeatureKey, defaultValue: boolean): boolean;
+export function getFeatureValue(
+  plan: Plan,
+  key: FeatureKey,
+  defaultValue: number | boolean,
+): number | boolean {
   const feature = plan.features.find((f) => f.key === key);
   if (feature?.included !== true) {
     return defaultValue;
   }
 
   // If value is explicitly provided, use it.
+  // PlanFeature.value is number | boolean | undefined from the union type.
   if (feature.value !== undefined) {
-    return feature.value as unknown as T;
+    return feature.value;
   }
 
   // Fallback for toggle features that are included but have no explicit value.
-  // We only return 'true' if the expected type (defaultValue) is boolean.
+  // Return true only when expecting a boolean (toggle features).
   if (typeof defaultValue === 'boolean') {
-    return true as unknown as T;
+    return true;
   }
 
   return defaultValue;

@@ -101,9 +101,68 @@ export function can(ctx: AuthContext, action: PolicyAction, resource: PolicyReso
 /**
  * Checks if a user has a specific granular permission.
  * This is a helper that wraps the can() function.
+ *
+ * @param ctx - The authorization context (roles, ownership)
+ * @param permission - A typed permission string in "resource:action" format
+ * @returns boolean — whether the user has the permission
  */
 export function hasPermission(ctx: AuthContext, permission: Permission): boolean {
-  // Use a map or simple string split
-  const [resource, action] = permission.split(':') as [PolicyResource, PolicyAction];
+  const colonIdx = permission.indexOf(':');
+  if (colonIdx < 1) {
+    return false;
+  }
+
+  const resource = permission.slice(0, colonIdx);
+  const action = permission.slice(colonIdx + 1);
+
+  if (!isPolicyResource(resource) || !isPolicyAction(action)) {
+    return false;
+  }
+
   return can(ctx, action, resource);
+}
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+/**
+ * Type guard: validates a string as a PolicyResource.
+ *
+ * @param value - The string to validate
+ * @returns True if the value is a valid PolicyResource
+ * @complexity O(1)
+ */
+function isPolicyResource(value: string): value is PolicyResource {
+  switch (value) {
+    case 'tenant':
+    case 'membership':
+    case 'billing':
+    case 'audit-log':
+    case 'settings':
+    case 'data':
+      return true;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Type guard: validates a string as a PolicyAction.
+ *
+ * @param value - The string to validate
+ * @returns True if the value is a valid PolicyAction
+ * @complexity O(1)
+ */
+function isPolicyAction(value: string): value is PolicyAction {
+  switch (value) {
+    case 'read':
+    case 'write':
+    case 'delete':
+    case 'manage':
+    case 'invite':
+      return true;
+    default:
+      return false;
+  }
 }

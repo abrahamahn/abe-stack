@@ -230,19 +230,36 @@ export function toPromise<T, E>(result: Result<T, E>): Promise<T> {
 }
 
 /**
- * Creates a Result from a Promise, catching any errors
+ * Creates a Result from a Promise, catching any errors.
+ * When no errorMapper is provided, caught errors are wrapped as Error instances.
+ *
+ * @param promise - The promise to convert
+ * @returns A Result wrapping the resolved value or an Error
  */
-export async function fromPromise<T, E = Error>(
+export async function fromPromise<T>(promise: Promise<T>): Promise<Result<T>>;
+/**
+ * Creates a Result from a Promise, catching any errors.
+ * Uses the provided errorMapper to transform caught errors into the desired error type.
+ *
+ * @param promise - The promise to convert
+ * @param errorMapper - Function to transform unknown errors into type E
+ * @returns A Result wrapping the resolved value or a mapped error
+ */
+export async function fromPromise<T, E>(
   promise: Promise<T>,
-  errorMapper?: (error: unknown) => E,
-): Promise<Result<T, E>> {
+  errorMapper: (error: unknown) => E,
+): Promise<Result<T, E>>;
+export async function fromPromise(
+  promise: Promise<unknown>,
+  errorMapper?: (error: unknown) => unknown,
+): Promise<Result<unknown, unknown>> {
   try {
     const data = await promise;
-    return ok<T, E>(data);
+    return ok(data);
   } catch (error) {
     if (errorMapper !== undefined) {
       return err(errorMapper(error));
     }
-    return err(error as E);
+    return err(error instanceof Error ? error : new Error(String(error)));
   }
 }

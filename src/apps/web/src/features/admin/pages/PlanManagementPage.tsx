@@ -55,7 +55,10 @@ interface PlanFeatureLocal {
 }
 
 /** Limit feature keys that require a numeric value */
-const LIMIT_KEYS: ReadonlySet<FeatureKey> = new Set<FeatureKey>(['projects:limit', 'storage:limit']);
+const LIMIT_KEYS: ReadonlySet<FeatureKey> = new Set<FeatureKey>([
+  'projects:limit',
+  'storage:limit',
+]);
 
 /**
  * Type guard: checks whether a FeatureKey is a limit feature key.
@@ -96,11 +99,13 @@ function toApiFeatures(features: readonly PlanFeatureLocal[]): PlanFeature[] {
  * @complexity O(n) where n is feature count
  */
 function fromApiFeatures(features: readonly PlanFeature[]): PlanFeatureLocal[] {
-  return features.map((f): PlanFeatureLocal => ({
-    key: f.key,
-    name: f.name,
-    included: f.included,
-  }));
+  return features.map(
+    (f): PlanFeatureLocal => ({
+      key: f.key,
+      name: f.name,
+      included: f.included,
+    }),
+  );
 }
 
 // ============================================================================

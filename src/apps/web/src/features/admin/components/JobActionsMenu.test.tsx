@@ -90,7 +90,6 @@ describe('JobActionsMenu', () => {
       expect(screen.getByText('No actions')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Actions' })).not.toBeInTheDocument();
     });
-
   });
 
   describe('retry action', () => {

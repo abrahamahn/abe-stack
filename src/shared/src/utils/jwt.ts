@@ -81,16 +81,21 @@ function parseExpiration(exp: string | number): number {
   }
 
   const value = parseInt(match[1], 10);
-  const unit = match[2] as 's' | 'm' | 'h' | 'd';
+  const unit = match[2];
 
-  const multipliers: Record<'s' | 'm' | 'h' | 'd', number> = {
+  const multipliers: Record<string, number> = {
     s: 1,
     m: 60,
     h: 3600,
     d: 86400,
   };
 
-  return value * multipliers[unit];
+  const multiplier = multipliers[unit];
+  if (multiplier === undefined) {
+    throw new JwtError(`Invalid expiration unit: ${unit}`, 'INVALID_TOKEN');
+  }
+
+  return value * multiplier;
 }
 
 /**
@@ -176,9 +181,13 @@ export function verify(token: string, secret: string): JwtPayload {
     header === null ||
     header === undefined ||
     typeof header !== 'object' ||
-    (header as Record<string, unknown>)['alg'] !== 'HS256' ||
-    (header as Record<string, unknown>)['typ'] !== 'JWT'
+    Array.isArray(header)
   ) {
+    throw new JwtError('Invalid header', 'MALFORMED_TOKEN');
+  }
+
+  const headerRecord = header as Record<string, unknown>;
+  if (headerRecord['alg'] !== 'HS256' || headerRecord['typ'] !== 'JWT') {
     throw new JwtError('Algorithm not supported', 'INVALID_TOKEN');
   }
 
@@ -190,10 +199,18 @@ export function verify(token: string, secret: string): JwtPayload {
   const signatureBuffer = Buffer.from(signature, 'utf8');
   const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
 
+  // Pad both buffers to equal length to prevent timing leak on length mismatch.
+  // Without padding, the && short-circuit reveals signature length via timing.
+  const maxLen = Math.max(signatureBuffer.length, expectedBuffer.length);
+  const paddedSignature = Buffer.alloc(maxLen);
+  const paddedExpected = Buffer.alloc(maxLen);
+  signatureBuffer.copy(paddedSignature);
+  expectedBuffer.copy(paddedExpected);
+
   // Constant-time comparison to prevent timing attacks
   const validSignature =
     signatureBuffer.length === expectedBuffer.length &&
-    timingSafeEqual(signatureBuffer, expectedBuffer);
+    timingSafeEqual(paddedSignature, paddedExpected);
 
   if (!validSignature) {
     throw new JwtError('Invalid signature', 'INVALID_SIGNATURE');
@@ -202,8 +219,13 @@ export function verify(token: string, secret: string): JwtPayload {
   // Decode and parse payload
   let payload: JwtPayload;
   try {
-    payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload;
-  } catch {
+    const parsed: unknown = JSON.parse(base64UrlDecode(encodedPayload));
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new JwtError('Malformed token payload', 'MALFORMED_TOKEN');
+    }
+    payload = parsed as JwtPayload;
+  } catch (e) {
+    if (e instanceof JwtError) throw e;
     throw new JwtError('Malformed token payload', 'MALFORMED_TOKEN');
   }
 
@@ -228,8 +250,9 @@ export function decode(token: string): JwtPayload | null {
     const encodedPayload = parts[1];
     if (parts.length !== 3 || encodedPayload === undefined || encodedPayload === '') return null;
 
-    const payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload;
-    return payload;
+    const parsed: unknown = JSON.parse(base64UrlDecode(encodedPayload));
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return parsed as JwtPayload;
   } catch {
     return null;
   }
@@ -287,10 +310,15 @@ export interface JwtRotationConfig {
 }
 
 /**
- * Sign a token using the current secret
+ * Sign a token using the current secret from a rotation config.
+ *
+ * @param payload - The JWT payload to sign
+ * @param config - Rotation config containing current and previous secrets
+ * @returns Signed JWT string
+ * @complexity O(n) where n = payload size
  */
-export function signWithRotation(payload: object, config: JwtRotationConfig): Promise<string> {
-  return Promise.resolve(jwtSign(payload, config.currentSecret));
+export function signWithRotation(payload: object, config: JwtRotationConfig): string {
+  return jwtSign(payload, config.currentSecret);
 }
 
 /**

@@ -1,3 +1,21 @@
+## Completed: `src/shared` Security Audit (2026-02-06)
+
+- [x] SQL injection prevention in `buildCursorPaginationQuery` — added `safeSqlIdentifier()` with validation + double-quoting
+- [x] ReDoS elimination in `evalLike` — replaced regex with iterative two-pointer `matchLikePattern()`
+- [x] O(1) rate limiter — rewrote from array-of-timestamps to sliding-window counter
+- [x] DeferredPromise `!` assertion removal — local variable + no-op initialization pattern
+- [x] SubscriptionManager error isolation — try-catch per socket + dead socket cleanup
+- [x] LRU cache TTL overhaul — pure `has()`, proactive expired eviction, `rawSize()` diagnostic
+- [x] Crypto hardening — constant-time length comparison, rejection sampling, 32-byte minimum secret
+
+### Discovered Debt (Security Audit)
+
+- [x] `src/shared` additional files reviewed in Round 2 audit — 12 issues found and fixed (ReDoS, timing leak, as-casts, dead code, stale messages)
+- [ ] `src/server/engine/src/security/crypto/jwt-rotation.ts` has separate `checkTokenSecret` that only checks for empty string (weaker than shared version's 32-byte minimum)
+- [ ] `src/shared/src/core/schemas.ts` and `src/shared/src/core/api.ts` are deprecated re-export shims — remove once consumers are migrated
+
+---
+
 ## Completed: Config Consolidation (2026-02-03)
 
 - [x] Add `./config` subpath export to `@abe-stack/server-engine`

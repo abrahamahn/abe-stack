@@ -281,7 +281,7 @@ describe('checkRateLimit', () => {
     const result = checkRateLimit();
 
     expect(result.status).toBe('up');
-    expect(result.message).toBe('token bucket active');
+    expect(result.message).toBe('sliding window active');
   });
 });
 

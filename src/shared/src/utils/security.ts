@@ -74,11 +74,18 @@ export function verifyToken(
     const sigBuffer = Buffer.from(signature, 'base64url');
     const expectedBuffer = Buffer.from(expectedSignature, 'base64url');
 
-    if (sigBuffer.length !== expectedBuffer.length) {
-      return { valid: false, token: null };
-    }
+    // Constant-time comparison: always iterate max length, XOR lengths
+    // to avoid leaking signature length through timing.
+    const maxLen = Math.max(sigBuffer.length, expectedBuffer.length);
+    const padSig = Buffer.alloc(maxLen);
+    const padExp = Buffer.alloc(maxLen);
+    sigBuffer.copy(padSig);
+    expectedBuffer.copy(padExp);
 
-    if (timingSafeEqual(sigBuffer, expectedBuffer)) {
+    const lengthMatch = sigBuffer.length === expectedBuffer.length;
+    const contentMatch = timingSafeEqual(padSig, padExp);
+
+    if (lengthMatch && contentMatch) {
       return { valid: true, token };
     }
   } catch {
@@ -170,7 +177,12 @@ export function validateCsrfToken(
 ): boolean {
   const { secret, encrypted = false, signed = true } = options;
 
-  if ((cookieToken ?? '') === '' || (requestToken ?? '') === '') {
+  if (
+    cookieToken === undefined ||
+    cookieToken === '' ||
+    requestToken === undefined ||
+    requestToken === ''
+  ) {
     return false;
   }
 
@@ -179,7 +191,7 @@ export function validateCsrfToken(
 
   if (encrypted) {
     // Decrypt first, then verify signature if signed
-    const decryptedToken = decryptToken(cookieToken as string, secret);
+    const decryptedToken = decryptToken(cookieToken, secret);
     if (decryptedToken == null) {
       return false;
     }
@@ -189,8 +201,8 @@ export function validateCsrfToken(
       : { valid: true, token: decryptedToken };
   } else {
     cookieResult = signed
-      ? verifyToken(cookieToken as string, secret)
-      : { valid: true, token: cookieToken as string };
+      ? verifyToken(cookieToken, secret)
+      : { valid: true, token: cookieToken };
   }
 
   if (!cookieResult.valid || cookieResult.token == null) {
@@ -199,7 +211,7 @@ export function validateCsrfToken(
 
   // Compare tokens (timing-safe)
   try {
-    const tokenBuffer = Buffer.from(requestToken as string);
+    const tokenBuffer = Buffer.from(requestToken);
     const expectedBuffer = Buffer.from(cookieResult.token);
 
     if (tokenBuffer.length !== expectedBuffer.length) {

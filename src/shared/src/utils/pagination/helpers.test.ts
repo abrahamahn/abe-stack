@@ -16,7 +16,7 @@ describe('Cursor Pagination Query Building', () => {
     const result = buildCursorPaginationQuery(undefined, 'createdAt', 'desc');
 
     expect(result.whereClause).toBe('');
-    expect(result.orderByClause).toBe('createdAt DESC, id DESC');
+    expect(result.orderByClause).toBe('"createdAt" DESC, "id" DESC');
     expect(result.params).toEqual([]);
   });
 
@@ -30,9 +30,9 @@ describe('Cursor Pagination Query Building', () => {
 
     const result = buildCursorPaginationQuery(cursor, 'createdAt', 'desc');
 
-    expect(result.whereClause).toContain('createdAt < $1');
-    expect(result.whereClause).toContain('id < $2');
-    expect(result.orderByClause).toBe('createdAt DESC, id DESC');
+    expect(result.whereClause).toContain('"createdAt" < $1');
+    expect(result.whereClause).toContain('"id" < $2');
+    expect(result.orderByClause).toBe('"createdAt" DESC, "id" DESC');
     expect(result.params).toEqual(['2024-01-01T00:00:00Z', '123']);
   });
 

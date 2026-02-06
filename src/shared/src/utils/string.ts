@@ -160,7 +160,6 @@ export function toPascalCase(str: string): string {
  * @returns Padded string
  */
 export function padLeft(str: string, length: number, padChar: string = ' '): string {
-  if (str === '') str = '';
   if (str.length >= length) return str;
   return padChar.repeat(length - str.length) + str;
 }

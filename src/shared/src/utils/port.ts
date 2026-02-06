@@ -117,6 +117,8 @@ export async function waitForPort(
     await delay(delayMs);
   }
 
-  // Fallback to the first configured port even if we could not detect it
-  return first ?? 5174;
+  // Fallback to the first configured port even if we could not detect it.
+  // Default matches Vite's secondary dev server port.
+  const VITE_FALLBACK_PORT = 5174;
+  return first ?? VITE_FALLBACK_PORT;
 }

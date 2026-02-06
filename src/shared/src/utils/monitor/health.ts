@@ -213,7 +213,7 @@ export function checkWebSocket(stats: WebSocketStats): ServiceHealth {
 export function checkRateLimit(): ServiceHealth {
   return {
     status: 'up',
-    message: 'token bucket active',
+    message: 'sliding window active',
   };
 }
 

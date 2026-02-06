@@ -6,8 +6,6 @@
  * Eliminates duplicate instanceof error checking across handlers.
  */
 
-import type { EmailSendError } from './auth.errors';
-
 /**
  * Known auth error names for cross-module boundary checking.
  * Using error.name instead of instanceof allows error detection to work
@@ -56,8 +54,10 @@ function isWeakPasswordError(
 /**
  * Type guard for EmailSendError shape
  */
-function isEmailSendError(error: unknown): error is { name: string; originalError?: Error } {
-  return hasName(error) && error.name === AUTH_ERROR_NAMES.EmailSendError;
+function isEmailSendError(
+  error: unknown,
+): error is { name: string; message: string; originalError?: Error } {
+  return hasName(error) && 'message' in error && error.name === AUTH_ERROR_NAMES.EmailSendError;
 }
 
 /**
@@ -100,13 +100,23 @@ export interface ErrorMapperLogger {
 }
 
 /**
+ * Narrowed shape of EmailSendError for cross-module boundary handling.
+ * Uses structural typing instead of requiring class identity.
+ */
+export interface EmailSendErrorShape {
+  name: string;
+  message: string;
+  originalError?: Error;
+}
+
+/**
  * Options for error mapping behavior
  */
 export interface ErrorMapperOptions {
   /** If true, logs the error context. Default: false */
   logContext?: Record<string, unknown>;
   /** Custom handler for EmailSendError. If returns undefined, uses default. */
-  onEmailSendError?: (error: EmailSendError) => HttpErrorResponse | undefined;
+  onEmailSendError?: (error: EmailSendErrorShape) => HttpErrorResponse | undefined;
 }
 
 /**
@@ -188,7 +198,7 @@ export function mapErrorToHttpResponse(
   if (isEmailSendError(error)) {
     // Allow custom handling (some endpoints want 503, others want success to prevent enumeration)
     if (options?.onEmailSendError !== undefined) {
-      const customResponse = options.onEmailSendError(error as EmailSendError);
+      const customResponse = options.onEmailSendError(error);
       if (customResponse !== undefined) {
         return customResponse;
       }
@@ -226,6 +236,6 @@ export function isKnownAuthError(error: unknown): boolean {
     return false;
   }
 
-  const knownNames = Object.values(AUTH_ERROR_NAMES);
-  return knownNames.includes(error.name as (typeof knownNames)[number]);
+  const knownNames: readonly string[] = Object.values(AUTH_ERROR_NAMES);
+  return knownNames.includes(error.name);
 }

@@ -56,11 +56,35 @@ const SENSITIVE_KEYS = [
   'privateKey',
 ];
 
+/** Maximum recursion depth for metadata sanitization to prevent stack overflow */
+const MAX_SANITIZE_DEPTH = 10;
+
 /**
  * Recursively removes sensitive keys from metadata objects.
  * Prevents accidental logging of PII or credentials.
+ *
+ * @param metadata - The metadata object to sanitize
+ * @param depth - Current recursion depth (internal, do not pass externally)
+ * @param seen - WeakSet tracking visited objects to prevent circular reference loops
+ * @returns Sanitized copy of the metadata with sensitive values redacted
+ * @complexity O(n) where n is the total number of keys across all nested objects
  */
-export function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeMetadata(
+  metadata: Record<string, unknown>,
+  depth = 0,
+  seen = new WeakSet(),
+): Record<string, unknown> {
+  // Guard against circular references
+  if (seen.has(metadata)) {
+    return { _circular: '[CIRCULAR]' };
+  }
+  seen.add(metadata);
+
+  // Guard against excessive nesting
+  if (depth >= MAX_SANITIZE_DEPTH) {
+    return { _truncated: '[MAX_DEPTH]' };
+  }
+
   const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(metadata)) {
@@ -73,11 +97,13 @@ export function sanitizeMetadata(metadata: Record<string, unknown>): Record<stri
     }
 
     if (Array.isArray(value)) {
-      sanitized[key] = (value as unknown[]).map((v) =>
-        v !== null && typeof v === 'object' ? sanitizeMetadata(v as Record<string, unknown>) : v,
+      sanitized[key] = (value as unknown[]).map((v: unknown) =>
+        v !== null && typeof v === 'object' && !Array.isArray(v)
+          ? sanitizeMetadata(v as Record<string, unknown>, depth + 1, seen)
+          : v,
       );
     } else if (value !== null && typeof value === 'object') {
-      sanitized[key] = sanitizeMetadata(value as Record<string, unknown>);
+      sanitized[key] = sanitizeMetadata(value as Record<string, unknown>, depth + 1, seen);
     } else {
       sanitized[key] = value;
     }

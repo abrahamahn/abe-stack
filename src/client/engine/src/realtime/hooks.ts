@@ -17,7 +17,6 @@ import { useRealtime, type WriteOperation, type WriteOptions } from './RealtimeC
 import type { RecordChangeListener } from '../cache/RecordCache';
 import type { VersionedRecord } from '../storage/RecordStorage';
 
-
 // ============================================================================
 // useRecord
 // ============================================================================

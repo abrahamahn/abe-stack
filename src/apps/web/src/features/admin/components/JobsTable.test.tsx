@@ -29,7 +29,9 @@ const createMockJob = (overrides: Partial<JobDetailsLocal> = {}): JobDetailsLoca
   ...overrides,
 });
 
-const createMockResponse = (overrides: Partial<JobListResponseLocal> = {}): JobListResponseLocal => ({
+const createMockResponse = (
+  overrides: Partial<JobListResponseLocal> = {},
+): JobListResponseLocal => ({
   data: [
     createMockJob({ id: 'job-1', name: 'job-1', status: 'completed' }),
     createMockJob({ id: 'job-2', name: 'job-2', status: 'failed' }),

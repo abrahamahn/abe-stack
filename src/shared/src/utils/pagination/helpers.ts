@@ -11,10 +11,11 @@ import type { CursorPaginationOptions, SortOrder } from '../../contracts';
 // ============================================================================
 
 /**
- * Pattern for safe SQL identifiers: lowercase letters, digits, underscores only.
- * Rejects anything that could be used for SQL injection.
+ * Pattern for safe SQL identifiers: letters (camelCase or snake_case), digits,
+ * underscores only. Rejects anything that could be used for SQL injection
+ * (spaces, semicolons, quotes, parentheses, operators, etc.).
  */
-const SAFE_SQL_IDENTIFIER = /^[a-z][a-z0-9_]{0,62}$/;
+const SAFE_SQL_IDENTIFIER = /^[a-zA-Z][a-zA-Z0-9_]{0,62}$/;
 
 /**
  * Validates and quotes a SQL column identifier to prevent injection.

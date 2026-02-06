@@ -47,7 +47,9 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
     ...(ttl !== undefined ? { ttl } : {}),
   };
 
-  const cache = new LRUCache<string, { result: ReturnType<T>; timestamp: number }>(cacheOptions);
+  // Wrap results in a container so we can distinguish "not cached" (undefined)
+  // from a cached result whose value happens to be undefined.
+  const cache = new LRUCache<string, { value: ReturnType<T> }>(cacheOptions);
 
   let hits = 0;
   let misses = 0;
@@ -58,12 +60,12 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
     const cached = cache.get(key);
     if (cached !== undefined) {
       hits++;
-      return cached.result;
+      return cached.value;
     }
 
     misses++;
     const result = fn(...args) as ReturnType<T>;
-    cache.set(key, { result, timestamp: Date.now() });
+    cache.set(key, { value: result });
     return result;
   }) as MemoizeFunction<T>;
 

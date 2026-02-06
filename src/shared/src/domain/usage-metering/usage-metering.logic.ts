@@ -26,8 +26,16 @@ export function aggregateValues(values: number[], type: AggregationType): number
   switch (type) {
     case 'sum':
       return values.reduce((acc, val) => acc + val, 0);
-    case 'max':
-      return Math.max(...values);
+    case 'max': {
+      // Iterative loop avoids stack overflow from Math.max(...largeArray)
+      // which spreads into function arguments and hits call stack limits (~65K+).
+      let max = values[0] ?? 0;
+      for (let i = 1; i < values.length; i++) {
+        const v = values[i];
+        if (v !== undefined && v > max) max = v;
+      }
+      return max;
+    }
     case 'last':
       return values[values.length - 1] ?? 0;
     default:

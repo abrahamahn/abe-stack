@@ -7,7 +7,6 @@ import { SubscriptionManager, createConsoleLogger } from '@abe-stack/shared';
 import { getWebSocketStats, registerWebSocket } from '@abe-stack/websocket';
 import { registerRoutes } from '@routes';
 
-
 import { createInfrastructure } from './infrastructure';
 
 import type { DbClient, PostgresPubSub, Repositories } from '@abe-stack/db';

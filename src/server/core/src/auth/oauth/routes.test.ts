@@ -294,7 +294,9 @@ describe('OAuth Routes', () => {
                 isNewUser: false,
               },
             };
-            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(mockResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>);
+            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(
+              mockResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>,
+            );
 
             const ctx = createMockContext();
             const req = createMockRequest();
@@ -328,7 +330,9 @@ describe('OAuth Routes', () => {
               status: 400 as const,
               body: { message: 'User denied access', code: 'access_denied' },
             };
-            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(mockResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>);
+            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(
+              mockResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>,
+            );
 
             const ctx = createMockContext();
             const req = createMockRequest();
@@ -373,7 +377,9 @@ describe('OAuth Routes', () => {
                 isNewUser: false,
               },
             };
-            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(expectedResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>);
+            vi.mocked(handleOAuthCallbackRequest).mockResolvedValue(
+              expectedResult as Awaited<ReturnType<typeof handleOAuthCallbackRequest>>,
+            );
 
             const ctx = createMockContext();
             const req = createMockRequest();
@@ -581,12 +587,24 @@ describe('OAuth Routes', () => {
           status: 200 as const,
           body: {
             connections: [
-              { id: 'conn-1', provider: 'google', providerEmail: 'user@gmail.com', connectedAt: new Date('2024-01-01T00:00:00Z') },
-              { id: 'conn-2', provider: 'github', providerEmail: 'user@github.com', connectedAt: new Date('2024-01-02T00:00:00Z') },
+              {
+                id: 'conn-1',
+                provider: 'google',
+                providerEmail: 'user@gmail.com',
+                connectedAt: new Date('2024-01-01T00:00:00Z'),
+              },
+              {
+                id: 'conn-2',
+                provider: 'github',
+                providerEmail: 'user@github.com',
+                connectedAt: new Date('2024-01-02T00:00:00Z'),
+              },
             ],
           },
         };
-        vi.mocked(handleGetConnections).mockResolvedValue(mockResult as unknown as Awaited<ReturnType<typeof handleGetConnections>>);
+        vi.mocked(handleGetConnections).mockResolvedValue(
+          mockResult as unknown as Awaited<ReturnType<typeof handleGetConnections>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest({
@@ -607,7 +625,9 @@ describe('OAuth Routes', () => {
           status: 200 as const,
           body: { connections: [] },
         };
-        vi.mocked(handleGetConnections).mockResolvedValue(expectedResult as Awaited<ReturnType<typeof handleGetConnections>>);
+        vi.mocked(handleGetConnections).mockResolvedValue(
+          expectedResult as Awaited<ReturnType<typeof handleGetConnections>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest({
@@ -914,7 +934,9 @@ describe('OAuth Routes', () => {
           status: 500 as const,
           body: { message: 'OAuth provider configuration error' },
         };
-        vi.mocked(handleOAuthInitiate).mockResolvedValue(errorResult as Awaited<ReturnType<typeof handleOAuthInitiate>>);
+        vi.mocked(handleOAuthInitiate).mockResolvedValue(
+          errorResult as Awaited<ReturnType<typeof handleOAuthInitiate>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest();
@@ -932,7 +954,9 @@ describe('OAuth Routes', () => {
           status: 400 as const,
           body: { message: 'Account already linked' },
         };
-        vi.mocked(handleOAuthLink).mockResolvedValue(errorResult as Awaited<ReturnType<typeof handleOAuthLink>>);
+        vi.mocked(handleOAuthLink).mockResolvedValue(
+          errorResult as Awaited<ReturnType<typeof handleOAuthLink>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest({
@@ -954,7 +978,9 @@ describe('OAuth Routes', () => {
           status: 404 as const,
           body: { message: 'OAuth account not linked' },
         };
-        vi.mocked(handleOAuthUnlink).mockResolvedValue(errorResult as Awaited<ReturnType<typeof handleOAuthUnlink>>);
+        vi.mocked(handleOAuthUnlink).mockResolvedValue(
+          errorResult as Awaited<ReturnType<typeof handleOAuthUnlink>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest({
@@ -976,7 +1002,9 @@ describe('OAuth Routes', () => {
           status: 200 as const,
           body: { connections: [] },
         };
-        vi.mocked(handleGetConnections).mockResolvedValue(emptyResult as Awaited<ReturnType<typeof handleGetConnections>>);
+        vi.mocked(handleGetConnections).mockResolvedValue(
+          emptyResult as Awaited<ReturnType<typeof handleGetConnections>>,
+        );
 
         const ctx = createMockContext();
         const req = createMockRequest({
