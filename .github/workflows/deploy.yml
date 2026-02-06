@@ -85,7 +85,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./config/docker/Dockerfile
+          file: ./infra/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}-api
           labels: ${{ steps.meta.outputs.labels }}
@@ -96,7 +96,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./config/docker/Dockerfile.web
+          file: ./infra/docker/Dockerfile.web
           push: true
           tags: ${{ steps.meta.outputs.tags }}-web
           labels: ${{ steps.meta.outputs.labels }}

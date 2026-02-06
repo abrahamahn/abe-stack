@@ -36,67 +36,64 @@
 
     /* 5. Clean Console */
     "ignoreDeprecations": "5.0",
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
+    "paths": {
+      "@abe-stack/shared": ["./src/shared/src/index.ts"],
+      "@abe-stack/shared/*": ["./src/shared/src/*"],
+      "@abe-stack/server-engine": ["./src/server/engine/src/index.ts"],
+      "@abe-stack/server-engine/*": ["./src/server/engine/src/*"],
+      "@abe-stack/db": ["./src/server/db/src/index.ts"],
+      "@abe-stack/db/*": ["./src/server/db/src/*"],
+      "@abe-stack/api": ["./src/client/api/src/index.ts"],
+      "@abe-stack/api/*": ["./src/client/api/src/*"],
+      "@abe-stack/ui": ["./src/client/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["./src/client/ui/src/*"]
+    }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"],
   "files": [],
   "references": [
     {
-      "path": "./apps/desktop"
+      "path": "./src/apps/desktop"
     },
     {
-      "path": "./apps/server"
+      "path": "./src/apps/server"
     },
     {
-      "path": "./apps/web"
+      "path": "./src/apps/web"
     },
     {
-      "path": "./packages/shared"
+      "path": "./src/shared"
     },
     {
-      "path": "./packages/backend-core"
+      "path": "./src/server/engine"
     },
     {
-      "path": "./premium/media"
+      "path": "./src/server/media"
     },
     {
-      "path": "./premium/client/engine"
+      "path": "./src/client/engine"
     },
     {
-      "path": "./client/api"
+      "path": "./src/client/api"
     },
     {
-      "path": "./client/react"
+      "path": "./src/client/react"
     },
     {
-      "path": "./client/ui"
+      "path": "./src/client/ui"
     },
     {
-      "path": "./modules/billing"
+      "path": "./src/server/core"
     },
     {
-      "path": "./modules/auth"
+      "path": "./src/server/websocket"
     },
     {
-      "path": "./modules/system"
+      "path": "./src/server/realtime"
     },
     {
-      "path": "./modules/notifications"
-    },
-    {
-      "path": "./modules/users"
-    },
-    {
-      "path": "./premium/websocket"
-    },
-    {
-      "path": "./premium/realtime"
-    },
-    {
-      "path": "./modules/admin"
-    },
-    {
-      "path": "./packages/db"
+      "path": "./src/server/db"
     }
   ]
 }

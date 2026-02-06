@@ -199,7 +199,13 @@ describe('Notification Routes', () => {
 
         expect(result).toBeDefined();
         expect(typeof result).toBe('object');
-        if (result !== null && result !== undefined && typeof result === 'object' && 'status' in result && 'body' in result) {
+        if (
+          result !== null &&
+          result !== undefined &&
+          typeof result === 'object' &&
+          'status' in result &&
+          'body' in result
+        ) {
           expect(result.status).toBe(200);
           expect(result.body).toHaveProperty('message');
         }
@@ -225,7 +231,12 @@ describe('Notification Routes', () => {
     test('should use subscribeRequestSchema for validation', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(subscribeRoute.schema).toBeDefined();
-      if (subscribeRoute.schema !== null && subscribeRoute.schema !== undefined && typeof subscribeRoute.schema === 'object' && 'safeParse' in subscribeRoute.schema) {
+      if (
+        subscribeRoute.schema !== null &&
+        subscribeRoute.schema !== undefined &&
+        typeof subscribeRoute.schema === 'object' &&
+        'safeParse' in subscribeRoute.schema
+      ) {
         expect(subscribeRoute.schema.safeParse).toBeDefined();
       }
     });
@@ -328,7 +339,12 @@ describe('Notification Routes', () => {
     test('should use unsubscribeRequestSchema for validation', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(unsubscribeRoute.schema).toBeDefined();
-      if (unsubscribeRoute.schema !== null && unsubscribeRoute.schema !== undefined && typeof unsubscribeRoute.schema === 'object' && 'safeParse' in unsubscribeRoute.schema) {
+      if (
+        unsubscribeRoute.schema !== null &&
+        unsubscribeRoute.schema !== undefined &&
+        typeof unsubscribeRoute.schema === 'object' &&
+        'safeParse' in unsubscribeRoute.schema
+      ) {
         expect(unsubscribeRoute.schema.safeParse).toBeDefined();
       }
     });
@@ -490,7 +506,12 @@ describe('Notification Routes', () => {
     test('should use updatePreferencesRequestSchema for validation', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(updatePreferencesRoute.schema).toBeDefined();
-      if (updatePreferencesRoute.schema !== null && updatePreferencesRoute.schema !== undefined && typeof updatePreferencesRoute.schema === 'object' && 'safeParse' in updatePreferencesRoute.schema) {
+      if (
+        updatePreferencesRoute.schema !== null &&
+        updatePreferencesRoute.schema !== undefined &&
+        typeof updatePreferencesRoute.schema === 'object' &&
+        'safeParse' in updatePreferencesRoute.schema
+      ) {
         expect(updatePreferencesRoute.schema.safeParse).toBeDefined();
       }
     });
@@ -671,7 +692,12 @@ describe('Notification Routes', () => {
     test('should use sendNotificationRequestSchema for validation', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(sendRoute.schema).toBeDefined();
-      if (sendRoute.schema !== null && sendRoute.schema !== undefined && typeof sendRoute.schema === 'object' && 'safeParse' in sendRoute.schema) {
+      if (
+        sendRoute.schema !== null &&
+        sendRoute.schema !== undefined &&
+        typeof sendRoute.schema === 'object' &&
+        'safeParse' in sendRoute.schema
+      ) {
         expect(sendRoute.schema.safeParse).toBeDefined();
       }
     });

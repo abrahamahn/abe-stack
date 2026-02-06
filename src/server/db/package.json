@@ -1,0 +1,43 @@
+{
+  "name": "@abe-stack/db",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Raw Postgres Database client and migrations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "source": "./src/testing/index.ts",
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs && tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "keywords": [
+    "postgres",
+    "database",
+    "raw",
+    "sql"
+  ],
+  "dependencies": {
+    "@abe-stack/shared": "workspace:*",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "fastify": "^5.7.4",
+    "tsup": "^8.1.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.0",
+    "zod": "^4.3.6"
+  }
+}

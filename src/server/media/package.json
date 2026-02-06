@@ -1,0 +1,50 @@
+{
+  "name": "@abe-stack/media",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Media processing utilities for abe-stack (server-only)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "sharp": "^0.33.2",
+    "@abe-stack/shared": "workspace:*"
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --reporter=dot --silent=passed-only",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-media --report-unused-disable-directives",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
+  },
+  "keywords": [
+    "abe-stack",
+    "media",
+    "ffmpeg",
+    "image-processing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "backend/media"
+  },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false
+}

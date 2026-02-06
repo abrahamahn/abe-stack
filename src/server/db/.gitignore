@@ -1,0 +1,8 @@
+# Build output
+dist/
+
+# TypeScript build artifacts (should never be in src/)
+src/**/*.d.ts
+src/**/*.d.ts.map
+src/**/*.js
+src/**/*.js.map

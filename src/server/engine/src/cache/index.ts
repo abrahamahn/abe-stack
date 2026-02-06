@@ -1,0 +1,94 @@
+// backend/engine/src/cache/index.ts
+/**
+ * @abe-stack/server-engine
+ *
+ * Cache layer with LRU and memory provider.
+ *
+ * Key features:
+ * - O(1) LRU cache operations
+ * - Tag-based cache invalidation
+ * - Optional memory tracking
+ *
+ * For memoization, import `memoize` from `@abe-stack/shared` directly.
+ *
+ * @example
+ * ```ts
+ * import { createMemoryCache } from '@abe-stack/server-engine';
+ *
+ * const cache = createMemoryCache({ maxSize: 1000 });
+ * ```
+ */
+
+// ============================================================================
+// Core LRU Cache (backend-specific doubly-linked-list implementation)
+// ============================================================================
+
+export { LRUCache } from './lru';
+export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';
+
+// ============================================================================
+// Providers
+// ============================================================================
+
+export { MemoryCacheProvider } from './providers';
+
+// ============================================================================
+// Factory
+// ============================================================================
+
+export { createCache, createCacheFromEnv, createMemoryCache } from './factory';
+
+// ============================================================================
+// Errors
+// ============================================================================
+
+export {
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  toCacheError,
+} from './errors';
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+export { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './config';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type {
+  BaseCacheConfig,
+  CacheConfig,
+  CacheDeleteOptions,
+  CacheEntry,
+  CacheEntryMetadata,
+  CacheGetOptions,
+  CacheProvider,
+  CacheSetOptions,
+  CacheStats,
+  MemoryCacheConfig,
+} from './types';
+
+// Cache-specific types
+export type {
+  CacheEvictionReason,
+  CacheLogger,
+  CacheOperationResult,
+  CreateCacheOptions,
+  MemoizedFunction,
+  MemoizeOptions,
+  MemoizeStats,
+} from './types';

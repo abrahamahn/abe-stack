@@ -1,15 +1,11 @@
 packages:
   # Applications
-  - 'apps/*'
+  - 'src/apps/*'
   # Infrastructure packages
-  - 'packages/backend-core'
-  - 'packages/db'
-  # Business modules
-  - 'modules/*'
+  - 'src/server/*'
   # Core
-  - 'packages/shared'
+  - 'src/shared'
   # Client
-  - 'client/*'
-  # Premium packages
-  - 'premium/*'
-  - 'premium/*/*'
+  - 'src/client/*'
+  # Tools
+  - 'src/tools'

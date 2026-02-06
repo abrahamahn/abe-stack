@@ -1,0 +1,89 @@
+{
+  "name": "@abe-stack/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Shared environment-agnostic code for ABE Stack",
+  "keywords": [
+    "shared",
+    "types",
+    "schemas",
+    "errors",
+    "utils",
+    "constants",
+    "environment-agnostic"
+  ],
+  "author": "ABE Stack",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abe-stack/abe-stack.git",
+    "directory": "shared"
+  },
+  "bugs": {
+    "url": "https://github.com/abe-stack/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abe-stack/abe-stack#readme",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./core": {
+      "source": "./src/core/index.ts",
+      "import": "./src/core/index.ts",
+      "default": "./src/core/index.ts"
+    },
+    "./types": {
+      "source": "./src/types/index.ts",
+      "import": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
+    },
+    "./contracts": {
+      "source": "./src/contracts/index.ts",
+      "import": "./src/contracts/index.ts",
+      "default": "./src/contracts/index.ts"
+    },
+    "./domain": {
+      "source": "./src/domain/index.ts",
+      "import": "./src/domain/index.ts",
+      "default": "./src/domain/index.ts"
+    },
+    "./utils": {
+      "source": "./src/utils/index.ts",
+      "import": "./src/utils/index.ts",
+      "default": "./src/utils/index.ts"
+    },
+    "./config": {
+      "source": "./src/config/index.ts",
+      "import": "./src/config/index.ts",
+      "default": "./src/config/index.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint . --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "verify-exports": "node scripts/verify-exports.mjs",
+    "prepack": "npm run build && npm run verify-exports && npm run test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

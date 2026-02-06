@@ -33,8 +33,8 @@ export default [
   {
     ignores: [
       '**/.github/**',
-      '**/tools/scripts/**',
-      '**/tools/sync/**',
+      '**/src/tools/scripts/**',
+      '**/src/tools/sync/**',
       '**/vite.config.ts',
       '**/vitest.config.js',
       '**/vitest.config.ts',
@@ -57,28 +57,21 @@ export default [
         typescript: {
           project: [
             './tsconfig.json',
-            './apps/desktop/tsconfig.json',
-            './apps/desktop/src/electron/tsconfig.json',
-            './apps/server/tsconfig.json',
-            './apps/web/tsconfig.json',
-            './client/api/tsconfig.json',
-            './client/react/tsconfig.json',
-            './client/ui/tsconfig.json',
-            './packages/backend-core/tsconfig.json',
-            './packages/shared/tsconfig.json',
-            './packages/db/tsconfig.json',
-            './modules/admin/tsconfig.json',
-
-            './modules/auth/tsconfig.json',
-            './modules/billing/tsconfig.json',
-            './modules/notifications/tsconfig.json',
-            './modules/system/tsconfig.json',
-            './modules/users/tsconfig.json',
-            './modules/realtime/tsconfig.json',
-            './premium/client/engine/tsconfig.json',
-            './premium/media/tsconfig.json',
-            './premium/realtime/tsconfig.json',
-            './premium/websocket/tsconfig.json',
+            './src/apps/desktop/tsconfig.json',
+            './src/apps/desktop/src/electron/tsconfig.json',
+            './src/apps/server/tsconfig.json',
+            './src/apps/web/tsconfig.json',
+            './src/client/api/tsconfig.json',
+            './src/client/react/tsconfig.json',
+            './src/client/ui/tsconfig.json',
+            './src/server/engine/tsconfig.json',
+            './src/shared/tsconfig.json',
+            './src/server/db/tsconfig.json',
+            './src/server/core/tsconfig.json',
+            './src/client/engine/tsconfig.json',
+            './src/server/media/tsconfig.json',
+            './src/server/realtime/tsconfig.json',
+            './src/server/websocket/tsconfig.json',
           ],
           alwaysTryTypes: true,
         },
@@ -97,20 +90,22 @@ export default [
         '**/*.test.*',
         '**/*.spec.*',
         '**/*.d.ts',
-        '**/apps/docs/**',
-        '**/tools/**',
+        '**/docs/**',
+        '**/src/tools/**',
         '**/ops/**',
         '**/.config/**',
         '**/.github/**',
       ],
       'boundaries/elements': [
-        { type: 'app', pattern: 'apps/*', mode: 'folder' },
-        { type: 'module', pattern: 'modules/*', mode: 'folder' },
-        { type: 'backend-core', pattern: 'backend-core', mode: 'folder' },
-        { type: 'premium', pattern: 'premium/*', mode: 'folder' },
-        { type: 'shared', pattern: 'packages/shared', mode: 'folder' },
-        { type: 'db', pattern: 'packages/db', mode: 'folder' },
-        { type: 'client', pattern: 'client/*', mode: 'folder' },
+        { type: 'app', pattern: 'src/apps/*', mode: 'folder' },
+        { type: 'module', pattern: 'src/server/core', mode: 'folder' },
+        { type: 'engine', pattern: 'src/server/engine', mode: 'folder' },
+        { type: 'media', pattern: 'src/server/media', mode: 'folder' },
+        { type: 'premium', pattern: 'src/server/websocket', mode: 'folder' },
+        { type: 'premium', pattern: 'src/server/realtime', mode: 'folder' },
+        { type: 'shared', pattern: 'src/shared', mode: 'folder' },
+        { type: 'db', pattern: 'src/server/db', mode: 'folder' },
+        { type: 'client', pattern: 'src/client/*', mode: 'folder' },
       ],
     },
     rules: {
@@ -122,63 +117,36 @@ export default [
           rules: [
             {
               from: 'app',
-              allow: [
-                'app',
-                'module',
-                'backend-core',
-                'premium',
-                'shared',
-                'db',
-                'client',
-              ],
+              allow: ['app', 'module', 'engine', 'media', 'premium', 'shared', 'db', 'client'],
             },
             {
               from: 'module',
-              allow: [
-                'module',
-                'backend-core',
-                'premium',
-                'shared',
-                'db',
-              ],
+              allow: ['module', 'engine', 'media', 'premium', 'shared', 'db'],
             },
             {
-              from: 'backend-core',
-              allow: [
-                ['backend-core', { relationship: 'internal' }],
-                'shared',
-                'db',
-              ],
+              from: 'engine',
+              allow: [['engine', { relationship: 'internal' }], 'shared', 'db'],
+            },
+            {
+              from: 'media',
+              allow: [['media', { relationship: 'internal' }], 'shared'],
             },
             {
               from: 'db',
-              allow: [
-                ['db', { relationship: 'internal' }],
-                'shared',
-              ],
+              allow: [['db', { relationship: 'internal' }], 'shared'],
             },
             {
               from: 'premium',
-              allow: [
-                ['premium', { relationship: 'internal' }],
-                'backend-core',
-                'shared',
-                'client',
-              ],
+              allow: [['premium', { relationship: 'internal' }], 'engine', 'shared', 'client'],
             },
             {
               from: 'client',
-              allow: [
-                'client',
-                'premium',
-                'shared',
-              ],
+              allow: ['client', 'premium', 'shared'],
             },
             {
               from: 'shared',
               allow: [['shared', { relationship: 'internal' }]],
             },
-
           ],
         },
       ],
@@ -207,179 +175,128 @@ export default [
     }),
   ),
   {
-    files: ['apps/server/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/apps/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/server/tsconfig.json'],
+        project: ['./src/apps/server/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['apps/desktop/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/apps/desktop/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/desktop/tsconfig.json', './apps/desktop/src/electron/tsconfig.json'],
+        project: [
+          './src/apps/desktop/tsconfig.json',
+          './src/apps/desktop/src/electron/tsconfig.json',
+        ],
         tsconfigRootDir,
       },
     },
   },
   {
-      files: ['apps/desktop/src/electron/**/*.{ts,tsx,cts,mts}'],
-      rules: {
-          'no-console': 'off',
-      },
+    files: ['src/apps/desktop/src/electron/**/*.{ts,tsx,cts,mts}'],
+    rules: {
+      'no-console': 'off',
+    },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx,cts,mts}', 'modules/auth/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/apps/web/**/*.{ts,tsx,cts,mts}', 'src/server/core/src/auth/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/web/tsconfig.json'],
+        project: ['./src/apps/web/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/shared/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/shared/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/shared/tsconfig.lint.json'],
+        project: ['./src/shared/tsconfig.lint.json'],
         tsconfigRootDir,
       },
     },
   },
 
   {
-    files: ['client/ui/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/client/ui/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./client/ui/tsconfig.json'],
+        project: ['./src/client/ui/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['client/api/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/client/api/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./client/api/tsconfig.json'],
+        project: ['./src/client/api/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['premium/media/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/media/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./premium/media/tsconfig.json'],
+        project: ['./src/server/media/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['premium/client/engine/**/*.{ts,tsx,cts,mts}', 'client/react/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/client/engine/**/*.{ts,tsx,cts,mts}', 'src/client/react/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./premium/client/engine/tsconfig.json', './client/react/tsconfig.json'],
+        project: ['./src/client/engine/tsconfig.json', './src/client/react/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/backend-core/src/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/engine/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/backend-core/tsconfig.json'],
+        project: ['./src/server/engine/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/db/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/db/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/db/tsconfig.lint.json'],
+        project: ['./src/server/db/tsconfig.lint.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['modules/billing/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/core/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./modules/billing/tsconfig.json'],
+        project: ['./src/server/core/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['modules/notifications/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/websocket/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./modules/notifications/tsconfig.json'],
+        project: ['./src/server/websocket/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['modules/auth/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/server/realtime/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./modules/auth/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['modules/system/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./modules/system/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['modules/users/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./modules/users/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['modules/realtime/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./modules/realtime/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['premium/websocket/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./premium/websocket/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['premium/realtime/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./premium/realtime/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['modules/admin/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./modules/admin/tsconfig.json'],
+        project: ['./src/server/realtime/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -581,7 +498,8 @@ export default [
           patterns: [
             {
               group: ['@abe-stack/*/src/**'],
-              message: 'Always import from the package entry point (e.g., "@abe-stack/shared"), never from "src" internals.',
+              message:
+                'Always import from the package entry point (e.g., "@abe-stack/shared"), never from "src" internals.',
             },
           ],
         },
@@ -597,18 +515,17 @@ export default [
           patterns: [
             {
               group: [
-                '**/apps/*/src/**',
-                '**/client/*/src/**',
-                '**/packages/backend-core/src/**',
-                '**/kernel/src/**',
-                '**/modules/*/src/**',
-                '**/premium/*/src/**',
+                '**/src/apps/*/src/**',
+                '**/src/client/*/src/**',
+                '**/src/server/engine/src/**',
+                '**/src/server/core/src/**',
+                '**/src/server/websocket/src/**',
               ],
               message: 'Import from package entrypoints only (no /src deep imports).',
             },
             {
-              group: ['@abe-stack/packages/backend-core/*'],
-              message: 'Use @abe-stack/backend-core entrypoint only.',
+              group: ['@abe-stack/packages/server-engine/*'],
+              message: 'Use @abe-stack/server-engine entrypoint only.',
             },
           ],
         },
@@ -628,7 +545,7 @@ export default [
   },
   // Prevent frontend clients from importing server-side code or DB internals
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*'],
+    files: ['src/apps/web/**/*', 'src/apps/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -641,7 +558,7 @@ export default [
                 'Do not create API clients manually in apps. Use `getApiClient()` or `useApi()` instead.',
             },
             {
-              name: '@abe-stack/engine',
+              name: '@abe-stack/client-engine',
               importNames: ['createApiClient'],
               message:
                 'Do not create API clients manually in apps. Use `getApiClient()` or `useApi()` instead.',
@@ -649,29 +566,34 @@ export default [
           ],
           patterns: [
             {
-              group: ['**/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
+              group: ['**/src/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
               message:
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
             {
-              group: ['**/infrastructure/**', '**/database/**', '@abe-stack/backend-core', 'postgres', 'pg'],
+              group: [
+                '**/infrastructure/**',
+                '**/database/**',
+                '@abe-stack/server-engine',
+                'postgres',
+                'pg',
+              ],
               message:
                 'UI must not import database or backend internals. Use API clients or shared contracts instead.',
             },
             {
               group: [
-                '**/apps/*/src/**',
-                '**/client/*/src/**',
-                '**/packages/backend-core/src/**',
-                '**/kernel/src/**',
-                '**/modules/*/src/**',
-                '**/premium/*/src/**',
+                '**/src/apps/*/src/**',
+                '**/src/client/*/src/**',
+                '**/src/server/engine/src/**',
+                '**/src/server/core/src/**',
+                '**/src/server/websocket/src/**',
               ],
               message: 'Import from package entrypoints only (no /src deep imports).',
             },
             {
-              group: ['@abe-stack/packages/backend-core/*'],
-              message: 'Use @abe-stack/backend-core entrypoint only.',
+              group: ['@abe-stack/packages/server-engine/*'],
+              message: 'Use @abe-stack/server-engine entrypoint only.',
             },
           ],
         },
@@ -679,21 +601,21 @@ export default [
     },
   },
   {
-    files: ['tools/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/tools/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
     },
   },
   {
     // Allow console in logger implementations and console-based dev services
-    files: ['kernel/src/config/*', 'apps/desktop/src/electron/**/*'],
+    files: ['src/server/core/src/config/*', 'src/apps/desktop/src/electron/**/*'],
     rules: {
       'no-console': 'off',
     },
   },
   {
     // Shared is a leaf package - disable boundaries rules for internal relative imports
-    files: ['packages/shared/src/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/shared/src/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'boundaries/no-unknown': 'off',
       'boundaries/element-types': 'off',
@@ -736,6 +658,4 @@ export default [
       '@typescript-eslint/no-misused-promises': 'error',
     },
   },
-
-
 ] satisfies Linter.Config[];

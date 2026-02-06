@@ -53,7 +53,7 @@ https://github.com/abrahamahn/abe-stack
 - Full **TypeScript strict mode** with end-to-end type safety
 - **5,300+ tests** (Vitest unit tests + Playwright E2E)
 - ESLint + Prettier + git hooks (no bad code slips through)
-- Shared UI library: 16 components, 25 elements, 13 hooks, 14 layouts (demo at `/demo`)
+- Shared UI library: 16 components, 25 elements, 13 hooks, 14 layouts (browse at `/ui-library`)
 - State: React Query for server state, offline mutation queue
 - Theming, hooks, layouts, resizable panels — all reusable
 
@@ -159,7 +159,7 @@ pnpm dev
 1. Open [http://localhost:5173](http://localhost:5173)
 2. Click "Register" and create an account
 3. Check your terminal for the verification email (console provider)
-4. Log in and explore the demo at `/demo`
+4. Log in and explore the UI library at `/ui-library`
 
 **Troubleshooting:**
 
@@ -193,13 +193,10 @@ abe-stack/
 │   ├── storage/          # File storage
 │   ├── stores/           # Framework-agnostic stores
 │   └── users/            # User management
-├── modules/              # Business Modules
-│   ├── admin/            # Admin module
-│   ├── auth/             # Authentication module
-│   └── billing/          # Billing module
-├── shared/               # Shared Libraries
-│   ├── core/             # Contracts, validation, stores, errors
-│   └── ui/               # 16 components, 25 elements, 13 hooks, 14 layouts
+├── backend/              # Shared Libraries & Business Modules
+│   ├── core/             # Business modules (admin, auth, billing, notifications, users)
+│   ├── engine/           # Backend infrastructure (cache, config, mailer, storage, etc.)
+│   └── db/               # Database (Drizzle ORM + PostgreSQL)
 ├── client/               # Type-safe API client + React Query + offline support
 ├── tools/                # Meta Development Tools
 │   ├── scripts/          # Dev, audit, export, git hooks, path utils, test runner
@@ -217,12 +214,10 @@ abe-stack/
 ## Architecture
 
 ```
-apps/*           → Thin renderers (just UI)
-                 ↓
-infra/*          → Infrastructure packages (cache, db, http, storage, etc.)
-modules/*        → Business modules (admin, auth, billing)
-shared/*         → Shared libraries (core, ui)
-client/          → Type-safe API client
+apps/*          - **src/apps/**: Thin renderers (just UI)
+- **src/server/core**: Business modules (admin, auth, billing, notifications, users)
+- **src/server/***: Shared libraries (engine, db)
+- **src/client/**: Type-safe API client
 ```
 
 **Dependency rule:** Apps import packages. Packages never import apps. Change your mind about React later? Only touch `apps/`. Everything else stays.

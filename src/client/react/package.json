@@ -1,0 +1,52 @@
+{
+  "name": "@abe-stack/react",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "React interface for abe-stack client",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js"
+    },
+    "./router": {
+      "types": "./dist/router/index.d.ts",
+      "import": "./dist/router/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-react --report-unused-disable-directives",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
+  },
+  "dependencies": {
+    "@abe-stack/client-engine": "workspace:*",
+    "@abe-stack/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.2.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "client/react"
+  }
+}

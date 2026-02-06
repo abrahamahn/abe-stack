@@ -1,0 +1,53 @@
+{
+  "extends": "../../../.config/tsconfig.node.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "composite": true,
+    "noEmit": false,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.server.tsbuildinfo",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@config": ["./src/config"],
+      "@config/*": ["./src/config/*"],
+      "@health": ["./src/health"],
+      "@health/*": ["./src/health/*"],
+      "@logger": ["./src/logger"],
+      "@logger/*": ["./src/logger/*"],
+      "@routes": ["./src/routes"],
+      "@routes/*": ["./src/routes/*"],
+      "@shared": ["./src/types/context"],
+      "@shared/*": ["./src/types/*"],
+      "@types": ["./src/types"],
+      "@types/*": ["./src/types/*"]
+    },
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "../../server/core"
+    },
+    {
+      "path": "../../server/engine"
+    },
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../../server/media"
+    },
+    {
+      "path": "../../server/realtime"
+    },
+    {
+      "path": "../../server/websocket"
+    },
+    {
+      "path": "../../server/db"
+    }
+  ]
+}

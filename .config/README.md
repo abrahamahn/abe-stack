@@ -35,7 +35,7 @@ Files located at the repository root that manage the workspace.
 | File                      | Purpose                     | Major Tweaks                                                                              |
 | :------------------------ | :-------------------------- | :---------------------------------------------------------------------------------------- |
 | **`package.json`**        | Workspace definition        | scripts: `type-check` uses `tsc --build` for speed; `build:headers` syncs file headers.   |
-| **`pnpm-workspace.yaml`** | Package linking             | Defines `apps/*`, `infra/*`, `modules/*`, `shared/*`, and `client` as members.            |
+| **`pnpm-workspace.yaml`** | Package linking             | Defines `apps/*`, `backend/*`, `premium/*`, and `client/*` as members.                    |
 | **`turbo.json`**          | Build Pipeline              | Configured dependencies (`^build`), output caching (`dist/**`, `.next/**`), and env vars. |
 | **`eslint.config.ts`**    | Linting Rules (Flat Config) | Uses `@eslint/compat` to respect `.gitignore`. Strict TS rules enabled.                   |
 | **`vitest.config.ts`**    | Test Defaults               | Minimal root config that delegates to the workspace file.                                 |
@@ -53,7 +53,7 @@ Each application extends the base configs and adds domain-specific settings.
 | **`apps/web`**     | `vite.web.config.ts`     | (Referenced via root .config). Scripts run `vite preview` for production start.           |
 | **`apps/desktop`** | `vite.desktop.config.ts` | (Referenced via root .config). Handles Electron main/renderer split.                      |
 
-### 4. **Package Configs** (`infra/*`, `modules/*`, `shared/*`, `client/`)
+### 4. **Package Configs** (`backend/*`, `client/*`, `premium/*`)
 
 Reusable libraries with strict build outputs.
 

@@ -144,7 +144,9 @@ function createMockContext(): AdminAppContext {
  * Create a mock FastifyRequest for testing
  */
 function createMockRequest(
-  overrides: Partial<FastifyRequest & { user?: { userId: string; email: string; role: string } }> = {},
+  overrides: Partial<
+    FastifyRequest & { user?: { userId: string; email: string; role: string } }
+  > = {},
   params: Record<string, string> = {},
   query: Record<string, unknown> = {},
 ): FastifyRequest & { user?: { userId: string; email: string; role: string } } {

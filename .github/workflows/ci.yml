@@ -158,11 +158,11 @@ jobs:
         with:
           path: |
             node_modules
-            apps/*/node_modules
-            infra/*/node_modules
-            modules/*/node_modules
-            shared/*/node_modules
-            client/node_modules
+            src/apps/*/node_modules
+            src/server/*/node_modules
+            src/client/*/node_modules
+            src/shared/node_modules
+            src/tools/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
@@ -188,11 +188,10 @@ jobs:
         with:
           name: dist
           path: |
-            apps/*/dist
-            infra/*/dist
-            modules/*/dist
-            shared/*/dist
-            client/dist
+            src/apps/*/dist
+            src/server/*/dist
+            src/client/*/dist
+            src/shared/dist
           retention-days: 7
 
       - name: Full Build Summary

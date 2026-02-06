@@ -6,8 +6,8 @@
   "tasks": {
     "build:theme": {
       "cache": true,
-      "inputs": ["tools/sync/sync-css-theme.ts",  "packages/shared/ui/src/theme/**"],
-      "outputs": [ "packages/shared/ui/src/generated/**"]
+      "inputs": ["src/tools/sync/sync-css-theme.ts", "src/client/ui/src/theme/**"],
+      "outputs": ["src/client/ui/src/generated/**"]
     },
     "build": {
       "dependsOn": ["^build", "build:theme"],
@@ -16,6 +16,11 @@
       "env": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_*", "VITE_*", "PUBLIC_*"]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },

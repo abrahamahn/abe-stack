@@ -1,0 +1,26 @@
+{
+  "extends": "../../../.config/tsconfig.node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM"],
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["vitest/globals", "node"],
+    "paths": {},
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.engine.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "vitest.config.ts"],
+  "references": [
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../api"
+    }
+  ]
+}
