@@ -44,7 +44,7 @@ export interface SmtpResult {
 // ============================================================================
 
 export class SmtpClient {
-  private config: SmtpConfig;
+  private readonly config: SmtpConfig;
   private socket: Socket | TLSSocket | null = null;
   private buffer = '';
 

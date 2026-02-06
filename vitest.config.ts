@@ -13,6 +13,8 @@ export const baseConfig = defineConfig({
     globals: true,
     exclude: ['**/node_modules/**', '**/dist/**', '**/backup/**', '**/*.spec.ts'],
     testTimeout: 10000,
+    clearMocks: true,
+    restoreMocks: true,
   },
 });
 

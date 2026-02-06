@@ -35,7 +35,7 @@ export const JobActionsMenu = ({
   isRetrying = false,
   isCancelling = false,
 }: JobActionsMenuProps): JSX.Element => {
-  const canRetry = status === 'failed' || status === 'dead_letter';
+  const canRetry = status === 'failed' || status === 'dead';
   const canCancel = status === 'pending' || status === 'processing';
 
   if (!canRetry && !canCancel) {

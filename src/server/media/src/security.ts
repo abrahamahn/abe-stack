@@ -15,7 +15,7 @@ import type { SecurityScanResult } from './types';
  */
 export class BasicSecurityScanner {
   constructor(
-    private options: {
+    private readonly options: {
       maxFileSize: number;
       allowedMimeTypes: string[];
     } = {

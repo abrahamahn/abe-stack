@@ -81,11 +81,11 @@ const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> =>
   });
 
 export class AuthService {
-  private api: ApiClient;
-  private config: ClientConfig;
-  private tokenStore: TokenStore;
+  private readonly api: ApiClient;
+  private readonly config: ClientConfig;
+  private readonly tokenStore: TokenStore;
   private refreshIntervalId: ReturnType<typeof setTimeout> | null = null;
-  private listeners: Set<() => void> = new Set();
+  private readonly listeners: Set<() => void> = new Set();
   private initialized = false;
   private refreshBackoffMs = 0;
   private consecutiveRefreshFailures = 0;
@@ -321,9 +321,7 @@ export class AuthService {
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
     const response = await this.api.verifyEmail(data);
     // Auto-login on successful verification
-    if (response.verified === true) {
-      this.handleAuthSuccess({ token: response.token, user: response.user });
-    }
+    this.handleAuthSuccess({ token: response.token, user: response.user });
     return response;
   }
 

@@ -85,8 +85,8 @@ function mapStripeEventType(stripeType: string): NormalizedEventType {
 export class StripeProvider implements BillingService {
   readonly provider = 'stripe' as const;
 
-  private stripe: stripeLib;
-  private webhookSecret: string;
+  private readonly stripe: stripeLib;
+  private readonly webhookSecret: string;
 
   constructor(config: StripeConfig) {
     this.stripe = new stripeDefault(config.secretKey, {
@@ -447,6 +447,8 @@ export class StripeProvider implements BillingService {
         }
         break;
       }
+      default:
+        break;
     }
 
     if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {

@@ -24,44 +24,58 @@
     "url": "https://github.com/abe-stack/abe-stack/issues"
   },
   "homepage": "https://github.com/abe-stack/abe-stack#readme",
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.mjs"
     },
     "./core": {
       "source": "./src/core/index.ts",
-      "import": "./src/core/index.ts",
-      "default": "./src/core/index.ts"
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js",
+      "default": "./dist/core/index.mjs"
     },
     "./types": {
       "source": "./src/types/index.ts",
-      "import": "./src/types/index.ts",
-      "default": "./src/types/index.ts"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.mjs",
+      "require": "./dist/types/index.js",
+      "default": "./dist/types/index.mjs"
     },
     "./contracts": {
       "source": "./src/contracts/index.ts",
-      "import": "./src/contracts/index.ts",
-      "default": "./src/contracts/index.ts"
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.mjs",
+      "require": "./dist/contracts/index.js",
+      "default": "./dist/contracts/index.mjs"
     },
     "./domain": {
       "source": "./src/domain/index.ts",
-      "import": "./src/domain/index.ts",
-      "default": "./src/domain/index.ts"
+      "types": "./dist/domain/index.d.ts",
+      "import": "./dist/domain/index.mjs",
+      "require": "./dist/domain/index.js",
+      "default": "./dist/domain/index.mjs"
     },
     "./utils": {
       "source": "./src/utils/index.ts",
-      "import": "./src/utils/index.ts",
-      "default": "./src/utils/index.ts"
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js",
+      "default": "./dist/utils/index.mjs"
     },
     "./config": {
       "source": "./src/config/index.ts",
-      "import": "./src/config/index.ts",
-      "default": "./src/config/index.ts"
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.mjs",
+      "require": "./dist/config/index.js",
+      "default": "./dist/config/index.mjs"
     }
   },
   "files": [

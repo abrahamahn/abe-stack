@@ -48,11 +48,11 @@ export interface SubscriptionCacheOptions {
  * ```
  */
 export class SubscriptionCache {
-  private counts = new Map<string, number>();
-  private cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private readonly counts = new Map<string, number>();
+  private readonly cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly cleanupDelayMs: number;
 
-  constructor(private options: SubscriptionCacheOptions) {
+  constructor(private readonly options: SubscriptionCacheOptions) {
     this.cleanupDelayMs = options.cleanupDelayMs ?? DEFAULT_CLEANUP_DELAY_MS;
   }
 

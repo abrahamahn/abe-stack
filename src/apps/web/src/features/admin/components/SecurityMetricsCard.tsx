@@ -57,6 +57,7 @@ const MetricItem = ({
         return 'text-yellow-600 dark:text-yellow-400';
       case 'low':
         return 'text-green-600 dark:text-green-400';
+      case 'default':
       default:
         return 'text-gray-900 dark:text-gray-100';
     }

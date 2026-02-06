@@ -8,7 +8,7 @@ import { useOnScreen } from './useOnScreen';
 
 type ObserverCallback = (entries: Array<Partial<IntersectionObserverEntry>>) => void;
 class FakeIntersectionObserver {
-  private callback: ObserverCallback;
+  private readonly callback: ObserverCallback;
   constructor(callback: ObserverCallback) {
     this.callback = callback;
   }
@@ -42,7 +42,7 @@ describe('useOnScreen', () => {
   it('sets visible to false when not intersecting', () => {
     const originalObserver = window['IntersectionObserver'];
     class HiddenIntersectionObserver {
-      private callback: ObserverCallback;
+      private readonly callback: ObserverCallback;
       constructor(callback: ObserverCallback) {
         this.callback = callback;
       }

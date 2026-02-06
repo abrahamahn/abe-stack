@@ -157,7 +157,7 @@ export const AUTH_RATE_LIMITS: Record<AuthEndpoint, AuthRateLimitConfig> = {
  * @complexity O(1) per check operation
  */
 class AuthRateLimiterRegistry {
-  private limiters = new Map<AuthEndpoint, RateLimiter>();
+  private readonly limiters = new Map<AuthEndpoint, RateLimiter>();
 
   /**
    * Get or create a rate limiter for the specified auth endpoint.

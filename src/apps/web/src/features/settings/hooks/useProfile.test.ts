@@ -16,6 +16,7 @@ import { createSettingsApi } from '../api';
 import { useProfileUpdate } from './useProfile';
 
 import type { UpdateProfileRequest, User } from '../api';
+import type { UserId } from '@abe-stack/shared';
 
 // ============================================================================
 // Mocks
@@ -38,7 +39,7 @@ const createWrapper = (cache: QueryCache): ((props: { children: ReactNode }) => 
 };
 
 const mockUser: User = {
-  id: '1',
+  id: '1' as unknown as UserId,
   email: 'test@example.com',
   name: 'Test User',
   avatarUrl: null,

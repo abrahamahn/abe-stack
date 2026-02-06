@@ -23,9 +23,9 @@ import {
  * DeleteBuilder class for constructing DELETE queries
  */
 export class DeleteBuilder implements QueryBuilder {
-  private _table: TableSpec;
+  private readonly _table: TableSpec;
   private _where: SqlFragment | null = null;
-  private _using: TableSpec[] = [];
+  private readonly _using: TableSpec[] = [];
   private _returning: string[] = [];
 
   constructor(table: string | TableSpec) {

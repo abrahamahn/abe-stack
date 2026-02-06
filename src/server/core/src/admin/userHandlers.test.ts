@@ -97,11 +97,26 @@ function createMockContext(): AdminAppContext {
     pubsub: {},
     cache: {},
     billing: {
+      provider: 'stripe' as const,
+      createCustomer: vi.fn(),
       createCheckoutSession: vi.fn(),
-      createCustomerPortalSession: vi.fn(),
-      getSubscription: vi.fn(),
       cancelSubscription: vi.fn(),
-    },
+      resumeSubscription: vi.fn(),
+      updateSubscription: vi.fn(),
+      getSubscription: vi.fn(),
+      createSetupIntent: vi.fn(),
+      listPaymentMethods: vi.fn(),
+      attachPaymentMethod: vi.fn(),
+      detachPaymentMethod: vi.fn(),
+      setDefaultPaymentMethod: vi.fn(),
+      listInvoices: vi.fn(),
+      createProduct: vi.fn(),
+      updateProduct: vi.fn(),
+      archivePrice: vi.fn(),
+      verifyWebhookSignature: vi.fn(),
+      parseWebhookEvent: vi.fn(),
+      createCustomerPortalSession: vi.fn(),
+    } as unknown as AdminAppContext['billing'],
     notifications: {
       isConfigured: vi.fn().mockReturnValue(false),
     },
@@ -130,6 +145,19 @@ function createMockRequest(
     params,
     query,
     ...overrides,
+  } as unknown as AdminRequest & FastifyRequest;
+}
+
+function createUnauthenticatedRequest(
+  params: Record<string, string> = {},
+  query: Record<string, unknown> = {},
+): AdminRequest & FastifyRequest {
+  return {
+    cookies: {},
+    headers: {},
+    requestInfo: { ipAddress: '127.0.0.1', userAgent: 'test' },
+    params,
+    query,
   } as unknown as AdminRequest & FastifyRequest;
 }
 
@@ -170,7 +198,7 @@ describe('Admin User Handlers', () => {
     });
 
     test('should return 401 when not authenticated', async () => {
-      const req = createMockRequest({ user: undefined });
+      const req = createUnauthenticatedRequest();
       const result = await handleListUsers(mockCtx, undefined, req, createMockReply());
 
       expect(result.status).toBe(401);
@@ -230,7 +258,7 @@ describe('Admin User Handlers', () => {
     });
 
     test('should return 401 when not authenticated', async () => {
-      const req = createMockRequest({ user: undefined }, { id: 'user-123' });
+      const req = createUnauthenticatedRequest({ id: 'user-123' });
       const result = await handleGetUser(mockCtx, undefined, req, createMockReply());
 
       expect(result.status).toBe(401);
@@ -266,7 +294,7 @@ describe('Admin User Handlers', () => {
     });
 
     test('should return 401 when not authenticated', async () => {
-      const req = createMockRequest({ user: undefined }, { id: 'user-123' });
+      const req = createUnauthenticatedRequest({ id: 'user-123' });
       const result = await handleUpdateUser(mockCtx, { name: 'Test' }, req, createMockReply());
 
       expect(result.status).toBe(401);
@@ -312,7 +340,7 @@ describe('Admin User Handlers', () => {
     });
 
     test('should return 401 when not authenticated', async () => {
-      const req = createMockRequest({ user: undefined }, { id: 'user-123' });
+      const req = createUnauthenticatedRequest({ id: 'user-123' });
       const result = await handleLockUser(mockCtx, { reason: 'Test' }, req, createMockReply());
 
       expect(result.status).toBe(401);
@@ -353,7 +381,7 @@ describe('Admin User Handlers', () => {
     });
 
     test('should return 401 when not authenticated', async () => {
-      const req = createMockRequest({ user: undefined }, { id: 'user-123' });
+      const req = createUnauthenticatedRequest({ id: 'user-123' });
       const result = await handleUnlockUser(
         mockCtx,
         { email: '', reason: 'Test' },

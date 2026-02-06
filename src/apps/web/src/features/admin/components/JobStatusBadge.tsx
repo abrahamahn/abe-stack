@@ -7,22 +7,15 @@
 
 import { Badge } from '@abe-stack/ui';
 
+import type { JobStatus } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 export interface JobStatusBadgeProps {
-  status: JobStatusLocal;
+  status: JobStatus;
 }
 
 // ============================================================================
@@ -30,15 +23,14 @@ export interface JobStatusBadgeProps {
 // ============================================================================
 
 const STATUS_CONFIG: Record<
-  JobStatusLocal,
+  JobStatus,
   { tone: 'info' | 'success' | 'danger' | 'warning'; label: string }
 > = {
   pending: { tone: 'info', label: 'Pending' },
   processing: { tone: 'warning', label: 'Processing' },
   completed: { tone: 'success', label: 'Completed' },
   failed: { tone: 'danger', label: 'Failed' },
-  ['dead_letter']: { tone: 'danger', label: 'Dead Letter' },
-  cancelled: { tone: 'warning', label: 'Cancelled' },
+  dead: { tone: 'danger', label: 'Dead' },
 };
 
 // ============================================================================

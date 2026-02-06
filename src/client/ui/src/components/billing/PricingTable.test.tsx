@@ -12,11 +12,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PricingTable } from './PricingTable';
 
-import type { Plan } from '@abe-stack/shared';
+import type { Plan, PlanId } from '@abe-stack/shared';
 
 const createMockPlans = (): Plan[] => [
   {
-    id: 'basic-month',
+    id: 'basic-month' as unknown as PlanId,
     name: 'Basic',
     description: 'For individuals',
     priceInCents: 999,
@@ -25,10 +25,10 @@ const createMockPlans = (): Plan[] => [
     trialDays: 0,
     isActive: true,
     sortOrder: 0,
-    features: [{ name: '10 GB Storage', included: true }],
+    features: [{ key: 'storage:limit', name: '10 GB Storage', included: true, value: 10 }],
   },
   {
-    id: 'basic-year',
+    id: 'basic-year' as unknown as PlanId,
     name: 'Basic',
     description: 'For individuals',
     priceInCents: 9900,
@@ -37,10 +37,10 @@ const createMockPlans = (): Plan[] => [
     trialDays: 0,
     isActive: true,
     sortOrder: 1,
-    features: [{ name: '10 GB Storage', included: true }],
+    features: [{ key: 'storage:limit', name: '10 GB Storage', included: true, value: 10 }],
   },
   {
-    id: 'pro-month',
+    id: 'pro-month' as unknown as PlanId,
     name: 'Pro',
     description: 'For teams',
     priceInCents: 2999,
@@ -49,10 +49,10 @@ const createMockPlans = (): Plan[] => [
     trialDays: 14,
     isActive: true,
     sortOrder: 2,
-    features: [{ name: '100 GB Storage', included: true }],
+    features: [{ key: 'storage:limit', name: '100 GB Storage', included: true, value: 100 }],
   },
   {
-    id: 'pro-year',
+    id: 'pro-year' as unknown as PlanId,
     name: 'Pro',
     description: 'For teams',
     priceInCents: 29900,
@@ -61,7 +61,7 @@ const createMockPlans = (): Plan[] => [
     trialDays: 14,
     isActive: true,
     sortOrder: 3,
-    features: [{ name: '100 GB Storage', included: true }],
+    features: [{ key: 'storage:limit', name: '100 GB Storage', included: true, value: 100 }],
   },
 ];
 
@@ -179,7 +179,7 @@ describe('PricingTable', () => {
     it('should not show savings when yearly is not cheaper', () => {
       const plans: Plan[] = [
         {
-          id: 'plan-month',
+          id: 'plan-month' as unknown as PlanId,
           name: 'Plan',
           description: null,
           priceInCents: 1000,
@@ -191,7 +191,7 @@ describe('PricingTable', () => {
           features: [],
         },
         {
-          id: 'plan-year',
+          id: 'plan-year' as unknown as PlanId,
           name: 'Plan',
           description: null,
           priceInCents: 15000,
@@ -479,7 +479,7 @@ describe('PricingTable', () => {
 
     it('should handle many plans', () => {
       const manyPlans: Plan[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `plan-${i}`,
+        id: `plan-${i}` as unknown as PlanId,
         name: `Plan ${i}`,
         description: null,
         priceInCents: 1000 * (i + 1),

@@ -25,7 +25,7 @@ class MockWebSocket {
   onerror: ((event: Event) => void) | null = null;
   onclose: ((event: CloseEvent) => void) | null = null;
 
-  private sentMessages: string[] = [];
+  private readonly sentMessages: string[] = [];
 
   constructor(url: string) {
     this.url = url;

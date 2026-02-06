@@ -28,6 +28,7 @@ import type {
   SessionsListResponse,
   UpdateProfileRequest,
   User,
+  UserId,
 } from '@abe-stack/shared';
 
 describe('createSettingsApi', () => {
@@ -111,7 +112,7 @@ describe('createSettingsApi', () => {
       };
 
       const mockUser: User = {
-        id: 'user-123',
+        id: 'user-123' as unknown as UserId,
         email: 'john@example.com',
         name: 'John Doe',
         avatarUrl: null,

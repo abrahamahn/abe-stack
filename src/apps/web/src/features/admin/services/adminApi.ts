@@ -17,6 +17,7 @@ import type {
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
+  JobStatus,
   UnlockAccountRequest,
 } from '@abe-stack/shared';
 
@@ -24,18 +25,10 @@ import type {
 // Local Type Definitions
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 interface JobDetailsLocal {
   id: string;
   name: string;
-  status: JobStatusLocal;
+  status: JobStatus;
   createdAt: string;
   scheduledAt: string;
   completedAt: string | null;
@@ -48,7 +41,7 @@ interface JobDetailsLocal {
 }
 
 interface JobListQueryLocal {
-  status?: JobStatusLocal;
+  status?: JobStatus;
   name?: string;
   page?: number;
   limit?: number;

@@ -128,6 +128,9 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
       };
       break;
 
+    case 'knock':
+    case 'sns':
+    case 'braze':
     case 'generic':
     default:
       config.config = {};
@@ -203,8 +206,12 @@ export function validateNotificationsConfig(config: NotificationConfig): string[
         break;
       }
 
+      case 'knock':
+      case 'sns':
+      case 'braze':
       case 'generic':
-        // No validation for generic provider
+      default:
+        // No validation for generic or unsupported providers
         break;
     }
   }

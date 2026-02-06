@@ -32,16 +32,10 @@ describe('JobStatusBadge', () => {
       expect(screen.getByText('Failed')).toBeInTheDocument();
     });
 
-    it('should render dead_letter status with danger tone', () => {
-      render(<JobStatusBadge status="dead_letter" />);
+    it('should render dead status with danger tone', () => {
+      render(<JobStatusBadge status="dead" />);
 
-      expect(screen.getByText('Dead Letter')).toBeInTheDocument();
-    });
-
-    it('should render cancelled status with warning tone', () => {
-      render(<JobStatusBadge status="cancelled" />);
-
-      expect(screen.getByText('Cancelled')).toBeInTheDocument();
+      expect(screen.getByText('Dead')).toBeInTheDocument();
     });
   });
 
@@ -51,8 +45,7 @@ describe('JobStatusBadge', () => {
       { status: 'processing', expectedLabel: 'Processing' },
       { status: 'completed', expectedLabel: 'Completed' },
       { status: 'failed', expectedLabel: 'Failed' },
-      { status: 'dead_letter', expectedLabel: 'Dead Letter' },
-      { status: 'cancelled', expectedLabel: 'Cancelled' },
+      { status: 'dead', expectedLabel: 'Dead' },
     ];
 
     it.each(statusTests)(

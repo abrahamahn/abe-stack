@@ -56,7 +56,7 @@
     ".config/env/.env.*",
     ".prettierrc",
     "eslint.config.ts",
-    ".config/.editorconfig",
+    ".editorconfig",
     ".pnpmrc"
   ]
 }

@@ -157,7 +157,7 @@ export interface MediaDatabaseAdapter {
  * ```
  */
 export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
-  private records = new Map<string, MediaProcessingRecord>();
+  private readonly records = new Map<string, MediaProcessingRecord>();
 
   /**
    * Insert multiple media records into the in-memory store

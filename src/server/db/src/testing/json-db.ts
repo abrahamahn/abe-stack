@@ -57,7 +57,7 @@ export interface JsonDatabaseConfig {
  */
 class Mutex {
   private locked = false;
-  private queue: Array<() => void> = [];
+  private readonly queue: Array<() => void> = [];
 
   /**
    * Acquire the mutex lock. If already locked, queues the caller.
@@ -717,7 +717,7 @@ export class JsonDbClient {
 // =============================================================================
 
 class JsonSelectBuilder<T extends DbRecord> {
-  private db: JsonDatabase;
+  private readonly db: JsonDatabase;
   private tableName: string | null = null;
   private whereCondition: WhereCondition<T> | null = null;
   private limitValue: number | undefined;
@@ -789,8 +789,8 @@ class JsonSelectBuilder<T extends DbRecord> {
 }
 
 class JsonInsertBuilder<T extends DbRecord> {
-  private db: JsonDatabase;
-  private tableName: string;
+  private readonly db: JsonDatabase;
+  private readonly tableName: string;
   private data: Array<Omit<T, 'id'> & { id?: string }> = [];
   private shouldReturn = false;
 
@@ -828,8 +828,8 @@ class JsonInsertBuilder<T extends DbRecord> {
 }
 
 class JsonUpdateBuilder<T extends DbRecord> {
-  private db: JsonDatabase;
-  private tableName: string;
+  private readonly db: JsonDatabase;
+  private readonly tableName: string;
   private updateData: Partial<T> = {};
   private whereCondition: WhereCondition<T> | null = null;
   private shouldReturn = false;
@@ -877,8 +877,8 @@ class JsonUpdateBuilder<T extends DbRecord> {
 }
 
 class JsonDeleteBuilder<T extends DbRecord> {
-  private db: JsonDatabase;
-  private tableName: string;
+  private readonly db: JsonDatabase;
+  private readonly tableName: string;
   private whereCondition: WhereCondition<T> | null = null;
   private shouldReturn = false;
 
@@ -923,7 +923,7 @@ class JsonDeleteBuilder<T extends DbRecord> {
 // =============================================================================
 
 class JsonQueryApi {
-  private db: JsonDatabase;
+  private readonly db: JsonDatabase;
 
   constructor(db: JsonDatabase) {
     this.db = db;
@@ -960,8 +960,8 @@ class JsonQueryApi {
 }
 
 class JsonTableQuery {
-  private db: JsonDatabase;
-  private tableName: string;
+  private readonly db: JsonDatabase;
+  private readonly tableName: string;
 
   constructor(db: JsonDatabase, tableName: string) {
     this.db = db;

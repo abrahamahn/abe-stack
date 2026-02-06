@@ -498,7 +498,12 @@ describe('handleLogin', () => {
 
     test('should handle undefined user agent', async () => {
       const ctx = createMockContext();
-      const request = createMockRequest({ userAgent: undefined });
+      const request = {
+        cookies: {},
+        headers: {},
+        ip: '127.0.0.1',
+        requestInfo: { ipAddress: '127.0.0.1' },
+      } as RequestWithCookies;
       const reply = createMockReply();
       const body = createLoginBody();
 

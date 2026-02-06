@@ -54,21 +54,21 @@ interface UnionDef {
  * SelectBuilder class for constructing SELECT queries
  */
 export class SelectBuilder implements QueryBuilder {
-  private _table: TableSpec;
+  private readonly _table: TableSpec;
   private _columns: string[] = ['*'];
-  private _computedColumns: ComputedColumn[] = [];
+  private readonly _computedColumns: ComputedColumn[] = [];
   private _distinct = false;
   private _where: SqlFragment | null = null;
-  private _joins: JoinSpec[] = [];
-  private _orderBy: SortSpec[] = [];
-  private _groupBy: string[] = [];
+  private readonly _joins: JoinSpec[] = [];
+  private readonly _orderBy: SortSpec[] = [];
+  private readonly _groupBy: string[] = [];
   private _having: SqlFragment | null = null;
   private _limit: number | null = null;
   private _offset: number | null = null;
   private _forUpdate = false;
   private _forShare = false;
-  private _ctes: CteDef[] = [];
-  private _unions: UnionDef[] = [];
+  private readonly _ctes: CteDef[] = [];
+  private readonly _unions: UnionDef[] = [];
 
   constructor(table: string | TableSpec) {
     this._table = typeof table === 'string' ? { name: table } : table;

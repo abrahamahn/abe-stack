@@ -25,8 +25,8 @@ import {
  * UpdateBuilder class for constructing UPDATE queries
  */
 export class UpdateBuilder implements QueryBuilder {
-  private _table: TableSpec;
-  private _set: Map<string, DbValue | SqlFragment> = new Map();
+  private readonly _table: TableSpec;
+  private readonly _set: Map<string, DbValue | SqlFragment> = new Map();
   private _where: SqlFragment | null = null;
   private _returning: string[] = [];
   private _from: TableSpec | null = null;

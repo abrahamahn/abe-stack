@@ -224,22 +224,69 @@ function evalEndsWith(
 /**
  * SQL LIKE pattern matching.
  * Supports % (any characters) and _ (single character) wildcards.
+ *
+ * Uses an iterative two-pointer algorithm instead of regex to avoid
+ * ReDoS (catastrophic backtracking) on adversarial patterns like `%a%a%a%a%a`.
+ *
+ * @complexity O(n * m) worst case where n = field length, m = pattern length
  */
 function evalLike(fieldValue: unknown, filterValue: FilterValue, caseSensitive: boolean): boolean {
   if (typeof fieldValue !== 'string' || typeof filterValue !== 'string') {
     return false;
   }
 
-  // Escape regex special characters except % and _
-  const escapedPattern = filterValue
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    .replace(/%/g, '.*')
-    .replace(/_/g, '.');
+  const text = caseSensitive ? fieldValue : fieldValue.toLowerCase();
+  const pattern = caseSensitive ? filterValue : filterValue.toLowerCase();
 
-  const flags = caseSensitive ? '' : 'i';
-  const regex = new RegExp(`^${escapedPattern}$`, flags);
+  return matchLikePattern(text, pattern);
+}
 
-  return regex.test(fieldValue);
+/**
+ * Iterative LIKE pattern matcher using two-pointer backtracking.
+ * Handles '%' (any sequence) and '_' (single char) wildcards.
+ *
+ * Algorithm: Advance through text and pattern in lock-step. On '%', record
+ * a backtrack point and greedily skip. On mismatch, return to the last '%'
+ * backtrack point and consume one more text character.
+ *
+ * @param text - The string to match against
+ * @param pattern - The LIKE pattern with % and _ wildcards
+ * @returns true if the text matches the pattern
+ * @complexity O(n * m) worst case, O(n + m) typical case
+ */
+function matchLikePattern(text: string, pattern: string): boolean {
+  let ti = 0; // text index
+  let pi = 0; // pattern index
+  let starIdx = -1; // last '%' position in pattern
+  let matchIdx = 0; // text position when last '%' was seen
+
+  while (ti < text.length) {
+    if (pi < pattern.length && (pattern[pi] === '_' || pattern[pi] === text[ti])) {
+      // Character match or single-char wildcard
+      ti++;
+      pi++;
+    } else if (pi < pattern.length && pattern[pi] === '%') {
+      // Record backtrack point for '%' wildcard
+      starIdx = pi;
+      matchIdx = ti;
+      pi++;
+    } else if (starIdx !== -1) {
+      // Mismatch: backtrack to last '%' and consume one more text char
+      pi = starIdx + 1;
+      matchIdx++;
+      ti = matchIdx;
+    } else {
+      // No match and no '%' to backtrack to
+      return false;
+    }
+  }
+
+  // Consume trailing '%' wildcards in pattern
+  while (pi < pattern.length && pattern[pi] === '%') {
+    pi++;
+  }
+
+  return pi === pattern.length;
 }
 
 /**

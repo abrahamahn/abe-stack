@@ -12,10 +12,11 @@
 
 import { useState, useEffect, useCallback, useSyncExternalStore, useMemo } from 'react';
 
-import { type RecordChangeListener } from '../cache/RecordCache';
-import { type VersionedRecord } from '../storage/RecordStorage';
-
 import { useRealtime, type WriteOperation, type WriteOptions } from './RealtimeContext';
+
+import type { RecordChangeListener } from '../cache/RecordCache';
+import type { VersionedRecord } from '../storage/RecordStorage';
+
 
 // ============================================================================
 // useRecord

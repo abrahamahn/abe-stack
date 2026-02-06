@@ -155,10 +155,10 @@ interface OptimisticState<TRecord> {
  * @typeParam TTables - A map of table names to record types
  */
 export class RecordCache<TTables extends TableMap = TableMap> {
-  private storage = new Map<string, Map<string, CacheEntry<unknown>>>();
-  private listeners = new Map<string, Set<RecordChangeListener>>();
-  private globalListeners = new Set<RecordChangeListener>();
-  private optimisticStates = new Map<string, OptimisticState<unknown>>();
+  private readonly storage = new Map<string, Map<string, CacheEntry<unknown>>>();
+  private readonly listeners = new Map<string, Set<RecordChangeListener>>();
+  private readonly globalListeners = new Set<RecordChangeListener>();
+  private readonly optimisticStates = new Map<string, OptimisticState<unknown>>();
   private readonly getVersion: (record: unknown) => number | undefined;
   private readonly defaultTtl: number | undefined;
   private readonly trackStats: boolean;

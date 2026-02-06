@@ -9,24 +9,17 @@ import { Button, Card, Heading, Spinner, Text } from '@abe-stack/ui';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
+import type { JobStatus } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 interface JobDetailsLocal {
   id: string;
   name: string;
-  status: JobStatusLocal;
+  status: JobStatus;
   createdAt: string;
   scheduledAt: string;
   completedAt: string | null;
@@ -82,7 +75,7 @@ export const JobDetailsPanel = ({
     );
   }
 
-  const canRetry = job.status === 'failed' || job.status === 'dead_letter';
+  const canRetry = job.status === 'failed' || job.status === 'dead';
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
   return (

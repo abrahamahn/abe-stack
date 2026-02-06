@@ -140,6 +140,7 @@ async function processEvent(
       handleChargebackCreated(event, log);
       break;
 
+    case 'unknown':
     default:
       log.info({ eventType: event.type }, 'Unhandled event type');
   }
@@ -584,6 +585,7 @@ function mapStatus(
       return 'paused';
     case 'APPROVAL_PENDING':
       return 'incomplete';
+    case undefined:
     default:
       return 'incomplete';
   }

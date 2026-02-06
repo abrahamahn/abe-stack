@@ -12,10 +12,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
-import type { AuthEmailTemplates } from '../index';
+import type { AuthEmailService, AuthEmailTemplates } from '../index';
 import type { DbClient, Repositories, MagicLinkToken, RawDb, User } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
-import type { EmailService } from '@abe-stack/shared/contracts';
 
 // ============================================================================
 // Mock Dependencies
@@ -108,10 +107,10 @@ function createMockDb(): DbClient {
   } as unknown as DbClient;
 }
 
-function createMockEmailService(): EmailService {
+function createMockEmailService(): AuthEmailService {
   return {
     send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-message-id' }),
-  };
+  } as unknown as AuthEmailService;
 }
 
 function createMockEmailTemplates(): AuthEmailTemplates {

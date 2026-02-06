@@ -38,11 +38,11 @@ describe('JobActionsMenu', () => {
       expect(screen.getByText('Actions')).toBeInTheDocument();
     });
 
-    it('should render actions button for dead_letter status', () => {
+    it('should render actions button for dead status', () => {
       render(
         <JobActionsMenu
           jobId="job-123"
-          status="dead_letter"
+          status="dead"
           onRetry={mockOnRetry}
           onCancel={mockOnCancel}
         />,
@@ -91,18 +91,6 @@ describe('JobActionsMenu', () => {
       expect(screen.queryByRole('button', { name: 'Actions' })).not.toBeInTheDocument();
     });
 
-    it('should render "No actions" for cancelled status', () => {
-      render(
-        <JobActionsMenu
-          jobId="job-123"
-          status="cancelled"
-          onRetry={mockOnRetry}
-          onCancel={mockOnCancel}
-        />,
-      );
-
-      expect(screen.getByText('No actions')).toBeInTheDocument();
-    });
   });
 
   describe('retry action', () => {
@@ -128,7 +116,7 @@ describe('JobActionsMenu', () => {
       render(
         <JobActionsMenu
           jobId="job-123"
-          status="dead_letter"
+          status="dead"
           onRetry={mockOnRetry}
           onCancel={mockOnCancel}
         />,
@@ -347,8 +335,7 @@ describe('JobActionsMenu', () => {
       { status: 'processing', expectRetry: false, expectCancel: true },
       { status: 'completed', expectRetry: false, expectCancel: false },
       { status: 'failed', expectRetry: true, expectCancel: false },
-      { status: 'dead_letter', expectRetry: true, expectCancel: false },
-      { status: 'cancelled', expectRetry: false, expectCancel: false },
+      { status: 'dead', expectRetry: true, expectCancel: false },
     ];
 
     testCases.forEach(({ status, expectRetry, expectCancel }) => {

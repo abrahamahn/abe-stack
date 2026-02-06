@@ -40,7 +40,9 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      expect(screen.getByText(mockUser.name)).toBeInTheDocument();
+      if (mockUser.name !== null) {
+        expect(screen.getByText(mockUser.name)).toBeInTheDocument();
+      }
     });
 
     it('should display "Not provided" when user has no name', () => {
@@ -75,7 +77,9 @@ describe('Dashboard Integration', () => {
       renderWithProviders(<DashboardPage />, { environment });
 
       expect(screen.getByText(mockAdminUser.email)).toBeInTheDocument();
-      expect(screen.getByText(mockAdminUser.name)).toBeInTheDocument();
+      if (mockAdminUser.name !== null) {
+        expect(screen.getByText(mockAdminUser.name)).toBeInTheDocument();
+      }
     });
   });
 

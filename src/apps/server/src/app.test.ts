@@ -1,5 +1,5 @@
 // apps/server/src/app.test.ts
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp, type AppOptions } from './app';
 
@@ -17,11 +17,7 @@ import type {
   StorageClient,
 } from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-
-// AppError is imported after mocks are set up (AppError extends BaseError)
-// We use AppError because BaseError is abstract and cannot be instantiated directly
-let AppError: typeof import('@abe-stack/shared').AppError;
+import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
 // Mock Dependencies - Hoisted factories
@@ -456,13 +452,6 @@ function spyOnAppLog(app: App): Record<string, ReturnType<typeof vi.fn>> {
 // ============================================================================
 
 describe('App', () => {
-  beforeAll(async () => {
-    // Import AppError after mocks are applied
-    // AppError extends BaseError, so `instanceof BaseError` will still work
-    const core = await import('@abe-stack/shared');
-    AppError = core.AppError;
-  });
-
   beforeEach(async () => {
     vi.clearAllMocks();
     // Reset mock implementations to default values
@@ -681,10 +670,6 @@ describe('App', () => {
           app,
         }),
       );
-      expect(mockServer).toHaveProperty('setErrorHandler');
-      expect(
-        (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls.length,
-      ).toBeGreaterThan(0);
       expect(mockListenFactory).toHaveBeenCalledWith(mockServer, config);
       expect(logStartupSummary).toHaveBeenCalled();
     });
@@ -814,175 +799,6 @@ describe('App', () => {
       spyOnAppLog(app);
 
       await expect(app.stop()).resolves.toBeUndefined();
-    });
-  });
-
-  // ============================================================================
-  // Tests: Error Handler
-  // ============================================================================
-
-  describe('error handler', () => {
-    // Note: The BaseError instanceof check in app.ts cannot be tested directly due to
-    // Vitest module identity issues with vite-tsconfig-paths. The @abe-stack/shared module
-    // gets resolved differently in the test context vs. when app.ts imports it, causing
-    // `error instanceof BaseError` to return false even for valid AppError instances.
-    // These tests verify the error handler setup and fallback behavior instead.
-    // The BaseError handling logic is tested indirectly through integration tests.
-
-    it('should register error handler on server', async () => {
-      const config = createMockConfig();
-      const mockServer = createMockServer();
-
-      mockServerFactory.mockResolvedValue(mockServer);
-      mockListenFactory.mockResolvedValue(undefined);
-
-      const app = new App({ config });
-      spyOnAppLog(app);
-      await app.start();
-
-      // Verify error handler was registered
-      expect(mockServer.setErrorHandler).toHaveBeenCalledTimes(1);
-      const errorHandler = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock
-        .calls[0]?.[0];
-      expect(errorHandler).toBeDefined();
-      expect(typeof errorHandler).toBe('function');
-    });
-
-    it('should handle AppError correctly with proper status code', async () => {
-      // With proper module resolution, AppError is now correctly recognized
-      // and handled with its actual status code and message.
-      const config = createMockConfig();
-      const mockServer = createMockServer();
-
-      mockServerFactory.mockResolvedValue(mockServer);
-      mockListenFactory.mockResolvedValue(undefined);
-
-      const app = new App({ config });
-      spyOnAppLog(app);
-      await app.start();
-
-      const mockCalls = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls;
-      const errorHandler = mockCalls[0]?.[0];
-      expect(errorHandler).toBeDefined();
-
-      if (errorHandler !== undefined) {
-        const error = new AppError('Test error', 400);
-        const logWarnMock = vi.fn();
-        const logErrorMock = vi.fn();
-        const mockRequest = {
-          log: {
-            warn: logWarnMock,
-            error: logErrorMock,
-          },
-        } as unknown as FastifyRequest;
-        const replyStatusMock = vi.fn().mockReturnThis();
-        const replySendMock = vi.fn();
-        const mockReply = {
-          status: replyStatusMock,
-          send: replySendMock,
-        } as unknown as FastifyReply;
-
-        await errorHandler(error, mockRequest, mockReply);
-
-        // AppError is now properly recognized and handled with its status code
-        expect(logWarnMock).toHaveBeenCalledWith({ err: error }, 'Operational Error');
-        expect(replyStatusMock).toHaveBeenCalledWith(400);
-        expect(replySendMock).toHaveBeenCalledWith({
-          code: 'INTERNAL_ERROR',
-          error: 'AppError',
-          message: 'Test error',
-        });
-      }
-    });
-
-    it('should handle validation errors', async () => {
-      const config = createMockConfig();
-      const mockServer = createMockServer();
-
-      mockServerFactory.mockResolvedValue(mockServer);
-      mockListenFactory.mockResolvedValue(undefined);
-
-      const app = new App({ config });
-      // Spy on log to provide proper fallback logger
-      spyOnAppLog(app);
-      await app.start();
-
-      const mockCalls = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls;
-      const errorHandler = mockCalls[0]?.[0];
-      expect(errorHandler).toBeDefined();
-
-      if (errorHandler !== undefined) {
-        const error = Object.assign(new Error('Validation failed'), {
-          validation: [{ message: 'Invalid field' }],
-        });
-        const logWarnMock = vi.fn();
-        const logErrorMock = vi.fn();
-        const mockRequest = {
-          log: {
-            warn: logWarnMock,
-            error: logErrorMock,
-          },
-        } as unknown as FastifyRequest;
-        const replyStatusMock = vi.fn().mockReturnThis();
-        const replySendMock = vi.fn();
-        const mockReply = {
-          status: replyStatusMock,
-          send: replySendMock,
-        } as unknown as FastifyReply;
-
-        await errorHandler(error, mockRequest, mockReply);
-
-        expect(replyStatusMock).toHaveBeenCalledWith(400);
-        expect(replySendMock).toHaveBeenCalledWith({
-          error: 'ValidationError',
-          message: 'Invalid request data',
-          details: [{ message: 'Invalid field' }],
-        });
-      }
-    });
-
-    it('should handle unexpected errors', async () => {
-      const config = createMockConfig();
-      const mockServer = createMockServer();
-
-      mockServerFactory.mockResolvedValue(mockServer);
-      mockListenFactory.mockResolvedValue(undefined);
-
-      const app = new App({ config });
-      // Spy on log to provide proper fallback logger
-      spyOnAppLog(app);
-      await app.start();
-
-      const mockCalls = (mockServer.setErrorHandler as ReturnType<typeof vi.fn>).mock.calls;
-      const errorHandler = mockCalls[0]?.[0];
-      expect(errorHandler).toBeDefined();
-
-      if (errorHandler !== undefined) {
-        const error = new Error('Unexpected error');
-        const logWarnMock = vi.fn();
-        const logErrorMock = vi.fn();
-        const mockRequest = {
-          log: {
-            warn: logWarnMock,
-            error: logErrorMock,
-          },
-        } as unknown as FastifyRequest;
-        const replyStatusMock = vi.fn().mockReturnThis();
-        const replySendMock = vi.fn();
-        const mockReply = {
-          status: replyStatusMock,
-          send: replySendMock,
-        } as unknown as FastifyReply;
-
-        await errorHandler(error, mockRequest, mockReply);
-
-        expect(logErrorMock).toHaveBeenCalledWith({ err: error }, 'Unexpected Crash');
-        expect(replyStatusMock).toHaveBeenCalledWith(500);
-        expect(replySendMock).toHaveBeenCalledWith({
-          error: 'InternalServerError',
-          message: 'Something went wrong',
-        });
-      }
     });
   });
 

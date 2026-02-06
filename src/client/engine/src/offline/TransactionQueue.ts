@@ -256,8 +256,8 @@ export class TransactionQueue {
   private isOnline: boolean;
   private readonly pendingWrites = new ReactiveMap<string, number>();
   private readonly options: Required<TransactionQueueOptions>;
-  private boundHandleOnline: () => void;
-  private boundHandleOffline: () => void;
+  private readonly boundHandleOnline: () => void;
+  private readonly boundHandleOffline: () => void;
 
   constructor(options: TransactionQueueOptions) {
     this.options = {

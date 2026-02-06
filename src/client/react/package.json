@@ -7,18 +7,22 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./hooks": {
+      "source": "./src/hooks/index.ts",
       "types": "./dist/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"
     },
     "./providers": {
+      "source": "./src/providers/index.ts",
       "types": "./dist/providers/index.d.ts",
       "import": "./dist/providers/index.js"
     },
     "./router": {
+      "source": "./src/router/index.ts",
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
     },
@@ -29,6 +33,7 @@
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-react --report-unused-disable-directives",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {

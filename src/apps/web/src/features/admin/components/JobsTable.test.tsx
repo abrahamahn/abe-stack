@@ -4,40 +4,39 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobsTable } from './JobsTable';
 
-import type { JobDetails, JobListResponse, JobStatus } from '@abe-stack/shared';
+import type { JobsTableProps } from './JobsTable';
+import type { JobStatus } from '@abe-stack/shared';
+
+// ============================================================================
+// Test Types (matching component internal types)
+// ============================================================================
+
+/** Infer data shape from the component props */
+type JobListResponseLocal = NonNullable<JobsTableProps['data']>;
+type JobDetailsLocal = JobListResponseLocal['data'][number];
 
 // ============================================================================
 // Test Data
 // ============================================================================
 
-const createMockJob = (overrides: Partial<JobDetails> = {}): JobDetails => ({
+const createMockJob = (overrides: Partial<JobDetailsLocal> = {}): JobDetailsLocal => ({
   id: 'job-123',
   name: 'test-job',
   status: 'completed',
   createdAt: '2024-01-15T10:30:00Z',
-  scheduledAt: '2024-01-15T10:30:00Z',
-  completedAt: '2024-01-15T10:31:00Z',
-  durationMs: 60000,
   attempts: 1,
   maxAttempts: 3,
-  args: { test: 'data' },
-  error: null,
-  deadLetterReason: null,
   ...overrides,
 });
 
-const createMockResponse = (overrides: Partial<JobListResponse> = {}): JobListResponse => ({
+const createMockResponse = (overrides: Partial<JobListResponseLocal> = {}): JobListResponseLocal => ({
   data: [
     createMockJob({ id: 'job-1', name: 'job-1', status: 'completed' }),
     createMockJob({ id: 'job-2', name: 'job-2', status: 'failed' }),
     createMockJob({ id: 'job-3', name: 'job-3', status: 'pending' }),
   ],
   page: 1,
-  limit: 20,
   totalPages: 1,
-  total: 3,
-  hasNext: false,
-  hasPrev: false,
   ...overrides,
 });
 
@@ -143,7 +142,7 @@ describe('JobsTable', () => {
     it('should show no jobs message when data array is empty', () => {
       render(
         <JobsTable
-          data={createMockResponse({ data: [], total: 0 })}
+          data={createMockResponse({ data: [] })}
           isLoading={false}
           isError={false}
           error={null}
@@ -181,7 +180,7 @@ describe('JobsTable', () => {
       expect(screen.getByRole('tab', { name: 'Pending' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Processing' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Failed' })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: 'Dead Letter' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'Dead' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Completed' })).toBeInTheDocument();
     });
 
@@ -614,9 +613,9 @@ describe('JobsTable', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle job with dead_letter status', () => {
+    it('should handle job with dead status', () => {
       const data = createMockResponse({
-        data: [createMockJob({ status: 'dead_letter' })],
+        data: [createMockJob({ status: 'dead' })],
       });
 
       render(
@@ -634,7 +633,7 @@ describe('JobsTable', () => {
         />,
       );
 
-      // Dead letter status is rendered in the table
+      // Dead status is rendered in the table
       expect(screen.getByRole('table')).toBeInTheDocument();
     });
 

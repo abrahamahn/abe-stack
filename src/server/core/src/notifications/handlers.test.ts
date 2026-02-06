@@ -666,7 +666,7 @@ describe('Notification Handlers', () => {
           },
           types: {
             ...createDefaultPreferences('user-123').types,
-            marketing: { enabled: true, channels: ['email'] },
+            marketing: { enabled: true, channels: ['email' as const] },
           },
         };
         vi.mocked(service.updatePreferences).mockResolvedValue(updatedPrefs);

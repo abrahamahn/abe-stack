@@ -140,6 +140,7 @@ async function processEvent(
       handleChargebackCreated(event, repos, log);
       break;
 
+    case 'unknown':
     default:
       log.info({ eventType: event.type }, 'Unhandled event type');
   }
@@ -542,6 +543,7 @@ function mapStatus(
       return 'trialing';
     case 'unpaid':
       return 'unpaid';
+    case undefined:
     default:
       return 'incomplete';
   }

@@ -659,7 +659,6 @@ describe('handleRefresh', () => {
         ...baseRequest,
         requestInfo: {
           ipAddress: baseRequest.requestInfo.ipAddress,
-          userAgent: undefined,
         },
       };
       const reply = createMockReply();

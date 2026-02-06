@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  */
 class MockCache {
   name: string;
-  private _store: Map<string, Response>;
+  private readonly _store: Map<string, Response>;
 
   constructor(name: string) {
     this.name = name;
@@ -143,7 +143,7 @@ interface NotificationPayload {
  * Mock PushMessageData
  */
 class MockPushMessageData {
-  private _data: string | NotificationPayload;
+  private readonly _data: string | NotificationPayload;
 
   constructor(data: string | NotificationPayload) {
     this._data = data;

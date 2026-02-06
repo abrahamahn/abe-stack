@@ -318,7 +318,7 @@ describe('handleOAuthInitiate', () => {
 
       expect(result.status).not.toBe(302);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should not call service for invalid provider', async () => {
@@ -349,7 +349,7 @@ describe('handleOAuthInitiate', () => {
 
       expect(result.status).not.toBe(302);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should not call service when rate limited', async () => {
@@ -388,7 +388,7 @@ describe('handleOAuthInitiate', () => {
 
       expect(result.status).not.toBe(302);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 
@@ -743,7 +743,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should return error when state is missing', async () => {
@@ -761,7 +761,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should return error when code is empty string', async () => {
@@ -779,7 +779,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should handle OAuth error from provider', async () => {
@@ -797,7 +797,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should handle OAuth error without description', async () => {
@@ -815,7 +815,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
 
     test('should log failure event on error', async () => {
@@ -860,7 +860,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 
@@ -922,7 +922,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 
@@ -942,7 +942,7 @@ describe('handleOAuthCallbackRequest', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 });
@@ -1061,7 +1061,7 @@ describe('handleOAuthLink', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 
@@ -1075,7 +1075,7 @@ describe('handleOAuthLink', () => {
 
       expect(result.status).not.toBe(200);
       expect(result.body).toHaveProperty('message');
-      expect(result.body.message).toBeTruthy();
+      expect((result.body as { message: string }).message).toBeTruthy();
     });
   });
 });

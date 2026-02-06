@@ -35,7 +35,7 @@ interface StoredTask extends Task {
  * @complexity O(n) dequeue, O(1) enqueue/complete/fail
  */
 export class MemoryQueueStore implements QueueStore {
-  private tasks = new Map<string, StoredTask>();
+  private readonly tasks = new Map<string, StoredTask>();
 
   /**
    * Enqueue a new task

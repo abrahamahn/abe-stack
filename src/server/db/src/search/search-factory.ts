@@ -87,7 +87,7 @@ export type ProviderOptions = {
  * });
  */
 export class SearchProviderFactory {
-  private providers: Map<string, ServerSearchProvider> = new Map();
+  private readonly providers: Map<string, ServerSearchProvider> = new Map();
 
   /**
    * Create a SQL search provider.

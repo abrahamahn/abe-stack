@@ -9,7 +9,8 @@
     "start": "vite preview --port 4173",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-web --report-unused-disable-directives"
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-web --report-unused-disable-directives",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@abe-stack/api": "workspace:*",

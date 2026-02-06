@@ -218,7 +218,7 @@ describe('Magic Link Routes', () => {
       test('should handle error response from handler', async () => {
         const { handleMagicLinkRequest } = await import('./handlers');
         const errorResult = {
-          status: 429,
+          status: 429 as const,
           body: {
             message: 'Too many requests',
             code: 'RATE_LIMIT_EXCEEDED',
@@ -334,7 +334,7 @@ describe('Magic Link Routes', () => {
       test('should handle error response from handler', async () => {
         const { handleMagicLinkVerify } = await import('./handlers');
         const errorResult = {
-          status: 401,
+          status: 401 as const,
           body: {
             message: 'Invalid or expired token',
             code: 'INVALID_TOKEN',
@@ -662,7 +662,6 @@ describe('Route Integration', () => {
     vi.mocked(handleMagicLinkRequest).mockResolvedValue({
       status: 200,
       body: {
-        success: true,
         message: 'Magic link sent to your email',
       },
     });
@@ -679,11 +678,11 @@ describe('Route Integration', () => {
       .get('auth/magic-link/request')!
       .handler(ctx, requestBody, req as never, reply as never)) as {
       status: number;
-      body: { success: boolean };
+      body: { message: string };
     };
 
     expect(requestResult.status).toBe(200);
-    expect(requestResult.body).toHaveProperty('success', true);
+    expect(requestResult.body).toHaveProperty('message');
 
     // Step 2: Verify magic link
     vi.mocked(handleMagicLinkVerify).mockResolvedValue({

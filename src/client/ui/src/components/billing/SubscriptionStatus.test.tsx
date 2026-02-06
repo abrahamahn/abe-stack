@@ -12,14 +12,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SubscriptionStatus } from './SubscriptionStatus';
 
-import type { Subscription } from '@abe-stack/shared';
+import type { Subscription, SubscriptionId, UserId, PlanId } from '@abe-stack/shared';
 
 const createMockSubscription = (overrides?: Partial<Subscription>): Subscription => ({
-  id: 'sub_123',
-  userId: 'user_123',
-  planId: 'plan_123',
+  id: 'sub_123' as unknown as SubscriptionId,
+  userId: 'user_123' as unknown as UserId,
+  planId: 'plan_123' as unknown as PlanId,
   plan: {
-    id: 'plan_123',
+    id: 'plan_123' as unknown as PlanId,
     name: 'Pro Plan',
     description: null,
     priceInCents: 2999,
@@ -78,7 +78,7 @@ describe('SubscriptionStatus', () => {
     it('should show yearly price', () => {
       const subscription = createMockSubscription({
         plan: {
-          id: 'plan_123',
+          id: 'plan_123' as unknown as PlanId,
           name: 'Pro Plan',
           description: null,
           priceInCents: 29900,

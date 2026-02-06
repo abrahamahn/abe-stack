@@ -24,7 +24,6 @@ import {
   type ReactElement,
 } from 'react';
 
-import { type RecordCache, type TableMap } from '../cache/RecordCache';
 import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
 import { RecordStorage, type RecordMap, type VersionedRecord } from '../storage/RecordStorage';
 import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
@@ -32,6 +31,7 @@ import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../un
 import { SubscriptionCache } from './SubscriptionCache';
 import { WebsocketPubsubClient, type ConnectionState } from './WebsocketPubsubClient';
 
+import type { RecordCache, TableMap } from '../cache/RecordCache';
 import type { Contracts } from '@abe-stack/shared';
 
 type RealtimeOperation = Contracts.Operation;

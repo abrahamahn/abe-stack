@@ -13,12 +13,12 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { type DbClient, type Repositories } from '@abe-stack/db';
 import { InvalidCredentialsError, InvalidTokenError } from '@abe-stack/shared';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { DbClient, Repositories } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================

@@ -194,11 +194,8 @@ export function isUnauthorizedError(error: unknown): error is UnauthorizedError 
  * Extract a user-friendly error message from any error
  */
 export function getErrorMessage(error: unknown): string {
-  if (error instanceof AppError) {
-    return (error as unknown as AppError).message;
-  }
   if (error instanceof Error) {
-    return (error as unknown as Error).message;
+    return error.message;
   }
   if (typeof error === 'string') {
     return error;

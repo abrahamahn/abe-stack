@@ -64,31 +64,63 @@ export function generateUUID(): string {
 
 /**
  * Generates a secure random alphanumeric ID.
+ *
+ * Uses rejection sampling to eliminate modular bias: byte values that
+ * don't divide evenly into the alphabet size are discarded and re-sampled.
+ *
+ * @param length - Desired ID length (default: 16)
+ * @returns Uniformly random alphanumeric string
+ * @complexity O(length) expected, with negligible rejection probability
  */
 export function generateSecureId(length: number = 16): string {
   const crypto = getCrypto();
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
+  const charCount = chars.length; // 62
+  // Largest multiple of charCount that fits in a byte (62 * 4 = 248)
+  const maxUnbiased = Math.floor(256 / charCount) * charCount;
 
-  return Array.from(array, (val) => chars[val % chars.length]).join('');
+  const result: string[] = [];
+  // Over-allocate to reduce re-sampling rounds; ~3% rejection rate for 62 chars
+  const batchSize = Math.ceil(length * 1.05) + 8;
+
+  while (result.length < length) {
+    const batch = new Uint8Array(batchSize);
+    crypto.getRandomValues(batch);
+
+    for (let i = 0; i < batch.length && result.length < length; i++) {
+      const val = batch[i] ?? 0;
+      // Reject values >= maxUnbiased to eliminate modular bias
+      if (val < maxUnbiased) {
+        result.push(chars[val % charCount] ?? '');
+      }
+    }
+  }
+
+  return result.join('');
 }
 
 /**
  * Compares two strings in constant time to prevent timing attacks.
  *
+ * Always iterates over the full length of the longer string to avoid
+ * leaking length information through timing side-channels.
+ *
  * @param a - First string to compare
  * @param b - Second string to compare
  * @returns True if strings are equal, false otherwise
+ * @complexity O(max(a.length, b.length))
  */
 export function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
+  const maxLen = Math.max(a.length, b.length);
+  // XOR the lengths so unequal lengths always fail without early return
+  let result = a.length ^ b.length;
+
+  for (let i = 0; i < maxLen; i++) {
+    // Use 0 as fallback for out-of-bounds to avoid short-circuiting
+    const ca = i < a.length ? a.charCodeAt(i) : 0;
+    const cb = i < b.length ? b.charCodeAt(i) : 0;
+    result |= ca ^ cb;
   }
 
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
   return result === 0;
 }

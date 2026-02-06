@@ -83,9 +83,9 @@ interface RequiredQueueOptions {
  * - cleanupJobs: O(n) where n is total jobs
  */
 export class CustomJobQueue<T = unknown> {
-  private jobs: Map<string, JobData<T>> = new Map();
-  private waitingQueue: JobData<T>[] = [];
-  private activeJobs: Set<string> = new Set();
+  private readonly jobs: Map<string, JobData<T>> = new Map();
+  private readonly waitingQueue: JobData<T>[] = [];
+  private readonly activeJobs: Set<string> = new Set();
   private running = false;
   private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
   protected options: RequiredQueueOptions;

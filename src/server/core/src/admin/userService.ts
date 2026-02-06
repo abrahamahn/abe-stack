@@ -56,6 +56,7 @@ function mapSortByToColumn(sortBy?: string): 'email' | 'name' | 'created_at' | '
       return 'created_at';
     case 'updatedAt':
       return 'updated_at';
+    case undefined:
     default:
       return 'created_at';
   }

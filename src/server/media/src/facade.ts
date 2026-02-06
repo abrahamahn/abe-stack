@@ -48,7 +48,7 @@ export interface MediaJobData {
  * ```
  */
 export class ServerMediaQueue extends CustomJobQueue {
-  private orchestrator: MediaProcessingOrchestrator;
+  private readonly orchestrator: MediaProcessingOrchestrator;
 
   /**
    * Create a server media queue with pre-configured processors

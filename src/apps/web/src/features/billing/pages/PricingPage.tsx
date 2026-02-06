@@ -8,6 +8,7 @@ import { tokenStore } from '@abe-stack/shared';
 import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
+import type { PlanId } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================
@@ -29,7 +30,7 @@ export const PricingPage = (): ReactElement => {
   const subscriptionResult = useSubscription(clientConfig);
   const { subscription, createCheckout, isActing } = subscriptionResult;
 
-  const handleSelectPlan = async (plan: { id: string }): Promise<void> => {
+  const handleSelectPlan = async (plan: { id: PlanId }): Promise<void> => {
     // If user is already subscribed to this plan, go to billing settings
     if (subscription?.planId === plan.id) {
       navigate('/settings/billing');
@@ -45,7 +46,7 @@ export const PricingPage = (): ReactElement => {
     }
   };
 
-  const getActionLabel = (_plan: { id: string }, isCurrent: boolean): string => {
+  const getActionLabel = (_plan: { id: PlanId }, isCurrent: boolean): string => {
     if (isCurrent) return 'Current Plan';
     if (subscription === null) return 'Get Started';
     return 'Switch to This Plan';

@@ -31,53 +31,76 @@ import {
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useState, useCallback } from 'react';
 
+import type {
+  AdminPlan,
+  CreatePlanRequest,
+  FeatureKey,
+  PlanFeature,
+  UpdatePlanRequest,
+} from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================
-// Local Types (for ESLint type resolution)
+// Local Types (for form state)
 // ============================================================================
 
+/**
+ * Simplified feature shape for form state.
+ * Mapped to the domain PlanFeature union at API call boundaries.
+ */
 interface PlanFeatureLocal {
+  key: FeatureKey;
   name: string;
   included: boolean;
 }
 
-interface AdminPlanLocal {
-  id: string;
-  name: string;
-  description: string | null;
-  interval: 'month' | 'year';
-  priceInCents: number;
-  currency: string;
-  trialDays: number;
-  isActive: boolean;
-  sortOrder: number;
-  features: PlanFeatureLocal[];
-  stripePriceId: string | null;
+/** Limit feature keys that require a numeric value */
+const LIMIT_KEYS: ReadonlySet<FeatureKey> = new Set<FeatureKey>(['projects:limit', 'storage:limit']);
+
+/**
+ * Type guard: checks whether a FeatureKey is a limit feature key.
+ *
+ * @param key - Feature key to check
+ * @returns True if the key is a limit feature key
+ */
+function isLimitKey(key: FeatureKey): key is 'projects:limit' | 'storage:limit' {
+  return LIMIT_KEYS.has(key);
 }
 
-interface CreatePlanRequestLocal {
-  name: string;
-  description?: string;
-  interval: 'month' | 'year';
-  priceInCents: number;
-  currency: string;
-  trialDays: number;
-  isActive: boolean;
-  sortOrder: number;
-  features?: PlanFeatureLocal[];
+/**
+ * Maps local form features to domain PlanFeature union.
+ *
+ * Limit features receive a default value of 0 since the local form
+ * state does not track numeric limits; the actual value is set
+ * separately in the plan editor.
+ *
+ * @param features - Local feature form data
+ * @returns Domain-typed PlanFeature array
+ * @complexity O(n) where n is feature count
+ */
+function toApiFeatures(features: readonly PlanFeatureLocal[]): PlanFeature[] {
+  return features.map((f): PlanFeature => {
+    const { key, name, included } = f;
+    if (isLimitKey(key)) {
+      return { key, name, included, value: 0 };
+    }
+    return { key, name, included };
+  });
 }
 
-interface UpdatePlanRequestLocal {
-  name?: string;
-  description?: string | null;
-  interval?: 'month' | 'year';
-  priceInCents?: number;
-  currency?: string;
-  trialDays?: number;
-  isActive?: boolean;
-  sortOrder?: number;
-  features?: PlanFeatureLocal[];
+/**
+ * Maps domain PlanFeature union to local form features.
+ *
+ * @param features - Domain PlanFeature array
+ * @returns Local feature form data
+ * @complexity O(n) where n is feature count
+ */
+function fromApiFeatures(features: readonly PlanFeature[]): PlanFeatureLocal[] {
+  return features.map((f): PlanFeatureLocal => ({
+    key: f.key,
+    name: f.name,
+    included: f.included,
+  }));
 }
 
 // ============================================================================
@@ -126,7 +149,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
   const handleAddFeature = (): void => {
     onChange({
       ...data,
-      features: [...data.features, { name: '', included: true }],
+      features: [...data.features, { key: 'team:invite' as FeatureKey, name: '', included: true }],
     });
   };
 
@@ -280,6 +303,19 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
         </div>
         {data.features.map((feature, index) => (
           <div key={index} className="plan-form__feature-row">
+            <Select
+              value={feature.key}
+              onChange={(value) => {
+                handleFeatureChange(index, 'key', value);
+              }}
+              disabled={isSubmitting}
+            >
+              <option value="team:invite">Team Invite</option>
+              <option value="api:access">API Access</option>
+              <option value="branding:custom">Custom Branding</option>
+              <option value="projects:limit">Projects Limit</option>
+              <option value="storage:limit">Storage Limit</option>
+            </Select>
             <Input
               value={feature.name}
               onChange={(e) => {
@@ -321,7 +357,7 @@ export const PlanManagementPage = (): ReactElement => {
   const { config } = useClientEnvironment();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editPlan, setEditPlan] = useState<AdminPlanLocal | null>(null);
+  const [editPlan, setEditPlan] = useState<AdminPlan | null>(null);
   const [formData, setFormData] = useState<PlanFormData>(defaultFormData);
 
   const clientConfig: AdminBillingClientConfig = {
@@ -338,7 +374,7 @@ export const PlanManagementPage = (): ReactElement => {
     setCreateDialogOpen(true);
   }, []);
 
-  const handleOpenEdit = useCallback((plan: AdminPlanLocal): void => {
+  const handleOpenEdit = useCallback((plan: AdminPlan): void => {
     setFormData({
       name: plan.name,
       description: plan.description ?? '',
@@ -348,13 +384,13 @@ export const PlanManagementPage = (): ReactElement => {
       trialDays: plan.trialDays,
       isActive: plan.isActive,
       sortOrder: plan.sortOrder,
-      features: plan.features,
+      features: fromApiFeatures(plan.features),
     });
     setEditPlan(plan);
   }, []);
 
   const handleCreate = useCallback(async (): Promise<void> => {
-    const request: CreatePlanRequestLocal = {
+    const request: CreatePlanRequest = {
       name: formData.name,
       ...(formData.description !== '' && { description: formData.description }),
       interval: formData.interval,
@@ -363,7 +399,7 @@ export const PlanManagementPage = (): ReactElement => {
       trialDays: formData.trialDays,
       isActive: formData.isActive,
       sortOrder: formData.sortOrder,
-      ...(formData.features.length > 0 && { features: formData.features }),
+      features: toApiFeatures(formData.features),
     };
     await create(request);
     setCreateDialogOpen(false);
@@ -371,7 +407,7 @@ export const PlanManagementPage = (): ReactElement => {
 
   const handleUpdate = useCallback(async (): Promise<void> => {
     if (editPlan === null) return;
-    const request: UpdatePlanRequestLocal = {
+    const request: UpdatePlanRequest = {
       name: formData.name,
       description: formData.description !== '' ? formData.description : null,
       interval: formData.interval,
@@ -380,7 +416,7 @@ export const PlanManagementPage = (): ReactElement => {
       trialDays: formData.trialDays,
       isActive: formData.isActive,
       sortOrder: formData.sortOrder,
-      features: formData.features,
+      features: toApiFeatures(formData.features),
     };
     await update(editPlan.id, request);
     setEditPlan(null);
@@ -440,7 +476,7 @@ export const PlanManagementPage = (): ReactElement => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(plans as AdminPlanLocal[]).map((plan: AdminPlanLocal) => (
+              {plans.map((plan: AdminPlan) => (
                 <TableRow key={plan.id}>
                   <TableCell>
                     <strong>{plan.name}</strong>

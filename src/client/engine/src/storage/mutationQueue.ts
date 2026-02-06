@@ -59,9 +59,9 @@ export class MutationQueue {
   private queue: QueuedMutation[] = [];
   private isProcessing = false;
   private isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
-  private options: Required<MutationQueueOptions>;
-  private boundHandleOnline: () => void;
-  private boundHandleOffline: () => void;
+  private readonly options: Required<MutationQueueOptions>;
+  private readonly boundHandleOnline: () => void;
+  private readonly boundHandleOffline: () => void;
 
   constructor(options: MutationQueueOptions = {}) {
     this.options = {

@@ -70,6 +70,7 @@ import { AuthService, createAuthService } from './AuthService';
 
 import type { ClientConfig } from '../../../config';
 import type { AuthResponse, RegisterResponse, User } from '@abe-stack/api';
+import type { UserId } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Helpers
@@ -84,7 +85,7 @@ function createMockConfig(): ClientConfig {
 
 function createMockUser(): User {
   return {
-    id: 'user-123',
+    id: 'user-123' as unknown as UserId,
     email: 'test@example.com',
     name: 'Test User',
     avatarUrl: null,

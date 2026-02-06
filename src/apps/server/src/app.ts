@@ -3,10 +3,10 @@
 import { verifyToken } from '@abe-stack/core/auth';
 import { requireValidSchema } from '@abe-stack/db';
 import { logStartupSummary } from '@abe-stack/server-engine';
-import { BaseError, SubscriptionManager, createConsoleLogger } from '@abe-stack/shared';
+import { SubscriptionManager, createConsoleLogger } from '@abe-stack/shared';
 import { getWebSocketStats, registerWebSocket } from '@abe-stack/websocket';
 import { registerRoutes } from '@routes';
-import { type AppContext, type IServiceContainer } from '@shared';
+
 
 import { createInfrastructure } from './infrastructure';
 
@@ -14,6 +14,7 @@ import type { DbClient, PostgresPubSub, Repositories } from '@abe-stack/db';
 import type { QueueServer, ServerSearchProvider, WriteService } from '@abe-stack/server-engine';
 import type { BillingService, CacheProvider, EmailService, StorageClient } from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
+import type { AppContext, IServiceContainer } from '@shared';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 // Temporary local declaration - NotificationService export issue in @abe-stack/shared
@@ -54,7 +55,7 @@ export class App implements IServiceContainer {
   public readonly cache: CacheProvider;
   public readonly emailTemplates: IServiceContainer['emailTemplates'];
 
-  private _pgPubSub: PostgresPubSub | null = null;
+  private readonly _pgPubSub: PostgresPubSub | null = null;
   private _server: FastifyInstance | null = null;
   private _fallbackLogger: FastifyBaseLogger | null = null;
 
@@ -127,51 +128,6 @@ export class App implements IServiceContainer {
     this._pgPubSub = infra.pgPubSub;
   }
 
-  private setupErrorHandler(server: FastifyInstance): void {
-    server.setErrorHandler((error, request, reply) => {
-      // 1. Handle Known Domain Errors (Clean Architecture)
-      if (error instanceof BaseError) {
-        const baseError: BaseError = error;
-        // Log "operational" errors as info/warn, not error, to reduce noise
-        const errorRecord = baseError as unknown as Record<string, unknown>;
-        const statusCode =
-          typeof errorRecord['statusCode'] === 'number' ? errorRecord['statusCode'] : 500;
-        if (statusCode < 500) {
-          request.log.warn({ err: baseError }, 'Operational Error');
-        } else {
-          request.log.error({ err: baseError }, 'Domain Error');
-        }
-
-        return reply.status(statusCode).send({
-          error: baseError.name,
-          message: baseError.message,
-          code: errorRecord['code'],
-        });
-      }
-
-      // 2. Handle Schema Validation Errors (Fastify native)
-      if (
-        error !== null &&
-        typeof error === 'object' &&
-        'validation' in error &&
-        (error as { validation?: unknown }).validation !== undefined
-      ) {
-        return reply.status(400).send({
-          error: 'ValidationError',
-          message: 'Invalid request data',
-          details: (error as Record<string, unknown>)['validation'],
-        });
-      }
-
-      // 3. Fallback: Unexpected Crash
-      request.log.error({ err: error }, 'Unexpected Crash');
-      return reply.status(500).send({
-        error: 'InternalServerError',
-        message: 'Something went wrong',
-      });
-    });
-  }
-
   async start(): Promise<void> {
     try {
       // Validate DB Schema before accepting traffic
@@ -181,14 +137,13 @@ export class App implements IServiceContainer {
       if (this._pgPubSub !== null) await this._pgPubSub.start();
 
       // Initialize Web Server
+      // Note: Error handling is registered by registerPlugins() inside createServer()
+      // via the injected isAppError/getErrorInfo callbacks (see server.ts + http/plugins.ts)
       this._server = await createServer({
         config: this.config,
         db: this.db,
         app: this,
       });
-
-      // Register Centralized Error Handler
-      this.setupErrorHandler(this._server);
 
       registerRoutes(this._server, this.context);
 

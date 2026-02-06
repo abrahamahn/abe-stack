@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/deferred-promise.ts
+// src/shared/src/utils/async/deferred-promise.ts
 
 /**
  * A Promise with externally accessible resolve and reject functions.
@@ -38,14 +38,22 @@
  * ```
  */
 export class DeferredPromise<T> {
-  public resolve!: (value: T | PromiseLike<T>) => void;
-  public reject!: (error: unknown) => void;
+  public resolve: (value: T | PromiseLike<T>) => void;
+  public reject: (error: unknown) => void;
   public readonly promise: Promise<T>;
 
   constructor() {
+    // Initialize to no-ops to satisfy strict property initialization.
+    // The Promise executor runs synchronously and overwrites these immediately.
+    let r: (value: T | PromiseLike<T>) => void = () => {};
+    let j: (error: unknown) => void = () => {};
+
     this.promise = new Promise<T>((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
+      r = resolve;
+      j = reject;
     });
+
+    this.resolve = r;
+    this.reject = j;
   }
 }

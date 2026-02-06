@@ -8,11 +8,12 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { type ReactElement, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Link, Navigate, Outlet, Route, Routes, useParams } from './components';
 import { MemoryRouter } from './context';
+
+import type { ReactElement, ReactNode } from 'react';
 
 // Test components
 const TestComponent = ({ text }: { text: string }): ReactElement => {

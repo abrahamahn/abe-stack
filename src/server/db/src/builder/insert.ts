@@ -22,9 +22,9 @@ import {
  * InsertBuilder class for constructing INSERT queries
  */
 export class InsertBuilder implements QueryBuilder {
-  private _table: TableSpec;
+  private readonly _table: TableSpec;
   private _columns: string[] = [];
-  private _values: unknown[][] = [];
+  private readonly _values: unknown[][] = [];
   private _returning: string[] = [];
   private _onConflict: {
     columns?: string[];

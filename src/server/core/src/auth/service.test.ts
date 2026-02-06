@@ -35,9 +35,8 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthEmailTemplates, AuthLogger } from './index';
+import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './index';
 import type { AuthConfig } from '@abe-stack/shared/config';
-import type { EmailService, Logger } from '@abe-stack/shared/contracts';
 
 // ============================================================================
 // Mock Dependencies
@@ -205,10 +204,10 @@ function createMockRepos(): Repositories {
   } as unknown as Repositories;
 }
 
-function createMockEmailService(): EmailService {
+function createMockEmailService(): AuthEmailService {
   return {
     send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-id' }),
-  };
+  } as unknown as AuthEmailService;
 }
 
 function createMockLogger(): AuthLogger {
@@ -276,7 +275,7 @@ function createMockUser(overrides?: Partial<User>): User {
 describe('registerUser', () => {
   let db: DbClient;
   let repos: Repositories;
-  let emailService: EmailService;
+  let emailService: AuthEmailService;
   let templates: AuthEmailTemplates;
   let config: AuthConfig;
 
@@ -459,7 +458,7 @@ describe('authenticateUser', () => {
   let db: DbClient;
   let repos: Repositories;
   let config: AuthConfig;
-  let logger: Logger;
+  let logger: AuthLogger;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -843,7 +842,7 @@ describe('logoutUser', () => {
 describe('requestPasswordReset', () => {
   let db: DbClient;
   let repos: Repositories;
-  let emailService: EmailService;
+  let emailService: AuthEmailService;
   let templates: AuthEmailTemplates;
 
   beforeEach(() => {
@@ -1086,7 +1085,7 @@ describe('verifyEmail', () => {
 describe('resendVerificationEmail', () => {
   let db: DbClient;
   let repos: Repositories;
-  let emailService: EmailService;
+  let emailService: AuthEmailService;
   let templates: AuthEmailTemplates;
 
   beforeEach(() => {

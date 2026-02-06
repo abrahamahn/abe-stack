@@ -12,22 +12,16 @@ import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
+import type { JobStatus } from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 interface JobDetailsLocal {
   id: string;
   name: string;
-  status: JobStatusLocal;
+  status: JobStatus;
   createdAt: string;
   scheduledAt: string;
   completedAt: string | null;

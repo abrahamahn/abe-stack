@@ -282,6 +282,9 @@ export async function registerServiceWorker(
         case 'redundant':
           // Worker was replaced
           break;
+        case 'parsed':
+          // Initial state after registration, no action needed
+          break;
       }
     });
   }

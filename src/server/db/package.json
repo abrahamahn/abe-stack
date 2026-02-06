@@ -20,6 +20,8 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs && tsc --emitDeclarationOnly",
     "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --max-warnings 0"
   },
   "keywords": [

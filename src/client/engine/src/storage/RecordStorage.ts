@@ -481,7 +481,7 @@ class LocalStorageBackend implements StorageBackend {
 // ============================================================================
 
 class MemoryBackend implements StorageBackend {
-  private storage = new Map<string, unknown>();
+  private readonly storage = new Map<string, unknown>();
 
   isAvailable(): boolean {
     return true;
@@ -565,7 +565,7 @@ export class RecordStorage<Tables extends string = string> {
   private backend: StorageBackend;
   private readonly debug: boolean;
   private readonly listeners: Set<RecordStorageListener<Tables>>;
-  private readyPromise: Promise<void>;
+  private readonly readyPromise: Promise<void>;
 
   constructor(options: RecordStorageOptions = {}) {
     const { dbName = 'abe-stack-records', storeName = 'records', debug = false } = options;

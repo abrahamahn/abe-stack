@@ -259,7 +259,9 @@ describe('useInfiniteSearch', () => {
       data: [{ item: { id: '1', name: 'John' }, score: 1 }],
       limit: 10,
       hasNext: true,
+      hasPrev: false,
       nextCursor: 'cursor-1',
+      prevCursor: null,
     } as CursorSearchResult<TestUser>);
 
     const { result } = renderHook(
@@ -283,13 +285,17 @@ describe('useInfiniteSearch', () => {
         data: [{ item: { id: '1', name: 'John' }, score: 1 }],
         limit: 10,
         hasNext: true,
+        hasPrev: false,
         nextCursor: 'cursor-1',
+        prevCursor: null,
       } as CursorSearchResult<TestUser>)
       .mockResolvedValueOnce({
         data: [{ item: { id: '2', name: 'Jane' }, score: 1 }],
         limit: 10,
         hasNext: false,
-        nextCursor: undefined,
+        hasPrev: true,
+        nextCursor: null,
+        prevCursor: 'cursor-0',
       } as CursorSearchResult<TestUser>);
 
     const { result } = renderHook(
@@ -322,12 +328,17 @@ describe('useInfiniteSearch', () => {
         ],
         limit: 2,
         hasNext: true,
+        hasPrev: false,
         nextCursor: 'cursor-1',
+        prevCursor: null,
       } as CursorSearchResult<TestUser>)
       .mockResolvedValueOnce({
         data: [{ item: { id: '3', name: 'Bob' }, score: 0.8 }],
         limit: 2,
         hasNext: false,
+        hasPrev: true,
+        nextCursor: null,
+        prevCursor: 'cursor-0',
       } as CursorSearchResult<TestUser>);
 
     const { result } = renderHook(
@@ -355,6 +366,9 @@ describe('useInfiniteSearch', () => {
       data: [{ item: { id: '1', name: 'John' }, score: 1 }],
       limit: 10,
       hasNext: false,
+      hasPrev: false,
+      nextCursor: null,
+      prevCursor: null,
     } as CursorSearchResult<TestUser>);
 
     const { result } = renderHook(() => useInfiniteSearch<TestUser>(mockSearchFn), {
@@ -384,6 +398,9 @@ describe('useInfiniteSearch', () => {
       data: [{ item: { id: '1', name: 'John' }, score: 1 }],
       limit: 10,
       hasNext: false,
+      hasPrev: false,
+      nextCursor: null,
+      prevCursor: null,
       total: 1,
     } as CursorSearchResult<TestUser>);
 

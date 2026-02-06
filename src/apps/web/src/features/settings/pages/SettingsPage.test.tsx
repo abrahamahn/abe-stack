@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SettingsPage } from './SettingsPage';
 
 import type { User } from '../api';
+import type { UserId } from '@abe-stack/shared';
 import type { ReactNode } from 'react';
 
 vi.mock('@abe-stack/client-engine', () => ({
@@ -67,7 +68,7 @@ vi.mock('@abe-stack/ui', () => {
 
 describe('SettingsPage', () => {
   const mockUser: User = {
-    id: 'user-123',
+    id: 'user-123' as unknown as UserId,
     email: 'test@example.com',
     name: 'Test User',
     avatarUrl: 'https://example.com/avatar.jpg',

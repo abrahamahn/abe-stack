@@ -307,8 +307,8 @@ class CteBuilderImpl implements CteBuilder {
 // ============================================================================
 
 class CteSelectBuilderImpl implements CteSelectBuilder {
-  private _ctes: CteDefinition[];
-  private _builder: SelectBuilder;
+  private readonly _ctes: CteDefinition[];
+  private readonly _builder: SelectBuilder;
 
   constructor(ctes: CteDefinition[], table: string | TableSpec) {
     this._ctes = ctes;
@@ -405,8 +405,8 @@ class CteSelectBuilderImpl implements CteSelectBuilder {
 }
 
 class CteInsertBuilderImpl implements CteInsertBuilder {
-  private _ctes: CteDefinition[];
-  private _builder: InsertBuilder;
+  private readonly _ctes: CteDefinition[];
+  private readonly _builder: InsertBuilder;
 
   constructor(ctes: CteDefinition[], table: string | TableSpec) {
     this._ctes = ctes;
@@ -460,8 +460,8 @@ class CteInsertBuilderImpl implements CteInsertBuilder {
 }
 
 class CteUpdateBuilderImpl implements CteUpdateBuilder {
-  private _ctes: CteDefinition[];
-  private _builder: UpdateBuilder;
+  private readonly _ctes: CteDefinition[];
+  private readonly _builder: UpdateBuilder;
 
   constructor(ctes: CteDefinition[], table: string | TableSpec) {
     this._ctes = ctes;
@@ -516,8 +516,8 @@ class CteUpdateBuilderImpl implements CteUpdateBuilder {
 }
 
 class CteDeleteBuilderImpl implements CteDeleteBuilder {
-  private _ctes: CteDefinition[];
-  private _builder: DeleteBuilder;
+  private readonly _ctes: CteDefinition[];
+  private readonly _builder: DeleteBuilder;
 
   constructor(ctes: CteDefinition[], table: string | TableSpec) {
     this._ctes = ctes;

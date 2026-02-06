@@ -104,7 +104,6 @@ export async function handleMagicLinkRequest(
       );
       // Return success anyway to prevent enumeration (user can retry)
       const responseBody: MagicLinkRequestResponse = {
-        success: true,
         message: SUCCESS_MESSAGES.MAGIC_LINK_SENT,
       };
       return { status: 200 as const, body: responseBody };

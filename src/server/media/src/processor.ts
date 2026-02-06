@@ -74,10 +74,10 @@ export interface ProcessingLimits {
  * ```
  */
 export class MediaProcessingOrchestrator {
-  private activeJobs = new Map<string, ProcessingJob>();
-  private queue: ProcessingJob[] = [];
+  private readonly activeJobs = new Map<string, ProcessingJob>();
+  private readonly queue: ProcessingJob[] = [];
   private readonly limits: ProcessingLimits;
-  private securityScanner: BasicSecurityScanner;
+  private readonly securityScanner: BasicSecurityScanner;
 
   /**
    * Create a media processing orchestrator
@@ -89,9 +89,9 @@ export class MediaProcessingOrchestrator {
    * @param _securityOptions - Reserved for future security configuration
    */
   constructor(
-    private imageProcessor: ImageProcessor,
-    private audioProcessor: AudioProcessor,
-    private videoProcessor: VideoProcessor,
+    private readonly imageProcessor: ImageProcessor,
+    private readonly audioProcessor: AudioProcessor,
+    private readonly videoProcessor: VideoProcessor,
     limits: Partial<ProcessingLimits> = {},
     _securityOptions?: Record<string, unknown>,
   ) {

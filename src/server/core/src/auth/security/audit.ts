@@ -177,11 +177,11 @@ export interface AuditStats {
  * @complexity O(1) per event logging, O(n) for stats computation
  */
 export class SecurityAuditLogger {
-  private config: AuditConfig;
+  private readonly config: AuditConfig;
   private eventBuffer: AuditEvent[] = [];
   private flushTimer?: NodeJS.Timeout | undefined;
   private intrusionCleanupTimer?: NodeJS.Timeout | undefined;
-  private intrusionState = new Map<string, { lastTriggered: number; count: number }>();
+  private readonly intrusionState = new Map<string, { lastTriggered: number; count: number }>();
   private static readonly maxBufferSize = 10000;
   private static readonly intrusionStateMaxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
   private static readonly intrusionCleanupIntervalMs = 60 * 60 * 1000; // 1 hour

@@ -1,6 +1,7 @@
 // client/ui/src/components/Accordion.tsx
 import { useControllableState } from '@hooks/useControllableState';
-import { type ReactElement, type ReactNode } from 'react';
+
+import type { ReactElement, ReactNode } from 'react';
 
 import '../styles/components.css';
 

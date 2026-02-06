@@ -23,8 +23,8 @@ interface Visit {
 }
 
 export class RateLimiter {
-  private visits = new Map<string, Visit>();
-  private config: RateLimitConfig;
+  private readonly visits = new Map<string, Visit>();
+  private readonly config: RateLimitConfig;
 
   constructor(config: RateLimitConfig) {
     this.config = config;

@@ -407,7 +407,6 @@ describe('handleMagicLinkRequest', () => {
 
       expect(result.status).toBe(200);
       expect(result.body).toEqual({
-        success: true,
         message: 'Magic link sent to your email',
       });
       expect(ctx.log.error).toHaveBeenCalledWith(
@@ -432,7 +431,6 @@ describe('handleMagicLinkRequest', () => {
 
       expect(result.status).toBe(200);
       expect(result.body).toEqual({
-        success: true,
         message: 'Magic link sent to your email',
       });
       expect(ctx.log.error).toHaveBeenCalledWith(

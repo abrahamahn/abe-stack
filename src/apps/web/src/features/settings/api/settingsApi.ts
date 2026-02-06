@@ -6,16 +6,17 @@
  */
 
 import { createApiError, NetworkError } from '@abe-stack/client-engine';
-import {
-  type AvatarDeleteResponse,
-  type AvatarUploadResponse,
-  type ChangePasswordRequest,
-  type ChangePasswordResponse,
-  type RevokeAllSessionsResponse,
-  type RevokeSessionResponse,
-  type SessionsListResponse,
-  type UpdateProfileRequest,
-  type User,
+
+import type {
+  AvatarDeleteResponse,
+  AvatarUploadResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  RevokeAllSessionsResponse,
+  RevokeSessionResponse,
+  SessionsListResponse,
+  UpdateProfileRequest,
+  User,
 } from '@abe-stack/shared';
 
 // ============================================================================

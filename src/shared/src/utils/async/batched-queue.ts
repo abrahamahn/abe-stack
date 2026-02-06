@@ -51,8 +51,8 @@ export interface BatchProcessResult<T> {
 export class BatchedQueue<T, R = T> {
   private tasks: Array<{ item: T; deferred: DeferredPromise<R> }> = [];
   private timer: ReturnType<typeof setTimeout> | null = null;
-  private processor: (batch: T[]) => Promise<R[]>;
-  private options: Required<BatchedQueueOptions>;
+  private readonly processor: (batch: T[]) => Promise<R[]>;
+  private readonly options: Required<BatchedQueueOptions>;
 
   constructor(processor: (batch: T[]) => Promise<R[]>, options: BatchedQueueOptions = {}) {
     this.processor = processor;

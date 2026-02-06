@@ -27,8 +27,8 @@ export interface SubscriptionManagerOptions {
 // ============================================================================
 
 export class SubscriptionManager {
-  private subscriptions = new Map<SubscriptionKey, Set<WebSocket>>();
-  private socketSubscriptions = new WeakMap<WebSocket, Set<SubscriptionKey>>();
+  private readonly subscriptions = new Map<SubscriptionKey, Set<WebSocket>>();
+  private readonly socketSubscriptions = new WeakMap<WebSocket, Set<SubscriptionKey>>();
   private adapter: PostgresPubSub | null = null;
 
   constructor(options: SubscriptionManagerOptions = {}) {
@@ -77,8 +77,17 @@ export class SubscriptionManager {
   }
 
   /**
-   * Publish an update to all subscribers (local only)
-   * Used internally and by PostgresPubSub for cross-instance messages
+   * Publish an update to all subscribers (local only).
+   * Used internally and by PostgresPubSub for cross-instance messages.
+   *
+   * Wraps each send in a try-catch so a single failing socket cannot
+   * prevent delivery to the remaining subscribers. Dead sockets
+   * (readyState !== OPEN) are pruned during iteration to prevent
+   * gradual memory leaks from disconnected clients.
+   *
+   * @param key - The subscription key to publish to
+   * @param version - The data version number
+   * @complexity O(n) where n = subscribers for this key
    */
   publishLocal(key: SubscriptionKey, version: number): void {
     const sockets = this.subscriptions.get(key);
@@ -86,12 +95,31 @@ export class SubscriptionManager {
 
     const message: ServerMessage = { type: 'update', key, version };
     const payload = JSON.stringify(message);
+    const dead: WebSocket[] = [];
 
     for (const socket of sockets) {
       if (socket.readyState === 1) {
         // WebSocket.OPEN
-        socket.send(payload);
+        try {
+          socket.send(payload);
+        } catch {
+          // Socket closed between readyState check and send — mark for cleanup
+          dead.push(socket);
+        }
+      } else {
+        // CONNECTING (0), CLOSING (2), or CLOSED (3) — prune
+        dead.push(socket);
       }
+    }
+
+    // Clean up dead sockets outside the iteration loop
+    for (const socket of dead) {
+      sockets.delete(socket);
+      this.socketSubscriptions.get(socket)?.delete(key);
+    }
+
+    if (sockets.size === 0) {
+      this.subscriptions.delete(key);
     }
   }
 

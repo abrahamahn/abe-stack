@@ -114,6 +114,8 @@ export function buildConnectionString(config: DatabaseConfig): string {
     }
     case 'mongodb':
       return config.connectionString;
+    case 'json':
+    case 'sqlite':
     default:
       return '';
   }

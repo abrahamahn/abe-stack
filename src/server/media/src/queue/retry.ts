@@ -59,8 +59,8 @@ export interface RetryState {
  * ```
  */
 export class MediaProcessingRetryHandler {
-  private retryStates = new Map<string, RetryState>();
-  private defaultOptions: Required<RetryOptions>;
+  private readonly retryStates = new Map<string, RetryState>();
+  private readonly defaultOptions: Required<RetryOptions>;
   private cleanupInterval: NodeJS.Timeout | null = null;
   private static readonly cleanupIntervalMs = 5 * 60 * 1000; // 5 minutes
   private static readonly defaultMaxAgeMs = 60 * 60 * 1000; // 1 hour
@@ -72,7 +72,7 @@ export class MediaProcessingRetryHandler {
    * @param options - Partial retry options (defaults are applied)
    */
   constructor(
-    private logger: Logger,
+    private readonly logger: Logger,
     options: Partial<RetryOptions> = {},
   ) {
     this.defaultOptions = {

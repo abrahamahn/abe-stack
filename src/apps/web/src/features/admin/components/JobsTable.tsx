@@ -21,24 +21,17 @@ import {
 
 import { JobStatusBadge } from './JobStatusBadge';
 
+import type { JobStatus } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 interface JobDetailsLocal {
   id: string;
   name: string;
-  status: JobStatusLocal;
+  status: JobStatus;
   createdAt: string;
   attempts: number;
   maxAttempts: number;
@@ -55,8 +48,8 @@ export interface JobsTableProps {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  selectedStatus: JobStatusLocal | undefined;
-  onStatusChange: (status: JobStatusLocal | undefined) => void;
+  selectedStatus: JobStatus | undefined;
+  onStatusChange: (status: JobStatus | undefined) => void;
   onPageChange: (page: number) => void;
   onJobClick: (job: JobDetailsLocal) => void;
   onRetry: (jobId: string) => Promise<void>;
@@ -67,12 +60,12 @@ export interface JobsTableProps {
 // Status Tabs
 // ============================================================================
 
-const STATUS_TABS: Array<{ id: string; label: string; status: JobStatusLocal | undefined }> = [
+const STATUS_TABS: Array<{ id: string; label: string; status: JobStatus | undefined }> = [
   { id: 'all', label: 'All', status: undefined },
   { id: 'pending', label: 'Pending', status: 'pending' },
   { id: 'processing', label: 'Processing', status: 'processing' },
   { id: 'failed', label: 'Failed', status: 'failed' },
-  { id: 'dead_letter', label: 'Dead Letter', status: 'dead_letter' },
+  { id: 'dead', label: 'Dead', status: 'dead' },
   { id: 'completed', label: 'Completed', status: 'completed' },
 ];
 
@@ -174,7 +167,7 @@ interface JobRowProps {
 }
 
 const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element => {
-  const canRetry = job.status === 'failed' || job.status === 'dead_letter';
+  const canRetry = job.status === 'failed' || job.status === 'dead';
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
   return (

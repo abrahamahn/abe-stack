@@ -10,7 +10,8 @@ import {
   paginateArray,
   sortArray,
 } from './operators';
-import { type CompoundFilter, type FilterCondition } from './types';
+
+import type { CompoundFilter, FilterCondition } from './types';
 
 describe('operators', () => {
   describe('getFieldValue', () => {

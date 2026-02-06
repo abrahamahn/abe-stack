@@ -359,6 +359,17 @@ export default [
       // Deprecation check
       '@typescript-eslint/no-deprecated': 'error',
 
+      // Exhaustiveness & immutability
+      '@typescript-eslint/switch-exhaustiveness-check': [
+        'error',
+        {
+          allowDefaultCaseForExhaustiveSwitch: true,
+          considerDefaultExhaustiveForUnions: true,
+        },
+      ],
+      '@typescript-eslint/prefer-readonly': 'error',
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+
       // 6. Naming Conventions (Big Tech Standard)
       '@typescript-eslint/naming-convention': [
         'error',
@@ -540,7 +551,7 @@ export default [
     },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'error',
     },
   },
   // Prevent frontend clients from importing server-side code or DB internals

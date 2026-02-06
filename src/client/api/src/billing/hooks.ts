@@ -23,6 +23,7 @@ import type {
   PaymentMethod,
   PaymentMethodsListResponse,
   Plan,
+  PlanId,
   PlansListResponse,
   SetupIntentResponse,
   Subscription,
@@ -140,7 +141,7 @@ export interface SubscriptionState {
   /** Resume subscription */
   resume: () => Promise<void>;
   /** Change plan */
-  changePlan: (planId: string) => Promise<void>;
+  changePlan: (planId: PlanId) => Promise<void>;
   /** Refresh subscription from server */
   refresh: () => Promise<void>;
 }
@@ -258,7 +259,7 @@ export function useSubscription(clientConfig: BillingClientConfig): Subscription
   }, [client, fetchSubscription]);
 
   const changePlan = useCallback(
-    async (planId: string): Promise<void> => {
+    async (planId: PlanId): Promise<void> => {
       try {
         setIsActing(true);
         setError(null);

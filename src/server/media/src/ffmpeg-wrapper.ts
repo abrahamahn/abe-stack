@@ -335,6 +335,8 @@ export async function convertVideo(
       ffmpegOptions.videoCodec = options.videoCodec ?? 'libx264';
       ffmpegOptions.audioCodec = options.audioCodec ?? 'mp3';
       break;
+    case undefined:
+      break;
   }
 
   if (options.videoBitrate !== undefined && options.videoBitrate.length > 0) {

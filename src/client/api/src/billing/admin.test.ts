@@ -30,6 +30,7 @@ import type {
   SubscriptionActionResponse,
   SyncStripeResponse,
   UpdatePlanRequest,
+  PlanId,
 } from '@abe-stack/shared';
 
 // ============================================================================
@@ -37,15 +38,15 @@ import type {
 // ============================================================================
 
 const mockAdminPlan: AdminPlan = {
-  id: 'plan-123',
+  id: 'plan-123' as PlanId,
   name: 'Pro Plan',
   description: 'Professional tier',
   interval: 'month',
   priceInCents: 1999,
   currency: 'USD',
   features: [
-    { name: 'Feature 1', included: true },
-    { name: 'Feature 2', included: true },
+    { key: 'team:invite', name: 'Feature 1', included: true },
+    { key: 'api:access', name: 'Feature 2', included: true },
   ],
   trialDays: 14,
   isActive: true,
@@ -58,16 +59,16 @@ const mockAdminPlan: AdminPlan = {
 };
 
 const mockAdminPlan2: AdminPlan = {
-  id: 'plan-456',
+  id: 'plan-456' as PlanId,
   name: 'Enterprise Plan',
   description: 'Enterprise tier',
   interval: 'year',
   priceInCents: 19999,
   currency: 'USD',
   features: [
-    { name: 'Feature 1', included: true },
-    { name: 'Feature 2', included: true },
-    { name: 'Feature 3', included: true },
+    { key: 'team:invite', name: 'Feature 1', included: true },
+    { key: 'api:access', name: 'Feature 2', included: true },
+    { key: 'branding:custom', name: 'Feature 3', included: true },
   ],
   trialDays: 30,
   isActive: true,
@@ -258,7 +259,7 @@ describe('createAdminBillingClient', () => {
       interval: 'month',
       priceInCents: 2999,
       currency: 'USD',
-      features: [{ name: 'Feature A', included: true }],
+      features: [{ key: 'team:invite', name: 'Feature A', included: true }],
       trialDays: 7,
       isActive: true,
       sortOrder: 3,
@@ -267,7 +268,7 @@ describe('createAdminBillingClient', () => {
     it('should create a new plan', async () => {
       const createdPlan: AdminPlan = {
         ...mockAdminPlan,
-        id: 'plan-789',
+        id: 'plan-789' as PlanId,
         name: createRequest.name,
         description: createRequest.description ?? null,
         priceInCents: createRequest.priceInCents,
@@ -298,6 +299,8 @@ describe('createAdminBillingClient', () => {
         name: 'Minimal Plan',
         interval: 'year',
         priceInCents: 9999,
+        features: [],
+        trialDays: 0,
       };
 
       mockFetch.mockResolvedValue({
@@ -717,11 +720,13 @@ describe('useAdminPlans', () => {
         name: 'New Plan',
         interval: 'month',
         priceInCents: 4999,
+        features: [],
+        trialDays: 0,
       };
 
       const createdPlan: AdminPlan = {
         ...mockAdminPlan,
-        id: 'plan-new',
+        id: 'plan-new' as PlanId,
         name: 'New Plan',
         priceInCents: 4999,
       };
@@ -790,6 +795,8 @@ describe('useAdminPlans', () => {
             name: '',
             interval: 'month',
             priceInCents: 0,
+            features: [],
+            trialDays: 0,
           }),
         ).rejects.toThrow();
       });
@@ -831,6 +838,8 @@ describe('useAdminPlans', () => {
           name: 'Test',
           interval: 'month',
           priceInCents: 1000,
+          features: [],
+          trialDays: 0,
         });
       });
 
@@ -1223,6 +1232,8 @@ describe('useAdminPlans', () => {
             name: 'Test',
             interval: 'month',
             priceInCents: 1000,
+            features: [],
+            trialDays: 0,
           }),
         ).rejects.toThrow();
       });
@@ -1247,6 +1258,8 @@ describe('useAdminPlans', () => {
           name: 'Valid Plan',
           interval: 'year',
           priceInCents: 9999,
+          features: [],
+          trialDays: 0,
         });
       });
 

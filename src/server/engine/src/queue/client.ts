@@ -52,10 +52,10 @@ export interface QueueServerOptions {
 }
 
 export class QueueServer {
-  private store: QueueStore;
-  private handlers: TaskHandlers;
-  private config: Required<QueueConfig>;
-  private log?: Logger;
+  private readonly store: QueueStore;
+  private readonly handlers: TaskHandlers;
+  private readonly config: Required<QueueConfig>;
+  private readonly log?: Logger;
   private running = false;
   private stopPromise: Promise<void> | null = null;
   private stopResolve: (() => void) | null = null;

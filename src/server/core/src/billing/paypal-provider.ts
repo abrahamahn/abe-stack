@@ -137,10 +137,10 @@ function mapPayPalEventType(eventType: string): NormalizedEventType {
 export class PayPalProvider implements BillingService {
   readonly provider = 'paypal' as const;
 
-  private baseUrl: string;
-  private clientId: string;
-  private clientSecret: string;
-  private webhookId: string;
+  private readonly baseUrl: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly webhookId: string;
 
   private accessToken: string | null = null;
   private tokenExpiresAt: number = 0;

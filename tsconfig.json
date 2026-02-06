@@ -9,8 +9,8 @@
     "noEmit": false,
 
     /* 2. Language Fundamentals */
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "ES2023",
+    "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -30,12 +30,10 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
 
-    /* 5. Clean Console */
-    "ignoreDeprecations": "5.0",
+    /* 5. Build Cache */
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
     "paths": {
       "@abe-stack/shared": ["./src/shared/src/index.ts"],

@@ -11,8 +11,8 @@ import type { EmailConfig } from '../config';
 import type { EmailOptions, EmailResult, EmailService } from './types';
 
 export class SmtpEmailService implements EmailService {
-  private client: SmtpClient;
-  private config: EmailConfig;
+  private readonly client: SmtpClient;
+  private readonly config: EmailConfig;
 
   constructor(config: EmailConfig) {
     this.config = config;

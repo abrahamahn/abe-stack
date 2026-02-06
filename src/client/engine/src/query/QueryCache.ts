@@ -182,8 +182,8 @@ function createInitialState<TData, TError>(): QueryState<TData, TError> {
  * ```
  */
 export class QueryCache {
-  private queries = new Map<string, QueryEntry>();
-  private globalSubscribers = new Set<() => void>();
+  private readonly queries = new Map<string, QueryEntry>();
+  private readonly globalSubscribers = new Set<() => void>();
   private readonly defaultStaleTime: number;
   private readonly defaultGcTime: number;
   private readonly refetchOnWindowFocus: boolean;

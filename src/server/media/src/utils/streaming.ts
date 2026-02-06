@@ -77,7 +77,7 @@ interface FfmpegModule {
  * ```
  */
 export class StreamingMediaProcessor {
-  private options: Required<StreamingOptions>;
+  private readonly options: Required<StreamingOptions>;
   private sharpModule: SharpFunction | null = null;
   private ffmpegModule: FfmpegModule | null = null;
 

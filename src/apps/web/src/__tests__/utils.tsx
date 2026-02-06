@@ -22,7 +22,7 @@ import { ClientEnvironmentProvider } from '../app/ClientEnvironment';
 import type { ClientEnvironment } from '../app/ClientEnvironment';
 import type { ClientConfig } from '../config';
 import type { AuthService, AuthState } from '../features/auth';
-import type { User } from '@abe-stack/shared';
+import type { User, UserId } from '@abe-stack/shared';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 
@@ -34,7 +34,7 @@ import type { ReactElement, ReactNode } from 'react';
  * Standard mock user for authenticated tests.
  */
 export const mockUser: User = {
-  id: 'user-123',
+  id: 'user-123' as unknown as UserId,
   email: 'test@example.com',
   name: 'Test User',
   avatarUrl: null,
@@ -48,7 +48,7 @@ export const mockUser: User = {
  * Admin user for admin-related tests.
  */
 export const mockAdminUser: User = {
-  id: 'admin-123',
+  id: 'admin-123' as unknown as UserId,
   email: 'admin@example.com',
   name: 'Admin User',
   avatarUrl: null,

@@ -12,22 +12,16 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
+import type { JobStatus } from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
 
-type JobStatusLocal =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
 interface JobDetailsLocal {
   id: string;
   name: string;
-  status: JobStatusLocal;
+  status: JobStatus;
   createdAt: string;
   attempts: number;
   maxAttempts: number;
@@ -40,7 +34,7 @@ interface JobListResponseLocal {
 }
 
 export interface JobsFilter {
-  status?: JobStatusLocal;
+  status?: JobStatus;
   name?: string;
 }
 
@@ -65,7 +59,7 @@ export interface UseJobsListResult {
   refetch: () => Promise<void>;
   setFilter: (filter: JobsFilter) => void;
   setPage: (page: number) => void;
-  setStatus: (status: JobStatusLocal | undefined) => void;
+  setStatus: (status: JobStatus | undefined) => void;
   filter: JobsFilter;
   pagination: JobsPagination;
 }
@@ -121,7 +115,7 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
 
-  const setStatus = useCallback((status: JobStatusLocal | undefined) => {
+  const setStatus = useCallback((status: JobStatus | undefined) => {
     setFilter((prev) => ({ ...prev, ...(status !== undefined && { status }) }));
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);

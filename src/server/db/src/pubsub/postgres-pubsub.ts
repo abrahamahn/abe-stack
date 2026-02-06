@@ -53,7 +53,7 @@ export class PostgresPubSub {
   private listenClient: postgres.Sql | null = null;
   private notifyClient: postgres.Sql | null = null;
   private isListening = false;
-  private connectionString: string;
+  private readonly connectionString: string;
 
   constructor(options: PostgresPubSubOptions) {
     this.connectionString = options.connectionString;

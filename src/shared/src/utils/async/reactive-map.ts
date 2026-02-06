@@ -11,8 +11,8 @@
  * - Pub/sub patterns for specific keys
  */
 export class ReactiveMap<K = string, V = unknown> {
-  private data = new Map<K, V>();
-  private listeners = new Map<K, Set<(value: V | undefined) => void>>();
+  private readonly data = new Map<K, V>();
+  private readonly listeners = new Map<K, Set<(value: V | undefined) => void>>();
 
   /**
    * Get a value by key.

@@ -15,8 +15,8 @@ import {
 } from '@abe-stack/shared';
 
 export class SearchQueryBuilder<T = Record<string, unknown>> {
-  private filters: Array<FilterCondition<T> | CompoundFilter<T>> = [];
-  private sort: SortConfig<T>[] = [];
+  private readonly filters: Array<FilterCondition<T> | CompoundFilter<T>> = [];
+  private readonly sort: SortConfig<T>[] = [];
   private search?: SearchQuery<T>['search'];
   private page?: number;
   private limit?: number;

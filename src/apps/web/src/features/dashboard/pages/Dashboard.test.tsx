@@ -8,6 +8,7 @@ import { DashboardPage } from './Dashboard';
 
 import type { RenderWithProvidersResult } from '../../../__tests__/utils';
 import type { User } from '../../auth';
+import type { UserId } from '@abe-stack/shared';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
@@ -21,14 +22,14 @@ vi.mock('@abe-stack/ui', async () => {
 
 describe('DashboardPage', () => {
   const renderDashboardPage = (options?: {
-    user?: User | null;
+    user?: User;
     isLoading?: boolean;
     isAuthenticated?: boolean;
   }): RenderWithProvidersResult => {
     const environment = createMockEnvironment({
-      user: options?.user === undefined ? mockUser : options.user,
+      user: options?.user ?? mockUser,
       isLoading: options?.isLoading ?? false,
-      isAuthenticated: options?.isAuthenticated ?? options?.user !== null,
+      isAuthenticated: options?.isAuthenticated ?? options?.user !== undefined,
     });
 
     return renderWithProviders(<DashboardPage />, { environment });
@@ -94,7 +95,7 @@ describe('DashboardPage', () => {
       renderDashboardPage({
         user: {
           ...mockUser,
-          id: 'user-456',
+          id: 'user-456' as unknown as UserId,
           email: 'noname@example.com',
           name: null,
         },
@@ -147,11 +148,10 @@ describe('DashboardPage', () => {
   });
 
   describe('Null User Handling', () => {
-    it('should handle null user gracefully', () => {
-      // Should not throw
+    it('should handle missing user gracefully', () => {
+      // Should not throw when no user is provided
       expect(() =>
         renderDashboardPage({
-          user: null,
           isAuthenticated: false,
         }),
       ).not.toThrow();
@@ -201,7 +201,7 @@ describe('DashboardPage', () => {
         renderDashboardPage({
           user: {
             ...mockUser,
-            id: '',
+            id: '' as unknown as UserId,
             name: '',
           },
         }),
@@ -274,7 +274,6 @@ describe('DashboardPage', () => {
     it('should handle user object being undefined', () => {
       expect(() =>
         renderDashboardPage({
-          user: null,
           isAuthenticated: false,
         }),
       ).not.toThrow();

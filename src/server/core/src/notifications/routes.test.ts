@@ -187,7 +187,7 @@ describe('Notification Routes', () => {
         vi.mocked(handleGetVapidKey).mockReturnValue({
           status: 200,
           body: {
-            message: 'Push notifications are not configured',
+            publicKey: '',
           },
         });
 
@@ -207,7 +207,7 @@ describe('Notification Routes', () => {
           'body' in result
         ) {
           expect(result.status).toBe(200);
-          expect(result.body).toHaveProperty('message');
+          expect(result.body).toHaveProperty('publicKey', '');
         }
       });
     });
@@ -255,8 +255,8 @@ describe('Notification Routes', () => {
         vi.mocked(handleSubscribe).mockResolvedValue({
           status: 200,
           body: {
-            success: true,
             subscriptionId: 'sub-123',
+            message: 'Successfully subscribed to push notifications',
           },
         });
 
@@ -291,8 +291,8 @@ describe('Notification Routes', () => {
         const expectedResult = {
           status: 200 as const,
           body: {
-            success: true,
             subscriptionId: 'sub-456',
+            message: 'Successfully subscribed to push notifications',
           },
         };
         vi.mocked(handleSubscribe).mockResolvedValue(expectedResult);
@@ -364,6 +364,7 @@ describe('Notification Routes', () => {
           status: 200,
           body: {
             success: true,
+            message: 'Successfully unsubscribed from push notifications',
           },
         });
 
@@ -390,6 +391,7 @@ describe('Notification Routes', () => {
           status: 200 as const,
           body: {
             success: true,
+            message: 'Successfully unsubscribed from push notifications',
           },
         };
         vi.mocked(handleUnsubscribe).mockResolvedValue(expectedResult);
@@ -443,9 +445,22 @@ describe('Notification Routes', () => {
           status: 200,
           body: {
             preferences: {
-              email: true,
-              push: true,
-              marketing: false,
+              userId: 'user-123',
+              globalEnabled: true,
+              quietHours: {
+                enabled: false,
+                startHour: 22,
+                endHour: 8,
+                timezone: 'UTC',
+              },
+              types: {
+                system: { enabled: true, channels: ['push' as const, 'email' as const] },
+                security: { enabled: true, channels: ['push' as const, 'email' as const] },
+                marketing: { enabled: false, channels: ['email' as const] },
+                social: { enabled: true, channels: ['push' as const] },
+                transactional: { enabled: true, channels: ['push' as const, 'email' as const] },
+              },
+              updatedAt: new Date('2024-01-01T00:00:00.000Z'),
             },
           },
         });
@@ -469,9 +484,22 @@ describe('Notification Routes', () => {
           status: 200 as const,
           body: {
             preferences: {
-              email: true,
-              push: false,
-              marketing: true,
+              userId: 'user-123',
+              globalEnabled: true,
+              quietHours: {
+                enabled: false,
+                startHour: 22,
+                endHour: 8,
+                timezone: 'UTC',
+              },
+              types: {
+                system: { enabled: true, channels: ['push' as const, 'email' as const] },
+                security: { enabled: true, channels: ['push' as const, 'email' as const] },
+                marketing: { enabled: true, channels: ['email' as const] },
+                social: { enabled: false, channels: ['push' as const] },
+                transactional: { enabled: true, channels: ['push' as const, 'email' as const] },
+              },
+              updatedAt: new Date('2024-01-01T00:00:00.000Z'),
             },
           },
         };
@@ -531,9 +559,22 @@ describe('Notification Routes', () => {
           status: 200,
           body: {
             preferences: {
-              email: false,
-              push: true,
-              marketing: false,
+              userId: 'user-123',
+              globalEnabled: false,
+              quietHours: {
+                enabled: true,
+                startHour: 22,
+                endHour: 7,
+                timezone: 'UTC',
+              },
+              types: {
+                system: { enabled: true, channels: ['push' as const, 'email' as const] },
+                security: { enabled: true, channels: ['push' as const, 'email' as const] },
+                marketing: { enabled: false, channels: ['email' as const] },
+                social: { enabled: false, channels: ['push' as const] },
+                transactional: { enabled: true, channels: ['push' as const, 'email' as const] },
+              },
+              updatedAt: new Date('2024-01-01T00:00:00.000Z'),
             },
           },
         });
@@ -566,12 +607,22 @@ describe('Notification Routes', () => {
           status: 200 as const,
           body: {
             preferences: {
+              userId: 'user-123',
               globalEnabled: true,
               quietHours: {
                 enabled: false,
                 startHour: 0,
                 endHour: 0,
+                timezone: 'UTC',
               },
+              types: {
+                system: { enabled: true, channels: ['push' as const, 'email' as const] },
+                security: { enabled: true, channels: ['push' as const, 'email' as const] },
+                marketing: { enabled: false, channels: ['email' as const] },
+                social: { enabled: true, channels: ['push' as const] },
+                transactional: { enabled: true, channels: ['push' as const, 'email' as const] },
+              },
+              updatedAt: new Date('2024-01-01T00:00:00.000Z'),
             },
           },
         };

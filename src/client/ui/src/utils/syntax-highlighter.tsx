@@ -9,7 +9,7 @@
  * - Line numbers support
  */
 
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // ============================================================================
 // Types
@@ -639,6 +639,7 @@ function getTokenColor(type: Token['type'], theme: SyntaxTheme): string {
       return theme.numbers;
     case 'operator':
       return theme.operators;
+    case 'plain':
     default:
       return theme.foreground;
   }

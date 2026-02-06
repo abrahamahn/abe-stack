@@ -57,10 +57,10 @@ export interface WriteServiceOptions {
 }
 
 export class WriteService {
-  private db: DbClient;
-  private pubsub?: SubscriptionManager;
-  private log?: Logger;
-  private hooks: WriteHooks;
+  private readonly db: DbClient;
+  private readonly pubsub?: SubscriptionManager;
+  private readonly log?: Logger;
+  private readonly hooks: WriteHooks;
 
   constructor(options: WriteServiceOptions) {
     this.db = options.db;

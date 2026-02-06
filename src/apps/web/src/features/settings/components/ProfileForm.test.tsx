@@ -21,6 +21,7 @@ import { ProfileForm } from './ProfileForm';
 
 import type { User } from '../api';
 import type { ProfileFormProps } from './ProfileForm';
+import type { UserId } from '@abe-stack/shared';
 import type { ChangeEvent, ReactNode } from 'react';
 
 // Mock the hooks
@@ -116,7 +117,7 @@ describe('ProfileForm', () => {
   let mockOnSuccess: any;
 
   const mockUser: User = {
-    id: 'user-123',
+    id: 'user-123' as unknown as UserId,
     email: 'john@example.com',
     name: 'John Doe',
     avatarUrl: null,

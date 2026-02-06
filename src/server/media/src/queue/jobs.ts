@@ -55,7 +55,7 @@ export interface MediaJobResult {
  * ```
  */
 export class MediaProcessingQueue extends CustomJobQueue<MediaJobData> {
-  private orchestrator: MediaProcessingOrchestrator;
+  private readonly orchestrator: MediaProcessingOrchestrator;
 
   /**
    * Create a media processing queue with orchestrator

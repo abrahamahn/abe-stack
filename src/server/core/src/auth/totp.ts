@@ -11,11 +11,11 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { type DbClient } from '@abe-stack/db';
 import * as otpAuth from 'otpauth';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
 
+import type { DbClient } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================

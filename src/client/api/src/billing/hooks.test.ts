@@ -19,22 +19,30 @@ import {
   useSubscription,
 } from './hooks';
 
-import type { Invoice, PaymentMethod, Plan, Subscription } from '@abe-stack/shared';
+import type {
+  Invoice,
+  PaymentMethod,
+  Plan,
+  PlanId,
+  SubscriptionId,
+  Subscription,
+  UserId,
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data Factories
 // ============================================================================
 
 const createMockPlan = (overrides?: Partial<Plan>): Plan => ({
-  id: 'plan-123',
+  id: 'plan-123' as PlanId,
   name: 'Pro Plan',
   description: 'Professional features',
   interval: 'month',
   priceInCents: 1999,
-  currency: 'usd',
+  currency: 'USD',
   features: [
-    { name: 'Feature 1', included: true },
-    { name: 'Feature 2', included: true },
+    { key: 'team:invite', name: 'Feature 1', included: true },
+    { key: 'api:access', name: 'Feature 2', included: true },
   ],
   trialDays: 14,
   isActive: true,
@@ -43,9 +51,9 @@ const createMockPlan = (overrides?: Partial<Plan>): Plan => ({
 });
 
 const createMockSubscription = (overrides?: Partial<Subscription>): Subscription => ({
-  id: 'sub-123',
-  userId: 'user-123',
-  planId: 'plan-123',
+  id: 'sub-123' as SubscriptionId,
+  userId: 'user-123' as UserId,
+  planId: 'plan-123' as PlanId,
   plan: createMockPlan(),
   provider: 'stripe',
   status: 'active',
@@ -160,7 +168,7 @@ describe('usePlans', () => {
     vi.clearAllMocks();
     // Setup default successful responses
     mockListPlans.mockResolvedValue({
-      plans: [createMockPlan(), createMockPlan({ id: 'plan-456', name: 'Enterprise' })],
+      plans: [createMockPlan(), createMockPlan({ id: 'plan-456' as PlanId, name: 'Enterprise' })],
     });
   });
 
@@ -183,8 +191,8 @@ describe('usePlans', () => {
       });
 
       expect(result.current.plans).toHaveLength(2);
-      expect(result.current.plans[0].id).toBe('plan-123');
-      expect(result.current.plans[0].name).toBe('Pro Plan');
+      expect(result.current.plans[0]?.id).toBe('plan-123');
+      expect(result.current.plans[0]?.name).toBe('Pro Plan');
       expect(result.current.error).toBeNull();
     });
 
@@ -361,7 +369,7 @@ describe('useSubscription', () => {
 
       let checkoutUrl: string = '';
       await act(async () => {
-        checkoutUrl = await result.current.createCheckout({ planId: 'plan-123' });
+        checkoutUrl = await result.current.createCheckout({ planId: 'plan-123' as PlanId });
       });
 
       expect(checkoutUrl).toBe('https://checkout.example.com/session-123');
@@ -381,7 +389,7 @@ describe('useSubscription', () => {
       let thrownError: Error | null = null;
       await act(async () => {
         try {
-          await result.current.createCheckout({ planId: 'plan-123' });
+          await result.current.createCheckout({ planId: 'plan-123' as PlanId });
         } catch (error) {
           thrownError = error as Error;
         }
@@ -549,7 +557,7 @@ describe('useSubscription', () => {
       });
 
       await act(async () => {
-        await result.current.changePlan('plan-456');
+        await result.current.changePlan('plan-456' as PlanId);
       });
 
       await waitFor(() => {
@@ -561,7 +569,7 @@ describe('useSubscription', () => {
       mockGetSubscription
         .mockResolvedValueOnce({ subscription: createMockSubscription() })
         .mockResolvedValueOnce({
-          subscription: createMockSubscription({ planId: 'plan-456' }),
+          subscription: createMockSubscription({ planId: 'plan-456' as PlanId }),
         });
 
       const { result } = renderHook(() => useSubscription(clientConfig));
@@ -571,7 +579,7 @@ describe('useSubscription', () => {
       });
 
       await act(async () => {
-        await result.current.changePlan('plan-456');
+        await result.current.changePlan('plan-456' as PlanId);
       });
 
       await waitFor(() => {
@@ -591,7 +599,7 @@ describe('useSubscription', () => {
       let thrownError: Error | null = null;
       await act(async () => {
         try {
-          await result.current.changePlan('plan-456');
+          await result.current.changePlan('plan-456' as PlanId);
         } catch (error) {
           thrownError = error as Error;
         }
@@ -636,7 +644,7 @@ describe('useSubscription', () => {
 
       await expect(
         act(async () => {
-          await result.current.createCheckout({ planId: 'plan-123' });
+          await result.current.createCheckout({ planId: 'plan-123' as PlanId });
         }),
       ).rejects.toThrow('Failed to create checkout');
     });
@@ -682,8 +690,8 @@ describe('useInvoices', () => {
       });
 
       expect(result.current.invoices).toHaveLength(2);
-      expect(result.current.invoices[0].id).toBe('inv-123');
-      expect(result.current.invoices[0].status).toBe('paid');
+      expect(result.current.invoices[0]?.id).toBe('inv-123');
+      expect(result.current.invoices[0]?.status).toBe('paid');
       expect(result.current.hasMore).toBe(false);
       expect(result.current.error).toBeNull();
     });
@@ -852,8 +860,8 @@ describe('usePaymentMethods', () => {
       });
 
       expect(result.current.paymentMethods).toHaveLength(2);
-      expect(result.current.paymentMethods[0].id).toBe('pm-123');
-      expect(result.current.paymentMethods[0].isDefault).toBe(true);
+      expect(result.current.paymentMethods[0]?.id).toBe('pm-123');
+      expect(result.current.paymentMethods[0]?.isDefault).toBe(true);
       expect(result.current.error).toBeNull();
     });
 

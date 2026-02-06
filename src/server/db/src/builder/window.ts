@@ -76,8 +76,8 @@ export interface AggregateFunction extends WindowFunction {
 // ============================================================================
 
 class WindowSpecBuilder implements WindowSpec {
-  private _partitionBy: string[] = [];
-  private _orderBy: Array<{ column: string; direction: 'asc' | 'desc' }> = [];
+  private readonly _partitionBy: string[] = [];
+  private readonly _orderBy: Array<{ column: string; direction: 'asc' | 'desc' }> = [];
   private _frame: { type: 'rows' | 'range'; start: FrameBound; end?: FrameBound } | null = null;
 
   partitionBy(...columns: string[]): WindowSpec {

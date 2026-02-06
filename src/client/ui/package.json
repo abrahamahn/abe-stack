@@ -6,30 +6,37 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./components": {
+      "source": "./src/components/index.ts",
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
     },
     "./elements": {
+      "source": "./src/elements/index.ts",
       "types": "./dist/elements/index.d.ts",
       "import": "./dist/elements/index.js"
     },
     "./layouts": {
+      "source": "./src/layouts/index.ts",
       "types": "./dist/layouts/index.d.ts",
       "import": "./dist/layouts/index.js"
     },
     "./hooks": {
+      "source": "./src/hooks/index.ts",
       "types": "./dist/hooks/index.d.ts",
       "import": "./dist/hooks/index.js"
     },
     "./theme": {
+      "source": "./src/theme/index.ts",
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js"
     },
     "./utils": {
+      "source": "./src/utils/index.ts",
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js"
     },

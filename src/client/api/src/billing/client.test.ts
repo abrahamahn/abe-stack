@@ -18,10 +18,13 @@ import type {
   InvoicesListResponse,
   PaymentMethodResponse,
   PaymentMethodsListResponse,
+  PlanId,
   PlansListResponse,
   SubscriptionActionResponse,
+  SubscriptionId,
   SubscriptionResponse,
   UpdateSubscriptionRequest,
+  UserId,
 } from '@abe-stack/shared';
 
 describe('createBillingClient', () => {
@@ -96,16 +99,16 @@ describe('createBillingClient', () => {
       const mockPlans: PlansListResponse = {
         plans: [
           {
-            id: 'plan-1',
+            id: 'plan-1' as PlanId,
             name: 'Basic',
-            provider: 'stripe',
-            providerId: 'price_123',
-            price: 999,
-            currency: 'usd',
+            description: null,
             interval: 'month',
-            active: true,
+            priceInCents: 999,
+            currency: 'USD',
             features: [],
-            createdAt: '2024-01-01T00:00:00Z',
+            trialDays: 0,
+            isActive: true,
+            sortOrder: 1,
           },
         ],
       };
@@ -162,17 +165,29 @@ describe('createBillingClient', () => {
     it('should fetch subscription with authentication', async () => {
       const mockSubscription: SubscriptionResponse = {
         subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
+          id: 'sub-123' as SubscriptionId,
+          userId: 'user-1' as UserId,
+          planId: 'plan-1' as PlanId,
+          plan: {
+            id: 'plan-1' as PlanId,
+            name: 'Basic',
+            description: null,
+            interval: 'month',
+            priceInCents: 999,
+            currency: 'USD',
+            features: [],
+            trialDays: 0,
+            isActive: true,
+            sortOrder: 1,
+          },
           provider: 'stripe',
-          providerId: 'sub_stripe_123',
           status: 'active',
           currentPeriodStart: '2024-01-01T00:00:00Z',
           currentPeriodEnd: '2024-02-01T00:00:00Z',
           cancelAtPeriodEnd: false,
+          canceledAt: null,
+          trialEnd: null,
           createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
         },
       };
 
@@ -227,10 +242,11 @@ describe('createBillingClient', () => {
   describe('createCheckout', () => {
     it('should create checkout session with plan ID', async () => {
       const checkoutRequest: CheckoutRequest = {
-        planId: 'plan-premium',
+        planId: 'plan-premium' as PlanId,
       };
 
       const mockResponse: CheckoutResponse = {
+        sessionId: 'session-123',
         url: 'https://checkout.stripe.com/session-123',
       };
 
@@ -268,30 +284,21 @@ describe('createBillingClient', () => {
 
       const client = createClient('test-token');
 
-      await expect(client.createCheckout({ planId: 'invalid' })).rejects.toThrow('Invalid plan ID');
+      await expect(client.createCheckout({ planId: 'invalid' as PlanId })).rejects.toThrow(
+        'Invalid plan ID',
+      );
     });
   });
 
   describe('cancelSubscription', () => {
     it('should cancel subscription immediately', async () => {
       const cancelRequest: CancelSubscriptionRequest = {
-        cancelAtPeriodEnd: false,
+        immediately: true,
       };
 
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'canceled',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Subscription canceled successfully',
       };
 
       mockFetch.mockResolvedValue({
@@ -303,7 +310,7 @@ describe('createBillingClient', () => {
       const result = await client.cancelSubscription(cancelRequest);
 
       expect(result).toEqual(mockResponse);
-      expect(result.subscription.status).toBe('canceled');
+      expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/api/billing/subscription/cancel',
         expect.objectContaining({
@@ -315,23 +322,12 @@ describe('createBillingClient', () => {
 
     it('should cancel subscription at period end', async () => {
       const cancelRequest: CancelSubscriptionRequest = {
-        cancelAtPeriodEnd: true,
+        immediately: false,
       };
 
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'active',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: true,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Subscription will be canceled at period end',
       };
 
       mockFetch.mockResolvedValue({
@@ -342,25 +338,14 @@ describe('createBillingClient', () => {
       const client = createClient('test-token');
       const result = await client.cancelSubscription(cancelRequest);
 
-      expect(result.subscription.cancelAtPeriodEnd).toBe(true);
-      expect(result.subscription.status).toBe('active');
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Subscription will be canceled at period end');
     });
 
     it('should handle cancel without parameters (defaults to empty object)', async () => {
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'canceled',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Subscription canceled successfully',
       };
 
       mockFetch.mockResolvedValue({
@@ -396,19 +381,8 @@ describe('createBillingClient', () => {
   describe('resumeSubscription', () => {
     it('should resume canceled subscription', async () => {
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'active',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Subscription resumed successfully',
       };
 
       mockFetch.mockResolvedValue({
@@ -420,7 +394,7 @@ describe('createBillingClient', () => {
       const result = await client.resumeSubscription();
 
       expect(result).toEqual(mockResponse);
-      expect(result.subscription.cancelAtPeriodEnd).toBe(false);
+      expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/api/billing/subscription/resume',
         expect.objectContaining({
@@ -446,23 +420,12 @@ describe('createBillingClient', () => {
   describe('updateSubscription', () => {
     it('should update subscription plan', async () => {
       const updateRequest: UpdateSubscriptionRequest = {
-        planId: 'plan-premium',
+        planId: 'plan-premium' as PlanId,
       };
 
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-premium',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'active',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Subscription updated successfully',
       };
 
       mockFetch.mockResolvedValue({
@@ -474,7 +437,7 @@ describe('createBillingClient', () => {
       const result = await client.updateSubscription(updateRequest);
 
       expect(result).toEqual(mockResponse);
-      expect(result.subscription.planId).toBe('plan-premium');
+      expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/api/billing/subscription/update',
         expect.objectContaining({
@@ -493,7 +456,7 @@ describe('createBillingClient', () => {
 
       const client = createClient('test-token');
 
-      await expect(client.updateSubscription({ planId: 'plan-basic' })).rejects.toThrow(
+      await expect(client.updateSubscription({ planId: 'plan-basic' as PlanId })).rejects.toThrow(
         'Already subscribed to this plan',
       );
     });
@@ -505,16 +468,18 @@ describe('createBillingClient', () => {
         invoices: [
           {
             id: 'inv-1',
-            subscriptionId: 'sub-123',
-            provider: 'stripe',
-            providerId: 'in_123',
-            amountPaid: 999,
-            currency: 'usd',
             status: 'paid',
-            pdfUrl: 'https://invoice.pdf',
+            amountDue: 999,
+            amountPaid: 999,
+            currency: 'USD',
+            periodStart: '2024-01-01T00:00:00Z',
+            periodEnd: '2024-02-01T00:00:00Z',
+            paidAt: '2024-01-05T00:00:00Z',
+            invoicePdfUrl: 'https://invoice.pdf',
             createdAt: '2024-01-01T00:00:00Z',
           },
         ],
+        hasMore: false,
       };
 
       mockFetch.mockResolvedValue({
@@ -537,13 +502,14 @@ describe('createBillingClient', () => {
     it('should handle empty invoice list', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ invoices: [] }),
+        json: () => Promise.resolve({ invoices: [], hasMore: false }),
       });
 
       const client = createClient('test-token');
       const result = await client.listInvoices();
 
       expect(result.invoices).toEqual([]);
+      expect(result.hasMore).toBe(false);
     });
   });
 
@@ -553,15 +519,14 @@ describe('createBillingClient', () => {
         paymentMethods: [
           {
             id: 'pm-1',
-            userId: 'user-1',
-            provider: 'stripe',
-            providerId: 'pm_123',
             type: 'card',
-            last4: '4242',
-            brand: 'visa',
-            expiryMonth: 12,
-            expiryYear: 2025,
             isDefault: true,
+            cardDetails: {
+              brand: 'visa',
+              last4: '4242',
+              expMonth: 12,
+              expYear: 2025,
+            },
             createdAt: '2024-01-01T00:00:00Z',
           },
         ],
@@ -606,15 +571,14 @@ describe('createBillingClient', () => {
       const mockResponse: PaymentMethodResponse = {
         paymentMethod: {
           id: 'pm-2',
-          userId: 'user-1',
-          provider: 'stripe',
-          providerId: 'pm_stripe_new',
           type: 'card',
-          last4: '5555',
-          brand: 'mastercard',
-          expiryMonth: 6,
-          expiryYear: 2026,
           isDefault: false,
+          cardDetails: {
+            brand: 'mastercard',
+            last4: '5555',
+            expMonth: 6,
+            expYear: 2026,
+          },
           createdAt: '2024-01-15T00:00:00Z',
         },
       };
@@ -655,19 +619,8 @@ describe('createBillingClient', () => {
   describe('removePaymentMethod', () => {
     it('should remove payment method', async () => {
       const mockResponse: SubscriptionActionResponse = {
-        subscription: {
-          id: 'sub-123',
-          userId: 'user-1',
-          planId: 'plan-1',
-          provider: 'stripe',
-          providerId: 'sub_stripe_123',
-          status: 'active',
-          currentPeriodStart: '2024-01-01T00:00:00Z',
-          currentPeriodEnd: '2024-02-01T00:00:00Z',
-          cancelAtPeriodEnd: false,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T00:00:00Z',
-        },
+        success: true,
+        message: 'Payment method removed successfully',
       };
 
       mockFetch.mockResolvedValue({
@@ -721,15 +674,14 @@ describe('createBillingClient', () => {
       const mockResponse: PaymentMethodResponse = {
         paymentMethod: {
           id: 'pm-2',
-          userId: 'user-1',
-          provider: 'stripe',
-          providerId: 'pm_stripe_123',
           type: 'card',
-          last4: '5555',
-          brand: 'mastercard',
-          expiryMonth: 6,
-          expiryYear: 2026,
           isDefault: true,
+          cardDetails: {
+            brand: 'mastercard',
+            last4: '5555',
+            expMonth: 6,
+            expYear: 2026,
+          },
           createdAt: '2024-01-15T00:00:00Z',
         },
       };
@@ -871,7 +823,7 @@ describe('createBillingClient', () => {
 
       const client = createClient('test-token');
 
-      await expect(client.createCheckout({ planId: 'plan-1' })).rejects.toThrow(
+      await expect(client.createCheckout({ planId: 'plan-1' as PlanId })).rejects.toThrow(
         'Failed to fetch POST /billing/checkout',
       );
     });
@@ -924,7 +876,7 @@ describe('createBillingClient', () => {
       const client = createClient('test-token');
 
       try {
-        await client.createCheckout({ planId: '' });
+        await client.createCheckout({ planId: '' as PlanId });
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).toHaveProperty('message', 'Validation failed');

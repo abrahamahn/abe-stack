@@ -2,7 +2,7 @@
 
 import type { AppConfig } from '../config';
 import type { RawDb } from '@abe-stack/db';
-import type { HealthCheckDatabase, HealthCheckPubSub, LoggerNs } from '@abe-stack/shared';
+import type { HealthCheckDatabase, HealthCheckPubSub, Logger } from '@abe-stack/shared';
 
 /**
  * Context required by the system health-check functions.
@@ -17,5 +17,5 @@ export interface SystemContext {
   config: AppConfig;
   db: HealthCheckDatabase & RawDb;
   pubsub: HealthCheckPubSub;
-  log: LoggerNs.Logger;
+  log: Logger;
 }

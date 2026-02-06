@@ -261,14 +261,19 @@ export function jwtDecode(token: string): JwtPayload | null {
 }
 
 /**
- * Check if a token secret meets minimum requirements
+ * Check if a token secret meets minimum security requirements.
+ *
+ * For HMAC-SHA256, the key should be at least 32 bytes (256 bits).
+ * Keys shorter than this weaken the cryptographic guarantee.
+ *
+ * @param secret - The secret key to validate
+ * @returns true if the secret meets minimum length requirements
+ * @complexity O(1)
  */
 export function checkTokenSecret(secret: string): boolean {
-  if (secret === '') {
-    return false;
-  }
-  // Additional validation could be added here
-  return true;
+  // HMAC-SHA256 requires at minimum a 256-bit (32-byte) key for full security
+  const MIN_SECRET_LENGTH = 32;
+  return secret.length >= MIN_SECRET_LENGTH;
 }
 
 // ============================================================================

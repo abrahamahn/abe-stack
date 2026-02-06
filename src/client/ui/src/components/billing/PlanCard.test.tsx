@@ -12,10 +12,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PlanCard } from './PlanCard';
 
-import type { Plan, PlanFeature } from '@abe-stack/shared';
+import type { Plan, PlanFeature, PlanId } from '@abe-stack/shared';
 
 const createMockPlan = (overrides?: Partial<Plan>): Plan => ({
-  id: 'basic',
+  id: 'basic' as unknown as PlanId,
   name: 'Basic Plan',
   description: 'Perfect for individuals',
   priceInCents: 999,
@@ -25,10 +25,10 @@ const createMockPlan = (overrides?: Partial<Plan>): Plan => ({
   isActive: true,
   sortOrder: 0,
   features: [
-    { name: '10 GB Storage', included: true },
-    { name: '5 Projects', included: true },
-    { name: 'Email Support', included: true },
-    { name: 'Priority Support', included: false },
+    { key: 'storage:limit', name: '10 GB Storage', included: true, value: 10 },
+    { key: 'projects:limit', name: '5 Projects', included: true, value: 5 },
+    { key: 'team:invite', name: 'Email Support', included: true },
+    { key: 'team:invite', name: 'Priority Support', included: false },
   ],
   ...overrides,
 });
@@ -342,7 +342,15 @@ describe('PlanCard', () => {
 
     it('should render feature descriptions', () => {
       const plan = createMockPlan({
-        features: [{ name: 'Storage', description: 'Cloud storage space', included: true }],
+        features: [
+          {
+            key: 'storage:limit',
+            name: 'Storage',
+            description: 'Cloud storage space',
+            included: true,
+            value: 10,
+          },
+        ],
       });
 
       render(<PlanCard plan={plan} />);
@@ -352,7 +360,9 @@ describe('PlanCard', () => {
 
     it('should not render empty feature descriptions', () => {
       const plan = createMockPlan({
-        features: [{ name: 'Storage', description: '', included: true }],
+        features: [
+          { key: 'storage:limit', name: 'Storage', description: '', included: true, value: 10 },
+        ],
       });
 
       render(<PlanCard plan={plan} />);

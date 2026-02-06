@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { useAuth } from './useAuth';
 
 import type { ClientConfig } from '@/config';
+import type { UserId } from '@abe-stack/shared';
 import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { AuthService } from '@auth/services/AuthService';
 import type { ReactNode } from 'react';
@@ -78,7 +79,7 @@ function createMockEnvironment(
 
 describe('useAuth', () => {
   const mockUser = {
-    id: '1',
+    id: '1' as unknown as UserId,
     email: 'test@example.com',
     name: 'Test User',
     avatarUrl: null,

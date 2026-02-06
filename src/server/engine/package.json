@@ -13,8 +13,8 @@
     },
     "./config": {
       "source": "./src/config/index.ts",
-      "import": "./src/config/index.ts",
       "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js",
       "default": "./dist/config/index.js"
     },
     "./package.json": "./package.json"

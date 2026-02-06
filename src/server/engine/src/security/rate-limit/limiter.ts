@@ -140,7 +140,7 @@ const DEFAULT_MAX_SIZE = 100_000;
  * @complexity O(1) for get/set/delete operations
  */
 export class MemoryStore implements RateLimitStore {
-  private hits = new Map<string, ClientRecord>();
+  private readonly hits = new Map<string, ClientRecord>();
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
   private readonly maxSize: number;
   private evictionCount = 0;
@@ -307,7 +307,7 @@ export class RateLimiter {
    *
    * @param config - Rate limit configuration
    */
-  constructor(private config: RateLimitConfig) {
+  constructor(private readonly config: RateLimitConfig) {
     this.store = config.store ?? new MemoryStore(config.cleanupIntervalMs);
   }
 

@@ -9,11 +9,11 @@ import { describe, expect, it } from 'vitest';
 
 import { getPostLoginRedirect } from './redirects';
 
-import type { User } from '@abe-stack/shared';
+import type { AppRole, User, UserId } from '@abe-stack/shared';
 
 describe('getPostLoginRedirect', () => {
-  const createUser = (role: any): User => ({
-    id: 'user_123',
+  const createUser = (role: AppRole): User => ({
+    id: 'user_123' as unknown as UserId,
     email: 'user@example.com',
     name: 'Test User',
     avatarUrl: null,
@@ -66,19 +66,19 @@ describe('getPostLoginRedirect', () => {
     });
 
     it('should redirect user with unknown role to settings', () => {
-      const userWithUnknownRole = createUser('superuser');
+      const userWithUnknownRole = createUser('superuser' as unknown as AppRole);
       const redirect = getPostLoginRedirect(userWithUnknownRole);
       expect(redirect).toBe('/settings');
     });
 
     it('should be case-sensitive for admin role', () => {
-      const upperCaseAdmin = createUser('Admin');
+      const upperCaseAdmin = createUser('Admin' as unknown as AppRole);
       const redirect = getPostLoginRedirect(upperCaseAdmin);
       expect(redirect).toBe('/settings'); // Not '/admin' because 'Admin' !== 'admin'
     });
 
     it('should redirect guest role to settings', () => {
-      const guestUser = createUser('guest');
+      const guestUser = createUser('guest' as unknown as AppRole);
       const redirect = getPostLoginRedirect(guestUser);
       expect(redirect).toBe('/settings');
     });

@@ -4,13 +4,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobDetailsPanel } from './JobDetailsPanel';
 
-import type { JobDetails } from '@abe-stack/shared';
+import type { JobDetailsPanelProps } from './JobDetailsPanel';
+
+// ============================================================================
+// Test Types (matching component internal types)
+// ============================================================================
+
+/** Infer job details shape from the component props */
+type JobDetailsLocal = NonNullable<JobDetailsPanelProps['job']>;
 
 // ============================================================================
 // Test Data
 // ============================================================================
 
-const mockJob: JobDetails = {
+const mockJob: JobDetailsLocal = {
   id: 'job-123',
   name: 'test-job',
   status: 'completed',
@@ -289,7 +296,7 @@ describe('JobDetailsPanel', () => {
 
   describe('null field handling', () => {
     it('should show "-" for null completedAt', () => {
-      const jobWithoutCompletion: JobDetails = {
+      const jobWithoutCompletion: JobDetailsLocal = {
         ...mockJob,
         completedAt: null,
       };
@@ -309,7 +316,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should show "-" for null durationMs', () => {
-      const jobWithoutDuration: JobDetails = {
+      const jobWithoutDuration: JobDetailsLocal = {
         ...mockJob,
         durationMs: null,
       };
@@ -331,7 +338,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should show "-" for zero durationMs', () => {
-      const jobWithZeroDuration: JobDetails = {
+      const jobWithZeroDuration: JobDetailsLocal = {
         ...mockJob,
         durationMs: 0,
       };
@@ -355,7 +362,7 @@ describe('JobDetailsPanel', () => {
 
   describe('error information display', () => {
     it('should render error section when error is present', () => {
-      const jobWithError: JobDetails = {
+      const jobWithError: JobDetailsLocal = {
         ...mockJob,
         status: 'failed',
         error: {
@@ -380,7 +387,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should render error stack trace when available', () => {
-      const jobWithError: JobDetails = {
+      const jobWithError: JobDetailsLocal = {
         ...mockJob,
         status: 'failed',
         error: {
@@ -418,7 +425,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render stack trace when stack is empty', () => {
-      const jobWithErrorNoStack: JobDetails = {
+      const jobWithErrorNoStack: JobDetailsLocal = {
         ...mockJob,
         status: 'failed',
         error: {
@@ -443,7 +450,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render stack trace when stack is undefined', () => {
-      const jobWithErrorNoStack: JobDetails = {
+      const jobWithErrorNoStack: JobDetailsLocal = {
         ...mockJob,
         status: 'failed',
         error: {
@@ -470,9 +477,9 @@ describe('JobDetailsPanel', () => {
 
   describe('dead letter information', () => {
     it('should render dead letter reason when present', () => {
-      const jobWithDeadLetter: JobDetails = {
+      const jobWithDeadLetter: JobDetailsLocal = {
         ...mockJob,
-        status: 'dead_letter',
+        status: 'dead',
         deadLetterReason: 'Maximum retry attempts exceeded',
       };
 
@@ -505,7 +512,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render dead letter section when reason is empty string', () => {
-      const jobWithEmptyReason: JobDetails = {
+      const jobWithEmptyReason: JobDetailsLocal = {
         ...mockJob,
         deadLetterReason: '',
       };
@@ -524,7 +531,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render dead letter section when reason is undefined', () => {
-      const jobWithUndefinedReason: JobDetails = {
+      const jobWithUndefinedReason: JobDetailsLocal = {
         ...mockJob,
         deadLetterReason: undefined as any,
       };
@@ -545,7 +552,7 @@ describe('JobDetailsPanel', () => {
 
   describe('action buttons', () => {
     it('should show retry button for failed job', () => {
-      const failedJob: JobDetails = { ...mockJob, status: 'failed' };
+      const failedJob: JobDetailsLocal = { ...mockJob, status: 'failed' };
 
       render(
         <JobDetailsPanel
@@ -561,8 +568,8 @@ describe('JobDetailsPanel', () => {
       expect(screen.getByRole('button', { name: 'Retry Job' })).toBeInTheDocument();
     });
 
-    it('should show retry button for dead_letter job', () => {
-      const deadLetterJob: JobDetails = { ...mockJob, status: 'dead_letter' };
+    it('should show retry button for dead job', () => {
+      const deadLetterJob: JobDetailsLocal = { ...mockJob, status: 'dead' };
 
       render(
         <JobDetailsPanel
@@ -579,7 +586,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should show cancel button for pending job', () => {
-      const pendingJob: JobDetails = { ...mockJob, status: 'pending' };
+      const pendingJob: JobDetailsLocal = { ...mockJob, status: 'pending' };
 
       render(
         <JobDetailsPanel
@@ -596,7 +603,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should show cancel button for processing job', () => {
-      const processingJob: JobDetails = { ...mockJob, status: 'processing' };
+      const processingJob: JobDetailsLocal = { ...mockJob, status: 'processing' };
 
       render(
         <JobDetailsPanel
@@ -630,7 +637,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should call onRetry with job id when retry button is clicked', () => {
-      const failedJob: JobDetails = { ...mockJob, status: 'failed' };
+      const failedJob: JobDetailsLocal = { ...mockJob, status: 'failed' };
 
       render(
         <JobDetailsPanel
@@ -650,7 +657,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should call onCancel with job id when cancel button is clicked', () => {
-      const pendingJob: JobDetails = { ...mockJob, status: 'pending' };
+      const pendingJob: JobDetailsLocal = { ...mockJob, status: 'pending' };
 
       render(
         <JobDetailsPanel
@@ -670,7 +677,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render actions section when onRetry is undefined for failed job', () => {
-      const failedJob: JobDetails = { ...mockJob, status: 'failed' };
+      const failedJob: JobDetailsLocal = { ...mockJob, status: 'failed' };
 
       render(
         <JobDetailsPanel
@@ -686,7 +693,7 @@ describe('JobDetailsPanel', () => {
     });
 
     it('should not render actions section when onCancel is undefined for pending job', () => {
-      const pendingJob: JobDetails = { ...mockJob, status: 'pending' };
+      const pendingJob: JobDetailsLocal = { ...mockJob, status: 'pending' };
 
       render(
         <JobDetailsPanel
@@ -705,7 +712,7 @@ describe('JobDetailsPanel', () => {
   describe('error handling', () => {
     it('should handle onRetry promise rejection silently', () => {
       mockOnRetry.mockRejectedValue(new Error('Retry failed'));
-      const failedJob: JobDetails = { ...mockJob, status: 'failed' };
+      const failedJob: JobDetailsLocal = { ...mockJob, status: 'failed' };
 
       render(
         <JobDetailsPanel
@@ -727,7 +734,7 @@ describe('JobDetailsPanel', () => {
 
     it('should handle onCancel promise rejection silently', () => {
       mockOnCancel.mockRejectedValue(new Error('Cancel failed'));
-      const pendingJob: JobDetails = { ...mockJob, status: 'pending' };
+      const pendingJob: JobDetailsLocal = { ...mockJob, status: 'pending' };
 
       render(
         <JobDetailsPanel

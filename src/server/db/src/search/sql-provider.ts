@@ -620,6 +620,9 @@ export class SqlSearchProvider<
           condition.operator,
         );
 
+      case FILTER_OPERATORS.ArrayContains:
+      case FILTER_OPERATORS.ArrayContainsAny:
+      case FILTER_OPERATORS.FullText:
       default:
         throw new InvalidFilterError(
           `Unsupported operator: ${condition.operator as string}`,

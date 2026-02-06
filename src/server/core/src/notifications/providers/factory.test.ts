@@ -22,7 +22,7 @@ import type { NotificationFactoryOptions } from './types';
 vi.mock('./fcm-provider', () => ({
   FcmProvider: class MockFcmProvider {
     name = 'fcm';
-    private config: unknown;
+    private readonly config: unknown;
 
     constructor(config?: unknown) {
       this.config = config;

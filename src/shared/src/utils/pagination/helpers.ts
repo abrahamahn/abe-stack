@@ -1,4 +1,4 @@
-// packages/shared/src/utils/pagination/helpers.ts
+// src/shared/src/utils/pagination/helpers.ts
 import { PaginationError } from '../pagination';
 
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
@@ -6,9 +6,54 @@ import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
 import type { CursorData } from './cursor';
 import type { CursorPaginationOptions, SortOrder } from '../../contracts';
 
+// ============================================================================
+// SQL Identifier Safety
+// ============================================================================
+
 /**
- * Builds SQL WHERE clause and ORDER BY for cursor-based pagination
- * Returns the SQL fragments and parameters for safe query building
+ * Pattern for safe SQL identifiers: lowercase letters, digits, underscores only.
+ * Rejects anything that could be used for SQL injection.
+ */
+const SAFE_SQL_IDENTIFIER = /^[a-z][a-z0-9_]{0,62}$/;
+
+/**
+ * Validates and quotes a SQL column identifier to prevent injection.
+ * Only allows simple lowercase identifiers (letters, digits, underscores).
+ *
+ * @param name - The column name to validate
+ * @param label - Label for error messages (e.g. 'sortBy', 'tieBreakerField')
+ * @returns The double-quoted identifier safe for SQL interpolation
+ * @throws PaginationError if the identifier contains invalid characters
+ * @complexity O(n) where n = identifier length (regex test)
+ */
+function safeSqlIdentifier(name: string, label: string): string {
+  if (!SAFE_SQL_IDENTIFIER.test(name)) {
+    throw new PaginationError(
+      'INVALID_SORT_FIELD',
+      `Invalid ${label}: "${name}". Must be a lowercase identifier (a-z, 0-9, _).`,
+    );
+  }
+  return `"${name}"`;
+}
+
+// ============================================================================
+// Query Builder
+// ============================================================================
+
+/**
+ * Builds SQL WHERE clause and ORDER BY for cursor-based pagination.
+ * Returns the SQL fragments and parameters for safe query building.
+ *
+ * Field names are validated against a strict alphanumeric pattern and
+ * double-quoted to prevent SQL injection.
+ *
+ * @param cursor - Encoded cursor string from a previous page (optional)
+ * @param sortBy - Column name to sort by (must be a safe SQL identifier)
+ * @param sortOrder - Sort direction ('asc' or 'desc')
+ * @param tieBreakerField - Column for tie-breaking (default: 'id')
+ * @returns SQL fragments and parameterized values
+ * @throws PaginationError if cursor is invalid or field names are unsafe
+ * @complexity O(1)
  */
 export function buildCursorPaginationQuery(
   cursor: string | undefined,
@@ -20,6 +65,9 @@ export function buildCursorPaginationQuery(
   orderByClause: string;
   params: unknown[];
 } {
+  const safeSortBy = safeSqlIdentifier(sortBy, 'sortBy');
+  const safeTieBreaker = safeSqlIdentifier(tieBreakerField, 'tieBreakerField');
+
   const params: unknown[] = [];
   let whereClause = '';
 
@@ -43,14 +91,15 @@ export function buildCursorPaginationQuery(
     // (sort_value, tie_breaker) > (<cursor_value>, <cursor_tie_breaker>)
     // OR (sort_value = <cursor_value> AND tie_breaker > <cursor_tie_breaker>)
     whereClause = `(
-      (${sortBy} ${operator} $1) OR
-      (${sortBy} = $1 AND ${tieBreakerField} ${operator} $2)
+      (${safeSortBy} ${operator} $1) OR
+      (${safeSortBy} = $1 AND ${safeTieBreaker} ${operator} $2)
     )`;
 
     params.push(cursorData.value, cursorData.tieBreaker);
   }
 
-  const orderByClause = `${sortBy} ${sortOrder.toUpperCase()}, ${tieBreakerField} ${sortOrder.toUpperCase()}`;
+  const direction = sortOrder.toUpperCase();
+  const orderByClause = `${safeSortBy} ${direction}, ${safeTieBreaker} ${direction}`;
 
   return {
     whereClause,

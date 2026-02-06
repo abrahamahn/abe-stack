@@ -78,7 +78,7 @@ type CountRow = Record<string, unknown> & {
 // ============================================================================
 
 export class PostgresQueueStore implements QueueStore {
-  constructor(private db: DbClient) {}
+  constructor(private readonly db: DbClient) {}
 
   async enqueue(task: Task): Promise<void> {
     await this.db.execute({
