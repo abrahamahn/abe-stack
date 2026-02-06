@@ -967,9 +967,7 @@ describe('notificationsListRequestSchema', () => {
         limit: 0,
       };
 
-      expect(() => notificationsListRequestSchema.parse(input)).toThrow(
-        'limit must be at least 1',
-      );
+      expect(() => notificationsListRequestSchema.parse(input)).toThrow('limit must be at least 1');
     });
   });
 
@@ -1093,7 +1091,11 @@ describe('baseMarkAsReadRequestSchema', () => {
 
     it('should reject when some UUIDs are invalid', () => {
       const input = {
-        ids: ['00000000-0000-0000-0000-000000000001', 'not-a-uuid', '00000000-0000-0000-0000-000000000003'],
+        ids: [
+          '00000000-0000-0000-0000-000000000001',
+          'not-a-uuid',
+          '00000000-0000-0000-0000-000000000003',
+        ],
       };
 
       expect(() => baseMarkAsReadRequestSchema.parse(input)).toThrow();

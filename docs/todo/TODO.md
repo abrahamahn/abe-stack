@@ -11,6 +11,7 @@
 ### Discovered Debt (Security Audit)
 
 - [x] `src/shared` additional files reviewed in Round 2 audit — 12 issues found and fixed (ReDoS, timing leak, as-casts, dead code, stale messages)
+- [x] `src/shared` Round 3 audit — all ~80 remaining files reviewed, 11 issues fixed across 7 files (JWT timing leak, sanitizeMetadata depth limit, cursor dedup, contracts validation guards, http-mapper cast elimination)
 - [ ] `src/server/engine/src/security/crypto/jwt-rotation.ts` has separate `checkTokenSecret` that only checks for empty string (weaker than shared version's 32-byte minimum)
 - [ ] `src/shared/src/core/schemas.ts` and `src/shared/src/core/api.ts` are deprecated re-export shims — remove once consumers are migrated
 

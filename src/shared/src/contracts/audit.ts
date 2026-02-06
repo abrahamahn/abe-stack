@@ -158,7 +158,12 @@ export const auditEntrySchema: Schema<AuditEntry> = createSchema((data: unknown)
   if (typeof obj['outcome'] !== 'string') throw new Error('outcome required');
 
   const rawActor = obj['actor'];
-  if (rawActor === undefined || rawActor === null || typeof rawActor !== 'object' || Array.isArray(rawActor)) {
+  if (
+    rawActor === undefined ||
+    rawActor === null ||
+    typeof rawActor !== 'object' ||
+    Array.isArray(rawActor)
+  ) {
     throw new Error('actor must be an object');
   }
   const actor = rawActor as Record<string, unknown>;
@@ -167,7 +172,12 @@ export const auditEntrySchema: Schema<AuditEntry> = createSchema((data: unknown)
   }
 
   const rawTarget = obj['target'];
-  if (rawTarget === undefined || rawTarget === null || typeof rawTarget !== 'object' || Array.isArray(rawTarget)) {
+  if (
+    rawTarget === undefined ||
+    rawTarget === null ||
+    typeof rawTarget !== 'object' ||
+    Array.isArray(rawTarget)
+  ) {
     throw new Error('target must be an object');
   }
   const target = rawTarget as Record<string, unknown>;

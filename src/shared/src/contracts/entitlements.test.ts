@@ -516,9 +516,7 @@ describe('assertWithinLimit', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(ForbiddenError);
         expect((error as ForbiddenError).code).toBe('LIMIT_EXCEEDED');
-        expect((error as ForbiddenError).message).toBe(
-          "Limit exceeded for 'max_projects': 5/5",
-        );
+        expect((error as ForbiddenError).message).toBe("Limit exceeded for 'max_projects': 5/5");
       }
     });
   });
@@ -538,9 +536,7 @@ describe('assertWithinLimit', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(ForbiddenError);
         expect((error as ForbiddenError).code).toBe('LIMIT_EXCEEDED');
-        expect((error as ForbiddenError).message).toBe(
-          "Limit exceeded for 'max_projects': 10/5",
-        );
+        expect((error as ForbiddenError).message).toBe("Limit exceeded for 'max_projects': 10/5");
       }
     });
   });

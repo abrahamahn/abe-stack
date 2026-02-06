@@ -14,7 +14,12 @@ import type { SoftDeletable } from './deletion';
 
 describe('DELETION_STATES', () => {
   it('should contain all expected deletion states', () => {
-    expect(DELETION_STATES).toEqual(['active', 'soft_deleted', 'pending_hard_delete', 'hard_deleted']);
+    expect(DELETION_STATES).toEqual([
+      'active',
+      'soft_deleted',
+      'pending_hard_delete',
+      'hard_deleted',
+    ]);
   });
 
   it('should be a readonly array', () => {

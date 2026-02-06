@@ -21,9 +21,7 @@ import type { UsageMetric, UsageSnapshot } from './usage-metering.schemas';
  * @param overrides - Partial overrides for the default values
  * @returns A complete UsageMetric object
  */
-function createValidUsageMetric(
-  overrides: Partial<UsageMetric> = {},
-): Record<string, unknown> {
+function createValidUsageMetric(overrides: Partial<UsageMetric> = {}): Record<string, unknown> {
   return {
     key: 'api_requests',
     name: 'API Requests',
@@ -38,9 +36,7 @@ function createValidUsageMetric(
  * @param overrides - Partial overrides for the default values
  * @returns A complete UsageSnapshot object
  */
-function createValidUsageSnapshot(
-  overrides: Partial<UsageSnapshot> = {},
-): Record<string, unknown> {
+function createValidUsageSnapshot(overrides: Partial<UsageSnapshot> = {}): Record<string, unknown> {
   return {
     tenantId: '00000000-0000-0000-0000-000000000001',
     metricKey: 'api_requests',
@@ -110,25 +106,19 @@ describe('usageMetricSchema', () => {
     it('should throw error for numeric aggregation type', () => {
       const input = createValidUsageMetric({ aggregationType: 123 });
 
-      expect(() => usageMetricSchema.parse(input)).toThrow(
-        'aggregation type must be a string',
-      );
+      expect(() => usageMetricSchema.parse(input)).toThrow('aggregation type must be a string');
     });
 
     it('should throw error for null aggregation type', () => {
       const input = createValidUsageMetric({ aggregationType: null });
 
-      expect(() => usageMetricSchema.parse(input)).toThrow(
-        'aggregation type must be a string',
-      );
+      expect(() => usageMetricSchema.parse(input)).toThrow('aggregation type must be a string');
     });
 
     it('should throw error for undefined aggregation type', () => {
       const input = createValidUsageMetric({ aggregationType: undefined });
 
-      expect(() => usageMetricSchema.parse(input)).toThrow(
-        'aggregation type must be a string',
-      );
+      expect(() => usageMetricSchema.parse(input)).toThrow('aggregation type must be a string');
     });
   });
 
@@ -186,9 +176,7 @@ describe('usageMetricSchema', () => {
     it('should throw error when aggregationType is missing', () => {
       const { aggregationType: _aggregationType, ...input } = createValidUsageMetric();
 
-      expect(() => usageMetricSchema.parse(input)).toThrow(
-        'aggregation type must be a string',
-      );
+      expect(() => usageMetricSchema.parse(input)).toThrow('aggregation type must be a string');
     });
   });
 
@@ -388,25 +376,19 @@ describe('usageSnapshotSchema', () => {
     it('should throw error when periodStart is a number', () => {
       const input = createValidUsageSnapshot({ periodStart: 1675209600000 });
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
 
     it('should throw error when periodEnd is null', () => {
       const input = createValidUsageSnapshot({ periodEnd: null });
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
 
     it('should throw error when updatedAt is undefined', () => {
       const input = createValidUsageSnapshot({ updatedAt: undefined });
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
 
     it('should accept datetime string without explicit timezone (local time)', () => {
@@ -478,25 +460,19 @@ describe('usageSnapshotSchema', () => {
     it('should throw error when periodStart is missing', () => {
       const { periodStart: _periodStart, ...input } = createValidUsageSnapshot();
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
 
     it('should throw error when periodEnd is missing', () => {
       const { periodEnd: _periodEnd, ...input } = createValidUsageSnapshot();
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
 
     it('should throw error when updatedAt is missing', () => {
       const { updatedAt: _updatedAt, ...input } = createValidUsageSnapshot();
 
-      expect(() => usageSnapshotSchema.parse(input)).toThrow(
-        'ISO datetime must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('ISO datetime must be a string');
     });
   });
 
@@ -506,15 +482,11 @@ describe('usageSnapshotSchema', () => {
     });
 
     it('should throw error when input is undefined', () => {
-      expect(() => usageSnapshotSchema.parse(undefined)).toThrow(
-        'TenantId must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse(undefined)).toThrow('TenantId must be a string');
     });
 
     it('should throw error when input is not an object', () => {
-      expect(() => usageSnapshotSchema.parse('string')).toThrow(
-        'TenantId must be a string',
-      );
+      expect(() => usageSnapshotSchema.parse('string')).toThrow('TenantId must be a string');
     });
 
     it('should throw error when input is an array', () => {

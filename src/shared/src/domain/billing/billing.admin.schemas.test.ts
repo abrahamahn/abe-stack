@@ -678,19 +678,19 @@ describe('adminBillingStatsSchema', () => {
   describe('when given valid input', () => {
     it('should parse successfully with all numeric fields', () => {
       const input: AdminBillingStats = {
-        totalRevenue: 125000.50,
+        totalRevenue: 125000.5,
         activeSubscriptions: 342,
         churnRate: 2.5,
-        mrr: 12500.00,
+        mrr: 12500.0,
       };
 
       const result = adminBillingStatsSchema.parse(input);
 
       expect(result).toEqual(input);
-      expect(result.totalRevenue).toBe(125000.50);
+      expect(result.totalRevenue).toBe(125000.5);
       expect(result.activeSubscriptions).toBe(342);
       expect(result.churnRate).toBe(2.5);
-      expect(result.mrr).toBe(12500.00);
+      expect(result.mrr).toBe(12500.0);
     });
 
     it('should parse with zero values', () => {

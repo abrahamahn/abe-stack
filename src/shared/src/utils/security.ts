@@ -200,9 +200,7 @@ export function validateCsrfToken(
       ? verifyToken(decryptedToken, secret)
       : { valid: true, token: decryptedToken };
   } else {
-    cookieResult = signed
-      ? verifyToken(cookieToken, secret)
-      : { valid: true, token: cookieToken };
+    cookieResult = signed ? verifyToken(cookieToken, secret) : { valid: true, token: cookieToken };
   }
 
   if (!cookieResult.valid || cookieResult.token == null) {

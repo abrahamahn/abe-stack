@@ -169,9 +169,7 @@ describe('jobSchema', () => {
 
   describe('status validation', () => {
     it('should reject invalid status enum', () => {
-      expect(() => jobSchema.parse({ ...validFullJob, status: 'invalid' })).toThrow(
-        /job status/i,
-      );
+      expect(() => jobSchema.parse({ ...validFullJob, status: 'invalid' })).toThrow(/job status/i);
     });
 
     it('should reject empty string status', () => {

@@ -640,9 +640,7 @@ describe('auditEventSchema', () => {
         resource: 'user',
       };
 
-      expect(() => auditEventSchema.parse(input)).toThrow(
-        'Action must follow "noun.verb" format',
-      );
+      expect(() => auditEventSchema.parse(input)).toThrow('Action must follow "noun.verb" format');
     });
 
     it('should validate category', () => {
@@ -870,7 +868,9 @@ describe('auditLogFilterSchema', () => {
         sortOrder: 'invalid',
       };
 
-      expect(() => auditLogFilterSchema.parse(input)).toThrow(/Invalid sort order.*Expected one of/);
+      expect(() => auditLogFilterSchema.parse(input)).toThrow(
+        /Invalid sort order.*Expected one of/,
+      );
     });
 
     it('should accept sortBy field', () => {
@@ -992,9 +992,7 @@ describe('auditLogListResponseSchema', () => {
         limit: 50,
       };
 
-      expect(() => auditLogListResponseSchema.parse(input)).toThrow(
-        'hasNext must be a boolean',
-      );
+      expect(() => auditLogListResponseSchema.parse(input)).toThrow('hasNext must be a boolean');
     });
 
     it('should require limit number', () => {
