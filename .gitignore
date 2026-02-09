@@ -14,6 +14,8 @@ build/
 out/
 *.tsbuildinfo
 *.txt
+vitest.config.d.ts
+vitest.config.d.ts.map
 
 # Allow Vite config for web build
 !config/build/
