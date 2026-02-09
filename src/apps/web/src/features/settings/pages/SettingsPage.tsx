@@ -1,47 +1,46 @@
-// apps/web/src/features/settings/pages/SettingsPage.tsx
+// src/apps/web/src/features/settings/pages/SettingsPage.tsx
 /**
  * Settings Page
  *
  * Main settings page with tabs for Profile, Security, Sessions, and Billing.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
-import { Button, Card, Container, Heading, Tabs } from '@abe-stack/ui';
+import { Button, Card, Heading, Tabs } from '@abe-stack/ui';
+import { useAuth } from '@auth/hooks';
 import { useMemo, type ReactElement } from 'react';
 
 import {
   AvatarUpload,
+  EmailChangeForm,
+  ForgotPasswordShortcut,
   OAuthConnectionsList,
   PasswordChangeForm,
   ProfileForm,
   SessionsList,
+  TotpManagement,
 } from '../components';
+
+import type { User } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface UserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  avatarUrl: string | null;
-  role: 'user' | 'admin' | 'moderator';
-  createdAt: string;
-}
+type UserLocal = User;
 
 // ============================================================================
 // Tab Content Components
 // ============================================================================
 
 const ProfileTab = ({ user }: { user: UserLocal }): ReactElement => {
+  const displayName = `${user.firstName} ${user.lastName}`.trim();
   return (
     <div className="space-y-6">
       <div>
         <Heading as="h3" size="md" className="mb-4">
           Avatar
         </Heading>
-        <AvatarUpload currentAvatarUrl={user.avatarUrl ?? ''} userName={user.name ?? ''} />
+        <AvatarUpload currentAvatarUrl={user.avatarUrl ?? ''} userName={displayName} />
       </div>
 
       <div className="border-t pt-6">
@@ -54,14 +53,31 @@ const ProfileTab = ({ user }: { user: UserLocal }): ReactElement => {
   );
 };
 
-const SecurityTab = (): ReactElement => {
+const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
   return (
     <div className="space-y-6">
       <div>
         <Heading as="h3" size="md" className="mb-4">
+          Two-Factor Authentication
+        </Heading>
+        <TotpManagement />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
           Change Password
         </Heading>
         <PasswordChangeForm />
+        <div className="mt-6">
+          <ForgotPasswordShortcut email={user.email} />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
+          Change Email
+        </Heading>
+        <EmailChangeForm />
       </div>
 
       <div className="border-t pt-6">
@@ -114,31 +130,29 @@ const BillingTab = (): ReactElement => {
 // ============================================================================
 
 export const SettingsPage = (): ReactElement => {
-  // Fetch current user
-  const apiBaseUrl =
-    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
-  const queryResult = useQuery<UserLocal>({
-    queryKey: ['user', 'me'],
-    queryFn: async (): Promise<UserLocal> => {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`${apiBaseUrl}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token ?? ''}`,
-        },
-        credentials: 'include',
-      });
+  const { user, isLoading, isAuthenticated } = useAuth();
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch user');
-      }
+  // Determine page status:
+  // - Show loading while auth is initializing OR while user data is being fetched
+  // - Show success ONLY when we have the user object loaded
+  // - Show error if not loading, not authenticated, and no user
+  const status =
+    isLoading || (isAuthenticated && user === null)
+      ? 'pending'
+      : user !== null
+        ? 'success'
+        : 'error';
 
-      const data = (await response.json()) as UserLocal;
-      return data;
-    },
-  });
+  // Only treat as error if we're definitely not authenticated and not loading
+  const error =
+    !isLoading && user === null && !isAuthenticated ? new Error('Not authenticated') : null;
 
-  const user = queryResult.data;
-  const { status, error, refetch } = queryResult;
+  // Mock refetch as a no-op since useAuth handles state primarily,
+  // though typically you'd trigger a re-fetch via auth.initialize() or similar if needed.
+  // For now, we can just reload the page or rely on the auth service's polling.
+  const refetch = (): void => {
+    window.location.reload();
+  };
 
   // Build tabs
   const tabs = useMemo(
@@ -146,12 +160,12 @@ export const SettingsPage = (): ReactElement => {
       {
         id: 'profile',
         label: 'Profile',
-        content: user !== undefined ? <ProfileTab user={user} /> : null,
+        content: user !== null ? <ProfileTab user={user} /> : null,
       },
       {
         id: 'security',
         label: 'Security',
-        content: <SecurityTab />,
+        content: user !== null ? <SecurityTab user={user} /> : null,
       },
       {
         id: 'sessions',
@@ -170,43 +184,53 @@ export const SettingsPage = (): ReactElement => {
   // Loading state
   if (status === 'pending') {
     return (
-      <Container className="py-8">
+      <div className="py-8 max-w-3xl mx-auto px-4">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
           <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg" />
         </div>
-      </Container>
+      </div>
     );
   }
 
-  // Error state
-  if (status === 'error' || user === undefined) {
+  // Error state - show friendly message for auth errors
+  if (status === 'error' || user === null) {
+    const errorMessage = error instanceof Error ? error.message : null;
+    const isAuthError =
+      (errorMessage?.includes('401') ?? false) || (errorMessage?.includes('Unauthorized') ?? false);
+
     return (
-      <Container className="py-8">
+      <div className="py-8 max-w-3xl mx-auto px-4">
         <Card className="p-6 text-center">
           <Heading as="h2" size="lg" className="mb-4">
-            Unable to Load Settings
+            {isAuthError ? 'Session Expired' : 'Unable to Load Settings'}
           </Heading>
           <p className="text-gray-500 mb-4">
-            {error?.message ?? 'Failed to load your profile. Please try again.'}
+            {isAuthError
+              ? 'Your session has expired. Please log in again to access your settings.'
+              : (errorMessage ?? 'Failed to load your profile. Please try again.')}
           </p>
           <Button
             type="button"
             variant="text"
             onClick={() => {
-              void refetch();
+              if (isAuthError) {
+                window.location.href = '/login';
+              } else {
+                refetch();
+              }
             }}
             className="underline"
           >
-            Try Again
+            {isAuthError ? 'Go to Login' : 'Try Again'}
           </Button>
         </Card>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="py-8 max-w-3xl">
+    <div className="py-8 max-w-3xl mx-auto px-4">
       <Heading as="h1" size="xl" className="mb-6">
         Settings
       </Heading>
@@ -214,6 +238,6 @@ export const SettingsPage = (): ReactElement => {
       <Card className="p-6">
         <Tabs items={tabs} />
       </Card>
-    </Container>
+    </div>
   );
 };

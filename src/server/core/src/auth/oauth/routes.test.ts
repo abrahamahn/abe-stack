@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/routes.test.ts
+// src/server/core/src/auth/oauth/routes.test.ts
 /**
  * OAuth Routes Unit Tests
  *
@@ -18,8 +18,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
+vi.mock('@abe-stack/server-engine', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/server-engine')>(
+    '@abe-stack/server-engine',
+  );
   return {
     ...actual,
   };
@@ -36,7 +38,7 @@ vi.mock('./handlers', () => ({
 import { oauthRoutes } from './routes';
 
 import type { AppContext } from '../index';
-import type { RouteDefinition } from '@abe-stack/db';
+import type { RouteDefinition } from '@abe-stack/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -286,10 +288,18 @@ describe('OAuth Routes', () => {
                 user: {
                   id: 'user-123',
                   email: 'test@example.com',
-                  name: 'Test User',
+                  username: 'testuser',
+                  firstName: 'Test',
+                  lastName: 'User',
                   role: 'user',
                   avatarUrl: null,
+                  emailVerified: true,
+                  phone: null,
+                  phoneVerified: null,
+                  dateOfBirth: null,
+                  gender: null,
                   createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
                 },
                 isNewUser: false,
               },
@@ -369,10 +379,18 @@ describe('OAuth Routes', () => {
                 user: {
                   id: 'user-123',
                   email: 'test@example.com',
-                  name: 'Test User',
+                  username: 'testuser',
+                  firstName: 'Test',
+                  lastName: 'User',
                   role: 'user',
                   avatarUrl: null,
+                  emailVerified: true,
+                  phone: null,
+                  phoneVerified: null,
+                  dateOfBirth: null,
+                  gender: null,
                   createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
                 },
                 isNewUser: false,
               },

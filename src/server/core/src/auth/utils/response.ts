@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/response.ts
+// src/server/core/src/auth/utils/response.ts
 /**
  * Authentication response utilities
  *
@@ -16,14 +16,26 @@ export interface AuthUser {
   id: UserId;
   /** User's email address */
   email: string;
-  /** User's display name */
-  name: string | null;
+  /** User's unique username */
+  username: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
   /** URL to user's avatar image */
   avatarUrl: string | null;
   /** User's role in the system */
   role: AppRole;
   /** Whether user's email is verified */
-  isVerified: boolean;
+  emailVerified: boolean;
+  /** User's phone number */
+  phone: string | null;
+  /** Whether user's phone is verified */
+  phoneVerified: boolean | null;
+  /** User's date of birth as ISO date string */
+  dateOfBirth: string | null;
+  /** User's gender */
+  gender: string | null;
   /** ISO 8601 string of when the user was created */
   createdAt: string;
   /** ISO 8601 string of when the user was last updated */
@@ -61,10 +73,16 @@ export function createAuthResponse(
   user: {
     id: string;
     email: string;
-    name: string | null;
+    username: string;
+    firstName: string;
+    lastName: string;
     avatarUrl?: string | null;
     role: AppRole;
     emailVerified: boolean;
+    phone?: string | null;
+    phoneVerified?: boolean | null;
+    dateOfBirth?: Date | string | null;
+    gender?: string | null;
     createdAt: Date | string;
     updatedAt: Date | string;
   },
@@ -73,6 +91,10 @@ export function createAuthResponse(
     typeof user.createdAt === 'string' ? user.createdAt : user.createdAt.toISOString();
   const updatedAt =
     typeof user.updatedAt === 'string' ? user.updatedAt : user.updatedAt.toISOString();
+  const dateOfBirth =
+    user.dateOfBirth instanceof Date
+      ? user.dateOfBirth.toISOString().slice(0, 10)
+      : (user.dateOfBirth ?? null);
 
   return {
     accessToken,
@@ -80,10 +102,16 @@ export function createAuthResponse(
     user: {
       id: user.id as UserId,
       email: user.email,
-      name: user.name,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       avatarUrl: user.avatarUrl ?? null,
       role: user.role,
-      isVerified: user.emailVerified,
+      emailVerified: user.emailVerified,
+      phone: user.phone ?? null,
+      phoneVerified: user.phoneVerified ?? null,
+      dateOfBirth,
+      gender: user.gender ?? null,
       createdAt,
       updatedAt,
     },

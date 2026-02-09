@@ -1,4 +1,4 @@
-// apps/web/src/features/home/hooks/useHomeKeyboard.test.ts
+// src/apps/web/src/features/home/hooks/useHomeKeyboard.test.ts
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +8,8 @@ describe('useHomeKeyboard', () => {
   const mockOptions = {
     togglePane: vi.fn(),
     cycleTheme: vi.fn(),
+    cycleDensity: vi.fn(),
+    cycleContrast: vi.fn(),
     clearSelection: vi.fn(),
   };
 
@@ -15,44 +17,60 @@ describe('useHomeKeyboard', () => {
     vi.clearAllMocks();
   });
 
-  it('should toggle top pane on T key', () => {
+  it('should toggle top pane on ArrowUp key', () => {
+    renderHook(() => {
+      useHomeKeyboard(mockOptions);
+    });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(mockOptions.togglePane).toHaveBeenCalledWith('top');
+  });
+
+  it('should toggle left pane on ArrowLeft key', () => {
+    renderHook(() => {
+      useHomeKeyboard(mockOptions);
+    });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(mockOptions.togglePane).toHaveBeenCalledWith('left');
+  });
+
+  it('should toggle right pane on ArrowRight key', () => {
+    renderHook(() => {
+      useHomeKeyboard(mockOptions);
+    });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(mockOptions.togglePane).toHaveBeenCalledWith('right');
+  });
+
+  it('should toggle bottom pane on ArrowDown key', () => {
+    renderHook(() => {
+      useHomeKeyboard(mockOptions);
+    });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(mockOptions.togglePane).toHaveBeenCalledWith('bottom');
+  });
+
+  it('should cycle theme on T key', () => {
     renderHook(() => {
       useHomeKeyboard(mockOptions);
     });
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'T' }));
-    expect(mockOptions.togglePane).toHaveBeenCalledWith('top');
+    expect(mockOptions.cycleTheme).toHaveBeenCalled();
   });
 
-  it('should toggle left pane on L key', () => {
-    renderHook(() => {
-      useHomeKeyboard(mockOptions);
-    });
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'L' }));
-    expect(mockOptions.togglePane).toHaveBeenCalledWith('left');
-  });
-
-  it('should toggle right pane on R key', () => {
-    renderHook(() => {
-      useHomeKeyboard(mockOptions);
-    });
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'R' }));
-    expect(mockOptions.togglePane).toHaveBeenCalledWith('right');
-  });
-
-  it('should toggle bottom pane on B key', () => {
-    renderHook(() => {
-      useHomeKeyboard(mockOptions);
-    });
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'B' }));
-    expect(mockOptions.togglePane).toHaveBeenCalledWith('bottom');
-  });
-
-  it('should cycle theme on D key', () => {
+  it('should cycle density on D key', () => {
     renderHook(() => {
       useHomeKeyboard(mockOptions);
     });
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'D' }));
-    expect(mockOptions.cycleTheme).toHaveBeenCalled();
+    expect(mockOptions.cycleDensity).toHaveBeenCalled();
+  });
+
+  it('should cycle contrast on C key', () => {
+    renderHook(() => {
+      useHomeKeyboard(mockOptions);
+    });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'C' }));
+    expect(mockOptions.cycleContrast).toHaveBeenCalled();
   });
 
   it('should clear selection on Escape key', () => {
@@ -69,7 +87,7 @@ describe('useHomeKeyboard', () => {
     });
     const input = document.createElement('input');
     document.body.appendChild(input);
-    const event = new KeyboardEvent('keydown', { key: 'L', bubbles: true });
+    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true });
     Object.defineProperty(event, 'target', { value: input, enumerable: true });
     input.dispatchEvent(event);
     expect(mockOptions.togglePane).not.toHaveBeenCalled();
@@ -87,13 +105,13 @@ describe('useHomeKeyboard', () => {
 });
 
 describe('HOME_KEYBOARD_SHORTCUTS', () => {
-  it('should have 6 shortcut definitions', () => {
-    expect(HOME_KEYBOARD_SHORTCUTS).toHaveLength(6);
+  it('should have 8 shortcut definitions', () => {
+    expect(HOME_KEYBOARD_SHORTCUTS).toHaveLength(8);
   });
 
-  it('should include T, L, R, B, D, Esc keys', () => {
+  it('should include arrow keys plus T, D, C, Esc', () => {
     const keys = HOME_KEYBOARD_SHORTCUTS.map((s) => s.key);
-    expect(keys).toEqual(['T', 'L', 'R', 'B', 'D', 'Esc']);
+    expect(keys).toEqual(['↑', '↓', '←', '→', 'T', 'D', 'C', 'Esc']);
   });
 
   it('should have descriptions for all shortcuts', () => {

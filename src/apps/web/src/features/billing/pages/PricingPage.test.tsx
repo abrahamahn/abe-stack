@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/PricingPage.test.tsx
+// src/apps/web/src/features/billing/pages/PricingPage.test.tsx
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/types.ts
+// src/apps/server/src/http/pagination/types.ts
 /**
  * Pagination type definitions for HTTP middleware and helpers.
  */

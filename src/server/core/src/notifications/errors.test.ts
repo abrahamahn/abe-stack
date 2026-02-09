@@ -1,4 +1,4 @@
-// backend/core/src/notifications/errors.test.ts
+// src/server/core/src/notifications/errors.test.ts
 /**
  * Notification Error Tests
  *

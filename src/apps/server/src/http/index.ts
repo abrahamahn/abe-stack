@@ -1,4 +1,4 @@
-// apps/server/src/http/index.ts
+// src/apps/server/src/http/index.ts
 /**
  * HTTP Layer Package
  *
@@ -78,26 +78,22 @@ export {
   type ValidationOptions,
 } from './middleware';
 
-// Router
+// Router — re-exported from @abe-stack/server-engine (canonical implementation)
 export {
   createRouteMap,
   protectedRoute,
   publicRoute,
   registerRouteMap,
   type AuthGuardFactory,
-  type AuthGuardHook,
-  type BaseRouteDefinition,
   type HandlerContext,
   type HttpMethod,
-  type ProtectedHandler,
-  type PublicHandler,
   type RouteDefinition,
   type RouteHandler,
   type RouteMap,
   type RouteResult,
   type RouterOptions,
   type ValidationSchema,
-} from './router';
+} from '@abe-stack/server-engine';
 
 // Pagination
 export {

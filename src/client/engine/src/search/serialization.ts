@@ -1,4 +1,4 @@
-// client/src/search/serialization.ts
+// src/client/engine/src/search/serialization.ts
 /**
  * Search Query Serialization
  *

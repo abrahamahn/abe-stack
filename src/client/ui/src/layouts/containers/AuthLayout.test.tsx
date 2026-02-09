@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/AuthLayout.test.tsx
+// src/client/ui/src/layouts/containers/AuthLayout.test.tsx
 // client/ui/src/layouts/__tests__/AuthLayout.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

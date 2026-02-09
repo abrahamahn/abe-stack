@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-patterns.test.ts
+// src/server/core/src/auth/security/password-patterns.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/membership/membership.logic.test.ts
+// src/shared/src/domain/membership/membership.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

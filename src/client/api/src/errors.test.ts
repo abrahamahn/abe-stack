@@ -1,4 +1,4 @@
-// client/src/errors.test.ts
+// src/client/api/src/errors.test.ts
 import {
   BadRequestError,
   ConflictError,

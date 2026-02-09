@@ -1,4 +1,4 @@
-// backend/db/src/validation.ts
+// src/server/db/src/validation.ts
 /**
  * Schema Validation
  *
@@ -59,6 +59,14 @@ export const REQUIRED_TABLES = [
   'legal_documents',
   'user_agreements',
   'consent_logs',
+  // 0009_auth_extensions: TOTP + email change
+  'totp_backup_codes',
+  'email_change_tokens',
+  'email_change_revert_tokens',
+  // 0010_api_keys: Programmatic API access
+  'api_keys',
+  // 0011_data_exports: GDPR data export/deletion
+  'data_export_requests',
 ] as const;
 
 export type RequiredTable = (typeof REQUIRED_TABLES)[number];
@@ -77,7 +85,7 @@ export class SchemaValidationError extends Error {
   constructor(public readonly missingTables: string[]) {
     super(
       `Database schema is incomplete. Missing tables: ${missingTables.join(', ')}. ` +
-        `Run 'pnpm --filter @abe-stack/server db:push' to create tables.`,
+        `Run 'pnpm db:push' to create tables (development).`,
     );
     this.name = 'SchemaValidationError';
   }

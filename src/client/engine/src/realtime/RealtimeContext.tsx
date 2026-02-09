@@ -32,9 +32,7 @@ import { SubscriptionCache } from './SubscriptionCache';
 import { WebsocketPubsubClient, type ConnectionState } from './WebsocketPubsubClient';
 
 import type { RecordCache, TableMap } from '../cache/RecordCache';
-import type { Contracts } from '@abe-stack/shared';
-
-type RealtimeOperation = Contracts.Operation;
+import type { RealtimeOperation } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

@@ -1,4 +1,4 @@
-// apps/desktop/src/main.test.tsx
+// src/apps/desktop/src/main.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { act, cleanup, screen, waitFor } from '@testing-library/react';
@@ -119,6 +119,7 @@ describe('main.tsx', () => {
     });
 
     it('should call createRoot with the correct element', async () => {
+      vi.clearAllMocks();
       await import('./main');
 
       expect(mockCreateRoot).toHaveBeenCalledTimes(1);

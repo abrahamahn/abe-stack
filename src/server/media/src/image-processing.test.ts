@@ -1,4 +1,4 @@
-// premium/media/src/image-processing.test.ts
+// src/server/media/src/image-processing.test.ts
 import sharp from 'sharp';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -263,11 +263,21 @@ describe('Image Processing', () => {
       await expect(resizeImage(mockImageBuffer, { width: 0, height: 0 })).rejects.toThrow();
     });
 
-    test('should handle resize with very large dimensions', async () => {
+    test('should handle resize with moderately large dimensions', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 10000, height: 10000 });
 
       expect(mockInstance.resize).toHaveBeenCalledWith(10000, 10000);
       expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should reject dimensions exceeding MAX_IMAGE_DIMENSION (65536)', async () => {
+      await expect(resizeImage(mockImageBuffer, { width: 100000, height: 600 })).rejects.toThrow(
+        'Dimensions exceed maximum',
+      );
+
+      await expect(resizeImage(mockImageBuffer, { width: 800, height: 100000 })).rejects.toThrow(
+        'Dimensions exceed maximum',
+      );
     });
 
     test('should handle resize with decimal dimensions', async () => {

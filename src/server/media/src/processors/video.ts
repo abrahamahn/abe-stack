@@ -1,8 +1,8 @@
-// premium/media/src/processors/video.ts
+// src/server/media/src/processors/video.ts
 /**
  * Video Processing Module
  *
- * Handles video processing operations using FFmpeg.
+ * Handles video processing operations using the internal FFmpeg wrapper.
  * Provides transcoding, metadata extraction, audio extraction, and HLS streaming.
  *
  * @module processors/video
@@ -10,71 +10,17 @@
 
 import path from 'path';
 
+import { convertVideo, createHLSStream, extractAudio, getMediaMetadata } from '../ffmpeg-wrapper';
+
 import type { MediaMetadata, ProcessingResult, VideoProcessingOptions } from '../types';
 
 export type { VideoProcessingOptions };
 
 /**
- * Fluent-ffmpeg command interface for type-safe FFmpeg pipeline building
- */
-interface FfmpegCommand {
-  videoCodec: (codec: string) => FfmpegCommand;
-  toFormat: (format: string) => FfmpegCommand;
-  size: (size: string) => FfmpegCommand;
-  videoBitrate: (bitrate: string) => FfmpegCommand;
-  noVideo: () => FfmpegCommand;
-  audioCodec: (codec: string) => FfmpegCommand;
-  addOptions: (options: string[]) => FfmpegCommand;
-  output: (path: string) => FfmpegCommand;
-  complexFilter: (filter: string) => FfmpegCommand;
-  screenshots: (options: {
-    timestamps: number[];
-    filename: string;
-    folder: string;
-    size: string;
-  }) => FfmpegCommand;
-  setStartTime: (time: number) => FfmpegCommand;
-  setDuration: (duration: number) => FfmpegCommand;
-  on: (event: string, callback: (err?: Error) => void) => FfmpegCommand;
-  save: (outputPath: string) => FfmpegCommand;
-  run: () => FfmpegCommand;
-}
-
-/**
- * FFprobe data structure returned by fluent-ffmpeg's ffprobe
- */
-interface FfprobeData {
-  format: {
-    duration?: number;
-    bit_rate?: string;
-  };
-  streams: Array<{
-    codec_type: string;
-    codec_name?: string;
-    width?: number;
-    height?: number;
-    channels?: number;
-    sample_rate?: string;
-  }>;
-}
-
-type FfprobeCallback = (err: Error | null, data: FfprobeData) => void;
-
-/**
- * Lazy-loaded fluent-ffmpeg module interface
- */
-interface FfmpegModule {
-  default: (input: string) => FfmpegCommand;
-  setFfmpegPath: (path: string) => void;
-  ffprobe: (input: string, callback: FfprobeCallback) => void;
-}
-
-/**
- * Video processor using FFmpeg for transcoding, metadata extraction,
- * variant generation, audio extraction, and HLS streaming.
+ * Video processor using the internal FFmpeg wrapper for transcoding,
+ * metadata extraction, variant generation, audio extraction, and HLS streaming.
  *
- * Uses lazy module loading to avoid importing heavy native dependencies
- * until first use.
+ * No external npm dependencies — relies on the system-installed `ffmpeg`/`ffprobe` binaries.
  *
  * @example
  * ```typescript
@@ -86,24 +32,6 @@ interface FfmpegModule {
  * ```
  */
 export class VideoProcessor {
-  private ffmpegModule: FfmpegModule | null = null;
-
-  /**
-   * Lazy load ffmpeg module to defer native dependency loading
-   *
-   * @returns The fluent-ffmpeg module with ffmpeg-static path configured
-   * @complexity O(1) after first call (cached)
-   */
-  private async getFfmpeg(): Promise<FfmpegModule> {
-    if (this.ffmpegModule === null) {
-      const ffmpegStaticModule = (await import('ffmpeg-static')) as { default: string };
-      const ffmpegModule = (await import('fluent-ffmpeg')) as unknown as FfmpegModule;
-      this.ffmpegModule = ffmpegModule;
-      this.ffmpegModule.setFfmpegPath(ffmpegStaticModule.default);
-    }
-    return this.ffmpegModule;
-  }
-
   /**
    * Process a video file with the specified options
    *
@@ -147,7 +75,7 @@ export class VideoProcessor {
   }
 
   /**
-   * Process video using FFmpeg with format, resolution, and bitrate options
+   * Process video using FFmpeg wrapper with format, resolution, and bitrate options
    *
    * @param inputPath - Path to the input video file
    * @param outputPath - Path for the processed output file
@@ -159,93 +87,74 @@ export class VideoProcessor {
     outputPath: string,
     options: VideoProcessingOptions,
   ): Promise<void> {
-    const ffmpegModule = await this.getFfmpeg();
+    const convertOpts: {
+      format?: 'mp4' | 'webm' | 'avi';
+      videoCodec?: string;
+      videoBitrate?: string;
+      resolution?: { width: number; height: number };
+    } = {};
 
-    return new Promise((resolve, reject) => {
-      let command = ffmpegModule.default(inputPath);
-
-      if (options.format !== undefined) {
-        switch (options.format) {
-          case 'mp4':
-            command = command.videoCodec('libx264').toFormat('mp4');
-            break;
-          case 'webm':
-            command = command.videoCodec('libvpx-vp9').toFormat('webm');
-            break;
-          case 'avi':
-            command = command.toFormat('avi');
-            break;
-          case 'mov':
-            command = command.toFormat('mov');
-            break;
-        }
+    if (options.format !== undefined) {
+      switch (options.format) {
+        case 'mp4':
+          convertOpts.format = 'mp4';
+          convertOpts.videoCodec = 'libx264';
+          break;
+        case 'webm':
+          convertOpts.format = 'webm';
+          convertOpts.videoCodec = 'libvpx-vp9';
+          break;
+        case 'avi':
+          convertOpts.format = 'avi';
+          break;
+        case 'mov':
+          // mov is handled by ffmpeg without explicit format flag
+          break;
       }
+    }
 
-      if (options.resolution !== undefined) {
-        command = command.size(
-          `${String(options.resolution.width)}x${String(options.resolution.height)}`,
-        );
-      }
+    if (typeof options.bitrate === 'string' && options.bitrate !== '') {
+      convertOpts.videoBitrate = options.bitrate;
+    }
 
-      if (options.bitrate !== undefined && options.bitrate !== '') {
-        command = command.videoBitrate(options.bitrate);
-      }
+    if (options.resolution !== undefined) {
+      convertOpts.resolution = options.resolution;
+    }
 
-      command
-        .on('end', () => {
-          resolve();
-        })
-        .on('error', (err?: Error) => {
-          reject(err ?? new Error('Video processing failed'));
-        })
-        .save(outputPath);
-    });
+    const result = await convertVideo(inputPath, outputPath, convertOpts);
+
+    if (!result.success) {
+      throw new Error(result.error ?? 'Video processing failed');
+    }
   }
 
   /**
-   * Extract metadata from a video file using ffprobe
+   * Extract metadata from a video file using ffprobe via the FFmpeg wrapper
    *
    * @param inputPath - Path to the video file
    * @returns Extracted media metadata (duration, dimensions, bitrate, codec, etc.)
    */
   async getMetadata(inputPath: string): Promise<MediaMetadata> {
-    const ffmpegModule = await this.getFfmpeg();
+    try {
+      const meta = await getMediaMetadata(inputPath);
 
-    return new Promise((resolve) => {
-      ffmpegModule.ffprobe(inputPath, (err: Error | null, data: FfprobeData) => {
-        if (err !== null) {
-          resolve({});
-          return;
-        }
-
-        const videoStream = data.streams.find((s) => s.codec_type === 'video');
-        const audioStream = data.streams.find((s) => s.codec_type === 'audio');
-
-        const result: MediaMetadata = {};
-        if (data.format.duration !== undefined) {
-          result.duration = data.format.duration;
-        }
-        if (videoStream?.width !== undefined) {
-          result.width = videoStream.width;
-        }
-        if (videoStream?.height !== undefined) {
-          result.height = videoStream.height;
-        }
-        if (data.format.bit_rate !== undefined && data.format.bit_rate !== '') {
-          result.bitrate = parseInt(data.format.bit_rate, 10);
-        }
-        if (videoStream?.codec_name !== undefined) {
-          result.codec = videoStream.codec_name;
-        }
-        if (audioStream?.channels !== undefined) {
-          result.channels = audioStream.channels;
-        }
-        if (audioStream?.sample_rate !== undefined && audioStream.sample_rate !== '') {
-          result.sampleRate = parseInt(audioStream.sample_rate, 10);
-        }
-        resolve(result);
-      });
-    });
+      const result: MediaMetadata = {};
+      if (meta.duration !== undefined) {
+        result.duration = meta.duration;
+      }
+      if (meta.width !== undefined) {
+        result.width = meta.width;
+      }
+      if (meta.height !== undefined) {
+        result.height = meta.height;
+      }
+      if (meta.hasVideo === true) {
+        result.codec = 'video';
+      }
+      return result;
+    } catch {
+      return {};
+    }
   }
 
   /**
@@ -292,13 +201,17 @@ export class VideoProcessor {
    * @param format - Output audio format (mp3, wav, or aac)
    * @returns Processing result with success status and output path
    */
-  async extractAudio(
+  async extractAudioTrack(
     inputPath: string,
     outputPath: string,
     format: 'mp3' | 'wav' | 'aac' = 'mp3',
   ): Promise<ProcessingResult> {
     try {
-      await this.extractAudioWithFfmpeg(inputPath, outputPath, format);
+      const result = await extractAudio(inputPath, outputPath, format);
+
+      if (!result.success) {
+        throw new Error(result.error ?? 'Audio extraction failed');
+      }
 
       return {
         success: true,
@@ -313,38 +226,6 @@ export class VideoProcessor {
   }
 
   /**
-   * Extract audio using FFmpeg, stripping video track
-   *
-   * @param inputPath - Path to the video file
-   * @param outputPath - Path for the extracted audio
-   * @param format - Target audio format
-   * @throws Error if extraction fails
-   */
-  private async extractAudioWithFfmpeg(
-    inputPath: string,
-    outputPath: string,
-    format: string,
-  ): Promise<void> {
-    const ffmpegModule = await this.getFfmpeg();
-
-    return new Promise((resolve, reject) => {
-      const command = ffmpegModule.default(inputPath);
-
-      command
-        .noVideo()
-        .audioCodec(format === 'mp3' ? 'libmp3lame' : format === 'aac' ? 'aac' : 'pcm_s16le')
-        .toFormat(format)
-        .on('end', () => {
-          resolve();
-        })
-        .on('error', (err?: Error) => {
-          reject(err ?? new Error('Video processing failed'));
-        })
-        .save(outputPath);
-    });
-  }
-
-  /**
    * Create HLS (HTTP Live Streaming) segments from a video file
    *
    * @param inputPath - Path to the source video
@@ -352,14 +233,18 @@ export class VideoProcessor {
    * @param baseName - Base name for the m3u8 playlist file
    * @returns Processing result with the playlist path
    */
-  async createHLSStream(
+  async createHLS(
     inputPath: string,
     outputDir: string,
     baseName: string,
   ): Promise<ProcessingResult> {
     try {
+      const result = await createHLSStream(inputPath, outputDir, baseName);
       const outputPath = path.join(outputDir, `${baseName}.m3u8`);
-      await this.createHLSWithFfmpeg(inputPath, outputPath);
+
+      if (!result.success) {
+        throw new Error(result.error ?? 'HLS creation failed');
+      }
 
       return {
         success: true,
@@ -374,48 +259,17 @@ export class VideoProcessor {
   }
 
   /**
-   * Create HLS stream using FFmpeg with 10-second segments
-   *
-   * @param inputPath - Path to the source video
-   * @param outputPath - Path for the m3u8 playlist
-   * @throws Error if HLS creation fails
-   */
-  private async createHLSWithFfmpeg(inputPath: string, outputPath: string): Promise<void> {
-    const ffmpegModule = await this.getFfmpeg();
-
-    return new Promise((resolve, reject) => {
-      const command = ffmpegModule.default(inputPath);
-
-      command
-        .addOptions(['-hls_time 10', '-hls_list_size 0', '-hls_segment_type mpegts'])
-        .output(outputPath)
-        .on('end', () => {
-          resolve();
-        })
-        .on('error', (err?: Error) => {
-          reject(err ?? new Error('Video processing failed'));
-        })
-        .run();
-    });
-  }
-
-  /**
    * Get the duration of a video file in seconds
    *
    * @param inputPath - Path to the video file
    * @returns Duration in seconds, or null if unable to determine
    */
   async getDuration(inputPath: string): Promise<number | null> {
-    const ffmpegModule = await this.getFfmpeg();
-
-    return new Promise((resolve) => {
-      ffmpegModule.ffprobe(inputPath, (err: Error | null, data: FfprobeData) => {
-        if (err !== null) {
-          resolve(null);
-          return;
-        }
-        resolve(data.format.duration ?? null);
-      });
-    });
+    try {
+      const meta = await getMediaMetadata(inputPath);
+      return meta.duration ?? null;
+    } catch {
+      return null;
+    }
   }
 }

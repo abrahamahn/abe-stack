@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/factory.ts
+// src/server/core/src/notifications/providers/factory.ts
 /**
  * Notification Provider Factory
  *

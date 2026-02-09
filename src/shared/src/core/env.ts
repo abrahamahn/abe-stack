@@ -1,4 +1,4 @@
-// packages/shared/src/core/env.ts
+// src/shared/src/core/env.ts
 /**
  * Environment Configuration Utilities
  *
@@ -8,10 +8,10 @@
  * @module Core/Env
  */
 
-import { createEnumSchema, createSchema, parseOptional, parseString } from '../contracts/schema';
 import { ConfigurationError } from '../core/errors';
+import { createEnumSchema, createSchema, parseOptional, parseString } from '../core/schema.utils';
 
-import type { Schema } from '../contracts/types';
+import type { Schema } from '../core/api';
 
 // ============================================================================
 // Base Environment Schema

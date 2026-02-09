@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/SidePeekUILibraryContent.test.tsx
+// src/apps/web/src/features/ui-library/components/SidePeekUILibraryContent.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

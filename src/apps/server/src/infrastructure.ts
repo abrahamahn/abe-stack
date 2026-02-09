@@ -1,9 +1,10 @@
-// apps/server/src/infrastructure.ts
+// src/apps/server/src/infrastructure.ts
 
 import * as billingServiceImpl from '@abe-stack/core/billing';
 import * as notificationServiceImpl from '@abe-stack/core/notifications';
 import {
   createRepositories,
+  escapeIdentifier,
   PostgresPubSub,
   type DbClient,
   type Repositories,
@@ -12,11 +13,16 @@ import {
 import {
   createCache,
   createMemoryQueueStore,
+  createOwnerRule,
+  createPermissionChecker,
   createQueueServer,
   createStorage,
   createWriteService,
+  emailTemplates as engineEmailTemplates,
   MailerClient,
+  SqlSearchProvider,
   type CacheProvider,
+  type PermissionChecker,
   type QueueServer,
   type ServerSearchProvider,
   type StorageConfig,
@@ -56,6 +62,7 @@ export interface Infrastructure {
   queue: QueueServer;
   write: WriteService;
   cache: CacheProvider;
+  permissions: PermissionChecker;
   pgPubSub: PostgresPubSub; // PostgresPubSub is an adapter, not a SubscriptionManager
   emailTemplates: AuthEmailTemplates;
 }
@@ -122,57 +129,18 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     ...billingServiceImpl,
   } as unknown as BillingService;
 
-  // Search - Mock for now as generic search is not configured
-  const search: ServerSearchProvider = {
-    name: 'noop',
-    getCapabilities: () => ({
-      fullTextSearch: false,
-      fuzzyMatching: false,
-      highlighting: false,
-      nestedFields: false,
-      arrayOperations: false,
-      cursorPagination: false,
-      maxPageSize: 0,
-      supportedOperators: [],
-    }),
-    search: async () => {
-      return await Promise.resolve({
-        data: [],
-        limit: 10,
-        hasNext: false,
-        hasPrev: false,
-        page: 1,
-        executionTime: 0,
-      });
-    },
-    searchWithCursor: async () => {
-      return await Promise.resolve({
-        data: [],
-        limit: 10,
-        hasNext: false,
-        hasPrev: false,
-        nextCursor: null,
-        prevCursor: null,
-        executionTime: 0,
-      });
-    },
-    searchFaceted: async () => {
-      return await Promise.resolve({
-        data: [],
-        limit: 10,
-        hasNext: false,
-        hasPrev: false,
-        page: 1,
-        facets: [],
-        executionTime: 0,
-      });
-    },
-    count: async () => await Promise.resolve(0),
-    healthCheck: async () => await Promise.resolve(true),
-    close: async () => {
-      await Promise.resolve();
-    },
-  };
+  // Search — SQL-based provider for the users table
+  const search: ServerSearchProvider = new SqlSearchProvider(raw, repos, {
+    table: 'users',
+    primaryKey: 'id',
+    columns: [
+      { field: 'email', column: 'email', type: 'string', filterable: true, sortable: true },
+      { field: 'role', column: 'role', type: 'string', filterable: true, sortable: true },
+      { field: 'status', column: 'status', type: 'string', filterable: true, sortable: true },
+      { field: 'createdAt', column: 'created_at', type: 'date', filterable: true, sortable: true },
+    ],
+    defaultSort: { column: 'created_at', order: 'desc' },
+  });
 
   // Logger Adapter (Fastify/Pino -> Engine Interface)
   const loggerAdapter: LoggerAdapter = {
@@ -196,11 +164,19 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
   // Cache
   const cache = createCache(config.cache, { logger: loggerAdapter });
 
-  // Queue
+  // Queue — register background task handlers
   const queueStore = createMemoryQueueStore();
   const queue = createQueueServer({
     store: queueStore,
-    handlers: {},
+    handlers: {
+      cleanupExpiredTokens: async () => {
+        await repos.magicLinkTokens.deleteExpired();
+      },
+      cleanupCompletedTasks: async () => {
+        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        await queueStore.clearCompleted(cutoff);
+      },
+    },
     config: config.queue,
     log: loggerAdapter,
   });
@@ -228,40 +204,31 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
   };
   const write: WriteService = createWriteService(writeOptions);
 
-  // Email Templates (Simple stub implementation)
-  // Note: The 'to' field is required by AuthEmailTemplates but will be overridden by the caller
-  const emailTemplates: AuthEmailTemplates = {
-    passwordReset: (resetUrl: string, expiresInMinutes = 30) => ({
-      to: '', // Placeholder - overridden by caller
-      subject: 'Reset your password',
-      text: `Click this link to reset your password: ${resetUrl}\n\nThis link expires in ${expiresInMinutes} minutes.`,
-      html: `<p>Click this link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p><p>This link expires in ${expiresInMinutes} minutes.</p>`,
-    }),
-    magicLink: (loginUrl: string, expiresInMinutes = 15) => ({
-      to: '', // Placeholder - overridden by caller
-      subject: 'Your login link',
-      text: `Click this link to log in: ${loginUrl}\n\nThis link expires in ${expiresInMinutes} minutes.`,
-      html: `<p>Click this link to log in: <a href="${loginUrl}">${loginUrl}</a></p><p>This link expires in ${expiresInMinutes} minutes.</p>`,
-    }),
-    emailVerification: (verificationUrl: string) => ({
-      to: '', // Placeholder - overridden by caller
-      subject: 'Verify your email address',
-      text: `Click this link to verify your email: ${verificationUrl}`,
-      html: `<p>Click this link to verify your email: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
-    }),
-    existingAccountRegistrationAttempt: () => ({
-      to: '', // Placeholder - overridden by caller
-      subject: 'Account registration attempt',
-      text: 'Someone tried to create an account with your email address.',
-      html: '<p>Someone tried to create an account with your email address.</p>',
-    }),
-    tokenReuseAlert: () => ({
-      to: '', // Placeholder - overridden by caller
-      subject: 'Security alert: Token reuse detected',
-      text: 'A previously used token was attempted to be reused. All your sessions have been invalidated for security.',
-      html: '<p>A previously used token was attempted to be reused. All your sessions have been invalidated for security.</p>',
-    }),
-  };
+  // Permissions — row-level access control with default owner-based rule
+  const permissions = createPermissionChecker({
+    config: {
+      defaultDeny: false,
+      globalRules: [createOwnerRule(['read', 'write', 'delete'], 'ownerId')],
+    },
+    recordLoader: async (table, id) => {
+      const rows = await raw.raw<{ id: string; owner_id?: string; created_by?: string }>(
+        `SELECT id, owner_id, created_by FROM ${escapeIdentifier(table)} WHERE id = $1 LIMIT 1`,
+        [id],
+      );
+      const row = (rows as Array<{ id: string; owner_id?: string; created_by?: string }>)[0];
+      if (row === undefined) return null;
+
+      // Build PermissionRecord with exact optional properties
+      // (exactOptionalPropertyTypes requires omitting undefined keys)
+      const record: { id: string; ownerId?: string; createdBy?: string } = { id: row.id };
+      if (row.owner_id !== undefined) record.ownerId = row.owner_id;
+      if (row.created_by !== undefined) record.createdBy = row.created_by;
+      return record;
+    },
+  });
+
+  // Email Templates — use production templates from server-engine
+  const emailTemplates: AuthEmailTemplates = engineEmailTemplates;
 
   return {
     db: raw,
@@ -274,6 +241,7 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     queue,
     write,
     cache,
+    permissions,
     pgPubSub,
     emailTemplates,
   };

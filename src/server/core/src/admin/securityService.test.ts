@@ -1,4 +1,4 @@
-// backend/core/src/admin/securityService.test.ts
+// src/server/core/src/admin/securityService.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -39,7 +39,7 @@ function createMockSecurityEvent(overrides: Partial<Record<string, unknown>> = {
     severity: 'medium',
     ip_address: '192.168.1.1',
     user_agent: 'Mozilla/5.0',
-    metadata: JSON.stringify({ reason: 'Too many failed attempts' }),
+    metadata: { reason: 'Too many failed attempts' },
     created_at: new Date('2024-01-15T10:30:00Z'),
     ...overrides,
   };
@@ -149,9 +149,9 @@ describe('Security Service', () => {
       expect(result.hasPrev).toBe(true);
     });
 
-    test('should parse metadata from JSON', async () => {
+    test('should pass through JSONB metadata', async () => {
       const mockEvent = createMockSecurityEvent({
-        metadata: JSON.stringify({ customField: 'value' }),
+        metadata: { customField: 'value' },
       });
       mockDb.query.mockResolvedValue([mockEvent]);
       mockDb.queryOne.mockResolvedValue({ count: '1' });
@@ -190,9 +190,9 @@ describe('Security Service', () => {
       );
     });
 
-    test('should parse metadata correctly', async () => {
+    test('should pass through JSONB metadata correctly', async () => {
       const mockEvent = createMockSecurityEvent({
-        metadata: JSON.stringify({ failedAttempts: 5 }),
+        metadata: { failedAttempts: 5 },
       });
       mockDb.queryOne.mockResolvedValue(mockEvent);
 

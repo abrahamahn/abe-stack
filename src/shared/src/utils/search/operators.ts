@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/operators.ts
+// src/shared/src/utils/search/operators.ts
 /**
  * Filter Operator Implementations
  *
@@ -21,6 +21,20 @@ import {
 // ============================================================================
 // Value Comparison Utilities
 // ============================================================================
+
+/**
+ * Type guard for FilterPrimitive values.
+ * Rejects objects and arrays which cannot be meaningfully compared.
+ *
+ * @param value - The value to check
+ * @returns True if value is string, number, boolean, Date, or null
+ * @complexity O(1)
+ */
+function isFilterPrimitive(value: unknown): value is FilterPrimitive {
+  if (value === null) return true;
+  const t = typeof value;
+  return t === 'string' || t === 'number' || t === 'boolean' || value instanceof Date;
+}
 
 /**
  * Get a nested field value using dot notation.
@@ -122,7 +136,8 @@ function evalGt(fieldValue: unknown, filterValue: FilterValue): boolean {
   if (typeof filterValue === 'object' && !(filterValue instanceof Date)) {
     return false;
   }
-  return comparePrimitives(fieldValue as FilterPrimitive, filterValue) > 0;
+  if (!isFilterPrimitive(fieldValue)) return false;
+  return comparePrimitives(fieldValue, filterValue) > 0;
 }
 
 /**
@@ -136,7 +151,8 @@ function evalGte(fieldValue: unknown, filterValue: FilterValue): boolean {
   if (typeof filterValue === 'object' && !(filterValue instanceof Date)) {
     return false;
   }
-  return comparePrimitives(fieldValue as FilterPrimitive, filterValue) >= 0;
+  if (!isFilterPrimitive(fieldValue)) return false;
+  return comparePrimitives(fieldValue, filterValue) >= 0;
 }
 
 /**
@@ -150,7 +166,8 @@ function evalLt(fieldValue: unknown, filterValue: FilterValue): boolean {
   if (typeof filterValue === 'object' && !(filterValue instanceof Date)) {
     return false;
   }
-  return comparePrimitives(fieldValue as FilterPrimitive, filterValue) < 0;
+  if (!isFilterPrimitive(fieldValue)) return false;
+  return comparePrimitives(fieldValue, filterValue) < 0;
 }
 
 /**
@@ -164,7 +181,8 @@ function evalLte(fieldValue: unknown, filterValue: FilterValue): boolean {
   if (typeof filterValue === 'object' && !(filterValue instanceof Date)) {
     return false;
   }
-  return comparePrimitives(fieldValue as FilterPrimitive, filterValue) <= 0;
+  if (!isFilterPrimitive(fieldValue)) return false;
+  return comparePrimitives(fieldValue, filterValue) <= 0;
 }
 
 /**
@@ -351,10 +369,8 @@ function evalBetween(fieldValue: unknown, filterValue: FilterValue): boolean {
   }
 
   const { min, max } = filterValue;
-  return (
-    comparePrimitives(fieldValue as FilterPrimitive, min) >= 0 &&
-    comparePrimitives(fieldValue as FilterPrimitive, max) <= 0
-  );
+  if (!isFilterPrimitive(fieldValue)) return false;
+  return comparePrimitives(fieldValue, min) >= 0 && comparePrimitives(fieldValue, max) <= 0;
 }
 
 /**
@@ -393,7 +409,8 @@ function evalArrayContainsAny(
 
   return fieldValue.some((v) => {
     const normalizedV = normalizeForComparison(v, caseSensitive);
-    return normalizedFilterValues.includes(normalizedV as FilterPrimitive);
+    if (!isFilterPrimitive(normalizedV)) return false;
+    return normalizedFilterValues.includes(normalizedV);
   });
 }
 
@@ -550,9 +567,8 @@ export function sortArray<T extends Record<string, unknown>>(
       if (aIsNull) return config.nulls === 'first' ? -1 : 1;
       if (bIsNull) return config.nulls === 'first' ? 1 : -1;
 
-      const aValue = aRawValue as FilterPrimitive;
-      const bValue = bRawValue as FilterPrimitive;
-      const comparison = comparePrimitives(aValue, bValue);
+      if (!isFilterPrimitive(aRawValue) || !isFilterPrimitive(bRawValue)) continue;
+      const comparison = comparePrimitives(aRawValue, bRawValue);
 
       if (comparison !== 0) {
         return config.order === 'asc' ? comparison : -comparison;

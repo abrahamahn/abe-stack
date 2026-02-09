@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/package.test.ts
+// src/apps/server/src/config/infra/package.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_PACKAGE_MANAGER_CONFIG, loadPackageManagerConfig } from './package';

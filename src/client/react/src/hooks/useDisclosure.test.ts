@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useDisclosure.test.ts
+// src/client/react/src/hooks/useDisclosure.test.ts
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import react from 'react';

@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/api/settingsApi.ts
+// src/apps/web/src/features/settings/api/settingsApi.ts
 /**
  * Settings API Client
  *

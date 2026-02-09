@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/errors.test.ts
+// src/shared/src/utils/search/errors.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { AppError } from '../../core/errors';

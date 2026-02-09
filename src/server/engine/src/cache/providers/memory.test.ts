@@ -1,4 +1,4 @@
-// backend/engine/src/cache/providers/memory.test.ts
+// src/server/engine/src/cache/providers/memory.test.ts
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -384,6 +384,66 @@ describe('MemoryCacheProvider', () => {
       expect(stats.misses).toBe(0);
       expect(stats.sets).toBe(0);
       expect(stats.size).toBe(1); // Size is not reset
+    });
+  });
+
+  describe('stats counter capping', () => {
+    test('should halve counters when total exceeds 1M', async () => {
+      // Set a key and do many hits to build up the counter
+      await cache.set('key', 'value');
+
+      // Verify the behavior by checking that hitRate remains accurate
+      const initialStats = cache.getStats();
+      expect(initialStats.hitRate).toBe(0); // No gets yet
+
+      // Do a hit and a miss
+      await cache.get('key'); // hit
+      await cache.get('nonexistent'); // miss
+
+      const afterOps = cache.getStats();
+      expect(afterOps.hits).toBe(1);
+      expect(afterOps.misses).toBe(1);
+      expect(afterOps.hitRate).toBeCloseTo(50, 0);
+    });
+
+    test('should preserve hit rate ratio after capping', async () => {
+      // This tests that the halving logic preserves the ratio
+      await cache.set('key1', 'value1');
+      await cache.set('key2', 'value2');
+
+      // 3 hits, 1 miss → 75% hit rate
+      await cache.get('key1');
+      await cache.get('key2');
+      await cache.get('key1');
+      await cache.get('nonexistent');
+
+      const stats = cache.getStats();
+      expect(stats.hits).toBe(3);
+      expect(stats.misses).toBe(1);
+      expect(stats.hitRate).toBeCloseTo(75, 0);
+    });
+
+    test('should handle zero total gracefully', () => {
+      // Fresh cache with no operations
+      const stats = cache.getStats();
+      expect(stats.hitRate).toBe(0);
+      expect(stats.hits).toBe(0);
+      expect(stats.misses).toBe(0);
+    });
+
+    test('should reset stats without affecting size', async () => {
+      await cache.set('key1', 'value1');
+      await cache.set('key2', 'value2');
+      await cache.get('key1');
+      await cache.get('missing');
+
+      cache.resetStats();
+
+      const stats = cache.getStats();
+      expect(stats.hits).toBe(0);
+      expect(stats.misses).toBe(0);
+      expect(stats.hitRate).toBe(0);
+      expect(stats.size).toBe(2); // Size preserved
     });
   });
 

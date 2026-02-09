@@ -1,4 +1,4 @@
-// backend/db/src/repositories/index.ts
+// src/server/db/src/repositories/index.ts
 /**
  * Repository Barrel Exports
  *
@@ -27,13 +27,20 @@ export {
   createPasswordResetTokenRepository,
   createEmailVerificationTokenRepository,
   createSecurityEventRepository,
+  createTotpBackupCodeRepository,
+  createEmailChangeTokenRepository,
   type RefreshTokenRepository,
   type RefreshTokenFamilyRepository,
   type LoginAttemptRepository,
   type PasswordResetTokenRepository,
   type EmailVerificationTokenRepository,
   type SecurityEventRepository,
+  type TotpBackupCodeRepository,
+  type EmailChangeTokenRepository,
 } from './auth';
+
+// API Keys
+export { createApiKeyRepository, type ApiKeyRepository } from './api-keys';
 
 // Magic Link
 export { createMagicLinkTokenRepository, type MagicLinkTokenRepository } from './magic-link';
@@ -116,7 +123,26 @@ export {
   createLegalDocumentRepository,
   createUserAgreementRepository,
   createConsentLogRepository,
+  createDataExportRequestRepository,
   type LegalDocumentRepository,
   type UserAgreementRepository,
   type ConsentLogRepository,
+  type DataExportRequestRepository,
 } from './compliance';
+
+// Files
+export { createFileRepository, type FileRepository } from './files';
+
+// Email (Templates & Log)
+export {
+  createEmailTemplateRepository,
+  createEmailLogRepository,
+  type EmailTemplateRepository,
+  type EmailLogRepository,
+} from './email';
+
+// Tenant Settings
+export { createTenantSettingRepository, type TenantSettingRepository } from './tenant-settings';
+
+// Activities
+export { createActivityRepository, type ActivityRepository } from './activities';

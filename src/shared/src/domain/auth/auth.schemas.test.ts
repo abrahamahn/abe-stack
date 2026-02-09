@@ -1,4 +1,4 @@
-// shared/src/domain/auth/auth.schemas.test.ts
+// src/shared/src/domain/auth/auth.schemas.test.ts
 
 /**
  * @file Auth Schemas Tests
@@ -32,43 +32,56 @@ import {
 // ============================================================================
 
 describe('loginRequestSchema', () => {
-  it('should validate valid login credentials', () => {
+  it('should validate valid login credentials with email', () => {
     const validLogin = {
-      email: 'user@example.com',
+      identifier: 'user@example.com',
       password: 'password123',
     };
     const result = loginRequestSchema.safeParse(validLogin);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.email).toBe('user@example.com');
+      expect(result.data.identifier).toBe('user@example.com');
       expect(result.data.password).toBe('password123');
     }
   });
 
-  it('should trim and lowercase email', () => {
-    const loginWithUntrimmedEmail = {
-      email: '  User@EXAMPLE.COM  ',
+  it('should validate valid login credentials with username', () => {
+    const validLogin = {
+      identifier: 'johndoe',
       password: 'password123',
     };
-    const result = loginRequestSchema.safeParse(loginWithUntrimmedEmail);
+    const result = loginRequestSchema.safeParse(validLogin);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.email).toBe('user@example.com');
+      expect(result.data.identifier).toBe('johndoe');
+      expect(result.data.password).toBe('password123');
     }
   });
 
-  it('should reject non-string email', () => {
+  it('should trim identifier', () => {
+    const loginWithUntrimmedIdentifier = {
+      identifier: '  user@example.com  ',
+      password: 'password123',
+    };
+    const result = loginRequestSchema.safeParse(loginWithUntrimmedIdentifier);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.identifier).toBe('user@example.com');
+    }
+  });
+
+  it('should reject non-string identifier', () => {
     const invalidLogin = {
-      email: 12345,
+      identifier: 12345,
       password: 'password123',
     };
     const result = loginRequestSchema.safeParse(invalidLogin);
     expect(result.success).toBe(false);
   });
 
-  it('should reject invalid email format', () => {
+  it('should reject empty identifier', () => {
     const invalidLogin = {
-      email: 'not-an-email',
+      identifier: '',
       password: 'password123',
     };
     const result = loginRequestSchema.safeParse(invalidLogin);
@@ -77,14 +90,14 @@ describe('loginRequestSchema', () => {
 
   it('should reject password shorter than 8 characters', () => {
     const invalidLogin = {
-      email: 'user@example.com',
+      identifier: 'user@example.com',
       password: 'short',
     };
     const result = loginRequestSchema.safeParse(invalidLogin);
     expect(result.success).toBe(false);
   });
 
-  it('should reject missing email field', () => {
+  it('should reject missing identifier field', () => {
     const invalidLogin = {
       password: 'password123',
     };
@@ -94,7 +107,7 @@ describe('loginRequestSchema', () => {
 
   it('should reject missing password field', () => {
     const invalidLogin = {
-      email: 'user@example.com',
+      identifier: 'user@example.com',
     };
     const result = loginRequestSchema.safeParse(invalidLogin);
     expect(result.success).toBe(false);
@@ -107,70 +120,96 @@ describe('loginRequestSchema', () => {
 });
 
 describe('registerRequestSchema', () => {
-  it('should validate registration with name', () => {
+  it('should validate registration with all required fields', () => {
     const validRegister = {
       email: 'user@example.com',
-      name: 'John Doe',
+      username: 'johndoe',
+      firstName: 'John',
+      lastName: 'Doe',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(validRegister);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.email).toBe('user@example.com');
-      expect(result.data.name).toBe('John Doe');
+      expect(result.data.username).toBe('johndoe');
+      expect(result.data.firstName).toBe('John');
+      expect(result.data.lastName).toBe('Doe');
       expect(result.data.password).toBe('password123');
     }
   });
 
-  it('should validate registration without name (undefined)', () => {
+  it('should trim all string fields', () => {
     const validRegister = {
-      email: 'user@example.com',
+      email: '  user@example.com  ',
+      username: '  johndoe  ',
+      firstName: '  John  ',
+      lastName: '  Doe  ',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(validRegister);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.name).toBeUndefined();
+      expect(result.data.email).toBe('user@example.com');
+      expect(result.data.username).toBe('johndoe');
+      expect(result.data.firstName).toBe('John');
+      expect(result.data.lastName).toBe('Doe');
     }
   });
 
-  it('should validate registration with null name', () => {
-    const validRegister = {
-      email: 'user@example.com',
-      name: null,
-      password: 'password123',
-    };
-    const result = registerRequestSchema.safeParse(validRegister);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.name).toBeNull();
-    }
-  });
-
-  it('should reject name shorter than 2 characters', () => {
+  it('should reject missing username', () => {
     const invalidRegister = {
       email: 'user@example.com',
-      name: 'A',
+      firstName: 'John',
+      lastName: 'Doe',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(invalidRegister);
     expect(result.success).toBe(false);
   });
 
-  it('should accept name with exactly 2 characters', () => {
+  it('should reject username shorter than 2 characters', () => {
+    const invalidRegister = {
+      email: 'user@example.com',
+      username: 'a',
+      firstName: 'John',
+      lastName: 'Doe',
+      password: 'password123',
+    };
+    const result = registerRequestSchema.safeParse(invalidRegister);
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept username with exactly 2 characters', () => {
     const validRegister = {
       email: 'user@example.com',
-      name: 'Jo',
+      username: 'jo',
+      firstName: 'John',
+      lastName: 'Doe',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(validRegister);
     expect(result.success).toBe(true);
   });
 
-  it('should reject empty string name', () => {
+  it('should reject empty firstName', () => {
     const invalidRegister = {
       email: 'user@example.com',
-      name: '',
+      username: 'johndoe',
+      firstName: '',
+      lastName: 'Doe',
+      password: 'password123',
+    };
+    const result = registerRequestSchema.safeParse(invalidRegister);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject empty lastName', () => {
+    const invalidRegister = {
+      email: 'user@example.com',
+      username: 'johndoe',
+      firstName: 'John',
+      lastName: '',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(invalidRegister);
@@ -180,7 +219,9 @@ describe('registerRequestSchema', () => {
   it('should reject invalid email', () => {
     const invalidRegister = {
       email: 'invalid-email',
-      name: 'John Doe',
+      username: 'johndoe',
+      firstName: 'John',
+      lastName: 'Doe',
       password: 'password123',
     };
     const result = registerRequestSchema.safeParse(invalidRegister);
@@ -190,7 +231,9 @@ describe('registerRequestSchema', () => {
   it('should reject short password', () => {
     const invalidRegister = {
       email: 'user@example.com',
-      name: 'John Doe',
+      username: 'johndoe',
+      firstName: 'John',
+      lastName: 'Doe',
       password: 'short',
     };
     const result = registerRequestSchema.safeParse(invalidRegister);
@@ -584,10 +627,16 @@ describe('authResponseSchema', () => {
       user: {
         id: '00000000-0000-0000-0000-000000000001',
         email: 'user@example.com',
-        name: 'John Doe',
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -598,22 +647,30 @@ describe('authResponseSchema', () => {
       expect(result.data.token).toBe('jwt-token-abc123');
       expect(result.data.user.id).toBe('00000000-0000-0000-0000-000000000001');
       expect(result.data.user.email).toBe('user@example.com');
-      expect(result.data.user.name).toBe('John Doe');
+      expect(result.data.user.username).toBe('johndoe');
+      expect(result.data.user.firstName).toBe('John');
+      expect(result.data.user.lastName).toBe('Doe');
       expect(result.data.user.role).toBe('user');
-      expect(result.data.user.isVerified).toBe(true);
+      expect(result.data.user.emailVerified).toBe(true);
     }
   });
 
-  it('should validate auth response with null name and avatarUrl', () => {
+  it('should validate auth response with null avatarUrl', () => {
     const validResponse = {
       token: 'jwt-token-abc123',
       user: {
         id: '00000000-0000-0000-0000-000000000001',
         email: 'user@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
-        isVerified: false,
+        emailVerified: false,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -621,7 +678,6 @@ describe('authResponseSchema', () => {
     const result = authResponseSchema.safeParse(validResponse);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.user.name).toBeNull();
       expect(result.data.user.avatarUrl).toBeNull();
     }
   });
@@ -632,10 +688,16 @@ describe('authResponseSchema', () => {
       user: {
         id: '00000000-0000-0000-0000-000000000001',
         email: 'admin@example.com',
-        name: 'Admin User',
+        username: 'adminuser',
+        firstName: 'Admin',
+        lastName: 'User',
         avatarUrl: null,
         role: 'admin',
-        isVerified: true,
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -653,10 +715,16 @@ describe('authResponseSchema', () => {
       user: {
         id: '00000000-0000-0000-0000-000000000001',
         email: 'mod@example.com',
-        name: 'Moderator',
+        username: 'moderator',
+        firstName: 'Mod',
+        lastName: 'User',
         avatarUrl: null,
         role: 'moderator',
-        isVerified: true,
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -677,7 +745,7 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -695,7 +763,7 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -713,7 +781,7 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'superadmin',
-        isVerified: true,
+        emailVerified: true,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -722,7 +790,7 @@ describe('authResponseSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject response with invalid isVerified (non-boolean)', () => {
+  it('should reject response with invalid emailVerified (non-boolean)', () => {
     const invalidResponse = {
       token: 'jwt-token-abc123',
       user: {
@@ -731,7 +799,7 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: 'true',
+        emailVerified: 'true',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
@@ -749,8 +817,8 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
-        createdAt: '2024-01-01',
+        emailVerified: true,
+        createdAt: 'not-a-date',
         updatedAt: '2024-01-01T00:00:00Z',
       },
     };
@@ -766,7 +834,7 @@ describe('authResponseSchema', () => {
         name: 'John Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },

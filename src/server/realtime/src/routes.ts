@@ -1,4 +1,4 @@
-// modules/realtime/src/routes.ts
+// src/server/realtime/src/routes.ts
 /**
  * Realtime Routes
  *
@@ -34,7 +34,6 @@ import type {
   RealtimeRequest,
   WriteResult,
 } from './types';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge
@@ -71,10 +70,10 @@ export const realtimeRoutes: RouteMap = createRouteMap([
       async (
         ctx: HandlerContext,
         body: RealtimeTransaction,
-        req: FastifyRequest & { user: { userId: string; email: string; role: string } },
-        _reply: FastifyReply,
+        req: unknown,
+        _reply: unknown,
       ): Promise<RouteResult<WriteResult | ConflictResult | { message: string }>> => {
-        return handleWrite(asRealtimeDeps(ctx), body, req as unknown as RealtimeRequest);
+        return handleWrite(asRealtimeDeps(ctx), body, req as RealtimeRequest);
       },
       transactionSchema,
       'user',
@@ -88,13 +87,13 @@ export const realtimeRoutes: RouteMap = createRouteMap([
       async (
         ctx: HandlerContext,
         body: GetRecordsRequest,
-        req: FastifyRequest & { user: { userId: string; email: string; role: string } },
-        _reply: FastifyReply,
+        req: unknown,
+        _reply: unknown,
       ): Promise<RouteResult<GetRecordsResult | { message: string }>> => {
         return handleGetRecords(
           asRealtimeDeps(ctx),
           body as { pointers: RecordPointer[] },
-          req as unknown as RealtimeRequest,
+          req as RealtimeRequest,
         );
       },
       getRecordsRequestSchema,

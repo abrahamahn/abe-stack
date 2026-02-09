@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/OAuthButtons.test.tsx
+// src/apps/web/src/features/auth/components/OAuthButtons.test.tsx
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-// backend/db/src/testing/json-db.ts
+// src/server/db/src/testing/json-db.ts
 /**
  * JSON File Database - Development/Prototyping Mock
  *

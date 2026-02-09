@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/index.ts
+// src/server/core/src/auth/oauth/index.ts
 /**
  * OAuth Module
  *

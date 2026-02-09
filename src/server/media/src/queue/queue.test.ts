@@ -1,4 +1,4 @@
-// premium/media/src/queue/queue.test.ts
+// src/server/media/src/queue/queue.test.ts
 /**
  * Tests for CustomJobQueue
  */
@@ -144,6 +144,43 @@ describe('CustomJobQueue', () => {
           baseQueue as unknown as { processJobData: (data: TestJobData) => Promise<void> }
         ).processJobData({ value: 'test' }),
       ).rejects.toThrow('processJobData must be implemented by subclass');
+    });
+  });
+
+  describe('queue capacity', () => {
+    it('should reject jobs when waiting queue is at capacity', async () => {
+      const smallQueue = new TestQueue({
+        concurrency: 2,
+        retryDelayMs: 100,
+        maxRetries: 2,
+        maxWaitingQueueSize: 3,
+        logger,
+      });
+
+      // Fill the queue to capacity
+      await smallQueue.add('job-1', { value: 'a' });
+      await smallQueue.add('job-2', { value: 'b' });
+      await smallQueue.add('job-3', { value: 'c' });
+
+      // 4th job should be rejected
+      await expect(smallQueue.add('job-4', { value: 'd' })).rejects.toThrow('Queue is full (3/3)');
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Job rejected: waiting queue at capacity',
+        expect.objectContaining({ jobId: 'job-4', queueSize: 3, maxSize: 3 }),
+      );
+
+      await smallQueue.stop();
+    });
+
+    it('should accept maxWaitingQueueSize option', () => {
+      const customQueue = new TestQueue({
+        concurrency: 1,
+        maxWaitingQueueSize: 500,
+        logger,
+      });
+
+      expect(customQueue).toBeInstanceOf(CustomJobQueue);
     });
   });
 });

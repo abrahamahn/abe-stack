@@ -1,4 +1,4 @@
-// packages/shared/src/core/transactions/operations.ts
+// src/shared/src/core/transactions/operations.ts
 import type {
   ListInsertOperation,
   ListRemoveOperation,

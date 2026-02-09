@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/lazyRegistry.ts
+// src/apps/web/src/features/ui-library/catalog/lazyRegistry.ts
 import { getAllCategories, getComponentsByCategory } from './index';
 
 import type { ComponentCategory, ComponentDemo } from '../types';

@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/AuthLayout.tsx
+// src/client/ui/src/layouts/containers/AuthLayout.tsx
 import { Container } from '@containers/Container';
 import '../../styles/layouts.css';
 

@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/handlers.ts
+// src/server/core/src/auth/magic-link/handlers.ts
 /**
  * Magic Link Handlers
  *
@@ -149,8 +149,8 @@ export async function handleMagicLinkVerify(
     setRefreshTokenCookie(reply, result.refreshToken, ctx.config.auth);
 
     // Log successful verification (fire and forget)
-    // isNewUser is approximated - user was just created if they have no name
-    const isNewUser = result.user.name === null;
+    // isNewUser is approximated - new users have the default firstName "User"
+    const isNewUser = result.user.firstName === 'User' && result.user.lastName === '';
     void logMagicLinkVerifiedEvent(
       ctx.db,
       result.user.id,

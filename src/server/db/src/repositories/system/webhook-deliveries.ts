@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/webhook-deliveries.ts
+// src/server/db/src/repositories/system/webhook-deliveries.ts
 /**
  * Webhook Deliveries Repository (Functional)
  *

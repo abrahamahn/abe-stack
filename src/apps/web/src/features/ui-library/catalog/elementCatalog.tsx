@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/elementCatalog.tsx
+// src/apps/web/src/features/ui-library/catalog/elementCatalog.tsx
 import {
   Accordion,
   Alert,

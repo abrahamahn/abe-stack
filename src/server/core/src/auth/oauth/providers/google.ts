@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/providers/google.ts
+// src/server/core/src/auth/oauth/providers/google.ts
 /**
  * Google OAuth Provider
  *

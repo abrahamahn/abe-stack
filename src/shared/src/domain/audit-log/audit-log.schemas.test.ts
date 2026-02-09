@@ -1,4 +1,4 @@
-// shared/src/domain/audit-log/audit-log.schemas.test.ts
+// src/shared/src/domain/audit-log/audit-log.schemas.test.ts
 
 /**
  * @file Unit Tests for Audit Log Schemas

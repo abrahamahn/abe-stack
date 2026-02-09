@@ -1,4 +1,4 @@
-// backend/db/src/repositories/users/index.ts
+// src/server/db/src/repositories/users/index.ts
 /**
  * Users Repository Barrel
  */

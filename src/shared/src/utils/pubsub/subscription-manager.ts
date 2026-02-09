@@ -1,4 +1,4 @@
-// packages/shared/src/utils/pubsub/subscription-manager.ts
+// src/shared/src/utils/pubsub/subscription-manager.ts
 /**
  * Subscription Manager
  *
@@ -11,7 +11,7 @@
  */
 
 import type { PostgresPubSub } from './postgres-pubsub';
-import type { ClientMessage, ServerMessage, SubscriptionKey, WebSocket } from './types';
+import type { ServerMessage, SubscriptionKey, WebSocket } from './types';
 
 // ============================================================================
 // Types
@@ -165,19 +165,23 @@ export class SubscriptionManager {
     onSubscribe?: (key: SubscriptionKey) => void,
   ): void {
     try {
-      const message = JSON.parse(data) as ClientMessage;
+      const parsed: unknown = JSON.parse(data);
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return;
+      const msg = parsed as Record<string, unknown>;
+      if (typeof msg['type'] !== 'string' || typeof msg['key'] !== 'string') return;
 
-      switch (message.type) {
+      const key = msg['key'] as SubscriptionKey;
+      switch (msg['type']) {
         case 'subscribe':
-          this.subscribe(message.key, socket);
-          onSubscribe?.(message.key);
+          this.subscribe(key, socket);
+          onSubscribe?.(key);
           break;
         case 'unsubscribe':
-          this.unsubscribe(message.key, socket);
+          this.unsubscribe(key, socket);
           break;
       }
     } catch {
-      // Invalid message, ignore
+      // Invalid JSON, ignore
     }
   }
 

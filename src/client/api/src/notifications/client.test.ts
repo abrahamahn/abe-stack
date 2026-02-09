@@ -1,4 +1,4 @@
-// client/src/notifications/client.test.ts
+// src/client/api/src/notifications/client.test.ts
 /**
  * Notification Client Tests
  *

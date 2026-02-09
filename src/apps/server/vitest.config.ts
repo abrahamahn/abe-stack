@@ -1,4 +1,4 @@
-// apps/server/vitest.config.ts
+// src/apps/server/vitest.config.ts
 import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../../vitest.config';
@@ -6,7 +6,6 @@ import { baseConfig } from '../../../vitest.config';
 const modulesPkg = path.resolve(__dirname, '../../server/core/src');
 const infraPkg = path.resolve(__dirname, '../../server/engine/src');
 const dbPkg = path.resolve(__dirname, '../../server/db/src');
-const contractsPkg = path.resolve(__dirname, '../../shared/src/contracts');
 const corePkg = path.resolve(__dirname, '../../shared/src');
 const realtimePkg = path.resolve(__dirname, '../../server/realtime/src');
 const websocketPkg = path.resolve(__dirname, '../../server/websocket/src');
@@ -62,10 +61,6 @@ export default mergeConfig(baseConfig, {
       },
       { find: '@abe-stack/packages/shared/config', replacement: `${corePkg}/config/index.ts` },
       // Handle subpath imports with regex
-      {
-        find: /^@abe-stack\/contracts\/(.*)$/,
-        replacement: `${contractsPkg}/$1`,
-      },
       // @abe-stack/core subpath exports (modules consolidation)
       {
         find: /^@abe-stack\/core\/(.*)$/,

@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/providers/apple.test.ts
+// src/server/core/src/auth/oauth/providers/apple.test.ts
 /**
  * Unit tests for Apple OAuth Provider
  *

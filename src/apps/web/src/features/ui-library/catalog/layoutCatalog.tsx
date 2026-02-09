@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/layoutCatalog.tsx
+// src/apps/web/src/features/ui-library/catalog/layoutCatalog.tsx
 import {
   AppShell,
   AuthLayout,

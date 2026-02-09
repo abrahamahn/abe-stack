@@ -1,4 +1,4 @@
-// client/ui/src/utils/markdown.test.tsx
+// src/client/ui/src/utils/markdown.test.tsx
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

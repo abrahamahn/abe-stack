@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/PasswordChangeForm.tsx
+// src/apps/web/src/features/settings/components/PasswordChangeForm.tsx
 /**
  * Password Change Form Component
  *

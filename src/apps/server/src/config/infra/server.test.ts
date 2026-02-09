@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/server.test.ts
+// src/apps/server/src/config/infra/server.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { loadServerConfig } from './server';

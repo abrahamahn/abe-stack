@@ -1,4 +1,4 @@
-// apps/desktop/vite.config.ts
+// src/apps/desktop/vite.config.ts
 import net from 'node:net';
 import path from 'node:path';
 
@@ -90,7 +90,7 @@ export default defineConfig(async ({ command }) => {
         '@types': resolveAlias('client/ui/src/types'),
         '@utils': resolveAlias('client/ui/src/utils'),
         // Core package internal aliases
-        '@contracts': resolveAlias('shared/src/contracts'),
+        '@domain': resolveAlias('shared/src/domain'),
         '@shared': resolveAlias('shared/src'), // Assuming this was the intent, or maybe src/shared?
         // Web app aliases (Shared with Desktop)
         '@': resolveAlias('apps/web/src'),

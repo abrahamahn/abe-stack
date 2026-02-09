@@ -15,20 +15,24 @@ This directory contains all environment variable files for ABE Stack. The config
 
 2. Choose your development method:
 
-   **Option A: Local Development**
+   **Option A: Local Postgres (VM-like dev)**
 
    ```bash
    pnpm install
+   ENV_FILE=.config/env/.env.local pnpm db:push
+   ENV_FILE=.config/env/.env.local pnpm db:seed
    pnpm dev
    ```
 
-   **Option B: Docker**
+   **Option B: Docker Postgres (recommended default)**
 
    ```bash
-   docker compose -f infra/docker/development/docker-compose.yml up
+   docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+   pnpm db:push
+   pnpm db:seed
    ```
 
-3. Customize as needed by editing `.config/env/.env.local`
+3. Customize as needed by editing the env file you’re using (`.env.development` for Docker, `.env.local` for local Postgres)
 
 > **Note:** The four main env files (`.env.development`, `.env.production`, `.env.test`, `.env.local`) are gitignored for security.
 
@@ -59,13 +63,13 @@ Environment variables are loaded in this order (highest to lowest priority):
 
 ### `.env.development`
 
-**Purpose:** Default settings for local development
+**Purpose:** Default settings for Docker-based development
 
-**Includes:** PostgreSQL database, local cache, console email, local file storage
+**Includes:** Docker Postgres on `localhost:5432`, local cache, console email, local file storage
 
-**Optimized for:** Zero-infrastructure setup - works immediately after cloning
+**Optimized for:** Consistent, reproducible local dev with Docker
 
-**When to use:** Running `pnpm dev` or `NODE_ENV=development`
+**When to use:** Running Docker dev DB + `pnpm dev` or `NODE_ENV=development`
 
 ### `.env.production`
 
@@ -91,11 +95,11 @@ Environment variables are loaded in this order (highest to lowest priority):
 
 ### `.env.local`
 
-**Purpose:** Your personal development overrides
+**Purpose:** Local Postgres development (VM-like)
 
 **Use this for:**
 
-- Local database credentials
+- Local Postgres credentials and ports (defaults to `localhost:5433`)
 - API keys for testing third-party services
 - Debug settings and feature flags
 - Any secrets that should never be committed

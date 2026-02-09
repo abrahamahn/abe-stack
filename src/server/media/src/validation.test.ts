@@ -1,4 +1,4 @@
-// premium/media/src/validation.test.ts
+// src/server/media/src/validation.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {

@@ -1,9 +1,12 @@
-// backend/db/src/schema/users.ts
+// src/server/db/src/schema/users.ts
 /**
  * Users Schema Types
  *
  * Explicit TypeScript interfaces for users and refresh_tokens tables.
  * These replace Drizzle's inferred types with explicit definitions.
+ *
+ * @see 0000_init.sql - Original users table
+ * @see 0012_user_profile.sql - Profile expansion (username, firstName/lastName, profile fields)
  */
 
 import type { UserRole } from './types/roles';
@@ -26,58 +29,105 @@ export const REFRESH_TOKENS_TABLE = 'refresh_tokens';
 // export type UserRole = 'user' | 'admin' | 'moderator'; // Imported from kernel
 
 /**
- * User record from database (SELECT result)
+ * User record from database (SELECT result).
+ *
+ * @see 0012_user_profile.sql for profile expansion fields
  */
 export interface User {
   id: string;
   email: string;
+  canonicalEmail: string;
+  username: string;
   passwordHash: string;
-  name: string | null;
+  firstName: string;
+  lastName: string;
   avatarUrl: string | null;
   role: UserRole;
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
   lockedUntil: Date | null;
   failedLoginAttempts: number;
+  totpSecret: string | null;
+  totpEnabled: boolean;
+  phone: string | null;
+  phoneVerified: boolean | null;
+  dateOfBirth: Date | null;
+  gender: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  bio: string | null;
+  language: string | null;
+  website: string | null;
   createdAt: Date;
   updatedAt: Date;
   version: number;
 }
 
 /**
- * Data for creating a new user (INSERT)
- * id, createdAt, updatedAt, version are auto-generated
+ * Data for creating a new user (INSERT).
+ * id, createdAt, updatedAt, version are auto-generated.
  */
 export interface NewUser {
   id?: string;
   email: string;
+  canonicalEmail: string;
+  username: string;
   passwordHash: string;
-  name?: string | null;
+  firstName: string;
+  lastName: string;
   avatarUrl?: string | null;
   role?: UserRole;
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
   lockedUntil?: Date | null;
   failedLoginAttempts?: number;
+  totpSecret?: string | null;
+  totpEnabled?: boolean;
+  phone?: string | null;
+  phoneVerified?: boolean | null;
+  dateOfBirth?: Date | null;
+  gender?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  bio?: string | null;
+  language?: string | null;
+  website?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
   version?: number;
 }
 
 /**
- * Data for updating a user (UPDATE)
- * All fields optional except those managed by triggers
+ * Data for updating a user (UPDATE).
+ * All fields optional except those managed by triggers.
  */
 export interface UpdateUser {
   email?: string;
+  canonicalEmail?: string;
+  username?: string;
   passwordHash?: string;
-  name?: string | null;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string | null;
   role?: UserRole;
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
   lockedUntil?: Date | null;
   failedLoginAttempts?: number;
+  totpSecret?: string | null;
+  totpEnabled?: boolean;
+  phone?: string | null;
+  phoneVerified?: boolean | null;
+  dateOfBirth?: Date | null;
+  gender?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  bio?: string | null;
+  language?: string | null;
+  website?: string | null;
   updatedAt?: Date;
   version?: number;
 }
@@ -115,19 +165,35 @@ export interface NewRefreshToken {
 // ============================================================================
 
 /**
- * Column mappings for users table
+ * Column mappings for users table.
+ * Maps camelCase TypeScript property names to snake_case SQL column names.
  */
 export const USER_COLUMNS = {
   id: 'id',
   email: 'email',
+  canonicalEmail: 'canonical_email',
+  username: 'username',
   passwordHash: 'password_hash',
-  name: 'name',
+  firstName: 'first_name',
+  lastName: 'last_name',
   avatarUrl: 'avatar_url',
   role: 'role',
   emailVerified: 'email_verified',
   emailVerifiedAt: 'email_verified_at',
   lockedUntil: 'locked_until',
   failedLoginAttempts: 'failed_login_attempts',
+  totpSecret: 'totp_secret',
+  totpEnabled: 'totp_enabled',
+  phone: 'phone',
+  phoneVerified: 'phone_verified',
+  dateOfBirth: 'date_of_birth',
+  gender: 'gender',
+  city: 'city',
+  state: 'state',
+  country: 'country',
+  bio: 'bio',
+  language: 'language',
+  website: 'website',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   version: 'version',

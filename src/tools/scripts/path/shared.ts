@@ -1,5 +1,5 @@
-#!/usr/bin/env node
-// tools/scripts/path/shared.ts
+#!/usr/bin/env tsx
+// src/tools/scripts/path/shared.ts
 
 /**
  * @file shared.ts
@@ -8,14 +8,14 @@
  * @module tools/scripts/path/shared
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '../../..');
-const SHARED_ROOT = path.join(REPO_ROOT, 'shared/src');
+const REPO_ROOT = path.resolve(__dirname, '../../../..');
+const SHARED_ROOT = path.join(REPO_ROOT, 'src/shared/src');
 
 /**
  * Recursively walks a directory and collects all files
@@ -67,22 +67,23 @@ function exportSharedFiles(): void {
 
   for (const file of allFiles) {
     const parts = file.split(path.sep);
-    // Pattern: shared/src/<category>/...
-    // parts[0]: shared
-    // parts[1]: src
-    // parts[2]: <category> (e.g. config, utils, or filename if in src root)
+    // Pattern: src/shared/src/<category>/...
+    // parts[0]: src
+    // parts[1]: shared
+    // parts[2]: src
+    // parts[3]: <category> (e.g. config, utils, domain, or filename if in src root)
 
-    const cat = parts[2] && !parts[2].includes('.') ? parts[2] : 'Root';
+    const cat = parts[3] && !parts[3].includes('.') ? parts[3] : 'Root';
 
     const existing = groups.get(cat) ?? [];
     existing.push(file);
     groups.set(cat, existing);
   }
 
-  const categories = ['config', 'constants', 'errors', 'types', 'schemas', 'utils', 'Root'];
+  const categories = ['config', 'contracts', 'core', 'domain', 'types', 'utils', 'Root'];
   let output = '# @abe-stack/shared Package Files\n';
   output += '\n> This package is the single source of truth for environment-agnostic code.\n';
-  output += '> All files below are located in `shared/src/`.\n';
+  output += '> All files below are located in `src/shared/src/`.\n';
 
   let count = 0;
 

@@ -1,9 +1,15 @@
-// backend/db/vitest.config.ts
+// src/server/db/vitest.config.ts
+/// <reference types="vitest" />
 import path from 'node:path';
-import { mergeConfig } from 'vitest/config';
-import { baseConfig } from '../../../vitest.config';
+import { fileURLToPath } from 'node:url';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
-export default mergeConfig(baseConfig, {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default defineConfig({
+  plugins: [tsconfigPaths()],
   resolve: {
     alias: [
       {
@@ -21,7 +27,14 @@ export default mergeConfig(baseConfig, {
     ],
   },
   test: {
+    globals: true,
+    exclude: ['**/node_modules/**', '**/dist/**', '**/backup/**', '**/*.spec.ts'],
+    testTimeout: 60000,
+    hookTimeout: 60000,
+    clearMocks: true,
+    restoreMocks: true,
     name: 'db',
     isolate: true,
+    pool: 'threads',
   },
 });

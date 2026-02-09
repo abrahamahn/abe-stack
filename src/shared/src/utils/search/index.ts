@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/index.ts
+// src/shared/src/utils/search/index.ts
 /**
  * Search Domain
  *

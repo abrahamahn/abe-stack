@@ -1,4 +1,4 @@
-// client/ui/src/theme/motion.ts
+// src/client/ui/src/theme/motion.ts
 export const motion = {
   durations: {
     fast: '120ms',

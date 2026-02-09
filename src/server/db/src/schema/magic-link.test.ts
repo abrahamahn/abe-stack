@@ -1,4 +1,4 @@
-// backend/db/src/schema/magic-link.test.ts
+// src/server/db/src/schema/magic-link.test.ts
 /**
  * Magic Link Schema Tests
  *

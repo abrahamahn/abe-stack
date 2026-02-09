@@ -283,7 +283,7 @@ describe('API Client Error Handling Integration', () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       try {
-        await client.login({ email: 'test@test.com', password: 'password' });
+        await client.login({ identifier: 'test@test.com', password: 'password' });
         expect.fail('Expected NetworkError to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(NetworkError);
@@ -295,7 +295,7 @@ describe('API Client Error Handling Integration', () => {
       mockFetch.mockResolvedValue(createMockResponse(401, { message: 'Invalid credentials' }));
 
       try {
-        await client.login({ email: 'test@test.com', password: 'wrong' });
+        await client.login({ identifier: 'test@test.com', password: 'wrong' });
         expect.fail('Expected UnauthorizedError to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(UnauthorizedError);
@@ -308,7 +308,7 @@ describe('API Client Error Handling Integration', () => {
       mockFetch.mockResolvedValue(createMockResponse(400, { message: 'Invalid email format' }));
 
       try {
-        await client.login({ email: 'invalid', password: 'password' });
+        await client.login({ identifier: 'invalid', password: 'password' });
         expect.fail('Expected BadRequestError to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestError);
@@ -321,7 +321,7 @@ describe('API Client Error Handling Integration', () => {
       mockFetch.mockResolvedValue(createMockResponse(429, { message: 'Too many login attempts' }));
 
       try {
-        await client.login({ email: 'test@test.com', password: 'password' });
+        await client.login({ identifier: 'test@test.com', password: 'password' });
         expect.fail('Expected TooManyRequestsError to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(TooManyRequestsError);
@@ -334,7 +334,7 @@ describe('API Client Error Handling Integration', () => {
       mockFetch.mockResolvedValue(createMockResponse(500, { message: 'Server error' }));
 
       try {
-        await client.login({ email: 'test@test.com', password: 'password' });
+        await client.login({ identifier: 'test@test.com', password: 'password' });
         expect.fail('Expected InternalError to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(InternalError);
@@ -350,9 +350,9 @@ describe('API Client Error Handling Integration', () => {
         json: () => Promise.reject(new Error('No body')),
       });
 
-      await expect(client.login({ email: 'test@test.com', password: 'password' })).rejects.toThrow(
-        BadRequestError,
-      );
+      await expect(
+        client.login({ identifier: 'test@test.com', password: 'password' }),
+      ).rejects.toThrow(BadRequestError);
     });
 
     it('should return data on success', async () => {
@@ -363,9 +363,13 @@ describe('API Client Error Handling Integration', () => {
 
       mockFetch.mockResolvedValue(createMockResponse(200, responseData));
 
-      const result = await client.login({ email: 'test@test.com', password: 'password' });
+      const result = await client.login({ identifier: 'test@test.com', password: 'password' });
 
-      expect(result.token).toBe('token123');
+      if ('token' in result) {
+        expect(result.token).toBe('token123');
+      } else {
+        throw new Error('Expected token response');
+      }
     });
   });
 

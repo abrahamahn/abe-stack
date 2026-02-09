@@ -1,4 +1,4 @@
-// apps/server/src/config/services/search.test.ts
+// src/apps/server/src/config/services/search.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

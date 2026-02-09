@@ -1,4 +1,4 @@
-// packages/shared/src/types/ids.ts
+// src/shared/src/types/ids.ts
 
 /**
  * @file Branded ID Types
@@ -7,7 +7,7 @@
  * @module Shared/Types
  */
 
-import { createBrandedStringSchema, createBrandedUuidSchema } from '../contracts/schema';
+import { createBrandedStringSchema, createBrandedUuidSchema } from '../core/schema.utils';
 
 // ============================================================================
 // Identity & Access Management
@@ -59,6 +59,10 @@ export const subscriptionIdSchema = createBrandedStringSchema<SubscriptionId>('S
 export type AuditEventId = string & { readonly __brand: 'AuditEventId' };
 export const auditEventIdSchema = createBrandedUuidSchema<AuditEventId>('AuditEventId');
 
+/** Activity ID (UUID) */
+export type ActivityId = string & { readonly __brand: 'ActivityId' };
+export const activityIdSchema = createBrandedUuidSchema<ActivityId>('ActivityId');
+
 /** Notification ID (UUID) */
 export type NotificationId = string & { readonly __brand: 'NotificationId' };
 export const notificationIdSchema = createBrandedUuidSchema<NotificationId>('NotificationId');
@@ -79,6 +83,27 @@ export const webhookIdSchema = createBrandedUuidSchema<WebhookId>('WebhookId');
 export type WebhookDeliveryId = string & { readonly __brand: 'WebhookDeliveryId' };
 export const webhookDeliveryIdSchema =
   createBrandedUuidSchema<WebhookDeliveryId>('WebhookDeliveryId');
+
+/** API Key ID (UUID) */
+export type ApiKeyId = string & { readonly __brand: 'ApiKeyId' };
+export const apiKeyIdSchema = createBrandedUuidSchema<ApiKeyId>('ApiKeyId');
+
+/** File ID (UUID) */
+export type FileId = string & { readonly __brand: 'FileId' };
+export const fileIdSchema = createBrandedUuidSchema<FileId>('FileId');
+
+// ============================================================================
+// Email & Communications
+// ============================================================================
+
+/** Email Template Key (dot-notation string, e.g. "auth.welcome") */
+export type EmailTemplateKey = string & { readonly __brand: 'EmailTemplateKey' };
+export const emailTemplateKeySchema =
+  createBrandedStringSchema<EmailTemplateKey>('EmailTemplateKey');
+
+/** Email Log ID (UUID) */
+export type EmailLogId = string & { readonly __brand: 'EmailLogId' };
+export const emailLogIdSchema = createBrandedUuidSchema<EmailLogId>('EmailLogId');
 
 // ============================================================================
 // Compliance

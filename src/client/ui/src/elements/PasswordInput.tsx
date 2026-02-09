@@ -1,4 +1,4 @@
-// client/ui/src/elements/PasswordInput.tsx
+// src/client/ui/src/elements/PasswordInput.tsx
 import { estimatePasswordStrength, getStrengthColor, getStrengthLabel } from '@abe-stack/shared';
 import { forwardRef, useState } from 'react';
 

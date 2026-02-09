@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useFocusReturn.test.ts
+// src/client/react/src/hooks/useFocusReturn.test.ts
 /** @vitest-environment jsdom */
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

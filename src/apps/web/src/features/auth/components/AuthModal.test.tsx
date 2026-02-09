@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/AuthModal.test.tsx
+// src/apps/web/src/features/auth/components/AuthModal.test.tsx
 /**
  * Unit tests for AuthModal component.
  *

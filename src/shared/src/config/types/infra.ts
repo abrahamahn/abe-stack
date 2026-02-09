@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/infra.ts
+// src/shared/src/config/types/infra.ts
 /**
  * Infrastructure Configuration Contracts
  *

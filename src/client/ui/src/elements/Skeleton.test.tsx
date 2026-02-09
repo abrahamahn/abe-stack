@@ -1,4 +1,4 @@
-// client/ui/src/elements/Skeleton.test.tsx
+// src/client/ui/src/elements/Skeleton.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

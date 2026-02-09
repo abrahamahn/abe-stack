@@ -1,4 +1,4 @@
-// premium/media/vitest.config.ts
+// src/server/media/vitest.config.ts
 
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../../vitest.config';

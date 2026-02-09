@@ -1,4 +1,4 @@
-// backend/db/src/schema/users.test.ts
+// src/server/db/src/schema/users.test.ts
 /**
  * Unit tests for users schema type definitions
  *
@@ -24,6 +24,48 @@ import {
   USERS_TABLE,
 } from './users';
 
+/**
+ * Creates a complete User object with sensible defaults.
+ * Override any field by passing partial overrides.
+ *
+ * @param overrides - Partial fields to override
+ * @returns Complete User object
+ * @complexity O(1)
+ */
+function makeUser(overrides: Partial<User> = {}): User {
+  return {
+    id: '1',
+    email: 'test@example.com',
+    canonicalEmail: 'test@example.com',
+    username: 'testuser',
+    passwordHash: 'hash',
+    firstName: 'Test',
+    lastName: 'User',
+    avatarUrl: null,
+    role: 'user',
+    emailVerified: false,
+    emailVerifiedAt: null,
+    lockedUntil: null,
+    failedLoginAttempts: 0,
+    totpSecret: null,
+    totpEnabled: false,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1,
+    ...overrides,
+  };
+}
+
 describe('Schema Constants', () => {
   describe('Table Names', () => {
     test('USERS_TABLE should be "users"', () => {
@@ -42,14 +84,29 @@ describe('Schema Constants', () => {
       expect(USER_COLUMNS).toEqual({
         id: 'id',
         email: 'email',
+        canonicalEmail: 'canonical_email',
+        username: 'username',
         passwordHash: 'password_hash',
-        name: 'name',
+        firstName: 'first_name',
+        lastName: 'last_name',
         avatarUrl: 'avatar_url',
         role: 'role',
         emailVerified: 'email_verified',
         emailVerifiedAt: 'email_verified_at',
         lockedUntil: 'locked_until',
         failedLoginAttempts: 'failed_login_attempts',
+        totpSecret: 'totp_secret',
+        totpEnabled: 'totp_enabled',
+        phone: 'phone',
+        phoneVerified: 'phone_verified',
+        dateOfBirth: 'date_of_birth',
+        gender: 'gender',
+        city: 'city',
+        state: 'state',
+        country: 'country',
+        bio: 'bio',
+        language: 'language',
+        website: 'website',
         createdAt: 'created_at',
         updatedAt: 'updated_at',
         version: 'version',
@@ -58,11 +115,16 @@ describe('Schema Constants', () => {
 
     test('should map camelCase to snake_case correctly', () => {
       expect(USER_COLUMNS.passwordHash).toBe('password_hash');
+      expect(USER_COLUMNS.firstName).toBe('first_name');
+      expect(USER_COLUMNS.lastName).toBe('last_name');
       expect(USER_COLUMNS.avatarUrl).toBe('avatar_url');
+      expect(USER_COLUMNS.canonicalEmail).toBe('canonical_email');
       expect(USER_COLUMNS.emailVerified).toBe('email_verified');
       expect(USER_COLUMNS.emailVerifiedAt).toBe('email_verified_at');
       expect(USER_COLUMNS.lockedUntil).toBe('locked_until');
       expect(USER_COLUMNS.failedLoginAttempts).toBe('failed_login_attempts');
+      expect(USER_COLUMNS.phoneVerified).toBe('phone_verified');
+      expect(USER_COLUMNS.dateOfBirth).toBe('date_of_birth');
       expect(USER_COLUMNS.createdAt).toBe('created_at');
       expect(USER_COLUMNS.updatedAt).toBe('updated_at');
     });
@@ -70,8 +132,16 @@ describe('Schema Constants', () => {
     test('should map simple columns to themselves', () => {
       expect(USER_COLUMNS.id).toBe('id');
       expect(USER_COLUMNS.email).toBe('email');
-      expect(USER_COLUMNS.name).toBe('name');
+      expect(USER_COLUMNS.username).toBe('username');
       expect(USER_COLUMNS.role).toBe('role');
+      expect(USER_COLUMNS.phone).toBe('phone');
+      expect(USER_COLUMNS.gender).toBe('gender');
+      expect(USER_COLUMNS.city).toBe('city');
+      expect(USER_COLUMNS.state).toBe('state');
+      expect(USER_COLUMNS.country).toBe('country');
+      expect(USER_COLUMNS.bio).toBe('bio');
+      expect(USER_COLUMNS.language).toBe('language');
+      expect(USER_COLUMNS.website).toBe('website');
       expect(USER_COLUMNS.version).toBe('version');
     });
 
@@ -79,7 +149,7 @@ describe('Schema Constants', () => {
       // This tests that the object is marked as const and immutable
       // The TypeScript compiler ensures this, but we verify the structure
       const keys = Object.keys(USER_COLUMNS);
-      expect(keys).toHaveLength(13);
+      expect(keys).toHaveLength(28);
       expect(keys).toContain('id');
       expect(keys).toContain('email');
       expect(keys).toContain('passwordHash');
@@ -152,14 +222,28 @@ describe('User Type Structure', () => {
       const validUser: User = {
         id: 'user_123',
         email: 'test@example.com',
+        username: 'johndoe',
         passwordHash: 'hashed_password',
-        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
         role: 'user',
         emailVerified: true,
         emailVerifiedAt: new Date('2024-01-01'),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
         version: 1,
@@ -174,47 +258,51 @@ describe('User Type Structure', () => {
       const userWithNulls: User = {
         id: 'user_123',
         email: 'test@example.com',
+        username: 'testuser',
         passwordHash: 'hashed_password',
-        name: null,
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'admin',
         emailVerified: false,
         emailVerifiedAt: null,
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         version: 1,
       };
 
-      expect(userWithNulls.name).toBeNull();
       expect(userWithNulls.avatarUrl).toBeNull();
       expect(userWithNulls.emailVerifiedAt).toBeNull();
       expect(userWithNulls.lockedUntil).toBeNull();
+      expect(userWithNulls.phone).toBeNull();
+      expect(userWithNulls.phoneVerified).toBeNull();
     });
 
     test('should require all non-nullable fields', () => {
       // This is a compile-time test verified by TypeScript
       // Runtime test verifies structure exists
-      const user: User = {
-        id: '1',
-        email: 'test@example.com',
-        passwordHash: 'hash',
-        name: null,
-        avatarUrl: null,
-        role: 'user',
-        emailVerified: false,
-        emailVerifiedAt: null,
-        lockedUntil: null,
-        failedLoginAttempts: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      };
+      const user: User = makeUser();
 
       expect(user).toHaveProperty('id');
       expect(user).toHaveProperty('email');
+      expect(user).toHaveProperty('username');
       expect(user).toHaveProperty('passwordHash');
+      expect(user).toHaveProperty('firstName');
+      expect(user).toHaveProperty('lastName');
       expect(user).toHaveProperty('role');
       expect(user).toHaveProperty('emailVerified');
       expect(user).toHaveProperty('failedLoginAttempts');
@@ -224,24 +312,9 @@ describe('User Type Structure', () => {
     });
 
     test('should support all UserRole values', () => {
-      const userRole: User = {
-        id: '1',
-        email: 'user@example.com',
-        passwordHash: 'hash',
-        name: null,
-        avatarUrl: null,
-        role: 'user',
-        emailVerified: false,
-        emailVerifiedAt: null,
-        lockedUntil: null,
-        failedLoginAttempts: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      };
-
-      const adminRole: User = { ...userRole, role: 'admin' };
-      const moderatorRole: User = { ...userRole, role: 'moderator' };
+      const userRole: User = makeUser({ role: 'user' });
+      const adminRole: User = makeUser({ role: 'admin' });
+      const moderatorRole: User = makeUser({ role: 'moderator' });
 
       expect(userRole.role).toBe('user');
       expect(adminRole.role).toBe('admin');
@@ -250,21 +323,13 @@ describe('User Type Structure', () => {
 
     test('should have Date types for timestamp fields', () => {
       const now = new Date();
-      const user: User = {
-        id: '1',
-        email: 'test@example.com',
-        passwordHash: 'hash',
-        name: null,
-        avatarUrl: null,
-        role: 'user',
+      const user: User = makeUser({
         emailVerified: true,
         emailVerifiedAt: now,
         lockedUntil: now,
-        failedLoginAttempts: 0,
         createdAt: now,
         updatedAt: now,
-        version: 1,
-      };
+      });
 
       expect(user.createdAt).toBeInstanceOf(Date);
       expect(user.updatedAt).toBeInstanceOf(Date);
@@ -298,55 +363,86 @@ describe('User Type Structure', () => {
     test('should accept minimal required fields', () => {
       const minimalUser: NewUser = {
         email: 'new@example.com',
+        canonicalEmail: 'new@example.com',
+        username: 'newuser',
         passwordHash: 'hashed_password',
+        firstName: 'New',
+        lastName: 'User',
       };
 
       expect(minimalUser.email).toBe('new@example.com');
       expect(minimalUser.passwordHash).toBe('hashed_password');
+      expect(minimalUser.username).toBe('newuser');
     });
 
     test('should accept all optional fields', () => {
       const fullUser: NewUser = {
         id: 'custom_id',
         email: 'new@example.com',
+        canonicalEmail: 'new@example.com',
+        username: 'janedoe',
         passwordHash: 'hashed_password',
-        name: 'Jane Doe',
+        firstName: 'Jane',
+        lastName: 'Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
         role: 'admin',
         emailVerified: true,
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: '+1234567890',
+        phoneVerified: true,
+        dateOfBirth: new Date('1990-01-01'),
+        gender: 'female',
+        city: 'San Francisco',
+        state: 'CA',
+        country: 'US',
+        bio: 'Software engineer',
+        language: 'en',
+        website: 'https://jane.dev',
         createdAt: new Date(),
         updatedAt: new Date(),
         version: 1,
       };
 
       expect(fullUser.id).toBe('custom_id');
-      expect(fullUser.name).toBe('Jane Doe');
+      expect(fullUser.firstName).toBe('Jane');
       expect(fullUser.role).toBe('admin');
     });
 
     test('should allow null for nullable optional fields', () => {
       const userWithNulls: NewUser = {
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
+        username: 'testuser',
         passwordHash: 'hash',
-        name: null,
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         emailVerifiedAt: null,
         lockedUntil: null,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
       };
 
-      expect(userWithNulls.name).toBeNull();
       expect(userWithNulls.avatarUrl).toBeNull();
       expect(userWithNulls.emailVerifiedAt).toBeNull();
       expect(userWithNulls.lockedUntil).toBeNull();
+      expect(userWithNulls.phone).toBeNull();
     });
 
     test('should allow omitting auto-generated fields', () => {
       const user: NewUser = {
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
+        username: 'testuser',
         passwordHash: 'hash',
+        firstName: 'Test',
+        lastName: 'User',
         // id, createdAt, updatedAt, version omitted
       };
 
@@ -359,7 +455,11 @@ describe('User Type Structure', () => {
     test('should allow providing default values', () => {
       const userWithDefaults: NewUser = {
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
+        username: 'testuser',
         passwordHash: 'hash',
+        firstName: 'Test',
+        lastName: 'User',
         role: 'user',
         emailVerified: false,
         failedLoginAttempts: 0,
@@ -377,40 +477,42 @@ describe('User Type Structure', () => {
         email: 'newemail@example.com',
       };
 
-      const nameUpdate: UpdateUser = {
-        name: 'New Name',
+      const firstNameUpdate: UpdateUser = {
+        firstName: 'New',
       };
 
       expect(emailUpdate.email).toBe('newemail@example.com');
-      expect(nameUpdate.name).toBe('New Name');
+      expect(firstNameUpdate.firstName).toBe('New');
     });
 
     test('should allow updating multiple fields', () => {
       const multiUpdate: UpdateUser = {
         email: 'updated@example.com',
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
         role: 'moderator',
         emailVerified: true,
         failedLoginAttempts: 0,
       };
 
       expect(multiUpdate.email).toBe('updated@example.com');
-      expect(multiUpdate.name).toBe('Updated Name');
+      expect(multiUpdate.firstName).toBe('Updated');
       expect(multiUpdate.role).toBe('moderator');
     });
 
     test('should allow setting nullable fields to null', () => {
       const clearFields: UpdateUser = {
-        name: null,
         avatarUrl: null,
         emailVerifiedAt: null,
         lockedUntil: null,
+        phone: null,
+        gender: null,
       };
 
-      expect(clearFields.name).toBeNull();
       expect(clearFields.avatarUrl).toBeNull();
       expect(clearFields.emailVerifiedAt).toBeNull();
       expect(clearFields.lockedUntil).toBeNull();
+      expect(clearFields.phone).toBeNull();
     });
 
     test('should allow empty update object', () => {
@@ -589,14 +691,29 @@ describe('Type Compatibility', () => {
       const newUser: NewUser = {
         id: '1',
         email: 'test@example.com',
+        canonicalEmail: 'test@example.com',
+        username: 'testuser',
         passwordHash: 'hash',
-        name: null,
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         emailVerified: false,
         emailVerifiedAt: null,
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         version: 1,
@@ -610,29 +727,15 @@ describe('Type Compatibility', () => {
     });
 
     test('UpdateUser should accept partial User properties', () => {
-      const user: User = {
-        id: '1',
-        email: 'original@example.com',
-        passwordHash: 'hash',
-        name: 'Original Name',
-        avatarUrl: null,
-        role: 'user',
-        emailVerified: false,
-        emailVerifiedAt: null,
-        lockedUntil: null,
-        failedLoginAttempts: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      };
+      const user: User = makeUser({ email: 'original@example.com', firstName: 'Original' });
 
       const update: UpdateUser = {
         email: user.email,
-        name: 'New Name',
+        firstName: 'New',
       };
 
       expect(update.email).toBe(user.email);
-      expect(update.name).toBe('New Name');
+      expect(update.firstName).toBe('New');
     });
   });
 
@@ -659,21 +762,7 @@ describe('Type Compatibility', () => {
 describe('Edge Cases', () => {
   describe('Boundary values', () => {
     test('should handle zero failed login attempts', () => {
-      const user: User = {
-        id: '1',
-        email: 'test@example.com',
-        passwordHash: 'hash',
-        name: null,
-        avatarUrl: null,
-        role: 'user',
-        emailVerified: false,
-        emailVerifiedAt: null,
-        lockedUntil: null,
-        failedLoginAttempts: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      };
+      const user: User = makeUser({ failedLoginAttempts: 0 });
 
       expect(user.failedLoginAttempts).toBe(0);
     });
@@ -710,21 +799,10 @@ describe('Edge Cases', () => {
 
     test('should handle past dates for locked accounts', () => {
       const pastDate = new Date('2000-01-01');
-      const user: User = {
-        id: '1',
-        email: 'test@example.com',
-        passwordHash: 'hash',
-        name: null,
-        avatarUrl: null,
-        role: 'user',
-        emailVerified: false,
-        emailVerifiedAt: null,
+      const user: User = makeUser({
         lockedUntil: pastDate,
         failedLoginAttempts: 5,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        version: 1,
-      };
+      });
 
       expect(user.lockedUntil?.getFullYear()).toBe(2000);
     });
@@ -734,47 +812,60 @@ describe('Edge Cases', () => {
     test('should handle empty string values where strings are allowed', () => {
       const user: NewUser = {
         email: '',
+        canonicalEmail: '',
+        username: '',
         passwordHash: '',
-        name: '',
+        firstName: '',
+        lastName: '',
       };
 
       expect(user.email).toBe('');
       expect(user.passwordHash).toBe('');
-      expect(user.name).toBe('');
+      expect(user.firstName).toBe('');
     });
 
     test('should handle very long string values', () => {
       const longString = 'a'.repeat(10000);
       const user: NewUser = {
         email: longString,
+        canonicalEmail: longString,
+        username: longString,
         passwordHash: longString,
-        name: longString,
+        firstName: longString,
+        lastName: longString,
         avatarUrl: longString,
       };
 
       expect(user.email).toHaveLength(10000);
-      expect(user.name).toHaveLength(10000);
+      expect(user.firstName).toHaveLength(10000);
     });
 
     test('should handle special characters in strings', () => {
       const specialChars = '!@#$%^&*(){}[]|\\:";\'<>?,./`~';
       const user: NewUser = {
         email: `test${specialChars}@example.com`,
+        canonicalEmail: `test${specialChars}@example.com`,
+        username: 'testuser',
         passwordHash: specialChars,
-        name: specialChars,
+        firstName: specialChars,
+        lastName: specialChars,
       };
 
-      expect(user.name).toContain(specialChars);
+      expect(user.firstName).toContain(specialChars);
     });
 
     test('should handle Unicode characters', () => {
       const user: NewUser = {
         email: 'test@例え.com',
+        canonicalEmail: 'test@例え.com',
+        username: 'tanaka',
         passwordHash: 'hash',
-        name: '田中太郎',
+        firstName: '太郎',
+        lastName: '田中',
       };
 
-      expect(user.name).toBe('田中太郎');
+      expect(user.firstName).toBe('太郎');
+      expect(user.lastName).toBe('田中');
     });
   });
 
@@ -795,14 +886,29 @@ describe('Column Mapping Consistency', () => {
     const userFields: Array<keyof User> = [
       'id',
       'email',
+      'canonicalEmail',
+      'username',
       'passwordHash',
-      'name',
+      'firstName',
+      'lastName',
       'avatarUrl',
       'role',
       'emailVerified',
       'emailVerifiedAt',
       'lockedUntil',
       'failedLoginAttempts',
+      'totpSecret',
+      'totpEnabled',
+      'phone',
+      'phoneVerified',
+      'dateOfBirth',
+      'gender',
+      'city',
+      'state',
+      'country',
+      'bio',
+      'language',
+      'website',
       'createdAt',
       'updatedAt',
       'version',
@@ -838,14 +944,29 @@ describe('Column Mapping Consistency', () => {
     const expectedFields = [
       'id',
       'email',
+      'canonicalEmail',
+      'username',
       'passwordHash',
-      'name',
+      'firstName',
+      'lastName',
       'avatarUrl',
       'role',
       'emailVerified',
       'emailVerifiedAt',
       'lockedUntil',
       'failedLoginAttempts',
+      'totpSecret',
+      'totpEnabled',
+      'phone',
+      'phoneVerified',
+      'dateOfBirth',
+      'gender',
+      'city',
+      'state',
+      'country',
+      'bio',
+      'language',
+      'website',
       'createdAt',
       'updatedAt',
       'version',

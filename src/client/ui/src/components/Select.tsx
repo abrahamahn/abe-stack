@@ -1,4 +1,4 @@
-// client/ui/src/components/Select.tsx
+// src/client/ui/src/components/Select.tsx
 
 import { useControllableState } from '@hooks/useControllableState';
 import { useDisclosure } from '@hooks/useDisclosure';

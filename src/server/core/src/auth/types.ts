@@ -1,3 +1,4 @@
+// src/server/core/src/auth/types.ts
 export const ERROR_MESSAGES = {
   USER_NOT_FOUND: 'User not found',
   INVALID_CREDENTIALS: 'Invalid credentials',
@@ -14,6 +15,34 @@ export const SUCCESS_MESSAGES = {
   LOGOUT_SUCCESS: 'Logged out successfully',
   ACCOUNT_UNLOCKED: 'Account unlocked successfully',
 } as const;
+
+/**
+ * Standardized login failure reason codes.
+ *
+ * Stored in `login_attempts.failure_reason` for structured filtering and
+ * support diagnostics. NEVER exposed to the client (anti-enumeration).
+ *
+ * @complexity O(1) constant access
+ */
+export const LOGIN_FAILURE_REASON = {
+  /** Email/username not found in database */
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  /** User exists but password does not match */
+  PASSWORD_MISMATCH: 'PASSWORD_MISMATCH',
+  /** Correct credentials but email not verified */
+  UNVERIFIED_EMAIL: 'UNVERIFIED_EMAIL',
+  /** Correct credentials but account is locked/suspended */
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  /** Correct credentials but 2FA challenge needed (not a failure) */
+  TOTP_REQUIRED: 'TOTP_REQUIRED',
+  /** Wrong TOTP code during 2FA challenge */
+  TOTP_INVALID: 'TOTP_INVALID',
+  /** Bot protection (CAPTCHA) check failed */
+  CAPTCHA_FAILED: 'CAPTCHA_FAILED',
+} as const;
+
+/** Type for login failure reason values */
+export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGIN_FAILURE_REASON];
 /**
  * Auth Module Types
  *
@@ -27,7 +56,7 @@ export const SUCCESS_MESSAGES = {
  */
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { EmailOptions, EmailResult } from '@abe-stack/shared';
+import type { EmailOptions, SendResult } from '@abe-stack/shared';
 import type {
   AuthenticatedUser,
   BaseContext,
@@ -35,7 +64,7 @@ import type {
   ReplyContext,
   RequestContext,
   RequestInfo,
-} from '@abe-stack/shared/contracts';
+} from '@abe-stack/shared/core';
 
 // ============================================================================
 // Logger Interface
@@ -108,7 +137,7 @@ export interface AuthEmailService {
    * @returns Result indicating success or failure
    * @throws When the email transport encounters a fatal error
    */
-  send(options: AuthEmailOptions): Promise<EmailResult>;
+  send(options: AuthEmailOptions): Promise<SendResult>;
 }
 
 // ============================================================================
@@ -177,6 +206,43 @@ export interface AuthEmailTemplates {
    * @returns Email template data
    */
   tokenReuseAlert(ipAddress: string, userAgent: string, timestamp: Date): EmailTemplateResult;
+
+  /**
+   * New login "Was this you?" alert email
+   *
+   * @param ipAddress - IP address of the login
+   * @param userAgent - Browser/device of the login
+   * @param timestamp - When the login occurred
+   * @returns Email template data
+   */
+  newLoginAlert(ipAddress: string, userAgent: string, timestamp: Date): EmailTemplateResult;
+
+  /**
+   * Password changed "Was this you?" alert email
+   *
+   * @param ipAddress - IP address of the request
+   * @param userAgent - Browser/device of the request
+   * @param timestamp - When the change occurred
+   * @returns Email template data
+   */
+  passwordChangedAlert(ipAddress: string, userAgent: string, timestamp: Date): EmailTemplateResult;
+
+  /**
+   * Email changed "Was this you?" alert email (sent to OLD email)
+   *
+   * @param newEmail - The new email address
+   * @param ipAddress - IP address of the request
+   * @param userAgent - Browser/device of the request
+   * @param timestamp - When the change occurred
+   * @returns Email template data
+   */
+  emailChangedAlert(
+    newEmail: string,
+    ipAddress: string,
+    userAgent: string,
+    timestamp: Date,
+    revertUrl?: string,
+  ): EmailTemplateResult;
 }
 
 // ============================================================================

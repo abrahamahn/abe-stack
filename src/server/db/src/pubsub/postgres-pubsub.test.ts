@@ -1,4 +1,4 @@
-// backend/db/src/pubsub/postgres-pubsub.test.ts
+// src/server/db/src/pubsub/postgres-pubsub.test.ts
 import { SubKeys } from '@abe-stack/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

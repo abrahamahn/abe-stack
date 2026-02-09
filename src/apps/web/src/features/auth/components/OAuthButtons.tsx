@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/OAuthButtons.tsx
+// src/apps/web/src/features/auth/components/OAuthButtons.tsx
 /**
  * OAuth Buttons Component
  *

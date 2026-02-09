@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/payment-methods.test.ts
+// src/server/db/src/repositories/billing/payment-methods.test.ts
 /**
  * Tests for Payment Methods Repository
  *

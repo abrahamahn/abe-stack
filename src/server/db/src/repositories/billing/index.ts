@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/index.ts
+// src/server/db/src/repositories/billing/index.ts
 /**
  * Billing Repositories
  *

@@ -1,4 +1,4 @@
-// backend/engine/src/storage/providers/s3-client-wrapper.ts
+// src/server/engine/src/storage/providers/s3-client-wrapper.ts
 /**
  * S3 Client Wrapper
  *

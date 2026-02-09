@@ -1,4 +1,4 @@
-// client/ui/src/elements/OAuthButton.test.tsx
+// src/client/ui/src/elements/OAuthButton.test.tsx
 /**
  * Tests for OAuthButton component.
  *

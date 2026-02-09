@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/proxyValidation.ts
+// src/apps/server/src/http/middleware/proxyValidation.ts
 /**
  * IP Proxy Header Validation
  *

@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/storage.test.ts
+// src/apps/server/src/config/infra/storage.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { loadStorageConfig, validateStorage } from './storage';

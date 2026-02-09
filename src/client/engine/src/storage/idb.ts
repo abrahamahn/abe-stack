@@ -1,4 +1,4 @@
-// client/src/storage/idb.ts
+// src/client/engine/src/storage/idb.ts
 /**
  * Minimal IndexedDB Wrapper
  *

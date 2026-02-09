@@ -1,4 +1,4 @@
-// modules/realtime/src/handlers/sync.ts
+// src/server/realtime/src/handlers/sync.ts
 /**
  * Realtime Sync Handlers
  *
@@ -38,10 +38,10 @@ import type {
 function hasAuthenticatedUser(
   req: RealtimeRequest,
 ): req is RealtimeRequest & { readonly user: AuthenticatedUser } {
-  if (req.user === undefined || req.user === null || typeof req.user !== 'object') {
+  if (req.user === undefined || typeof req.user !== 'object') {
     return false;
   }
-  const user = req.user as Record<string, unknown>;
+  const user = req.user as unknown as Record<string, unknown>;
   return 'userId' in user && typeof user['userId'] === 'string' && user['userId'] !== '';
 }
 
@@ -114,14 +114,11 @@ export async function handleWrite(
 
   // Validate author matches authenticated user
   if (body.authorId !== userId) {
-    log.warn(
-      {
-        authorId: body.authorId,
-        userId,
-        txId: body.txId,
-      },
-      'Write attempt with mismatched authorId',
-    );
+    log.warn('Write attempt with mismatched authorId', {
+      authorId: body.authorId,
+      userId,
+      txId: body.txId,
+    });
     return {
       status: 403,
       body: { message: ERROR_MESSAGES.AUTHOR_MISMATCH },
@@ -139,14 +136,11 @@ export async function handleWrite(
   }
 
   try {
-    log.debug(
-      {
-        txId: body.txId,
-        authorId: body.authorId,
-        operationCount: body.operations.length,
-      },
-      'Write transaction started',
-    );
+    log.debug('Write transaction started', {
+      txId: body.txId,
+      authorId: body.authorId,
+      operationCount: body.operations.length,
+    });
 
     // Execute in a database transaction
     const result = await withTransaction(db, async (tx) => {
@@ -199,13 +193,10 @@ export async function handleWrite(
       }
     });
 
-    log.debug(
-      {
-        txId: body.txId,
-        modifiedCount: result.modifiedRecords.length,
-      },
-      'Write transaction completed',
-    );
+    log.debug('Write transaction completed', {
+      txId: body.txId,
+      modifiedCount: result.modifiedRecords.length,
+    });
 
     return {
       status: 200,
@@ -220,13 +211,10 @@ export async function handleWrite(
     }
 
     if (error instanceof VersionConflictError) {
-      log.info(
-        {
-          txId: body.txId,
-          conflicts: error.conflictingRecords,
-        },
-        'Write transaction conflict',
-      );
+      log.info('Write transaction conflict', {
+        txId: body.txId,
+        conflicts: error.conflictingRecords,
+      });
       return {
         status: 409,
         body: {
@@ -236,13 +224,10 @@ export async function handleWrite(
       };
     }
 
-    log.error(
-      {
-        txId: body.txId,
-        error: error instanceof Error ? error.message : String(error),
-      },
-      'Write transaction failed',
-    );
+    log.error('Write transaction failed', {
+      txId: body.txId,
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     return {
       status: 500,

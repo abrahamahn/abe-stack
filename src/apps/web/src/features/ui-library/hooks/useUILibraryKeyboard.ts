@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/hooks/useUILibraryKeyboard.ts
+// src/apps/web/src/features/ui-library/hooks/useUILibraryKeyboard.ts
 import { useCallback, useEffect } from 'react';
 
 import type { UILibraryPaneConfig } from '../types';

@@ -1,4 +1,4 @@
-// tools/scripts/db/db-push.test.ts
+// src/tools/scripts/db/db-push.test.ts
 /**
  * Tests for Database Schema Push Script
  *
@@ -82,8 +82,8 @@ describe('db-push script', () => {
 
       await pushSchema();
 
-      // Should execute all statements (1 extension + 11 tables + 12 indexes = 24 statements)
-      expect(mockRaw).toHaveBeenCalledTimes(24);
+      // Should execute all statements (1 extension + 12 tables + 15 indexes = 28 statements)
+      expect(mockRaw).toHaveBeenCalledTimes(28);
       expect(mockBuildConnectionString).toHaveBeenCalledTimes(1);
       expect(mockCreateDbClient).toHaveBeenCalledTimes(1);
     });

@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useSidePeek.ts
+// src/client/react/src/hooks/useSidePeek.ts
 /**
  * useSidePeek - Hook for managing Notion-style side-peek state with URL sync.
  *

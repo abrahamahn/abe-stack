@@ -1,4 +1,4 @@
-// client/ui/src/router/components.tsx
+// src/client/react/src/router/components.tsx
 /**
  * Custom Router Components
  *

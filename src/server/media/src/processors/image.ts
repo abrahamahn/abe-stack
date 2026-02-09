@@ -1,4 +1,4 @@
-// premium/media/src/processors/image.ts
+// src/server/media/src/processors/image.ts
 /**
  * Image Processing Module
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobStatusBadge.tsx
+// src/apps/web/src/features/admin/components/JobStatusBadge.tsx
 /**
  * JobStatusBadge component
  *
@@ -30,7 +30,8 @@ const STATUS_CONFIG: Record<
   processing: { tone: 'warning', label: 'Processing' },
   completed: { tone: 'success', label: 'Completed' },
   failed: { tone: 'danger', label: 'Failed' },
-  dead: { tone: 'danger', label: 'Dead' },
+  dead_letter: { tone: 'danger', label: 'Dead Letter' },
+  cancelled: { tone: 'warning', label: 'Cancelled' },
 };
 
 // ============================================================================

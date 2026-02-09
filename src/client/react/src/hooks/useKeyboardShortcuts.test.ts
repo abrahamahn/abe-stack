@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useKeyboardShortcuts.test.ts
+// src/client/react/src/hooks/useKeyboardShortcuts.test.ts
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement, type ReactElement } from 'react';

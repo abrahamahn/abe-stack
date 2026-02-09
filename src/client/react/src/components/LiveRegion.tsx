@@ -1,4 +1,4 @@
-// client/ui/src/components/LiveRegion.tsx
+// src/client/react/src/components/LiveRegion.tsx
 import {
   createContext,
   useCallback,

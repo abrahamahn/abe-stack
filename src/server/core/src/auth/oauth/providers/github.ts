@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/providers/github.ts
+// src/server/core/src/auth/oauth/providers/github.ts
 /**
  * GitHub OAuth Provider
  *

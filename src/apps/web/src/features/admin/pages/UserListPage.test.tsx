@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/UserListPage.test.tsx
+// src/apps/web/src/features/admin/pages/UserListPage.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

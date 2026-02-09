@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/webhook-deliveries.test.ts
+// src/server/db/src/repositories/system/webhook-deliveries.test.ts
 /**
  * Tests for Webhook Deliveries Repository
  *

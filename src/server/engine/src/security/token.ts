@@ -1,4 +1,4 @@
-// server/engine/src/security/token.ts
+// src/server/engine/src/security/token.ts
 /**
  * Security Token Utilities
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/catalog.ts
+// src/apps/web/src/features/ui-library/catalog/catalog.ts
 import { componentCatalog as components } from './componentCatalog';
 import { elementCatalog as elements } from './elementCatalog';
 import { layoutCatalog as layouts } from './layoutCatalog';

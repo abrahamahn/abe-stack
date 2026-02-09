@@ -1,8 +1,17 @@
-// apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
-import { AuthLayout, Button, Spinner, Text, useNavigate, useSearchParams } from '@abe-stack/ui';
+// src/apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
+import {
+  Alert,
+  AuthLayout,
+  Button,
+  Heading,
+  Spinner,
+  Text,
+  useNavigate,
+  useSearchParams,
+} from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
@@ -26,6 +35,7 @@ export const ConfirmEmailPage = (): ReactElement => {
   const [message, setMessage] = useState('');
 
   const token = searchParams.get('token');
+  const verifyStarted = useRef(false);
 
   useEffect(() => {
     if (token === null) {
@@ -33,6 +43,9 @@ export const ConfirmEmailPage = (): ReactElement => {
       setMessage('Invalid verification link');
       return;
     }
+
+    if (verifyStarted.current) return;
+    verifyStarted.current = true;
 
     const verify = async (): Promise<void> => {
       try {
@@ -64,7 +77,9 @@ export const ConfirmEmailPage = (): ReactElement => {
           {status === 'loading' && (
             <>
               <div className="auth-form-header">
-                <h2 className="auth-form-title">Verifying your email...</h2>
+                <Heading as="h2" size="md" className="auth-form-title">
+                  Verifying your email...
+                </Heading>
               </div>
               <div className="flex-center">
                 <Spinner size="lg" />
@@ -78,23 +93,13 @@ export const ConfirmEmailPage = (): ReactElement => {
           {status === 'success' && (
             <>
               <div className="auth-form-header">
-                <h2 className="auth-form-title text-success">Email verified!</h2>
+                <Heading as="h2" size="md" className="auth-form-title text-success">
+                  Email verified!
+                </Heading>
               </div>
-              <div className="status-icon bg-success-muted mx-auto">
-                <svg
-                  className="icon-lg text-success"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
+              <Alert tone="success" title="Verified">
+                Your email verification was successful.
+              </Alert>
               <Text tone="muted" className="text-center">
                 {message}
               </Text>
@@ -107,23 +112,13 @@ export const ConfirmEmailPage = (): ReactElement => {
           {status === 'error' && (
             <>
               <div className="auth-form-header">
-                <h2 className="auth-form-title text-danger">Verification failed</h2>
+                <Heading as="h2" size="md" className="auth-form-title text-danger">
+                  Verification failed
+                </Heading>
               </div>
-              <div className="status-icon bg-danger-muted mx-auto">
-                <svg
-                  className="icon-lg text-danger"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </div>
+              <Alert tone="danger" title="Verification failed">
+                We could not verify this token.
+              </Alert>
               <Text tone="muted" className="text-center">
                 {message}
               </Text>

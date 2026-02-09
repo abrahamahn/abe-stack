@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/index.ts
+// src/server/core/src/notifications/providers/index.ts
 /**
  * Notification Infrastructure
  *

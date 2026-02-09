@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobsTable.test.tsx
+// src/apps/web/src/features/admin/components/JobsTable.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -182,7 +182,7 @@ describe('JobsTable', () => {
       expect(screen.getByRole('tab', { name: 'Pending' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Processing' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Failed' })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: 'Dead' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'Dead Letter' })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: 'Completed' })).toBeInTheDocument();
     });
 
@@ -615,9 +615,9 @@ describe('JobsTable', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle job with dead status', () => {
+    it('should handle job with dead_letter status', () => {
       const data = createMockResponse({
-        data: [createMockJob({ status: 'dead' })],
+        data: [createMockJob({ status: 'dead_letter' })],
       });
 
       render(

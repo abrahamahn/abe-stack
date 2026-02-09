@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useVirtualScroll.tsx
+// src/client/react/src/hooks/useVirtualScroll.tsx
 /**
  * Virtual Scrolling Hook
  *

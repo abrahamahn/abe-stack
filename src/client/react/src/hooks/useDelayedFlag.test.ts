@@ -1,4 +1,4 @@
-// client/react/src/hooks/useDelayedFlag.test.ts
+// src/client/react/src/hooks/useDelayedFlag.test.ts
 /**
  * Tests for useDelayedFlag hook.
  *

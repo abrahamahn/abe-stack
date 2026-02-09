@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/AuthForms.test.tsx
+// src/apps/web/src/features/auth/components/AuthForms.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -19,7 +19,7 @@ describe('AuthForms', () => {
       // Pass onForgotPassword to show the forgot password link
       renderWithRouter(<LoginForm onForgotPassword={vi.fn()} />);
 
-      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email or Username')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
       expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe('AuthForms', () => {
       const mockOnLogin = vi.fn();
       renderWithRouter(<LoginForm onLogin={mockOnLogin} />);
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -40,7 +40,7 @@ describe('AuthForms', () => {
 
       await waitFor(() => {
         expect(mockOnLogin).toHaveBeenCalledWith({
-          email: 'test@example.com',
+          identifier: 'test@example.com',
           password: 'password123',
         });
       });
@@ -54,11 +54,17 @@ describe('AuthForms', () => {
 
     it('calls onForgotPassword when forgot password is clicked', () => {
       const mockOnForgotPassword = vi.fn();
-      renderWithRouter(<LoginForm onForgotPassword={mockOnForgotPassword} />);
+      const mockOnModeChange = vi.fn();
+      renderWithRouter(
+        <LoginForm onForgotPassword={mockOnForgotPassword} onModeChange={mockOnModeChange} />,
+      );
 
       fireEvent.click(screen.getByText('Forgot your password?'));
 
-      expect(mockOnForgotPassword).toHaveBeenCalledWith({ email: '' });
+      // onForgotPassword not called with empty identifier (no @ symbol)
+      expect(mockOnForgotPassword).not.toHaveBeenCalled();
+      // onModeChange is called to switch to forgot-password mode
+      expect(mockOnModeChange).toHaveBeenCalledWith('forgot-password');
     });
   });
 
@@ -67,7 +73,9 @@ describe('AuthForms', () => {
       renderWithRouter(<RegisterForm />);
 
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
-      expect(screen.getByLabelText('Name (optional)')).toBeInTheDocument();
+      expect(screen.getByLabelText('Username')).toBeInTheDocument();
+      expect(screen.getByLabelText('First Name')).toBeInTheDocument();
+      expect(screen.getByLabelText('Last Name')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Create account' })).toBeInTheDocument();
     });
@@ -82,8 +90,14 @@ describe('AuthForms', () => {
       fireEvent.change(screen.getByLabelText('Email'), {
         target: { value: 'test@example.com' },
       });
-      fireEvent.change(screen.getByLabelText('Name (optional)'), {
-        target: { value: 'Test User' },
+      fireEvent.change(screen.getByLabelText('Username'), {
+        target: { value: 'testuser' },
+      });
+      fireEvent.change(screen.getByLabelText('First Name'), {
+        target: { value: 'Test' },
+      });
+      fireEvent.change(screen.getByLabelText('Last Name'), {
+        target: { value: 'User' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
         target: { value: 'password123' },
@@ -94,13 +108,15 @@ describe('AuthForms', () => {
       await waitFor(() => {
         expect(mockOnRegister).toHaveBeenCalledWith({
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           password: 'password123',
         });
       });
     });
 
-    it('submits without name when optional', async () => {
+    it('submits with all required fields filled', async () => {
       const mockOnRegister = vi.fn().mockResolvedValue({
         email: 'test@example.com',
         message: 'Check your email',
@@ -110,6 +126,15 @@ describe('AuthForms', () => {
       fireEvent.change(screen.getByLabelText('Email'), {
         target: { value: 'test@example.com' },
       });
+      fireEvent.change(screen.getByLabelText('Username'), {
+        target: { value: 'testuser2' },
+      });
+      fireEvent.change(screen.getByLabelText('First Name'), {
+        target: { value: 'Another' },
+      });
+      fireEvent.change(screen.getByLabelText('Last Name'), {
+        target: { value: 'User' },
+      });
       fireEvent.change(screen.getByLabelText('Password'), {
         target: { value: 'password123' },
       });
@@ -119,6 +144,9 @@ describe('AuthForms', () => {
       await waitFor(() => {
         expect(mockOnRegister).toHaveBeenCalledWith({
           email: 'test@example.com',
+          username: 'testuser2',
+          firstName: 'Another',
+          lastName: 'User',
           password: 'password123',
         });
       });

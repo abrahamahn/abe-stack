@@ -1,4 +1,4 @@
-// packages/shared/src/domain/membership/membership.logic.ts
+// src/shared/src/domain/membership/membership.logic.ts
 /**
  * @file Membership Logic
  * @description Business logic for invite status, transitions, and role validation.

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/operators.test.ts
+// src/shared/src/utils/search/operators.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

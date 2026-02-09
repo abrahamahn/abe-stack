@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/deferred-promise.test.ts
+// src/shared/src/utils/async/deferred-promise.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { DeferredPromise } from './deferred-promise';

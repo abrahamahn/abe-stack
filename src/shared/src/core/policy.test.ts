@@ -1,4 +1,4 @@
-// packages/shared/src/core/policy.test.ts
+// src/shared/src/core/policy.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { can, hasPermission } from './policy';

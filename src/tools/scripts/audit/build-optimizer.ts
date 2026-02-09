@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/scripts/audit/build-optimizer.ts
+// src/tools/scripts/audit/build-optimizer.ts
 /**
  * Build Performance Optimizer
  *
@@ -7,8 +7,8 @@
  * Identifies slow imports, large dependencies, and optimization opportunities
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface ImportAnalysis {
   file: string;
@@ -120,14 +120,14 @@ function analyzeBuildPerformance(): BuildAnalysis {
     optimizationSuggestions: [],
   };
 
-  const rootDir = path.resolve(__dirname, '..', '..');
+  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
 
   // Analyze source files
   const sourceDirs = [
-    path.join(rootDir, 'apps', 'web', 'src'),
-    path.join(rootDir, 'packages', 'ui', 'src'),
-    path.join(rootDir, 'client', 'src'),
-    path.join(rootDir, 'packages', 'core', 'src'),
+    path.join(rootDir, 'src', 'apps', 'web', 'src'),
+    path.join(rootDir, 'src', 'client', 'ui', 'src'),
+    path.join(rootDir, 'src', 'client', 'engine', 'src'),
+    path.join(rootDir, 'src', 'server', 'core', 'src'),
   ];
 
   for (const dir of sourceDirs) {
@@ -306,7 +306,7 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '.tmp');
+    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -319,6 +319,8 @@ function main(): void {
   }
 }
 
-if (require.main === module) {
+const entryArg = process.argv[1];
+const isMainModule = entryArg !== undefined && import.meta.url === `file://${entryArg}`;
+if (isMainModule) {
   main();
 }

@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useLocalStorage.test.ts
+// src/client/react/src/hooks/useLocalStorage.test.ts
 /**
  * Tests for useLocalStorage hook.
  *

@@ -1,4 +1,4 @@
-// backend/core/src/admin/jobsService.test.ts
+// src/server/core/src/admin/jobsService.test.ts
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

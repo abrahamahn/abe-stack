@@ -1,16 +1,77 @@
-// packages/shared/src/core/api.ts
-
+// src/shared/src/core/api.ts
 /**
- * @file API Contract Types (Re-exports)
- * @description Re-exports contract types from contracts/types for backward compatibility.
- * @module Shared/Api
- * @deprecated Import directly from '../contracts/types' instead.
+ * API Contract Types
+ *
+ * Core definitions for the type-safe API system.
+ * Replaces ts-rest contract structure with plain TypeScript.
  */
 
 import type { ErrorCode } from './constants';
 
-// Re-export contract types with backward-compatible names
-export type { Contract, EndpointDef as EndpointContract } from '../contracts/types';
+// ============================================================================
+// Core Schema Interface
+// ============================================================================
+
+/**
+ * Result type for safeParse operations.
+ */
+export type SafeParseResult<T> = { success: true; data: T } | { success: false; error: Error };
+
+/**
+ * Schema interface for validation.
+ * Supports parse/safeParse for runtime validation.
+ */
+export interface Schema<T> {
+  parse: (data: unknown) => T;
+  safeParse: (data: unknown) => SafeParseResult<T>;
+  _type: T; // Phantom type for inference
+}
+
+/**
+ * Infer the type from a schema (similar to z.infer).
+ */
+export type InferSchema<S> = S extends Schema<infer T> ? T : never;
+
+// ============================================================================
+// Endpoint Definitions
+// ============================================================================
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+/**
+ * Definition of a single API endpoint.
+ */
+export interface EndpointDef<TBody = unknown, TResponse = unknown, TQuery = unknown> {
+  method: HttpMethod;
+  path: string;
+  body?: Schema<TBody>;
+  query?: Schema<TQuery>;
+  responses: Record<string, Schema<TResponse>>;
+  summary?: string;
+}
+
+/**
+ * Alias for EndpointDef for backward compatibility.
+ */
+export type EndpointContract<TBody = unknown, TResponse = unknown, TQuery = unknown> = EndpointDef<
+  TBody,
+  TResponse,
+  TQuery
+>;
+
+/**
+ * A contract is a record of endpoint names to endpoint definitions.
+ */
+export type Contract = Record<string, EndpointDef>;
+
+/**
+ * A router combines multiple contracts into a namespace.
+ */
+export type ContractRouter = Record<string, Contract>;
+
+// ============================================================================
+// Wrapper Types (Response Envelope)
+// ============================================================================
 
 /**
  * Supported API status codes.
@@ -56,6 +117,37 @@ export interface ErrorResponse {
  */
 export type ApiResult<T = unknown> = ApiResponse<T> | ErrorResponse;
 
+// ============================================================================
+// Type Helpers
+// ============================================================================
+
+/**
+ * Extract the success response type (200 or 201) from an endpoint definition.
+ */
+export type SuccessResponse<E extends EndpointDef> = '200' extends keyof E['responses']
+  ? E['responses']['200'] extends Schema<infer R>
+    ? R
+    : never
+  : '201' extends keyof E['responses']
+    ? E['responses']['201'] extends Schema<infer R>
+      ? R
+      : never
+    : '302' extends keyof E['responses']
+      ? E['responses']['302'] extends Schema<infer R>
+        ? R
+        : never
+      : unknown;
+
+/**
+ * Extract the request body type from an endpoint definition.
+ */
+export type RequestBody<E extends EndpointDef> = E['body'] extends Schema<infer B> ? B : undefined;
+
+/**
+ * Extract the query parameters type from an endpoint definition.
+ */
+export type QueryParams<E extends EndpointDef> = E['query'] extends Schema<infer Q> ? Q : undefined;
+
 /**
  * Helper to extract the success data type from a response.
  * Handles both wrapped `{ ok: true, data: T }` and raw `T` responses.
@@ -63,7 +155,7 @@ export type ApiResult<T = unknown> = ApiResponse<T> | ErrorResponse;
 type InferOkData<S> = S extends { ok: true; data: infer D } ? D : S;
 
 /**
- * Helper to extract the success data type from an EndpointContract.
+ * Helper to extract the success data type from an EndpointDef.
  * Checks common success status codes (200, 201, 202, 204).
  */
 export type InferResponseData<C extends { responses: Record<string, unknown> }> =
@@ -76,3 +168,26 @@ export type InferResponseData<C extends { responses: Record<string, unknown> }> 
         : C['responses'] extends { 204: unknown }
           ? undefined
           : unknown;
+
+// ============================================================================
+// Service Interfaces (Ports - Hexagonal Architecture)
+// ============================================================================
+
+/**
+ * Generic Logger interface.
+ */
+export interface Logger {
+  info(msg: string, data?: Record<string, unknown>): void;
+  info(data: Record<string, unknown>, msg: string): void;
+  warn(msg: string, data?: Record<string, unknown>): void;
+  warn(data: Record<string, unknown>, msg: string): void;
+  error(msg: string | Error, data?: Record<string, unknown>): void;
+  error(data: unknown, msg?: string): void;
+  debug(msg: string, data?: Record<string, unknown>): void;
+  debug(data: Record<string, unknown>, msg: string): void;
+  trace?(msg: string, data?: Record<string, unknown>): void;
+  trace?(data: Record<string, unknown>, msg: string): void;
+  fatal?(msg: string | Error, data?: Record<string, unknown>): void;
+  fatal?(data: Record<string, unknown>, msg: string): void;
+  child?(bindings: Record<string, unknown>): Logger;
+}

@@ -1,4 +1,4 @@
-// backend/db/src/client.ts
+// src/server/db/src/client.ts
 /**
  * Raw PostgreSQL Client Wrapper
  *

@@ -1,4 +1,4 @@
-// premium/websocket/src/websocket/index.ts
+// src/server/websocket/src/index.ts
 /**
  * WebSocket Module
  *

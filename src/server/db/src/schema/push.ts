@@ -1,4 +1,4 @@
-// backend/db/src/schema/push.ts
+// src/server/db/src/schema/push.ts
 /**
  * Push Subscriptions Schema Types
  *

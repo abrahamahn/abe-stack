@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/invoices.ts
+// src/server/db/src/repositories/billing/invoices.ts
 /**
  * Invoices Repository
  *

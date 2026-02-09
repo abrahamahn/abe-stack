@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/services.test.ts
+// src/shared/src/config/types/services.test.ts
 /**
  * Unit tests for service configuration type definitions.
  *

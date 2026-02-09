@@ -1,4 +1,4 @@
-// backend/db/src/schema/metering.ts
+// src/server/db/src/schema/metering.ts
 /**
  * Usage Metering Schema Types
  *

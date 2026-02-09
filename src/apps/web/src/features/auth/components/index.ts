@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/index.ts
+// src/apps/web/src/features/auth/components/index.ts
 export { AuthForm } from './AuthForms';
 export type { AuthFormProps } from './AuthForms';
 export { ForgotPasswordForm } from './ForgotPasswordForm';

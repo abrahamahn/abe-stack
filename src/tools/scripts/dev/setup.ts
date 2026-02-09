@@ -1,4 +1,4 @@
-// tools/scripts/dev/setup.ts
+// src/tools/scripts/dev/setup.ts
 /**
  * ABE Stack Interactive Setup Script
  *
@@ -17,11 +17,11 @@
  * Usage: pnpm setup
  */
 
-import { execSync, spawnSync } from 'node:child_process';
-import { randomFillSync } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { createInterface } from 'node:readline';
+import { execSync, spawnSync } from 'child_process';
+import { randomFillSync } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
+import { createInterface } from 'readline';
 
 // =============================================================================
 // Types
@@ -220,7 +220,8 @@ async function promptChoice<T extends string>(
 
   if (!choice) {
     logWarning(`Invalid choice. Using default: ${defaultKey ?? '1'}`);
-    return choices.find((c) => c.key === defaultKey)?.value ?? choices[0].value;
+    const fallback = choices.find((c) => c.key === defaultKey) ?? choices[0];
+    return fallback?.value as T;
   }
 
   return choice.value;
@@ -644,8 +645,9 @@ function parseEnvFile(path: string): Record<string, string> {
     for (const line of content.split('\n')) {
       const match = line.match(/^([^=:#]+?)[=:](.*)/);
       if (match) {
-        const value = match[2].trim().replace(/^['"](.*)['"]$/, '$1');
-        env[match[1].trim()] = value;
+        const key = match[1]?.trim();
+        const value = match[2]?.trim().replace(/^['"](.*)['"]$/, '$1') ?? '';
+        if (key) env[key] = value;
       }
     }
     return env;
@@ -793,7 +795,7 @@ function pushDatabaseSchema(pm: PackageManager, step: number, total: number): vo
 function seedDatabase(pm: PackageManager, step: number, total: number): void {
   logStep(step, total, 'Seeding database...');
 
-  const serverDir = resolve(ROOT, 'apps/server');
+  const serverDir = resolve(ROOT, 'src/apps/server');
 
   if (!run(pm, ['db:seed'], { cwd: serverDir })) {
     logError('Failed to seed database');

@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/middleware.ts
+// src/apps/server/src/http/pagination/middleware.ts
 /**
  * Pagination middleware factory for Fastify.
  * Parses query parameters and attaches pagination context to requests.

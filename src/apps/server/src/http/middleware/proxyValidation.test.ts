@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/proxyValidation.test.ts
+// src/apps/server/src/http/middleware/proxyValidation.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

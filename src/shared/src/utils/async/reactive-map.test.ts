@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/reactive-map.test.ts
+// src/shared/src/utils/async/reactive-map.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReactiveMap } from './reactive-map';

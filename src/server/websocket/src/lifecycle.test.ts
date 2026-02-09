@@ -1,4 +1,4 @@
-// premium/websocket/src/websocket/lifecycle.test.ts
+// src/server/websocket/src/lifecycle.test.ts
 /**
  * WebSocket Lifecycle Unit Tests
  *

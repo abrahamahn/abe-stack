@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useExportEvents.test.ts
+// src/apps/web/src/features/admin/hooks/useExportEvents.test.ts
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 

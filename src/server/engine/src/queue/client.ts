@@ -1,4 +1,4 @@
-// backend/engine/src/queue/client.ts
+// src/server/engine/src/queue/client.ts
 /**
  * Queue Server
  *
@@ -255,11 +255,15 @@ export class QueueServer {
         resolve();
       }, ms);
 
-      signal.addEventListener('abort', () => {
-        clearTimeout(timeoutId);
-        this.sleepAbortController = null;
-        resolve();
-      });
+      signal.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(timeoutId);
+          this.sleepAbortController = null;
+          resolve();
+        },
+        { once: true },
+      );
     });
   }
 }

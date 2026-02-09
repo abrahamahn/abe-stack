@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/invitations.ts
+// src/server/db/src/repositories/tenant/invitations.ts
 /**
  * Invitations Repository (Functional)
  *

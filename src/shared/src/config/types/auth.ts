@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/auth.ts
+// src/shared/src/config/types/auth.ts
 /**
  * Authentication Configuration Contracts
  *
@@ -179,6 +179,22 @@ export interface AuthConfig {
     issuer: string;
     /** Time window tolerance (number of periods) */
     window: number;
+  };
+
+  /**
+   * CAPTCHA configuration for bot protection on public endpoints.
+   * When enabled, login, register, and forgot-password require a valid CAPTCHA token.
+   * Currently supports Cloudflare Turnstile.
+   */
+  captcha?: {
+    /** Whether CAPTCHA verification is enabled */
+    enabled: boolean;
+    /** CAPTCHA provider (currently only Turnstile is supported) */
+    provider: 'turnstile';
+    /** Site key (public, sent to client) */
+    siteKey: string;
+    /** Secret key (server-side, for verification API calls) */
+    secretKey: string;
   };
 }
 

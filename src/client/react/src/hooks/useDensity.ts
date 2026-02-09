@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useDensity.ts
+// src/client/react/src/hooks/useDensity.ts
 
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback, useEffect } from 'react';

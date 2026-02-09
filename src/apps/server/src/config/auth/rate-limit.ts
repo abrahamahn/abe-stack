@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/rate-limit.ts
+// src/apps/server/src/config/auth/rate-limit.ts
 import { getBool, getInt } from '@abe-stack/shared/config';
 
 import type { RateLimitConfig } from '@abe-stack/shared/config';

@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/errors.ts
+// src/server/core/src/auth/utils/errors.ts
 /**
  * Re-exports auth domain errors from shared package.
  *

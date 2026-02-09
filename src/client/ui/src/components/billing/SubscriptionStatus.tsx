@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/SubscriptionStatus.tsx
+// src/client/ui/src/components/billing/SubscriptionStatus.tsx
 /**
  * SubscriptionStatus Component
  *

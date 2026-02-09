@@ -1,4 +1,4 @@
-// packages/shared/src/utils/logger/index.ts
+// src/shared/src/utils/logger/index.ts
 /**
  * Logger Module
  *

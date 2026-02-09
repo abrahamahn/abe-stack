@@ -1,4 +1,4 @@
-// packages/shared/src/utils/constants/time.test.ts
+// src/shared/src/utils/constants/time.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

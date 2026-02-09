@@ -1,4 +1,4 @@
-// backend/engine/src/security/rate-limit/limiter.test.ts
+// src/server/engine/src/security/rate-limit/limiter.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '.';
@@ -94,6 +94,112 @@ describe('MemoryStore', () => {
       expect(stats.trackedClients).toBe(0);
       expect(stats.limitedClients).toBe(0);
     });
+  });
+});
+
+describe('MemoryStore O(1) stats counter', () => {
+  let store: MemoryStore;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    store = new MemoryStore({ cleanupIntervalMs: 60000, maxSize: 100 });
+  });
+
+  afterEach(() => {
+    store.destroy();
+    vi.useRealTimers();
+  });
+
+  test('should increment limitedClients when adding a limited record', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+
+    expect(store.getStats().limitedClients).toBe(1);
+  });
+
+  test('should not increment limitedClients for non-limited records', () => {
+    store.set('client-1', createRecord({ tokens: 5 }));
+
+    expect(store.getStats().limitedClients).toBe(0);
+  });
+
+  test('should adjust counter when updating from limited to non-limited', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+    expect(store.getStats().limitedClients).toBe(1);
+
+    store.set('client-1', createRecord({ tokens: 5 }));
+    expect(store.getStats().limitedClients).toBe(0);
+  });
+
+  test('should adjust counter when updating from non-limited to limited', () => {
+    store.set('client-1', createRecord({ tokens: 5 }));
+    expect(store.getStats().limitedClients).toBe(0);
+
+    store.set('client-1', createRecord({ tokens: 0 }));
+    expect(store.getStats().limitedClients).toBe(1);
+  });
+
+  test('should not double-count when updating limited to limited', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+    store.set('client-1', createRecord({ tokens: 0.5 }));
+
+    expect(store.getStats().limitedClients).toBe(1);
+  });
+
+  test('should decrement counter when deleting a limited record', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+    store.set('client-2', createRecord({ tokens: 0 }));
+    expect(store.getStats().limitedClients).toBe(2);
+
+    store.delete('client-1');
+    expect(store.getStats().limitedClients).toBe(1);
+  });
+
+  test('should not decrement counter when deleting a non-limited record', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+    store.set('client-2', createRecord({ tokens: 5 }));
+    expect(store.getStats().limitedClients).toBe(1);
+
+    store.delete('client-2');
+    expect(store.getStats().limitedClients).toBe(1);
+  });
+
+  test('should decrement counter during cleanup of limited records', () => {
+    const now = Date.now();
+    store.set('limited-stale', createRecord({ tokens: 0, lastRefill: now - 5000 }));
+    store.set('limited-fresh', createRecord({ tokens: 0, lastRefill: now }));
+    store.set('ok-stale', createRecord({ tokens: 5, lastRefill: now - 5000 }));
+    expect(store.getStats().limitedClients).toBe(2);
+
+    store.cleanup(2000);
+
+    // limited-stale is removed, limited-fresh remains
+    expect(store.getStats().limitedClients).toBe(1);
+    expect(store.getStats().trackedClients).toBe(1);
+  });
+
+  test('should reset counter to zero on destroy', () => {
+    store.set('client-1', createRecord({ tokens: 0 }));
+    store.set('client-2', createRecord({ tokens: 0 }));
+    expect(store.getStats().limitedClients).toBe(2);
+
+    store.destroy();
+    expect(store.getStats().limitedClients).toBe(0);
+  });
+
+  test('should decrement counter during LRU eviction of limited records', () => {
+    const smallStore = new MemoryStore({ cleanupIntervalMs: 60000, maxSize: 2 });
+
+    smallStore.set('client-1', createRecord({ tokens: 0 }));
+    smallStore.set('client-2', createRecord({ tokens: 0 }));
+    expect(smallStore.getStats().limitedClients).toBe(2);
+
+    // Adding a third triggers eviction of oldest (client-1)
+    smallStore.set('client-3', createRecord({ tokens: 5 }));
+
+    // Evicted limited client(s) should be subtracted
+    expect(smallStore.getStats().limitedClients).toBeLessThanOrEqual(1);
+
+    smallStore.destroy();
   });
 });
 

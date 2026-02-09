@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/StackedLayout.tsx
+// src/client/ui/src/layouts/containers/StackedLayout.tsx
 import { Container } from '@containers/Container';
 import '../../styles/layouts.css';
 

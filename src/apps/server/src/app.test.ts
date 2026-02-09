@@ -1,4 +1,4 @@
-// apps/server/src/app.test.ts
+// src/apps/server/src/app.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp, type AppOptions } from './app';
@@ -240,6 +240,7 @@ vi.mock('./infrastructure', () => ({
     },
     write: {
       execute: vi.fn(),
+      close: vi.fn(),
     },
     cache: {
       name: 'memory',
@@ -556,6 +557,7 @@ describe('App', () => {
         write: vi.fn(),
         writeOne: vi.fn(),
         executeOperation: vi.fn(),
+        close: vi.fn(),
       } as unknown as WriteService;
       const mockCache: CacheProvider = {
         name: 'memory',

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/constants/time.ts
+// src/shared/src/utils/constants/time.ts
 /**
  * Time Constants
  *

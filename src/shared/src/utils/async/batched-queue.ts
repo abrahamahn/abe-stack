@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/batched-queue.ts
+// src/shared/src/utils/async/batched-queue.ts
 /**
  * Batched Queue with Backpressure Control
  *

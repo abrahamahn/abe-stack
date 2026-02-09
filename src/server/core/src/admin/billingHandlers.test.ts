@@ -1,4 +1,4 @@
-// backend/core/src/admin/billingHandlers.test.ts
+// src/server/core/src/admin/billingHandlers.test.ts
 /**
  * Unit tests for Admin Billing Handlers
  *
@@ -61,8 +61,13 @@ function createMockDbPlan(overrides: Partial<DbPlan> = {}): DbPlan {
     priceInCents: 2999,
     currency: 'usd',
     features: [
-      { name: 'Unlimited projects', included: true },
-      { name: 'Priority support', included: true, description: '24/7 support' },
+      { key: 'projects:limit' as const, name: 'Unlimited projects', included: true, value: 999999 },
+      {
+        key: 'api:access' as const,
+        name: 'Priority support',
+        included: true,
+        description: '24/7 support',
+      },
     ],
     trialDays: 14,
     stripePriceId: 'price_123',
@@ -115,7 +120,7 @@ function createMockContext(
       error: vi.fn(),
       debug: vi.fn(),
     },
-    email: { send: vi.fn() },
+    email: { send: vi.fn(), healthCheck: vi.fn() },
     storage: {
       upload: vi.fn(),
       download: vi.fn(),
@@ -123,7 +128,7 @@ function createMockContext(
       getSignedUrl: vi.fn(),
     },
     billing: {
-      provider: 'stripe' as const,
+      provider: 'stripe',
       createCustomer: vi.fn(),
       createCheckoutSession: vi.fn(),
       cancelSubscription: vi.fn(),
@@ -142,7 +147,7 @@ function createMockContext(
       verifyWebhookSignature: vi.fn(),
       parseWebhookEvent: vi.fn(),
       createCustomerPortalSession: vi.fn(),
-    } as unknown as AdminAppContext['billing'],
+    } as unknown,
     notifications: {
       isConfigured: vi.fn().mockReturnValue(false),
     },
@@ -322,7 +327,7 @@ describe('handleAdminGetPlan', () => {
         interval: 'year',
         priceInCents: 99900,
         currency: 'usd',
-        features: [{ name: 'Custom integrations', included: true }],
+        features: [{ key: 'api:access' as const, name: 'Custom integrations', included: true }],
         trialDays: 30,
         stripePriceId: 'price_enterprise',
         stripeProductId: 'prod_enterprise',

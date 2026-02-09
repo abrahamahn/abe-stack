@@ -1,4 +1,4 @@
-// backend/core/src/billing/routes.ts
+// src/server/core/src/billing/routes.ts
 /**
  * Billing Routes
  *

@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/index.ts
+// src/server/core/src/auth/utils/index.ts
 export {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -23,3 +23,4 @@ export * from './password';
 export * from './refresh-token';
 export * from './request';
 export * from './response';
+export * from './username';

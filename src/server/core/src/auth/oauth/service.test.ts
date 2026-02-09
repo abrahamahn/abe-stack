@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/service.test.ts
+// src/server/core/src/auth/oauth/service.test.ts
 // backend/core/src/auth/oauth/__tests__/service.test.ts
 import { asMockDb, createMockDb } from '@abe-stack/db/testing';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -48,6 +48,14 @@ vi.mock('./providers', () => ({
 
 // Mock auth utils
 vi.mock('../utils', () => ({
+  generateUniqueUsername: vi.fn((_repos: unknown, email: string) =>
+    Promise.resolve(email.split('@')[0]),
+  ),
+  splitFullName: vi.fn((name: string | null) => {
+    if (name === null || name === undefined) return { firstName: 'User', lastName: '' };
+    const parts = name.trim().split(/\s+/);
+    return { firstName: parts[0] ?? 'User', lastName: parts.slice(1).join(' ') };
+  }),
   createAccessToken: vi.fn(() => 'mock-access-token'),
   createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
 }));
@@ -89,6 +97,7 @@ describe('OAuth Service', () => {
       users: {
         findById: vi.fn(),
         findByEmail: vi.fn(),
+        findByUsername: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
         listWithFilters: vi.fn(),
@@ -134,6 +143,10 @@ describe('OAuth Service', () => {
       legalDocuments: {} as Repositories['legalDocuments'],
       userAgreements: {} as Repositories['userAgreements'],
       consentLogs: {} as Repositories['consentLogs'],
+      totpBackupCodes: {} as Repositories['totpBackupCodes'],
+      emailChangeTokens: {} as Repositories['emailChangeTokens'],
+      apiKeys: {} as Repositories['apiKeys'],
+      dataExportRequests: {} as Repositories['dataExportRequests'],
     };
 
     // Mock auth config
@@ -401,7 +414,10 @@ describe('OAuth Service', () => {
       const existingUser = {
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'hash',
@@ -411,6 +427,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
 
@@ -461,7 +489,10 @@ describe('OAuth Service', () => {
       const newUser = {
         id: 'new-user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash',
@@ -471,6 +502,12 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
         version: 1,
       };
 
@@ -510,7 +547,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findByEmail).mockResolvedValue({
         id: 'existing-user',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -520,6 +560,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
 
@@ -553,7 +605,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -563,6 +618,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -622,7 +689,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -632,6 +702,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -678,7 +760,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -688,6 +773,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue({
@@ -721,7 +818,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -731,6 +831,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -779,7 +891,10 @@ describe('OAuth Service', () => {
       const user = {
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'regular-hash', // Not oauth:*
@@ -789,6 +904,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
 
@@ -823,7 +950,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -833,6 +963,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
@@ -880,7 +1022,10 @@ describe('OAuth Service', () => {
       const user = {
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash', // OAuth-only user
@@ -890,6 +1035,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
 
@@ -919,7 +1076,10 @@ describe('OAuth Service', () => {
       const user = {
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash', // OAuth-only user
@@ -929,6 +1089,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
 
@@ -1035,7 +1207,10 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue({
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Test User',
+        canonicalEmail: 'user@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
@@ -1045,6 +1220,18 @@ describe('OAuth Service', () => {
         emailVerifiedAt: new Date(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       });
 
@@ -1053,6 +1240,7 @@ describe('OAuth Service', () => {
       expect(result).toEqual({
         userId: 'user-123',
         email: 'user@example.com',
+        canonicalEmail: 'user@example.com',
       });
     });
 

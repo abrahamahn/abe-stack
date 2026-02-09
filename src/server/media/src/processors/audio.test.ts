@@ -1,57 +1,30 @@
-// premium/media/src/processors/audio.test.ts
+// src/server/media/src/processors/audio.test.ts
 /**
  * Tests for AudioProcessor
+ *
+ * Mocks the internal ffmpeg-wrapper and audio-metadata modules
+ * instead of the removed fluent-ffmpeg/music-metadata external deps.
  */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { AudioProcessor } from './audio';
 
-// Mock ffmpeg-static
-vi.mock('ffmpeg-static', () => ({
-  default: '/usr/bin/ffmpeg',
+// Mock internal ffmpeg-wrapper
+vi.mock('../ffmpeg-wrapper', () => ({
+  runFFmpeg: vi.fn().mockResolvedValue({ success: true, output: '' }),
 }));
 
-const mockFfmpegCommand = {
-  toFormat: vi.fn().mockReturnThis(),
-  audioBitrate: vi.fn().mockReturnThis(),
-  audioChannels: vi.fn().mockReturnThis(),
-  audioFrequency: vi.fn().mockReturnThis(),
-  setStartTime: vi.fn().mockReturnThis(),
-  setDuration: vi.fn().mockReturnThis(),
-  on: vi.fn().mockImplementation(function (
-    this: typeof mockFfmpegCommand,
-    event: string,
-    callback: (err?: Error) => void,
-  ) {
-    if (event === 'end') {
-      setTimeout(() => {
-        callback();
-      }, 0);
-    }
-    return this;
-  }),
-  save: vi.fn().mockReturnThis(),
-};
-
-vi.mock('fluent-ffmpeg', () => ({
-  default: vi.fn().mockReturnValue(mockFfmpegCommand),
-  setFfmpegPath: vi.fn(),
-}));
-
-const mockMetadata = {
-  format: {
+// Mock internal audio-metadata
+vi.mock('../audio-metadata', () => ({
+  parseAudioMetadata: vi.fn().mockResolvedValue({
     duration: 180.5,
     bitrate: 320000,
     codec: 'mp3',
-    container: 'MPEG',
-    numberOfChannels: 2,
+    format: 'MPEG',
+    channels: 2,
     sampleRate: 44100,
-  },
-};
-
-vi.mock('music-metadata', () => ({
-  parseFile: vi.fn().mockResolvedValue(mockMetadata),
+  }),
 }));
 
 describe('AudioProcessor', () => {
@@ -71,36 +44,20 @@ describe('AudioProcessor', () => {
       expect(result.metadata).toBeDefined();
     });
 
-    it('should apply format option', async () => {
+    it('should pass format and bitrate to runFFmpeg', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.process('/input/audio.wav', '/output/audio.mp3', {
         format: 'mp3',
-      });
-
-      expect(mockFfmpegCommand.toFormat).toHaveBeenCalledWith('mp3');
-    });
-
-    it('should apply bitrate option', async () => {
-      await processor.process('/input/audio.wav', '/output/audio.mp3', {
         bitrate: '192k',
       });
 
-      expect(mockFfmpegCommand.audioBitrate).toHaveBeenCalledWith('192k');
-    });
-
-    it('should apply channels option', async () => {
-      await processor.process('/input/audio.wav', '/output/audio.mp3', {
-        channels: 1,
+      expect(runFFmpeg).toHaveBeenCalledWith({
+        input: '/input/audio.wav',
+        output: '/output/audio.mp3',
+        format: 'mp3',
+        audioBitrate: '192k',
       });
-
-      expect(mockFfmpegCommand.audioChannels).toHaveBeenCalledWith(1);
-    });
-
-    it('should apply sampleRate option', async () => {
-      await processor.process('/input/audio.wav', '/output/audio.mp3', {
-        sampleRate: 22050,
-      });
-
-      expect(mockFfmpegCommand.audioFrequency).toHaveBeenCalledWith(22050);
     });
 
     it('should set waveform path when waveform option is provided', async () => {
@@ -113,46 +70,22 @@ describe('AudioProcessor', () => {
     });
 
     it('should return error result on processing failure', async () => {
-      // The code chains: command.on('end', resolve).on('error', reject).save(path)
-      // We need the error callback to fire instead of end
-      const callbacks: Record<string, (err?: Error) => void> = {};
-      mockFfmpegCommand.on.mockImplementation(function (
-        this: typeof mockFfmpegCommand,
-        event: string,
-        callback: (err?: Error) => void,
-      ) {
-        callbacks[event] = callback;
-        return this;
-      });
-      mockFfmpegCommand.save.mockImplementation(function (this: typeof mockFfmpegCommand) {
-        setTimeout(() => callbacks['error']?.(new Error('FFmpeg error')), 0);
-        return this;
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+      vi.mocked(runFFmpeg).mockResolvedValueOnce({
+        success: false,
+        output: '',
+        error: 'FFmpeg error',
       });
 
       const result = await processor.process('/input/audio.wav', '/output/audio.mp3');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBeDefined();
-
-      // Restore default mocks
-      mockFfmpegCommand.on.mockImplementation(function (
-        this: typeof mockFfmpegCommand,
-        event: string,
-        callback: (err?: Error) => void,
-      ) {
-        if (event === 'end') {
-          setTimeout(() => {
-            callback();
-          }, 0);
-        }
-        return this;
-      });
-      mockFfmpegCommand.save.mockReturnThis();
+      expect(result.error).toBe('FFmpeg error');
     });
   });
 
   describe('getMetadata', () => {
-    it('should extract audio metadata', async () => {
+    it('should extract audio metadata via parseAudioMetadata', async () => {
       const metadata = await processor.getMetadata('/input/audio.mp3');
 
       expect(metadata.duration).toBe(180.5);
@@ -164,8 +97,8 @@ describe('AudioProcessor', () => {
     });
 
     it('should return empty metadata on error', async () => {
-      const musicMetadata = await import('music-metadata');
-      vi.mocked(musicMetadata.parseFile).mockRejectedValueOnce(new Error('Parse failed'));
+      const { parseAudioMetadata } = await import('../audio-metadata');
+      vi.mocked(parseAudioMetadata).mockRejectedValueOnce(new Error('Parse failed'));
 
       const metadata = await processor.getMetadata('/input/audio.mp3');
 
@@ -174,15 +107,24 @@ describe('AudioProcessor', () => {
   });
 
   describe('getDuration', () => {
-    it('should return duration from music-metadata', async () => {
+    it('should return duration from parseAudioMetadata', async () => {
       const duration = await processor.getDuration('/input/audio.mp3');
 
       expect(duration).toBe(180.5);
     });
 
     it('should return null on error', async () => {
-      const musicMetadata = await import('music-metadata');
-      vi.mocked(musicMetadata.parseFile).mockRejectedValueOnce(new Error('Parse failed'));
+      const { parseAudioMetadata } = await import('../audio-metadata');
+      vi.mocked(parseAudioMetadata).mockRejectedValueOnce(new Error('Parse failed'));
+
+      const duration = await processor.getDuration('/input/audio.mp3');
+
+      expect(duration).toBeNull();
+    });
+
+    it('should return null when duration is undefined', async () => {
+      const { parseAudioMetadata } = await import('../audio-metadata');
+      vi.mocked(parseAudioMetadata).mockResolvedValueOnce({ codec: 'mp3' });
 
       const duration = await processor.getDuration('/input/audio.mp3');
 
@@ -201,7 +143,9 @@ describe('AudioProcessor', () => {
   });
 
   describe('extractSegment', () => {
-    it('should extract an audio segment', async () => {
+    it('should extract an audio segment via runFFmpeg', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       const result = await processor.extractSegment(
         '/input/audio.mp3',
         '/output/segment.mp3',
@@ -211,8 +155,31 @@ describe('AudioProcessor', () => {
 
       expect(result.success).toBe(true);
       expect(result.outputPath).toBe('/output/segment.mp3');
-      expect(mockFfmpegCommand.setStartTime).toHaveBeenCalledWith(10);
-      expect(mockFfmpegCommand.setDuration).toHaveBeenCalledWith(30);
+      expect(runFFmpeg).toHaveBeenCalledWith({
+        input: '/input/audio.mp3',
+        output: '/output/segment.mp3',
+        startTime: 10,
+        duration: 30,
+      });
+    });
+
+    it('should return error on segment extraction failure', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+      vi.mocked(runFFmpeg).mockResolvedValueOnce({
+        success: false,
+        output: '',
+        error: 'Segment error',
+      });
+
+      const result = await processor.extractSegment(
+        '/input/audio.mp3',
+        '/output/segment.mp3',
+        10,
+        30,
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Segment error');
     });
   });
 });

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useAdminUser.test.ts
+// src/apps/web/src/features/admin/hooks/useAdminUser.test.ts
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,12 +33,16 @@ describe('useAdminUser', () => {
   const mockUser: AdminUser = {
     id: 'user-123',
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00Z',
     failedLoginAttempts: 0,
     lockedUntil: null,
+    phone: null,
+    phoneVerified: false,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -187,7 +191,8 @@ describe('useAdminUser', () => {
       mockGetUser.mockClear();
       const updatedUser: AdminUser = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       mockGetUser.mockResolvedValue(updatedUser);
 
@@ -249,7 +254,8 @@ describe('useAdminUser', () => {
 
       const updatedUser: AdminUser = {
         ...mockUser,
-        name: 'Manually Updated',
+        firstName: 'Manually',
+        lastName: 'Updated',
       };
 
       act(() => {

@@ -1,4 +1,4 @@
-// backend/core/src/billing/handlers.ts
+// src/server/core/src/billing/handlers.ts
 /**
  * Billing Handlers
  *
@@ -24,6 +24,7 @@ import {
 } from './service';
 
 import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
+import type { Plan as DbPlan, Subscription as DbSubscription } from '@abe-stack/db';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
@@ -35,13 +36,16 @@ import type {
   PaymentMethodResponse,
   PaymentMethodsListResponse,
   Plan,
+  PlanId,
   PlansListResponse,
   SetupIntentResponse,
   Subscription,
   SubscriptionActionResponse,
+  SubscriptionId,
   SubscriptionResponse,
   UpdateSubscriptionRequest,
-} from '@abe-stack/shared/contracts';
+  UserId,
+} from '@abe-stack/shared/domain';
 
 // ============================================================================
 // Helper Functions
@@ -71,20 +75,9 @@ function getBillingRepos(ctx: BillingAppContext): BillingRepositories {
  * @returns Formatted plan for API response
  * @complexity O(1)
  */
-function formatPlan(plan: {
-  id: string;
-  name: string;
-  description: string | null;
-  interval: 'month' | 'year';
-  priceInCents: number;
-  currency: string;
-  features: { name: string; included: boolean; description?: string | undefined }[];
-  trialDays: number;
-  isActive: boolean;
-  sortOrder: number;
-}): Plan {
+function formatPlan(plan: DbPlan): Plan {
   return {
-    id: plan.id,
+    id: plan.id as PlanId,
     name: plan.name,
     description: plan.description,
     interval: plan.interval,
@@ -105,43 +98,11 @@ function formatPlan(plan: {
  * @returns Formatted subscription for API response
  * @complexity O(1)
  */
-function formatSubscription(subscription: {
-  id: string;
-  userId: string;
-  planId: string;
-  provider: 'stripe' | 'paypal';
-  status:
-    | 'active'
-    | 'canceled'
-    | 'incomplete'
-    | 'incomplete_expired'
-    | 'past_due'
-    | 'paused'
-    | 'trialing'
-    | 'unpaid';
-  currentPeriodStart: Date;
-  currentPeriodEnd: Date;
-  cancelAtPeriodEnd: boolean;
-  canceledAt: Date | null;
-  trialEnd: Date | null;
-  createdAt: Date;
-  plan: {
-    id: string;
-    name: string;
-    description: string | null;
-    interval: 'month' | 'year';
-    priceInCents: number;
-    currency: string;
-    features: { name: string; included: boolean; description?: string | undefined }[];
-    trialDays: number;
-    isActive: boolean;
-    sortOrder: number;
-  };
-}): Subscription {
+function formatSubscription(subscription: DbSubscription & { plan: DbPlan }): Subscription {
   return {
-    id: subscription.id,
-    userId: subscription.userId,
-    planId: subscription.planId,
+    id: subscription.id as SubscriptionId,
+    userId: subscription.userId as UserId,
+    planId: subscription.planId as PlanId,
     plan: formatPlan(subscription.plan),
     provider: subscription.provider,
     status: subscription.status,
@@ -427,10 +388,9 @@ export async function handleCancelSubscription(
       status: 200,
       body: {
         success: true,
-        message:
-          body.immediately === true
-            ? 'Subscription canceled immediately'
-            : 'Subscription will be canceled at the end of the billing period',
+        message: body.immediately
+          ? 'Subscription canceled immediately'
+          : 'Subscription will be canceled at the end of the billing period',
       },
     };
   } catch (error: unknown) {

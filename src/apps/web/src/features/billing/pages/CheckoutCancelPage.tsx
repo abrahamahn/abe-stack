@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/CheckoutCancelPage.tsx
+// src/apps/web/src/features/billing/pages/CheckoutCancelPage.tsx
 /**
  * CheckoutCancelPage - Displayed after checkout is canceled.
  */

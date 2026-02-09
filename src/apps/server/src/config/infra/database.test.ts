@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/database.test.ts
+// src/apps/server/src/config/infra/database.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

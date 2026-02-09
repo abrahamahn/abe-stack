@@ -1,4 +1,4 @@
-// backend/engine/src/config/env.loader.ts
+// src/server/engine/src/config/env.loader.ts
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -28,13 +28,15 @@ function parseAndPopulate(filePath: string): void {
       const key = trimmed.substring(0, idx).trim();
       let val = trimmed.substring(idx + 1).trim();
 
-      // Clean quotes
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      ) {
-        val = val.slice(1, -1);
+      const isQuoted =
+        (val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"));
+      if (!isQuoted) {
+        // Support inline comments like: FLAG=false  # options: true | false
+        val = val.replace(/\s+#.*$/, '').trim();
       }
+
+      // Clean quotes
+      if (isQuoted) val = val.slice(1, -1);
 
       // Priority: System Env > Custom File > Local > Stage
       if (!(key in process.env)) {
@@ -119,7 +121,13 @@ export function loadServerEnv(): FullEnv {
   initEnv();
 
   // 2. Validate using the schema contract
-  const result = EnvSchema.safeParse(process.env) as
+  const sanitized: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(process.env)) {
+    if (typeof v === 'string') sanitized[k] = v.replace(/\s+#.*$/, '').trim();
+    else sanitized[k] = v;
+  }
+
+  const result = EnvSchema.safeParse(sanitized) as
     | { success: true; data: FullEnv }
     | { success: false; error: { message: string } };
 
@@ -150,7 +158,13 @@ export function loadServerEnv(): FullEnv {
  * @throws Exits process on validation failure
  */
 export function validateEnvironment(raw: Record<string, unknown> = process.env): FullEnv {
-  const parsed = EnvSchema.safeParse(raw) as
+  const sanitized: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (typeof v === 'string') sanitized[k] = v.replace(/\s+#.*$/, '').trim();
+    else sanitized[k] = v;
+  }
+
+  const parsed = EnvSchema.safeParse(sanitized) as
     | { success: true; data: FullEnv }
     | { success: false; error: { message: string } };
   if (!parsed.success) {

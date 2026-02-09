@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/login.test.ts
+// src/server/core/src/auth/handlers/login.test.ts
 /**
  * Login Handler Tests
  *
@@ -146,7 +146,7 @@ function createMockRequest(
 
 function createLoginBody(overrides?: Partial<LoginRequest>): LoginRequest {
   return {
-    email: 'test@example.com',
+    identifier: 'test@example.com',
     password: 'SecureP@ssw0rd!',
     ...overrides,
   };
@@ -176,10 +176,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: null,
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -206,10 +214,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -221,7 +237,7 @@ describe('handleLogin', () => {
         ctx.db,
         ctx.repos,
         ctx.config.auth,
-        body.email,
+        body.identifier,
         body.password,
         ctx.log,
         '127.0.0.1',
@@ -242,10 +258,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -260,7 +284,7 @@ describe('handleLogin', () => {
       );
     });
 
-    test('should handle user with null name', async () => {
+    test('should handle user with null optional fields', async () => {
       const ctx = createMockContext();
       const request = createMockRequest();
       const reply = createMockReply();
@@ -272,10 +296,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: null,
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -284,7 +316,10 @@ describe('handleLogin', () => {
       const result = await handleLogin(ctx, body, request, reply);
 
       expect(result.status).toBe(200);
-      expect((result.body as { user: { name: string | null } }).user.name).toBeNull();
+      const user = (result.body as { user: { phone: string | null; avatarUrl: string | null } })
+        .user;
+      expect(user.phone).toBeNull();
+      expect(user.avatarUrl).toBeNull();
     });
 
     test('should handle admin role user', async () => {
@@ -299,10 +334,18 @@ describe('handleLogin', () => {
         user: {
           id: 'admin-123',
           email: 'admin@example.com',
-          name: 'Test User',
+          username: 'adminuser',
+          firstName: 'Admin',
+          lastName: 'User',
           avatarUrl: null,
           role: 'admin' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -399,10 +442,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -436,10 +487,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -472,10 +531,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 
@@ -513,10 +580,18 @@ describe('handleLogin', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt,
+          updatedAt: createdAt,
         },
       };
 

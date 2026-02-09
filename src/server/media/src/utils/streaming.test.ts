@@ -1,13 +1,15 @@
-// premium/media/src/utils/streaming.test.ts
+// src/server/media/src/utils/streaming.test.ts
 /**
  * Tests for StreamingMediaProcessor
+ *
+ * Mocks the internal ffmpeg-wrapper (not fluent-ffmpeg) and sharp.
  */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { StreamingMediaProcessor } from './streaming';
 
-// Mock sharp
+// Mock sharp (still an external dep)
 const mockSharpPipeline = {
   resize: vi.fn().mockReturnThis(),
   jpeg: vi.fn().mockReturnThis(),
@@ -20,36 +22,9 @@ vi.mock('sharp', () => ({
   default: vi.fn().mockReturnValue(mockSharpPipeline),
 }));
 
-// Mock ffmpeg
-vi.mock('ffmpeg-static', () => ({
-  default: '/usr/bin/ffmpeg',
-}));
-
-const mockFfmpegCommand = {
-  videoCodec: vi.fn().mockReturnThis(),
-  toFormat: vi.fn().mockReturnThis(),
-  size: vi.fn().mockReturnThis(),
-  videoBitrate: vi.fn().mockReturnThis(),
-  setStartTime: vi.fn().mockReturnThis(),
-  setDuration: vi.fn().mockReturnThis(),
-  on: vi.fn().mockImplementation(function (
-    this: typeof mockFfmpegCommand,
-    event: string,
-    callback: (err?: Error) => void,
-  ) {
-    if (event === 'end') {
-      setTimeout(() => {
-        callback();
-      }, 0);
-    }
-    return this;
-  }),
-  save: vi.fn().mockReturnThis(),
-};
-
-vi.mock('fluent-ffmpeg', () => ({
-  default: vi.fn().mockReturnValue(mockFfmpegCommand),
-  setFfmpegPath: vi.fn(),
+// Mock internal ffmpeg-wrapper
+vi.mock('../ffmpeg-wrapper', () => ({
+  runFFmpeg: vi.fn().mockResolvedValue({ success: true, output: '' }),
 }));
 
 // Mock fs
@@ -66,7 +41,9 @@ vi.mock('fs', async () => {
     }),
     promises: {
       mkdir: vi.fn().mockResolvedValue(undefined),
-      stat: vi.fn().mockResolvedValue({ size: 1024 * 1024 }),
+      stat: vi.fn().mockResolvedValue({ size: 1024 * 1024, isFile: () => true, mtimeMs: 0 }),
+      readdir: vi.fn().mockResolvedValue([]),
+      unlink: vi.fn().mockResolvedValue(undefined),
     },
   };
 });
@@ -160,47 +137,96 @@ describe('StreamingMediaProcessor', () => {
       expect(result.outputPath).toBe('/output/large.mp4');
     });
 
-    it('should apply mp4 format', async () => {
+    it('should apply mp4 format via runFFmpeg', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.processLargeVideo('/input/large.avi', '/output/large.mp4', {
         format: 'mp4',
       });
 
-      expect(mockFfmpegCommand.videoCodec).toHaveBeenCalledWith('libx264');
-      expect(mockFfmpegCommand.toFormat).toHaveBeenCalledWith('mp4');
+      expect(runFFmpeg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: '/input/large.avi',
+          output: '/output/large.mp4',
+          videoCodec: 'libx264',
+          format: 'mp4',
+        }),
+      );
     });
 
-    it('should apply webm format', async () => {
+    it('should apply webm format via runFFmpeg', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.processLargeVideo('/input/large.mp4', '/output/large.webm', {
         format: 'webm',
       });
 
-      expect(mockFfmpegCommand.videoCodec).toHaveBeenCalledWith('libvpx-vp9');
+      expect(runFFmpeg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          videoCodec: 'libvpx-vp9',
+          format: 'webm',
+        }),
+      );
     });
 
     it('should apply resolution', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.processLargeVideo('/input/large.mp4', '/output/large.mp4', {
         resolution: { width: 1280, height: 720 },
       });
 
-      expect(mockFfmpegCommand.size).toHaveBeenCalledWith('1280x720');
+      expect(runFFmpeg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resolution: { width: 1280, height: 720 },
+        }),
+      );
     });
 
     it('should apply bitrate', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.processLargeVideo('/input/large.mp4', '/output/large.mp4', {
         bitrate: '5000k',
       });
 
-      expect(mockFfmpegCommand.videoBitrate).toHaveBeenCalledWith('5000k');
+      expect(runFFmpeg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          videoBitrate: '5000k',
+        }),
+      );
     });
 
     it('should apply time segment', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+
       await processor.processLargeVideo('/input/large.mp4', '/output/large.mp4', {
         startTime: 10,
         duration: 30,
       });
 
-      expect(mockFfmpegCommand.setStartTime).toHaveBeenCalledWith(10);
-      expect(mockFfmpegCommand.setDuration).toHaveBeenCalledWith(30);
+      expect(runFFmpeg).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startTime: 10,
+          duration: 30,
+        }),
+      );
+    });
+
+    it('should return error on failure', async () => {
+      const { runFFmpeg } = await import('../ffmpeg-wrapper');
+      vi.mocked(runFFmpeg).mockResolvedValueOnce({
+        success: false,
+        output: '',
+        error: 'FFmpeg error',
+      });
+
+      const result = await processor.processLargeVideo('/input/large.mp4', '/output/large.mp4', {
+        format: 'mp4',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('FFmpeg error');
     });
   });
 
@@ -240,6 +266,42 @@ describe('StreamingMediaProcessor', () => {
   describe('cleanupTempFiles', () => {
     it('should not throw on cleanup', async () => {
       await expect(processor.cleanupTempFiles()).resolves.not.toThrow();
+    });
+
+    it('should delete old temp files', async () => {
+      const fsModule = await import('fs');
+      const oldMtimeMs = Date.now() - 25 * 60 * 60 * 1000; // 25 hours ago
+
+      vi.mocked(fsModule.promises.readdir).mockResolvedValueOnce([
+        'old-file.tmp',
+      ] as unknown as Awaited<ReturnType<typeof fsModule.promises.readdir>>);
+      vi.mocked(fsModule.promises.stat).mockResolvedValueOnce({
+        size: 1024,
+        isFile: () => true,
+        mtimeMs: oldMtimeMs,
+      } as Awaited<ReturnType<typeof fsModule.promises.stat>>);
+
+      await processor.cleanupTempFiles();
+
+      expect(fsModule.promises.unlink).toHaveBeenCalledWith('/tmp/test-streaming/old-file.tmp');
+    });
+
+    it('should not delete recent temp files', async () => {
+      const fsModule = await import('fs');
+      const recentMtimeMs = Date.now() - 1000; // 1 second ago
+
+      vi.mocked(fsModule.promises.readdir).mockResolvedValueOnce([
+        'recent-file.tmp',
+      ] as unknown as Awaited<ReturnType<typeof fsModule.promises.readdir>>);
+      vi.mocked(fsModule.promises.stat).mockResolvedValueOnce({
+        size: 1024,
+        isFile: () => true,
+        mtimeMs: recentMtimeMs,
+      } as Awaited<ReturnType<typeof fsModule.promises.stat>>);
+
+      await processor.cleanupTempFiles();
+
+      expect(fsModule.promises.unlink).not.toHaveBeenCalled();
     });
   });
 });

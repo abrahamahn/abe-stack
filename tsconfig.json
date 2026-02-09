@@ -42,6 +42,8 @@
       "@abe-stack/server-engine/*": ["./src/server/engine/src/*"],
       "@abe-stack/db": ["./src/server/db/src/index.ts"],
       "@abe-stack/db/*": ["./src/server/db/src/*"],
+      "@abe-stack/core": ["./src/server/core/src/index.ts"],
+      "@abe-stack/core/*": ["./src/server/core/src/*"],
       "@abe-stack/api": ["./src/client/api/src/index.ts"],
       "@abe-stack/api/*": ["./src/client/api/src/*"],
       "@abe-stack/ui": ["./src/client/ui/src/index.ts"],

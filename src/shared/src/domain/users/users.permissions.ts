@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/users.permissions.ts
+// src/shared/src/domain/users/users.permissions.ts
 
 /**
  * @file User Permissions

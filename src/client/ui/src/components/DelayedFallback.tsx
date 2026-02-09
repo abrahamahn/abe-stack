@@ -1,4 +1,4 @@
-// client/ui/src/components/DelayedFallback.tsx
+// src/client/ui/src/components/DelayedFallback.tsx
 import { useDelayedFlag } from '@abe-stack/react/hooks';
 
 import { LoadingContainer } from './LoadingContainer';

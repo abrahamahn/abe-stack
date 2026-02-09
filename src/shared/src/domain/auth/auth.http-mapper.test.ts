@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.http-mapper.test.ts
+// src/shared/src/domain/auth/auth.http-mapper.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import {

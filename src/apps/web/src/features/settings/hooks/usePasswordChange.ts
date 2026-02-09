@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/usePasswordChange.ts
+// src/apps/web/src/features/settings/hooks/usePasswordChange.ts
 /**
  * Password Change Hook
  *

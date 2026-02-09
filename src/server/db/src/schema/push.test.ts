@@ -1,4 +1,4 @@
-// backend/db/src/schema/push.test.ts
+// src/server/db/src/schema/push.test.ts
 /**
  * Unit tests for Push Subscriptions Schema Types
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/RoleBadge.tsx
+// src/apps/web/src/features/admin/components/RoleBadge.tsx
 /**
  * RoleBadge Component
  *

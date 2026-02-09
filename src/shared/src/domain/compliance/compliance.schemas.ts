@@ -1,4 +1,4 @@
-// packages/shared/src/domain/compliance/compliance.schemas.ts
+// src/shared/src/domain/compliance/compliance.schemas.ts
 
 /**
  * @file Compliance Domain Schemas
@@ -16,7 +16,7 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
 import {
   consentLogIdSchema,
   legalDocumentIdSchema,
@@ -24,7 +24,7 @@ import {
   userIdSchema,
 } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../types/ids';
 
 // ============================================================================
@@ -41,6 +41,24 @@ export const DOCUMENT_TYPES = [
 
 /** Document type union type */
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+/** Data export request types */
+export const DATA_EXPORT_TYPES = ['export', 'deletion'] as const;
+
+/** Data export type union */
+export type DataExportType = (typeof DATA_EXPORT_TYPES)[number];
+
+/** Data export request lifecycle statuses */
+export const DATA_EXPORT_STATUSES = [
+  'pending',
+  'processing',
+  'completed',
+  'failed',
+  'canceled',
+] as const;
+
+/** Data export status union */
+export type DataExportStatus = (typeof DATA_EXPORT_STATUSES)[number];
 
 /** Standard GDPR consent types */
 export const CONSENT_TYPES = [
@@ -119,6 +137,29 @@ export interface CreateConsentLog {
   granted: boolean;
   ipAddress?: string | null | undefined;
   userAgent?: string | null | undefined;
+  metadata?: Record<string, unknown> | undefined;
+}
+
+/** Full data export request entity */
+export interface DataExportRequest {
+  id: string;
+  userId: UserId;
+  type: DataExportType;
+  status: DataExportStatus;
+  format: string;
+  downloadUrl: string | null;
+  expiresAt: Date | null;
+  completedAt: Date | null;
+  errorMessage: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+}
+
+/** Input for creating a new data export request */
+export interface CreateDataExportRequest {
+  userId: UserId;
+  type: DataExportType;
+  format?: string | undefined;
   metadata?: Record<string, unknown> | undefined;
 }
 
@@ -248,3 +289,76 @@ export const createConsentLogSchema: Schema<CreateConsentLog> = createSchema((da
     metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
   };
 });
+
+// ============================================================================
+// Data Export Request Schemas
+// ============================================================================
+
+/**
+ * Validates a data export type string.
+ *
+ * @param value - Value to validate
+ * @param label - Field label for error messages
+ * @returns Validated DataExportType
+ * @throws {Error} If value is not a valid data export type
+ */
+function parseDataExportType(value: unknown, label: string): DataExportType {
+  const s = parseString(value, label);
+  if (!DATA_EXPORT_TYPES.includes(s as DataExportType)) {
+    throw new Error(`${label} must be one of: ${DATA_EXPORT_TYPES.join(', ')}`);
+  }
+  return s as DataExportType;
+}
+
+/**
+ * Validates a data export status string.
+ *
+ * @param value - Value to validate
+ * @param label - Field label for error messages
+ * @returns Validated DataExportStatus
+ * @throws {Error} If value is not a valid data export status
+ */
+function parseDataExportStatus(value: unknown, label: string): DataExportStatus {
+  const s = parseString(value, label);
+  if (!DATA_EXPORT_STATUSES.includes(s as DataExportStatus)) {
+    throw new Error(`${label} must be one of: ${DATA_EXPORT_STATUSES.join(', ')}`);
+  }
+  return s as DataExportStatus;
+}
+
+/**
+ * Full data export request schema (matches DB SELECT result).
+ */
+export const dataExportRequestSchema: Schema<DataExportRequest> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  return {
+    id: parseString(obj['id'], 'id', { uuid: true }),
+    userId: userIdSchema.parse(obj['userId']),
+    type: parseDataExportType(obj['type'], 'type'),
+    status: parseDataExportStatus(obj['status'], 'status'),
+    format: parseString(obj['format'], 'format', { min: 1 }),
+    downloadUrl: parseNullable(obj['downloadUrl'], (v) => parseString(v, 'downloadUrl')),
+    expiresAt: parseNullable(obj['expiresAt'], (v) => coerceDate(v, 'expiresAt')),
+    completedAt: parseNullable(obj['completedAt'], (v) => coerceDate(v, 'completedAt')),
+    errorMessage: parseNullable(obj['errorMessage'], (v) => parseString(v, 'errorMessage')),
+    metadata: parseRecord(obj['metadata'], 'metadata'),
+    createdAt: coerceDate(obj['createdAt'], 'createdAt'),
+  };
+});
+
+/**
+ * Schema for creating a new data export request.
+ */
+export const createDataExportRequestSchema: Schema<CreateDataExportRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      userId: userIdSchema.parse(obj['userId']),
+      type: parseDataExportType(obj['type'], 'type'),
+      format: parseOptional(obj['format'], (v) => parseString(v, 'format', { min: 1 })),
+      metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
+    };
+  },
+);

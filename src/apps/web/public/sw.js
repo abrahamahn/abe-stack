@@ -1,4 +1,4 @@
-// apps/web/public/sw.js
+// src/apps/web/public/sw.js
 /**
  * Service Worker for PWA Offline Asset Caching and Push Notifications
  *

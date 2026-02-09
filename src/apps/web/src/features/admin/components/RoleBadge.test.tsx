@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/RoleBadge.test.tsx
+// src/apps/web/src/features/admin/components/RoleBadge.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

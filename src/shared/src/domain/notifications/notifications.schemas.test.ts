@@ -1,4 +1,4 @@
-// shared/src/domain/notifications/notifications.schemas.test.ts
+// src/shared/src/domain/notifications/notifications.schemas.test.ts
 
 /**
  * @file Unit Tests for Notification Schemas

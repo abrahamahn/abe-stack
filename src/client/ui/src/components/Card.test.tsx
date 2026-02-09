@@ -1,4 +1,4 @@
-// client/ui/src/components/Card.test.tsx
+// src/client/ui/src/components/Card.test.tsx
 // client/ui/src/elements/__tests__/Card.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

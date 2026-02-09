@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/layouts/AdminLayout.tsx
+// src/apps/web/src/features/admin/layouts/AdminLayout.tsx
 /**
  * AdminLayout - Layout shell for all admin pages.
  *

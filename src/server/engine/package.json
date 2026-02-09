@@ -53,7 +53,6 @@
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/credential-providers": "^3.600.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",
-    "@elastic/elasticsearch": "^8.13.0",
     "fastify": "^5.7.4",
     "@abe-stack/db": "workspace:*",
     "@abe-stack/shared": "workspace:*"

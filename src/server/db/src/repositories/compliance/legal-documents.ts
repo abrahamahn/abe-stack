@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/legal-documents.ts
+// src/server/db/src/repositories/compliance/legal-documents.ts
 /**
  * Legal Documents Repository (Functional)
  *

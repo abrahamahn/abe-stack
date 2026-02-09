@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/index.ts
+// src/apps/web/src/features/settings/hooks/index.ts
 export {
   useAvatarDelete,
   useAvatarUpload,
@@ -30,3 +30,9 @@ export {
   type UseRevokeSessionResult,
   type UseSessionsResult,
 } from './useSessions';
+
+export {
+  useTotpManagement,
+  type TotpState,
+  type UseTotpManagementResult,
+} from './useTotpManagement';

@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useSidePeek.test.ts
+// src/client/react/src/hooks/useSidePeek.test.ts
 /**
  * Tests for useSidePeek hook.
  *

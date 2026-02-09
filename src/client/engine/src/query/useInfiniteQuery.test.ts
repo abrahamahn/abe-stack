@@ -1,4 +1,4 @@
-// client/src/query/useInfiniteQuery.test.ts
+// src/client/engine/src/query/useInfiniteQuery.test.ts
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { renderHook, waitFor, act, cleanup } from '@testing-library/react';

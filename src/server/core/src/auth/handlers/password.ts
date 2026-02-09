@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/password.ts
+// src/server/core/src/auth/handlers/password.ts
 /**
  * Password Handlers
  *
@@ -12,6 +12,7 @@ import {
   mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
+import { sendPasswordChangedAlert } from '../security';
 import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { createErrorMapperLogger } from '../types';
 
@@ -66,16 +67,29 @@ export async function handleForgotPassword(
  *
  * @param ctx - Application context
  * @param body - Request body with token and new password
+ * @param req - Request with cookies and request info
  * @returns Success response or error
  * @complexity O(1)
  */
 export async function handleResetPassword(
   ctx: AppContext,
   body: { token: string; password: string },
+  req: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
   try {
     const { token, password } = body;
-    await resetPassword(ctx.db, ctx.repos, ctx.config.auth, token, password);
+    const email = await resetPassword(ctx.db, ctx.repos, ctx.config.auth, token, password);
+    const { ipAddress, userAgent } = req.requestInfo;
+
+    // Fire-and-forget: send "Was this you?" password changed alert
+    sendPasswordChangedAlert(ctx.email, ctx.emailTemplates, {
+      email,
+      ipAddress,
+      userAgent,
+      timestamp: new Date(),
+    }).catch((err: unknown) => {
+      ctx.log.warn({ err, email }, 'Failed to send password changed alert email');
+    });
 
     return {
       status: 200,

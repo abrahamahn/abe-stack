@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/hooks/index.ts
+// src/apps/web/src/features/auth/hooks/index.ts
 /**
  * Auth Hooks
  *

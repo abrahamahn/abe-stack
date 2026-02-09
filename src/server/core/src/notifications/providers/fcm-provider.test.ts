@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/fcm-provider.test.ts
+// src/server/core/src/notifications/providers/fcm-provider.test.ts
 /**
  * Tests for FCM Provider Stub
  *

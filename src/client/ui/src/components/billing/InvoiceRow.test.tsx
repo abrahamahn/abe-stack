@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/InvoiceRow.test.tsx
+// src/client/ui/src/components/billing/InvoiceRow.test.tsx
 /**
  * Tests for InvoiceRow and InvoiceList components.
  *

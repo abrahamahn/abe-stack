@@ -1,4 +1,4 @@
-// packages/shared/src/domain/webhooks/index.ts
+// src/shared/src/domain/webhooks/index.ts
 
 export {
   calculateRetryDelay,

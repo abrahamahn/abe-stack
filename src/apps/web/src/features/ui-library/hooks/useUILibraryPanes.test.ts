@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/hooks/useUILibraryPanes.test.ts
+// src/apps/web/src/features/ui-library/hooks/useUILibraryPanes.test.ts
 import { renderHook, act } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';

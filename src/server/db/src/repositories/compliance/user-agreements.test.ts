@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/user-agreements.test.ts
+// src/server/db/src/repositories/compliance/user-agreements.test.ts
 /**
  * Tests for User Agreements Repository
  *

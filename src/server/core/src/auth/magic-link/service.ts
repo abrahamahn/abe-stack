@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/service.ts
+// src/server/core/src/auth/magic-link/service.ts
 /**
  * Magic Link Service
  *
@@ -28,13 +28,20 @@ import {
   type User,
 } from '@abe-stack/db';
 import {
+  canonicalizeEmail,
   EmailSendError,
   InvalidTokenError,
+  normalizeEmail,
   TooManyRequestsError,
   type UserId,
 } from '@abe-stack/shared';
 
-import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from '../utils';
+import {
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  generateUniqueUsername,
+} from '../utils';
 
 import type { AuthEmailService, AuthEmailTemplates } from '../types';
 import type { AuthConfig } from '@abe-stack/shared/config';
@@ -74,10 +81,16 @@ export interface MagicLinkResult {
   user: {
     id: UserId;
     email: string;
-    name: string | null;
+    username: string;
+    firstName: string;
+    lastName: string;
     avatarUrl: string | null;
     role: 'user' | 'admin' | 'moderator';
-    isVerified: boolean;
+    emailVerified: boolean;
+    phone: string | null;
+    phoneVerified: boolean | null;
+    dateOfBirth: string | null;
+    gender: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -211,11 +224,11 @@ export async function requestMagicLink(
     maxAttemptsPerIp = DEFAULT_MAX_REQUESTS_PER_IP,
   } = options ?? {};
 
-  // Normalize email to lowercase
-  const normalizedEmail = email.toLowerCase().trim();
+  const normalizedEmail = normalizeEmail(email);
+  const canonicalEmail = canonicalizeEmail(email);
 
   // Check email-based rate limit (using repository)
-  const emailRateLimited = await isEmailRateLimited(repos, normalizedEmail, maxAttemptsPerEmail);
+  const emailRateLimited = await isEmailRateLimited(repos, canonicalEmail, maxAttemptsPerEmail);
   if (emailRateLimited) {
     throw new TooManyRequestsError('Too many magic link requests. Please try again later.');
   }
@@ -237,7 +250,7 @@ export async function requestMagicLink(
 
   // Store hashed token (using repository)
   await repos.magicLinkTokens.create({
-    email: normalizedEmail,
+    email: canonicalEmail,
     tokenHash,
     expiresAt,
     ipAddress: ipAddress ?? null,
@@ -286,7 +299,7 @@ export async function requestMagicLink(
  * in the same operation that validates it, ensuring only one request can succeed.
  *
  * @param db - Database client
- * @param _repos - Repositories (kept for interface consistency)
+ * @param repos - Repositories for username uniqueness checks
  * @param config - Auth configuration
  * @param token - The magic link token from the URL
  * @returns Authentication result with tokens and user info
@@ -295,7 +308,7 @@ export async function requestMagicLink(
  */
 export async function verifyMagicLink(
   db: DbClient,
-  _repos: Repositories,
+  repos: Repositories,
   config: AuthConfig,
   token: string,
 ): Promise<MagicLinkResult> {
@@ -329,18 +342,27 @@ export async function verifyMagicLink(
     }
 
     // Find existing user
+    const tokenCanonicalEmail = canonicalizeEmail(tokenRecord.email);
     const userRow = await tx.queryOne(
-      select(USERS_TABLE).where(eq('email', tokenRecord.email)).limit(1).toSql(),
+      select(USERS_TABLE).where(eq('canonical_email', tokenCanonicalEmail)).limit(1).toSql(),
     );
     let user: User | null = userRow != null ? toCamelCase<User>(userRow, USER_COLUMNS) : null;
 
     // If user doesn't exist, create them
     if (user == null) {
+      // Generate a unique username from the email prefix
+      const username = await generateUniqueUsername(repos, tokenRecord.email);
+      const normalizedTokenEmail = normalizeEmail(tokenRecord.email);
+      const canonicalTokenEmail = canonicalizeEmail(tokenRecord.email);
+
       const newUserRows = await tx.query(
         insert(USERS_TABLE)
           .values({
-            email: tokenRecord.email,
-            name: null,
+            email: normalizedTokenEmail,
+            canonical_email: canonicalTokenEmail,
+            username,
+            first_name: 'User',
+            last_name: '',
             // Magic link users don't have a password - generate a random unusable hash
             password_hash: `magiclink:${randomBytes(32).toString('hex')}`,
             role: 'user',

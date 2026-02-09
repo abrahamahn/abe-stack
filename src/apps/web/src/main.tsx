@@ -1,4 +1,4 @@
-// apps/web/src/main.tsx
+// src/apps/web/src/main.tsx
 /**
  * Application entry point.
  *

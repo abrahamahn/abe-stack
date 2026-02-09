@@ -1,4 +1,4 @@
-// backend/core/src/billing/handlers.test.ts
+// src/server/core/src/billing/handlers.test.ts
 /**
  * Billing Handlers Unit Tests
  *
@@ -25,6 +25,7 @@ import {
 } from './handlers';
 
 import type { BillingAppContext, BillingRequest } from './types';
+import type { PlanId } from '@abe-stack/shared/domain';
 
 // ============================================================================
 // Mock Dependencies
@@ -289,7 +290,7 @@ describe('handleCreateCheckout', () => {
   it('should return 401 for unauthenticated request', async () => {
     const request = createUnauthenticatedRequest();
 
-    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(result.status).toBe(401);
   });
@@ -303,7 +304,7 @@ describe('handleCreateCheckout', () => {
     } as unknown as BillingAppContext;
     const request = createAuthenticatedRequest();
 
-    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(result.status).toBe(500);
     expect(result.body).toEqual({ message: 'Billing is not enabled' });
@@ -317,7 +318,7 @@ describe('handleCreateCheckout', () => {
     });
 
     const request = createAuthenticatedRequest();
-    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({
@@ -334,7 +335,7 @@ describe('handleCreateCheckout', () => {
     });
 
     const request = createAuthenticatedRequest();
-    await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(createCheckoutSession).toHaveBeenCalledWith(
       expect.anything(),
@@ -357,7 +358,7 @@ describe('handleCreateCheckout', () => {
     await handleCreateCheckout(
       ctx,
       {
-        planId: 'plan-1',
+        planId: 'plan-1' as PlanId,
         successUrl: 'https://custom.com/success',
         cancelUrl: 'https://custom.com/cancel',
       },
@@ -386,7 +387,7 @@ describe('handleCancelSubscription', () => {
   it('should return 401 for unauthenticated request', async () => {
     const request = createUnauthenticatedRequest();
 
-    const result = await handleCancelSubscription(ctx, {}, request);
+    const result = await handleCancelSubscription(ctx, { immediately: false }, request);
 
     expect(result.status).toBe(401);
   });
@@ -396,7 +397,7 @@ describe('handleCancelSubscription', () => {
     vi.mocked(cancelSubscription).mockResolvedValue(undefined);
 
     const request = createAuthenticatedRequest();
-    const result = await handleCancelSubscription(ctx, {}, request);
+    const result = await handleCancelSubscription(ctx, { immediately: false }, request);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({
@@ -462,7 +463,7 @@ describe('handleUpdateSubscription', () => {
   it('should return 401 for unauthenticated request', async () => {
     const request = createUnauthenticatedRequest();
 
-    const result = await handleUpdateSubscription(ctx, { planId: 'plan-2' }, request);
+    const result = await handleUpdateSubscription(ctx, { planId: 'plan-2' as PlanId }, request);
 
     expect(result.status).toBe(401);
   });
@@ -472,7 +473,7 @@ describe('handleUpdateSubscription', () => {
     vi.mocked(updateSubscription).mockResolvedValue(undefined);
 
     const request = createAuthenticatedRequest();
-    const result = await handleUpdateSubscription(ctx, { planId: 'plan-2' }, request);
+    const result = await handleUpdateSubscription(ctx, { planId: 'plan-2' as PlanId }, request);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({
@@ -742,7 +743,7 @@ describe('error handling', () => {
     vi.mocked(createCheckoutSession).mockRejectedValue(error);
 
     const request = createAuthenticatedRequest();
-    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(result.status).toBe(409);
   });
@@ -754,7 +755,7 @@ describe('error handling', () => {
     vi.mocked(createCheckoutSession).mockRejectedValue(error);
 
     const request = createAuthenticatedRequest();
-    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' }, request);
+    const result = await handleCreateCheckout(ctx, { planId: 'plan-1' as PlanId }, request);
 
     expect(result.status).toBe(400);
   });

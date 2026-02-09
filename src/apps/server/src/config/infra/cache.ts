@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/cache.ts
+// src/apps/server/src/config/infra/cache.ts
 import type { CacheConfig, FullEnv } from '@abe-stack/shared/config';
 
 /**

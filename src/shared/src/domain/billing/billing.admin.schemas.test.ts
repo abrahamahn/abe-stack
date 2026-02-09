@@ -1,4 +1,4 @@
-// shared/src/domain/billing/billing.admin.schemas.test.ts
+// src/shared/src/domain/billing/billing.admin.schemas.test.ts
 
 /**
  * @file Billing Admin Schemas Tests

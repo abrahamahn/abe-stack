@@ -1,4 +1,4 @@
-// backend/core/src/notifications/types.ts
+// src/server/core/src/notifications/types.ts
 /**
  * Notification Module Types
  *
@@ -11,7 +11,7 @@
  */
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/contracts';
+import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Logger Interface (Transition Alias)

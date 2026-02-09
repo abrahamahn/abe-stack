@@ -1,4 +1,4 @@
-// packages/shared/src/config/auth-helpers.ts
+// src/shared/src/config/auth-helpers.ts
 /**
  * Auth Configuration Helpers
  *

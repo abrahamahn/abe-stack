@@ -1,4 +1,4 @@
-// tools/sync/sync-ts-references.ts
+// src/tools/sync/sync-ts-references.ts
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,10 +6,10 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, '../../..');
+const ROOT = path.resolve(__dirname, '../../..', '..');
 
 const TSCONFIG_PATH = path.join(ROOT, 'tsconfig.json');
-const SCAN_DIRS = ['apps', 'packages'];
+const SCAN_DIRS = ['src/apps', 'src/client', 'src/server', 'src/shared'];
 
 interface ProjectReference {
   path: string;

@@ -1,4 +1,4 @@
-// client/src/search/query-builder.ts
+// src/client/engine/src/search/query-builder.ts
 /**
  * Client-Side Query Builder
  *

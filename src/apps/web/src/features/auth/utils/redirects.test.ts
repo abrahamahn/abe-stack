@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/utils/redirects.test.ts
+// src/apps/web/src/features/auth/utils/redirects.test.ts
 /**
  * Post-Login Redirect Utility Tests
  *
@@ -15,10 +15,16 @@ describe('getPostLoginRedirect', () => {
   const createUser = (role: AppRole): User => ({
     id: 'user_123' as unknown as UserId,
     email: 'user@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: null,
     role,
-    isVerified: true,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   });

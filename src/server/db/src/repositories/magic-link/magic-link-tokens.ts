@@ -1,4 +1,4 @@
-// backend/db/src/repositories/magic-link/magic-link-tokens.ts
+// src/server/db/src/repositories/magic-link/magic-link-tokens.ts
 /**
  * Magic Link Tokens Repository (Functional)
  *

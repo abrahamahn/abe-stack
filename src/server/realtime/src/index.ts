@@ -1,4 +1,4 @@
-// modules/realtime/src/index.ts
+// src/server/realtime/src/index.ts
 /**
  * Realtime Package
  *

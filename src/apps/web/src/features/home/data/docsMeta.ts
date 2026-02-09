@@ -1,4 +1,4 @@
-// apps/web/src/features/home/data/docsMeta.ts
+// src/apps/web/src/features/home/data/docsMeta.ts
 
 import type { DocCategoryDef, DocKey, DocMeta } from '../types';
 

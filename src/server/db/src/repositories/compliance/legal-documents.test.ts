@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/legal-documents.test.ts
+// src/server/db/src/repositories/compliance/legal-documents.test.ts
 /**
  * Tests for Legal Documents Repository
  *

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/security-events.ts
+// src/server/db/src/repositories/auth/security-events.ts
 /**
  * Security Events Repository (Functional)
  *

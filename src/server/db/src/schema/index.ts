@@ -1,4 +1,4 @@
-// backend/db/src/schema/index.ts
+// src/server/db/src/schema/index.ts
 /**
  * Schema Type Exports
  *
@@ -20,19 +20,28 @@ export {
   USERS_TABLE,
 } from './users';
 
-// Auth (token families, login attempts, password reset, email verification, security events)
+// Auth (token families, login attempts, password reset, email verification, security events, TOTP, email change)
 export {
+  EMAIL_CHANGE_TOKEN_COLUMNS,
+  EMAIL_CHANGE_TOKENS_TABLE,
+  EMAIL_CHANGE_REVERT_TOKEN_COLUMNS,
+  EMAIL_CHANGE_REVERT_TOKENS_TABLE,
+  type EmailChangeToken,
+  type EmailChangeRevertToken,
   EMAIL_VERIFICATION_TOKEN_COLUMNS,
   EMAIL_VERIFICATION_TOKENS_TABLE,
   type EmailVerificationToken,
   LOGIN_ATTEMPT_COLUMNS,
   LOGIN_ATTEMPTS_TABLE,
   type LoginAttempt,
+  type NewEmailChangeToken,
+  type NewEmailChangeRevertToken,
   type NewEmailVerificationToken,
   type NewLoginAttempt,
   type NewPasswordResetToken,
   type NewRefreshTokenFamily,
   type NewSecurityEvent,
+  type NewTotpBackupCode,
   PASSWORD_RESET_TOKEN_COLUMNS,
   PASSWORD_RESET_TOKENS_TABLE,
   type PasswordResetToken,
@@ -44,6 +53,9 @@ export {
   type SecurityEvent,
   type SecurityEventSeverity,
   type SecurityEventType,
+  TOTP_BACKUP_CODES_TABLE,
+  TOTP_BACKUP_CODE_COLUMNS,
+  type TotpBackupCode,
 } from './auth';
 
 // Magic Link
@@ -241,19 +253,90 @@ export {
   type UsageSnapshot,
 } from './metering';
 
-// Compliance (Legal Documents, User Agreements, Consent Logs)
+// API Keys
+export {
+  API_KEYS_TABLE,
+  API_KEY_COLUMNS,
+  type ApiKey,
+  type NewApiKey,
+  type UpdateApiKey,
+} from './api-keys';
+
+// Compliance (Legal Documents, User Agreements, Consent Logs, Data Export Requests)
 export {
   CONSENT_LOG_COLUMNS,
   CONSENT_LOGS_TABLE,
+  CONSENT_TYPES,
   type ConsentLog,
+  type ConsentType,
+  DATA_EXPORT_REQUEST_COLUMNS,
+  DATA_EXPORT_REQUESTS_TABLE,
+  DATA_EXPORT_STATUSES,
+  DATA_EXPORT_TYPES,
+  type DataExportRequest,
+  type DataExportStatus,
+  type DataExportType,
+  DOCUMENT_TYPES,
+  type DocumentType,
   LEGAL_DOCUMENT_COLUMNS,
   LEGAL_DOCUMENTS_TABLE,
   type LegalDocument,
   type NewConsentLog,
+  type NewDataExportRequest,
   type NewLegalDocument,
   type NewUserAgreement,
+  type UpdateDataExportRequest,
   type UpdateLegalDocument,
   USER_AGREEMENT_COLUMNS,
   USER_AGREEMENTS_TABLE,
   type UserAgreement,
 } from './compliance';
+
+// Files/Uploads
+export {
+  FILE_COLUMNS,
+  FILE_PURPOSES,
+  FILES_TABLE,
+  type FilePurpose,
+  type FileRecord,
+  type NewFileRecord,
+  STORAGE_PROVIDERS,
+  type StorageProvider,
+  type UpdateFileRecord,
+} from './files';
+
+// Email (Templates & Delivery Log)
+export {
+  EMAIL_LOG_COLUMNS,
+  EMAIL_LOG_TABLE,
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  EMAIL_TEMPLATE_COLUMNS,
+  EMAIL_TEMPLATES_TABLE,
+  type EmailLog,
+  type EmailProvider,
+  type EmailStatus,
+  type EmailTemplate,
+  type NewEmailLog,
+  type NewEmailTemplate,
+  type UpdateEmailTemplate,
+} from './email';
+
+// Tenant Settings
+export {
+  type NewTenantSetting,
+  TENANT_SETTING_COLUMNS,
+  TENANT_SETTINGS_TABLE,
+  type TenantSetting,
+  type UpdateTenantSetting,
+} from './tenant-settings';
+
+// Activities (Activity Feed)
+export {
+  ACTIVITIES_TABLE,
+  ACTIVITY_COLUMNS,
+  ACTOR_TYPES,
+  type Activity,
+  type ActorType,
+  type NewActivity,
+} from './activities';

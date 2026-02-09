@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.password-patterns.ts
+// src/shared/src/domain/auth/auth.password-patterns.ts
 
 /**
  * Common Passwords (Top 200 most common)

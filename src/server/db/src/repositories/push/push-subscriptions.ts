@@ -1,4 +1,4 @@
-// backend/db/src/repositories/push/push-subscriptions.ts
+// src/server/db/src/repositories/push/push-subscriptions.ts
 /**
  * Push Subscriptions Repository (Functional)
  *

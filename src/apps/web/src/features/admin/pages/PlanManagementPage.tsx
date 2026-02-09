@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/PlanManagementPage.tsx
+// src/apps/web/src/features/admin/pages/PlanManagementPage.tsx
 /**
  * PlanManagementPage - Admin page for managing billing plans.
  *
@@ -58,6 +58,7 @@ interface PlanFeatureLocal {
 const LIMIT_KEYS: ReadonlySet<FeatureKey> = new Set<FeatureKey>([
   'projects:limit',
   'storage:limit',
+  'media:max_file_size',
 ]);
 
 /**
@@ -66,7 +67,9 @@ const LIMIT_KEYS: ReadonlySet<FeatureKey> = new Set<FeatureKey>([
  * @param key - Feature key to check
  * @returns True if the key is a limit feature key
  */
-function isLimitKey(key: FeatureKey): key is 'projects:limit' | 'storage:limit' {
+function isLimitKey(
+  key: FeatureKey,
+): key is 'projects:limit' | 'storage:limit' | 'media:max_file_size' {
   return LIMIT_KEYS.has(key);
 }
 

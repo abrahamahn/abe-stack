@@ -1,4 +1,4 @@
-// client/ui/src/elements/OAuthButton.tsx
+// src/client/ui/src/elements/OAuthButton.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 import '../styles/elements.css';

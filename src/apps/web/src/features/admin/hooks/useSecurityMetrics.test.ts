@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useSecurityMetrics.test.ts
+// src/apps/web/src/features/admin/hooks/useSecurityMetrics.test.ts
 /**
  * Tests for useSecurityMetrics hook
  *

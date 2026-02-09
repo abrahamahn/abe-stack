@@ -1,4 +1,4 @@
-// packages/shared/src/core/result.ts
+// src/shared/src/core/result.ts
 /**
  * Functional Result Type
  *

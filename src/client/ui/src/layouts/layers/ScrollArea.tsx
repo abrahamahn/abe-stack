@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/ScrollArea.tsx
+// src/client/ui/src/layouts/layers/ScrollArea.tsx
 import {
   forwardRef,
   useEffect,

@@ -1,4 +1,4 @@
-// premium/media/src/processor.test.ts
+// src/server/media/src/processor.test.ts
 /**
  * Tests for MediaProcessingOrchestrator
  */

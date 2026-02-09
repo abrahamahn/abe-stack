@@ -1,4 +1,4 @@
-// client/src/realtime/SubscriptionCache.ts
+// src/client/engine/src/realtime/SubscriptionCache.ts
 
 const DEFAULT_CLEANUP_DELAY_MS = 10_000;
 

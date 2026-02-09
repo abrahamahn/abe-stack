@@ -1,4 +1,4 @@
-// client/src/undo/UndoRedoStack.test.ts
+// src/client/engine/src/undo/UndoRedoStack.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { UndoRedoStack, createUndoRedoStack } from './UndoRedoStack';

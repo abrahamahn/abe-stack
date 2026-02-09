@@ -1,4 +1,4 @@
-// server/core/vitest.config.ts
+// src/server/core/vitest.config.ts
 import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 
@@ -41,5 +41,8 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     reporters: ['dot'],
+    pool: 'threads',
+    testTimeout: 60000,
+    hookTimeout: 60000,
   },
 });

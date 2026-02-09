@@ -1,4 +1,4 @@
-// backend/core/src/auth/middleware.test.ts
+// src/server/core/src/auth/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {

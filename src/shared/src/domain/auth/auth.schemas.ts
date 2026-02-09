@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.schemas.ts
+// src/shared/src/domain/auth/auth.schemas.ts
 
 /**
  * @file Auth Schemas
@@ -6,34 +6,40 @@
  * @module Domain/Auth
  */
 
-import { emailSchema, passwordSchema } from '../../contracts/common';
 import {
   createLiteralSchema,
   createSchema,
   parseBoolean,
+  parseNumber,
   parseString,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { emailSchema, passwordSchema } from '../../core/schemas';
 import { userSchema as domainUserSchema, type User as DomainUser } from '../users/users.schemas';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 
 // Re-export utility schemas from contracts/common
-export { emptyBodySchema, type EmptyBody } from '../../contracts/common';
-export { errorResponseSchema, type ErrorResponse } from '../../contracts/common';
+export { emptyBodySchema, type EmptyBody } from '../../core/schemas';
+export { errorResponseSchema } from '../../core/schemas';
+export type { ErrorResponse } from '../../core/api';
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface LoginRequest {
-  email: string;
+  identifier: string;
   password: string;
+  captchaToken?: string;
 }
 
 export interface RegisterRequest {
   email: string;
-  name?: string | null | undefined;
+  username: string;
+  firstName: string;
+  lastName: string;
   password: string;
+  captchaToken?: string;
 }
 
 export interface EmailVerificationRequest {
@@ -42,6 +48,7 @@ export interface EmailVerificationRequest {
 
 export interface ForgotPasswordRequest {
   email: string;
+  captchaToken?: string;
 }
 
 export interface ResendVerificationRequest {
@@ -74,7 +81,36 @@ export interface ConfirmEmailChangeRequest {
   token: string;
 }
 
+export interface RevertEmailChangeRequest {
+  token: string;
+}
+
+export interface AcceptTosRequest {
+  documentId: string;
+}
+
+export interface AcceptTosResponse {
+  agreedAt: string;
+}
+
+export interface TosStatusResponse {
+  accepted: boolean;
+  requiredVersion: number | null;
+  documentId: string | null;
+}
+
 export interface TotpVerifyRequest {
+  code: string;
+}
+
+export interface TotpLoginChallengeResponse {
+  requiresTotp: true;
+  challengeToken: string;
+  message: string;
+}
+
+export interface TotpLoginVerifyRequest {
+  challengeToken: string;
   code: string;
 }
 
@@ -101,6 +137,7 @@ export interface LogoutResponse {
 }
 
 export interface EmailVerificationResponse {
+  verified: boolean;
   token: string;
   user: User;
 }
@@ -139,6 +176,11 @@ export interface ConfirmEmailChangeResponse {
   email: string;
 }
 
+export interface RevertEmailChangeResponse {
+  message: string;
+  email: string;
+}
+
 export interface TotpSetupResponse {
   secret: string;
   otpauthUrl: string;
@@ -160,8 +202,9 @@ export interface TotpStatusResponse {
 export const loginRequestSchema: Schema<LoginRequest> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
   return {
-    email: emailSchema.parse(obj['email']),
+    identifier: parseString(obj['identifier'], 'identifier', { min: 1, trim: true }),
     password: passwordSchema.parse(obj['password']),
+    ...(typeof obj['captchaToken'] === 'string' ? { captchaToken: obj['captchaToken'] } : {}),
   };
 });
 
@@ -169,13 +212,11 @@ export const registerRequestSchema: Schema<RegisterRequest> = createSchema((data
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
   return {
     email: emailSchema.parse(obj['email']),
-    name:
-      obj['name'] === undefined
-        ? undefined
-        : obj['name'] === null
-          ? null
-          : parseString(obj['name'], 'name', { min: 2 }),
+    username: parseString(obj['username'], 'username', { min: 2, trim: true }),
+    firstName: parseString(obj['firstName'], 'first name', { min: 1, trim: true }),
+    lastName: parseString(obj['lastName'], 'last name', { min: 1, trim: true }),
     password: passwordSchema.parse(obj['password']),
+    ...(typeof obj['captchaToken'] === 'string' ? { captchaToken: obj['captchaToken'] } : {}),
   };
 });
 
@@ -189,7 +230,10 @@ export const emailVerificationRequestSchema: Schema<EmailVerificationRequest> = 
 export const forgotPasswordRequestSchema: Schema<ForgotPasswordRequest> = createSchema(
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
-    return { email: emailSchema.parse(obj['email']) };
+    return {
+      email: emailSchema.parse(obj['email']),
+      ...(typeof obj['captchaToken'] === 'string' ? { captchaToken: obj['captchaToken'] } : {}),
+    };
   },
 );
 
@@ -248,11 +292,34 @@ export const confirmEmailChangeRequestSchema: Schema<ConfirmEmailChangeRequest> 
   },
 );
 
+export const revertEmailChangeRequestSchema: Schema<RevertEmailChangeRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return { token: parseString(obj['token'], 'token', { min: 1 }) };
+  },
+);
+
+// ToS (Terms of Service)
+export const acceptTosRequestSchema: Schema<AcceptTosRequest> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return { documentId: parseString(obj['documentId'], 'documentId', { min: 1 }) };
+});
+
 // TOTP (2FA)
 export const totpVerifyRequestSchema: Schema<TotpVerifyRequest> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
   return { code: parseString(obj['code'], 'code', { min: 6 }) };
 });
+
+export const totpLoginVerifyRequestSchema: Schema<TotpLoginVerifyRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      challengeToken: parseString(obj['challengeToken'], 'challengeToken', { min: 1 }),
+      code: parseString(obj['code'], 'code', { min: 6 }),
+    };
+  },
+);
 
 // ============================================================================
 // Response Schemas
@@ -294,6 +361,7 @@ export const emailVerificationResponseSchema: Schema<EmailVerificationResponse> 
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     return {
+      verified: parseBoolean(obj['verified'], 'verified'),
       token: parseString(obj['token'], 'token'),
       user: userSchema.parse(obj['user']),
     };
@@ -362,6 +430,34 @@ export const confirmEmailChangeResponseSchema: Schema<ConfirmEmailChangeResponse
   },
 );
 
+export const revertEmailChangeResponseSchema: Schema<RevertEmailChangeResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      message: parseString(obj['message'], 'message'),
+      email: emailSchema.parse(obj['email']),
+    };
+  },
+);
+
+// ToS Responses
+export const acceptTosResponseSchema: Schema<AcceptTosResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return { agreedAt: parseString(obj['agreedAt'], 'agreedAt') };
+});
+
+export const tosStatusResponseSchema: Schema<TosStatusResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return {
+    accepted: parseBoolean(obj['accepted'], 'accepted'),
+    requiredVersion:
+      obj['requiredVersion'] === null
+        ? null
+        : parseNumber(obj['requiredVersion'], 'requiredVersion'),
+    documentId: obj['documentId'] === null ? null : parseString(obj['documentId'], 'documentId'),
+  };
+});
+
 // TOTP Responses
 export const totpSetupResponseSchema: Schema<TotpSetupResponse> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
@@ -388,5 +484,18 @@ export const totpStatusResponseSchema: Schema<TotpStatusResponse> = createSchema
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     return { enabled: parseBoolean(obj['enabled'], 'enabled') };
+  },
+);
+
+const requiresTotpLiteral = createLiteralSchema(true as const);
+
+export const totpLoginChallengeResponseSchema: Schema<TotpLoginChallengeResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      requiresTotp: requiresTotpLiteral.parse(obj['requiresTotp']),
+      challengeToken: parseString(obj['challengeToken'], 'challengeToken'),
+      message: parseString(obj['message'], 'message'),
+    };
   },
 );

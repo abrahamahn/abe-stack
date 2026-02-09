@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-scoring.ts
+// src/server/core/src/auth/security/password-scoring.ts
 
 /**
  * Penalties structure for password scoring

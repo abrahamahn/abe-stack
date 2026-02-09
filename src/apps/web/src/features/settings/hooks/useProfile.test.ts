@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useProfile.test.ts
+// src/apps/web/src/features/settings/hooks/useProfile.test.ts
 /**
  * Tests for useProfileUpdate hook.
  *
@@ -41,10 +41,16 @@ const createWrapper = (cache: QueryCache): ((props: { children: ReactNode }) => 
 const mockUser: User = {
   id: '1' as unknown as UserId,
   email: 'test@example.com',
-  name: 'Test User',
+  username: 'testuser',
+  firstName: 'Test',
+  lastName: 'User',
   avatarUrl: null,
   role: 'user',
-  isVerified: true,
+  emailVerified: true,
+  phone: null,
+  phoneVerified: null,
+  dateOfBirth: null,
+  gender: null,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -88,11 +94,13 @@ describe('useProfileUpdate', () => {
   describe('successful profile update', () => {
     it('should update profile successfully', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -142,14 +150,16 @@ describe('useProfileUpdate', () => {
       expect(mockUpdateProfile).toHaveBeenCalledWith(profileData);
     });
 
-    it('should update both name and email', async () => {
+    it('should update firstName, lastName and email', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'New Name',
+        firstName: 'New',
+        lastName: 'Name',
         email: 'newemail@example.com',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'New Name',
+        firstName: 'New',
+        lastName: 'Name',
         email: 'newemail@example.com',
       };
 
@@ -172,11 +182,13 @@ describe('useProfileUpdate', () => {
 
     it('should invalidate user cache on success', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -201,11 +213,13 @@ describe('useProfileUpdate', () => {
 
     it('should call onSuccess callback with updated user', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const onSuccess = vi.fn();
 
@@ -278,7 +292,8 @@ describe('useProfileUpdate', () => {
 
     it('should handle network errors', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const mockError = new Error('Network error');
 
@@ -301,7 +316,8 @@ describe('useProfileUpdate', () => {
 
     it('should call onError callback', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const mockError = new Error('Update failed');
       const onError = vi.fn();
@@ -325,7 +341,8 @@ describe('useProfileUpdate', () => {
 
     it('should not invalidate cache on error', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const mockError = new Error('Update failed');
 
@@ -352,11 +369,13 @@ describe('useProfileUpdate', () => {
   describe('reset functionality', () => {
     it('should reset state to idle', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -385,40 +404,14 @@ describe('useProfileUpdate', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle empty name string', async () => {
+    it('should handle very long firstName', async () => {
+      const longFirstName = 'a'.repeat(1000);
       const profileData: UpdateProfileRequest = {
-        name: '',
+        firstName: longFirstName,
       };
       const updatedUser: User = {
         ...mockUser,
-        name: '',
-      };
-
-      mockUpdateProfile.mockResolvedValue(updatedUser);
-
-      const { result } = renderHook(() => useProfileUpdate(), {
-        wrapper: createWrapper(queryCache),
-      });
-
-      act(() => {
-        result.current.updateProfile(profileData);
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockUpdateProfile).toHaveBeenCalledWith(profileData);
-    });
-
-    it('should handle very long names', async () => {
-      const longName = 'a'.repeat(1000);
-      const profileData: UpdateProfileRequest = {
-        name: longName,
-      };
-      const updatedUser: User = {
-        ...mockUser,
-        name: longName,
+        firstName: longFirstName,
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -440,11 +433,13 @@ describe('useProfileUpdate', () => {
 
     it('should handle names with special characters', async () => {
       const profileData: UpdateProfileRequest = {
-        name: "O'Neill-Smith (Sr.) 李明",
+        firstName: "O'Neill",
+        lastName: '李明',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: "O'Neill-Smith (Sr.) 李明",
+        firstName: "O'Neill",
+        lastName: '李明',
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -489,11 +484,13 @@ describe('useProfileUpdate', () => {
   describe('callbacks without options', () => {
     it('should work without any callbacks', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
 
       mockUpdateProfile.mockResolvedValue(updatedUser);
@@ -515,11 +512,13 @@ describe('useProfileUpdate', () => {
 
     it('should work with only onSuccess callback', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const onSuccess = vi.fn();
 
@@ -542,7 +541,8 @@ describe('useProfileUpdate', () => {
 
     it('should work with only onError callback', async () => {
       const profileData: UpdateProfileRequest = {
-        name: 'Updated Name',
+        firstName: 'Updated',
+        lastName: 'Name',
       };
       const mockError = new Error('Failed');
       const onError = vi.fn();

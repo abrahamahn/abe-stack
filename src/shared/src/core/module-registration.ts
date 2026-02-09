@@ -1,4 +1,4 @@
-// packages/shared/src/core/module-registration.ts
+// src/shared/src/core/module-registration.ts
 /**
  * Module Registration Contract
  *

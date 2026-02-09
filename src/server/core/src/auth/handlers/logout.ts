@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/logout.ts
+// src/server/core/src/auth/handlers/logout.ts
 /**
  * Logout Handler
  *

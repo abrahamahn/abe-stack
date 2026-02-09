@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/UILibraryBottomBar.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryBottomBar.tsx
 import { Button, EnvironmentBadge, Kbd, ResizablePanel, Text, VersionBadge } from '@abe-stack/ui';
 import { KEYBOARD_SHORTCUTS } from '@ui-library/hooks';
 

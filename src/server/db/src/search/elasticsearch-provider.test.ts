@@ -1,4 +1,4 @@
-// backend/db/src/search/elasticsearch-provider.test.ts
+// src/server/db/src/search/elasticsearch-provider.test.ts
 /**
  * Tests for Elasticsearch Search Provider Stub
  *

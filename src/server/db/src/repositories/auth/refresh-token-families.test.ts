@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/refresh-token-families.test.ts
+// src/server/db/src/repositories/auth/refresh-token-families.test.ts
 /**
  * Tests for Refresh Token Families Repository
  *

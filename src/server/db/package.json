@@ -18,8 +18,9 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs && tsc --emitDeclarationOnly",
-    "clean": "rm -rf dist",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --max-warnings 0"
@@ -35,11 +36,8 @@
     "postgres": "^3.4.4"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
-    "fastify": "^5.7.4",
-    "tsup": "^8.1.0",
+    "@types/node": "^25.0.9",
     "tsx": "^4.15.0",
-    "typescript": "^5.4.0",
-    "zod": "^4.3.6"
+    "typescript": "^5.9.3"
   }
 }

@@ -1,4 +1,4 @@
-// client/ui/src/elements/VersionBadge.test.tsx
+// src/client/ui/src/elements/VersionBadge.test.tsx
 // client/ui/src/components/__tests__/VersionBadge.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

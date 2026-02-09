@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/AuthPage.tsx
+// src/apps/web/src/features/auth/pages/AuthPage.tsx
 
 import { toastStore } from '@abe-stack/react';
 import { AuthLayout, useFormState, useNavigate, useSearchParams } from '@abe-stack/ui';

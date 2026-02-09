@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/auth.test.ts
+// src/shared/src/config/types/auth.test.ts
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import type {

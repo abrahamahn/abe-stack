@@ -1,4 +1,4 @@
-// @abe-stack/react
+// src/client/react/src/index.ts
 // React interface logic, hooks, and context
 
 // ============================================================================

@@ -1,4 +1,4 @@
-// backend/engine/src/storage/factory.ts
+// src/server/engine/src/storage/factory.ts
 import { LocalStorageProvider } from './providers/local';
 import { S3StorageProvider } from './providers/s3';
 

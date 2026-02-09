@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/factory.test.ts
+// src/server/core/src/notifications/providers/factory.test.ts
 /**
  * Tests for Notification Provider Factory
  *

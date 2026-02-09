@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/reactive-map.ts
+// src/shared/src/utils/async/reactive-map.ts
 
 /**
  * An observable key-value store with subscription support.

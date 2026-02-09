@@ -1,4 +1,4 @@
-// premium/media/src/file-type.test.ts
+// src/server/media/src/file-type.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {
@@ -382,6 +382,24 @@ describe('detectFileTypeFromFile', () => {
 
     const result = await detectFileTypeFromFile('/test/unknownfile');
 
+    expect(result).toBeNull();
+  });
+
+  test('should close file descriptor even when fd.read() throws', async () => {
+    const fs = await import('fs');
+    const closeFn = vi.fn().mockResolvedValue(undefined);
+    const mockFileHandle = {
+      read: vi.fn().mockRejectedValue(new Error('Read failure')),
+      close: closeFn,
+    };
+
+    vi.mocked(fs.promises.open).mockResolvedValue(mockFileHandle as never);
+
+    const result = await detectFileTypeFromFile('/test/failing-read.bin');
+
+    // fd.close() must still be called despite fd.read() throwing
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    // Falls through to catch → returns null
     expect(result).toBeNull();
   });
 });

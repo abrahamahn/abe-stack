@@ -1,4 +1,4 @@
-// backend/db/src/repositories/notifications/index.ts
+// src/server/db/src/repositories/notifications/index.ts
 /**
  * Notifications Repository Barrel
  */

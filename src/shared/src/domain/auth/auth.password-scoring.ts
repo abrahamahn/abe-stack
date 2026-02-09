@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.password-scoring.ts
+// src/shared/src/domain/auth/auth.password-scoring.ts
 
 /**
  * Penalties structure for password scoring

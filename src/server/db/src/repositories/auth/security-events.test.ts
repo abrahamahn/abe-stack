@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/security-events.test.ts
+// src/server/db/src/repositories/auth/security-events.test.ts
 /**
  * Tests for Security Events Repository
  *

@@ -1,4 +1,4 @@
-// client/react/src/stores/createStore.test.ts
+// src/client/react/src/stores/createStore.test.ts
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-// client/ui/src/elements/Progress.test.tsx
+// src/client/ui/src/elements/Progress.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

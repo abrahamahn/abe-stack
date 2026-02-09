@@ -1,4 +1,4 @@
-// client/ui/src/components/Image.test.tsx
+// src/client/ui/src/components/Image.test.tsx
 // client/ui/src/elements/__tests__/Image.test.tsx
 /** @vitest-environment jsdom */
 import { Image } from '@components/Image';

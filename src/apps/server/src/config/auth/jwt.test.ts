@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/jwt.test.ts
+// src/apps/server/src/config/auth/jwt.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_JWT_ROTATION_CONFIG, loadJwtRotationConfig } from './jwt';

@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/jwt.ts
+// src/apps/server/src/config/auth/jwt.ts
 import type { JwtRotationConfig } from '@abe-stack/shared/config';
 
 /**

@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/preload.test.ts
+// src/apps/desktop/src/electron/preload.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock ipcRenderer

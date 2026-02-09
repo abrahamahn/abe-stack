@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-strength.test.ts
+// src/server/core/src/auth/security/password-strength.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { estimatePasswordStrength } from './password-strength';

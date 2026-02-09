@@ -1,4 +1,4 @@
-// modules/realtime/src/handlers/subscribe.ts
+// src/server/realtime/src/handlers/subscribe.ts
 /**
  * Realtime Subscribe Handlers
  *
@@ -23,10 +23,10 @@ import type { AuthenticatedUser, RecordPointer, RouteResult } from '@abe-stack/s
 function hasAuthenticatedUser(
   req: RealtimeRequest,
 ): req is RealtimeRequest & { readonly user: AuthenticatedUser } {
-  if (req.user === undefined || req.user === null || typeof req.user !== 'object') {
+  if (req.user === undefined || typeof req.user !== 'object') {
     return false;
   }
-  const user = req.user as Record<string, unknown>;
+  const user = req.user as unknown as Record<string, unknown>;
   return 'userId' in user && typeof user['userId'] === 'string' && user['userId'] !== '';
 }
 
@@ -76,13 +76,10 @@ export async function handleGetRecords(
   }
 
   try {
-    log.debug(
-      {
-        userId,
-        pointerCount: body.pointers.length,
-      },
-      'GetRecords request',
-    );
+    log.debug('GetRecords request', {
+      userId,
+      pointerCount: body.pointers.length,
+    });
 
     const recordMap = await loadRecords(db, body.pointers);
 
@@ -91,12 +88,9 @@ export async function handleGetRecords(
       body: { recordMap },
     };
   } catch (error) {
-    log.error(
-      {
-        error: error instanceof Error ? error.message : String(error),
-      },
-      'GetRecords failed',
-    );
+    log.error('GetRecords failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
     return {
       status: 500,

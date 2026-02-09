@@ -1,4 +1,4 @@
-// client/ui/src/components/Dialog.tsx
+// src/client/ui/src/components/Dialog.tsx
 import { FocusTrap } from '@components/FocusTrap';
 import { useControllableState } from '@hooks/useControllableState';
 import {

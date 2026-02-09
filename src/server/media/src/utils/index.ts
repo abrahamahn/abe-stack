@@ -1,4 +1,4 @@
-// premium/media/src/utils/index.ts
+// src/server/media/src/utils/index.ts
 /**
  * Media Utilities
  *

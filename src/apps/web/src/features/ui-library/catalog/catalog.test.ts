@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/catalog.test.ts
+// src/apps/web/src/features/ui-library/catalog/catalog.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { getComponentsByCategory, getAllCategories, getTotalComponentCount } from './catalog';

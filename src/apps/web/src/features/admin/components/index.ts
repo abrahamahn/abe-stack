@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/index.ts
+// src/apps/web/src/features/admin/components/index.ts
 export { ExportDialog } from './ExportDialog';
 export type { ExportDialogProps } from './ExportDialog';
 

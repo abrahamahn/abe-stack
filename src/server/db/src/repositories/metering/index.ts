@@ -1,4 +1,4 @@
-// backend/db/src/repositories/metering/index.ts
+// src/server/db/src/repositories/metering/index.ts
 /**
  * Metering Repositories Barrel
  */

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/compliance/compliance.logic.ts
+// src/shared/src/domain/compliance/compliance.logic.ts
 
 /**
  * @file Compliance Domain Logic

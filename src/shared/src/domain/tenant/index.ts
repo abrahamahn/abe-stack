@@ -1,4 +1,4 @@
-// packages/shared/src/domain/tenant/index.ts
+// src/shared/src/domain/tenant/index.ts
 
 export {
   createTenantSchema,
@@ -8,3 +8,11 @@ export {
   type Tenant,
   type UpdateTenantInput,
 } from './tenant.schemas';
+
+export {
+  assertWorkspaceScope,
+  createWorkspaceContext,
+  isWorkspaceScoped,
+  type MaybeWorkspaceContext,
+  type WorkspaceContext,
+} from './tenant.workspace';

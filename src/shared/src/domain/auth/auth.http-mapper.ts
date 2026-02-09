@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.http-mapper.ts
+// src/shared/src/domain/auth/auth.http-mapper.ts
 /**
  * HTTP Error Mapper
  *

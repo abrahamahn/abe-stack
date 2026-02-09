@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useAuthModeNavigation.ts
+// src/client/react/src/hooks/useAuthModeNavigation.ts
 import { useCallback, useMemo } from 'react';
 
 import { useNavigate } from '../router';

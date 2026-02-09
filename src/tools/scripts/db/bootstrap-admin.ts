@@ -1,4 +1,4 @@
-// tools/scripts/db/bootstrap-admin.ts
+// src/tools/scripts/db/bootstrap-admin.ts
 /**
  * Production Admin Bootstrap Script
  *
@@ -18,7 +18,7 @@
  * - Outputs credentials only once (save them!)
  */
 
-import { randomBytes } from 'node:crypto';
+import { randomBytes } from 'crypto';
 
 import {
   buildConnectionString,

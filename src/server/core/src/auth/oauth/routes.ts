@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/routes.ts
+// src/server/core/src/auth/oauth/routes.ts
 /**
  * OAuth Routes
  *
@@ -16,7 +16,7 @@ import {
   type HandlerContext,
   type RouteDefinition,
   type RouteResult,
-} from '@abe-stack/db';
+} from '@abe-stack/server-engine';
 
 import {
   handleGetConnections,

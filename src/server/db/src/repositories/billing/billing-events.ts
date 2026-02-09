@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/billing-events.ts
+// src/server/db/src/repositories/billing/billing-events.ts
 /**
  * Billing Events Repository
  *

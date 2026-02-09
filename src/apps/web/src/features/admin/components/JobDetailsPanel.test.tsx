@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobDetailsPanel.test.tsx
+// src/apps/web/src/features/admin/components/JobDetailsPanel.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -479,7 +479,7 @@ describe('JobDetailsPanel', () => {
     it('should render dead letter reason when present', () => {
       const jobWithDeadLetter: JobDetailsLocal = {
         ...mockJob,
-        status: 'dead',
+        status: 'dead_letter',
         deadLetterReason: 'Maximum retry attempts exceeded',
       };
 
@@ -568,8 +568,8 @@ describe('JobDetailsPanel', () => {
       expect(screen.getByRole('button', { name: 'Retry Job' })).toBeInTheDocument();
     });
 
-    it('should show retry button for dead job', () => {
-      const deadLetterJob: JobDetailsLocal = { ...mockJob, status: 'dead' };
+    it('should show retry button for dead_letter job', () => {
+      const deadLetterJob: JobDetailsLocal = { ...mockJob, status: 'dead_letter' };
 
       render(
         <JobDetailsPanel

@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/ipc/handlers.test.ts
+// src/apps/desktop/src/electron/ipc/handlers.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock types

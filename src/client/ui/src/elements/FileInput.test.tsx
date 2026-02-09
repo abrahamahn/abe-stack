@@ -1,4 +1,4 @@
-// client/ui/src/elements/FileInput.test.tsx
+// src/client/ui/src/elements/FileInput.test.tsx
 /**
  * Tests for FileInput component.
  *

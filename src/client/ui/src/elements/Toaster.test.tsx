@@ -1,4 +1,4 @@
-// client/ui/src/elements/Toaster.test.tsx
+// src/client/ui/src/elements/Toaster.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

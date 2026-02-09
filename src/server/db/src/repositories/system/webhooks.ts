@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/webhooks.ts
+// src/server/db/src/repositories/system/webhooks.ts
 /**
  * Webhooks Repository (Functional)
  *

@@ -1,8 +1,8 @@
-// backend/db/src/builder/select.test.ts
+// src/server/db/src/builder/select.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { select } from './select';
-import { fragment, raw } from './types';
+import { fragment, raw } from './types/types';
 
 describe('Select Query Builder', () => {
   describe('select', () => {

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useAdminUser.ts
+// src/apps/web/src/features/admin/hooks/useAdminUser.ts
 /**
  * useAdminUser hook
  *
@@ -11,20 +11,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
+import type { AdminUser } from '@abe-stack/shared';
 
-interface AdminUserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRoleLocal;
-  emailVerified: boolean;
-  emailVerifiedAt: string | null;
-  failedLoginAttempts: number;
-  lockedUntil: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+type AdminUserLocal = AdminUser;
 
 export interface UseAdminUserState {
   user: AdminUserLocal | null;
@@ -62,7 +51,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const result: AdminUserLocal = (await adminApi.getUser(id)) as AdminUserLocal;
+        const result = await adminApi.getUser(id);
         setState({
           user: result,
           isLoading: false,

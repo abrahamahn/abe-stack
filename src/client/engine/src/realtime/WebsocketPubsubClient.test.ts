@@ -1,4 +1,4 @@
-// client/src/realtime/WebsocketPubsubClient.test.ts
+// src/client/engine/src/realtime/WebsocketPubsubClient.test.ts
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 

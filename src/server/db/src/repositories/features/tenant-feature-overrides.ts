@@ -1,4 +1,4 @@
-// backend/db/src/repositories/features/tenant-feature-overrides.ts
+// src/server/db/src/repositories/features/tenant-feature-overrides.ts
 /**
  * Tenant Feature Overrides Repository (Functional)
  *

@@ -1,4 +1,4 @@
-// client/api/src/api/types.ts
+// src/client/api/src/api/types.ts
 /**
  * API Client Types
  *

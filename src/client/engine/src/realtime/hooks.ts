@@ -1,4 +1,4 @@
-// client/src/realtime/hooks.ts
+// src/client/engine/src/realtime/hooks.ts
 /**
  * Realtime React Hooks
  *

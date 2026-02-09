@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/static.ts
+// src/apps/server/src/http/middleware/static.ts
 /**
  * Static File Serving
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/SecurityEventsPage.tsx
+// src/apps/web/src/features/admin/pages/SecurityEventsPage.tsx
 /**
  * SecurityEventsPage
  *

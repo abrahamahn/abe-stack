@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/api/settingsApi.test.ts
+// src/apps/web/src/features/settings/api/settingsApi.test.ts
 /**
  * Settings API Client Tests
  *
@@ -107,17 +107,24 @@ describe('createSettingsApi', () => {
   describe('updateProfile', () => {
     it('should update user profile successfully', async () => {
       const request: UpdateProfileRequest = {
-        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
         email: 'john@example.com',
       };
 
       const mockUser: User = {
         id: 'user-123' as unknown as UserId,
         email: 'john@example.com',
-        name: 'John Doe',
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -139,7 +146,7 @@ describe('createSettingsApi', () => {
     });
 
     it('should include authorization header for profile update', async () => {
-      const request: UpdateProfileRequest = { name: 'Jane Doe' };
+      const request: UpdateProfileRequest = { firstName: 'Jane', lastName: 'Doe' };
       mockFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
 
       const api = createSettingsApi(config);
@@ -715,7 +722,7 @@ describe('createSettingsApi', () => {
     });
 
     it('should handle Content-Type correctly for JSON requests', async () => {
-      const request: UpdateProfileRequest = { name: 'Test User' };
+      const request: UpdateProfileRequest = { firstName: 'Test', lastName: 'User' };
       mockFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
 
       const api = createSettingsApi(config);

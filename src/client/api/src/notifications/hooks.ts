@@ -1,4 +1,4 @@
-// client/src/notifications/hooks.ts
+// src/client/api/src/notifications/hooks.ts
 /**
  * Push Notification React Hooks
  *

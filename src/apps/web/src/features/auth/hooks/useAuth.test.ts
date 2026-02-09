@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/hooks/useAuth.test.ts
+// src/apps/web/src/features/auth/hooks/useAuth.test.ts
 import { QueryCache } from '@abe-stack/client-engine';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { renderHook } from '@testing-library/react';
@@ -68,6 +68,10 @@ function createMockEnvironment(
     apiUrl: '',
     tokenRefreshInterval: 13 * 60 * 1000,
     uiVersion: '1.0.0',
+    queryPersistence: {
+      maxAge: 24 * 60 * 60 * 1000,
+      throttleTime: 1000,
+    },
   };
 
   return {
@@ -81,10 +85,16 @@ describe('useAuth', () => {
   const mockUser = {
     id: '1' as unknown as UserId,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: null,
     role: 'user' as const,
-    isVerified: true,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

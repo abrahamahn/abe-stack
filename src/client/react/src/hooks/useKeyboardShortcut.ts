@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useKeyboardShortcut.ts
+// src/client/react/src/hooks/useKeyboardShortcut.ts
 import { useCallback, useEffect, useRef } from 'react';
 
 // ============================================================================

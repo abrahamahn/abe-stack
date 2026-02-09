@@ -1,4 +1,4 @@
-// backend/engine/src/storage/providers/s3.ts
+// src/server/engine/src/storage/providers/s3.ts
 import { S3Client } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 
@@ -96,7 +96,11 @@ export class S3StorageProvider implements StorageProvider {
             return { done: false, value: chunk.value };
           },
           releaseLock: (): void => {
-            // No-op for S3 streams, cleanup happens automatically
+            // Clean up the async iterator to release the underlying HTTP connection.
+            // Without this, abandoned streams keep the S3 response socket open.
+            if (typeof iterator.return === 'function') {
+              void iterator.return(undefined);
+            }
           },
         };
       },

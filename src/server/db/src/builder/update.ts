@@ -1,4 +1,4 @@
-// backend/db/src/builder/update.ts
+// src/server/db/src/builder/update.ts
 /**
  * UpdateBuilder - Fluent API for building UPDATE queries
  *
@@ -19,7 +19,7 @@ import {
   type QueryResult,
   type SqlFragment,
   type TableSpec,
-} from './types';
+} from './types/types';
 
 /**
  * UpdateBuilder class for constructing UPDATE queries

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/refresh-tokens.test.ts
+// src/server/db/src/repositories/auth/refresh-tokens.test.ts
 /**
  * Tests for Refresh Tokens Repository
  *

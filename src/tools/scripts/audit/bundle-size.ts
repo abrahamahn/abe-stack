@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
-// tools/scripts/audit/bundle-size.ts
-import { execSync } from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+// src/tools/scripts/audit/bundle-size.ts
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Bundle Size Benchmark Tool
@@ -30,7 +30,7 @@ type BenchmarkResult = {
   totals: Record<string, { size: number; gzipSize: number }>;
 };
 
-const ROOT_DIR = path.resolve(__dirname, '..', '..', '..');
+const ROOT_DIR = path.resolve(__dirname, '..', '..', '..', '..');
 const OUTPUT_DIR = path.join(ROOT_DIR, '.tmp');
 const BENCHMARK_FILE = path.join(OUTPUT_DIR, '.bundle-sizes.json');
 
@@ -263,19 +263,19 @@ function main(): void {
   const packages: Record<string, { name: string; distPath: string }> = {
     ui: {
       name: '@abe-stack/ui',
-      distPath: path.join(ROOT_DIR, 'client/ui/dist'),
+      distPath: path.join(ROOT_DIR, 'src', 'client', 'ui', 'dist'),
     },
-    core: {
+    shared: {
       name: '@abe-stack/shared',
-      distPath: path.join(ROOT_DIR, 'core/dist'),
+      distPath: path.join(ROOT_DIR, 'src', 'shared', 'dist'),
     },
-    client: {
-      name: '@abe-stack/engine',
-      distPath: path.join(ROOT_DIR, 'client/dist'),
+    'client-engine': {
+      name: '@abe-stack/client-engine',
+      distPath: path.join(ROOT_DIR, 'src', 'client', 'engine', 'dist'),
     },
     web: {
       name: '@abe-stack/web',
-      distPath: path.join(ROOT_DIR, 'apps/web/dist'),
+      distPath: path.join(ROOT_DIR, 'src', 'apps', 'web', 'dist'),
     },
   };
 

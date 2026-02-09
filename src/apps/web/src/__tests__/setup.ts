@@ -140,6 +140,28 @@ if (document.getElementById('root') === null) {
 }
 
 // ============================================================================
+// Module Mocks
+// ============================================================================
+
+vi.mock('@ui-library/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ui-library/hooks')>();
+  return {
+    ...actual,
+    useUILibraryPanes: vi.fn(() => ({
+      paneConfig: {
+        top: { visible: true, size: 6 },
+        left: { visible: true, size: 18 },
+        right: { visible: true, size: 25 },
+        bottom: { visible: true, size: 8 },
+      },
+      togglePane: vi.fn(),
+      handlePaneResize: vi.fn(),
+      resetLayout: vi.fn(),
+    })),
+  };
+});
+
+// ============================================================================
 // Test Lifecycle Hooks
 // ============================================================================
 

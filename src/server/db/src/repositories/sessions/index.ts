@@ -1,4 +1,4 @@
-// backend/db/src/repositories/sessions/index.ts
+// src/server/db/src/repositories/sessions/index.ts
 /**
  * Sessions Repository Barrel
  */

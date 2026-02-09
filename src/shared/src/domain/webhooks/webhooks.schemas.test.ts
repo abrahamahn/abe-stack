@@ -1,4 +1,4 @@
-// shared/src/domain/webhooks/webhooks.schemas.test.ts
+// src/shared/src/domain/webhooks/webhooks.schemas.test.ts
 
 /**
  * @file Tests for Webhook Domain Schemas

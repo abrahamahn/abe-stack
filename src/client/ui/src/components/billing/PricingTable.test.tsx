@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PricingTable.test.tsx
+// src/client/ui/src/components/billing/PricingTable.test.tsx
 /**
  * Tests for PricingTable component.
  *

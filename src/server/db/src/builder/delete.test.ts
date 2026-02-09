@@ -1,4 +1,4 @@
-// backend/db/src/builder/delete.test.ts
+// src/server/db/src/builder/delete.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { and, eq, lt } from './conditions';

@@ -1,4 +1,4 @@
-// backend/core/src/users/handlers/profile.ts
+// src/server/core/src/users/handlers/profile.ts
 /**
  * User Profile Handlers
  *
@@ -11,7 +11,7 @@
 import { getUserById, listUsers } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
-import type { HandlerContext } from '@abe-stack/db';
+import type { HandlerContext } from '@abe-stack/server-engine';
 import type {
   CursorPaginatedResult,
   CursorPaginationOptions,
@@ -95,10 +95,16 @@ export async function handleMe(
       body: {
         id: user.id as UserId,
         email: user.email,
-        name: user.name,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         avatarUrl: user.avatarUrl ?? null,
         role: user.role,
-        isVerified: user.emailVerified,
+        emailVerified: user.emailVerified,
+        phone: user.phone ?? null,
+        phoneVerified: user.phoneVerified,
+        dateOfBirth: user.dateOfBirth ?? null,
+        gender: user.gender ?? null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       },
@@ -140,10 +146,16 @@ export async function handleListUsers(
     const userResponses: User[] = users.map((user) => ({
       id: user.id as UserId,
       email: user.email,
-      name: user.name,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       avatarUrl: user.avatarUrl ?? null,
       role: user.role,
-      isVerified: user.emailVerified,
+      emailVerified: user.emailVerified,
+      phone: user.phone ?? null,
+      phoneVerified: user.phoneVerified,
+      dateOfBirth: user.dateOfBirth ?? null,
+      gender: user.gender ?? null,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     }));

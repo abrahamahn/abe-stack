@@ -1,4 +1,4 @@
-// backend/core/src/admin/userHandlers.ts
+// src/server/core/src/admin/userHandlers.ts
 /**
  * Admin User Handlers
  *
@@ -13,6 +13,7 @@ import { ERROR_MESSAGES } from '../auth';
 import { getUserById, listUsers, lockUser, unlockUser, updateUser } from './userService';
 
 import type { AdminAppContext } from './types';
+import type { UserRole } from '@abe-stack/db';
 import type {
   AdminLockUserRequest,
   AdminLockUserResponse,
@@ -61,7 +62,13 @@ export async function handleListUsers(
       filters.status = query['status'] as 'active' | 'locked' | 'unverified';
     }
     if (typeof query['sortBy'] === 'string') {
-      filters.sortBy = query['sortBy'] as 'email' | 'name' | 'createdAt' | 'updatedAt';
+      filters.sortBy = query['sortBy'] as
+        | 'email'
+        | 'username'
+        | 'firstName'
+        | 'lastName'
+        | 'createdAt'
+        | 'updatedAt';
     }
     if (typeof query['sortOrder'] === 'string') {
       filters.sortOrder = query['sortOrder'] as 'asc' | 'desc';
@@ -156,7 +163,13 @@ export async function handleUpdateUser(
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
-    const user = await updateUser(ctx.repos.users, userId, body);
+    // Extract only defined fields to satisfy exactOptionalPropertyTypes
+    const updates: { firstName?: string; lastName?: string; role?: UserRole } = {};
+    if (body.firstName !== undefined) updates.firstName = body.firstName;
+    if (body.lastName !== undefined) updates.lastName = body.lastName;
+    if (body.role !== undefined) updates.role = body.role;
+
+    const user = await updateUser(ctx.repos.users, userId, updates);
 
     ctx.log.info(
       { adminId: authUser.userId, targetUserId: userId, updates: Object.keys(body) },

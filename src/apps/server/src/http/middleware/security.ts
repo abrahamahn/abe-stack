@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/security.ts
+// src/apps/server/src/http/middleware/security.ts
 /**
  * HTTP Security Middleware
  *

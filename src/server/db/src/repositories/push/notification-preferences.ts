@@ -1,4 +1,4 @@
-// backend/db/src/repositories/push/notification-preferences.ts
+// src/server/db/src/repositories/push/notification-preferences.ts
 /**
  * Notification Preferences Repository (Functional)
  *

@@ -1,4 +1,4 @@
-// client/ui/src/elements/Heading.tsx
+// src/client/ui/src/elements/Heading.tsx
 import {
   forwardRef,
   type ComponentPropsWithoutRef,

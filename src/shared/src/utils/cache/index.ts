@@ -1,4 +1,4 @@
-// packages/shared/src/utils/cache/index.ts
+// src/shared/src/utils/cache/index.ts
 
 export { LRUCache, type LRUCacheOptions } from './lru';
 

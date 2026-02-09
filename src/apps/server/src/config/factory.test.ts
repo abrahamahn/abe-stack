@@ -1,4 +1,4 @@
-// apps/server/src/config/factory.test.ts
+// src/apps/server/src/config/factory.test.ts
 import fs from 'node:fs';
 
 import { initEnv, loadServerEnv } from '@abe-stack/server-engine/config';

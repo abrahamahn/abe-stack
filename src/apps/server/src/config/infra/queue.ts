@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/queue.ts
+// src/apps/server/src/config/infra/queue.ts
 import type { FullEnv, QueueConfig } from '@abe-stack/shared/config';
 
 /**

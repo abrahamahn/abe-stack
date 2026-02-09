@@ -1,4 +1,4 @@
-// apps/web/src/features/home/hooks/useDocContent.ts
+// src/apps/web/src/features/home/hooks/useDocContent.ts
 import { useEffect, useState } from 'react';
 
 import { loadDocContent } from '../data';

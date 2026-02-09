@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/utils/lazyDocs.ts
+// src/apps/web/src/features/ui-library/utils/lazyDocs.ts
 
 import type { ComponentCategory } from '../types';
 

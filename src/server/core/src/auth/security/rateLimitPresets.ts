@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/rateLimitPresets.ts
+// src/server/core/src/auth/security/rateLimitPresets.ts
 /**
  * Auth Rate Limit Presets
  *
@@ -14,7 +14,7 @@
  * @module security/rateLimitPresets
  */
 
-import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '@abe-stack/db';
+import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '@abe-stack/server-engine';
 
 // ============================================================================
 // Types

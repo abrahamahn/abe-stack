@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.password-scoring.test.ts
+// src/shared/src/domain/auth/auth.password-scoring.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

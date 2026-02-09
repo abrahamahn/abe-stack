@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useResendCooldown.ts
+// src/client/react/src/hooks/useResendCooldown.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseResendCooldownReturn {

@@ -1,4 +1,4 @@
-// client/ui/src/components/Image.tsx
+// src/client/ui/src/components/Image.tsx
 import {
   forwardRef,
   useEffect,

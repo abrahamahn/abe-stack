@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useFocusReturn.ts
+// src/client/react/src/hooks/useFocusReturn.ts
 import { useCallback, useEffect, useRef } from 'react';
 
 /**

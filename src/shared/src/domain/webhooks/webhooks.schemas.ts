@@ -1,4 +1,4 @@
-// packages/shared/src/domain/webhooks/webhooks.schemas.ts
+// src/shared/src/domain/webhooks/webhooks.schemas.ts
 
 /**
  * @file Webhook Domain Schemas
@@ -17,10 +17,10 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
 import { tenantIdSchema, webhookDeliveryIdSchema, webhookIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { TenantId, WebhookDeliveryId, WebhookId } from '../../types/ids';
 
 // ============================================================================

@@ -1,4 +1,4 @@
-// client/ui/src/theme/colors.test.ts
+// src/client/ui/src/theme/colors.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { colors, darkColors, lightColors } from './colors';

@@ -1,4 +1,4 @@
-// backend/core/src/admin/index.ts
+// src/server/core/src/admin/index.ts
 /**
  * Admin Module
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/UserListPage.tsx
+// src/apps/web/src/features/admin/pages/UserListPage.tsx
 /**
  * UserListPage Component
  *
@@ -19,6 +19,8 @@ export const UserListPage = (): JSX.Element => {
     total,
     page,
     totalPages,
+    hasNext,
+    hasPrev,
     isLoading,
     error,
     setFilters,
@@ -61,7 +63,11 @@ export const UserListPage = (): JSX.Element => {
               ? {
                   data: users,
                   total,
+                  page,
+                  limit: 20,
                   totalPages,
+                  hasNext,
+                  hasPrev,
                 }
               : undefined
           }

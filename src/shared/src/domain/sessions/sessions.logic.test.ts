@@ -1,4 +1,4 @@
-// packages/shared/src/domain/sessions/sessions.logic.test.ts
+// src/shared/src/domain/sessions/sessions.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { getSessionAge, isSessionActive, isSessionRevoked } from './sessions.logic';

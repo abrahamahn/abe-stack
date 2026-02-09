@@ -1,4 +1,4 @@
-// backend/engine/src/storage/http/server.test.ts
+// src/server/engine/src/storage/http/server.test.ts
 import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -32,7 +32,7 @@ describe('File Server', () => {
       signatureSecret: secretKey,
     };
 
-    server = fastify();
+    server = fastify({ forceCloseConnections: true });
 
     // Register a pass-through content type parser for file uploads
     // This allows the route handler to stream request.raw directly without consuming it
@@ -46,12 +46,16 @@ describe('File Server', () => {
     registerFileServer(config, server);
 
     await server.ready();
-  }, 15000);
+  }, 30000);
 
   afterEach(async () => {
-    await server.close();
+    if (server !== undefined) {
+      await server.close();
+    }
     // Clean up temp directory
-    await rm(uploadDir, { recursive: true, force: true });
+    if (uploadDir !== undefined) {
+      await rm(uploadDir, { recursive: true, force: true });
+    }
   });
 
   // ============================================================================

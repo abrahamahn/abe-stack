@@ -1,4 +1,4 @@
-// premium/media/src/database.ts
+// src/server/media/src/database.ts
 /**
  * Media Processing Database Operations
  *

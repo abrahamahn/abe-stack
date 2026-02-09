@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/index.ts
+// src/apps/server/src/config/auth/index.ts
 export { AuthValidationError, loadAuthConfig, validateAuthConfig } from './auth';
 
 export { DEFAULT_JWT_ROTATION_CONFIG, loadJwtRotationConfig } from './jwt';

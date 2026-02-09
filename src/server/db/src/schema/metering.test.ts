@@ -1,4 +1,4 @@
-// backend/db/src/schema/metering.test.ts
+// src/server/db/src/schema/metering.test.ts
 /**
  * Unit tests for metering schema type definitions
  *

@@ -1,11 +1,11 @@
-// packages/shared/src/utils/storage.ts
+// src/shared/src/utils/storage.ts
 /**
  * Storage Path Utilities
  *
  * Path normalization and filename generation for storage systems.
  */
 
-import { generateSecureId } from './crypto';
+import { generateSecureId } from './crypto/crypto';
 
 // ============================================================================
 // Constants

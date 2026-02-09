@@ -1,4 +1,4 @@
-// premium/media/src/database.test.ts
+// src/server/media/src/database.test.ts
 /**
  * Tests for InMemoryMediaDatabase
  */

@@ -1,4 +1,4 @@
-// backend/core/src/billing/webhooks/stripe-webhook.ts
+// src/server/core/src/billing/webhooks/stripe-webhook.ts
 /**
  * Stripe Webhook Handler
  *

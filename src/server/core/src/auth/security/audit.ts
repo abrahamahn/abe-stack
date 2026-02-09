@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/audit.ts
+// src/server/core/src/auth/security/audit.ts
 /**
  * Security Audit Logging & Monitoring
  *

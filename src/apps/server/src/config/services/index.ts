@@ -1,4 +1,4 @@
-// apps/server/src/config/services/index.ts
+// src/apps/server/src/config/services/index.ts
 
 // billing.ts
 export { loadBillingConfig, validateBillingConfig } from './billing';

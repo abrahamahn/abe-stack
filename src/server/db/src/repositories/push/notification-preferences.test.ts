@@ -1,4 +1,4 @@
-// backend/db/src/repositories/push/notification-preferences.test.ts
+// src/server/db/src/repositories/push/notification-preferences.test.ts
 /**
  * Tests for Notification Preferences Repository
  *

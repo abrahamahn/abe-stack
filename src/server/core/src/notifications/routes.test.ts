@@ -1,4 +1,4 @@
-// backend/core/src/notifications/routes.test.ts
+// src/server/core/src/notifications/routes.test.ts
 /**
  * Notification Routes Unit Tests
  *
@@ -25,8 +25,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
+vi.mock('@abe-stack/server-engine', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/server-engine')>(
+    '@abe-stack/server-engine',
+  );
   return {
     ...actual,
   };
@@ -45,7 +47,7 @@ vi.mock('./handlers', () => ({
 import { notificationRoutes } from './routes';
 
 import type { NotificationModuleDeps, NotificationRequest } from './types';
-import type { RouteDefinition } from '@abe-stack/db';
+import type { RouteDefinition } from '@abe-stack/server-engine';
 import type { FastifyReply } from 'fastify';
 
 // ============================================================================

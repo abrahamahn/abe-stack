@@ -1,4 +1,4 @@
-// client/ui/src/components/Tabs.tsx
+// src/client/ui/src/components/Tabs.tsx
 import { useState, type ReactElement, type ReactNode } from 'react';
 import '../styles/components.css';
 

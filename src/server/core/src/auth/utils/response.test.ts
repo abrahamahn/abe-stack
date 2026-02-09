@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/response.test.ts
+// src/server/core/src/auth/utils/response.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { createAuthResponse } from './response';
@@ -19,7 +19,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -38,7 +40,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -56,7 +60,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-456',
         email: 'john@example.com',
-        name: 'John Doe',
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
         avatarUrl: null,
         role: 'admin' as UserRole,
         emailVerified: true,
@@ -68,7 +74,9 @@ describe('createAuthResponse', () => {
 
       expect(result.user.id).toBe('user-456');
       expect(result.user.email).toBe('john@example.com');
-      expect(result.user.name).toBe('John Doe');
+      expect(result.user.username).toBe('johndoe');
+      expect(result.user.firstName).toBe('John');
+      expect(result.user.lastName).toBe('Doe');
       expect(result.user.role).toBe('admin');
     });
   });
@@ -78,7 +86,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'user@example.com',
-        name: 'Regular User',
+        username: 'regularuser',
+        firstName: 'Regular',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -95,7 +105,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'admin-123',
         email: 'admin@example.com',
-        name: 'Admin User',
+        username: 'adminuser',
+        firstName: 'Admin',
+        lastName: 'User',
         avatarUrl: null,
         role: 'admin' as UserRole,
         emailVerified: true,
@@ -112,7 +124,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'mod-123',
         email: 'mod@example.com',
-        name: 'Moderator',
+        username: 'moderator',
+        firstName: 'Mod',
+        lastName: 'Erator',
         avatarUrl: null,
         role: 'moderator' as UserRole,
         emailVerified: true,
@@ -126,12 +140,14 @@ describe('createAuthResponse', () => {
     });
   });
 
-  describe('null name handling', () => {
-    test('should handle null name', () => {
+  describe('name handling', () => {
+    test('should include username, firstName, lastName in response', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -141,15 +157,18 @@ describe('createAuthResponse', () => {
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
 
-      expect(result.user.name).toBeNull();
+      expect(result.user.username).toBe('testuser');
+      expect(result.user.firstName).toBe('Test');
+      expect(result.user.lastName).toBe('User');
     });
 
-    test('should handle empty string name', () => {
-      // Empty string is technically a valid name value
+    test('should handle empty string lastName', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: '',
+        username: 'testuser',
+        firstName: 'User',
+        lastName: '',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -159,7 +178,8 @@ describe('createAuthResponse', () => {
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
 
-      expect(result.user.name).toBe('');
+      expect(result.user.firstName).toBe('User');
+      expect(result.user.lastName).toBe('');
     });
   });
 
@@ -168,7 +188,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -190,7 +212,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -209,7 +233,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -228,7 +254,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -246,7 +274,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-with-unicode-\u00e9\u00e8',
         email: 'test+tag@example.com',
-        name: 'Name with "quotes" and <brackets>',
+        username: 'special_user',
+        firstName: 'Name with "quotes"',
+        lastName: 'And <brackets>',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -258,14 +288,17 @@ describe('createAuthResponse', () => {
 
       expect(result.user.id).toBe('user-with-unicode-\u00e9\u00e8');
       expect(result.user.email).toBe('test+tag@example.com');
-      expect(result.user.name).toBe('Name with "quotes" and <brackets>');
+      expect(result.user.firstName).toBe('Name with "quotes"');
+      expect(result.user.lastName).toBe('And <brackets>');
     });
 
     test('should handle UUID format ids', () => {
       const user = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -284,7 +317,9 @@ describe('createAuthResponse', () => {
       const user = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,
@@ -299,10 +334,16 @@ describe('createAuthResponse', () => {
       expect(Object.keys(result.user)).toEqual([
         'id',
         'email',
-        'name',
+        'username',
+        'firstName',
+        'lastName',
         'avatarUrl',
         'role',
-        'isVerified',
+        'emailVerified',
+        'phone',
+        'phoneVerified',
+        'dateOfBirth',
+        'gender',
         'createdAt',
         'updatedAt',
       ]);
@@ -312,7 +353,9 @@ describe('createAuthResponse', () => {
       const userWithExtra = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as UserRole,
         emailVerified: true,

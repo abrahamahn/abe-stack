@@ -1,4 +1,4 @@
-// backend/core/src/admin/jobsHandlers.ts
+// src/server/core/src/admin/jobsHandlers.ts
 /**
  * Jobs Handlers
  *

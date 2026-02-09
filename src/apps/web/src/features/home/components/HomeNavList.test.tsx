@@ -1,4 +1,4 @@
-// apps/web/src/features/home/components/HomeNavList.test.tsx
+// src/apps/web/src/features/home/components/HomeNavList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -62,65 +62,50 @@ vi.mock('@abe-stack/ui', () => {
 });
 
 describe('HomeNavList', () => {
-  const defaultProps = {
-    activeDoc: 'readme' as const,
-    onSelectDoc: vi.fn(),
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders page links', () => {
-    render(<HomeNavList {...defaultProps} />);
-    expect(screen.getByText('UI Library')).toBeInTheDocument();
+  it('renders app menu links', () => {
+    render(<HomeNavList />);
+    expect(screen.getByText('Auth')).toBeInTheDocument();
+    expect(screen.getByText('Profile')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
-  it('renders UI Library link with correct href', () => {
-    render(<HomeNavList {...defaultProps} />);
-    expect(screen.getByRole('link', { name: /ui library/i })).toHaveAttribute(
+  it('renders Auth link with correct href', () => {
+    render(<HomeNavList />);
+    expect(screen.getByRole('link', { name: /auth/i })).toHaveAttribute('href', '/auth');
+  });
+
+  it('renders Profile link with correct href', () => {
+    render(<HomeNavList />);
+    expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
       'href',
-      '/ui-library',
+      '/settings/accounts',
     );
   });
 
+  it('renders Settings link with correct href', () => {
+    render(<HomeNavList />);
+    expect(screen.getByRole('link', { name: /settings/i })).toHaveAttribute('href', '/settings');
+  });
+
   it('renders Dashboard link with correct href', () => {
-    render(<HomeNavList {...defaultProps} />);
+    render(<HomeNavList />);
     expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', '/dashboard');
   });
 
-  it('renders category labels', () => {
-    render(<HomeNavList {...defaultProps} />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Apps')).toBeInTheDocument();
-    expect(screen.getByText('Packages')).toBeInTheDocument();
-    expect(screen.getByText('Dev Docs')).toBeInTheDocument();
-    expect(screen.getByText('Changelog')).toBeInTheDocument();
+  it('renders Admin link with correct href', () => {
+    render(<HomeNavList />);
+    expect(screen.getByRole('link', { name: /admin/i })).toHaveAttribute('href', '/admin');
   });
 
-  it('renders doc buttons', () => {
-    render(<HomeNavList {...defaultProps} />);
-    expect(screen.getByRole('button', { name: 'README' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Web' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Architecture' })).toBeInTheDocument();
-  });
-
-  it('calls onSelectDoc when a doc button is clicked', () => {
-    render(<HomeNavList {...defaultProps} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Web' }));
-    expect(defaultProps.onSelectDoc).toHaveBeenCalledWith('web');
-  });
-
-  it('highlights the active doc with primary variant', () => {
-    render(<HomeNavList {...defaultProps} activeDoc="readme" />);
-    const readmeBtn = screen.getByRole('button', { name: 'README' });
-    expect(readmeBtn).toHaveAttribute('data-variant', 'primary');
-  });
-
-  it('uses text variant for inactive docs', () => {
-    render(<HomeNavList {...defaultProps} activeDoc="readme" />);
-    const webBtn = screen.getByRole('button', { name: 'Web' });
-    expect(webBtn).toHaveAttribute('data-variant', 'text');
+  it('menu links are clickable anchors', () => {
+    render(<HomeNavList />);
+    fireEvent.click(screen.getByRole('link', { name: /dashboard/i }));
+    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', '/dashboard');
   });
 });

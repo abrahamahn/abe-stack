@@ -1,4 +1,4 @@
-// packages/shared/src/domain/webhooks/webhooks.logic.test.ts
+// src/shared/src/domain/webhooks/webhooks.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

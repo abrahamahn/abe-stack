@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/events.ts
+// src/server/core/src/auth/security/events.ts
 /**
  * Security Events
  *
@@ -404,6 +404,125 @@ export async function sendTokenReuseAlert(
   const { email, ipAddress, userAgent, timestamp } = params;
 
   const template = emailTemplates.tokenReuseAlert(ipAddress, userAgent ?? 'Unknown', timestamp);
+
+  await emailService.send({
+    to: email,
+    subject: template.subject,
+    ...(template.html !== undefined && { html: template.html }),
+    ...(template.text !== undefined && { text: template.text }),
+  });
+}
+
+// ============================================================================
+// "Was This You?" Alert Emails
+// ============================================================================
+
+/**
+ * Parameters for sending a "Was This You?" security alert.
+ */
+export interface SendSecurityAlertParams {
+  /** User email to alert */
+  email: string;
+  /** IP address of the request */
+  ipAddress: string;
+  /** User agent of the request */
+  userAgent: string | undefined;
+  /** Timestamp of the event */
+  timestamp: Date;
+}
+
+/**
+ * Parameters for sending an email change alert.
+ */
+export interface SendEmailChangedAlertParams extends SendSecurityAlertParams {
+  /** The new email address */
+  newEmail: string;
+  /** Optional link to revert the email change */
+  revertUrl?: string | undefined;
+}
+
+/**
+ * Send a "Was this you?" alert after a successful login.
+ *
+ * @param emailService - Email service for sending the alert
+ * @param emailTemplates - Email templates for rendering the alert
+ * @param params - Alert parameters
+ * @returns Promise that resolves when email is sent
+ * @throws When email sending fails
+ * @complexity O(1)
+ */
+export async function sendNewLoginAlert(
+  emailService: AuthEmailService,
+  emailTemplates: AuthEmailTemplates,
+  params: SendSecurityAlertParams,
+): Promise<void> {
+  const { email, ipAddress, userAgent, timestamp } = params;
+
+  const template = emailTemplates.newLoginAlert(ipAddress, userAgent ?? 'Unknown', timestamp);
+
+  await emailService.send({
+    to: email,
+    subject: template.subject,
+    ...(template.html !== undefined && { html: template.html }),
+    ...(template.text !== undefined && { text: template.text }),
+  });
+}
+
+/**
+ * Send a "Was this you?" alert after a password change.
+ *
+ * @param emailService - Email service for sending the alert
+ * @param emailTemplates - Email templates for rendering the alert
+ * @param params - Alert parameters
+ * @returns Promise that resolves when email is sent
+ * @throws When email sending fails
+ * @complexity O(1)
+ */
+export async function sendPasswordChangedAlert(
+  emailService: AuthEmailService,
+  emailTemplates: AuthEmailTemplates,
+  params: SendSecurityAlertParams,
+): Promise<void> {
+  const { email, ipAddress, userAgent, timestamp } = params;
+
+  const template = emailTemplates.passwordChangedAlert(
+    ipAddress,
+    userAgent ?? 'Unknown',
+    timestamp,
+  );
+
+  await emailService.send({
+    to: email,
+    subject: template.subject,
+    ...(template.html !== undefined && { html: template.html }),
+    ...(template.text !== undefined && { text: template.text }),
+  });
+}
+
+/**
+ * Send a "Was this you?" alert after an email change (to the OLD email).
+ *
+ * @param emailService - Email service for sending the alert
+ * @param emailTemplates - Email templates for rendering the alert
+ * @param params - Alert parameters including the new email
+ * @returns Promise that resolves when email is sent
+ * @throws When email sending fails
+ * @complexity O(1)
+ */
+export async function sendEmailChangedAlert(
+  emailService: AuthEmailService,
+  emailTemplates: AuthEmailTemplates,
+  params: SendEmailChangedAlertParams,
+): Promise<void> {
+  const { email, newEmail, ipAddress, userAgent, timestamp, revertUrl } = params;
+
+  const template = emailTemplates.emailChangedAlert(
+    newEmail,
+    ipAddress,
+    userAgent ?? 'Unknown',
+    timestamp,
+    revertUrl,
+  );
 
   await emailService.send({
     to: email,

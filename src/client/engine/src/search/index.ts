@@ -1,4 +1,4 @@
-// client/src/search/index.ts
+// src/client/engine/src/search/index.ts
 /**
  * Search SDK
  *

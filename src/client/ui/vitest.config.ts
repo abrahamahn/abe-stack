@@ -1,4 +1,4 @@
-// client/ui/vitest.config.ts
+// src/client/ui/vitest.config.ts
 
 import path from 'node:path';
 import tsconfigPaths from 'vite-tsconfig-paths';

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/users.roles.ts
+// src/shared/src/domain/users/users.roles.ts
 /**
  * User Roles
  */

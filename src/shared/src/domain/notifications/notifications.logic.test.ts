@@ -1,4 +1,4 @@
-// packages/shared/src/domain/notifications/notifications.logic.test.ts
+// src/shared/src/domain/notifications/notifications.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { shouldSendNotification } from './notifications.logic';

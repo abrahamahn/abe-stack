@@ -1,4 +1,4 @@
-// apps/server/src/logger/middleware.ts
+// src/apps/server/src/logger/middleware.ts
 /**
  * Logging Middleware
  *
@@ -14,7 +14,8 @@ import {
 
 import { createRequestLogger } from './logger';
 
-import type { Logger, RequestContext } from '@abe-stack/shared';
+import type { RequestContext } from '@abe-stack/shared';
+import type { Logger } from '@abe-stack/shared/core';
 import type { FastifyInstance } from 'fastify';
 
 // Extend Fastify request with our custom properties

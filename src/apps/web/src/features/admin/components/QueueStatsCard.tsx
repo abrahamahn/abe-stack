@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/QueueStatsCard.tsx
+// src/apps/web/src/features/admin/components/QueueStatsCard.tsx
 /**
  * QueueStatsCard component
  *

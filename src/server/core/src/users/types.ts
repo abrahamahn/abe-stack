@@ -1,4 +1,4 @@
-// backend/core/src/users/types.ts
+// src/server/core/src/users/types.ts
 /**
  * Users Module Types
  *
@@ -19,7 +19,7 @@ import type {
   RequestContext,
   RequestInfo,
   StorageService,
-} from '@abe-stack/shared/contracts';
+} from '@abe-stack/shared/core';
 
 // ============================================================================
 // Logger Interface (Transition Alias)

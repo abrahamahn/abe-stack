@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/index.ts
+// src/apps/web/src/features/admin/pages/index.ts
 export { JobMonitorPage } from './JobMonitorPage';
 export { PlanManagementPage } from './PlanManagementPage';
 export { SecurityEventDetailPage } from './SecurityEventDetailPage';

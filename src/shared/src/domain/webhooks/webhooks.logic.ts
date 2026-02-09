@@ -1,4 +1,4 @@
-// packages/shared/src/domain/webhooks/webhooks.logic.ts
+// src/shared/src/domain/webhooks/webhooks.logic.ts
 
 /**
  * @file Webhook Domain Logic

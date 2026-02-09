@@ -1,4 +1,4 @@
-// packages/shared/src/config/auth-helpers.test.ts
+// src/shared/src/config/auth-helpers.test.ts
 /**
  * Auth Configuration Helpers Unit Tests
  *

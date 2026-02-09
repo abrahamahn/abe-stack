@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useUserActions.test.ts
+// src/apps/web/src/features/admin/hooks/useUserActions.test.ts
 /**
  * Tests for useUserActions hook
  *
@@ -13,12 +13,7 @@ import { createAdminApiClient } from '../services/adminApi';
 import { useUserActions } from './useUserActions';
 
 import type { AdminApiClient } from '../services/adminApi';
-import type {
-  AdminLockUserRequest,
-  AdminLockUserResponse,
-  AdminUpdateUserRequest,
-  AdminUpdateUserResponse,
-} from '@abe-stack/shared';
+import type { AdminLockUserResponse, AdminUpdateUserResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Mocks
@@ -51,12 +46,16 @@ const mockUpdateResponse: AdminUpdateUserResponse = {
   user: {
     id: 'user-123',
     email: 'updated@example.com',
-    name: 'Updated Name',
+    username: 'updateduser',
+    firstName: 'Updated',
+    lastName: 'Name',
     role: 'admin',
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00Z',
     lockedUntil: null,
     failedLoginAttempts: 0,
+    phone: null,
+    phoneVerified: false,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z',
   },
@@ -107,7 +106,7 @@ describe('useUserActions', () => {
 
       const { result } = renderHook(() => useUserActions());
 
-      const updateData: AdminUpdateUserRequest = { name: 'Updated Name' };
+      const updateData = { firstName: 'Updated', lastName: 'Name' };
       let response: AdminUpdateUserResponse | null = null;
 
       await act(async () => {
@@ -131,7 +130,7 @@ describe('useUserActions', () => {
       const { result } = renderHook(() => useUserActions());
 
       act(() => {
-        void result.current.updateUserAction('user-123', { name: 'Test' });
+        void result.current.updateUserAction('user-123', { firstName: 'Test' });
       });
 
       await waitFor(() => {
@@ -155,7 +154,7 @@ describe('useUserActions', () => {
       let response: AdminUpdateUserResponse | null = null;
 
       await act(async () => {
-        response = await result.current.updateUserAction('user-123', { name: 'Test' });
+        response = await result.current.updateUserAction('user-123', { firstName: 'Test' });
       });
 
       expect(response).toBeNull();
@@ -169,7 +168,7 @@ describe('useUserActions', () => {
       const { result } = renderHook(() => useUserActions());
 
       await act(async () => {
-        await result.current.updateUserAction('user-123', { name: 'Test' });
+        await result.current.updateUserAction('user-123', { firstName: 'Test' });
       });
 
       expect(result.current.error).toBe('Failed to update user');
@@ -181,7 +180,7 @@ describe('useUserActions', () => {
       const { result } = renderHook(() => useUserActions());
 
       await act(async () => {
-        await result.current.updateUserAction('user-123', { name: 'Test' });
+        await result.current.updateUserAction('user-123', { firstName: 'Test' });
       });
 
       expect(result.current.error).toBe('First error');
@@ -189,7 +188,7 @@ describe('useUserActions', () => {
       mockUpdateUser.mockResolvedValue(mockUpdateResponse);
 
       await act(async () => {
-        await result.current.updateUserAction('user-123', { name: 'Test 2' });
+        await result.current.updateUserAction('user-123', { firstName: 'Test2' });
       });
 
       expect(result.current.error).toBeNull();
@@ -202,7 +201,7 @@ describe('useUserActions', () => {
 
       const { result } = renderHook(() => useUserActions());
 
-      const lockData: AdminLockUserRequest = { reason: 'Suspicious activity' };
+      const lockData = { reason: 'Suspicious activity' };
       let response: AdminLockUserResponse | null = null;
 
       await act(async () => {
@@ -355,7 +354,7 @@ describe('useUserActions', () => {
       const { result } = renderHook(() => useUserActions());
 
       await act(async () => {
-        await result.current.updateUserAction('user-123', { name: 'Test' });
+        await result.current.updateUserAction('user-123', { firstName: 'Test' });
       });
 
       expect(result.current.error).toBe('Test error');
@@ -376,7 +375,7 @@ describe('useUserActions', () => {
       const { result } = renderHook(() => useUserActions());
 
       await act(async () => {
-        await result.current.updateUserAction('user-1', { name: 'Test' });
+        await result.current.updateUserAction('user-1', { firstName: 'Test' });
       });
 
       expect(result.current.lastAction).toBe('update');

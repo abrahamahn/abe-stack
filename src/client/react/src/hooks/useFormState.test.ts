@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useFormState.test.ts
+// src/client/react/src/hooks/useFormState.test.ts
 /** @vitest-environment jsdom */
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

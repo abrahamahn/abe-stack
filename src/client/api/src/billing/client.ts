@@ -1,4 +1,4 @@
-// client/src/billing/client.ts
+// src/client/api/src/billing/client.ts
 /**
  * Billing API Client
  *

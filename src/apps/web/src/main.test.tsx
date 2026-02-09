@@ -1,4 +1,4 @@
-// apps/web/src/main.test.tsx
+// src/apps/web/src/main.test.tsx
 /**
  * Unit tests for application entry point.
  *

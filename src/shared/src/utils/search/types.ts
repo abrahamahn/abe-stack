@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/types.ts
+// src/shared/src/utils/search/types.ts
 /**
  * Search & Filtering Core Types
  *

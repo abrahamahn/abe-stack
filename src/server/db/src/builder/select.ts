@@ -1,4 +1,4 @@
-// backend/db/src/builder/select.ts
+// src/server/db/src/builder/select.ts
 /**
  * SelectBuilder - Fluent API for building SELECT queries
  *
@@ -24,7 +24,7 @@ import {
   type SortSpec,
   type SqlFragment,
   type TableSpec,
-} from './types';
+} from './types/types';
 
 /**
  * A computed column expression with optional alias

@@ -1,9 +1,14 @@
-// apps/web/src/features/auth/components/RegisterForm.tsx
+// src/apps/web/src/features/auth/components/RegisterForm.tsx
 import { Button, Input, Link, PasswordInput, Text, useResendCooldown } from '@abe-stack/ui';
 import { useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
 
+import type {
+  RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+} from '@abe-stack/shared';
 import type { AuthMode } from '@abe-stack/ui';
 import type { ChangeEvent, ReactElement } from 'react';
 
@@ -11,20 +16,9 @@ import type { ChangeEvent, ReactElement } from 'react';
 // Local Types (for ESLint type resolution)
 // ============================================================================
 
-interface RegisterRequestLocal {
-  email: string;
-  password: string;
-  name?: string;
-}
-
-interface RegisterResponseLocal {
-  email: string;
-  message: string;
-}
-
-interface ResendVerificationRequestLocal {
-  email: string;
-}
+type RegisterRequestLocal = RegisterRequest;
+type RegisterResponseLocal = RegisterResponse;
+type ResendVerificationRequestLocal = ResendVerificationRequest;
 
 // ============================================================================
 // Types
@@ -47,7 +41,9 @@ export const RegisterForm = ({
   error,
 }: RegisterFormProps): ReactElement => {
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [registrationResult, setRegistrationResult] = useState<RegisterResponseLocal | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
@@ -61,8 +57,10 @@ export const RegisterForm = ({
     try {
       const result: RegisterResponseLocal = await onRegister({
         email,
+        username,
+        firstName,
+        lastName,
         password,
-        ...(name.length > 0 && { name }),
       });
       setRegistrationResult(result);
     } catch {
@@ -207,12 +205,36 @@ export const RegisterForm = ({
           />
 
           <Input.Field
-            label="Name (optional)"
+            label="Username"
             type="text"
-            value={name}
+            value={username}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setName(e.target.value);
+              setUsername(e.target.value);
             }}
+            required
+            disabled={isLoading}
+            placeholder="Choose a unique username"
+          />
+
+          <Input.Field
+            label="First Name"
+            type="text"
+            value={firstName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setFirstName(e.target.value);
+            }}
+            required
+            disabled={isLoading}
+          />
+
+          <Input.Field
+            label="Last Name"
+            type="text"
+            value={lastName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setLastName(e.target.value);
+            }}
+            required
             disabled={isLoading}
           />
 

@@ -1,4 +1,4 @@
-// tools/sync/sync-css-theme.ts
+// src/tools/sync/sync-css-theme.ts
 /**
  * Build theme.css from TypeScript theme source files
  *
@@ -15,7 +15,7 @@ import { generateThemeCss } from '../../client/ui/src/theme/buildThemeCss';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const themeCssPath = path.resolve(__dirname, '../../client/ui/src/styles/theme.css');
-const cacheDir = path.resolve(__dirname, '../../.cache');
+const cacheDir = path.resolve(__dirname, '../../node_modules/.cache');
 const themeHashPath = path.join(cacheDir, 'theme-css.hash');
 
 const isQuiet = process.argv.includes('--quiet');

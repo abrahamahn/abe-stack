@@ -1,4 +1,4 @@
-// packages/shared/src/core/policy.ts
+// src/shared/src/core/policy.ts
 /**
  * @file Authorization Policy
  * @description Centralized, pure authorization rules for the entire platform.

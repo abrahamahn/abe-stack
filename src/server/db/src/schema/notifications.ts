@@ -1,4 +1,4 @@
-// backend/db/src/schema/notifications.ts
+// src/server/db/src/schema/notifications.ts
 /**
  * Notifications Schema Types
  *

@@ -1,4 +1,4 @@
-// backend/engine/src/storage/http/signatures.ts
+// src/server/engine/src/storage/http/signatures.ts
 /**
  * HTTP File Signature Utilities
  *

@@ -1,4 +1,4 @@
-// client/api/src/api/index.ts
+// src/client/api/src/api/index.ts
 /**
  * API Client Module
  *

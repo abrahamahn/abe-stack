@@ -1,4 +1,4 @@
-// backend/core/src/billing/stripe-provider.test.ts
+// src/server/core/src/billing/stripe-provider.test.ts
 /**
  * Unit tests for Stripe billing provider
  *

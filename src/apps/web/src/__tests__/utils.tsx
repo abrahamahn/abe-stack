@@ -36,10 +36,16 @@ import type { ReactElement, ReactNode } from 'react';
 export const mockUser: User = {
   id: 'user-123' as unknown as UserId,
   email: 'test@example.com',
-  name: 'Test User',
+  username: 'testuser',
+  firstName: 'Test',
+  lastName: 'User',
   avatarUrl: null,
   role: 'user',
-  isVerified: true,
+  emailVerified: true,
+  phone: null,
+  phoneVerified: null,
+  dateOfBirth: null,
+  gender: null,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -50,10 +56,16 @@ export const mockUser: User = {
 export const mockAdminUser: User = {
   id: 'admin-123' as unknown as UserId,
   email: 'admin@example.com',
-  name: 'Admin User',
+  username: 'adminuser',
+  firstName: 'Admin',
+  lastName: 'User',
   avatarUrl: null,
   role: 'admin',
-  isVerified: true,
+  emailVerified: true,
+  phone: null,
+  phoneVerified: null,
+  dateOfBirth: null,
+  gender: null,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -72,6 +84,10 @@ export const mockConfig: ClientConfig = {
   apiUrl: 'http://localhost:3000/api',
   tokenRefreshInterval: 13 * 60 * 1000,
   uiVersion: '1.0.0',
+  queryPersistence: {
+    maxAge: 24 * 60 * 60 * 1000,
+    throttleTime: 1000,
+  },
 };
 
 // ============================================================================
@@ -232,7 +248,16 @@ export function createMockEnvironment(options: MockEnvironmentOptions = {}): Cli
   });
 
   return {
-    config: { ...mockConfig, ...configOverrides },
+    config: {
+      ...mockConfig,
+      ...configOverrides,
+      queryPersistence: {
+        maxAge: configOverrides?.queryPersistence?.maxAge ?? mockConfig.queryPersistence.maxAge,
+        throttleTime:
+          configOverrides?.queryPersistence?.throttleTime ??
+          mockConfig.queryPersistence.throttleTime,
+      },
+    },
     queryCache,
     auth: createMockAuthService(authOptions),
   };

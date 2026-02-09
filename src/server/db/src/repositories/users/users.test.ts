@@ -1,4 +1,4 @@
-// backend/db/src/repositories/users/users.test.ts
+// src/server/db/src/repositories/users/users.test.ts
 /**
  * Tests for Users Repository
  *
@@ -37,6 +37,7 @@ const createMockDb = (): RawDb => ({
 const mockUser: User = {
   id: 'usr-123',
   email: 'test@example.com',
+  canonicalEmail: 'test@example.com',
   passwordHash: '$2b$10$hashedpassword',
   name: 'Test User',
   avatarUrl: null,
@@ -53,6 +54,7 @@ const mockUser: User = {
 const mockDbRow = {
   id: 'usr-123',
   email: 'test@example.com',
+  canonical_email: 'test@example.com',
   password_hash: '$2b$10$hashedpassword',
   name: 'Test User',
   avatar_url: null,
@@ -102,7 +104,7 @@ describe('createUserRepository', () => {
       expect(result).toBeNull();
     });
 
-    it('should query with email where clause', async () => {
+    it('should query with canonical_email where clause', async () => {
       vi.mocked(mockDb.queryOne).mockResolvedValue(mockDbRow);
 
       const repo = createUserRepository(mockDb);
@@ -110,7 +112,7 @@ describe('createUserRepository', () => {
 
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('email'),
+          text: expect.stringContaining('canonical_email'),
         }),
       );
     });
@@ -123,7 +125,7 @@ describe('createUserRepository', () => {
 
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          values: expect.arrayContaining(['TEST@EXAMPLE.COM']),
+          values: expect.arrayContaining(['test@example.com']),
         }),
       );
     });
@@ -246,6 +248,7 @@ describe('createUserRepository', () => {
     it('should insert and return new user', async () => {
       const newUser: NewUser = {
         email: 'new@example.com',
+        canonicalEmail: 'new@example.com',
         passwordHash: '$2b$10$newhashedpassword',
         name: 'New User',
       };
@@ -276,6 +279,7 @@ describe('createUserRepository', () => {
     it('should create user with minimal required fields', async () => {
       const minimalUser: NewUser = {
         email: 'minimal@example.com',
+        canonicalEmail: 'minimal@example.com',
         passwordHash: '$2b$10$hash',
       };
 
@@ -309,6 +313,7 @@ describe('createUserRepository', () => {
       const userWithId: NewUser = {
         id: 'custom-usr-id',
         email: 'custom@example.com',
+        canonicalEmail: 'custom@example.com',
         passwordHash: '$2b$10$hash',
       };
 
@@ -327,6 +332,7 @@ describe('createUserRepository', () => {
     it('should create user with admin role', async () => {
       const adminUser: NewUser = {
         email: 'admin@example.com',
+        canonicalEmail: 'admin@example.com',
         passwordHash: '$2b$10$hash',
         role: 'admin',
       };
@@ -346,6 +352,7 @@ describe('createUserRepository', () => {
     it('should create user with email already verified', async () => {
       const verifiedUser: NewUser = {
         email: 'verified@example.com',
+        canonicalEmail: 'verified@example.com',
         passwordHash: '$2b$10$hash',
         emailVerified: true,
         emailVerifiedAt: new Date('2024-01-01T10:00:00Z'),
@@ -368,6 +375,7 @@ describe('createUserRepository', () => {
     it('should create user with avatar URL', async () => {
       const userWithAvatar: NewUser = {
         email: 'avatar@example.com',
+        canonicalEmail: 'avatar@example.com',
         passwordHash: '$2b$10$hash',
         avatarUrl: 'https://example.com/avatar.jpg',
       };
@@ -392,6 +400,7 @@ describe('createUserRepository', () => {
       await expect(
         repo.create({
           email: 'fail@example.com',
+          canonicalEmail: 'fail@example.com',
           passwordHash: '$2b$10$hash',
         }),
       ).rejects.toThrow('Failed to create user');
@@ -400,6 +409,7 @@ describe('createUserRepository', () => {
     it('should return RETURNING clause in query', async () => {
       const newUser: NewUser = {
         email: 'returning@example.com',
+        canonicalEmail: 'returning@example.com',
         passwordHash: '$2b$10$hash',
       };
 
@@ -418,6 +428,7 @@ describe('createUserRepository', () => {
     it('should convert camelCase input to snake_case for database', async () => {
       const newUser: NewUser = {
         email: 'camel@example.com',
+        canonicalEmail: 'camel@example.com',
         passwordHash: '$2b$10$hash',
         emailVerified: true,
         failedLoginAttempts: 0,

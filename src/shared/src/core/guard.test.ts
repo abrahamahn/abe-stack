@@ -1,4 +1,4 @@
-// packages/shared/src/core/guard.test.ts
+// src/shared/src/core/guard.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

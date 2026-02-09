@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/LoginForm.test.tsx
+// src/apps/web/src/features/auth/components/LoginForm.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -53,9 +53,9 @@ describe('LoginForm', () => {
     it('renders the email input field', () => {
       renderWithRouter(<LoginForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       expect(emailInput).toBeInTheDocument();
-      expect(emailInput).toHaveAttribute('type', 'email');
+      expect(emailInput).toHaveAttribute('type', 'text');
       expect(emailInput).toBeRequired();
     });
 
@@ -102,7 +102,7 @@ describe('LoginForm', () => {
       const user = userEvent.setup();
       renderWithRouter(<LoginForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       await user.type(emailInput, 'test@example.com');
 
       expect(emailInput).toHaveValue('test@example.com');
@@ -122,7 +122,7 @@ describe('LoginForm', () => {
       const mockOnLogin = vi.fn().mockResolvedValue(undefined);
       renderWithRouter(<LoginForm {...defaultProps} onLogin={mockOnLogin} />);
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -132,7 +132,7 @@ describe('LoginForm', () => {
 
       await waitFor(() => {
         expect(mockOnLogin).toHaveBeenCalledWith({
-          email: 'test@example.com',
+          identifier: 'test@example.com',
           password: 'password123',
         });
       });
@@ -145,7 +145,7 @@ describe('LoginForm', () => {
         <LoginForm {...defaultProps} onLogin={mockOnLogin} onSuccess={mockOnSuccess} />,
       );
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -161,7 +161,7 @@ describe('LoginForm', () => {
     it('does not call onLogin when no handler provided', () => {
       renderWithRouter(<LoginForm {...defaultProps} />);
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -170,7 +170,7 @@ describe('LoginForm', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
       // No error should be thrown
-      expect(screen.getByLabelText('Email')).toHaveValue('test@example.com');
+      expect(screen.getByLabelText('Email or Username')).toHaveValue('test@example.com');
     });
 
     it('calls onForgotPassword with current email when forgot password is clicked', () => {
@@ -184,7 +184,7 @@ describe('LoginForm', () => {
         />,
       );
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.click(screen.getByRole('button', { name: 'Forgot your password?' }));
@@ -234,7 +234,7 @@ describe('LoginForm', () => {
     it('disables email input when isLoading is true', () => {
       renderWithRouter(<LoginForm {...defaultProps} isLoading={true} />);
 
-      expect(screen.getByLabelText('Email')).toBeDisabled();
+      expect(screen.getByLabelText('Email or Username')).toBeDisabled();
     });
 
     it('disables password input when isLoading is true', () => {
@@ -268,7 +268,7 @@ describe('LoginForm', () => {
       const mockOnLogin = vi.fn().mockRejectedValue(new Error('Network error'));
       renderWithRouter(<LoginForm {...defaultProps} onLogin={mockOnLogin} />);
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -281,7 +281,7 @@ describe('LoginForm', () => {
       });
 
       // Should not throw, error is caught
-      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email or Username')).toBeInTheDocument();
     });
 
     it('does not call onSuccess when onLogin throws', async () => {
@@ -291,7 +291,7 @@ describe('LoginForm', () => {
         <LoginForm {...defaultProps} onLogin={mockOnLogin} onSuccess={mockOnSuccess} />,
       );
 
-      fireEvent.change(screen.getByLabelText('Email'), {
+      fireEvent.change(screen.getByLabelText('Email or Username'), {
         target: { value: 'test@example.com' },
       });
       fireEvent.change(screen.getByLabelText('Password'), {
@@ -311,7 +311,7 @@ describe('LoginForm', () => {
     it('requires email field via HTML validation', () => {
       renderWithRouter(<LoginForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       expect(emailInput).toBeRequired();
     });
 
@@ -335,7 +335,7 @@ describe('LoginForm', () => {
     it('has accessible email input with label', () => {
       renderWithRouter(<LoginForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       expect(emailInput).toBeInTheDocument();
     });
 
@@ -357,11 +357,21 @@ describe('LoginForm', () => {
   describe('Edge Cases', () => {
     it('handles empty email when forgot password is clicked', () => {
       const mockOnForgotPassword = vi.fn();
-      renderWithRouter(<LoginForm {...defaultProps} onForgotPassword={mockOnForgotPassword} />);
+      const mockOnModeChange = vi.fn();
+      renderWithRouter(
+        <LoginForm
+          {...defaultProps}
+          onForgotPassword={mockOnForgotPassword}
+          onModeChange={mockOnModeChange}
+        />,
+      );
 
       fireEvent.click(screen.getByRole('button', { name: 'Forgot your password?' }));
 
-      expect(mockOnForgotPassword).toHaveBeenCalledWith({ email: '' });
+      // Empty identifier (no @ symbol) means onForgotPassword is not called
+      expect(mockOnForgotPassword).not.toHaveBeenCalled();
+      // But onModeChange should be called
+      expect(mockOnModeChange).toHaveBeenCalledWith('forgot-password');
     });
 
     it('does not call onModeChange for forgot password if not provided', () => {
@@ -370,8 +380,8 @@ describe('LoginForm', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Forgot your password?' }));
 
-      // onForgotPassword should still be called
-      expect(mockOnForgotPassword).toHaveBeenCalledWith({ email: '' });
+      // onForgotPassword not called with empty identifier (no @ symbol)
+      expect(mockOnForgotPassword).not.toHaveBeenCalled();
     });
   });
 });

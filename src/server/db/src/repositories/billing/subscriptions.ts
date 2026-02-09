@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/subscriptions.ts
+// src/server/db/src/repositories/billing/subscriptions.ts
 /**
  * Subscriptions Repository
  *

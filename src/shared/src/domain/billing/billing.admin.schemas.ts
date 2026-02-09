@@ -1,4 +1,4 @@
-// packages/shared/src/domain/billing/billing.admin.schemas.ts
+// src/shared/src/domain/billing/billing.admin.schemas.ts
 
 /**
  * @file Billing Admin Schemas
@@ -6,7 +6,6 @@
  * @module Domain/Billing/Admin
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
 import {
   createSchema,
   parseBoolean,
@@ -16,7 +15,8 @@ import {
   parseString,
   withDefault,
   createEnumSchema,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 
 import {
   planFeatureSchema,
@@ -27,7 +27,7 @@ import {
   type PlanInterval,
 } from './billing.schemas';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 
 // ============================================================================
 // Types

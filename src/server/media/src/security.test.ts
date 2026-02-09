@@ -1,4 +1,4 @@
-// premium/media/src/security.test.ts
+// src/server/media/src/security.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { BasicSecurityScanner } from './security';
@@ -165,6 +165,81 @@ describe('BasicSecurityScanner', () => {
       const scanner = new BasicSecurityScanner();
       const result = await scanner.scanFile('/nonexistent.txt');
 
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('Scan failed'))).toBe(true);
+    });
+
+    it('should warn about null bytes only in text-based files', async () => {
+      const fs = await import('fs');
+      // Buffer containing null bytes
+      const buffer = Buffer.from('Hello\x00World');
+
+      const mockFd = {
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.stat).mockResolvedValue({
+        size: buffer.length,
+      } as never);
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+
+      // Text file with null bytes → should warn
+      const textResult = await scanner.scanFile('/suspect.txt');
+      expect(textResult.warnings.some((w: string) => w.includes('null bytes'))).toBe(true);
+    });
+
+    it('should NOT warn about null bytes in binary media files', async () => {
+      const fs = await import('fs');
+      // JPEG-like buffer with null bytes (normal for binary)
+      const buffer = Buffer.alloc(1024, 0);
+      buffer[0] = 0xff;
+      buffer[1] = 0xd8;
+      buffer[2] = 0xff;
+
+      const mockFd = {
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.stat).mockResolvedValue({
+        size: buffer.length,
+      } as never);
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+
+      // Binary file with null bytes → should NOT warn about null bytes
+      const binaryResult = await scanner.scanFile('/image.jpg');
+      expect(binaryResult.warnings.every((w: string) => !w.includes('null bytes'))).toBe(true);
+    });
+
+    it('should close file descriptor even when fd.read() throws', async () => {
+      const fs = await import('fs');
+      const closeFn = vi.fn().mockResolvedValue(undefined);
+      const mockFd = {
+        read: vi.fn().mockRejectedValue(new Error('Read error')),
+        close: closeFn,
+      };
+
+      vi.mocked(fs.promises.stat).mockResolvedValue({
+        size: 1024,
+      } as never);
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/failing-read.bin');
+
+      // fd.close() must still be called despite fd.read() throwing
+      expect(closeFn).toHaveBeenCalledTimes(1);
       expect(result.safe).toBe(false);
       expect(result.threats.some((t: string) => t.includes('Scan failed'))).toBe(true);
     });

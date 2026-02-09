@@ -1,10 +1,11 @@
-// packages/shared/src/domain/billing/index.ts
+// src/shared/src/domain/billing/index.ts
 
 export { PLAN_FEES, calculateProration, type BillingStats } from './billing.logic';
 
 export { billingContract } from './billing.contracts';
 
 export {
+  BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
   FEATURE_KEYS,
   INVOICE_STATUSES,
@@ -30,6 +31,7 @@ export {
   subscriptionSchema,
   updateSubscriptionRequestSchema,
   type AddPaymentMethodRequest,
+  type BillingEventType,
   type BillingProvider,
   type CancelSubscriptionRequest,
   type CardDetails,
@@ -99,3 +101,29 @@ export {
   WebhookEventAlreadyProcessedError,
   WebhookSignatureError,
 } from './billing.errors';
+
+export {
+  assertEntitled,
+  assertWithinLimit,
+  hasActiveSubscription,
+  isEntitled,
+  resolveEntitlements,
+  type EntitlementInput,
+  type FeatureEntitlement,
+  type ResolvedEntitlements,
+  type SubscriptionState,
+} from './billing.entitlements';
+
+export {
+  type BillingService,
+  type CheckoutParams,
+  type CheckoutResult,
+  type CreateProductParams,
+  type CreateProductResult,
+  type NormalizedEventType,
+  type NormalizedWebhookEvent,
+  type ProviderInvoice,
+  type ProviderPaymentMethod,
+  type ProviderSubscription,
+  type SetupIntentResult,
+} from './billing.service-types';

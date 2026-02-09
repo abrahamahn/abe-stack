@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserDetailCard.test.tsx
+// src/apps/web/src/features/admin/components/UserDetailCard.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -10,12 +10,16 @@ describe('UserDetailCard', () => {
   const mockUser: AdminUser = {
     id: 'user-123',
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: '2024-01-15T10:30:00Z',
     failedLoginAttempts: 2,
     lockedUntil: null,
+    phone: null,
+    phoneVerified: false,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-10T00:00:00Z',
   };
@@ -72,18 +76,32 @@ describe('UserDetailCard', () => {
       expect(screen.getByText('test@example.com')).toBeInTheDocument();
     });
 
-    it('should display name', () => {
+    it('should display username', () => {
       render(<UserDetailCard user={mockUser} isLoading={false} />);
 
-      expect(screen.getByText('Name')).toBeInTheDocument();
-      expect(screen.getByText('Test User')).toBeInTheDocument();
+      expect(screen.getByText('Username')).toBeInTheDocument();
+      expect(screen.getByText('testuser')).toBeInTheDocument();
+    });
+
+    it('should display first name', () => {
+      render(<UserDetailCard user={mockUser} isLoading={false} />);
+
+      expect(screen.getByText('First Name')).toBeInTheDocument();
+      expect(screen.getByText('Test')).toBeInTheDocument();
+    });
+
+    it('should display last name', () => {
+      render(<UserDetailCard user={mockUser} isLoading={false} />);
+
+      expect(screen.getByText('Last Name')).toBeInTheDocument();
+      expect(screen.getAllByText('User').length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display role with RoleBadge', () => {
       render(<UserDetailCard user={mockUser} isLoading={false} />);
 
       expect(screen.getByText('Role')).toBeInTheDocument();
-      expect(screen.getByText('User')).toBeInTheDocument();
+      expect(screen.getAllByText('User').length).toBeGreaterThanOrEqual(1);
     });
 
     it('should display status with StatusBadge', () => {
@@ -120,19 +138,6 @@ describe('UserDetailCard', () => {
       render(<UserDetailCard user={mockUser} isLoading={false} />);
 
       expect(screen.getByText('Updated At')).toBeInTheDocument();
-    });
-  });
-
-  describe('when user has no name', () => {
-    it('should display "Not set" for null name', () => {
-      const userWithoutName: AdminUser = {
-        ...mockUser,
-        name: null,
-      };
-
-      render(<UserDetailCard user={userWithoutName} isLoading={false} />);
-
-      expect(screen.getByText('Not set')).toBeInTheDocument();
     });
   });
 
@@ -234,7 +239,7 @@ describe('UserDetailCard', () => {
       render(<UserDetailCard user={mockUser} isLoading={false} />);
 
       // RoleBadge should render the role
-      expect(screen.getByText('User')).toBeInTheDocument();
+      expect(screen.getAllByText('User').length).toBeGreaterThanOrEqual(1);
     });
 
     it('should render StatusBadge component', () => {

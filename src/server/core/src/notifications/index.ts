@@ -1,4 +1,4 @@
-// backend/core/src/notifications/index.ts
+// src/server/core/src/notifications/index.ts
 /**
  * @abe-stack/notifications - Push Notification Module
  *

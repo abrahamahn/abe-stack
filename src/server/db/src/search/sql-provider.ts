@@ -1,4 +1,4 @@
-// backend/db/src/search/sql-provider.ts
+// src/server/db/src/search/sql-provider.ts
 /**
  * SQL Search Provider
  *

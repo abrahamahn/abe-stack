@@ -1,4 +1,4 @@
-// packages/shared/src/types/roles.ts
+// src/shared/src/types/roles.ts
 
 /**
  * @file App Roles
@@ -7,7 +7,7 @@
  * @module Shared/Types
  */
 
-import { createEnumSchema } from '../contracts/schema';
+import { createEnumSchema } from '../core/schema.utils';
 
 // ============================================================================
 // Role Definitions
@@ -34,6 +34,18 @@ export type AppRole = (typeof APP_ROLES)[number];
  * Schema for validating application roles.
  */
 export const appRoleSchema = createEnumSchema(APP_ROLES, 'app role');
+
+/**
+ * Legacy alias for `APP_ROLES`.
+ * Prefer importing `APP_ROLES` and `AppRole` in new code.
+ */
+export const USER_ROLES = APP_ROLES;
+
+/** Legacy alias for `AppRole`. */
+export type UserRole = AppRole;
+
+/** Legacy alias for `appRoleSchema`. */
+export const userRoleSchema = appRoleSchema;
 // ============================================================================
 // Tenant Role Definitions
 // ============================================================================

@@ -1,4 +1,4 @@
-// backend/engine/src/index.ts
+// src/server/engine/src/index.ts
 /**
  * @abe-stack/server-engine
  *
@@ -24,6 +24,7 @@ export {
 // ============================================================================
 
 export { MailerClient } from './mailer/client';
+export { emailTemplates } from './mailer/templates';
 export type { EmailOptions, EmailResult, EmailService } from './mailer/types';
 
 // ============================================================================
@@ -293,9 +294,6 @@ export {
   // SQL Provider
   createSqlSearchProvider,
   SqlSearchProvider,
-  // Elasticsearch Provider
-  createElasticsearchProvider,
-  ElasticsearchProvider,
   // Query Builder
   createSearchQuery,
   fromSearchQuery,
@@ -304,7 +302,6 @@ export {
   getSearchProviderFactory,
   resetSearchProviderFactory,
   SearchProviderFactory,
-  type ElasticsearchProviderOptions,
   type ProviderOptions,
   type SqlSearchProviderOptions,
   // Types
@@ -338,7 +335,22 @@ export {
 } from './system';
 
 // ============================================================================
-// Utilities (Node.js-only)
+// Routing (Fastify-specific)
 // ============================================================================
 
-export { isPortFree, isPortListening, pickAvailablePort, uniquePorts, waitForPort } from './utils';
+export {
+  createRouteMap,
+  protectedRoute,
+  publicRoute,
+  registerRouteMap,
+  type AuthGuardFactory,
+  type HandlerContext,
+  type HttpMethod,
+  type RouteDefinition,
+  type RouteHandler,
+  type RouteMap,
+  type RouteResult,
+  type RouteSchema,
+  type RouterOptions,
+  type ValidationSchema,
+} from './routing';

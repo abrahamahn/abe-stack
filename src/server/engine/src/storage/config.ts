@@ -1,4 +1,4 @@
-// backend/engine/src/storage/config.ts
+// src/server/engine/src/storage/config.ts
 import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from './types';
 
 /**

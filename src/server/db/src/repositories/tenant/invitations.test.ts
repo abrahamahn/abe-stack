@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/invitations.test.ts
+// src/server/db/src/repositories/tenant/invitations.test.ts
 /**
  * Tests for Invitations Repository
  *

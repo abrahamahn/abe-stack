@@ -1,4 +1,4 @@
-// client/ui/src/hooks/usePaginatedQuery.ts
+// src/client/react/src/hooks/usePaginatedQuery.ts
 import { useInfiniteQuery, useQueryCache } from '@abe-stack/client-engine';
 import { useCallback, useMemo, useRef } from 'react';
 

@@ -1,4 +1,4 @@
-// client/ui/src/index.ts
+// src/client/ui/src/index.ts
 // Shared UI components for all platforms (web, desktop, mobile)
 
 // Elements - Atomic UI building blocks

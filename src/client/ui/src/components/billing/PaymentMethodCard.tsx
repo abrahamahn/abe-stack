@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PaymentMethodCard.tsx
+// src/client/ui/src/components/billing/PaymentMethodCard.tsx
 /**
  * PaymentMethodCard Component
  *

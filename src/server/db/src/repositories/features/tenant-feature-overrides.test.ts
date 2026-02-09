@@ -1,4 +1,4 @@
-// backend/db/src/repositories/features/tenant-feature-overrides.test.ts
+// src/server/db/src/repositories/features/tenant-feature-overrides.test.ts
 /**
  * Tests for Tenant Feature Overrides Repository
  *

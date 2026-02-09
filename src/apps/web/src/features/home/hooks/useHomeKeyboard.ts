@@ -1,15 +1,17 @@
-// apps/web/src/features/home/hooks/useHomeKeyboard.ts
+// src/apps/web/src/features/home/hooks/useHomeKeyboard.ts
 import { useCallback, useEffect } from 'react';
 
 import type { HomePaneConfig } from '../types';
 
 /** Keyboard shortcut definitions displayed in the bottom bar. */
 export const HOME_KEYBOARD_SHORTCUTS = [
-  { key: 'T', description: 'Toggle top bar' },
-  { key: 'L', description: 'Toggle left panel' },
-  { key: 'R', description: 'Toggle right panel' },
-  { key: 'B', description: 'Toggle bottom bar' },
-  { key: 'D', description: 'Cycle theme' },
+  { key: '↑', description: 'Toggle top bar' },
+  { key: '↓', description: 'Toggle bottom bar' },
+  { key: '←', description: 'Toggle left panel' },
+  { key: '→', description: 'Toggle right panel' },
+  { key: 'T', description: 'Cycle theme' },
+  { key: 'D', description: 'Cycle density' },
+  { key: 'C', description: 'Cycle contrast' },
   { key: 'Esc', description: 'Clear selection' },
 ] as const;
 
@@ -19,6 +21,10 @@ export interface UseHomeKeyboardOptions {
   togglePane: (pane: keyof HomePaneConfig) => void;
   /** Cycle through theme modes */
   cycleTheme: () => void;
+  /** Cycle through density modes */
+  cycleDensity: () => void;
+  /** Cycle through contrast modes */
+  cycleContrast: () => void;
   /** Clear the currently selected document */
   clearSelection: () => void;
 }
@@ -33,35 +39,50 @@ export interface UseHomeKeyboardOptions {
 export function useHomeKeyboard({
   togglePane,
   cycleTheme,
+  cycleDensity,
+  cycleContrast,
   clearSelection,
 }: UseHomeKeyboardOptions): void {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement ||
+        (e.target instanceof HTMLElement && e.target.isContentEditable)
+      ) {
         return;
       }
 
       switch (e.key.toUpperCase()) {
-        case 'T':
+        case 'ARROWUP':
           e.preventDefault();
           togglePane('top');
           break;
-        case 'L':
-          e.preventDefault();
-          togglePane('left');
-          break;
-        case 'R':
-          e.preventDefault();
-          togglePane('right');
-          break;
-        case 'B':
+        case 'ARROWDOWN':
           e.preventDefault();
           togglePane('bottom');
           break;
-        case 'D':
+        case 'ARROWLEFT':
+          e.preventDefault();
+          togglePane('left');
+          break;
+        case 'ARROWRIGHT':
+          e.preventDefault();
+          togglePane('right');
+          break;
+        case 'T':
           e.preventDefault();
           cycleTheme();
+          break;
+        case 'D':
+          e.preventDefault();
+          cycleDensity();
+          break;
+        case 'C':
+          e.preventDefault();
+          cycleContrast();
           break;
         case 'ESCAPE':
           e.preventDefault();
@@ -69,7 +90,7 @@ export function useHomeKeyboard({
           break;
       }
     },
-    [togglePane, cycleTheme, clearSelection],
+    [togglePane, cycleTheme, cycleDensity, cycleContrast, clearSelection],
   );
 
   useEffect(() => {

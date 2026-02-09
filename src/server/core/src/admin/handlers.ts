@@ -1,4 +1,4 @@
-// backend/core/src/admin/handlers.ts
+// src/server/core/src/admin/handlers.ts
 /**
  * Admin Handlers
  *
@@ -24,7 +24,7 @@ export async function handleAdminUnlock(
   request: AdminRequest,
 ): Promise<
   | { status: 200; body: UnlockAccountResponse }
-  | { status: 401 | 403 | 404 | 500; body: { message: string } }
+  | { status: 400 | 401 | 403 | 404 | 500; body: { message: string } }
 > {
   // User and role are already verified by middleware
   const user = request.user;
@@ -38,6 +38,9 @@ export async function handleAdminUnlock(
     const userAgent = requestInfo.userAgent;
 
     const { email, reason } = body;
+    if (email === undefined || email === '') {
+      return { status: 400, body: { message: 'Email is required' } };
+    }
     const result = await unlockUserAccount(
       ctx.db,
       email,

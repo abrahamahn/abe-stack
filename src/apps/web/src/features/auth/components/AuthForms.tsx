@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/AuthForms.tsx
+// src/apps/web/src/features/auth/components/AuthForms.tsx
 import { ForgotPasswordForm } from './ForgotPasswordForm';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';

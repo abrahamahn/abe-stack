@@ -1,4 +1,4 @@
-// packages/shared/src/core/constants.ts
+// src/shared/src/core/constants.ts
 /**
  * Global Constants
  *

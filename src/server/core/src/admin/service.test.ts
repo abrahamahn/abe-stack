@@ -1,4 +1,4 @@
-// backend/core/src/admin/service.test.ts
+// src/server/core/src/admin/service.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import * as auth from '../auth';

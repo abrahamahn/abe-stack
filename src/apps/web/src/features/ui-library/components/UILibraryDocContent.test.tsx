@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/UILibraryDocContent.test.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryDocContent.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import { UILibraryDocContent } from '@ui-library/components/UILibraryDocContent';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

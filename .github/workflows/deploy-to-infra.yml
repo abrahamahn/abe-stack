@@ -46,35 +46,35 @@ jobs:
         with:
           name: deployment-info-${{ inputs.environment }}-${{ inputs.provider }}
           path: .deploy/
-
+        continue-on-error: true
       - name: Extract Infrastructure Information
         id: get-deployment-info
         run: |
           DEPLOY_FILE=".deploy/${{ inputs.environment }}-${{ inputs.provider }}.json"
 
-          if [ -f "$DEPLOY_FILE" ]; then
-            echo "📋 Found deployment info for ${{ inputs.environment }} on ${{ inputs.provider }}"
-
-            INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
-            SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
-            DOMAIN=$(jq -r '.domain // empty' "$DEPLOY_FILE")
-
-            echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
-            echo "ssh_connection=$SSH_CONNECTION" >> $GITHUB_OUTPUT
-            echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
-
-            echo "## 🚀 Target Infrastructure" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
-            echo "**Domain:** $DOMAIN" >> $GITHUB_STEP_SUMMARY
-            echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ No deployment info found for ${{ inputs.environment }} on ${{ inputs.provider }}"
-            echo "Please run the 'Infrastructure Deploy' workflow first to provision infrastructure."
+          if [ ! -f "$DEPLOY_FILE" ]; then
+            echo "❌ Deployment info not found for ${{ inputs.environment }} on ${{ inputs.provider }}."
+            echo "Please ensure the 'Infrastructure Deploy' workflow has been run successfully for this environment and provider."
             exit 1
           fi
+
+          echo "📋 Found deployment info for ${{ inputs.environment }} on ${{ inputs.provider }}"
+
+          INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
+          SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
+          DOMAIN=$(jq -r '.domain // empty' "$DEPLOY_FILE")
+
+          echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
+          echo "ssh_connection=$SSH_CONNECTION" >> $GITHUB_OUTPUT
+          echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+
+          echo "## 🚀 Target Infrastructure" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
+          echo "**Domain:** $DOMAIN" >> $GITHUB_STEP_SUMMARY
+          echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy:
     runs-on: ubuntu-latest

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/tenants.ts
+// src/server/db/src/repositories/tenant/tenants.ts
 /**
  * Tenants Repository (Functional)
  *

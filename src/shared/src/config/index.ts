@@ -1,4 +1,4 @@
-// packages/shared/src/config/index.ts
+// src/shared/src/config/index.ts
 /**
  * Configuration Module
  *

@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/http-mapper.ts
+// src/server/core/src/auth/utils/http-mapper.ts
 import {
   AccountLockedError,
   EmailAlreadyExistsError,

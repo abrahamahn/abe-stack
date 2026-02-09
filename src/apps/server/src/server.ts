@@ -1,4 +1,4 @@
-// apps/server/src/server.ts
+// src/apps/server/src/server.ts
 /**
  * Fastify Server Factory
  *
@@ -13,7 +13,7 @@
 
 import path from 'node:path';
 
-import { RateLimiter } from '@abe-stack/db';
+import { RateLimiter } from '@abe-stack/server-engine';
 import { createConsoleLogger, isAppError } from '@abe-stack/shared';
 import fastify from 'fastify';
 

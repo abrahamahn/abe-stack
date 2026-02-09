@@ -1,4 +1,4 @@
-// backend/db/src/schema/oauth.test.ts
+// src/server/db/src/schema/oauth.test.ts
 /**
  * OAuth Schema Tests
  *

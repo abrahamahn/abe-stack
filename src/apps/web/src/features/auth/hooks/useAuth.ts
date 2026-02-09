@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/hooks/useAuth.ts
+// src/apps/web/src/features/auth/hooks/useAuth.ts
 /**
  * useAuth hook - Access authentication state and operations.
  *
@@ -37,6 +37,7 @@ export type AuthContextType = {
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
   resendVerification: (data: ResendVerificationRequest) => Promise<void>;
+  verifyTotpLogin: (challengeToken: string, code: string) => Promise<void>;
 };
 
 /**
@@ -117,6 +118,13 @@ export function useAuth(): AuthContextType {
     [auth],
   );
 
+  const verifyTotpLogin = useCallback(
+    async (challengeToken: string, code: string): Promise<void> => {
+      await auth.verifyTotpLogin(challengeToken, code);
+    },
+    [auth],
+  );
+
   return {
     user: state.user,
     isLoading: state.isLoading,
@@ -129,5 +137,6 @@ export function useAuth(): AuthContextType {
     resetPassword,
     verifyEmail,
     resendVerification,
+    verifyTotpLogin,
   };
 }

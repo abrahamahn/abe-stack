@@ -1,4 +1,4 @@
-// client/src/query/index.ts
+// src/client/engine/src/query/index.ts
 /**
  * Query Module
  *

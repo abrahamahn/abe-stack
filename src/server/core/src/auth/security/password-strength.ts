@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-strength.ts
+// src/server/core/src/auth/security/password-strength.ts
 /**
  * Password Strength Estimation
  *

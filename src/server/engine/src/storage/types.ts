@@ -1,4 +1,4 @@
-// backend/engine/src/storage/types.ts
+// src/server/engine/src/storage/types.ts
 /**
  * Storage Provider Types
  *

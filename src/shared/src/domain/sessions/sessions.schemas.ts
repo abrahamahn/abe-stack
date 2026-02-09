@@ -1,4 +1,4 @@
-// packages/shared/src/domain/sessions/sessions.schemas.ts
+// src/shared/src/domain/sessions/sessions.schemas.ts
 
 /**
  * @file Session Domain Schemas
@@ -13,10 +13,10 @@ import {
   parseNullableOptional,
   parseOptional,
   parseString,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
 import { sessionIdSchema, userIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { SessionId, UserId } from '../../types/ids';
 
 // ============================================================================

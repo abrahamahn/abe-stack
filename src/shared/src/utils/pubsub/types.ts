@@ -1,4 +1,4 @@
-// packages/shared/src/utils/pubsub/types.ts
+// src/shared/src/utils/pubsub/types.ts
 /**
  * Pub/Sub Types
  *

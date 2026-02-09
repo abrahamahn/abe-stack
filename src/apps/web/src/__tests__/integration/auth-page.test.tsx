@@ -165,13 +165,13 @@ describe('AuthPage Integration', () => {
     it('should call login with credentials', async () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=login' });
 
-      await user.type(screen.getByLabelText('Email'), 'user@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'user@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalledWith({
-          email: 'user@example.com',
+          identifier: 'user@example.com',
           password: 'password123',
         });
       });
@@ -181,14 +181,18 @@ describe('AuthPage Integration', () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
       await user.type(screen.getByLabelText('Email'), 'new@example.com');
-      await user.type(screen.getByLabelText('Name (optional)'), 'New User');
+      await user.type(screen.getByLabelText('Username'), 'newuser');
+      await user.type(screen.getByLabelText('First Name'), 'New');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'newpass123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(mockRegister).toHaveBeenCalledWith({
           email: 'new@example.com',
-          name: 'New User',
+          username: 'newuser',
+          firstName: 'New',
+          lastName: 'User',
           password: 'newpass123',
         });
       });
@@ -259,7 +263,7 @@ describe('AuthPage Integration', () => {
 
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=login' });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -279,12 +283,12 @@ describe('AuthPage Integration', () => {
 
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=login' });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Email')).toBeDisabled();
+        expect(screen.getByLabelText('Email or Username')).toBeDisabled();
         expect(screen.getByLabelText('Password')).toBeDisabled();
       });
 
@@ -302,7 +306,7 @@ describe('AuthPage Integration', () => {
 
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=login' });
 
-      await user.type(screen.getByLabelText('Email'), 'wrong@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'wrong@example.com');
       await user.type(screen.getByLabelText('Password'), 'wrongpass');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -317,6 +321,9 @@ describe('AuthPage Integration', () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
       await user.type(screen.getByLabelText('Email'), 'existing@example.com');
+      await user.type(screen.getByLabelText('Username'), 'existinguser');
+      await user.type(screen.getByLabelText('First Name'), 'Existing');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 

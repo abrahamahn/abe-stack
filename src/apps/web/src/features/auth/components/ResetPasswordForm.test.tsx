@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/ResetPasswordForm.test.tsx
+// src/apps/web/src/features/auth/components/ResetPasswordForm.test.tsx
 /**
  * Unit tests for ResetPasswordForm component.
  *

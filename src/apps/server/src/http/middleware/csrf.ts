@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/csrf.ts
+// src/apps/server/src/http/middleware/csrf.ts
 /**
  * CSRF Protection
  *
@@ -94,6 +94,7 @@ const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/reset-password',
   '/api/auth/verify-email',
   '/api/auth/refresh',
+  '/api/auth/resend-verification',
 ]);
 
 // ============================================================================

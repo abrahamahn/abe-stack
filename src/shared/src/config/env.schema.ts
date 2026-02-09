@@ -1,4 +1,4 @@
-// packages/shared/src/config/env.schema.ts
+// src/shared/src/config/env.schema.ts
 /**
  * Environment Variable Validation Schemas
  *
@@ -16,9 +16,9 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../contracts/schema';
+} from '../core/schema.utils';
 
-import type { Schema } from '../contracts/types';
+import type { Schema } from '../core/api';
 
 // ============================================================================
 // Sub-Schema Interfaces
@@ -111,6 +111,10 @@ export interface AuthEnv {
   MAGIC_LINK_MAX_ATTEMPTS: number;
   TOTP_ISSUER: string;
   TOTP_WINDOW: number;
+  CAPTCHA_ENABLED?: 'true' | 'false' | undefined;
+  CAPTCHA_PROVIDER?: 'turnstile' | undefined;
+  CAPTCHA_SITE_KEY?: string | undefined;
+  CAPTCHA_SECRET_KEY?: string | undefined;
 }
 
 /** Email environment variables */
@@ -501,6 +505,16 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     ),
     TOTP_ISSUER: parseString(withDefault(obj['TOTP_ISSUER'], 'ABE Stack'), 'TOTP_ISSUER'),
     TOTP_WINDOW: coerceNumber(withDefault(obj['TOTP_WINDOW'], 1), 'TOTP_WINDOW'),
+    CAPTCHA_ENABLED: parseOptional(obj['CAPTCHA_ENABLED'], (v) => trueFalseSchema.parse(v)),
+    CAPTCHA_PROVIDER: parseOptional(obj['CAPTCHA_PROVIDER'], (v) =>
+      createEnumSchema(['turnstile'] as const, 'CAPTCHA_PROVIDER').parse(v),
+    ),
+    CAPTCHA_SITE_KEY: parseOptional(obj['CAPTCHA_SITE_KEY'], (v) =>
+      parseString(v, 'CAPTCHA_SITE_KEY'),
+    ),
+    CAPTCHA_SECRET_KEY: parseOptional(obj['CAPTCHA_SECRET_KEY'], (v) =>
+      parseString(v, 'CAPTCHA_SECRET_KEY'),
+    ),
   };
 });
 

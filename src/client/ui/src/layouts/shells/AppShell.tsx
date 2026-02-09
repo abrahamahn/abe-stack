@@ -1,4 +1,4 @@
-// client/ui/src/layouts/shells/AppShell.tsx
+// src/client/ui/src/layouts/shells/AppShell.tsx
 import { ResizablePanel, ResizablePanelGroup } from '@shells/ResizablePanel';
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/compliance/compliance.logic.test.ts
+// src/shared/src/domain/compliance/compliance.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { getEffectiveConsent, isConsentGranted, needsReacceptance } from './compliance.logic';

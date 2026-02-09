@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/layouts/AdminLayout.test.tsx
+// src/apps/web/src/features/admin/layouts/AdminLayout.test.tsx
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

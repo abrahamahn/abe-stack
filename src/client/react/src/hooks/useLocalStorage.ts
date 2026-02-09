@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useLocalStorage.ts
+// src/client/react/src/hooks/useLocalStorage.ts
 import { useEffect, useRef, useState } from 'react';
 
 /**

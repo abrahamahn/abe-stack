@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useExportEvents.ts
+// src/apps/web/src/features/admin/hooks/useExportEvents.ts
 /**
  * useExportEvents hook
  *

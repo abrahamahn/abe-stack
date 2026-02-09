@@ -1,4 +1,4 @@
-// client/ui/src/components/FocusTrap.tsx
+// src/client/ui/src/components/FocusTrap.tsx
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
 import '../styles/components.css';

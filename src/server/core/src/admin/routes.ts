@@ -1,4 +1,4 @@
-// backend/core/src/admin/routes.ts
+// src/server/core/src/admin/routes.ts
 /**
  * Admin Routes
  *
@@ -11,6 +11,7 @@ import {
   protectedRoute,
   type BaseRouteDefinition,
   type RouteHandler,
+  type RouteMap,
   type RouteResult,
   type ValidationSchema,
   adminLockUserRequestSchema,
@@ -96,7 +97,7 @@ function adminProtectedRoute<TBody, TResult>(
 // Route Definitions
 // ============================================================================
 
-export const adminRoutes = createRouteMap([
+export const adminRoutes: RouteMap = createRouteMap([
   // ============================================================================
   // User Management Routes
   // ============================================================================

@@ -1,4 +1,4 @@
-// premium/media/src/utils/streaming.ts
+// src/server/media/src/utils/streaming.ts
 /**
  * Media Streaming Processor
  *
@@ -12,6 +12,8 @@ import { createReadStream, createWriteStream, promises as fs } from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 
+import { runFFmpeg } from '../ffmpeg-wrapper';
+
 /**
  * Configuration for streaming media processing
  */
@@ -22,20 +24,6 @@ export interface StreamingOptions {
   maxMemoryUsage?: number;
   /** Directory for temporary files during processing */
   tempDir?: string;
-}
-
-/**
- * Fluent-ffmpeg command interface for video streaming operations
- */
-interface FfmpegCommand {
-  videoCodec: (codec: string) => FfmpegCommand;
-  toFormat: (format: string) => FfmpegCommand;
-  size: (size: string) => FfmpegCommand;
-  videoBitrate: (bitrate: string) => FfmpegCommand;
-  setStartTime: (time: number) => FfmpegCommand;
-  setDuration: (duration: number) => FfmpegCommand;
-  on: (event: string, callback: (err?: Error) => void) => FfmpegCommand;
-  save: (outputPath: string) => FfmpegCommand;
 }
 
 /**
@@ -56,17 +44,13 @@ interface SharpInstance {
 
 type SharpFunction = (input: string) => SharpInstance;
 
-/**
- * Lazy-loaded FFmpeg module interface
- */
-interface FfmpegModule {
-  default: (input: string) => FfmpegCommand;
-  setFfmpegPath: (path: string) => void;
-}
+/** Maximum age for temp files before cleanup (24 hours in milliseconds) */
+const TEMP_FILE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Streaming media processor for handling large files without exhausting memory.
- * Uses Sharp for images and FFmpeg for video, both with streaming pipelines.
+ * Uses Sharp for images and the internal FFmpeg wrapper for video,
+ * both with streaming pipelines.
  *
  * @example
  * ```typescript
@@ -79,7 +63,6 @@ interface FfmpegModule {
 export class StreamingMediaProcessor {
   private readonly options: Required<StreamingOptions>;
   private sharpModule: SharpFunction | null = null;
-  private ffmpegModule: FfmpegModule | null = null;
 
   /**
    * Create a streaming media processor
@@ -107,22 +90,6 @@ export class StreamingMediaProcessor {
       this.sharpModule = sharpModule.default;
     }
     return this.sharpModule;
-  }
-
-  /**
-   * Lazy load ffmpeg module
-   *
-   * @returns The FFmpeg module with static path configured
-   * @complexity O(1) after first call (cached)
-   */
-  private async getFfmpeg(): Promise<FfmpegModule> {
-    if (this.ffmpegModule === null) {
-      const ffmpegStaticModule = (await import('ffmpeg-static')) as { default: string };
-      const ffmpegModule = (await import('fluent-ffmpeg')) as unknown as FfmpegModule;
-      this.ffmpegModule = ffmpegModule;
-      this.ffmpegModule.setFfmpegPath(ffmpegStaticModule.default);
-    }
-    return this.ffmpegModule;
   }
 
   /**
@@ -188,7 +155,8 @@ export class StreamingMediaProcessor {
   }
 
   /**
-   * Process large video files with streaming via FFmpeg
+   * Process large video files with streaming via the internal FFmpeg wrapper.
+   * Delegates to `runFFmpeg()` with mapped options.
    *
    * @param inputPath - Path to the input video
    * @param outputPath - Path for the processed output
@@ -209,55 +177,45 @@ export class StreamingMediaProcessor {
     try {
       await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-      const ffmpegModule = await this.getFfmpeg();
+      const ffmpegOpts: import('../ffmpeg-wrapper').FFmpegOptions = {
+        input: inputPath,
+        output: outputPath,
+      };
 
-      return await new Promise((resolve) => {
-        let command = ffmpegModule.default(inputPath);
+      if (operations.format === 'mp4') {
+        ffmpegOpts.videoCodec = 'libx264';
+        ffmpegOpts.format = 'mp4';
+      } else if (operations.format === 'webm') {
+        ffmpegOpts.videoCodec = 'libvpx-vp9';
+        ffmpegOpts.format = 'webm';
+      }
 
-        // Configure format
-        if (operations.format !== undefined) {
-          switch (operations.format) {
-            case 'mp4':
-              command = command.videoCodec('libx264').toFormat('mp4');
-              break;
-            case 'webm':
-              command = command.videoCodec('libvpx-vp9').toFormat('webm');
-              break;
-          }
-        }
+      if (operations.resolution !== undefined) {
+        ffmpegOpts.resolution = operations.resolution;
+      }
 
-        // Configure resolution
-        if (operations.resolution !== undefined) {
-          command = command.size(
-            `${String(operations.resolution.width)}x${String(operations.resolution.height)}`,
-          );
-        }
+      if (typeof operations.bitrate === 'string' && operations.bitrate !== '') {
+        ffmpegOpts.videoBitrate = operations.bitrate;
+      }
 
-        // Configure bitrate
-        if (typeof operations.bitrate === 'string' && operations.bitrate !== '') {
-          command = command.videoBitrate(operations.bitrate);
-        }
+      if (operations.startTime !== undefined) {
+        ffmpegOpts.startTime = operations.startTime;
+      }
 
-        // Configure time segment
-        if (operations.startTime !== undefined) {
-          command = command.setStartTime(operations.startTime);
-        }
-        if (operations.duration !== undefined) {
-          command = command.setDuration(operations.duration);
-        }
+      if (operations.duration !== undefined) {
+        ffmpegOpts.duration = operations.duration;
+      }
 
-        command
-          .on('end', () => {
-            resolve({ success: true, outputPath });
-          })
-          .on('error', (err?: Error) => {
-            resolve({
-              success: false,
-              error: err?.message ?? 'Streaming video processing failed',
-            });
-          })
-          .save(outputPath);
-      });
+      const result = await runFFmpeg(ffmpegOpts);
+
+      if (result.success) {
+        return { success: true, outputPath };
+      }
+
+      return {
+        success: false,
+        error: result.error ?? 'Streaming video processing failed',
+      };
     } catch (error) {
       return {
         success: false,
@@ -334,15 +292,33 @@ export class StreamingMediaProcessor {
   }
 
   /**
-   * Clean up temporary files in the configured temp directory
+   * Clean up temporary files in the configured temp directory.
+   * Deletes files older than the specified max age (default: 24 hours).
    *
-   * @param _pattern - Optional pattern to filter files (reserved for future use)
+   * @param maxAgeMs - Maximum file age in milliseconds before deletion (default: 24h)
+   * @complexity O(n) where n = number of files in temp directory
    */
-  async cleanupTempFiles(_pattern?: string): Promise<void> {
+  async cleanupTempFiles(maxAgeMs: number = TEMP_FILE_MAX_AGE_MS): Promise<void> {
     try {
       await fs.mkdir(this.options.tempDir, { recursive: true });
+
+      const entries = await fs.readdir(this.options.tempDir);
+      const now = Date.now();
+
+      for (const entry of entries) {
+        try {
+          const filePath = path.join(this.options.tempDir, entry);
+          const stat = await fs.stat(filePath);
+
+          if (stat.isFile() && now - stat.mtimeMs > maxAgeMs) {
+            await fs.unlink(filePath);
+          }
+        } catch {
+          // Skip files that cannot be accessed or deleted
+        }
+      }
     } catch {
-      // Ignore cleanup errors
+      // Ignore cleanup errors (directory may not exist yet)
     }
   }
 

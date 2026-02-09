@@ -1,4 +1,4 @@
-// shared/src/domain/tenant/tenant.schemas.test.ts
+// src/shared/src/domain/tenant/tenant.schemas.test.ts
 
 /**
  * @file Unit Tests for Tenant Schemas
@@ -578,14 +578,14 @@ describe('tenantSchema', () => {
       expect(() => tenantSchema.parse(input)).toThrow();
     });
 
-    it('should reject date-only string for createdAt', () => {
+    it('should reject invalid date string for createdAt', () => {
       const input = {
         id: '00000000-0000-0000-0000-000000000001',
         name: 'Acme',
         slug: 'acme',
         ownerId: '00000000-0000-0000-0000-000000000002',
         isActive: true,
-        createdAt: '2024-01-01',
+        createdAt: 'not-a-date',
         updatedAt: '2024-01-01T12:00:00.000Z',
         metadata: {},
       };

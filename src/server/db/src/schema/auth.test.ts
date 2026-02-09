@@ -1,18 +1,27 @@
-// backend/db/src/schema/auth.test.ts
+// src/server/db/src/schema/auth.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
+  EMAIL_CHANGE_REVERT_TOKEN_COLUMNS,
+  EMAIL_CHANGE_REVERT_TOKENS_TABLE,
+  EMAIL_CHANGE_TOKEN_COLUMNS,
+  EMAIL_CHANGE_TOKENS_TABLE,
+  type EmailChangeRevertToken,
+  type EmailChangeToken,
   EMAIL_VERIFICATION_TOKEN_COLUMNS,
   EMAIL_VERIFICATION_TOKENS_TABLE,
   type EmailVerificationToken,
   LOGIN_ATTEMPT_COLUMNS,
   LOGIN_ATTEMPTS_TABLE,
   type LoginAttempt,
+  type NewEmailChangeRevertToken,
+  type NewEmailChangeToken,
   type NewEmailVerificationToken,
   type NewLoginAttempt,
   type NewPasswordResetToken,
   type NewRefreshTokenFamily,
   type NewSecurityEvent,
+  type NewTotpBackupCode,
   PASSWORD_RESET_TOKEN_COLUMNS,
   PASSWORD_RESET_TOKENS_TABLE,
   type PasswordResetToken,
@@ -24,6 +33,9 @@ import {
   type SecurityEvent,
   type SecurityEventSeverity,
   type SecurityEventType,
+  TOTP_BACKUP_CODES_TABLE,
+  TOTP_BACKUP_CODE_COLUMNS,
+  type TotpBackupCode,
 } from './auth';
 
 describe('Auth Schema - Table Names', () => {
@@ -47,6 +59,18 @@ describe('Auth Schema - Table Names', () => {
     expect(SECURITY_EVENTS_TABLE).toBe('security_events');
   });
 
+  test('should have correct table name for totp_backup_codes', () => {
+    expect(TOTP_BACKUP_CODES_TABLE).toBe('totp_backup_codes');
+  });
+
+  test('should have correct table name for email_change_tokens', () => {
+    expect(EMAIL_CHANGE_TOKENS_TABLE).toBe('email_change_tokens');
+  });
+
+  test('should have correct table name for email_change_revert_tokens', () => {
+    expect(EMAIL_CHANGE_REVERT_TOKENS_TABLE).toBe('email_change_revert_tokens');
+  });
+
   test('table names should be unique', () => {
     const tableNames = [
       REFRESH_TOKEN_FAMILIES_TABLE,
@@ -54,6 +78,9 @@ describe('Auth Schema - Table Names', () => {
       PASSWORD_RESET_TOKENS_TABLE,
       EMAIL_VERIFICATION_TOKENS_TABLE,
       SECURITY_EVENTS_TABLE,
+      TOTP_BACKUP_CODES_TABLE,
+      EMAIL_CHANGE_TOKENS_TABLE,
+      EMAIL_CHANGE_REVERT_TOKENS_TABLE,
     ];
 
     const uniqueNames = new Set(tableNames);
@@ -68,6 +95,9 @@ describe('Auth Schema - Table Names', () => {
     expect(PASSWORD_RESET_TOKENS_TABLE).toMatch(snakeCasePattern);
     expect(EMAIL_VERIFICATION_TOKENS_TABLE).toMatch(snakeCasePattern);
     expect(SECURITY_EVENTS_TABLE).toMatch(snakeCasePattern);
+    expect(TOTP_BACKUP_CODES_TABLE).toMatch(snakeCasePattern);
+    expect(EMAIL_CHANGE_TOKENS_TABLE).toMatch(snakeCasePattern);
+    expect(EMAIL_CHANGE_REVERT_TOKENS_TABLE).toMatch(snakeCasePattern);
   });
 });
 
@@ -644,7 +674,7 @@ describe('Auth Schema - SecurityEvent Type', () => {
       severity: 'low',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify({ device: 'Desktop' }),
+      metadata: { device: 'Desktop' },
       createdAt: new Date(),
     };
 
@@ -692,20 +722,41 @@ describe('Auth Schema - SecurityEvent Type', () => {
     });
   });
 
-  test('should accept all event types', () => {
+  test('should accept all event types (legacy + current)', () => {
     const eventTypes: SecurityEventType[] = [
+      // Token events
       'token_reuse',
+      'token_reuse_detected',
+      'token_family_revoked',
+      // Account lifecycle
       'account_locked',
       'account_unlocked',
+      // Password events
       'password_changed',
       'password_reset_requested',
       'password_reset_completed',
+      // Email events
       'email_verification_sent',
       'email_verified',
+      'email_changed',
+      // Login/session events
       'login_success',
       'login_failure',
       'logout',
       'suspicious_activity',
+      'suspicious_login',
+      // Magic link events
+      'magic_link_requested',
+      'magic_link_verified',
+      'magic_link_failed',
+      // OAuth events
+      'oauth_login_success',
+      'oauth_login_failure',
+      'oauth_account_created',
+      'oauth_link_success',
+      'oauth_link_failure',
+      'oauth_unlink_success',
+      'oauth_unlink_failure',
     ];
 
     eventTypes.forEach((eventType, index) => {
@@ -725,7 +776,7 @@ describe('Auth Schema - SecurityEvent Type', () => {
     });
   });
 
-  test('should accept metadata as JSON string', () => {
+  test('should accept metadata as JSONB object', () => {
     const metadata = {
       device: 'Desktop',
       browser: 'Chrome',
@@ -741,14 +792,11 @@ describe('Auth Schema - SecurityEvent Type', () => {
       severity: 'low',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify(metadata),
+      metadata,
       createdAt: new Date(),
     };
 
-    expect(event.metadata).toBe(JSON.stringify(metadata));
-    if (event.metadata !== null) {
-      expect(JSON.parse(event.metadata)).toEqual(metadata);
-    }
+    expect(event.metadata).toEqual(metadata);
   });
 });
 
@@ -772,7 +820,7 @@ describe('Auth Schema - NewSecurityEvent Type', () => {
       severity: 'medium',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify({ reason: 'User requested' }),
+      metadata: { reason: 'User requested' },
       createdAt: new Date(),
     };
 
@@ -786,7 +834,7 @@ describe('Auth Schema - NewSecurityEvent Type', () => {
       eventType: 'token_reuse',
       severity: 'critical',
       userId: 'user-456',
-      metadata: JSON.stringify({ familyId: 'family-123' }),
+      metadata: { familyId: 'family-123' },
     };
 
     expect(criticalEvent.severity).toBe('critical');
@@ -813,66 +861,59 @@ describe('Auth Schema - SecurityEventSeverity Type', () => {
 });
 
 describe('Auth Schema - SecurityEventType Type', () => {
-  test('should only allow valid event type values', () => {
-    const validEventTypes: SecurityEventType[] = [
-      'token_reuse',
-      'account_locked',
-      'account_unlocked',
-      'password_changed',
-      'password_reset_requested',
-      'password_reset_completed',
-      'email_verification_sent',
-      'email_verified',
-      'login_success',
-      'login_failure',
-      'logout',
-      'suspicious_activity',
-    ];
+  /** All 26 known security event types (legacy + current). */
+  const ALL_EVENT_TYPES: SecurityEventType[] = [
+    // Token events
+    'token_reuse',
+    'token_reuse_detected',
+    'token_family_revoked',
+    // Account lifecycle
+    'account_locked',
+    'account_unlocked',
+    // Password events
+    'password_changed',
+    'password_reset_requested',
+    'password_reset_completed',
+    // Email events
+    'email_verification_sent',
+    'email_verified',
+    'email_changed',
+    // Login/session events
+    'login_success',
+    'login_failure',
+    'logout',
+    'suspicious_activity',
+    'suspicious_login',
+    // Magic link events
+    'magic_link_requested',
+    'magic_link_verified',
+    'magic_link_failed',
+    // OAuth events
+    'oauth_login_success',
+    'oauth_login_failure',
+    'oauth_account_created',
+    'oauth_link_success',
+    'oauth_link_failure',
+    'oauth_unlink_success',
+    'oauth_unlink_failure',
+  ];
 
-    validEventTypes.forEach((eventType) => {
+  test('should only allow valid event type values', () => {
+    ALL_EVENT_TYPES.forEach((eventType) => {
       const event: Pick<SecurityEvent, 'eventType'> = { eventType };
       expect(event.eventType).toBe(eventType);
     });
   });
 
-  test('should have exactly 12 event types', () => {
-    const eventTypes: SecurityEventType[] = [
-      'token_reuse',
-      'account_locked',
-      'account_unlocked',
-      'password_changed',
-      'password_reset_requested',
-      'password_reset_completed',
-      'email_verification_sent',
-      'email_verified',
-      'login_success',
-      'login_failure',
-      'logout',
-      'suspicious_activity',
-    ];
-    const uniqueEventTypes = new Set(eventTypes);
-
-    expect(uniqueEventTypes.size).toBe(12);
+  test('should have exactly 26 event types', () => {
+    const uniqueEventTypes = new Set(ALL_EVENT_TYPES);
+    expect(uniqueEventTypes.size).toBe(26);
   });
 
   test('all event types should be in snake_case', () => {
     const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const eventTypes: SecurityEventType[] = [
-      'token_reuse',
-      'account_locked',
-      'account_unlocked',
-      'password_changed',
-      'password_reset_requested',
-      'password_reset_completed',
-      'email_verification_sent',
-      'email_verified',
-      'login_success',
-      'login_failure',
-      'logout',
-      'suspicious_activity',
-    ];
 
-    eventTypes.forEach((eventType) => {
+    ALL_EVENT_TYPES.forEach((eventType) => {
       expect(eventType).toMatch(snakeCasePattern);
     });
   });
@@ -994,7 +1035,7 @@ describe('Auth Schema - Edge Cases', () => {
       severity: 'critical',
       ipAddress: '192.168.1.1',
       userAgent: specialChars,
-      metadata: JSON.stringify({ note: specialChars }),
+      metadata: { note: specialChars },
       createdAt: new Date(),
     };
 
@@ -1100,7 +1141,7 @@ describe('Auth Schema - Integration Scenarios', () => {
       severity: 'critical',
       ipAddress: family.ipAddress,
       userAgent: family.userAgent,
-      metadata: JSON.stringify({ familyId: family.id }),
+      metadata: { familyId: family.id },
       createdAt: new Date(),
     };
 
@@ -1130,7 +1171,7 @@ describe('Auth Schema - Integration Scenarios', () => {
       severity: 'high',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify({ attemptCount: attempts.length }),
+      metadata: { attemptCount: attempts.length },
       createdAt: new Date(),
     };
 
@@ -1178,7 +1219,7 @@ describe('Auth Schema - Integration Scenarios', () => {
       severity: 'medium',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify({ tokenId: token.id }),
+      metadata: { tokenId: token.id },
       createdAt: new Date(),
     };
 
@@ -1226,12 +1267,328 @@ describe('Auth Schema - Integration Scenarios', () => {
       severity: 'low',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
-      metadata: JSON.stringify({ tokenId: token.id }),
+      metadata: { tokenId: token.id },
       createdAt: new Date(),
     };
 
     expect(sentEvent.eventType).toBe('email_verification_sent');
     expect(usedToken.usedAt).toBeDefined();
     expect(verifiedEvent.eventType).toBe('email_verified');
+  });
+});
+
+// ============================================================================
+// TOTP Backup Code Tests
+// ============================================================================
+
+describe('Auth Schema - TOTP Backup Code Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(TOTP_BACKUP_CODE_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      codeHash: 'code_hash',
+      usedAt: 'used_at',
+      createdAt: 'created_at',
+    });
+  });
+
+  test('should map camelCase to snake_case correctly', () => {
+    expect(TOTP_BACKUP_CODE_COLUMNS.userId).toBe('user_id');
+    expect(TOTP_BACKUP_CODE_COLUMNS.codeHash).toBe('code_hash');
+    expect(TOTP_BACKUP_CODE_COLUMNS.usedAt).toBe('used_at');
+    expect(TOTP_BACKUP_CODE_COLUMNS.createdAt).toBe('created_at');
+  });
+
+  test('should have all required columns', () => {
+    const requiredColumns = ['id', 'userId', 'codeHash', 'usedAt', 'createdAt'];
+    const actualColumns = Object.keys(TOTP_BACKUP_CODE_COLUMNS);
+
+    expect(actualColumns).toEqual(requiredColumns);
+  });
+
+  test('column values should be in snake_case format', () => {
+    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
+    const columnValues = Object.values(TOTP_BACKUP_CODE_COLUMNS);
+
+    columnValues.forEach((value) => {
+      expect(value).toMatch(snakeCasePattern);
+    });
+  });
+});
+
+describe('Auth Schema - TotpBackupCode Type', () => {
+  test('should accept valid unused backup code', () => {
+    const code: TotpBackupCode = {
+      id: 'tbc-123',
+      userId: 'user-456',
+      codeHash: 'sha256-code-hash',
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    expect(code.usedAt).toBeNull();
+    expect(code.codeHash).toBe('sha256-code-hash');
+  });
+
+  test('should accept valid used backup code', () => {
+    const usedCode: TotpBackupCode = {
+      id: 'tbc-123',
+      userId: 'user-456',
+      codeHash: 'sha256-code-hash',
+      usedAt: new Date(),
+      createdAt: new Date(Date.now() - 3600000),
+    };
+
+    expect(usedCode.usedAt).toBeInstanceOf(Date);
+  });
+
+  test('should support batch of 10 backup codes', () => {
+    const codes: TotpBackupCode[] = Array.from({ length: 10 }, (_, index) => ({
+      id: `tbc-${index}`,
+      userId: 'user-456',
+      codeHash: `hash-${index}`,
+      usedAt: null,
+      createdAt: new Date(),
+    }));
+
+    expect(codes.length).toBe(10);
+    expect(codes.every((c) => c.usedAt === null)).toBe(true);
+    expect(codes.every((c) => c.userId === 'user-456')).toBe(true);
+  });
+});
+
+describe('Auth Schema - NewTotpBackupCode Type', () => {
+  test('should accept minimal new backup code', () => {
+    const newCode: NewTotpBackupCode = {
+      userId: 'user-456',
+      codeHash: 'sha256-code-hash',
+    };
+
+    expect(newCode.userId).toBe('user-456');
+    expect(newCode.codeHash).toBe('sha256-code-hash');
+  });
+
+  test('should accept new backup code with all optional fields', () => {
+    const newCode: NewTotpBackupCode = {
+      id: 'tbc-123',
+      userId: 'user-456',
+      codeHash: 'sha256-code-hash',
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    expect(newCode.id).toBe('tbc-123');
+    expect(newCode.usedAt).toBeNull();
+    expect(newCode.createdAt).toBeInstanceOf(Date);
+  });
+});
+
+// ============================================================================
+// Email Change Token Tests
+// ============================================================================
+
+describe('Auth Schema - Email Change Token Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      newEmail: 'new_email',
+      tokenHash: 'token_hash',
+      expiresAt: 'expires_at',
+      usedAt: 'used_at',
+      createdAt: 'created_at',
+    });
+  });
+
+  test('should map camelCase to snake_case correctly', () => {
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.userId).toBe('user_id');
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.newEmail).toBe('new_email');
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.tokenHash).toBe('token_hash');
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.usedAt).toBe('used_at');
+    expect(EMAIL_CHANGE_TOKEN_COLUMNS.createdAt).toBe('created_at');
+  });
+
+  test('should have all required columns', () => {
+    const requiredColumns = [
+      'id',
+      'userId',
+      'newEmail',
+      'tokenHash',
+      'expiresAt',
+      'usedAt',
+      'createdAt',
+    ];
+    const actualColumns = Object.keys(EMAIL_CHANGE_TOKEN_COLUMNS);
+
+    expect(actualColumns).toEqual(requiredColumns);
+  });
+
+  test('column values should be in snake_case format', () => {
+    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
+    const columnValues = Object.values(EMAIL_CHANGE_TOKEN_COLUMNS);
+
+    columnValues.forEach((value) => {
+      expect(value).toMatch(snakeCasePattern);
+    });
+  });
+});
+
+describe('Auth Schema - EmailChangeToken Type', () => {
+  test('should accept valid unused email change token', () => {
+    const token: EmailChangeToken = {
+      id: 'ect-123',
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    expect(token.usedAt).toBeNull();
+    expect(token.newEmail).toBe('new@example.com');
+    expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  test('should accept valid used email change token', () => {
+    const usedToken: EmailChangeToken = {
+      id: 'ect-123',
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: new Date(),
+      createdAt: new Date(Date.now() - 1800000),
+    };
+
+    expect(usedToken.usedAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept expired token', () => {
+    const expiredToken: EmailChangeToken = {
+      id: 'ect-789',
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() - 3600000),
+      usedAt: null,
+      createdAt: new Date(Date.now() - 7200000),
+    };
+
+    expect(expiredToken.expiresAt.getTime()).toBeLessThan(Date.now());
+  });
+
+  test('should have similar structure to password reset token plus newEmail', () => {
+    const emailChangeToken: EmailChangeToken = {
+      id: 'ect-123',
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'hash',
+      expiresAt: new Date(),
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    const emailChangeKeys = Object.keys(emailChangeToken).sort();
+    const passwordResetKeys = Object.keys({
+      id: '',
+      userId: '',
+      tokenHash: '',
+      expiresAt: new Date(),
+      usedAt: null,
+      createdAt: new Date(),
+    } satisfies PasswordResetToken).sort();
+
+    // EmailChangeToken has all fields of PasswordResetToken plus newEmail
+    passwordResetKeys.forEach((key) => {
+      expect(emailChangeKeys).toContain(key);
+    });
+    expect(emailChangeKeys).toContain('newEmail');
+  });
+});
+
+describe('Auth Schema - NewEmailChangeToken Type', () => {
+  test('should accept minimal new email change token', () => {
+    const newToken: NewEmailChangeToken = {
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+    };
+
+    expect(newToken.userId).toBe('user-456');
+    expect(newToken.newEmail).toBe('new@example.com');
+    expect(newToken.tokenHash).toBe('sha256-token-hash');
+    expect(newToken.expiresAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept new token with all optional fields', () => {
+    const newToken: NewEmailChangeToken = {
+      id: 'ect-123',
+      userId: 'user-456',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    expect(newToken.id).toBe('ect-123');
+    expect(newToken.usedAt).toBeNull();
+    expect(newToken.createdAt).toBeInstanceOf(Date);
+  });
+});
+
+// ============================================================================
+// Email Change Revert Token Tests
+// ============================================================================
+
+describe('Auth Schema - Email Change Revert Token Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(EMAIL_CHANGE_REVERT_TOKEN_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      oldEmail: 'old_email',
+      newEmail: 'new_email',
+      tokenHash: 'token_hash',
+      expiresAt: 'expires_at',
+      usedAt: 'used_at',
+      createdAt: 'created_at',
+    });
+  });
+});
+
+describe('Auth Schema - EmailChangeRevertToken Type', () => {
+  test('should accept valid revert token', () => {
+    const token: EmailChangeRevertToken = {
+      id: 'ecrt-123',
+      userId: 'user-456',
+      oldEmail: 'old@example.com',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      createdAt: new Date(),
+    };
+
+    expect(token.oldEmail).toBe('old@example.com');
+    expect(token.newEmail).toBe('new@example.com');
+    expect(token.usedAt).toBeNull();
+  });
+});
+
+describe('Auth Schema - NewEmailChangeRevertToken Type', () => {
+  test('should accept minimal new revert token', () => {
+    const newToken: NewEmailChangeRevertToken = {
+      userId: 'user-456',
+      oldEmail: 'old@example.com',
+      newEmail: 'new@example.com',
+      tokenHash: 'sha256-token-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+    };
+
+    expect(newToken.oldEmail).toBe('old@example.com');
+    expect(newToken.newEmail).toBe('new@example.com');
   });
 });

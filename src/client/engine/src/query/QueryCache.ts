@@ -1,4 +1,4 @@
-// client/src/query/QueryCache.ts
+// src/client/engine/src/query/QueryCache.ts
 /**
  * QueryCache - Manages query state with subscription support.
  *

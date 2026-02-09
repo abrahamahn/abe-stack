@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/lockout.test.ts
+// src/server/core/src/auth/security/lockout.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {

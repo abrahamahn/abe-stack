@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/ProfileForm.tsx
+// src/apps/web/src/features/settings/components/ProfileForm.tsx
 /**
  * Profile Form Component
  *
@@ -16,7 +16,8 @@ import { useProfileUpdate } from '../hooks';
 
 interface UserLocal {
   email: string;
-  name: string | null;
+  firstName: string;
+  lastName: string;
 }
 
 // ============================================================================
@@ -33,9 +34,11 @@ export interface ProfileFormProps {
 // ============================================================================
 
 export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement => {
-  const userName: string | null = user.name;
+  const userFirstName: string = user.firstName;
+  const userLastName: string = user.lastName;
   const userEmail: string = user.email;
-  const [name, setName] = useState(userName ?? '');
+  const [firstName, setFirstName] = useState(userFirstName);
+  const [lastName, setLastName] = useState(userLastName);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { updateProfile, isLoading, error, reset } = useProfileUpdate({
@@ -53,10 +56,13 @@ export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setSuccessMessage(null);
-    updateProfile({ name: name.trim().length > 0 ? name.trim() : null });
+    updateProfile({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    });
   };
 
-  const hasChanges = (name.trim().length > 0 ? name.trim() : null) !== userName;
+  const hasChanges = firstName.trim() !== userFirstName || lastName.trim() !== userLastName;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,19 +74,34 @@ export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement
           disabled
           className="bg-gray-100 dark:bg-gray-800"
         />
-        <p className="text-sm text-gray-500 mt-1">Email cannot be changed at this time.</p>
+        <p className="text-sm text-gray-500 mt-1">To change your email, go to the Security tab.</p>
       </FormField>
 
-      <FormField label="Display Name" htmlFor="name">
+      <FormField label="First Name" htmlFor="firstName">
         <Input
-          id="name"
+          id="firstName"
           type="text"
-          value={name}
+          value={firstName}
           onChange={(e) => {
-            setName(e.target.value);
+            setFirstName(e.target.value);
           }}
-          placeholder="Enter your display name"
+          placeholder="Enter your first name"
           maxLength={100}
+          required
+        />
+      </FormField>
+
+      <FormField label="Last Name" htmlFor="lastName">
+        <Input
+          id="lastName"
+          type="text"
+          value={lastName}
+          onChange={(e) => {
+            setLastName(e.target.value);
+          }}
+          placeholder="Enter your last name"
+          maxLength={100}
+          required
         />
       </FormField>
 

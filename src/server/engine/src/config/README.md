@@ -9,7 +9,7 @@ This package provides the **core infrastructure** that all ABE Stack application
 - **Framework Agnostic** - Works with any Node.js application
 - **Type Safe** - Full TypeScript support with runtime validation
 - **Fail Fast** - Invalid configuration prevents application startup
-- **Zero Dependencies** - Only uses Node.js built-ins and Zod for validation
+- **Zero Dependencies** - Only uses Node.js built-ins and custom Schema<T> for validation
 
 ## 📂 Directory Structure
 
@@ -22,7 +22,7 @@ packages/core/src/config/
 │   ├── notification.ts  # Notification provider types
 │   └── index.ts         # Exports all type contracts
 ├── env.loader.ts        # Loads .env files with priority-based merging
-├── env.schema.ts        # Zod schema that validates all environment variables
+├── env.schema.ts        # Schema that validates all environment variables
 ├── parsers.ts           # Type-safe utility functions for parsing env values
 ├── index.ts             # Public API exports
 └── README.md            # This file
@@ -78,14 +78,14 @@ The `initEnv()` function searches for `.env` files and loads them into `process.
 
 **File:** `env.schema.ts`
 
-After loading, the `EnvSchema` validates all environment variables using Zod. This ensures:
+After loading, the `EnvSchema` validates all environment variables using the custom Schema<T> system. This ensures:
 
 - **Required variables exist** - Missing variables cause immediate failure
 - **Types are correct** - Strings are coerced to numbers, booleans, etc.
 - **Formats are valid** - URLs have protocols, ports are numbers, enums match allowed values
 - **Security constraints** - Production secrets must be strong, localhost URLs blocked in production
 
-**Why Zod?** It provides runtime validation with automatic TypeScript type inference. The schema IS the type.
+The custom Schema<T> system provides runtime validation with TypeScript type inference. The schema IS the type.
 
 **Example validation rules:**
 
@@ -156,34 +156,26 @@ The `env.schema.ts` file is the **gatekeeper** of your application. It defines e
 **Structure:**
 
 ```typescript
-export const EnvSchema = z
-  .object({
-    // Application
-    NODE_ENV: z.enum(['development', 'production', 'test']),
-    PORT: z.coerce.number().int().min(1).max(65535),
-
-    // Auth
-    JWT_SECRET: z.string().min(32),
-    JWT_ISSUER: z.string(),
-
-    // Database
-    DATABASE_PROVIDER: z.enum(['postgresql', 'sqlite', 'mongodb']),
-    DATABASE_URL: z.string().url().optional(),
-
-    // ... hundreds more
-  })
-  .refine(/* custom validation rules */);
+export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unknown) => {
+  const obj = parseObject(data, 'BaseEnv');
+  return {
+    NODE_ENV: createEnumSchema(['development', 'production', 'test'] as const, 'NODE_ENV').parse(
+      withDefault(obj['NODE_ENV'], 'development'),
+    ),
+    PORT: coerceNumber(withDefault(obj['PORT'], 8080), 'PORT'),
+  };
+});
 ```
 
 **Key features:**
 
-1. **Coercion** - `z.coerce.number()` converts string "8080" to number 8080
-2. **Optional with defaults** - `.optional().default('value')`
-3. **Enums** - Restrict to specific values
-4. **Custom validation** - `.refine()` for complex rules (e.g., "if provider is X, then Y must be set")
+1. **Coercion** - `coerceNumber()` converts string "8080" to number 8080
+2. **Optional with defaults** - `withDefault()` and `parseOptional()` helpers
+3. **Enums** - `createEnumSchema()` restricts to specific values
+4. **Custom validation** - Inline logic in the parse function for complex rules
 5. **Production guards** - Extra validation when `NODE_ENV === 'production'`
 
-**Why not just TypeScript?** TypeScript only validates at compile time. Zod validates at runtime, catching configuration errors before your app starts.
+**Why not just TypeScript?** TypeScript only validates at compile time. The Schema<T> system validates at runtime, catching configuration errors before your app starts.
 
 ---
 
@@ -259,11 +251,15 @@ pnpm test parsers.test.ts
 **1. Add to schema** (`env.schema.ts`):
 
 ```typescript
-export const EnvSchema = z.object({
-  // ... existing fields
-  MY_NEW_API_KEY: z.string().min(1),
-  MY_NEW_TIMEOUT: z.coerce.number().int().min(1000).default(5000),
-});
+export const MyServiceEnvSchema: Schema<MyServiceEnv> = createSchema<MyServiceEnv>(
+  (data: unknown) => {
+    const obj = parseObject(data, 'MyServiceEnv');
+    return {
+      MY_NEW_API_KEY: parseString(obj['MY_NEW_API_KEY'], 'MY_NEW_API_KEY'),
+      MY_NEW_TIMEOUT: coerceNumber(withDefault(obj['MY_NEW_TIMEOUT'], 5000), 'MY_NEW_TIMEOUT'),
+    };
+  },
+);
 ```
 
 **2. Add to environment files** (`.config/env/.env.development.example`):
@@ -329,7 +325,7 @@ export type { AnalyticsConfig } from './analytics';
 1. **Framework Agnostic** - No dependencies on Express, Fastify, or any framework
 2. **Type Safe** - Full TypeScript support with strict mode
 3. **Fail Fast** - Validation errors prevent application startup (no silent failures)
-4. **Zero Runtime Dependencies** - Only Zod for validation, rest is Node.js built-ins
+4. **Zero Runtime Dependencies** - Custom Schema<T> for validation, rest is Node.js built-ins
 5. **Testable** - All functions are pure and easily testable
 6. **Extensible** - Easy to add new variables, contracts, and validation rules
 7. **Secure by Default** - Production guards prevent weak secrets and insecure configurations

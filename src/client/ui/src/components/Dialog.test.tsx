@@ -1,4 +1,4 @@
-// client/ui/src/components/Dialog.test.tsx
+// src/client/ui/src/components/Dialog.test.tsx
 // client/ui/src/elements/__tests__/Dialog.test.tsx
 /** @vitest-environment jsdom */
 import { Dialog } from '@components/Dialog';

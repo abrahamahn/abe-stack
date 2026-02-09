@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-patterns.ts
+// src/server/core/src/auth/security/password-patterns.ts
 
 /**
  * Common Passwords (Top 200 most common)

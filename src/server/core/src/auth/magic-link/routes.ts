@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/routes.ts
+// src/server/core/src/auth/magic-link/routes.ts
 /**
  * Magic Link Routes
  *
@@ -13,7 +13,7 @@ import {
   publicRoute,
   type HandlerContext,
   type RouteDefinition,
-} from '@abe-stack/db';
+} from '@abe-stack/server-engine';
 import { magicLinkRequestSchema, magicLinkVerifyRequestSchema } from '@abe-stack/shared';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';

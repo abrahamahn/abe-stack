@@ -1,4 +1,4 @@
-// packages/shared/src/core/transactions/operations.test.ts
+// src/shared/src/core/transactions/operations.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

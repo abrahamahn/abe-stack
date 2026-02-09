@@ -1,4 +1,4 @@
-// backend/core/src/admin/securityHandlers.ts
+// src/server/core/src/admin/securityHandlers.ts
 /**
  * Security Handlers
  *

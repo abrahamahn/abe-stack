@@ -1,4 +1,4 @@
-// apps/web/src/features/home/data/docsMeta.test.ts
+// src/apps/web/src/features/home/data/docsMeta.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { docCategories, docsMeta } from './docsMeta';

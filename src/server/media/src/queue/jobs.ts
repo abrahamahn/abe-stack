@@ -1,4 +1,4 @@
-// premium/media/src/queue/jobs.ts
+// src/server/media/src/queue/jobs.ts
 /**
  * Media Processing Job Queue
  *

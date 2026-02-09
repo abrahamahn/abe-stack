@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/SidePeek.tsx
+// src/client/ui/src/layouts/layers/SidePeek.tsx
 /**
  * SidePeek - Notion-style slide-out panel from the right.
  *

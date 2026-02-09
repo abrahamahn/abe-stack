@@ -1,7 +1,7 @@
-// backend/core/src/auth/service.test.ts
+// src/server/core/src/auth/service.test.ts
 // backend/core/src/auth/__tests__/service.test.ts
 import { toCamelCase, type DbClient, type Repositories, type User } from '@abe-stack/db';
-import { validatePassword } from '@abe-stack/shared';
+import { canonicalizeEmail, validatePassword } from '@abe-stack/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -25,6 +25,7 @@ import {
   verifyEmail,
   type AuthResult,
 } from './service';
+import { LOGIN_FAILURE_REASON } from './types';
 import {
   createAccessToken,
   createAuthResponse,
@@ -115,6 +116,7 @@ vi.mock('./utils', () => ({
   createRefreshTokenFamily: vi.fn(),
   hashPassword: vi.fn(),
   needsRehash: vi.fn(),
+  revokeAllUserTokens: vi.fn(),
   rotateRefreshToken: vi.fn(),
   verifyPasswordSafe: vi.fn(),
 }));
@@ -181,6 +183,7 @@ function createMockRepos(): Repositories {
     users: {
       findByEmail: vi.fn(),
       findById: vi.fn(),
+      findByUsername: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
     },
@@ -253,7 +256,10 @@ function createMockUser(overrides?: Partial<User>): User {
   return {
     id: 'user-id',
     email: 'test@example.com',
-    name: 'Test User',
+    canonicalEmail: 'test@example.com',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: null,
     role: 'user',
     passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$test',
@@ -261,6 +267,18 @@ function createMockUser(overrides?: Partial<User>): User {
     emailVerifiedAt: new Date(),
     lockedUntil: null,
     failedLoginAttempts: 0,
+    totpSecret: null,
+    totpEnabled: false,
+    phone: null,
+    phoneVerified: false,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -292,14 +310,19 @@ describe('registerUser', () => {
     it('should create user and send verification email', async () => {
       const email = 'newuser@example.com';
       const password = 'StrongPass123!';
-      const name = 'New User';
+      const username = 'newuser';
+      const firstName = 'New';
+      const lastName = 'User';
       const baseUrl = 'http://localhost:3000';
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(null);
+      vi.mocked(repos.users.findByUsername).mockResolvedValue(null);
       vi.mocked(validatePassword).mockResolvedValue(VALID_PASSWORD_RESULT);
       vi.mocked(hashPassword).mockResolvedValue('hashed-password');
-      vi.mocked(toCamelCase).mockReturnValue(createMockUser({ email, name, emailVerified: false }));
-      vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email, name }]);
+      vi.mocked(toCamelCase).mockReturnValue(
+        createMockUser({ email, username, firstName, lastName, emailVerified: false }),
+      );
+      vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email, username }]);
 
       const result = await registerUser(
         db,
@@ -309,7 +332,9 @@ describe('registerUser', () => {
         config,
         email,
         password,
-        name,
+        username,
+        firstName,
+        lastName,
         baseUrl,
       );
 
@@ -318,7 +343,7 @@ describe('registerUser', () => {
         message: expect.stringContaining('check your email'),
         email,
       });
-      expect(repos.users.findByEmail).toHaveBeenCalledWith(email);
+      expect(repos.users.findByEmail).toHaveBeenCalledWith(canonicalizeEmail(email));
       // Note: validatePassword is called internally but mocking it in Vitest 4.x
       // with partial module mocks doesn't guarantee the service uses the mock.
       // The password validation behavior is tested via the WeakPasswordError tests.
@@ -335,12 +360,24 @@ describe('registerUser', () => {
       const password = 'weak';
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(null);
+      vi.mocked(repos.users.findByUsername).mockResolvedValue(null);
       vi.mocked(validatePassword).mockResolvedValue(
         INVALID_PASSWORD_RESULT(['Password is too short']),
       );
 
       await expect(
-        registerUser(db, repos, emailService, templates, config, email, password),
+        registerUser(
+          db,
+          repos,
+          emailService,
+          templates,
+          config,
+          email,
+          password,
+          'newuser',
+          'New',
+          'User',
+        ),
       ).rejects.toMatchObject({
         name: 'WeakPasswordError',
       });
@@ -353,6 +390,7 @@ describe('registerUser', () => {
       const baseUrl = 'http://localhost:3000';
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(null);
+      vi.mocked(repos.users.findByUsername).mockResolvedValue(null);
       vi.mocked(validatePassword).mockResolvedValue(VALID_PASSWORD_RESULT);
       vi.mocked(hashPassword).mockResolvedValue('hashed-password');
       vi.mocked(toCamelCase).mockReturnValue(createMockUser({ email, emailVerified: false }));
@@ -368,7 +406,9 @@ describe('registerUser', () => {
           config,
           email,
           password,
-          undefined,
+          'newuser',
+          'New',
+          'User',
           baseUrl,
         ),
       ).rejects.toMatchObject({
@@ -381,13 +421,25 @@ describe('registerUser', () => {
       const password = 'StrongPass123!';
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(null);
+      vi.mocked(repos.users.findByUsername).mockResolvedValue(null);
       vi.mocked(validatePassword).mockResolvedValue(VALID_PASSWORD_RESULT);
       vi.mocked(hashPassword).mockResolvedValue('hashed-password');
       vi.mocked(toCamelCase).mockReturnValue(createMockUser({ email, emailVerified: false }));
       vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email }]);
 
       await expect(
-        registerUser(db, repos, emailService, templates, config, email, password),
+        registerUser(
+          db,
+          repos,
+          emailService,
+          templates,
+          config,
+          email,
+          password,
+          'newuser',
+          'New',
+          'User',
+        ),
       ).rejects.toThrow('baseUrl is required');
     });
   });
@@ -408,6 +460,9 @@ describe('registerUser', () => {
         config,
         email,
         password,
+        'existinguser',
+        'Existing',
+        'User',
       );
 
       expect(result).toEqual({
@@ -439,6 +494,9 @@ describe('registerUser', () => {
         config,
         email,
         password,
+        'existinguser',
+        'Existing',
+        'User',
       );
 
       expect(result).toEqual({
@@ -488,10 +546,14 @@ describe('authenticateUser', () => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
           avatarUrl: user.avatarUrl ?? null,
           role: user.role,
+          emailVerified: user.emailVerified,
           createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
         },
       } as AuthResult);
       vi.mocked(needsRehash).mockReturnValue(false);
@@ -527,10 +589,14 @@ describe('authenticateUser', () => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
           avatarUrl: user.avatarUrl ?? null,
           role: user.role,
+          emailVerified: user.emailVerified,
           createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
         },
       } as AuthResult);
       vi.mocked(needsRehash).mockReturnValue(false);
@@ -561,10 +627,14 @@ describe('authenticateUser', () => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
           avatarUrl: user.avatarUrl ?? null,
           role: user.role,
+          emailVerified: user.emailVerified,
           createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
         },
       } as AuthResult);
       vi.mocked(needsRehash).mockReturnValue(true);
@@ -604,7 +674,7 @@ describe('authenticateUser', () => {
         false,
         undefined,
         undefined,
-        'Account locked',
+        LOGIN_FAILURE_REASON.ACCOUNT_LOCKED,
       );
     });
 
@@ -631,7 +701,7 @@ describe('authenticateUser', () => {
         false,
         undefined,
         undefined,
-        'User not found',
+        LOGIN_FAILURE_REASON.USER_NOT_FOUND,
       );
     });
 
@@ -659,7 +729,7 @@ describe('authenticateUser', () => {
         false,
         undefined,
         undefined,
-        'Invalid password',
+        LOGIN_FAILURE_REASON.PASSWORD_MISMATCH,
       );
     });
 
@@ -683,7 +753,7 @@ describe('authenticateUser', () => {
         false,
         undefined,
         undefined,
-        'Email not verified',
+        LOGIN_FAILURE_REASON.UNVERIFIED_EMAIL,
       );
     });
 
@@ -863,7 +933,7 @@ describe('requestPasswordReset', () => {
 
     await requestPasswordReset(db, repos, emailService, templates, email, baseUrl);
 
-    expect(repos.users.findByEmail).toHaveBeenCalledWith(email);
+    expect(repos.users.findByEmail).toHaveBeenCalledWith(canonicalizeEmail(email));
     expect(emailService.send).toHaveBeenCalledWith(
       expect.objectContaining({
         to: email,
@@ -1050,10 +1120,14 @@ describe('verifyEmail', () => {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         avatarUrl: user.avatarUrl ?? null,
         role: user.role,
+        emailVerified: user.emailVerified,
         createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       },
     } as AuthResult);
 
@@ -1106,7 +1180,7 @@ describe('resendVerificationEmail', () => {
 
     await resendVerificationEmail(db, repos, emailService, templates, email, baseUrl);
 
-    expect(repos.users.findByEmail).toHaveBeenCalledWith(email);
+    expect(repos.users.findByEmail).toHaveBeenCalledWith(canonicalizeEmail(email));
     expect(emailService.send).toHaveBeenCalledWith(
       expect.objectContaining({
         to: email,
@@ -1262,11 +1336,10 @@ describe('createEmailVerificationToken', () => {
   it('should create token using repositories', async () => {
     const userId = 'user-id';
 
-    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
     vi.mocked(repos.emailVerificationTokens.create).mockResolvedValue({
       id: 'token-id',
       userId,
-      tokenHash: 'hashed-token',
+      tokenHash: '3f4ef424246c2b4034a84c294e485ecb4bf8befdda82452fb860559a2d918bcb',
       expiresAt: new Date(),
       usedAt: null,
       createdAt: new Date(),
@@ -1276,10 +1349,11 @@ describe('createEmailVerificationToken', () => {
 
     expect(token).toBeTruthy();
     expect(typeof token).toBe('string');
+    expect(token).toMatch(/^[a-f0-9]{64}$/);
     expect(repos.emailVerificationTokens.create).toHaveBeenCalledWith(
       expect.objectContaining({
         userId,
-        tokenHash: 'hashed-token',
+        tokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
         expiresAt: expect.any(Date),
       }),
     );
@@ -1289,12 +1363,11 @@ describe('createEmailVerificationToken', () => {
     const db = createMockDb();
     const userId = 'user-id';
 
-    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-
     const token = await createEmailVerificationToken(db, userId);
 
     expect(token).toBeTruthy();
     expect(typeof token).toBe('string');
+    expect(token).toMatch(/^[a-f0-9]{64}$/);
     expect(db.execute).toHaveBeenCalled();
   });
 });

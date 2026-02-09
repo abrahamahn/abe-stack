@@ -1,4 +1,4 @@
-// client/react/src/stores/toastStore.ts
+// src/client/react/src/stores/toastStore.ts
 import { createStore } from './createStore';
 
 /** Visual tone for toast notification styling */

@@ -1,4 +1,4 @@
-// packages/shared/src/__tests__/pagination.integration.test.ts
+// shared/src/__tests__/pagination.integration.test.ts
 /**
  * Integration tests for pagination utilities with real data sets
  *

@@ -1,4 +1,4 @@
-// backend/core/src/admin/securityService.ts
+// src/server/core/src/admin/securityService.ts
 /**
  * Security Service
  *
@@ -58,8 +58,7 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
     severity: event.severity,
     ipAddress: event.ipAddress,
     userAgent: event.userAgent,
-    metadata:
-      event.metadata !== null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
+    metadata: event.metadata,
     createdAt: event.createdAt.toISOString(),
   };
 }

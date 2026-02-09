@@ -1,9 +1,9 @@
-// backend/db/src/builder/index.ts
+// src/server/db/src/builder/index.ts
 
 // Types
 export {
-  EMPTY_FRAGMENT,
   combine,
+  EMPTY_FRAGMENT,
   escapeIdentifier,
   formatTable,
   fragment,
@@ -18,7 +18,7 @@ export {
   type SortSpec,
   type SqlFragment,
   type TableSpec,
-} from './types';
+} from './types/types';
 
 // Conditions
 export {
@@ -64,16 +64,16 @@ export {
 } from './conditions';
 
 // Select
-export { SelectBuilder, select, selectCount, selectExists } from './select';
+export { select, SelectBuilder, selectCount, selectExists } from './select';
 
 // Insert
-export { InsertBuilder, insert } from './insert';
+export { insert, InsertBuilder } from './insert';
 
 // Update
-export { UpdateBuilder, update } from './update';
+export { update, UpdateBuilder } from './update';
 
 // Delete
-export { DeleteBuilder, del, deleteFrom, truncate, truncateCascade } from './delete';
+export { del, DeleteBuilder, deleteFrom, truncate, truncateCascade } from './delete';
 
 // Window Functions
 export {

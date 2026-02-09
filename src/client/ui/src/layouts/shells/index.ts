@@ -1,4 +1,4 @@
-// client/ui/src/layouts/shells/index.ts
+// src/client/ui/src/layouts/shells/index.ts
 // Shells - App-level structural layout components
 export { AppShell } from './AppShell';
 export { BottombarLayout } from './BottombarLayout';

@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/notification.ts
+// src/shared/src/config/types/notification.ts
 /**
  * Notification Configuration Schemas
  *
@@ -16,7 +16,7 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
 
 import type {
   BrazeConfig,
@@ -26,7 +26,7 @@ import type {
   OneSignalConfig,
   SnsConfig,
 } from './services';
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 
 // ============================================================================
 // Provider Config Schemas

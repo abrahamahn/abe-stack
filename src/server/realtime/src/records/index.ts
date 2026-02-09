@@ -1,4 +1,4 @@
-// modules/realtime/src/records/index.ts
+// src/server/realtime/src/records/index.ts
 /**
  * Record Management
  *

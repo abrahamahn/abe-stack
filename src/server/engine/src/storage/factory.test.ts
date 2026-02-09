@@ -1,4 +1,4 @@
-// backend/engine/src/storage/factory.test.ts
+// src/server/engine/src/storage/factory.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createStorage } from './factory';

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/query-builder.ts
+// src/shared/src/utils/search/query-builder.ts
 /**
  * Fluent Query Builder
  *

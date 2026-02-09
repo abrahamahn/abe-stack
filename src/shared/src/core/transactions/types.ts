@@ -1,4 +1,4 @@
-// packages/shared/src/core/transactions/types.ts
+// src/shared/src/core/transactions/types.ts
 
 /**
  * Set operation - replaces a value at a path.

@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/ipc/index.ts
+// src/apps/desktop/src/electron/ipc/index.ts
 export { registerIPCHandlers } from './handlers';
 export type {
   DialogFileFilter,

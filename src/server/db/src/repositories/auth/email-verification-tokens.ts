@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/email-verification-tokens.ts
+// src/server/db/src/repositories/auth/email-verification-tokens.ts
 /**
  * Email Verification Tokens Repository (Functional)
  *

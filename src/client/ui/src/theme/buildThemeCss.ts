@@ -1,4 +1,4 @@
-// client/ui/src/theme/buildThemeCss.ts
+// src/client/ui/src/theme/buildThemeCss.ts
 /**
  * Theme CSS generator for UI tokens.
  *

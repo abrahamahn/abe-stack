@@ -1,4 +1,4 @@
-// @abe-stack/api
+// src/client/api/src/index.ts
 // Lightweight API client wrappers for abe-stack
 
 // API Client
@@ -8,6 +8,10 @@ export { clearApiClient, getApiClient } from './api/instance';
 export type { ApiClientOptions } from './api/types';
 export type {
   AuthResponse,
+  ChangeEmailRequest,
+  ChangeEmailResponse,
+  ConfirmEmailChangeRequest,
+  ConfirmEmailChangeResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
   ForgotPasswordRequest,
@@ -23,6 +27,12 @@ export type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  TotpLoginChallengeResponse,
+  TotpLoginVerifyRequest,
+  TotpSetupResponse,
+  TotpStatusResponse,
+  TotpVerifyRequest,
+  TotpVerifyResponse,
   User,
 } from '@abe-stack/shared';
 

@@ -1,4 +1,4 @@
-// packages/shared/src/config/env.parsers.test.ts
+// src/shared/src/config/env.parsers.test.ts
 import { describe, expect, it, test } from 'vitest';
 
 import { getBool, getInt, getList, getRequired } from './env.parsers';

@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/scripts/audit/security-audit.ts
+// src/tools/scripts/audit/security-audit.ts
 /**
  * Security Vulnerability Scanner
  *
@@ -7,9 +7,9 @@
  * Provides automated security updates and alerts
  */
 
-import { execSync } from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface Vulnerability {
   package: string;
@@ -56,7 +56,7 @@ function scanVulnerabilities(): AuditResult {
     // Run npm audit in JSON format
     const auditOutput = execSync('npm audit --audit-level=moderate --json', {
       encoding: 'utf-8',
-      cwd: path.resolve(__dirname, '..', '..'),
+      cwd: path.resolve(__dirname, '..', '..', '..', '..'),
       timeout: 60000, // 1 minute timeout
     });
 
@@ -164,7 +164,7 @@ function checkOutdatedDependencies(): Array<{
   try {
     const outdatedOutput = execSync('npm outdated --json', {
       encoding: 'utf-8',
-      cwd: path.resolve(__dirname, '..', '..'),
+      cwd: path.resolve(__dirname, '..', '..', '..', '..'),
       timeout: 30000,
     });
 
@@ -280,7 +280,7 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '.tmp');
+    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -304,6 +304,8 @@ function main(): void {
   }
 }
 
-if (require.main === module) {
+const entryArg = process.argv[1];
+const isMainModule = entryArg !== undefined && import.meta.url === `file://${entryArg}`;
+if (isMainModule) {
   main();
 }

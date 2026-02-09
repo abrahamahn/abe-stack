@@ -1,4 +1,4 @@
-// packages/shared/src/domain/jobs/index.ts
+// src/shared/src/domain/jobs/index.ts
 
 export { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './jobs.logic';
 
@@ -7,11 +7,27 @@ export {
   JOB_PRIORITIES,
   JOB_PRIORITY_VALUES,
   JOB_STATUSES,
+  jobActionResponseSchema,
+  jobDetailsSchema,
+  jobErrorSchema,
+  jobIdRequestSchema,
+  jobListQuerySchema,
+  jobListResponseSchema,
   jobSchema,
+  jobStatusSchema,
+  queueStatsSchema,
   updateJobSchema,
   type CreateJob,
   type DomainJob,
+  type Job,
+  type JobActionResponse,
+  type JobDetails,
+  type JobError,
+  type JobIdRequest,
+  type JobListQuery,
+  type JobListResponse,
   type JobPriority,
   type JobStatus,
+  type QueueStats,
   type UpdateJob,
 } from './jobs.schemas';

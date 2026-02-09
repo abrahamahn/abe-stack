@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useUserActions.ts
+// src/apps/web/src/features/admin/hooks/useUserActions.ts
 /**
  * useUserActions hook
  *
@@ -11,44 +11,21 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
+import type {
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+} from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
-
-interface AdminUserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRoleLocal;
-  emailVerified: boolean;
-  emailVerifiedAt: string | null;
-  lockedUntil: string | null;
-  failedLoginAttempts: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface AdminUpdateUserRequestLocal {
-  name?: string | null;
-  role?: UserRoleLocal;
-}
-
-interface AdminUpdateUserResponseLocal {
-  message: string;
-  user: AdminUserLocal;
-}
-
-interface AdminLockUserRequestLocal {
-  reason: string;
-  durationMinutes?: number;
-}
-
-interface AdminLockUserResponseLocal {
-  message: string;
-  user: AdminUserLocal;
-}
+type AdminUpdateUserRequestLocal = AdminUpdateUserRequest;
+type AdminUpdateUserResponseLocal = AdminUpdateUserResponse;
+type AdminLockUserRequestLocal = AdminLockUserRequest;
+type AdminLockUserResponseLocal = AdminLockUserResponse;
 
 export interface UseUserActionsState {
   isUpdating: boolean;
@@ -101,10 +78,7 @@ export function useUserActions(): UseUserActionsResult {
       setState((prev) => ({ ...prev, isUpdating: true, error: null }));
 
       try {
-        const result: AdminUpdateUserResponseLocal = (await adminApi.updateUser(
-          userId,
-          data,
-        )) as AdminUpdateUserResponseLocal;
+        const result = await adminApi.updateUser(userId, data);
         setState((prev) => ({
           ...prev,
           isUpdating: false,
@@ -132,10 +106,7 @@ export function useUserActions(): UseUserActionsResult {
       setState((prev) => ({ ...prev, isLocking: true, error: null }));
 
       try {
-        const result: AdminLockUserResponseLocal = (await adminApi.lockUser(
-          userId,
-          data,
-        )) as AdminLockUserResponseLocal;
+        const result = await adminApi.lockUser(userId, data);
         setState((prev) => ({
           ...prev,
           isLocking: false,
@@ -163,10 +134,10 @@ export function useUserActions(): UseUserActionsResult {
         // The unlock endpoint expects the email in the request body for the legacy endpoint,
         // but the new /users/:id/unlock endpoint needs the email for logging purposes
         // We'll use a placeholder since the backend will look up the user by ID
-        const result: AdminLockUserResponseLocal = (await adminApi.unlockUser(userId, {
+        const result = await adminApi.unlockUser(userId, {
           email: '',
           reason,
-        })) as AdminLockUserResponseLocal;
+        });
         setState((prev) => ({
           ...prev,
           isUnlocking: false,

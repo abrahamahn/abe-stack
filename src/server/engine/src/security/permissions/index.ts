@@ -1,4 +1,4 @@
-// backend/engine/src/security/permissions/index.ts
+// src/server/engine/src/security/permissions/index.ts
 /**
  * Permissions Module
  *

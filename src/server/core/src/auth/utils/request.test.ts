@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/request.test.ts
+// src/server/core/src/auth/utils/request.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { extractRequestInfo } from './request';

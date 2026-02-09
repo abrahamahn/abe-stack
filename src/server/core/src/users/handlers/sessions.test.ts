@@ -1,4 +1,4 @@
-// server/core/src/users/handlers/sessions.test.ts
+// src/server/core/src/users/handlers/sessions.test.ts
 /**
  * Sessions Service Tests
  *
@@ -84,6 +84,10 @@ function createMockRepos(): Repositories {
     legalDocuments: {} as never,
     userAgreements: {} as never,
     consentLogs: {} as never,
+    totpBackupCodes: {} as never,
+    emailChangeTokens: {} as never,
+    apiKeys: {} as never,
+    dataExportRequests: {} as never,
   } as Repositories;
 }
 

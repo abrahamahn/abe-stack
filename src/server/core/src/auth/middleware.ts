@@ -1,4 +1,4 @@
-// backend/core/src/auth/middleware.ts
+// src/server/core/src/auth/middleware.ts
 /**
  * Authentication Middleware
  *

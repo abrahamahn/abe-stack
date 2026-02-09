@@ -1,4 +1,4 @@
-// backend/db/src/search/search-factory.ts
+// src/server/db/src/search/search-factory.ts
 /**
  * Search Provider Factory
  *

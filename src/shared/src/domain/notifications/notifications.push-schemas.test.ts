@@ -1,4 +1,4 @@
-// packages/shared/src/domain/notifications/notifications.push-schemas.test.ts
+// src/shared/src/domain/notifications/notifications.push-schemas.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

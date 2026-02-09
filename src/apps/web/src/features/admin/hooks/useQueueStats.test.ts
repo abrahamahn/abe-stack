@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useQueueStats.test.ts
+// src/apps/web/src/features/admin/hooks/useQueueStats.test.ts
 import { useQuery } from '@abe-stack/client-engine';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

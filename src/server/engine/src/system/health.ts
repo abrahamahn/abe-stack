@@ -1,4 +1,4 @@
-// backend/engine/src/system/health.ts
+// src/server/engine/src/system/health.ts
 
 import { REQUIRED_TABLES, validateSchema } from '@abe-stack/db';
 import {

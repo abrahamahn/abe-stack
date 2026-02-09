@@ -1,4 +1,4 @@
-// modules/realtime/src/routes.test.ts
+// src/server/realtime/src/routes.test.ts
 /**
  * Realtime Routes Unit Tests
  *

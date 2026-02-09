@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/SidePeekUILibraryContent.tsx
+// src/apps/web/src/features/ui-library/components/SidePeekUILibraryContent.tsx
 import { Button, Markdown } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';

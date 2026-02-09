@@ -1,4 +1,4 @@
-// packages/shared/src/domain/jobs/jobs.logic.ts
+// src/shared/src/domain/jobs/jobs.logic.ts
 
 /**
  * @file Job Domain Logic
@@ -13,13 +13,18 @@ import type { DomainJob, JobStatus } from './jobs.schemas';
 // ============================================================================
 
 /** Set of statuses that represent a finished job */
-const TERMINAL_STATUSES: ReadonlySet<JobStatus> = new Set(['completed', 'failed', 'dead']);
+const TERMINAL_STATUSES: ReadonlySet<JobStatus> = new Set([
+  'completed',
+  'failed',
+  'dead_letter',
+  'cancelled',
+]);
 
 /**
  * Checks whether a job status is terminal (no further processing).
  *
  * @param status - The job status to evaluate
- * @returns `true` if `completed`, `failed`, or `dead`
+ * @returns `true` if `completed`, `failed`, `dead_letter`, or `cancelled`
  * @complexity O(1) — Set lookup
  */
 export function isTerminalStatus(status: JobStatus): boolean {

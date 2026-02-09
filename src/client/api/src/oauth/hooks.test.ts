@@ -1,4 +1,4 @@
-// client/src/oauth/hooks.test.ts
+// src/client/api/src/oauth/hooks.test.ts
 /**
  * OAuth Hooks Unit Tests
  *
@@ -57,6 +57,14 @@ const createMockApiClient = (overrides?: Partial<ApiClient>): ApiClient => ({
   resetPassword: vi.fn(),
   verifyEmail: vi.fn(),
   resendVerification: vi.fn(),
+  totpSetup: vi.fn(),
+  totpEnable: vi.fn(),
+  totpDisable: vi.fn(),
+  totpStatus: vi.fn(),
+  totpVerifyLogin: vi.fn(),
+  changeEmail: vi.fn(),
+  confirmEmailChange: vi.fn(),
+  revertEmailChange: vi.fn(),
   getEnabledOAuthProviders: vi.fn().mockResolvedValue({ providers: [] }),
   getOAuthConnections: vi.fn().mockResolvedValue({ connections: [] }),
   unlinkOAuthProvider: vi.fn().mockResolvedValue({ message: 'Unlinked' }),

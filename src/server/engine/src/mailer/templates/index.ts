@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/templates/index.ts
+// src/server/engine/src/mailer/templates/index.ts
 /**
  * Email Templates Barrel
  *

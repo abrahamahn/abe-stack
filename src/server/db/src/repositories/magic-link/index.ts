@@ -1,4 +1,4 @@
-// backend/db/src/repositories/magic-link/index.ts
+// src/server/db/src/repositories/magic-link/index.ts
 /**
  * Magic Link Repositories Barrel
  */

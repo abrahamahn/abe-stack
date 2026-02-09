@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useRouteFocusAnnounce.ts
+// src/client/react/src/hooks/useRouteFocusAnnounce.ts
 import { useEffect, useRef } from 'react';
 
 import { useAnnounce } from '../components/LiveRegion';

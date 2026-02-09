@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserActionsMenu.tsx
+// src/apps/web/src/features/admin/components/UserActionsMenu.tsx
 /**
  * UserActionsMenu Component
  *
@@ -15,7 +15,8 @@ import type { JSX } from 'react';
 type UserRoleLocal = 'user' | 'moderator' | 'admin';
 
 interface AdminUserLocal {
-  name: string | null;
+  firstName: string;
+  lastName: string;
   role: UserRoleLocal;
   lockedUntil: string | null;
   emailVerified: boolean;
@@ -23,7 +24,11 @@ interface AdminUserLocal {
 
 export interface UserActionsMenuProps {
   user: AdminUserLocal;
-  onUpdate: (data: { name?: string | null; role?: UserRoleLocal }) => Promise<void>;
+  onUpdate: (data: {
+    firstName?: string;
+    lastName?: string;
+    role?: UserRoleLocal;
+  }) => Promise<void>;
   onLock: (reason: string, durationMinutes?: number) => Promise<void>;
   onUnlock: (reason: string) => Promise<void>;
   isUpdating: boolean;
@@ -57,7 +62,8 @@ export const UserActionsMenu = ({
   error,
 }: UserActionsMenuProps): JSX.Element => {
   // Edit form state
-  const [editName, setEditName] = useState(user.name ?? '');
+  const [editFirstName, setEditFirstName] = useState(user.firstName);
+  const [editLastName, setEditLastName] = useState(user.lastName);
   const [editRole, setEditRole] = useState<UserRoleLocal>(user.role);
 
   // Lock form state
@@ -74,10 +80,13 @@ export const UserActionsMenu = ({
   const handleUpdateSubmit = useCallback(
     async (e: React.SyntheticEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const updates: { name?: string | null; role?: UserRoleLocal } = {};
+      const updates: { firstName?: string; lastName?: string; role?: UserRoleLocal } = {};
 
-      if (editName !== (user.name ?? '')) {
-        updates.name = editName.length > 0 ? editName : null;
+      if (editFirstName !== user.firstName) {
+        updates.firstName = editFirstName;
+      }
+      if (editLastName !== user.lastName) {
+        updates.lastName = editLastName;
       }
       if (editRole !== user.role) {
         updates.role = editRole;
@@ -87,7 +96,7 @@ export const UserActionsMenu = ({
         await onUpdate(updates);
       }
     },
-    [editName, editRole, user.name, user.role, onUpdate],
+    [editFirstName, editLastName, editRole, user.firstName, user.lastName, user.role, onUpdate],
   );
 
   const handleLockSubmit = useCallback(
@@ -132,19 +141,38 @@ export const UserActionsMenu = ({
           >
             <div>
               <label
-                htmlFor="edit-name"
+                htmlFor="edit-first-name"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                Name
+                First Name
               </label>
               <Input
-                id="edit-name"
+                id="edit-first-name"
                 type="text"
-                value={editName}
+                value={editFirstName}
                 onChange={(e) => {
-                  setEditName(e.target.value);
+                  setEditFirstName(e.target.value);
                 }}
-                placeholder="Enter name"
+                placeholder="Enter first name"
+                disabled={isAnyLoading}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="edit-last-name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Last Name
+              </label>
+              <Input
+                id="edit-last-name"
+                type="text"
+                value={editLastName}
+                onChange={(e) => {
+                  setEditLastName(e.target.value);
+                }}
+                placeholder="Enter last name"
                 disabled={isAnyLoading}
               />
             </div>
@@ -174,7 +202,12 @@ export const UserActionsMenu = ({
 
             <Button
               type="submit"
-              disabled={isAnyLoading || (editName === (user.name ?? '') && editRole === user.role)}
+              disabled={
+                isAnyLoading ||
+                (editFirstName === user.firstName &&
+                  editLastName === user.lastName &&
+                  editRole === user.role)
+              }
             >
               {isUpdating ? 'Updating...' : 'Update User'}
             </Button>

@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/smtp.ts
+// src/server/engine/src/mailer/smtp.ts
 /**
  * SMTP Email Service (Production)
  *

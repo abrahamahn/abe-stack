@@ -1,4 +1,4 @@
-// backend/db/src/repositories/users/users.ts
+// src/server/db/src/repositories/users/users.ts
 /**
  * Users Repository (Functional)
  *
@@ -8,19 +8,21 @@
  * @module
  */
 
+import { canonicalizeEmail } from '@abe-stack/shared';
+
 import {
   and,
   eq,
   escapeLikePattern,
   gt,
   ilike,
+  insert,
   isNotNull,
   isNull,
   or,
   rawCondition,
   select,
   selectCount,
-  insert,
   update,
 } from '../../builder/index';
 import {
@@ -53,14 +55,21 @@ export type UserStatus = 'active' | 'locked' | 'unverified';
  * The sortBy field uses snake_case column names matching the database schema.
  */
 export interface AdminUserListFilters {
-  /** Full-text search across email and name (case-insensitive) */
+  /** Full-text search across email, username, first_name, last_name (case-insensitive) */
   search?: string | undefined;
   /** Filter by user role */
   role?: UserRole | undefined;
   /** Filter by computed user status (active, locked, unverified) */
   status?: UserStatus | undefined;
   /** Column to sort by (snake_case database column names) */
-  sortBy?: 'email' | 'name' | 'created_at' | 'updated_at' | undefined;
+  sortBy?:
+    | 'email'
+    | 'username'
+    | 'first_name'
+    | 'last_name'
+    | 'created_at'
+    | 'updated_at'
+    | undefined;
   /** Sort direction */
   sortOrder?: 'asc' | 'desc' | undefined;
   /** Page number (1-indexed, defaults to 1) */
@@ -104,6 +113,15 @@ export interface UserRepository {
    * @returns The user or null if not found
    */
   findByEmail(email: string): Promise<User | null>;
+
+  /**
+   * Find a user by username (case-insensitive).
+   * Usernames are stored lowercase, so the input is lowercased before lookup.
+   *
+   * @param username - The username to search for
+   * @returns The user or null if not found
+   */
+  findByUsername(username: string): Promise<User | null>;
 
   /**
    * Find a user by ID
@@ -166,6 +184,17 @@ function transformUser(row: Record<string, unknown>): User {
   return toCamelCase<User>(row, USER_COLUMNS);
 }
 
+function withCanonicalEmail<T extends NewUser | UpdateUser>(data: T): T {
+  if (data.email === undefined || data.email === '') {
+    return data;
+  }
+  if (data.canonicalEmail !== undefined && data.canonicalEmail !== '') {
+    return data;
+  }
+
+  return { ...data, canonicalEmail: canonicalizeEmail(data.email) };
+}
+
 /**
  * Build a WHERE clause fragment array from AdminUserListFilters.
  * Only non-empty, defined filter fields produce conditions.
@@ -177,11 +206,18 @@ function transformUser(row: Record<string, unknown>): User {
 function buildFilterConditions(filters: AdminUserListFilters): SqlFragment[] {
   const conditions: SqlFragment[] = [];
 
-  // Search: case-insensitive match on email or name
+  // Search: case-insensitive match on email, username, first_name, or last_name
   if (filters.search !== undefined && filters.search !== '') {
     const escapedSearch = escapeLikePattern(filters.search);
     const pattern = `%${escapedSearch}%`;
-    conditions.push(or(ilike('email', pattern), ilike('name', pattern)));
+    conditions.push(
+      or(
+        ilike('email', pattern),
+        ilike('username', pattern),
+        ilike('first_name', pattern),
+        ilike('last_name', pattern),
+      ),
+    );
   }
 
   // Role filter
@@ -220,7 +256,17 @@ function buildFilterConditions(filters: AdminUserListFilters): SqlFragment[] {
 export function createUserRepository(db: RawDb): UserRepository {
   return {
     async findByEmail(email: string): Promise<User | null> {
-      const result = await db.queryOne(select(USERS_TABLE).where(eq('email', email)).toSql());
+      const canonicalEmail = canonicalizeEmail(email);
+      const result = await db.queryOne(
+        select(USERS_TABLE).where(eq('canonical_email', canonicalEmail)).toSql(),
+      );
+      return result !== null ? transformUser(result) : null;
+    },
+
+    async findByUsername(username: string): Promise<User | null> {
+      const result = await db.queryOne(
+        select(USERS_TABLE).where(eq('username', username.toLowerCase())).toSql(),
+      );
       return result !== null ? transformUser(result) : null;
     },
 
@@ -230,7 +276,10 @@ export function createUserRepository(db: RawDb): UserRepository {
     },
 
     async create(data: NewUser): Promise<User> {
-      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, USER_COLUMNS);
+      const snakeData = toSnakeCase(
+        withCanonicalEmail(data) as unknown as Record<string, unknown>,
+        USER_COLUMNS,
+      );
       const result = await db.queryOne(
         insert(USERS_TABLE).values(snakeData).returningAll().toSql(),
       );
@@ -241,7 +290,10 @@ export function createUserRepository(db: RawDb): UserRepository {
     },
 
     async update(id: string, data: UpdateUser): Promise<User | null> {
-      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, USER_COLUMNS);
+      const snakeData = toSnakeCase(
+        withCanonicalEmail(data) as unknown as Record<string, unknown>,
+        USER_COLUMNS,
+      );
       const result = await db.queryOne(
         update(USERS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );

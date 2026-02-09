@@ -1,4 +1,4 @@
-// packages/shared/src/domain/notifications/notifications.errors.test.ts
+// src/shared/src/domain/notifications/notifications.errors.test.ts
 /**
  * Notification Error Tests
  *

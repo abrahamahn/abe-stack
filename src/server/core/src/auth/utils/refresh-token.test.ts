@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/refresh-token.test.ts
+// src/server/core/src/auth/utils/refresh-token.test.ts
 // backend/core/src/auth/utils/refresh-token.test.ts
 /**
  * Refresh Token Management Tests
@@ -227,6 +227,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
@@ -288,6 +289,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
@@ -376,7 +378,8 @@ describe('rotateRefreshToken', () => {
           revoked_at: mockFamily.revokedAt,
           revoke_reason: 'Token reuse detected',
           created_at: mockFamily.createdAt,
-        });
+        })
+        .mockResolvedValueOnce(null);
 
       await expect(rotateRefreshToken(db, 'old-token', '127.0.0.1', 'Mozilla/5.0')).rejects.toThrow(
         'Token has already been used',
@@ -427,6 +430,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({
           id: newerToken.id,
           user_id: newerToken.userId,
@@ -482,6 +486,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({
           id: newerToken.id,
           user_id: newerToken.userId,
@@ -547,6 +552,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce({
           id: newerToken.id,
           user_id: newerToken.userId,
@@ -652,6 +658,7 @@ describe('rotateRefreshToken', () => {
           revoke_reason: null,
           created_at: mockFamily.createdAt,
         })
+        .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
@@ -694,7 +701,7 @@ describe('revokeTokenFamily', () => {
     await revokeTokenFamily(db, 'family-123', 'Token reuse detected');
 
     expect(withTransaction).toHaveBeenCalledWith(db, expect.any(Function));
-    expect(mockTx.execute).toHaveBeenCalledTimes(2);
+    expect(mockTx.execute).toHaveBeenCalledTimes(3);
   });
 
   test('should set revoked_at and revoke_reason on family', async () => {
@@ -746,7 +753,7 @@ describe('revokeAllUserTokens', () => {
     await revokeAllUserTokens(db, 'user-123');
 
     expect(withTransaction).toHaveBeenCalledWith(db, expect.any(Function));
-    expect(mockTx.execute).toHaveBeenCalledTimes(2);
+    expect(mockTx.execute).toHaveBeenCalledTimes(3);
   });
 
   test('should set appropriate revoke reason', async () => {

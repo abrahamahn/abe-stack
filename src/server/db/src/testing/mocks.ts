@@ -1,4 +1,4 @@
-// backend/db/src/testing/mocks.ts
+// src/server/db/src/testing/mocks.ts
 /**
  * Database Test Utilities
  *

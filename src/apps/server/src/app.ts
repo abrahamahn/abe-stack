@@ -1,4 +1,4 @@
-// apps/server/src/app.ts
+// src/apps/server/src/app.ts
 
 import { verifyToken } from '@abe-stack/core/auth';
 import { requireValidSchema } from '@abe-stack/db';
@@ -149,6 +149,9 @@ export class App implements IServiceContainer {
       // Register WebSocket support for realtime features
       registerWebSocket(this._server, this.context, { verifyToken });
 
+      // Start background queue processing after routes are registered
+      this.queue.start();
+
       await listen(this._server, this.config);
 
       const routeCount = Object.values(this.moduleInfo).reduce((sum, m) => sum + m.routes, 0);
@@ -173,10 +176,13 @@ export class App implements IServiceContainer {
     if (this._pgPubSub !== null) await this._pgPubSub.stop();
     await this.queue.stop();
 
-    // 2. Close cache provider
+    // 2. Clean up write service (clears pending setImmediate handles)
+    this.write.close();
+
+    // 3. Close cache provider
     await this.cache.close();
 
-    // 3. Stop receiving HTTP traffic
+    // 4. Stop receiving HTTP traffic
     if (this._server !== null) {
       await this._server.close();
       this._server = null;

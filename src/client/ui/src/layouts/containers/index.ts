@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/index.ts
+// src/client/ui/src/layouts/containers/index.ts
 // Containers - Content wrapper layout components
 export { AuthLayout } from './AuthLayout';
 export { Container } from './Container';

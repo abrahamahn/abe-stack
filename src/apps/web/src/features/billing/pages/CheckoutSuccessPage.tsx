@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/CheckoutSuccessPage.tsx
+// src/apps/web/src/features/billing/pages/CheckoutSuccessPage.tsx
 /**
  * CheckoutSuccessPage - Displayed after successful checkout.
  */

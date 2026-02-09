@@ -1,4 +1,4 @@
-// apps/web/vitest.config.ts
+// src/apps/web/vitest.config.ts
 /**
  * Vitest configuration for web app tests.
  *
@@ -40,10 +40,6 @@ const workspacePackages: Record<string, string> = {
  * @complexity O(n) where n is the number of subpath patterns
  */
 const workspaceSubpaths: Array<{ pattern: RegExp; base: string }> = [
-  {
-    pattern: /^@abe-stack\/kernel\/contracts\/(.+)$/,
-    base: path.resolve(__dirname, '../../shared/src/contracts/'),
-  },
   {
     pattern: /^@abe-stack\/kernel\/(.+)$/,
     base: path.resolve(__dirname, '../../shared/src/'),

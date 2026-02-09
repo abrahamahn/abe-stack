@@ -1,4 +1,4 @@
-// tools/scripts/db/bootstrap-admin.test.ts
+// src/tools/scripts/db/bootstrap-admin.test.ts
 /**
  * Tests for Production Admin Bootstrap Script
  *
@@ -11,7 +11,7 @@
  * - Cryptographic security of generated passwords
  */
 
-import { randomBytes } from 'node:crypto';
+import { randomBytes } from 'crypto';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -44,8 +44,8 @@ const {
   mockEq: vi.fn(),
 }));
 
-vi.mock('node:crypto', async () => {
-  const actual = await vi.importActual('node:crypto');
+vi.mock('crypto', async () => {
+  const actual = await vi.importActual('crypto');
   return {
     ...actual,
     randomBytes: vi.fn(),

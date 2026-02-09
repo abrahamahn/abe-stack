@@ -1,4 +1,4 @@
-// packages/shared/src/core/guard.ts
+// src/shared/src/core/guard.ts
 /**
  * Guard Utilities
  *

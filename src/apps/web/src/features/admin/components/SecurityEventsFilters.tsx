@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/SecurityEventsFilters.tsx
+// src/apps/web/src/features/admin/components/SecurityEventsFilters.tsx
 /**
  * SecurityEventsFilters Component
  *

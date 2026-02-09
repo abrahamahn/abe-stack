@@ -1,4 +1,4 @@
-// backend/core/src/admin/handlers.test.ts
+// src/server/core/src/admin/handlers.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock dependencies - use relative paths to match how vitest resolves modules

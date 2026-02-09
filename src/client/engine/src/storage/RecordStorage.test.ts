@@ -1,4 +1,4 @@
-// client/src/storage/RecordStorage.test.ts
+// src/client/engine/src/storage/RecordStorage.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

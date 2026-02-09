@@ -1,8 +1,9 @@
-// packages/shared/src/utils/pagination/index.ts
+// src/shared/src/utils/pagination/index.ts
 /**
  * Pagination Domain
  *
- * Cursor-based pagination utilities for database queries and in-memory arrays.
+ * Cursor-based and offset-based pagination utilities for database queries
+ * and in-memory arrays.
  */
 
 // Cursor encoding/decoding
@@ -15,9 +16,6 @@ export {
 } from './cursor';
 export type { CursorData } from './cursor';
 
-// Pagination error — re-exported from parent pagination.ts
-// (error.ts was removed as duplicate; PaginationError lives in ../pagination.ts)
-
 // Pagination helpers
 export {
   buildCursorPaginationQuery,
@@ -25,3 +23,22 @@ export {
   paginateArrayWithCursor,
   paginateLargeArrayWithCursor,
 } from './helpers';
+
+// Core pagination schemas, types, and utilities
+export {
+  calculateOffsetPaginationMetadata,
+  createCursorPaginatedResult,
+  createPaginatedResult,
+  cursorPaginatedResultSchema,
+  cursorPaginationOptionsSchema,
+  paginatedResultSchema,
+  PAGINATION_ERROR_TYPES,
+  PaginationError,
+  paginationOptionsSchema,
+  sortOrderSchema,
+  type CursorPaginatedResult,
+  type CursorPaginationOptions,
+  type PaginatedResult,
+  type PaginationErrorType,
+  type PaginationOptions,
+} from './pagination';

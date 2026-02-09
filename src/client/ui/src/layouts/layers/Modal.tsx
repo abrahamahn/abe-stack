@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/Modal.tsx
+// src/client/ui/src/layouts/layers/Modal.tsx
 import { FocusTrap } from '@components/FocusTrap';
 import { Overlay } from '@layers/Overlay';
 import {

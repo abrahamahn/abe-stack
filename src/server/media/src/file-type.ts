@@ -1,4 +1,4 @@
-// premium/media/src/file-type.ts
+// src/server/media/src/file-type.ts
 /**
  * Custom File Type Detection - Lightweight replacement for file-type package
  *
@@ -139,14 +139,25 @@ export function detectFileTypeFromPath(filePath: string): FileTypeResult | null 
 }
 
 /**
- * Read file header and detect type
+ * Read file header and detect type.
+ *
+ * Opens the file, reads the first 64 bytes for magic-byte detection,
+ * then falls back to extension-based detection.
+ *
+ * @param filePath - Absolute path to the file
+ * @returns Detected file type, or null if unknown or unreadable
+ * @throws Never — errors are caught and return null
+ * @complexity O(m) where m is the number of known magic signatures
  */
 export async function detectFileTypeFromFile(filePath: string): Promise<FileTypeResult | null> {
   try {
     const fd = await fs.open(filePath, 'r');
-    const buffer = Buffer.alloc(64); // Read first 64 bytes
-    await fd.read(buffer, 0, 64, 0);
-    await fd.close();
+    const buffer = Buffer.alloc(64);
+    try {
+      await fd.read(buffer, 0, 64, 0);
+    } finally {
+      await fd.close();
+    }
 
     // Try magic byte detection first
     const result = detectFileType(buffer);

@@ -33,7 +33,7 @@
       "cache": true
     },
     "type-check": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "@abe-stack/web#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
       "cache": true
     },

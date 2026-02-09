@@ -1,4 +1,4 @@
-// backend/engine/src/security/crypto/jwt-rotation.test.ts
+// src/server/engine/src/security/crypto/jwt-rotation.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { JwtError, sign as jwtSign } from '../jwt';

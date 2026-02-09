@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/hooks/useUILibraryPanes.ts
+// src/apps/web/src/features/ui-library/hooks/useUILibraryPanes.ts
 import { useLocalStorage, useMediaQuery } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 

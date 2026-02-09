@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/cookie.test.ts
+// src/apps/server/src/http/middleware/cookie.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { parseCookies, serializeCookie, signCookie, unsignCookie } from './cookie';

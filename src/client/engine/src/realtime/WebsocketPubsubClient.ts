@@ -1,4 +1,4 @@
-// client/src/realtime/WebsocketPubsubClient.ts
+// src/client/engine/src/realtime/WebsocketPubsubClient.ts
 
 /**
  * Time constants for reconnection delays

@@ -1,4 +1,4 @@
-// apps/server/src/config/services/notifications.ts
+// src/apps/server/src/config/services/notifications.ts
 import type {
   CourierConfig,
   FcmConfig,

@@ -1,8 +1,8 @@
-// packages/shared/src/core/env.test.ts
+// src/shared/src/core/env.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { createSchema, parseString } from '../contracts/schema';
 import { ConfigurationError } from '../core/errors';
+import { createSchema, parseString } from '../core/schema.utils';
 
 import { baseEnvSchema, getRawEnv, validateEnv } from './env';
 

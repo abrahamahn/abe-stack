@@ -1,5 +1,6 @@
-// apps/web/src/features/auth/components/LoginForm.tsx
+// src/apps/web/src/features/auth/components/LoginForm.tsx
 import { Button, Input, Link, PasswordInput } from '@abe-stack/ui';
+import { TotpChallengeError } from '@auth/services/AuthService';
 import { useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
@@ -11,6 +12,7 @@ import type { ChangeEvent, ReactElement } from 'react';
 export interface LoginFormProps {
   onLogin?: (data: LoginRequest) => Promise<void>;
   onForgotPassword?: (data: ForgotPasswordRequest) => Promise<void>;
+  onTotpVerify?: (challengeToken: string, code: string) => Promise<void>;
   onSuccess?: () => void;
   onModeChange?: (mode: AuthMode) => void;
   isLoading?: boolean;
@@ -20,33 +22,125 @@ export interface LoginFormProps {
 export const LoginForm = ({
   onLogin,
   onForgotPassword,
+  onTotpVerify,
   onModeChange,
   isLoading,
   error,
   onSuccess,
 }: LoginFormProps): ReactElement => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [totpChallenge, setTotpChallenge] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [totpError, setTotpError] = useState<string | null>(null);
+  const [totpLoading, setTotpLoading] = useState(false);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onLogin === undefined) return;
 
     try {
-      await onLogin({ email, password });
+      await onLogin({ identifier, password });
       onSuccess?.();
-    } catch {
-      // Error handled by parent component via onLogin callback
+    } catch (err) {
+      if (err instanceof TotpChallengeError) {
+        setTotpChallenge(err.challengeToken);
+        setTotpError(null);
+        return;
+      }
+      // Other errors handled by parent component via error prop
     }
   };
 
+  const handleTotpSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    if (totpChallenge === null || onTotpVerify === undefined) return;
+
+    setTotpLoading(true);
+    setTotpError(null);
+
+    try {
+      await onTotpVerify(totpChallenge, totpCode);
+      onSuccess?.();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid TOTP code';
+      setTotpError(message);
+    } finally {
+      setTotpLoading(false);
+    }
+  };
+
+  const handleBackToLogin = (): void => {
+    setTotpChallenge(null);
+    setTotpCode('');
+    setTotpError(null);
+  };
+
   const handleForgotPassword = (): void => {
-    void onForgotPassword?.({ email });
+    const emailValue = identifier.includes('@') ? identifier : '';
+    if (emailValue.length > 0) {
+      void onForgotPassword?.({ email: emailValue });
+    }
     if (onModeChange !== undefined) {
       onModeChange('forgot-password');
     }
   };
 
+  // TOTP verification step
+  if (totpChallenge !== null) {
+    return (
+      <div className="auth-form">
+        <div className="auth-form-content">
+          <div className="auth-form-header">
+            <h2 className="auth-form-title">Two-Factor Authentication</h2>
+            <p className="auth-form-subtitle">
+              Enter the 6-digit code from your authenticator app, or a backup code
+            </p>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              void handleTotpSubmit(e);
+            }}
+            className="auth-form-fields"
+          >
+            <Input.Field
+              label="Authentication Code"
+              type="text"
+              value={totpCode}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setTotpCode(e.target.value);
+              }}
+              required
+              disabled={totpLoading}
+              placeholder="000000"
+              maxLength={8}
+              autoComplete="one-time-code"
+              autoFocus
+            />
+
+            <p className="text-xs text-muted">
+              Lost your authenticator? Enter one of your backup codes instead.
+            </p>
+
+            {totpError !== null && <div className="auth-form-error">{totpError}</div>}
+
+            <Button type="submit" className="w-full" disabled={totpLoading || totpCode.length < 6}>
+              {totpLoading ? 'Verifying...' : 'Verify'}
+            </Button>
+          </form>
+
+          <div className="text-center">
+            <Button variant="text" onClick={handleBackToLogin} disabled={totpLoading}>
+              Back to login
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard login form
   return (
     <div className="auth-form">
       <div className="auth-form-content">
@@ -64,14 +158,15 @@ export const LoginForm = ({
           className="auth-form-fields"
         >
           <Input.Field
-            label="Email"
-            type="email"
-            value={email}
+            label="Email or Username"
+            type="text"
+            value={identifier}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setEmail(e.target.value);
+              setIdentifier(e.target.value);
             }}
             required
             disabled={isLoading}
+            placeholder="Enter your email or username"
           />
 
           <PasswordInput

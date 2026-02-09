@@ -1,4 +1,4 @@
-// client/react/src/hooks/useDebounce.test.ts
+// src/client/react/src/hooks/useDebounce.test.ts
 /**
  * Tests for useDebounce hook.
  *

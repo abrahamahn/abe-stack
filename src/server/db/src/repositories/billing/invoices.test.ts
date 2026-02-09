@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/invoices.test.ts
+// src/server/db/src/repositories/billing/invoices.test.ts
 /**
  * Tests for Invoices Repository
  *

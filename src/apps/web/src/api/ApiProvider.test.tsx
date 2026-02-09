@@ -1,4 +1,4 @@
-// apps/web/src/api/ApiProvider.test.tsx
+// src/apps/web/src/api/ApiProvider.test.tsx
 import { QueryCache } from '@abe-stack/client-engine';
 import { MemoryRouter } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
@@ -61,6 +61,10 @@ function createMockEnvironment(): ClientEnvironment {
     apiUrl: '',
     tokenRefreshInterval: 13 * 60 * 1000,
     uiVersion: '1.0.0',
+    queryPersistence: {
+      maxAge: 24 * 60 * 60 * 1000,
+      throttleTime: 1000,
+    },
   };
 
   const mockAuth = {

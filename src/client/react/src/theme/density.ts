@@ -1,4 +1,4 @@
-// client/ui/src/theme/density.ts
+// src/client/react/src/theme/density.ts
 
 /**
  * Theme density variants for adjusting spacing across the UI.

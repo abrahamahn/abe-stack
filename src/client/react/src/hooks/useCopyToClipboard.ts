@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useCopyToClipboard.ts
+// src/client/react/src/hooks/useCopyToClipboard.ts
 import { useEffect, useRef, useState } from 'react';
 
 type CopyToClipboardResult = {

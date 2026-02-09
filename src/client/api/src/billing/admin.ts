@@ -1,4 +1,4 @@
-// client/src/billing/admin.ts
+// src/client/api/src/billing/admin.ts
 /**
  * Admin Billing API Client
  *

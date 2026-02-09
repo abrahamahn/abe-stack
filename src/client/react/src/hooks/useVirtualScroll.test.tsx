@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useVirtualScroll.test.tsx
+// src/client/react/src/hooks/useVirtualScroll.test.tsx
 /** @vitest-environment jsdom */
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

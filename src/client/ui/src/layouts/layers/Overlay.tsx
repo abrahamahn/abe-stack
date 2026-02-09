@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/Overlay.tsx
+// src/client/ui/src/layouts/layers/Overlay.tsx
 import {
   forwardRef,
   useEffect,

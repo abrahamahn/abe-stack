@@ -1,4 +1,4 @@
-// backend/db/src/schema/features.test.ts
+// src/server/db/src/schema/features.test.ts
 /**
  * Unit tests for features schema type definitions
  *

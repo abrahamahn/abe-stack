@@ -1,4 +1,4 @@
-// client/ui/src/elements/Box.tsx
+// src/client/ui/src/elements/Box.tsx
 import { cn } from '@utils/cn';
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 import '../styles/elements.css';

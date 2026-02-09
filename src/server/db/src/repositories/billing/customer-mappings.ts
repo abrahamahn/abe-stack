@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/customer-mappings.ts
+// src/server/db/src/repositories/billing/customer-mappings.ts
 /**
  * Customer Mappings Repository
  *

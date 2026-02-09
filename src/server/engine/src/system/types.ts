@@ -1,4 +1,4 @@
-// backend/engine/src/system/types.ts
+// src/server/engine/src/system/types.ts
 
 import type { AppConfig } from '../config';
 import type { RawDb } from '@abe-stack/db';

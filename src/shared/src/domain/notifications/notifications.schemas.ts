@@ -6,7 +6,6 @@
  * @module Domain/Notifications
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
 import {
   createEnumSchema,
   createSchema,
@@ -16,11 +15,12 @@ import {
   parseRecord,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 import { notificationIdSchema, userIdSchema } from '../../types/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../../utils/pagination';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { NotificationId, UserId } from '../../types/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../../utils/pagination';
 
@@ -35,24 +35,27 @@ export const NOTIFICATION_TYPES = {
   ERROR: 'error',
 } as const;
 
-/** Notification type values */
-const NOTIFICATION_TYPE_VALUES = ['info', 'success', 'warning', 'error'] as const;
+/**
+ * Severity levels for in-app notifications (must match DB NotificationLevel in notifications.ts).
+ * Aliased as NOTIFICATION_LEVELS to match DB naming convention.
+ */
+export const NOTIFICATION_LEVELS = ['info', 'success', 'warning', 'error'] as const;
+
+/** Notification level type matching DB NotificationLevel */
+export type NotificationLevel = (typeof NOTIFICATION_LEVELS)[number];
 
 /** Notification type enum schema */
-const notificationTypeSchema = createEnumSchema(NOTIFICATION_TYPE_VALUES, 'notification type');
+const notificationTypeSchema = createEnumSchema(NOTIFICATION_LEVELS, 'notification type');
 
 // ============================================================================
 // Types
 // ============================================================================
 
-/** Notification type value */
-type NotificationTypeValue = (typeof NOTIFICATION_TYPE_VALUES)[number];
-
 /** Standard notification entity */
 export interface Notification {
   id: NotificationId;
   userId: UserId;
-  type: NotificationTypeValue;
+  type: NotificationLevel;
   title: string;
   message: string;
   data?: Record<string, unknown> | undefined;
@@ -79,7 +82,7 @@ export interface NotificationPreferencesConfig {
 /** List request options for notifications */
 export interface NotificationsListRequest extends CursorPaginationOptions {
   isRead?: boolean | undefined;
-  type?: NotificationTypeValue | undefined;
+  type?: NotificationLevel | undefined;
 }
 
 /** Paginated list response for notifications */

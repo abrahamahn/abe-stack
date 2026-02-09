@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useSessions.test.ts
+// src/apps/web/src/features/settings/hooks/useSessions.test.ts
 /**
  * Tests for useSessions, useRevokeSession, and useRevokeAllSessions hooks.
  *

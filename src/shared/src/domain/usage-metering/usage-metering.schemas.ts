@@ -1,4 +1,4 @@
-// packages/shared/src/domain/usage-metering/usage-metering.schemas.ts
+// src/shared/src/domain/usage-metering/usage-metering.schemas.ts
 
 /**
  * @file Usage Metering Contracts
@@ -6,11 +6,11 @@
  * @module Domain/UsageMetering
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
-import { createEnumSchema, createSchema, parseNumber, parseString } from '../../contracts/schema';
+import { createEnumSchema, createSchema, parseNumber, parseString } from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 import { tenantIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { TenantId } from '../../types/ids';
 
 // ============================================================================
@@ -30,6 +30,7 @@ export interface UsageMetric {
 
 /** A snapshot of usage for a specific tenant and metric for a time period */
 export interface UsageSnapshot {
+  id: string;
   tenantId: TenantId;
   metricKey: string;
   value: number;
@@ -66,6 +67,7 @@ export const usageSnapshotSchema: Schema<UsageSnapshot> = createSchema((data: un
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   return {
+    id: parseString(obj['id'], 'id'),
     tenantId: tenantIdSchema.parse(obj['tenantId']),
     metricKey: parseString(obj['metricKey'], 'metricKey'),
     value: parseNumber(obj['value'], 'value'),

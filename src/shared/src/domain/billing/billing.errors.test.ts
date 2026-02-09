@@ -1,4 +1,4 @@
-// packages/shared/src/domain/billing/billing.errors.test.ts
+// src/shared/src/domain/billing/billing.errors.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

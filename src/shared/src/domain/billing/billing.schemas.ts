@@ -1,4 +1,4 @@
-// packages/shared/src/domain/billing/billing.schemas.ts
+// src/shared/src/domain/billing/billing.schemas.ts
 
 /**
  * @file Billing Schemas
@@ -6,7 +6,6 @@
  * @module Domain/Billing
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
 import {
   createEnumSchema,
   createSchema,
@@ -17,14 +16,16 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 import { planIdSchema, subscriptionIdSchema, userIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { PlanId, SubscriptionId, UserId } from '../../types/ids';
 
 // Re-export types
-export { errorResponseSchema, type ErrorResponse } from '../../contracts/common';
+export { errorResponseSchema } from '../../core/schemas';
+export type { ErrorResponse } from '../../core/api';
 export type { PlanId, SubscriptionId, UserId } from '../../types/ids';
 
 // ============================================================================
@@ -55,12 +56,26 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 export const PAYMENT_METHOD_TYPES = ['card', 'bank_account', 'paypal'] as const;
 export type PaymentMethodType = (typeof PAYMENT_METHOD_TYPES)[number];
 
+/** Billing event types normalized from provider webhooks (must match DB BillingEventType) */
+export const BILLING_EVENT_TYPES = [
+  'subscription.created',
+  'subscription.updated',
+  'subscription.canceled',
+  'invoice.paid',
+  'invoice.payment_failed',
+  'refund.created',
+  'chargeback.created',
+] as const;
+export type BillingEventType = (typeof BILLING_EVENT_TYPES)[number];
+
 export const FEATURE_KEYS = {
   PROJECTS: 'projects:limit',
   STORAGE: 'storage:limit',
   TEAM_MEMBERS: 'team:invite',
   API_ACCESS: 'api:access',
   CUSTOM_BRANDING: 'branding:custom',
+  MEDIA_PROCESSING: 'media:processing',
+  MEDIA_MAX_FILE_SIZE_MB: 'media:max_file_size',
 } as const;
 
 export type FeatureKey = (typeof FEATURE_KEYS)[keyof typeof FEATURE_KEYS];
@@ -77,7 +92,11 @@ const invoiceStatusSchema = createEnumSchema(INVOICE_STATUSES, 'invoice status')
 const paymentMethodTypeSchema = createEnumSchema(PAYMENT_METHOD_TYPES, 'payment method type');
 
 // Limit feature keys
-const LIMIT_FEATURE_KEYS = [FEATURE_KEYS.PROJECTS, FEATURE_KEYS.STORAGE] as const;
+const LIMIT_FEATURE_KEYS = [
+  FEATURE_KEYS.PROJECTS,
+  FEATURE_KEYS.STORAGE,
+  FEATURE_KEYS.MEDIA_MAX_FILE_SIZE_MB,
+] as const;
 const limitFeatureKeySchema = createEnumSchema(LIMIT_FEATURE_KEYS, 'limit feature key');
 
 // Toggle feature keys
@@ -85,6 +104,7 @@ const TOGGLE_FEATURE_KEYS = [
   FEATURE_KEYS.TEAM_MEMBERS,
   FEATURE_KEYS.API_ACCESS,
   FEATURE_KEYS.CUSTOM_BRANDING,
+  FEATURE_KEYS.MEDIA_PROCESSING,
 ] as const;
 const toggleFeatureKeySchema = createEnumSchema(TOGGLE_FEATURE_KEYS, 'toggle feature key');
 

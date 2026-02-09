@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/ProfileForm.test.tsx
+// src/apps/web/src/features/settings/components/ProfileForm.test.tsx
 /**
  * Profile Form Component Tests
  *
@@ -119,10 +119,16 @@ describe('ProfileForm', () => {
   const mockUser: User = {
     id: 'user-123' as unknown as UserId,
     email: 'john@example.com',
-    name: 'John Doe',
+    username: 'johndoe',
+    firstName: 'John',
+    lastName: 'Doe',
     avatarUrl: null,
     role: 'user',
-    isVerified: true,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -164,18 +170,26 @@ describe('ProfileForm', () => {
       expect(emailInput).toBeDisabled();
     });
 
-    it('should render name field with user name', () => {
+    it('should render firstName field with user firstName', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      expect(nameInput).toHaveValue('John Doe');
-      expect(nameInput).not.toBeDisabled();
+      const firstNameInput = screen.getByTestId('input-firstName');
+      expect(firstNameInput).toHaveValue('John');
+      expect(firstNameInput).not.toBeDisabled();
+    });
+
+    it('should render lastName field with user lastName', () => {
+      render(<ProfileForm {...defaultProps} />);
+
+      const lastNameInput = screen.getByTestId('input-lastName');
+      expect(lastNameInput).toHaveValue('Doe');
+      expect(lastNameInput).not.toBeDisabled();
     });
 
     it('should render email warning message', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      expect(screen.getByText('Email cannot be changed at this time.')).toBeInTheDocument();
+      expect(screen.getByText('To change your email, go to the Security tab.')).toBeInTheDocument();
     });
 
     it('should render submit button', () => {
@@ -185,37 +199,40 @@ describe('ProfileForm', () => {
       expect(screen.getByText('Save Changes')).toBeInTheDocument();
     });
 
-    it('should render with null user name', () => {
-      const userWithoutName: User = {
-        ...mockUser,
-        name: null,
-      };
-
-      render(<ProfileForm {...defaultProps} user={userWithoutName} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      expect(nameInput).toHaveValue('');
-    });
-
     it('should render form fields with correct labels', () => {
       render(<ProfileForm {...defaultProps} />);
 
       expect(screen.getByText('Email')).toBeInTheDocument();
-      expect(screen.getByText('Display Name')).toBeInTheDocument();
+      expect(screen.getByText('First Name')).toBeInTheDocument();
+      expect(screen.getByText('Last Name')).toBeInTheDocument();
     });
 
-    it('should render name input with maxLength attribute', () => {
+    it('should render firstName input with maxLength attribute', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      expect(nameInput).toHaveAttribute('maxLength', '100');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      expect(firstNameInput).toHaveAttribute('maxLength', '100');
     });
 
-    it('should render name input with placeholder', () => {
+    it('should render lastName input with maxLength attribute', () => {
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      expect(nameInput).toHaveAttribute('placeholder', 'Enter your display name');
+      const lastNameInput = screen.getByTestId('input-lastName');
+      expect(lastNameInput).toHaveAttribute('maxLength', '100');
+    });
+
+    it('should render firstName input with placeholder', () => {
+      render(<ProfileForm {...defaultProps} />);
+
+      const firstNameInput = screen.getByTestId('input-firstName');
+      expect(firstNameInput).toHaveAttribute('placeholder', 'Enter your first name');
+    });
+
+    it('should render lastName input with placeholder', () => {
+      render(<ProfileForm {...defaultProps} />);
+
+      const lastNameInput = screen.getByTestId('input-lastName');
+      expect(lastNameInput).toHaveAttribute('placeholder', 'Enter your last name');
     });
   });
 
@@ -224,15 +241,26 @@ describe('ProfileForm', () => {
   // ============================================================================
 
   describe('user interactions', () => {
-    it('should update name field when typing', async () => {
+    it('should update firstName field when typing', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Jane Smith');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, 'Jane');
 
-      expect(nameInput).toHaveValue('Jane Smith');
+      expect(firstNameInput).toHaveValue('Jane');
+    });
+
+    it('should update lastName field when typing', async () => {
+      const user = userEvent.setup({ delay: null });
+      render(<ProfileForm {...defaultProps} />);
+
+      const lastNameInput = screen.getByTestId('input-lastName');
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, 'Smith');
+
+      expect(lastNameInput).toHaveValue('Smith');
     });
 
     it('should not allow editing email field', async () => {
@@ -246,46 +274,46 @@ describe('ProfileForm', () => {
       expect(emailInput).toBeDisabled();
     });
 
-    it('should enable submit button when name changes', async () => {
+    it('should enable submit button when firstName changes', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
+      const firstNameInput = screen.getByTestId('input-firstName');
       const submitButton = screen.getByTestId('submit-button');
 
       // Initially disabled (no changes)
       expect(submitButton).toBeDisabled();
 
-      // Type new name
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Jane Smith');
+      // Type new firstName
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, 'Jane');
 
       // Should be enabled
       expect(submitButton).not.toBeDisabled();
     });
 
-    it('should disable submit button when name is unchanged', () => {
+    it('should enable submit button when lastName changes', async () => {
+      const user = userEvent.setup({ delay: null });
+      render(<ProfileForm {...defaultProps} />);
+
+      const lastNameInput = screen.getByTestId('input-lastName');
+      const submitButton = screen.getByTestId('submit-button');
+
+      // Initially disabled (no changes)
+      expect(submitButton).toBeDisabled();
+
+      // Type new lastName
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, 'Smith');
+
+      // Should be enabled
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    it('should disable submit button when fields are unchanged', () => {
       render(<ProfileForm {...defaultProps} />);
 
       const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toBeDisabled();
-    });
-
-    it('should disable submit button when name is cleared and was null originally', async () => {
-      const user = userEvent.setup({ delay: null });
-      const userWithoutName: User = {
-        ...mockUser,
-        name: null,
-      };
-
-      render(<ProfileForm {...defaultProps} user={userWithoutName} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      const submitButton = screen.getByTestId('submit-button');
-
-      await user.type(nameInput, 'Test');
-      await user.clear(nameInput);
-
       expect(submitButton).toBeDisabled();
     });
   });
@@ -295,51 +323,32 @@ describe('ProfileForm', () => {
   // ============================================================================
 
   describe('form submission', () => {
-    it('should call updateProfile with trimmed name', async () => {
+    it('should call updateProfile with trimmed names', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, '  Jane Smith  ');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      const lastNameInput = screen.getByTestId('input-lastName');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, '  Jane  ');
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, '  Smith  ');
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: 'Jane Smith' });
-    });
-
-    it('should call updateProfile with null for empty name', async () => {
-      const user = userEvent.setup({ delay: null });
-      render(<ProfileForm {...defaultProps} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-
-      fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
-
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: null });
-    });
-
-    it('should call updateProfile with null for whitespace-only name', async () => {
-      const user = userEvent.setup({ delay: null });
-      render(<ProfileForm {...defaultProps} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, '   ');
-
-      fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
-
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: null });
+      expect(mockUpdateProfile).toHaveBeenCalledWith({
+        firstName: 'Jane',
+        lastName: 'Smith',
+      });
     });
 
     it('should prevent default form submission', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Jane Smith');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, 'Jane');
 
       const form = screen.getByTestId('submit-button').closest('form')!;
       const preventDefaultSpy = vi.fn();
@@ -379,9 +388,9 @@ describe('ProfileForm', () => {
 
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
 
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'New Name');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, 'Jane');
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
@@ -674,83 +683,61 @@ describe('ProfileForm', () => {
   // ============================================================================
 
   describe('change detection', () => {
-    it('should detect changes with trimmed comparison', async () => {
+    it('should detect changes with trimmed comparison for firstName', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
+      const firstNameInput = screen.getByTestId('input-firstName');
       const submitButton = screen.getByTestId('submit-button');
 
       // Add whitespace
-      await user.clear(nameInput);
-      await user.type(nameInput, '  John Doe  ');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, '  John  ');
 
       // Should be disabled (same after trim)
       expect(submitButton).toBeDisabled();
     });
 
-    it('should enable button when name changes after trimming whitespace', async () => {
+    it('should detect changes with trimmed comparison for lastName', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
+      const lastNameInput = screen.getByTestId('input-lastName');
       const submitButton = screen.getByTestId('submit-button');
 
-      await user.clear(nameInput);
-      await user.type(nameInput, '  Jane Smith  ');
+      // Add whitespace
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, '  Doe  ');
+
+      // Should be disabled (same after trim)
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('should enable button when firstName changes after trimming whitespace', async () => {
+      const user = userEvent.setup({ delay: null });
+      render(<ProfileForm {...defaultProps} />);
+
+      const firstNameInput = screen.getByTestId('input-firstName');
+      const submitButton = screen.getByTestId('submit-button');
+
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, '  Jane  ');
 
       // Should be enabled (different after trim)
       expect(submitButton).not.toBeDisabled();
     });
 
-    it('should compare empty string as null', async () => {
-      const user = userEvent.setup({ delay: null });
-      const userWithoutName: User = {
-        ...mockUser,
-        name: null,
-      };
-
-      render(<ProfileForm {...defaultProps} user={userWithoutName} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      const submitButton = screen.getByTestId('submit-button');
-
-      // Type then clear
-      await user.type(nameInput, 'Test');
-      await user.clear(nameInput);
-
-      // Should be disabled (empty string becomes null, same as original)
-      expect(submitButton).toBeDisabled();
-    });
-
-    it('should detect change from null to non-empty', async () => {
-      const user = userEvent.setup({ delay: null });
-      const userWithoutName: User = {
-        ...mockUser,
-        name: null,
-      };
-
-      render(<ProfileForm {...defaultProps} user={userWithoutName} />);
-
-      const nameInput = screen.getByTestId('input-name');
-      const submitButton = screen.getByTestId('submit-button');
-
-      await user.type(nameInput, 'New Name');
-
-      // Should be enabled
-      expect(submitButton).not.toBeDisabled();
-    });
-
-    it('should detect change from non-empty to null', async () => {
+    it('should enable button when lastName changes after trimming whitespace', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
+      const lastNameInput = screen.getByTestId('input-lastName');
       const submitButton = screen.getByTestId('submit-button');
 
-      await user.clear(nameInput);
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, '  Smith  ');
 
-      // Should be enabled (changed from "John Doe" to null)
+      // Should be enabled (different after trim)
       expect(submitButton).not.toBeDisabled();
     });
   });
@@ -760,58 +747,67 @@ describe('ProfileForm', () => {
   // ============================================================================
 
   describe('edge cases', () => {
-    it('should handle very long names (up to maxLength)', async () => {
+    it('should handle very long firstName (up to maxLength)', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      const longName = 'a'.repeat(100);
+      const firstNameInput = screen.getByTestId('input-firstName');
+      const longFirstName = 'a'.repeat(100);
 
-      await user.clear(nameInput);
-      await user.type(nameInput, longName);
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, longFirstName);
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: longName });
+      expect(mockUpdateProfile).toHaveBeenCalledWith({
+        firstName: longFirstName,
+        lastName: 'Doe',
+      });
     });
 
-    it('should handle names with special characters', async () => {
+    it('should handle firstName with special characters', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      const specialName = "O'Brien-Smith 3rd";
+      const firstNameInput = screen.getByTestId('input-firstName');
+      const specialFirstName = "O'Brien";
 
-      await user.clear(nameInput);
-      await user.type(nameInput, specialName);
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, specialFirstName);
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: specialName });
+      expect(mockUpdateProfile).toHaveBeenCalledWith({
+        firstName: specialFirstName,
+        lastName: 'Doe',
+      });
     });
 
-    it('should handle names with unicode characters', async () => {
+    it('should handle lastName with unicode characters', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      const unicodeName = 'José María Pérez';
+      const lastNameInput = screen.getByTestId('input-lastName');
+      const unicodeLastName = 'Pérez';
 
-      await user.clear(nameInput);
-      await user.type(nameInput, unicodeName);
+      await user.clear(lastNameInput);
+      await user.type(lastNameInput, unicodeLastName);
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({ name: unicodeName });
+      expect(mockUpdateProfile).toHaveBeenCalledWith({
+        firstName: 'John',
+        lastName: unicodeLastName,
+      });
     });
 
     it('should handle form submission via button click', async () => {
       const user = userEvent.setup({ delay: null });
       render(<ProfileForm {...defaultProps} />);
 
-      const nameInput = screen.getByTestId('input-name');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'Jane Smith');
+      const firstNameInput = screen.getByTestId('input-firstName');
+      await user.clear(firstNameInput);
+      await user.type(firstNameInput, 'Jane');
 
       await user.click(screen.getByTestId('submit-button'));
 

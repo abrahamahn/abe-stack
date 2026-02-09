@@ -1,4 +1,4 @@
-// backend/core/src/admin/billingService.test.ts
+// src/server/core/src/admin/billingService.test.ts
 /**
  * Admin Billing Service Tests
  *
@@ -41,8 +41,13 @@ function createMockPlan(overrides: Partial<DbPlan> = {}): DbPlan {
     priceInCents: 2999,
     currency: 'usd',
     features: [
-      { name: 'Unlimited API calls', included: true, description: 'No rate limits' },
-      { name: 'Priority support', included: true },
+      {
+        key: 'api:access' as const,
+        name: 'Unlimited API calls',
+        included: true,
+        description: 'No rate limits',
+      },
+      { key: 'team:invite' as const, name: 'Priority support', included: true },
     ],
     trialDays: 14,
     stripePriceId: 'price_123',
@@ -261,8 +266,13 @@ describe('Admin Billing Service', () => {
         priceInCents: 4900,
         currency: 'eur',
         features: [
-          { name: 'API Access', included: true, description: 'Full API' },
-          { name: 'Support', included: false },
+          {
+            key: 'api:access' as const,
+            name: 'API Access',
+            included: true,
+            description: 'Full API',
+          },
+          { key: 'team:invite' as const, name: 'Support', included: false },
         ],
         trialDays: 30,
         isActive: false,
@@ -427,8 +437,13 @@ describe('Admin Billing Service', () => {
     test('should update plan features array', async () => {
       const existingPlan = createMockPlan();
       const newFeatures = [
-        { name: 'New Feature 1', included: true },
-        { name: 'New Feature 2', included: false, description: 'Paid add-on' },
+        { key: 'projects:limit' as const, name: 'New Feature 1', included: true, value: 100 },
+        {
+          key: 'api:access' as const,
+          name: 'New Feature 2',
+          included: false,
+          description: 'Paid add-on',
+        },
       ];
       const updatedPlan = createMockPlan({ features: newFeatures });
       vi.mocked(mockRepos.plans.findById).mockResolvedValue(existingPlan);
@@ -742,7 +757,7 @@ describe('Admin Billing Service', () => {
 
     test('updatePlan should handle empty features array', async () => {
       const existingPlan = createMockPlan({
-        features: [{ name: 'Feature 1', included: true }],
+        features: [{ key: 'api:access' as const, name: 'Feature 1', included: true }],
       });
       const updatedPlan = createMockPlan({ features: [] });
       vi.mocked(mockRepos.plans.findById).mockResolvedValue(existingPlan);

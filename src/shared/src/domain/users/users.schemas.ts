@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/users.schemas.ts
+// src/shared/src/domain/users/users.schemas.ts
 
 /**
  * @file User Schemas
@@ -6,19 +6,20 @@
  * @module Domain/Users
  */
 
-import { emailSchema, isoDateTimeSchema, passwordSchema } from '../../contracts/common';
 import {
   createSchema,
   parseBoolean,
   parseNullable,
+  parseNullableOptional,
   parseNumber,
   parseOptional,
   parseString,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { emailSchema, isoDateTimeSchema, passwordSchema } from '../../core/schemas';
 import { userIdSchema } from '../../types/ids';
 import { appRoleSchema } from '../../types/roles';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { UserId } from '../../types/ids';
 import type { AppRole } from '../../types/roles';
 
@@ -29,32 +30,64 @@ import type { AppRole } from '../../types/roles';
 export { userIdSchema };
 export type { UserId } from '../../types/ids';
 
-// Re-export AppRole from core types
-export { APP_ROLES, appRoleSchema, type AppRole } from '../../types/roles';
+// Re-export AppRole from core types (plus legacy aliases)
+export {
+  APP_ROLES,
+  appRoleSchema,
+  USER_ROLES,
+  userRoleSchema,
+  type AppRole,
+  type UserRole,
+} from '../../types/roles';
 
 // Re-export error response
-export { errorResponseSchema, type ErrorResponse } from '../../contracts/common';
+export { errorResponseSchema } from '../../core/schemas';
+export type { ErrorResponse } from '../../core/api';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-/** Full user entity */
+/** Full user entity (API-facing, ISO date strings) */
 export interface User {
+  /** User's unique identifier (branded) */
   id: UserId;
+  /** User's email address */
   email: string;
-  name: string | null;
+  /** User's unique username */
+  username: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
+  /** URL to user's avatar image */
   avatarUrl: string | null;
+  /** User's role in the system */
   role: AppRole;
-  isVerified: boolean;
+  /** Whether user's email is verified */
+  emailVerified: boolean;
+  /** User's phone number */
+  phone: string | null;
+  /** Whether user's phone is verified */
+  phoneVerified: boolean | null;
+  /** User's date of birth as ISO date string */
+  dateOfBirth: string | null;
+  /** User's gender */
+  gender: string | null;
+  /** ISO 8601 string of when the user was created */
   createdAt: string;
+  /** ISO 8601 string of when the user was last updated */
   updatedAt: string;
 }
 
 /** Update profile request */
 export interface UpdateProfileRequest {
-  name?: string | null | undefined;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
   email?: string | undefined;
+  phone?: string | null | undefined;
+  dateOfBirth?: string | null | undefined;
+  gender?: string | null | undefined;
 }
 
 /** Change password request */
@@ -117,10 +150,16 @@ export const userSchema: Schema<User> = createSchema((data: unknown) => {
   return {
     id: userIdSchema.parse(obj['id']),
     email: emailSchema.parse(obj['email']),
-    name: parseNullable(obj['name'], (v) => parseString(v, 'name')),
+    username: parseString(obj['username'], 'username'),
+    firstName: parseString(obj['firstName'], 'firstName'),
+    lastName: parseString(obj['lastName'], 'lastName'),
     avatarUrl: parseNullable(obj['avatarUrl'], (v) => parseString(v, 'avatarUrl', { url: true })),
     role: appRoleSchema.parse(obj['role']),
-    isVerified: parseBoolean(obj['isVerified'], 'isVerified'),
+    emailVerified: parseBoolean(obj['emailVerified'], 'emailVerified'),
+    phone: parseNullable(obj['phone'], (v) => parseString(v, 'phone')),
+    phoneVerified: parseNullable(obj['phoneVerified'], (v) => parseBoolean(v, 'phoneVerified')),
+    dateOfBirth: parseNullable(obj['dateOfBirth'], (v) => parseString(v, 'dateOfBirth')),
+    gender: parseNullable(obj['gender'], (v) => parseString(v, 'gender')),
     createdAt: isoDateTimeSchema.parse(obj['createdAt']),
     updatedAt: isoDateTimeSchema.parse(obj['updatedAt']),
   };
@@ -131,11 +170,16 @@ export const updateProfileRequestSchema: Schema<UpdateProfileRequest> = createSc
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     return {
-      name:
-        obj['name'] === undefined
-          ? undefined
-          : parseNullable(obj['name'], (v) => parseString(v, 'name', { min: 2, max: 100 })),
+      firstName: parseOptional(obj['firstName'], (v) =>
+        parseString(v, 'firstName', { min: 1, max: 100 }),
+      ),
+      lastName: parseOptional(obj['lastName'], (v) =>
+        parseString(v, 'lastName', { min: 1, max: 100 }),
+      ),
       email: parseOptional(obj['email'], (v) => emailSchema.parse(v)),
+      phone: parseNullableOptional(obj['phone'], (v) => parseString(v, 'phone')),
+      dateOfBirth: parseNullableOptional(obj['dateOfBirth'], (v) => parseString(v, 'dateOfBirth')),
+      gender: parseNullableOptional(obj['gender'], (v) => parseString(v, 'gender')),
     };
   },
 );

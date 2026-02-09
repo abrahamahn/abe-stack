@@ -1,4 +1,4 @@
-// client/src/api/client.ts
+// src/client/api/src/api/client.ts
 
 import { addAuthHeader } from '@abe-stack/shared';
 
@@ -7,6 +7,10 @@ import { createApiError, NetworkError } from '../errors';
 import type { ApiErrorBody } from '../errors';
 import type {
   AuthResponse,
+  ChangeEmailRequest,
+  ChangeEmailResponse,
+  ConfirmEmailChangeRequest,
+  ConfirmEmailChangeResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
   ForgotPasswordRequest,
@@ -20,10 +24,18 @@ import type {
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
+  RevertEmailChangeRequest,
+  RevertEmailChangeResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  TotpLoginChallengeResponse,
+  TotpLoginVerifyRequest,
+  TotpSetupResponse,
+  TotpStatusResponse,
+  TotpVerifyRequest,
+  TotpVerifyResponse,
   User,
 } from '@abe-stack/shared';
 
@@ -34,7 +46,7 @@ export interface ApiClientConfig {
 }
 
 export interface ApiClient {
-  login: (data: LoginRequest) => Promise<AuthResponse>;
+  login: (data: LoginRequest) => Promise<AuthResponse | TotpLoginChallengeResponse>;
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
   refresh: () => Promise<RefreshResponse>;
   logout: () => Promise<LogoutResponse>;
@@ -43,6 +55,16 @@ export interface ApiClient {
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
   resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
+  // TOTP methods
+  totpSetup: () => Promise<TotpSetupResponse>;
+  totpEnable: (data: TotpVerifyRequest) => Promise<TotpVerifyResponse>;
+  totpDisable: (data: TotpVerifyRequest) => Promise<TotpVerifyResponse>;
+  totpStatus: () => Promise<TotpStatusResponse>;
+  totpVerifyLogin: (data: TotpLoginVerifyRequest) => Promise<AuthResponse>;
+  // Email change methods
+  changeEmail: (data: ChangeEmailRequest) => Promise<ChangeEmailResponse>;
+  confirmEmailChange: (data: ConfirmEmailChangeRequest) => Promise<ConfirmEmailChangeResponse>;
+  revertEmailChange: (data: RevertEmailChangeRequest) => Promise<RevertEmailChangeResponse>;
   // OAuth methods
   getEnabledOAuthProviders: () => Promise<OAuthEnabledProvidersResponse>;
   getOAuthConnections: () => Promise<OAuthConnectionsResponse>;
@@ -107,8 +129,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   };
 
   return {
-    async login(data: LoginRequest): Promise<AuthResponse> {
-      return request<AuthResponse>('/auth/login', {
+    async login(data: LoginRequest): Promise<AuthResponse | TotpLoginChallengeResponse> {
+      return request<AuthResponse | TotpLoginChallengeResponse>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -154,6 +176,53 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     async resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
       return request<ResendVerificationResponse>('/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    // TOTP methods
+    async totpSetup(): Promise<TotpSetupResponse> {
+      return request<TotpSetupResponse>('/auth/totp/setup', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+    async totpEnable(data: TotpVerifyRequest): Promise<TotpVerifyResponse> {
+      return request<TotpVerifyResponse>('/auth/totp/enable', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async totpDisable(data: TotpVerifyRequest): Promise<TotpVerifyResponse> {
+      return request<TotpVerifyResponse>('/auth/totp/disable', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async totpStatus(): Promise<TotpStatusResponse> {
+      return request<TotpStatusResponse>('/auth/totp/status');
+    },
+    async totpVerifyLogin(data: TotpLoginVerifyRequest): Promise<AuthResponse> {
+      return request<AuthResponse>('/auth/totp/verify-login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    // Email change methods
+    async changeEmail(data: ChangeEmailRequest): Promise<ChangeEmailResponse> {
+      return request<ChangeEmailResponse>('/auth/change-email', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async confirmEmailChange(data: ConfirmEmailChangeRequest): Promise<ConfirmEmailChangeResponse> {
+      return request<ConfirmEmailChangeResponse>('/auth/change-email/confirm', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async revertEmailChange(data: RevertEmailChangeRequest): Promise<RevertEmailChangeResponse> {
+      return request<RevertEmailChangeResponse>('/auth/change-email/revert', {
         method: 'POST',
         body: JSON.stringify(data),
       });

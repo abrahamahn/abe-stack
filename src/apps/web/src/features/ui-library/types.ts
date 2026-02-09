@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/types.ts
+// src/apps/web/src/features/ui-library/types.ts
 import type { ReactNode } from 'react';
 
 export type ComponentCategory = 'elements' | 'components' | 'hooks' | 'layouts' | 'theme' | 'utils';

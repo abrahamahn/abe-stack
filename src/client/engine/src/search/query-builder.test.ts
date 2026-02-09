@@ -1,4 +1,4 @@
-// client/src/search/query-builder.test.ts
+// src/client/engine/src/search/query-builder.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

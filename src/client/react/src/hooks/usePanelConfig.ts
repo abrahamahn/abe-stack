@@ -1,4 +1,4 @@
-// client/ui/src/hooks/usePanelConfig.ts
+// src/client/react/src/hooks/usePanelConfig.ts
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback } from 'react';
 

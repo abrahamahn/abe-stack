@@ -5,6 +5,6 @@
     "composite": false,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "migrations/**/*.ts"],
+  "include": ["src/**/*.ts", "migrations/**/*.ts", "*.config.ts", "tsconfig*.json"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/scripts/audit/bundle-monitor.ts
+// src/tools/scripts/audit/bundle-monitor.ts
 /**
  * Bundle Size Monitor
  *
@@ -7,8 +7,8 @@
  * Tracks changes over time and alerts on significant increases
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface BundleInfo {
   name: string;
@@ -116,10 +116,10 @@ function generateBundleReport(): BundleReport {
   const packages: Record<string, BundleInfo[]> = {};
   const totals: Record<string, { size: number; gzipSize: number }> = {};
 
-  const rootDir = path.resolve(__dirname, '..', '..');
+  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
 
   // Analyze web app
-  const webPath = path.join(rootDir, 'apps', 'web');
+  const webPath = path.join(rootDir, 'src', 'apps', 'web');
   if (fs.existsSync(webPath)) {
     const bundles = estimatePackageBundleSize('@abe-stack/web', webPath);
     packages['@abe-stack/web'] = bundles;
@@ -134,12 +134,15 @@ function generateBundleReport(): BundleReport {
     totals['@abe-stack/web'] = total;
   }
 
-  // Analyze packages
-  const packagesDir = path.join(rootDir, 'packages');
-  if (fs.existsSync(packagesDir)) {
-    const packageDirs = fs.readdirSync(packagesDir);
+  // Analyze packages across src/client/*, src/server/*, src/shared
+  const packageLayers = ['src/client', 'src/server'];
+  for (const layer of packageLayers) {
+    const layerDir = path.join(rootDir, layer);
+    if (!fs.existsSync(layerDir)) continue;
+
+    const packageDirs = fs.readdirSync(layerDir);
     for (const pkgName of packageDirs) {
-      const pkgPath = path.join(packagesDir, pkgName);
+      const pkgPath = path.join(layerDir, pkgName);
       if (fs.existsSync(path.join(pkgPath, 'package.json'))) {
         const bundles = estimatePackageBundleSize(`@abe-stack/${pkgName}`, pkgPath);
         packages[`@abe-stack/${pkgName}`] = bundles;
@@ -156,6 +159,22 @@ function generateBundleReport(): BundleReport {
     }
   }
 
+  // Analyze src/shared
+  const sharedPath = path.join(rootDir, 'src', 'shared');
+  if (fs.existsSync(path.join(sharedPath, 'package.json'))) {
+    const bundles = estimatePackageBundleSize('@abe-stack/shared', sharedPath);
+    packages['@abe-stack/shared'] = bundles;
+
+    const total = bundles.reduce(
+      (acc, bundle) => ({
+        size: acc.size + bundle.size,
+        gzipSize: acc.gzipSize + bundle.gzipSize,
+      }),
+      { size: 0, gzipSize: 0 },
+    );
+    totals['@abe-stack/shared'] = total;
+  }
+
   return {
     timestamp: new Date().toISOString(),
     packages,
@@ -168,7 +187,7 @@ function generateBundleReport(): BundleReport {
 // ============================================================================
 
 function getOutputDir(): string {
-  return path.join(__dirname, '..', '..', '..', '.tmp');
+  return path.join(__dirname, '..', '..', '..', '..', '.tmp');
 }
 
 function getReportPath(): string {
@@ -310,6 +329,8 @@ function main(): void {
   }
 }
 
-if (require.main === module) {
+const entryArg = process.argv[1];
+const isMainModule = entryArg !== undefined && import.meta.url === `file://${entryArg}`;
+if (isMainModule) {
   main();
 }

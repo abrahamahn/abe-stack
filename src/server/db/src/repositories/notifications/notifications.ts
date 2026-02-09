@@ -1,4 +1,4 @@
-// backend/db/src/repositories/notifications/notifications.ts
+// src/server/db/src/repositories/notifications/notifications.ts
 /**
  * Notifications Repository (Functional)
  *

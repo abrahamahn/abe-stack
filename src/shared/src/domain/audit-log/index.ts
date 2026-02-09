@@ -1,4 +1,4 @@
-// packages/shared/src/domain/audit-log/index.ts
+// src/shared/src/domain/audit-log/index.ts
 
 export { buildAuditEvent, sanitizeMetadata, type AuditBuilderParams } from './audit-log.logic';
 

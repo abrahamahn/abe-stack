@@ -1,4 +1,4 @@
-// backend/core/src/billing/webhooks/paypal-webhook.ts
+// src/server/core/src/billing/webhooks/paypal-webhook.ts
 /**
  * PayPal Webhook Handler
  *

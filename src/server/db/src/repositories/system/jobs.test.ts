@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/jobs.test.ts
+// src/server/db/src/repositories/system/jobs.test.ts
 /**
  * Tests for Jobs Repository
  *

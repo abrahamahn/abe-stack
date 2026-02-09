@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/consent-logs.ts
+// src/server/db/src/repositories/compliance/consent-logs.ts
 /**
  * Consent Logs Repository (Functional)
  *

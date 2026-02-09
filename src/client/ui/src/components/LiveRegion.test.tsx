@@ -1,4 +1,4 @@
-// client/ui/src/components/LiveRegion.test.tsx
+// src/client/ui/src/components/LiveRegion.test.tsx
 /** @vitest-environment jsdom */
 import { LiveRegion, useAnnounce } from '@abe-stack/react';
 import { act, cleanup, render, screen } from '@testing-library/react';

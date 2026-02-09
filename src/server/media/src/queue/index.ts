@@ -1,4 +1,4 @@
-// premium/media/src/queue/index.ts
+// src/server/media/src/queue/index.ts
 /**
  * Media Queue
  *

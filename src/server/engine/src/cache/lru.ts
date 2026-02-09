@@ -1,4 +1,4 @@
-// backend/engine/src/cache/lru.ts
+// src/server/engine/src/cache/lru.ts
 /**
  * Efficient LRU (Least Recently Used) Cache Implementation
  *
@@ -6,6 +6,13 @@
  * of Map and doubly-linked list. This is a backend-specific LRU with
  * per-entry TTL support and eviction reason tracking, used by the
  * MemoryCacheProvider.
+ *
+ * **Design decision**: This implementation is intentionally separate from
+ * `@abe-stack/shared`'s LRU cache, which uses Map insertion order only.
+ * The engine version uses a true doubly-linked list for:
+ * - Per-entry TTL overrides (not just global TTL)
+ * - Eviction reason callbacks (lru, expired, manual, clear)
+ * - Deterministic LRU ordering independent of Map implementation details
  *
  * @complexity
  * - get: O(1)

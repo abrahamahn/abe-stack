@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/index.ts
+// src/client/ui/src/layouts/layers/index.ts
 // Layers - Overlay and positioning components
 export { Modal } from './Modal';
 export { Overlay } from './Overlay';

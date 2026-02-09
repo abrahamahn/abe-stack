@@ -1,4 +1,4 @@
-// client/ui/src/components/PeekLink.tsx
+// src/client/ui/src/components/PeekLink.tsx
 /**
  * PeekLink - A link that opens content in a side-peek panel.
  *

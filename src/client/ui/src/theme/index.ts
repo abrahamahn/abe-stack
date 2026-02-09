@@ -1,4 +1,4 @@
-// client/ui/src/theme/index.ts
+// src/client/ui/src/theme/index.ts
 export { colors, darkColors, lightColors } from './colors';
 export {
   DEFAULT_CONTRAST_MODE,

@@ -1,4 +1,4 @@
-// apps/web/src/app/ClientEnvironment.tsx
+// src/apps/web/src/app/ClientEnvironment.tsx
 /**
  * ClientEnvironment - Single context for all client-side services.
  *

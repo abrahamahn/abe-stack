@@ -1,4 +1,4 @@
-// packages/shared/src/utils/logger/console.ts
+// src/shared/src/utils/logger/console.ts
 /**
  * Console Logger
  *

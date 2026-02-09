@@ -34,7 +34,7 @@ describe('Auth Flow Integration', () => {
     it('should render login form with all required fields', () => {
       renderWithProviders(<LoginPage />);
 
-      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email or Username')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
@@ -51,7 +51,7 @@ describe('Auth Flow Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -73,13 +73,13 @@ describe('Auth Flow Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'securePassword123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         expect(loginSpy).toHaveBeenCalledWith({
-          email: 'test@example.com',
+          identifier: 'test@example.com',
           password: 'securePassword123',
         });
       });
@@ -92,7 +92,7 @@ describe('Auth Flow Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'wrong@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'wrong@example.com');
       await user.type(screen.getByLabelText('Password'), 'wrongpassword');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -113,13 +113,13 @@ describe('Auth Flow Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       // Check fields are disabled during loading
       await waitFor(() => {
-        expect(screen.getByLabelText('Email')).toBeDisabled();
+        expect(screen.getByLabelText('Email or Username')).toBeDisabled();
         expect(screen.getByLabelText('Password')).toBeDisabled();
       });
 
@@ -166,7 +166,9 @@ describe('Auth Flow Integration', () => {
       renderWithProviders(<RegisterPage />);
 
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
-      expect(screen.getByLabelText('Name (optional)')).toBeInTheDocument();
+      expect(screen.getByLabelText('Username')).toBeInTheDocument();
+      expect(screen.getByLabelText('First Name')).toBeInTheDocument();
+      expect(screen.getByLabelText('Last Name')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     });
@@ -182,37 +184,46 @@ describe('Auth Flow Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'newuser@example.com');
-      await user.type(screen.getByLabelText('Name (optional)'), 'New User');
+      await user.type(screen.getByLabelText('Username'), 'newuser');
+      await user.type(screen.getByLabelText('First Name'), 'New');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'newpassword123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(registerSpy).toHaveBeenCalledWith({
           email: 'newuser@example.com',
-          name: 'New User',
+          username: 'newuser',
+          firstName: 'New',
+          lastName: 'User',
           password: 'newpassword123',
         });
       });
     });
 
-    it('should submit registration without name when not provided', async () => {
+    it('should submit registration with all required fields', async () => {
       const environment = createMockEnvironment();
       const registerSpy = vi.fn().mockResolvedValue({
         message: 'Please check your email',
-        email: 'noname@example.com',
+        email: 'minimal@example.com',
       });
       (environment.auth as { register: AuthService['register'] }).register = registerSpy;
 
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'noname@example.com');
+      await user.type(screen.getByLabelText('Email'), 'minimal@example.com');
+      await user.type(screen.getByLabelText('Username'), 'minimaluser');
+      await user.type(screen.getByLabelText('First Name'), 'Min');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(registerSpy).toHaveBeenCalledWith({
-          email: 'noname@example.com',
-          name: undefined,
+          email: 'minimal@example.com',
+          username: 'minimaluser',
+          firstName: 'Min',
+          lastName: 'User',
           password: 'password123',
         });
       });
@@ -229,6 +240,9 @@ describe('Auth Flow Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'newuser@example.com');
+      await user.type(screen.getByLabelText('Username'), 'newuser');
+      await user.type(screen.getByLabelText('First Name'), 'New');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -252,6 +266,9 @@ describe('Auth Flow Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Username'), 'testuser');
+      await user.type(screen.getByLabelText('First Name'), 'Test');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -268,6 +285,9 @@ describe('Auth Flow Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'existing@example.com');
+      await user.type(screen.getByLabelText('Username'), 'existinguser');
+      await user.type(screen.getByLabelText('First Name'), 'Existing');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -297,6 +317,9 @@ describe('Auth Flow Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Username'), 'testuser');
+      await user.type(screen.getByLabelText('First Name'), 'Test');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -357,14 +380,14 @@ describe('Auth Flow Integration', () => {
       await user.click(submitButton);
 
       // HTML5 validation will prevent submission
-      const emailInput = screen.getByLabelText<HTMLInputElement>('Email');
+      const emailInput = screen.getByLabelText<HTMLInputElement>('Email or Username');
       expect(emailInput.validity.valueMissing).toBe(true);
     });
 
     it('should require password field in login form', async () => {
       const { user } = renderWithProviders(<LoginPage />);
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
 
       const submitButton = screen.getByRole('button', { name: /sign in/i });
       await user.click(submitButton);
@@ -389,10 +412,12 @@ describe('Auth Flow Integration', () => {
     it('should validate email format', async () => {
       const { user } = renderWithProviders(<LoginPage />);
 
-      await user.type(screen.getByLabelText('Email'), 'invalid-email');
+      await user.type(screen.getByLabelText('Email or Username'), 'invalid-email');
 
-      const emailInput = screen.getByLabelText<HTMLInputElement>('Email');
-      expect(emailInput.validity.typeMismatch).toBe(true);
+      // Note: The field type is "text" not "email", so typeMismatch won't work
+      // This test is checking client-side validation, but the identifier field accepts both email and username
+      const emailInput = screen.getByLabelText<HTMLInputElement>('Email or Username');
+      expect(emailInput.value).toBe('invalid-email');
     });
   });
 });

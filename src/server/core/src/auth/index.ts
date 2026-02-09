@@ -1,4 +1,4 @@
-// backend/core/src/auth/index.ts
+// src/server/core/src/auth/index.ts
 /**
  * Auth Package
  *
@@ -22,6 +22,7 @@ export {
 
 // Handlers
 export {
+  handleAcceptTos,
   handleChangeEmail,
   handleConfirmEmailChange,
   handleForgotPassword,
@@ -33,8 +34,10 @@ export {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleTosStatus,
   handleTotpDisable,
   handleTotpEnable,
+  handleTotpLoginVerify,
   handleTotpSetup,
   handleTotpStatus,
   handleVerifyEmail,
@@ -101,12 +104,14 @@ export type {
 export {
   createErrorMapperLogger,
   ERROR_MESSAGES,
+  LOGIN_FAILURE_REASON,
   MAX_PROGRESSIVE_DELAY_MS,
   MIN_JWT_SECRET_LENGTH,
   PROGRESSIVE_DELAY_WINDOW_MS,
   REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_BYTES,
   SUCCESS_MESSAGES,
+  type LoginFailureReason,
 } from './types';
 
 // Service (business logic)
@@ -125,6 +130,7 @@ export {
   type AuthResult,
   type RefreshResult,
   type RegisterResult,
+  type TotpChallengeResult,
 } from './service';
 
 // TOTP (2FA)
@@ -145,6 +151,14 @@ export {
   type EmailChangeConfirmResult,
   type EmailChangeResult,
 } from './email-change';
+
+// ToS Gating
+export {
+  acceptTos,
+  checkTosAcceptance,
+  createRequireTosAcceptance,
+  type TosAcceptanceStatus,
+} from './tos-gating';
 
 // Utils (for direct use if needed)
 export {
@@ -169,6 +183,8 @@ export {
   verifyPassword,
   verifyPasswordSafe,
   verifyToken,
+  generateUniqueUsername,
+  splitFullName,
   type AuthResponseData,
   type AuthUser,
   type RequestWithClientInfo,
@@ -202,18 +218,26 @@ export {
   logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
+  sendEmailChangedAlert,
+  sendNewLoginAlert,
+  sendPasswordChangedAlert,
   sendTokenReuseAlert,
   unlockAccount,
 } from './security';
 
+export { isCaptchaRequired, verifyCaptchaToken, verifyTurnstileToken } from './security';
+
 export type {
   AuthEndpoint,
   AuthRateLimitConfig,
+  CaptchaVerifyResult,
   LockoutConfig,
   LockoutStatus,
   LogSecurityEventParams,
   SecurityEventMetadata,
   SecurityEventSeverity,
   SecurityEventType,
+  SendEmailChangedAlertParams,
+  SendSecurityAlertParams,
   SendTokenReuseAlertParams,
 } from './security';

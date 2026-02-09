@@ -1,4 +1,4 @@
-// backend/core/src/billing/types.ts
+// src/server/core/src/billing/types.ts
 /**
  * Billing Module Types
  *
@@ -22,11 +22,11 @@ import type { BillingConfig } from '@abe-stack/shared/config';
 import type {
   AuthenticatedUser,
   BaseContext,
-  BillingService,
   Logger,
   RequestContext,
   RequestInfo,
-} from '@abe-stack/shared/contracts';
+} from '@abe-stack/shared/core';
+import type { BillingService } from '@abe-stack/shared/domain';
 
 // ============================================================================
 // Logger Interface (Transition Alias)

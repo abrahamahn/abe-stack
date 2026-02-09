@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useAdminUsers.ts
+// src/apps/web/src/features/admin/hooks/useAdminUsers.ts
 /**
  * useAdminUsers hook
  *
@@ -11,36 +11,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
+import type { AdminUser, AdminUserListFilters } from '@abe-stack/shared';
 
-interface AdminUserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRoleLocal;
-  emailVerified: boolean;
-  lockedUntil: string | null;
-  createdAt: string;
-}
-
-interface AdminUserListFiltersLocal {
-  search?: string;
-  role?: UserRoleLocal;
-  status?: 'active' | 'locked' | 'unverified';
-  sortBy?: 'email' | 'name' | 'createdAt' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  limit?: number;
-}
-
-interface AdminUserListResponseLocal {
-  data: AdminUserLocal[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
+type AdminUserLocal = AdminUser;
+type AdminUserListFiltersLocal = AdminUserListFilters;
 
 export interface UseAdminUsersState {
   users: AdminUserLocal[];
@@ -103,9 +77,7 @@ export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): U
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        const result: AdminUserListResponseLocal = (await adminApi.listUsers(
-          currentFilters,
-        )) as AdminUserListResponseLocal;
+        const result = await adminApi.listUsers(currentFilters);
         setState({
           users: result.data,
           total: result.total,

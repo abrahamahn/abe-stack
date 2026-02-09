@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/security.test.ts
+// src/apps/server/src/http/middleware/security.test.ts
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 

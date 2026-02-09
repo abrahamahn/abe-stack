@@ -76,9 +76,7 @@
   "dependencies": {
     "@abe-stack/client-engine": "workspace:*",
     "@abe-stack/react": "workspace:*",
-    "@abe-stack/shared": "workspace:*",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.4.0"
+    "@abe-stack/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",

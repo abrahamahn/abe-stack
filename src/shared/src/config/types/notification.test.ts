@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/notification.test.ts
+// src/shared/src/config/types/notification.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

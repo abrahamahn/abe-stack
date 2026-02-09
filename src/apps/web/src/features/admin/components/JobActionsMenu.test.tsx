@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobActionsMenu.test.tsx
+// src/apps/web/src/features/admin/components/JobActionsMenu.test.tsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -38,11 +38,11 @@ describe('JobActionsMenu', () => {
       expect(screen.getByText('Actions')).toBeInTheDocument();
     });
 
-    it('should render actions button for dead status', () => {
+    it('should render actions button for dead_letter status', () => {
       render(
         <JobActionsMenu
           jobId="job-123"
-          status="dead"
+          status="dead_letter"
           onRetry={mockOnRetry}
           onCancel={mockOnCancel}
         />,
@@ -115,7 +115,7 @@ describe('JobActionsMenu', () => {
       render(
         <JobActionsMenu
           jobId="job-123"
-          status="dead"
+          status="dead_letter"
           onRetry={mockOnRetry}
           onCancel={mockOnCancel}
         />,
@@ -334,7 +334,7 @@ describe('JobActionsMenu', () => {
       { status: 'processing', expectRetry: false, expectCancel: true },
       { status: 'completed', expectRetry: false, expectCancel: false },
       { status: 'failed', expectRetry: true, expectCancel: false },
-      { status: 'dead', expectRetry: true, expectCancel: false },
+      { status: 'dead_letter', expectRetry: true, expectCancel: false },
     ];
 
     testCases.forEach(({ status, expectRetry, expectCancel }) => {

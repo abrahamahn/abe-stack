@@ -1,4 +1,4 @@
-// client/ui/src/elements/Spinner.tsx
+// src/client/ui/src/elements/Spinner.tsx
 import type { CSSProperties, ReactElement } from 'react';
 
 import '../styles/elements.css';

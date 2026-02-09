@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/index.test.ts
+// src/shared/src/config/types/index.test.ts
 /**
  * Configuration Types Tests
  *

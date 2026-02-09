@@ -1,4 +1,4 @@
-// backend/core/src/users/handlers/avatar.test.ts
+// src/server/core/src/users/handlers/avatar.test.ts
 /**
  * Avatar & Profile Service Unit Tests
  *
@@ -21,17 +21,19 @@ import {
 } from './avatar';
 
 import type { UsersAuthConfig } from '../types';
-import type { Repositories } from '@abe-stack/db';
+import type { DbClient, Repositories, User } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-const { mockValidatePassword, mockHashPassword, mockVerifyPassword } = vi.hoisted(() => ({
-  mockValidatePassword: vi.fn(),
-  mockHashPassword: vi.fn(),
-  mockVerifyPassword: vi.fn(),
-}));
+const { mockValidatePassword, mockHashPassword, mockVerifyPassword, mockRevokeAllUserTokens } =
+  vi.hoisted(() => ({
+    mockValidatePassword: vi.fn(),
+    mockHashPassword: vi.fn(),
+    mockVerifyPassword: vi.fn(),
+    mockRevokeAllUserTokens: vi.fn(),
+  }));
 
 vi.mock('@abe-stack/shared', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/shared')>();
@@ -43,6 +45,7 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
 
 vi.mock('../../auth', () => ({
   hashPassword: mockHashPassword,
+  revokeAllUserTokens: mockRevokeAllUserTokens,
   verifyPassword: mockVerifyPassword,
 }));
 
@@ -50,24 +53,47 @@ vi.mock('../../auth', () => ({
 // Test Fixtures
 // ============================================================================
 
-const mockUser = {
-  id: 'user-123',
-  email: 'test@example.com',
-  name: 'John Doe',
-  avatarUrl: null,
-  role: 'user' as const,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
-  passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$hash',
-  emailVerified: true,
-  emailVerifiedAt: new Date('2024-01-01'),
-  lockedUntil: null,
-  failedLoginAttempts: 0,
-  totpSecret: null,
-  version: 1,
-  lastLoginAt: null,
-  lastPasswordChangeAt: null,
-};
+/**
+ * Creates a complete mock DB user with all required fields.
+ *
+ * @param overrides - Fields to override from defaults
+ * @returns Complete User object
+ */
+function createMockUser(overrides: Partial<User> = {}): User {
+  return {
+    id: 'user-123',
+    email: 'test@example.com',
+    canonicalEmail: 'test@example.com',
+    username: 'johndoe',
+    firstName: 'John',
+    lastName: 'Doe',
+    avatarUrl: null,
+    role: 'user' as const,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$hash',
+    emailVerified: true,
+    emailVerifiedAt: new Date('2024-01-01'),
+    lockedUntil: null,
+    failedLoginAttempts: 0,
+    totpSecret: null,
+    totpEnabled: false,
+    phone: null,
+    phoneVerified: false,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
+    version: 1,
+    ...overrides,
+  };
+}
+
+const mockUser = createMockUser();
 
 const mockAuthConfig: UsersAuthConfig = {
   argon2: {
@@ -83,6 +109,7 @@ function createMockRepos(): Repositories {
     users: {
       findById: vi.fn(),
       findByEmail: vi.fn(),
+      findByUsername: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       listWithFilters: vi.fn(),
@@ -95,8 +122,11 @@ function createMockRepos(): Repositories {
     passwordResetTokens: {} as Repositories['passwordResetTokens'],
     emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
     securityEvents: {} as Repositories['securityEvents'],
+    totpBackupCodes: {} as Repositories['totpBackupCodes'],
+    emailChangeTokens: {} as Repositories['emailChangeTokens'],
     magicLinkTokens: {} as Repositories['magicLinkTokens'],
     oauthConnections: {} as Repositories['oauthConnections'],
+    apiKeys: {} as Repositories['apiKeys'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
     notificationPreferences: {} as Repositories['notificationPreferences'],
     plans: {} as Repositories['plans'],
@@ -121,6 +151,7 @@ function createMockRepos(): Repositories {
     legalDocuments: {} as Repositories['legalDocuments'],
     userAgreements: {} as Repositories['userAgreements'],
     consentLogs: {} as Repositories['consentLogs'],
+    dataExportRequests: {} as Repositories['dataExportRequests'],
   };
 }
 
@@ -143,37 +174,41 @@ describe('updateProfile', () => {
     vi.clearAllMocks();
   });
 
-  describe('when user exists and name is updated', () => {
-    it('should update user name and return profile', async () => {
-      const updatedUser = { ...mockUser, name: 'Jane Smith' };
+  describe('when user exists and firstName is updated', () => {
+    it('should update user firstName and return profile', async () => {
+      const updatedUser = createMockUser({ firstName: 'Jane' });
       vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
       vi.mocked(mockRepos.users.update).mockResolvedValue(updatedUser);
 
-      const data: UpdateProfileData = { name: 'Jane Smith' };
+      const data: UpdateProfileData = { firstName: 'Jane' };
       const result = await updateProfile(mockRepos, mockUser.id, data);
 
       expect(mockRepos.users.findById).toHaveBeenCalledWith(mockUser.id);
-      expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, { name: 'Jane Smith' });
+      expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, { firstName: 'Jane' });
       expect(result).toEqual<ProfileUser>({
         id: updatedUser.id,
         email: updatedUser.email,
-        name: 'Jane Smith',
+        username: updatedUser.username,
+        firstName: 'Jane',
+        lastName: updatedUser.lastName,
         avatarUrl: updatedUser.avatarUrl,
         role: updatedUser.role,
         createdAt: updatedUser.createdAt,
       });
     });
 
-    it('should allow setting name to null', async () => {
-      const updatedUser = { ...mockUser, name: null };
+    it('should update username with uniqueness check', async () => {
+      const updatedUser = createMockUser({ username: 'newname' });
       vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepos.users.findByUsername).mockResolvedValue(null);
       vi.mocked(mockRepos.users.update).mockResolvedValue(updatedUser);
 
-      const data: UpdateProfileData = { name: null };
+      const data: UpdateProfileData = { username: 'newname' };
       const result = await updateProfile(mockRepos, mockUser.id, data);
 
-      expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, { name: null });
-      expect(result.name).toBeNull();
+      expect(mockRepos.users.findByUsername).toHaveBeenCalledWith('newname');
+      expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, { username: 'newname' });
+      expect(result.username).toBe('newname');
     });
   });
 
@@ -194,7 +229,7 @@ describe('updateProfile', () => {
     it('should throw NotFoundError', async () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
 
-      const data: UpdateProfileData = { name: 'New Name' };
+      const data: UpdateProfileData = { firstName: 'New Name' };
 
       await expect(updateProfile(mockRepos, 'non-existent', data)).rejects.toMatchObject({
         name: 'NotFoundError',
@@ -226,12 +261,14 @@ describe('changePassword', () => {
         errors: [],
       });
       mockHashPassword.mockResolvedValue('$argon2id$new-hash');
-      vi.mocked(mockRepos.users.update).mockResolvedValue({
-        ...mockUser,
-        passwordHash: '$argon2id$new-hash',
-      });
+      vi.mocked(mockRepos.users.update).mockResolvedValue(
+        createMockUser({
+          passwordHash: '$argon2id$new-hash',
+        }),
+      );
 
       await changePassword(
+        {} as DbClient,
         mockRepos,
         mockAuthConfig,
         mockUser.id,
@@ -243,12 +280,15 @@ describe('changePassword', () => {
       expect(mockVerifyPassword).toHaveBeenCalledWith('currentPassword123', mockUser.passwordHash);
       expect(mockValidatePassword).toHaveBeenCalledWith('newStrongPassword456!', [
         mockUser.email,
-        mockUser.name,
+        mockUser.username,
+        mockUser.firstName,
+        mockUser.lastName,
       ]);
       expect(mockHashPassword).toHaveBeenCalledWith('newStrongPassword456!', mockAuthConfig.argon2);
       expect(mockRepos.users.update).toHaveBeenCalledWith(mockUser.id, {
         passwordHash: '$argon2id$new-hash',
       });
+      expect(mockRevokeAllUserTokens).toHaveBeenCalledWith(expect.anything(), mockUser.id);
     });
   });
 
@@ -257,7 +297,7 @@ describe('changePassword', () => {
       vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
 
       await expect(
-        changePassword(mockRepos, mockAuthConfig, 'non-existent', 'current', 'new'),
+        changePassword({} as DbClient, mockRepos, mockAuthConfig, 'non-existent', 'current', 'new'),
       ).rejects.toMatchObject({
         name: 'NotFoundError',
         message: 'User not found',
@@ -268,11 +308,11 @@ describe('changePassword', () => {
 
   describe('when user has OAuth-only account', () => {
     it('should throw BadRequestError for oauth: prefix', async () => {
-      const oauthUser = { ...mockUser, passwordHash: 'oauth:google' };
+      const oauthUser = createMockUser({ passwordHash: 'oauth:google' });
       vi.mocked(mockRepos.users.findById).mockResolvedValue(oauthUser);
 
       await expect(
-        changePassword(mockRepos, mockAuthConfig, mockUser.id, 'current', 'new'),
+        changePassword({} as DbClient, mockRepos, mockAuthConfig, mockUser.id, 'current', 'new'),
       ).rejects.toThrow('Cannot change password for accounts without a password');
     });
   });
@@ -283,7 +323,14 @@ describe('changePassword', () => {
       mockVerifyPassword.mockResolvedValue(false);
 
       await expect(
-        changePassword(mockRepos, mockAuthConfig, mockUser.id, 'wrongPassword', 'newPassword'),
+        changePassword(
+          {} as DbClient,
+          mockRepos,
+          mockAuthConfig,
+          mockUser.id,
+          'wrongPassword',
+          'newPassword',
+        ),
       ).rejects.toMatchObject({
         name: 'BadRequestError',
         message: 'Current password is incorrect',
@@ -302,7 +349,14 @@ describe('changePassword', () => {
       });
 
       await expect(
-        changePassword(mockRepos, mockAuthConfig, mockUser.id, 'currentPassword', 'weak'),
+        changePassword(
+          {} as DbClient,
+          mockRepos,
+          mockAuthConfig,
+          mockUser.id,
+          'currentPassword',
+          'weak',
+        ),
       ).rejects.toMatchObject({
         name: 'WeakPasswordError',
       });
@@ -343,10 +397,11 @@ describe('uploadAvatar', () => {
     vi.mocked(mockStorage.getSignedUrl).mockResolvedValue(
       'https://storage.example.com/avatars/user-123/1705320000000.jpeg?signature=abc123',
     );
-    vi.mocked(mockRepos.users.update).mockResolvedValue({
-      ...mockUser,
-      avatarUrl: 'avatars/user-123/1705320000000.jpeg',
-    });
+    vi.mocked(mockRepos.users.update).mockResolvedValue(
+      createMockUser({
+        avatarUrl: 'avatars/user-123/1705320000000.jpeg',
+      }),
+    );
 
     const result = await uploadAvatar(mockRepos, mockStorage, mockUser.id, file);
 
@@ -422,9 +477,9 @@ describe('deleteAvatar', () => {
   });
 
   it('should clear avatar URL from user', async () => {
-    const userWithAvatar = { ...mockUser, avatarUrl: 'avatars/user-123/avatar.jpg' };
+    const userWithAvatar = createMockUser({ avatarUrl: 'avatars/user-123/avatar.jpg' });
     vi.mocked(mockRepos.users.findById).mockResolvedValue(userWithAvatar);
-    vi.mocked(mockRepos.users.update).mockResolvedValue({ ...userWithAvatar, avatarUrl: null });
+    vi.mocked(mockRepos.users.update).mockResolvedValue(createMockUser({ avatarUrl: null }));
 
     await deleteAvatar(mockRepos, mockStorage, mockUser.id);
 
@@ -464,7 +519,7 @@ describe('getAvatarUrl', () => {
   });
 
   it('should generate signed URL for storage-based avatar', async () => {
-    const userWithAvatar = { ...mockUser, avatarUrl: 'avatars/user-123/avatar.jpg' };
+    const userWithAvatar = createMockUser({ avatarUrl: 'avatars/user-123/avatar.jpg' });
     vi.mocked(mockRepos.users.findById).mockResolvedValue(userWithAvatar);
     vi.mocked(mockStorage.getSignedUrl).mockResolvedValue(
       'https://storage.example.com/avatars/user-123/avatar.jpg?signature=xyz',
@@ -477,10 +532,9 @@ describe('getAvatarUrl', () => {
   });
 
   it('should return external URL as-is', async () => {
-    const userWithExternalAvatar = {
-      ...mockUser,
+    const userWithExternalAvatar = createMockUser({
       avatarUrl: 'https://gravatar.com/avatar/123',
-    };
+    });
     vi.mocked(mockRepos.users.findById).mockResolvedValue(userWithExternalAvatar);
 
     const result = await getAvatarUrl(mockRepos, mockStorage, mockUser.id);

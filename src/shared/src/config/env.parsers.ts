@@ -1,4 +1,4 @@
-// packages/shared/src/config/env.parsers.ts
+// src/shared/src/config/env.parsers.ts
 /**
  * Configuration Parsing Utilities
  *

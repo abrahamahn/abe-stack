@@ -1,4 +1,4 @@
-// apps/server/src/server.test.ts
+// src/apps/server/src/server.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DbClient } from '@abe-stack/db';

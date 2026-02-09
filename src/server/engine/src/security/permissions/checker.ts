@@ -1,4 +1,4 @@
-// backend/engine/src/security/permissions/checker.ts
+// src/server/engine/src/security/permissions/checker.ts
 /**
  * Permission Checker
  *

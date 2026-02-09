@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/SecurityEventsTable.tsx
+// src/apps/web/src/features/admin/components/SecurityEventsTable.tsx
 /**
  * SecurityEventsTable Component
  *

@@ -1,4 +1,4 @@
-// client/ui/src/layouts/shells/ResizablePanel.tsx
+// src/client/ui/src/layouts/shells/ResizablePanel.tsx
 import {
   forwardRef,
   useCallback,

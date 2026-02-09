@@ -1,4 +1,4 @@
-// backend/engine/src/security/permissions/types.ts
+// src/server/engine/src/security/permissions/types.ts
 /**
  * Permissions Types
  *

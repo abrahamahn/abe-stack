@@ -1,4 +1,4 @@
-// packages/shared/src/core/ports.ts
+// src/shared/src/core/ports.ts
 /**
  * Infrastructure Ports (Contracts)
  *
@@ -343,4 +343,131 @@ export interface InfrastructureService {
    * Shutdown the service gracefully
    */
   shutdown(): Promise<void>;
+}
+
+// ============================================================================
+// Storage Service Port (Minimal)
+// ============================================================================
+
+/**
+ * Minimal storage service contract for context composition.
+ *
+ * Modules that only need basic upload/download/delete capabilities can
+ * depend on this narrow interface. The richer `StorageClient` (above)
+ * structurally satisfies `StorageService`, so the server provides
+ * `StorageClient` and consumers accept either type without casting.
+ */
+export interface StorageService {
+  /** Upload binary or text data to storage */
+  upload(key: string, data: Uint8Array | string, contentType: string): Promise<string>;
+  /** Download a file from storage */
+  download(key: string): Promise<unknown>;
+  /** Delete a file from storage */
+  delete(key: string): Promise<void>;
+  /** Generate a signed URL for temporary access */
+  getSignedUrl(key: string, expiresIn: number): Promise<string>;
+}
+
+// ============================================================================
+// Notification Service Port (Minimal)
+// ============================================================================
+
+/**
+ * Minimal push notification service contract for context composition.
+ *
+ * Provides just enough surface for the HasNotifications capability
+ * interface. Server-side notification implementations add richer
+ * methods (send, subscribe, batch) that are used directly via the
+ * concrete type, not through this port.
+ */
+export interface NotificationService {
+  /** Whether the notification provider has been configured */
+  isConfigured(): boolean;
+  /** Get the underlying FCM provider instance (if configured) */
+  getFcmProvider?(): unknown;
+}
+
+// ============================================================================
+// Audit Log Port
+// ============================================================================
+
+export interface AuditEntry {
+  id: string;
+  tenantId: string | null;
+  actorId: string | null;
+  action: string;
+  category: string;
+  severity: string;
+  resource: string;
+  resourceId: string | null;
+  metadata: Record<string, unknown>;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+}
+
+export interface RecordAuditRequest {
+  tenantId?: string | null;
+  actorId?: string | null;
+  action: string;
+  category?: string;
+  severity?: string;
+  resource: string;
+  resourceId?: string | null;
+  metadata?: Record<string, unknown>;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+}
+
+export interface AuditQuery {
+  actorId?: string;
+  tenantId?: string;
+  category?: string;
+  severity?: string;
+  action?: string;
+  resource?: string;
+  resourceId?: string;
+  from?: Date;
+  to?: Date;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AuditResponse {
+  entries: AuditEntry[];
+  total: number;
+  hasMore: boolean;
+}
+
+/**
+ * Audit log service contract (Port)
+ */
+export interface AuditService {
+  /**
+   * Record an audit entry.
+   */
+  record(request: RecordAuditRequest): Promise<AuditEntry>;
+
+  /**
+   * Query audit log entries.
+   */
+  query(query: AuditQuery): Promise<AuditResponse>;
+
+  /**
+   * Get a single audit entry by ID.
+   */
+  getById(id: string): Promise<AuditEntry | null>;
+}
+// ============================================================================
+// Deletion Port
+// ============================================================================
+
+/**
+ * Service for managing GDPR-compliant data deletion workflows.
+ */
+export interface DeletionService {
+  /**
+   * Schedule a resource for deletion.
+   */
+  scheduleDeletion(resourceType: string, resourceId: string, requestedBy: string): Promise<void>;
 }

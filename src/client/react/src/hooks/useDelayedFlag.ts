@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useDelayedFlag.ts
+// src/client/react/src/hooks/useDelayedFlag.ts
 import { useEffect, useState } from 'react';
 
 /**

@@ -1,4 +1,4 @@
-// client/src/queryKeys.test.ts
+// src/client/engine/src/queryKeys.test.ts
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import {

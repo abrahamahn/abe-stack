@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/queue.test.ts
+// src/apps/server/src/config/infra/queue.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';

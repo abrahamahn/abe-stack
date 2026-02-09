@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/verify.test.ts
+// src/server/core/src/auth/handlers/verify.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleResendVerification, handleVerifyEmail } from './verify';
@@ -118,8 +118,18 @@ describe('Email Verification Handlers', () => {
           user: {
             id: 'user-123',
             email: 'test@example.com',
-            name: 'Test User',
+            username: 'testuser',
+            firstName: 'Test',
+            lastName: 'User',
+            avatarUrl: null,
             role: 'user' as const,
+            emailVerified: true,
+            phone: null,
+            phoneVerified: null,
+            dateOfBirth: null,
+            gender: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
           },
         };
         mockVerifyEmail.mockResolvedValue(mockResult);
@@ -156,8 +166,18 @@ describe('Email Verification Handlers', () => {
           user: {
             id: 'user-456',
             email: 'another@example.com',
-            name: null,
+            username: 'anotheruser',
+            firstName: 'Another',
+            lastName: 'User',
+            avatarUrl: null,
             role: 'user' as const,
+            emailVerified: true,
+            phone: null,
+            phoneVerified: null,
+            dateOfBirth: null,
+            gender: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
           },
         };
         mockVerifyEmail.mockResolvedValue(mockResult);
@@ -171,15 +191,25 @@ describe('Email Verification Handlers', () => {
         );
       });
 
-      test('should handle user with null name', async () => {
+      test('should handle user with null optional fields', async () => {
         const mockResult = {
           accessToken: 'token',
           refreshToken: 'refresh',
           user: {
             id: 'user-789',
             email: 'user@example.com',
-            name: null,
+            username: 'user789',
+            firstName: 'Some',
+            lastName: 'User',
+            avatarUrl: null,
             role: 'user' as const,
+            emailVerified: true,
+            phone: null,
+            phoneVerified: null,
+            dateOfBirth: null,
+            gender: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
           },
         };
         mockVerifyEmail.mockResolvedValue(mockResult);
@@ -192,8 +222,11 @@ describe('Email Verification Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toHaveProperty('user');
-        const body = result.body as { user: { name: string | null } };
-        expect(body.user.name).toBeNull();
+        const body = result.body as {
+          user: { phone: string | null; avatarUrl: string | null };
+        };
+        expect(body.user.phone).toBeNull();
+        expect(body.user.avatarUrl).toBeNull();
       });
 
       test('should handle admin role user verification', async () => {
@@ -203,8 +236,18 @@ describe('Email Verification Handlers', () => {
           user: {
             id: 'admin-001',
             email: 'admin@example.com',
-            name: 'Admin User',
+            username: 'adminuser',
+            firstName: 'Admin',
+            lastName: 'User',
+            avatarUrl: null,
             role: 'admin' as const,
+            emailVerified: true,
+            phone: null,
+            phoneVerified: null,
+            dateOfBirth: null,
+            gender: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
           },
         };
         mockVerifyEmail.mockResolvedValue(mockResult);
@@ -314,7 +357,22 @@ describe('Email Verification Handlers', () => {
         const mockResult = {
           accessToken: 'access',
           refreshToken: 'refresh',
-          user: { id: 'u1', email: 'test@example.com', name: 'Test', role: 'user' as const },
+          user: {
+            id: 'u1',
+            email: 'test@example.com',
+            username: 'testuser',
+            firstName: 'Test',
+            lastName: 'User',
+            avatarUrl: null,
+            role: 'user' as const,
+            emailVerified: true,
+            phone: null,
+            phoneVerified: null,
+            dateOfBirth: null,
+            gender: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          },
         };
         mockVerifyEmail.mockResolvedValue(mockResult);
 

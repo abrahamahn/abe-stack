@@ -1,4 +1,4 @@
-// client/ui/src/theme/radius.ts
+// src/client/ui/src/theme/radius.ts
 /**
  * Border radius tokens
  * Single source of truth for border radius values

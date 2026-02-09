@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/OAuthConnectionsList.tsx
+// src/apps/web/src/features/settings/components/OAuthConnectionsList.tsx
 /**
  * OAuth Connections List Component
  *

@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/templates/templates.ts
+// src/server/engine/src/mailer/templates/templates.ts
 /**
  * Email Templates
  *
@@ -200,6 +200,205 @@ If you did not attempt to create a new account, you can safely ignore this email
         <p style="${styles.text}">Someone attempted to create a new account using your email address.</p>
         <p style="${styles.text}">If this was you, you may already have an account. Try signing in instead, or use the "Forgot Password" option if you don't remember your password.</p>
         <p style="${styles.footer}">If you did not attempt to create a new account, you can safely ignore this email. Your account remains secure.</p>
+        `,
+      ),
+    };
+  },
+
+  /**
+   * New login "Was this you?" alert
+   * Sent after a successful login to notify the user.
+   */
+  newLoginAlert(ipAddress: string, userAgent: string, timestamp: Date): EmailOptions & { to: '' } {
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+
+    return {
+      to: '',
+      subject: 'New Sign-In to Your Account',
+      text: `
+New Sign-In Detected
+
+We noticed a new sign-in to your account.
+
+Details:
+- Time: ${formattedDate}
+- IP Address: ${ipAddress}
+- Device/Browser: ${userAgent !== '' ? userAgent : 'Unknown'}
+
+Was this you?
+If yes, you can ignore this email.
+
+If no, your account may be compromised. Please:
+1. Change your password immediately
+2. Enable two-factor authentication (2FA) if not already enabled
+3. Review your recent account activity
+      `.trim(),
+      html: renderLayout(
+        'New Sign-In',
+        `
+        <h2 style="${styles.heading}">New Sign-In to Your Account</h2>
+        <p style="${styles.text}">We noticed a new sign-in to your account.</p>
+
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <h3 style="color: #374151; margin: 0 0 12px 0; font-size: 16px;">Details:</h3>
+          <table style="color: #4b5563; font-size: 14px;">
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Time:</td><td>${formattedDate}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">IP Address:</td><td>${ipAddress}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent !== '' ? userAgent : 'Unknown'}</td></tr>
+          </table>
+        </div>
+
+        <p style="${styles.text}"><strong>Was this you?</strong></p>
+        <p style="${styles.text}">If yes, you can safely ignore this email.</p>
+        <p style="${styles.alert}">If no, your account may be compromised. Change your password immediately and enable two-factor authentication (2FA).</p>
+        `,
+      ),
+    };
+  },
+
+  /**
+   * Password changed "Was this you?" alert
+   * Sent after a user's password is changed.
+   */
+  passwordChangedAlert(
+    ipAddress: string,
+    userAgent: string,
+    timestamp: Date,
+  ): EmailOptions & { to: '' } {
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+
+    return {
+      to: '',
+      subject: 'Your Password Was Changed',
+      text: `
+Your Password Was Changed
+
+Your account password was recently changed.
+
+Details:
+- Time: ${formattedDate}
+- IP Address: ${ipAddress}
+- Device/Browser: ${userAgent !== '' ? userAgent : 'Unknown'}
+
+Was this you?
+If yes, you can ignore this email.
+
+If no, your account may be compromised. Please:
+1. Use "Forgot Password" to regain access immediately
+2. Contact support if you cannot access your account
+      `.trim(),
+      html: renderLayout(
+        'Password Changed',
+        `
+        <h2 style="${styles.heading}">Your Password Was Changed</h2>
+        <p style="${styles.text}">Your account password was recently changed.</p>
+
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <h3 style="color: #374151; margin: 0 0 12px 0; font-size: 16px;">Details:</h3>
+          <table style="color: #4b5563; font-size: 14px;">
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Time:</td><td>${formattedDate}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">IP Address:</td><td>${ipAddress}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent !== '' ? userAgent : 'Unknown'}</td></tr>
+          </table>
+        </div>
+
+        <p style="${styles.text}"><strong>Was this you?</strong></p>
+        <p style="${styles.text}">If yes, you can safely ignore this email.</p>
+        <p style="${styles.alert}">If no, use "Forgot Password" to regain access immediately and contact support.</p>
+        `,
+      ),
+    };
+  },
+
+  /**
+   * Email changed "Was this you?" alert
+   * Sent to the OLD email address after an email change.
+   */
+  emailChangedAlert(
+    newEmail: string,
+    ipAddress: string,
+    userAgent: string,
+    timestamp: Date,
+    revertUrl?: string,
+  ): EmailOptions & { to: '' } {
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+
+    const revertText =
+      revertUrl !== undefined && revertUrl !== ''
+        ? `\nIf this wasn't you, revert the change immediately:\n${revertUrl}\n`
+        : '';
+    const revertHtml =
+      revertUrl !== undefined && revertUrl !== ''
+        ? `
+        <p style="${styles.alert}">
+          If this wasn't you, revert the change immediately:
+        </p>
+        <p><a href="${revertUrl}" style="${styles.button}">Revert email change</a></p>
+        `
+        : '';
+
+    return {
+      to: '',
+      subject: 'Your Email Address Was Changed',
+      text: `
+Your Email Address Was Changed
+
+The email address on your account was recently changed to ${newEmail}.
+
+Details:
+- Time: ${formattedDate}
+- IP Address: ${ipAddress}
+- Device/Browser: ${userAgent !== '' ? userAgent : 'Unknown'}
+
+Was this you?
+If yes, you can ignore this email.
+
+If no, your account may be compromised. Please contact support immediately to recover your account.
+${revertText}
+      `.trim(),
+      html: renderLayout(
+        'Email Changed',
+        `
+        <h2 style="${styles.heading}">Your Email Address Was Changed</h2>
+        <p style="${styles.text}">The email address on your account was recently changed to <strong>${newEmail}</strong>.</p>
+
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <h3 style="color: #374151; margin: 0 0 12px 0; font-size: 16px;">Details:</h3>
+          <table style="color: #4b5563; font-size: 14px;">
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Time:</td><td>${formattedDate}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">IP Address:</td><td>${ipAddress}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent !== '' ? userAgent : 'Unknown'}</td></tr>
+          </table>
+        </div>
+
+        <p style="${styles.text}"><strong>Was this you?</strong></p>
+        <p style="${styles.text}">If yes, you can safely ignore this email.</p>
+        <p style="${styles.alert}">If no, your account may be compromised. Contact support immediately to recover your account.</p>
+        ${revertHtml}
         `,
       ),
     };

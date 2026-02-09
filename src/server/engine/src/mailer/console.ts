@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/console.ts
+// src/server/engine/src/mailer/console.ts
 /**
  * Console Email Service (Development)
  *

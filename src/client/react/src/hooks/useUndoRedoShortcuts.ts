@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useUndoRedoShortcuts.ts
+// src/client/react/src/hooks/useUndoRedoShortcuts.ts
 import { useCallback, useEffect, useRef } from 'react';
 
 // ============================================================================

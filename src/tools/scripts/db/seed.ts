@@ -1,4 +1,4 @@
-// tools/scripts/db/seed.ts
+// src/tools/scripts/db/seed.ts
 /**
  * Database Seed Script
  *
@@ -18,6 +18,7 @@
 
 import { hashPassword } from '@abe-stack/core/auth';
 import { buildConnectionString, createDbClient, USERS_TABLE } from '@abe-stack/db';
+import { loadServerEnv } from '@abe-stack/server-engine';
 
 /** Supported user roles for seed data */
 type SeedUserRole = 'admin' | 'user';
@@ -66,6 +67,9 @@ export const TEST_USERS: SeedUser[] = [
  * @complexity O(n) where n = number of test users
  */
 export async function seed(): Promise<void> {
+  // Load + validate `.config/env` files (prefers `.env.local` when present).
+  loadServerEnv();
+
   // Safety check: refuse to seed in production
   if (process.env['NODE_ENV'] === 'production') {
     console.error('');

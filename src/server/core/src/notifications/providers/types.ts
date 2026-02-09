@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/types.ts
+// src/server/core/src/notifications/providers/types.ts
 /**
  * Push Notification Provider Types
  *

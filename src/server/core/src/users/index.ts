@@ -1,4 +1,4 @@
-// backend/core/src/users/index.ts
+// src/server/core/src/users/index.ts
 /**
  * Users Package
  *

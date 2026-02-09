@@ -1,8 +1,8 @@
-// backend/db/src/factory.test.ts
+// src/server/db/src/factory.test.ts
 /**
  * Tests for Repository Factory
  *
- * Validates that createRepositories returns all 33 repository keys
+ * Validates that createRepositories returns all 37 repository keys
  * and that getRepositoryContext provides singleton behavior in development.
  */
 
@@ -38,7 +38,7 @@ describe('createRepositories', () => {
     expect(ctx.repos).toBeDefined();
   });
 
-  it('should create all 33 repository keys', () => {
+  it('should create all 37 repository keys', () => {
     const ctx = createRepositories(testConnectionString);
     const repos = ctx.repos;
 
@@ -52,12 +52,17 @@ describe('createRepositories', () => {
     expect(repos.passwordResetTokens).toBeDefined();
     expect(repos.emailVerificationTokens).toBeDefined();
     expect(repos.securityEvents).toBeDefined();
+    expect(repos.totpBackupCodes).toBeDefined();
+    expect(repos.emailChangeTokens).toBeDefined();
 
     // Magic Link
     expect(repos.magicLinkTokens).toBeDefined();
 
     // OAuth
     expect(repos.oauthConnections).toBeDefined();
+
+    // API Keys
+    expect(repos.apiKeys).toBeDefined();
 
     // Push Notifications
     expect(repos.pushSubscriptions).toBeDefined();
@@ -100,13 +105,14 @@ describe('createRepositories', () => {
     expect(repos.legalDocuments).toBeDefined();
     expect(repos.userAgreements).toBeDefined();
     expect(repos.consentLogs).toBeDefined();
+    expect(repos.dataExportRequests).toBeDefined();
   });
 
-  it('should have exactly 33 keys in repos', () => {
+  it('should have exactly 37 keys in repos', () => {
     const ctx = createRepositories(testConnectionString);
     const repoKeys = Object.keys(ctx.repos);
 
-    expect(repoKeys).toHaveLength(33);
+    expect(repoKeys).toHaveLength(37);
   });
 
   it('should expose repository methods', () => {

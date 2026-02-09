@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobDetailsPanel.tsx
+// src/apps/web/src/features/admin/components/JobDetailsPanel.tsx
 /**
  * JobDetailsPanel component
  *
@@ -75,7 +75,7 @@ export const JobDetailsPanel = ({
     );
   }
 
-  const canRetry = job.status === 'failed' || job.status === 'dead';
+  const canRetry = job.status === 'failed' || job.status === 'dead_letter';
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
   return (

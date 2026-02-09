@@ -1,4 +1,4 @@
-// backend/core/src/notifications/errors.ts
+// src/server/core/src/notifications/errors.ts
 /**
  * Push Notification Errors
  *

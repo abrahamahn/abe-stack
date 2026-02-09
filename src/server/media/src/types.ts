@@ -1,4 +1,4 @@
-// premium/media/src/types.ts
+// src/server/media/src/types.ts
 /**
  * Core Media Processing Types
  *

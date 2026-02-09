@@ -4,7 +4,8 @@ import { PaginationError } from '../pagination';
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
 
 import type { CursorData } from './cursor';
-import type { CursorPaginationOptions, SortOrder } from '../../contracts';
+import type { CursorPaginationOptions } from './pagination';
+import type { SortOrder } from '../constants';
 
 // ============================================================================
 // SQL Identifier Safety

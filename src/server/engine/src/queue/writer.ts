@@ -1,4 +1,4 @@
-// backend/engine/src/queue/writer.ts
+// src/server/engine/src/queue/writer.ts
 /**
  * Write Service
  *
@@ -60,6 +60,7 @@ export class WriteService {
   private readonly pubsub?: SubscriptionManager;
   private readonly log?: Logger;
   private readonly hooks: WriteHooks;
+  private pendingPublish: NodeJS.Immediate | null = null;
 
   constructor(options: WriteServiceOptions) {
     this.db = options.db;
@@ -70,6 +71,17 @@ export class WriteService {
       this.log = options.log;
     }
     this.hooks = options.hooks ?? {};
+  }
+
+  /**
+   * Release pending setImmediate handles for graceful shutdown.
+   * Call this in the application's stop() method to prevent orphaned callbacks.
+   */
+  close(): void {
+    if (this.pendingPublish !== null) {
+      clearImmediate(this.pendingPublish);
+      this.pendingPublish = null;
+    }
   }
 
   // ==========================================================================
@@ -190,15 +202,19 @@ export class WriteService {
     }
 
     // Insert with version 1
-    const record = {
+    const record: Record<string, unknown> = {
       id,
-      ...data,
+      ...(data as Record<string, unknown>),
       version: 1,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    await tx.raw(`INSERT INTO ${escapeIdentifier(table)} ${this.buildInsertClause(record)}`);
+    const { columns, placeholders, values } = this.buildParameterizedInsert(record);
+    await tx.raw(
+      `INSERT INTO ${escapeIdentifier(table)} (${columns}) VALUES (${placeholders})`,
+      values,
+    );
 
     return {
       operation,
@@ -216,13 +232,12 @@ export class WriteService {
       throw new Error('Update operation requires data');
     }
 
-    // Build version check condition
-    const versionCheck =
-      expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
+    const idStr = typeof id === 'string' ? id : String(id);
 
-    // Get current record for previous version
+    // Get current record for previous version (parameterized)
     const currentRows = (await tx.raw<{ version: number }>(
-      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${(typeof id === 'string' ? id : String(id)).replace(/'/g, "''")}'`,
+      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = $1`,
+      [idStr],
     )) as { version: number }[];
     const currentRow = currentRows[0];
     if (currentRow === undefined) {
@@ -239,18 +254,25 @@ export class WriteService {
 
     // Update with version bump
     const newVersion = currentRow.version + 1;
-    const updateData = {
-      ...data,
+    const updateData: Record<string, unknown> = {
+      ...(data as Record<string, unknown>),
       version: newVersion,
       updated_at: new Date().toISOString(),
     };
 
-    const idEscaped = (typeof id === 'string' ? id : String(id)).replace(/'/g, "''");
+    const { setClause, values: updateValues } = this.buildParameterizedUpdate(updateData);
+
+    // WHERE id = $N (and optionally AND version = $N+1)
+    const whereParams: unknown[] = [idStr];
+    let whereClause = `WHERE id = $${String(updateValues.length + 1)}`;
+    if (expectedVersion !== undefined) {
+      whereClause += ` AND version = $${String(updateValues.length + 2)}`;
+      whereParams.push(expectedVersion);
+    }
+
     const result = (await tx.raw<T & { id: string; version: number }>(
-      `UPDATE ${escapeIdentifier(table)}
-      SET ${this.buildUpdateClause(updateData)}
-      WHERE id = '${idEscaped}' ${versionCheck}
-      RETURNING *`,
+      `UPDATE ${escapeIdentifier(table)} SET ${setClause} ${whereClause} RETURNING *`,
+      [...updateValues, ...whereParams],
     )) as (T & { id: string; version: number })[];
 
     if (result.length === 0) {
@@ -275,25 +297,29 @@ export class WriteService {
   ): Promise<OperationResult<T>> {
     const { table, id, expectedVersion } = operation;
 
-    const idEscaped = (typeof id === 'string' ? id : String(id)).replace(/'/g, "''");
+    const idStr = typeof id === 'string' ? id : String(id);
 
-    // Build version check condition
-    const versionCheck =
-      expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
-
-    // Get current version before delete
+    // Get current version before delete (parameterized)
     const currentRows = (await tx.raw<{ version: number }>(
-      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}'`,
+      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = $1`,
+      [idStr],
     )) as { version: number }[];
     const currentRow = currentRows[0];
     if (currentRow === undefined) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
 
-    // Delete with version check
+    // Delete with parameterized version check
+    let deleteText = `DELETE FROM ${escapeIdentifier(table)} WHERE id = $1`;
+    const deleteValues: unknown[] = [idStr];
+    if (expectedVersion !== undefined) {
+      deleteText += ` AND version = $2`;
+      deleteValues.push(expectedVersion);
+    }
+
     const rowCount = await tx.execute({
-      text: `DELETE FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}' ${versionCheck}`,
-      values: [],
+      text: deleteText,
+      values: deleteValues,
     });
 
     if (rowCount === 0) {
@@ -309,8 +335,9 @@ export class WriteService {
   private publishResults<T>(results: OperationResult<T>[], _ctx: WriteContext): void {
     if (this.pubsub === undefined) return;
 
-    // Use setImmediate to not block the response
-    setImmediate(() => {
+    // Use setImmediate to not block the response; track handle for cleanup
+    this.pendingPublish = setImmediate(() => {
+      this.pendingPublish = null;
       for (const result of results) {
         const { operation, record } = result;
 
@@ -342,26 +369,51 @@ export class WriteService {
     }
   }
 
-  private buildInsertClause(data: Record<string, unknown>): string {
+  /**
+   * Build parameterized INSERT clause from a data record.
+   *
+   * @param data - Key-value record to insert
+   * @returns Columns string, $N placeholders string, and values array
+   * @complexity O(n) where n is the number of keys
+   */
+  private buildParameterizedInsert(data: Record<string, unknown>): {
+    columns: string;
+    placeholders: string;
+    values: unknown[];
+  } {
     const keys = Object.keys(data);
-    const columns = keys.map((k) => `"${this.toSnakeCase(k)}"`).join(', ');
-    const values = keys.map((k) => this.formatValue(data[k])).join(', ');
-    return `(${columns}) VALUES (${values})`;
-  }
-
-  private buildUpdateClause(data: Record<string, unknown>): string {
-    return Object.entries(data)
-      .map(([k, v]) => `"${this.toSnakeCase(k)}" = ${this.formatValue(v)}`)
+    const values: unknown[] = [];
+    const columns = keys.map((k) => escapeIdentifier(this.toSnakeCase(k))).join(', ');
+    const placeholders = keys
+      .map((k) => {
+        const val = data[k];
+        values.push(val instanceof Date ? val.toISOString() : val);
+        return `$${String(values.length)}`;
+      })
       .join(', ');
+    return { columns, placeholders, values };
   }
 
-  private formatValue(value: unknown): string {
-    if (value === null || value === undefined) return 'NULL';
-    if (typeof value === 'number') return String(value);
-    if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
-    if (typeof value === 'string') return `'${value.replace(/'/g, "''")}'`;
-    if (value instanceof Date) return `'${value.toISOString()}'`;
-    return `'${JSON.stringify(value).replace(/'/g, "''")}'::jsonb`;
+  /**
+   * Build parameterized UPDATE SET clause from a data record.
+   *
+   * @param data - Key-value record for the SET clause
+   * @returns SET clause string with $N placeholders and values array
+   * @complexity O(n) where n is the number of keys
+   */
+  private buildParameterizedUpdate(data: Record<string, unknown>): {
+    setClause: string;
+    values: unknown[];
+  } {
+    const entries = Object.entries(data);
+    const values: unknown[] = [];
+    const setClause = entries
+      .map(([k, v]) => {
+        values.push(v instanceof Date ? v.toISOString() : v);
+        return `${escapeIdentifier(this.toSnakeCase(k))} = $${String(values.length)}`;
+      })
+      .join(', ');
+    return { setClause, values };
   }
 
   private toSnakeCase(str: string): string {

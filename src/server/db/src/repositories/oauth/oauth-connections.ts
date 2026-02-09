@@ -1,4 +1,4 @@
-// backend/db/src/repositories/oauth/oauth-connections.ts
+// src/server/db/src/repositories/oauth/oauth-connections.ts
 /**
  * OAuth Connections Repository (Functional)
  *

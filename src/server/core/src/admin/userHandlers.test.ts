@@ -1,4 +1,4 @@
-// backend/core/src/admin/userHandlers.test.ts
+// src/server/core/src/admin/userHandlers.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -11,21 +11,8 @@ import {
 import * as userService from './userService';
 
 import type { AdminAppContext, AdminRequest } from './types';
+import type { AdminUser } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-
-// Define AdminUser type inline to avoid export issues
-interface AdminUser {
-  id: string;
-  email: string;
-  name: string | null;
-  role: 'user' | 'moderator' | 'admin';
-  emailVerified: boolean;
-  emailVerifiedAt: string | null;
-  lockedUntil: string | null;
-  failedLoginAttempts: number;
-  createdAt: string;
-  updatedAt: string;
-}
 
 // ============================================================================
 // Mocks - use relative path to match vitest module resolution
@@ -68,12 +55,16 @@ function createMockAdminUser(overrides: Partial<AdminUser> = {}): AdminUser {
   return {
     id: 'user-123',
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00.000Z',
     lockedUntil: null,
     failedLoginAttempts: 0,
+    phone: null,
+    phoneVerified: false,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
@@ -87,7 +78,7 @@ function createMockContext(): AdminAppContext {
     repos: {
       users: {} as AdminAppContext['repos']['users'],
     } as AdminAppContext['repos'],
-    email: { send: vi.fn() },
+    email: { send: vi.fn(), healthCheck: vi.fn() },
     storage: {
       upload: vi.fn(),
       download: vi.fn(),
@@ -116,7 +107,7 @@ function createMockContext(): AdminAppContext {
       verifyWebhookSignature: vi.fn(),
       parseWebhookEvent: vi.fn(),
       createCustomerPortalSession: vi.fn(),
-    } as unknown as AdminAppContext['billing'],
+    } as unknown,
     notifications: {
       isConfigured: vi.fn().mockReturnValue(false),
     },
@@ -267,13 +258,13 @@ describe('Admin User Handlers', () => {
 
   describe('handleUpdateUser', () => {
     test('should return 200 with updated user', async () => {
-      const mockUser = createMockAdminUser({ name: 'Updated Name' });
+      const mockUser = createMockAdminUser({ firstName: 'Updated', lastName: 'Name' });
       vi.mocked(userService.updateUser).mockResolvedValue(mockUser);
 
       const req = createMockRequest({}, { id: 'user-123' });
       const result = await handleUpdateUser(
         mockCtx,
-        { name: 'Updated Name' },
+        { firstName: 'Updated', lastName: 'Name' },
         req,
         createMockReply(),
       );
@@ -288,14 +279,14 @@ describe('Admin User Handlers', () => {
       );
 
       const req = createMockRequest({}, { id: 'nonexistent' });
-      const result = await handleUpdateUser(mockCtx, { name: 'Test' }, req, createMockReply());
+      const result = await handleUpdateUser(mockCtx, { firstName: 'Test' }, req, createMockReply());
 
       expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {
       const req = createUnauthenticatedRequest({ id: 'user-123' });
-      const result = await handleUpdateUser(mockCtx, { name: 'Test' }, req, createMockReply());
+      const result = await handleUpdateUser(mockCtx, { firstName: 'Test' }, req, createMockReply());
 
       expect(result.status).toBe(401);
     });

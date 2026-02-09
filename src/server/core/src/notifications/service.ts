@@ -1,4 +1,4 @@
-// backend/core/src/notifications/service.ts
+// src/server/core/src/notifications/service.ts
 /**
  * Notification Service
  *

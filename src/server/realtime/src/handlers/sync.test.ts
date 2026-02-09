@@ -1,4 +1,4 @@
-// modules/realtime/src/handlers/sync.test.ts
+// src/server/realtime/src/handlers/sync.test.ts
 /**
  * Realtime Sync Handler Unit Tests
  *
@@ -73,13 +73,19 @@ function createMockContext(overrides: Partial<RealtimeModuleDeps> = {}): Realtim
   } as unknown as RealtimeModuleDeps;
 }
 
-function createMockRequest(user?: { userId: string }): RealtimeRequest {
+const mockUser = { userId: 'user-123', email: 'test@example.com', role: 'user' };
+
+function createMockRequest(user?: {
+  userId: string;
+  email: string;
+  role: string;
+}): RealtimeRequest {
   return {
-    user: user as RealtimeRequest['user'],
+    ...(user !== undefined ? { user } : {}),
     cookies: {},
     headers: {},
     requestInfo: { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
-  };
+  } as RealtimeRequest;
 }
 
 function createWriteTransaction(
@@ -118,7 +124,7 @@ describe('Realtime Sync Handler', () => {
 
       test('should reject mismatched authorId', async () => {
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('different-user', []);
 
         const result = await handleWrite(ctx, body, req);
@@ -132,7 +138,7 @@ describe('Realtime Sync Handler', () => {
     describe('Table Validation', () => {
       test('should reject operations on disallowed tables', async () => {
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'secret_table', id: 'id-1', key: 'name', value: 'test' },
         ]);
@@ -160,7 +166,7 @@ describe('Realtime Sync Handler', () => {
         vi.mocked(saveRecords).mockResolvedValue(undefined);
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'user-1', key: 'name', value: 'Updated' },
         ]);
@@ -177,7 +183,7 @@ describe('Realtime Sync Handler', () => {
         vi.mocked(loadRecords).mockResolvedValue({ users: {} }); // Empty - no records
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'nonexistent', key: 'name', value: 'Test' },
         ]);
@@ -205,7 +211,7 @@ describe('Realtime Sync Handler', () => {
         ]);
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'user-1', key: 'name', value: 'Test' },
         ]);
@@ -237,7 +243,7 @@ describe('Realtime Sync Handler', () => {
         vi.mocked(saveRecords).mockResolvedValue(undefined);
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'user-1', key: 'name', value: 'Updated' },
         ]);
@@ -265,7 +271,7 @@ describe('Realtime Sync Handler', () => {
         vi.mocked(saveRecords).mockResolvedValue(undefined);
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'user-1', key: 'name', value: 'Test' },
         ]);
@@ -273,12 +279,12 @@ describe('Realtime Sync Handler', () => {
         await handleWrite(ctx, body, req);
 
         expect(ctx.log.debug).toHaveBeenCalledWith(
-          expect.objectContaining({ txId: body.txId }),
           'Write transaction started',
+          expect.objectContaining({ txId: body.txId }),
         );
         expect(ctx.log.debug).toHaveBeenCalledWith(
-          expect.objectContaining({ txId: body.txId, modifiedCount: 1 }),
           'Write transaction completed',
+          expect.objectContaining({ txId: body.txId, modifiedCount: 1 }),
         );
       });
     });
@@ -289,7 +295,7 @@ describe('Realtime Sync Handler', () => {
         vi.mocked(loadRecords).mockRejectedValue(new Error('Database connection failed'));
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = createWriteTransaction('user-123', [
           { type: 'set', table: 'users', id: 'user-1', key: 'name', value: 'Test' },
         ]);

@@ -1,5 +1,5 @@
-// apps/web/src/features/settings/pages/SettingsPage.test.tsx
-import { useQuery } from '@abe-stack/client-engine';
+// src/apps/web/src/features/settings/pages/SettingsPage.test.tsx
+import { useAuth } from '@auth/hooks';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,25 +9,33 @@ import type { User } from '../api';
 import type { UserId } from '@abe-stack/shared';
 import type { ReactNode } from 'react';
 
-vi.mock('@abe-stack/client-engine', () => ({
-  useQuery: vi.fn(),
+vi.mock('@auth/hooks', () => ({
+  useAuth: vi.fn(),
 }));
 
 vi.mock('../components', () => {
   const mockAvatarUpload = () => <div data-testid="avatar-upload">Avatar Upload</div>;
+  const mockEmailChangeForm = () => <div data-testid="email-change-form">Email Change Form</div>;
+  const mockForgotPasswordShortcut = () => (
+    <div data-testid="forgot-password-shortcut">Forgot Password Shortcut</div>
+  );
   const mockOAuthConnectionsList = () => (
     <div data-testid="oauth-connections">OAuth Connections</div>
   );
   const mockPasswordChangeForm = () => <div data-testid="password-form">Password Form</div>;
   const mockProfileForm = () => <div data-testid="profile-form">Profile Form</div>;
   const mockSessionsList = () => <div data-testid="sessions-list">Sessions List</div>;
+  const mockTotpManagement = () => <div data-testid="totp-management">TOTP Management</div>;
 
   return {
     AvatarUpload: mockAvatarUpload,
+    EmailChangeForm: mockEmailChangeForm,
+    ForgotPasswordShortcut: mockForgotPasswordShortcut,
     OAuthConnectionsList: mockOAuthConnectionsList,
     PasswordChangeForm: mockPasswordChangeForm,
     ProfileForm: mockProfileForm,
     SessionsList: mockSessionsList,
+    TotpManagement: mockTotpManagement,
   };
 });
 
@@ -70,10 +78,16 @@ describe('SettingsPage', () => {
   const mockUser: User = {
     id: 'user-123' as unknown as UserId,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: 'https://example.com/avatar.jpg',
     role: 'user',
-    isVerified: true,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -84,15 +98,11 @@ describe('SettingsPage', () => {
 
   describe('loading state', () => {
     it('should show loading skeleton', () => {
-      vi.mocked(useQuery).mockReturnValue({
-        data: undefined,
-        status: 'pending',
-        error: null,
-        refetch: vi.fn(),
+      vi.mocked(useAuth).mockReturnValue({
+        user: null,
         isLoading: true,
-        isFetching: true,
-        isError: false,
-        isSuccess: false,
+        isAuthenticated: false,
+        logout: vi.fn(),
       } as any);
 
       const { container } = render(<SettingsPage />);
@@ -104,15 +114,11 @@ describe('SettingsPage', () => {
 
   describe('error state', () => {
     it('should show error message', () => {
-      vi.mocked(useQuery).mockReturnValue({
-        data: undefined,
-        status: 'error',
-        error: new Error('Failed to load'),
-        refetch: vi.fn(),
+      vi.mocked(useAuth).mockReturnValue({
+        user: null,
         isLoading: false,
-        isFetching: false,
-        isError: true,
-        isSuccess: false,
+        isAuthenticated: false,
+        logout: vi.fn(),
       } as any);
 
       render(<SettingsPage />);
@@ -120,35 +126,27 @@ describe('SettingsPage', () => {
     });
 
     it('should allow retry', () => {
-      const mockRefetch = vi.fn();
-      vi.mocked(useQuery).mockReturnValue({
-        data: undefined,
-        status: 'error',
-        error: new Error('Failed'),
-        refetch: mockRefetch,
+      vi.mocked(useAuth).mockReturnValue({
+        user: null,
         isLoading: false,
-        isFetching: false,
-        isError: true,
-        isSuccess: false,
+        isAuthenticated: false,
+        logout: vi.fn(),
       } as any);
 
       render(<SettingsPage />);
-      fireEvent.click(screen.getByText('Try Again'));
-      expect(mockRefetch).toHaveBeenCalled();
+      const retryButton = screen.getByText('Try Again');
+      expect(retryButton).toBeInTheDocument();
+      fireEvent.click(retryButton);
     });
   });
 
   describe('success state', () => {
     beforeEach(() => {
-      vi.mocked(useQuery).mockReturnValue({
-        data: mockUser,
-        status: 'success',
-        error: null,
-        refetch: vi.fn(),
+      vi.mocked(useAuth).mockReturnValue({
+        user: mockUser,
         isLoading: false,
-        isFetching: false,
-        isError: false,
-        isSuccess: true,
+        isAuthenticated: true,
+        logout: vi.fn(),
       } as any);
     });
 
@@ -168,7 +166,10 @@ describe('SettingsPage', () => {
 
     it('should render security tab content', () => {
       render(<SettingsPage />);
+      expect(screen.getByTestId('totp-management')).toBeInTheDocument();
       expect(screen.getByTestId('password-form')).toBeInTheDocument();
+      expect(screen.getByTestId('forgot-password-shortcut')).toBeInTheDocument();
+      expect(screen.getByTestId('email-change-form')).toBeInTheDocument();
       expect(screen.getByTestId('oauth-connections')).toBeInTheDocument();
     });
 

@@ -1,4 +1,4 @@
-// client/ui/src/components/RadioGroup.tsx
+// src/client/ui/src/components/RadioGroup.tsx
 import { useControllableState } from '@hooks/useControllableState';
 import {
   createContext,

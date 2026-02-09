@@ -31,7 +31,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'wrongpassword');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -47,7 +47,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'nonexistent@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'nonexistent@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -64,6 +64,9 @@ describe('Error Handling Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'existing@example.com');
+      await user.type(screen.getByLabelText('Username'), 'existinguser');
+      await user.type(screen.getByLabelText('First Name'), 'Existing');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -79,7 +82,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'locked@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'locked@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -95,7 +98,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'unverified@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'unverified@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -117,7 +120,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -133,7 +136,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -149,7 +152,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -172,6 +175,9 @@ describe('Error Handling Integration', () => {
       const { user } = renderWithProviders(<RegisterPage />, { environment });
 
       await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Username'), 'testuser');
+      await user.type(screen.getByLabelText('First Name'), 'Test');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), '123');
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -190,6 +196,9 @@ describe('Error Handling Integration', () => {
       // Type a technically valid email that server might reject
       // (e.g., valid format but server-side validation fails for domain)
       await user.type(screen.getByLabelText('Email'), 'test@invalid-domain.test');
+      await user.type(screen.getByLabelText('Username'), 'testuser');
+      await user.type(screen.getByLabelText('First Name'), 'Test');
+      await user.type(screen.getByLabelText('Last Name'), 'User');
       await user.type(screen.getByLabelText('Password'), 'password123');
 
       // Submit the form
@@ -230,7 +239,7 @@ describe('Error Handling Integration', () => {
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
       // First attempt fails
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'wrong');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -261,7 +270,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
 
       // First click - fails
@@ -324,7 +333,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -354,7 +363,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -372,7 +381,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -390,7 +399,7 @@ describe('Error Handling Integration', () => {
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 

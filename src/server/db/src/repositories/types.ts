@@ -1,4 +1,4 @@
-// backend/db/src/repositories/types.ts
+// src/server/db/src/repositories/types.ts
 /**
  * Repository Types
  *

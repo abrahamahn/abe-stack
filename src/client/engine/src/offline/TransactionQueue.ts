@@ -1,4 +1,4 @@
-// client/src/offline/TransactionQueue.ts
+// src/client/engine/src/offline/TransactionQueue.ts
 /**
  * Transaction Queue for Offline-First Support
  *
@@ -14,18 +14,14 @@
 
 import {
   BadRequestError,
-  type Contracts,
   DeferredPromise,
   ForbiddenError,
   InternalError,
   MS_PER_SECOND,
   ReactiveMap,
+  type RealtimeOperation,
   type RealtimeTransaction,
 } from '@abe-stack/shared';
-
-// Realtime-specific Operation type which has table and id properties
-// Using Contracts.Operation (from contracts/realtime) instead of core Operation
-type RealtimeOperation = Contracts.Operation;
 
 // ============================================================================
 // Types

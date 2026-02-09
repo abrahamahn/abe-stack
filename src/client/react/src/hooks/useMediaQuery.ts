@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useMediaQuery.ts
+// src/client/react/src/hooks/useMediaQuery.ts
 import { useEffect, useState } from 'react';
 
 /**

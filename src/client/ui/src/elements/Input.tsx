@@ -1,4 +1,4 @@
-// client/ui/src/elements/Input.tsx
+// src/client/ui/src/elements/Input.tsx
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
 
 import { Text } from './Text';

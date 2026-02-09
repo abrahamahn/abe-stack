@@ -1,4 +1,4 @@
-// premium/media/src/processors/image.test.ts
+// src/server/media/src/processors/image.test.ts
 /**
  * Tests for ImageProcessor
  */

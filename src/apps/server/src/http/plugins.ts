@@ -1,4 +1,4 @@
-// apps/server/src/http/plugins.ts
+// src/apps/server/src/http/plugins.ts
 /**
  * HTTP Plugin Registration
  *

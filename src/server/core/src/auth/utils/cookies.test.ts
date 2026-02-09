@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/cookies.test.ts
+// src/server/core/src/auth/utils/cookies.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { REFRESH_COOKIE_NAME } from '../index';

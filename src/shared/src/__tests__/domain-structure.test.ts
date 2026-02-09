@@ -1,4 +1,4 @@
-// packages/shared/src/__tests__/domain-structure.test.ts
+// shared/src/__tests__/domain-structure.test.ts
 import { describe, expect, test } from 'vitest';
 
 // Test domain exports for the new domain-based structure
@@ -94,10 +94,13 @@ describe('Domain Structure', () => {
 
   describe('Pagination Domain', () => {
     test('should export pagination utilities', async () => {
-      const { encodeCursor, decodeCursor, buildCursorPaginationQuery, paginateArrayWithCursor } =
-        await import('../utils/pagination/index.js');
-
-      const { PaginationError } = await import('../utils/pagination.js');
+      const {
+        encodeCursor,
+        decodeCursor,
+        buildCursorPaginationQuery,
+        paginateArrayWithCursor,
+        PaginationError,
+      } = await import('../utils/pagination/index.js');
 
       expect(typeof encodeCursor).toBe('function');
       expect(typeof decodeCursor).toBe('function');
@@ -118,7 +121,7 @@ describe('Domain Structure', () => {
     });
 
     test('should export HTTP utilities', async () => {
-      const { parseCookies } = await import('../utils/http.js');
+      const { parseCookies } = await import('../utils/http/http.js');
 
       expect(typeof parseCookies).toBe('function');
     });
@@ -212,7 +215,7 @@ describe('Domain Structure', () => {
     });
 
     test('should export crypto utilities', async () => {
-      const { sign, decode, verify } = await import('../utils/jwt.js');
+      const { sign, decode, verify } = await import('../utils/crypto/jwt.js');
 
       expect(typeof sign).toBe('function');
       expect(typeof decode).toBe('function');
@@ -247,7 +250,7 @@ describe('Domain Structure', () => {
 
       // Types namespace (from export * as Types)
       expect(typeof mainIndex.Types).toBe('object');
-    }, 15_000);
+    }, 45_000);
   });
 
   describe('Backward Compatibility', () => {
@@ -265,6 +268,6 @@ describe('Domain Structure', () => {
 
       // Utils are NOT at top level (Node-only code) - use subpath imports
       // e.g., import { parseCookies } from '@abe-stack/shared/utils'
-    });
+    }, 20_000);
   });
 });

@@ -1,4 +1,4 @@
-// backend/db/src/builder/conditions.ts
+// src/server/db/src/builder/conditions.ts
 /**
  * SQL Condition Builders
  *
@@ -13,7 +13,7 @@
  * // { text: '"email" = $1 AND "created_at" > $2', values: ['user@example.com', Date] }
  */
 
-import { combine, escapeIdentifier, EMPTY_FRAGMENT, type SqlFragment } from './types';
+import { combine, EMPTY_FRAGMENT, escapeIdentifier, type SqlFragment } from './types/types';
 
 // ============================================================================
 // Comparison Operators

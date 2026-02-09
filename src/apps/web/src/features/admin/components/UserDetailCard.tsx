@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserDetailCard.tsx
+// src/apps/web/src/features/admin/components/UserDetailCard.tsx
 /**
  * UserDetailCard Component
  *
@@ -10,22 +10,10 @@ import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
+import type { AdminUser } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
-
-interface AdminUserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRoleLocal;
-  emailVerified: boolean;
-  emailVerifiedAt: string | null;
-  failedLoginAttempts: number;
-  lockedUntil: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+type AdminUserLocal = AdminUser;
 
 export interface UserDetailCardProps {
   user: AdminUserLocal | null;
@@ -95,8 +83,16 @@ export const UserDetailCard = ({ user, isLoading }: UserDetailCardProps): JSX.El
             <Text>{user.email}</Text>
           </InfoRow>
 
-          <InfoRow label="Name">
-            <Text>{user.name ?? 'Not set'}</Text>
+          <InfoRow label="Username">
+            <Text>{user.username}</Text>
+          </InfoRow>
+
+          <InfoRow label="First Name">
+            <Text>{user.firstName}</Text>
+          </InfoRow>
+
+          <InfoRow label="Last Name">
+            <Text>{user.lastName}</Text>
           </InfoRow>
 
           <InfoRow label="Role">

@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useContrast.ts
+// src/client/react/src/hooks/useContrast.ts
 
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useMediaQuery } from '@hooks/useMediaQuery';

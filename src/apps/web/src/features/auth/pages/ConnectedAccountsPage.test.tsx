@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/ConnectedAccountsPage.test.tsx
+// src/apps/web/src/features/auth/pages/ConnectedAccountsPage.test.tsx
 import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

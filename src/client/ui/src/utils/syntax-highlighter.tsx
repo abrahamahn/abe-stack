@@ -1,4 +1,4 @@
-// client/ui/src/utils/syntax-highlighter.tsx
+// src/client/ui/src/utils/syntax-highlighter.tsx
 /**
  * Custom Syntax Highlighter - Lightweight replacement for react-syntax-highlighter
  *

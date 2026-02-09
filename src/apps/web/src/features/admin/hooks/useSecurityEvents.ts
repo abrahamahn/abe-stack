@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useSecurityEvents.ts
+// src/apps/web/src/features/admin/hooks/useSecurityEvents.ts
 /**
  * useSecurityEvents hook
  *

@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/register.ts
+// src/server/core/src/auth/handlers/register.ts
 /**
  * Register Handler
  *
@@ -9,10 +9,11 @@
 
 import { mapErrorToHttpResponse } from '@abe-stack/shared';
 
+import { isCaptchaRequired, verifyCaptchaToken } from '../security';
 import { registerUser, type RegisterResult } from '../service';
 import { createErrorMapperLogger } from '../types';
 
-import type { AppContext, ReplyWithCookies } from '../types';
+import type { AppContext, RequestWithCookies, ReplyWithCookies } from '../types';
 import type { HttpErrorResponse, RegisterRequest } from '@abe-stack/shared';
 
 /**
@@ -20,7 +21,7 @@ import type { HttpErrorResponse, RegisterRequest } from '@abe-stack/shared';
  * Creates user with unverified email and sends verification email.
  *
  * @param ctx - Application context
- * @param body - Registration request body (email + password + optional name)
+ * @param body - Registration request body (email, username, firstName, lastName, password)
  * @param _reply - Reply with cookie support (unused - no cookies set before verification)
  * @returns Registration result or error
  * @complexity O(1)
@@ -28,12 +29,26 @@ import type { HttpErrorResponse, RegisterRequest } from '@abe-stack/shared';
 export async function handleRegister(
   ctx: AppContext,
   body: RegisterRequest,
+  request: RequestWithCookies,
   _reply: ReplyWithCookies,
 ): Promise<
   { status: 201; body: RegisterResult & { emailSendFailed?: boolean } } | HttpErrorResponse
 > {
   try {
-    const { email, password, name } = body;
+    // Verify CAPTCHA token if enabled
+    if (isCaptchaRequired(ctx.config.auth)) {
+      const { ipAddress } = request.requestInfo;
+      const captchaToken = body.captchaToken ?? '';
+      const captchaResult = await verifyCaptchaToken(ctx.config.auth, captchaToken, ipAddress);
+      if (!captchaResult.success) {
+        return {
+          status: 400,
+          body: { message: 'CAPTCHA verification failed' },
+        };
+      }
+    }
+
+    const { email, username, firstName, lastName, password } = body;
     const baseUrl = ctx.config.server.appBaseUrl;
     const result = await registerUser(
       ctx.db,
@@ -43,7 +58,9 @@ export async function handleRegister(
       ctx.config.auth,
       email,
       password,
-      name ?? undefined,
+      username,
+      firstName,
+      lastName,
       baseUrl,
     );
 

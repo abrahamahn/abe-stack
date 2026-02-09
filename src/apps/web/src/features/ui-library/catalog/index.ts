@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/index.ts
+// src/apps/web/src/features/ui-library/catalog/index.ts
 export {
   componentCatalog,
   getAllCategories,

@@ -1,4 +1,4 @@
-// client/src/realtime/hooks.test.tsx
+// src/client/engine/src/realtime/hooks.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 

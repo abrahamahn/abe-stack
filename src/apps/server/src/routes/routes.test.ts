@@ -1,4 +1,4 @@
-// apps/server/src/routes/routes.test.ts
+// src/apps/server/src/routes/routes.test.ts
 /**
  * Routes Module Unit Tests
  *
@@ -13,7 +13,7 @@
  */
 
 import { registerWebhookRoutes } from '@abe-stack/core/billing';
-import { registerRouteMap } from '@abe-stack/db';
+import { registerRouteMap } from '@abe-stack/server-engine';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { registerRoutes } from './routes';
@@ -26,49 +26,41 @@ import type { FastifyInstance } from 'fastify';
 // ============================================================================
 
 // Mock dependencies
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@abe-stack/server-engine', () => ({
   registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),
   createRouteMap: vi.fn(),
 }));
 
-const adminTestRoute = 'admin/test';
-const authTestRoute = 'auth/test';
-const billingTestRoute = 'billing/test';
-const notificationsTestRoute = 'notifications/test';
-const realtimeTestRoute = 'realtime/test';
-const systemTestRoute = 'system/test';
-const usersTestRoute = 'users/test';
-
 vi.mock('@abe-stack/core/admin', () => ({
-  adminRoutes: { [adminTestRoute]: { method: 'GET', handler: vi.fn() } },
+  adminRoutes: { ['admin/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/core/auth', () => ({
-  authRoutes: { [authTestRoute]: { method: 'POST', handler: vi.fn() } },
+  authRoutes: { ['auth/test']: { method: 'POST', handler: vi.fn() } },
   createAuthGuard: vi.fn(),
 }));
 
 vi.mock('@abe-stack/core/billing', () => ({
-  billingRoutes: { [billingTestRoute]: { method: 'GET', handler: vi.fn() } },
+  billingRoutes: { ['billing/test']: { method: 'GET', handler: vi.fn() } },
   registerWebhookRoutes: vi.fn(),
 }));
 
 vi.mock('@abe-stack/core/notifications', () => ({
-  notificationRoutes: { [notificationsTestRoute]: { method: 'POST', handler: vi.fn() } },
+  notificationRoutes: { ['notifications/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/realtime', () => ({
-  realtimeRoutes: { [realtimeTestRoute]: { method: 'GET', handler: vi.fn() } },
+  realtimeRoutes: { ['realtime/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('./system.routes', () => ({
-  systemRoutes: { [systemTestRoute]: { method: 'GET', handler: vi.fn() } },
+  systemRoutes: { ['system/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/core/users', () => ({
-  userRoutes: { [usersTestRoute]: { method: 'GET', handler: vi.fn() } },
+  userRoutes: { ['users/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
 // Get mocked functions
@@ -342,9 +334,9 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Verify registerRouteMap was called for each core module
-      // Order: auth, users, notifications, admin, realtime (system commented out)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(5);
+      // Verify registerRouteMap was called for each core module + system
+      // Order: auth, users, notifications, admin, realtime, system
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
 
       // Verify each module's routes were registered with correct options
       const calls = mockRegisterRouteMap.mock.calls;
@@ -355,6 +347,7 @@ describe('registerRoutes', () => {
       expect(routeMapHasKey(calls[2]![2], 'notifications/test')).toBe(true);
       expect(routeMapHasKey(calls[3]![2], 'admin/test')).toBe(true);
       expect(routeMapHasKey(calls[4]![2], 'realtime/test')).toBe(true);
+      expect(routeMapHasKey(calls[5]![2], 'system/test')).toBe(true);
     });
 
     test('should pass Fastify instance to registerRouteMap', () => {
@@ -400,26 +393,33 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // All core routes use /api prefix (system routes are commented out)
-      for (const call of mockRegisterRouteMap.mock.calls) {
+      // Core routes use /api prefix; system routes use empty prefix
+      const apiCalls = mockRegisterRouteMap.mock.calls.filter(
+        (call) => (call[3] as { prefix: string }).prefix === '/api',
+      );
+      const systemCalls = mockRegisterRouteMap.mock.calls.filter(
+        (call) => (call[3] as { prefix: string }).prefix === '',
+      );
+
+      expect(systemCalls).toHaveLength(1);
+      expect(apiCalls.length).toBeGreaterThan(0);
+      for (const call of apiCalls) {
         const options = call[3] as { prefix: string; jwtSecret: string };
         expect(options.prefix).toBe('/api');
+        expect(options.jwtSecret).toBe('test-jwt-secret');
       }
     });
 
-    test.skip('should use empty prefix for system routes', () => {
-      // System routes are currently commented out in routes.ts
+    test('should register system routes with empty prefix', () => {
       const app = createMockFastify();
       const ctx = createMockContext(false);
 
       registerRoutes(app, ctx);
 
-      // Get the last call (system routes)
-      const systemCall = mockRegisterRouteMap.mock.calls[5]!;
-      const options = systemCall[3] as { prefix: string; jwtSecret: string };
-
-      expect(options.prefix).toBe('');
-      expect(options.jwtSecret).toBe('test-jwt-secret');
+      const systemCalls = mockRegisterRouteMap.mock.calls.filter(
+        (call) => (call[3] as { prefix: string }).prefix === '',
+      );
+      expect(systemCalls).toHaveLength(1);
     });
   });
 
@@ -430,8 +430,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Should call registerRouteMap 6 times (5 core + 1 billing)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
+      // Should call registerRouteMap 7 times (5 core + 1 system + 1 billing)
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(7);
 
       // Verify billing routes were registered (billing uses Map via buildRouteMap)
       const billingCall = mockRegisterRouteMap.mock.calls.find((call) => {
@@ -451,8 +451,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Should only call registerRouteMap 5 times (no billing, system routes commented out)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(5);
+      // Should call registerRouteMap 6 times (5 core + 1 system)
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
 
       // Verify no billing routes were registered
       const billingCall = mockRegisterRouteMap.mock.calls.find((call) => {
@@ -481,8 +481,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Should register only core routes (system routes commented out)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(5);
+      // Should register core + system routes
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
     });
   });
 
@@ -527,8 +527,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Verify order: auth, users, notifications, admin, realtime, billing
-      // (system routes are commented out)
+      // Verify order: auth, users, notifications, admin, realtime, system, billing
       const calls = mockRegisterRouteMap.mock.calls;
 
       expect(routeMapHasKey(calls[0]![2], 'auth/test')).toBe(true);
@@ -536,7 +535,8 @@ describe('registerRoutes', () => {
       expect(routeMapHasKey(calls[2]![2], 'notifications/test')).toBe(true);
       expect(routeMapHasKey(calls[3]![2], 'admin/test')).toBe(true);
       expect(routeMapHasKey(calls[4]![2], 'realtime/test')).toBe(true);
-      expect(routeMapHasKey(calls[5]![2], 'billing/test')).toBe(true);
+      expect(routeMapHasKey(calls[5]![2], 'system/test')).toBe(true);
+      expect(routeMapHasKey(calls[6]![2], 'billing/test')).toBe(true);
     });
 
     test('should register webhooks after all route maps', () => {
@@ -607,8 +607,8 @@ describe('registerRoutes', () => {
       registerRoutes(app, ctx2);
 
       // Second registration should work independently
-      // 5 core + 1 billing = 6 (system commented out)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
+      // 5 core + 1 system + 1 billing = 7
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(7);
       expect(mockRegisterWebhookRoutes).toHaveBeenCalledTimes(1);
     });
 
@@ -623,8 +623,8 @@ describe('registerRoutes', () => {
       expect(() => {
         registerRoutes(app, ctx);
       }).not.toThrow();
-      // 5 core + 1 billing = 6 (system commented out)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(6);
+      // 5 core + 1 system + 1 billing = 7
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(7);
     });
 
     test('should not fail if route modules return empty route maps', () => {
@@ -646,9 +646,14 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // All core routes use /api prefix and include authGuardFactory
+      // Core routes use /api prefix; system routes use empty prefix
       for (const call of mockRegisterRouteMap.mock.calls) {
         const options = call[3] as { prefix: string; jwtSecret: string; authGuardFactory: unknown };
+        if (options.prefix === '') {
+          expect(options.jwtSecret).toBe('test-jwt-secret');
+          expect(typeof options.authGuardFactory).toBe('function');
+          continue;
+        }
         expect(options).toMatchObject({
           prefix: '/api',
           jwtSecret: 'test-jwt-secret',
@@ -657,20 +662,16 @@ describe('registerRoutes', () => {
       }
     });
 
-    test.skip('should create custom router options for system routes', () => {
-      // System routes are currently commented out in routes.ts
+    test('should create empty prefix for system routes', () => {
       const app = createMockFastify();
       const ctx = createMockContext(false);
 
       registerRoutes(app, ctx);
 
-      const systemCall = mockRegisterRouteMap.mock.calls[5]!;
-      const options = systemCall[3] as { prefix: string; jwtSecret: string };
-
-      expect(options).toMatchObject({
-        prefix: '',
-        jwtSecret: 'test-jwt-secret',
-      });
+      const systemCalls = mockRegisterRouteMap.mock.calls.filter(
+        (call) => (call[3] as { prefix: string }).prefix === '',
+      );
+      expect(systemCalls).toHaveLength(1);
     });
 
     test('should include billing routes with standard options when enabled', () => {

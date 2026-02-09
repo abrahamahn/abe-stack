@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/ConfirmEmailPage.test.tsx
+// src/apps/web/src/features/auth/pages/ConfirmEmailPage.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -101,7 +101,7 @@ describe('ConfirmEmailPage', () => {
       renderConfirmEmailPage('/confirm-email');
 
       await waitFor(() => {
-        expect(screen.getByText(/verification failed/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /verification failed/i })).toBeInTheDocument();
       });
 
       expect(screen.getByText(/invalid verification link/i)).toBeInTheDocument();

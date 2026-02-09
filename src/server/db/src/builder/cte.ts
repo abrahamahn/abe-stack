@@ -1,4 +1,4 @@
-// backend/db/src/builder/cte.ts
+// src/server/db/src/builder/cte.ts
 /**
  * CTE (Common Table Expressions) - WITH clause builders
  *
@@ -29,7 +29,7 @@
 import { DeleteBuilder } from './delete';
 import { InsertBuilder } from './insert';
 import { SelectBuilder } from './select';
-import { combine, type QueryBuilder, type QueryResult, type TableSpec } from './types';
+import { combine, type QueryBuilder, type QueryResult, type TableSpec } from './types/types';
 import { UpdateBuilder } from './update';
 
 // ============================================================================

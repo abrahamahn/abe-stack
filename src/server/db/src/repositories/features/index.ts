@@ -1,4 +1,4 @@
-// backend/db/src/repositories/features/index.ts
+// src/server/db/src/repositories/features/index.ts
 /**
  * Features Repositories Barrel
  */

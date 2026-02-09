@@ -1,4 +1,4 @@
-// backend/engine/src/search/types.ts
+// src/server/engine/src/search/types.ts
 /**
  * Search Provider Types
  *
@@ -211,7 +211,7 @@ export interface SearchProviderFactoryOptions {
   /** Provider type */
   type: SearchProviderType;
   /** Provider configuration */
-  config: SearchProviderConfig | SqlSearchProviderConfig | ElasticsearchProviderConfig;
+  config: SearchProviderConfig | SqlSearchProviderConfig;
 }
 
 // ============================================================================

@@ -1,4 +1,4 @@
-// backend/core/src/notifications/handlers.ts
+// src/server/core/src/notifications/handlers.ts
 /**
  * Notification Handlers
  *

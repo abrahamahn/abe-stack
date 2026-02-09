@@ -1,4 +1,4 @@
-// client/ui/src/elements/VersionBadge.tsx
+// src/client/ui/src/elements/VersionBadge.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/elements.css';
 

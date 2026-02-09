@@ -1,4 +1,4 @@
-// client/src/query/useQuery.ts
+// src/client/engine/src/query/useQuery.ts
 /**
  * useQuery - React hook for data fetching with caching.
  *

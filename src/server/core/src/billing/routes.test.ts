@@ -1,4 +1,4 @@
-// backend/core/src/billing/routes.test.ts
+// src/server/core/src/billing/routes.test.ts
 /**
  * Billing Routes Unit Tests
  *

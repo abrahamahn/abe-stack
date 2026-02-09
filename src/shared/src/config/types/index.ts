@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/index.ts
+// src/shared/src/config/types/index.ts
 /**
  * Configuration Contracts - Public API
  *

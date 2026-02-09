@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// tools/scripts/audit/dependency-audit.ts
+// src/tools/scripts/audit/dependency-audit.ts
 /**
  * Dependency Audit Tool
  *
@@ -10,9 +10,9 @@
  * - Bundle size impact
  */
 
-import { execSync } from 'node:child_process';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface PackageInfo {
   name: string;
@@ -36,7 +36,7 @@ interface AuditResult {
 
 function getAllPackages(): PackageInfo[] {
   const packages: PackageInfo[] = [];
-  const rootDir = path.resolve(__dirname, '..', '..');
+  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
 
   // Root package
   interface PackageJson {
@@ -56,32 +56,18 @@ function getAllPackages(): PackageInfo[] {
     path: rootDir,
   });
 
-  // Apps
-  const appsDir = path.join(rootDir, 'apps');
-  if (fs.existsSync(appsDir)) {
-    const apps = fs.readdirSync(appsDir);
-    for (const app of apps) {
-      const appPath = path.join(appsDir, app);
-      const packageJsonPath = path.join(appPath, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
-        packages.push({
-          name: packageJson.name ?? 'unknown',
-          version: packageJson.version ?? '0.0.0',
-          dependencies: packageJson.dependencies ?? {},
-          devDependencies: packageJson.devDependencies ?? {},
-          path: appPath,
-        });
-      }
-    }
-  }
+  // Scan monorepo layer directories: src/apps, src/client, src/server
+  const layerDirs = [
+    path.join(rootDir, 'src', 'apps'),
+    path.join(rootDir, 'src', 'client'),
+    path.join(rootDir, 'src', 'server'),
+  ];
 
-  // Packages
-  const packagesDir = path.join(rootDir, 'packages');
-  if (fs.existsSync(packagesDir)) {
-    const packageDirs = fs.readdirSync(packagesDir);
-    for (const pkg of packageDirs) {
-      const pkgPath = path.join(packagesDir, pkg);
+  for (const layerDir of layerDirs) {
+    if (!fs.existsSync(layerDir)) continue;
+    const subdirs = fs.readdirSync(layerDir);
+    for (const subdir of subdirs) {
+      const pkgPath = path.join(layerDir, subdir);
       const packageJsonPath = path.join(pkgPath, 'package.json');
       if (fs.existsSync(packageJsonPath)) {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
@@ -94,6 +80,20 @@ function getAllPackages(): PackageInfo[] {
         });
       }
     }
+  }
+
+  // Shared (standalone package at src/shared)
+  const sharedPath = path.join(rootDir, 'src', 'shared');
+  const sharedPackageJsonPath = path.join(sharedPath, 'package.json');
+  if (fs.existsSync(sharedPackageJsonPath)) {
+    const packageJson = JSON.parse(fs.readFileSync(sharedPackageJsonPath, 'utf-8')) as PackageJson;
+    packages.push({
+      name: packageJson.name ?? 'unknown',
+      version: packageJson.version ?? '0.0.0',
+      dependencies: packageJson.dependencies ?? {},
+      devDependencies: packageJson.devDependencies ?? {},
+      path: sharedPath,
+    });
   }
 
   return packages;
@@ -259,7 +259,7 @@ function estimateBundleImpact(
   };
 
   for (const [name] of Object.entries(dependencies)) {
-    const estimatedSize = sizeEstimates[name] || 50; // Default 50KB estimate
+    const estimatedSize = sizeEstimates[name] ?? 50; // Default 50KB estimate
     impacts.push({ name, size: estimatedSize });
   }
 
@@ -352,7 +352,7 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '.tmp');
+    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -378,6 +378,8 @@ function main(): void {
   }
 }
 
-if (require.main === module) {
+const entryArg = process.argv[1];
+const isMainModule = entryArg !== undefined && import.meta.url === `file://${entryArg}`;
+if (isMainModule) {
   main();
 }

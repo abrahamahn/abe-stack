@@ -1,4 +1,4 @@
-// client/ui/src/elements/Toaster.tsx
+// src/client/ui/src/elements/Toaster.tsx
 import '../styles/elements.css';
 import { ToastContainer } from '@components/Toast';
 

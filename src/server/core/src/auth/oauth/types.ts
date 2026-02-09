@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/types.ts
+// src/server/core/src/auth/oauth/types.ts
 /**
  * OAuth Types
  *

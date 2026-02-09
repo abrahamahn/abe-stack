@@ -1,4 +1,4 @@
-// backend/db/src/builder/delete.ts
+// src/server/db/src/builder/delete.ts
 /**
  * DeleteBuilder - Fluent API for building DELETE queries
  *
@@ -17,7 +17,7 @@ import {
   type QueryResult,
   type SqlFragment,
   type TableSpec,
-} from './types';
+} from './types/types';
 
 /**
  * DeleteBuilder class for constructing DELETE queries

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/StatusBadge.test.tsx
+// src/apps/web/src/features/admin/components/StatusBadge.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -52,12 +52,16 @@ describe('getUserStatus', () => {
   const baseUser: AdminUser = {
     id: 'user-123',
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00Z',
     failedLoginAttempts: 0,
     lockedUntil: null,
+    phone: null,
+    phoneVerified: false,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };

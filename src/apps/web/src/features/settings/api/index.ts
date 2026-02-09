@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/api/index.ts
+// src/apps/web/src/features/settings/api/index.ts
 export { createSettingsApi } from './settingsApi';
 export type {
   ApiError,

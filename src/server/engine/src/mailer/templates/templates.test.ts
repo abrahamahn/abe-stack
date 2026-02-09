@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/templates/templates.test.ts
+// src/server/engine/src/mailer/templates/templates.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { emailTemplates } from './templates';

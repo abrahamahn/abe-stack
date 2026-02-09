@@ -9,7 +9,6 @@
     "declaration": true,
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
-    "paths": {},
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],
@@ -17,6 +16,9 @@
   "references": [
     {
       "path": "../../shared"
+    },
+    {
+      "path": "../db"
     },
     {
       "path": "../engine"

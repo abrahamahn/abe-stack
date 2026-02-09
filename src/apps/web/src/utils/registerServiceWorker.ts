@@ -1,4 +1,4 @@
-// apps/web/src/utils/registerServiceWorker.ts
+// src/apps/web/src/utils/registerServiceWorker.ts
 /**
  * Service Worker Registration Utility
  *

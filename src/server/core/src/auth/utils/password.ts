@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/password.ts
+// src/server/core/src/auth/utils/password.ts
 /**
  * Password Hashing Utilities
  *

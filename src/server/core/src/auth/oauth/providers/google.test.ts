@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/providers/google.test.ts
+// src/server/core/src/auth/oauth/providers/google.test.ts
 /**
  * Google OAuth Provider Unit Tests
  *

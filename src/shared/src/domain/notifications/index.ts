@@ -1,8 +1,9 @@
-// packages/shared/src/domain/notifications/index.ts
+// src/shared/src/domain/notifications/index.ts
 
 export { shouldSendNotification } from './notifications.logic';
 
 export {
+  NOTIFICATION_LEVELS,
   NOTIFICATION_TYPES,
   baseMarkAsReadRequestSchema,
   notificationPreferencesSchema,
@@ -11,6 +12,7 @@ export {
   notificationsListResponseSchema,
   type BaseMarkAsReadRequest,
   type Notification,
+  type NotificationLevel,
   type NotificationPreferencesConfig,
   type NotificationsListRequest,
   type NotificationsListResponse,

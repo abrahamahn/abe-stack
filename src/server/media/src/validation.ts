@@ -1,10 +1,11 @@
-// premium/media/src/validation.ts
+// src/server/media/src/validation.ts
 /**
  * Media Validation Utilities
  *
  * Validation helpers for media files and upload configurations.
  */
 
+import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 
 import { detectFileTypeFromFile, isAllowedFileType } from './file-type';
@@ -165,11 +166,15 @@ export function sanitizeFilename(filename: string): string {
 }
 
 /**
- * Generate secure file ID
+ * Generate a cryptographically secure file ID.
+ *
+ * Uses `crypto.randomUUID()` for unpredictable, collision-resistant IDs
+ * suitable for use in URLs and storage keys. Returns a 32-character
+ * hex-encoded UUID (dashes stripped).
+ *
+ * @returns 32-character lowercase hex string
+ * @complexity O(1)
  */
 export function generateFileId(): string {
-  // Simple ID generation without crypto dependency
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).slice(2);
-  return `${timestamp}${random}`.slice(0, 32);
+  return randomUUID().replace(/-/g, '');
 }

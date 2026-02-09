@@ -1,4 +1,4 @@
-// apps/server/src/config/factory.ts
+// src/apps/server/src/config/factory.ts
 import { initEnv } from '@abe-stack/server-engine/config';
 import { EnvSchema } from '@abe-stack/shared/config';
 

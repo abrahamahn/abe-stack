@@ -1,4 +1,4 @@
-// apps/server/src/middleware/rate-limit/limiter.test.ts
+// src/apps/server/src/middleware/rate-limit/limiter.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '.';

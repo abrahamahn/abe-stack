@@ -1,4 +1,4 @@
-// apps/server/src/logger/logger.test.ts
+// src/apps/server/src/logger/logger.test.ts
 /**
  * Logger Service Tests
  *

@@ -1,4 +1,4 @@
-// premium/media/src/queue/retry.test.ts
+// src/server/media/src/queue/retry.test.ts
 /**
  * Tests for MediaProcessingRetryHandler
  */

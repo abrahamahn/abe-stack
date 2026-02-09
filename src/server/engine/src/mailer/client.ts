@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/client.ts
+// src/server/engine/src/mailer/client.ts
 import { ConsoleEmailService } from './console';
 import { SmtpEmailService } from './smtp';
 

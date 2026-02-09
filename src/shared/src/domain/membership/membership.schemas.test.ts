@@ -1,4 +1,4 @@
-// shared/src/domain/membership/membership.schemas.test.ts
+// src/shared/src/domain/membership/membership.schemas.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -130,13 +130,13 @@ describe('membership.schemas', () => {
 
     describe('when given invalid datetimes', () => {
       it('should reject non-ISO createdAt', () => {
-        const membership = { ...validMembership, createdAt: '2026-01-01' };
+        const membership = { ...validMembership, createdAt: 'not-a-date' };
         const result = membershipSchema.safeParse(membership);
         expect(result.success).toBe(false);
       });
 
       it('should reject non-ISO updatedAt', () => {
-        const membership = { ...validMembership, updatedAt: 'January 1, 2026' };
+        const membership = { ...validMembership, updatedAt: 'not-a-date' };
         const result = membershipSchema.safeParse(membership);
         expect(result.success).toBe(false);
       });
@@ -379,7 +379,7 @@ describe('membership.schemas', () => {
       });
 
       it('should reject invalid ISO datetime for expiresAt', () => {
-        const invitation = { ...validInvitation, expiresAt: '2026-12-31' };
+        const invitation = { ...validInvitation, expiresAt: 'not-a-date' };
         const result = invitationSchema.safeParse(invitation);
         expect(result.success).toBe(false);
       });

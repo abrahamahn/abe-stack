@@ -1,4 +1,4 @@
-// backend/core/src/billing/webhooks/paypal-webhook.test.ts
+// src/server/core/src/billing/webhooks/paypal-webhook.test.ts
 /**
  * PayPal Webhook Handler Unit Tests
  *

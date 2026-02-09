@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/logout-all.ts
+// src/server/core/src/auth/handlers/logout-all.ts
 /**
  * Logout All Devices Handler
  *

@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/index.ts
+// src/apps/server/src/http/pagination/index.ts
 /**
  * Backend pagination utilities for consistent pagination handling
  *

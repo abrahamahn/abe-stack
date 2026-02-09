@@ -1,15 +1,15 @@
-// tools/scripts/path/types.ts
+// src/tools/scripts/path/types.ts
 /**
  * Exports type definition files (types.ts) to .tmp/PATH-types.md
  * @module tools/scripts/path/types
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '../../..');
+const REPO_ROOT = path.resolve(__dirname, '../../../..');
 
 /** Directories to exclude from scanning */
 const EXCLUDED_DIRS = new Set([
@@ -23,8 +23,6 @@ const EXCLUDED_DIRS = new Set([
   '.cache',
   '.tmp',
   '.pnpm-store',
-  'tools',
-  'infra',
   '.config',
   '.github',
 ]);
@@ -59,9 +57,10 @@ function walkDir(dir: string, files: string[] = []): string[] {
 }
 
 /**
- * Groups files by their package/app directory
- * @param files - Array of file paths
- * @returns Map of directory to files
+ * Groups files by their package directory under src/
+ * @param files - Array of file paths relative to REPO_ROOT
+ * @returns Map of group key to files
+ * @complexity O(n) where n is number of files
  */
 function groupByPackage(files: string[]): Map<string, string[]> {
   const groups = new Map<string, string[]>();
@@ -70,8 +69,13 @@ function groupByPackage(files: string[]): Map<string, string[]> {
     const parts = file.split('/');
     let groupKey: string;
 
-    if (['apps', 'infra', 'backend', 'client', 'premium'].includes(parts[0])) {
-      groupKey = `${parts[0]}/${parts[1]}`;
+    if (parts[0] === 'src' && parts.length >= 3) {
+      groupKey =
+        parts[1] === 'shared' || parts[1] === 'tools'
+          ? `src/${parts[1]}`
+          : `src/${parts[1]}/${parts[2]}`;
+    } else if (parts[0] === 'docs' || parts[0] === 'infra') {
+      groupKey = parts[0];
     } else {
       groupKey = 'Other';
     }
@@ -95,20 +99,24 @@ function exportTypeFiles(): void {
 
   const grouped = groupByPackage(typeFiles);
 
-  // Define section order
+  // Define section order (hexagonal: shared → server → client → apps)
   const sectionOrder = [
-    'apps/desktop',
-    'apps/server',
-    'apps/web',
-    'infra/contracts',
-    'kernel',
-    'infra/src',
-    'premium/media',
-    'premium/websocket',
-    'premium/client',
-    'client',
-    'client/react',
-    'client/ui',
+    'src/shared',
+    'src/server/core',
+    'src/server/db',
+    'src/server/engine',
+    'src/server/media',
+    'src/server/realtime',
+    'src/server/websocket',
+    'src/client/api',
+    'src/client/engine',
+    'src/client/react',
+    'src/client/ui',
+    'src/apps/desktop',
+    'src/apps/server',
+    'src/apps/web',
+    'src/apps/storybook',
+    'src/tools',
   ];
 
   let output = '# Type Definitions (types.ts)\n';

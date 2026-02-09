@@ -1,4 +1,4 @@
-// modules/realtime/src/handlers/index.ts
+// src/server/realtime/src/handlers/index.ts
 /**
  * Realtime Handlers
  *

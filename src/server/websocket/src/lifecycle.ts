@@ -1,4 +1,4 @@
-// premium/websocket/src/lifecycle.ts
+// src/server/websocket/src/lifecycle.ts
 /**
  * WebSocket Lifecycle Management
  *
@@ -219,7 +219,7 @@ async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: strin
   // Validate subscription key format and table whitelist
   const validation = isValidSubscriptionKey(key);
   if (!validation.valid || (validation.table ?? '') === '' || (validation.id ?? '') === '') {
-    ctx.log.warn({ key }, 'Invalid subscription key format or non-whitelisted table');
+    ctx.log.warn('Invalid subscription key format or non-whitelisted table', { key });
     return;
   }
 
@@ -232,7 +232,7 @@ async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: strin
       socket.send(JSON.stringify({ type: 'update', key, version }));
     }
   } catch (err) {
-    ctx.log.warn({ err, key }, 'Failed to fetch initial data for subscription');
+    ctx.log.warn('Failed to fetch initial data for subscription', { err, key });
   }
 }
 
@@ -390,10 +390,10 @@ function handleConnection(
 
     // Track connection
     const connCount = incrementConnections();
-    ctx.log.debug(
-      { userId: user.userId, activeConnections: connCount },
-      'WebSocket client connected',
-    );
+    ctx.log.debug('WebSocket client connected', {
+      userId: user.userId,
+      activeConnections: connCount,
+    });
 
     // 2. Setup handlers
     const pubsub = ctx.pubsub;
@@ -416,20 +416,20 @@ function handleConnection(
 
     socket.on('close', () => {
       const remaining = decrementConnections();
-      ctx.log.debug(
-        { userId: user.userId, activeConnections: remaining },
-        'WebSocket client disconnected',
-      );
+      ctx.log.debug('WebSocket client disconnected', {
+        userId: user.userId,
+        activeConnections: remaining,
+      });
       pubsub.cleanup(asPubSubWebSocket(socket));
     });
 
     socket.on('error', (err: Error) => {
       const remaining = decrementConnections();
-      ctx.log.error({ err, userId: user.userId, activeConnections: remaining }, 'WebSocket error');
+      ctx.log.error('WebSocket error', { err, userId: user.userId, activeConnections: remaining });
       pubsub.cleanup(asPubSubWebSocket(socket));
     });
   } catch (err) {
-    ctx.log.warn({ err }, 'WebSocket token verification failed');
+    ctx.log.warn('WebSocket token verification failed', { err });
     socket.close(1008, 'Invalid token');
   }
 }

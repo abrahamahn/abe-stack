@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/users.permissions.test.ts
+// src/shared/src/domain/users/users.permissions.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -21,10 +21,16 @@ describe('users.permissions', () => {
     return {
       id: '550e8400-e29b-41d4-a716-446655440000' as User['id'],
       email: 'test@example.com',
-      name: 'Test User',
+      username: 'testuser',
+      firstName: 'Test',
+      lastName: 'User',
       avatarUrl: null,
       role,
-      isVerified: true,
+      emailVerified: true,
+      phone: null,
+      phoneVerified: null,
+      dateOfBirth: null,
+      gender: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

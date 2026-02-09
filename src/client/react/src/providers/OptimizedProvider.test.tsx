@@ -1,4 +1,4 @@
-// client/ui/src/providers/OptimizedProvider.test.tsx
+// src/client/react/src/providers/OptimizedProvider.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, renderHook, screen } from '@testing-library/react';
 import { useState } from 'react';

@@ -1,4 +1,4 @@
-// backend/core/src/auth/routes.ts
+// src/server/core/src/auth/routes.ts
 /**
  * Auth Routes
  *
@@ -18,10 +18,13 @@ import {
   publicRoute,
   type HandlerContext,
   type RouteDefinition,
-} from '@abe-stack/db';
+  type RouteSchema,
+} from '@abe-stack/server-engine';
 import {
+  acceptTosRequestSchema,
   changeEmailRequestSchema,
   confirmEmailChangeRequestSchema,
+  revertEmailChangeRequestSchema,
   emailVerificationRequestSchema,
   forgotPasswordRequestSchema,
   loginRequestSchema,
@@ -29,9 +32,12 @@ import {
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
   setPasswordRequestSchema,
+  totpLoginVerifyRequestSchema,
   totpVerifyRequestSchema,
+  type AcceptTosRequest,
   type ChangeEmailRequest,
   type ConfirmEmailChangeRequest,
+  type RevertEmailChangeRequest,
   type EmailVerificationRequest,
   type ForgotPasswordRequest,
   type LoginRequest,
@@ -39,12 +45,15 @@ import {
   type ResendVerificationRequest,
   type ResetPasswordRequest,
   type SetPasswordRequest,
+  type TotpLoginVerifyRequest,
   type TotpVerifyRequest,
 } from '@abe-stack/shared';
 
 import {
+  handleAcceptTos,
   handleChangeEmail,
   handleConfirmEmailChange,
+  handleRevertEmailChange,
   handleForgotPassword,
   handleLogin,
   handleLogout,
@@ -54,8 +63,10 @@ import {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleTosStatus,
   handleTotpDisable,
   handleTotpEnable,
+  handleTotpLoginVerify,
   handleTotpSetup,
   handleTotpStatus,
   handleVerifyEmail,
@@ -96,10 +107,11 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/register',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown, _req: FastifyRequest, reply: FastifyReply) => {
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
         return handleRegister(
           asAppContext(ctx),
           body as RegisterRequest,
+          req as unknown as RequestWithCookies,
           reply as unknown as ReplyWithCookies,
         );
       },
@@ -180,8 +192,12 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/reset-password',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown) => {
-        return handleResetPassword(asAppContext(ctx), body as ResetPasswordRequest);
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleResetPassword(
+          asAppContext(ctx),
+          body as ResetPasswordRequest,
+          req as unknown as RequestWithCookies,
+        );
       },
       resetPasswordRequestSchema,
     ),
@@ -276,6 +292,46 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     }),
   ],
 
+  [
+    'auth/totp/verify-login',
+    publicRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, _req: FastifyRequest, reply: FastifyReply) => {
+        return handleTotpLoginVerify(
+          asAppContext(ctx),
+          body as TotpLoginVerifyRequest,
+          _req as unknown as RequestWithCookies,
+          reply as unknown as ReplyWithCookies,
+        );
+      },
+      totpLoginVerifyRequestSchema,
+    ),
+  ],
+
+  // Terms of Service routes
+  [
+    'auth/tos/status',
+    protectedRoute('GET', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      return handleTosStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+    }),
+  ],
+
+  [
+    'auth/tos/accept',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleAcceptTos(
+          asAppContext(ctx),
+          body as AcceptTosRequest,
+          req as unknown as RequestWithCookies,
+        );
+      },
+      'user',
+      acceptTosRequestSchema as RouteSchema,
+    ),
+  ],
+
   // Email change routes
   [
     'auth/change-email',
@@ -297,10 +353,25 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/change-email/confirm',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown) => {
-        return handleConfirmEmailChange(asAppContext(ctx), body as ConfirmEmailChangeRequest);
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleConfirmEmailChange(
+          asAppContext(ctx),
+          body as ConfirmEmailChangeRequest,
+          req as unknown as RequestWithCookies,
+        );
       },
       confirmEmailChangeRequestSchema,
+    ),
+  ],
+
+  [
+    'auth/change-email/revert',
+    publicRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown) => {
+        return handleRevertEmailChange(asAppContext(ctx), body as RevertEmailChangeRequest);
+      },
+      revertEmailChangeRequestSchema,
     ),
   ],
 ];

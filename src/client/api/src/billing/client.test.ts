@@ -1,4 +1,4 @@
-// client/src/billing/client.test.ts
+// src/client/api/src/billing/client.test.ts
 /**
  * Billing Client Tests
  *

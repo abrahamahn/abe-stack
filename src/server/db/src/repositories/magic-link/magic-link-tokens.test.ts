@@ -1,4 +1,4 @@
-// backend/db/src/repositories/magic-link/magic-link-tokens.test.ts
+// src/server/db/src/repositories/magic-link/magic-link-tokens.test.ts
 /**
  * Tests for Magic Link Tokens Repository
  *

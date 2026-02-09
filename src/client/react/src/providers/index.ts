@@ -1,4 +1,4 @@
-// client/ui/src/providers/index.ts
+// src/client/react/src/providers/index.ts
 export {
   createMemoizedContext,
   createSelectiveContext,

@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/index.ts
+// src/apps/web/src/features/ui-library/index.ts
 export {
   componentCatalog,
   getAllCategories,
@@ -7,12 +7,13 @@ export {
 } from './catalog';
 export {
   KEYBOARD_SHORTCUTS,
+  useUILibraryPageModel,
   useUILibraryKeyboard,
   useUILibraryPanes,
   useUILibraryTheme,
 } from './hooks';
 export type { ThemeMode } from './hooks';
-export { UILibraryPage, SidePeekUILibraryPage } from './pages';
+export { UILibraryPage } from './UILibraryPage';
 export type {
   ComponentCategory,
   ComponentDemo,

@@ -1,4 +1,4 @@
-// client/ui/src/components/Card.tsx
+// src/client/ui/src/components/Card.tsx
 import {
   forwardRef,
   type ComponentPropsWithoutRef,

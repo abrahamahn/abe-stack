@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/SubscriptionStatus.test.tsx
+// src/client/ui/src/components/billing/SubscriptionStatus.test.tsx
 /**
  * Tests for SubscriptionStatus component.
  *

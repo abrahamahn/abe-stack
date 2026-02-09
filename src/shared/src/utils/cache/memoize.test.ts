@@ -1,4 +1,4 @@
-// packages/shared/src/utils/cache/memoize.test.ts
+// src/shared/src/utils/cache/memoize.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { memoize } from './memoize';

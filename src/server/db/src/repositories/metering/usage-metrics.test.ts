@@ -1,4 +1,4 @@
-// backend/db/src/repositories/metering/usage-metrics.test.ts
+// src/server/db/src/repositories/metering/usage-metrics.test.ts
 /**
  * Tests for Usage Metrics Repository
  *

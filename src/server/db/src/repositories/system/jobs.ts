@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/jobs.ts
+// src/server/db/src/repositories/system/jobs.ts
 /**
  * Jobs Repository (Functional)
  *

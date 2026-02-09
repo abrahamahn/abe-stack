@@ -1,4 +1,4 @@
-// shared/src/domain/compliance/compliance.schemas.test.ts
+// src/shared/src/domain/compliance/compliance.schemas.test.ts
 
 /**
  * @file Compliance Schemas Unit Tests

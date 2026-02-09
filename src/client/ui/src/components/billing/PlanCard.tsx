@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PlanCard.tsx
+// src/client/ui/src/components/billing/PlanCard.tsx
 /**
  * PlanCard Component
  *

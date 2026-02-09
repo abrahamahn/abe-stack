@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/storage.ts
+// src/apps/server/src/config/infra/storage.ts
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 

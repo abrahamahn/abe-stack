@@ -1,4 +1,4 @@
-// backend/db/src/repositories/oauth/oauth-connections.test.ts
+// src/server/db/src/repositories/oauth/oauth-connections.test.ts
 /**
  * Tests for OAuth Connections Repository
  *

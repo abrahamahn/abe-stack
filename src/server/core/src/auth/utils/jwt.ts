@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/jwt.ts
+// src/server/core/src/auth/utils/jwt.ts
 /**
  * JWT Token Utilities
  *

@@ -1,4 +1,4 @@
-// backend/core/src/admin/service.ts
+// src/server/core/src/admin/service.ts
 /**
  * Admin Service
  *

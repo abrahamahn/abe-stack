@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/AuthPage.test.tsx
+// src/apps/web/src/features/auth/pages/AuthPage.test.tsx
 import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

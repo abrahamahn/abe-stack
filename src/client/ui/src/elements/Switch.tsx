@@ -1,4 +1,4 @@
-// client/ui/src/elements/Switch.tsx
+// src/client/ui/src/elements/Switch.tsx
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 

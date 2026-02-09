@@ -1,4 +1,4 @@
-// backend/engine/src/system/index.ts
+// src/server/engine/src/system/index.ts
 
 export {
   checkDbStatus,

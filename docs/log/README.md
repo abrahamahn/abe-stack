@@ -1,6 +1,6 @@
 # Development Log
 
-**Last Updated: January 31, 2026**
+**Last Updated: February 8, 2026**
 
 Weekly changelog files for the ABE Stack project. This replaces the previous monolithic `CHANGELOG.md`.
 
@@ -10,6 +10,7 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 | Week                 | Dates     | Highlights                                                                             |
 | -------------------- | --------- | -------------------------------------------------------------------------------------- |
+| [W06](./2026-W06.md) | Feb 2-8   | Monorepo restructure, shared/db audits, server-engine + media refactors                |
 | [W05](./2026-W05.md) | Jan 26-31 | Hexagonal package extraction (18 packages), BaseContext contract, server decomposition |
 | [W04](./2026-W04.md) | Jan 20-25 | Billing (Stripe/PayPal), admin center, 73% bundle reduction, IaC, 7,517 tests          |
 | [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue                  |
@@ -19,6 +20,13 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 ---
 
 ## Recent Changes (This Week)
+
+### 2026-02-08
+
+- **Sessions**: HTTP endpoints wired, session security updates, user-agent labeling stored in `user_sessions`
+- **Auth**: Session revocation on password change/reset; refresh token metadata updates; UA parser added
+- **DB**: Migration for session device fields; `@abe-stack/db` exports aligned for sessions
+- **Dev UX**: Env strategy split (`.env.development` for Docker, `.env.local` for local Postgres), `ENV_FILE` override added to db scripts, README updated
 
 ### 2026-01-31
 

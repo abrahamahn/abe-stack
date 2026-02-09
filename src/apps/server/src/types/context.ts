@@ -1,4 +1,4 @@
-// apps/server/src/types/context.ts
+// src/apps/server/src/types/context.ts
 
 import type { AuthEmailTemplates } from '@abe-stack/core/auth';
 import type { DbClient, Repositories } from '@abe-stack/db';

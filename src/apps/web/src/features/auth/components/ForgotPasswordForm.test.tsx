@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/ForgotPasswordForm.test.tsx
+// src/apps/web/src/features/auth/components/ForgotPasswordForm.test.tsx
 /**
  * Unit tests for ForgotPasswordForm component.
  *

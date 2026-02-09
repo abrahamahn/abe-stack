@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/index.ts
+// src/server/db/src/repositories/auth/index.ts
 /**
  * Auth Repositories Barrel
  *
@@ -31,3 +31,12 @@ export {
 
 // Security Events
 export { createSecurityEventRepository, type SecurityEventRepository } from './security-events';
+
+// TOTP Backup Codes
+export { createTotpBackupCodeRepository, type TotpBackupCodeRepository } from './totp-backup-codes';
+
+// Email Change Tokens
+export {
+  createEmailChangeTokenRepository,
+  type EmailChangeTokenRepository,
+} from './email-change-tokens';

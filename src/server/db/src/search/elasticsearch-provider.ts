@@ -1,4 +1,4 @@
-// backend/db/src/search/elasticsearch-provider.ts
+// src/server/db/src/search/elasticsearch-provider.ts
 /**
  * Elasticsearch Search Provider (Stub)
  *

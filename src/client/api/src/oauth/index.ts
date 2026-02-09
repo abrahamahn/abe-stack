@@ -1,4 +1,4 @@
-// client/src/oauth/index.ts
+// src/client/api/src/oauth/index.ts
 /**
  * OAuth Module
  *

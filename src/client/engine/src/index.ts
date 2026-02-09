@@ -1,4 +1,4 @@
-// client/src/index.ts
+// src/client/engine/src/index.ts
 // NOTE: This file is manually maintained after refactor
 
 // API Client

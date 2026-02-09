@@ -1,4 +1,4 @@
-// backend/core/src/users/service.ts
+// src/server/core/src/users/service.ts
 /**
  * User Service
  *
@@ -10,7 +10,7 @@
 
 import type { UserRepository } from '@abe-stack/db';
 import type { CursorPaginationOptions } from '@abe-stack/shared';
-import type { UserRole } from '@abe-stack/shared/contracts';
+import type { AppRole as UserRole } from '@abe-stack/shared/domain';
 
 // ============================================================================
 // Types
@@ -25,14 +25,26 @@ export interface User {
   id: string;
   /** User's email address */
   email: string;
-  /** User's display name */
-  name: string | null;
+  /** User's unique username */
+  username: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
   /** URL to user's avatar image */
   avatarUrl: string | null;
-  /** User's role (user, admin) */
+  /** User's role (user, admin, moderator) */
   role: UserRole;
   /** Whether user's email is verified */
   emailVerified: boolean;
+  /** User's phone number */
+  phone: string | null;
+  /** Whether phone is verified */
+  phoneVerified: boolean | null;
+  /** Date of birth (ISO date string) */
+  dateOfBirth: string | null;
+  /** Gender (free text) */
+  gender: string | null;
   /** Date when the user was created */
   createdAt: Date;
   /** Date when the user was last updated */
@@ -74,10 +86,16 @@ export async function getUserById(userRepo: UserRepository, userId: string): Pro
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     avatarUrl: user.avatarUrl ?? null,
     role: user.role,
     emailVerified: user.emailVerified,
+    phone: user.phone ?? null,
+    phoneVerified: user.phoneVerified,
+    dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+    gender: user.gender ?? null,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -116,10 +134,16 @@ export async function listUsers(
     users: result.items.map((user) => ({
       id: user.id,
       email: user.email,
-      name: user.name,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       emailVerified: user.emailVerified,
+      phone: user.phone ?? null,
+      phoneVerified: user.phoneVerified,
+      dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+      gender: user.gender ?? null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })),

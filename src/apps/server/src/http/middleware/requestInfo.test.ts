@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/requestInfo.test.ts
+// src/apps/server/src/http/middleware/requestInfo.test.ts
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

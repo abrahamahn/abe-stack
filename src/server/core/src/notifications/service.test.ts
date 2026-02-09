@@ -1,4 +1,4 @@
-// backend/core/src/notifications/service.test.ts
+// src/server/core/src/notifications/service.test.ts
 /**
  * Notification Service Tests
  *

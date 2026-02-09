@@ -1,4 +1,4 @@
-// client/src/query/QueryCache.test.ts
+// src/client/engine/src/query/QueryCache.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import {

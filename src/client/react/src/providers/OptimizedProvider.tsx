@@ -1,4 +1,4 @@
-// client/ui/src/providers/OptimizedProvider.tsx
+// src/client/react/src/providers/OptimizedProvider.tsx
 /**
  * Optimized React Providers
  *

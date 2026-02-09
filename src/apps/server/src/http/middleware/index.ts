@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/index.ts
+// src/apps/server/src/http/middleware/index.ts
 /**
  * HTTP Middleware
  *

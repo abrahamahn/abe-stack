@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/ResetPasswordForm.tsx
+// src/apps/web/src/features/auth/components/ResetPasswordForm.tsx
 import { Button, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
 

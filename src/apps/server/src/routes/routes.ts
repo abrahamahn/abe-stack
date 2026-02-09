@@ -1,4 +1,4 @@
-// apps/server/src/routes/routes.ts
+// src/apps/server/src/routes/routes.ts
 /**
  * Route Registration
  *
@@ -13,14 +13,18 @@ import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/core/billing';
 import { notificationRoutes } from '@abe-stack/core/notifications';
 import { userRoutes } from '@abe-stack/core/users';
-import { registerRouteMap } from '@abe-stack/db';
 import { realtimeRoutes } from '@abe-stack/realtime';
+import { registerRouteMap } from '@abe-stack/server-engine';
 
-// import { systemRoutes } from '../modules/system';
+import { systemRoutes } from './system.routes';
 
-import type { AuthGuardFactory, HandlerContext } from '@/http';
 import type { BillingBaseRouteDefinition } from '@abe-stack/core/billing';
-import type { RouteMap as DbRouteMap, RouteDefinition as DbRouteDefinition } from '@abe-stack/db';
+import type {
+  AuthGuardFactory,
+  HandlerContext,
+  RouteMap as DbRouteMap,
+  RouteDefinition as DbRouteDefinition,
+} from '@abe-stack/server-engine';
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -56,7 +60,8 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, handlerCtx, notificationRoutes as unknown as DbRouteMap, routerOptions);
   registerRouteMap(app, handlerCtx, adminRoutes as unknown as DbRouteMap, routerOptions);
   registerRouteMap(app, handlerCtx, realtimeRoutes as unknown as DbRouteMap, routerOptions);
-  // registerRouteMap(app, handlerCtx, systemRoutes, { ...routerOptions, prefix: '' });
+  // System routes — no /api prefix (health checks, readiness, etc.)
+  registerRouteMap(app, handlerCtx, systemRoutes, { ...routerOptions, prefix: '' });
 
   // Billing routes — conditional on provider configuration
   if (ctx.config.billing.enabled) {

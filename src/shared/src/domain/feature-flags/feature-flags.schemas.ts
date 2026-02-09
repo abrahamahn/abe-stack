@@ -1,4 +1,4 @@
-// packages/shared/src/domain/feature-flags/feature-flags.schemas.ts
+// src/shared/src/domain/feature-flags/feature-flags.schemas.ts
 
 /**
  * @file Feature Flags Contracts
@@ -13,10 +13,10 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
 import { tenantIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 
 // ============================================================================
 // Types

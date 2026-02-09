@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/index.ts
+// src/apps/web/src/features/settings/index.ts
 /**
  * Settings Feature
  *

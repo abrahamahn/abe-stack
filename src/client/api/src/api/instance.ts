@@ -1,4 +1,4 @@
-// client/api/src/api/instance.ts
+// src/client/api/src/api/instance.ts
 import { createApiClient } from './client';
 
 import type { ApiClient, ApiClientConfig } from './client';

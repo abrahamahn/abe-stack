@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/services/AuthService.ts
+// src/apps/web/src/features/auth/services/AuthService.ts
 /**
  * AuthService - Manages authentication state and operations.
  *
@@ -8,10 +8,10 @@
 
 import { getApiClient } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
+import { createAuthRoute, type AuthRouteClient } from '@api/auth/route';
 
 import type { ClientConfig } from '@/config';
 import type {
-  ApiClient,
   AuthResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
@@ -24,6 +24,7 @@ import type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  TotpLoginChallengeResponse,
   User,
 } from '@abe-stack/api';
 
@@ -42,6 +43,36 @@ export type AuthState = {
   isLoading: boolean;
   isAuthenticated: boolean;
 };
+
+/**
+ * Error thrown when login requires TOTP verification.
+ * Contains the challenge token that must be sent back with the TOTP code.
+ *
+ * @complexity O(1)
+ */
+export class TotpChallengeError extends Error {
+  /** Challenge JWT token to send back with the TOTP code */
+  readonly challengeToken: string;
+
+  constructor(challengeToken: string) {
+    super('Two-factor authentication required');
+    this.name = 'TotpChallengeError';
+    this.challengeToken = challengeToken;
+  }
+}
+
+/**
+ * Type guard for TOTP challenge response.
+ *
+ * @param response - Login response to check
+ * @returns True if the response is a TOTP challenge
+ * @complexity O(1)
+ */
+function isTotpChallengeResponse(
+  response: AuthResponse | TotpLoginChallengeResponse,
+): response is TotpLoginChallengeResponse {
+  return 'requiresTotp' in response && response.requiresTotp;
+}
 
 // ============================================================================
 // AuthService Class
@@ -81,7 +112,7 @@ const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> =>
   });
 
 export class AuthService {
-  private readonly api: ApiClient;
+  private readonly api: AuthRouteClient;
   private readonly config: ClientConfig;
   private readonly tokenStore: TokenStore;
   private refreshIntervalId: ReturnType<typeof setTimeout> | null = null;
@@ -95,17 +126,19 @@ export class AuthService {
   private user: User | null = null;
   /** Whether user data is currently being loaded */
   private isLoadingUser = false;
+  /** Whether auth is currently initializing (restoring session on app load) */
+  private isInitializing = false;
 
   constructor(args: { config: ClientConfig }) {
     this.config = args.config;
 
     this.tokenStore = tokenStore as TokenStore;
 
-    // Use singleton API client
-    this.api = getApiClient({
+    const apiClient = getApiClient({
       baseUrl: this.config.apiUrl,
       getToken: (): string | null => this.tokenStore.get(),
     });
+    this.api = createAuthRoute(apiClient);
 
     // Start refresh interval if we have a token
     const currentToken: string | null = this.tokenStore.get();
@@ -128,27 +161,39 @@ export class AuthService {
       return this.getState().user;
     }
     this.initialized = true;
+    this.isInitializing = true;
+    this.notifyListeners(); // Notify that we're initializing
 
-    // If we already have a token in memory, fetch the user
-    const existingToken: string | null = this.tokenStore.get();
-    if (existingToken !== null) {
+    try {
+      // If we already have a token in memory, fetch the user
+      const existingToken: string | null = this.tokenStore.get();
+      if (existingToken !== null) {
+        try {
+          const user = await this.fetchCurrentUser();
+          return user;
+        } catch {
+          return null;
+        } finally {
+          this.isInitializing = false;
+          this.notifyListeners();
+        }
+      }
+
+      // No token in memory - try to restore session from refresh token cookie
       try {
-        return await this.fetchCurrentUser();
+        const refreshed = await this.refreshToken();
+        if (refreshed) {
+          const user = await this.fetchCurrentUser();
+          return user;
+        }
+        // No refresh token available - user is not logged in (this is normal)
+        return null;
       } catch {
         return null;
       }
-    }
-
-    // No token in memory - try to restore session from refresh token cookie
-    try {
-      const refreshed = await this.refreshToken();
-      if (refreshed) {
-        return await this.fetchCurrentUser();
-      }
-      // No refresh token available - user is not logged in (this is normal)
-      return null;
-    } catch {
-      return null;
+    } finally {
+      this.isInitializing = false;
+      this.notifyListeners();
     }
   }
 
@@ -162,7 +207,7 @@ export class AuthService {
 
     return {
       user: this.user,
-      isLoading: hasToken && this.isLoadingUser,
+      isLoading: this.isInitializing || (hasToken && this.isLoadingUser),
       isAuthenticated: Boolean(this.user),
     };
   }
@@ -185,9 +230,31 @@ export class AuthService {
   // Auth Operations
   // ==========================================================================
 
-  /** Login with email/password */
+  /**
+   * Login with email/password.
+   * Throws TotpChallengeError if user has 2FA enabled.
+   *
+   * @throws {TotpChallengeError} When 2FA verification is required
+   */
   async login(credentials: LoginRequest): Promise<void> {
     const response = await this.api.login(credentials);
+
+    if (isTotpChallengeResponse(response)) {
+      throw new TotpChallengeError(response.challengeToken);
+    }
+
+    this.handleAuthSuccess(response);
+  }
+
+  /**
+   * Verify TOTP code during login challenge.
+   * Called after login throws TotpChallengeError.
+   *
+   * @param challengeToken - JWT challenge token from TotpChallengeError
+   * @param code - 6-digit TOTP code from authenticator app
+   */
+  async verifyTotpLogin(challengeToken: string, code: string): Promise<void> {
+    const response = await this.api.totpVerifyLogin({ challengeToken, code });
     this.handleAuthSuccess(response);
   }
 

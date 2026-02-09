@@ -1,4 +1,4 @@
-// client/ui/src/components/Select.test.tsx
+// src/client/ui/src/components/Select.test.tsx
 /** @vitest-environment jsdom */
 import { Select } from '@components/Select';
 import { render, screen, waitFor } from '@testing-library/react';

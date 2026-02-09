@@ -1,12 +1,12 @@
-// packages/shared/src/domain/users/users.contracts.ts
-
+// src/shared/src/domain/users/users.contracts.ts
 /**
- * @file User Contracts
- * @description API Contract definitions for User management (Profile, Sessions, Avatar).
+ * User Contracts
+ *
+ * API Contract definitions for User management (Profile, Sessions, Avatar).
  * @module Domain/Users
  */
 
-import { envelopeErrorResponseSchema, successResponseSchema } from '../../contracts/common';
+import { errorResponseSchema, successResponseSchema } from '../../core/schemas';
 
 import {
   avatarDeleteResponseSchema,
@@ -20,7 +20,7 @@ import {
   userSchema,
 } from './users.schemas';
 
-import type { Contract } from '../../contracts/types';
+import type { Contract } from '../../core/api';
 
 // ============================================================================
 // Contract Definition
@@ -35,7 +35,7 @@ export const usersContract = {
     path: '/api/users/me',
     responses: {
       200: successResponseSchema(userSchema),
-      401: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Get current user profile',
   },
@@ -46,8 +46,8 @@ export const usersContract = {
     body: updateProfileRequestSchema,
     responses: {
       200: successResponseSchema(userSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Update current user profile',
   },
@@ -58,8 +58,8 @@ export const usersContract = {
     body: changePasswordRequestSchema,
     responses: {
       200: successResponseSchema(changePasswordResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Change user password',
   },
@@ -72,8 +72,8 @@ export const usersContract = {
     path: '/api/users/me/avatar',
     responses: {
       200: successResponseSchema(avatarUploadResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Upload user avatar',
   },
@@ -83,7 +83,7 @@ export const usersContract = {
     path: '/api/users/me/avatar',
     responses: {
       200: successResponseSchema(avatarDeleteResponseSchema),
-      401: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Delete user avatar',
   },
@@ -96,7 +96,7 @@ export const usersContract = {
     path: '/api/users/me/sessions',
     responses: {
       200: successResponseSchema(sessionsListResponseSchema),
-      401: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'List user sessions',
   },
@@ -106,8 +106,8 @@ export const usersContract = {
     path: '/api/users/me/sessions/:id',
     responses: {
       200: successResponseSchema(revokeSessionResponseSchema),
-      401: envelopeErrorResponseSchema,
-      404: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
     },
     summary: 'Revoke a specific session',
   },
@@ -117,7 +117,7 @@ export const usersContract = {
     path: '/api/users/me/sessions/revoke-all',
     responses: {
       200: successResponseSchema(revokeAllSessionsResponseSchema),
-      401: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Revoke all sessions except current',
   },

@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/index.ts
+// src/client/ui/src/components/billing/index.ts
 /**
  * Billing Components
  *

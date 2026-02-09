@@ -1,4 +1,4 @@
-// backend/db/src/schema/oauth.ts
+// src/server/db/src/schema/oauth.ts
 /**
  * OAuth Schema Types
  *

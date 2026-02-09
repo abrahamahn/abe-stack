@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.errors.test.ts
+// src/shared/src/domain/auth/auth.errors.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

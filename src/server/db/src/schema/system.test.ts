@@ -1,4 +1,4 @@
-// backend/db/src/schema/system.test.ts
+// src/server/db/src/schema/system.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

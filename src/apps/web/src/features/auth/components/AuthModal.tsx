@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/AuthModal.tsx
+// src/apps/web/src/features/auth/components/AuthModal.tsx
 import { Modal, useFormState } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';

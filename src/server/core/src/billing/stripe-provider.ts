@@ -1,4 +1,4 @@
-// backend/core/src/billing/stripe-provider.ts
+// src/server/core/src/billing/stripe-provider.ts
 /**
  * Stripe Payment Provider
  *

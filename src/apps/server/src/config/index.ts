@@ -1,4 +1,4 @@
-// apps/server/src/config/index.ts
+// src/apps/server/src/config/index.ts
 
 /**
  * 1. THE BRAIN

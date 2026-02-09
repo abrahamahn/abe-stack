@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/csrf.test.ts
+// src/apps/server/src/http/middleware/csrf.test.ts
 import { validateCsrfToken } from '@abe-stack/server-engine';
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

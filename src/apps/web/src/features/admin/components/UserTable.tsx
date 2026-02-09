@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserTable.tsx
+// src/apps/web/src/features/admin/components/UserTable.tsx
 /**
  * UserTable Component
  *
@@ -22,25 +22,11 @@ import {
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
+import type { AdminUser, AdminUserListResponse } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
-
-interface AdminUserLocal {
-  id: string;
-  email: string;
-  name: string | null;
-  role: UserRoleLocal;
-  emailVerified: boolean;
-  lockedUntil: string | null;
-  createdAt: string;
-}
-
-interface AdminUserListResponseLocal {
-  data: AdminUserLocal[];
-  total: number;
-  totalPages: number;
-}
+type AdminUserLocal = AdminUser;
+type AdminUserListResponseLocal = AdminUserListResponse;
 
 export interface UserTableProps {
   data: AdminUserListResponseLocal | undefined;
@@ -112,7 +98,11 @@ export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProp
                 <Text size="sm">{user.email}</Text>
               </TableCell>
               <TableCell>
-                <Text size="sm">{user.name ?? '-'}</Text>
+                <Text size="sm">
+                  {`${user.firstName} ${user.lastName}`.trim() !== ''
+                    ? `${user.firstName} ${user.lastName}`.trim()
+                    : user.username}
+                </Text>
               </TableCell>
               <TableCell>
                 <RoleBadge role={user.role} />

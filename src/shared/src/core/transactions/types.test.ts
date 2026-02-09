@@ -1,4 +1,4 @@
-// packages/shared/src/core/transactions/types.test.ts
+// src/shared/src/core/transactions/types.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { isListInsertOperation, isListRemoveOperation, isSetOperation } from './types';

@@ -1,4 +1,4 @@
-// premium/media/src/queue/queue.ts
+// src/server/media/src/queue/queue.ts
 /**
  * Custom In-Memory Job Queue
  *
@@ -44,6 +44,8 @@ export interface QueueOptions {
   jobRetentionMs?: number;
   /** Maximum number of jobs to keep in the jobs Map (default: 10000) */
   maxJobsSize?: number;
+  /** Maximum number of jobs allowed in the waiting queue (default: 1000). New jobs are rejected when full. */
+  maxWaitingQueueSize?: number;
   /** Logger instance for structured logging */
   logger: Logger;
 }
@@ -57,6 +59,7 @@ interface RequiredQueueOptions {
   maxRetries: number;
   jobRetentionMs: number;
   maxJobsSize: number;
+  maxWaitingQueueSize: number;
   logger: Logger;
 }
 
@@ -102,6 +105,7 @@ export class CustomJobQueue<T = unknown> {
       maxRetries: 3,
       jobRetentionMs: 60 * 60 * 1000, // 1 hour
       maxJobsSize: 10000,
+      maxWaitingQueueSize: 1000,
       ...options,
     };
   }
@@ -115,11 +119,35 @@ export class CustomJobQueue<T = unknown> {
    * @returns The job ID
    * @complexity O(n log n) due to priority sort
    */
+  /**
+   * Add a job to the queue. Jobs are sorted by priority (higher first).
+   *
+   * @param jobId - Unique identifier for the job
+   * @param data - Job payload data
+   * @param options - Optional priority and delay configuration
+   * @returns The job ID
+   * @throws Error if the waiting queue is at capacity
+   * @complexity O(n log n) due to priority sort
+   */
   add(
     jobId: string,
     data: T,
     options: { priority?: number; delay?: number } = {},
   ): Promise<string> {
+    // Guard against unbounded queue growth
+    if (this.waitingQueue.length >= this.options.maxWaitingQueueSize) {
+      this.options.logger.warn('Job rejected: waiting queue at capacity', {
+        jobId,
+        queueSize: this.waitingQueue.length,
+        maxSize: this.options.maxWaitingQueueSize,
+      });
+      return Promise.reject(
+        new Error(
+          `Queue is full (${String(this.waitingQueue.length)}/${String(this.options.maxWaitingQueueSize)})`,
+        ),
+      );
+    }
+
     const job: JobData<T> = {
       id: jobId,
       data,

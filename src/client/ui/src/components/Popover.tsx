@@ -1,4 +1,4 @@
-// client/ui/src/components/Popover.tsx
+// src/client/ui/src/components/Popover.tsx
 import { useDisclosure } from '@hooks/useDisclosure';
 import { useEffect, useId, useRef, type ReactElement, type ReactNode } from 'react';
 

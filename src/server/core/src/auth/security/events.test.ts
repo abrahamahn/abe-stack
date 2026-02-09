@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/events.test.ts
+// src/server/core/src/auth/security/events.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================
@@ -20,6 +20,29 @@ const emailTemplates = {
       html: `<p>Security alert from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}</p><p>Change your password and enable two-factor authentication</p>`,
       text: `Security alert from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}. Change your password and enable two-factor authentication for better security.`,
     })),
+  newLoginAlert: vi
+    .fn()
+    .mockImplementation((ipAddress: string, userAgent: string, timestamp: Date) => ({
+      subject: 'New Sign-In to Your Account',
+      html: `<p>New sign-in from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}</p>`,
+      text: `New sign-in from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}.`,
+    })),
+  passwordChangedAlert: vi
+    .fn()
+    .mockImplementation((ipAddress: string, userAgent: string, timestamp: Date) => ({
+      subject: 'Your Password Was Changed',
+      html: `<p>Password changed from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}</p>`,
+      text: `Password changed from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}.`,
+    })),
+  emailChangedAlert: vi
+    .fn()
+    .mockImplementation(
+      (newEmail: string, ipAddress: string, userAgent: string, timestamp: Date) => ({
+        subject: 'Your Email Address Was Changed',
+        html: `<p>Email changed to ${newEmail} from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}</p>`,
+        text: `Email changed to ${newEmail} from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}.`,
+      }),
+    ),
 };
 
 import {
@@ -30,6 +53,9 @@ import {
   logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
+  sendEmailChangedAlert,
+  sendNewLoginAlert,
+  sendPasswordChangedAlert,
   sendTokenReuseAlert,
 } from './events';
 
@@ -449,6 +475,163 @@ describe('Security Events', () => {
 
       const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
       expect(callArg?.html).toContain('2026-01-21T10:00:00.000Z');
+    });
+  });
+
+  // ==========================================================================
+  // sendNewLoginAlert
+  // ==========================================================================
+
+  describe('sendNewLoginAlert', () => {
+    let alertEmailService: EmailService;
+
+    beforeEach(() => {
+      alertEmailService = {
+        send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-id' }),
+        healthCheck: vi.fn().mockResolvedValue({ healthy: true }),
+      } as EmailService;
+    });
+
+    test('should send new login alert email', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.100',
+        userAgent: 'Mozilla/5.0' as string | undefined,
+        timestamp: new Date('2026-01-21T15:30:00Z'),
+      };
+
+      await sendNewLoginAlert(alertEmailService, emailTemplates, params);
+
+      expect(alertEmailService.send).toHaveBeenCalledTimes(1);
+      expect(alertEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@example.com',
+          subject: 'New Sign-In to Your Account',
+        }),
+      );
+    });
+
+    test('should default userAgent to "Unknown" when undefined', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '10.0.0.1',
+        userAgent: undefined,
+        timestamp: new Date(),
+      };
+
+      await sendNewLoginAlert(alertEmailService, emailTemplates, params);
+
+      expect(emailTemplates.newLoginAlert).toHaveBeenCalledWith(
+        '10.0.0.1',
+        'Unknown',
+        params.timestamp,
+      );
+    });
+  });
+
+  // ==========================================================================
+  // sendPasswordChangedAlert
+  // ==========================================================================
+
+  describe('sendPasswordChangedAlert', () => {
+    let alertEmailService: EmailService;
+
+    beforeEach(() => {
+      alertEmailService = {
+        send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-id' }),
+        healthCheck: vi.fn().mockResolvedValue({ healthy: true }),
+      } as EmailService;
+    });
+
+    test('should send password changed alert email', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.50',
+        userAgent: 'Chrome/120' as string | undefined,
+        timestamp: new Date('2026-02-01T12:00:00Z'),
+      };
+
+      await sendPasswordChangedAlert(alertEmailService, emailTemplates, params);
+
+      expect(alertEmailService.send).toHaveBeenCalledTimes(1);
+      expect(alertEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@example.com',
+          subject: 'Your Password Was Changed',
+        }),
+      );
+    });
+
+    test('should default userAgent to "Unknown" when undefined', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '10.0.0.1',
+        userAgent: undefined,
+        timestamp: new Date(),
+      };
+
+      await sendPasswordChangedAlert(alertEmailService, emailTemplates, params);
+
+      expect(emailTemplates.passwordChangedAlert).toHaveBeenCalledWith(
+        '10.0.0.1',
+        'Unknown',
+        params.timestamp,
+      );
+    });
+  });
+
+  // ==========================================================================
+  // sendEmailChangedAlert
+  // ==========================================================================
+
+  describe('sendEmailChangedAlert', () => {
+    let alertEmailService: EmailService;
+
+    beforeEach(() => {
+      alertEmailService = {
+        send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-id' }),
+        healthCheck: vi.fn().mockResolvedValue({ healthy: true }),
+      } as EmailService;
+    });
+
+    test('should send email changed alert to old email', async () => {
+      const params = {
+        email: 'old@example.com',
+        newEmail: 'new@example.com',
+        ipAddress: '192.168.1.75',
+        userAgent: 'Firefox/115' as string | undefined,
+        timestamp: new Date('2026-02-01T14:00:00Z'),
+      };
+
+      await sendEmailChangedAlert(alertEmailService, emailTemplates, params);
+
+      expect(alertEmailService.send).toHaveBeenCalledTimes(1);
+      expect(alertEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'old@example.com',
+          subject: 'Your Email Address Was Changed',
+        }),
+      );
+    });
+
+    test('should pass new email to template', async () => {
+      const params = {
+        email: 'old@example.com',
+        newEmail: 'new@example.com',
+        ipAddress: '10.0.0.2',
+        userAgent: undefined,
+        timestamp: new Date(),
+      };
+
+      await sendEmailChangedAlert(alertEmailService, emailTemplates, params);
+
+      expect(emailTemplates.emailChangedAlert).toHaveBeenCalledWith(
+        'new@example.com',
+        '10.0.0.2',
+        'Unknown',
+        params.timestamp,
+        undefined,
+      );
     });
   });
 });

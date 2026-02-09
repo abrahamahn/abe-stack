@@ -1,4 +1,4 @@
-// backend/db/src/schema/system.ts
+// src/server/db/src/schema/system.ts
 /**
  * System Infrastructure Schema Types
  *

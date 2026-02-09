@@ -1,4 +1,4 @@
-// apps/web/src/features/home/types.ts
+// src/apps/web/src/features/home/types.ts
 import type { UILibraryPaneConfig } from '@ui-library/types';
 
 /**

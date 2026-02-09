@@ -1,4 +1,4 @@
-// backend/core/src/users/handlers/avatar.ts
+// src/server/core/src/users/handlers/avatar.ts
 /**
  * Profile Service
  *
@@ -17,10 +17,10 @@ import {
   WeakPasswordError,
 } from '@abe-stack/shared';
 
-import { hashPassword, verifyPassword } from '../../auth';
+import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 
 import type { UsersAuthConfig } from '../types';
-import type { Repositories } from '@abe-stack/db';
+import type { DbClient, Repositories } from '@abe-stack/db';
 import type { UserRole } from '@abe-stack/shared';
 
 /**
@@ -58,11 +58,15 @@ export interface ProfileUser {
   id: string;
   /** User's email address */
   email: string;
-  /** User's display name */
-  name: string | null;
+  /** User's unique username */
+  username: string;
+  /** User's first name */
+  firstName: string;
+  /** User's last name */
+  lastName: string;
   /** URL or storage key to user's avatar image */
   avatarUrl: string | null;
-  /** User's role (user, admin) */
+  /** User's role (user, admin, moderator) */
   role: UserRole;
   /** Date when the user was created */
   createdAt: Date;
@@ -71,10 +75,22 @@ export interface ProfileUser {
 /**
  * Data for updating a user's profile.
  * Only includes fields that users can self-update.
+ * All fields are optional — omitted fields remain unchanged.
+ * Nullable fields can be set to null to clear them.
  */
 export interface UpdateProfileData {
-  /** New display name (or null to clear, or omit to leave unchanged) */
-  name?: string | null;
+  /** New username */
+  username?: string;
+  /** New first name */
+  firstName?: string;
+  /** New last name */
+  lastName?: string;
+  /** Phone number (nullable) */
+  phone?: string | null;
+  /** Date of birth as ISO date string (nullable) */
+  dateOfBirth?: string | null;
+  /** Gender (nullable) */
+  gender?: string | null;
 }
 
 // ============================================================================
@@ -103,9 +119,27 @@ export async function updateProfile(
     throw new NotFoundError('User not found');
   }
 
+  // Build update payload from provided fields
+  const updatePayload: Record<string, unknown> = {};
+  if ('username' in data) {
+    // Check username uniqueness if changing
+    if (data.username !== user.username) {
+      const existing = await repos.users.findByUsername(data.username);
+      if (existing !== null && existing.id !== userId) {
+        throw new BadRequestError('Username is already taken', 'USERNAME_TAKEN');
+      }
+    }
+    updatePayload['username'] = data.username;
+  }
+  if ('firstName' in data) updatePayload['firstName'] = data.firstName;
+  if ('lastName' in data) updatePayload['lastName'] = data.lastName;
+  if ('phone' in data) updatePayload['phone'] = data.phone;
+  if ('dateOfBirth' in data) updatePayload['dateOfBirth'] = data.dateOfBirth;
+  if ('gender' in data) updatePayload['gender'] = data.gender;
+
   // Only update if there are changes
-  if ('name' in data) {
-    const updated = await repos.users.update(userId, { name: data.name });
+  if (Object.keys(updatePayload).length > 0) {
+    const updated = await repos.users.update(userId, updatePayload);
     if (updated === null) {
       throw new Error('Failed to update user profile');
     }
@@ -113,7 +147,9 @@ export async function updateProfile(
     return {
       id: updated.id,
       email: updated.email,
-      name: updated.name,
+      username: updated.username,
+      firstName: updated.firstName,
+      lastName: updated.lastName,
       avatarUrl: updated.avatarUrl,
       role: updated.role,
       createdAt: updated.createdAt,
@@ -123,7 +159,9 @@ export async function updateProfile(
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     avatarUrl: user.avatarUrl,
     role: user.role,
     createdAt: user.createdAt,
@@ -149,6 +187,7 @@ export async function updateProfile(
  * @complexity O(1) - single database lookup, password hash, and update
  */
 export async function changePassword(
+  db: DbClient,
   repos: Repositories,
   authConfig: UsersAuthConfig,
   userId: string,
@@ -174,8 +213,13 @@ export async function changePassword(
     throw new BadRequestError('Current password is incorrect', 'INVALID_PASSWORD');
   }
 
-  // Validate new password strength
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
+  // Validate new password strength against user's personal info
+  const passwordValidation = await validatePassword(newPassword, [
+    user.email,
+    user.username,
+    user.firstName,
+    user.lastName,
+  ]);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -183,6 +227,7 @@ export async function changePassword(
   // Hash and update
   const newHash = await hashPassword(newPassword, authConfig.argon2);
   await repos.users.update(userId, { passwordHash: newHash });
+  await revokeAllUserTokens(db, userId);
 }
 
 // ============================================================================

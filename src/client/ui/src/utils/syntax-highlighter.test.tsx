@@ -1,4 +1,4 @@
-// client/ui/src/utils/syntax-highlighter.test.tsx
+// src/client/ui/src/utils/syntax-highlighter.test.tsx
 import { render } from '@testing-library/react';
 import { isValidElement } from 'react';
 import { describe, expect, it } from 'vitest';

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/errors.ts
+// src/shared/src/utils/search/errors.ts
 /**
  * Search-Specific Errors
  *

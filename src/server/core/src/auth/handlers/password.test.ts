@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/password.test.ts
+// src/server/core/src/auth/handlers/password.test.ts
 /**
  * Password Handler Tests
  *
@@ -451,7 +451,7 @@ describe('handleResetPassword', () => {
 
       mockResetPassword.mockResolvedValue(undefined);
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(200);
       expect(result.body.message).toBe('Password reset successfully');
@@ -466,7 +466,7 @@ describe('handleResetPassword', () => {
 
       mockResetPassword.mockResolvedValue(undefined);
 
-      await handleResetPassword(ctx, body);
+      await handleResetPassword(ctx, body, createMockRequest());
 
       expect(mockResetPassword).toHaveBeenCalledWith(
         ctx.db,
@@ -489,10 +489,14 @@ describe('handleResetPassword', () => {
       for (const password of complexPasswords) {
         mockResetPassword.mockResolvedValue(undefined);
 
-        const result = await handleResetPassword(ctx, {
-          token: 'token-123',
-          password,
-        });
+        const result = await handleResetPassword(
+          ctx,
+          {
+            token: 'token-123',
+            password,
+          },
+          createMockRequest(),
+        );
 
         expect(result.status).toBe(200);
         expect(mockResetPassword).toHaveBeenCalledWith(
@@ -516,7 +520,7 @@ describe('handleResetPassword', () => {
 
       mockResetPassword.mockResolvedValue(undefined);
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(200);
       expect(mockResetPassword).toHaveBeenCalledWith(
@@ -540,7 +544,7 @@ describe('handleResetPassword', () => {
       const error = new InvalidTokenError('Invalid or expired reset token');
       mockResetPassword.mockRejectedValue(error);
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(400);
       expect(result.body.message).toContain('Invalid or expired');
@@ -556,7 +560,7 @@ describe('handleResetPassword', () => {
       const error = new InvalidTokenError('Invalid or expired reset token');
       mockResetPassword.mockRejectedValue(error);
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(400);
     });
@@ -572,7 +576,7 @@ describe('handleResetPassword', () => {
         new WeakPasswordError({ errors: ['Password is too weak'] }),
       );
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(400);
       expect(result.body.message).toContain('weak');
@@ -587,7 +591,7 @@ describe('handleResetPassword', () => {
 
       mockResetPassword.mockRejectedValue(new Error('Database connection failed'));
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(500);
       expect(result.body.message).toBe('Internal server error');
@@ -603,7 +607,7 @@ describe('handleResetPassword', () => {
       const error = new InvalidTokenError('Token already used');
       mockResetPassword.mockRejectedValue(error);
 
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleResetPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(400);
     });

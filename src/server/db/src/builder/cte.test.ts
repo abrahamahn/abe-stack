@@ -1,10 +1,10 @@
-// backend/db/src/builder/cte.test.ts
+// src/server/db/src/builder/cte.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { colEq, eq, gt, isNull } from './conditions';
 import { withCte, withRecursiveCte } from './cte';
 import { select } from './select';
-import { raw } from './types';
+import { raw } from './types/types';
 
 describe('CTE (Common Table Expressions)', () => {
   describe('simple CTE', () => {

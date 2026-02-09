@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/main.ts
+// src/apps/desktop/src/electron/main.ts
 import * as path from 'path';
 
 import { waitForPort } from '@abe-stack/shared';

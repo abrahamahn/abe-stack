@@ -1,5 +1,4 @@
-// packages/shared/src/utils/constants/index.ts
-// packages/shared/src/utils/constants/index.ts
+// src/shared/src/utils/constants/index.ts
 /**
  * Constants
  *

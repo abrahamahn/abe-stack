@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useClickOutside.ts
+// src/client/react/src/hooks/useClickOutside.ts
 import { useEffect, type RefObject } from 'react';
 
 /**

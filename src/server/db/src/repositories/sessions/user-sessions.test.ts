@@ -1,4 +1,4 @@
-// backend/db/src/repositories/sessions/user-sessions.test.ts
+// src/server/db/src/repositories/sessions/user-sessions.test.ts
 /**
  * Tests for User Sessions Repository
  *

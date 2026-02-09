@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/cookie.ts
+// src/apps/server/src/http/middleware/cookie.ts
 /**
  * Cookie Utilities
  *

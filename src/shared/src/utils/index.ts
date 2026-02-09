@@ -1,4 +1,4 @@
-// packages/shared/src/utils/index.ts
+// src/shared/src/utils/index.ts
 
 export * as Async from './async';
 export * as Cache from './cache';
@@ -13,13 +13,18 @@ export {
   serializeCookie,
   type CookieOptions,
   type CookieSerializeOptions,
-} from './http';
+} from './http/http';
 
-export { type RequestInfo, type RouteResult, type ValidationSchema } from './http-types';
+export { type RequestInfo, type RouteResult, type ValidationSchema } from './http/http-types';
 
-export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';
+export {
+  constantTimeCompare,
+  generateSecureId,
+  generateToken,
+  generateUUID,
+} from './crypto/crypto';
 
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './token';
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './crypto/token';
 
 export {
   PAGINATION_ERROR_TYPES,
@@ -42,7 +47,14 @@ export {
 
 export { createRateLimiter } from './rate-limit';
 
-export { generateUniqueFilename, validateFileType } from './storage';
+export {
+  ALLOWED_IMAGE_TYPES,
+  generateUniqueFilename,
+  joinStoragePath,
+  MAX_IMAGE_SIZE,
+  normalizeStoragePath,
+  validateFileType,
+} from './storage';
 
 export {
   capitalize,
@@ -57,7 +69,7 @@ export {
   toKebabCase,
   toPascalCase,
   truncate,
-} from './string';
+} from './string/string';
 
 export {
   camelToSnake,
@@ -68,4 +80,4 @@ export {
   toCamelCaseArray,
   toSnakeCase,
   type KeyMapping,
-} from './casing';
+} from './string/casing';

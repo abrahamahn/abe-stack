@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/pagination-integration.test.ts
+// src/apps/server/src/http/pagination/pagination-integration.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { createPaginationHelpers } from './helpers';

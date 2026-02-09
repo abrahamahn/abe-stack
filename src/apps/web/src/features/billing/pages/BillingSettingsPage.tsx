@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/BillingSettingsPage.tsx
+// src/apps/web/src/features/billing/pages/BillingSettingsPage.tsx
 /**
  * BillingSettingsPage - User billing portal.
  *
@@ -19,10 +19,12 @@ import {
   Button,
   Card,
   Dialog,
+  Heading,
   InvoiceList,
   PageContainer,
   PaymentMethodCard,
   SubscriptionStatus,
+  Text,
   useNavigate,
 } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
@@ -121,11 +123,15 @@ export const BillingSettingsPage = (): ReactElement => {
 
   return (
     <PageContainer className="billing-settings-page">
-      <h1 className="billing-settings-page__title">Billing Settings</h1>
+      <Heading as="h1" size="xl" className="billing-settings-page__title">
+        Billing Settings
+      </Heading>
 
       {/* Subscription Section */}
       <section className="billing-settings-page__section">
-        <h2 className="billing-settings-page__section-title">Subscription</h2>
+        <Heading as="h2" size="md" className="billing-settings-page__section-title">
+          Subscription
+        </Heading>
         {subLoading ? (
           <Card>
             <Card.Body>Loading subscription...</Card.Body>
@@ -151,7 +157,9 @@ export const BillingSettingsPage = (): ReactElement => {
       {/* Payment Methods Section */}
       <section id="payment-methods" className="billing-settings-page__section">
         <div className="billing-settings-page__section-header">
-          <h2 className="billing-settings-page__section-title">Payment Methods</h2>
+          <Heading as="h2" size="md" className="billing-settings-page__section-title">
+            Payment Methods
+          </Heading>
           <Button
             onClick={() => {
               void handleAddPaymentMethod();
@@ -169,7 +177,7 @@ export const BillingSettingsPage = (): ReactElement => {
         ) : paymentMethods.length === 0 ? (
           <Card>
             <Card.Body>
-              <p>No payment methods saved.</p>
+              <Text>No payment methods saved.</Text>
               <Button
                 onClick={() => {
                   void handleAddPaymentMethod();
@@ -200,7 +208,9 @@ export const BillingSettingsPage = (): ReactElement => {
 
       {/* Invoices Section */}
       <section className="billing-settings-page__section">
-        <h2 className="billing-settings-page__section-title">Invoice History</h2>
+        <Heading as="h2" size="md" className="billing-settings-page__section-title">
+          Invoice History
+        </Heading>
         <InvoiceList
           invoices={invoices}
           isLoading={invLoading}
@@ -212,10 +222,10 @@ export const BillingSettingsPage = (): ReactElement => {
       {/* Cancel Subscription Dialog */}
       <Dialog.Root open={cancelDialogOpen} onChange={setCancelDialogOpen}>
         <Dialog.Content title="Cancel Subscription">
-          <p>
+          <Text>
             Are you sure you want to cancel your subscription? You&apos;ll continue to have access
             until the end of your current billing period.
-          </p>
+          </Text>
           <div className="dialog-actions">
             <Button
               variant="text"
@@ -246,7 +256,7 @@ export const BillingSettingsPage = (): ReactElement => {
         }}
       >
         <Dialog.Content title="Remove Payment Method">
-          <p>Are you sure you want to remove this payment method?</p>
+          <Text>Are you sure you want to remove this payment method?</Text>
           <div className="dialog-actions">
             <Button
               variant="text"

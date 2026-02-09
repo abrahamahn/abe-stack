@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx ../../tools/scripts/dev/kill-port.ts 8080 8081 8082 8083 && tsx --conditions source --env-file=../../../.config/env/.env.development src/main.ts",
+    "dev": "tsx --conditions source src/main.ts",
     "start": "node --env-file=../../../.config/env/.env.production dist/main.js",
     "build": "tsc",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
@@ -23,25 +23,11 @@
     "@abe-stack/db": "workspace:*",
     "@abe-stack/realtime": "workspace:*",
     "@abe-stack/websocket": "workspace:*",
-    "@aws-sdk/client-s3": "^3.971.0",
-    "@aws-sdk/credential-providers": "^3.971.0",
-    "@aws-sdk/s3-request-presigner": "^3.971.0",
-    "argon2": "^0.44.0",
     "fastify": "^5.7.4",
-    "inversify": "^7.11.0",
-    "lodash": "^4.17.23",
-    "md5": "^2.3.0",
-    "postgres": "^3.4.8",
-    "uuid": "^13.0.0",
     "ws": "^8.19.0",
     "@abe-stack/shared": "workspace:*"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.23",
-    "@types/md5": "^2.3.6",
-    "@types/uuid": "^11.0.0",
-    "@types/ws": "^8.18.1",
-    "supertest": "^7.2.2",
     "vite-tsconfig-paths": "^6.0.5"
   }
 }

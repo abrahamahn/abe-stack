@@ -1,4 +1,4 @@
-// apps/web/src/features/home/components/HomeDocViewer.tsx
+// src/apps/web/src/features/home/components/HomeDocViewer.tsx
 import { Heading, Markdown, Skeleton, Text, useDelayedFlag } from '@abe-stack/ui';
 
 import { docsMeta } from '../data';

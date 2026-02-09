@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/index.ts
+// src/server/db/src/repositories/tenant/index.ts
 /**
  * Tenant Repositories Barrel
  */

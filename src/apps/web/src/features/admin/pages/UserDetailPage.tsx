@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/UserDetailPage.tsx
+// src/apps/web/src/features/admin/pages/UserDetailPage.tsx
 /**
  * UserDetailPage Component
  *
@@ -18,12 +18,16 @@ type UserRoleLocal = 'user' | 'moderator' | 'admin';
 interface AdminUserLocal {
   id: string;
   email: string;
-  name: string | null;
+  username: string;
+  firstName: string;
+  lastName: string;
   role: UserRoleLocal;
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   lockedUntil: string | null;
   failedLoginAttempts: number;
+  phone: string | null;
+  phoneVerified: boolean;
   createdAt: string;
   updatedAt: string;
 }

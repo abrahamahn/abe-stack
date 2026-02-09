@@ -1,4 +1,4 @@
-// backend/engine/src/cache/providers/memory.ts
+// src/server/engine/src/cache/providers/memory.ts
 /**
  * Memory Cache Provider
  *
@@ -537,11 +537,19 @@ export class MemoryCacheProvider implements CacheProvider {
 
   /**
    * Update the hit rate statistic.
+   * Caps counters at 1M to prevent unbounded growth and floating-point
+   * precision loss. Halving preserves the ratio while reducing magnitude.
+   *
    * @internal
    */
   private updateHitRate(): void {
     const total = this.stats.hits + this.stats.misses;
-    this.stats.hitRate = total > 0 ? (this.stats.hits / total) * 100 : 0;
+    if (total > 1_000_000) {
+      this.stats.hits = Math.floor(this.stats.hits / 2);
+      this.stats.misses = Math.floor(this.stats.misses / 2);
+    }
+    const adjusted = this.stats.hits + this.stats.misses;
+    this.stats.hitRate = adjusted > 0 ? (this.stats.hits / adjusted) * 100 : 0;
   }
 
   /**

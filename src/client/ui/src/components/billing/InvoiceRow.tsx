@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/InvoiceRow.tsx
+// src/client/ui/src/components/billing/InvoiceRow.tsx
 /**
  * InvoiceRow Component
  *

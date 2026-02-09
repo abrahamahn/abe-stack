@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/password.ts
+// src/server/core/src/auth/security/password.ts
 import { estimatePasswordStrength } from './password-strength';
 
 /**

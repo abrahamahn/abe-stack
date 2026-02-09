@@ -1,5 +1,5 @@
-#!/usr/bin/env node
-// tools/sync/sync-file-headers.ts
+#!/usr/bin/env tsx
+// src/tools/sync/sync-file-headers.ts
 /**
  * Ensures files start with a path header comment.
  *
@@ -13,14 +13,14 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '../..');
+const ROOT = path.resolve(__dirname, '../../..');
 
 const isQuiet = process.argv.includes('--quiet');
 function log(...args: unknown[]): void {
   if (!isQuiet) console.log(...args);
 }
 
-const SCAN_DIRS = ['apps', 'packages', 'tools', 'config'];
+const SCAN_DIRS = ['src'];
 const EXCLUDE_DIRS = new Set([
   'node_modules',
   '.cache',

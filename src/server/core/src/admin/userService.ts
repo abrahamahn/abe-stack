@@ -1,4 +1,4 @@
-// backend/core/src/admin/userService.ts
+// src/server/core/src/admin/userService.ts
 /**
  * Admin User Service
  *
@@ -32,12 +32,16 @@ function toAdminUser(user: DbUser): AdminUser {
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
     role: user.role,
     emailVerified: user.emailVerified,
     emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
     lockedUntil: user.lockedUntil?.toISOString() ?? null,
     failedLoginAttempts: user.failedLoginAttempts,
+    phone: user.phone ?? null,
+    phoneVerified: user.phoneVerified ?? false,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };
@@ -46,12 +50,18 @@ function toAdminUser(user: DbUser): AdminUser {
 /**
  * Map frontend sortBy fields to database column names
  */
-function mapSortByToColumn(sortBy?: string): 'email' | 'name' | 'created_at' | 'updated_at' {
+function mapSortByToColumn(
+  sortBy?: string,
+): 'email' | 'username' | 'first_name' | 'last_name' | 'created_at' | 'updated_at' {
   switch (sortBy) {
     case 'email':
       return 'email';
-    case 'name':
-      return 'name';
+    case 'username':
+      return 'username';
+    case 'firstName':
+      return 'first_name';
+    case 'lastName':
+      return 'last_name';
     case 'createdAt':
       return 'created_at';
     case 'updatedAt':
@@ -114,12 +124,19 @@ export async function getUserById(userRepo: UserRepository, userId: string): Pro
 }
 
 /**
- * Update user details (name, role)
+ * Update user details (firstName, lastName, role)
+ *
+ * @param userRepo - User repository instance
+ * @param userId - ID of the user to update
+ * @param data - Fields to update (firstName, lastName, role)
+ * @returns Updated AdminUser
+ * @throws {UserNotFoundError} If user not found
+ * @complexity O(1)
  */
 export async function updateUser(
   userRepo: UserRepository,
   userId: string,
-  data: { name?: string | null; role?: UserRole },
+  data: { firstName?: string; lastName?: string; role?: UserRole },
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
@@ -128,9 +145,12 @@ export async function updateUser(
   }
 
   // Build update data
-  const updateData: { name?: string | null; role?: UserRole } = {};
-  if ('name' in data) {
-    updateData.name = data.name;
+  const updateData: { firstName?: string; lastName?: string; role?: UserRole } = {};
+  if ('firstName' in data) {
+    updateData.firstName = data.firstName;
+  }
+  if ('lastName' in data) {
+    updateData.lastName = data.lastName;
   }
   if (data.role !== undefined) {
     updateData.role = data.role;

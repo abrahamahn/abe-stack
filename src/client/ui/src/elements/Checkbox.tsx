@@ -1,4 +1,4 @@
-// client/ui/src/elements/Checkbox.tsx
+// src/client/ui/src/elements/Checkbox.tsx
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 

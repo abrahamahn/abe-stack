@@ -1,4 +1,4 @@
-// packages/shared/src/domain/billing/billing.errors.ts
+// src/shared/src/domain/billing/billing.errors.ts
 /**
  * Billing Domain Errors
  *

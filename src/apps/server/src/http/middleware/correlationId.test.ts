@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/correlationId.test.ts
+// src/apps/server/src/http/middleware/correlationId.test.ts
 /**
  * Correlation ID Middleware Tests
  */

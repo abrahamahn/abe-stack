@@ -1,4 +1,4 @@
-// premium/media/src/facade.ts
+// src/server/media/src/facade.ts
 /**
  * Server-Side Media Processing Facade
  *
@@ -7,6 +7,7 @@
  *
  * Balanced approach: Essential external libraries (Sharp, FFmpeg) + Custom implementations.
  * Provides background processing, security scanning, and advanced media processing.
+ * Supports optional entitlement gating via `ResolvedEntitlements`.
  *
  * @module facade
  */
@@ -19,7 +20,17 @@ import {
 } from './processor';
 import { CustomJobQueue } from './queue';
 
+import type { ProcessingLimits } from './processor';
 import type { Logger } from '@abe-stack/shared';
+
+/**
+ * Resolved entitlements for media access control.
+ * Optional — when not provided, entitlement checks are skipped.
+ */
+export interface MediaEntitlements {
+  /** Whether the feature map includes 'media:processing' = enabled */
+  features: Record<string, { enabled: boolean; limit?: number }>;
+}
 
 /**
  * Data payload for a media processing job submitted to the facade
@@ -29,6 +40,8 @@ export interface MediaJobData {
   filePath: string;
   filename: string;
   userId: string;
+  /** File size in megabytes (used for entitlement limit checks) */
+  fileSizeMb?: number;
 }
 
 /**
@@ -54,8 +67,9 @@ export class ServerMediaQueue extends CustomJobQueue {
    * Create a server media queue with pre-configured processors
    *
    * @param logger - Logger instance for structured logging
+   * @param limits - Optional processing limits override (e.g., from plan config)
    */
-  constructor(logger: Logger) {
+  constructor(logger: Logger, limits?: Partial<ProcessingLimits>) {
     super({
       concurrency: 3,
       retryDelayMs: 1000,
@@ -73,9 +87,7 @@ export class ServerMediaQueue extends CustomJobQueue {
         maxFileSize: 100 * 1024 * 1024, // 100MB
         maxConcurrentJobs: 3,
         allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'mp4', 'mov'],
-      },
-      {
-        securityOptions: {},
+        ...limits,
       },
     );
   }
@@ -127,17 +139,48 @@ export class ServerMediaQueue extends CustomJobQueue {
   }
 
   /**
-   * Add a media processing job to the queue
+   * Add a media processing job to the queue.
+   * When entitlements are provided, validates that:
+   *  - `media:processing` feature is enabled
+   *  - file size is within `media:max_file_size` limit
    *
    * @param data - The media job data
-   * @param options - Optional priority and delay settings
+   * @param options - Optional priority, delay, and entitlements
    * @returns The job ID (same as fileId)
+   * @throws Error if entitlement checks fail
    */
   async addJob(
     data: MediaJobData,
-    options: { priority?: number; delay?: number } = {},
+    options: { priority?: number; delay?: number; entitlements?: MediaEntitlements } = {},
   ): Promise<string> {
-    return this.add(data.fileId, data, options);
+    // Entitlement gating (optional — skipped if entitlements not provided)
+    if (options.entitlements !== undefined) {
+      const processingFeature = options.entitlements.features['media:processing'];
+      if (processingFeature?.enabled !== true) {
+        throw new Error('Media processing is not available on your plan');
+      }
+
+      const fileSizeFeature = options.entitlements.features['media:max_file_size'];
+      if (
+        fileSizeFeature?.limit !== undefined &&
+        data.fileSizeMb !== undefined &&
+        data.fileSizeMb > fileSizeFeature.limit
+      ) {
+        throw new Error(
+          `File size ${String(data.fileSizeMb)}MB exceeds plan limit of ${String(fileSizeFeature.limit)}MB`,
+        );
+      }
+    }
+
+    const addOpts: { priority?: number; delay?: number } = {};
+    if (options.priority !== undefined) {
+      addOpts.priority = options.priority;
+    }
+    if (options.delay !== undefined) {
+      addOpts.delay = options.delay;
+    }
+
+    return this.add(data.fileId, data, addOpts);
   }
 
   /**
@@ -154,8 +197,12 @@ export class ServerMediaQueue extends CustomJobQueue {
  * Create a server media processing queue with default configuration
  *
  * @param logger - Logger instance for structured logging
+ * @param limits - Optional processing limits override (e.g., from plan config)
  * @returns Configured ServerMediaQueue ready for use
  */
-export function createServerMediaQueue(logger: Logger): ServerMediaQueue {
-  return new ServerMediaQueue(logger);
+export function createServerMediaQueue(
+  logger: Logger,
+  limits?: Partial<ProcessingLimits>,
+): ServerMediaQueue {
+  return new ServerMediaQueue(logger, limits);
 }

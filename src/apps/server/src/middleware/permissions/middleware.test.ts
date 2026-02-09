@@ -1,4 +1,4 @@
-// apps/server/src/middleware/permissions/middleware.test.ts
+// src/apps/server/src/middleware/permissions/middleware.test.ts
 import { createDefaultPermissionConfig, createPermissionChecker } from '@abe-stack/server-engine';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/query-builder.test.ts
+// src/shared/src/utils/search/query-builder.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from './query-builder';

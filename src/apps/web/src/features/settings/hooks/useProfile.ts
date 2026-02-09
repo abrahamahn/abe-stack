@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useProfile.ts
+// src/apps/web/src/features/settings/hooks/useProfile.ts
 /**
  * Profile Hook
  *

@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/smtp-client.ts
+// src/server/engine/src/mailer/smtp-client.ts
 /**
  * Minimal SMTP Client
  *
@@ -120,6 +120,22 @@ export class SmtpClient {
         reject(err);
       };
 
+      const onConnected = (): void => {
+        clearTimeout(timeout);
+        if (this.socket !== null) {
+          this.socket.removeListener('error', onError);
+        }
+        this.readResponse()
+          .then((response) => {
+            if (!response.startsWith('220')) {
+              reject(new Error(`Unexpected greeting: ${response}`));
+            } else {
+              resolve();
+            }
+          })
+          .catch(reject);
+      };
+
       if (this.config.secure) {
         // Implicit TLS (port 465)
         this.socket = tlsConnect(
@@ -128,18 +144,7 @@ export class SmtpClient {
             port: this.config.port,
             rejectUnauthorized: true,
           },
-          () => {
-            clearTimeout(timeout);
-            this.readResponse()
-              .then((response) => {
-                if (!response.startsWith('220')) {
-                  reject(new Error(`Unexpected greeting: ${response}`));
-                } else {
-                  resolve();
-                }
-              })
-              .catch(reject);
-          },
+          onConnected,
         );
       } else {
         // Plain connection (may upgrade with STARTTLS)
@@ -148,18 +153,7 @@ export class SmtpClient {
             host: this.config.host,
             port: this.config.port,
           },
-          () => {
-            clearTimeout(timeout);
-            this.readResponse()
-              .then((response) => {
-                if (!response.startsWith('220')) {
-                  reject(new Error(`Unexpected greeting: ${response}`));
-                } else {
-                  resolve();
-                }
-              })
-              .catch(reject);
-          },
+          onConnected,
         );
       }
 
@@ -175,7 +169,7 @@ export class SmtpClient {
 
   private async authenticate(): Promise<void> {
     // Send EHLO
-    const ehloResponse = await this.command(`EHLO ${this.config.host}`);
+    let ehloResponse = await this.command(`EHLO ${this.config.host}`);
     if (!ehloResponse.startsWith('250')) {
       throw new Error(`EHLO failed: ${ehloResponse}`);
     }
@@ -189,9 +183,9 @@ export class SmtpClient {
       await this.upgradeToTls();
 
       // Re-send EHLO after TLS upgrade
-      const ehloResponse2 = await this.command(`EHLO ${this.config.host}`);
-      if (!ehloResponse2.startsWith('250')) {
-        throw new Error(`EHLO after STARTTLS failed: ${ehloResponse2}`);
+      ehloResponse = await this.command(`EHLO ${this.config.host}`);
+      if (!ehloResponse.startsWith('250')) {
+        throw new Error(`EHLO after STARTTLS failed: ${ehloResponse}`);
       }
     }
 
@@ -382,6 +376,28 @@ export class SmtpClient {
         return;
       }
 
+      let settled = false;
+
+      const cleanup = (): void => {
+        socket.removeListener('data', onData);
+        socket.removeListener('error', onError);
+        socket.removeListener('close', onClose);
+      };
+
+      const onError = (err: Error): void => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(err);
+      };
+
+      const onClose = (): void => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(new Error('Connection closed while reading response'));
+      };
+
       const onData = (data: Buffer): void => {
         this.buffer += data.toString();
 
@@ -392,15 +408,21 @@ export class SmtpClient {
           if (line === undefined) continue;
           // Check if this is the last line (no continuation)
           if (line.length >= 4 && line[3] === ' ') {
-            socket.removeListener('data', onData);
+            if (settled) return;
+            settled = true;
+            cleanup();
             this.buffer = lines.slice(i + 1).join('\r\n');
-            resolve(line);
+            // Return all lines up to this point
+            const fullResponse = lines.slice(0, i + 1).join('\r\n');
+            resolve(fullResponse);
             return;
           }
         }
       };
 
       socket.on('data', onData);
+      socket.once('error', onError);
+      socket.once('close', onClose);
     });
   }
 
@@ -411,9 +433,14 @@ export class SmtpClient {
         return;
       }
 
+      // Remove all listeners from old socket before TLS upgrade
+      // to prevent leaked handlers on the underlying plain socket
+      const oldSocket = this.socket;
+      oldSocket.removeAllListeners();
+
       const tlsSocket = tlsConnect(
         {
-          socket: this.socket as Socket,
+          socket: oldSocket as Socket,
           host: this.config.host,
           rejectUnauthorized: true,
         },
@@ -430,6 +457,7 @@ export class SmtpClient {
 
   private cleanup(): void {
     if (this.socket != null) {
+      this.socket.removeAllListeners();
       this.socket.destroy();
       this.socket = null;
     }

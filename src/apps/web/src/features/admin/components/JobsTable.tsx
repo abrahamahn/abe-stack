@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobsTable.tsx
+// src/apps/web/src/features/admin/components/JobsTable.tsx
 /**
  * JobsTable component
  *
@@ -65,7 +65,7 @@ const STATUS_TABS: Array<{ id: string; label: string; status: JobStatus | undefi
   { id: 'pending', label: 'Pending', status: 'pending' },
   { id: 'processing', label: 'Processing', status: 'processing' },
   { id: 'failed', label: 'Failed', status: 'failed' },
-  { id: 'dead', label: 'Dead', status: 'dead' },
+  { id: 'dead_letter', label: 'Dead Letter', status: 'dead_letter' },
   { id: 'completed', label: 'Completed', status: 'completed' },
 ];
 
@@ -167,7 +167,7 @@ interface JobRowProps {
 }
 
 const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element => {
-  const canRetry = job.status === 'failed' || job.status === 'dead';
+  const canRetry = job.status === 'failed' || job.status === 'dead_letter';
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
   return (

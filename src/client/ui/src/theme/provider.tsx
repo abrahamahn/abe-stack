@@ -1,4 +1,4 @@
-// client/ui/src/theme/provider.tsx
+// src/client/ui/src/theme/provider.tsx
 import { useContrast, type UseContrastReturn } from '@hooks/useContrast';
 import { useDensity, type UseDensityReturn } from '@hooks/useDensity';
 import { useThemeMode, type ThemeMode, type UseThemeModeReturn } from '@hooks/useThemeMode';

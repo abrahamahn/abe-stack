@@ -1,4 +1,4 @@
-// client/src/notifications/client.ts
+// src/client/api/src/notifications/client.ts
 /**
  * Notification API Client
  *

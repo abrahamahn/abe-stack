@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/refresh.ts
+// src/server/core/src/auth/handlers/refresh.ts
 /**
  * Refresh Handler
  *

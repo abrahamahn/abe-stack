@@ -1,13 +1,15 @@
-// server/engine/src/security/jwt.integration.test.ts
+// src/server/engine/src/security/jwt.integration.test.ts
 /**
  * Integration tests for JWT utilities with real tokens
  *
  * Tests JWT sign, verify, and decode with realistic authentication scenarios.
  */
 
+import { createHmac } from 'node:crypto';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { decode, JwtError, sign, verify } from './jwt';
+import { checkTokenSecret, decode, JwtError, sign, verify } from './jwt';
 
 describe('JWT Integration', () => {
   const SECRET = 'super-secret-key-for-testing-jwt-123!@#';
@@ -415,6 +417,106 @@ describe('JWT Integration', () => {
 
       expect(adminPayload['role']).toBe('admin');
       expect((adminPayload['permissions'] as string[]).includes('delete')).toBe(true);
+    });
+  });
+
+  describe('Timing-safe comparison', () => {
+    it('should reject tokens with different-length signatures', () => {
+      const token = sign({ userId: '123' }, SECRET);
+      const parts = token.split('.');
+
+      // Replace signature with a shorter one (different length)
+      const shortSig = 'abc123';
+      const tamperedToken = `${parts[0] ?? ''}.${parts[1] ?? ''}.${shortSig}`;
+
+      expect(() => verify(tamperedToken, SECRET)).toThrow('Invalid signature');
+    });
+
+    it('should reject tokens with longer signatures', () => {
+      const token = sign({ userId: '123' }, SECRET);
+      const parts = token.split('.');
+
+      // Replace signature with a much longer one
+      const longSig = (parts[2] ?? '') + 'extrapaddingtomakeitlonger';
+      const tamperedToken = `${parts[0] ?? ''}.${parts[1] ?? ''}.${longSig}`;
+
+      expect(() => verify(tamperedToken, SECRET)).toThrow('Invalid signature');
+    });
+
+    it('should reject empty signature', () => {
+      const token = sign({ userId: '123' }, SECRET);
+      const parts = token.split('.');
+
+      const tamperedToken = `${parts[0] ?? ''}.${parts[1] ?? ''}.`;
+
+      expect(() => verify(tamperedToken, SECRET)).toThrow('Invalid token format');
+    });
+  });
+
+  describe('Payload structural validation', () => {
+    it('should reject array payload', () => {
+      // Manually craft a token with an array payload
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
+      const payload = Buffer.from(JSON.stringify([1, 2, 3])).toString('base64url');
+
+      // Create valid signature for tampered content
+      const signature = createHmac('sha256', SECRET)
+        .update(`${header}.${payload}`)
+        .digest('base64url');
+
+      const token = `${header}.${payload}.${signature}`;
+
+      expect(() => verify(token, SECRET)).toThrow('Malformed token payload');
+    });
+
+    it('should reject null payload', () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
+      const payload = Buffer.from(JSON.stringify(null)).toString('base64url');
+
+      const signature = createHmac('sha256', SECRET)
+        .update(`${header}.${payload}`)
+        .digest('base64url');
+
+      const token = `${header}.${payload}.${signature}`;
+
+      expect(() => verify(token, SECRET)).toThrow('Malformed token payload');
+    });
+
+    it('should reject primitive string payload', () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
+      const payload = Buffer.from(JSON.stringify('just a string')).toString('base64url');
+
+      const signature = createHmac('sha256', SECRET)
+        .update(`${header}.${payload}`)
+        .digest('base64url');
+
+      const token = `${header}.${payload}.${signature}`;
+
+      expect(() => verify(token, SECRET)).toThrow('Malformed token payload');
+    });
+  });
+
+  describe('Secret strength validation', () => {
+    it('should accept secrets with 32+ characters', () => {
+      expect(checkTokenSecret('a'.repeat(32))).toBe(true);
+      expect(checkTokenSecret('a'.repeat(64))).toBe(true);
+      expect(checkTokenSecret(SECRET)).toBe(true);
+    });
+
+    it('should reject secrets shorter than 32 characters', () => {
+      expect(checkTokenSecret('')).toBe(false);
+      expect(checkTokenSecret('short')).toBe(false);
+      expect(checkTokenSecret('a'.repeat(31))).toBe(false);
+    });
+
+    it('should reject empty string', () => {
+      expect(checkTokenSecret('')).toBe(false);
     });
   });
 

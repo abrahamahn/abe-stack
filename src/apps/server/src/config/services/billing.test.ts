@@ -1,4 +1,4 @@
-// apps/server/src/config/services/billing.test.ts
+// src/apps/server/src/config/services/billing.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadBillingConfig, validateBillingConfig } from './billing';

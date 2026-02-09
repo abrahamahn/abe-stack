@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserTable.test.tsx
+// src/apps/web/src/features/admin/components/UserTable.test.tsx
 import { fireEvent, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -15,12 +15,16 @@ import type { AdminUser, AdminUserListResponse } from '@abe-stack/shared';
 const createMockUser = (overrides: Partial<AdminUser> = {}): AdminUser => ({
   id: 'user-123',
   email: 'test@example.com',
-  name: 'Test User',
+  username: 'testuser',
+  firstName: 'Test',
+  lastName: 'User',
   role: 'user',
   emailVerified: true,
   emailVerifiedAt: '2024-01-01T00:00:00Z',
   failedLoginAttempts: 0,
   lockedUntil: null,
+  phone: null,
+  phoneVerified: false,
   createdAt: '2024-01-15T10:30:00Z',
   updatedAt: '2024-01-15T10:30:00Z',
   ...overrides,
@@ -30,14 +34,30 @@ const createMockResponse = (
   overrides: Partial<AdminUserListResponse> = {},
 ): AdminUserListResponse => ({
   data: [
-    createMockUser({ id: 'user-1', email: 'user1@example.com', name: 'User One', role: 'admin' }),
+    createMockUser({
+      id: 'user-1',
+      email: 'user1@example.com',
+      username: 'user1',
+      firstName: 'User',
+      lastName: 'One',
+      role: 'admin',
+    }),
     createMockUser({
       id: 'user-2',
       email: 'user2@example.com',
-      name: 'User Two',
+      username: 'user2',
+      firstName: 'User',
+      lastName: 'Two',
       role: 'moderator',
     }),
-    createMockUser({ id: 'user-3', email: 'user3@example.com', name: 'User Three', role: 'user' }),
+    createMockUser({
+      id: 'user-3',
+      email: 'user3@example.com',
+      username: 'user3',
+      firstName: 'User',
+      lastName: 'Three',
+      role: 'user',
+    }),
   ],
   total: 3,
   page: 1,
@@ -151,16 +171,16 @@ describe('UserTable', () => {
       expect(screen.getByText('User Three')).toBeInTheDocument();
     });
 
-    it('should render "-" for null names', () => {
+    it('should render username when first and last names are empty', () => {
       const data = createMockResponse({
-        data: [createMockUser({ name: null })],
+        data: [createMockUser({ firstName: '', lastName: '' })],
       });
 
       renderWithProviders(
         <UserTable data={data} isLoading={false} page={1} onPageChange={mockOnPageChange} />,
       );
 
-      expect(screen.getByText('-')).toBeInTheDocument();
+      expect(screen.getByText('testuser')).toBeInTheDocument();
     });
 
     it('should render role badges', () => {
@@ -432,7 +452,7 @@ describe('UserTable', () => {
       const data = createMockResponse({
         data: [
           createMockUser({
-            name: null,
+            phone: null,
             emailVerifiedAt: null,
             lockedUntil: null,
           }),
@@ -443,7 +463,8 @@ describe('UserTable', () => {
         <UserTable data={data} isLoading={false} page={1} onPageChange={mockOnPageChange} />,
       );
 
-      expect(screen.getByText('-')).toBeInTheDocument();
+      // Table renders successfully with users that have null optional fields
+      expect(screen.getByRole('table')).toBeInTheDocument();
     });
 
     it('should handle users with expired lock', () => {

@@ -1,4 +1,4 @@
-// client/src/notifications/index.ts
+// src/client/api/src/notifications/index.ts
 /**
  * Push Notifications SDK
  *

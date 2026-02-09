@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/types/ipc.ts
+// src/apps/desktop/src/electron/types/ipc.ts
 /**
  * IPC Channel Type Definitions
  *

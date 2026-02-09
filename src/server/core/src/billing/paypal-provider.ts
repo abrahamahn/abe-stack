@@ -1,4 +1,4 @@
-// backend/core/src/billing/paypal-provider.ts
+// src/server/core/src/billing/paypal-provider.ts
 /**
  * PayPal Payment Provider
  *

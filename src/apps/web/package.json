@@ -4,9 +4,10 @@
   "description": "React web application for abe-stack",
   "type": "module",
   "scripts": {
-    "dev": "tsx ../../tools/scripts/dev/kill-port.ts 5173 && vite --open",
+    "dev": "vite --open",
     "build": "vite build",
     "start": "vite preview --port 4173",
+    "api:index": "node scripts/generate-api-index.mjs",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-web --report-unused-disable-directives",
@@ -22,6 +23,8 @@
     "@abe-stack/shared": "workspace:*"
   },
   "devDependencies": {
-    "vite-tsconfig-paths": "^6.0.5"
+    "vite-tsconfig-paths": "^6.0.5",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3"
   }
 }

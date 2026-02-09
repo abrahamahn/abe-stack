@@ -1,4 +1,4 @@
-// client/src/oauth/hooks.ts
+// src/client/api/src/oauth/hooks.ts
 /**
  * OAuth React Hooks
  *

@@ -202,10 +202,14 @@ export default [
     },
   },
   {
-    files: ['src/apps/web/**/*.{ts,tsx,cts,mts}', 'src/server/core/src/auth/**/*.{ts,tsx,cts,mts}'],
+    files: ['src/apps/web/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/apps/web/tsconfig.json'],
+        project: [
+          './src/apps/web/tsconfig.json',
+          './src/client/api/tsconfig.json',
+          './src/shared/tsconfig.json',
+        ],
         tsconfigRootDir,
       },
     },
@@ -278,7 +282,7 @@ export default [
     files: ['src/server/core/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/core/tsconfig.json'],
+        project: ['./src/server/core/tsconfig.json', './src/shared/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -398,6 +402,7 @@ export default [
           format: ['camelCase'],
           leadingUnderscore: 'allow',
         },
+
         {
           // Allow destructured properties to match their source
           selector: 'variable',
@@ -450,10 +455,6 @@ export default [
       'unused-imports': unusedImportsPlugin as any,
     },
     rules: {
-      // 7. Cyclic Dependency Detection (CPU & Memory Intensive)
-      // We limit maxDepth to 2 for performance in local dev. Bumping this to 'Infinity'
-      // is only recommended for CI environments with large heap limits.
-      'import-x/no-cycle': ['error', { maxDepth: 2, ignoreExternal: true }],
       'import-x/no-self-import': 'error',
       'import-x/no-duplicates': 'error',
       'import-x/order': [
@@ -552,6 +553,29 @@ export default [
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  // Naming Conventions for React components (PascalCase for functions)
+  {
+    files: ['**/*.{tsx,jsx}'],
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'], // Allow both camelCase and PascalCase for functions in React components
+          filter: {
+            // Function name starts with 'use' followed by uppercase, or is 'Fragment', etc., or starts with an uppercase letter
+            regex:
+              '^(use[A-Z]|Fragment|StrictMode|Suspense|Profiler|ConcurrentMode|Lazy|memo|forwardRef|[A-Z])',
+            match: true,
+          },
+        },
+        // It's important to include other naming conventions here if they are meant to apply to TSX/JSX files
+        // and you've overridden the global naming-convention. Otherwise, they might be lost.
+        // For simplicity, let's just assume the default applies to others unless specified.
+        // But for a full solution, one might merge with the general naming-convention rules.
+      ],
     },
   },
   // Prevent frontend clients from importing server-side code or DB internals

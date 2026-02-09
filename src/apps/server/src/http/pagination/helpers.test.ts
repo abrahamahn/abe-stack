@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/helpers.test.ts
+// src/apps/server/src/http/pagination/helpers.test.ts
 import { encodeCursor, type CursorPaginatedResult, type PaginatedResult } from '@abe-stack/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -186,7 +186,7 @@ describe('Pagination Helpers', () => {
       );
 
       expect(mockQueryBuilder.whereRaw).toHaveBeenCalled();
-      expect(mockQueryBuilder.orderByRaw).toHaveBeenCalledWith('createdAt DESC, id DESC');
+      expect(mockQueryBuilder.orderByRaw).toHaveBeenCalledWith('"createdAt" DESC, "id" DESC');
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(3); // limit + 1
 
       expect(result.data).toHaveLength(2); // Should exclude extra item
@@ -210,7 +210,7 @@ describe('Pagination Helpers', () => {
       );
 
       expect(mockQueryBuilder.whereRaw).not.toHaveBeenCalled();
-      expect(mockQueryBuilder.orderByRaw).toHaveBeenCalledWith('createdAt ASC, id ASC');
+      expect(mockQueryBuilder.orderByRaw).toHaveBeenCalledWith('"createdAt" ASC, "id" ASC');
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(11);
 
       expect(result.data).toHaveLength(1);

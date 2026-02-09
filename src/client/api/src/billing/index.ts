@@ -1,4 +1,4 @@
-// client/src/billing/index.ts
+// src/client/api/src/billing/index.ts
 /**
  * Billing SDK
  *

@@ -1,4 +1,4 @@
-// backend/core/src/billing/index.ts
+// src/server/core/src/billing/index.ts
 /**
  * Billing Package
  *

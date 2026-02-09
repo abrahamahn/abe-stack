@@ -1,4 +1,4 @@
-// client/src/billing/admin.test.ts
+// src/client/api/src/billing/admin.test.ts
 /**
  * Admin Billing Client Tests
  *

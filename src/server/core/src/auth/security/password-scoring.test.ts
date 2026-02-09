@@ -1,4 +1,4 @@
-// core/src/modules/auth/password-scoring.test.ts
+// src/server/core/src/auth/security/password-scoring.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

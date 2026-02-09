@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserActionsMenu.test.tsx
+// src/apps/web/src/features/admin/components/UserActionsMenu.test.tsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
@@ -13,12 +13,16 @@ import type { AdminUser, UserRole } from '@abe-stack/shared';
 const mockUser: AdminUser = {
   id: 'user-123',
   email: 'test@example.com',
-  name: 'Test User',
+  username: 'testuser',
+  firstName: 'Test',
+  lastName: 'User',
   role: 'user',
   emailVerified: true,
   emailVerifiedAt: '2024-01-01T00:00:00Z',
   failedLoginAttempts: 0,
   lockedUntil: null,
+  phone: null,
+  phoneVerified: false,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
 };
@@ -155,7 +159,7 @@ describe('UserActionsMenu', () => {
   });
 
   describe('edit user form', () => {
-    it('should display current name value', () => {
+    it('should display current first name value', () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -169,19 +173,14 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      expect((nameInput as HTMLInputElement).value).toBe('Test User');
+      const firstNameInput = screen.getByLabelText('First Name');
+      expect((firstNameInput as HTMLInputElement).value).toBe('Test');
     });
 
-    it('should display empty string when name is null', () => {
-      const userWithoutName: AdminUser = {
-        ...mockUser,
-        name: null,
-      };
-
+    it('should display current last name value', () => {
       render(
         <UserActionsMenu
-          user={userWithoutName}
+          user={mockUser}
           onUpdate={mockOnUpdate}
           onLock={mockOnLock}
           onUnlock={mockOnUnlock}
@@ -192,8 +191,8 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      expect((nameInput as HTMLInputElement).value).toBe('');
+      const lastNameInput = screen.getByLabelText('Last Name');
+      expect((lastNameInput as HTMLInputElement).value).toBe('User');
     });
 
     it('should display current role value', () => {
@@ -214,7 +213,7 @@ describe('UserActionsMenu', () => {
       expect(screen.getByText('User')).toBeInTheDocument();
     });
 
-    it('should allow changing name', () => {
+    it('should allow changing first name', () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -228,10 +227,30 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      fireEvent.change(nameInput, { target: { value: 'New Name' } });
+      const firstNameInput = screen.getByLabelText('First Name');
+      fireEvent.change(firstNameInput, { target: { value: 'New' } });
 
-      expect((nameInput as HTMLInputElement).value).toBe('New Name');
+      expect((firstNameInput as HTMLInputElement).value).toBe('New');
+    });
+
+    it('should allow changing last name', () => {
+      render(
+        <UserActionsMenu
+          user={mockUser}
+          onUpdate={mockOnUpdate}
+          onLock={mockOnLock}
+          onUnlock={mockOnUnlock}
+          isUpdating={false}
+          isLocking={false}
+          isUnlocking={false}
+          error={null}
+        />,
+      );
+
+      const lastNameInput = screen.getByLabelText('Last Name');
+      fireEvent.change(lastNameInput, { target: { value: 'Name' } });
+
+      expect((lastNameInput as HTMLInputElement).value).toBe('Name');
     });
 
     it('should allow changing role', () => {
@@ -272,7 +291,7 @@ describe('UserActionsMenu', () => {
       expect(updateButton).toBeDisabled();
     });
 
-    it('should enable update button when name is changed', () => {
+    it('should enable update button when first name is changed', () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -286,8 +305,8 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      fireEvent.change(nameInput, { target: { value: 'New Name' } });
+      const firstNameInput = screen.getByLabelText('First Name');
+      fireEvent.change(firstNameInput, { target: { value: 'New' } });
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       expect(updateButton).not.toBeDisabled();
@@ -317,7 +336,7 @@ describe('UserActionsMenu', () => {
       expect(updateButton).not.toBeDisabled();
     });
 
-    it('should call onUpdate with name change', async () => {
+    it('should call onUpdate with first name change', async () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -331,14 +350,14 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      fireEvent.change(nameInput, { target: { value: 'New Name' } });
+      const firstNameInput = screen.getByLabelText('First Name');
+      fireEvent.change(firstNameInput, { target: { value: 'New' } });
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       fireEvent.click(updateButton);
 
       await waitFor(() => {
-        expect(mockOnUpdate).toHaveBeenCalledWith({ name: 'New Name' });
+        expect(mockOnUpdate).toHaveBeenCalledWith({ firstName: 'New' });
       });
     });
 
@@ -370,7 +389,7 @@ describe('UserActionsMenu', () => {
       });
     });
 
-    it('should call onUpdate with both changes', async () => {
+    it('should call onUpdate with both name and role changes', async () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -384,8 +403,11 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      fireEvent.change(nameInput, { target: { value: 'Admin User' } });
+      const firstNameInput = screen.getByLabelText('First Name');
+      fireEvent.change(firstNameInput, { target: { value: 'Admin' } });
+
+      const lastNameInput = screen.getByLabelText('Last Name');
+      fireEvent.change(lastNameInput, { target: { value: 'NewLastName' } });
 
       // Custom Select: click trigger to open, then click option
       const roleSelectTrigger = screen.getByLabelText('Role');
@@ -398,13 +420,14 @@ describe('UserActionsMenu', () => {
 
       await waitFor(() => {
         expect(mockOnUpdate).toHaveBeenCalledWith({
-          name: 'Admin User',
+          firstName: 'Admin',
+          lastName: 'NewLastName',
           role: 'admin' as UserRole,
         });
       });
     });
 
-    it('should send null when name is cleared', async () => {
+    it('should call onUpdate when last name is changed', async () => {
       render(
         <UserActionsMenu
           user={mockUser}
@@ -418,14 +441,14 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
-      fireEvent.change(nameInput, { target: { value: '' } });
+      const lastNameInput = screen.getByLabelText('Last Name');
+      fireEvent.change(lastNameInput, { target: { value: 'NewLastName' } });
 
       const updateButton = screen.getByRole('button', { name: 'Update User' });
       fireEvent.click(updateButton);
 
       await waitFor(() => {
-        expect(mockOnUpdate).toHaveBeenCalledWith({ name: null });
+        expect(mockOnUpdate).toHaveBeenCalledWith({ lastName: 'NewLastName' });
       });
     });
   });
@@ -714,10 +737,12 @@ describe('UserActionsMenu', () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText('Name');
+      const firstNameInput = screen.getByLabelText('First Name');
+      const lastNameInput = screen.getByLabelText('Last Name');
       const roleSelect = screen.getByLabelText('Role');
 
-      expect(nameInput).toBeDisabled();
+      expect(firstNameInput).toBeDisabled();
+      expect(lastNameInput).toBeDisabled();
       expect(roleSelect).toBeDisabled();
     });
 

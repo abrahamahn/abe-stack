@@ -1,4 +1,4 @@
-// client/ui/src/components/DelayedFallback.test.tsx
+// src/client/ui/src/components/DelayedFallback.test.tsx
 /**
  * Tests for DelayedFallback component.
  *

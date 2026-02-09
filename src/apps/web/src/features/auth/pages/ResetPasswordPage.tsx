@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/ResetPasswordPage.tsx
+// src/apps/web/src/features/auth/pages/ResetPasswordPage.tsx
 import { toastStore } from '@abe-stack/react';
 import { AuthLayout, useAuthModeNavigation, useFormState, useSearchParams } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';

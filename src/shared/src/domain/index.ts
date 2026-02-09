@@ -1,4 +1,4 @@
-// packages/shared/src/domain/index.ts
+// src/shared/src/domain/index.ts
 
 export {
   buildAuditEvent,
@@ -55,6 +55,8 @@ export {
   setPasswordResponseSchema,
   totpSetupResponseSchema,
   totpStatusResponseSchema,
+  totpLoginChallengeResponseSchema,
+  totpLoginVerifyRequestSchema,
   totpVerifyRequestSchema,
   totpVerifyResponseSchema,
   type ErrorMapperLogger,
@@ -85,6 +87,8 @@ export {
   type ResetPasswordResponse,
   type SetPasswordRequest,
   type SetPasswordResponse,
+  type TotpLoginChallengeResponse,
+  type TotpLoginVerifyRequest,
   type TotpSetupResponse,
   type TotpStatusResponse,
   type TotpVerifyRequest,
@@ -163,11 +167,13 @@ export {
   type PaymentMethodsListResponse,
   type Plan,
   type PlanFeature,
+  type PlanId,
   type PlanInterval,
   type PlansListResponse,
   type SetupIntentResponse,
   type Subscription,
   type SubscriptionActionResponse,
+  type SubscriptionId,
   type SubscriptionResponse,
   type SubscriptionStatus,
   type UpdateSubscriptionRequest,
@@ -175,6 +181,17 @@ export {
   type AdminPlansListResponse,
   type CreatePlanRequest,
   type UpdatePlanRequest,
+  type BillingService,
+  type CheckoutParams,
+  type CheckoutResult,
+  type CreateProductParams,
+  type CreateProductResult,
+  type NormalizedEventType,
+  type NormalizedWebhookEvent,
+  type ProviderInvoice,
+  type ProviderPaymentMethod,
+  type ProviderSubscription,
+  type SetupIntentResult,
 } from './billing';
 
 export {
@@ -387,3 +404,97 @@ export {
   type WebhookDelivery,
   type WebhookDeliveryStatus,
 } from './webhooks';
+
+export {
+  realtimeContract,
+  conflictResponseSchema,
+  getRecordsRequestSchema,
+  getRecordsResponseSchema,
+  listInsertOperationSchema,
+  listPositionSchema,
+  listRemoveOperationSchema,
+  operationSchema,
+  recordMapSchema,
+  recordPointerSchema,
+  recordSchema,
+  setNowOperationSchema,
+  setOperationSchema,
+  transactionSchema,
+  writeResponseSchema,
+  type ConflictResponse,
+  type GetRecordsRequest,
+  type GetRecordsResponse,
+  type ListInsertOperation,
+  type ListPosition,
+  type ListRemoveOperation,
+  type RealtimeOperation,
+  type RealtimeRecord,
+  type RealtimeTransaction,
+  type RecordMap,
+  type RecordPointer,
+  type SetNowOperation,
+  type SetOperation,
+  type WriteResponse,
+} from './realtime';
+
+export {
+  ACTOR_TYPES,
+  activitySchema,
+  actorTypeSchema,
+  createActivitySchema,
+  type Activity,
+  type ActorType,
+  type CreateActivity,
+} from './activities';
+
+export {
+  apiKeySchema,
+  createApiKeySchema,
+  updateApiKeySchema,
+  type ApiKey,
+  type CreateApiKey,
+  type UpdateApiKey,
+} from './api-keys';
+
+export {
+  createEmailLogEntrySchema,
+  createEmailTemplateSchema,
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  emailLogEntrySchema,
+  emailProviderSchema,
+  emailStatusSchema,
+  emailTemplateSchema,
+  updateEmailTemplateSchema,
+  type CreateEmailLogEntry,
+  type CreateEmailTemplate,
+  type EmailLogEntry,
+  type EmailProvider,
+  type EmailStatus,
+  type EmailTemplate,
+  type UpdateEmailTemplate,
+} from './email';
+
+export {
+  createFileRecordSchema,
+  FILE_PURPOSES,
+  filePurposeSchema,
+  fileRecordSchema,
+  STORAGE_PROVIDERS,
+  storageProviderSchema,
+  updateFileRecordSchema,
+  type CreateFileRecord,
+  type FilePurpose,
+  type FileRecord,
+  type StorageProvider,
+  type UpdateFileRecord,
+} from './files';
+
+export {
+  createTenantSettingSchema,
+  tenantSettingSchema,
+  updateTenantSettingSchema,
+  type CreateTenantSetting,
+  type TenantSetting,
+  type UpdateTenantSetting,
+} from './tenant-settings';

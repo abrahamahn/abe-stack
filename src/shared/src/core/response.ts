@@ -1,4 +1,4 @@
-// packages/shared/src/core/response.ts
+// src/shared/src/core/response.ts
 /**
  * API Response Types
  *

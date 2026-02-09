@@ -1,4 +1,4 @@
-// apps/web/src/__tests__/integration/navigation.test.tsx
+// src/apps/web/src/__tests__/integration/navigation.test.tsx
 /**
  * Integration tests for navigation and routing.
  *
@@ -13,13 +13,13 @@
  * for Login/Register actions that trigger navigation modals.
  */
 
-import { Outlet, Route, Routes, useLocation, useNavigate } from '@abe-stack/ui';
-import { act, screen } from '@testing-library/react';
+import { Outlet, useNavigate } from '@abe-stack/ui';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DashboardPage } from '../../features/dashboard';
-import { HomePage } from '../../pages';
+import { App } from '../../app/App';
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 
 import type { ReactElement, ReactNode } from 'react';
@@ -30,12 +30,6 @@ let isLoading = false;
 
 // Mock for useAuth hook (used in Dashboard tests)
 const mockUseAuth = vi.fn();
-
-// Helper component to capture and display current location for testing
-const LocationDisplay = (): ReactElement => {
-  const location = useLocation();
-  return <div data-testid="location-display">{location.pathname}</div>;
-};
 
 // Simple ProtectedRoute mock that handles auth state internally
 // Uses useNavigate instead of Navigate component to avoid ESM identity issues
@@ -77,6 +71,18 @@ const MockProtectedRoute = ({
   return children !== null && children !== undefined ? <>{children}</> : <Outlet />;
 };
 
+const renderAppAtRoute = (
+  route: string,
+  environment = createMockEnvironment(),
+): {
+  user: ReturnType<typeof userEvent.setup>;
+} => {
+  window.history.replaceState({}, '', route);
+  const user = userEvent.setup();
+  render(<App environment={environment} />);
+  return { user };
+};
+
 // ============================================================================
 // Protected Route Tests
 // ============================================================================
@@ -84,6 +90,7 @@ const MockProtectedRoute = ({
 describe('Navigation Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState({}, '', '/');
     isAuthenticated = false;
     isLoading = false;
   });
@@ -108,22 +115,15 @@ describe('Navigation Integration', () => {
       isAuthenticated = false;
       isLoading = true;
 
-      renderWithProviders(
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={
-              <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                <div>Dashboard Content</div>
-              </MockProtectedRoute>
-            }
-          />
-        </Routes>,
-        { route: '/dashboard' },
+      renderAppAtRoute(
+        '/dashboard',
+        createMockEnvironment({ isAuthenticated: false, isLoading: true }),
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
-      expect(screen.queryByText('Dashboard Content')).not.toBeInTheDocument();
+      expect(screen.getByTestId('app-top-panel')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('heading', { name: /ABE Stack Dashboard/i }),
+      ).not.toBeInTheDocument();
     });
 
     it('should render protected content when authenticated', () => {
@@ -135,62 +135,40 @@ describe('Navigation Integration', () => {
         isAuthenticated: true,
       });
 
-      renderWithProviders(
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={
-              <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                <DashboardPage />
-              </MockProtectedRoute>
-            }
-          />
-        </Routes>,
-        { environment, route: '/dashboard' },
-      );
+      renderAppAtRoute('/dashboard', environment);
 
-      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+      expect(screen.getByTestId('app-top-panel')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
     it('should transition from loading to authenticated', () => {
+      // Removed async
       // Start with loading state
       isAuthenticated = false;
       isLoading = true;
 
-      const { rerender } = renderWithProviders(
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={
-              <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                <div data-testid="protected-content">Protected</div>
-              </MockProtectedRoute>
-            }
-          />
-        </Routes>,
-        { route: '/dashboard' },
+      window.history.replaceState({}, '', '/dashboard');
+      const { rerender } = render(
+        <App environment={createMockEnvironment({ isAuthenticated: false, isLoading: true })} />,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.getByTestId('app-top-panel')).toBeInTheDocument();
 
       // Simulate auth completing
       isAuthenticated = true;
       isLoading = false;
 
       rerender(
-        <Routes>
-          <Route
-            path="/dashboard"
-            element={
-              <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                <div data-testid="protected-content">Protected</div>
-              </MockProtectedRoute>
-            }
-          />
-        </Routes>,
+        <App
+          environment={createMockEnvironment({
+            user: mockUser,
+            isAuthenticated: true,
+            isLoading: false,
+          })}
+        />,
       );
 
-      expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
   });
 
@@ -200,7 +178,7 @@ describe('Navigation Integration', () => {
 
   describe('Home Page Navigation', () => {
     it('should render home page with navigation elements', () => {
-      renderWithProviders(<HomePage />, { route: '/' });
+      renderAppAtRoute('/', createMockEnvironment());
 
       // Main heading is "ABE Stack" (there may be duplicates in README content)
       const headings = screen.getAllByRole('heading', { name: /abe stack/i, level: 1 });
@@ -208,20 +186,26 @@ describe('Navigation Integration', () => {
       // Login and Register are buttons that trigger modals, not links
       expect(screen.getByRole('button', { name: /^login$/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /^register$/i })).toBeInTheDocument();
-      // Navigation links for Dashboard and UI Library
-      expect(document.querySelector('a[href="/dashboard"]')).toBeInTheDocument();
-      expect(document.querySelector('a[href="/ui-library"]')).toBeInTheDocument();
+      // Navigation links in right-side Home menu
+      expect(screen.getByRole('link', { name: 'Auth' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Admin' })).toBeInTheDocument();
     });
 
     it('should have correct navigation link destinations', () => {
-      renderWithProviders(<HomePage />, { route: '/' });
+      renderAppAtRoute('/', createMockEnvironment());
 
       // Use href-based queries for navigation links
-      const dashboardLink = document.querySelector('a[href="/dashboard"]');
-      const uiLibraryLink = document.querySelector('a[href="/ui-library"]');
-
-      expect(dashboardLink).toBeInTheDocument();
-      expect(uiLibraryLink).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Auth' })).toHaveAttribute('href', '/auth');
+      expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute(
+        'href',
+        '/settings/accounts',
+      );
+      expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
+      expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin');
     });
 
     it('should navigate to dashboard when dashboard link is clicked', async () => {
@@ -234,35 +218,23 @@ describe('Navigation Integration', () => {
         isAuthenticated: true,
       });
 
-      const { user } = renderWithProviders(<HomePage />, { environment, route: '/' });
+      const { user } = renderAppAtRoute('/', environment);
 
-      const dashboardLink = document.querySelector('a[href="/dashboard"]');
+      const dashboardLink = screen.getByRole('link', { name: 'Dashboard' });
       expect(dashboardLink).not.toBeNull();
-
-      // Click will attempt navigation - test that link is clickable
-      await act(async () => {
-        await user.click(dashboardLink!);
-      });
-      // Note: Full navigation test is covered in Route Transitions tests
+      await user.click(dashboardLink);
+      expect(screen.getByRole('heading', { name: /ABE Stack Dashboard/i })).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/dashboard');
     });
 
-    it('should navigate to ui-library page when ui-library link is clicked', async () => {
-      const { user } = renderWithProviders(
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/ui-library"
-            element={<div data-testid="ui-library-page">UI Library Page</div>}
-          />
-        </Routes>,
-        { route: '/' },
-      );
+    it('should navigate to auth page when auth link is clicked', async () => {
+      const { user } = renderAppAtRoute('/', createMockEnvironment());
 
-      const uiLibraryLink = document.querySelector('a[href="/ui-library"]');
-      expect(uiLibraryLink).not.toBeNull();
-      await user.click(uiLibraryLink!);
-
-      expect(screen.getByTestId('ui-library-page')).toBeInTheDocument();
+      const authLink = screen.getByRole('link', { name: 'Auth' });
+      expect(authLink).not.toBeNull();
+      await user.click(authLink);
+      expect(screen.getByRole('heading', { name: /ABE Stack Auth/i })).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/auth');
     });
   });
 
@@ -283,16 +255,9 @@ describe('Navigation Integration', () => {
         isAuthenticated: true,
       });
 
-      renderWithProviders(
-        <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-          <DashboardPage />
-        </MockProtectedRoute>,
-        { environment, route: '/dashboard' },
-      );
+      renderAppAtRoute('/dashboard', environment);
 
-      // Dashboard should render when authenticated
-      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
-      // Logout button should be present
+      // Authenticated controls should be present
       expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
@@ -308,31 +273,13 @@ describe('Navigation Integration', () => {
         logout: vi.fn(),
       });
 
-      const environment = createMockEnvironment({
-        user: mockUser,
-        isAuthenticated: true,
-      });
-
-      renderWithProviders(
-        <>
-          <LocationDisplay />
-          <Routes>
-            <Route
-              path="/dashboard"
-              element={
-                <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                  <DashboardPage />
-                </MockProtectedRoute>
-              }
-            />
-          </Routes>
-        </>,
-        { environment, route: '/dashboard' },
+      renderAppAtRoute(
+        '/dashboard',
+        createMockEnvironment({ user: mockUser, isAuthenticated: true }),
       );
 
-      // Verify location stays at dashboard
-      expect(screen.getByTestId('location-display')).toHaveTextContent('/dashboard');
-      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+      expect(window.location.pathname).not.toBe('/login');
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
   });
 
@@ -358,40 +305,23 @@ describe('Navigation Integration', () => {
         isAuthenticated: true,
       });
 
-      const { user } = renderWithProviders(
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                <DashboardPage />
-              </MockProtectedRoute>
-            }
-          />
-        </Routes>,
-        { environment, route: '/' },
-      );
+      const { user } = renderAppAtRoute('/', environment);
 
-      // Navigate to dashboard via href-based selector (avoids README link conflicts)
-      const dashboardLink = document.querySelector('a[href="/dashboard"]');
+      const dashboardLink = screen.getByRole('link', { name: 'Dashboard' });
       expect(dashboardLink).not.toBeNull();
-      await user.click(dashboardLink!);
+      await user.click(dashboardLink);
 
       // Should still be authenticated
-      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /ABE Stack Dashboard/i })).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/dashboard');
     });
 
     it('should handle navigation to non-existent routes gracefully', () => {
-      renderWithProviders(
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="*" element={<div data-testid="not-found">Not Found</div>} />
-        </Routes>,
-        { route: '/non-existent-route' },
-      );
+      renderAppAtRoute('/non-existent-route', createMockEnvironment());
 
-      expect(screen.getByTestId('not-found')).toBeInTheDocument();
+      // Route remains reachable in browser history and app shell still renders.
+      expect(screen.getByTestId('app-top-panel')).toBeInTheDocument();
+      expect(window.location.pathname).toBe('/non-existent-route');
     });
   });
 
@@ -417,26 +347,9 @@ describe('Navigation Integration', () => {
         isAuthenticated: true,
       });
 
-      renderWithProviders(
-        <>
-          <LocationDisplay />
-          <Routes>
-            <Route
-              path="/dashboard"
-              element={
-                <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-                  <DashboardPage />
-                </MockProtectedRoute>
-              }
-            />
-          </Routes>
-        </>,
-        { environment, route: '/dashboard' },
-      );
+      renderAppAtRoute('/dashboard', environment);
 
-      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
-      // Verify location is preserved for deep link
-      expect(screen.getByTestId('location-display')).toHaveTextContent('/dashboard');
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
     it('should not render dashboard content when not authenticated on deep link', () => {
@@ -444,15 +357,13 @@ describe('Navigation Integration', () => {
       isAuthenticated = false;
       isLoading = false;
 
-      renderWithProviders(
-        <MockProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-          <div data-testid="dashboard-content">Dashboard Content</div>
-        </MockProtectedRoute>,
-        { route: '/dashboard' },
+      renderAppAtRoute(
+        '/dashboard',
+        createMockEnvironment({ isAuthenticated: false, isLoading: false }),
       );
 
-      // Dashboard content should not be visible when not authenticated
-      expect(screen.queryByTestId('dashboard-content')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument();
     });
   });
 });

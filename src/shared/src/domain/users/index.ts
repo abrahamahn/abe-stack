@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/index.ts
+// src/shared/src/domain/users/index.ts
 
 export { getAllRoles, getRoleDisplayName, isAdmin, isModerator, isUser } from './users.roles';
 
@@ -9,6 +9,9 @@ export { usersContract } from './users.contracts';
 export {
   APP_ROLES,
   appRoleSchema,
+  USER_ROLES,
+  userRoleSchema,
+  type UserRole,
   avatarDeleteResponseSchema,
   avatarUploadResponseSchema,
   changePasswordRequestSchema,

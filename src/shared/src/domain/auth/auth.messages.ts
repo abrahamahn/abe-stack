@@ -1,4 +1,4 @@
-// packages/shared/src/domain/auth/auth.messages.ts
+// src/shared/src/domain/auth/auth.messages.ts
 
 /**
  * @file Auth Messages

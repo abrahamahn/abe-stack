@@ -1,4 +1,4 @@
-// backend/db/src/schema/billing.ts
+// src/server/db/src/schema/billing.ts
 /**
  * Billing Schema Types
  *
@@ -106,12 +106,23 @@ export const BILLING_EVENT_TYPES = [
 
 /**
  * Plan feature item stored in JSONB
+ * Supports both limit features (with numeric value) and toggle features (boolean)
  */
-export interface PlanFeature {
-  name: string;
-  included: boolean;
-  description?: string | undefined;
-}
+export type PlanFeature =
+  | {
+      key: 'projects:limit' | 'storage:limit' | 'media:max_file_size';
+      name: string;
+      included: boolean;
+      value: number;
+      description?: string | undefined;
+    }
+  | {
+      key: 'team:invite' | 'api:access' | 'branding:custom' | 'media:processing';
+      name: string;
+      included: boolean;
+      value?: boolean | undefined;
+      description?: string | undefined;
+    };
 
 /**
  * Plan record from database (SELECT result)

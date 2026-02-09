@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/pages/JobMonitorPage.tsx
+// src/apps/web/src/features/admin/pages/JobMonitorPage.tsx
 /**
  * JobMonitorPage
  *

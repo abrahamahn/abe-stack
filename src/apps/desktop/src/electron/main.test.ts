@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/main.test.ts
+// src/apps/desktop/src/electron/main.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted to ensure mocks are available at mock time

@@ -1,9 +1,15 @@
-// backend/engine/src/security/jwt.ts
+// src/server/engine/src/security/jwt.ts
 /**
  * Native JWT Implementation
  *
  * Minimal JWT implementation using Node's native crypto module.
  * Supports HS256 (HMAC SHA-256) - the standard for most applications.
+ *
+ * Security measures mirror the shared implementation at
+ * `src/shared/src/utils/crypto/jwt.ts`:
+ * - Buffer-padded timing-safe signature comparison
+ * - Structural payload validation (rejects arrays, nulls, primitives)
+ * - Minimum 32-character secret requirement
  *
  * Zero dependencies. Full control over token handling.
  */
@@ -190,20 +196,33 @@ export function verify(token: string, secret: string): JwtPayload {
   const signatureBuffer = Buffer.from(signature, 'utf8');
   const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
 
-  // Constant-time comparison to prevent timing attacks
+  // Pad both buffers to equal length before comparison to prevent
+  // timing side-channel leaks from Buffer.length short-circuit.
+  // Without padding, different-length buffers skip timingSafeEqual entirely,
+  // leaking signature length information through response timing.
+  const maxLen = Math.max(signatureBuffer.length, expectedBuffer.length);
+  const paddedSignature = Buffer.alloc(maxLen);
+  const paddedExpected = Buffer.alloc(maxLen);
+  signatureBuffer.copy(paddedSignature);
+  expectedBuffer.copy(paddedExpected);
   const validSignature =
     signatureBuffer.length === expectedBuffer.length &&
-    timingSafeEqual(signatureBuffer, expectedBuffer);
+    timingSafeEqual(paddedSignature, paddedExpected);
 
   if (!validSignature) {
     throw new JwtError('Invalid signature', 'INVALID_SIGNATURE');
   }
 
-  // Decode and parse payload
+  // Decode and parse payload with structural validation
   let payload: JwtPayload;
   try {
-    payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload;
-  } catch {
+    const parsed: unknown = JSON.parse(base64UrlDecode(encodedPayload));
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new JwtError('Malformed token payload', 'MALFORMED_TOKEN');
+    }
+    payload = parsed as JwtPayload;
+  } catch (err) {
+    if (err instanceof JwtError) throw err;
     throw new JwtError('Malformed token payload', 'MALFORMED_TOKEN');
   }
 
@@ -261,12 +280,13 @@ export function jwtDecode(token: string): JwtPayload | null {
 }
 
 /**
- * Check if a token secret meets minimum requirements
+ * Check if a token secret meets minimum strength requirements.
+ * Requires at least 32 characters to resist brute-force attacks.
+ *
+ * @param secret - The JWT signing secret to validate
+ * @returns True if the secret meets minimum length requirements
  */
 export function checkTokenSecret(secret: string): boolean {
-  if (secret === '') {
-    return false;
-  }
-  // Additional validation could be added here
-  return true;
+  const MIN_SECRET_LENGTH = 32;
+  return secret.length >= MIN_SECRET_LENGTH;
 }

@@ -1,4 +1,4 @@
-// premium/media/src/index.ts
+// src/server/media/src/index.ts
 /**
  * @abe-stack/media
  *
@@ -110,5 +110,6 @@ export {
 export {
   createServerMediaQueue,
   ServerMediaQueue,
+  type MediaEntitlements,
   type MediaJobData as ServerMediaJobData,
 } from './facade';

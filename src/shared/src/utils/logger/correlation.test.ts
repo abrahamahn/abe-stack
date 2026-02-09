@@ -1,4 +1,4 @@
-// packages/shared/src/utils/logger/correlation.test.ts
+// src/shared/src/utils/logger/correlation.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

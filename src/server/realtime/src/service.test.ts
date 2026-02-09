@@ -1,4 +1,4 @@
-// modules/realtime/src/service.test.ts
+// src/server/realtime/src/service.test.ts
 /**
  * Realtime Service Unit Tests
  *
@@ -24,14 +24,14 @@ import {
 } from './service';
 
 import type { RealtimeRecord } from './types';
-import type { Contracts } from '@abe-stack/shared';
-
-type ListInsertOperation = Contracts.ListInsertOperation;
-type ListRemoveOperation = Contracts.ListRemoveOperation;
-type Operation = Contracts.Operation;
-type SetNowOperation = Contracts.SetNowOperation;
-type SetOperation = Contracts.SetOperation;
-type RecordMap = Contracts.RecordMap;
+import type {
+  RealtimeListInsertOperation as ListInsertOperation,
+  RealtimeListRemoveOperation as ListRemoveOperation,
+  RealtimeOperation as Operation,
+  RealtimeSetOperation as SetOperation,
+  SetNowOperation,
+  RecordMap,
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Database Client

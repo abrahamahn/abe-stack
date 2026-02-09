@@ -1,4 +1,4 @@
-// packages/shared/src/domain/membership/index.ts
+// src/shared/src/domain/membership/index.ts
 
 export {
   canAcceptInvite,

@@ -1,4 +1,4 @@
-// backend/engine/src/security/permissions/checker.test.ts
+// src/server/engine/src/security/permissions/checker.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

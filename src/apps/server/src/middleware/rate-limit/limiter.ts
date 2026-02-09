@@ -1,4 +1,4 @@
-// apps/server/src/middleware/rate-limit/limiter.ts
+// src/apps/server/src/middleware/rate-limit/limiter.ts
 /**
  * Token Bucket Rate Limiter
  *

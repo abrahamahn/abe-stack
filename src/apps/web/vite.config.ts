@@ -1,4 +1,4 @@
-// apps/web/vite.config.ts
+// src/apps/web/vite.config.ts
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
@@ -58,7 +58,7 @@ export default defineConfig({
       '@utils': resolveAlias('client/ui/src/utils'),
 
       // Core package internal aliases
-      '@contracts': resolveAlias('shared/src/contracts'),
+      '@domain': resolveAlias('shared/src/domain'),
       '@shared': resolveAlias('shared/src'),
 
       // Web app aliases

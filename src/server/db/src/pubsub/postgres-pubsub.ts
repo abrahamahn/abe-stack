@@ -1,4 +1,4 @@
-// backend/db/src/pubsub/postgres-pubsub.ts
+// src/server/db/src/pubsub/postgres-pubsub.ts
 /**
  * PostgreSQL NOTIFY/LISTEN Pub/Sub Adapter
  *

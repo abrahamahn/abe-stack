@@ -1,4 +1,4 @@
-// backend/core/src/billing/factory.ts
+// src/server/core/src/billing/factory.ts
 /**
  * Billing Provider Factory
  *

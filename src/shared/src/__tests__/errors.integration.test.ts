@@ -1,4 +1,4 @@
-// packages/shared/src/__tests__/errors.integration.test.ts
+// shared/src/__tests__/errors.integration.test.ts
 /**
  * Integration tests for error handling infrastructure
  *

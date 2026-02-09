@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/hooks/useAuthFormState.ts
+// src/apps/web/src/features/auth/hooks/useAuthFormState.ts
 // Re-export from @abe-stack/ui for backwards compatibility
 import { useFormState } from '@abe-stack/ui';
 

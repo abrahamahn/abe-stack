@@ -1,4 +1,4 @@
-// client/src/offline/index.ts
+// src/client/engine/src/offline/index.ts
 /**
  * Offline-First Transaction Queue
  *

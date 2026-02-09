@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/types.ts
+// src/server/core/src/auth/security/types.ts
 /**
  * Security Types
  *

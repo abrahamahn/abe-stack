@@ -1,4 +1,4 @@
-// backend/core/src/billing/service.ts
+// src/server/core/src/billing/service.ts
 /**
  * Billing Service
  *
@@ -33,7 +33,7 @@ import type {
   CheckoutParams,
   CheckoutResult,
   ProviderPaymentMethod,
-} from '@abe-stack/shared/contracts';
+} from '@abe-stack/shared/domain';
 
 // ============================================================================
 // Plan Operations

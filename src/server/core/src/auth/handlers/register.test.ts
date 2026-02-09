@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/register.test.ts
+// src/server/core/src/auth/handlers/register.test.ts
 /**
  * Register Handler Tests
  *
@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { handleRegister } from './register';
 
 import type { RegisterResult } from '../service';
-import type { AppContext, ReplyWithCookies } from '../types';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type { RegisterRequest } from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
 
@@ -231,11 +231,24 @@ function createMockReply(): ReplyWithCookies {
   };
 }
 
+function createMockRequest(): RequestWithCookies {
+  return {
+    cookies: {},
+    headers: {},
+    requestInfo: {
+      ipAddress: '127.0.0.1',
+      userAgent: 'test-agent',
+    },
+  } as RequestWithCookies;
+}
+
 function createRegisterBody(overrides?: Partial<RegisterRequest>): RegisterRequest {
   return {
     email: 'newuser@example.com',
+    username: 'newuser',
+    firstName: 'New',
+    lastName: 'User',
     password: 'SecureP@ssw0rd!123',
-    name: 'New User',
     ...overrides,
   };
 }
@@ -264,13 +277,13 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(201);
       expect(result.body).toEqual(mockRegisterResult);
     });
 
-    test('should call registerUser with correct parameters including name', async () => {
+    test('should call registerUser with correct parameters including profile fields', async () => {
       const ctx = createMockContext();
       const reply = createMockReply();
       const body = createRegisterBody();
@@ -283,7 +296,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
         ctx.db,
@@ -293,15 +306,21 @@ describe('handleRegister', () => {
         ctx.config.auth,
         'newuser@example.com',
         'SecureP@ssw0rd!123',
-        'New User',
+        'newuser',
+        'New',
+        'User',
         'http://localhost:3000',
       );
     });
 
-    test('should call registerUser without name when not provided', async () => {
+    test('should pass all profile fields to registerUser', async () => {
       const ctx = createMockContext();
       const reply = createMockReply();
-      const body = createRegisterBody({ name: undefined });
+      const body = createRegisterBody({
+        username: 'customuser',
+        firstName: 'Custom',
+        lastName: 'Name',
+      });
 
       const mockRegisterResult: RegisterResult = {
         status: 'pending_verification',
@@ -311,7 +330,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
         ctx.db,
@@ -321,7 +340,9 @@ describe('handleRegister', () => {
         ctx.config.auth,
         'newuser@example.com',
         'SecureP@ssw0rd!123',
-        undefined,
+        'customuser',
+        'Custom',
+        'Name',
         'http://localhost:3000',
       );
     });
@@ -348,9 +369,11 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -376,7 +399,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(reply.setCookie).not.toHaveBeenCalled();
     });
@@ -391,7 +414,7 @@ describe('handleRegister', () => {
       const originalError = new Error('SMTP connection timeout');
       mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send', originalError));
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(201);
       expect(result.body).toEqual({
@@ -411,7 +434,7 @@ describe('handleRegister', () => {
       const originalError = new Error('Email service unavailable');
       mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send', originalError));
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(ctx.log.error).toHaveBeenCalledWith(
         {
@@ -429,7 +452,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send'));
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(201);
       expect(result.body).toMatchObject({
@@ -451,7 +474,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(weakPasswordError);
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(400);
       expect((result.body as { message: string }).message).toBeTruthy();
@@ -468,7 +491,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(emailExistsError);
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       // mapErrorToResponse should handle this - verify error was processed
       expect(result.status).toBeDefined();
@@ -484,7 +507,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(new Error('Database connection failed'));
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(500);
       expect((result.body as { message: string }).message).toBe('Internal server error');
@@ -497,7 +520,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(new Error('Unexpected error'));
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(reply.setCookie).not.toHaveBeenCalled();
     });
@@ -510,7 +533,7 @@ describe('handleRegister', () => {
       const error = new Error('Unexpected database error');
       mockRegisterUser.mockRejectedValue(error);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(ctx.log.error).toHaveBeenCalled();
     });
@@ -530,7 +553,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.status).toBe(201);
       expect(mockRegisterUser).toHaveBeenCalledWith(
@@ -543,13 +566,15 @@ describe('handleRegister', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
+        expect.anything(),
       );
     });
 
-    test('should handle special characters in name', async () => {
+    test('should handle special characters in lastName', async () => {
       const ctx = createMockContext();
       const reply = createMockReply();
-      const body = createRegisterBody({ name: "O'Brien-Smith" });
+      const body = createRegisterBody({ lastName: "O'Brien-Smith" });
 
       const mockRegisterResult: RegisterResult = {
         status: 'pending_verification',
@@ -559,9 +584,11 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -574,10 +601,10 @@ describe('handleRegister', () => {
       );
     });
 
-    test('should handle empty string name as undefined', async () => {
+    test('should handle empty string firstName as-is', async () => {
       const ctx = createMockContext();
       const reply = createMockReply();
-      const body = createRegisterBody({ name: '' });
+      const body = createRegisterBody({ firstName: '' });
 
       const mockRegisterResult: RegisterResult = {
         status: 'pending_verification',
@@ -587,7 +614,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       // Empty string should be passed as-is (service layer handles normalization)
       expect(mockRegisterUser).toHaveBeenCalledWith(
@@ -598,7 +625,9 @@ describe('handleRegister', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         '',
+        expect.anything(),
         expect.anything(),
       );
     });
@@ -617,7 +646,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      await handleRegister(ctx, body, reply);
+      await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
@@ -627,6 +656,8 @@ describe('handleRegister', () => {
         expect.anything(),
         expect.anything(),
         longPassword,
+        expect.anything(),
+        expect.anything(),
         expect.anything(),
         expect.anything(),
       );
@@ -647,7 +678,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.body).toEqual(mockRegisterResult);
       expect(result.body).not.toHaveProperty('emailSendFailed');
@@ -660,7 +691,7 @@ describe('handleRegister', () => {
 
       mockRegisterUser.mockRejectedValue(new EmailSendError('Email failed'));
 
-      const result = await handleRegister(ctx, body, reply);
+      const result = await handleRegister(ctx, body, createMockRequest(), reply);
 
       expect(result.body).toHaveProperty('emailSendFailed', true);
     });

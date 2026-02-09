@@ -1,4 +1,4 @@
-// backend/db/src/repositories/features/feature-flags.test.ts
+// src/server/db/src/repositories/features/feature-flags.test.ts
 /**
  * Tests for Feature Flags Repository
  *

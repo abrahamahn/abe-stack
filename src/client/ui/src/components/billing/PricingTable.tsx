@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PricingTable.tsx
+// src/client/ui/src/components/billing/PricingTable.tsx
 /**
  * PricingTable Component
  *

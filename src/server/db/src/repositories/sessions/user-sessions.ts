@@ -1,4 +1,4 @@
-// backend/db/src/repositories/sessions/user-sessions.ts
+// src/server/db/src/repositories/sessions/user-sessions.ts
 /**
  * User Sessions Repository (Functional)
  *

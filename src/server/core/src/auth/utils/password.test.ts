@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/password.test.ts
+// src/server/core/src/auth/utils/password.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import {

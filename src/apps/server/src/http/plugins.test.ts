@@ -1,4 +1,4 @@
-// apps/server/src/http/plugins.test.ts
+// src/apps/server/src/http/plugins.test.ts
 /**
  * Tests for HTTP Plugins Registration
  *

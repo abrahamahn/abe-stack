@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useMediaQuery.test.ts
+// src/client/react/src/hooks/useMediaQuery.test.ts
 /** @vitest-environment jsdom */
 import { act, render, screen } from '@testing-library/react';
 import react from 'react';

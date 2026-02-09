@@ -1,4 +1,4 @@
-// backend/core/src/billing/webhooks/index.ts
+// src/server/core/src/billing/webhooks/index.ts
 /**
  * Billing Webhooks
  *

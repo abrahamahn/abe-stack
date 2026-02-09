@@ -1,4 +1,4 @@
-// apps/server/src/logger/middleware.test.ts
+// src/apps/server/src/logger/middleware.test.ts
 // apps/server/src/logger/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

@@ -1,9 +1,11 @@
-// apps/web/src/features/admin/components/StatusBadge.tsx
+// src/apps/web/src/features/admin/components/StatusBadge.tsx
 /**
  * StatusBadge Component
  *
  * Displays a user's status (active, locked, unverified) with appropriate styling.
  */
+
+import { Badge } from '@abe-stack/ui';
 
 import type { JSX } from 'react';
 
@@ -44,13 +46,13 @@ export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
 function getStatusStyles(status: UserStatusLocal): string {
   switch (status) {
     case 'active':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      return 'bg-green-100 text-green-800';
     case 'locked':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      return 'bg-red-100 text-red-800';
     case 'unverified':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      return 'bg-yellow-100 text-yellow-800';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+      return '';
   }
 }
 
@@ -68,9 +70,10 @@ function getStatusLabel(status: UserStatusLocal): string {
 }
 
 export const StatusBadge = ({ status }: StatusBadgeProps): JSX.Element => {
+  const tone = status === 'active' ? 'success' : status === 'locked' ? 'danger' : 'warning';
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyles(status)}`}>
+    <Badge tone={tone} className={getStatusStyles(status)}>
       {getStatusLabel(status)}
-    </span>
+    </Badge>
   );
 };

@@ -1,4 +1,4 @@
-// shared/src/domain/billing/billing.schemas.test.ts
+// src/shared/src/domain/billing/billing.schemas.test.ts
 
 /**
  * @file Billing Schemas Unit Tests

@@ -1,14 +1,16 @@
-// apps/web/src/features/ui-library/components/UILibraryMainLayout.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryMainLayout.tsx
 import {
   Button,
   CloseButton,
   Heading,
+  Link,
   MenuItem,
   ResizablePanel,
   ResizablePanelGroup,
   ScrollArea,
   Text,
 } from '@abe-stack/ui';
+import { useState } from 'react';
 
 import { UILibraryDocContent, UILibraryPreviewArea } from '.';
 
@@ -53,6 +55,8 @@ export const UILibraryMainLayout = ({
   selectedComponent,
   setSelectedComponent,
 }: UILibraryMainLayoutProps): ReactElement => {
+  const [leftView, setLeftView] = useState<'navigation' | 'submenu'>('submenu');
+
   return (
     <div className="flex-1 min-h-0 flex">
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-w-0">
@@ -113,9 +117,26 @@ export const UILibraryMainLayout = ({
           <div className="panel border-r relative">
             <span className="layout-label">LeftSidebarLayout</span>
             <div className="panel-header">
-              <Heading as="h2" size="md">
-                Components
-              </Heading>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="small"
+                  variant={leftView === 'navigation' ? 'primary' : 'secondary'}
+                  onClick={() => {
+                    setLeftView('navigation');
+                  }}
+                >
+                  Navigation
+                </Button>
+                <Button
+                  size="small"
+                  variant={leftView === 'submenu' ? 'primary' : 'secondary'}
+                  onClick={() => {
+                    setLeftView('submenu');
+                  }}
+                >
+                  Submenu
+                </Button>
+              </div>
               <CloseButton
                 aria-label="Collapse left panel"
                 onClick={() => {
@@ -125,20 +146,48 @@ export const UILibraryMainLayout = ({
             </div>
             <ScrollArea className="scroll-flex">
               <div className="flex-col gap-1 p-2">
-                {componentsInCategory.map((comp) => (
-                  <MenuItem
-                    key={comp.id}
-                    onClick={() => {
-                      setSelectedComponent(comp);
-                    }}
-                    data-selected={selectedComponent?.id === comp.id}
-                  >
-                    <Text>{comp.name}</Text>
-                    <Text tone="muted" className="text-xs">
-                      {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
-                    </Text>
-                  </MenuItem>
-                ))}
+                {leftView === 'navigation' ? (
+                  <>
+                    <Heading as="h2" size="md">
+                      Navigation
+                    </Heading>
+                    <Link to="/" className="no-underline">
+                      <MenuItem>
+                        <Text>Home</Text>
+                      </MenuItem>
+                    </Link>
+                    <Link to="/dashboard" className="no-underline">
+                      <MenuItem>
+                        <Text>Dashboard</Text>
+                      </MenuItem>
+                    </Link>
+                    <Link to="/settings" className="no-underline">
+                      <MenuItem>
+                        <Text>Settings</Text>
+                      </MenuItem>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Heading as="h2" size="md">
+                      Components
+                    </Heading>
+                    {componentsInCategory.map((comp) => (
+                      <MenuItem
+                        key={comp.id}
+                        onClick={() => {
+                          setSelectedComponent(comp);
+                        }}
+                        data-selected={selectedComponent?.id === comp.id}
+                      >
+                        <Text>{comp.name}</Text>
+                        <Text tone="muted" className="text-xs">
+                          {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
+                        </Text>
+                      </MenuItem>
+                    ))}
+                  </>
+                )}
               </div>
             </ScrollArea>
           </div>

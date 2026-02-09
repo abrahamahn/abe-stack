@@ -1,381 +1,415 @@
-## Completed: `src/shared` Security Audit (2026-02-06)
+# TODO (Execution Plan)
 
-- [x] SQL injection prevention in `buildCursorPaginationQuery` — added `safeSqlIdentifier()` with validation + double-quoting
-- [x] ReDoS elimination in `evalLike` — replaced regex with iterative two-pointer `matchLikePattern()`
-- [x] O(1) rate limiter — rewrote from array-of-timestamps to sliding-window counter
-- [x] DeferredPromise `!` assertion removal — local variable + no-op initialization pattern
-- [x] SubscriptionManager error isolation — try-catch per socket + dead socket cleanup
-- [x] LRU cache TTL overhaul — pure `has()`, proactive expired eviction, `rawSize()` diagnostic
-- [x] Crypto hardening — constant-time length comparison, rejection sampling, 32-byte minimum secret
+This file is the **factory-worker** plan: build the product via **vertical slices** (end-to-end) instead of “layers”.
 
-### Discovered Debt (Security Audit)
+Business-level feature tracking and progress live in `docs/CHECKLIST.md`.
 
-- [x] `src/shared` additional files reviewed in Round 2 audit — 12 issues found and fixed (ReDoS, timing leak, as-casts, dead code, stale messages)
-- [x] `src/shared` Round 3 audit — all ~80 remaining files reviewed, 11 issues fixed across 7 files (JWT timing leak, sanitizeMetadata depth limit, cursor dedup, contracts validation guards, http-mapper cast elimination)
-- [ ] `src/server/engine/src/security/crypto/jwt-rotation.ts` has separate `checkTokenSecret` that only checks for empty string (weaker than shared version's 32-byte minimum)
-- [ ] `src/shared/src/core/schemas.ts` and `src/shared/src/core/api.ts` are deprecated re-export shims — remove once consumers are migrated
+Last updated: 2026-02-09
 
 ---
 
-## Completed: Config Consolidation (2026-02-03)
+## How To Use This File
 
-- [x] Add `./config` subpath export to `@abe-stack/server-engine`
-- [x] Rewire ~60 files from `@abe-stack/shared/config` to `@abe-stack/server-engine/config`
-- [x] Extract `isStrategyEnabled` and `getRefreshCookieOptions` to `backend/engine/src/config/auth-helpers.ts` (consolidated from 3 duplicate locations)
-- [x] Delete scattered config duplicates (~30 files across 6 locations)
-- [x] Fix `AppConfig`, `AuthConfig`, `BillingConfig`, `Argon2Config`, `StripeProviderConfig`, `PayPalProviderConfig` imports
-- [x] Remove `shared/src/config/` directory and `"./config"` export
-
-### Discovered Debt (Config-Related)
-
-- [ ] `backend/core/src/billing/factory.test.ts` — test fixtures missing `sandbox` on `PayPalProviderConfig`, `BillingPlansConfig` wrong shape, `BillingUrlsConfig` wrong shape
-- [ ] `backend/core/src/billing/stripe-provider.test.ts` — test fixture missing `publishableKey` on `StripeProviderConfig`
-- [ ] `@abe-stack/shared` barrel — `BillingService`, `NormalizedWebhookEvent`, and other billing domain types declared locally but not properly exported
-- [ ] `apps/server/src/modules/auth/security/rateLimitPresets.ts` — imports `RateLimitConfig` from `@abe-stack/db` (should be from `@abe-stack/server-engine/config`)
+1. Pick the next slice from **Work Queue** (below).
+2. Implement it using the **Vertical Slice Protocol**.
+3. Check it off only when it meets **Definition of Done**.
+4. If a task is “big”, split it into multiple slices instead of leaving it half-wired.
 
 ---
 
-## 0. backend/db: Remaining Debt
+## Vertical Slice Protocol (Do Not Deviate)
 
-### Phase 4: Fix Legacy Module Imports
+For each feature slice:
 
-The functional repository refactor (Phases 1–5), post-refactor improvement loop, and Phase 2 repository expansion (16 new repos, 33 total keys, 615 tests) are complete. Phase 4 fixes broken imports in legacy/recovered modules.
+1. Contract first
+   - Add request/response schemas + types in `@abe-stack/shared` (domain contracts/schemas).
+2. Service logic
+   - Implement pure logic in `@abe-stack/core` handlers (no HTTP).
+3. Unit test
+   - Add/extend tests for handler behavior.
+4. Route wiring
+   - Wire into Fastify in `@abe-stack/server` routes using `publicRoute` / `protectedRoute` / `adminProtectedRoute`.
+5. Client hook
+   - Add `client/api` method + hook (`useQuery`/`useMutation`) with typed contracts.
+6. UI wiring
+   - Update `apps/web` pages/components to use the hook; handle loading/error/empty states.
 
-- [ ] `backend/db/src/config/database.ts` — fix `@abe-stack/shared/config` import (now `@abe-stack/server-engine/config`)
-- [ ] `backend/db/src/config/search.ts` — fix `@abe-stack/shared/config` import (now `@abe-stack/server-engine/config`)
-- [ ] `backend/db/src/write/write-service.ts` — fix `@abe-stack/infra` imports
-- [ ] `backend/db/src/write/postgres-store.ts` — fix circular `@abe-stack/db` import
-- [ ] `backend/db/src/pubsub/postgres-pubsub.ts` — fix missing `./types` module
-- [ ] `backend/db/src/repositories/*-legacy.ts` — fix stale schema type references (`UserInsert`, `UserUpdate`, `EmailVerificationTokenInsert`, etc.)
-
-### Quality Debt (from improvement audit)
-
-- [ ] Stale file path comments in ~48 legacy files (e.g., `// infra/src/db/...` instead of `// backend/db/src/...`)
-- [ ] Billing repos have minimal JSDoc compared to new repos
-- [ ] `isInTransaction` stub always returns `true` in transaction utilities
-
-### shared Barrel Export Debt
-
-- [x] `shared/src/index.ts` — converted to explicit named exports (2026-02-04)
-- [x] `shared/src/domain/index.ts` — converted 13 wildcards to explicit named exports (2026-02-04)
-- [x] `shared/src/contracts/index.ts` — converted billing wildcard to explicit exports (2026-02-04)
-- [x] `shared/src/utils/index.ts` — converted casing wildcard to explicit exports (2026-02-04)
-- [ ] Restored files retain old path comments (e.g., `// core/src/infrastructure/...`) — need header updates
+If any step is missing, the slice is not “done”.
 
 ---
 
-## 1. Restore Missing Code to `shared/src/`
+## Definition of Done (Per Slice)
 
-Code scattered across deleted directories (`core/src/`, `infra/contracts/src/`, `kernel/src/contracts/`) needs to be restored into `shared/src/`. Files marked with `[verify]` may overlap with existing code and need deduplication.
-
-### P0: Search Types & Operators (breaks `backend/db` imports)
-
-Source: `core/src/infrastructure/search/`
-
-- [ ] `errors.ts` + `errors.test.ts` → `shared/src/utils/search/errors.ts`
-- [ ] `operators.ts` + `operators.test.ts` → `shared/src/utils/search/operators.ts`
-- [ ] `query-builder.ts` + `query-builder.test.ts` → `shared/src/utils/search/query-builder.ts`
-- [ ] `schemas.ts` + `schemas.test.ts` → `shared/src/utils/search/schemas.ts`
-- [ ] `types.ts` → `shared/src/utils/search/types.ts`
-- [ ] `index.ts` → `shared/src/utils/search/index.ts`
-
-### P0: API Contracts (shared types for server + client)
-
-Source: `infra/contracts/src/`
-
-- [ ] `admin.ts` + `admin.test.ts` → `shared/src/contracts/admin.ts`
-- [ ] `api.ts` + `api.test.ts` → `shared/src/contracts/api.ts`
-- [ ] `auth.ts` + `auth.test.ts` → `shared/src/contracts/auth.ts` `[verify]` vs `domain/auth/auth.contracts.ts`
-- [ ] `billing/billing.ts` + `billing.test.ts` → `shared/src/contracts/billing/billing.ts` `[verify]` vs `domain/billing/billing.contracts.ts`
-- [ ] `billing/service.ts` + `billing/service.test.ts` → `shared/src/contracts/billing/service.ts`
-- [ ] `billing/index.ts` → `shared/src/contracts/billing/index.ts`
-- [ ] `common.ts` + `common.test.ts` → `shared/src/contracts/common.ts`
-- [ ] `context.ts` → `shared/src/contracts/context.ts`
-- [ ] `environment.ts` + `environment.test.ts` → `shared/src/contracts/environment.ts`
-- [ ] `jobs.ts` + `jobs.test.ts` → `shared/src/contracts/jobs.ts`
-- [ ] `native.ts` + `native.test.ts` → `shared/src/contracts/native.ts`
-- [ ] `oauth.ts` + `oauth.test.ts` → `shared/src/contracts/oauth.ts`
-- [ ] `pagination.ts` + `pagination.test.ts` → `shared/src/contracts/pagination.ts` `[verify]` vs `utils/pagination.ts`
-- [ ] `realtime.ts` + `realtime.test.ts` → `shared/src/contracts/realtime.ts`
-- [ ] `schema.ts` → `shared/src/contracts/schema.ts`
-- [ ] `security.ts` + `security.test.ts` → `shared/src/contracts/security.ts`
-- [ ] `types.ts` → `shared/src/contracts/types.ts`
-- [ ] `users.ts` + `users.test.ts` → `shared/src/contracts/users.ts` `[verify]` vs `domain/users/users.contracts.ts`
-- [ ] `index.ts` → `shared/src/contracts/index.ts`
-
-### P1: Kernel Contracts (workspace, entitlements, audit, deletion)
-
-Source: `kernel/src/contracts/`
-
-- [ ] `workspace.ts` → `shared/src/contracts/workspace.ts`
-- [ ] `entitlements.ts` → `shared/src/contracts/entitlements.ts`
-- [ ] `audit.ts` → `shared/src/contracts/audit.ts`
-- [ ] `deletion.ts` → `shared/src/contracts/deletion.ts`
-- [ ] `schema.test.ts` → `shared/src/contracts/schema.test.ts`
-
-### P1: Logger Types & Implementations
-
-Source: `core/src/infrastructure/logger/`
-
-- [ ] `base-logger.ts` + `base-logger.test.ts` → `shared/src/utils/logger/base-logger.ts`
-- [ ] `console.ts` + `console.test.ts` → `shared/src/utils/logger/console.ts`
-- [ ] `correlation.ts` + `correlation.test.ts` → `shared/src/utils/logger/correlation.ts`
-- [ ] `levels.ts` + `levels.test.ts` → `shared/src/utils/logger/levels.ts`
-- [ ] `types.ts` → `shared/src/utils/logger/types.ts`
-- [ ] `index.ts` → `shared/src/utils/logger/index.ts`
-
-### P1: Domain Module Errors
-
-Source: `core/src/modules/` (now `backend/core/src/`)
-
-- [ ] `auth/errors.ts` + `auth/errors.test.ts` → `shared/src/domain/auth/auth.errors.ts` (AccountLockedError, EmailSendError, etc.)
-- [ ] `auth/http-mapper.ts` + `auth/http-mapper.test.ts` → `shared/src/domain/auth/auth.http-mapper.ts`
-- [ ] `billing/errors.ts` + `billing/errors.test.ts` → `shared/src/domain/billing/billing.errors.ts`
-- [ ] `billing/index.ts` → merge into `shared/src/domain/billing/index.ts`
-- [ ] `notifications/errors.ts` + `notifications/errors.test.ts` → `shared/src/domain/notifications/notifications.errors.ts`
-- [ ] `notifications/types.ts` → `shared/src/domain/notifications/notifications.types.ts`
-- [ ] `notifications/schemas.ts` + `notifications/schemas.test.ts` → `shared/src/domain/notifications/` `[verify]` vs existing `notifications.schemas.ts`
-
-### P1: Monitor / Health Check Types
-
-Source: `core/src/infrastructure/monitor/`
-
-- [ ] `health.ts` + `health.test.ts` → `shared/src/utils/monitor/health.ts`
-- [ ] `types.ts` → `shared/src/utils/monitor/types.ts`
-- [ ] `index.ts` → `shared/src/utils/monitor/index.ts`
-
-### P1: Infrastructure Errors (base error classes)
-
-Source: `core/src/infrastructure/errors/`
-
-- [ ] `base.ts` + `base.test.ts` → `[verify]` vs `shared/src/core/errors.ts`
-- [ ] `http.ts` + `http.test.ts` → `[verify]` vs `shared/src/core/errors.ts`
-- [ ] `response.ts` + `response.test.ts` → `shared/src/core/` `[verify]`
-- [ ] `validation-error.ts` + `validation-error.test.ts` → `[verify]` vs `shared/src/core/errors.ts`
-- [ ] `validation.ts` + `validation.test.ts` → `[verify]` vs `shared/src/core/errors.ts`
-- [ ] `index.ts` → merge exports if missing
-
-### P2: Config System (env loading, schema, types)
-
-Source: `core/src/config/` (also duplicated in `backend/engine/src/config/`)
-
-- [ ] `env.loader.ts` + `env.loader.test.ts` → `shared/src/config/env.loader.ts`
-- [ ] `env.parsers.ts` + `env.parsers.test.ts` → `shared/src/config/env.parsers.ts`
-- [ ] `env.schema.ts` + `env.schema.test.ts` → `shared/src/config/env.schema.ts`
-- [ ] `index.ts` → `shared/src/config/index.ts`
-- [ ] `types/auth.ts` + `types/auth.test.ts` → `shared/src/config/types/auth.ts`
-- [ ] `types/index.ts` + `types/index.test.ts` → `shared/src/config/types/index.ts`
-- [ ] `types/infra.ts` + `types/infra.test.ts` → `shared/src/config/types/infra.ts`
-- [ ] `types/notification.ts` + `types/notification.test.ts` → `shared/src/config/types/notification.ts`
-- [ ] `types/services.ts` + `types/services.test.ts` → `shared/src/config/types/services.ts`
-
-### P2: Shared Utilities (constants, token, cookie, jwt)
-
-Source: `core/src/shared/` and `core/src/infrastructure/`
-
-- [ ] `shared/constants/time.ts` + `time.test.ts` → `shared/src/utils/constants/time.ts`
-- [ ] `shared/constants/http.ts` + `http.test.ts` → `[verify]` vs `shared/src/utils/http.ts`
-- [ ] `shared/constants/index.ts` → `shared/src/utils/constants/index.ts`
-- [ ] `shared/token.ts` + `token.test.ts` → `shared/src/utils/token.ts`
-- [ ] `shared/port.ts` + `port.test.ts` → `[verify]` vs `shared/src/core/ports.ts`
-- [ ] `shared/utils.ts` + `utils.test.ts` → `[verify]` vs existing utils
-- [ ] `shared/async.ts` + `async.test.ts` → `[verify]` vs `shared/src/utils/async/`
-- [ ] `shared/storage.ts` + `storage.test.ts` → `[verify]` vs `shared/src/utils/storage.ts`
-- [ ] `infrastructure/http/cookie.ts` + `cookie.test.ts` → `shared/src/utils/cookie.ts`
-- [ ] `infrastructure/http/types.ts` → merge into `shared/src/utils/http.ts`
-- [ ] `infrastructure/crypto/jwt.ts` + `jwt.test.ts` → `shared/src/utils/jwt.ts` `[verify]` vs `utils/crypto.ts`
-- [ ] `infrastructure/crypto/index.ts` → merge into utils
-
-### P2: Cache Types & Errors
-
-Source: `core/src/infrastructure/cache/`
-
-- [ ] `errors.ts` + `errors.test.ts` → `shared/src/utils/cache/errors.ts`
-- [ ] `types.ts` → `shared/src/utils/cache/types.ts`
-- [ ] `index.ts` → merge into `shared/src/utils/cache/index.ts`
-
-### P2: PubSub Types & Helpers (non-DB parts)
-
-Source: `core/src/infrastructure/pubsub/`
-
-- [ ] `helpers.ts` + `helpers.test.ts` → `shared/src/utils/pubsub/helpers.ts`
-- [ ] `subscription-manager.ts` + `subscription-manager.test.ts` → `shared/src/utils/pubsub/subscription-manager.ts`
-- [ ] `types.ts` → `shared/src/utils/pubsub/types.ts`
-- [ ] `index.ts` → `shared/src/utils/pubsub/index.ts`
-
-### P2: Module Registration
-
-Source: `core/src/infrastructure/`
-
-- [ ] `module-registration.ts` → `shared/src/core/module-registration.ts`
-
-### P3: Advanced Password Logic
-
-Source: `core/src/modules/auth/` (now `backend/core/src/auth/`)
-
-- [ ] `password-patterns.ts` + `password-patterns.test.ts` → `[verify]` vs `shared/src/utils/password.ts`
-- [ ] `password-scoring.ts` + `password-scoring.test.ts` → `[verify]` vs `shared/src/utils/password.ts`
-- [ ] `password-strength.ts` + `password-strength.test.ts` → `[verify]` vs `shared/src/utils/password.ts`
-- [ ] `password.ts` + `password.test.ts` → `[verify]` vs `shared/src/utils/password.ts`
-- [ ] `index.ts` → merge into `shared/src/domain/auth/index.ts`
-
-### P3: Shared Pagination (cursor-based, separate from offset)
-
-Source: `core/src/shared/pagination/`
-
-- [ ] `cursor.ts` + `cursor.test.ts` → `[verify]` vs `shared/src/utils/pagination.ts`
-- [ ] `error.ts` + `error.test.ts` → `[verify]` vs `shared/src/utils/pagination.ts`
-- [ ] `helpers.ts` + `helpers.test.ts` → `[verify]` vs `shared/src/utils/pagination.ts`
-- [ ] `index.ts` → merge if needed
-
-### P3: Integration Tests
-
-Source: `core/src/__tests__/`
-
-- [ ] `async-utilities.integration.test.ts` → `shared/src/__tests__/`
-- [ ] `auth-domain.integration.test.ts` → `shared/src/__tests__/`
-- [ ] `contracts.integration.test.ts` → `shared/src/__tests__/`
-- [ ] `domain-structure.test.ts` → `shared/src/__tests__/`
-- [ ] `errors.integration.test.ts` → `shared/src/__tests__/`
-- [ ] `jwt.integration.test.ts` → `shared/src/__tests__/`
-- [ ] `pagination.integration.test.ts` → `shared/src/__tests__/`
+- [ ] Contract: strict schema (no `any`), request/response typed, error cases documented
+- [ ] Handler: unit tests cover success + expected failure modes
+- [ ] Route: correct auth guard + validation + consistent status codes
+- [ ] Client: hook exposes typed data/errors; retries/timeouts sane
+- [ ] UI: loading + error + empty + success states; accessible basic UX
+- [ ] Ops: logs/audit events where relevant; rate limit/captcha applied where relevant
+- [ ] DB (if applicable): table/schema/repo/migration/seed sanity checks done (see below)
 
 ---
 
-## 2. Essential Features Audit (Verify vs Add)
+## DB Artifact Checklist (When Slice Touches The Database)
 
-- [ ] Multi-tenant workspaces + membership roles + invites
-  - [ ] Memberships (role per workspace)
-  - [ ] Invites (email invite → accept)
-  - [ ] Request context has `workspaceId` (scoping)
-- [ ] Entitlements service + assert helper
-  - [ ] `resolveEntitlements(subscription, role) -> { flags/limits }`
-  - [ ] Helper: `assertEntitled("feature_x")`
-  - [ ] Limit checks: basic counters (e.g., max projects, max seats)
-- [ ] Subscription lifecycle states wired end-to-end
-  - [ ] States: `trialing`/`active`/`past_due`/`canceled`
-  - [ ] Webhook handling that updates state reliably
-  - [ ] Access rules tied to state (via entitlements)
-- [ ] General audit log (separate from security events)
-  - [ ] `audit_log` table
-  - [ ] `audit.record({ actor, action, target, metadata })`
-  - [ ] Admin viewer (minimal)
-- [ ] Data export + deletion workflows
-  - [ ] Soft delete + background job for hard delete
-  - [ ] Cascading cleanup rules (storage objects, sessions, tokens, etc.)
-- [ ] Baseline observability (metrics + error reporting hooks)
-- [ ] Idempotent webhooks + replay safety
-  - [ ] Store event IDs, ignore duplicates
-  - [ ] Safe handling for "out of order" events
-- [ ] Tenant scoping is enforced everywhere
-  - [ ] Every query scoped by `workspaceId` (repository helpers require it in signatures)
-- [ ] Baseline security defaults
-  - [ ] Secure cookies, CSRF strategy, sensible CORS, rate limit presets
-  - [ ] One canonical request context + correlation id logging
-- [ ] Deployment sanity
-  - [ ] migrations + seed + "bootstrap admin" is smooth
-  - [ ] Env validation fails fast with good messages
+Before marking a DB-backed slice as done, verify these artifacts exist:
+
+- [ ] Table exists in migrations: `src/server/db/migrations/*.sql`
+- [ ] Table included in runtime validation list (when required for boot): `src/server/db/src/validation.ts` (`REQUIRED_TABLES`)
+- [ ] Schema table constant exported: `src/server/db/src/schema/*` and re-exported via `src/server/db/src/schema/index.ts` (`*_TABLE`)
+- [ ] Repository exists for reads/writes: `src/server/db/src/repositories/**`
+- [ ] Dev bootstrap is not missing it: `src/tools/scripts/db/db-push.ts` (if you rely on `pnpm db:push` for local dev)
+- [ ] Seed coverage is intentional:
+  - If needed for dev/demo: ensure `src/tools/scripts/db/seed.ts` creates minimal rows
+  - If not needed: explicitly leave unseeded (do not “seed everything”)
+- [ ] Run `pnpm db:audit` after changes (and `pnpm db:audit:db` if you have a DB running)
 
 ---
 
-## Notes
-
-### Package Admission Rules
-
-- Only create/keep a standalone package if it is used by **2+ separate applications** or is a **replaceable subsystem** with a clean boundary.
-
-### Premium Module Strategy
-
-- All optional, advanced, or paid-tier features (realtime, media, offline, search) must live under the `premium/` root to keep the core lightweight.
-
-### API Client Ownership
-
-- `@abe-stack/api` (or `@abe-stack/client-api`) is the single source of truth for the initialized API client and hooks.
-- Applications must consume the exported client/hooks and avoid re-implementing API calling logic.
-
-### Schema Source-of-Truth
-
-- Database schemas defined in `@abe-stack/db` are the source of truth.
-- `@abe-stack/shared` uses a manual `createSchema` validation system (`contracts/schema.ts`) — zero Zod dependency.
-- `@abe-stack/shared` (contracts) re-exports these types to maintain a clean dependency flow without shape duplication.
-
-### Admin Feature Boundary
-
-- `backend/core/admin` owns all backend logic, routes, and services for administration.
-- `apps/web/src/features/admin` is a UI-only layer that consumes the backend services via shared types.
-
-- Apps should contain pages + wiring only. Reusable logic belongs to packages.
-- If a type is needed by multiple layers, move it to `shared/src/contracts`.
-- Keep boundary rules strict; fix violations instead of suppressing.
-- Avoid overengineering: only add new packages/features if they reduce complexity or remove duplication.
+## Work Queue (Ordered For Day 1 Launch)
 
 ---
 
-## SaaS Expectations (Appendix)
+## Verification Queue (Already Marked Complete In CHECKLIST.md)
 
-### 1) SaaS "core loops" people expect
+Purpose: anything already marked `[x]` in `docs/CHECKLIST.md` still needs an explicit **end-to-end proof** (or it will silently rot).
 
-- **Subscription lifecycle completeness**
-  - Trials: trial start/end, "trialing → active" transitions
-  - Seat-based billing support (minimum): quantity + proration handling rules
-  - Plan changes: upgrade/downgrade scheduling, proration previews
-  - Dunning / failed payment flow: retries, "past_due" states, user messaging
-- **Entitlements**: single place that answers what a user/team can do right now
-  - Minimum: `entitlements` service resolving features from subscription + role
+Each verification item is a **vertical slice**, but the output is confidence, not new features:
 
-### 2) Multi-tenant & team support (big one)
+- prove contracts compile
+- prove DB artifacts exist (when applicable)
+- prove routes are reachable and protected
+- prove client hooks/UI wiring works
+- prove tests cover the critical behaviors
 
-- Organizations/Workspaces
-- Memberships (roles per org)
-- Invites (email invite accept flow)
-- Role/permission model per org (not just global roles)
-- Minimum: orgs table, memberships, invites, roles (owner/admin/member), per-org scoping in DB + request context
+### Auth Verification (CHECKLIST 1.1–1.11)
 
-### 3) Auditability & compliance-lite
+#### Verify Registration (1.1)
 
-- Audit log (general) separate from security events
-  e.g., "billing plan changed", "user role changed", "project deleted"
-- Data export (GDPR-ish): export user/org data
-- Data deletion: soft delete + retention windows, hard delete jobs
-- Minimum: audit log table + `audit.record(event)` helper with typed events
+- [ ] Contract: shared request/response schemas compile
+- [ ] DB: `users` has `canonical_email` and uniqueness enforced
+- [ ] Server: `POST /api/auth/register` creates user; returns expected shape; no user enumeration leaks
+- [ ] Server: password strength rules enforced (reject weak)
+- [ ] Server: verification email attempt logged; graceful fallback if email send fails
+- [ ] Client: register UI submits and shows success/failure states
+- [ ] Tests: auth registration tests pass
 
-### 4) Observability & operations
+#### Verify Email Verification (1.2)
 
-- Minimal metrics: request count/latency, job success/fail counts
-- Tracing hook points or structured timing logs
-- Error reporting integration (Sentry-like) as optional provider
-- Operational dashboards (job monitor + security metrics already exist)
-- Minimum: monitoring interface in kernel + infra/observability provider(s)
+- [ ] Contract: schemas compile
+- [ ] Server: `POST /api/auth/verify-email` consumes token and marks verified
+- [ ] Server: `POST /api/auth/resend-verification` invalidates old tokens and creates new
+- [ ] Client: confirm email page flow works end-to-end
+- [ ] Tests: email verification tests pass
 
-### 5) Rate limits, abuse, and platform safety
+#### Verify Login (1.3)
 
-- Per-route presets (auth stricter than others)
-- IP reputation / allowlist / blocklist hooks (optional)
-- Feature gating for high-risk actions (export, delete, billing)
-- Minimum: policy config per route/module
+- [ ] Contract: schemas compile
+- [ ] Server: `POST /api/auth/login` works for email and username identifier
+- [ ] Server: unverified email rejected without revealing account existence
+- [ ] Server: lockout + progressive delays work; failure reasons logged internally
+- [ ] Server: refresh token family created; HttpOnly cookie set (Secure/SameSite)
+- [ ] Client: login UI works; handles error states
+- [ ] Tests: login handler/security tests pass
 
-### 6) Developer experience features
+#### Verify Token Refresh (1.4)
 
-- Local dev + preview environments
-- docker-compose for db/cache/email dev
-- One-command setup: `pnpm dev` starts server + web + workers
-- Reset dev DB path
-- CLI/scaffolding: create-module, migration scaffolding
-- Env validation output ("you're missing X vars")
-- Storybook/UI catalog (UI library catalog at `/ui-library` already covers this)
+- [ ] Server: `POST /api/auth/refresh` rotates; old token reuse is detected and handled
+- [ ] Server: grace period/clock skew behavior matches config defaults
+- [ ] Client: refresh path works during navigation (no infinite loops)
+- [ ] Tests: refresh/token-family tests pass
 
-### 7) Security essentials that might still be missing
+#### Verify Logout + Logout-All (1.5)
 
-- Session/device management (list sessions, revoke one/all)
-- Password breach checks or strong policy hooks
-- File upload validation + scanning hooks
-- Secret rotation guidelines (docs + env patterns)
+- [ ] Server: `POST /api/auth/logout` clears cookie and revokes token
+- [ ] Server: `POST /api/auth/logout-all` revokes all families
+- [ ] Client: logout returns to logged-out state cleanly
+- [ ] Tests: logout-related tests pass
 
-### 8) "SaaS product" surface area (UI)
+#### Verify Password Reset (1.6)
 
-- Onboarding flow
-- Create workspace
-- Invite teammate
-- Pick plan
-- First success moment ("project created")
-- Usage/limits UI ("you're on free plan; 80% of X used")
+- [ ] Server: `POST /api/auth/forgot-password` is anti-enumeration (generic success)
+- [ ] Server: `POST /api/auth/reset-password` validates strength; updates atomically
+- [ ] Server: reset invalidates old tokens/sessions as expected
+- [ ] Client: reset-password UI flows work
+- [ ] Tests: password reset tests pass
+
+#### Verify Magic Link (1.7)
+
+- [ ] Server: request endpoint rate limits per email + IP
+- [ ] Server: verify endpoint logs in and can auto-create new user (if enabled)
+- [ ] Server: set-password works for passwordless accounts
+- [ ] Client: magic link request/verify UX works (dev-friendly)
+- [ ] Tests: magic link tests pass
+
+#### Verify OAuth2 (1.8)
+
+- [ ] Server: authorization URL endpoint works (CSRF state included)
+- [ ] Server: callback exchanges code and logs user in; can auto-create user
+- [ ] Server: link/unlink provider works; list connections works
+- [ ] Client: connected accounts UI reflects state
+- [ ] Tests: OAuth tests pass (mock provider paths)
+
+#### Verify Email Change (1.9)
+
+- [ ] Server: `POST /api/auth/change-email` sends verification to new address
+- [ ] Server: `POST /api/auth/change-email/confirm` updates email atomically
+- [ ] Server: reversion link behavior (old email) does the safety actions (if enabled)
+- [ ] Client: settings email change UI + confirm page work
+- [ ] Tests: email change tests pass
+
+#### Verify TOTP (1.10)
+
+- [ ] Server: setup -> enable -> status -> disable endpoints work
+- [ ] Server: login returns challenge when `totpEnabled` and verifies challenge token
+- [ ] Server: backup codes: single-use enforced
+- [ ] Client: settings 2FA UI works; login TOTP challenge step works
+- [ ] Tests: TOTP handler tests pass
+
+#### Verify Canonicalization (1.11)
+
+- [ ] Server: `.trim()` + lowercase at ingress everywhere emails are accepted
+- [ ] Server: Gmail dot-insensitivity and `+` stripping prevents duplicates
+- [ ] DB: canonical uniqueness constraint actually blocks duplicates
+- [ ] Tests: canonicalization tests pass
+
+### Sessions Verification (CHECKLIST 2.1–2.5)
+
+#### Verify Sessions API (2.3)
+
+- [ ] Contract: session domain schemas compile
+- [ ] Server: routes require auth
+- [ ] Server: `GET /api/users/me/sessions` lists sessions and marks current
+- [ ] Server: `DELETE /api/users/me/sessions/:id` prevents revoking current session
+- [ ] Server: `POST /api/users/me/sessions/revoke-all` keeps current session only
+- [ ] Server: `GET /api/users/me/sessions/count` matches list length
+- [ ] Client/UI: settings sessions list fetches and renders states; revoke actions update UI
+- [ ] Tests: sessions handler tests pass
+
+#### Verify Session UA labeling (2.5)
+
+- [ ] Server: login creates `user_sessions` record with parsed label fields populated
+- [ ] UI: device label is human-readable (not raw UA string)
+- [ ] Tests: UA parsing logic tests pass (or equivalent unit coverage)
+
+### Module 1 Verification: Identity (Appendix A)
+
+Goal: ensure the identity “skeleton” is truly present 1-to-1 (migrations + schema + repos + domain types), even if some HTTP/UI is not built yet.
+
+- [ ] `users`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql` creates table
+  - [ ] Migration: `src/server/db/migrations/0009_auth_extensions.sql` adds TOTP columns to `users`
+  - [ ] Migration: `src/server/db/migrations/0012_user_profile.sql` adds username + profile columns
+  - [ ] Migration: `src/server/db/migrations/0017_user_profile_extended.sql` adds extended profile columns
+  - [ ] Migration: `src/server/db/migrations/0018_email_canonicalization.sql` adds `canonical_email` + unique index
+  - [ ] Schema: `src/server/db/src/schema/users.ts` exports `USERS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/users/**` exists and is used by core
+  - [ ] Domain: `src/shared/src/domain/users/**` types/schemas compile
+- [ ] `tenants`
+  - [ ] Migration: `src/server/db/migrations/0001_tenant.sql` creates table
+  - [ ] Schema: `src/server/db/src/schema/tenant.ts` exports `TENANTS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/tenant/**` exists
+  - [ ] Domain: `src/shared/src/domain/tenant/**` types/schemas compile
+- [ ] `memberships`
+  - [ ] Migration: `src/server/db/migrations/0001_tenant.sql` creates table
+  - [ ] Schema: `src/server/db/src/schema/tenant.ts` exports `MEMBERSHIPS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/tenant/**` (membership operations) exist
+  - [ ] Domain: `src/shared/src/domain/membership/**` types/schemas compile
+- [ ] `invitations`
+  - [ ] Migration: `src/server/db/migrations/0001_tenant.sql` creates table
+  - [ ] Schema: `src/server/db/src/schema/tenant.ts` exports `INVITATIONS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/tenant/**` (invitation operations) exist
+  - [ ] Domain: `src/shared/src/domain/membership/**` types/schemas compile
+- [ ] `user_sessions`
+  - [ ] Migration: `src/server/db/migrations/0002_sessions.sql` creates table
+  - [ ] Migration: `src/server/db/migrations/0019_user_sessions_device_fields.sql` adds `device_name` / `device_type`
+  - [ ] Schema: `src/server/db/src/schema/sessions.ts` exports `USER_SESSIONS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/sessions/**` exists
+  - [ ] Domain: `src/shared/src/domain/sessions/**` types/schemas compile
+
+### Module 2 Verification: Auth & Security (Appendix A)
+
+Goal: verify the auth/security persistence layer and repos match the promised flows.
+
+- [ ] `refresh_tokens`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/users.ts` exports `REFRESH_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**` token methods exist
+- [ ] `refresh_token_families`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `REFRESH_TOKEN_FAMILIES_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `login_attempts`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `LOGIN_ATTEMPTS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `password_reset_tokens`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `PASSWORD_RESET_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `email_verification_tokens`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `EMAIL_VERIFICATION_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `security_events`
+  - [ ] Migration: `src/server/db/migrations/0000_init.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `SECURITY_EVENTS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**` (or security events repo) exists
+- [ ] `magic_link_tokens`
+  - [ ] Migration: `src/server/db/migrations/0002_sessions.sql`
+  - [ ] Schema: `src/server/db/src/schema/magic-link.ts` exports `MAGIC_LINK_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/magic-link/**` exists
+- [ ] `oauth_connections`
+  - [ ] Migration: `src/server/db/migrations/0002_sessions.sql`
+  - [ ] Schema: `src/server/db/src/schema/oauth.ts` exports `OAUTH_CONNECTIONS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/oauth/**` exists
+- [ ] `totp_backup_codes`
+  - [ ] Migration: `src/server/db/migrations/0009_auth_extensions.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `TOTP_BACKUP_CODES_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `email_change_tokens`
+  - [ ] Migration: `src/server/db/migrations/0009_auth_extensions.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `EMAIL_CHANGE_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `email_change_revert_tokens`
+  - [ ] Migration: `src/server/db/migrations/0018_email_canonicalization.sql`
+  - [ ] Schema: `src/server/db/src/schema/auth.ts` exports `EMAIL_CHANGE_REVERT_TOKENS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/auth/**`
+- [ ] `api_keys` (DB layer complete; service/routes may still be pending)
+  - [ ] Migration: `src/server/db/migrations/0010_api_keys.sql`
+  - [ ] Schema: `src/server/db/src/schema/api-keys.ts` exports `API_KEYS_TABLE`
+  - [ ] Repo: `src/server/db/src/repositories/api-keys/**` exists
+  - [ ] Domain: `src/shared/src/domain/api-keys/**` types/schemas compile
+
+### Infra-Complete Domains (Build-Time Integrity)
+
+#### Verify Multi-Tenant Infra (4.1)
+
+- [ ] DB artifacts: migrations + schema constants + repositories exist
+- [ ] `pnpm db:audit` passes
+- [ ] Tests: tenant/membership/invitation repo/schema tests pass
+
+#### Verify RBAC Definitions (5.1)
+
+- [ ] Shared permissions/policy engine compiles
+- [ ] Tests: permission matrix tests (or equivalent) pass
+
+#### Verify Realtime (Server) (6.9)
+
+- [ ] Server boots with realtime routes registered
+- [ ] Smoke: subscribe -> publish -> receive (manual or test harness)
+- [ ] Tests: realtime handler/service tests pass
+
+#### Verify WebSocket Transport (6.10)
+
+- [ ] Tests: websocket lifecycle/stats tests pass
+- [ ] Smoke: connect/disconnect/reconnect under dev server
+
+#### Verify Media Processing (Server) (6.11)
+
+- [ ] Tests: image/audio/video processor tests pass
+- [ ] Verify no HTTP endpoints expected here (this is server-only module verification)
+
+#### Verify Desktop Scaffold (12)
+
+- [ ] Desktop dev starts and loads renderer
+- [ ] Basic IPC handlers do not crash on startup
+
+---
+
+The ordering mirrors `docs/CHECKLIST.md` “Next Priority Actions”.
+
+### Sprint 1: Security & Sessions (Ship Blockers)
+
+1. Sessions HTTP wiring (CHECKLIST 2.3 + 2.7)
+   - [ ] Slice: `GET /api/users/me/sessions`
+   - [ ] Slice: `DELETE /api/users/me/sessions/:id`
+   - [ ] Slice: `POST /api/users/me/sessions/revoke-all`
+   - [ ] Slice: `GET /api/users/me/sessions/count`
+   - [ ] Slice: Web UI wiring in Settings (route/nav + revoke actions + “this device”)
+
+2. Turnstile / CAPTCHA on public auth forms (CHECKLIST 11.1)
+   - [ ] Slice: server middleware + verification (config-gated)
+   - [ ] Slice: apply to register/login/forgot-password (and invite accept if public)
+   - [ ] Slice: client UI widget + error messaging
+   - [ ] Slice: tests (verification happy path + fail closed)
+
+3. “Was this you?” security emails (CHECKLIST 11.2)
+   - [ ] Slice: security email template + send on suspicious login / sensitive change
+   - [ ] Slice: minimal UI copy to explain event + recommended action
+
+4. ToS version gating middleware (CHECKLIST 11.3)
+   - [ ] Slice: middleware (protect sensitive routes, redirect/deny)
+   - [ ] Slice: client handling (show ToS modal/page; accept -> proceed)
+
+5. Granular login failure logging (CHECKLIST 11.4)
+   - [ ] Slice: internal audit/security event enums for login failures
+   - [ ] Slice: ensure HTTP responses remain generic (anti-enumeration)
+
+6. Session labeling (UA parsing) (CHECKLIST 2.5)
+   - [ ] Slice: parse/store UA label on login
+   - [ ] Slice: display labels in sessions UI
+
+### Sprint 2: Multi-Tenant Core (Make It Usable For Teams)
+
+Keep this strictly vertical: create workspace -> invite -> accept -> switch context.
+
+1. Tenant CRUD (CHECKLIST 4.2)
+   - [ ] Slice: `POST /api/tenants` create workspace (transaction: tenant + owner membership)
+   - [ ] Slice: `GET /api/tenants` list user’s workspaces
+
+2. Invitations (CHECKLIST 4.4 + 4.8)
+   - [ ] Slice: `POST /api/tenants/:id/invitations` create invite + send email
+   - [ ] Slice: `POST /api/invitations/:token/accept` accept invite -> membership
+   - [ ] Slice: UI: invite member flow in workspace settings
+
+3. Tenant scoping middleware (CHECKLIST 4.9)
+   - [ ] Slice: read `x-workspace-id`, validate membership, attach to request context
+   - [ ] Slice: tenant switcher UI + header injection in client API
+
+### Sprint 3: Operational Safety (Reduce Support Load)
+
+1. Email change reversion hardening (CHECKLIST 1.9 + 11.2)
+   - [ ] Slice: “revert email change” link to old email; lock + revoke all sessions
+
+2. Impersonation (CHECKLIST 7.4)
+   - [ ] Slice: `POST /api/admin/impersonate/:userId` + audit events
+   - [ ] Slice: web UI banner + exit impersonation
+
+3. Compliance basics (CHECKLIST 6.8)
+   - [ ] Slice: data export request endpoint + admin visibility
+   - [ ] Slice: deletion request endpoint + grace period job wiring
+
+---
+
+## Slice Template (Copy/Paste)
+
+Use this block when starting a slice. Keep it tight and check it in with the code.
+
+```md
+## Slice: <name>
+
+- [ ] DB artifacts (if applicable):
+  - [ ] migrations: <sql file(s)>
+  - [ ] schema const: <schema file(s)>
+  - [ ] repository: <repo file(s)>
+  - [ ] seed: <seed touches it?> (yes/no)
+- [ ] Contract: <shared file(s)>
+- [ ] Handler: <core file(s)>
+- [ ] Tests: <test file(s)>
+- [ ] Route: <server route file(s)>
+- [ ] Client: <client/api file(s)>
+- [ ] UI: <apps/web file(s)>
+- [ ] Notes:
+  - Risks:
+  - Rollout / config gates:
+```
+
+---
+
+## Notes / Guardrails
+
+- Prefer **one slice fully done** over “80% of five slices”.
+- Don’t add new packages to implement a slice unless it removes duplication across apps.
+- If you touch auth/session/billing flows, add at least one test that asserts the failure mode you’re most worried about.
+- For file placement rules during execution, follow `docs/todo/EXECUTION.md` (Hybrid Hexagonal standard).

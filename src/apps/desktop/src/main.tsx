@@ -1,4 +1,4 @@
-// apps/desktop/src/main.tsx
+// src/apps/desktop/src/main.tsx
 import { QueryCache } from '@abe-stack/client-engine';
 import '@abe-stack/ui/styles/elements.css';
 import { App } from '@app/App';

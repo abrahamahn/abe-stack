@@ -1,20 +1,17 @@
-// backend/engine/src/search/factory.ts
+// src/server/engine/src/search/factory.ts
 /**
  * Search Provider Factory
  *
  * Factory for creating and managing search providers.
- * Supports multiple provider types with a unified interface.
+ * Currently supports SQL providers with a unified interface.
  *
  * @module @abe-stack/server-engine/search
  */
 
-import { createElasticsearchProvider } from './elastic';
 import { createSqlSearchProvider } from './sql-provider';
 
-import type { ElasticsearchProvider } from './elastic';
 import type { SqlSearchProvider } from './sql-provider';
 import type {
-  ElasticsearchProviderConfig,
   SearchProviderType,
   ServerSearchProvider,
   SqlSearchProviderConfig,
@@ -41,19 +38,10 @@ export interface SqlSearchProviderOptions {
 }
 
 /**
- * Options for creating an Elasticsearch search provider.
- */
-export interface ElasticsearchProviderOptions {
-  /** Elasticsearch configuration */
-  config: ElasticsearchProviderConfig;
-}
-
-/**
  * All provider options mapped by type.
  */
 export type ProviderOptions = {
   sql: SqlSearchProviderOptions;
-  elasticsearch: ElasticsearchProviderOptions;
 };
 
 // ============================================================================
@@ -63,9 +51,7 @@ export type ProviderOptions = {
 /**
  * Factory for creating search providers.
  *
- * Supports multiple provider types:
- * - SQL: Query-based search using raw SQL
- * - Elasticsearch: Full-text search using Elasticsearch
+ * Creates SQL-based search providers with a unified management interface.
  *
  * @example
  * ```typescript
@@ -78,13 +64,6 @@ export type ProviderOptions = {
  *   { table: 'users', primaryKey: 'id', columns: [...] },
  *   { name: 'users-sql' }
  * );
- *
- * // Create Elasticsearch provider
- * const esProvider = factory.createElasticsearchProvider({
- *   node: 'http://localhost:9200',
- *   index: 'users',
- *   name: 'users-es',
- * });
  * ```
  */
 export class SearchProviderFactory {
@@ -106,20 +85,6 @@ export class SearchProviderFactory {
     config?: SqlSearchProviderConfig,
   ): SqlSearchProvider<TRecord> {
     const provider = createSqlSearchProvider<TRecord>(db, repos, tableConfig, config);
-    this.providers.set(provider.name, provider as ServerSearchProvider);
-    return provider;
-  }
-
-  /**
-   * Create an Elasticsearch provider.
-   *
-   * @param config - Elasticsearch provider configuration.
-   * @returns A registered Elasticsearch provider instance.
-   */
-  createElasticsearchProvider<TRecord = Record<string, unknown>>(
-    config: ElasticsearchProviderConfig,
-  ): ElasticsearchProvider<TRecord> {
-    const provider = createElasticsearchProvider<TRecord>(config);
     this.providers.set(provider.name, provider as ServerSearchProvider);
     return provider;
   }
@@ -157,9 +122,6 @@ export class SearchProviderFactory {
       .filter(([, provider]) => {
         if (type === 'sql') {
           return provider instanceof Object && 'name' in provider && provider.name.includes('sql');
-        }
-        if (type === 'elasticsearch') {
-          return provider instanceof Object && 'name' in provider && provider.name.includes('es');
         }
         return false;
       })

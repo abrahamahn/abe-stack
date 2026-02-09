@@ -1,4 +1,4 @@
-// apps/server/src/config/services/search.ts
+// src/apps/server/src/config/services/search.ts
 import type {
   ElasticsearchProviderConfig,
   FullEnv,

@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/verify.ts
+// src/server/core/src/auth/handlers/verify.ts
 /**
  * Email Verification Handlers
  *

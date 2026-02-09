@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PaymentMethodCard.test.tsx
+// src/client/ui/src/components/billing/PaymentMethodCard.test.tsx
 /**
  * Tests for PaymentMethodCard component.
  *

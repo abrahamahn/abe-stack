@@ -1,4 +1,4 @@
-// client/ui/src/components/billing/PlanCard.test.tsx
+// src/client/ui/src/components/billing/PlanCard.test.tsx
 /**
  * Tests for PlanCard component.
  *

@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/Container.tsx
+// src/client/ui/src/layouts/containers/Container.tsx
 import { cn } from '@utils/cn';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../../styles/layouts.css';

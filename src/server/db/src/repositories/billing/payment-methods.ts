@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/payment-methods.ts
+// src/server/db/src/repositories/billing/payment-methods.ts
 /**
  * Payment Methods Repository
  *

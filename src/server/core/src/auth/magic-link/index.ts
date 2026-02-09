@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/index.ts
+// src/server/core/src/auth/magic-link/index.ts
 /**
  * Magic Link Module
  *

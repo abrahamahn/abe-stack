@@ -1,4 +1,4 @@
-// premium/websocket/src/websocket/types.ts
+// src/server/websocket/src/types.ts
 /**
  * WebSocket Types
  *

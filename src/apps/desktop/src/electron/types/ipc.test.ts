@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/types/ipc.test.ts
+// src/apps/desktop/src/electron/types/ipc.test.ts
 /**
  * Type Tests for IPC Types
  *

@@ -1,4 +1,4 @@
-// backend/db/src/schema/sessions.test.ts
+// src/server/db/src/schema/sessions.test.ts
 /**
  * Unit tests for sessions schema type definitions
  *
@@ -34,6 +34,8 @@ describe('Schema Constants', () => {
         userId: 'user_id',
         ipAddress: 'ip_address',
         userAgent: 'user_agent',
+        deviceName: 'device_name',
+        deviceType: 'device_type',
         deviceId: 'device_id',
         lastActiveAt: 'last_active_at',
         revokedAt: 'revoked_at',
@@ -45,6 +47,8 @@ describe('Schema Constants', () => {
       expect(USER_SESSION_COLUMNS.userId).toBe('user_id');
       expect(USER_SESSION_COLUMNS.ipAddress).toBe('ip_address');
       expect(USER_SESSION_COLUMNS.userAgent).toBe('user_agent');
+      expect(USER_SESSION_COLUMNS.deviceName).toBe('device_name');
+      expect(USER_SESSION_COLUMNS.deviceType).toBe('device_type');
       expect(USER_SESSION_COLUMNS.deviceId).toBe('device_id');
       expect(USER_SESSION_COLUMNS.lastActiveAt).toBe('last_active_at');
       expect(USER_SESSION_COLUMNS.revokedAt).toBe('revoked_at');
@@ -59,11 +63,13 @@ describe('Schema Constants', () => {
       // This tests that the object is marked as const and immutable
       // The TypeScript compiler ensures this, but we verify the structure
       const keys = Object.keys(USER_SESSION_COLUMNS);
-      expect(keys).toHaveLength(8);
+      expect(keys).toHaveLength(10);
       expect(keys).toContain('id');
       expect(keys).toContain('userId');
       expect(keys).toContain('ipAddress');
       expect(keys).toContain('userAgent');
+      expect(keys).toContain('deviceName');
+      expect(keys).toContain('deviceType');
       expect(keys).toContain('deviceId');
     });
 
@@ -638,6 +644,8 @@ describe('Column Mapping Consistency', () => {
       'userId',
       'ipAddress',
       'userAgent',
+      'deviceName',
+      'deviceType',
       'deviceId',
       'lastActiveAt',
       'revokedAt',
@@ -659,6 +667,8 @@ describe('Column Mapping Consistency', () => {
       'userId',
       'ipAddress',
       'userAgent',
+      'deviceName',
+      'deviceType',
       'deviceId',
       'lastActiveAt',
       'revokedAt',
@@ -675,6 +685,8 @@ describe('Column Mapping Consistency', () => {
     expect(USER_SESSION_COLUMNS.userId).toBe('user_id');
     expect(USER_SESSION_COLUMNS.ipAddress).toBe('ip_address');
     expect(USER_SESSION_COLUMNS.userAgent).toBe('user_agent');
+    expect(USER_SESSION_COLUMNS.deviceName).toBe('device_name');
+    expect(USER_SESSION_COLUMNS.deviceType).toBe('device_type');
     expect(USER_SESSION_COLUMNS.deviceId).toBe('device_id');
     expect(USER_SESSION_COLUMNS.lastActiveAt).toBe('last_active_at');
     expect(USER_SESSION_COLUMNS.revokedAt).toBe('revoked_at');

@@ -1,4 +1,4 @@
-// client/ui/src/elements/Table.tsx
+// src/client/ui/src/elements/Table.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/elements.css';
 

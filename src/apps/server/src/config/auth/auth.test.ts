@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/auth.test.ts
+// src/apps/server/src/config/auth/auth.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadAuthConfig, validateAuthConfig } from './auth';

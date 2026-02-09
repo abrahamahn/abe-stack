@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/jwt.test.ts
+// src/server/core/src/auth/utils/jwt.test.ts
 /**
  * JWT Token Utility Tests
  *

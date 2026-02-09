@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/memberships.test.ts
+// src/server/db/src/repositories/tenant/memberships.test.ts
 /**
  * Tests for Memberships Repository
  *

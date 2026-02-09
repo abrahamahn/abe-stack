@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useAuthModeNavigation.test.ts
+// src/client/react/src/hooks/useAuthModeNavigation.test.ts
 /**
  * Tests for useAuthModeNavigation hook.
  *

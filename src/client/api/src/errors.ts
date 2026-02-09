@@ -1,4 +1,4 @@
-// client/src/errors.ts
+// src/client/api/src/errors.ts
 /**
  * SDK Error Classes
  *

@@ -1,4 +1,4 @@
-// backend/engine/src/storage/http/signatures.test.ts
+// src/server/engine/src/storage/http/signatures.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { createSignature, verifySignature } from './signatures';

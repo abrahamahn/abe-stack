@@ -1,4 +1,4 @@
-// backend/db/src/builder/window.ts
+// src/server/db/src/builder/window.ts
 /**
  * Window Functions - SQL window function builders
  *
@@ -16,7 +16,7 @@
  *   .toSql()
  */
 
-import { escapeIdentifier, type SqlFragment } from './types';
+import { escapeIdentifier, type SqlFragment } from './types/types';
 
 // ============================================================================
 // Types

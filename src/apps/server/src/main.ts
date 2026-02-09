@@ -1,4 +1,4 @@
-// apps/server/src/main.ts
+// src/apps/server/src/main.ts
 /**
  * Application Entry Point
  *

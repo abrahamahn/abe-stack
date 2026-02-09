@@ -1,4 +1,4 @@
-// client/ui/src/layouts/containers/StackedLayout.test.tsx
+// src/client/ui/src/layouts/containers/StackedLayout.test.tsx
 // client/ui/src/layouts/__tests__/StackedLayout.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

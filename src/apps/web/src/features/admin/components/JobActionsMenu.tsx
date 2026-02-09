@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobActionsMenu.tsx
+// src/apps/web/src/features/admin/components/JobActionsMenu.tsx
 /**
  * JobActionsMenu component
  *
@@ -35,7 +35,7 @@ export const JobActionsMenu = ({
   isRetrying = false,
   isCancelling = false,
 }: JobActionsMenuProps): JSX.Element => {
-  const canRetry = status === 'failed' || status === 'dead';
+  const canRetry = status === 'failed' || status === 'dead_letter';
   const canCancel = status === 'pending' || status === 'processing';
 
   if (!canRetry && !canCancel) {

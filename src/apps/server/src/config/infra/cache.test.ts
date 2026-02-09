@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/cache.test.ts
+// src/apps/server/src/config/infra/cache.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';

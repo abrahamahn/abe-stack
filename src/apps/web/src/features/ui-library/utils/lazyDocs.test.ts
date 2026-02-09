@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/utils/lazyDocs.test.ts
+// src/apps/web/src/features/ui-library/utils/lazyDocs.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { clearDocsCache, getComponentDocsLazy } from './lazyDocs';

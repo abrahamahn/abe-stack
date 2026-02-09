@@ -1,4 +1,4 @@
-// tools/scripts/dev/run-tests.ts
+// src/tools/scripts/dev/run-tests.ts
 /**
  * Sequential Test Runner with Aggregated Results
  *
@@ -6,8 +6,8 @@
  * then displays a summary with total counts.
  */
 
-import { execSync } from 'node:child_process';
-import * as path from 'node:path';
+import { execFileSync } from 'child_process';
+import * as path from 'path';
 
 interface PackageResult {
   name: string;
@@ -74,7 +74,7 @@ function parseVitestOutput(output: string): Omit<PackageResult, 'name' | 'succes
   const skipped = testsMatch ? parseInt(testsMatch[3] ?? '0', 10) : 0;
 
   const durationMatch = clean.match(/Duration\s+([\d.]+s)/);
-  const duration = durationMatch ? durationMatch[1] : '0s';
+  const duration = durationMatch?.[1] ?? '0s';
 
   return { testFiles, passed, failed, skipped, duration };
 }
@@ -90,12 +90,16 @@ function runPackageTests(name: string, packagePath: string, verbose: boolean): P
   let success = true;
 
   try {
-    const result = execSync('npx vitest run --reporter=dot --silent=passed-only', {
-      cwd: pkgDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-      env: { ...process.env, FORCE_COLOR: '1' },
-    });
+    const result = execFileSync(
+      'pnpm',
+      ['exec', 'vitest', 'run', '--reporter=dot', '--silent', '--pool=threads'],
+      {
+        cwd: pkgDir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+        env: { ...process.env, FORCE_COLOR: '1' },
+      },
+    );
     output = typeof result === 'string' ? result : '';
     if (verbose) {
       if (output) process.stdout.write(output);

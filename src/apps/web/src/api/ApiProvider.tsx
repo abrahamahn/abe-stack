@@ -1,4 +1,4 @@
-// apps/web/src/api/ApiProvider.tsx
+// src/apps/web/src/api/ApiProvider.tsx
 import { getApiClient, type ApiClient } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app';

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/webhooks.test.ts
+// src/server/db/src/repositories/system/webhooks.test.ts
 /**
  * Tests for Webhooks Repository
  *

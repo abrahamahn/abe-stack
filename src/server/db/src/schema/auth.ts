@@ -1,4 +1,4 @@
-// backend/db/src/schema/auth.ts
+// src/server/db/src/schema/auth.ts
 /**
  * Auth Schema Types
  *
@@ -8,6 +8,8 @@
  * - password_reset_tokens
  * - email_verification_tokens
  * - security_events
+ * - totp_backup_codes
+ * - email_change_tokens
  */
 
 // ============================================================================
@@ -19,6 +21,9 @@ export const LOGIN_ATTEMPTS_TABLE = 'login_attempts';
 export const PASSWORD_RESET_TOKENS_TABLE = 'password_reset_tokens';
 export const EMAIL_VERIFICATION_TOKENS_TABLE = 'email_verification_tokens';
 export const SECURITY_EVENTS_TABLE = 'security_events';
+export const TOTP_BACKUP_CODES_TABLE = 'totp_backup_codes';
+export const EMAIL_CHANGE_TOKENS_TABLE = 'email_change_tokens';
+export const EMAIL_CHANGE_REVERT_TOKENS_TABLE = 'email_change_revert_tokens';
 
 // ============================================================================
 // Refresh Token Families
@@ -187,21 +192,55 @@ export const EMAIL_VERIFICATION_TOKEN_COLUMNS = {
 export type SecurityEventSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 /**
- * Security event types
+ * Security event types.
+ *
+ * The DB column is TEXT (no CHECK constraint), so any string is accepted.
+ * This union defines all known event types for type-safety.
+ *
+ * Legacy types (pre-0009): token_reuse, suspicious_activity, login_success,
+ * login_failure, logout, password_reset_requested, password_reset_completed,
+ * email_verification_sent, email_verified.
+ *
+ * Current types (post-0009): token_reuse_detected, suspicious_login, plus
+ * magic_link_*, oauth_*, and email_changed events.
+ *
+ * @see src/server/core/src/auth/security/events.ts — Event emitters
+ * @see src/shared/src/contracts/security.ts — API contract
  */
 export type SecurityEventType =
+  // Token events
   | 'token_reuse'
+  | 'token_reuse_detected'
+  | 'token_family_revoked'
+  // Account lifecycle
   | 'account_locked'
   | 'account_unlocked'
+  // Password events
   | 'password_changed'
   | 'password_reset_requested'
   | 'password_reset_completed'
+  // Email events
   | 'email_verification_sent'
   | 'email_verified'
+  | 'email_changed'
+  // Login/session events
   | 'login_success'
   | 'login_failure'
   | 'logout'
-  | 'suspicious_activity';
+  | 'suspicious_activity'
+  | 'suspicious_login'
+  // Magic link events
+  | 'magic_link_requested'
+  | 'magic_link_verified'
+  | 'magic_link_failed'
+  // OAuth events
+  | 'oauth_login_success'
+  | 'oauth_login_failure'
+  | 'oauth_account_created'
+  | 'oauth_link_success'
+  | 'oauth_link_failure'
+  | 'oauth_unlink_success'
+  | 'oauth_unlink_failure';
 
 /**
  * Security event record (SELECT result)
@@ -215,7 +254,7 @@ export interface SecurityEvent {
   severity: string;
   ipAddress: string | null;
   userAgent: string | null;
-  metadata: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: Date;
 }
 
@@ -230,7 +269,7 @@ export interface NewSecurityEvent {
   severity: string;
   ipAddress?: string | null;
   userAgent?: string | null;
-  metadata?: string | null;
+  metadata?: Record<string, unknown> | null;
   createdAt?: Date;
 }
 
@@ -243,5 +282,131 @@ export const SECURITY_EVENT_COLUMNS = {
   ipAddress: 'ip_address',
   userAgent: 'user_agent',
   metadata: 'metadata',
+  createdAt: 'created_at',
+} as const;
+
+// ============================================================================
+// TOTP Backup Codes
+// ============================================================================
+
+/**
+ * TOTP backup code record (SELECT result).
+ * Each user has up to 10 single-use backup codes for 2FA recovery.
+ * Append-only — codes are consumed by setting `usedAt`, never updated otherwise.
+ *
+ * @see 0009_auth_extensions.sql
+ */
+export interface TotpBackupCode {
+  id: string;
+  userId: string;
+  codeHash: string;
+  usedAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * Fields for inserting a new TOTP backup code (INSERT).
+ */
+export interface NewTotpBackupCode {
+  id?: string;
+  userId: string;
+  codeHash: string;
+  usedAt?: Date | null;
+  createdAt?: Date;
+}
+
+export const TOTP_BACKUP_CODE_COLUMNS = {
+  id: 'id',
+  userId: 'user_id',
+  codeHash: 'code_hash',
+  usedAt: 'used_at',
+  createdAt: 'created_at',
+} as const;
+
+// ============================================================================
+// Email Change Tokens
+// ============================================================================
+
+/**
+ * Email change token record (SELECT result).
+ * Used for the email change flow with verification.
+ * Append-only — tokens are consumed by setting `usedAt`, never updated otherwise.
+ *
+ * @see 0009_auth_extensions.sql
+ */
+export interface EmailChangeToken {
+  id: string;
+  userId: string;
+  newEmail: string;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * Fields for inserting a new email change token (INSERT).
+ */
+export interface NewEmailChangeToken {
+  id?: string;
+  userId: string;
+  newEmail: string;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt?: Date | null;
+  createdAt?: Date;
+}
+
+export const EMAIL_CHANGE_TOKEN_COLUMNS = {
+  id: 'id',
+  userId: 'user_id',
+  newEmail: 'new_email',
+  tokenHash: 'token_hash',
+  expiresAt: 'expires_at',
+  usedAt: 'used_at',
+  createdAt: 'created_at',
+} as const;
+
+// ============================================================================
+// Email Change Revert Tokens
+// ============================================================================
+
+/**
+ * Email change revert token record (SELECT result).
+ * Used for "This wasn't me" reversion flow.
+ */
+export interface EmailChangeRevertToken {
+  id: string;
+  userId: string;
+  oldEmail: string;
+  newEmail: string;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * Fields for inserting a new email change revert token (INSERT).
+ */
+export interface NewEmailChangeRevertToken {
+  id?: string;
+  userId: string;
+  oldEmail: string;
+  newEmail: string;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt?: Date | null;
+  createdAt?: Date;
+}
+
+export const EMAIL_CHANGE_REVERT_TOKEN_COLUMNS = {
+  id: 'id',
+  userId: 'user_id',
+  oldEmail: 'old_email',
+  newEmail: 'new_email',
+  tokenHash: 'token_hash',
+  expiresAt: 'expires_at',
+  usedAt: 'used_at',
   createdAt: 'created_at',
 } as const;

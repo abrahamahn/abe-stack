@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/delay.test.ts
+// src/shared/src/utils/async/delay.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { delay } from './delay';

@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/UILibraryBottomBar.test.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryBottomBar.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

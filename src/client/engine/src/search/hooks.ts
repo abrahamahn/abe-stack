@@ -1,4 +1,4 @@
-// client/src/search/hooks.ts
+// src/client/engine/src/search/hooks.ts
 /**
  * Search React Hooks
  *

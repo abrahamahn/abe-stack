@@ -1,4 +1,4 @@
-// apps/server/src/config/auth/auth.ts
+// src/apps/server/src/config/auth/auth.ts
 import { BaseError } from '@abe-stack/shared';
 import { getList } from '@abe-stack/shared/config';
 
@@ -200,6 +200,19 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
       issuer: env.TOTP_ISSUER,
       window: env.TOTP_WINDOW,
     },
+
+    ...(env.CAPTCHA_ENABLED === 'true' &&
+    env.CAPTCHA_SITE_KEY !== undefined &&
+    env.CAPTCHA_SECRET_KEY !== undefined
+      ? {
+          captcha: {
+            enabled: true as const,
+            provider: (env.CAPTCHA_PROVIDER ?? 'turnstile') as 'turnstile',
+            siteKey: env.CAPTCHA_SITE_KEY,
+            secretKey: env.CAPTCHA_SECRET_KEY,
+          },
+        }
+      : {}),
   };
 
   // Run validation before returning

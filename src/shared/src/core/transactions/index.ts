@@ -1,4 +1,4 @@
-// packages/shared/src/core/transactions/index.ts
+// src/shared/src/core/transactions/index.ts
 /**
  * Transaction Operations
  *

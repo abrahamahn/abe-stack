@@ -1,16 +1,16 @@
-// tools/scripts/path/source-code.ts
+// src/tools/scripts/path/source-code.ts
 /**
  * Exports package source code paths to .tmp/PATH-source-code.md
  * Includes: src/... .ts(x) (excluding tests) + config files (tsconfig, package.json, eslint, etc.)
  * @module tools/scripts/path/source-code
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '../../..');
+const REPO_ROOT = path.resolve(__dirname, '../../../..');
 
 const EXCLUDED_DIRS = new Set([
   'node_modules',
@@ -99,6 +99,12 @@ function walkDir(
   return files;
 }
 
+/**
+ * Groups files by their top-level package directory
+ * @param files - Array of file paths relative to REPO_ROOT
+ * @returns Map of group key to files
+ * @complexity O(n) where n is number of files
+ */
 function groupByTopLevel(files: string[]): Map<string, string[]> {
   const groups = new Map<string, string[]>();
 
@@ -108,8 +114,14 @@ function groupByTopLevel(files: string[]): Map<string, string[]> {
 
     if (parts.length === 1) {
       key = 'Root';
-    } else if (parts[0] === 'apps' || parts[0] === 'backend' || parts[0] === 'infra') {
-      key = `${parts[0]}/${parts[1] ?? ''}`.replace(/\/$/, '');
+    } else if (parts[0] === 'src' && parts.length >= 3) {
+      // src/shared/... → 'src/shared', src/apps/web/... → 'src/apps/web'
+      key =
+        parts[1] === 'shared' || parts[1] === 'tools'
+          ? `src/${parts[1]}`
+          : `src/${parts[1]}/${parts[2]}`;
+    } else if (parts[0] === 'docs' || parts[0] === 'infra' || parts[0] === 'config') {
+      key = parts[0];
     } else {
       key = parts[0];
     }

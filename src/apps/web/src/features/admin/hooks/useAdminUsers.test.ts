@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useAdminUsers.test.ts
+// src/apps/web/src/features/admin/hooks/useAdminUsers.test.ts
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -35,24 +35,32 @@ describe('useAdminUsers', () => {
       {
         id: 'user-1',
         email: 'user1@test.com',
-        name: 'User One',
+        username: 'user1',
+        firstName: 'User',
+        lastName: 'One',
         role: 'user',
         emailVerified: true,
         emailVerifiedAt: '2024-01-01T00:00:00Z',
         failedLoginAttempts: 0,
         lockedUntil: null,
+        phone: null,
+        phoneVerified: false,
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
       },
       {
         id: 'user-2',
         email: 'user2@test.com',
-        name: 'User Two',
+        username: 'user2',
+        firstName: 'User',
+        lastName: 'Two',
         role: 'admin',
         emailVerified: true,
         emailVerifiedAt: '2024-01-02T00:00:00Z',
         failedLoginAttempts: 0,
         lockedUntil: null,
+        phone: null,
+        phoneVerified: false,
         createdAt: '2024-01-02T00:00:00Z',
         updatedAt: '2024-01-02T00:00:00Z',
       },

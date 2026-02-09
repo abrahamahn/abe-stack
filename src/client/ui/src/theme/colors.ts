@@ -1,4 +1,4 @@
-// client/ui/src/theme/colors.ts
+// src/client/ui/src/theme/colors.ts
 /**
  * Theme color tokens
  * Single source of truth for all colors used in the UI

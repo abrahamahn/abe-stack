@@ -1,4 +1,4 @@
-// core/src/modules/auth/password.test.ts
+// src/server/core/src/auth/security/password.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

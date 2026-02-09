@@ -1,4 +1,4 @@
-// modules/realtime/src/types.ts
+// src/server/realtime/src/types.ts
 /**
  * Realtime Module Types
  *
@@ -15,9 +15,9 @@
 import type { DbClient } from '@abe-stack/db';
 import type {
   BaseContext,
+  ContractRequestContext as RequestContext,
   Logger,
   RecordMap,
-  RequestContext,
   SubscriptionManager,
 } from '@abe-stack/shared';
 
@@ -56,7 +56,7 @@ export type RealtimeLogger = Logger;
  * };
  * ```
  */
-export interface RealtimeModuleDeps extends Omit<BaseContext, 'repos'> {
+export interface RealtimeModuleDeps extends Omit<BaseContext, 'repos' | 'log'> {
   /** Database client for executing queries */
   readonly db: DbClient;
   /** Pub/sub manager for real-time subscriptions */

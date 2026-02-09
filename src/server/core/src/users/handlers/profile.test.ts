@@ -1,4 +1,4 @@
-// backend/core/src/users/handlers/profile.test.ts
+// src/server/core/src/users/handlers/profile.test.ts
 /**
  * Profile Handler Unit Tests
  *
@@ -68,10 +68,16 @@ describe('Profile Handlers', () => {
       const mockUser = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       };
@@ -83,10 +89,16 @@ describe('Profile Handlers', () => {
       expect(result.body).toEqual({
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
-        isVerified: true,
+        emailVerified: true,
+        phone: null,
+        phoneVerified: null,
+        dateOfBirth: null,
+        gender: null,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       });

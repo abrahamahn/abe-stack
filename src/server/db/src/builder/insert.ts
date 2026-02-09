@@ -1,4 +1,4 @@
-// backend/db/src/builder/insert.ts
+// src/server/db/src/builder/insert.ts
 /**
  * InsertBuilder - Fluent API for building INSERT queries
  *
@@ -16,7 +16,7 @@ import {
   type QueryResult,
   type SqlFragment,
   type TableSpec,
-} from './types';
+} from './types/types';
 
 /**
  * InsertBuilder class for constructing INSERT queries

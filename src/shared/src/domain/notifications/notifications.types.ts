@@ -1,4 +1,4 @@
-// packages/shared/src/domain/notifications/notifications.types.ts
+// src/shared/src/domain/notifications/notifications.types.ts
 /**
  * Push Notification Types
  *

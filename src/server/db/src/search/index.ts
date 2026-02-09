@@ -1,4 +1,4 @@
-// backend/db/src/search/index.ts
+// src/server/db/src/search/index.ts
 /**
  * Search Module Barrel Exports
  */

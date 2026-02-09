@@ -8,7 +8,11 @@
     "sourceMap": true,
     "composite": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "vitest/globals"]
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "typeRoots": ["../../node_modules/@types"],
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.shared.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

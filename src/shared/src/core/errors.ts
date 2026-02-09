@@ -1,4 +1,4 @@
-// packages/shared/src/core/errors.ts
+// src/shared/src/core/errors.ts
 /**
  * Core Error Classes and Utilities
  *

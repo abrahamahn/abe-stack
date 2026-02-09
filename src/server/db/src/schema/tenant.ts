@@ -1,4 +1,4 @@
-// backend/db/src/schema/tenant.ts
+// src/server/db/src/schema/tenant.ts
 /**
  * Tenant Schema Types
  *

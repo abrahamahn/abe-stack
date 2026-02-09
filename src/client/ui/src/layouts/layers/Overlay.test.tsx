@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/Overlay.test.tsx
+// src/client/ui/src/layouts/layers/Overlay.test.tsx
 // client/ui/src/elements/__tests__/Overlay.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';

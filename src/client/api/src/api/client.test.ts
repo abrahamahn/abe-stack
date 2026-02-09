@@ -1,4 +1,4 @@
-// client/src/api/client.test.ts
+// src/client/api/src/api/client.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createApiClient } from './client';
@@ -31,13 +31,13 @@ describe('createApiClient', () => {
     });
 
     const client = createApiClient({ baseUrl, fetchImpl: mockFetch });
-    const result = await client.login({ email: 'test@example.com', password: 'password123' });
+    const result = await client.login({ identifier: 'test@example.com', password: 'password123' });
 
     expect(mockFetch).toHaveBeenCalledWith(
       'http://localhost:3000/api/auth/login',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+        body: JSON.stringify({ identifier: 'test@example.com', password: 'password123' }),
         credentials: 'include',
       }),
     );
@@ -147,9 +147,9 @@ describe('createApiClient', () => {
 
     const client = createApiClient({ baseUrl, fetchImpl: mockFetch });
 
-    await expect(client.login({ email: 'test@example.com', password: 'pass' })).rejects.toThrow(
-      'Failed to fetch POST /auth/login',
-    );
+    await expect(
+      client.login({ identifier: 'test@example.com', password: 'pass' }),
+    ).rejects.toThrow('Failed to fetch POST /auth/login');
   });
 
   it('should throw NetworkError with original error stored when fetch fails', async () => {
@@ -197,7 +197,9 @@ describe('createApiClient', () => {
     const result = await client.register({
       email: 'new@example.com',
       password: 'password123',
-      name: 'Test User',
+      username: 'testuser',
+      firstName: 'Test',
+      lastName: 'User',
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -207,7 +209,9 @@ describe('createApiClient', () => {
         body: JSON.stringify({
           email: 'new@example.com',
           password: 'password123',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
         }),
         credentials: 'include',
       }),

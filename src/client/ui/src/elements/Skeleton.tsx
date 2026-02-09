@@ -1,4 +1,4 @@
-// client/ui/src/elements/Skeleton.tsx
+// src/client/ui/src/elements/Skeleton.tsx
 import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from 'react';
 import '../styles/elements.css';
 

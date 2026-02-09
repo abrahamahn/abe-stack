@@ -1,4 +1,4 @@
-// apps/web/src/utils/registerServiceWorker.test.ts
+// src/apps/web/src/utils/registerServiceWorker.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

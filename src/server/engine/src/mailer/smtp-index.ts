@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/smtp-index.ts
+// src/server/engine/src/mailer/smtp-index.ts
 /**
  * SMTP Client Barrel
  *

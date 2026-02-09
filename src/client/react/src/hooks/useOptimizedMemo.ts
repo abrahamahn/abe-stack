@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useOptimizedMemo.ts
+// src/client/react/src/hooks/useOptimizedMemo.ts
 /**
  * Optimized React Hooks
  *

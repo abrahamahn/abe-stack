@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/usePasswordChange.test.ts
+// src/apps/web/src/features/settings/hooks/usePasswordChange.test.ts
 /**
  * Tests for usePasswordChange hook.
  *

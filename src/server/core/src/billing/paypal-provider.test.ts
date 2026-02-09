@@ -1,4 +1,4 @@
-// backend/core/src/billing/paypal-provider.test.ts
+// src/server/core/src/billing/paypal-provider.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PayPalProvider } from './paypal-provider';

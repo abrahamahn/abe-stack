@@ -1,4 +1,4 @@
-// backend/core/src/auth/routes.test.ts
+// src/server/core/src/auth/routes.test.ts
 /**
  * Auth Routes Unit Tests
  *
@@ -113,8 +113,8 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (16) + Magic-link routes (2) + OAuth routes (13) = 31
-      expect(routeKeys).toHaveLength(31);
+      // Core auth routes (18) + ToS routes (2) + Magic-link routes (2) + OAuth routes (13) = 35
+      expect(routeKeys).toHaveLength(35);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -135,10 +135,16 @@ describe('Auth Routes', () => {
       expect(routeKeys).toContain('auth/totp/enable');
       expect(routeKeys).toContain('auth/totp/disable');
       expect(routeKeys).toContain('auth/totp/status');
+      expect(routeKeys).toContain('auth/totp/verify-login');
+
+      // Terms of Service routes
+      expect(routeKeys).toContain('auth/tos/status');
+      expect(routeKeys).toContain('auth/tos/accept');
 
       // Email change routes
       expect(routeKeys).toContain('auth/change-email');
       expect(routeKeys).toContain('auth/change-email/confirm');
+      expect(routeKeys).toContain('auth/change-email/revert');
 
       // OAuth routes
       expect(routeKeys).toContain('auth/oauth/google');
@@ -198,13 +204,15 @@ describe('Auth Routes', () => {
 
         const body = {
           email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           password: 'SecurePassword123!',
-          name: 'Test User',
         };
 
         await registerRoute.handler(ctx, body, req as never, reply as never);
 
-        expect(handleRegister).toHaveBeenCalledWith(ctx, body, reply);
+        expect(handleRegister).toHaveBeenCalledWith(ctx, body, req, reply);
       });
 
       test('should return result from handleRegister', async () => {
@@ -225,6 +233,9 @@ describe('Auth Routes', () => {
 
         const body = {
           email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           password: 'SecurePassword123!',
         };
 
@@ -268,11 +279,17 @@ describe('Auth Routes', () => {
             user: {
               id: 'user-123' as UserId,
               email: 'test@example.com',
-              name: 'Test',
+              username: 'testuser',
+              firstName: 'Test',
+              lastName: 'User',
               avatarUrl: null,
               role: 'user',
+              emailVerified: true,
+              phone: null,
+              phoneVerified: null,
+              dateOfBirth: null,
+              gender: null,
               createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
-              isVerified: true,
               updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
             },
           },
@@ -283,7 +300,7 @@ describe('Auth Routes', () => {
         const reply = createMockReply();
 
         const body = {
-          email: 'test@example.com',
+          identifier: 'test@example.com',
           password: 'SecurePassword123!',
         };
 
@@ -510,7 +527,7 @@ describe('Auth Routes', () => {
 
         await resetPasswordRoute.handler(ctx, body, req as never, reply as never);
 
-        expect(handleResetPassword).toHaveBeenCalledWith(ctx, body);
+        expect(handleResetPassword).toHaveBeenCalledWith(ctx, body, req);
       });
     });
   });
@@ -549,11 +566,17 @@ describe('Auth Routes', () => {
             user: {
               id: 'user-123' as UserId,
               email: 'test@example.com',
-              name: 'Test',
+              username: 'testuser',
+              firstName: 'Test',
+              lastName: 'User',
               avatarUrl: null,
               role: 'user',
+              emailVerified: true,
+              phone: null,
+              phoneVerified: null,
+              dateOfBirth: null,
+              gender: null,
               createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
-              isVerified: true,
               updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
             },
           },
@@ -626,27 +649,34 @@ describe('Schema Validation', () => {
     test('should accept valid registration request', () => {
       const validRequest = {
         email: 'test@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
-        name: 'Test User',
       };
 
       const result = registerRequestSchema.safeParse(validRequest);
       expect(result.success).toBe(true);
     });
 
-    test('should accept registration without name', () => {
-      const validRequest = {
+    test('should reject registration without username', () => {
+      const invalidRequest = {
         email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
       };
 
-      const result = registerRequestSchema.safeParse(validRequest);
-      expect(result.success).toBe(true);
+      const result = registerRequestSchema.safeParse(invalidRequest);
+      expect(result.success).toBe(false);
     });
 
     test('should reject registration with invalid email', () => {
       const invalidRequest = {
         email: 'not-an-email',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
       };
 
@@ -656,8 +686,10 @@ describe('Schema Validation', () => {
 
     test('should reject registration without email', () => {
       const invalidRequest = {
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
-        name: 'Test User',
       };
 
       const result = registerRequestSchema.safeParse(invalidRequest);
@@ -667,7 +699,9 @@ describe('Schema Validation', () => {
     test('should reject registration without password', () => {
       const invalidRequest = {
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
       };
 
       const result = registerRequestSchema.safeParse(invalidRequest);
@@ -677,6 +711,9 @@ describe('Schema Validation', () => {
     test('should reject empty password', () => {
       const invalidRequest = {
         email: 'test@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: '',
       };
 
@@ -686,9 +723,9 @@ describe('Schema Validation', () => {
   });
 
   describe('loginRequestSchema', () => {
-    test('should accept valid login request', () => {
+    test('should accept valid login request with email as identifier', () => {
       const validRequest = {
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'SecurePassword123!',
       };
 
@@ -696,9 +733,18 @@ describe('Schema Validation', () => {
       expect(result.success).toBe(true);
     });
 
-    test('should reject login with invalid email', () => {
+    test('should accept valid login request with username as identifier', () => {
+      const validRequest = {
+        identifier: 'testuser',
+        password: 'SecurePassword123!',
+      };
+
+      const result = loginRequestSchema.safeParse(validRequest);
+      expect(result.success).toBe(true);
+    });
+
+    test('should reject login without identifier', () => {
       const invalidRequest = {
-        email: 'not-an-email',
         password: 'SecurePassword123!',
       };
 
@@ -708,7 +754,7 @@ describe('Schema Validation', () => {
 
     test('should reject login without password', () => {
       const invalidRequest = {
-        email: 'test@example.com',
+        identifier: 'test@example.com',
       };
 
       const result = loginRequestSchema.safeParse(invalidRequest);
@@ -849,8 +895,9 @@ describe('Route Protection', () => {
     const protectedRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => !def.isPublic);
 
     // 7 core protected (logout-all, set-password, totp/setup, totp/enable, totp/disable, totp/status, change-email)
-    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 14 protected routes
-    expect(protectedRoutes).toHaveLength(14);
+    // + 2 ToS protected (tos/status, tos/accept)
+    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 16 protected routes
+    expect(protectedRoutes).toHaveLength(16);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -861,6 +908,9 @@ describe('Route Protection', () => {
     expect(protectedRouteNames).toContain('auth/totp/disable');
     expect(protectedRouteNames).toContain('auth/totp/status');
     expect(protectedRouteNames).toContain('auth/change-email');
+    // ToS protected routes
+    expect(protectedRouteNames).toContain('auth/tos/status');
+    expect(protectedRouteNames).toContain('auth/tos/accept');
     // OAuth protected routes
     expect(protectedRouteNames).toContain('auth/oauth/google/link');
     expect(protectedRouteNames).toContain('auth/oauth/github/link');
@@ -879,8 +929,8 @@ describe('Route Protection', () => {
   test('should have all other routes as public', () => {
     const publicRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => def.isPublic);
 
-    // 9 core public + 2 magic-link + 6 OAuth (3 initiate + 3 callback) = 17 public routes
-    expect(publicRoutes).toHaveLength(17);
+    // 11 core public + 2 magic-link + 6 OAuth (3 initiate + 3 callback) = 19 public routes
+    expect(publicRoutes).toHaveLength(19);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
     // Core public routes
@@ -893,6 +943,8 @@ describe('Route Protection', () => {
     expect(publicRouteNames).toContain('auth/verify-email');
     expect(publicRouteNames).toContain('auth/resend-verification');
     expect(publicRouteNames).toContain('auth/change-email/confirm');
+    expect(publicRouteNames).toContain('auth/change-email/revert');
+    expect(publicRouteNames).toContain('auth/totp/verify-login');
     // Magic-link public routes
     expect(publicRouteNames).toContain('auth/magic-link/request');
     expect(publicRouteNames).toContain('auth/magic-link/verify');
@@ -997,6 +1049,9 @@ describe('Edge Cases', () => {
     test('should accept email with plus sign', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test+tag@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
       });
       expect(result.success).toBe(true);
@@ -1005,6 +1060,9 @@ describe('Edge Cases', () => {
     test('should accept email with subdomain', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test@mail.example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
       });
       expect(result.success).toBe(true);
@@ -1013,6 +1071,9 @@ describe('Edge Cases', () => {
     test('should accept email with international domain', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test@example.co.uk',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         password: 'SecurePassword123!',
       });
       expect(result.success).toBe(true);
@@ -1037,33 +1098,46 @@ describe('Edge Cases', () => {
   });
 
   describe('Name field variations', () => {
-    test('should accept name with special characters', () => {
+    test('should accept firstName with special characters', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test@example.com',
+        username: 'jeanpierre',
+        firstName: 'Jean-Pierre',
+        lastName: "O'Connor",
         password: 'SecurePassword123!',
-        name: "Jean-Pierre O'Connor",
       });
       expect(result.success).toBe(true);
     });
 
-    test('should accept name with unicode characters', () => {
+    test('should accept firstName with unicode characters', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test@example.com',
+        username: 'francois',
+        firstName: 'Francois',
+        lastName: 'Muller',
         password: 'SecurePassword123!',
-        name: 'Francois Muller',
       });
       expect(result.success).toBe(true);
     });
 
-    test('should accept empty name string', () => {
+    test('should reject registration without firstName', () => {
       const result = registerRequestSchema.safeParse({
         email: 'test@example.com',
+        username: 'testuser',
+        lastName: 'User',
         password: 'SecurePassword123!',
-        name: '',
       });
-      // Empty string may be valid or invalid depending on schema definition
-      // This test documents current behavior
-      expect(typeof result.success).toBe('boolean');
+      expect(result.success).toBe(false);
+    });
+
+    test('should reject registration without lastName', () => {
+      const result = registerRequestSchema.safeParse({
+        email: 'test@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        password: 'SecurePassword123!',
+      });
+      expect(result.success).toBe(false);
     });
   });
 });

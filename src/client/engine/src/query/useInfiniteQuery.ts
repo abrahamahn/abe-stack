@@ -1,4 +1,4 @@
-// client/src/query/useInfiniteQuery.ts
+// src/client/engine/src/query/useInfiniteQuery.ts
 /**
  * useInfiniteQuery - React hook for paginated data fetching.
  *

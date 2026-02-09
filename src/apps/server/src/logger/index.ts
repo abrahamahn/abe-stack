@@ -1,4 +1,4 @@
-// apps/server/src/logger/index.ts
+// src/apps/server/src/logger/index.ts
 /**
  * Logger Module
  *

@@ -1,4 +1,4 @@
-// backend/core/src/auth/totp.ts
+// src/server/core/src/auth/totp.ts
 
 /**
  * TOTP (2FA) Service
@@ -35,7 +35,7 @@ const TOTP_ALGORITHM = 'SHA1';
 const BACKUP_CODE_HASH_CONFIG = {
   type: 2 as const, // argon2id
   memoryCost: 8192, // 8 MiB
-  timeCost: 1,
+  timeCost: 2,
   parallelism: 1,
 };
 

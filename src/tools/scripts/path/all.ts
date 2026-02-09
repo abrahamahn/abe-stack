@@ -1,16 +1,16 @@
-// tools/scripts/path/all.ts
+// src/tools/scripts/path/all.ts
 /**
- * Exports ALL project files to .tmp/PATH-all.md in a categorized format
- * Categories: Root, tools, ops, .config, .github, apps/*, backend/*, client, premium/*, Styles, Barrel Exports, Documentation
+ * Exports ALL project files to .tmp/PATH-all.md in a categorized format.
+ * Categories: Root, docs, infra, .config, .github, src/apps/*, src/client/*, src/server/*, src/shared, src/tools, Styles, Barrels, Markdown
  * @module tools/scripts/path/all
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '../../..');
+const REPO_ROOT = path.resolve(__dirname, '../../../..');
 
 /** Directories to exclude from scanning */
 const EXCLUDED_DIRS = new Set([
@@ -27,10 +27,11 @@ const EXCLUDED_DIRS = new Set([
 ]);
 
 /**
- * Recursively walks a directory and collects all files
+ * Recursively walks a directory and collects all files.
  * @param dir - Directory to walk
  * @param files - Accumulator for found files
  * @returns Array of relative file paths
+ * @complexity O(n) where n is total filesystem entries
  */
 function walkDir(dir: string, files: string[] = []): string[] {
   if (!fs.existsSync(dir)) {
@@ -56,7 +57,7 @@ function walkDir(dir: string, files: string[] = []): string[] {
 }
 
 /**
- * Gets root-level files
+ * Gets root-level files.
  * @returns Array of root file paths
  */
 function getRootFiles(): string[] {
@@ -72,34 +73,36 @@ function getRootFiles(): string[] {
   return files.sort();
 }
 
-/**
- * Categorizes files into groups
- * @param allFiles - All file paths
- * @returns Categorized files
- */
-function categorizeFiles(allFiles: string[]): {
+interface CategorizedFiles {
   root: string[];
-  tools: string[];
+  docs: string[];
   infra: string[];
   config: string[];
   github: string[];
-  apps: Map<string, string[]>;
+  /** Source code packages keyed by e.g. 'src/apps/web', 'src/shared' */
   packages: Map<string, string[]>;
   styles: string[];
   barrels: string[];
   markdown: string[];
-} {
-  const result = {
-    root: [] as string[],
-    tools: [] as string[],
-    infra: [] as string[],
-    config: [] as string[],
-    github: [] as string[],
-    apps: new Map<string, string[]>(),
+}
+
+/**
+ * Categorizes files into groups matching the current monorepo structure.
+ * @param allFiles - All file paths relative to REPO_ROOT
+ * @returns Categorized files
+ * @complexity O(n) where n is number of files
+ */
+function categorizeFiles(allFiles: string[]): CategorizedFiles {
+  const result: CategorizedFiles = {
+    root: [],
+    docs: [],
+    infra: [],
+    config: [],
+    github: [],
     packages: new Map<string, string[]>(),
-    styles: [] as string[],
-    barrels: [] as string[],
-    markdown: [] as string[],
+    styles: [],
+    barrels: [],
+    markdown: [],
   };
 
   for (const file of allFiles) {
@@ -118,12 +121,12 @@ function categorizeFiles(allFiles: string[]): {
     }
 
     // CSS/Styles
-    if (file.endsWith('.css') || file.startsWith('client/ui/src/styles/')) {
+    if (file.endsWith('.css') || file.startsWith('src/client/ui/src/styles/')) {
       result.styles.push(file);
       continue;
     }
 
-    // Root files
+    // Root files (no directory)
     if (!file.includes('/')) {
       result.root.push(file);
       continue;
@@ -131,43 +134,33 @@ function categorizeFiles(allFiles: string[]): {
 
     // Categorize by top-level directory
     switch (parts[0]) {
-      case 'tools':
-        result.tools.push(file);
+      case 'src': {
+        // Group src/ files by package: src/<layer>/<pkg> or src/shared, src/tools
+        let pkgKey: string;
+        if (parts.length >= 3 && parts[1] !== 'shared' && parts[1] !== 'tools') {
+          pkgKey = `src/${parts[1]}/${parts[2]}`;
+        } else {
+          pkgKey = `src/${parts[1]}`;
+        }
+        const existing = result.packages.get(pkgKey) ?? [];
+        existing.push(file);
+        result.packages.set(pkgKey, existing);
+        break;
+      }
+      case 'docs':
+        result.docs.push(file);
         break;
       case 'infra':
-      case 'backend':
-      case 'shared':
-      case 'premium': {
-        const pkgName = `${parts[0]}/${parts[1]}`;
-        const existingPkg = result.packages.get(pkgName) ?? [];
-        existingPkg.push(file);
-        result.packages.set(pkgName, existingPkg);
-        break;
-      }
-      case 'client': {
-        const existingSdk = result.packages.get('client') ?? [];
-        existingSdk.push(file);
-        result.packages.set('client', existingSdk);
-        break;
-      }
-      case 'ops':
         result.infra.push(file);
         break;
+      case 'config':
       case '.config':
         result.config.push(file);
         break;
       case '.github':
         result.github.push(file);
         break;
-      case 'apps': {
-        const appName = `apps/${parts[1]}`;
-        const existing = result.apps.get(appName) ?? [];
-        existing.push(file);
-        result.apps.set(appName, existing);
-        break;
-      }
       default:
-        // Other files go to root
         result.root.push(file);
     }
   }
@@ -176,10 +169,10 @@ function categorizeFiles(allFiles: string[]): {
 }
 
 /**
- * Builds output section
+ * Builds a markdown section with a title and file list.
  * @param title - Section title
  * @param files - Files in section
- * @returns Formatted section string
+ * @returns Formatted section string (empty string if no files)
  */
 function buildSection(title: string, files: string[]): string {
   if (files.length === 0) {
@@ -194,12 +187,11 @@ function buildSection(title: string, files: string[]): string {
 }
 
 /**
- * Exports all files to PATH-all.md
+ * Exports all files to PATH-all.md.
  */
 function exportAllFiles(): void {
   console.log('📦 Scanning all project files...');
 
-  // Get all files
   const allFiles = walkDir(REPO_ROOT);
   const rootFiles = getRootFiles();
 
@@ -219,59 +211,58 @@ function exportAllFiles(): void {
   // Configuration & Infrastructure section
   output += '\n---\n\n# Configuration & Infrastructure\n';
 
-  // Root
   output += buildSection('Root', categorized.root);
   count += categorized.root.length;
 
-  // tools
-  output += buildSection('tools', categorized.tools);
-  count += categorized.tools.length;
+  output += buildSection('docs', categorized.docs);
+  count += categorized.docs.length;
 
-  // ops (operational infrastructure)
-  output += buildSection('ops', categorized.infra);
+  output += buildSection('infra', categorized.infra);
   count += categorized.infra.length;
 
-  // .config
   output += buildSection('.config', categorized.config);
   count += categorized.config.length;
 
-  // .github
   output += buildSection('.github', categorized.github);
   count += categorized.github.length;
 
-  // Source Code section
+  // Source Code section (hexagonal order: shared → server → client → apps → tools)
   output += '\n---\n\n# Source Code\n';
 
-  // Apps
-  const appOrder = ['apps/desktop', 'apps/server', 'apps/web'];
-  for (const app of appOrder) {
-    const files = categorized.apps.get(app);
-    if (files && files.length > 0) {
-      output += buildSection(app, files);
-      count += files.length;
-    }
-  }
-
-  // Packages
-  const pkgOrder = [
-    'infra/contracts',
-    'kernel',
-    'infra/src',
-    'premium/media',
-    'premium/websocket',
-    'premium/client',
-    'infra/notifications',
-    'infra/realtime',
-    'client/react',
-    'infra/users',
-    'backend/core',
-    'client/ui',
-    'client',
+  const packageOrder = [
+    'src/shared',
+    'src/server/core',
+    'src/server/db',
+    'src/server/engine',
+    'src/server/media',
+    'src/server/realtime',
+    'src/server/websocket',
+    'src/client/api',
+    'src/client/engine',
+    'src/client/react',
+    'src/client/ui',
+    'src/apps/desktop',
+    'src/apps/server',
+    'src/apps/web',
+    'src/apps/storybook',
+    'src/tools',
   ];
-  for (const pkg of pkgOrder) {
+
+  for (const pkg of packageOrder) {
     const files = categorized.packages.get(pkg);
     if (files && files.length > 0) {
       output += buildSection(pkg, files);
+      count += files.length;
+      categorized.packages.delete(pkg);
+    }
+  }
+
+  // Remaining packages not in the predefined order
+  const remainingKeys = Array.from(categorized.packages.keys()).sort();
+  for (const key of remainingKeys) {
+    const files = categorized.packages.get(key);
+    if (files && files.length > 0) {
+      output += buildSection(key, files);
       count += files.length;
     }
   }

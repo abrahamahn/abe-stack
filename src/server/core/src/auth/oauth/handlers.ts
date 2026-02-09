@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/handlers.ts
+// src/server/core/src/auth/oauth/handlers.ts
 /**
  * OAuth Handlers
  *

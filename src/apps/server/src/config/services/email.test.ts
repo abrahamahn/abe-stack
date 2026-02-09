@@ -1,4 +1,4 @@
-// apps/server/src/config/services/email.test.ts
+// src/apps/server/src/config/services/email.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadEmailConfig } from './email';

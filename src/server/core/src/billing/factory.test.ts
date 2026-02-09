@@ -1,4 +1,4 @@
-// backend/core/src/billing/factory.test.ts
+// src/server/core/src/billing/factory.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createBillingProvider, isBillingConfigured } from './factory';

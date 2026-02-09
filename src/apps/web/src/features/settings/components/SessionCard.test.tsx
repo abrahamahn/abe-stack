@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/SessionCard.test.tsx
+// src/apps/web/src/features/settings/components/SessionCard.test.tsx
 /**
  * Session Card Component Tests
  *

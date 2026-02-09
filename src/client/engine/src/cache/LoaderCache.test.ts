@@ -1,4 +1,4 @@
-// client/src/cache/LoaderCache.test.ts
+// src/client/engine/src/cache/LoaderCache.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { Loader, LoaderCache, loadWithCache } from './LoaderCache';

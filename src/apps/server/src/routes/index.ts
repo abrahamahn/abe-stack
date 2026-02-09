@@ -1,2 +1,2 @@
-// apps/server/src/routes/index.ts
+// src/apps/server/src/routes/index.ts
 export { registerRoutes } from './routes';

@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/refresh-token.ts
+// src/server/core/src/auth/utils/refresh-token.ts
 /**
  * Refresh Token Management
  *
@@ -15,26 +15,30 @@ import {
   gt,
   insert,
   lt,
-  REFRESH_TOKENS_TABLE,
   REFRESH_TOKEN_COLUMNS,
   REFRESH_TOKEN_FAMILIES_TABLE,
   REFRESH_TOKEN_FAMILY_COLUMNS,
+  REFRESH_TOKENS_TABLE,
   select,
   toCamelCase,
   update,
   USER_COLUMNS,
+  USER_SESSIONS_TABLE,
+  USER_SESSION_COLUMNS,
   USERS_TABLE,
   withTransaction,
   type DbClient,
   type RefreshToken,
   type RefreshTokenFamily,
   type User,
+  type UserSession,
 } from '@abe-stack/db';
 import { TokenReuseError } from '@abe-stack/shared';
 
 import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../security/events';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
+import { parseUserAgentDeviceInfo } from './user-agent';
 
 import type { UserRole } from '@abe-stack/shared';
 
@@ -52,6 +56,7 @@ import type { UserRole } from '@abe-stack/shared';
  * @param db - Database client
  * @param userId - User ID to create family for
  * @param expiryDays - Number of days until token expires (default: 7)
+ * @param sessionMeta - Optional session metadata for user_sessions
  * @returns Object containing the family ID and token
  * @throws When database operations fail
  * @complexity O(1) - two database inserts
@@ -60,6 +65,7 @@ export async function createRefreshTokenFamily(
   db: DbClient,
   userId: string,
   expiryDays: number = 7,
+  sessionMeta?: { ipAddress?: string; userAgent?: string; deviceId?: string },
 ): Promise<{ familyId: string; token: string }> {
   return await withTransaction(db, async (tx) => {
     const familyRows = await tx.query(
@@ -73,6 +79,7 @@ export async function createRefreshTokenFamily(
     const family = toCamelCase<RefreshTokenFamily>(familyRows[0], REFRESH_TOKEN_FAMILY_COLUMNS);
 
     const token = createRefreshToken();
+    const now = new Date();
     await tx.execute(
       insert(REFRESH_TOKENS_TABLE)
         .values({
@@ -80,6 +87,24 @@ export async function createRefreshTokenFamily(
           family_id: family.id,
           token,
           expires_at: getRefreshTokenExpiry(expiryDays),
+        })
+        .toSql(),
+    );
+
+    const deviceInfo = parseUserAgentDeviceInfo(sessionMeta?.userAgent);
+
+    await tx.execute(
+      insert(USER_SESSIONS_TABLE)
+        .values({
+          id: family.id,
+          user_id: userId,
+          ip_address: sessionMeta?.ipAddress ?? null,
+          user_agent: sessionMeta?.userAgent ?? null,
+          device_name: deviceInfo.deviceName,
+          device_type: deviceInfo.deviceType,
+          device_id: sessionMeta?.deviceId ?? null,
+          last_active_at: now,
+          created_at: now,
         })
         .toSql(),
     );
@@ -144,7 +169,7 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 2: Parallel fetch of user and family data
   // These are independent queries that can run concurrently
-  const [userRow, familyRow] = await Promise.all([
+  const [userRow, familyRow, sessionRow] = await Promise.all([
     // User lookup - always needed for the response
     db.queryOne(select(USERS_TABLE).where(eq('id', storedToken.userId)).limit(1).toSql()),
     // Family lookup - only if familyId exists
@@ -154,6 +179,12 @@ export async function rotateRefreshToken(
             .where(eq('id', storedToken.familyId))
             .limit(1)
             .toSql(),
+        )
+      : Promise.resolve(null),
+    // Session lookup - for checking User-Agent binding
+    storedToken.familyId !== null
+      ? db.queryOne(
+          select(USER_SESSIONS_TABLE).where(eq('id', storedToken.familyId)).limit(1).toSql(),
         )
       : Promise.resolve(null),
   ]);
@@ -168,6 +199,48 @@ export async function rotateRefreshToken(
     familyRow !== null
       ? toCamelCase<RefreshTokenFamily>(familyRow, REFRESH_TOKEN_FAMILY_COLUMNS)
       : null;
+  const session =
+    sessionRow !== null ? toCamelCase<UserSession>(sessionRow, USER_SESSION_COLUMNS) : null;
+
+  // SESSION BINDING CHECK: User-Agent Validation
+  // If the session was started with a specific User-Agent, verify it hasn't changed.
+  // This prevents session hijacking if a token is stolen and used from a different device.
+  // Note: userAgent header matches are exact strings. Browser updates may invalidate sessions, which is acceptable for security.
+  if (
+    session?.userAgent !== undefined &&
+    session.userAgent !== null &&
+    session.userAgent !== '' &&
+    userAgent !== undefined
+  ) {
+    if (session.userAgent !== userAgent) {
+      if (storedToken.familyId !== null) {
+        await logTokenReuseEvent(
+          db,
+          user.id,
+          user.email,
+          storedToken.familyId,
+          ipAddress,
+          userAgent,
+        );
+        await logTokenFamilyRevokedEvent(
+          db,
+          user.id,
+          user.email,
+          storedToken.familyId,
+          'Session hijacking detected: User-Agent mismatch',
+          ipAddress,
+          userAgent, // The attacker's UA
+        );
+        await revokeTokenFamily(
+          db,
+          storedToken.familyId,
+          'Session hijacking detected: User-Agent mismatch',
+        );
+        // We reuse TokenReuseError or throw a specific security error
+        throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
+      }
+    }
+  }
 
   // Check if family is revoked (token reuse attack)
   if (
@@ -259,6 +332,15 @@ export async function rotateRefreshToken(
     return token;
   });
 
+  if (storedToken.familyId !== null) {
+    await db.execute(
+      update(USER_SESSIONS_TABLE)
+        .set({ last_active_at: new Date() })
+        .where(eq('id', storedToken.familyId))
+        .toSql(),
+    );
+  }
+
   return {
     token: newToken,
     userId: user.id,
@@ -289,10 +371,11 @@ export async function revokeTokenFamily(
   reason: string,
 ): Promise<void> {
   await withTransaction(db, async (tx) => {
+    const now = new Date();
     await tx.execute(
       update(REFRESH_TOKEN_FAMILIES_TABLE)
         .set({
-          revoked_at: new Date(),
+          revoked_at: now,
           revoke_reason: reason,
         })
         .where(eq('id', familyId))
@@ -300,6 +383,10 @@ export async function revokeTokenFamily(
     );
 
     await tx.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(eq('family_id', familyId)).toSql());
+
+    await tx.execute(
+      update(USER_SESSIONS_TABLE).set({ revoked_at: now }).where(eq('id', familyId)).toSql(),
+    );
   });
 }
 
@@ -316,10 +403,11 @@ export async function revokeTokenFamily(
  */
 export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
   await withTransaction(db, async (tx) => {
+    const now = new Date();
     await tx.execute(
       update(REFRESH_TOKEN_FAMILIES_TABLE)
         .set({
-          revoked_at: new Date(),
+          revoked_at: now,
           revoke_reason: 'User logged out from all devices',
         })
         .where(eq('user_id', userId))
@@ -327,6 +415,10 @@ export async function revokeAllUserTokens(db: DbClient, userId: string): Promise
     );
 
     await tx.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(eq('user_id', userId)).toSql());
+
+    await tx.execute(
+      update(USER_SESSIONS_TABLE).set({ revoked_at: now }).where(eq('user_id', userId)).toSql(),
+    );
   });
 }
 

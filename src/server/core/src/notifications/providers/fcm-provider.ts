@@ -1,4 +1,4 @@
-// backend/core/src/notifications/providers/fcm-provider.ts
+// src/server/core/src/notifications/providers/fcm-provider.ts
 /**
  * FCM (Firebase Cloud Messaging) Provider Stub
  *

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/sessions/index.ts
+// src/shared/src/domain/sessions/index.ts
 
 export { getSessionAge, isSessionActive, isSessionRevoked } from './sessions.logic';
 

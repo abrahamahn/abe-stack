@@ -1,4 +1,4 @@
-// backend/core/src/admin/userService.test.ts
+// src/server/core/src/admin/userService.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -20,14 +20,29 @@ function createMockUser(overrides: Partial<DbUser> = {}): DbUser {
   return {
     id: 'user-123',
     email: 'test@example.com',
+    canonicalEmail: 'test@example.com',
+    username: 'testuser',
     passwordHash: 'hash',
-    name: 'Test User',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: null,
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: new Date('2024-01-01'),
     lockedUntil: null,
     failedLoginAttempts: 0,
+    totpSecret: null,
+    totpEnabled: false,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     version: 1,
@@ -139,12 +154,16 @@ describe('Admin User Service', () => {
       expect(result.data[0]).toEqual({
         id: mockUser.id,
         email: mockUser.email,
-        name: mockUser.name,
+        username: mockUser.username,
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
         role: mockUser.role,
         emailVerified: mockUser.emailVerified,
         emailVerifiedAt: mockUser.emailVerifiedAt?.toISOString() ?? null,
         lockedUntil: null,
         failedLoginAttempts: mockUser.failedLoginAttempts,
+        phone: null,
+        phoneVerified: false,
         createdAt: mockUser.createdAt.toISOString(),
         updatedAt: mockUser.updatedAt.toISOString(),
       });
@@ -171,16 +190,23 @@ describe('Admin User Service', () => {
   });
 
   describe('updateUser', () => {
-    test('should update user name', async () => {
+    test('should update user firstName and lastName', async () => {
       const mockUser = createMockUser();
-      const updatedUser = createMockUser({ name: 'New Name' });
+      const updatedUser = createMockUser({ firstName: 'New', lastName: 'Name' });
       vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
       vi.mocked(mockRepo.update).mockResolvedValue(updatedUser);
 
-      const result = await updateUser(mockRepo, 'user-123', { name: 'New Name' });
+      const result = await updateUser(mockRepo, 'user-123', {
+        firstName: 'New',
+        lastName: 'Name',
+      });
 
-      expect(result.name).toBe('New Name');
-      expect(mockRepo.update).toHaveBeenCalledWith('user-123', { name: 'New Name' });
+      expect(result.firstName).toBe('New');
+      expect(result.lastName).toBe('Name');
+      expect(mockRepo.update).toHaveBeenCalledWith('user-123', {
+        firstName: 'New',
+        lastName: 'Name',
+      });
     });
 
     test('should update user role', async () => {
@@ -198,7 +224,7 @@ describe('Admin User Service', () => {
     test('should throw UserNotFoundError when user not found', async () => {
       vi.mocked(mockRepo.findById).mockResolvedValue(null);
 
-      await expect(updateUser(mockRepo, 'nonexistent', { name: 'Test' })).rejects.toThrow(
+      await expect(updateUser(mockRepo, 'nonexistent', { firstName: 'Test' })).rejects.toThrow(
         'User not found',
       );
     });
@@ -272,12 +298,16 @@ describe('Admin User Service', () => {
       const result = getUserStatus({
         id: '1',
         email: 'test@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         role: 'user',
         emailVerified: true,
         emailVerifiedAt: null,
         lockedUntil: futureDate,
         failedLoginAttempts: 0,
+        phone: null,
+        phoneVerified: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -289,12 +319,16 @@ describe('Admin User Service', () => {
       const result = getUserStatus({
         id: '1',
         email: 'test@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         role: 'user',
         emailVerified: false,
         emailVerifiedAt: null,
         lockedUntil: null,
         failedLoginAttempts: 0,
+        phone: null,
+        phoneVerified: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -306,12 +340,16 @@ describe('Admin User Service', () => {
       const result = getUserStatus({
         id: '1',
         email: 'test@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         role: 'user',
         emailVerified: true,
         emailVerifiedAt: new Date().toISOString(),
         lockedUntil: null,
         failedLoginAttempts: 0,
+        phone: null,
+        phoneVerified: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -324,12 +362,16 @@ describe('Admin User Service', () => {
       const result = getUserStatus({
         id: '1',
         email: 'test@example.com',
-        name: null,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         role: 'user',
         emailVerified: true,
         emailVerifiedAt: new Date().toISOString(),
         lockedUntil: pastDate,
         failedLoginAttempts: 0,
+        phone: null,
+        phoneVerified: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

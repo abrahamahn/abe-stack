@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useThemeMode.ts
+// src/client/react/src/hooks/useThemeMode.ts
 
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useMediaQuery } from '@hooks/useMediaQuery';

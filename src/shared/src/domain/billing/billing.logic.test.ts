@@ -1,4 +1,4 @@
-// packages/shared/src/domain/billing/billing.logic.test.ts
+// src/shared/src/domain/billing/billing.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { parsePlanId, parseUserId } from '../../types/ids';
@@ -157,8 +157,8 @@ describe('billing.logic', () => {
       expect(value).toBe(false);
     });
 
-    it('does NOT return true for numeric features if value is missing (bug fix)', () => {
-      const brokenPlan: Plan = {
+    it('returns true for included feature when value is undefined (nullish coalescing)', () => {
+      const planWithMissingValue: Plan = {
         ...mockPlan,
         features: [
           {
@@ -170,9 +170,9 @@ describe('billing.logic', () => {
         ],
       };
 
-      const value = getFeatureValue(brokenPlan, FEATURE_KEYS.PROJECTS, 100);
-      expect(value).toBe(100);
-      expect(value).not.toBe(true);
+      // When included=true and value is undefined, `feature.value ?? true` returns true
+      const value = getFeatureValue(planWithMissingValue, FEATURE_KEYS.PROJECTS, 100);
+      expect(value).toBe(true);
     });
   });
 

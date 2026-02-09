@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/utils/redirects.ts
+// src/apps/web/src/features/auth/utils/redirects.ts
 
 interface UserLocal {
   role?: string;

@@ -1,4 +1,4 @@
-// client/ui/src/layouts/layers/SidePeek.test.tsx
+// src/client/ui/src/layouts/layers/SidePeek.test.tsx
 /** @vitest-environment jsdom */
 import { SidePeek } from '@layers/SidePeek';
 import { render, screen, waitFor } from '@testing-library/react';

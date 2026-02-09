@@ -1,4 +1,4 @@
-// packages/shared/src/__tests__/async-utilities.integration.test.ts
+// shared/src/__tests__/async-utilities.integration.test.ts
 /**
  * Integration tests for async utilities under load
  *

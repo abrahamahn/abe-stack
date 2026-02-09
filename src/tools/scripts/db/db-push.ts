@@ -1,4 +1,4 @@
-// tools/scripts/db/db-push.ts
+// src/tools/scripts/db/db-push.ts
 /**
  * Database Schema Push (Development)
  *
@@ -10,6 +10,7 @@
  */
 
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
+import { loadServerEnv } from '@abe-stack/server-engine';
 
 const STATEMENTS: string[] = [
   `CREATE EXTENSION IF NOT EXISTS "pgcrypto";`,
@@ -17,8 +18,11 @@ const STATEMENTS: string[] = [
   CREATE TABLE IF NOT EXISTS users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     email text NOT NULL UNIQUE,
+    username text UNIQUE,
+    canonical_email text NOT NULL UNIQUE,
     password_hash text NOT NULL,
-    name text,
+    first_name text,
+    last_name text,
     avatar_url text,
     role text NOT NULL DEFAULT 'user',
     email_verified boolean NOT NULL DEFAULT false,
@@ -27,10 +31,54 @@ const STATEMENTS: string[] = [
     failed_login_attempts integer NOT NULL DEFAULT 0,
     totp_secret text,
     totp_enabled boolean NOT NULL DEFAULT false,
+    phone text,
+    phone_verified boolean,
+    date_of_birth timestamptz,
+    gender text,
+    city text,
+    state text,
+    country text,
+    bio text,
+    language text,
+    website text,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     version integer NOT NULL DEFAULT 1
   );
+  `,
+  `
+  -- Existing dev DBs might have an older users table without canonical_email.
+  -- CREATE TABLE IF NOT EXISTS won't add new columns, so we patch forward here.
+  ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS canonical_email text;
+  `,
+  `
+  -- Backfill canonical_email for existing rows.
+  UPDATE users
+  SET canonical_email = lower(trim(email))
+  WHERE canonical_email IS NULL;
+  `,
+  `
+  -- Enforce non-null after backfill (will fail loudly if existing data is invalid).
+  ALTER TABLE users
+    ALTER COLUMN canonical_email SET NOT NULL;
+  `,
+  `
+  -- Patch forward: Add specific profile columns if they are missing from an older dev DB.
+  ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS username text UNIQUE,
+    ADD COLUMN IF NOT EXISTS first_name text,
+    ADD COLUMN IF NOT EXISTS last_name text,
+    ADD COLUMN IF NOT EXISTS phone text,
+    ADD COLUMN IF NOT EXISTS phone_verified boolean,
+    ADD COLUMN IF NOT EXISTS date_of_birth timestamptz,
+    ADD COLUMN IF NOT EXISTS gender text,
+    ADD COLUMN IF NOT EXISTS city text,
+    ADD COLUMN IF NOT EXISTS state text,
+    ADD COLUMN IF NOT EXISTS country text,
+    ADD COLUMN IF NOT EXISTS bio text,
+    ADD COLUMN IF NOT EXISTS language text,
+    ADD COLUMN IF NOT EXISTS website text;
   `,
   `
   CREATE TABLE IF NOT EXISTS refresh_token_families (
@@ -93,7 +141,7 @@ const STATEMENTS: string[] = [
     severity text NOT NULL,
     ip_address text,
     user_agent text,
-    metadata text,
+    metadata jsonb,
     created_at timestamptz NOT NULL DEFAULT now()
   );
   `,
@@ -169,6 +217,18 @@ const STATEMENTS: string[] = [
   );
   `,
   `
+  CREATE TABLE IF NOT EXISTS email_change_revert_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    old_email text NOT NULL,
+    new_email text NOT NULL,
+    token_hash text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `
   CREATE TABLE IF NOT EXISTS tenants (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name text NOT NULL,
@@ -179,6 +239,37 @@ const STATEMENTS: string[] = [
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `
+  CREATE TABLE IF NOT EXISTS api_keys (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id uuid REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name text NOT NULL,
+    key_prefix text NOT NULL,
+    key_hash text NOT NULL UNIQUE,
+    scopes text[] NOT NULL DEFAULT '{}',
+    last_used_at timestamptz,
+    expires_at timestamptz,
+    revoked_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `
+  CREATE TABLE IF NOT EXISTS data_export_requests (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type text NOT NULL CHECK (type IN ('export', 'deletion')),
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'canceled')),
+    format text NOT NULL DEFAULT 'json',
+    download_url text,
+    expires_at timestamptz,
+    completed_at timestamptz,
+    error_message text,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
   );
   `,
   `
@@ -212,10 +303,18 @@ const STATEMENTS: string[] = [
     ip_address text,
     user_agent text,
     device_id text,
+    device_name text,
+    device_type text,
     last_active_at timestamptz NOT NULL DEFAULT now(),
     revoked_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now()
   );
+  `,
+  `
+  -- Patch forward: Add device info to user_sessions if missing.
+  ALTER TABLE user_sessions
+    ADD COLUMN IF NOT EXISTS device_name text,
+    ADD COLUMN IF NOT EXISTS device_type text;
   `,
   `
   CREATE TABLE IF NOT EXISTS notifications (
@@ -457,6 +556,7 @@ const STATEMENTS: string[] = [
   );
   `,
   `CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_canonical_email ON users (canonical_email);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_expires ON refresh_tokens (token, expires_at);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_refresh_token_families_user ON refresh_token_families (user_id);`,
@@ -471,6 +571,13 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_totp_backup_codes_user ON totp_backup_codes (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_user ON email_change_tokens (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_hash ON email_change_tokens (token_hash);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_change_revert_tokens_user ON email_change_revert_tokens (user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_change_revert_tokens_hash ON email_change_revert_tokens (token_hash);`,
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON api_keys(tenant_id) WHERE tenant_id IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(key_prefix);`,
+  `CREATE INDEX IF NOT EXISTS idx_data_export_requests_user ON data_export_requests(user_id, created_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_data_export_requests_status ON data_export_requests(status);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_tenant_email ON invitations (tenant_id, email) WHERE status = 'pending';`,
   `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications (user_id, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_jobs_status_priority_created ON jobs (status, priority DESC, created_at);`,
@@ -485,6 +592,9 @@ const STATEMENTS: string[] = [
  * @complexity O(n) where n = number of SQL statements
  */
 export async function pushSchema(): Promise<void> {
+  // Load + validate `.config/env` files (prefers `.env.local` when present).
+  loadServerEnv();
+
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);
 

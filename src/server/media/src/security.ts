@@ -1,4 +1,4 @@
-// premium/media/src/security.ts
+// src/server/media/src/security.ts
 /**
  * Basic Media Security Scanner
  *
@@ -73,15 +73,15 @@ export class BasicSecurityScanner {
       // Read first 1KB for basic content analysis
       const fd = await fs.open(filePath, 'r');
       const buffer = Buffer.alloc(1024);
-      await fd.read(buffer, 0, 1024, 0);
-      await fd.close();
+      try {
+        await fd.read(buffer, 0, 1024, 0);
+      } finally {
+        await fd.close();
+      }
 
       const content = buffer.toString('binary');
-
-      // Check for suspicious patterns
-      if (content.includes('\0')) {
-        result.warnings.push('File contains null bytes (potentially suspicious)');
-      }
+      const detectedMime = this.detectMimeType(filePath);
+      const isTextBased = this.isTextBasedMimeType(detectedMime);
 
       // Check for extremely high entropy (might indicate encryption/obfuscation)
       const entropy = this.calculateEntropy(buffer);
@@ -89,8 +89,14 @@ export class BasicSecurityScanner {
         result.warnings.push('File has high entropy (might be encrypted or compressed)');
       }
 
-      // Check for embedded scripts in text-based files
-      if (this.isTextBasedMimeType(this.detectMimeType(filePath))) {
+      // Text-file specific checks: null bytes and embedded scripts
+      // Binary media files (images, audio, video) naturally contain null bytes,
+      // so these heuristics only apply to text-based MIME types.
+      if (isTextBased) {
+        if (content.includes('\0')) {
+          result.warnings.push('Text file contains null bytes (potentially suspicious)');
+        }
+
         if (
           content.includes('<script') ||
           content.includes('javascript:') ||
@@ -100,16 +106,9 @@ export class BasicSecurityScanner {
           result.threats.push('Potential XSS content detected');
         }
 
-        // Check for server-side code
         if (content.includes('<?php') || content.includes('<%') || content.includes('<%=')) {
           result.threats.push('Server-side code detected in file');
         }
-      }
-
-      // Check for extremely large embedded data
-      const nullSequences = (content.match(/\0{10,}/g) ?? []).length;
-      if (nullSequences > 5) {
-        result.warnings.push('File contains unusual null byte sequences');
       }
 
       if (result.threats.length > 0) {

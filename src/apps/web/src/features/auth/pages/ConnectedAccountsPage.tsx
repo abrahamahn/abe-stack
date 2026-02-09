@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/pages/ConnectedAccountsPage.tsx
+// src/apps/web/src/features/auth/pages/ConnectedAccountsPage.tsx
 /**
  * ConnectedAccountsPage - Manage OAuth connected accounts.
  *

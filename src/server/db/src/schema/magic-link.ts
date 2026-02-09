@@ -1,4 +1,4 @@
-// backend/db/src/schema/magic-link.ts
+// src/server/db/src/schema/magic-link.ts
 /**
  * Magic Link Schema Types
  *

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/cache/errors.ts
+// src/shared/src/utils/cache/errors.ts
 /**
  * Cache-Specific Errors
  *

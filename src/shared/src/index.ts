@@ -1,6 +1,6 @@
-// packages/shared/src/index.ts
+// src/shared/src/index.ts
 
-export type * from './contracts/types';
+export type * from './core/api';
 
 // ============================================================================
 // CORE EXPORTS (Errors, constants, guards, result, policy, etc.)
@@ -99,6 +99,7 @@ export {
   type JobQueueService,
   type LocalStorageConfig,
   type MetricsService,
+  type NotificationService,
   type ReadableStreamLike,
   type S3StorageConfig,
   type SendResult,
@@ -176,6 +177,10 @@ export {
   changeEmailResponseSchema,
   confirmEmailChangeRequestSchema,
   confirmEmailChangeResponseSchema,
+  acceptTosRequestSchema,
+  acceptTosResponseSchema,
+  revertEmailChangeRequestSchema,
+  revertEmailChangeResponseSchema,
   defaultPasswordConfig,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
@@ -201,17 +206,24 @@ export {
   resetPasswordResponseSchema,
   setPasswordRequestSchema,
   setPasswordResponseSchema,
+  totpLoginChallengeResponseSchema,
+  totpLoginVerifyRequestSchema,
   totpSetupResponseSchema,
   totpStatusResponseSchema,
   totpVerifyRequestSchema,
+  tosStatusResponseSchema,
   totpVerifyResponseSchema,
   validatePassword,
   validatePasswordBasic,
+  type AcceptTosRequest,
+  type AcceptTosResponse,
   type AuthResponse,
   type ChangeEmailRequest,
   type ChangeEmailResponse,
   type ConfirmEmailChangeRequest,
   type ConfirmEmailChangeResponse,
+  type RevertEmailChangeRequest,
+  type RevertEmailChangeResponse,
   type EmailVerificationRequest,
   type EmailVerificationResponse,
   type ErrorMapperLogger,
@@ -238,9 +250,12 @@ export {
   type SetPasswordRequest,
   type SetPasswordResponse,
   type StrengthResult,
+  type TotpLoginChallengeResponse,
+  type TotpLoginVerifyRequest,
   type TotpSetupResponse,
   type TotpStatusResponse,
   type TotpVerifyRequest,
+  type TosStatusResponse,
   type TotpVerifyResponse,
 } from './domain/auth';
 
@@ -566,14 +581,13 @@ export {
 } from './domain/webhooks';
 
 // ============================================================================
-// API CONTRACTS (Namespace + flat convenience exports)
+// ADDITIONAL DOMAIN EXPORTS (formerly in contracts/)
 // ============================================================================
 
-export * as Contracts from './contracts';
-
-// Admin (flat convenience)
+// Admin (additional exports)
 export {
   USER_STATUSES,
+  adminActionResponseSchema,
   adminLockUserRequestSchema,
   adminLockUserResponseSchema,
   adminUpdateUserRequestSchema,
@@ -584,6 +598,7 @@ export {
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
   userStatusSchema,
+  type AdminActionResponse,
   type AdminLockUserRequest,
   type AdminLockUserResponse,
   type AdminUpdateUserRequest,
@@ -594,9 +609,9 @@ export {
   type UnlockAccountRequest,
   type UnlockAccountResponse,
   type UserStatus,
-} from './contracts/admin';
+} from './domain/admin';
 
-// Context (flat convenience)
+// Context (from core)
 export {
   type AuthenticatedUser,
   type BaseContext,
@@ -609,9 +624,9 @@ export {
   type HasPubSub,
   type HasStorage,
   type ReplyContext,
-} from './contracts/context';
+} from './core/context';
 
-// Jobs (flat convenience)
+// Jobs (additional contract exports)
 export {
   jobActionResponseSchema,
   jobDetailsSchema,
@@ -623,9 +638,9 @@ export {
   type JobListQuery,
   type JobListResponse,
   type QueueStats,
-} from './contracts/jobs';
+} from './domain/jobs';
 
-// Billing Service (flat convenience)
+// Billing Service types (from domain)
 export {
   type BillingService,
   type CheckoutParams,
@@ -638,9 +653,9 @@ export {
   type ProviderPaymentMethod,
   type ProviderSubscription,
   type SetupIntentResult,
-} from './contracts/billing/service';
+} from './domain/billing';
 
-// OAuth (flat convenience)
+// OAuth (from domain/auth)
 export {
   OAUTH_PROVIDERS,
   oauthCallbackQuerySchema,
@@ -664,18 +679,15 @@ export {
   type OAuthLinkResponse,
   type OAuthProvider,
   type OAuthUnlinkResponse,
-} from './contracts/oauth';
+} from './domain/auth';
 
-// Native bridge (flat convenience)
-export { type NativeBridge } from './contracts/native';
+// Native bridge (from core)
+export { type NativeBridge } from './core/native';
 
-// Users contract (flat convenience)
-export { USER_ROLES, userRoleSchema, type UserRole } from './contracts/users';
+// Users contract (legacy aliases)
+export { USER_ROLES, userRoleSchema, type UserRole } from './domain/users';
 
-// Realtime (flat convenience)
-// NOTE: Types SetOperation, ListInsertOperation, ListRemoveOperation, Operation,
-// Transaction are exported from ./core/transactions. Use Contracts.* for the
-// realtime-specific versions if needed.
+// Realtime (from domain)
 export {
   conflictResponseSchema,
   getRecordsRequestSchema,
@@ -695,16 +707,20 @@ export {
   type ConflictResponse,
   type GetRecordsRequest,
   type GetRecordsResponse,
+  type ListInsertOperation as RealtimeListInsertOperation,
   type ListPosition,
+  type ListRemoveOperation as RealtimeListRemoveOperation,
+  type RealtimeOperation,
   type RealtimeRecord,
   type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
   type SetNowOperation,
+  type SetOperation as RealtimeSetOperation,
   type WriteResponse,
-} from './contracts/realtime';
+} from './domain/realtime';
 
-// Security (flat convenience)
+// Security (from domain/admin)
 export {
   SECURITY_EVENT_TYPES,
   SECURITY_SEVERITIES,
@@ -733,7 +749,7 @@ export {
   type SecurityMetricsRequest,
   type SecurityMetricsResponse,
   type SecuritySeverity,
-} from './contracts/security';
+} from './domain/admin';
 
 // ============================================================================
 // TYPE DEFINITIONS (Namespace)
@@ -963,9 +979,9 @@ export {
   toCamelCaseArray,
   toSnakeCase,
   type KeyMapping,
-} from './utils/casing';
-// NOTE: toCamelCase is exported from ./utils/string (string conversion).
-// For record-key conversion, import { toCamelCase } from './utils/casing' directly.
+} from './utils/string/casing';
+// NOTE: toCamelCase is exported from ./utils/string/string (string conversion).
+// For record-key conversion, import { toCamelCase } from './utils/string/casing' directly.
 
 // --- Constants ---
 export {
@@ -984,7 +1000,12 @@ export {
 } from './utils/constants';
 
 // --- Crypto ---
-export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './utils/crypto';
+export {
+  constantTimeCompare,
+  generateSecureId,
+  generateToken,
+  generateUUID,
+} from './utils/crypto/crypto';
 
 // --- HTTP ---
 export {
@@ -992,7 +1013,7 @@ export {
   serializeCookie,
   type CookieOptions,
   type CookieSerializeOptions,
-} from './utils/http';
+} from './utils/http/http';
 
 export {
   type BaseRouteDefinition,
@@ -1003,10 +1024,10 @@ export {
   type RouteMap,
   type RouteResult,
   type ValidationSchema,
-} from './utils/http-types';
+} from './utils/http/http-types';
 
 // --- Routes ---
-export { createRouteMap, protectedRoute, publicRoute } from './utils/routes';
+export { createRouteMap, protectedRoute, publicRoute } from './utils/http/routes';
 
 // --- Pagination ---
 export {
@@ -1051,9 +1072,11 @@ export {
 // --- String ---
 export {
   capitalize,
+  canonicalizeEmail,
   countCharactersNoWhitespace,
   countWords,
   escapeHtml,
+  normalizeEmail,
   normalizeWhitespace,
   padLeft,
   slugify,
@@ -1063,10 +1086,10 @@ export {
   toKebabCase,
   toPascalCase,
   truncate,
-} from './utils/string';
+} from './utils/string/string';
 
 // --- Token ---
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './utils/token';
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './utils/crypto/token';
 
 // --- Port ---
 export {
@@ -1076,3 +1099,9 @@ export {
   uniquePorts,
   waitForPort,
 } from './utils/port';
+
+// ============================================================================
+// CONTRACTS NAMESPACE (Backward Compatibility)
+// ============================================================================
+
+export * as Contracts from './contracts';

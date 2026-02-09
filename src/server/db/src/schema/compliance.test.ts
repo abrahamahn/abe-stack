@@ -1,16 +1,25 @@
-// backend/db/src/schema/compliance.test.ts
+// src/server/db/src/schema/compliance.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
   CONSENT_LOG_COLUMNS,
   CONSENT_LOGS_TABLE,
   type ConsentLog,
+  DATA_EXPORT_REQUEST_COLUMNS,
+  DATA_EXPORT_REQUESTS_TABLE,
+  DATA_EXPORT_STATUSES,
+  DATA_EXPORT_TYPES,
+  type DataExportRequest,
+  type DataExportStatus,
+  type DataExportType,
   LEGAL_DOCUMENT_COLUMNS,
   LEGAL_DOCUMENTS_TABLE,
   type LegalDocument,
   type NewConsentLog,
+  type NewDataExportRequest,
   type NewLegalDocument,
   type NewUserAgreement,
+  type UpdateDataExportRequest,
   type UpdateLegalDocument,
   USER_AGREEMENT_COLUMNS,
   USER_AGREEMENTS_TABLE,
@@ -30,8 +39,17 @@ describe('Compliance Schema - Table Names', () => {
     expect(CONSENT_LOGS_TABLE).toBe('consent_logs');
   });
 
+  test('should have correct table name for data_export_requests', () => {
+    expect(DATA_EXPORT_REQUESTS_TABLE).toBe('data_export_requests');
+  });
+
   test('table names should be unique', () => {
-    const tableNames = [LEGAL_DOCUMENTS_TABLE, USER_AGREEMENTS_TABLE, CONSENT_LOGS_TABLE];
+    const tableNames = [
+      LEGAL_DOCUMENTS_TABLE,
+      USER_AGREEMENTS_TABLE,
+      CONSENT_LOGS_TABLE,
+      DATA_EXPORT_REQUESTS_TABLE,
+    ];
 
     const uniqueNames = new Set(tableNames);
     expect(uniqueNames.size).toBe(tableNames.length);
@@ -43,6 +61,7 @@ describe('Compliance Schema - Table Names', () => {
     expect(LEGAL_DOCUMENTS_TABLE).toMatch(snakeCasePattern);
     expect(USER_AGREEMENTS_TABLE).toMatch(snakeCasePattern);
     expect(CONSENT_LOGS_TABLE).toMatch(snakeCasePattern);
+    expect(DATA_EXPORT_REQUESTS_TABLE).toMatch(snakeCasePattern);
   });
 });
 
@@ -1157,5 +1176,407 @@ describe('Compliance Schema - Integration Scenarios', () => {
     expect(grantedConsents.length).toBe(2);
     expect(deniedConsents.length).toBe(2);
     expect(logs.every((log) => log.userId === userId)).toBe(true);
+  });
+});
+
+// ============================================================================
+// Data Export Request Tests
+// ============================================================================
+
+describe('Compliance Schema - Data Export Enums', () => {
+  test('should have correct export types', () => {
+    expect(DATA_EXPORT_TYPES).toEqual(['export', 'deletion']);
+  });
+
+  test('should have correct export statuses', () => {
+    expect(DATA_EXPORT_STATUSES).toEqual([
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'canceled',
+    ]);
+  });
+
+  test('should have exactly 2 export types', () => {
+    expect(DATA_EXPORT_TYPES.length).toBe(2);
+  });
+
+  test('should have exactly 5 export statuses', () => {
+    expect(DATA_EXPORT_STATUSES.length).toBe(5);
+  });
+
+  test('enum values should be in snake_case format', () => {
+    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
+
+    DATA_EXPORT_TYPES.forEach((type) => {
+      expect(type).toMatch(snakeCasePattern);
+    });
+
+    DATA_EXPORT_STATUSES.forEach((status) => {
+      expect(status).toMatch(snakeCasePattern);
+    });
+  });
+});
+
+describe('Compliance Schema - Data Export Request Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(DATA_EXPORT_REQUEST_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      type: 'type',
+      status: 'status',
+      format: 'format',
+      downloadUrl: 'download_url',
+      expiresAt: 'expires_at',
+      completedAt: 'completed_at',
+      errorMessage: 'error_message',
+      metadata: 'metadata',
+      createdAt: 'created_at',
+    });
+  });
+
+  test('should map camelCase to snake_case correctly', () => {
+    expect(DATA_EXPORT_REQUEST_COLUMNS.userId).toBe('user_id');
+    expect(DATA_EXPORT_REQUEST_COLUMNS.downloadUrl).toBe('download_url');
+    expect(DATA_EXPORT_REQUEST_COLUMNS.expiresAt).toBe('expires_at');
+    expect(DATA_EXPORT_REQUEST_COLUMNS.completedAt).toBe('completed_at');
+    expect(DATA_EXPORT_REQUEST_COLUMNS.errorMessage).toBe('error_message');
+    expect(DATA_EXPORT_REQUEST_COLUMNS.createdAt).toBe('created_at');
+  });
+
+  test('should have all required columns', () => {
+    const requiredColumns = [
+      'id',
+      'userId',
+      'type',
+      'status',
+      'format',
+      'downloadUrl',
+      'expiresAt',
+      'completedAt',
+      'errorMessage',
+      'metadata',
+      'createdAt',
+    ];
+    const actualColumns = Object.keys(DATA_EXPORT_REQUEST_COLUMNS);
+
+    expect(actualColumns).toEqual(requiredColumns);
+  });
+
+  test('column values should be in snake_case format', () => {
+    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
+    const columnValues = Object.values(DATA_EXPORT_REQUEST_COLUMNS);
+
+    columnValues.forEach((value) => {
+      expect(value).toMatch(snakeCasePattern);
+    });
+  });
+});
+
+describe('Compliance Schema - DataExportRequest Type', () => {
+  test('should accept valid pending export request', () => {
+    const request: DataExportRequest = {
+      id: 'der-123',
+      userId: 'user-456',
+      type: 'export',
+      status: 'pending',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: null,
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    expect(request.type).toBe('export');
+    expect(request.status).toBe('pending');
+    expect(request.downloadUrl).toBeNull();
+    expect(request.completedAt).toBeNull();
+  });
+
+  test('should accept completed export request with download URL', () => {
+    const request: DataExportRequest = {
+      id: 'der-123',
+      userId: 'user-456',
+      type: 'export',
+      status: 'completed',
+      format: 'json',
+      downloadUrl: 'https://storage.example.com/exports/der-123.zip',
+      expiresAt: new Date(Date.now() + 86400000),
+      completedAt: new Date(),
+      errorMessage: null,
+      metadata: { fileSize: 1024, recordCount: 42 },
+      createdAt: new Date(Date.now() - 3600000),
+    };
+
+    expect(request.status).toBe('completed');
+    expect(request.downloadUrl).toBeDefined();
+    expect(request.completedAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept failed export request with error', () => {
+    const request: DataExportRequest = {
+      id: 'der-456',
+      userId: 'user-456',
+      type: 'export',
+      status: 'failed',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: 'Storage quota exceeded',
+      metadata: { attemptCount: 3 },
+      createdAt: new Date(),
+    };
+
+    expect(request.status).toBe('failed');
+    expect(request.errorMessage).toBe('Storage quota exceeded');
+  });
+
+  test('should accept deletion request', () => {
+    const request: DataExportRequest = {
+      id: 'der-789',
+      userId: 'user-456',
+      type: 'deletion',
+      status: 'processing',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: null,
+      metadata: { reason: 'user_requested', gdprArticle: '17' },
+      createdAt: new Date(),
+    };
+
+    expect(request.type).toBe('deletion');
+    expect(request.status).toBe('processing');
+  });
+
+  test('should accept all valid data export types', () => {
+    const types: DataExportType[] = ['export', 'deletion'];
+
+    types.forEach((type, index) => {
+      const request: DataExportRequest = {
+        id: `der-${index}`,
+        userId: 'user-456',
+        type,
+        status: 'pending',
+        format: 'json',
+        downloadUrl: null,
+        expiresAt: null,
+        completedAt: null,
+        errorMessage: null,
+        metadata: {},
+        createdAt: new Date(),
+      };
+
+      expect(request.type).toBe(type);
+    });
+  });
+
+  test('should accept all valid data export statuses', () => {
+    const statuses: DataExportStatus[] = [
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'canceled',
+    ];
+
+    statuses.forEach((status, index) => {
+      const request: DataExportRequest = {
+        id: `der-${index}`,
+        userId: 'user-456',
+        type: 'export',
+        status,
+        format: 'json',
+        downloadUrl: null,
+        expiresAt: null,
+        completedAt: null,
+        errorMessage: null,
+        metadata: {},
+        createdAt: new Date(),
+      };
+
+      expect(request.status).toBe(status);
+    });
+  });
+});
+
+describe('Compliance Schema - NewDataExportRequest Type', () => {
+  test('should accept minimal new data export request', () => {
+    const newRequest: NewDataExportRequest = {
+      userId: 'user-456',
+      type: 'export',
+    };
+
+    expect(newRequest.userId).toBe('user-456');
+    expect(newRequest.type).toBe('export');
+  });
+
+  test('should accept new request with all optional fields', () => {
+    const newRequest: NewDataExportRequest = {
+      id: 'der-123',
+      userId: 'user-456',
+      type: 'deletion',
+      status: 'pending',
+      format: 'csv',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: null,
+      metadata: { reason: 'user_requested' },
+      createdAt: new Date(),
+    };
+
+    expect(newRequest.id).toBe('der-123');
+    expect(newRequest.format).toBe('csv');
+    expect(newRequest.metadata).toEqual({ reason: 'user_requested' });
+  });
+
+  test('should accept new request with custom format', () => {
+    const newRequest: NewDataExportRequest = {
+      userId: 'user-456',
+      type: 'export',
+      format: 'csv',
+    };
+
+    expect(newRequest.format).toBe('csv');
+  });
+});
+
+describe('Compliance Schema - UpdateDataExportRequest Type', () => {
+  test('should accept partial updates', () => {
+    const update1: UpdateDataExportRequest = { status: 'processing' };
+    const update2: UpdateDataExportRequest = { downloadUrl: 'https://example.com/file.zip' };
+    const update3: UpdateDataExportRequest = { errorMessage: 'Failed' };
+
+    expect(update1.status).toBeDefined();
+    expect(update2.downloadUrl).toBeDefined();
+    expect(update3.errorMessage).toBeDefined();
+  });
+
+  test('should accept completion update', () => {
+    const update: UpdateDataExportRequest = {
+      status: 'completed',
+      downloadUrl: 'https://storage.example.com/exports/der-123.zip',
+      completedAt: new Date(),
+      expiresAt: new Date(Date.now() + 86400000),
+    };
+
+    expect(update.status).toBe('completed');
+    expect(update.downloadUrl).toBeDefined();
+    expect(update.completedAt).toBeInstanceOf(Date);
+    expect(update.expiresAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept failure update', () => {
+    const update: UpdateDataExportRequest = {
+      status: 'failed',
+      errorMessage: 'Internal server error',
+    };
+
+    expect(update.status).toBe('failed');
+    expect(update.errorMessage).toBe('Internal server error');
+  });
+
+  test('should accept empty update object', () => {
+    const update: UpdateDataExportRequest = {};
+
+    expect(Object.keys(update).length).toBe(0);
+  });
+
+  test('should not include immutable fields', () => {
+    const update: UpdateDataExportRequest = { status: 'completed' };
+
+    expect('id' in update).toBe(false);
+    expect('userId' in update).toBe(false);
+    expect('type' in update).toBe(false);
+    expect('createdAt' in update).toBe(false);
+  });
+});
+
+describe('Compliance Schema - Data Export Integration Scenarios', () => {
+  test('should support GDPR data export workflow', () => {
+    // User requests export
+    const pendingRequest: DataExportRequest = {
+      id: 'der-123',
+      userId: 'user-456',
+      type: 'export',
+      status: 'pending',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: null,
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    // Processing starts
+    const processingRequest: DataExportRequest = {
+      ...pendingRequest,
+      status: 'processing',
+    };
+
+    // Export completes
+    const completedRequest: DataExportRequest = {
+      ...processingRequest,
+      status: 'completed',
+      downloadUrl: 'https://storage.example.com/exports/der-123.zip',
+      expiresAt: new Date(Date.now() + 86400000 * 7),
+      completedAt: new Date(),
+      metadata: { fileSize: 2048, recordCount: 150 },
+    };
+
+    expect(pendingRequest.status).toBe('pending');
+    expect(processingRequest.status).toBe('processing');
+    expect(completedRequest.status).toBe('completed');
+    expect(completedRequest.downloadUrl).toBeDefined();
+    expect(completedRequest.completedAt).toBeInstanceOf(Date);
+  });
+
+  test('should support GDPR right to deletion workflow', () => {
+    const deletionRequest: DataExportRequest = {
+      id: 'der-456',
+      userId: 'user-789',
+      type: 'deletion',
+      status: 'completed',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: new Date(),
+      errorMessage: null,
+      metadata: {
+        tablesProcessed: ['users', 'sessions', 'notifications'],
+        recordsDeleted: 47,
+      },
+      createdAt: new Date(Date.now() - 3600000),
+    };
+
+    expect(deletionRequest.type).toBe('deletion');
+    expect(deletionRequest.status).toBe('completed');
+    expect(deletionRequest.downloadUrl).toBeNull();
+  });
+
+  test('should support canceled request workflow', () => {
+    const canceledRequest: DataExportRequest = {
+      id: 'der-789',
+      userId: 'user-456',
+      type: 'export',
+      status: 'canceled',
+      format: 'json',
+      downloadUrl: null,
+      expiresAt: null,
+      completedAt: null,
+      errorMessage: null,
+      metadata: { canceledBy: 'user', canceledAt: new Date().toISOString() },
+      createdAt: new Date(Date.now() - 1800000),
+    };
+
+    expect(canceledRequest.status).toBe('canceled');
+    expect(canceledRequest.completedAt).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-// client/ui/src/theme/contrast.test.ts
+// src/client/ui/src/theme/contrast.test.ts
 import {
   DEFAULT_CONTRAST_MODE,
   getContrastCssVariables,

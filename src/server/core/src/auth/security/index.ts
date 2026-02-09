@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/index.ts
+// src/server/core/src/auth/security/index.ts
 /**
  * Security Infrastructure
  *
@@ -49,11 +49,17 @@ export {
   logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
+  // "Was This You?" alerts
+  sendEmailChangedAlert,
+  sendNewLoginAlert,
+  sendPasswordChangedAlert,
   sendTokenReuseAlert,
   type LogSecurityEventParams,
   type SecurityEventMetadata,
   type SecurityEventSeverity,
   type SecurityEventType,
+  type SendEmailChangedAlertParams,
+  type SendSecurityAlertParams,
   type SendTokenReuseAlertParams,
 } from './events';
 
@@ -95,3 +101,11 @@ export type { PasswordPenalties } from './password-scoring';
 // Password Strength Estimation
 export { estimatePasswordStrength } from './password-strength';
 export type { StrengthResult } from './password-strength';
+
+// CAPTCHA Verification
+export {
+  isCaptchaRequired,
+  verifyCaptchaToken,
+  verifyTurnstileToken,
+  type CaptchaVerifyResult,
+} from './captcha';

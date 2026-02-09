@@ -1,4 +1,4 @@
-// backend/engine/src/queue/client.test.ts
+// src/server/engine/src/queue/client.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createQueueServer } from './client';
@@ -163,6 +163,58 @@ describe('QueueServer', () => {
     test('should create QueueServer instance', () => {
       const server = createQueueServer({ store, handlers });
       expect(server.constructor.name).toBe('QueueServer');
+    });
+  });
+
+  describe('abort listener cleanup', () => {
+    test('should use { once: true } on abort listener to prevent accumulation', async () => {
+      vi.useFakeTimers();
+
+      const addEventListenerSpy = vi.spyOn(AbortSignal.prototype, 'addEventListener');
+
+      const server = createQueueServer({
+        store,
+        handlers: {},
+        config: { pollIntervalMs: 50 },
+      });
+
+      server.start();
+
+      // Let a few poll cycles run (each creates a sleep → abort listener)
+      await vi.advanceTimersByTimeAsync(200);
+
+      await server.stop();
+
+      // Verify all addEventListener calls use { once: true }
+      const abortCalls = addEventListenerSpy.mock.calls.filter((call) => call[0] === 'abort');
+
+      for (const call of abortCalls) {
+        const options = call[2] as { once?: boolean } | undefined;
+        expect(options).toBeDefined();
+        expect(options?.once).toBe(true);
+      }
+
+      addEventListenerSpy.mockRestore();
+      vi.useRealTimers();
+    });
+
+    test('should stop cleanly when abort is triggered during sleep', async () => {
+      const server = createQueueServer({
+        store,
+        handlers: {},
+        config: { pollIntervalMs: 100 },
+      });
+
+      server.start();
+
+      // Let the server enter its first poll cycle (real timer)
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Stop should resolve quickly (abort triggers immediate resolution)
+      await server.stop();
+
+      // If we got here, abort-based stop works correctly
+      expect(true).toBe(true);
     });
   });
 

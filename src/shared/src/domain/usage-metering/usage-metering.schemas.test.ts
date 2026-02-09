@@ -1,4 +1,4 @@
-// shared/src/domain/usage-metering/usage-metering.schemas.test.ts
+// src/shared/src/domain/usage-metering/usage-metering.schemas.test.ts
 
 /**
  * @file Usage Metering Schema Tests
@@ -38,6 +38,7 @@ function createValidUsageMetric(overrides: Partial<UsageMetric> = {}): Record<st
  */
 function createValidUsageSnapshot(overrides: Partial<UsageSnapshot> = {}): Record<string, unknown> {
   return {
+    id: 'snap_001',
     tenantId: '00000000-0000-0000-0000-000000000001',
     metricKey: 'api_requests',
     value: 1000,
@@ -223,6 +224,7 @@ describe('usageSnapshotSchema', () => {
       const result = usageSnapshotSchema.parse(input);
 
       expect(result).toEqual({
+        id: 'snap_001',
         tenantId: '00000000-0000-0000-0000-000000000001',
         metricKey: 'api_requests',
         value: 1000,
@@ -356,7 +358,7 @@ describe('usageSnapshotSchema', () => {
 
   describe('when given invalid ISO datetime fields', () => {
     it('should throw error for invalid periodStart format', () => {
-      const input = createValidUsageSnapshot({ periodStart: '2026-02-01' });
+      const input = createValidUsageSnapshot({ periodStart: 'not-a-date' });
 
       expect(() => usageSnapshotSchema.parse(input)).toThrow('Invalid ISO datetime format');
     });
@@ -368,7 +370,7 @@ describe('usageSnapshotSchema', () => {
     });
 
     it('should throw error for invalid updatedAt format', () => {
-      const input = createValidUsageSnapshot({ updatedAt: 'Feb 6, 2026' });
+      const input = createValidUsageSnapshot({ updatedAt: 'not-a-date' });
 
       expect(() => usageSnapshotSchema.parse(input)).toThrow('Invalid ISO datetime format');
     });
@@ -439,6 +441,12 @@ describe('usageSnapshotSchema', () => {
   });
 
   describe('when given missing fields', () => {
+    it('should throw error when id is missing', () => {
+      const { id: _id, ...input } = createValidUsageSnapshot();
+
+      expect(() => usageSnapshotSchema.parse(input)).toThrow('id must be a string');
+    });
+
     it('should throw error when tenantId is missing', () => {
       const { tenantId: _tenantId, ...input } = createValidUsageSnapshot();
 
@@ -478,19 +486,19 @@ describe('usageSnapshotSchema', () => {
 
   describe('edge cases', () => {
     it('should throw error when input is null', () => {
-      expect(() => usageSnapshotSchema.parse(null)).toThrow('TenantId must be a string');
+      expect(() => usageSnapshotSchema.parse(null)).toThrow('id must be a string');
     });
 
     it('should throw error when input is undefined', () => {
-      expect(() => usageSnapshotSchema.parse(undefined)).toThrow('TenantId must be a string');
+      expect(() => usageSnapshotSchema.parse(undefined)).toThrow('id must be a string');
     });
 
     it('should throw error when input is not an object', () => {
-      expect(() => usageSnapshotSchema.parse('string')).toThrow('TenantId must be a string');
+      expect(() => usageSnapshotSchema.parse('string')).toThrow('id must be a string');
     });
 
     it('should throw error when input is an array', () => {
-      expect(() => usageSnapshotSchema.parse([])).toThrow('TenantId must be a string');
+      expect(() => usageSnapshotSchema.parse([])).toThrow('id must be a string');
     });
 
     it('should accept very large numeric values', () => {

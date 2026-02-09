@@ -1,4 +1,4 @@
-// backend/db/src/repositories/metering/usage-snapshots.test.ts
+// src/server/db/src/repositories/metering/usage-snapshots.test.ts
 /**
  * Tests for Usage Snapshots Repository
  *

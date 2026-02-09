@@ -1,4 +1,4 @@
-// premium/media/src/queue/jobs.test.ts
+// src/server/media/src/queue/jobs.test.ts
 /**
  * Tests for MediaProcessingQueue and createMediaProcessingQueue
  */

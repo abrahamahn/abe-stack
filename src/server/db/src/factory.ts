@@ -1,4 +1,4 @@
-// backend/db/src/factory.ts
+// src/server/db/src/factory.ts
 /**
  * Repository Factory
  *
@@ -9,19 +9,24 @@
  */
 
 import { createRawDb, type RawDb } from './client';
+import { createApiKeyRepository, type ApiKeyRepository } from './repositories/api-keys';
 import {
-  createRefreshTokenRepository,
-  createRefreshTokenFamilyRepository,
+  createEmailChangeTokenRepository,
+  createEmailVerificationTokenRepository,
   createLoginAttemptRepository,
   createPasswordResetTokenRepository,
-  createEmailVerificationTokenRepository,
+  createRefreshTokenFamilyRepository,
+  createRefreshTokenRepository,
   createSecurityEventRepository,
-  type RefreshTokenRepository,
-  type RefreshTokenFamilyRepository,
+  createTotpBackupCodeRepository,
+  type EmailChangeTokenRepository,
+  type EmailVerificationTokenRepository,
   type LoginAttemptRepository,
   type PasswordResetTokenRepository,
-  type EmailVerificationTokenRepository,
+  type RefreshTokenFamilyRepository,
+  type RefreshTokenRepository,
   type SecurityEventRepository,
+  type TotpBackupCodeRepository,
 } from './repositories/auth';
 import {
   createBillingEventRepository,
@@ -38,12 +43,14 @@ import {
   type SubscriptionRepository,
 } from './repositories/billing';
 import {
+  createConsentLogRepository,
+  createDataExportRequestRepository,
   createLegalDocumentRepository,
   createUserAgreementRepository,
-  createConsentLogRepository,
+  type ConsentLogRepository,
+  type DataExportRequestRepository,
   type LegalDocumentRepository,
   type UserAgreementRepository,
-  type ConsentLogRepository,
 } from './repositories/compliance';
 import {
   createFeatureFlagRepository,
@@ -101,7 +108,7 @@ import { createUserRepository, type UserRepository } from './repositories/users'
 // ============================================================================
 
 /**
- * Flat 33-key repository container.
+ * Flat 37-key repository container.
  * This is the canonical consumer API.
  */
 export interface Repositories {
@@ -115,12 +122,17 @@ export interface Repositories {
   passwordResetTokens: PasswordResetTokenRepository;
   emailVerificationTokens: EmailVerificationTokenRepository;
   securityEvents: SecurityEventRepository;
+  totpBackupCodes: TotpBackupCodeRepository;
+  emailChangeTokens: EmailChangeTokenRepository;
 
   // Magic Link
   magicLinkTokens: MagicLinkTokenRepository;
 
   // OAuth
   oauthConnections: OAuthConnectionRepository;
+
+  // API Keys
+  apiKeys: ApiKeyRepository;
 
   // Push Notifications
   pushSubscriptions: PushSubscriptionRepository;
@@ -163,6 +175,7 @@ export interface Repositories {
   legalDocuments: LegalDocumentRepository;
   userAgreements: UserAgreementRepository;
   consentLogs: ConsentLogRepository;
+  dataExportRequests: DataExportRequestRepository;
 }
 
 /**
@@ -200,12 +213,17 @@ export function createRepositories(connectionString: string): RepositoryContext 
       passwordResetTokens: createPasswordResetTokenRepository(raw),
       emailVerificationTokens: createEmailVerificationTokenRepository(raw),
       securityEvents: createSecurityEventRepository(raw),
+      totpBackupCodes: createTotpBackupCodeRepository(raw),
+      emailChangeTokens: createEmailChangeTokenRepository(raw),
 
       // Magic Link
       magicLinkTokens: createMagicLinkTokenRepository(raw),
 
       // OAuth
       oauthConnections: createOAuthConnectionRepository(raw),
+
+      // API Keys
+      apiKeys: createApiKeyRepository(raw),
 
       // Push
       pushSubscriptions: createPushSubscriptionRepository(raw),
@@ -248,6 +266,7 @@ export function createRepositories(connectionString: string): RepositoryContext 
       legalDocuments: createLegalDocumentRepository(raw),
       userAgreements: createUserAgreementRepository(raw),
       consentLogs: createConsentLogRepository(raw),
+      dataExportRequests: createDataExportRequestRepository(raw),
     },
   };
 }

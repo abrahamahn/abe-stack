@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/UILibraryTopBar.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryTopBar.tsx
 import { toastStore } from '@abe-stack/react';
 import { Button, Heading, ResizablePanel, Text, useNavigate, useSidePeek } from '@abe-stack/ui';
 

@@ -1,4 +1,4 @@
-// client/ui/src/layouts/index.ts
+// src/client/ui/src/layouts/index.ts
 // @auto-generated - Do not edit manually
 
 export { AuthLayout, Container, PageContainer, StackedLayout } from './containers';

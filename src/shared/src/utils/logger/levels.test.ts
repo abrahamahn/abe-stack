@@ -1,4 +1,4 @@
-// packages/shared/src/utils/logger/levels.test.ts
+// src/shared/src/utils/logger/levels.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { LOG_LEVELS, shouldLog } from './levels';

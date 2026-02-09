@@ -1,4 +1,4 @@
-// backend/engine/src/security/crypto/jwt-rotation.ts
+// src/server/engine/src/security/crypto/jwt-rotation.ts
 /**
  * JWT Secret Rotation Support
  *

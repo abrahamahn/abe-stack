@@ -1,4 +1,4 @@
-// packages/shared/src/utils/pagination/helpers.test.ts
+// src/shared/src/utils/pagination/helpers.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { PaginationError } from '../pagination';

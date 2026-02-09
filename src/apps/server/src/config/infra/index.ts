@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/index.ts
+// src/apps/server/src/config/infra/index.ts
 
 // cache.ts
 export { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';

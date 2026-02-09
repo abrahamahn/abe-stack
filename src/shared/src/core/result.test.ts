@@ -1,4 +1,4 @@
-// packages/shared/src/core/result.test.ts
+// src/shared/src/core/result.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import {

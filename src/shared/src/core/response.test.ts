@@ -1,4 +1,4 @@
-// packages/shared/src/core/response.test.ts
+// src/shared/src/core/response.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

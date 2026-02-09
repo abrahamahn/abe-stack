@@ -1,4 +1,4 @@
-// apps/web/src/config.ts
+// src/apps/web/src/config.ts
 /**
  * Centralized client configuration.
  *
@@ -41,6 +41,12 @@ export type ClientConfig = {
   /** UI version string */
   uiVersion: string;
 
+  /** Query cache persistence configuration */
+  queryPersistence: {
+    maxAge: number; // in milliseconds
+    throttleTime: number; // in milliseconds
+  };
+
   // Future additions:
   // wsUrl: string;
 };
@@ -59,6 +65,10 @@ export function createClientConfig(): ClientConfig {
     apiUrl: (viteApiUrl ?? '').replace(/\/+$/, ''),
     tokenRefreshInterval: 13 * 60 * 1000, // 13 minutes
     uiVersion: '1.1.0',
+    queryPersistence: {
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      throttleTime: 1000, // 1 second
+    },
   };
 }
 

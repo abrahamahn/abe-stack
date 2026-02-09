@@ -1,4 +1,4 @@
-// client/src/billing/hooks.test.ts
+// src/client/api/src/billing/hooks.test.ts
 /**
  * Billing Hooks Tests
  *

@@ -1,4 +1,4 @@
-// client/ui/src/router/hooks.ts
+// src/client/react/src/router/hooks.ts
 /**
  * Custom Router Hooks
  *

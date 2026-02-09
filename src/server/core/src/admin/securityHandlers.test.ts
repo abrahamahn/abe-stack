@@ -1,4 +1,4 @@
-// backend/core/src/admin/securityHandlers.test.ts
+// src/server/core/src/admin/securityHandlers.test.ts
 /**
  * Security Handlers Unit Tests
  *
@@ -110,7 +110,7 @@ function createMockContext(): AdminAppContext {
     repos: {
       users: {} as AdminAppContext['repos']['users'],
     } as AdminAppContext['repos'],
-    email: { send: vi.fn() },
+    email: { send: vi.fn(), healthCheck: vi.fn() },
     storage: {
       upload: vi.fn(),
       download: vi.fn(),
@@ -120,7 +120,7 @@ function createMockContext(): AdminAppContext {
     pubsub: {},
     cache: {},
     billing: {
-      provider: 'stripe' as const,
+      provider: 'stripe',
       createCustomer: vi.fn(),
       createCheckoutSession: vi.fn(),
       cancelSubscription: vi.fn(),
@@ -139,7 +139,7 @@ function createMockContext(): AdminAppContext {
       verifyWebhookSignature: vi.fn(),
       parseWebhookEvent: vi.fn(),
       createCustomerPortalSession: vi.fn(),
-    } as unknown as AdminAppContext['billing'],
+    } as unknown,
     notifications: {
       isConfigured: vi.fn().mockReturnValue(false),
     },

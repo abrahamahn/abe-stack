@@ -25,76 +25,50 @@
   },
   "homepage": "https://github.com/abe-stack/abe-stack#readme",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.js"
     },
     "./core": {
-      "source": "./src/core/index.ts",
       "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.mjs",
-      "require": "./dist/core/index.js",
-      "default": "./dist/core/index.mjs"
+      "default": "./dist/core/index.js"
     },
     "./types": {
-      "source": "./src/types/index.ts",
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js",
-      "default": "./dist/types/index.mjs"
-    },
-    "./contracts": {
-      "source": "./src/contracts/index.ts",
-      "types": "./dist/contracts/index.d.ts",
-      "import": "./dist/contracts/index.mjs",
-      "require": "./dist/contracts/index.js",
-      "default": "./dist/contracts/index.mjs"
+      "default": "./dist/types/index.js"
     },
     "./domain": {
-      "source": "./src/domain/index.ts",
       "types": "./dist/domain/index.d.ts",
-      "import": "./dist/domain/index.mjs",
-      "require": "./dist/domain/index.js",
-      "default": "./dist/domain/index.mjs"
+      "default": "./dist/domain/index.js"
     },
     "./utils": {
-      "source": "./src/utils/index.ts",
       "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js",
-      "default": "./dist/utils/index.mjs"
+      "default": "./dist/utils/index.js"
     },
     "./config": {
-      "source": "./src/config/index.ts",
       "types": "./dist/config/index.d.ts",
-      "import": "./dist/config/index.mjs",
-      "require": "./dist/config/index.js",
-      "default": "./dist/config/index.mjs"
+      "default": "./dist/config/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "postbuild": "node --import tsx ../tools/scripts/build/ensure-js-extensions.ts dist",
     "test": "vitest run",
     "lint": "eslint . --max-warnings 0",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit --types node --skipLibCheck",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "verify-exports": "node scripts/verify-exports.mjs",
     "prepack": "npm run build && npm run verify-exports && npm run test"
   },
   "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.2.0",
-    "@types/node": "^20.0.0",
-    "tsup": "^8.0.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^25.0.9",
     "vitest": "^1.0.0"
   },
   "publishConfig": {

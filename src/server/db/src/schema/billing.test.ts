@@ -1,4 +1,4 @@
-// backend/db/src/schema/billing.test.ts
+// src/server/db/src/schema/billing.test.ts
 /**
  * Tests for Billing Schema Type Definitions
  *

@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/lockout.ts
+// src/server/core/src/auth/security/lockout.ts
 /**
  * Account Lockout Functions
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/hooks/useUILibraryTheme.ts
+// src/apps/web/src/features/ui-library/hooks/useUILibraryTheme.ts
 import { useThemeMode } from '@abe-stack/ui';
 
 export type ThemeMode = 'system' | 'light' | 'dark';

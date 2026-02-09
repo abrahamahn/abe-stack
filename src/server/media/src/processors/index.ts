@@ -1,4 +1,4 @@
-// premium/media/src/processors/index.ts
+// src/server/media/src/processors/index.ts
 /**
  * Media Processors
  *

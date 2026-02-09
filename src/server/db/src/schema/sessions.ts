@@ -1,4 +1,4 @@
-// backend/db/src/schema/sessions.ts
+// src/server/db/src/schema/sessions.ts
 /**
  * User Sessions Schema Types
  *
@@ -27,6 +27,8 @@ export interface UserSession {
   userId: string;
   ipAddress: string | null;
   userAgent: string | null;
+  deviceName?: string | null;
+  deviceType?: string | null;
   deviceId: string | null;
   lastActiveAt: Date;
   revokedAt: Date | null;
@@ -41,6 +43,8 @@ export interface NewUserSession {
   userId: string;
   ipAddress?: string | null;
   userAgent?: string | null;
+  deviceName?: string | null;
+  deviceType?: string | null;
   deviceId?: string | null;
   lastActiveAt?: Date;
   revokedAt?: Date | null;
@@ -53,6 +57,8 @@ export interface NewUserSession {
  */
 export interface UpdateUserSession {
   lastActiveAt?: Date;
+  deviceName?: string | null;
+  deviceType?: string | null;
   revokedAt?: Date | null;
 }
 
@@ -65,6 +71,8 @@ export const USER_SESSION_COLUMNS = {
   userId: 'user_id',
   ipAddress: 'ip_address',
   userAgent: 'user_agent',
+  deviceName: 'device_name',
+  deviceType: 'device_type',
   deviceId: 'device_id',
   lastActiveAt: 'last_active_at',
   revokedAt: 'revoked_at',

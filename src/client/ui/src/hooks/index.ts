@@ -1,4 +1,4 @@
-// client/ui/src/hooks/index.ts
+// src/client/ui/src/hooks/index.ts
 export {
   deepEqual,
   formatKeyBinding,

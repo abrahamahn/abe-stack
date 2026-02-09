@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/SecurityMetricsCard.tsx
+// src/apps/web/src/features/admin/components/SecurityMetricsCard.tsx
 /**
  * SecurityMetricsCard Component
  *

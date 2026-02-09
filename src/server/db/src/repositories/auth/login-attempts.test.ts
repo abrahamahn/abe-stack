@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/login-attempts.test.ts
+// src/server/db/src/repositories/auth/login-attempts.test.ts
 /**
  * Tests for Login Attempts Repository
  *

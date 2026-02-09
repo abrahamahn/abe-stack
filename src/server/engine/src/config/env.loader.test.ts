@@ -1,4 +1,4 @@
-// backend/engine/src/config/env.loader.test.ts
+// src/server/engine/src/config/env.loader.test.ts
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -102,6 +102,32 @@ describe('Env Loader (Unit)', () => {
     initEnv();
     expect(process.env['VAR1']).toBe('double quotes');
     expect(process.env['VAR2']).toBe('single quotes');
+  });
+
+  test('should strip inline comments for unquoted values', () => {
+    vi.mocked(fs.readFileSync).mockImplementation((p) => {
+      if (String(p).endsWith('.config/env/.env')) {
+        return `FLAG=false  # options: true | false\nNUM=123 # trailing`;
+      }
+      return '';
+    });
+
+    initEnv();
+    expect(process.env['FLAG']).toBe('false');
+    expect(process.env['NUM']).toBe('123');
+  });
+
+  test('should not strip # inside quoted values', () => {
+    vi.mocked(fs.readFileSync).mockImplementation((p) => {
+      if (String(p).endsWith('.config/env/.env')) {
+        return `TOKEN="abc #def"\nTOKEN2='abc #def'`;
+      }
+      return '';
+    });
+
+    initEnv();
+    expect(process.env['TOKEN']).toBe('abc #def');
+    expect(process.env['TOKEN2']).toBe('abc #def');
   });
 
   test('should fallback to root .env if .config/env/.env is missing', () => {

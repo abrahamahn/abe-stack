@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/request.ts
+// src/server/core/src/auth/utils/request.ts
 /**
  * Request utilities for extracting client information.
  *

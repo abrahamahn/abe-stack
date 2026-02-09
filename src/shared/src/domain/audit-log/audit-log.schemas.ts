@@ -1,4 +1,4 @@
-// packages/shared/src/domain/audit-log/audit-log.schemas.ts
+// src/shared/src/domain/audit-log/audit-log.schemas.ts
 
 /**
  * @file Audit Log Contracts
@@ -6,7 +6,6 @@
  * @module Domain/AuditLog
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
 import {
   createEnumSchema,
   createSchema,
@@ -15,11 +14,12 @@ import {
   parseRecord,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../../utils/pagination';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { AuditEventId, TenantId, UserId } from '../../types/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../../utils/pagination';
 

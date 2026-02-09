@@ -1,22 +1,22 @@
-// packages/shared/src/domain/membership/membership.schemas.ts
+// src/shared/src/domain/membership/membership.schemas.ts
 /**
  * @file Membership Contracts
  * @description Types and schemas for workspace/tenant memberships and invitations.
  * @module Domain/Membership
  */
 
-import { emailSchema, isoDateTimeSchema } from '../../contracts/common';
 import {
   createEnumSchema,
   createSchema,
   parseOptional,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { emailSchema, isoDateTimeSchema } from '../../core/schemas';
 import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
 import { tenantRoleSchema } from '../../types/roles';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { InviteId, MembershipId, TenantId, UserId } from '../../types/ids';
 import type { TenantRole } from '../../types/roles';
 

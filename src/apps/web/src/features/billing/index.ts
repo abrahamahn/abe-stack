@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/index.ts
+// src/apps/web/src/features/billing/index.ts
 /**
  * Billing Feature
  *

@@ -1,6 +1,8 @@
-// tools/scripts/audit/health-check.ts
+// src/tools/scripts/audit/health-check.ts
 
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function runAudit() {
   console.log('🔍 Starting Monorepo Health Audit...');
@@ -68,43 +70,45 @@ function parseOutput(fullLog: string) {
   const packageStats: Record<string, { lint: number; type: number; test: number }> = {};
 
   // Pre-populate package list to ensure we show all packages, even those with 0 output
+  interface PnpmPackageInfo {
+    name?: string;
+  }
+
   try {
-    const listProc = require('child_process').spawnSync(
-      'pnpm',
-      ['m', 'ls', '--json', '--depth=-1'],
-      { encoding: 'utf-8' },
-    );
+    const listProc = spawnSync('pnpm', ['m', 'ls', '--json', '--depth=-1'], {
+      encoding: 'utf-8',
+    });
     if (listProc.error) throw listProc.error;
     if (listProc.stderr && listProc.stderr.length > 0) process.stderr.write(listProc.stderr);
 
-    const packages = JSON.parse(listProc.stdout);
-    packages.forEach((pkg: any) => {
-      // Skip the root package itself if needed, usually named "@abe-stack/root"
-      if (pkg.name !== '@abe-stack/root') {
+    const packages = JSON.parse(listProc.stdout) as PnpmPackageInfo[];
+    for (const pkg of packages) {
+      if (pkg.name && pkg.name !== '@abe-stack/root') {
         packageStats[pkg.name] = { lint: 0, type: 0, test: 0 };
       }
-    });
-  } catch (e) {
+    }
+  } catch {
     console.warn('⚠️ Could not auto-detect package list via pnpm, trying fallback...');
     // Fallback: use find to locate package.json files
     try {
-      const findProc = require('child_process').spawnSync(
+      const findProc = spawnSync(
         'find',
         ['.', '-name', 'package.json', '-not', '-path', '*/node_modules/*'],
         { encoding: 'utf-8' },
       );
       const files = findProc.stdout.split('\n').filter(Boolean);
-      files.forEach((f: string) => {
+      for (const f of files) {
         try {
-          const pkg = require(require('path').resolve(process.cwd(), f));
+          const pkgContent = fs.readFileSync(path.resolve(process.cwd(), f), 'utf-8');
+          const pkg = JSON.parse(pkgContent) as PnpmPackageInfo;
           if (pkg.name && pkg.name !== '@abe-stack/root') {
             packageStats[pkg.name] = { lint: 0, type: 0, test: 0 };
           }
-        } catch (err) {
+        } catch {
           /* ignore invalid json */
         }
-      });
-    } catch (err2) {
+      }
+    } catch {
       console.warn('⚠️ Could not auto-detect package list via fallback either.');
     }
   }

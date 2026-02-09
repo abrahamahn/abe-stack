@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/UserFilters.tsx
+// src/apps/web/src/features/admin/components/UserFilters.tsx
 /**
  * UserFilters Component
  *
@@ -8,18 +8,10 @@
 import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
+import type { AdminUserListFilters } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
-type UserRoleLocal = 'user' | 'moderator' | 'admin';
-type UserStatusLocal = 'active' | 'locked' | 'unverified';
-
-interface AdminUserListFiltersLocal {
-  search?: string;
-  role?: UserRoleLocal;
-  status?: UserStatusLocal;
-  sortBy?: 'email' | 'name' | 'createdAt' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
-}
+type AdminUserListFiltersLocal = AdminUserListFilters;
 
 export interface UserFiltersProps {
   filters: AdminUserListFiltersLocal;
@@ -45,7 +37,9 @@ const SORT_OPTIONS = [
   { value: 'createdAt', label: 'Date Created' },
   { value: 'updatedAt', label: 'Date Updated' },
   { value: 'email', label: 'Email' },
-  { value: 'name', label: 'Name' },
+  { value: 'username', label: 'Username' },
+  { value: 'firstName', label: 'First Name' },
+  { value: 'lastName', label: 'Last Name' },
 ];
 
 export const UserFilters = ({
@@ -65,14 +59,18 @@ export const UserFilters = ({
 
   const handleRoleChange = useCallback(
     (value: string) => {
-      onFiltersChange({ ...(value.length > 0 && { role: value as UserRoleLocal }) });
+      onFiltersChange({
+        ...(value.length > 0 && { role: value as 'user' | 'moderator' | 'admin' }),
+      });
     },
     [onFiltersChange],
   );
 
   const handleStatusChange = useCallback(
     (value: string) => {
-      onFiltersChange({ ...(value.length > 0 && { status: value as UserStatusLocal }) });
+      onFiltersChange({
+        ...(value.length > 0 && { status: value as 'active' | 'locked' | 'unverified' }),
+      });
     },
     [onFiltersChange],
   );
@@ -82,7 +80,13 @@ export const UserFilters = ({
       if (value.length > 0) {
         const newFilters: AdminUserListFiltersLocal = {
           ...filters,
-          sortBy: value as 'email' | 'name' | 'createdAt' | 'updatedAt',
+          sortBy: value as
+            | 'email'
+            | 'username'
+            | 'firstName'
+            | 'lastName'
+            | 'createdAt'
+            | 'updatedAt',
         };
         onFiltersChange(newFilters);
       }

@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/catalog/componentCatalog.tsx
+// src/apps/web/src/features/ui-library/catalog/componentCatalog.tsx
 import {
   AppShell,
   Badge,

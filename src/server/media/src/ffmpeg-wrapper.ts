@@ -1,13 +1,73 @@
-// premium/media/src/ffmpeg-wrapper.ts
+// src/server/media/src/ffmpeg-wrapper.ts
 /**
  * Custom FFmpeg Wrapper - Lightweight replacement for fluent-ffmpeg
  *
  * Provides basic FFmpeg functionality for media processing without external dependencies.
+ * Includes buffer bounding, process timeout/kill, and path validation.
+ *
+ * @module ffmpeg-wrapper
  */
 
 import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
+
+/**
+ * Maximum buffer size for stdout/stderr accumulation (10 MB).
+ * Prevents unbounded memory growth when FFmpeg produces large output.
+ */
+const MAX_BUFFER_SIZE = 10 * 1024 * 1024;
+
+/** Default process timeout: 5 minutes */
+const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
+
+/**
+ * Validate that a file path does not contain control characters (0x00–0x1F).
+ *
+ * Since we use `spawn` (not `exec`), arguments are NOT interpreted by a shell,
+ * so classic shell metacharacters (`;`, `|`, `$()`) are not exploitable.
+ * However, null bytes and control characters can cause unexpected behavior
+ * in FFmpeg's own path parsing.
+ *
+ * @param filePath - The path to validate
+ * @param label - Human-readable label for error messages
+ * @throws Error if the path contains unsafe characters
+ * @complexity O(n) where n is the path length
+ */
+/**
+ * Maximum allowed dimension for video/image width or height.
+ * Prevents resource exhaustion from absurdly large filter graphs.
+ */
+const MAX_DIMENSION = 65_536;
+
+function validatePath(filePath: string, label: string): void {
+  for (let i = 0; i < filePath.length; i++) {
+    const code = filePath.charCodeAt(i);
+    if (code <= 0x1f) {
+      throw new Error(`${label} contains invalid characters`);
+    }
+  }
+}
+
+/**
+ * Validate that a numeric value is a safe positive integer suitable for
+ * interpolation into FFmpeg filter expressions.
+ *
+ * Rejects NaN, Infinity, negative numbers, non-integers, and values
+ * exceeding MAX_DIMENSION to prevent filter injection and resource exhaustion.
+ *
+ * @param value - The numeric value to validate
+ * @param label - Human-readable label for error messages
+ * @throws Error if value is not a safe positive integer within bounds
+ * @complexity O(1)
+ */
+function validateDimension(value: number, label: string): void {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value <= 0 || value > MAX_DIMENSION) {
+    throw new Error(
+      `${label} must be a positive integer <= ${String(MAX_DIMENSION)}, got ${String(value)}`,
+    );
+  }
+}
 
 export interface FFmpegOptions {
   input?: string;
@@ -20,6 +80,8 @@ export interface FFmpegOptions {
   format?: string;
   startTime?: number;
   duration?: number;
+  /** Process timeout in milliseconds. Defaults to 5 minutes. Set to 0 to disable. */
+  timeoutMs?: number;
   thumbnail?: {
     time: number;
     size: number;
@@ -40,9 +102,39 @@ export interface FFmpegResult {
 }
 
 /**
- * Execute FFmpeg command with given options
+ * Execute FFmpeg command with given options.
+ *
+ * Validates all file paths, bounds stdout/stderr buffers, and kills
+ * the child process on timeout to prevent zombie FFmpeg processes.
+ *
+ * @param options - FFmpeg processing options
+ * @returns FFmpeg result with success status and output
+ * @throws Error if any file path contains control characters
  */
 export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
+  // Validate all file paths before spawning
+  if (options.input !== undefined && options.input.length > 0) {
+    validatePath(options.input, 'Input path');
+  }
+  if (options.output !== undefined && options.output.length > 0) {
+    validatePath(options.output, 'Output path');
+  }
+  if (options.thumbnail !== undefined) {
+    validatePath(options.thumbnail.output, 'Thumbnail output path');
+    validateDimension(options.thumbnail.size, 'Thumbnail size');
+  }
+  if (options.waveform !== undefined) {
+    validatePath(options.waveform.output, 'Waveform output path');
+    validateDimension(options.waveform.width, 'Waveform width');
+    validateDimension(options.waveform.height, 'Waveform height');
+  }
+  if (options.resolution !== undefined) {
+    validateDimension(options.resolution.width, 'Resolution width');
+    validateDimension(options.resolution.height, 'Resolution height');
+  }
+
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+
   return new Promise((resolve) => {
     const args: string[] = [];
 
@@ -94,19 +186,17 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     // Special handling for thumbnails
     if (options.thumbnail !== undefined) {
       const thumbSize = String(options.thumbnail.size);
-      // Generate single frame at specific time
       args.push('-frames:v', '1');
       args.push(
         '-vf',
         `scale=${thumbSize}:${thumbSize}:force_original_aspect_ratio=decrease,pad=${thumbSize}:${thumbSize}:(ow-iw)/2:(oh-ih)/2`,
       );
-      args.push('-q:v', '2'); // High quality
+      args.push('-q:v', '2');
       args.push(options.thumbnail.output);
     }
 
     // Special handling for waveforms
     else if (options.waveform !== undefined) {
-      // Generate waveform visualization
       args.push(
         '-filter_complex',
         `showwavespic=s=${String(options.waveform.width)}x${String(options.waveform.height)}:colors=white`,
@@ -127,16 +217,49 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
 
     let stdout = '';
     let stderr = '';
+    let killed = false;
+
+    // Set up timeout to kill the process and prevent zombies
+    let timer: NodeJS.Timeout | undefined;
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        killed = true;
+        ffmpeg.kill('SIGKILL');
+      }, timeoutMs);
+    }
 
     ffmpeg.stdout.on('data', (data: Buffer) => {
-      stdout += data.toString();
+      if (stdout.length < MAX_BUFFER_SIZE) {
+        stdout += data.toString();
+        if (stdout.length > MAX_BUFFER_SIZE) {
+          stdout = stdout.slice(0, MAX_BUFFER_SIZE);
+        }
+      }
     });
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
-      stderr += data.toString();
+      if (stderr.length < MAX_BUFFER_SIZE) {
+        stderr += data.toString();
+        if (stderr.length > MAX_BUFFER_SIZE) {
+          stderr = stderr.slice(0, MAX_BUFFER_SIZE);
+        }
+      }
     });
 
     ffmpeg.on('close', (code) => {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+
+      if (killed) {
+        resolve({
+          success: false,
+          output: stdout,
+          error: `FFmpeg process killed after ${String(timeoutMs)}ms timeout`,
+        });
+        return;
+      }
+
       const success = code === 0;
 
       if (success) {
@@ -154,6 +277,9 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     });
 
     ffmpeg.on('error', (error) => {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
       resolve({
         success: false,
         output: '',
@@ -237,9 +363,18 @@ export async function getMediaMetadata(inputPath: string): Promise<MediaMetadata
 }
 
 /**
- * Run ffprobe for detailed metadata
+ * Run ffprobe for detailed metadata.
+ *
+ * Includes path validation, buffer bounding, and a 30-second timeout
+ * to prevent zombie processes.
+ *
+ * @param inputPath - Path to the media file
+ * @returns Parsed metadata result
+ * @throws Error if path is invalid, ffprobe fails, or output cannot be parsed
  */
 async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
+  validatePath(inputPath, 'Probe input path');
+
   return new Promise((resolve, reject) => {
     const ffprobe = spawn('ffprobe', [
       '-v',
@@ -252,12 +387,31 @@ async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
     ]);
 
     let output = '';
+    let killed = false;
+
+    // 30-second timeout for metadata probing
+    const timer = setTimeout(() => {
+      killed = true;
+      ffprobe.kill('SIGKILL');
+    }, 30_000);
 
     ffprobe.stdout.on('data', (data: Buffer) => {
-      output += data.toString();
+      if (output.length < MAX_BUFFER_SIZE) {
+        output += data.toString();
+        if (output.length > MAX_BUFFER_SIZE) {
+          output = output.slice(0, MAX_BUFFER_SIZE);
+        }
+      }
     });
 
     ffprobe.on('close', (code) => {
+      clearTimeout(timer);
+
+      if (killed) {
+        reject(new Error('ffprobe timed out'));
+        return;
+      }
+
       if (code === 0) {
         try {
           const parsed = JSON.parse(output) as {
@@ -296,6 +450,7 @@ async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
     });
 
     ffprobe.on('error', (error) => {
+      clearTimeout(timer);
       reject(error);
     });
   });
@@ -303,6 +458,11 @@ async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
 
 /**
  * Convert video to different format
+ *
+ * @param inputPath - Path to the input video file
+ * @param outputPath - Path for the converted output file
+ * @param options - Conversion options (format, codecs, bitrate, resolution)
+ * @returns FFmpeg result with success status
  */
 export async function convertVideo(
   inputPath: string,
@@ -430,12 +590,21 @@ export async function extractAudioSegment(
 
 /**
  * Create HLS streaming segments
+ *
+ * @param inputPath - Path to the source video
+ * @param outputDir - Directory for HLS output files
+ * @param baseName - Base name for the m3u8 playlist file
+ * @returns FFmpeg result with the playlist path
  */
 export async function createHLSStream(
   inputPath: string,
   outputDir: string,
   baseName: string = 'stream',
 ): Promise<FFmpegResult> {
+  validatePath(inputPath, 'HLS input path');
+  validatePath(outputDir, 'HLS output directory');
+  validatePath(baseName, 'HLS base name');
+
   await fs.mkdir(outputDir, { recursive: true });
 
   const playlistPath = path.join(outputDir, `${baseName}.m3u8`);
@@ -446,8 +615,6 @@ export async function createHLSStream(
   return runFFmpeg({
     input: inputPath,
     output: playlistPath,
-    // HLS specific options would be added here
-    // This is a simplified version
   });
 }
 

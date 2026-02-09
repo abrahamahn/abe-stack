@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/middleware.test.ts
+// src/apps/server/src/http/pagination/middleware.test.ts
 import { PAGINATION_ERROR_TYPES } from '@abe-stack/shared';
 import { describe, expect, it } from 'vitest';
 

@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/server.ts
+// src/apps/server/src/config/infra/server.ts
 import { getList } from '@abe-stack/shared/config';
 
 import type { FullEnv, LogLevel, ServerConfig } from '@abe-stack/shared/config';

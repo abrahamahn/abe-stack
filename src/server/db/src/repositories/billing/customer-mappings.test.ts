@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/customer-mappings.test.ts
+// src/server/db/src/repositories/billing/customer-mappings.test.ts
 /**
  * Tests for Customer Mappings Repository
  *

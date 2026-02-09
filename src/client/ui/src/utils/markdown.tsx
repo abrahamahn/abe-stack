@@ -1,4 +1,4 @@
-// client/ui/src/utils/markdown.tsx
+// src/client/ui/src/utils/markdown.tsx
 /**
  * Custom Markdown Parser - Lightweight replacement for react-markdown
  *

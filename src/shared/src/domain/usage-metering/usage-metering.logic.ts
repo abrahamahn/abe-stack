@@ -1,4 +1,4 @@
-// packages/shared/src/domain/usage-metering/usage-metering.logic.ts
+// src/shared/src/domain/usage-metering/usage-metering.logic.ts
 /**
  * @file Usage Metering Logic
  * @description Pure functions for aggregating usage events and checking limits.

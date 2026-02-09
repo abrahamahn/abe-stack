@@ -1,4 +1,4 @@
-// apps/server/src/logger/logger.ts
+// src/apps/server/src/logger/logger.ts
 /**
  * Logger Service
  *
@@ -13,7 +13,7 @@ import {
 } from '@abe-stack/shared';
 
 import type { RequestContext } from '@abe-stack/shared';
-import type { Logger } from '@abe-stack/shared/contracts';
+import type { Logger } from '@abe-stack/shared/core';
 import type { FastifyBaseLogger } from 'fastify';
 
 /**

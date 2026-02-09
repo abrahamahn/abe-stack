@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/memberships.ts
+// src/server/db/src/repositories/tenant/memberships.ts
 /**
  * Memberships Repository (Functional)
  *

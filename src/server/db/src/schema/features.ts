@@ -1,4 +1,4 @@
-// backend/db/src/schema/features.ts
+// src/server/db/src/schema/features.ts
 /**
  * Feature Management Schema Types
  *

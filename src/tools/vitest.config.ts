@@ -1,4 +1,4 @@
-// tools/vitest.config.ts
+// src/tools/vitest.config.ts
 /**
  * Vitest configuration for tools/scripts/ tests.
  *
@@ -7,19 +7,19 @@
  * @abe-stack/* imports are mocked in the DB script tests, only the
  * type declarations need to be reachable.
  */
-import path from 'node:path';
+import path from 'path';
 import { mergeConfig } from 'vitest/config';
-import { baseConfig } from '../vitest.config';
+import { baseConfig } from '../../vitest.config';
 
-const corePkg = path.resolve(__dirname, '../backend/core/src');
-const sharedPkg = path.resolve(__dirname, '../kernel/src');
-const infraPkg = path.resolve(__dirname, '../backend/engine/src');
+const corePkg = path.resolve(__dirname, '../server/core/src');
+const sharedPkg = path.resolve(__dirname, '../shared/src');
+const dbPkg = path.resolve(__dirname, '../server/db/src');
 
 export default mergeConfig(baseConfig, {
   test: {
     name: 'tools',
     environment: 'node',
-    include: ['tools/scripts/**/*.test.ts'],
+    include: ['src/tools/scripts/**/*.test.ts'],
     server: {
       deps: {
         inline: ['@abe-stack/core', '@abe-stack/shared', '@abe-stack/db'],
@@ -31,7 +31,7 @@ export default mergeConfig(baseConfig, {
       { find: /^@abe-stack\/core\/(.*)$/, replacement: `${corePkg}/$1/index.ts` },
       { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
       { find: '@abe-stack/shared', replacement: `${sharedPkg}/index.ts` },
-      { find: '@abe-stack/db', replacement: `${infraPkg}/index.ts` },
+      { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
     ],
   },
 });

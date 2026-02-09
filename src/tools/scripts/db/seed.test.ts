@@ -1,4 +1,4 @@
-// tools/scripts/db/seed.test.ts
+// src/tools/scripts/db/seed.test.ts
 /**
  * Tests for Database Seed Script
  *

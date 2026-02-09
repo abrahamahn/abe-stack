@@ -1,4 +1,4 @@
-// client/ui/src/router/hooks.test.ts
+// src/client/react/src/router/hooks.test.tsx
 /**
  * Tests for custom router hooks.
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/AvatarUpload.test.tsx
+// src/apps/web/src/features/settings/components/AvatarUpload.test.tsx
 /**
  * Avatar Upload Component Tests
  *

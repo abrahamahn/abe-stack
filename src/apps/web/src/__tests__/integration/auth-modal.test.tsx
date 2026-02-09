@@ -121,13 +121,13 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'modal@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'modal@example.com');
       await user.type(screen.getByLabelText('Password'), 'modalpass123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalledWith({
-          email: 'modal@example.com',
+          identifier: 'modal@example.com',
           password: 'modalpass123',
         });
       });
@@ -140,7 +140,7 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={onOpenChange} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -156,7 +156,7 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" onSuccess={onSuccess} />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -184,7 +184,7 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -206,12 +206,12 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
       await waitFor(() => {
-        expect(screen.getByLabelText('Email')).toBeDisabled();
+        expect(screen.getByLabelText('Email or Username')).toBeDisabled();
         expect(screen.getByLabelText('Password')).toBeDisabled();
       });
 
@@ -231,7 +231,7 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'wrongpassword');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -248,7 +248,7 @@ describe('AuthModal Integration', () => {
         <AuthModal open={true} onOpenChange={onOpenChange} initialMode="login" />,
       );
 
-      await user.type(screen.getByLabelText('Email'), 'test@example.com');
+      await user.type(screen.getByLabelText('Email or Username'), 'test@example.com');
       await user.type(screen.getByLabelText('Password'), 'password');
       await user.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -281,7 +281,7 @@ describe('AuthModal Integration', () => {
 
       // Get the modal dialog
       const dialog = screen.getByRole('dialog');
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
 
       // Focus the email input first
       emailInput.focus();
@@ -323,10 +323,10 @@ describe('AuthModal Integration', () => {
       renderWithProviders(<AuthModal open={true} onOpenChange={vi.fn()} initialMode="login" />);
 
       // Verify inputs have associated labels
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
 
-      expect(emailInput).toHaveAccessibleName('Email');
+      expect(emailInput).toHaveAccessibleName('Email or Username');
       expect(passwordInput).toHaveAccessibleName('Password');
     });
 

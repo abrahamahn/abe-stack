@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/user-agreements.ts
+// src/server/db/src/repositories/compliance/user-agreements.ts
 /**
  * User Agreements Repository (Functional)
  *

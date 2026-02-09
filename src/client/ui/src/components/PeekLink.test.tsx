@@ -1,4 +1,4 @@
-// client/ui/src/components/PeekLink.test.tsx
+// src/client/ui/src/components/PeekLink.test.tsx
 /**
  * Tests for PeekLink component.
  *

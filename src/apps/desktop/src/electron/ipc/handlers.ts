@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/ipc/handlers.ts
+// src/apps/desktop/src/electron/ipc/handlers.ts
 import { app, dialog, ipcMain, Notification } from 'electron';
 
 import { IPC_CHANNELS } from '../types';

@@ -1,11 +1,13 @@
-// packages/shared/src/domain/notifications/notifications.push-schemas.ts
+// src/shared/src/domain/notifications/notifications.push-schemas.ts
 /**
  * Push Notification Validation Schemas
  *
  * Validation schemas for notification-related requests and data.
  */
 
-import { createSchema, type Schema } from '../../contracts';
+import { createSchema } from '../../core/schema.utils';
+
+import type { Schema } from '../../core/api';
 
 // ============================================================================
 // Constants

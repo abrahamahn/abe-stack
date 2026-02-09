@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/services.ts
+// src/shared/src/config/types/services.ts
 /**
  * Service Configuration Contracts
  *

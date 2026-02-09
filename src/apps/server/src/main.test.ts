@@ -1,4 +1,4 @@
-// apps/server/src/main.test.ts
+// src/apps/server/src/main.test.ts
 /**
  * Unit Tests for Application Entry Point
  *

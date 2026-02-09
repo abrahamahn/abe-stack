@@ -1,4 +1,4 @@
-// backend/db/src/utils/optimistic-lock.ts
+// src/server/db/src/utils/optimistic-lock.ts
 /**
  * Optimistic Concurrency Control Utilities
  *
@@ -10,7 +10,8 @@
 
 import { and, eq, select, update } from '../builder/index';
 import { USERS_TABLE, USER_COLUMNS, type User } from '../schema/index';
-import { toCamelCase, toSnakeCase } from '../utils';
+
+import { toCamelCase, toSnakeCase } from './database';
 
 import type { RawDb } from '../client';
 

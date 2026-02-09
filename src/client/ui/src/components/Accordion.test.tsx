@@ -1,4 +1,4 @@
-// client/ui/src/components/Accordion.test.tsx
+// src/client/ui/src/components/Accordion.test.tsx
 // client/ui/src/elements/__tests__/Accordion.test.tsx
 /** @vitest-environment jsdom */
 import { Accordion } from '@components/Accordion';

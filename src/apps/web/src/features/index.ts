@@ -1,4 +1,4 @@
-// apps/web/src/features/index.ts
+// src/apps/web/src/features/index.ts
 // @auto-generated - Do not edit manually
 
 export { LoginPage, type AuthContextType, type User, useAuth } from './auth';

@@ -1,4 +1,4 @@
-// client/ui/src/theme/typography.ts
+// src/client/ui/src/theme/typography.ts
 export const typography = {
   fontFamily:
     'system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji',

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/services/adminApi.test.ts
+// src/apps/web/src/features/admin/services/adminApi.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { createAdminApiClient } from './adminApi';

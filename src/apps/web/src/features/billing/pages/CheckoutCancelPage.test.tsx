@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/CheckoutCancelPage.test.tsx
+// src/apps/web/src/features/billing/pages/CheckoutCancelPage.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

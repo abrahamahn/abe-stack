@@ -1,4 +1,4 @@
-// client/ui/src/components/Toast.tsx
+// src/client/ui/src/components/Toast.tsx
 import { useCallback, useEffect, type ReactElement } from 'react';
 
 import type { ToastMessage } from '@abe-stack/react';

@@ -1,4 +1,4 @@
-// client/src/query/QueryCacheProvider.tsx
+// src/client/engine/src/query/QueryCacheProvider.tsx
 /**
  * QueryCacheProvider - React context for QueryCache.
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useJobActions.test.ts
+// src/apps/web/src/features/admin/hooks/useJobActions.test.ts
 import { useMutation } from '@abe-stack/client-engine';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

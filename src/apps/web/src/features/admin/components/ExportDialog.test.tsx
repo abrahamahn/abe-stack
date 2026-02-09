@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/ExportDialog.test.tsx
+// src/apps/web/src/features/admin/components/ExportDialog.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

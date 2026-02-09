@@ -1,4 +1,4 @@
-// packages/shared/src/utils/async/batched-queue.test.ts
+// src/shared/src/utils/async/batched-queue.test.ts
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { BatchedQueue } from './batched-queue';

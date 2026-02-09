@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/totp.ts
+// src/server/core/src/auth/handlers/totp.ts
 /**
  * TOTP (2FA) Handlers
  *
@@ -7,19 +7,34 @@
  * @module handlers/totp
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
-
-import { disableTotp, enableTotp, getTotpStatus, setupTotp } from '../totp';
-import { createErrorMapperLogger } from '../types';
-
-import type { AppContext, RequestWithCookies } from '../types';
-import type {
-  HttpErrorResponse,
-  TotpSetupResponse,
-  TotpStatusResponse,
-  TotpVerifyRequest,
-  TotpVerifyResponse,
+import { withTransaction } from '@abe-stack/db';
+import { verify as jwtVerify, JwtError } from '@abe-stack/server-engine';
+import {
+  InvalidTokenError,
+  mapErrorToHttpResponse,
+  type UserRole,
+  type AuthResponse,
+  type HttpErrorResponse,
+  type TotpLoginVerifyRequest,
+  type TotpSetupResponse,
+  type TotpStatusResponse,
+  type TotpVerifyRequest,
+  type TotpVerifyResponse,
 } from '@abe-stack/shared';
+
+import { disableTotp, enableTotp, getTotpStatus, setupTotp, verifyTotpForLogin } from '../totp';
+import {
+  createErrorMapperLogger,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
+} from '../types';
+import {
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  setRefreshTokenCookie,
+} from '../utils';
 
 /**
  * Handle TOTP setup — generate secret and backup codes.
@@ -112,6 +127,100 @@ export async function handleTotpStatus(
 
     const result = await getTotpStatus(ctx.db, userId);
     return { status: 200, body: result };
+  } catch (error) {
+    return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
+  }
+}
+
+/**
+ * Handle TOTP login verification — verify challenge token + TOTP code, return auth tokens.
+ *
+ * This is called after login returns a 202 TOTP challenge. The client sends back
+ * the challenge JWT and the 6-digit TOTP code. On success, full auth tokens are issued.
+ *
+ * @param ctx - Application context
+ * @param body - Challenge token and TOTP code
+ * @param _request - Request with cookies (unused)
+ * @param reply - Reply with cookie support
+ * @returns Auth response with tokens or error
+ * @complexity O(1)
+ */
+export async function handleTotpLoginVerify(
+  ctx: AppContext,
+  body: TotpLoginVerifyRequest,
+  request: RequestWithCookies,
+  reply: ReplyWithCookies,
+): Promise<{ status: 200; body: AuthResponse } | HttpErrorResponse> {
+  try {
+    const { ipAddress, userAgent } = request.requestInfo;
+
+    // Verify the challenge JWT
+    let payload: Record<string, unknown>;
+    try {
+      payload = jwtVerify(body.challengeToken, ctx.config.auth.jwt.secret) as Record<
+        string,
+        unknown
+      >;
+    } catch (error) {
+      if (error instanceof JwtError) {
+        throw new InvalidTokenError('Challenge token is invalid or expired');
+      }
+      throw error;
+    }
+
+    // Validate challenge token purpose and extract userId
+    if (payload['purpose'] !== 'totp_challenge' || typeof payload['userId'] !== 'string') {
+      throw new InvalidTokenError('Invalid challenge token');
+    }
+
+    const userId = payload['userId'];
+
+    // Verify TOTP code
+    const isValid = await verifyTotpForLogin(ctx.db, userId, body.code, ctx.config.auth);
+    if (!isValid) {
+      return { status: 401, body: { message: 'Invalid TOTP code' } };
+    }
+
+    // Fetch user for token creation
+    const user = await ctx.repos.users.findById(userId);
+    if (user === null) {
+      throw new InvalidTokenError('User not found');
+    }
+
+    // Create tokens
+    const { token: refreshToken } = await withTransaction(ctx.db, async (tx) => {
+      const sessionMeta: { ipAddress?: string; userAgent?: string } = { ipAddress };
+      if (userAgent !== undefined) {
+        sessionMeta.userAgent = userAgent;
+      }
+      return createRefreshTokenFamily(
+        tx,
+        user.id,
+        ctx.config.auth.refreshToken.expiryDays,
+        sessionMeta,
+      );
+    });
+
+    const accessToken = createAccessToken(
+      user.id,
+      user.email,
+      user.role as UserRole,
+      ctx.config.auth.jwt.secret,
+      ctx.config.auth.jwt.accessTokenExpiry,
+    );
+
+    // Set refresh token cookie
+    setRefreshTokenCookie(reply, refreshToken, ctx.config.auth);
+
+    const authResponse = createAuthResponse(accessToken, refreshToken, user);
+
+    return {
+      status: 200,
+      body: {
+        token: authResponse.accessToken,
+        user: authResponse.user,
+      },
+    };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/index.ts
+// src/apps/web/src/features/admin/index.ts
 /**
  * Admin Feature
  *

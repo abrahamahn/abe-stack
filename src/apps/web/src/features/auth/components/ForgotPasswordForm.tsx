@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/ForgotPasswordForm.tsx
+// src/apps/web/src/features/auth/components/ForgotPasswordForm.tsx
 import { Button, Input, Link } from '@abe-stack/ui';
 import { useState } from 'react';
 

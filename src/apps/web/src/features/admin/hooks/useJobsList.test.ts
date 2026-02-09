@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useJobsList.test.ts
+// src/apps/web/src/features/admin/hooks/useJobsList.test.ts
 import { useQuery } from '@abe-stack/client-engine';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

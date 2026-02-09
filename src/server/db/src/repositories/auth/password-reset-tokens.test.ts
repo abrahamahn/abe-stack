@@ -1,4 +1,4 @@
-// backend/db/src/repositories/auth/password-reset-tokens.test.ts
+// src/server/db/src/repositories/auth/password-reset-tokens.test.ts
 /**
  * Tests for Password Reset Tokens Repository
  *

@@ -1,4 +1,4 @@
-// premium/media/src/audio-metadata.ts
+// src/server/media/src/audio-metadata.ts
 /**
  * Custom Audio Metadata Parser - Lightweight replacement for music-metadata
  *
@@ -6,6 +6,13 @@
  */
 
 import { promises as fs } from 'fs';
+
+/**
+ * Maximum audio file size for full-file metadata parsing (200 MB).
+ * Files larger than this threshold skip the full-buffer read to
+ * prevent out-of-memory conditions; an empty metadata object is returned.
+ */
+const MAX_AUDIO_FILE_SIZE = 200 * 1024 * 1024;
 
 export interface AudioMetadata {
   duration?: number;
@@ -24,6 +31,11 @@ export interface AudioMetadata {
  */
 export async function parseAudioMetadata(filePath: string): Promise<AudioMetadata> {
   try {
+    const stat = await fs.stat(filePath);
+    if (stat.size > MAX_AUDIO_FILE_SIZE) {
+      return {};
+    }
+
     const buffer = await fs.readFile(filePath);
     const metadata: AudioMetadata = {};
 
@@ -192,29 +204,60 @@ function isWAV(buffer: Buffer): boolean {
   );
 }
 
+/**
+ * Parse WAV fmt chunk and optional data chunk for duration.
+ *
+ * WAV header layout (RIFF):
+ *   bytes 0-3:   "RIFF"
+ *   bytes 4-7:   file size - 8
+ *   bytes 8-11:  "WAVE"
+ *   bytes 12-15: "fmt " sub-chunk ID
+ *   bytes 16-19: fmt chunk size (16 for PCM)
+ *   bytes 20-21: audio format (1 = PCM)
+ *   bytes 22-23: number of channels
+ *   bytes 24-27: sample rate
+ *   bytes 28-31: byte rate
+ *   bytes 32-33: block align
+ *   bytes 34-35: bits per sample
+ *   bytes 36-39: "data" sub-chunk ID
+ *   bytes 40-43: data chunk size
+ *
+ * @param buffer - File buffer with at least 12 bytes (isWAV check)
+ * @returns Parsed metadata with format set to 'wav'
+ * @complexity O(1) — reads fixed offsets
+ */
 function parseWAVMetadata(buffer: Buffer): AudioMetadata {
   const metadata: AudioMetadata = {
     format: 'wav',
     codec: 'pcm',
   };
 
+  // Need at least 44 bytes for a complete WAV header (RIFF + fmt + data header)
+  if (buffer.length < 44) {
+    return metadata;
+  }
+
   try {
-    // Parse WAV header
     const channels = buffer.readUInt16LE(22);
     const sampleRate = buffer.readUInt32LE(24);
     const bitsPerSample = buffer.readUInt16LE(34);
     const dataSize = buffer.readUInt32LE(40);
 
+    // Sanity-check parsed values to avoid nonsensical metadata
+    if (channels === 0 || channels > 32 || sampleRate === 0 || bitsPerSample === 0) {
+      return metadata;
+    }
+
     metadata.channels = channels;
     metadata.sampleRate = sampleRate;
     metadata.bitrate = sampleRate * channels * bitsPerSample;
 
-    if (sampleRate > 0) {
-      const bytesPerSecond = sampleRate * channels * (bitsPerSample / 8);
+    const bytesPerSecond = sampleRate * channels * (bitsPerSample / 8);
+    if (bytesPerSecond > 0) {
       metadata.duration = dataSize / bytesPerSecond;
     }
   } catch {
-    // Ignore parsing errors
+    // Return partial metadata on malformed buffer
   }
 
   return metadata;
@@ -234,19 +277,80 @@ function isFLAC(buffer: Buffer): boolean {
   );
 }
 
-function parseFLACMetadata(_buffer: Buffer): AudioMetadata {
+/**
+ * Parse FLAC STREAMINFO metadata block.
+ *
+ * FLAC layout after the 4-byte "fLaC" marker:
+ *   byte 4: block type (bit 7 = last-block flag, bits 0-6 = type; 0 = STREAMINFO)
+ *   bytes 5-7: block length (24-bit big-endian)
+ *   STREAMINFO (34 bytes):
+ *     bytes 0-1: min block size
+ *     bytes 2-3: max block size
+ *     bytes 4-6: min frame size
+ *     bytes 7-9: max frame size
+ *     bytes 10-13: sample rate (20 bits) | channels-1 (3 bits) | bps-1 (5 bits) | total samples high (4 bits)
+ *     bytes 14-17: total samples low (32 bits)
+ *
+ * @complexity O(1) — reads fixed offsets
+ */
+function parseFLACMetadata(buffer: Buffer): AudioMetadata {
   const metadata: AudioMetadata = {
     format: 'flac',
     codec: 'flac',
   };
 
   try {
-    // FLAC metadata parsing is complex, just return basic info
-    // In a full implementation, we'd parse the metadata blocks
-    metadata.channels = 2; // Default assumption
-    metadata.sampleRate = 44100; // Default assumption
+    // STREAMINFO starts at offset 4 (after "fLaC") + 4 (block header)
+    const streamInfoOffset = 8;
+    // Need at least streamInfoOffset + 18 bytes for sample rate / channels / total samples
+    if (buffer.length < streamInfoOffset + 18) {
+      return metadata;
+    }
+
+    // Bytes 10-13 of STREAMINFO (absolute offset: streamInfoOffset + 10)
+    const byte10 = buffer[streamInfoOffset + 10] ?? 0;
+    const byte11 = buffer[streamInfoOffset + 11] ?? 0;
+    const byte12 = buffer[streamInfoOffset + 12] ?? 0;
+    const byte13 = buffer[streamInfoOffset + 13] ?? 0;
+
+    // Sample rate: 20 bits from byte10[7:0] byte11[7:0] byte12[7:4]
+    const sampleRate = (byte10 << 12) | (byte11 << 4) | (byte12 >> 4);
+    // Channels: 3 bits from byte12[3:1], stored as channels - 1
+    const channels = ((byte12 >> 1) & 0x07) + 1;
+    // Bits per sample: 5 bits from byte12[0] byte13[7:4], stored as bps - 1
+    const bitsPerSample = ((byte12 & 0x01) << 4) | (byte13 >> 4);
+
+    // Sanity-check: FLAC spec limits sample rate to 655350 Hz (20-bit max)
+    // and channels to 8 (3-bit field + 1). Reject obviously corrupt headers.
+    if (sampleRate === 0 || sampleRate > 655350 || channels > 8) {
+      return metadata;
+    }
+
+    metadata.sampleRate = sampleRate;
+    metadata.channels = channels;
+
+    // Total samples: 4 bits from byte13[3:0] + 32 bits from bytes 14-17
+    // totalSamplesHigh is 0–15, totalSamplesLow is unsigned 32-bit.
+    // Max combined: 15 * 2^32 + (2^32 - 1) ≈ 6.87 × 10^10, well within
+    // Number.MAX_SAFE_INTEGER (2^53 - 1), so no precision loss.
+    const totalSamplesHigh = byte13 & 0x0f;
+    const byte14 = buffer[streamInfoOffset + 14] ?? 0;
+    const byte15 = buffer[streamInfoOffset + 15] ?? 0;
+    const byte16 = buffer[streamInfoOffset + 16] ?? 0;
+    const byte17 = buffer[streamInfoOffset + 17] ?? 0;
+    const totalSamplesLow = (byte14 << 24) | (byte15 << 16) | (byte16 << 8) | byte17;
+    // Use >>> 0 to convert signed 32-bit result to unsigned before widening
+    const totalSamples = totalSamplesHigh * 0x100000000 + (totalSamplesLow >>> 0);
+
+    if (totalSamples > 0) {
+      metadata.duration = totalSamples / sampleRate;
+    }
+
+    if (bitsPerSample > 0) {
+      metadata.bitrate = sampleRate * channels * (bitsPerSample + 1);
+    }
   } catch {
-    // Ignore parsing errors
+    // Return partial metadata on error
   }
 
   return metadata;
@@ -266,18 +370,75 @@ function isOGG(buffer: Buffer): boolean {
   );
 }
 
-function parseOGGMetadata(_buffer: Buffer): AudioMetadata {
+/**
+ * Parse OGG Vorbis identification header.
+ *
+ * OGG page header (27+ bytes):
+ *   bytes 0-3:   "OggS"
+ *   byte 4:      version (0)
+ *   byte 5:      header type
+ *   bytes 6-13:  granule position
+ *   bytes 14-17: serial number
+ *   bytes 18-21: page sequence
+ *   bytes 22-25: CRC
+ *   byte 26:     number of segments
+ *   bytes 27+:   segment table
+ *
+ * After the segment table, the Vorbis identification header starts with:
+ *   byte 0:      packet type (1 = identification)
+ *   bytes 1-6:   "vorbis"
+ *   bytes 7-10:  vorbis version (0)
+ *   byte 11:     channels
+ *   bytes 12-15: sample rate (32-bit LE)
+ *   bytes 16-19: bitrate maximum
+ *   bytes 20-23: bitrate nominal
+ *   bytes 24-27: bitrate minimum
+ *
+ * @complexity O(1) — reads fixed offsets
+ */
+function parseOGGMetadata(buffer: Buffer): AudioMetadata {
   const metadata: AudioMetadata = {
     format: 'ogg',
-    codec: 'vorbis', // Default assumption for OGG
+    codec: 'vorbis',
   };
 
   try {
-    // OGG metadata parsing is complex, just return basic info
-    metadata.channels = 2; // Default assumption
-    metadata.sampleRate = 44100; // Default assumption
+    // Need at least 27 bytes for OGG page header + 1 byte segment count
+    if (buffer.length < 28) {
+      return metadata;
+    }
+
+    const numSegments = buffer[26] ?? 0;
+    // Data starts after the page header (27 bytes) + segment table
+    const dataOffset = 27 + numSegments;
+
+    // Check we have enough for the Vorbis identification header (28 bytes)
+    if (buffer.length < dataOffset + 28) {
+      return metadata;
+    }
+
+    // Verify Vorbis identification header: packet type 1 + "vorbis"
+    const packetType = buffer[dataOffset];
+    const vorbisTag = buffer.subarray(dataOffset + 1, dataOffset + 7).toString('ascii');
+    if (packetType !== 1 || vorbisTag !== 'vorbis') {
+      return metadata;
+    }
+
+    const channels = buffer[dataOffset + 11] ?? 0;
+    const sampleRate = buffer.readUInt32LE(dataOffset + 12);
+    const bitrateNominal = buffer.readInt32LE(dataOffset + 20);
+
+    if (channels > 0) {
+      metadata.channels = channels;
+    }
+    if (sampleRate > 0) {
+      metadata.sampleRate = sampleRate;
+    }
+    if (bitrateNominal > 0) {
+      metadata.bitrate = bitrateNominal;
+    }
   } catch {
-    // Ignore parsing errors
+    // Return partial metadata on error
   }
 
   return metadata;

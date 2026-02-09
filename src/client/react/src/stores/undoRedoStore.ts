@@ -1,4 +1,4 @@
-// client/react/src/stores/undoRedoStore.ts
+// src/client/react/src/stores/undoRedoStore.ts
 /**
  * Undo/Redo Store
  *

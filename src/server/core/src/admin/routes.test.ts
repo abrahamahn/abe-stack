@@ -1,4 +1,4 @@
-// backend/core/src/admin/routes.test.ts
+// src/server/core/src/admin/routes.test.ts
 /*
  * Admin Routes Tests
  *

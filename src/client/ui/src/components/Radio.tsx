@@ -1,4 +1,4 @@
-// client/ui/src/components/Radio.tsx
+// src/client/ui/src/components/Radio.tsx
 import { useRadioGroupContext } from '@components/RadioGroup';
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';

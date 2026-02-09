@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/requestInfo.ts
+// src/apps/server/src/http/middleware/requestInfo.ts
 /**
  * Request Info Middleware
  *

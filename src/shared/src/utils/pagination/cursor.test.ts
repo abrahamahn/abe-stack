@@ -1,4 +1,4 @@
-// packages/shared/src/utils/pagination/cursor.test.ts
+// src/shared/src/utils/pagination/cursor.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { decodeCursor, encodeCursor, type CursorData } from './cursor';

@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/handlers.test.ts
+// src/server/core/src/auth/magic-link/handlers.test.ts
 /**
  * Magic Link Handlers Tests
  *
@@ -569,11 +569,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-123' as UserId,
           email: 'user@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -601,11 +607,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-123' as UserId,
           email: 'user@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -634,11 +646,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-123' as UserId,
           email: 'user@example.com',
-          name: 'Test User',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           avatarUrl: null,
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -673,11 +691,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-new' as UserId,
           email: 'newuser@example.com',
-          name: null,
+          username: 'newuser',
+          firstName: 'User',
+          lastName: '',
           avatarUrl: null,
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -715,11 +739,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-existing' as UserId,
           email: 'existing@example.com',
-          name: 'Existing User',
+          username: 'existinguser',
+          firstName: 'Existing',
+          lastName: 'User',
           avatarUrl: 'https://example.com/avatar.jpg',
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2023-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2023-01-01T00:00:00Z',
         },
       };
@@ -831,7 +861,7 @@ describe('handleMagicLinkVerify', () => {
   });
 
   describe('edge cases', () => {
-    test('should handle user with empty string name as new user', async () => {
+    test('should handle user with default name as new user', async () => {
       const ctx = createMockContext();
       const body = { token: 'valid-token' };
       const request = createMockRequest();
@@ -843,11 +873,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'user-123' as UserId,
           email: 'user@example.com',
-          name: null,
+          username: 'user123',
+          firstName: 'User',
+          lastName: '',
           avatarUrl: null,
           role: 'user',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -880,11 +916,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'admin-123' as UserId,
           email: 'admin@example.com',
-          name: 'Admin User',
+          username: 'adminuser',
+          firstName: 'Admin',
+          lastName: 'User',
           avatarUrl: null,
           role: 'admin',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };
@@ -911,11 +953,17 @@ describe('handleMagicLinkVerify', () => {
         user: {
           id: 'mod-123' as UserId,
           email: 'moderator@example.com',
-          name: 'Moderator',
+          username: 'moderator',
+          firstName: 'Moderator',
+          lastName: '',
           avatarUrl: null,
           role: 'moderator',
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
           createdAt: '2024-01-01T00:00:00Z',
-          isVerified: true,
           updatedAt: '2024-01-01T00:00:00Z',
         },
       };

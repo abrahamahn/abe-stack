@@ -1,4 +1,4 @@
-// modules/realtime/src/handlers/subscribe.test.ts
+// src/server/realtime/src/handlers/subscribe.test.ts
 /**
  * Realtime Subscribe Handler Unit Tests
  *
@@ -51,13 +51,19 @@ function createMockContext(overrides: Partial<RealtimeModuleDeps> = {}): Realtim
   } as unknown as RealtimeModuleDeps;
 }
 
-function createMockRequest(user?: { userId: string }): RealtimeRequest {
+const mockUser = { userId: 'user-123', email: 'test@example.com', role: 'user' };
+
+function createMockRequest(user?: {
+  userId: string;
+  email: string;
+  role: string;
+}): RealtimeRequest {
   return {
-    user: user as RealtimeRequest['user'],
+    ...(user !== undefined ? { user } : {}),
     cookies: {},
     headers: {},
     requestInfo: { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
-  };
+  } as RealtimeRequest;
 }
 
 // ============================================================================
@@ -86,7 +92,7 @@ describe('Realtime Subscribe Handler', () => {
     describe('Table Validation', () => {
       test('should reject requests for disallowed tables', async () => {
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = { pointers: [{ table: 'secret_table', id: 'id-1' }] };
 
         const result = await handleGetRecords(ctx, body, req);
@@ -111,7 +117,7 @@ describe('Realtime Subscribe Handler', () => {
         vi.mocked(loadRecords).mockResolvedValue(mockRecords);
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = {
           pointers: [
             { table: 'users', id: 'user-1' },
@@ -130,14 +136,14 @@ describe('Realtime Subscribe Handler', () => {
         vi.mocked(loadRecords).mockResolvedValue({});
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = { pointers: [{ table: 'users', id: 'user-1' }] };
 
         await handleGetRecords(ctx, body, req);
 
         expect(ctx.log.debug).toHaveBeenCalledWith(
-          expect.objectContaining({ userId: 'user-123', pointerCount: 1 }),
           'GetRecords request',
+          expect.objectContaining({ userId: 'user-123', pointerCount: 1 }),
         );
       });
     });
@@ -148,7 +154,7 @@ describe('Realtime Subscribe Handler', () => {
         vi.mocked(loadRecords).mockRejectedValue(new Error('Database error'));
 
         const ctx = createMockContext();
-        const req = createMockRequest({ userId: 'user-123' });
+        const req = createMockRequest(mockUser);
         const body = { pointers: [{ table: 'users', id: 'user-1' }] };
 
         const result = await handleGetRecords(ctx, body, req);

@@ -1,4 +1,4 @@
-// premium/websocket/src/websocket/stats.ts
+// src/server/websocket/src/stats.ts
 /**
  * WebSocket Statistics
  *

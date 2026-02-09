@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/validation.test.ts
+// src/apps/server/src/http/middleware/validation.test.ts
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

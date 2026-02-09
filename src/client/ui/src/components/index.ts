@@ -1,4 +1,4 @@
-// client/ui/src/components/index.ts
+// src/client/ui/src/components/index.ts
 // Components - Composed multi-part components with complex state/behavior
 export { Accordion } from './Accordion';
 export { Card } from './Card';

@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/service.ts
+// src/server/core/src/auth/oauth/service.ts
 /**
  * OAuth Service
  *
@@ -24,15 +24,22 @@ import {
   type UserRole,
 } from '@abe-stack/db';
 import {
+  canonicalizeEmail,
   ConflictError,
   EmailAlreadyExistsError,
   NotFoundError,
+  normalizeEmail,
   OAuthError,
   OAuthStateMismatchError,
   type UserId,
 } from '@abe-stack/shared';
 
-import { createAccessToken, createRefreshTokenFamily } from '../utils';
+import {
+  createAccessToken,
+  createRefreshTokenFamily,
+  generateUniqueUsername,
+  splitFullName,
+} from '../utils';
 
 import {
   createAppleProvider,
@@ -66,10 +73,16 @@ export interface OAuthAuthResult {
   user: {
     id: UserId;
     email: string;
-    name: string | null;
+    username: string;
+    firstName: string;
+    lastName: string;
     avatarUrl: string | null;
     role: UserRole;
-    isVerified: boolean;
+    emailVerified: boolean;
+    phone: string | null;
+    phoneVerified: boolean | null;
+    dateOfBirth: string | null;
+    gender: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -420,6 +433,8 @@ async function authenticateOrCreateWithOAuth(
   tokens: OAuthTokenResponse,
 ): Promise<OAuthAuthResult> {
   const encryptionKey = config.cookie.secret;
+  const normalizedEmail = normalizeEmail(userInfo.email);
+  const canonicalEmail = canonicalizeEmail(userInfo.email);
 
   // Check if OAuth connection already exists (using repository)
   const existingConnection = await repos.oauthConnections.findByProviderUserId(
@@ -465,10 +480,16 @@ async function authenticateOrCreateWithOAuth(
       user: {
         id: user.id as UserId,
         email: user.email,
-        name: user.name,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         avatarUrl: user.avatarUrl ?? null,
         role: user.role,
-        isVerified: user.emailVerified,
+        emailVerified: user.emailVerified,
+        phone: user.phone ?? null,
+        phoneVerified: user.phoneVerified ?? null,
+        dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+        gender: user.gender ?? null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       },
@@ -477,7 +498,7 @@ async function authenticateOrCreateWithOAuth(
   }
 
   // Check if email already exists (for a different user) - using repository
-  const existingUser = await repos.users.findByEmail(userInfo.email);
+  const existingUser = await repos.users.findByEmail(canonicalEmail);
 
   if (existingUser != null) {
     // Email exists but no OAuth connection - user should link their account
@@ -486,14 +507,21 @@ async function authenticateOrCreateWithOAuth(
     );
   }
 
+  // Generate username and split name for new OAuth user
+  const username = await generateUniqueUsername(repos, userInfo.email);
+  const { firstName, lastName } = splitFullName(userInfo.name);
+
   // Create new user with OAuth connection
   const result = await withTransaction(db, async (tx) => {
     // Create user (verified if provider verified email)
     const newUserRows = await tx.query(
       insert(USERS_TABLE)
         .values({
-          email: userInfo.email,
-          name: userInfo.name,
+          email: normalizedEmail,
+          canonical_email: canonicalEmail,
+          username,
+          first_name: firstName,
+          last_name: lastName,
           // OAuth users don't have a password - generate a random unusable hash
           password_hash: `oauth:${provider}:${randomBytes(32).toString('hex')}`,
           role: 'user',
@@ -553,10 +581,19 @@ async function authenticateOrCreateWithOAuth(
     user: {
       id: result.user.id as UserId,
       email: result.user.email,
-      name: result.user.name,
+      username: result.user.username,
+      firstName: result.user.firstName,
+      lastName: result.user.lastName,
       avatarUrl: result.user.avatarUrl ?? null,
       role: result.user.role,
-      isVerified: result.user.emailVerified,
+      emailVerified: result.user.emailVerified,
+      phone: result.user.phone ?? null,
+      phoneVerified: result.user.phoneVerified ?? null,
+      dateOfBirth:
+        result.user.dateOfBirth !== null
+          ? result.user.dateOfBirth.toISOString().slice(0, 10)
+          : null,
+      gender: result.user.gender ?? null,
       createdAt: result.user.createdAt.toISOString(),
       updatedAt: result.user.updatedAt.toISOString(),
     },
@@ -721,7 +758,7 @@ export async function findUserByOAuthProvider(
   repos: Repositories,
   provider: OAuthProvider,
   providerUserId: string,
-): Promise<{ userId: string; email: string } | null> {
+): Promise<{ userId: string; email: string; canonicalEmail: string } | null> {
   // Using repositories (two queries instead of JOIN)
   const connection = await repos.oauthConnections.findByProviderUserId(provider, providerUserId);
 
@@ -735,5 +772,9 @@ export async function findUserByOAuthProvider(
     return null;
   }
 
-  return { userId: user.id, email: user.email };
+  return {
+    userId: user.id,
+    email: user.email,
+    canonicalEmail: user.canonicalEmail,
+  };
 }

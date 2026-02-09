@@ -1,4 +1,4 @@
-// backend/engine/src/security/rate-limit/limiter.ts
+// src/server/engine/src/security/rate-limit/limiter.ts
 /**
  * Token Bucket Rate Limiter
  *
@@ -144,6 +144,7 @@ export class MemoryStore implements RateLimitStore {
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
   private readonly maxSize: number;
   private evictionCount = 0;
+  private limitedClientsCount = 0;
 
   /**
    * Create a new MemoryStore
@@ -180,17 +181,27 @@ export class MemoryStore implements RateLimitStore {
   }
 
   /**
-   * Set a client record, triggering LRU eviction if at capacity
+   * Set a client record, triggering LRU eviction if at capacity.
+   * Maintains O(1) limitedClients counter by comparing old vs new state.
    *
    * @param key - Client identifier
    * @param record - The client record to store
    * @complexity O(1) amortized
    */
   set(key: string, record: ClientRecord): void {
-    if (this.hits.has(key)) {
+    const existing = this.hits.get(key);
+    if (existing !== undefined) {
+      // Adjust counter: remove old state contribution
+      const wasLimited = existing.tokens < 1;
+      const isLimited = record.tokens < 1;
+      if (wasLimited && !isLimited) this.limitedClientsCount--;
+      else if (!wasLimited && isLimited) this.limitedClientsCount++;
       this.hits.delete(key);
-    } else if (this.hits.size >= this.maxSize) {
-      this.evictOldest(Math.max(1, Math.floor(this.maxSize * 0.1)));
+    } else {
+      if (record.tokens < 1) this.limitedClientsCount++;
+      if (this.hits.size >= this.maxSize) {
+        this.evictOldest(Math.max(1, Math.floor(this.maxSize * 0.1)));
+      }
     }
     this.hits.set(key, record);
   }
@@ -202,6 +213,10 @@ export class MemoryStore implements RateLimitStore {
    * @complexity O(1)
    */
   delete(key: string): void {
+    const record = this.hits.get(key);
+    if (record !== undefined && record.tokens < 1) {
+      this.limitedClientsCount--;
+    }
     this.hits.delete(key);
   }
 
@@ -215,6 +230,7 @@ export class MemoryStore implements RateLimitStore {
     const now = Date.now();
     for (const [key, record] of this.hits.entries()) {
       if (now - record.lastRefill > expireThreshold) {
+        if (record.tokens < 1) this.limitedClientsCount--;
         this.hits.delete(key);
       }
     }
@@ -229,24 +245,20 @@ export class MemoryStore implements RateLimitStore {
       this.cleanupTimer = null;
     }
     this.hits.clear();
+    this.limitedClientsCount = 0;
   }
 
   /**
-   * Get store statistics
+   * Get store statistics.
+   * Uses pre-computed limitedClientsCount for O(1) instead of iterating.
    *
    * @returns MemoryStoreStats with tracked/limited client counts and evictions
-   * @complexity O(n) where n is the number of tracked clients
+   * @complexity O(1)
    */
   getStats(): MemoryStoreStats {
-    let limitedClients = 0;
-    for (const record of this.hits.values()) {
-      if (record.tokens < 1) {
-        limitedClients++;
-      }
-    }
     return {
       trackedClients: this.hits.size,
-      limitedClients,
+      limitedClients: this.limitedClientsCount,
       evictions: this.evictionCount,
     };
   }
@@ -260,8 +272,9 @@ export class MemoryStore implements RateLimitStore {
    */
   private evictOldest(count: number): void {
     let evicted = 0;
-    for (const key of this.hits.keys()) {
+    for (const [key, record] of this.hits.entries()) {
       if (evicted >= count) break;
+      if (record.tokens < 1) this.limitedClientsCount--;
       this.hits.delete(key);
       evicted++;
     }

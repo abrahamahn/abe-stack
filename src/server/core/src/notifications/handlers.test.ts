@@ -1,4 +1,4 @@
-// backend/core/src/notifications/handlers.test.ts
+// src/server/core/src/notifications/handlers.test.ts
 /**
  * Notification Handlers Unit Tests
  *

@@ -1,4 +1,4 @@
-// client/react/src/stores/toastStore.test.ts
+// src/client/react/src/stores/toastStore.test.ts
 import { describe, expect, it, beforeEach } from 'vitest';
 
 import { toastStore, type ToastMessage } from './toastStore';

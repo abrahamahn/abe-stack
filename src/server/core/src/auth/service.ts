@@ -1,4 +1,4 @@
-// backend/core/src/auth/service.ts
+// src/server/core/src/auth/service.ts
 /**
  * Auth Service
  *
@@ -8,7 +8,7 @@
  * @module service
  */
 
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 import {
   and,
@@ -26,12 +26,15 @@ import {
   type Repositories,
   type User,
 } from '@abe-stack/db';
+import { sign as jwtSign } from '@abe-stack/server-engine';
 import {
   AccountLockedError,
+  canonicalizeEmail,
   EmailNotVerifiedError,
   EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
+  normalizeEmail,
   validatePassword,
   WeakPasswordError,
   type UserId,
@@ -45,12 +48,14 @@ import {
   logAccountLockedEvent,
   logLoginAttempt,
 } from './security';
+import { LOGIN_FAILURE_REASON } from './types';
 import {
   createAccessToken,
   createAuthResponse,
   createRefreshTokenFamily,
   hashPassword,
   needsRehash,
+  revokeAllUserTokens,
   rotateRefreshToken as rotateRefreshTokenUtil,
   verifyPasswordSafe,
 } from './utils';
@@ -106,13 +111,32 @@ export interface AuthResult {
   user: {
     id: UserId;
     email: string;
-    name: string | null;
+    username: string;
+    firstName: string;
+    lastName: string;
     avatarUrl: string | null;
     role: UserRole;
-    isVerified: boolean;
+    emailVerified: boolean;
+    phone: string | null;
+    phoneVerified: boolean | null;
+    dateOfBirth: string | null;
+    gender: string | null;
     createdAt: string;
     updatedAt: string;
   };
+}
+
+/**
+ * Result returned when the user has TOTP enabled and must verify a code.
+ * Contains a signed JWT challenge token (5-minute expiry) with the user ID.
+ */
+export interface TotpChallengeResult {
+  /** Discriminant — always true for TOTP challenge responses */
+  requiresTotp: true;
+  /** Signed JWT challenge token (purpose: totp_challenge, userId, 5-min expiry) */
+  challengeToken: string;
+  /** Human-readable message */
+  message: string;
 }
 
 /**
@@ -153,7 +177,9 @@ export interface RegisterResult {
  * @param config - Auth configuration
  * @param email - User email
  * @param password - User password
- * @param name - Optional user name
+ * @param username - Unique username (1-15 chars, alphanumeric + underscores)
+ * @param firstName - User first name
+ * @param lastName - User last name
  * @param baseUrl - Base URL for verification link
  * @returns Registration result
  * @throws {WeakPasswordError} If password is too weak
@@ -168,11 +194,16 @@ export async function registerUser(
   config: AuthConfig,
   email: string,
   password: string,
-  name?: string,
+  username: string,
+  firstName: string,
+  lastName: string,
   baseUrl?: string,
 ): Promise<RegisterResult> {
+  const normalizedEmail = normalizeEmail(email);
+  const canonicalEmail = canonicalizeEmail(email);
+
   // Check if email is already taken (using repository)
-  const existingUser = await repos.users.findByEmail(email);
+  const existingUser = await repos.users.findByEmail(canonicalEmail);
 
   if (existingUser !== null) {
     // If user exists, send an email to them to notify about the new registration attempt
@@ -188,12 +219,25 @@ export async function registerUser(
       status: 'pending_verification',
       message:
         'Registration successful! Please check your email inbox and click the confirmation link to complete your registration.',
-      email,
+      email: normalizedEmail,
     };
   }
 
-  // Validate password strength
-  const passwordValidation = await validatePassword(password, [email, name ?? '']);
+  // Check if username is already taken
+  const existingUsername = await repos.users.findByUsername(username);
+  if (existingUsername !== null) {
+    const error = new Error('Username is already taken');
+    error.name = 'ConflictError';
+    throw error;
+  }
+
+  // Validate password strength (include personal info for dictionary check)
+  const passwordValidation = await validatePassword(password, [
+    normalizedEmail,
+    username,
+    firstName,
+    lastName,
+  ]);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -205,8 +249,11 @@ export async function registerUser(
     const newUserRows = await tx.query(
       insert(USERS_TABLE)
         .values({
-          email,
-          name: name ?? null,
+          email: normalizedEmail,
+          canonical_email: canonicalEmail,
+          username,
+          first_name: firstName,
+          last_name: lastName,
           password_hash: passwordHash,
           role: 'user',
           email_verified: false,
@@ -235,7 +282,10 @@ export async function registerUser(
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
 
   try {
-    await emailService.send(buildEmailOptions(email, emailTemplate));
+    const result = await emailService.send(buildEmailOptions(normalizedEmail, emailTemplate));
+    if (!result.success) {
+      throw new Error(result.error ?? 'Unknown email error');
+    }
   } catch (error) {
     // User was created but email failed - throw specific error so handler can handle gracefully
     throw new EmailSendError(
@@ -259,13 +309,13 @@ export async function registerUser(
  * @param db - Database client
  * @param repos - Repositories
  * @param config - Auth configuration
- * @param email - User email
+ * @param identifier - Email or username (auto-detected via '@')
  * @param password - User password
  * @param logger - Logger instance
  * @param ipAddress - Client IP address
  * @param userAgent - Client user agent
  * @param onPasswordRehash - Callback for password rehash events
- * @returns Authentication result
+ * @returns Authentication result, or TOTP challenge if 2FA is enabled
  * @throws {AccountLockedError} If account is locked
  * @throws {InvalidCredentialsError} If credentials are invalid
  * @throws {EmailNotVerifiedError} If email is not verified
@@ -275,49 +325,126 @@ export async function authenticateUser(
   db: DbClient,
   repos: Repositories,
   config: AuthConfig,
-  email: string,
+  identifier: string,
   password: string,
   logger: AuthLogger,
   ipAddress?: string,
   userAgent?: string,
   onPasswordRehash?: (userId: string, error?: Error) => void,
-): Promise<AuthResult> {
+): Promise<AuthResult | TotpChallengeResult> {
+  // Resolve identifier: email (contains '@') or username
+  const isEmail = identifier.includes('@');
+  const normalizedIdentifier = isEmail ? normalizeEmail(identifier) : identifier;
+  const canonicalIdentifier = isEmail ? canonicalizeEmail(identifier) : identifier;
+  const user = isEmail
+    ? await repos.users.findByEmail(canonicalIdentifier)
+    : await repos.users.findByUsername(normalizedIdentifier);
+
+  // Use email for lockout tracking (fall back to normalized identifier if user not found)
+  const lockoutKey = user?.email ?? (isEmail ? canonicalIdentifier : normalizedIdentifier);
+
   // Check if account is locked
-  const locked = await isAccountLocked(db, email, config.lockout);
+  const locked = await isAccountLocked(db, lockoutKey, config.lockout);
   if (locked) {
-    await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Account locked');
+    await logLoginAttempt(
+      db,
+      lockoutKey,
+      false,
+      ipAddress,
+      userAgent,
+      LOGIN_FAILURE_REASON.ACCOUNT_LOCKED,
+    );
     throw new AccountLockedError();
   }
 
   // Apply progressive delay based on recent failed attempts
-  await applyProgressiveDelay(db, email, config.lockout);
-
-  // Fetch user (may be null) - using repository
-  const user = await repos.users.findByEmail(email);
+  await applyProgressiveDelay(db, lockoutKey, config.lockout);
 
   // Timing-safe password verification
   const isValid = await verifyPasswordSafe(password, user?.passwordHash);
 
   if (user === null) {
-    await handleFailedLogin(db, config, email, 'User not found', ipAddress, userAgent);
+    await handleFailedLogin(
+      db,
+      config,
+      lockoutKey,
+      LOGIN_FAILURE_REASON.USER_NOT_FOUND,
+      ipAddress,
+      userAgent,
+    );
     throw new InvalidCredentialsError();
   }
 
   if (!isValid) {
-    await handleFailedLogin(db, config, email, 'Invalid password', ipAddress, userAgent);
+    await handleFailedLogin(
+      db,
+      config,
+      lockoutKey,
+      LOGIN_FAILURE_REASON.PASSWORD_MISMATCH,
+      ipAddress,
+      userAgent,
+    );
     throw new InvalidCredentialsError();
   }
 
   // Check if email is verified
   if (!user.emailVerified) {
-    await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Email not verified');
-    throw new EmailNotVerifiedError(email);
+    await logLoginAttempt(
+      db,
+      lockoutKey,
+      false,
+      ipAddress,
+      userAgent,
+      LOGIN_FAILURE_REASON.UNVERIFIED_EMAIL,
+    );
+    throw new EmailNotVerifiedError(user.email);
+  }
+
+  // Check if TOTP (2FA) is enabled — return challenge instead of tokens
+  if (user.totpEnabled) {
+    await logLoginAttempt(
+      db,
+      lockoutKey,
+      true,
+      ipAddress,
+      userAgent,
+      LOGIN_FAILURE_REASON.TOTP_REQUIRED,
+    );
+
+    // Check if password hash needs upgrading (background task)
+    if (needsRehash(user.passwordHash)) {
+      rehashPassword(db, config, user.id, password, logger, onPasswordRehash);
+    }
+
+    const challengeToken = jwtSign(
+      { userId: user.id, purpose: 'totp_challenge' },
+      config.jwt.secret,
+      { expiresIn: '5m' },
+    );
+
+    return {
+      requiresTotp: true,
+      challengeToken,
+      message: 'Two-factor authentication required. Please enter your TOTP code.',
+    };
   }
 
   // Create tokens and log success atomically
   const { refreshToken } = await withTransaction(db, async (tx) => {
-    await logLoginAttempt(tx, email, true, ipAddress, userAgent);
-    const { token } = await createRefreshTokenFamily(tx, user.id, config.refreshToken.expiryDays);
+    await logLoginAttempt(tx, lockoutKey, true, ipAddress, userAgent);
+    const sessionMeta: { ipAddress?: string; userAgent?: string } = {};
+    if (ipAddress !== undefined) {
+      sessionMeta.ipAddress = ipAddress;
+    }
+    if (userAgent !== undefined) {
+      sessionMeta.userAgent = userAgent;
+    }
+    const { token } = await createRefreshTokenFamily(
+      tx,
+      user.id,
+      config.refreshToken.expiryDays,
+      sessionMeta,
+    );
     return { refreshToken: token };
   });
 
@@ -493,18 +620,15 @@ function rehashPassword(
 // ============================================================================
 
 /**
- * Lightweight Argon2 config for token hashing.
- * Tokens are already high-entropy, so we use minimal params.
+ * Hash a token using SHA-256 for deterministic lookup.
+ * Tokens are high-entropy, so fast hashing is acceptable for storage.
+ *
+ * @param token - The token to hash
+ * @returns SHA-256 hash in hex
  */
-const TOKEN_HASH_CONFIG = {
-  type: 2 as const, // argon2id
-  memoryCost: 8192, // 8 MiB (lighter than password hashing)
-  timeCost: 1,
-  parallelism: 1,
-};
-
-/** Token expiry in hours */
-const TOKEN_EXPIRY_HOURS = 24;
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
 
 /**
  * Generate a random token and return both plain and hashed versions.
@@ -512,11 +636,14 @@ const TOKEN_EXPIRY_HOURS = 24;
  * @returns Object with plain text and hashed token
  * @complexity O(1) - one hash operation
  */
-async function generateSecureToken(): Promise<{ plain: string; hash: string }> {
+function generateSecureToken(): { plain: string; hash: string } {
   const plain = randomBytes(32).toString('hex');
-  const hash = await hashPassword(plain, TOKEN_HASH_CONFIG);
+  const hash = hashToken(plain);
   return { plain, hash };
 }
+
+/** Token expiry in hours */
+const TOKEN_EXPIRY_HOURS = 24;
 
 /**
  * Request a password reset email.
@@ -539,15 +666,16 @@ export async function requestPasswordReset(
   email: string,
   baseUrl: string,
 ): Promise<void> {
+  const canonicalEmail = canonicalizeEmail(email);
   // Using repository for user lookup
-  const user = await repos.users.findByEmail(email);
+  const user = await repos.users.findByEmail(canonicalEmail);
 
   if (user === null) {
     // Don't reveal user doesn't exist - silently succeed
     return;
   }
 
-  const { plain, hash } = await generateSecureToken();
+  const { plain, hash } = generateSecureToken();
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
   await withTransaction(db, async (tx) => {
@@ -576,7 +704,10 @@ export async function requestPasswordReset(
   const emailTemplate = emailTemplates.passwordReset(resetUrl);
 
   try {
-    await emailService.send(buildEmailOptions(email, emailTemplate));
+    const result = await emailService.send(buildEmailOptions(user.email, emailTemplate));
+    if (!result.success) {
+      throw new Error(result.error ?? 'Unknown email error');
+    }
   } catch (error) {
     // Token was created but email failed - throw specific error so handler can handle gracefully
     throw new EmailSendError(
@@ -594,6 +725,7 @@ export async function requestPasswordReset(
  * @param config - Auth configuration
  * @param token - Password reset token
  * @param newPassword - New password
+ * @returns The email address of the user whose password was reset
  * @throws {InvalidTokenError} If token is invalid or expired
  * @throws {WeakPasswordError} If new password is too weak
  * @complexity O(1)
@@ -604,9 +736,9 @@ export async function resetPassword(
   config: AuthConfig,
   token: string,
   newPassword: string,
-): Promise<void> {
+): Promise<string> {
   // Hash the token to look it up
-  const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
+  const tokenHash = hashToken(token);
 
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.passwordResetTokens.findValidByTokenHash(tokenHash);
@@ -624,7 +756,12 @@ export async function resetPassword(
   }
 
   // Validate password strength first
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
+  const passwordValidation = await validatePassword(newPassword, [
+    user.email,
+    user.username,
+    user.firstName,
+    user.lastName,
+  ]);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -648,6 +785,10 @@ export async function resetPassword(
         .toSql(),
     );
   });
+
+  await revokeAllUserTokens(db, tokenRecord.userId);
+
+  return user.email;
 }
 
 /**
@@ -696,7 +837,12 @@ export async function setPassword(
   }
 
   // Validate password strength
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
+  const passwordValidation = await validatePassword(newPassword, [
+    user.email,
+    user.username,
+    user.firstName,
+    user.lastName,
+  ]);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -718,7 +864,7 @@ export async function createEmailVerificationToken(
   dbOrRepos: DbClient | Repositories,
   userId: string,
 ): Promise<string> {
-  const { plain, hash } = await generateSecureToken();
+  const { plain, hash } = generateSecureToken();
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
   // Check if this is a Repositories object (has emailVerificationTokens property)
@@ -765,8 +911,9 @@ export async function resendVerificationEmail(
   email: string,
   baseUrl: string,
 ): Promise<void> {
+  const canonicalEmail = canonicalizeEmail(email);
   // Using repository for user lookup
-  const user = await repos.users.findByEmail(email);
+  const user = await repos.users.findByEmail(canonicalEmail);
 
   if (user === null) {
     // Don't reveal user doesn't exist - silently succeed
@@ -796,7 +943,10 @@ export async function resendVerificationEmail(
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
 
   try {
-    await emailService.send(buildEmailOptions(email, emailTemplate));
+    const result = await emailService.send(buildEmailOptions(user.email, emailTemplate));
+    if (!result.success) {
+      throw new Error(result.error ?? 'Unknown email error');
+    }
   } catch (error) {
     // Token was created but email failed - throw specific error so handler can handle gracefully
     throw new EmailSendError(
@@ -825,7 +975,7 @@ export async function verifyEmail(
   token: string,
 ): Promise<AuthResult> {
   // Hash the token to look it up
-  const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
+  const tokenHash = hashToken(token);
 
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.emailVerificationTokens.findValidByTokenHash(tokenHash);
@@ -851,13 +1001,19 @@ export async function verifyEmail(
 
     const updatedUser = toCamelCase<User>(updatedUserRows[0], USER_COLUMNS);
 
-    // Mark token as used
-    await tx.execute(
+    // Mark token as used ATOMICALLY to prevent race conditions
+    // We check isNull('used_at') again in the update to ensure only one request succeeds
+    const updatedTokens = await tx.query(
       update(EMAIL_VERIFICATION_TOKENS_TABLE)
         .set({ used_at: new Date() })
-        .where(eq('id', tokenRecord.id))
+        .where(and(eq('id', tokenRecord.id), isNull('used_at')))
+        .returningAll()
         .toSql(),
     );
+
+    if (updatedTokens[0] === undefined) {
+      throw new InvalidTokenError('Token already used');
+    }
 
     // Create refresh token for auto-login
     const { token: refreshTok } = await createRefreshTokenFamily(

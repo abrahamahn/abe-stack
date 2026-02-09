@@ -1,4 +1,4 @@
-// client/src/storage/RecordStorage.ts
+// src/client/engine/src/storage/RecordStorage.ts
 /**
  * RecordStorage - Persistent IndexedDB storage for versioned records
  *

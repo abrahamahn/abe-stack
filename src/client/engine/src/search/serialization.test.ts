@@ -1,4 +1,4 @@
-// client/src/search/serialization.test.ts
+// src/client/engine/src/search/serialization.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

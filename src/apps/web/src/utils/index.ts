@@ -1,4 +1,4 @@
-// apps/web/src/utils/index.ts
+// src/apps/web/src/utils/index.ts
 /**
  * Utility Functions
  *

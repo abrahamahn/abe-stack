@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/services/AuthService.test.ts
+// src/apps/web/src/features/auth/services/AuthService.test.ts
 /**
  * Unit tests for AuthService.
  *
@@ -87,10 +87,16 @@ function createMockUser(): User {
   return {
     id: 'user-123' as unknown as UserId,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     avatarUrl: null,
     role: 'user',
-    isVerified: true,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   };
@@ -172,7 +178,7 @@ describe('AuthService', () => {
 
       mocks.mockApiClient.login.mockResolvedValue(mockResponse);
 
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
       const state = authService.getState();
 
       expect(state.user).toEqual(mockUser);
@@ -205,7 +211,7 @@ describe('AuthService', () => {
 
       mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
 
       expect(listener).toHaveBeenCalled();
     });
@@ -218,7 +224,7 @@ describe('AuthService', () => {
 
       mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
 
       expect(listener).not.toHaveBeenCalled();
     });
@@ -228,10 +234,10 @@ describe('AuthService', () => {
     it('should call api client with credentials', async () => {
       mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
 
-      await authService.login({ email: 'test@example.com', password: 'password123' });
+      await authService.login({ identifier: 'test@example.com', password: 'password123' });
 
       expect(mocks.mockApiClient.login).toHaveBeenCalledWith({
-        email: 'test@example.com',
+        identifier: 'test@example.com',
         password: 'password123',
       });
     });
@@ -240,7 +246,7 @@ describe('AuthService', () => {
       const response = createMockAuthResponse();
       mocks.mockApiClient.login.mockResolvedValue(response);
 
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
 
       expect(mocks.mockTokenStore.set).toHaveBeenCalledWith(response.token);
     });
@@ -249,7 +255,7 @@ describe('AuthService', () => {
       const response = createMockAuthResponse();
       mocks.mockApiClient.login.mockResolvedValue(response);
 
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
 
       expect(authService.getState().user).toEqual(response.user);
     });
@@ -258,7 +264,7 @@ describe('AuthService', () => {
       mocks.mockApiClient.login.mockRejectedValue(new Error('Invalid credentials'));
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'wrong' }),
+        authService.login({ identifier: 'test@example.com', password: 'wrong' }),
       ).rejects.toThrow();
     });
   });
@@ -267,8 +273,10 @@ describe('AuthService', () => {
     it('should call api client with data', async () => {
       const data = {
         email: 'new@example.com',
+        username: 'newuser',
+        firstName: 'New',
+        lastName: 'User',
         password: 'password123',
-        name: 'New User',
       };
       mocks.mockApiClient.register.mockResolvedValue(createMockRegisterResponse(data.email));
 
@@ -283,8 +291,10 @@ describe('AuthService', () => {
 
       const result = await authService.register({
         email: 'new@example.com',
+        username: 'newuser',
+        firstName: 'New',
+        lastName: 'User',
         password: 'password123',
-        name: 'New User',
       });
 
       expect(result.status).toBe('pending_verification');
@@ -312,7 +322,7 @@ describe('AuthService', () => {
     it('should remove user from state', async () => {
       // First login to set user
       mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse());
-      await authService.login({ email: 'test@example.com', password: 'password' });
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
 
       mocks.mockApiClient.logout.mockResolvedValue({ success: true });
       await authService.logout();

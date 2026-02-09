@@ -1,4 +1,4 @@
-// server/core/src/users/service.test.ts
+// src/server/core/src/users/service.test.ts
 /**
  * Users Service Unit Tests
  *
@@ -18,6 +18,7 @@ describe('Users Service', () => {
   const mockUserRepo: UserRepository = {
     findById: vi.fn(),
     findByEmail: vi.fn(),
+    findByUsername: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     listWithFilters: vi.fn(),
@@ -34,7 +35,10 @@ describe('Users Service', () => {
       const mockUser = {
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        canonicalEmail: 'test@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user' as const,
         createdAt: new Date('2024-01-01'),
@@ -44,6 +48,18 @@ describe('Users Service', () => {
         passwordHash: 'hashed',
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);
@@ -53,10 +69,16 @@ describe('Users Service', () => {
       expect(result).toEqual({
         id: 'user-123',
         email: 'test@example.com',
-        name: 'Test User',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         avatarUrl: null,
         role: 'user',
         emailVerified: true,
+        phone: null,
+        phoneVerified: false,
+        dateOfBirth: null,
+        gender: null,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });
@@ -70,11 +92,14 @@ describe('Users Service', () => {
       expect(result).toBeNull();
     });
 
-    test('should handle user with null name', async () => {
+    test('should convert dateOfBirth Date to ISO date string', async () => {
       const mockUser = {
         id: 'user-123',
         email: 'test@example.com',
-        name: null,
+        canonicalEmail: 'test@example.com',
+        username: 'adminuser',
+        firstName: 'Admin',
+        lastName: 'User',
         avatarUrl: null,
         role: 'admin' as const,
         createdAt: new Date('2024-01-01'),
@@ -84,6 +109,18 @@ describe('Users Service', () => {
         passwordHash: 'hashed',
         lockedUntil: null,
         failedLoginAttempts: 0,
+        totpSecret: null,
+        totpEnabled: false,
+        phone: '+1234567890',
+        phoneVerified: true,
+        dateOfBirth: new Date('1990-05-15'),
+        gender: 'male',
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);
@@ -93,10 +130,16 @@ describe('Users Service', () => {
       expect(result).toEqual({
         id: 'user-123',
         email: 'test@example.com',
-        name: null,
+        username: 'adminuser',
+        firstName: 'Admin',
+        lastName: 'User',
         avatarUrl: null,
         role: 'admin',
         emailVerified: true,
+        phone: '+1234567890',
+        phoneVerified: true,
+        dateOfBirth: '1990-05-15',
+        gender: 'male',
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });

@@ -7,12 +7,12 @@
  */
 
 import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/db';
+import { registerRouteMap } from '@abe-stack/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/db';
+import type { AuthGuardFactory } from '@abe-stack/server-engine';
 
 // ============================================================================
 // Mock Repositories
@@ -22,6 +22,7 @@ function createMockRepos() {
   return {
     users: {
       findByEmail: vi.fn().mockResolvedValue(null),
+      findByUsername: vi.fn().mockResolvedValue(null),
       findById: vi.fn().mockResolvedValue(null),
       create: vi.fn().mockResolvedValue({ id: 'user-1', email: 'test@example.com' }),
       update: vi.fn().mockResolvedValue(null),
@@ -594,13 +595,18 @@ describe('Auth API Integration Tests', () => {
       // Mock repos.users.findByEmail to return null (new user)
       mockRepos.users.findByEmail.mockResolvedValue(null);
 
+      // Mock repos.users.findByUsername to return null (username available)
+      mockRepos.users.findByUsername.mockResolvedValue(null);
+
       const response = await testServer.inject({
         method: 'POST',
         url: '/api/auth/register',
         payload: {
           email: 'newuser@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
           password: 'StrongP@ssword123!',
-          name: 'Test User',
         },
       });
 
@@ -619,7 +625,7 @@ describe('Auth API Integration Tests', () => {
         method: 'POST',
         url: '/api/auth/login',
         payload: {
-          email: 'user@example.com',
+          identifier: 'user@example.com',
           password: 'TestPassword123!',
         },
       });

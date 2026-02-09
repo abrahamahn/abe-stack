@@ -1,4 +1,4 @@
-// core/src/__tests__/integration/contracts.integration.test.ts
+// src/shared/src/__tests__/contracts.integration.test.ts
 /**
  * Integration tests for contract schema validation
  *
@@ -11,6 +11,13 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
 import {
+  emailSchema,
+  nameSchema,
+  passwordSchema,
+  simpleErrorResponseSchema,
+  uuidSchema,
+} from '../core/schemas';
+import {
   authResponseSchema,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
@@ -19,15 +26,40 @@ import {
   registerRequestSchema,
   registerResponseSchema,
   resetPasswordRequestSchema,
-} from '../contracts/auth';
-import {
-  emailSchema,
-  errorResponseSchema,
-  nameSchema,
-  passwordSchema,
-  uuidSchema,
-} from '../contracts/common';
-import { userRoleSchema, userSchema } from '../contracts/users';
+} from '../domain/auth/auth.schemas';
+import { userRoleSchema, userSchema } from '../domain/users/users.schemas';
+
+/**
+ * Helper to create a valid user object matching the expanded userSchema.
+ *
+ * @param overrides - Partial user fields to override defaults
+ * @returns A complete user object suitable for userSchema.safeParse()
+ */
+function createValidUser(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    id: randomUUID(),
+    email: 'user@example.com',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
+    avatarUrl: null,
+    role: 'user',
+    emailVerified: true,
+    phoneVerified: false,
+    phone: null,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ...overrides,
+  };
+}
 
 describe('Contract Schema Integration', () => {
   describe('Common schemas with real data', () => {
@@ -195,37 +227,34 @@ describe('Contract Schema Integration', () => {
 
   describe('User schemas with real data', () => {
     it('should validate complete user object', () => {
-      const timestamp = new Date().toISOString();
-      const user = {
-        id: randomUUID(),
+      const user = createValidUser({
         email: 'john@example.com',
-        name: 'John Doe',
-        avatarUrl: null,
-        role: 'user',
-        isVerified: true,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
+        username: 'johndoe',
+        firstName: 'John',
+        lastName: 'Doe',
+      });
 
       const result = userSchema.safeParse(user);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual(user);
+        expect(result.data.email).toBe('john@example.com');
+        expect(result.data.username).toBe('johndoe');
+        expect(result.data.firstName).toBe('John');
+        expect(result.data.lastName).toBe('Doe');
       }
     });
 
-    it('should validate user with null name', () => {
-      const timestamp = new Date().toISOString();
-      const user = {
-        id: randomUUID(),
+    it('should validate user with populated nullable fields', () => {
+      const user = createValidUser({
         email: 'jane@example.com',
-        name: null,
-        avatarUrl: null,
+        username: 'janedoe',
+        firstName: 'Jane',
+        lastName: 'Doe',
         role: 'admin',
-        isVerified: true,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
+        phone: '+1-555-1234',
+        bio: 'A test bio',
+        city: 'Seattle',
+      });
 
       const result = userSchema.safeParse(user);
       expect(result.success).toBe(true);
@@ -248,9 +277,9 @@ describe('Contract Schema Integration', () => {
 
   describe('Auth request schemas with real data', () => {
     describe('loginRequestSchema', () => {
-      it('should validate valid login request', () => {
+      it('should validate valid login request with email identifier', () => {
         const loginData = {
-          email: 'user@example.com',
+          identifier: 'user@example.com',
           password: 'SecurePass123!',
         };
 
@@ -260,30 +289,28 @@ describe('Contract Schema Integration', () => {
         // Verify parsed shape
         if (result.success) {
           expect(result.data).toEqual(loginData);
-          expect(result.data).toHaveProperty('email', 'user@example.com');
+          expect(result.data).toHaveProperty('identifier', 'user@example.com');
           expect(result.data).toHaveProperty('password', 'SecurePass123!');
         }
       });
 
-      it('should reject login with invalid email', () => {
+      it('should validate valid login request with username identifier', () => {
         const loginData = {
-          email: 'not-an-email',
+          identifier: 'testuser',
           password: 'SecurePass123!',
         };
 
         const result = loginRequestSchema.safeParse(loginData);
-        expect(result.success).toBe(false);
+        expect(result.success).toBe(true);
 
-        // Verify error mentions email
-        if (!result.success) {
-          expect(result.error).toBeInstanceOf(Error);
-          expect(result.error.message.toLowerCase()).toContain('email');
+        if (result.success) {
+          expect(result.data.identifier).toBe('testuser');
         }
       });
 
       it('should reject login with short password', () => {
         const loginData = {
-          email: 'user@example.com',
+          identifier: 'user@example.com',
           password: 'short',
         };
 
@@ -302,7 +329,9 @@ describe('Contract Schema Integration', () => {
       it('should validate valid registration request', () => {
         const registerData = {
           email: 'newuser@example.com',
-          name: 'New User',
+          username: 'newuser',
+          firstName: 'New',
+          lastName: 'User',
           password: 'SecurePass123!',
         };
 
@@ -313,42 +342,40 @@ describe('Contract Schema Integration', () => {
         if (result.success) {
           expect(result.data).toEqual(registerData);
           expect(result.data).toHaveProperty('email', 'newuser@example.com');
-          expect(result.data).toHaveProperty('name', 'New User');
+          expect(result.data).toHaveProperty('username', 'newuser');
+          expect(result.data).toHaveProperty('firstName', 'New');
+          expect(result.data).toHaveProperty('lastName', 'User');
           expect(result.data).toHaveProperty('password', 'SecurePass123!');
         }
       });
 
-      it('should validate registration without name (optional)', () => {
+      it('should reject registration without username', () => {
         const registerData = {
           email: 'newuser@example.com',
+          firstName: 'New',
+          lastName: 'User',
           password: 'SecurePass123!',
         };
 
         const result = registerRequestSchema.safeParse(registerData);
-        expect(result.success).toBe(true);
-
-        // Verify name is optional
-        if (result.success) {
-          expect(result.data).toHaveProperty('email');
-          expect(result.data).toHaveProperty('password');
-          expect(result.data.name).toBeUndefined();
-        }
+        expect(result.success).toBe(false);
       });
 
-      it('should reject registration with single character name', () => {
+      it('should reject registration without firstName', () => {
         const registerData = {
           email: 'newuser@example.com',
-          name: 'X',
+          username: 'newuser',
+          lastName: 'User',
           password: 'SecurePass123!',
         };
 
         const result = registerRequestSchema.safeParse(registerData);
         expect(result.success).toBe(false);
 
-        // Verify error mentions name
+        // Verify error mentions first name
         if (!result.success) {
           expect(result.error).toBeInstanceOf(Error);
-          expect(result.error.message.toLowerCase()).toContain('name');
+          expect(result.error.message.toLowerCase()).toContain('first name');
         }
       });
     });
@@ -411,18 +438,14 @@ describe('Contract Schema Integration', () => {
     it('should validate auth response with user', () => {
       const userId = randomUUID();
       const timestamp = new Date().toISOString();
+      const user = createValidUser({
+        id: userId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
       const authResponse = {
         token: 'jwt-token-here',
-        user: {
-          id: userId,
-          email: 'user@example.com',
-          name: 'Test User',
-          avatarUrl: null,
-          role: 'user',
-          isVerified: true,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        },
+        user,
       };
 
       const result = authResponseSchema.safeParse(authResponse);
@@ -431,18 +454,11 @@ describe('Contract Schema Integration', () => {
       // Verify parsed shape matches expected structure
       if (result.success) {
         expect(result.data.token).toBe('jwt-token-here');
-        expect(result.data.user).toEqual({
-          id: userId,
-          email: 'user@example.com',
-          name: 'Test User',
-          avatarUrl: null,
-          role: 'user',
-          isVerified: true,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        });
         expect(result.data.user.id).toBe(userId);
         expect(result.data.user.email).toBe('user@example.com');
+        expect(result.data.user.username).toBe('testuser');
+        expect(result.data.user.firstName).toBe('Test');
+        expect(result.data.user.lastName).toBe('User');
       }
     });
 
@@ -467,19 +483,19 @@ describe('Contract Schema Integration', () => {
     it('should validate email verification response', () => {
       const userId = randomUUID();
       const timestamp = new Date().toISOString();
+      const user = createValidUser({
+        id: userId,
+        email: 'verified@example.com',
+        username: 'verified',
+        firstName: 'Verified',
+        lastName: 'User',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
       const verifyResponse = {
         verified: true,
         token: 'jwt-access-token',
-        user: {
-          id: userId,
-          email: 'verified@example.com',
-          name: 'Verified User',
-          avatarUrl: null,
-          role: 'user',
-          isVerified: true,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-        },
+        user,
       };
 
       const result = emailVerificationResponseSchema.safeParse(verifyResponse);
@@ -491,7 +507,7 @@ describe('Contract Schema Integration', () => {
         expect(result.data.token).toBe('jwt-access-token');
         expect(result.data.user.id).toBe(userId);
         expect(result.data.user.email).toBe('verified@example.com');
-        expect(result.data.user.name).toBe('Verified User');
+        expect(result.data.user.firstName).toBe('Verified');
         expect(result.data.user.role).toBe('user');
       }
     });
@@ -503,7 +519,7 @@ describe('Contract Schema Integration', () => {
         message: 'Something went wrong',
       };
 
-      const result = errorResponseSchema.safeParse(errorResponse);
+      const result = simpleErrorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
 
       // Verify parsed shape
@@ -520,7 +536,7 @@ describe('Contract Schema Integration', () => {
         code: 'INVALID_CREDENTIALS',
       };
 
-      const result = errorResponseSchema.safeParse(errorResponse);
+      const result = simpleErrorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
 
       // Verify parsed shape includes code
@@ -540,7 +556,7 @@ describe('Contract Schema Integration', () => {
         },
       };
 
-      const result = errorResponseSchema.safeParse(errorResponse);
+      const result = simpleErrorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
 
       // Verify parsed shape includes all fields
@@ -562,16 +578,16 @@ describe('Contract Schema Integration', () => {
       const timestamp = new Date().toISOString();
       const authResponse = {
         token: 'jwt.token.here',
-        user: {
+        user: createValidUser({
           id: userId,
           email: 'integration@test.com',
-          name: 'Integration Test',
-          avatarUrl: null,
+          username: 'inttest',
+          firstName: 'Integration',
+          lastName: 'Test',
           role: 'moderator',
-          isVerified: true,
           createdAt: timestamp,
           updatedAt: timestamp,
-        },
+        }),
       };
 
       const result = authResponseSchema.safeParse(authResponse);
@@ -585,13 +601,7 @@ describe('Contract Schema Integration', () => {
     it('should propagate validation errors from nested schemas', () => {
       const authResponse = {
         token: 'jwt.token.here',
-        user: {
-          id: 'not-a-uuid', // Invalid UUID
-          email: 'test@example.com',
-          name: 'Test',
-          role: 'user',
-          createdAt: new Date().toISOString(),
-        },
+        user: createValidUser({ id: 'not-a-uuid' }),
       };
 
       const result = authResponseSchema.safeParse(authResponse);
@@ -604,7 +614,9 @@ describe('Contract Schema Integration', () => {
       // Step 1: Registration request
       const registerRequest = {
         email: 'newuser@company.com',
-        name: 'New User',
+        username: 'newuser',
+        firstName: 'New',
+        lastName: 'User',
         password: 'Str0ngP@ssw0rd!',
       };
       expect(registerRequestSchema.safeParse(registerRequest).success).toBe(true);
@@ -628,24 +640,22 @@ describe('Contract Schema Integration', () => {
       const verifyResponse = {
         verified: true,
         token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        user: {
-          id: randomUUID(),
+        user: createValidUser({
           email: 'newuser@company.com',
-          name: 'New User',
-          avatarUrl: null,
-          role: 'user' as const,
-          isVerified: true,
+          username: 'newuser',
+          firstName: 'New',
+          lastName: 'User',
           createdAt: timestamp1,
           updatedAt: timestamp1,
-        },
+        }),
       };
       expect(emailVerificationResponseSchema.safeParse(verifyResponse).success).toBe(true);
     });
 
     it('should handle complete login flow data', () => {
-      // Step 1: Login request
+      // Step 1: Login request (uses identifier, not email)
       const loginRequest = {
-        email: 'existing@company.com',
+        identifier: 'existing@company.com',
         password: 'MyP@ssw0rd!',
       };
       expect(loginRequestSchema.safeParse(loginRequest).success).toBe(true);
@@ -654,16 +664,15 @@ describe('Contract Schema Integration', () => {
       const timestamp2 = new Date().toISOString();
       const loginResponse = {
         token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        user: {
-          id: randomUUID(),
+        user: createValidUser({
           email: 'existing@company.com',
-          name: 'Existing User',
-          avatarUrl: null,
+          username: 'existing',
+          firstName: 'Existing',
+          lastName: 'User',
           role: 'admin' as const,
-          isVerified: true,
           createdAt: timestamp2,
           updatedAt: timestamp2,
-        },
+        }),
       };
       expect(authResponseSchema.safeParse(loginResponse).success).toBe(true);
     });

@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/schemas.test.ts
+// src/shared/src/utils/search/schemas.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

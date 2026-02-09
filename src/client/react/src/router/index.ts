@@ -1,4 +1,4 @@
-// client/ui/src/router/index.ts
+// src/client/react/src/router/index.ts
 /**
  * Custom Router
  *

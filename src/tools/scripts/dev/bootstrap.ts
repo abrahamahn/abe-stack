@@ -1,4 +1,4 @@
-// tools/scripts/dev/bootstrap.ts
+// src/tools/scripts/dev/bootstrap.ts
 /**
  * Database Bootstrap Script
  *
@@ -7,12 +7,12 @@
  *
  * Usage:
  *   pnpm bootstrap
- *   ./node_modules/.bin/tsx tools/dev/bootstrap.ts
+ *   pnpm tsx src/tools/scripts/dev/bootstrap.ts
  */
 
-import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { spawnSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 // Helper to parse .env file
 function parseEnv(path: string): Record<string, string> {
@@ -22,8 +22,9 @@ function parseEnv(path: string): Record<string, string> {
     for (const line of content.split('\n')) {
       const match = line.match(/^([^=:#]+?)[=:](.*)/);
       if (match) {
-        const value = match[2].trim().replace(/^['"](.*)['"]$/, '$1');
-        env[match[1].trim()] = value;
+        const key = match[1]?.trim();
+        const value = match[2]?.trim().replace(/^['"](.*)['"]$/, '$1') ?? '';
+        if (key) env[key] = value;
       }
     }
     return env;

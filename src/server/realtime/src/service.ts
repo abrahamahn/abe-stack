@@ -1,4 +1,4 @@
-// modules/realtime/src/service.ts
+// src/server/realtime/src/service.ts
 /**
  * Realtime Service
  *
@@ -13,17 +13,16 @@ import { and, eq, inArray, insert, select, update, USERS_TABLE } from '@abe-stac
 
 import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type { DbClient, User } from '@abe-stack/db';
-import type { Contracts } from '@abe-stack/shared';
-
-// Use realtime contract types (with table, id, key fields)
-type ListInsertOperation = Contracts.ListInsertOperation;
-type ListPosition = Contracts.ListPosition;
-type ListRemoveOperation = Contracts.ListRemoveOperation;
-type Operation = Contracts.Operation;
-type RecordMap = Contracts.RecordMap;
-type RecordPointer = Contracts.RecordPointer;
-type SetNowOperation = Contracts.SetNowOperation;
-type SetOperation = Contracts.SetOperation;
+import type {
+  ListPosition,
+  RecordMap,
+  RecordPointer,
+  RealtimeListInsertOperation,
+  RealtimeListRemoveOperation,
+  RealtimeOperation as Operation,
+  RealtimeSetOperation,
+  SetNowOperation,
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Table Configuration
@@ -309,9 +308,8 @@ export function applyOperation(record: RealtimeRecord, op: Operation): RealtimeR
  * @param record - Record to modify in place
  * @param op - Set operation with key and value
  */
-function applySetOp(record: RealtimeRecord, op: SetOperation): void {
-  const key = op.key;
-  setPath(record, key, op.value);
+function applySetOp(record: RealtimeRecord, op: RealtimeSetOperation): void {
+  setPath(record, op.key, op.value);
 }
 
 /**
@@ -321,8 +319,7 @@ function applySetOp(record: RealtimeRecord, op: SetOperation): void {
  * @param op - Set-now operation with key
  */
 function applySetNowOp(record: RealtimeRecord, op: SetNowOperation): void {
-  const key: string = op.key;
-  setPath(record, key, new Date().toISOString());
+  setPath(record, op.key, new Date().toISOString());
 }
 
 /**
@@ -332,9 +329,8 @@ function applySetNowOp(record: RealtimeRecord, op: SetNowOperation): void {
  * @param record - Record to modify in place
  * @param op - List insert operation with key, value, and position
  */
-function applyListInsertOp(record: RealtimeRecord, op: ListInsertOperation): void {
-  const key = op.key;
-  const currentValue = getPath(record, key);
+function applyListInsertOp(record: RealtimeRecord, op: RealtimeListInsertOperation): void {
+  const currentValue = getPath(record, op.key);
   const list = Array.isArray(currentValue) ? [...(currentValue as unknown[])] : [];
 
   // Remove duplicates first
@@ -343,17 +339,17 @@ function applyListInsertOp(record: RealtimeRecord, op: ListInsertOperation): voi
   const position: ListPosition = op.position;
 
   if (position === 'prepend') {
-    setPath(record, key, [op.value, ...filtered]);
+    setPath(record, op.key, [op.value, ...filtered]);
   } else if (position === 'append') {
-    setPath(record, key, [...filtered, op.value]);
+    setPath(record, op.key, [...filtered, op.value]);
   } else if ('before' in position) {
     const index = filtered.findIndex((item) => deepEqual(item, position.before));
     filtered.splice(index >= 0 ? index : 0, 0, op.value);
-    setPath(record, key, filtered);
+    setPath(record, op.key, filtered);
   } else if ('after' in position) {
     const index = filtered.findIndex((item) => deepEqual(item, position.after));
     filtered.splice(index + 1, 0, op.value);
-    setPath(record, key, filtered);
+    setPath(record, op.key, filtered);
   }
 }
 
@@ -363,16 +359,15 @@ function applyListInsertOp(record: RealtimeRecord, op: ListInsertOperation): voi
  * @param record - Record to modify in place
  * @param op - List remove operation with key and value to remove
  */
-function applyListRemoveOp(record: RealtimeRecord, op: ListRemoveOperation): void {
-  const key = op.key;
-  const currentValue = getPath(record, key);
+function applyListRemoveOp(record: RealtimeRecord, op: RealtimeListRemoveOperation): void {
+  const currentValue = getPath(record, op.key);
   if (!Array.isArray(currentValue)) {
     return;
   }
 
   setPath(
     record,
-    key,
+    op.key,
     currentValue.filter((item) => !deepEqual(item, op.value)),
   );
 }

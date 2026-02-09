@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/package.ts
+// src/apps/server/src/config/infra/package.ts
 import type {
   FullEnv,
   NpmConfig,

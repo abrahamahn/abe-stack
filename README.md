@@ -59,24 +59,45 @@ https://github.com/abrahamahn/abe-stack
 
 ---
 
+## Feature Guide
+
+This repo tracks detailed status in `docs/CHECKLIST.md`. At a high level, it includes:
+
+- Auth + security (email verify, reset, OAuth, 2FA, session management)
+- Accounts + profiles (settings UI, avatars, password change, lifecycle scaffolding)
+- RBAC + multi-tenant foundations (roles, memberships, invitations, policies)
+- Billing + subscriptions (Stripe/PayPal plumbing, plans, UI + API clients)
+- Notifications + audit (email/notification infra, security events, admin views)
+- Realtime + media + storage (websocket transport, media processing, file storage)
+- Compliance + ops (GDPR scaffolding, admin surfaces, CI/CD + infra tooling)
+
+For exact progress and gaps, see `docs/CHECKLIST.md`.
+
+---
+
 ## Quick Start
 
-### Option 1: Local Development
+### Option 1: Docker Postgres (Default)
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 pnpm install
 cp .config/env/.env.development.example .config/env/.env.development
+docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+pnpm db:push
+pnpm db:seed
 pnpm dev
 ```
 
-Open [localhost:3000](http://localhost:3000).
-
-### Option 2: Docker
+### Option 2: Local Postgres (VM-like Dev)
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
-docker compose -f infra/docker/development/docker-compose.yml up --build
+pnpm install
+cp .config/env/.env.local.example .config/env/.env.local
+ENV_FILE=.config/env/.env.local pnpm db:push
+ENV_FILE=.config/env/.env.local pnpm db:seed
+pnpm dev
 ```
 
 ---
@@ -94,13 +115,8 @@ Ensure you have these installed:
 node --version  # Should be 20.x or higher
 pnpm --version  # Should be 10.x or higher
 
-# PostgreSQL (for local development)
+# PostgreSQL (optional for local Postgres dev)
 pg_isready  # Check if PostgreSQL is running
-
-# If PostgreSQL isn't running:
-# macOS (Homebrew): brew services start postgresql
-# Linux: sudo systemctl start postgresql
-# Windows: Start PostgreSQL service from Services
 ```
 
 ### 2. Clone and Install
@@ -116,30 +132,39 @@ pnpm install
 Copy the example environment files:
 
 ```bash
-# Development environment (works out-of-box with PostgreSQL)
+# Development environment (Docker Postgres)
 cp .config/env/.env.development.example .config/env/.env.development
 
-# Local overrides (optional, for your personal settings)
+# Local Postgres (VM-like dev)
 cp .config/env/.env.local.example .config/env/.env.local
 ```
 
-**Default configuration:**
+**Default configurations:**
 
-- PostgreSQL: `postgresql://postgres:postgres@localhost:5432/abe_stack_dev`
+- Docker Postgres: `postgresql://postgres:development@localhost:5432/abe_stack_dev`
+- Local Postgres: `postgresql://postgres:postgres@localhost:5433/abe_stack_dev`
 - Email: Console (logs to terminal)
 - Storage: Local filesystem (`apps/server/uploads`)
 - All other services: Local/mock providers
 
-**Need to customize?** Edit `.config/env/.env.local` with your settings. See [.config/env/README.md](.config/env/README.md) for details.
+**Need to customize?** Edit the env file you’re using. See [.config/env/README.md](.config/env/README.md) for details.
 
 ### 4. Initialize Database
 
-```bash
-# Create the database
-createdb abe_stack_dev
+Docker Postgres:
 
-# Run migrations and seed data
-pnpm db:bootstrap
+```bash
+docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+pnpm db:push
+pnpm db:seed
+```
+
+Local Postgres:
+
+```bash
+createdb abe_stack_dev
+ENV_FILE=.config/env/.env.local pnpm db:push
+ENV_FILE=.config/env/.env.local pnpm db:seed
 ```
 
 ### 5. Start Development
@@ -167,119 +192,6 @@ pnpm dev
 - **Port already in use?** Change `APP_PORT` or `API_PORT` in `.config/env/.env.local`
 - **Module not found?** Run `pnpm install` again
 - **More help?** See [.config/env/README.md](.config/env/README.md#troubleshooting)
-
----
-
-## Repository Layout
-
-```
-abe-stack/
-├── apps/                 # Applications (Web, Server, Desktop, Docs)
-│   ├── web/              # Vite + React web app
-│   ├── desktop/          # Electron app (shares code with web)
-│   ├── server/           # Fastify API (enterprise security, audit logging)
-│   └── docs/             # Documentation (specs, guides, logs)
-├── infra/                # Infrastructure Packages
-│   ├── cache/            # Caching providers (LRU, memoize)
-│   ├── contracts/        # API contracts (ts-rest + Zod)
-│   ├── db/               # Database (Drizzle ORM + PostgreSQL)
-│   ├── email/            # Email service
-│   ├── http/             # HTTP utilities
-│   ├── jobs/             # Background jobs
-│   ├── media/            # Media processing
-│   ├── notifications/    # Notification system
-│   ├── realtime/         # WebSocket / real-time
-│   ├── security/         # Security utilities
-│   ├── storage/          # File storage
-│   ├── stores/           # Framework-agnostic stores
-│   └── users/            # User management
-├── backend/              # Shared Libraries & Business Modules
-│   ├── core/             # Business modules (admin, auth, billing, notifications, users)
-│   ├── engine/           # Backend infrastructure (cache, config, mailer, storage, etc.)
-│   └── db/               # Database (Drizzle ORM + PostgreSQL)
-├── client/               # Type-safe API client + React Query + offline support
-├── tools/                # Meta Development Tools
-│   ├── scripts/          # Dev, audit, export, git hooks, path utils, test runner
-│   └── sync/             # Sync scripts (file headers, CSS theme, TS references)
-├── .config/              # Tooling Configurations (hidden)
-│   ├── tsconfig*.json    # TypeScript configurations
-│   ├── vite.config.ts    # Vite build config
-│   ├── vitest.config.ts  # Testing framework config
-│   └── ...               # Other tool configs
-└── .env*                 # Environment configuration files
-```
-
----
-
-## Architecture
-
-```
-apps/*          - **src/apps/**: Thin renderers (just UI)
-- **src/server/core**: Business modules (admin, auth, billing, notifications, users)
-- **src/server/***: Shared libraries (engine, db)
-- **src/client/**: Type-safe API client
-```
-
-**Dependency rule:** Apps import packages. Packages never import apps. Change your mind about React later? Only touch `apps/`. Everything else stays.
-
----
-
-## Client Features
-
-_Inspired by [chet-stack](https://github.com/ccorcos/chet-stack) — particularly the offline-first data layer, real-time sync, and undo/redo patterns._
-
-- **Type-safe API Client** — Built on ts-rest with automatic request/response typing
-- **React Query Integration** — Custom hooks for data fetching with caching
-- **Pagination Hooks** — `usePaginatedQuery` for infinite scroll, `useOffsetPaginatedQuery` for traditional pagination
-- **Offline Mutation Queue** — Queue mutations when offline, auto-sync when back online
-- **Query Persister** — Persist React Query cache to localStorage for instant hydration
-- **WebSocket Client** — Auto-reconnecting PubSub with exponential backoff
-- **Record Cache** — Type-safe in-memory cache with version conflict resolution and optimistic updates
-- **Record Storage** — IndexedDB persistence with automatic fallback to localStorage
-- **Undo/Redo Stack** — Generic operation history with grouping support
-
----
-
-## Core Package
-
-- **API Contracts** — Type-safe contracts with ts-rest for client-server communication
-- **Validation Schemas** — Zod schemas for runtime validation (auth, user, environment)
-- **Pagination System** — Cursor-based pagination with encoding/decoding utilities
-- **Shared Stores** — Framework-agnostic stores (toastStore, tokenStore)
-- **Error Types** — Custom HTTP error classes with utilities
-
----
-
-## Development Automation
-
-`pnpm dev` runs all sync watchers in watch mode (quiet by default):
-
-| Tool                | Purpose                                                          |
-| ------------------- | ---------------------------------------------------------------- |
-| `sync-path-aliases` | Auto-generates TS path aliases when directories add `index.ts`   |
-| `sync-file-headers` | Adds `// path/to/file.ts` headers on new files                   |
-| `sync-test-folders` | Creates `__tests__/` folders for code directories                |
-| `sync-tsconfig`     | Auto-generates TypeScript project references                     |
-| `sync-linting`      | Syncs linting config to `package.json` + `.vscode/settings.json` |
-| `sync-css-theme`    | Rebuilds `theme.css` when theme tokens change                    |
-
-**Path alias configuration:**
-
-- Max depth: 3 levels from `src/` (e.g., `src/features/auth/components`)
-- Excluded names: `utils`, `helpers`, `types`, `constants` (use relative imports)
-- Shallower directories win for duplicate names
-
----
-
-## Audit Tools
-
-```bash
-pnpm audit:deps      # Dependency analysis (unused, outdated, security)
-pnpm audit:security  # Security vulnerability scanning with CVSS scores
-pnpm audit:build     # Bundle size monitoring and optimization suggestions
-pnpm audit:bundle    # Build performance analysis and bottleneck detection
-pnpm audit:all       # Run all audit tools
-```
 
 ---
 

@@ -1,4 +1,4 @@
-// backend/engine/src/queue/writer.test.ts
+// src/server/engine/src/queue/writer.test.ts
 /**
  * Tests for Write Service
  *
@@ -621,6 +621,139 @@ describe('WriteService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.code).toBe('INTERNAL');
+    });
+  });
+
+  describe('close method', () => {
+    it('should clear pending setImmediate handle', () => {
+      const clearImmediateSpy = vi.spyOn(global, 'clearImmediate');
+
+      // Trigger a write that creates a setImmediate (via publishResults)
+      service.close();
+
+      // close() should not throw even if no pending publish
+      expect(() => {
+        service.close();
+      }).not.toThrow();
+
+      clearImmediateSpy.mockRestore();
+    });
+
+    it('should clear pending publish after write', async () => {
+      vi.mocked(mockDb.raw).mockResolvedValue([]);
+
+      const operation: WriteOperation = {
+        type: 'create',
+        table: 'users',
+        id: 'user-1',
+        data: { name: 'Test' },
+      };
+
+      const batch = createWriteBatch([operation]);
+      await service.write(batch);
+
+      // close() should clear the pending setImmediate from publishResults
+      const clearImmediateSpy = vi.spyOn(global, 'clearImmediate');
+      service.close();
+
+      // Verify clearImmediate was called (since publishResults schedules a setImmediate)
+      expect(clearImmediateSpy).toHaveBeenCalled();
+
+      clearImmediateSpy.mockRestore();
+    });
+
+    it('should be idempotent', () => {
+      service.close();
+      service.close();
+      service.close();
+
+      // Should not throw
+      expect(true).toBe(true);
+    });
+  });
+
+  describe('parameterized queries', () => {
+    it('should use $N placeholders in INSERT queries', async () => {
+      vi.mocked(mockDb.raw).mockResolvedValue([]);
+
+      const operation: WriteOperation = {
+        type: 'create',
+        table: 'users',
+        id: 'user-1',
+        data: { name: 'John; DROP TABLE users;--', email: 'john@test.com' },
+      };
+
+      const batch = createWriteBatch([operation]);
+      await service.write(batch);
+
+      // Verify raw was called with parameterized query (values array)
+      expect(mockDb.raw).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO'),
+        expect.arrayContaining(['user-1', 'John; DROP TABLE users;--', 'john@test.com']),
+      );
+
+      // Verify no raw SQL string interpolation of user data
+      const rawCall = vi.mocked(mockDb.raw).mock.calls[0];
+      const sqlString = rawCall?.[0] as string;
+      expect(sqlString).not.toContain('John; DROP TABLE users;--');
+      expect(sqlString).toContain('$');
+    });
+
+    it('should use $N placeholders in UPDATE queries', async () => {
+      vi.mocked(mockDb.raw)
+        .mockResolvedValueOnce([{ version: 1 }]) // SELECT
+        .mockResolvedValueOnce([{ id: 'user-1', name: "Robert'; DROP TABLE--", version: 2 }]); // UPDATE RETURNING
+
+      const operation: WriteOperation = {
+        type: 'update',
+        table: 'users',
+        id: 'user-1',
+        data: { name: "Robert'; DROP TABLE--" },
+      };
+
+      const batch = createWriteBatch([operation]);
+      await service.write(batch);
+
+      // The SELECT should be parameterized
+      expect(mockDb.raw).toHaveBeenCalledWith(
+        expect.stringMatching(/WHERE id = \$1/),
+        expect.arrayContaining(['user-1']),
+      );
+
+      // The UPDATE should use $N placeholders
+      const updateCall = vi.mocked(mockDb.raw).mock.calls[1];
+      const updateSql = updateCall?.[0] as string;
+      expect(updateSql).toContain('SET');
+      expect(updateSql).toContain('$');
+      expect(updateSql).not.toContain("Robert'; DROP TABLE--");
+    });
+
+    it('should use parameterized WHERE in DELETE queries', async () => {
+      vi.mocked(mockDb.raw).mockResolvedValueOnce([{ version: 1 }]);
+      vi.mocked(mockDb.execute).mockResolvedValueOnce(1);
+
+      const operation: WriteOperation = {
+        type: 'delete',
+        table: 'users',
+        id: "user-1'; DROP TABLE users;--",
+      };
+
+      const batch = createWriteBatch([operation]);
+      await service.write(batch);
+
+      // SELECT should be parameterized
+      expect(mockDb.raw).toHaveBeenCalledWith(
+        expect.stringMatching(/WHERE id = \$1/),
+        expect.arrayContaining(["user-1'; DROP TABLE users;--"]),
+      );
+
+      // DELETE should use parameterized query via tx.execute
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('WHERE id = $1'),
+          values: expect.arrayContaining(["user-1'; DROP TABLE users;--"]),
+        }),
+      );
     });
   });
 

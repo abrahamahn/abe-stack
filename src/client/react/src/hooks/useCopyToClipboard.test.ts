@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useCopyToClipboard.test.ts
+// src/client/react/src/hooks/useCopyToClipboard.test.ts
 /**
  * Tests for useCopyToClipboard hook.
  *

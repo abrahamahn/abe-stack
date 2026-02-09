@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useDisclosure.ts
+// src/client/react/src/hooks/useDisclosure.ts
 import { useControllableState } from '@hooks/useControllableState';
 import { useCallback } from 'react';
 

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/metering/usage-snapshots.ts
+// src/server/db/src/repositories/metering/usage-snapshots.ts
 /**
  * Usage Snapshots Repository (Functional)
  *

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useQueueStats.ts
+// src/apps/web/src/features/admin/hooks/useQueueStats.ts
 /**
  * useQueueStats hook
  *

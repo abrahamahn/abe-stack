@@ -1,4 +1,4 @@
-// backend/db/src/schema/notifications.test.ts
+// src/server/db/src/schema/notifications.test.ts
 /**
  * Unit tests for notifications schema type definitions
  *

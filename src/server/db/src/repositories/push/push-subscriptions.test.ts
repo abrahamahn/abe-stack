@@ -1,4 +1,4 @@
-// backend/db/src/repositories/push/push-subscriptions.test.ts
+// src/server/db/src/repositories/push/push-subscriptions.test.ts
 /**
  * Tests for Push Subscriptions Repository
  *

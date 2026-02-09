@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/OAuthConnectionsList.test.tsx
+// src/apps/web/src/features/settings/components/OAuthConnectionsList.test.tsx
 /**
  * OAuth Connections List Component Tests
  *

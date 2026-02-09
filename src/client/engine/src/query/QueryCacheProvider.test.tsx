@@ -1,4 +1,4 @@
-// client/src/query/QueryCacheProvider.test.tsx
+// src/client/engine/src/query/QueryCacheProvider.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';

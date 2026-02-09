@@ -1,4 +1,4 @@
-// backend/db/src/search/search-factory.test.ts
+// src/server/db/src/search/search-factory.test.ts
 /**
  * Tests for Search Provider Factory
  *

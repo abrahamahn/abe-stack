@@ -1,4 +1,4 @@
-// client/ui/src/hooks/usePaginatedQuery.test.ts
+// src/client/react/src/hooks/usePaginatedQuery.test.ts
 /** @vitest-environment jsdom */
 import { QueryCache, QueryCacheProvider } from '@abe-stack/client-engine';
 import { act, renderHook, waitFor } from '@testing-library/react';

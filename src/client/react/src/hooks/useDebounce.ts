@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useDebounce.ts
+// src/client/react/src/hooks/useDebounce.ts
 import { useEffect, useState } from 'react';
 
 /**

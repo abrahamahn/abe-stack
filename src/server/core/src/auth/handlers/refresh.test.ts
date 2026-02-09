@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/refresh.test.ts
+// src/server/core/src/auth/handlers/refresh.test.ts
 /**
  * Refresh Handler Tests
  *

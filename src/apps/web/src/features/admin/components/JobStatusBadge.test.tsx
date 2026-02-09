@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/JobStatusBadge.test.tsx
+// src/apps/web/src/features/admin/components/JobStatusBadge.test.tsx
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -32,10 +32,10 @@ describe('JobStatusBadge', () => {
       expect(screen.getByText('Failed')).toBeInTheDocument();
     });
 
-    it('should render dead status with danger tone', () => {
-      render(<JobStatusBadge status="dead" />);
+    it('should render dead_letter status with danger tone', () => {
+      render(<JobStatusBadge status="dead_letter" />);
 
-      expect(screen.getByText('Dead')).toBeInTheDocument();
+      expect(screen.getByText('Dead Letter')).toBeInTheDocument();
     });
   });
 
@@ -45,7 +45,7 @@ describe('JobStatusBadge', () => {
       { status: 'processing', expectedLabel: 'Processing' },
       { status: 'completed', expectedLabel: 'Completed' },
       { status: 'failed', expectedLabel: 'Failed' },
-      { status: 'dead', expectedLabel: 'Dead' },
+      { status: 'dead_letter', expectedLabel: 'Dead Letter' },
     ];
 
     it.each(statusTests)(

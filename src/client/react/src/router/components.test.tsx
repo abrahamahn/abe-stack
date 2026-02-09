@@ -1,4 +1,4 @@
-// client/react/src/router/components.test.tsx
+// src/client/react/src/router/components.test.tsx
 /**
  * Tests for custom router components.
  *

@@ -1,4 +1,4 @@
-// backend/db/src/builder/insert.test.ts
+// src/server/db/src/builder/insert.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { gt } from './conditions';

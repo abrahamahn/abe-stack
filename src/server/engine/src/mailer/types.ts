@@ -1,4 +1,4 @@
-// backend/engine/src/mailer/types.ts
+// src/server/engine/src/mailer/types.ts
 /**
  * Email Service Types
  *

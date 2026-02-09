@@ -1,4 +1,4 @@
-// packages/shared/src/utils/monitor/types.ts
+// src/shared/src/utils/monitor/types.ts
 /**
  * Health Check Types
  *

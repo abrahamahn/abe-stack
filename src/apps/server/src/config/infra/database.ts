@@ -1,4 +1,4 @@
-// apps/server/src/config/infra/database.ts
+// src/apps/server/src/config/infra/database.ts
 import type {
   DatabaseConfig,
   DatabaseProvider,

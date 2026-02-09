@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/index.ts
+// src/apps/web/src/features/admin/hooks/index.ts
 // User management hooks
 export { useAdminUser } from './useAdminUser';
 export type { UseAdminUserResult, UseAdminUserState } from './useAdminUser';

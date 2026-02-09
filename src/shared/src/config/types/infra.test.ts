@@ -1,4 +1,4 @@
-// packages/shared/src/config/types/infra.test.ts
+// src/shared/src/config/types/infra.test.ts
 import { assertType, describe, expect, it } from 'vitest';
 
 import type {

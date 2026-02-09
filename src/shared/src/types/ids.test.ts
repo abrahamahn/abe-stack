@@ -1,4 +1,4 @@
-// packages/shared/src/types/ids.test.ts
+// src/shared/src/types/ids.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

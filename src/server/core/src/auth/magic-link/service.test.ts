@@ -1,4 +1,4 @@
-// backend/core/src/auth/magic-link/service.test.ts
+// src/server/core/src/auth/magic-link/service.test.ts
 
 // backend/core/src/auth/magic-link/__tests__/service.test.ts
 /**
@@ -8,6 +8,7 @@
  * Tests requestMagicLink and verifyMagicLink with repository pattern.
  */
 
+import { canonicalizeEmail } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
@@ -79,16 +80,33 @@ vi.mock('@abe-stack/db', async () => {
 });
 
 vi.mock('../utils', () => ({
+  generateUniqueUsername: vi.fn((_repos: unknown, email: string) =>
+    Promise.resolve(email.split('@')[0]),
+  ),
   createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
     accessToken,
     refreshToken,
     user: {
       id: user.id,
       email: user.email,
-      name: user.name,
-      avatarUrl: user.avatarUrl ?? null,
+      username: user.username ?? user.first_name?.toLowerCase() ?? 'user',
+      firstName: user.firstName ?? user.first_name ?? 'User',
+      lastName: user.lastName ?? user.last_name ?? '',
+      avatarUrl: user.avatarUrl ?? user.avatar_url ?? null,
       role: user.role,
-      createdAt: user.createdAt.toISOString(),
+      emailVerified: user.emailVerified ?? user.email_verified ?? false,
+      phone: user.phone ?? null,
+      phoneVerified: user.phoneVerified ?? user.phone_verified ?? null,
+      dateOfBirth: user.dateOfBirth ?? user.date_of_birth ?? null,
+      gender: user.gender ?? null,
+      createdAt:
+        user.createdAt?.toISOString?.() ??
+        user.created_at?.toISOString?.() ??
+        new Date().toISOString(),
+      updatedAt:
+        user.updatedAt?.toISOString?.() ??
+        user.updated_at?.toISOString?.() ??
+        new Date().toISOString(),
     },
   })),
   createAccessToken: vi.fn(() => 'mock-access-token'),
@@ -140,6 +158,8 @@ function createMockRepositories(): Repositories {
     passwordResetTokens: {} as Repositories['passwordResetTokens'],
     emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
     securityEvents: {} as Repositories['securityEvents'],
+    totpBackupCodes: {} as Repositories['totpBackupCodes'],
+    emailChangeTokens: {} as Repositories['emailChangeTokens'],
     magicLinkTokens: {
       findValidByTokenHash: vi.fn(),
       create: vi.fn(),
@@ -148,6 +168,7 @@ function createMockRepositories(): Repositories {
       countRecentByIp: vi.fn(),
     },
     oauthConnections: {} as Repositories['oauthConnections'],
+    apiKeys: {} as Repositories['apiKeys'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
     notificationPreferences: {} as Repositories['notificationPreferences'],
     plans: {} as Repositories['plans'],
@@ -172,6 +193,7 @@ function createMockRepositories(): Repositories {
     legalDocuments: {} as Repositories['legalDocuments'],
     userAgreements: {} as Repositories['userAgreements'],
     consentLogs: {} as Repositories['consentLogs'],
+    dataExportRequests: {} as Repositories['dataExportRequests'],
   };
 }
 
@@ -236,13 +258,28 @@ function createMockUser(overrides?: Partial<User>): User {
   return {
     id: 'user-123',
     email: 'test@example.com',
-    name: 'Test User',
+    canonicalEmail: 'test@example.com',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     passwordHash: 'hash',
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: new Date(),
     lockedUntil: null,
     failedLoginAttempts: 0,
+    totpSecret: null,
+    totpEnabled: false,
+    phone: null,
+    phoneVerified: false,
+    dateOfBirth: null,
+    gender: null,
+    city: null,
+    state: null,
+    country: null,
+    bio: null,
+    language: null,
+    website: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -302,7 +339,7 @@ describe('requestMagicLink', () => {
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          email: 'test@example.com',
+          email: canonicalizeEmail(email),
         }),
       );
     });
@@ -322,7 +359,7 @@ describe('requestMagicLink', () => {
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          email: 'test@example.com',
+          email: canonicalizeEmail(email),
         }),
       );
     });
@@ -702,7 +739,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -748,7 +787,9 @@ describe('verifyMagicLink', () => {
                 {
                   id: 'new-user-123',
                   email: 'newuser@example.com',
-                  name: null,
+                  username: 'newuser',
+                  first_name: 'User',
+                  last_name: '',
                   password_hash: 'magiclink:hash',
                   role: 'user',
                   email_verified: true,
@@ -796,7 +837,9 @@ describe('verifyMagicLink', () => {
                 {
                   id: user.id,
                   email: user.email,
-                  name: user.name,
+                  username: user.username ?? 'testuser',
+                  first_name: user.firstName ?? 'Test',
+                  last_name: user.lastName ?? 'User',
                   password_hash: user.passwordHash,
                   role: user.role,
                   email_verified: true,
@@ -808,7 +851,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: false,
@@ -852,7 +897,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1006,7 +1053,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1051,7 +1100,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1072,12 +1123,12 @@ describe('verifyMagicLink', () => {
   });
 
   describe('edge cases', () => {
-    test('should handle user with null name', async () => {
+    test('should handle user with default name', async () => {
       const db = createMockDb();
       const repos = createMockRepositories();
       const config = createMockAuthConfig();
       const token = 'valid-token';
-      const user = createMockUser({ name: null });
+      const user = createMockUser();
 
       const { withTransaction } = await import('@abe-stack/db');
       vi.mocked(withTransaction).mockImplementation(
@@ -1095,7 +1146,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: null,
+              username: 'testuser',
+              first_name: 'Test',
+              last_name: 'User',
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1111,7 +1164,7 @@ describe('verifyMagicLink', () => {
 
       const result = await verifyMagicLink(db, repos, config, token);
 
-      expect(result.user.name).toBeNull();
+      expect(result.user.firstName).toBe('Test');
     });
 
     test('should handle admin role user', async () => {
@@ -1137,7 +1190,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              name: user.name,
+              username: user.username ?? 'testuser',
+              first_name: user.firstName ?? 'Test',
+              last_name: user.lastName ?? 'User',
               password_hash: user.passwordHash,
               role: 'admin',
               email_verified: true,

@@ -1,4 +1,4 @@
-// apps/server/src/http/middleware/static.test.ts
+// src/apps/server/src/http/middleware/static.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { registerStaticServe } from './static';

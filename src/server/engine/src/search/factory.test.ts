@@ -1,4 +1,4 @@
-// backend/engine/src/search/factory.test.ts
+// src/server/engine/src/search/factory.test.ts
 /**
  * Tests for Search Provider Factory
  *
@@ -71,22 +71,6 @@ describe('SearchProviderFactory', () => {
     });
   });
 
-  describe('createElasticsearchProvider', () => {
-    test('should create and register Elasticsearch provider', () => {
-      const factory = new SearchProviderFactory();
-
-      const provider = factory.createElasticsearchProvider({
-        name: 'test-es',
-        node: 'http://localhost:9200',
-        index: 'test',
-      });
-
-      expect(provider).toBeDefined();
-      expect(provider.name).toBe('test-es');
-      expect(factory.hasProvider('test-es')).toBe(true);
-    });
-  });
-
   describe('getProvider', () => {
     test('should return registered provider', () => {
       const factory = new SearchProviderFactory();
@@ -149,11 +133,7 @@ describe('SearchProviderFactory', () => {
       const factory = new SearchProviderFactory();
 
       factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'provider1' });
-      factory.createElasticsearchProvider({
-        name: 'provider2',
-        node: 'http://localhost:9200',
-        index: 'test',
-      });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'provider2' });
 
       const providers = factory.getProviders();
 
@@ -169,18 +149,11 @@ describe('SearchProviderFactory', () => {
 
       factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'users-sql' });
       factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'orders-sql' });
-      factory.createElasticsearchProvider({
-        name: 'search-es',
-        node: 'http://localhost:9200',
-        index: 'test',
-      });
 
       const sqlProviders = factory.getProvidersByType('sql');
-      const esProviders = factory.getProvidersByType('elasticsearch');
 
       expect(sqlProviders).toContain('users-sql');
       expect(sqlProviders).toContain('orders-sql');
-      expect(esProviders).toContain('search-es');
     });
   });
 
@@ -189,11 +162,7 @@ describe('SearchProviderFactory', () => {
       const factory = new SearchProviderFactory();
 
       factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'p1' });
-      factory.createElasticsearchProvider({
-        name: 'p2',
-        node: 'http://localhost:9200',
-        index: 'test',
-      });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'p2' });
 
       await factory.closeAll();
 

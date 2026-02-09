@@ -1,4 +1,4 @@
-// packages/shared/src/types/index.ts
+// src/shared/src/types/index.ts
 
 export {
   auditEventIdSchema,

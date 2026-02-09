@@ -1,4 +1,4 @@
-// client/ui/src/elements/Avatar.tsx
+// src/client/ui/src/elements/Avatar.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 import { cn } from '../utils/cn';

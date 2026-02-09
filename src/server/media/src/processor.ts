@@ -1,4 +1,4 @@
-// premium/media/src/processor.ts
+// src/server/media/src/processor.ts
 /**
  * Media Processing Orchestrator
  *
@@ -85,8 +85,10 @@ export class MediaProcessingOrchestrator {
    * @param imageProcessor - Image processor instance
    * @param audioProcessor - Audio processor instance
    * @param videoProcessor - Video processor instance
-   * @param limits - Processing resource limits (merged with defaults)
-   * @param _securityOptions - Reserved for future security configuration
+   * @param limits - Processing resource limits (merged with defaults).
+   *   Pass plan-based limits (e.g., premium gets 500MB, free gets 10MB) to
+   *   override the hardcoded defaults.
+   * @param _securityOptions - Reserved for future security scanning configuration
    */
   constructor(
     private readonly imageProcessor: ImageProcessor,
@@ -282,10 +284,7 @@ export class MediaProcessingOrchestrator {
    * Clean up resources: cancel all active jobs and clear the queue
    */
   cleanup(): void {
-    for (const [fileId] of this.activeJobs) {
-      this.activeJobs.delete(fileId);
-    }
-
+    this.activeJobs.clear();
     this.queue.length = 0;
   }
 }

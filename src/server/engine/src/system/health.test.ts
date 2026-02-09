@@ -1,4 +1,4 @@
-// backend/engine/src/system/health.test.ts
+// src/server/engine/src/system/health.test.ts
 /**
  * System Health Check Tests
  *
@@ -274,7 +274,7 @@ describe('checkRateLimitStatus', () => {
     const result = checkRateLimitStatus();
 
     expect(result.status).toBe('up');
-    expect(result.message).toBe('token bucket active');
+    expect(result.message).toBe('sliding window active');
   });
 });
 

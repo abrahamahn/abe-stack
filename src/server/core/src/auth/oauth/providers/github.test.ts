@@ -1,4 +1,4 @@
-// backend/core/src/auth/oauth/providers/github.test.ts
+// src/server/core/src/auth/oauth/providers/github.test.ts
 /**
  * GitHub OAuth Provider Tests
  *

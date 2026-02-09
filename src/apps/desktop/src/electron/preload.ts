@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/preload.ts
+// src/apps/desktop/src/electron/preload.ts
 import { contextBridge, ipcRenderer, shell } from 'electron';
 
 import { IPC_CHANNELS } from './types';

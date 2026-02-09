@@ -1,4 +1,4 @@
-// backend/core/src/auth/security/rateLimitPresets.test.ts
+// src/server/core/src/auth/security/rateLimitPresets.test.ts
 /**
  * Auth Rate Limit Presets Tests
  */

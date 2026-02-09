@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/RegisterForm.test.tsx
+// src/apps/web/src/features/auth/components/RegisterForm.test.tsx
 /**
  * Unit tests for RegisterForm component.
  *

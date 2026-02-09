@@ -1,4 +1,4 @@
-// backend/core/src/auth/handlers/index.ts
+// src/server/core/src/auth/handlers/index.ts
 /**
  * Auth Handlers
  *
@@ -14,5 +14,16 @@ export { handleLogout } from './logout';
 export { handleLogoutAll } from './logout-all';
 export { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 export { handleVerifyEmail, handleResendVerification } from './verify';
-export { handleTotpSetup, handleTotpEnable, handleTotpDisable, handleTotpStatus } from './totp';
-export { handleChangeEmail, handleConfirmEmailChange } from './email-change';
+export {
+  handleTotpSetup,
+  handleTotpEnable,
+  handleTotpDisable,
+  handleTotpStatus,
+  handleTotpLoginVerify,
+} from './totp';
+export {
+  handleChangeEmail,
+  handleConfirmEmailChange,
+  handleRevertEmailChange,
+} from './email-change';
+export { handleAcceptTos, handleTosStatus } from './tos';

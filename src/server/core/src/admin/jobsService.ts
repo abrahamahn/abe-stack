@@ -1,4 +1,4 @@
-// backend/core/src/admin/jobsService.ts
+// src/server/core/src/admin/jobsService.ts
 /**
  * Jobs Service
  *

@@ -1,4 +1,4 @@
-// client/ui/src/elements/index.ts
+// src/client/ui/src/elements/index.ts
 // Elements - Atomic UI building blocks
 export { Alert } from './Alert';
 export { Avatar } from './Avatar';

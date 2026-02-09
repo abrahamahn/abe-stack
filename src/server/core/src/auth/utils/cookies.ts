@@ -1,4 +1,4 @@
-// backend/core/src/auth/utils/cookies.ts
+// src/server/core/src/auth/utils/cookies.ts
 /**
  * Cookie Helper Utilities
  *

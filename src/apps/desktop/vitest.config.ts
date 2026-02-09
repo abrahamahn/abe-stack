@@ -1,4 +1,4 @@
-// apps/desktop/vitest.config.ts
+// src/apps/desktop/vitest.config.ts
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { mergeConfig } from 'vitest/config';
@@ -8,11 +8,11 @@ export default mergeConfig(baseConfig, {
   plugins: [react()],
   resolve: {
     alias: [
-      // Handle subpath imports first
       {
-        find: /^@abe-stack\/shared\/contracts\/(.*)$/,
-        replacement: path.resolve(__dirname, '../../shared/src/contracts/$1'),
+        find: 'react-router-dom',
+        replacement: path.resolve(__dirname, '../web/src/__tests__/mocks/react-router-dom.tsx'),
       },
+      // Handle subpath imports first
       {
         find: /^@abe-stack\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '../../shared/src/$1'),

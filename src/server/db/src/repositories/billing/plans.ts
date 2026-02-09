@@ -1,4 +1,4 @@
-// backend/db/src/repositories/billing/plans.ts
+// src/server/db/src/repositories/billing/plans.ts
 /**
  * Plans Repository
  *

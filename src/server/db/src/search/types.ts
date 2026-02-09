@@ -1,4 +1,4 @@
-// backend/db/src/search/types.ts
+// src/server/db/src/search/types.ts
 /**
  * Search Provider Types
  *

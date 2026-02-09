@@ -1,4 +1,4 @@
-// backend/core/src/users/handlers/index.ts
+// src/server/core/src/users/handlers/index.ts
 /**
  * Users Handlers
  *

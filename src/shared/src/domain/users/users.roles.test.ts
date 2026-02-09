@@ -1,4 +1,4 @@
-// packages/shared/src/domain/users/users.roles.test.ts
+// src/shared/src/domain/users/users.roles.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { getAllRoles, getRoleDisplayName, isAdmin, isModerator, isUser } from './users.roles';

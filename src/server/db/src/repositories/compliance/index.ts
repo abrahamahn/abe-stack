@@ -1,4 +1,4 @@
-// backend/db/src/repositories/compliance/index.ts
+// src/server/db/src/repositories/compliance/index.ts
 /**
  * Compliance Repositories Barrel
  */
@@ -11,3 +11,9 @@ export { createUserAgreementRepository, type UserAgreementRepository } from './u
 
 // Consent Logs
 export { createConsentLogRepository, type ConsentLogRepository } from './consent-logs';
+
+// Data Export Requests
+export {
+  createDataExportRequestRepository,
+  type DataExportRequestRepository,
+} from './data-export-requests';

@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useSessions.ts
+// src/apps/web/src/features/settings/hooks/useSessions.ts
 /**
  * Sessions Hook
  *

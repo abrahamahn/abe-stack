@@ -1,4 +1,4 @@
-// apps/web/src/features/ui-library/components/UILibraryDocContent.tsx
+// src/apps/web/src/features/ui-library/components/UILibraryDocContent.tsx
 import { Heading, Markdown, Skeleton, Text } from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
 

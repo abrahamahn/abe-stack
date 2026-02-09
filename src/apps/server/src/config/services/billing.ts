@@ -1,4 +1,4 @@
-// apps/server/src/config/services/billing.ts
+// src/apps/server/src/config/services/billing.ts
 import type {
   BillingConfig,
   BillingPlansConfig,

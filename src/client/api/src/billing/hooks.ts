@@ -1,4 +1,4 @@
-// client/src/billing/hooks.ts
+// src/client/api/src/billing/hooks.ts
 /**
  * Billing React Hooks
  *

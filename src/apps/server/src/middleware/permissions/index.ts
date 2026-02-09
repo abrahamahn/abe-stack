@@ -1,4 +1,4 @@
-// apps/server/src/middleware/permissions/index.ts
+// src/apps/server/src/middleware/permissions/index.ts
 /**
  * Permission Middleware
  *

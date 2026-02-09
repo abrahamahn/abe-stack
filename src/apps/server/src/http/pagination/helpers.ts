@@ -1,4 +1,4 @@
-// apps/server/src/http/pagination/helpers.ts
+// src/apps/server/src/http/pagination/helpers.ts
 /**
  * Pagination helper functions for creating paginated responses
  * and applying pagination to database queries.
@@ -168,7 +168,13 @@ async function applyCursorPagination<T extends Record<string, unknown>>(
 
   // Calculate pagination metadata
   // The shared utility only uses data and limit to calculate hasNext and nextCursor
-  const metadata = calculateCursorPaginationMetadata(results, limit);
+  const metadata = calculateCursorPaginationMetadata(
+    results,
+    limit,
+    sortBy,
+    sortOrder,
+    tieBreakerField as keyof T,
+  );
 
   return {
     data: results.slice(0, limit),

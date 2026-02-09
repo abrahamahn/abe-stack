@@ -1,4 +1,4 @@
-// client/ui/src/components/Pagination.test.tsx
+// src/client/ui/src/components/Pagination.test.tsx
 // client/ui/src/elements/__tests__/Pagination.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen, waitFor } from '@testing-library/react';

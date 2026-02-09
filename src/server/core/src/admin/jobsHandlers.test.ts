@@ -1,4 +1,4 @@
-// backend/core/src/admin/jobsHandlers.test.ts
+// src/server/core/src/admin/jobsHandlers.test.ts
 /**
  * Unit tests for jobs handlers
  *
@@ -79,7 +79,7 @@ function createMockContext(): AdminAppContext {
       error: vi.fn(),
       debug: vi.fn(),
     },
-    email: { send: vi.fn() },
+    email: { send: vi.fn(), healthCheck: vi.fn() },
     storage: {
       upload: vi.fn(),
       download: vi.fn(),
@@ -87,7 +87,7 @@ function createMockContext(): AdminAppContext {
       getSignedUrl: vi.fn(),
     },
     billing: {
-      provider: 'stripe' as const,
+      provider: 'stripe',
       createCustomer: vi.fn(),
       createCheckoutSession: vi.fn(),
       cancelSubscription: vi.fn(),
@@ -106,7 +106,7 @@ function createMockContext(): AdminAppContext {
       verifyWebhookSignature: vi.fn(),
       parseWebhookEvent: vi.fn(),
       createCustomerPortalSession: vi.fn(),
-    } as unknown as AdminAppContext['billing'],
+    } as unknown,
     notifications: {
       isConfigured: vi.fn().mockReturnValue(false),
     },

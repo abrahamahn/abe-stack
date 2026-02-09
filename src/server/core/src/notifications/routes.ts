@@ -1,4 +1,4 @@
-// backend/core/src/notifications/routes.ts
+// src/server/core/src/notifications/routes.ts
 /**
  * Notification Routes
  *
@@ -10,7 +10,11 @@
  * (which satisfies NotificationModuleDeps) as the handler context.
  */
 
-import { createRouteMap, type HandlerContext, type RouteDefinition } from '@abe-stack/db';
+import {
+  createRouteMap,
+  type HandlerContext,
+  type RouteDefinition,
+} from '@abe-stack/server-engine';
 import {
   sendNotificationRequestSchema,
   subscribeRequestSchema,

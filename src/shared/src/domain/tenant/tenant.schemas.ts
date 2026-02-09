@@ -1,4 +1,4 @@
-// packages/shared/src/domain/tenant/tenant.schemas.ts
+// src/shared/src/domain/tenant/tenant.schemas.ts
 
 /**
  * @file Tenant Contracts
@@ -6,7 +6,6 @@
  * @module Domain/Tenant
  */
 
-import { isoDateTimeSchema } from '../../contracts/common';
 import {
   createSchema,
   parseBoolean,
@@ -15,15 +14,32 @@ import {
   parseRecord,
   parseString,
   withDefault,
-} from '../../contracts/schema';
+} from '../../core/schema.utils';
+import { isoDateTimeSchema } from '../../core/schemas';
 import { tenantIdSchema, userIdSchema } from '../../types/ids';
 
-import type { Schema } from '../../contracts/types';
+import type { Schema } from '../../core/api';
 import type { TenantId, UserId } from '../../types/ids';
 
 // ============================================================================
 // Types
 // ============================================================================
+
+/**
+ * Workspace context for scoped operations.
+ * Required for repository functions that operate on tenant-scoped data.
+ */
+export interface WorkspaceContext {
+  /** Workspace/Tenant identifier */
+  workspaceId: string;
+  /** Acting user ID within the workspace */
+  userId: string;
+  /** User's role within this workspace */
+  role?: 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+}
+
+/** Partial workspace context for optional scoping. */
+export type MaybeWorkspaceContext = Partial<WorkspaceContext>;
 
 /** Slug format regex: lowercase alphanumeric and hyphens */
 const SLUG_REGEX = /^[a-z0-9-]+$/;

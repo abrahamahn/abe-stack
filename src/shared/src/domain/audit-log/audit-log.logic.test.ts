@@ -1,4 +1,4 @@
-// packages/shared/src/domain/audit-log/audit-log.logic.test.ts
+// src/shared/src/domain/audit-log/audit-log.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { buildAuditEvent, sanitizeMetadata } from './audit-log.logic';

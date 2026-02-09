@@ -1,4 +1,4 @@
-// backend/core/src/billing/webhooks/stripe-webhook.test.ts
+// src/server/core/src/billing/webhooks/stripe-webhook.test.ts
 /**
  * Stripe Webhook Handler Unit Tests
  *

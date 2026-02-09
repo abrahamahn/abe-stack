@@ -1,4 +1,4 @@
-// packages/shared/src/utils/rate-limit.test.ts
+// src/shared/src/utils/rate-limit.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createRateLimiter } from './rate-limit';

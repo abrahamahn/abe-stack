@@ -1,4 +1,4 @@
-// client/ui/src/components/Slider.tsx
+// src/client/ui/src/components/Slider.tsx
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 

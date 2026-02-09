@@ -1,4 +1,4 @@
-// backend/db/src/repositories/tenant/tenants.test.ts
+// src/server/db/src/repositories/tenant/tenants.test.ts
 /**
  * Tests for Tenants Repository
  *

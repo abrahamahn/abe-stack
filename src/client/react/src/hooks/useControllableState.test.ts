@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useControllableState.test.ts
+// src/client/react/src/hooks/useControllableState.test.ts
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement, type ReactElement } from 'react';

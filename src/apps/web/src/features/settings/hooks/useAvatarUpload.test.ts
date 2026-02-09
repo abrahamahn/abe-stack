@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useAvatarUpload.test.ts
+// src/apps/web/src/features/settings/hooks/useAvatarUpload.test.ts
 /**
  * Tests for useAvatarUpload and useAvatarDelete hooks.
  *

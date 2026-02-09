@@ -1,4 +1,4 @@
-// packages/shared/src/domain/sessions/sessions.logic.ts
+// src/shared/src/domain/sessions/sessions.logic.ts
 
 /**
  * @file Session Domain Logic

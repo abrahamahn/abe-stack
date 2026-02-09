@@ -23,7 +23,7 @@ import type {
   HasStorage,
   Logger,
   RequestContext,
-} from '@abe-stack/shared/contracts';
+} from '@abe-stack/shared/core';
 
 /**
  * Application context narrowed for the admin module.

@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/index.ts
+// src/server/db/src/repositories/system/index.ts
 /**
  * System Repositories Barrel
  */

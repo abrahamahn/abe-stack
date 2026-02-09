@@ -1,4 +1,4 @@
-// backend/core/src/index.ts
+// src/server/core/src/index.ts
 /**
  * @abe-stack/core — Unified Business Modules
  *

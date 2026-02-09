@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/hooks/useAvatarUpload.ts
+// src/apps/web/src/features/settings/hooks/useAvatarUpload.ts
 /**
  * Avatar Upload Hook
  *

@@ -1,4 +1,4 @@
-// client/react/src/stores/index.ts
+// src/client/react/src/stores/index.ts
 /**
  * Stores (merged into @abe-stack/react)
  *

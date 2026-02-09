@@ -1,4 +1,4 @@
-// client/react/src/stores/createStore.ts
+// src/client/react/src/stores/createStore.ts
 /**
  * Custom Store Implementation
  *

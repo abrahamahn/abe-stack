@@ -1,4 +1,4 @@
-// apps/web/src/features/settings/components/SessionsList.tsx
+// src/apps/web/src/features/settings/components/SessionsList.tsx
 /**
  * Sessions List Component
  *

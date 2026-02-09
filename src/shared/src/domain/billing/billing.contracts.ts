@@ -1,28 +1,29 @@
-// packages/shared/src/domain/billing/billing.contracts.ts
-
+// src/shared/src/domain/billing/billing.contracts.ts
 /**
- * @file Billing Contracts
- * @description API Contract definitions for the Billing domain (Plans, Subscriptions, Checkout).
+ * Billing Contracts
+ *
+ * API Contract definitions for the Billing domain (Plans, Subscriptions, Checkout).
  * @module Domain/Billing
  */
 
-import {
-  emptyBodySchema,
-  envelopeErrorResponseSchema,
-  successResponseSchema,
-} from '../../contracts/common';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../../core/schemas';
 
 import {
+  addPaymentMethodRequestSchema,
   cancelSubscriptionRequestSchema,
   checkoutRequestSchema,
   checkoutResponseSchema,
+  invoicesListResponseSchema,
+  paymentMethodResponseSchema,
+  paymentMethodsListResponseSchema,
   plansListResponseSchema,
+  setupIntentResponseSchema,
   subscriptionActionResponseSchema,
   subscriptionResponseSchema,
   updateSubscriptionRequestSchema,
 } from './billing.schemas';
 
-import type { Contract } from '../../contracts/types';
+import type { Contract } from '../../core/api';
 
 // ============================================================================
 // Contract Definition
@@ -49,7 +50,7 @@ export const billingContract = {
     path: '/api/billing/subscription',
     responses: {
       200: successResponseSchema(subscriptionResponseSchema),
-      401: envelopeErrorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Get current user subscription',
   },
@@ -60,8 +61,8 @@ export const billingContract = {
     body: checkoutRequestSchema,
     responses: {
       200: successResponseSchema(checkoutResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
     },
     summary: 'Create checkout session for subscription',
   },
@@ -75,9 +76,9 @@ export const billingContract = {
     body: cancelSubscriptionRequestSchema,
     responses: {
       200: successResponseSchema(subscriptionActionResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
-      404: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
     },
     summary: 'Cancel current subscription',
   },
@@ -85,12 +86,12 @@ export const billingContract = {
   resumeSubscription: {
     method: 'POST' as const,
     path: '/api/billing/subscription/resume',
-    body: emptyBodySchema, // Use shared emptyBodySchema
+    body: emptyBodySchema,
     responses: {
       200: successResponseSchema(subscriptionActionResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
-      404: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
     },
     summary: 'Resume subscription before period end',
   },
@@ -101,10 +102,83 @@ export const billingContract = {
     body: updateSubscriptionRequestSchema,
     responses: {
       200: successResponseSchema(subscriptionActionResponseSchema),
-      400: envelopeErrorResponseSchema,
-      401: envelopeErrorResponseSchema,
-      404: envelopeErrorResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
     },
     summary: 'Change subscription plan',
+  },
+
+  // --------------------------------------------------------------------------
+  // Invoices
+  // --------------------------------------------------------------------------
+  listInvoices: {
+    method: 'GET' as const,
+    path: '/api/billing/invoices',
+    responses: {
+      200: successResponseSchema(invoicesListResponseSchema),
+      401: errorResponseSchema,
+    },
+    summary: 'List user invoices',
+  },
+
+  // --------------------------------------------------------------------------
+  // Payment Methods
+  // --------------------------------------------------------------------------
+  createSetupIntent: {
+    method: 'POST' as const,
+    path: '/api/billing/payment-methods/setup',
+    body: emptyBodySchema,
+    responses: {
+      200: successResponseSchema(setupIntentResponseSchema),
+      401: errorResponseSchema,
+    },
+    summary: 'Create setup intent for adding payment method',
+  },
+
+  listPaymentMethods: {
+    method: 'GET' as const,
+    path: '/api/billing/payment-methods',
+    responses: {
+      200: successResponseSchema(paymentMethodsListResponseSchema),
+      401: errorResponseSchema,
+    },
+    summary: 'List user payment methods',
+  },
+
+  addPaymentMethod: {
+    method: 'POST' as const,
+    path: '/api/billing/payment-methods',
+    body: addPaymentMethodRequestSchema,
+    responses: {
+      200: successResponseSchema(paymentMethodResponseSchema),
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Add a payment method after setup intent success',
+  },
+
+  deletePaymentMethod: {
+    method: 'DELETE' as const,
+    path: '/api/billing/payment-methods/:id',
+    responses: {
+      200: successResponseSchema(subscriptionActionResponseSchema),
+      401: errorResponseSchema,
+      404: errorResponseSchema,
+      409: errorResponseSchema,
+    },
+    summary: 'Delete a payment method',
+  },
+
+  setDefaultPaymentMethod: {
+    method: 'POST' as const,
+    path: '/api/billing/payment-methods/:id/default',
+    body: emptyBodySchema,
+    responses: {
+      200: successResponseSchema(subscriptionActionResponseSchema),
+      401: errorResponseSchema,
+      404: errorResponseSchema,
+    },
+    summary: 'Set default payment method',
   },
 } satisfies Contract;

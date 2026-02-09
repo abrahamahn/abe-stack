@@ -1,4 +1,4 @@
-// apps/web/src/app/App.tsx
+// src/apps/web/src/app/App.tsx
 /**
  * App - Root component that composes providers and routes.
  *
@@ -8,7 +8,12 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { createQueryPersister, QueryCacheProvider } from '@abe-stack/client-engine';
+import {
+  createQueryPersister,
+  QueryCacheProvider,
+  type QueryKey,
+  type QueryState,
+} from '@abe-stack/client-engine';
 import { toastStore } from '@abe-stack/react';
 import {
   BrowserRouter,
@@ -18,49 +23,20 @@ import {
   ProtectedRoute,
   Route,
   Routes,
-  ScrollArea,
   SkipLink,
   ThemeProvider,
   Toaster,
   useRouteFocusAnnounce,
 } from '@abe-stack/ui';
-import {
-  AdminLayout,
-  JobMonitorPage,
-  PlanManagementPage,
-  SecurityEventDetailPage,
-  SecurityEventsPage,
-  UserDetailPage,
-  UserListPage,
-} from '@features/admin';
-import {
-  AuthPage,
-  ConfirmEmailPage,
-  ConnectedAccountsPage,
-  LoginPage,
-  RegisterPage,
-  ResetPasswordPage,
-  useAuth,
-} from '@features/auth';
-import {
-  BillingSettingsPage,
-  CheckoutCancelPage,
-  CheckoutSuccessPage,
-  PricingPage,
-} from '@features/billing';
-import { DashboardPage } from '@features/dashboard';
-import { SettingsPage } from '@features/settings';
-import { HomePage } from '@home';
-import { UILibraryPage, SidePeekUILibraryPage } from '@ui-library';
-import { useEffect, type ReactElement } from 'react';
+import { useAuth } from '@features/auth';
+import { useEffect, type ReactElement, Suspense } from 'react';
 
 import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
+import { appRoutes, type AppRoute } from './routes'; // Import appRoutes and AppRoute type
 
 // ============================================================================
-// Persistence Configuration
+// Types for Persistence (re-added)
 // ============================================================================
-
-const PERSIST_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
 type PersistedQuery = {
   queryKey: readonly unknown[];
@@ -90,16 +66,16 @@ type PersistedClient = {
   clientState: PersistedClientState;
 };
 
+type QueryCacheEntry = {
+  queryKey: QueryKey;
+  state: QueryState;
+};
+
 type QueryPersister = {
   persistClient: (client: PersistedClient) => void;
   restoreClient: () => Promise<PersistedClient | undefined>;
   removeClient: () => Promise<void>;
 };
-
-const persister = createQueryPersister({
-  maxAge: PERSIST_MAX_AGE,
-  throttleTime: 1000, // 1 second
-}) as QueryPersister;
 
 // ============================================================================
 // Types
@@ -124,88 +100,52 @@ const RouteFocusAnnouncer = (): null => {
   return null;
 };
 
-const AppRoutes = (): ReactElement => {
-  const { isAuthenticated, isLoading } = useAuth();
+// Helper function to render routes recursively
+const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
+  return routes.map((route: AppRoute, index) => {
+    const Element = route.element;
+    let elementToRender = <Element />;
 
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/clean" element={<HomePage />} />
-      <Route path="/ui-library" element={<UILibraryPage />} />
-      <Route path="/side-peek-ui-library" element={<SidePeekUILibraryPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+    // Apply ProtectedRoute if 'protected' is true
+    if (route.protected === true) {
+      const { isAuthenticated, isLoading } = useAuth();
+      elementToRender = (
+        <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+          <Element />
+        </ProtectedRoute>
+      );
+    }
 
-      {/* Settings Routes */}
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings/accounts"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <ConnectedAccountsPage />
-          </ProtectedRoute>
-        }
-      />
+    const routeProps: { key: number; element: ReactElement; path?: string; index?: boolean } = {
+      key: index,
+      element: elementToRender,
+    };
 
-      {/* Billing Routes */}
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route
-        path="/settings/billing"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <BillingSettingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/billing/success"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <CheckoutSuccessPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/billing/cancel"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-            <CheckoutCancelPage />
-          </ProtectedRoute>
-        }
-      />
+    if (route.path !== undefined) {
+      routeProps.path = route.path;
+    }
 
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<UserListPage />} />
-        <Route path="users" element={<UserListPage />} />
-        <Route path="users/:id" element={<UserDetailPage />} />
-        <Route path="security" element={<SecurityEventsPage />} />
-        <Route path="security/:id" element={<SecurityEventDetailPage />} />
-        <Route path="jobs" element={<JobMonitorPage />} />
-        <Route path="billing/plans" element={<PlanManagementPage />} />
-      </Route>
-    </Routes>
-  );
+    if (route.index !== undefined) {
+      routeProps.index = route.index;
+    }
+
+    // Safely check for children before mapping
+    const childRoutes =
+      Array.isArray(route.children) && route.children.length > 0
+        ? renderRoutes(route.children)
+        : null;
+
+    return <Route {...routeProps}>{childRoutes}</Route>;
+  });
 };
 
+const AppRoutes = (): ReactElement => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>{renderRoutes(appRoutes)}</Routes>
+    </Suspense>
+  );
+};
 // ============================================================================
 // App
 // ============================================================================
@@ -219,7 +159,13 @@ const AppRoutes = (): ReactElement => {
  * - Persists cache changes to IndexedDB (throttled)
  */
 function useQueryPersistence(environment: ClientEnvironment): void {
-  const { queryCache } = environment;
+  const { queryCache, config } = environment;
+  const { maxAge, throttleTime } = config.queryPersistence;
+
+  const persister = createQueryPersister({
+    maxAge,
+    throttleTime,
+  }) as QueryPersister;
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -227,37 +173,43 @@ function useQueryPersistence(environment: ClientEnvironment): void {
     const init = async (): Promise<void> => {
       // Restore cached data from IndexedDB in background
       try {
-        const persistedClient = await persister.restoreClient();
+        const persistedClient: PersistedClient | undefined = await persister.restoreClient();
         if (persistedClient !== undefined) {
           for (const persistedQuery of persistedClient.clientState.queries) {
             queryCache.setQueryData(persistedQuery.queryKey, persistedQuery.state.data);
           }
         }
-      } catch {
+      } catch (_error: unknown) {
         // Restore failed silently, continue with empty cache
+        // Optionally log error for debugging: console.error(_error);
       }
 
       // Subscribe to cache changes for persistence
       unsubscribe = queryCache.subscribeAll(() => {
-        const allQueries = queryCache.getAll();
+        const allQueries: QueryCacheEntry[] = queryCache.getAll();
         const queries = allQueries
-          .filter((entry) => entry.state.data !== undefined)
-          .map((entry) => ({
-            queryKey: entry.queryKey,
-            queryHash: JSON.stringify(entry.queryKey),
-            state: {
-              data: entry.state.data,
-              dataUpdatedAt: entry.state.dataUpdatedAt,
-              error: entry.state.error,
-              errorUpdatedAt: entry.state.errorUpdatedAt,
-              fetchFailureCount: entry.state.fetchFailureCount,
-              fetchFailureReason: null,
-              fetchMeta: null,
-              fetchStatus: entry.state.fetchStatus,
-              isInvalidated: entry.state.isInvalidated,
-              status: entry.state.status,
-            },
-          }));
+          .filter(
+            (entry): entry is QueryCacheEntry & { state: QueryState & { data: unknown } } =>
+              entry.state.data !== undefined,
+          )
+          .map(
+            (entry: QueryCacheEntry): PersistedQuery => ({
+              queryKey: entry.queryKey,
+              queryHash: JSON.stringify(entry.queryKey),
+              state: {
+                data: entry.state.data,
+                dataUpdatedAt: entry.state.dataUpdatedAt,
+                error: entry.state.error,
+                errorUpdatedAt: entry.state.errorUpdatedAt,
+                fetchFailureCount: entry.state.fetchFailureCount,
+                fetchFailureReason: null,
+                fetchMeta: null,
+                fetchStatus: entry.state.fetchStatus,
+                isInvalidated: entry.state.isInvalidated,
+                status: entry.state.status,
+              },
+            }),
+          );
 
         persister.persistClient({
           timestamp: Date.now(),
@@ -272,7 +224,23 @@ function useQueryPersistence(environment: ClientEnvironment): void {
     return (): void => {
       unsubscribe?.();
     };
-  }, [queryCache]);
+  }, [queryCache, maxAge, throttleTime, persister]);
+}
+
+/**
+ * useAuthInitialization - Restores authentication session on app mount
+ *
+ * Calls auth.initialize() which:
+ * - Attempts to restore session from HTTP-only refresh token cookie
+ * - Updates auth state if session is valid
+ * - Handles session expiration gracefully
+ */
+function useAuthInitialization(environment: ClientEnvironment): void {
+  const { auth } = environment;
+
+  useEffect(() => {
+    void auth.initialize();
+  }, [auth]);
 }
 
 /**
@@ -293,6 +261,9 @@ export const App = ({ environment }: AppProps): ReactElement => {
   // Start background cache restoration (non-blocking)
   useQueryPersistence(environment);
 
+  // Restore authentication session from cookies
+  useAuthInitialization(environment);
+
   return (
     <ErrorBoundary>
       <QueryCacheProvider cache={environment.queryCache}>
@@ -301,14 +272,12 @@ export const App = ({ environment }: AppProps): ReactElement => {
             <ClientEnvironmentProvider value={environment}>
               <HistoryProvider>
                 <LiveRegion>
-                  <div className="h-screen">
+                  <div className="h-screen flex flex-col overflow-hidden">
                     <SkipLink />
-                    <ScrollArea className="h-full">
-                      <div id="main-content">
-                        <RouteFocusAnnouncer />
-                        <AppRoutes />
-                      </div>
-                    </ScrollArea>
+                    <RouteFocusAnnouncer />
+                    <div className="flex-1 min-h-0 relative">
+                      <AppRoutes />
+                    </div>
                     <AppToaster />
                   </div>
                 </LiveRegion>

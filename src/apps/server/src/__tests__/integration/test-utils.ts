@@ -6,7 +6,7 @@
  * integration testing with fastify.inject().
  */
 
-import { RateLimiter } from '@abe-stack/db';
+import { RateLimiter } from '@abe-stack/server-engine';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 

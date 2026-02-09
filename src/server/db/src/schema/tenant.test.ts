@@ -1,4 +1,4 @@
-// backend/db/src/schema/tenant.test.ts
+// src/server/db/src/schema/tenant.test.ts
 /**
  * Unit tests for tenant schema type definitions
  *

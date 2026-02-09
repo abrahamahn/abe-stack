@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/components/SecurityEventCard.tsx
+// src/apps/web/src/features/admin/components/SecurityEventCard.tsx
 /**
  * SecurityEventCard Component
  *

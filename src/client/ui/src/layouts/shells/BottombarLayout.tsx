@@ -1,4 +1,4 @@
-// client/ui/src/layouts/shells/BottombarLayout.tsx
+// src/client/ui/src/layouts/shells/BottombarLayout.tsx
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 import '../../styles/layouts.css';
 

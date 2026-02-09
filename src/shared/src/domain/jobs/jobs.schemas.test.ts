@@ -1,4 +1,4 @@
-// shared/src/domain/jobs/jobs.schemas.test.ts
+// src/shared/src/domain/jobs/jobs.schemas.test.ts
 
 /**
  * @file Jobs Schema Tests
@@ -435,14 +435,21 @@ describe('updateJobSchema', () => {
 
 describe('JOB_STATUSES', () => {
   it('should contain all expected statuses in lifecycle order', () => {
-    expect(JOB_STATUSES).toEqual(['pending', 'processing', 'completed', 'failed', 'dead']);
+    expect(JOB_STATUSES).toEqual([
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'dead_letter',
+      'cancelled',
+    ]);
   });
 
   it('should be readonly (as const)', () => {
     // TypeScript enforces readonly via 'as const', not Object.freeze
     // Verify it's an array with correct values
     expect(Array.isArray(JOB_STATUSES)).toBe(true);
-    expect(JOB_STATUSES.length).toBe(5);
+    expect(JOB_STATUSES.length).toBe(6);
   });
 });
 

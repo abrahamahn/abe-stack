@@ -1,4 +1,4 @@
-// client/ui/src/hooks/useOnScreen.ts
+// src/client/react/src/hooks/useOnScreen.ts
 import { useEffect, useState, type RefObject } from 'react';
 
 /**

@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/useJobActions.ts
+// src/apps/web/src/features/admin/hooks/useJobActions.ts
 /**
  * useJobActions hook
  *

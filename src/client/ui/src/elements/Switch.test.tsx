@@ -1,4 +1,4 @@
-// client/ui/src/elements/Switch.test.tsx
+// src/client/ui/src/elements/Switch.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

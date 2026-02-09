@@ -1,4 +1,4 @@
-// packages/shared/src/utils/search/schemas.ts
+// src/shared/src/utils/search/schemas.ts
 /**
  * Search & Filtering Validation Schemas
  *
@@ -6,7 +6,7 @@
  * Used for API validation and type inference.
  */
 
-import { createSchema, type Schema } from '../../contracts';
+import { createSchema } from '../../core/schema.utils';
 
 import { FILTER_OPERATORS, LOGICAL_OPERATORS, SORT_ORDER } from './types';
 
@@ -30,6 +30,7 @@ import type {
   SortConfig,
   SortOrder,
 } from './types';
+import type { Schema } from '../../core/api';
 
 // ============================================================================
 // Filter Operator Schemas

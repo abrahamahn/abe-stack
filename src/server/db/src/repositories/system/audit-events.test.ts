@@ -1,4 +1,4 @@
-// backend/db/src/repositories/system/audit-events.test.ts
+// src/server/db/src/repositories/system/audit-events.test.ts
 /**
  * Tests for Audit Events Repository
  *

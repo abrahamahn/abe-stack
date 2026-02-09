@@ -1,4 +1,4 @@
-// backend/core/src/admin/billingService.ts
+// src/server/core/src/admin/billingService.ts
 /**
  * Admin Billing Service
  *
@@ -10,7 +10,12 @@ import {
   PlanNotFoundError,
 } from '@abe-stack/shared';
 
-import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
+import type {
+  Plan as DbPlan,
+  PlanFeature,
+  PlanRepository,
+  SubscriptionRepository,
+} from '@abe-stack/db';
 import type { BillingService, CreateProductParams } from '@abe-stack/shared';
 
 // ============================================================================
@@ -28,7 +33,7 @@ export interface CreatePlanParams {
   interval: 'month' | 'year';
   priceInCents: number;
   currency?: string | undefined;
-  features?: { name: string; included: boolean; description?: string | undefined }[] | undefined;
+  features?: PlanFeature[] | undefined;
   trialDays?: number | undefined;
   isActive?: boolean | undefined;
   sortOrder?: number | undefined;
@@ -40,7 +45,7 @@ export interface UpdatePlanParams {
   interval?: 'month' | 'year' | undefined;
   priceInCents?: number | undefined;
   currency?: string | undefined;
-  features?: { name: string; included: boolean; description?: string | undefined }[] | undefined;
+  features?: PlanFeature[] | undefined;
   trialDays?: number | undefined;
   isActive?: boolean | undefined;
   sortOrder?: number | undefined;
@@ -114,7 +119,7 @@ export async function updatePlan(
     interval?: 'month' | 'year';
     priceInCents?: number;
     currency?: string;
-    features?: { name: string; included: boolean; description?: string | undefined }[];
+    features?: PlanFeature[];
     trialDays?: number;
     isActive?: boolean;
     sortOrder?: number;

@@ -1,4 +1,4 @@
-// apps/web/src/features/billing/pages/PricingPage.tsx
+// src/apps/web/src/features/billing/pages/PricingPage.tsx
 /**
  * PricingPage - Public pricing page with plan selection.
  */

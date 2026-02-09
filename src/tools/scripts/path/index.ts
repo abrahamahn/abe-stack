@@ -1,4 +1,4 @@
-// tools/scripts/path/index.ts
+// src/tools/scripts/path/index.ts
 /**
  * Path export scripts for generating project file listings
  *

@@ -1,4 +1,4 @@
-// packages/shared/src/domain/jobs/jobs.logic.test.ts
+// src/shared/src/domain/jobs/jobs.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './jobs.logic';
@@ -18,8 +18,12 @@ describe('jobs.logic', () => {
       expect(isTerminalStatus('failed')).toBe(true);
     });
 
-    it('returns true for "dead"', () => {
-      expect(isTerminalStatus('dead')).toBe(true);
+    it('returns true for "dead_letter"', () => {
+      expect(isTerminalStatus('dead_letter')).toBe(true);
+    });
+
+    it('returns true for "cancelled"', () => {
+      expect(isTerminalStatus('cancelled')).toBe(true);
     });
 
     it('returns false for "pending"', () => {
@@ -31,9 +35,16 @@ describe('jobs.logic', () => {
     });
 
     it('identifies all terminal statuses correctly', () => {
-      const allStatuses: JobStatus[] = ['pending', 'processing', 'completed', 'failed', 'dead'];
+      const allStatuses: JobStatus[] = [
+        'pending',
+        'processing',
+        'completed',
+        'failed',
+        'dead_letter',
+        'cancelled',
+      ];
       const terminal = allStatuses.filter(isTerminalStatus);
-      expect(terminal).toEqual(['completed', 'failed', 'dead']);
+      expect(terminal).toEqual(['completed', 'failed', 'dead_letter', 'cancelled']);
     });
   });
 
@@ -60,11 +71,11 @@ describe('jobs.logic', () => {
     it('returns false when status is terminal even with retries remaining', () => {
       expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'completed' })).toBe(false);
       expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'failed' })).toBe(false);
-      expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'dead' })).toBe(false);
+      expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'dead_letter' })).toBe(false);
     });
 
     it('returns false when both conditions fail', () => {
-      expect(canRetry({ attempts: 3, maxAttempts: 3, status: 'dead' })).toBe(false);
+      expect(canRetry({ attempts: 3, maxAttempts: 3, status: 'dead_letter' })).toBe(false);
     });
   });
 
@@ -94,7 +105,7 @@ describe('jobs.logic', () => {
       expect(shouldProcess({ status: 'processing', scheduledAt: past })).toBe(false);
       expect(shouldProcess({ status: 'completed', scheduledAt: past })).toBe(false);
       expect(shouldProcess({ status: 'failed', scheduledAt: past })).toBe(false);
-      expect(shouldProcess({ status: 'dead', scheduledAt: past })).toBe(false);
+      expect(shouldProcess({ status: 'dead_letter', scheduledAt: past })).toBe(false);
     });
   });
 
