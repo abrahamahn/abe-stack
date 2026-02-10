@@ -2,7 +2,7 @@
 
 **Last Updated: February 10, 2026**
 
-Weekly changelog files for the ABE Stack project. This replaces the previous monolithic `CHANGELOG.md`.
+Weekly and monthly changelog files for the ABE Stack project. This replaces the previous monolithic `CHANGELOG.md`.
 
 ---
 
@@ -17,6 +17,15 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 | [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue                  |
 | [W02](./2026-W02.md) | Jan 6-12  | Build tooling, codebase simplification                                                 |
 | [W01](./2026-W01.md) | Jan 1-5   | File reorganization, initial setup                                                     |
+
+---
+
+## Monthly Logs (2026)
+
+| Month                | Summary                                                                  |
+| -------------------- | ------------------------------------------------------------------------ |
+| [M01](./2026-M01.md) | January: platform foundation, architecture extraction, test expansion    |
+| [M02](./2026-M02.md) | February: CI/CD hardening, workflow stabilization, quality gate recovery |
 
 ---
 
