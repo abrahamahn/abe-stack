@@ -23,6 +23,14 @@ on:
         description: 'Docker image tag to deploy (leave empty for latest commit SHA)'
         required: false
         type: string
+      instance_ip:
+        description: 'Optional target server IP (used if deployment artifact is unavailable)'
+        required: false
+        type: string
+      domain:
+        description: 'Optional domain override (used if deployment artifact is unavailable)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -51,18 +59,38 @@ jobs:
         id: get-deployment-info
         run: |
           DEPLOY_FILE=".deploy/${{ inputs.environment }}-${{ inputs.provider }}.json"
+          MANUAL_INSTANCE_IP="${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || '' }}"
+          MANUAL_DOMAIN="${{ inputs.domain || vars.DOMAIN || '' }}"
 
-          if [ ! -f "$DEPLOY_FILE" ]; then
+          if [ -f "$DEPLOY_FILE" ]; then
+            echo "📋 Found deployment info for ${{ inputs.environment }} on ${{ inputs.provider }}"
+            INFO_SOURCE="artifact"
+
+            INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
+            SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
+            DOMAIN=$(jq -r '.domain // empty' "$DEPLOY_FILE")
+          elif [ -n "$MANUAL_INSTANCE_IP" ]; then
+            echo "⚠️ Deployment artifact not found. Falling back to manual instance IP."
+            INFO_SOURCE="manual"
+
+            INSTANCE_IP="$MANUAL_INSTANCE_IP"
+            SSH_CONNECTION="ssh ${{ vars.SSH_USERNAME || 'root' }}@$MANUAL_INSTANCE_IP"
+            DOMAIN="$MANUAL_DOMAIN"
+          else
             echo "❌ Deployment info not found for ${{ inputs.environment }} on ${{ inputs.provider }}."
-            echo "Please ensure the 'Infrastructure Deploy' workflow has been run successfully for this environment and provider."
+            echo "Provide workflow input 'instance_ip' (or repository variable INSTANCE_IP/DEPLOY_HOST),"
+            echo "or run 'Infrastructure Deploy' first to generate deployment-info artifact."
             exit 1
           fi
 
-          echo "📋 Found deployment info for ${{ inputs.environment }} on ${{ inputs.provider }}"
+          if [ -z "$INSTANCE_IP" ] || [ "$INSTANCE_IP" = "N/A" ]; then
+            echo "❌ Instance IP is empty."
+            exit 1
+          fi
 
-          INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
-          SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
-          DOMAIN=$(jq -r '.domain // empty' "$DEPLOY_FILE")
+          if [ -z "$DOMAIN" ] || [ "$DOMAIN" = "N/A" ]; then
+            DOMAIN="$INSTANCE_IP"
+          fi
 
           echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
           echo "ssh_connection=$SSH_CONNECTION" >> $GITHUB_OUTPUT
@@ -72,6 +100,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Info Source:** $INFO_SOURCE" >> $GITHUB_STEP_SUMMARY
           echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
           echo "**Domain:** $DOMAIN" >> $GITHUB_STEP_SUMMARY
           echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
@@ -141,7 +170,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./config/docker/Dockerfile
+          file: ./infra/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}-api
           labels: ${{ steps.meta.outputs.labels }}
@@ -152,7 +181,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./config/docker/Dockerfile.web
+          file: ./infra/docker/Dockerfile.web
           push: true
           tags: ${{ steps.meta.outputs.tags }}-web
           labels: ${{ steps.meta.outputs.labels }}
@@ -194,11 +223,11 @@ jobs:
 
             # Download docker-compose.prod.yml
             echo "📦 Downloading production docker-compose file..."
-            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/config/docker/docker-compose.prod.yml" -o docker-compose.prod.yml
+            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/infra/docker/production/docker-compose.prod.yml" -o docker-compose.prod.yml
 
             # Download Caddyfile
             echo "🔐 Downloading Caddyfile..."
-            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/config/caddy/Caddyfile" -o Caddyfile
+            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/infra/runtime/caddy/Caddyfile" -o Caddyfile
 
             # Create environment file
             echo "⚙️ Creating environment configuration..."
@@ -296,15 +325,22 @@ jobs:
       - name: Verify Deployment
         run: |
           echo "🔍 Verifying deployment..."
+          TARGET="${{ needs.get-infrastructure-info.outputs.domain }}"
+          HEALTH_URL="https://$TARGET/health"
 
           # Wait a moment for DNS propagation if needed
           sleep 10
 
           # Test health endpoint
-          if curl -f -s "https://${{ needs.get-infrastructure-info.outputs.domain }}/health" > /dev/null; then
+          if curl -f -s "$HEALTH_URL" > /dev/null; then
             echo "✅ Application health check passed"
           else
-            echo "⚠️ Health check failed - this might be normal if DNS hasn't propagated yet"
+            FALLBACK_URL="http://$TARGET/health"
+            if curl -f -s "$FALLBACK_URL" > /dev/null; then
+              echo "✅ Application health check passed over HTTP fallback"
+            else
+              echo "⚠️ Health check failed on both HTTPS and HTTP"
+            fi
           fi
 
       - name: Deployment Summary

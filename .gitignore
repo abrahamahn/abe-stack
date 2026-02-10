@@ -88,6 +88,7 @@ Thumbs.db
 
 # Uploads
 .data/
+src/apps/server/uploads/
 
 # Temporary export files
 .tmp/
