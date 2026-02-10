@@ -11,7 +11,89 @@
  * through the public interface testing.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('stripe', () => {
+  class MockStripe {
+    public readonly customers = {
+      create: vi.fn(() => Promise.resolve({ id: 'cus_test_123' })),
+      retrieve: vi.fn(() =>
+        Promise.resolve({
+          deleted: false,
+          invoice_settings: { default_payment_method: 'pm_test_123' },
+        }),
+      ),
+      update: vi.fn(() => Promise.resolve({})),
+    };
+
+    public readonly checkout = {
+      sessions: {
+        create: vi.fn(() =>
+          Promise.resolve({ id: 'cs_test_123', url: 'https://checkout.stripe.test' }),
+        ),
+      },
+    };
+
+    public readonly subscriptions = {
+      cancel: vi.fn(() => Promise.resolve({})),
+      update: vi.fn(() => Promise.resolve({})),
+      retrieve: vi.fn(() =>
+        Promise.resolve({
+          id: 'sub_test_123',
+          customer: 'cus_test_123',
+          status: 'active',
+          start_date: 1_700_000_000,
+          cancel_at_period_end: false,
+          canceled_at: null,
+          trial_end: null,
+          metadata: {},
+          items: {
+            data: [
+              {
+                id: 'si_test_123',
+                price: { id: 'price_test_123' },
+                current_period_start: 1_700_000_000,
+                current_period_end: 1_700_086_400,
+              },
+            ],
+          },
+        }),
+      ),
+    };
+
+    public readonly setupIntents = {
+      create: vi.fn(() => Promise.resolve({ client_secret: 'seti_test_secret' })),
+    };
+
+    public readonly paymentMethods = {
+      list: vi.fn(() => Promise.resolve({ data: [] })),
+      attach: vi.fn(() => Promise.resolve({})),
+      detach: vi.fn(() => Promise.resolve({})),
+    };
+
+    public readonly invoices = {
+      list: vi.fn(() => Promise.resolve({ data: [] })),
+    };
+
+    public readonly products = {
+      create: vi.fn(() => Promise.resolve({ id: 'prod_test_123' })),
+      update: vi.fn(() => Promise.resolve({})),
+    };
+
+    public readonly prices = {
+      create: vi.fn(() => Promise.resolve({ id: 'price_test_123' })),
+      update: vi.fn(() => Promise.resolve({})),
+    };
+
+    public readonly webhooks = {
+      constructEvent: vi.fn(() => {
+        throw new Error('Invalid signature');
+      }),
+    };
+  }
+
+  return { default: MockStripe };
+});
 
 import { StripeProvider } from './stripe-provider';
 
