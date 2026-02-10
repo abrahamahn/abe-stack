@@ -21,9 +21,13 @@ export function useOnScreen<T extends HTMLElement>(
       return;
     }
 
-    const observer = new IntersectionObserver(([entry]) => {
+    const callback: IntersectionObserverCallback = ([entry]) => {
       setIsVisible(entry?.isIntersecting ?? false);
-    }, options);
+    };
+    const observer =
+      options !== undefined
+        ? new IntersectionObserver(callback, options)
+        : new IntersectionObserver(callback);
 
     observer.observe(element);
 

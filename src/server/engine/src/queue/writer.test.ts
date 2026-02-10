@@ -104,7 +104,7 @@ function createServiceOptions(overrides: Partial<WriteServiceOptions> = {}): Wri
   };
 
   // Conditionally add log if not in overrides
-  if (overrides.log === undefined && mockLogger !== undefined) {
+  if (overrides.log === undefined) {
     base.log = mockLogger as unknown as Logger;
   }
 

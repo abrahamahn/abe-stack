@@ -52,10 +52,10 @@ function parseOutput(fullLog: string) {
 
   // Regex to match standard ESLint summary line: "✖ 1377 problems (1377 errors, 0 warnings)"
   // Format may vary slightly by ESLint version or formatter, but this is standard.
-  const eslintRegex = /✖ (\d+) problems \((\d+) errors, (\d+) warnings\)/g;
+  const ESLINT_REGEX = /✖ (\d+) problems \((\d+) errors, (\d+) warnings\)/;
 
   // Regex for TSC: "Found 12 errors." or "Found 1 error."
-  const tscRegex = /Found (\d+) error/;
+  const TSC_REGEX = /Found (\d+) error/;
 
   // We need to associate errors with packages.
   // Turbo output prefixes lines with package name colorfully, e.g. "@abe-stack/server:lint: ..."
@@ -129,7 +129,7 @@ function parseOutput(fullLog: string) {
     }
 
     // ESLint check
-    const eslintMatch = new RegExp(/✖ (\d+) problems \((\d+) errors, (\d+) warnings\)/).exec(line);
+    const eslintMatch = ESLINT_REGEX.exec(line);
     if (eslintMatch) {
       const errors = parseInt(eslintMatch[2], 10);
       const warnings = parseInt(eslintMatch[3], 10);
@@ -144,7 +144,7 @@ function parseOutput(fullLog: string) {
 
     // TSC check
     // TSC output is often multi-line, but the summary "Found X errors" is usually printed at the end of that package's stream.
-    const tscMatch = new RegExp(/Found (\d+) error/).exec(line);
+    const tscMatch = TSC_REGEX.exec(line);
     if (tscMatch) {
       const errors = parseInt(tscMatch[1], 10);
       totalTypeErrors += errors;

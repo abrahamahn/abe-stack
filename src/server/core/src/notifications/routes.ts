@@ -89,7 +89,7 @@ function notificationPublicRoute<TBody>(
   handler: NotificationHandler<TBody>,
   schema?: ValidationSchema<TBody>,
 ): RouteDefinition {
-  const routeDef: RouteDefinition = {
+  const baseRoute: RouteDefinition = {
     method,
     isPublic: true,
     handler: (
@@ -107,11 +107,7 @@ function notificationPublicRoute<TBody>(
     },
   };
 
-  if (schema !== undefined) {
-    routeDef.schema = schema;
-  }
-
-  return routeDef;
+  return schema === undefined ? baseRoute : { ...baseRoute, schema };
 }
 
 /**
@@ -134,7 +130,7 @@ function notificationProtectedRoute<TBody>(
   roles: string[] = [],
   schema?: ValidationSchema<TBody>,
 ): RouteDefinition {
-  const routeDef: RouteDefinition = {
+  const baseRoute: RouteDefinition = {
     method,
     isPublic: false,
     handler: (
@@ -153,11 +149,7 @@ function notificationProtectedRoute<TBody>(
     roles,
   };
 
-  if (schema !== undefined) {
-    routeDef.schema = schema;
-  }
-
-  return routeDef;
+  return schema === undefined ? baseRoute : { ...baseRoute, schema };
 }
 
 // ============================================================================

@@ -61,13 +61,13 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
     const pageParam = getParam(paramNames.page);
     const hasCursor = cursorParam !== undefined;
 
-    let paginationType: 'offset' | 'cursor' = 'offset';
     let offsetOptions: PaginationOptions | undefined;
     let cursorOptions: CursorPaginationOptions | undefined;
 
-    if (hasCursor && config.enableCursorPagination) {
-      paginationType = 'cursor';
+    const paginationType: 'offset' | 'cursor' =
+      hasCursor && config.enableCursorPagination ? 'cursor' : 'offset';
 
+    if (paginationType === 'cursor') {
       const cursor = Array.isArray(cursorParam) ? cursorParam[0] : cursorParam;
 
       const limit = parseLimit(getParam(paramNames.limit), config);
@@ -83,8 +83,6 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
         cursorOptions.cursor = cursor;
       }
     } else {
-      paginationType = 'offset';
-
       const page = parsePage(pageParam);
       const limit = parseLimit(getParam(paramNames.limit), config);
       const sortBy = parseSortBy(getParam(paramNames.sortBy), config);

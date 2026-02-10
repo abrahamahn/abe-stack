@@ -43,7 +43,6 @@ export class SubscriptionExistsError extends ConflictError {
 
 export { SubscriptionExistsError as PushSubscriptionExistsError };
 export { SubscriptionNotFoundError as PushSubscriptionNotFoundError };
-export { ProviderNotConfiguredError as PushProviderNotConfiguredError };
 
 /**
  * Invalid push subscription data
@@ -133,6 +132,8 @@ export class ProviderNotConfiguredError extends AppError {
     );
   }
 }
+
+export { ProviderNotConfiguredError as PushProviderNotConfiguredError };
 
 /**
  * Push notification provider error

@@ -27,7 +27,7 @@ const TestConsumer = (): ReactNode => {
         : JSON.stringify(queryData);
   return (
     <div>
-      <span data-testid="cache-exists">{cache !== null ? 'true' : 'false'}</span>
+      <span data-testid="cache-exists">{'true'}</span>
       <span data-testid="cache-size">{cache.size}</span>
       <span data-testid="query-data">{queryDataDisplay}</span>
     </div>

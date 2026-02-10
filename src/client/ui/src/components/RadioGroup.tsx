@@ -97,7 +97,7 @@ export const RadioGroup = (props: RadioGroupProps): ReactElement => {
     // If focus is on a disabled item (which shouldn't happen easily with tab index), we might be in a weird state.
     // For now, let's proceed with finding the next/prev in the enabled list.
 
-    let nextIndex = currentIndex;
+    let nextIndex: number;
 
     switch (event.key) {
       case 'ArrowDown':

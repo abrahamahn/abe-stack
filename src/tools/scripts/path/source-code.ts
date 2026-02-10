@@ -110,7 +110,7 @@ function groupByTopLevel(files: string[]): Map<string, string[]> {
 
   for (const file of files) {
     const parts = file.split(path.sep);
-    let key = 'Other';
+    let key: string;
 
     if (parts.length === 1) {
       key = 'Root';
@@ -120,8 +120,6 @@ function groupByTopLevel(files: string[]): Map<string, string[]> {
         parts[1] === 'shared' || parts[1] === 'tools'
           ? `src/${parts[1]}`
           : `src/${parts[1]}/${parts[2]}`;
-    } else if (parts[0] === 'docs' || parts[0] === 'infra' || parts[0] === 'config') {
-      key = parts[0];
     } else {
       key = parts[0];
     }
