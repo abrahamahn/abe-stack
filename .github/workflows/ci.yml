@@ -101,7 +101,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check file headers
-        run: pnpm sync:headers:check
+        run: pnpm -w run sync:headers:check
 
       - name: Cache Turbo
         uses: actions/cache@v4
@@ -156,8 +156,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check file headers
-        run: pnpm sync:headers:check
+      - name: Run CI Verify (headers + build + tests)
+        run: pnpm ci:verify
 
       - name: Cache Turbo
         uses: actions/cache@v4
@@ -166,9 +166,6 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
-
-      - name: Run Full Build and Verification Pipeline
-        run: pnpm build
 
   docker-build-publish:
     runs-on: ubuntu-latest

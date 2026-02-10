@@ -10,6 +10,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -131,6 +132,40 @@ function syncAll(checkOnly: boolean): { ok: SyncResult[]; updated: SyncResult[] 
   };
 }
 
+function getStagedFiles(): string[] {
+  try {
+    const output = execSync('git diff --cached --name-only --diff-filter=ACMR', {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+
+    return output
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== '')
+      .map((relativePath) => path.join(ROOT, relativePath))
+      .filter((fullPath) => fs.existsSync(fullPath) && fs.statSync(fullPath).isFile());
+  } catch {
+    return [];
+  }
+}
+
+function syncFiles(
+  files: string[],
+  checkOnly: boolean,
+): { ok: SyncResult[]; updated: SyncResult[] } {
+  const results: SyncResult[] = [];
+  for (const file of files) {
+    results.push(syncFile(file, checkOnly));
+  }
+
+  return {
+    ok: results.filter((r) => r.status === 'ok'),
+    updated: results.filter((r) => r.status === 'updated'),
+  };
+}
+
 function watchFiles(): void {
   log('Watching for file changes...\n');
   syncAll(false);
@@ -160,6 +195,7 @@ function watchFiles(): void {
 function main(): void {
   const checkOnly = process.argv.includes('--check');
   const watch = process.argv.includes('--watch');
+  const stagedOnly = process.argv.includes('--staged');
 
   if (watch) {
     watchFiles();
@@ -167,7 +203,7 @@ function main(): void {
   }
 
   log(checkOnly ? 'Checking file headers...\n' : 'Syncing file headers...\n');
-  const { ok, updated } = syncAll(checkOnly);
+  const { ok, updated } = stagedOnly ? syncFiles(getStagedFiles(), checkOnly) : syncAll(checkOnly);
 
   if (checkOnly) {
     if (updated.length > 0) {
@@ -193,6 +229,11 @@ function main(): void {
     if (updated.length > 10) {
       log(`  ... and ${String(updated.length - 10)} more`);
     }
+  }
+
+  if (stagedOnly && !checkOnly && updated.length > 0) {
+    const filesToStage = updated.map((item) => `"${item.path}"`).join(' ');
+    execSync(`git add ${filesToStage}`, { cwd: ROOT, stdio: 'pipe' });
   }
 
   log(`\n✓ ${String(ok.length + updated.length)} files synced (${String(updated.length)} updated)`);
