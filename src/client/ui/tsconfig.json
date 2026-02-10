@@ -8,6 +8,12 @@
     "baseUrl": "./",
     "types": ["react", "react-dom", "vitest/globals", "@testing-library/jest-dom", "node"],
     "paths": {
+      "@abe-stack/shared": ["../../shared/src/index.ts"],
+      "@abe-stack/shared/*": ["../../shared/src/*"],
+      "@abe-stack/client-engine": ["../engine/src/index.ts"],
+      "@abe-stack/client-engine/*": ["../engine/src/*"],
+      "@abe-stack/react": ["../react/src/index.ts"],
+      "@abe-stack/react/*": ["../react/src/*"],
       "@components": ["./src/components"],
       "@components/*": ["./src/components/*"],
       "@containers": ["./src/layouts/containers"],

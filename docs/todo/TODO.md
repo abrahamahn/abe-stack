@@ -325,6 +325,356 @@ Goal: verify the auth/security persistence layer and repos match the promised fl
 - [ ] Desktop dev starts and loads renderer
 - [ ] Basic IPC handlers do not crash on startup
 
+### Account Management Verification (CHECKLIST 3)
+
+#### Verify Username Auto-Generation (3.2)
+
+- [ ] `core/auth/utils/username.ts` exists and exports username generation function
+- [ ] Registration creates a username from email automatically
+- [ ] Tests: username generation tests pass (edge cases: special chars, long emails, duplicates)
+
+#### Verify Avatar Workflow — Existing Parts (3.3)
+
+- [ ] Handler: `core/users/handlers/avatar.ts` exists and handles upload logic
+- [ ] Client: `AvatarUpload.tsx` + `useAvatarUpload.ts` exist in `apps/web/src/features/settings/`
+- [ ] Upload → validate → resize pipeline works (handler exists, verify full chain)
+- [ ] Tests: avatar handler tests pass
+
+#### Verify Profile — Existing Parts (3.4)
+
+- [ ] Server: `GET /api/users/me` returns current user profile with expected fields
+- [ ] Client: `ProfileForm.tsx` renders and submits (even if limited fields)
+- [ ] Tests: profile endpoint tests pass
+
+#### Verify Account Locking (3.6)
+
+- [ ] Server: `POST /api/admin/users/:id/lock` blocks subsequent login
+- [ ] Server: `POST /api/admin/users/:id/unlock` restores login ability
+- [ ] Server: `isAccountLocked()` check runs on every login attempt
+- [ ] Tests: lock/unlock behavior tests pass
+
+### Tenant Scoping Utilities Verification (CHECKLIST 4.9)
+
+- [ ] `WORKSPACE_ID_HEADER` / `WORKSPACE_ROLE_HEADER` constants exported from shared
+- [ ] `getWorkspaceContext()` reads headers correctly
+- [ ] `assertWorkspaceScope()` throws `WorkspaceScopeError` (or equivalent) when missing
+- [ ] Tests: workspace context utilities compile and pass
+
+### RBAC Existing Enforcement Verification (CHECKLIST 5.2–5.3)
+
+#### Verify Backend Guards (5.2)
+
+- [ ] `protectedRoute()` / `publicRoute()` helpers work (protected rejects 401, public allows)
+- [ ] `createRequireRole()` checks JWT role field correctly
+- [ ] `adminProtectedRoute()` rejects non-admin users with 403
+- [ ] Permission checker (`server-engine/security/permissions/checker.ts`) evaluates batch permissions
+- [ ] Tests: route guard tests pass, permission checker tests pass
+
+#### Verify ProtectedRoute Component (5.3)
+
+- [ ] `ProtectedRoute.tsx` renders children when authenticated
+- [ ] `ProtectedRoute.tsx` redirects to login when unauthenticated
+- [ ] Tests: ProtectedRoute tests pass (in `client/ui/layouts/layers/`)
+
+### Module 3 Verification: Billing DB (Appendix A)
+
+- [ ] `plans` — migration 0003, schema constant, repo CRUD
+- [ ] `subscriptions` — migration 0003, schema constant, repo CRUD
+- [ ] `customer_mappings` — migration 0003, schema constant, repo CRUD
+- [ ] `invoices` — migration 0003, schema constant, repo CRUD
+- [ ] `payment_methods` — migration 0003, schema constant, repo CRUD
+- [ ] `billing_events` — migration 0003, schema constant, repo CRUD
+- [ ] `pnpm db:audit` passes for billing tables
+
+### Module 4-9 Verification: Supporting DB (Appendix A)
+
+- [ ] `notifications` — migration 0004, schema, repo
+- [ ] `push_subscriptions` — migration 0004, schema, repo
+- [ ] `notification_preferences` — migration 0004, schema, repo
+- [ ] `jobs` — migration 0005, schema, repo
+- [ ] `audit_events` — migration 0005, schema, repo
+- [ ] `webhooks` — migration 0005, schema, repo
+- [ ] `webhook_deliveries` — migration 0005, schema, repo
+- [ ] `feature_flags` — migration 0006, schema, repo
+- [ ] `tenant_feature_overrides` — migration 0006, schema, repo
+- [ ] `usage_metrics` — migration 0007, schema, repo
+- [ ] `usage_snapshots` — migration 0007, schema, repo
+- [ ] `legal_documents` — migration 0008, schema, repo
+- [ ] `user_agreements` — migration 0008, schema, repo
+- [ ] `consent_logs` — migration 0008, schema, repo
+- [ ] `data_export_requests` — migration 0011, schema, repo
+- [ ] `files` — migration 0013, schema, repo
+- [ ] `email_templates` — migration 0014, schema, repo
+- [ ] `email_log` — migration 0014, schema, repo
+- [ ] `tenant_settings` — migration 0015, schema, repo
+- [ ] `activities` — migration 0016, schema, repo
+- [ ] `pnpm db:audit` passes for all supporting tables
+
+### Supporting Modules Verification (CHECKLIST 6)
+
+#### Verify API Keys DB Layer (6.1)
+
+- [ ] `api_keys` table: key_hash, scopes, tenant_id, expires_at, revoked_at columns exist
+- [ ] Repo: findByKeyHash, findByUserId, findByTenantId, create, revoke, updateLastUsedAt work
+- [ ] Domain: `shared/domain/api-keys/**` types/schemas compile
+- [ ] Tests: api-keys repo tests pass
+
+#### Verify Billing Infrastructure (6.2)
+
+- [ ] Admin plan CRUD: list, create, get, update, deactivate, sync-to-stripe endpoints reachable
+- [ ] Billing routes conditionally registered on `config.billing.enabled`
+- [ ] Webhook routes: Stripe + PayPal endpoints accept POST
+- [ ] Provider factory: `billing/factory.ts` returns correct provider for Stripe/PayPal
+- [ ] Entitlements domain logic: `billing.entitlements.ts` compiles and exports resolvers
+- [ ] Client UI: BillingSettingsPage, PricingPage, CheckoutSuccessPage, CheckoutCancelPage render
+- [ ] Client API: `billing/client.ts`, `admin.ts`, `hooks.ts` compile
+- [ ] Tests: billing handler/provider tests pass
+
+#### Verify Audit & Security Events (6.3)
+
+- [ ] Security events table: 18+ event types with severity levels exist
+- [ ] Event logging fires on: login, OAuth, lockout, TOTP (`core/auth/security/audit.ts`, `events.ts`)
+- [ ] Admin API: `GET /api/admin/security/events`, `/events/:id`, `/metrics`, `/events/export` reachable
+- [ ] General audit log: `audit_events` table + repo functional
+- [ ] Admin UI: SecurityEventsPage, SecurityEventDetailPage, SecurityEventsTable, SecurityEventsFilters, SecurityMetricsCard, SecurityEventCard, ExportDialog render
+- [ ] Hooks: useSecurityEvents, useSecurityMetrics, useSecurityEvent, useExportEvents compile
+- [ ] Tests: security event tests pass
+
+#### Verify Notifications Infrastructure (6.4)
+
+- [ ] `notifications` table + routes wired and reachable
+- [ ] `email_templates` + `email_log` tables + repos functional
+- [ ] Mailer module: client abstraction, SMTP transport, console provider (dev), template renderer all work
+- [ ] Notification service: `core/notifications/service.ts` + `handlers.ts` compile
+- [ ] Push provider: FCM provider + factory pattern compiles
+- [ ] Client API: `notifications/client.ts`, `hooks.ts` compile
+- [ ] Tests: notification service/handler tests pass
+
+#### Verify File Storage Infrastructure (6.5)
+
+- [ ] `files` table + repository functional
+- [ ] S3 storage provider (`server-engine/storage/providers/s3.ts`) compiles
+- [ ] Local storage provider works for dev
+- [ ] Presigned URL generation functional
+- [ ] Tests: storage provider tests pass
+
+#### Verify Activity Tracking DB (6.6)
+
+- [ ] `activities` table + repository functional
+- [ ] Domain logic compiles (even if partial)
+- [ ] Tests: activity repo tests pass
+
+#### Verify Feature Flags & Metering DB (6.7)
+
+- [ ] `feature_flags` + `tenant_feature_overrides` tables + repos functional
+- [ ] `usage_metrics` + `usage_snapshots` tables + repos functional
+- [ ] Tests: feature flag / metering repo tests pass
+
+#### Verify Compliance DB Layer (6.8)
+
+- [ ] `legal_documents`, `user_agreements`, `consent_logs` tables + repos functional
+- [ ] `data_export_requests` table + repo functional
+- [ ] Deletion domain logic: `deletion.logic.ts` + `deletion.schemas.ts` compile
+- [ ] Tests: compliance domain logic tests pass
+
+#### Verify Realtime Client (6.9)
+
+- [ ] Client: `RealtimeContext.tsx`, `SubscriptionCache.ts`, `WebsocketPubsubClient.ts` compile
+- [ ] Realtime hooks compile and export correctly
+- [ ] Tests: realtime client tests pass (if any exist)
+
+### Admin & Support Verification (CHECKLIST 7)
+
+#### Verify User Settings — Existing Parts (7.1)
+
+- [ ] Profile: `ProfileForm.tsx`, `AvatarUpload.tsx` + hooks render and submit
+- [ ] Security: `PasswordChangeForm.tsx` + `usePasswordChange.ts` render and submit
+- [ ] Sessions: `SessionsList.tsx`, `SessionCard.tsx`, `useSessions.ts` render
+- [ ] Connected accounts: `OAuthConnectionsList.tsx` renders
+- [ ] Tests: settings component tests pass
+
+#### Verify System Admin — Existing Parts (7.3)
+
+- [ ] User list: `UserTable`, `UserFilters`, `UserListPage` render with data
+- [ ] User detail: `UserDetailCard`, `UserDetailPage`, `UserActionsMenu` render
+- [ ] Lock/unlock: admin can lock/unlock from UI, state reflects in list
+- [ ] Security events: SecurityEventsPage, SecurityEventDetailPage, all 7 components render
+- [ ] Job monitor: `JobsTable`, `JobDetailsPanel`, `JobStatusBadge`, `JobActionsMenu`, `QueueStatsCard` render
+- [ ] Billing: `PlanManagementPage` renders with plan data
+- [ ] Admin layout: `AdminLayout.tsx` wraps admin pages correctly
+- [ ] Admin API: `adminApi.ts` methods compile and return typed responses
+- [ ] Role badge: `RoleBadge.tsx` renders correct labels per role
+- [ ] Tests: admin component/hook tests pass
+
+#### Verify Soft Ban (7.5)
+
+- [ ] `POST /api/admin/users/:id/lock` blocks login, preserves data
+- [ ] `POST /api/admin/users/:id/unlock` restores access
+- [ ] `isAccountLocked()` check fires during login flow
+- [ ] Tests: lock/unlock handler tests pass
+
+### Architecture & Infrastructure Verification (CHECKLIST 8)
+
+#### Verify Backend Core Infrastructure
+
+- [ ] Shared Zod schemas compile: `*.contracts.ts` across auth, billing, users, jobs, audit-log, admin
+- [ ] Shared config module: env.schema, env.parsers, auth-helpers + config types all tested and passing
+- [ ] Request/response validation at boundary works (Zod parse on ingress)
+- [ ] Route maps: auth, billing, users, admin, realtime, notifications all registered on server boot
+- [ ] Postgres: connection + pooling, SQL builder (conditions, CTE, select, insert, update, delete, window) functional
+- [ ] All 20 migrations apply cleanly in sequence
+- [ ] Seed scripts + bootstrap admin run without errors
+- [ ] DB utilities: optimistic locking, transaction management, factory pattern, PubSub functional
+- [ ] Tests: config, SQL builder, DB utility tests pass
+
+#### Verify Server Engine Adapters
+
+- [ ] Cache: config, factory, LRU, memory provider work; tests pass
+- [ ] Mailer: client abstraction, SMTP transport, console provider, template renderer work
+- [ ] Storage: S3 provider, local provider, presigned URLs, HTTP server work
+- [ ] Queue + jobs: write service, client, memory store work; tests pass
+- [ ] Search: SQL provider, factory, query builder work; tests pass
+- [ ] Config loader: `env.loader.ts` works
+- [ ] Logger: `logger.ts` outputs structured logs
+- [ ] Routing: `routing.ts` registers Fastify routes with Zod + native validation
+
+#### Verify Security Modules
+
+- [ ] Rate limiting: token-bucket with role-based presets works; tests pass
+- [ ] JWT: native HS256, timing-safe, secret rotation works; tests pass
+- [ ] CSRF: token generation, signing, encryption works
+- [ ] Argon2id: password hashing with auto-rehash works
+- [ ] Permissions: types, batch checker, Fastify preHandler middleware work; tests pass
+- [ ] CORS, security headers, Pino logging, correlation IDs all active on server boot
+
+#### Verify Server App Middleware
+
+- [ ] Cookie parsing, CSRF protection, correlation IDs, proxy validation, request info, security headers, static files, validation all registered
+- [ ] Plugin registration (`http/plugins.ts`) runs without errors
+- [ ] Server config factory produces valid config for all modules
+
+#### Verify Job Idempotency
+
+- [ ] Job idempotency keys prevent duplicate execution
+- [ ] Retries + backoff work as configured
+- [ ] Dead-letter queue captures failed jobs
+- [ ] Tests: job idempotency tests pass
+
+### Frontend Verification (CHECKLIST 8 Frontend)
+
+#### Verify Core UI
+
+- [ ] Shared component library renders: accessibility defaults (LiveRegion), theme system functional
+- [ ] Sidebar + topbar layout renders without errors
+- [ ] Error boundaries catch and display errors
+- [ ] Global toasts appear and dismiss
+- [ ] Custom router: BrowserRouter, MemoryRouter, Link, Route, Switch, hooks all work
+- [ ] State management: createStore, toastStore, undoRedoStore functional
+- [ ] Form utilities: useFormState, createFormHandler, Zod form resolver work
+- [ ] UI hooks: useVirtualScroll, usePaginatedQuery, useSidePeek, useKeyboardShortcuts work
+- [ ] Billing UI components: InvoiceRow, PaymentMethodCard, PlanCard, PricingTable, SubscriptionStatus render
+- [ ] Tests: all client/ui and client/react tests pass
+
+#### Verify Client Engine
+
+- [ ] Query system: useQuery, useMutation, useInfiniteQuery, QueryCache, QueryCacheProvider work
+- [ ] Record cache + loader cache functional
+- [ ] Offline-first: TransactionQueue, mutationQueue (IndexedDB) functional
+- [ ] Storage layer: RecordStorage, idb, queryPersister functional
+- [ ] Search: client-side query-builder, serialization, hooks compile
+- [ ] Undo/redo: UndoRedoStack functional
+- [ ] Tests: all client/engine tests pass
+
+#### Verify Client API
+
+- [ ] Core API client: fetch wrapper, interceptors, auth headers work
+- [ ] Billing API: client, admin, hooks compile and return typed responses
+- [ ] Notifications API: client, hooks compile
+- [ ] OAuth hooks compile
+- [ ] Error handling: errors.ts maps API errors correctly
+- [ ] Tests: client/api tests pass
+
+#### Verify PWA Support
+
+- [ ] Service worker (`public/sw.js`) registers without errors
+- [ ] Web manifest (`public/manifest.json`) is valid
+- [ ] Service worker registration utility works
+
+#### Verify Web App Features
+
+- [ ] `auth/` — Login, Register, ConfirmEmail, ForgotPassword, ResetPassword pages render and navigate
+- [ ] `settings/` — SettingsPage, ProfileForm, PasswordChangeForm, AvatarUpload, SessionsList, SessionCard, OAuthConnectionsList render; tests pass
+- [ ] `admin/` — UserListPage, UserDetailPage, PlanManagementPage, SecurityEventsPage, SecurityEventDetailPage render; 15 components + 12 hooks compile; tests pass
+- [ ] `billing/` — BillingSettingsPage, PricingPage, CheckoutSuccessPage, CheckoutCancelPage render
+- [ ] `dashboard/` — Dashboard page renders; test passes
+- [ ] `home/` — HomePage, DocViewer, NavList, TopBar, BottomBar, MainLayout render; tests pass
+- [ ] `ui-library/` — UILibraryPage, SidePeekUILibraryPage, ComponentList, PreviewArea, DocContent render; tests pass
+
+### Operational Quality Verification (CHECKLIST 10)
+
+- [ ] Health endpoints: `server-engine/system/health.ts` + `shared/utils/monitor/health.ts` exist and tests pass
+- [ ] Request correlation IDs: `correlationId.ts` middleware attaches IDs to requests
+- [ ] Verify correlation ID appears in log output
+
+### Login Attempt Logging Verification (CHECKLIST 11.4)
+
+- [ ] Login attempt logging (IP, user agent, success/fail) fires on every login
+- [ ] Logged data is queryable from `login_attempts` table
+- [ ] Tests: login attempt logging tests pass
+
+### Infrastructure & CI/CD Verification (CHECKLIST 13)
+
+#### Verify Containerization (13.1)
+
+- [ ] `Dockerfile` builds production image successfully
+- [ ] `Dockerfile.web` builds web production image successfully
+- [ ] `docker-compose.dev.yml` starts all services (Postgres, Redis, etc.)
+- [ ] `docker-compose.prod.yml` composition is valid
+- [ ] `nginx.conf` and Caddy configs are syntactically valid
+
+#### Verify Cloud Deployment (13.2)
+
+- [ ] DigitalOcean Terraform: `terraform validate` passes
+- [ ] GCP Terraform: `terraform validate` passes
+- [ ] Provider abstraction: `main.tf`, `providers.tf`, `variables.tf` valid
+- [ ] Deployment docs: all 9 guides in `docs/deploy/` are current and accurate
+
+#### Verify CI Pipelines (13.3)
+
+- [ ] `ci.yml` runs lint, type-check, test successfully
+- [ ] `deploy.yml` workflow is valid
+- [ ] `security.yml` scans run
+- [ ] `audit.yml` dependency audit runs
+- [ ] `rollback.yml` workflow is valid
+- [ ] `infra-deploy.yml`, `infra-destroy.yml`, `infra-test.yml` workflows valid
+
+#### Verify Dev Tooling (13.4)
+
+- [ ] Audit scripts: all 6 scripts run without errors
+- [ ] DB tools: bootstrap-admin, db-push, migrate, seed run successfully; tests pass
+- [ ] Dev automation: bootstrap, dev, run-tests, setup work
+- [ ] Git hooks: pre-commit, pre-push execute correctly
+- [ ] Sync tools: sync-css-theme, sync-file-headers, sync-ts-references run
+- [ ] Path tools: barrel generation, alias management work
+- [ ] Export tools: code export utilities work
+
+#### Verify Engine Queue/Job System (Appendix C)
+
+- [ ] `types.ts` — merged queue + write types compile
+- [ ] `client.ts` (QueueServer) — tested and functional
+- [ ] `writer.ts` (WriteService) — tested and functional
+- [ ] `memory-store.ts` — in-memory store works for dev/test
+- [ ] `index.ts` barrel — explicit named exports correct
+- [ ] Tests: queue/job system tests pass
+
+#### Verify Engine Search (Appendix C)
+
+- [ ] `types.ts` — provider interfaces compile
+- [ ] `query-builder.ts` — builds queries correctly
+- [ ] `sql-provider.ts` — Postgres full-text search works; tests pass
+- [ ] `factory.ts` — SearchProviderFactory singleton works; tests pass
+- [ ] `index.ts` barrel — explicit named exports correct
+
 ---
 
 The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **all** of CHECKLIST sections 1-13.
