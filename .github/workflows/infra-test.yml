@@ -1,4 +1,5 @@
 name: Infrastructure Test
+run-name: Infrastructure Test (${{ github.ref_name }})
 
 on:
   push:
@@ -24,6 +25,7 @@ permissions:
 
 jobs:
   test-infrastructure:
+    name: Infrastructure Test (${{ matrix.provider }})
     # Optional repo variables:
     # - INFRA_TEST_ENABLED: "true" (default) or "false"
     # - ACTIVE_CLOUD_PROVIDER: "digitalocean" | "gcp" | "all" (default: no filter)

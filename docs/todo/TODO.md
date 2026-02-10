@@ -25,26 +25,32 @@ For each feature slice:
    - Add request/response schemas + types in `@abe-stack/shared` (domain contracts/schemas).
 2. Service logic
    - Implement pure logic in `@abe-stack/core` handlers (no HTTP).
-3. Unit test
-   - Add/extend tests for handler behavior.
+3. Unit tests (colocated)
+   - Add/extend tests for handler behavior — colocated adjacent to the file under test.
 4. Route wiring
    - Wire into Fastify in `@abe-stack/server` routes using `publicRoute` / `protectedRoute` / `adminProtectedRoute`.
-5. Client hook
+5. Integration tests
+   - Test the HTTP endpoint with real DB via Fastify inject — lives in `apps/server/src/__tests__/integration/`.
+6. Client hook
    - Add `client/api` method + hook (`useQuery`/`useMutation`) with typed contracts.
-6. UI wiring
+7. UI wiring
    - Update `apps/web` pages/components to use the hook; handle loading/error/empty states.
+8. E2E tests (Playwright)
+   - Add Playwright test for the full user-facing flow — lives in `apps/web/e2e/`.
 
-If any step is missing, the slice is not “done”.
+If any step is missing, the slice is not "done".
 
 ---
 
 ## Definition of Done (Per Slice)
 
 - [ ] Contract: strict schema (no `any`), request/response typed, error cases documented
-- [ ] Handler: unit tests cover success + expected failure modes
+- [ ] Handler: unit tests cover success + expected failure modes (colocated, `*.test.ts`)
 - [ ] Route: correct auth guard + validation + consistent status codes
+- [ ] Integration test: HTTP endpoint tested via Fastify inject with real DB (`apps/server/src/__tests__/integration/`)
 - [ ] Client: hook exposes typed data/errors; retries/timeouts sane
 - [ ] UI: loading + error + empty + success states; accessible basic UX
+- [ ] E2E test: Playwright test for the user-facing flow (`apps/web/e2e/`)
 - [ ] Ops: logs/audit events where relevant; rate limit/captcha applied where relevant
 - [ ] DB (if applicable): table/schema/repo/migration/seed sanity checks done (see below)
 
@@ -396,10 +402,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
   - [ ] seed: <seed touches it?> (yes/no)
 - [ ] Contract: <shared file(s)>
 - [ ] Handler: <core file(s)>
-- [ ] Tests: <test file(s)>
+- [ ] Unit tests: <colocated test file(s)> (e.g., `handler.test.ts`)
 - [ ] Route: <server route file(s)>
+- [ ] Integration tests: `apps/server/src/__tests__/integration/<domain>.test.ts`
 - [ ] Client: <client/api file(s)>
 - [ ] UI: <apps/web file(s)>
+- [ ] E2E tests: `apps/web/e2e/<flow>.spec.ts`
 - [ ] Notes:
   - Risks:
   - Rollout / config gates:
@@ -407,9 +415,53 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 ---
 
+### Sprint 4: Test Coverage Pipeline (All Business Domains)
+
+> Establish the three test layers across every business domain.
+> Unit tests are colocated. Integration tests live in `apps/server/src/__tests__/integration/`.
+> E2E tests live in `apps/web/e2e/`.
+
+1. Test infrastructure setup
+   - [ ] Slice: Playwright config + base test fixtures (`apps/web/e2e/` setup)
+   - [ ] Slice: Integration test harness — test DB setup/teardown, Fastify inject helpers (`apps/server/src/__tests__/integration/`)
+   - [ ] Slice: CI pipeline step for E2E tests (Playwright in headless mode)
+
+2. Auth test pipeline (CHECKLIST 14.1)
+   - [ ] Slice: Unit tests for all auth handlers (register, login, refresh, logout, reset, magic link, OAuth, TOTP, email change, canonicalization)
+   - [ ] Slice: Integration tests for all auth HTTP endpoints
+   - [ ] Slice: E2E tests — register/verify/login, password reset, 2FA, OAuth, lockout
+
+3. Sessions test pipeline (CHECKLIST 14.2)
+   - [ ] Slice: Unit tests for session handlers + UA parsing
+   - [ ] Slice: Integration tests for session endpoints
+   - [ ] Slice: E2E tests — view sessions, revoke, "log out all devices"
+
+4. Multi-tenant test pipeline (CHECKLIST 14.4)
+   - [ ] Slice: Unit tests for role hierarchy, orphan prevention, tenant scoping
+   - [ ] Slice: Integration tests for tenant CRUD, invitations, membership management
+   - [ ] Slice: E2E tests — create workspace, invite member, switch context
+
+5. Billing test pipeline (CHECKLIST 14.6)
+   - [ ] Slice: Unit tests for entitlements, webhook verification, state machine
+   - [ ] Slice: Integration tests for plan CRUD, webhook processing, checkout
+   - [ ] Slice: E2E tests — pricing page, checkout, upgrade/downgrade, invoices
+
+6. Remaining domain test pipelines (CHECKLIST 14.3, 14.5, 14.7–14.13)
+   - [ ] Slice: Account management tests (unit + integration + E2E)
+   - [ ] Slice: RBAC tests (unit + integration + E2E)
+   - [ ] Slice: Notifications tests (unit + integration + E2E)
+   - [ ] Slice: Audit & security events tests (unit + integration + E2E)
+   - [ ] Slice: Compliance tests (unit + integration + E2E)
+   - [ ] Slice: Realtime/WebSocket tests (unit + integration + E2E)
+   - [ ] Slice: Media processing tests (unit + integration + E2E)
+   - [ ] Slice: API keys tests (unit + integration + E2E)
+   - [ ] Slice: Admin console tests (unit + integration + E2E)
+
+---
+
 ## Notes / Guardrails
 
-- Prefer **one slice fully done** over “80% of five slices”.
-- Don’t add new packages to implement a slice unless it removes duplication across apps.
-- If you touch auth/session/billing flows, add at least one test that asserts the failure mode you’re most worried about.
+- Prefer **one slice fully done** over "80% of five slices".
+- Don't add new packages to implement a slice unless it removes duplication across apps.
+- If you touch auth/session/billing flows, add at least one test that asserts the failure mode you're most worried about.
 - For file placement rules during execution, follow `docs/todo/EXECUTION.md` (Hybrid Hexagonal standard).

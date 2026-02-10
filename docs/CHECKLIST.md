@@ -8,23 +8,23 @@
 
 ## Progress Dashboard
 
-| Domain             | DB Layer | Service Logic | HTTP Routes | Client UI | Overall |
-| ------------------ | -------- | ------------- | ----------- | --------- | ------- |
-| **Authentication** | [x] 100% | [x] 100%      | [x] 100%    | [x] ~90%  | ~95%    |
-| **Sessions**       | [x] 100% | [x] 100%      | [ ] 0%      | [-] ~30%  | ~45%    |
-| **Account Mgmt**   | [x] 80%  | [-] 30%       | [-] 10%     | [-] ~20%  | ~25%    |
-| **Multi-Tenant**   | [x] 100% | [-] 30%       | [ ] 0%      | [ ] 0%    | ~25%    |
-| **RBAC**           | [x] 100% | [-] 50%       | [-] 30%     | [ ] 0%    | ~35%    |
-| **2FA / TOTP**     | [x] 100% | [x] 100%      | [x] 100%    | [ ] 0%    | ~75%    |
-| **API Keys**       | [x] 100% | [ ] 0%        | [ ] 0%      | [ ] 0%    | ~20%    |
-| **Billing**        | [x] 100% | [-] 40%       | [-] 30%     | [-] ~40%  | ~40%    |
-| **Notifications**  | [x] 100% | [-] 40%       | [-] 20%     | [ ] 0%    | ~30%    |
-| **Audit & Events** | [x] 100% | [x] 80%       | [x] 70%     | [-] ~30%  | ~65%    |
-| **Compliance**     | [x] 100% | [-] 20%       | [ ] 0%      | [ ] 0%    | ~25%    |
-| **Realtime**       | [x] 100% | [x] 100%      | [x] 100%    | [-] ~30%  | ~80%    |
-| **Media**          | [x] 100% | [x] 90%       | [-] ~20%    | [ ] 0%    | ~50%    |
-| **Client Engine**  | n/a      | [x] 90%       | n/a         | [x] 80%   | ~85%    |
-| **Infra / CI**     | n/a      | n/a           | n/a         | n/a       | ~70%    |
+| Domain             | DB Layer | Service Logic | HTTP Routes | Client UI | Unit Tests | Integration Tests | E2E (Playwright) | Overall |
+| ------------------ | -------- | ------------- | ----------- | --------- | ---------- | ----------------- | ---------------- | ------- |
+| **Authentication** | [x] 100% | [x] 100%      | [x] 100%    | [x] ~90%  | [-] ~40%   | [ ] 0%            | [ ] 0%           | ~95%    |
+| **Sessions**       | [x] 100% | [x] 100%      | [ ] 0%      | [-] ~30%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~45%    |
+| **Account Mgmt**   | [x] 80%  | [-] 30%       | [-] 10%     | [-] ~20%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~25%    |
+| **Multi-Tenant**   | [x] 100% | [-] 30%       | [ ] 0%      | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~25%    |
+| **RBAC**           | [x] 100% | [-] 50%       | [-] 30%     | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~35%    |
+| **2FA / TOTP**     | [x] 100% | [x] 100%      | [x] 100%    | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~75%    |
+| **API Keys**       | [x] 100% | [ ] 0%        | [ ] 0%      | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~20%    |
+| **Billing**        | [x] 100% | [-] 40%       | [-] 30%     | [-] ~40%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~40%    |
+| **Notifications**  | [x] 100% | [-] 40%       | [-] 20%     | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~30%    |
+| **Audit & Events** | [x] 100% | [x] 80%       | [x] 70%     | [-] ~30%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~65%    |
+| **Compliance**     | [x] 100% | [-] 20%       | [ ] 0%      | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~25%    |
+| **Realtime**       | [x] 100% | [x] 100%      | [x] 100%    | [-] ~30%  | [-] ~50%   | [ ] 0%            | [ ] 0%           | ~80%    |
+| **Media**          | [x] 100% | [x] 90%       | [-] ~20%    | [ ] 0%    | [-] ~60%   | [ ] 0%            | [ ] 0%           | ~50%    |
+| **Client Engine**  | n/a      | [x] 90%       | n/a         | [x] 80%   | [-] ~40%   | [ ] 0%            | [ ] 0%           | ~85%    |
+| **Infra / CI**     | n/a      | n/a           | n/a         | n/a       | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~70%    |
 
 ---
 
@@ -931,6 +931,356 @@ The boilerplate is "enterprise-ready" when you can:
 - [ ] "Was this you?" email on password change + email change reversion
 - [ ] ToS gating middleware active
 - [ ] Granular login failure reasons in internal logs
+
+---
+
+## 14. Test Coverage Pipeline
+
+> Every business domain needs three layers of test coverage:
+>
+> - **Unit tests**: Pure logic in isolation (handlers, validators, domain logic) — Vitest
+> - **Integration tests**: Service + DB + HTTP round-trips against a real (test) database — Vitest + Fastify inject
+> - **E2E tests**: Full browser flows verifying user-facing behavior — Playwright
+
+### 14.1 Authentication Tests
+
+#### Unit Tests
+
+- [ ] Registration handler: validates input, rejects weak passwords, rejects duplicate emails
+- [ ] Login handler: correct credentials succeed, wrong password fails, unverified email rejected, locked account rejected
+- [ ] Token refresh: rotation works, reuse detection triggers family revocation, grace period honored
+- [ ] Password reset: token creation, token validation, token expiry, password strength enforcement
+- [ ] Magic link: token creation, rate limiting logic, auto-create user logic
+- [ ] OAuth: state generation, callback code exchange, link/unlink logic
+- [ ] Email change: token creation, confirmation logic, reversion logic
+- [ ] TOTP: setup secret generation, code validation, backup code single-use enforcement
+- [ ] Email canonicalization: trim, lowercase, Gmail dot-insensitivity, `+` alias stripping
+- [ ] Lockout logic: progressive delays, threshold enforcement, reset after success
+
+#### Integration Tests
+
+- [ ] `POST /api/auth/register` → creates user in DB, sends verification email, returns expected shape
+- [ ] `POST /api/auth/login` → returns tokens, sets HttpOnly cookie, creates session record
+- [ ] `POST /api/auth/refresh` → rotates token, old token rejected on reuse
+- [ ] `POST /api/auth/logout` → clears cookie, revokes token in DB
+- [ ] `POST /api/auth/logout-all` → revokes all families except current
+- [ ] `POST /api/auth/forgot-password` → creates token in DB, generic response (anti-enumeration)
+- [ ] `POST /api/auth/reset-password` → updates password hash, invalidates old tokens
+- [ ] `POST /api/auth/verify-email` → marks user verified, auto-login tokens returned
+- [ ] `POST /api/auth/magic-link/request` → creates token, rate limited
+- [ ] `POST /api/auth/magic-link/verify` → logs in user, creates new user if needed
+- [ ] `GET /api/auth/oauth/:provider` → returns valid authorization URL
+- [ ] `GET /api/auth/oauth/:provider/callback` → exchanges code, creates/logs in user
+- [ ] `POST /api/auth/change-email` + `/confirm` → full atomic email update flow
+- [ ] `POST /api/auth/totp/setup` → `/enable` → `/disable` lifecycle against DB
+- [ ] Protected routes reject unauthenticated requests with 401
+
+#### E2E Tests (Playwright)
+
+- [ ] Register → receive verification email → verify → auto-login → see dashboard
+- [ ] Login with email + password → see dashboard → logout → redirected to login
+- [ ] Login with username → see dashboard
+- [ ] Forgot password → reset password → login with new password
+- [ ] Login attempt lockout after N failures → wait → retry succeeds
+- [ ] Login with 2FA enabled → TOTP challenge → enter code → see dashboard
+- [ ] OAuth login flow (mock provider) → see dashboard
+- [ ] Magic link request → click link → see dashboard (if enabled)
+- [ ] Email change → confirm via link → old email shows in notification
+- [ ] Register with duplicate email → see error message
+
+### 14.2 Sessions & Device Security Tests
+
+#### Unit Tests
+
+- [ ] `listUserSessions()`: returns sessions, marks current session correctly
+- [ ] `revokeSession()`: validates ownership, prevents revoking current session
+- [ ] `revokeAllSessions()`: keeps current, revokes rest
+- [ ] `getSessionCount()`: returns correct count
+- [ ] UA parsing: Chrome/Firefox/Safari/Edge/mobile variants produce human-readable labels
+
+#### Integration Tests
+
+- [ ] `GET /api/users/me/sessions` → returns session list with current marker
+- [ ] `DELETE /api/users/me/sessions/:id` → revokes target session, rejects current session revocation
+- [ ] `POST /api/users/me/sessions/revoke-all` → all sessions revoked except current
+- [ ] `GET /api/users/me/sessions/count` → matches active session count
+- [ ] Login creates `user_sessions` record with parsed UA fields
+
+#### E2E Tests (Playwright)
+
+- [ ] Login → navigate to settings → see active sessions list with "This device" indicator
+- [ ] Login from two sessions → revoke one → verify revoked session is logged out
+- [ ] "Log out all other devices" → only current session remains active
+- [ ] Session shows human-readable device label (not raw UA string)
+
+### 14.3 Account Management Tests
+
+#### Unit Tests
+
+- [ ] Username validation: uniqueness (case-insensitive), reserved names, cooldown
+- [ ] Avatar processing: validate file type, resize dimensions
+- [ ] Profile update: field validation, completeness calculation
+- [ ] Account deactivation/deletion: grace period logic, reactivation logic
+
+#### Integration Tests
+
+- [ ] `PATCH /api/users/me/username` → updates username, rejects duplicates
+- [ ] `PUT /api/users/me/avatar` → processes and stores image
+- [ ] `PATCH /api/users/me` → updates profile fields
+- [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after
+- [ ] `POST /api/users/me/reactivate` → cancels pending deletion within grace period
+- [ ] `POST /api/auth/sudo` → returns sudo token; subsequent sensitive ops require it
+
+#### E2E Tests (Playwright)
+
+- [ ] Change username in settings → see updated username across the app
+- [ ] Upload avatar → see avatar in profile and header
+- [ ] Update profile fields → save → refresh → see persisted changes
+- [ ] Delete account → confirm → see logout; re-login attempt blocked
+- [ ] Sudo mode: attempt sensitive action → prompted for password → re-auth → action succeeds
+
+### 14.4 Multi-Tenant / Workspace Tests
+
+#### Unit Tests
+
+- [ ] `canAssignRole()`: enforces role hierarchy (owner > admin > member > viewer)
+- [ ] `canRemoveMember()`: prevents removing higher-ranked users
+- [ ] Orphan prevention: block removal of last owner, require ownership transfer
+- [ ] Invitation logic: domain restriction validation, expiry enforcement
+- [ ] Tenant scoping: `assertWorkspaceScope()` throws when context missing
+
+#### Integration Tests
+
+- [ ] `POST /api/tenants` → creates tenant + owner membership in transaction
+- [ ] `GET /api/tenants` → returns only user's workspaces
+- [ ] `POST /api/tenants/:id/invitations` → creates invite, sends email
+- [ ] `POST /api/invitations/:token/accept` → creates membership, consumes token
+- [ ] `PATCH /api/tenants/:id/members/:userId` → changes role, enforces hierarchy
+- [ ] `DELETE /api/tenants/:id/members/:userId` → removes member, blocks last owner removal
+- [ ] Tenant-scoped queries only return data for the active workspace
+- [ ] Expired invitation rejection
+
+#### E2E Tests (Playwright)
+
+- [ ] Create workspace → see it in workspace list → switch to it
+- [ ] Invite teammate by email → teammate accepts → appears in member list
+- [ ] Change member role → member sees updated permissions
+- [ ] Remove member → member loses access to workspace
+- [ ] Tenant switcher: switch between workspaces → see different data in each
+- [ ] Accept expired invitation → see error message
+
+### 14.5 RBAC & Authorization Tests
+
+#### Unit Tests
+
+- [ ] `canUser()` / `isOwner()` / `isAdmin()` permission checks for all role combinations
+- [ ] Policy engine: evaluation with multiple rules, deny overrides allow
+- [ ] Route-level role check: correct roles pass, others rejected
+
+#### Integration Tests
+
+- [ ] Protected routes reject unauthenticated requests (401)
+- [ ] Admin routes reject non-admin users (403)
+- [ ] Per-tenant role enforcement: viewer cannot write, member cannot manage
+- [ ] Resource ownership validation: user A cannot access user B's resources
+
+#### E2E Tests (Playwright)
+
+- [ ] Admin user: can access admin dashboard, manage users
+- [ ] Regular user: admin routes return 403 / redirect to dashboard
+- [ ] Workspace viewer: cannot create/edit resources; sees read-only UI
+- [ ] Workspace admin: can manage members but cannot transfer ownership
+
+### 14.6 Billing & Subscriptions Tests
+
+#### Unit Tests
+
+- [ ] Entitlements resolver: `resolveEntitlements(subscription, role)` returns correct flags/limits
+- [ ] Plan validation: required fields, price constraints
+- [ ] Webhook signature verification: Stripe + PayPal
+- [ ] Subscription state transitions: trialing → active → past_due → canceled
+
+#### Integration Tests
+
+- [ ] Admin: `POST /api/admin/billing/plans` → creates plan
+- [ ] Stripe webhook → updates subscription state in DB
+- [ ] PayPal webhook → updates subscription state in DB
+- [ ] Checkout session creation → returns redirect URL
+- [ ] Entitlement enforcement: free plan user blocked from premium features
+
+#### E2E Tests (Playwright)
+
+- [ ] View pricing page → select plan → complete checkout → see active subscription
+- [ ] Upgrade plan → see updated entitlements immediately
+- [ ] Downgrade plan → see reduced entitlements at next billing cycle
+- [ ] View billing settings → see current plan, invoices, payment method
+- [ ] Cancel subscription → see confirmation → plan remains active until period end
+
+### 14.7 Notifications Tests
+
+#### Unit Tests
+
+- [ ] Notification service: create, mark read, mark all read, delete
+- [ ] Push provider (FCM): payload formatting, error handling
+- [ ] Email template rendering: variable substitution, fallback values
+- [ ] Preference evaluation: channel enabled/disabled per notification type
+
+#### Integration Tests
+
+- [ ] `POST /api/notifications` → creates notification in DB
+- [ ] `PATCH /api/notifications/:id/read` → marks as read
+- [ ] `POST /api/notifications/read-all` → marks all as read
+- [ ] Email send: SMTP transport delivers (dev: console provider logs)
+- [ ] Push subscription: register → send → receive (mock FCM)
+
+#### E2E Tests (Playwright)
+
+- [ ] Trigger action → notification appears in bell dropdown
+- [ ] Click notification → navigates to relevant page
+- [ ] Mark notification as read → visual indicator updates
+- [ ] Notification preferences: toggle channel off → no longer receive that type
+- [ ] Transactional email received (verify via test mailbox or interceptor)
+
+### 14.8 Audit & Security Events Tests
+
+#### Unit Tests
+
+- [ ] Security event creation: all 18+ event types with correct severity
+- [ ] Audit event creation: typed events with actor/action/target/metadata
+- [ ] Event metrics aggregation logic
+
+#### Integration Tests
+
+- [ ] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
+- [ ] `GET /api/admin/security/events` → returns paginated events with filters
+- [ ] `GET /api/admin/security/events/:id` → returns event detail
+- [ ] `GET /api/admin/security/metrics` → returns aggregated metrics
+- [ ] `POST /api/admin/security/events/export` → returns CSV/JSON export
+
+#### E2E Tests (Playwright)
+
+- [ ] Admin: navigate to security events → see events list with filters
+- [ ] Filter by event type → results update
+- [ ] Click event → see detail view with all metadata
+- [ ] Export events → file downloads successfully
+- [ ] Trigger login failure → see new security event appear in list
+
+### 14.9 Compliance & Data Privacy Tests
+
+#### Unit Tests
+
+- [ ] Deletion logic: soft delete scheduling, grace period calculation, PII anonymization rules
+- [ ] Data export: user data aggregation from all tables
+- [ ] Consent tracking: version comparison, acceptance recording
+
+#### Integration Tests
+
+- [ ] `POST /api/users/me/export` → creates data export request, background job queued
+- [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login
+- [ ] ToS gating middleware: stale version → 403 with `TOS_ACCEPTANCE_REQUIRED`
+- [ ] `POST /api/agreements/accept` → records acceptance, unblocks user
+- [ ] Hard delete cron: anonymizes PII after grace period, preserves audit trail
+
+#### E2E Tests (Playwright)
+
+- [ ] Request data export → receive download link (email or in-app)
+- [ ] Delete account → confirm → logged out → cannot log back in during grace period
+- [ ] New ToS published → user forced to accept before continuing
+- [ ] Accept ToS → normal access restored
+- [ ] Consent preferences: toggle cookie consent → see updated state
+
+### 14.10 Realtime & WebSocket Tests
+
+#### Unit Tests
+
+- [ ] Subscription handler: subscribe/unsubscribe to channels
+- [ ] Sync handler: delta sync logic
+- [ ] PubSub: message routing, channel filtering
+- [ ] Connection lifecycle: connect, heartbeat, disconnect, reconnect
+
+#### Integration Tests
+
+- [ ] WebSocket connect → authenticate → subscribe to channel → receive published message
+- [ ] Unauthorized subscription attempt rejected
+- [ ] Connection stats updated on connect/disconnect
+- [ ] Multiple subscribers on same channel all receive message
+
+#### E2E Tests (Playwright)
+
+- [ ] Open two browser tabs → action in tab A → real-time update appears in tab B
+- [ ] Disconnect network → reconnect → missed messages synced
+- [ ] Subscribe to workspace-scoped channel → only see events for that workspace
+
+### 14.11 Media Processing Tests
+
+#### Unit Tests
+
+- [ ] Image processor: resize, crop, format conversion
+- [ ] Audio metadata extraction: duration, sample rate, channels
+- [ ] Video processor: thumbnail generation, format conversion
+- [ ] File type detection: correct MIME types for common formats
+- [ ] File validation: size limits, type restrictions, security scanning
+- [ ] Queue: job creation, retry logic, dead-letter handling
+
+#### Integration Tests
+
+- [ ] Upload image → processed and stored in S3 (or local)
+- [ ] Upload invalid file type → rejected with clear error
+- [ ] Upload oversized file → rejected with size limit error
+- [ ] Queue: job submitted → processed → result stored in DB
+- [ ] Presigned URL generation for direct upload/download
+
+#### E2E Tests (Playwright)
+
+- [ ] Upload avatar image → see processed/cropped version displayed
+- [ ] Upload document → see it in file list → download it
+- [ ] Drag-and-drop file upload → progress indicator → success confirmation
+- [ ] Upload invalid file → see user-friendly error message
+
+### 14.12 API Keys & Programmatic Access Tests
+
+#### Unit Tests
+
+- [ ] Key generation: hash storage, scope parsing, expiry validation
+- [ ] Key authentication: timing-safe comparison, scope enforcement
+- [ ] Key revocation: immediate invalidation
+
+#### Integration Tests
+
+- [ ] Create API key → use it to authenticate a request → success
+- [ ] Revoked key → 401 on subsequent requests
+- [ ] Expired key → 401 on subsequent requests
+- [ ] Scope enforcement: key with `read` scope cannot `write`
+- [ ] `GET /api/users/me/api-keys` → lists keys (hash not exposed)
+
+#### E2E Tests (Playwright)
+
+- [ ] Settings → API keys → create key → copy value (shown once) → see it in list
+- [ ] Revoke key → removed from list → API calls with that key fail
+- [ ] Create key with limited scopes → verify scope labels displayed
+
+### 14.13 Admin & Support Tests
+
+#### Unit Tests
+
+- [ ] Impersonation token: scoped TTL, target user validation, admin-only
+- [ ] User search: multi-field matching (email, name, UUID, stripe ID)
+- [ ] Ban logic: soft ban vs hard ban cascade rules
+
+#### Integration Tests
+
+- [ ] `POST /api/admin/impersonate/:userId` → returns scoped token + audit event
+- [ ] Admin user list with pagination and filters
+- [ ] Admin lock/unlock user → login behavior changes accordingly
+- [ ] Hard ban: revokes sessions, cancels subscriptions, schedules PII deletion
+- [ ] Cannot impersonate another admin (safety guard)
+
+#### E2E Tests (Playwright)
+
+- [ ] Admin: search for user → view detail → lock account → user cannot log in
+- [ ] Admin: impersonate user → see banner "Viewing as ..." → end session → return to admin
+- [ ] Admin: manage billing plans → create/edit/deactivate plan
+- [ ] Admin: view security events dashboard → filter → export
 
 ---
 
