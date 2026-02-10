@@ -1865,6 +1865,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 >
 > **Convention:** Unit tests colocated (`*.test.ts`). Integration tests in
 > `apps/server/src/__tests__/integration/`. E2E tests in `apps/web/e2e/`.
+>
+> **Before starting each section:** Check Sprint 1-3 test coverage first. Skip tests already
+> delivered inline with feature slices. Focus backfill on existing code with zero coverage.
 
 ---
 
@@ -2420,6 +2423,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Security: `/api/docs` auth-protected in non-dev environments
 - [ ] Validation: all annotated routes appear in generated spec
 
+**Deployment Sanity (Appendix D):**
+
+- [ ] Integration: `pnpm db:push` applies all migrations to fresh test DB without errors
+- [ ] Integration: `seed.ts` seeds test data without errors on clean DB
+- [ ] Integration: `bootstrap-admin.ts` creates admin user on empty DB, idempotent on re-run
+
 ---
 
 #### 4.16 Operational Blind Spot Verification (CHECKLIST 11)
@@ -2433,6 +2442,14 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Integration: CAPTCHA-disabled config → public endpoints work without token
 - [ ] Integration: invalid CAPTCHA token → 400 rejection
 - [ ] Unit test: Turnstile server-side verification (success, failure, network error, timeout)
+
+**Rate Limiting & IP Policy (Appendix E.5):**
+
+- [ ] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
+- [ ] Integration: rate limit preset on general API endpoints (higher threshold than auth)
+- [ ] Integration: IP allowlist on admin routes (allowed IP passes, blocked IP returns 403)
+- [ ] Integration: IP blocklist (blocked IP returns 403 on all routes)
+- [ ] Unit test: rate limiter window calculation, token bucket / sliding window logic
 
 **Security Notifications (11.2):**
 
@@ -2478,6 +2495,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] `session-cleanup.ts` — purge expired/idle sessions
 - [ ] Unit tests: each job's selection criteria, batch processing, error handling
 - [ ] Integration tests: job enqueued → processed → DB state updated correctly
+- [ ] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
 - [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
 
 ---
@@ -2496,9 +2514,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Search:**
 
-- [ ] `query-builder.ts` — query construction for all field types, pagination, sorting
-- [ ] SQL provider — full-text search, fuzzy matching, result ranking
-- [ ] Search factory — provider selection based on config
+- [ ] `query-builder.ts` — query construction for all field types, pagination, sorting (NEW — Appendix C gap)
+- [ ] SQL provider — full-text search, fuzzy matching, result ranking (verify existing tests adequate)
+- [ ] Search factory — provider selection based on config (verify existing tests adequate)
 
 ---
 
@@ -2506,6 +2524,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > **Existing:** Activity tracking table + service (Sprint 3.6), Feature flags table + metering table (Sprint 3.7).
 > **Gap:** Zero tests for activity CRUD, flag evaluation, metering aggregation.
+>
+> **Note:** This section bundles three related domains. Split into separate subsections during
+> execution if scope is too large for a single pass.
 
 **Activity Tracking:**
 
@@ -2533,9 +2554,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 ---
 
-#### 4.20 Webhook Delivery System Tests (Sprint 3.18 Backfill)
+#### 4.20 Webhook Delivery System Tests (Sprint 3.25 Backfill)
 
-> **Existing:** Webhook table + delivery log table, queue-based delivery (Sprint 3.18).
+> **Existing:** Webhook table + delivery log table, queue-based delivery (Sprint 3.25).
+> Signing + idempotent receiving in Sprint 3.18.
 > **Gap:** Zero tests for webhook signature, delivery, retry, registration.
 
 **Unit Tests:**
@@ -2569,6 +2591,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
 - [ ] Deep link handling — protocol handler parses `abe://` links correctly
 - [ ] Auto-update — version check, download progress, install-on-quit logic
+- [ ] Menu construction — correct items registered per platform (macOS vs Windows vs Linux)
+- [ ] System tray — icon rendering, context menu items, click handlers
 - [ ] Offline detection — network status change → queue operations, sync on reconnect
 
 **Integration Tests (Electron test runner):**
@@ -2581,35 +2605,50 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 ---
 
+#### 4.22 Golden Path Onboarding E2E (Appendix E.8)
+
+> **Existing:** Individual E2E tests per domain (auth, tenant, billing). No combined journey test.
+> **Gap:** No single test validating the full new-user onboarding flow end-to-end.
+
+- [ ] E2E: Register → verify email → create workspace → invite teammate → teammate accepts invite
+- [ ] E2E: Select plan → complete checkout → see dashboard with team member and active subscription
+- [ ] E2E: First success moment — user sees populated workspace with welcome content
+- [ ] E2E: Negative path — expired invite link → clear error; invalid payment → graceful fallback
+
+---
+
 #### Sprint 4 Cross-Reference Summary
 
 > Maps Sprint 4 items to CHECKLIST.md and BUSINESS.md sections for completeness verification.
 
-| CHECKLIST Section            | BUSINESS.md | Sprint 4 Items                                         | Coverage                                  |
-| ---------------------------- | ----------- | ------------------------------------------------------ | ----------------------------------------- |
-| 10. Operational Quality      | E.4         | 4.15 Operational Quality Tests                         | Health, error reporting, metrics, OpenAPI |
-| 11.1 Anti-Abuse              | —           | 4.16 Operational Blind Spot Verification               | CAPTCHA integration tests                 |
-| 11.2 Security Notifications  | —           | 4.16 Operational Blind Spot Verification               | "Was this you?" + email reversion tests   |
-| 11.3 ToS Gating              | —           | 4.16 Operational Blind Spot Verification               | Middleware + acceptance flow tests        |
-| 11.4 Login Failure Logging   | —           | 4.16 Operational Blind Spot Verification               | Granular failure reason tests             |
-| 14.1 Authentication          | 8.1         | 4.2 Authentication Tests                               | Full (unit + integration + E2E)           |
-| 14.2 Sessions                | 8.1         | 4.3 Sessions Tests                                     | Full (unit + integration + E2E)           |
-| 14.3 Account Management      | 8.1         | 4.4 Account Management Tests                           | Full (unit + integration + E2E)           |
-| 14.4 Multi-Tenant            | 8.2         | 4.5 Multi-Tenant Tests                                 | Full (unit + integration + E2E)           |
-| 14.5 RBAC                    | 8.2         | 4.6 RBAC Tests                                         | Full (unit + integration + E2E)           |
-| 14.6 Billing                 | 8.3         | 4.7 Billing Tests                                      | Full (unit + integration + E2E)           |
-| 14.7 Notifications           | 8.4         | 4.8 Notifications Tests                                | Full (unit + integration + E2E)           |
-| 14.8 Audit & Security Events | 8.5         | 4.9 Audit Tests                                        | Full (unit + integration + E2E)           |
-| 14.9 Compliance              | 8.6         | 4.10 Compliance Tests                                  | Full (unit + integration + E2E)           |
-| 14.10 Realtime               | —           | 4.11 Realtime Tests                                    | Full (unit + integration + E2E)           |
-| 14.11 Media                  | —           | 4.12 Media Tests                                       | Full (unit + integration + E2E)           |
-| 14.12 API Keys               | —           | 4.13 API Keys Tests                                    | Full (unit + integration + E2E)           |
-| 14.13 Admin Console          | 8.7         | 4.14 Admin Tests                                       | Full (unit + integration + E2E)           |
-| Appendix C (Engine)          | —           | 4.17 Scheduled Jobs, 4.18 Client Engine + Search       | Scheduled jobs + missing query builder    |
-| 6.6 Activity Tracking        | —           | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.6 backfill                       |
-| 6.7 Feature Flags & Metering | —           | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.7 backfill                       |
-| Appendix D (Webhooks)        | —           | 4.20 Webhook Delivery System Tests                     | Sprint 3.18 backfill                      |
-| Appendix E (Desktop)         | —           | 4.21 Desktop App Tests                                 | Sprint 3.19 backfill                      |
+| CHECKLIST Section            | BUSINESS.md   | Sprint 4 Items                                         | Coverage                                  |
+| ---------------------------- | ------------- | ------------------------------------------------------ | ----------------------------------------- |
+| 10. Operational Quality      | E.4           | 4.15 Operational Quality Tests                         | Health, error reporting, metrics, OpenAPI |
+| 11.1 Anti-Abuse              | —             | 4.16 Operational Blind Spot Verification               | CAPTCHA integration tests                 |
+| 11.2 Security Notifications  | —             | 4.16 Operational Blind Spot Verification               | "Was this you?" + email reversion tests   |
+| 11.3 ToS Gating              | —             | 4.16 Operational Blind Spot Verification               | Middleware + acceptance flow tests        |
+| 11.4 Login Failure Logging   | —             | 4.16 Operational Blind Spot Verification               | Granular failure reason tests             |
+| 14.1 Authentication          | 8.1           | 4.2 Authentication Tests                               | Full (unit + integration + E2E)           |
+| 14.2 Sessions                | 8.1           | 4.3 Sessions Tests                                     | Full (unit + integration + E2E)           |
+| 14.3 Account Management      | 8.1           | 4.4 Account Management Tests                           | Full (unit + integration + E2E)           |
+| 14.4 Multi-Tenant            | 8.2           | 4.5 Multi-Tenant Tests                                 | Full (unit + integration + E2E)           |
+| 14.5 RBAC                    | 8.2           | 4.6 RBAC Tests                                         | Full (unit + integration + E2E)           |
+| 14.6 Billing                 | 8.3           | 4.7 Billing Tests                                      | Full (unit + integration + E2E)           |
+| 14.7 Notifications           | 8.4           | 4.8 Notifications Tests                                | Full (unit + integration + E2E)           |
+| 14.8 Audit & Security Events | 8.5           | 4.9 Audit Tests                                        | Full (unit + integration + E2E)           |
+| 14.9 Compliance              | 8.6           | 4.10 Compliance Tests                                  | Full (unit + integration + E2E)           |
+| 14.10 Realtime               | —             | 4.11 Realtime Tests                                    | Full (unit + integration + E2E)           |
+| 14.11 Media                  | —             | 4.12 Media Tests                                       | Full (unit + integration + E2E)           |
+| 14.12 API Keys               | —             | 4.13 API Keys Tests                                    | Full (unit + integration + E2E)           |
+| 14.13 Admin Console          | 8.7           | 4.14 Admin Tests                                       | Full (unit + integration + E2E)           |
+| Appendix C (Engine)          | —             | 4.17 Scheduled Jobs, 4.18 Client Engine + Search       | Scheduled jobs + missing query builder    |
+| 6.6 Activity Tracking        | 8.5 (partial) | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.6 backfill                       |
+| 6.7 Feature Flags & Metering | 8.5 (partial) | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.7 backfill                       |
+| CHECKLIST 5 (Webhooks)       | 8.5           | 4.20 Webhook Delivery System Tests                     | Sprint 3.25 backfill                      |
+| CHECKLIST 12 (Desktop)       | —             | 4.21 Desktop App Tests                                 | Sprint 3.19 backfill                      |
+| Appendix D (Essential)       | —             | 4.15 (deployment sanity), 4.20 (idempotent webhooks)   | Verify-vs-add items                       |
+| Appendix E.5 (Rate Limits)   | —             | 4.16 Rate Limiting & IP Policy                         | Per-route presets + IP allowlist          |
+| Appendix E.8 (Onboarding)    | —             | 4.22 Golden Path Onboarding E2E                        | Full user journey                         |
 
 ---
 
