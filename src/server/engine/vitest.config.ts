@@ -8,6 +8,14 @@ export default mergeConfig(baseConfig, {
   resolve: {
     alias: [
       {
+        find: /^@abe-stack\/db\/(.*)$/,
+        replacement: path.resolve(__dirname, '../../db/src/$1'),
+      },
+      {
+        find: '@abe-stack/db',
+        replacement: path.resolve(__dirname, '../../db/src/index.ts'),
+      },
+      {
         find: /^@abe-stack\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '../../shared/src/$1'),
       },
