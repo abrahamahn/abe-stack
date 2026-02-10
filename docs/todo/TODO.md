@@ -4,7 +4,7 @@ This file is the **factory-worker** plan: build the product via **vertical slice
 
 Business-level feature tracking and progress live in `docs/CHECKLIST.md`.
 
-Last updated: 2026-02-09
+Last updated: 2026-02-10
 
 ---
 
@@ -73,6 +73,10 @@ Before marking a DB-backed slice as done, verify these artifacts exist:
 ---
 
 ## Work Queue (Ordered For Day 1 Launch)
+
+> Sprint execution order: **Sprint 1 → Sprint 2 → Sprint 3 → Sprint 4**.
+> Within each sprint, work top-to-bottom. Each sprint item references its CHECKLIST section.
+> See sprint definitions below the Verification Queue.
 
 ---
 
@@ -323,68 +327,395 @@ Goal: verify the auth/security persistence layer and repos match the promised fl
 
 ---
 
-The ordering mirrors `docs/CHECKLIST.md` “Next Priority Actions”.
+The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **all** of CHECKLIST sections 1-13.
 
-### Sprint 1: Security & Sessions (Ship Blockers)
+---
 
-1. Sessions HTTP wiring (CHECKLIST 2.3 + 2.7)
-   - [ ] Slice: `GET /api/users/me/sessions`
-   - [ ] Slice: `DELETE /api/users/me/sessions/:id`
-   - [ ] Slice: `POST /api/users/me/sessions/revoke-all`
-   - [ ] Slice: `GET /api/users/me/sessions/count`
-   - [ ] Slice: Web UI wiring in Settings (route/nav + revoke actions + “this device”)
+### Sprint 1: Ship Blockers + Auth/Session Completeness
 
-2. Turnstile / CAPTCHA on public auth forms (CHECKLIST 11.1)
-   - [ ] Slice: server middleware + verification (config-gated)
-   - [ ] Slice: apply to register/login/forgot-password (and invite accept if public)
-   - [ ] Slice: client UI widget + error messaging
-   - [ ] Slice: tests (verification happy path + fail closed)
+> **Goal:** Close every Day 1 security gap. Nothing here is optional before launch.
+> Covers: CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
 
-3. “Was this you?” security emails (CHECKLIST 11.2)
-   - [ ] Slice: security email template + send on suspicious login / sensitive change
-   - [ ] Slice: minimal UI copy to explain event + recommended action
+#### 1.1 Session UI wiring (CHECKLIST 2.7)
 
-4. ToS version gating middleware (CHECKLIST 11.3)
-   - [ ] Slice: middleware (protect sensitive routes, redirect/deny)
-   - [ ] Slice: client handling (show ToS modal/page; accept -> proceed)
+- [ ] Slice: Wire `SessionsList` + `SessionCard` to settings page navigation (route + nav link)
+- [ ] Slice: Revoke session button per device (calls `DELETE /api/users/me/sessions/:id`)
+- [ ] Slice: "Log out all other devices" button (calls `POST /api/users/me/sessions/revoke-all`)
+- [ ] Slice: Current session indicator (green dot / "This device" label)
+- [ ] Slice: "New login from unknown device" notification banner
 
-5. Granular login failure logging (CHECKLIST 11.4)
-   - [ ] Slice: internal audit/security event enums for login failures
-   - [ ] Slice: ensure HTTP responses remain generic (anti-enumeration)
+#### 1.2 Session security hardening (CHECKLIST 2.4)
 
-6. Session labeling (UA parsing) (CHECKLIST 2.5)
-   - [ ] Slice: parse/store UA label on login
-   - [ ] Slice: display labels in sessions UI
+- [ ] Slice: Session idle timeout enforcement (configurable TTL, server-side check on token refresh)
+- [ ] Slice: Max concurrent sessions limit (configurable, evict oldest on overflow)
 
-### Sprint 2: Multi-Tenant Core (Make It Usable For Teams)
+#### 1.3 Security intelligence (CHECKLIST 2.6)
 
-Keep this strictly vertical: create workspace -> invite -> accept -> switch context.
+- [ ] Slice: New device / new IP detection — compare login against known sessions
+- [ ] Slice: Suspicious login email alert — send email on unrecognized device/IP
+- [ ] Slice: Security event `new_device_login` with device fingerprint
+- [ ] Slice: Token version invalidation — `token_version` column on `users`, bump on password change / 2FA toggle / forced logout, JWT includes version
+- [ ] Slice: Trusted device tracking — user marks device as trusted, skip 2FA for N days
 
-1. Tenant CRUD (CHECKLIST 4.2)
-   - [ ] Slice: `POST /api/tenants` create workspace (transaction: tenant + owner membership)
-   - [ ] Slice: `GET /api/tenants` list user’s workspaces
+#### 1.4 Turnstile / CAPTCHA on public forms (CHECKLIST 11.1)
 
-2. Invitations (CHECKLIST 4.4 + 4.8)
-   - [ ] Slice: `POST /api/tenants/:id/invitations` create invite + send email
-   - [ ] Slice: `POST /api/invitations/:token/accept` accept invite -> membership
-   - [ ] Slice: UI: invite member flow in workspace settings
+- [ ] Slice: Server middleware — Turnstile/reCAPTCHA token verification, config-gated (`config.security.captcha.enabled`)
+- [ ] Slice: Apply to `POST /auth/register`, `/login`, `/forgot-password`, invite accept
+- [ ] Slice: Client invisible widget on public forms + error messaging
+- [ ] Slice: Unit tests (verification happy path + fail closed)
+- [ ] Slice: Integration tests (middleware rejects missing/invalid token)
+- [ ] Slice: E2E test (register form submits with widget, rejected without)
 
-3. Tenant scoping middleware (CHECKLIST 4.9)
-   - [ ] Slice: read `x-workspace-id`, validate membership, attach to request context
-   - [ ] Slice: tenant switcher UI + header injection in client API
+#### 1.5 "Was this you?" security emails (CHECKLIST 11.2)
 
-### Sprint 3: Operational Safety (Reduce Support Load)
+- [ ] Slice: Transactional email templates for: password changed, 2FA disabled, new API key, new device login
+- [ ] Slice: Email change reversion — send "Revert" link to old email (A); clicking reverts to A, locks account, kills all sessions
+- [ ] Slice: Integration tests (trigger event → email sent with correct template)
+- [ ] Slice: E2E test (change password → receive security notification email)
 
-1. Email change reversion hardening (CHECKLIST 1.9 + 11.2)
-   - [ ] Slice: “revert email change” link to old email; lock + revoke all sessions
+#### 1.6 ToS version gating middleware (CHECKLIST 11.3)
 
-2. Impersonation (CHECKLIST 7.4)
-   - [ ] Slice: `POST /api/admin/impersonate/:userId` + audit events
-   - [ ] Slice: web UI banner + exit impersonation
+- [ ] Slice: Fastify preHandler — `if (user.latest_tos_version < system.current_tos_version)` → block all API except `/auth/logout` + `/api/agreements`
+- [ ] Slice: Return 403 `{ code: 'TOS_ACCEPTANCE_REQUIRED', currentVersion }`
+- [ ] Slice: `POST /api/agreements/accept` — records acceptance, unblocks user
+- [ ] Slice: Admin: publish new ToS version (updates `legal_documents` row)
+- [ ] Slice: Client — intercept 403 → show "Accept New Terms" modal → accept → proceed
+- [ ] Slice: Unit tests (middleware logic, version comparison)
+- [ ] Slice: Integration tests (stale version blocked, acceptance unblocks)
+- [ ] Slice: E2E test (new ToS published → user forced to accept → normal access)
 
-3. Compliance basics (CHECKLIST 6.8)
-   - [ ] Slice: data export request endpoint + admin visibility
-   - [ ] Slice: deletion request endpoint + grace period job wiring
+#### 1.7 Granular login failure logging (CHECKLIST 11.4)
+
+- [ ] Slice: Failure reason enum: `USER_NOT_FOUND`, `PASSWORD_MISMATCH`, `UNVERIFIED_EMAIL`, `ACCOUNT_LOCKED`, `TOTP_REQUIRED`, `TOTP_INVALID`, `CAPTCHA_FAILED`
+- [ ] Slice: Store failure reason in `login_attempts` table (add column if needed)
+- [ ] Slice: Admin filter login attempts by failure reason in security events UI
+- [ ] Slice: Ensure HTTP responses remain generic 401 (anti-enumeration)
+- [ ] Slice: Unit tests (reason assignment per branch)
+- [ ] Slice: Integration tests (internal log contains reason, HTTP response generic)
+
+#### 1.8 Auth UI gap (CHECKLIST 1.10)
+
+- [ ] Slice: Show QR code during TOTP setup (in addition to manual secret entry)
+
+---
+
+### Sprint 2: Multi-Tenant + RBAC + Account Management
+
+> **Goal:** Make the product usable for teams and self-service account operations.
+> Covers: CHECKLIST 3 (all), 4 (all gaps), 5 (all gaps).
+
+#### 2.1 Sudo mode (CHECKLIST 3.1)
+
+- [ ] Slice: `POST /api/auth/sudo` — accepts password or TOTP code, returns sudo token (5 min TTL)
+- [ ] Slice: Sudo middleware — Fastify preHandler validates sudo token for protected operations
+- [ ] Slice: Wire to: email change, password change, 2FA enable/disable, account delete, API key create/revoke
+- [ ] Slice: Client re-auth modal (password prompt or TOTP input)
+- [ ] Slice: Security event logging for sudo elevation
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.2 Username management (CHECKLIST 3.2)
+
+- [ ] Slice: `PATCH /api/users/me/username` — uniqueness (case-insensitive), reserved blocklist
+- [ ] Slice: Cooldown timer (1 change per 30 days) — `last_username_change` column or history table
+- [ ] Slice: Client username edit field in profile settings
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.3 Avatar workflow (CHECKLIST 3.3)
+
+- [ ] Slice: `PUT /api/users/me/avatar` — multipart upload, validate → resize → store to S3
+- [ ] Slice: `DELETE /api/users/me/avatar` — remove custom avatar
+- [ ] Slice: Fallback chain: custom upload → Gravatar → generated initials
+- [ ] Slice: CDN cache invalidation on change (ETag or versioned URL)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.4 Profile management (CHECKLIST 3.4)
+
+- [ ] Slice: `PATCH /api/users/me` — update display name, bio, city, state, country
+- [ ] Slice: Profile completeness indicator (% complete)
+- [ ] Slice: Client full profile edit page in settings
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.5 Phone / SMS 2FA (CHECKLIST 3.5)
+
+- [ ] Slice: `POST /api/auth/phone/add` → send SMS verification code
+- [ ] Slice: `POST /api/auth/phone/verify` → verify code, store phone
+- [ ] Slice: `DELETE /api/auth/phone` → remove phone 2FA
+- [ ] Slice: SMS 2FA as fallback when TOTP unavailable
+- [ ] Slice: Rate limiting on SMS sends (cost control)
+- [ ] Slice: Phone number table/column + SMS provider abstraction
+- [ ] Slice: Client phone input + verification in security settings
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.6 Account lifecycle — self-service API + UI (CHECKLIST 3.6)
+
+> Background cron jobs and PII anonymization logic live in Sprint 3.16 (Data Hygiene).
+> This slice covers the user-facing API endpoints and UI only.
+
+- [ ] Slice: `POST /api/users/me/deactivate` — self-service pause (reversible)
+- [ ] Slice: `POST /api/users/me/delete` — deletion request (requires sudo), sets `deleted_at`, sends confirmation email
+- [ ] Slice: `POST /api/users/me/reactivate` — cancel pending deletion during grace period
+- [ ] Slice: Client account danger zone in settings (deactivate / delete with confirmation)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.7 Tenant CRUD (CHECKLIST 4.2)
+
+- [ ] Slice: `POST /api/tenants` — create workspace (transaction: tenant + owner membership)
+- [ ] Slice: `GET /api/tenants` — list user's workspaces
+- [ ] Slice: `GET /api/tenants/:id` — get workspace details
+- [ ] Slice: `PATCH /api/tenants/:id` — update workspace (name, slug, logo)
+- [ ] Slice: `DELETE /api/tenants/:id` — delete workspace (requires owner + sudo)
+- [ ] Slice: Auto-create default workspace on registration (integration with auth register flow)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.8 Membership management (CHECKLIST 4.3)
+
+- [ ] Slice: `GET /api/tenants/:id/members` — list members
+- [ ] Slice: `POST /api/tenants/:id/members` — add member directly
+- [ ] Slice: `PATCH /api/tenants/:id/members/:userId` — change role
+- [ ] Slice: `DELETE /api/tenants/:id/members/:userId` — remove member
+- [ ] Slice: Owner cannot be removed; minimum one owner per tenant
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.9 Invitation flow (CHECKLIST 4.4 + 4.8)
+
+- [ ] Slice: `POST /api/tenants/:id/invitations` — create invite + send email
+- [ ] Slice: `POST /api/invitations/:token/accept` — accept invite → create membership
+- [ ] Slice: `POST /api/tenants/:id/invitations/:id/resend` — resend invitation
+- [ ] Slice: `DELETE /api/tenants/:id/invitations/:id` — revoke invitation
+- [ ] Slice: `GET /api/tenants/:id/invitations` — list pending invitations
+- [ ] Slice: `POST /api/tenants/:id/invitations/:id/regenerate` — new token + new expiry
+- [ ] Slice: `expires_at` enforcement — reject expired invitations
+- [ ] Slice: Auto-expire cron — mark expired as `expired` status
+- [ ] Slice: Max pending invitations per tenant (configurable)
+- [ ] Slice: Invitation email template
+- [ ] Slice: Client UI: invite member flow in workspace settings
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.10 Orphan prevention & ownership (CHECKLIST 4.5)
+
+- [ ] Slice: Block removal of last owner — reject DELETE if target is sole owner
+- [ ] Slice: Block owner self-leave — reject if sole owner, must transfer first
+- [ ] Slice: `POST /api/tenants/:id/transfer-ownership` — current owner designates new owner
+- [ ] Slice: Cascade on user deletion — if sole owner, transfer to next admin or flag for support
+- [ ] Slice: Domain logic in `shared/domain/membership/membership.logic.ts`
+- [ ] Slice: Unit + integration tests
+
+#### 2.11 Role hierarchy protection (CHECKLIST 4.6)
+
+- [ ] Slice: `canAssignRole(actorRole, targetRole)` — enforce hierarchy matrix
+- [ ] Slice: `canRemoveMember(actorRole, targetRole)` — prevent removing higher-ranked
+- [ ] Slice: Enforce in membership PATCH/DELETE handlers
+- [ ] Slice: Enforce in invitation create handler (cannot invite as higher role)
+- [ ] Slice: Unit tests for every cell in the role matrix
+
+#### 2.12 Domain restrictions (CHECKLIST 4.7)
+
+- [ ] Slice: `allowed_email_domains` column on `tenants` table (string array)
+- [ ] Slice: Validate invitation email domain against allowed domains
+- [ ] Slice: Validate on membership creation
+- [ ] Slice: Admin override: system admins bypass restrictions
+- [ ] Slice: Client domain allowlist editor in workspace settings
+- [ ] Slice: Unit + integration tests
+
+#### 2.13 Tenant scoping middleware (CHECKLIST 4.9)
+
+- [ ] Slice: Fastify middleware — extract tenant from `x-workspace-id` header, validate membership
+- [ ] Slice: `tenant_id` auto-filtering on tenant-scoped queries
+- [ ] Slice: Default tenant selection on login
+- [ ] Slice: Tenant switcher UI component + header injection in client API
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 2.14 RBAC backend enforcement (CHECKLIST 5.2)
+
+- [ ] Slice: Per-operation permission enforcement in handlers
+- [ ] Slice: Per-tenant role enforcement middleware (JWT auth + workspace membership)
+- [ ] Slice: Resource ownership validation ("is this in the user's tenant?")
+- [ ] Slice: Unit + integration tests
+
+#### 2.15 RBAC frontend authorization (CHECKLIST 5.3)
+
+- [ ] Slice: `<Can permission="...">` fine-grained gating component
+- [ ] Slice: `usePermissions()` hook
+- [ ] Slice: Route guard for admin pages (beyond basic auth)
+- [ ] Slice: Conditional menu rendering by role
+- [ ] Slice: Hide/disable actions by permission
+- [ ] Slice: Unit + E2E tests
+
+---
+
+### Sprint 3: Supporting Modules + Admin + Operational Completeness
+
+> **Goal:** Wire every remaining module, close admin gaps, and reach operational readiness.
+> Covers: CHECKLIST 6 (all gaps), 7 (all gaps), 8 (gaps), 9, 10, 12 (gaps), 13 (gaps).
+
+#### 3.1 API keys & programmatic access (CHECKLIST 6.1)
+
+- [ ] Slice: HTTP endpoints — create, list, revoke (requires sudo)
+- [ ] Slice: `Authorization: Bearer <key>` authentication middleware
+- [ ] Slice: Scope enforcement on requests
+- [ ] Slice: Client UI — key management (create with name + scopes, copy once, revoke)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.2 Billing lifecycle (CHECKLIST 6.2)
+
+- [ ] Slice: Subscription lifecycle states end-to-end (trialing → active → past_due → canceled)
+- [ ] Slice: Stripe checkout session creation + customer portal redirect
+- [ ] Slice: Entitlements service integration — `assertEntitled("feature_x")` helper
+- [ ] Slice: Usage / seat metering
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.3 Audit & events completeness (CHECKLIST 6.3)
+
+- [ ] Slice: Workspace-level audit viewer (tenant-scoped events)
+- [ ] Slice: Audit log retention policy / cleanup cron
+- [ ] Slice: Unit + integration tests
+
+#### 3.4 Notifications & email (CHECKLIST 6.4)
+
+- [ ] Slice: SMTP configuration docs + dev/prod sanity check
+- [ ] Slice: Transactional email templates (Welcome, Verify, Reset, Invite) — content for existing template system
+- [ ] Slice: Push subscription service integration
+- [ ] Slice: Preference center UI
+- [ ] Slice: In-app notification bell / dropdown
+- [ ] Slice: Email bounce + unsubscribe handling
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.5 File storage endpoints (CHECKLIST 6.5)
+
+- [ ] Slice: File upload/download/delete HTTP endpoints
+- [ ] Slice: Wire avatar upload handler to routes (verify full pipeline)
+- [ ] Slice: Unit + integration tests
+
+#### 3.6 Activity tracking (CHECKLIST 6.6)
+
+- [ ] Slice: Activity logging integration with handlers
+- [ ] Slice: Activity feed endpoint (`GET /api/activities`)
+- [ ] Slice: Activity feed UI component
+- [ ] Slice: Unit + integration tests
+
+#### 3.7 Feature flags & usage metering (CHECKLIST 6.7)
+
+- [ ] Slice: Feature flag evaluation middleware
+- [ ] Slice: Admin UI for flag management
+- [ ] Slice: Metering counters / hooks
+- [ ] Slice: Unit + integration tests
+
+#### 3.8 Compliance & data privacy (CHECKLIST 6.8)
+
+- [ ] Slice: Data export endpoint (GDPR) — `POST /api/users/me/export`
+- [ ] Slice: Data deletion workflow — soft delete + hard delete handlers/routes
+- [ ] Slice: Consent tracking UI
+- [ ] Slice: Right to be forgotten implementation
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.9 Realtime client completeness (CHECKLIST 6.9)
+
+- [ ] Slice: Client-side reconnection + offline queue integration
+- [ ] Slice: E2E test: subscribe → publish → receive
+
+#### 3.10 Media HTTP endpoints (CHECKLIST 6.11)
+
+- [ ] Slice: HTTP endpoints for media upload/download/processing
+- [ ] Slice: Client integration (upload component → media processing pipeline)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.11 User settings completeness (CHECKLIST 7.1)
+
+- [ ] Slice: Preferences page (theme, locale/timezone, notifications)
+- [ ] Slice: Data controls page (export / delete with grace period)
+- [ ] Slice: API key management page
+- [ ] Slice: Wire TOTP management UI to settings
+- [ ] Slice: E2E tests (settings navigation, save/load preferences)
+
+#### 3.12 Workspace admin (CHECKLIST 7.2)
+
+- [ ] Slice: Members list + invite / resend / revoke UI
+- [ ] Slice: Role management + permission gating UI
+- [ ] Slice: Workspace settings page (name / logo / slug / defaults)
+- [ ] Slice: Billing page (plan + invoices + portal redirect)
+- [ ] Slice: Audit log viewer
+- [ ] Slice: Tenant-level feature flag overrides UI
+- [ ] Slice: Domain restrictions editor (allowed email domains)
+- [ ] Slice: E2E tests (workspace admin workflows)
+
+#### 3.13 System admin completeness (CHECKLIST 7.3)
+
+- [ ] Slice: User search by "everything" (email, name, UUID, stripe_customer_id)
+- [ ] Slice: Tenant search + suspend + plan override
+- [ ] Slice: Webhook monitor + replay UI (domain logic + DB tables exist)
+- [ ] Slice: Feature flag management UI
+- [ ] Slice: System health dashboard
+- [ ] Slice: E2E tests (admin workflows)
+
+#### 3.14 Impersonation (CHECKLIST 7.4)
+
+- [ ] Slice: `POST /api/admin/impersonate/:userId` — scoped token (30 min TTL) with audit events
+- [ ] Slice: Cannot impersonate other admins (safety guard)
+- [ ] Slice: All impersonated actions tagged in audit log with `impersonated_by`
+- [ ] Slice: Rate limit: max N impersonations per admin per hour
+- [ ] Slice: Web UI banner ("Viewing as user@example.com — End Session") + exit impersonation
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.15 Soft ban / hard ban (CHECKLIST 7.5)
+
+- [ ] Slice: Lock reason stored and displayed to user
+- [ ] Slice: Configurable lock duration (permanent or timed auto-unlock)
+- [ ] Slice: Notification email on lock/unlock
+- [ ] Slice: `POST /api/admin/users/:id/hard-ban` — schedules data deletion with grace period (7 days)
+- [ ] Slice: Hard ban cascade — revoke sessions + tokens, cancel subscriptions, remove from memberships (respecting orphan prevention)
+- [ ] Slice: Background job: anonymize PII after grace period
+- [ ] Slice: Admin confirmation required (re-enter password or 2FA)
+- [ ] Slice: Unit + integration + E2E tests
+
+#### 3.16 Data hygiene — background jobs + crons (CHECKLIST 9.1 + 9.2)
+
+> Self-service deletion API + UI live in Sprint 2.6 (Account Lifecycle).
+> This slice covers the background enforcement: crons, anonymization, and cleanup.
+
+- [ ] Slice: Soft-deleted users enforcement: block login, hide from search, preserve audit trail
+- [ ] Slice: Cron (daily): permanently wipe PII where `deleted_at > 30 days` (grace period)
+- [ ] Slice: Hard delete: anonymize PII with hashed placeholders, preserve audit log structure
+- [ ] Slice: Foreign key safety: audit logs, invoices, activity must not break on hard delete
+- [ ] Slice: Unverified user cleanup cron (> 7 days unverified, exclude OAuth-only)
+- [ ] Slice: Log cleanup counts to metrics/audit
+- [ ] Slice: Unit + integration tests
+
+#### 3.17 Operational quality (CHECKLIST 10)
+
+- [ ] Slice: Wire health endpoints to `/health` + `/ready` routes (verify existing)
+- [ ] Slice: Error reporting integration (Sentry)
+- [ ] Slice: Metrics (request count/latency, job success/fail)
+- [ ] Slice: OpenAPI / Swagger generation
+- [ ] Slice: Auth-protected docs in non-dev envs
+- [ ] Slice: Integration tests (health/ready endpoints)
+
+#### 3.18 Backend infra gaps (CHECKLIST 8)
+
+- [ ] Slice: Scheduled cleanup jobs — expired tokens, stale sessions
+- [ ] Slice: IP allowlisting for admin routes
+- [ ] Slice: Request signing for webhook delivery
+- [ ] Slice: Generated API client package
+- [ ] Slice: Module scaffold CLI
+
+#### 3.19 Desktop app gaps (CHECKLIST 12)
+
+- [ ] Slice: Auto-updater integration
+- [ ] Slice: Native menu + system tray
+- [ ] Slice: Deep link handling
+
+#### 3.20 CI/CD gaps (CHECKLIST 13.3)
+
+- [ ] Slice: Staging environment workflow
+- [ ] Slice: Preview deployments for PRs
+
+#### 3.21 Storybook (CHECKLIST 12)
+
+- [ ] Slice: Storybook config + setup in `src/apps/storybook/`
+- [ ] Slice: Component stories for `client/ui` design system
+
+#### 3.22 Frontend UX polish (CHECKLIST 8 Frontend Gaps)
+
+- [ ] Slice: Command palette (optional — defer if not blocking launch)
 
 ---
 
@@ -415,9 +746,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 ---
 
-### Sprint 4: Test Coverage Pipeline (All Business Domains)
+### Sprint 4: Test Backfill for Already-Complete Code
 
-> Establish the three test layers across every business domain.
+> Sprints 1-3 include "Unit + integration + E2E tests" for each **new** feature slice.
+> Sprint 4 is **only** for backfilling tests on code already marked `[x]` in CHECKLIST.md
+> that was shipped without adequate test coverage (e.g., Auth at ~40% unit, 0% integration/E2E).
+>
 > Unit tests are colocated. Integration tests live in `apps/server/src/__tests__/integration/`.
 > E2E tests live in `apps/web/e2e/`.
 
