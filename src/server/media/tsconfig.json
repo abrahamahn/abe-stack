@@ -6,8 +6,6 @@
     "baseUrl": "./",
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@abe-stack/shared": ["../../shared/src/index.ts"],
-      "@abe-stack/shared/*": ["../../shared/src/*"],
       "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.media.tsbuildinfo"

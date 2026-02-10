@@ -706,6 +706,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Slice: Security event `new_device_login` with device fingerprint
 - [ ] Slice: Token version invalidation — `token_version` column on `users`, bump on password change / 2FA toggle / forced logout, JWT includes version
 - [ ] Slice: Trusted device tracking — user marks device as trusted, skip 2FA for N days
+- [ ] Slice: (Optional) Geo-IP coarse lookup — country-level check for impossible travel detection
 
 #### 1.4 Turnstile / CAPTCHA on public forms (CHECKLIST 11.1)
 
@@ -793,6 +794,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Slice: SMS 2FA as fallback when TOTP unavailable
 - [ ] Slice: Rate limiting on SMS sends (cost control)
 - [ ] Slice: Phone number table/column + SMS provider abstraction
+- [ ] Slice: (Optional) Phone login via SMS OTP — separate flow from 2FA (CHECKLIST 3.5)
 - [ ] Slice: Client phone input + verification in security settings
 - [ ] Slice: Unit + integration + E2E tests
 
@@ -837,6 +839,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Slice: `expires_at` enforcement — reject expired invitations
 - [ ] Slice: Auto-expire cron — mark expired as `expired` status
 - [ ] Slice: Max pending invitations per tenant (configurable)
+- [ ] Slice: Invitation reminder email — configurable N days before expiry (CHECKLIST 4.8)
 - [ ] Slice: Invitation email template
 - [ ] Slice: Client UI: invite member flow in workspace settings
 - [ ] Slice: Unit + integration + E2E tests
@@ -1041,7 +1044,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.18 Backend infra gaps (CHECKLIST 8)
 
-- [ ] Slice: Scheduled cleanup jobs — expired tokens, stale sessions
+- [ ] Slice: Scheduled cleanup jobs — expired tokens, stale sessions, stale push subscriptions
+- [ ] Slice: Scheduled OAuth token refresh — proactively renew expiring OAuth tokens (Appendix C `oauth-refresh.ts`)
 - [ ] Slice: IP allowlisting for admin routes
 - [ ] Slice: Request signing for webhook delivery
 - [ ] Slice: Generated API client package

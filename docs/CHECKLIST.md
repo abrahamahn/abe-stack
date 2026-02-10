@@ -33,21 +33,21 @@
 > Ordered by Day 1 operational necessity, then security value / effort ratio.
 > Items 1-6 are **ship blockers**. Items 7+ are post-launch.
 
-| #   | Task                                       | Value             | Effort  | Section  |
-| --- | ------------------------------------------ | ----------------- | ------- | -------- |
-| 1   | **Wire session HTTP endpoints**            | Ship blocker      | Low     | 2.3      |
-| 2   | **Turnstile / CAPTCHA on public forms**    | Ship blocker      | Low     | 11.1     |
-| 3   | **Input normalization (trim + lowercase)** | Ship blocker      | Trivial | 1.11     |
-| 4   | **"Was this you?" security emails**        | Ship blocker      | Medium  | 11.2     |
-| 5   | **ToS version gating middleware**          | Ship blocker      | Low     | 11.3     |
-| 6   | **Granular login failure logging**         | Ship blocker      | Low     | 11.4     |
-| 7   | Session labeling (UA parsing)              | High (UX)         | Low     | 2.5      |
-| 8   | Sudo mode middleware                       | High (security)   | Low     | 3.1      |
-| 9   | Soft delete + cleanup crons                | High (compliance) | Medium  | 9.1, 9.2 |
-| 10  | Tenant module (CRUD + memberships)         | High (B2B)        | High    | 4.2-4.4  |
-| 11  | Impersonation                              | High (support)    | Medium  | 7.4      |
-| 12  | Email change reversion flow                | High (security)   | Medium  | 1.9      |
-| 13  | Frontend auth gating                       | Medium            | Medium  | 5.3      |
+| #   | Task                                       | Value             | Effort  | Section  | Status   |
+| --- | ------------------------------------------ | ----------------- | ------- | -------- | -------- |
+| 1   | ~~Wire session HTTP endpoints~~            | Ship blocker      | Low     | 2.3      | [x] Done |
+| 2   | **Turnstile / CAPTCHA on public forms**    | Ship blocker      | Low     | 11.1     | [ ]      |
+| 3   | ~~Input normalization (trim + lowercase)~~ | Ship blocker      | Trivial | 1.11     | [x] Done |
+| 4   | **"Was this you?" security emails**        | Ship blocker      | Medium  | 11.2     | [ ]      |
+| 5   | **ToS version gating middleware**          | Ship blocker      | Low     | 11.3     | [ ]      |
+| 6   | **Granular login failure logging**         | Ship blocker      | Low     | 11.4     | [ ]      |
+| 7   | ~~Session labeling (UA parsing)~~          | High (UX)         | Low     | 2.5      | [x] Done |
+| 8   | Sudo mode middleware                       | High (security)   | Low     | 3.1      | [ ]      |
+| 9   | Soft delete + cleanup crons                | High (compliance) | Medium  | 9.1, 9.2 | [ ]      |
+| 10  | Tenant module (CRUD + memberships)         | High (B2B)        | High    | 4.2-4.4  | [ ]      |
+| 11  | Impersonation                              | High (support)    | Medium  | 7.4      | [ ]      |
+| 12  | ~~Email change reversion flow~~            | High (security)   | Medium  | 1.9      | [x] Done |
+| 13  | Frontend auth gating                       | Medium            | Medium  | 5.3      | [ ]      |
 
 ---
 
