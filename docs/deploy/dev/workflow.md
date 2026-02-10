@@ -399,8 +399,7 @@ GitHub Actions workflows in `.github/workflows/`:
 | `ci.yml`                         | Main CI pipeline (build, lint, test, type-check) |
 | `security.yml`                   | Security scanning                                |
 | `audit.yml`                      | Dependency auditing                              |
-| `auto-merge-main-to-dev.yml`     | Auto-merge main → dev                            |
-| `auto-merge-claude-sessions.yml` | Auto-merge Claude Code sessions                  |
+| `auto-merge.yml`                 | Auto-merge main and Claude session branches → dev |
 
 ### CI Pipeline (`ci.yml`)
 

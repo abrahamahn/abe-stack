@@ -24,7 +24,9 @@ try {
     console.log('SUCCESS: Storage path is correct.');
     process.exit(0);
   } else {
-    console.error(`FAILURE: Storage path is incorrect. Expected to end with '${expectedEnd}', but got '${config.storage.rootPath}'`);
+    console.error(
+      `FAILURE: Storage path is incorrect. Expected to end with '${expectedEnd}', but got '${config.storage.rootPath}'`,
+    );
     process.exit(1);
   }
 } catch (error) {

@@ -62,11 +62,11 @@ jobs:
         with:
           path: |
             node_modules
-            apps/*/node_modules
-            infra/*/node_modules
-            modules/*/node_modules
-            shared/*/node_modules
-            client/node_modules
+            src/apps/*/node_modules
+            src/server/*/node_modules
+            src/client/*/node_modules
+            src/shared/node_modules
+            src/tools/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
   # Fast sanity checks for PRs
@@ -93,11 +93,11 @@ jobs:
         with:
           path: |
             node_modules
-            apps/*/node_modules
-            infra/*/node_modules
-            modules/*/node_modules
-            shared/*/node_modules
-            client/node_modules
+            src/apps/*/node_modules
+            src/server/*/node_modules
+            src/client/*/node_modules
+            src/shared/node_modules
+            src/tools/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
@@ -126,7 +126,7 @@ jobs:
 
       # Run only critical/changed tests for PRs
       - name: Run Critical Tests
-        run: pnpm test:changed || pnpm test -- --run --reporter=dot
+        run: pnpm test
 
       - name: PR Sanity Summary
         run: |
