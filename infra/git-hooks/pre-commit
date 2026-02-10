@@ -1,2 +1,9 @@
 #!/usr/bin/env sh
+
+# Fast path: no staged changes means nothing to validate.
+if git diff --cached --quiet; then
+  echo "ℹ️ pre-commit: no staged changes, skipping checks."
+  exit 0
+fi
+
 pnpm pre-commit

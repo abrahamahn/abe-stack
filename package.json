@@ -57,7 +57,7 @@
       "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write",
       "eslint --cache --cache-location node_modules/.cache/eslint/.cache --fix --max-warnings=0 --no-warn-ignored --ignore-pattern config/playwright.config.ts"
     ],
-    "*.{json,css,md}": [
+    "*.{json,css,md,yml,yaml}": [
       "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write"
     ]
   },

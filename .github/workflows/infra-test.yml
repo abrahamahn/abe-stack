@@ -119,29 +119,29 @@ jobs:
 
           # Test with minimal variables for validation
           cat > test.tfvars << EOF
-environment = "production"
-domain = "example.com"
-ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXn3QpXrUNQqXWnB6I6Q8r8j4NQFizH8hK2w5fQ8wz1 ci@test"
-app_name = "abe-stack-test"
-app_port = 3000
-EOF
+          environment = "production"
+          domain = "example.com"
+          ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXn3QpXrUNQqXWnB6I6Q8r8j4NQFizH8hK2w5fQ8wz1 ci@test"
+          app_name = "abe-stack-test"
+          app_port = 3000
+          EOF
 
           # Add provider-specific test variables
           if [ "${{ matrix.provider }}" = "digitalocean" ]; then
             cat >> test.tfvars << EOF
-region = "${DO_REGION:-nyc1}"
-instance_size = "${DO_INSTANCE_SIZE:-s-1vcpu-1gb}"
-enable_managed_database = ${DO_ENABLE_MANAGED_DB:-false}
-database_size = "${DO_DATABASE_SIZE:-db-s-1vcpu-1gb}"
-EOF
+            region = "${DO_REGION:-nyc1}"
+            instance_size = "${DO_INSTANCE_SIZE:-s-1vcpu-1gb}"
+            enable_managed_database = ${DO_ENABLE_MANAGED_DB:-false}
+            database_size = "${DO_DATABASE_SIZE:-db-s-1vcpu-1gb}"
+            EOF
           elif [ "${{ matrix.provider }}" = "gcp" ]; then
             cat >> test.tfvars << EOF
-project_id = "test-project-123456"
-region = "us-central1"
-zone = "us-central1-a"
-instance_size = "e2-small"
-enable_managed_database = false
-EOF
+            project_id = "test-project-123456"
+            region = "us-central1"
+            zone = "us-central1-a"
+            instance_size = "e2-small"
+            enable_managed_database = false
+            EOF
           fi
 
           # Test terraform plan with test variables
