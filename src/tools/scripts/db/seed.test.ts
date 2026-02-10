@@ -11,37 +11,35 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted() to ensure mock functions are available when vi.mock factory runs
-const {
-  mockBuildConnectionString,
-  mockCreateDbClient,
-  mockExecute,
-  mockHashPassword,
-  mockInsert,
-  mockValues,
-  mockOnConflictDoNothing,
-  mockToSql,
-} = vi.hoisted(() => ({
-  mockBuildConnectionString: vi.fn(),
-  mockCreateDbClient: vi.fn(),
-  mockExecute: vi.fn(),
-  mockHashPassword: vi.fn(),
-  mockInsert: vi.fn(),
-  mockValues: vi.fn(),
-  mockOnConflictDoNothing: vi.fn(),
-  mockToSql: vi.fn(),
-}));
+const { mockBuildConnectionString, mockCreateDbClient, mockExecute, mockHashPassword } = vi.hoisted(
+  () => ({
+    mockBuildConnectionString: vi.fn(),
+    mockCreateDbClient: vi.fn(),
+    mockExecute: vi.fn(),
+    mockHashPassword: vi.fn(),
+  }),
+);
 
 // Mock the database module using package path
 vi.mock('@abe-stack/db', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',
-  insert: mockInsert,
 }));
 
 // Mock the auth package — hashPassword uses DEFAULT_ARGON2_CONFIG when called without config arg
 vi.mock('@abe-stack/core/auth', () => ({
   hashPassword: mockHashPassword,
+}));
+
+// Mock canonicalizeEmail — just lowercase for tests
+vi.mock('@abe-stack/shared', () => ({
+  canonicalizeEmail: (email: string) => email.toLowerCase(),
+}));
+
+// Mock server-engine env loader
+vi.mock('@abe-stack/server-engine', () => ({
+  loadServerEnv: vi.fn(),
 }));
 
 // Store original process values
@@ -81,12 +79,6 @@ describe('seed script', () => {
 
     // Setup default mocks
     mockBuildConnectionString.mockReturnValue('postgresql://localhost:5432/test');
-
-    // Mock the query builder chain for insert()
-    mockToSql.mockReturnValue({ text: 'INSERT INTO users...', values: [] });
-    mockOnConflictDoNothing.mockReturnValue({ toSql: mockToSql });
-    mockValues.mockReturnValue({ onConflictDoNothing: mockOnConflictDoNothing });
-    mockInsert.mockReturnValue({ values: mockValues });
 
     // Mock db client with execute method
     mockExecute.mockResolvedValue(1);
@@ -166,21 +158,43 @@ describe('seed script', () => {
       expect(mockHashPassword).toHaveBeenCalledWith('password123');
     });
 
-    it('should seed admin user with admin role', async () => {
+    it('should include canonical_email in INSERT', async () => {
       process.env.NODE_ENV = 'development';
 
       const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      expect(mockValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'admin@example.com',
-          name: 'Admin User',
-          role: 'admin',
-          password_hash: '$argon2id$hashed',
-        }),
-      );
+      // Each execute call should include SQL with canonical_email
+      const firstCall = mockExecute.mock.calls[0]?.[0] as { text: string; values: string[] };
+      expect(firstCall.text).toContain('canonical_email');
+      expect(firstCall.values).toContain('admin@example.com'); // canonical form
+    });
+
+    it('should include email_verified in INSERT', async () => {
+      process.env.NODE_ENV = 'development';
+
+      const { seed } = await import('./seed');
+
+      await expect(seed()).rejects.toThrow('process.exit(0)');
+
+      const firstCall = mockExecute.mock.calls[0]?.[0] as { text: string };
+      expect(firstCall.text).toContain('email_verified');
+      expect(firstCall.text).toContain('true');
+    });
+
+    it('should seed admin user with correct values', async () => {
+      process.env.NODE_ENV = 'development';
+
+      const { seed } = await import('./seed');
+
+      await expect(seed()).rejects.toThrow('process.exit(0)');
+
+      const adminCall = mockExecute.mock.calls[0]?.[0] as { values: string[] };
+      expect(adminCall.values).toContain('admin@example.com');
+      expect(adminCall.values).toContain('$argon2id$hashed');
+      expect(adminCall.values).toContain('Admin User');
+      expect(adminCall.values).toContain('admin');
     });
 
     it('should seed regular users with user role', async () => {
@@ -190,32 +204,26 @@ describe('seed script', () => {
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      expect(mockValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'user@example.com',
-          name: 'Test User',
-          role: 'user',
-        }),
-      );
+      const userCall = mockExecute.mock.calls[1]?.[0] as { values: string[] };
+      expect(userCall.values).toContain('user@example.com');
+      expect(userCall.values).toContain('user');
 
-      expect(mockValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'demo@example.com',
-          name: 'Demo User',
-          role: 'user',
-        }),
-      );
+      const demoCall = mockExecute.mock.calls[2]?.[0] as { values: string[] };
+      expect(demoCall.values).toContain('demo@example.com');
+      expect(demoCall.values).toContain('user');
     });
 
-    it('should use onConflictDoNothing for existing users', async () => {
+    it('should use ON CONFLICT DO UPDATE to backfill existing users', async () => {
       process.env.NODE_ENV = 'development';
 
       const { seed } = await import('./seed');
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      expect(mockOnConflictDoNothing).toHaveBeenCalledTimes(3);
-      expect(mockOnConflictDoNothing).toHaveBeenCalledWith('email');
+      const firstCall = mockExecute.mock.calls[0]?.[0] as { text: string };
+      expect(firstCall.text).toContain('ON CONFLICT');
+      expect(firstCall.text).toContain('DO UPDATE SET');
+      expect(firstCall.text).toContain('canonical_email');
     });
 
     it('should display success message after seeding', async () => {
@@ -252,10 +260,10 @@ describe('seed script', () => {
   });
 
   describe('error handling', () => {
-    it('should handle unique constraint errors gracefully', async () => {
+    it('should handle database errors per user gracefully', async () => {
       process.env.NODE_ENV = 'development';
 
-      // First user succeeds, second throws unique error
+      // Second user throws error
       let callCount = 0;
       mockExecute.mockImplementation(() => {
         callCount++;
@@ -267,19 +275,10 @@ describe('seed script', () => {
 
       const { seed } = await import('./seed');
 
+      // seed catches per-user errors and continues, then exits 0
       await expect(seed()).rejects.toThrow('process.exit(0)');
-
-      expect(consoleOutput.some((msg) => msg.includes('already exists'))).toBe(true);
-    });
-
-    it('should rethrow non-unique errors', async () => {
-      process.env.NODE_ENV = 'development';
-
-      mockExecute.mockRejectedValue(new Error('Connection refused'));
-
-      const { seed } = await import('./seed');
-
-      await expect(seed()).rejects.toThrow('Connection refused');
+      // 3 calls: first and third succeed, second throws
+      expect(mockExecute).toHaveBeenCalledTimes(3);
     });
 
     it('should handle database connection errors', async () => {
@@ -313,29 +312,14 @@ describe('seed script', () => {
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      // Verify all expected users are seeded
-      const calls = mockValues.mock.calls.map((call) => call[0]);
-
-      expect(calls).toContainEqual(
-        expect.objectContaining({
-          email: 'admin@example.com',
-          role: 'admin',
-        }),
+      // Verify all expected users are seeded via execute calls
+      const emails = mockExecute.mock.calls.map(
+        (call) => (call[0] as { values: string[] }).values[0],
       );
 
-      expect(calls).toContainEqual(
-        expect.objectContaining({
-          email: 'user@example.com',
-          role: 'user',
-        }),
-      );
-
-      expect(calls).toContainEqual(
-        expect.objectContaining({
-          email: 'demo@example.com',
-          role: 'user',
-        }),
-      );
+      expect(emails).toContain('admin@example.com');
+      expect(emails).toContain('user@example.com');
+      expect(emails).toContain('demo@example.com');
     });
 
     it('should use the same password for all test users', async () => {

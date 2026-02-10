@@ -701,12 +701,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 1.3 Security intelligence (CHECKLIST 2.6)
 
-- [ ] Slice: New device / new IP detection — compare login against known sessions
-- [ ] Slice: Suspicious login email alert — send email on unrecognized device/IP
-- [ ] Slice: Security event `new_device_login` with device fingerprint
-- [ ] Slice: Token version invalidation — `token_version` column on `users`, bump on password change / 2FA toggle / forced logout, JWT includes version
-- [ ] Slice: Trusted device tracking — user marks device as trusted, skip 2FA for N days
-- [ ] Slice: (Optional) Geo-IP coarse lookup — country-level check for impossible travel detection
+> **Deferred to Sprint 3.23** — Security Intelligence & Device Detection is a supporting module
+> that depends on auth infrastructure from Sprint 1.1–1.2. Detailed breakdown in Sprint 3.23
+> covers: geo-IP lookup, trusted device tracking, token version invalidation, new-login alerts,
+> device management UI.
 
 #### 1.4 Turnstile / CAPTCHA on public forms (CHECKLIST 11.1)
 
@@ -788,15 +786,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 2.5 Phone / SMS 2FA (CHECKLIST 3.5)
 
-- [ ] Slice: `POST /api/auth/phone/add` → send SMS verification code
-- [ ] Slice: `POST /api/auth/phone/verify` → verify code, store phone
-- [ ] Slice: `DELETE /api/auth/phone` → remove phone 2FA
-- [ ] Slice: SMS 2FA as fallback when TOTP unavailable
-- [ ] Slice: Rate limiting on SMS sends (cost control)
-- [ ] Slice: Phone number table/column + SMS provider abstraction
-- [ ] Slice: (Optional) Phone login via SMS OTP — separate flow from 2FA (CHECKLIST 3.5)
-- [ ] Slice: Client phone input + verification in security settings
-- [ ] Slice: Unit + integration + E2E tests
+> **Deferred to Sprint 3.24** — SMS 2FA is a supporting module that depends on auth
+> infrastructure from Sprint 1 and 2FA patterns from Sprint 1.8 (TOTP). Detailed breakdown
+> in Sprint 3.24 covers: SMS provider abstraction (Twilio + console), phone number management,
+> SMS 2FA challenge flow, rate limiting, client UI.
 
 #### 2.6 Account lifecycle — self-service API + UI (CHECKLIST 3.6)
 
@@ -899,13 +892,17 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 ### Sprint 3: Supporting Modules + Admin + Operational Completeness
 
 > **Goal:** Wire every remaining module, close admin gaps, and reach operational readiness.
-> Covers: CHECKLIST 6 (all gaps), 7 (all gaps), 8 (gaps), 9, 10, 12 (gaps), 13 (gaps).
+> Covers: CHECKLIST 2.6 (security intel), 3.5 (SMS 2FA), 6 (all gaps), 7 (all gaps),
+> 8 (gaps), 9, 10, 12 (gaps), 13 (gaps).
 > Cross-references: BUSINESS.md Sections 1 (IAM gaps), 3 (Billing), 4 (Communication),
 > 5 (System Ops), 6 (Compliance), 7 (Admin Console), 8 (Test Pipelines).
 >
 > **Execution rule:** Each slice follows Vertical Slice Protocol (contract → service → unit test →
 > route → integration test → client hook → UI → E2E test). Infrastructure is horizontal,
 > logic is vertical (see EXECUTION.md).
+>
+> **Note:** Infrastructure/devex slices (3.16, 3.18, 3.19, 3.20, 3.21) follow a reduced protocol
+> appropriate to their nature (no client hooks or E2E for backend-only work).
 
 ---
 
@@ -1018,7 +1015,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Retention + Cleanup:**
 
 - [ ] Config: audit log retention period (configurable, default 90 days)
-- [ ] Cron: daily cleanup of audit events older than retention period
+- [ ] Cron: daily cleanup of audit events older than retention period (audit-specific; token/session crons in 3.18, PII crons in 3.16)
 - [ ] Cron: archive to cold storage before deletion (optional, config-gated)
 
 **Tests:**
@@ -1564,9 +1561,16 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Service: auth-protect docs endpoint in non-dev environments
 - [ ] Service: auto-generate from existing route registrations
 
+**Background Job Verification (BUSINESS 5.2):**
+
+- [ ] Verify: job queue processes enqueued items end-to-end (enqueue → dequeue → process → success)
+- [ ] Verify: failed jobs retry with exponential backoff, dead-letter after max retries
+- [ ] Verify: admin job monitor reflects real job state (pending, processing, completed, failed)
+
 **Tests:**
 
 - [ ] Integration: health/ready endpoints return correct status; metrics endpoint returns data
+- [ ] Integration: job queue lifecycle — enqueue → process → success callback; failure → retry → dead-letter
 
 ---
 
@@ -1588,13 +1592,18 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Security:**
 
 - [ ] Middleware: IP allowlisting for admin routes (configurable allowlist in config)
+- [ ] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
 - [ ] Service: request signing for webhook delivery (HMAC-SHA256 signature in headers)
 - [ ] Service: webhook signature verification on receiving end (example implementation)
+- [ ] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
+- [ ] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
+- [ ] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
 
 **Developer Experience:**
 
 - [ ] Tool: generated API client package — auto-generate typed fetch client from route definitions
 - [ ] Tool: module scaffold CLI — `pnpm scaffold:module <name>` → creates handler, service, route, test stubs
+- [ ] Tool: `pnpm db:reset` — convenience command to drop + recreate + migrate + seed dev DB (Appendix E.6)
 
 **Tests:**
 
@@ -1659,8 +1668,143 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 #### 3.22 Frontend UX Polish (CHECKLIST 8 Frontend Gaps)
 
 - [ ] Slice: command palette (Ctrl+K) — search pages, actions, settings (defer if not blocking launch)
-- [ ] Slice: tenant switcher component — dropdown in header to switch between workspaces (from Sprint 2.13)
+- [ ] Verify: tenant switcher component renders correctly (built in Sprint 2.13; polish UX if needed)
 - [ ] Slice: onboarding flow — create workspace → invite teammate → pick plan → first success moment (BUSINESS Appendix E.8)
+
+---
+
+#### 3.23 Security Intelligence & Device Detection (CHECKLIST 2.6)
+
+> **Existing:** Login handler already logs IP + user agent per session. `security_events` table exists.
+> `isNewDevice` check exists in `handleLogin` (compares IP + UA against active sessions).
+> **Gap:** No geo-IP lookup, no trusted device tracking, no "new login" banner in UI,
+> no token version invalidation for compromised devices.
+
+**Backend — Detection + Storage:**
+
+- [ ] Service: geo-IP coarse lookup — resolve IP → country/region (use MaxMind GeoLite2 or IP-API fallback)
+- [ ] Schema: `trusted_devices` table — `user_id`, `device_fingerprint` (IP + UA hash), `label`, `first_seen`, `last_seen`, `trusted_at`
+- [ ] Repository: `trusted_devices` CRUD — create, findByUser, markTrusted, revoke
+- [ ] Service: device fingerprint helper — deterministic hash of IP + UA (or subset)
+- [ ] Service: `isNewDevice()` → check `trusted_devices`, not just active sessions
+- [ ] Service: `flagSuspiciousLogin()` — create security event when login from new country/region
+- [ ] Security event types: `new_device_login`, `suspicious_location`, `device_trusted`, `device_revoked`
+
+**Backend — Token Version Invalidation:**
+
+> Note: This is distinct from Sprint 1.2's "max concurrent sessions" (limit N active sessions).
+> Token version invalidation forces ALL sessions to re-authenticate after security events.
+
+- [ ] Schema: add `token_version` column to `users` table (integer, default 0)
+- [ ] Service: increment `token_version` on password change, force logout, or admin action
+- [ ] Middleware: JWT validation checks `token_version` matches DB — reject stale tokens
+- [ ] Route: `POST /api/auth/invalidate-sessions` — increment version, revoke all refresh families
+
+**Backend — Alerts:**
+
+- [ ] Email template: "New login from {location}" alert (already partially wired in `sendNewLoginAlert`)
+- [ ] Route: `GET /api/users/me/devices` — list trusted + recent devices
+- [ ] Route: `POST /api/users/me/devices/:id/trust` — mark device as trusted
+- [ ] Route: `DELETE /api/users/me/devices/:id` — revoke trusted device
+
+**Client + UI:**
+
+- [ ] Client API: `devices/client.ts` — list, trust, revoke hooks
+- [ ] UI: Trusted Devices section in Settings → Sessions tab
+- [ ] UI: "New device login" banner — shown when `isNewDevice` flag is set on auth response
+- [ ] UI: Device list with location, last seen, trust/revoke actions
+
+**Tests:**
+
+- [ ] Unit tests: device fingerprint generation, geo-IP lookup mock, token version check
+- [ ] Integration tests: new device detection → security event created, token invalidation flow
+- [ ] E2E test: login → see new device banner → trust device → banner gone on next login
+
+---
+
+#### 3.24 Phone / SMS Two-Factor Authentication (CHECKLIST 3.5 | BUSINESS 1.9)
+
+> **Existing:** TOTP 2FA is fully implemented. SMS provider skeleton in `server/engine/src/sms/`.
+> Migration `0023_sms_verification.sql` exists but may need review.
+> **Gap:** No SMS sending service, no phone number management, no SMS-based 2FA challenge flow.
+
+**Backend — SMS Provider:**
+
+- [ ] Service: `sms/provider.ts` — interface `SmsProvider { send(to, body): Promise<void> }`
+- [ ] Service: `sms/console-provider.ts` — dev provider that logs SMS to console
+- [ ] Service: `sms/twilio-provider.ts` — Twilio integration (env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`)
+- [ ] Config: `auth.sms` config section — `provider`, `codeLength` (6), `codeExpirySeconds` (300), `maxAttempts` (3)
+- [ ] Factory: `createSmsProvider(config)` — returns console or Twilio based on config
+
+**Backend — Phone Number Management:**
+
+- [ ] Schema: add `phone_number` + `phone_verified_at` columns to `users` table
+- [ ] Route: `POST /api/users/me/phone` — set phone number, send verification code
+- [ ] Route: `POST /api/users/me/phone/verify` — verify phone with code
+- [ ] Route: `DELETE /api/users/me/phone` — remove phone number (requires sudo)
+- [ ] Service: rate limit SMS sends per user (max 3/hour, 10/day)
+
+**Backend — SMS 2FA Challenge:**
+
+- [ ] Service: `sendSms2faCode(userId)` — generate code, store hash, send SMS
+- [ ] Service: `verifySms2faCode(userId, code)` — timing-safe compare, mark used
+- [ ] Schema: `sms_verification_codes` table — `user_id`, `code_hash`, `expires_at`, `attempts`, `used_at`
+- [ ] Route: `POST /api/auth/sms/send` — send SMS 2FA code during login challenge
+- [ ] Route: `POST /api/auth/sms/verify` — verify SMS code, complete login
+- [ ] Integration: login handler — if user has SMS 2FA enabled (no TOTP), return SMS challenge
+
+**Client + UI:**
+
+- [ ] Client API: `sms/client.ts` — phone management + SMS 2FA hooks
+- [ ] UI: Phone number management in Settings → Security tab
+- [ ] UI: SMS 2FA setup flow — enter number → verify → enable as 2FA method
+- [ ] UI: SMS 2FA login challenge screen — "Enter the code sent to +1\*\*\*1234"
+
+**Tests:**
+
+- [ ] Unit tests: SMS code generation, rate limiting, timing-safe verify, provider factory
+- [ ] Integration tests: phone verification flow, SMS 2FA login challenge end-to-end
+- [ ] E2E test: settings → add phone → verify → enable SMS 2FA → login with SMS code
+
+---
+
+#### 3.25 Webhook Delivery System (BUSINESS 5.3 | CHECKLIST Appendix D)
+
+> **Existing:** `webhooks` table + `webhook_deliveries` table (DB complete). Webhook monitor +
+> replay UI in Sprint 3.13. Request signing in Sprint 3.18.
+> **Gap:** No webhook registration CRUD, no event subscription, no actual delivery service
+> (send HTTP POST to registered URLs when events occur), no retry pipeline.
+
+**Backend — Webhook Registration:**
+
+- [ ] Route: `POST /api/webhooks` — register webhook endpoint (URL, secret, event types)
+- [ ] Route: `GET /api/webhooks` — list registered webhooks for current tenant
+- [ ] Route: `GET /api/webhooks/:id` — webhook detail with delivery stats
+- [ ] Route: `PATCH /api/webhooks/:id` — update URL, events, enabled/disabled
+- [ ] Route: `DELETE /api/webhooks/:id` — remove webhook registration
+- [ ] Route: `POST /api/webhooks/:id/rotate-secret` — rotate shared secret (requires sudo)
+
+**Backend — Event Subscription + Delivery:**
+
+- [ ] Service: event type registry — define subscribable events (user.created, invoice.paid, etc.)
+- [ ] Service: webhook dispatcher — on event, find matching subscriptions, enqueue delivery jobs
+- [ ] Service: delivery worker — POST payload to URL with HMAC-SHA256 signature header
+- [ ] Service: retry with exponential backoff (1m, 5m, 30m, 2h, 12h) — max 5 retries
+- [ ] Service: dead-letter after max retries — mark webhook as failing, alert admin
+- [ ] Service: delivery log — store request/response/status/timing per delivery attempt
+
+**Client + UI:**
+
+- [ ] Client API: `webhooks/client.ts` — CRUD hooks for webhook management
+- [ ] UI: Webhook management page — create, list, edit, delete webhooks
+- [ ] UI: Webhook detail — delivery log with success/failure indicators, replay button
+
+**Tests:**
+
+- [ ] Unit: signature generation, retry backoff calculation, event matching, payload serialization
+- [ ] Integration: register webhook → trigger event → delivery queued → POST sent → logged
+- [ ] Integration: endpoint failure → retry scheduled → eventual dead-letter
+- [ ] E2E: admin → create webhook → trigger event → see delivery in log
 
 ---
 
@@ -1668,15 +1812,16 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 > Maps Sprint 3 items to BUSINESS.md sections for completeness verification.
 
-| BUSINESS.md Section       | Sprint 3 Items                                                      | Coverage                                                               |
-| ------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 1. IAM (gaps)             | 3.1 API Keys, 3.11 Settings                                         | Full                                                                   |
-| 3. Billing & Monetization | 3.2 Billing Lifecycle                                               | Full (checkout, recurring, invoicing, upgrade/downgrade, usage limits) |
-| 4. Communication          | 3.4 Notifications                                                   | Full (in-app, push, email, preferences)                                |
-| 5. System Operations      | 3.3 Audit, 3.6 Activity, 3.7 Flags+Metering, 3.17 Ops, 3.18 Backend | Full (audit, jobs, webhooks, flags, metering, health)                  |
-| 6. Compliance & Legal     | 3.8 Compliance, 3.16 Data Hygiene                                   | Full (ToS, consent, export, deletion)                                  |
-| 7. Business Admin Console | 3.13 System Admin, 3.14 Impersonation, 3.15 Bans                    | Full (user support, tenant mgmt, health)                               |
-| 8. Test Pipelines         | Each item includes unit + integration + E2E                         | Inline per slice; backfill in Sprint 4                                 |
+| BUSINESS.md Section       | Sprint 3 Items                                                                     | Coverage                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1. IAM (gaps)             | 3.1 API Keys, 3.11 Settings, 3.23 Security Intel, 3.24 SMS 2FA                     | Full                                                                   |
+| 2. Team & Workspace (UI)  | 3.12 Workspace Admin                                                               | UI layer only (backend in Sprint 2)                                    |
+| 3. Billing & Monetization | 3.2 Billing Lifecycle                                                              | Full (checkout, recurring, invoicing, upgrade/downgrade, usage limits) |
+| 4. Communication          | 3.4 Notifications                                                                  | Full (in-app, push, email, preferences)                                |
+| 5. System Operations      | 3.3 Audit, 3.6 Activity, 3.7 Flags+Metering, 3.17 Ops, 3.18 Backend, 3.25 Webhooks | Full (audit, jobs, webhook delivery, flags, metering, health)          |
+| 6. Compliance & Legal     | 3.8 Compliance, 3.16 Data Hygiene                                                  | Full (ToS, consent, export, deletion)                                  |
+| 7. Business Admin Console | 3.13 System Admin, 3.14 Impersonation, 3.15 Bans                                   | Full (user support, tenant mgmt, health)                               |
+| 8. Test Pipelines         | Each item includes unit + integration + E2E                                        | Inline per slice; backfill in Sprint 4                                 |
 
 ---
 
@@ -2248,6 +2393,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Integration: health check includes queue system status
 - [ ] E2E: health endpoint accessible from browser (no auth required)
 
+**Correlation IDs:**
+
+- [ ] Integration: request with `X-Correlation-Id` header → same ID appears in response header + logs
+- [ ] Integration: request without correlation ID → server generates one, returns in response header
+- [ ] Integration: correlation ID propagated to downstream service calls and queue jobs
+
 **Error Reporting:**
 
 - [ ] Service: Sentry integration provider (optional, config-gated)
@@ -2290,6 +2441,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Integration: new device login → new device alert email sent
 - [ ] Integration: email change A→B → "Revert" link sent to old email (A)
 - [ ] Integration: clicking revert link → email reverted, account locked, sessions killed
+- [ ] Integration: new API key generated → security notification email sent
 - [ ] Unit test: email template rendering for each notification type
 
 **ToS Gating (11.3):**
@@ -2306,6 +2458,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Integration: `UNVERIFIED_EMAIL` → stored with reason
 - [ ] Integration: `ACCOUNT_LOCKED` → stored with reason
 - [ ] Integration: `CAPTCHA_FAILED` → stored with reason
+- [ ] Integration: `TOTP_REQUIRED` → stored with reason (successful password, awaiting 2FA)
+- [ ] Integration: `TOTP_INVALID` → stored with reason (wrong 2FA code)
 - [ ] Integration: admin can filter login attempts by failure reason
 - [ ] Security: client receives identical 401 for all failure types (anti-enumeration)
 
@@ -2324,6 +2478,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] `session-cleanup.ts` — purge expired/idle sessions
 - [ ] Unit tests: each job's selection criteria, batch processing, error handling
 - [ ] Integration tests: job enqueued → processed → DB state updated correctly
+- [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
 
 ---
 
@@ -2347,31 +2502,114 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 ---
 
+#### 4.19 Activity Tracking, Feature Flags & Usage Metering Tests (Sprint 3.6 + 3.7 Backfill)
+
+> **Existing:** Activity tracking table + service (Sprint 3.6), Feature flags table + metering table (Sprint 3.7).
+> **Gap:** Zero tests for activity CRUD, flag evaluation, metering aggregation.
+
+**Activity Tracking:**
+
+- [ ] Unit: activity event creation — typed events with actor/action/target/metadata
+- [ ] Unit: activity feed query — pagination, filtering by actor/target/type, date range
+- [ ] Integration: `POST /api/activities` → creates activity record in DB
+- [ ] Integration: `GET /api/activities` → returns paginated activity feed with filters
+- [ ] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
+
+**Feature Flags:**
+
+- [ ] Unit: flag evaluation logic — enabled/disabled, percentage rollout, user targeting
+- [ ] Unit: flag defaults — missing flag returns default value, no crash
+- [ ] Integration: `GET /api/flags/:key` → returns flag value for current user/tenant
+- [ ] Integration: admin CRUD — create/update/delete flags, toggle enabled state
+- [ ] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
+
+**Usage Metering:**
+
+- [ ] Unit: meter increment logic — idempotency key, counter aggregation, period rollover
+- [ ] Unit: usage limit enforcement — soft limit (warn) vs hard limit (block)
+- [ ] Integration: API call → meter incremented → usage reflected in billing
+- [ ] Integration: usage exceeds plan limit → appropriate response (429 or degraded)
+- [ ] Integration: metering data feeds billing invoice line items
+
+---
+
+#### 4.20 Webhook Delivery System Tests (Sprint 3.18 Backfill)
+
+> **Existing:** Webhook table + delivery log table, queue-based delivery (Sprint 3.18).
+> **Gap:** Zero tests for webhook signature, delivery, retry, registration.
+
+**Unit Tests:**
+
+- [ ] Webhook signature generation — HMAC-SHA256 with shared secret, correct payload serialization
+- [ ] Webhook signature verification — valid signature accepted, tampered payload rejected
+- [ ] Retry logic — exponential backoff calculation, max retry count, dead-letter after exhaustion
+- [ ] Event filtering — webhook subscription with event type filter, wildcard matching
+
+**Integration Tests:**
+
+- [ ] Register webhook endpoint → stored in DB with secret
+- [ ] Event triggered → webhook queued → delivered to endpoint → delivery logged
+- [ ] Endpoint returns 500 → retry scheduled with exponential backoff
+- [ ] Endpoint returns 200 → delivery marked successful, no retry
+- [ ] Max retries exceeded → webhook marked failed, admin notified
+- [ ] `GET /api/webhooks/:id/deliveries` → delivery log with status/response/timing
+- [ ] Webhook secret rotation → old deliveries still verifiable, new deliveries use new secret
+- [ ] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
+
+---
+
+#### 4.21 Desktop App Tests (Sprint 3.19 Backfill)
+
+> **Existing:** Electron app shell, IPC bridge, local storage adapter (Sprint 3.19).
+> **Gap:** Zero tests for IPC handlers, auth flow, offline mode.
+
+**Unit Tests:**
+
+- [ ] IPC handler registration — all handlers registered with correct channel names
+- [ ] Auth flow — token storage in secure keychain (keytar/safeStorage), token refresh on app resume
+- [ ] Deep link handling — protocol handler parses `abe://` links correctly
+- [ ] Auto-update — version check, download progress, install-on-quit logic
+- [ ] Offline detection — network status change → queue operations, sync on reconnect
+
+**Integration Tests (Electron test runner):**
+
+- [ ] App launches → renders main window with correct preload script
+- [ ] Login flow → tokens stored securely → subsequent launch auto-authenticates
+- [ ] IPC: renderer requests data → main process fetches → result returned to renderer
+- [ ] Offline → online transition → queued operations replayed successfully
+- [ ] Menu items → correct IPC messages sent → expected actions performed
+
+---
+
 #### Sprint 4 Cross-Reference Summary
 
 > Maps Sprint 4 items to CHECKLIST.md and BUSINESS.md sections for completeness verification.
 
-| CHECKLIST Section              | BUSINESS.md | Sprint 4 Items                                                            | Coverage                                               |
-| ------------------------------ | ----------- | ------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 10. Operational Quality        | E.4         | 4.15 Operational Quality Tests                                            | Health, error reporting, metrics, OpenAPI               |
-| 11.1 Anti-Abuse                | —           | 4.16 Operational Blind Spot Verification                                  | CAPTCHA integration tests                              |
-| 11.2 Security Notifications    | —           | 4.16 Operational Blind Spot Verification                                  | "Was this you?" + email reversion tests                |
-| 11.3 ToS Gating                | —           | 4.16 Operational Blind Spot Verification                                  | Middleware + acceptance flow tests                      |
-| 11.4 Login Failure Logging     | —           | 4.16 Operational Blind Spot Verification                                  | Granular failure reason tests                          |
-| 14.1 Authentication            | 8.1         | 4.2 Authentication Tests                                                  | Full (unit + integration + E2E)                        |
-| 14.2 Sessions                  | 8.1         | 4.3 Sessions Tests                                                        | Full (unit + integration + E2E)                        |
-| 14.3 Account Management        | 8.1         | 4.4 Account Management Tests                                              | Full (unit + integration + E2E)                        |
-| 14.4 Multi-Tenant              | 8.2         | 4.5 Multi-Tenant Tests                                                    | Full (unit + integration + E2E)                        |
-| 14.5 RBAC                      | 8.2         | 4.6 RBAC Tests                                                            | Full (unit + integration + E2E)                        |
-| 14.6 Billing                   | 8.3         | 4.7 Billing Tests                                                         | Full (unit + integration + E2E)                        |
-| 14.7 Notifications             | 8.4         | 4.8 Notifications Tests                                                   | Full (unit + integration + E2E)                        |
-| 14.8 Audit & Security Events   | 8.5         | 4.9 Audit Tests                                                           | Full (unit + integration + E2E)                        |
-| 14.9 Compliance                | 8.6         | 4.10 Compliance Tests                                                     | Full (unit + integration + E2E)                        |
-| 14.10 Realtime                 | —           | 4.11 Realtime Tests                                                       | Full (unit + integration + E2E)                        |
-| 14.11 Media                    | —           | 4.12 Media Tests                                                          | Full (unit + integration + E2E)                        |
-| 14.12 API Keys                 | —           | 4.13 API Keys Tests                                                       | Full (unit + integration + E2E)                        |
-| 14.13 Admin Console            | 8.7         | 4.14 Admin Tests                                                          | Full (unit + integration + E2E)                        |
-| Appendix C (Engine)            | —           | 4.17 Scheduled Jobs, 4.18 Client Engine + Search                          | Scheduled jobs + missing query builder                 |
+| CHECKLIST Section            | BUSINESS.md | Sprint 4 Items                                         | Coverage                                  |
+| ---------------------------- | ----------- | ------------------------------------------------------ | ----------------------------------------- |
+| 10. Operational Quality      | E.4         | 4.15 Operational Quality Tests                         | Health, error reporting, metrics, OpenAPI |
+| 11.1 Anti-Abuse              | —           | 4.16 Operational Blind Spot Verification               | CAPTCHA integration tests                 |
+| 11.2 Security Notifications  | —           | 4.16 Operational Blind Spot Verification               | "Was this you?" + email reversion tests   |
+| 11.3 ToS Gating              | —           | 4.16 Operational Blind Spot Verification               | Middleware + acceptance flow tests        |
+| 11.4 Login Failure Logging   | —           | 4.16 Operational Blind Spot Verification               | Granular failure reason tests             |
+| 14.1 Authentication          | 8.1         | 4.2 Authentication Tests                               | Full (unit + integration + E2E)           |
+| 14.2 Sessions                | 8.1         | 4.3 Sessions Tests                                     | Full (unit + integration + E2E)           |
+| 14.3 Account Management      | 8.1         | 4.4 Account Management Tests                           | Full (unit + integration + E2E)           |
+| 14.4 Multi-Tenant            | 8.2         | 4.5 Multi-Tenant Tests                                 | Full (unit + integration + E2E)           |
+| 14.5 RBAC                    | 8.2         | 4.6 RBAC Tests                                         | Full (unit + integration + E2E)           |
+| 14.6 Billing                 | 8.3         | 4.7 Billing Tests                                      | Full (unit + integration + E2E)           |
+| 14.7 Notifications           | 8.4         | 4.8 Notifications Tests                                | Full (unit + integration + E2E)           |
+| 14.8 Audit & Security Events | 8.5         | 4.9 Audit Tests                                        | Full (unit + integration + E2E)           |
+| 14.9 Compliance              | 8.6         | 4.10 Compliance Tests                                  | Full (unit + integration + E2E)           |
+| 14.10 Realtime               | —           | 4.11 Realtime Tests                                    | Full (unit + integration + E2E)           |
+| 14.11 Media                  | —           | 4.12 Media Tests                                       | Full (unit + integration + E2E)           |
+| 14.12 API Keys               | —           | 4.13 API Keys Tests                                    | Full (unit + integration + E2E)           |
+| 14.13 Admin Console          | 8.7         | 4.14 Admin Tests                                       | Full (unit + integration + E2E)           |
+| Appendix C (Engine)          | —           | 4.17 Scheduled Jobs, 4.18 Client Engine + Search       | Scheduled jobs + missing query builder    |
+| 6.6 Activity Tracking        | —           | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.6 backfill                       |
+| 6.7 Feature Flags & Metering | —           | 4.19 Activity Tracking, Feature Flags & Usage Metering | Sprint 3.7 backfill                       |
+| Appendix D (Webhooks)        | —           | 4.20 Webhook Delivery System Tests                     | Sprint 3.18 backfill                      |
+| Appendix E (Desktop)         | —           | 4.21 Desktop App Tests                                 | Sprint 3.19 backfill                      |
 
 ---
 
