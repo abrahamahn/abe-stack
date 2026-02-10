@@ -1,3 +1,4 @@
+// eslint.config.ts
 import { includeIgnoreFile } from '@eslint/compat';
 import type { Linter } from 'eslint';
 import boundaries from 'eslint-plugin-boundaries';
@@ -261,7 +262,7 @@ export default [
     files: ['src/server/media/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/media/tsconfig.json'],
+        project: ['./src/server/media/tsconfig.lint.json'],
         tsconfigRootDir,
       },
     },
@@ -279,7 +280,7 @@ export default [
     files: ['src/server/engine/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/engine/tsconfig.json'],
+        project: ['./src/server/engine/tsconfig.lint.json'],
         tsconfigRootDir,
       },
     },

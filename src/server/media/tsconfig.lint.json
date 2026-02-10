@@ -7,8 +7,6 @@
     "paths": {
       "@abe-stack/shared": ["../../shared/src/index.ts"],
       "@abe-stack/shared/*": ["../../shared/src/*"],
-      "@abe-stack/db": ["../../server/db/src/index.ts"],
-      "@abe-stack/db/*": ["../../server/db/src/*"],
       "@/*": ["./src/*"]
     }
   },
