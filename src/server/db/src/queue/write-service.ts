@@ -14,7 +14,8 @@
 
 import { SubKeys } from '@abe-stack/shared';
 
-import { escapeIdentifier, withTransaction } from '@abe-stack/db';
+import { escapeIdentifier } from '../builder/types/types';
+import { withTransaction } from '../utils/transaction';
 
 import type {
   AfterWriteHook,
@@ -27,7 +28,7 @@ import type {
   WriteOperation,
   WriteResult,
 } from './types';
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '../client';
 import type { SubscriptionManager } from '@abe-stack/shared';
 
 // ============================================================================
