@@ -23,6 +23,11 @@ on:
         description: 'Docker image tag to deploy (leave empty for latest commit SHA)'
         required: false
         type: string
+      app_name:
+        description: 'Application slug used to isolate deployment resources (e.g., portfolio-api)'
+        required: false
+        default: 'abe-stack'
+        type: string
       instance_ip:
         description: 'Optional target server IP (used if deployment artifact is unavailable)'
         required: false
@@ -212,14 +217,24 @@ jobs:
             export REGISTRY="${{ vars.REGISTRY }}"
             export IMAGE_NAME="${{ vars.IMAGE_NAME }}"
             export DOMAIN="${{ needs.get-infrastructure-info.outputs.domain }}"
+            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
+
+            # Normalize app name for filesystem/compose project safety
+            APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
+            if [ -z "$APP_NAME" ]; then
+              APP_NAME="abe-stack"
+            fi
+            export APP_NAME
+            export COMPOSE_PROJECT_NAME="${APP_NAME}-${DEPLOY_ENV}"
 
             # Create deployment directory if it doesn't exist
-            mkdir -p ~/abe-stack-deploy
+            DEPLOY_ROOT="$HOME/deployments/$APP_NAME/$DEPLOY_ENV"
+            mkdir -p "$DEPLOY_ROOT"
 
             # Navigate to deployment directory
-            cd ~/abe-stack-deploy
+            cd "$DEPLOY_ROOT"
 
-            echo "🚀 Starting deployment of $IMAGE_TAG to $DEPLOY_ENV environment..."
+            echo "🚀 Starting deployment of $APP_NAME:$IMAGE_TAG to $DEPLOY_ENV environment..."
 
             # Download docker-compose.prod.yml
             echo "📦 Downloading production docker-compose file..."
@@ -232,6 +247,10 @@ jobs:
             # Create environment file
             echo "⚙️ Creating environment configuration..."
             cat > ".env" << EOF
+            # Deployment metadata
+            APP_NAME=\${APP_NAME}
+            COMPOSE_PROJECT_NAME=\${COMPOSE_PROJECT_NAME}
+
             # Domain Configuration
             DOMAIN=\${DOMAIN}
             ACME_EMAIL=${{ secrets.ACME_EMAIL }}
@@ -261,21 +280,45 @@ jobs:
             EMAIL_FROM_ADDRESS=noreply@\${DOMAIN}
             EOF
 
+            # Make compose file reusable for namespaced multi-app deploys
+            # - Remove hardcoded project/container/volume names that collide
+            # - Use local Caddyfile path in deployment directory
+            sed -i '/^name:/d' docker-compose.prod.yml
+            sed -i '/container_name:/d' docker-compose.prod.yml
+            sed -i '/^[[:space:]]\{2,\}name:[[:space:]]/d' docker-compose.prod.yml
+            sed -i 's|../caddy/Caddyfile:|./Caddyfile:|g' docker-compose.prod.yml
+
+            # Optional env_file paths in source compose are repo-specific and not valid on target host
+            awk '
+              BEGIN { skip = 0 }
+              /^    env_file:$/ { skip = 1; next }
+              skip == 1 && /^      - / { next }
+              skip == 1 { skip = 0 }
+              { print }
+            ' docker-compose.prod.yml > docker-compose.prod.tmp && mv docker-compose.prod.tmp docker-compose.prod.yml
+
             # Update docker-compose to use deployed images
             echo "🐳 Updating docker-compose with deployed images..."
-
-            # Replace API build block with image
-            sed -i "s|build:|image: \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-api|" docker-compose.prod.yml
-
-            # Replace Web build block with image
-            sed -i "s|build:|image: \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-web|" docker-compose.prod.yml
-            sed -i "/dockerfile:/d" docker-compose.prod.yml
-            sed -i "/args:/d" docker-compose.prod.yml
-            sed -i "/VITE_API_URL:/d" docker-compose.prod.yml
+            awk -v reg="$REGISTRY" -v img="$IMAGE_NAME" -v tag="$IMAGE_TAG" '
+              BEGIN { in_api=0; in_web=0; in_build=0 }
+              /^  api:$/ { in_api=1; in_web=0; print; next }
+              /^  web:$/ { in_web=1; in_api=0; print; next }
+              /^  [a-zA-Z0-9_-]+:$/ { in_api=0; in_web=0 }
+              (in_api || in_web) && /^    build:$/ {
+                in_build=1
+                if (in_api) print "    image: " reg "/" img ":" tag "-api"
+                if (in_web) print "    image: " reg "/" img ":" tag "-web"
+                next
+              }
+              in_build && /^      / { next }
+              in_build && !/^      / { in_build=0 }
+              (in_api || in_web) && /^      VITE_API_URL:/ { next }
+              { print }
+            ' docker-compose.prod.yml > docker-compose.prod.tmp && mv docker-compose.prod.tmp docker-compose.prod.yml
 
             # Stop existing containers gracefully
             echo "🛑 Stopping existing containers..."
-            docker compose -f docker-compose.prod.yml down --timeout 30
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml down --timeout 30 || true
 
             # Pull latest images
             echo "📥 Pulling latest Docker images..."
@@ -284,7 +327,7 @@ jobs:
 
             # Start new containers
             echo "🚀 Starting new containers..."
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml up -d
 
             # Wait for services to be healthy
             echo "🏥 Waiting for services to be healthy..."
@@ -292,8 +335,8 @@ jobs:
             elapsed=0
 
             while [ \$elapsed -lt \$timeout ]; do
-              healthy_count=\$(docker compose -f docker-compose.prod.yml ps | grep -c "healthy")
-              total_services=\$(docker compose -f docker-compose.prod.yml ps | grep -c "Up")
+              healthy_count=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "healthy")
+              total_services=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "Up")
 
               if [ "\$healthy_count" -eq "\$total_services" ] && [ "\$total_services" -gt 0 ]; then
                 echo "✅ All \$total_services services are healthy!"
@@ -307,7 +350,7 @@ jobs:
 
             if [ \$elapsed -ge \$timeout ]; then
               echo "❌ Timeout waiting for services to be healthy"
-              docker compose -f docker-compose.prod.yml logs
+              docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml logs
               echo "🔄 Attempting rollback..."
               # TODO: Implement rollback to previous version
               exit 1
@@ -319,8 +362,10 @@ jobs:
 
             echo "🎉 Deployment completed successfully!"
             echo "🌐 Application is available at: https://\${DOMAIN}"
+            echo "🧩 Compose project: \${COMPOSE_PROJECT_NAME}"
+            echo "📁 Deploy path: \${DEPLOY_ROOT}"
             echo "📊 Deployment summary:"
-            docker compose -f docker-compose.prod.yml ps
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps
 
       - name: Verify Deployment
         run: |
@@ -349,6 +394,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Domain:** https://${{ needs.get-infrastructure-info.outputs.domain }}" >> $GITHUB_STEP_SUMMARY
           echo "**Image Tag:** ${{ inputs.image_tag || github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed at:** $(date)" >> $GITHUB_STEP_SUMMARY
