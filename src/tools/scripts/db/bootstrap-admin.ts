@@ -30,6 +30,7 @@ import {
 } from '@abe-stack/db';
 
 import { hashPassword } from '@abe-stack/core/auth';
+import { canonicalizeEmail } from '@abe-stack/shared';
 
 interface BootstrapResult {
   email: string;
@@ -106,13 +107,16 @@ export async function bootstrapAdmin(): Promise<BootstrapResult> {
   const passwordHash = await hashPassword(password);
 
   // Create admin user
+  const canonical = canonicalizeEmail(email);
   await db.execute(
     insert(USERS_TABLE)
       .values({
         email,
+        canonical_email: canonical,
         password_hash: passwordHash,
         name,
         role: 'admin',
+        email_verified: true,
         email_verified_at: new Date(),
       })
       .toSql(),
