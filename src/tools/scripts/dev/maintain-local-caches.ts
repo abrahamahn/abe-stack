@@ -13,6 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '../../../..');
 const stateFile = path.join(repoRoot, 'node_modules', '.cache', 'hooks-cache-state.json');
+const legacyStateFile = path.join(repoRoot, '.cache', 'hooks-cache-state.json');
 const oneDayMs = 24 * 60 * 60 * 1000;
 
 const fingerprintInputs = [
@@ -75,6 +76,11 @@ function shouldPrune(currentFingerprint: string, prev: CacheState | null): boole
 }
 
 function main(): void {
+  // One-time migration cleanup from legacy root cache location.
+  if (fs.existsSync(legacyStateFile)) {
+    fs.rmSync(legacyStateFile, { force: true });
+  }
+
   const fingerprint = computeFingerprint();
   const prev = readState();
 
