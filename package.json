@@ -35,7 +35,7 @@
     "audit:engine-tests": "node --import tsx src/tools/scripts/audit/engine-colocated-tests.ts",
     "export:config": "node --import tsx src/tools/scripts/export/export-config.ts",
     "export:server-config": "node --import tsx src/tools/scripts/export/export-server-config.ts",
-    "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules .turbo  node_modules/.cache",
+    "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules node_modules/.cache",
     "db:push": "node --import tsx src/tools/scripts/db/db-push.ts",
     "db:seed": "node --import tsx src/tools/scripts/db/seed.ts",
     "db:bootstrap": "node --import tsx src/tools/scripts/dev/bootstrap.ts",

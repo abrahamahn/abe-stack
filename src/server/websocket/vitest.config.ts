@@ -1,6 +1,6 @@
-// src/server/engine/vitest.config.ts
+// src/server/websocket/vitest.config.ts
 
-import path from 'path';
+import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../../vitest.config';
 
@@ -23,10 +23,18 @@ export default mergeConfig(baseConfig, {
         find: '@abe-stack/shared',
         replacement: path.resolve(__dirname, '../../shared/src/index.ts'),
       },
+      {
+        find: /^@abe-stack\/server-engine\/(.*)$/,
+        replacement: path.resolve(__dirname, '../engine/src/$1'),
+      },
+      {
+        find: '@abe-stack/server-engine',
+        replacement: path.resolve(__dirname, '../engine/src/index.ts'),
+      },
     ],
   },
   test: {
-    name: 'engine',
+    name: 'websocket',
     environment: 'node',
     globals: true,
     include: ['src/**/*.{test,spec}.ts'],
