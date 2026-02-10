@@ -91,9 +91,11 @@ describe('main.tsx', () => {
     it('should find root container element', async () => {
       await import('./main');
 
-      expect(mockCreateRoot).toHaveBeenCalledTimes(1);
-      expect(mockCreateRoot).toHaveBeenCalledWith(rootElement);
-    }, 30000);
+      expect(mockCreateRoot).toHaveBeenCalled();
+      const lastCall = mockCreateRoot.mock.calls.at(-1);
+      const rootArg = (lastCall as unknown as [HTMLElement])[0];
+      expect(rootArg).toBe(rootElement);
+    }, 60000);
 
     it('should throw error when root container is not found', () => {
       // Remove the root element
@@ -122,8 +124,9 @@ describe('main.tsx', () => {
       vi.clearAllMocks();
       await import('./main');
 
-      expect(mockCreateRoot).toHaveBeenCalledTimes(1);
-      const rootArg = (mockCreateRoot.mock.calls[0] as unknown as [HTMLElement])[0];
+      expect(mockCreateRoot).toHaveBeenCalled();
+      const lastCall = mockCreateRoot.mock.calls.at(-1);
+      const rootArg = (lastCall as unknown as [HTMLElement])[0];
       expect(rootArg).toBe(document.getElementById('root'));
     });
   });

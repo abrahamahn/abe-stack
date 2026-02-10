@@ -47,13 +47,9 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/server-engine', async (importOriginal) => {
-  const actual = await importOriginal<object>();
-  return {
-    ...actual,
-    validateCsrfToken: mockValidateCsrfToken,
-  };
-});
+vi.mock('@abe-stack/server-engine', () => ({
+  validateCsrfToken: mockValidateCsrfToken,
+}));
 
 // Import module after mocks are set up
 import { registerWebSocket } from './lifecycle';

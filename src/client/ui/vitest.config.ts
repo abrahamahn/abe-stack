@@ -15,6 +15,22 @@ export default mergeConfig(baseConfig, {
         find: '@abe-stack/client-engine',
         replacement: path.resolve(__dirname, '..', 'engine', 'src'),
       },
+      {
+        find: /^@abe-stack\/api\/(.*)$/,
+        replacement: path.resolve(__dirname, '..', 'api', 'src', '$1'),
+      },
+      {
+        find: '@abe-stack/api',
+        replacement: path.resolve(__dirname, '..', 'api', 'src', 'index.ts'),
+      },
+      {
+        find: /^@abe-stack\/shared\/(.*)$/,
+        replacement: path.resolve(__dirname, '..', '..', 'shared', 'src', '$1'),
+      },
+      {
+        find: '@abe-stack/shared',
+        replacement: path.resolve(__dirname, '..', '..', 'shared', 'src', 'index.ts'),
+      },
       { find: '@abe-stack/react', replacement: path.resolve(__dirname, '..', 'react', 'src') },
       {
         find: /^@abe-stack\/client\/(.*)$/,
