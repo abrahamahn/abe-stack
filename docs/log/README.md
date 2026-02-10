@@ -38,6 +38,9 @@ Weekly and monthly changelog files for the ABE Stack project. This replaces the 
 - **Consistency**: Reproduced CI lint failures locally and corrected tsconfig alias/path overrides driving type-resolution cascades
 - **Cache**: Moved cache maintenance state under `node_modules/.cache` and expanded Turbo global dependency invalidation for config changes
 - **Hooks**: Kept pre-commit lightweight and retained full validation at pre-push/CI
+- **Parity**: Eliminated additional local-vs-CI type-resolution drift in client packages (`engine`, `ui`, `react`) and removed local generated DB JS artifacts that created local-only lint noise
+- **Stability**: Fixed recurring DB import-order lint blocker and reduced flaky auth timing test threshold sensitivity for CI jitter
+- **Formatting**: Enforced uncached CI Prettier check path and repaired infra workflow YAML indentation regressions
 
 ### 2026-02-08
 

@@ -62,6 +62,7 @@ export interface MediaJobData {
  */
 export class ServerMediaQueue extends CustomJobQueue {
   private readonly orchestrator: MediaProcessingOrchestrator;
+  private readonly logger: Logger;
 
   /**
    * Create a server media queue with pre-configured processors
@@ -76,6 +77,7 @@ export class ServerMediaQueue extends CustomJobQueue {
       maxRetries: 3,
       logger,
     });
+    this.logger = logger;
 
     // Initialize production processors with external dependencies
     this.orchestrator = new MediaProcessingOrchestrator(
@@ -102,7 +104,7 @@ export class ServerMediaQueue extends CustomJobQueue {
     const startTime = Date.now();
 
     try {
-      this.options.logger.info('Processing media job', {
+      this.logger.info('Processing media job', {
         fileId: data.fileId,
         filename: data.filename,
       });
@@ -118,7 +120,7 @@ export class ServerMediaQueue extends CustomJobQueue {
 
       const processingTime = Date.now() - startTime;
 
-      this.options.logger.info('Media processing completed', {
+      this.logger.info('Media processing completed', {
         fileId: data.fileId,
         success: result.success,
         processingTime,
@@ -128,7 +130,7 @@ export class ServerMediaQueue extends CustomJobQueue {
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
-      this.options.logger.error('Media processing failed', {
+      this.logger.error('Media processing failed', {
         fileId: data.fileId,
         error: error instanceof Error ? error.message : String(error),
         processingTime,

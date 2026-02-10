@@ -11,7 +11,7 @@
 | Domain             | DB Layer | Service Logic | HTTP Routes | Client UI | Unit Tests | Integration Tests | E2E (Playwright) | Overall |
 | ------------------ | -------- | ------------- | ----------- | --------- | ---------- | ----------------- | ---------------- | ------- |
 | **Authentication** | [x] 100% | [x] 100%      | [x] 100%    | [x] ~90%  | [-] ~40%   | [ ] 0%            | [ ] 0%           | ~95%    |
-| **Sessions**       | [x] 100% | [x] 100%      | [ ] 0%      | [-] ~30%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~45%    |
+| **Sessions**       | [x] 100% | [x] 100%      | [x] 100%    | [-] ~30%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~55%    |
 | **Account Mgmt**   | [x] 80%  | [-] 30%       | [-] 10%     | [-] ~20%  | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~25%    |
 | **Multi-Tenant**   | [x] 100% | [-] 30%       | [ ] 0%      | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~25%    |
 | **RBAC**           | [x] 100% | [-] 50%       | [-] 30%     | [ ] 0%    | [ ] 0%     | [ ] 0%            | [ ] 0%           | ~35%    |
@@ -155,8 +155,7 @@
 
 ## 2. Sessions & Device Security
 
-> Session handlers exist but are NOT wired to HTTP routes.
-> This is the #1 lowest-effort, highest-value gap to close.
+> Session handlers and HTTP routes are complete. Client UI wiring is the remaining gap.
 
 ### 2.1 Infrastructure — [x] Complete
 
@@ -789,8 +788,8 @@ All of these exist in `core/users/handlers/sessions.ts` and are registered in ro
   - Server-side token verification via Turnstile/reCAPTCHA API
   - Config-gated: `config.security.captcha.enabled` + `config.security.captcha.siteKey`
   - Client: invisible widget on public forms, pass token in request body
-- [ ] **Input normalization** — `.trim()` + lowercase all emails at ingress (see 1.11)
-- [ ] **Email canonicalization** — prevent duplicate accounts via `+` aliases (see 1.11)
+- [x] **Input normalization** — `.trim()` + lowercase all emails at ingress (done — see 1.11)
+- [x] **Email canonicalization** — prevent duplicate accounts via `+` aliases (done — see 1.11)
 
 ### 11.2 "Was This You?" Security Notifications — [ ] Not Started
 
@@ -926,7 +925,7 @@ The boilerplate is "enterprise-ready" when you can:
 **Ship Criteria (minimum viable launch):**
 
 - [x] Auth lifecycle complete (register → verify → login → refresh → logout → reset)
-- [ ] Session endpoints wired + UA labeling
+- [x] Session endpoints wired + UA labeling
 - [ ] Turnstile on public forms (register, login, forgot-password)
 - [ ] "Was this you?" email on password change + email change reversion
 - [ ] ToS gating middleware active
