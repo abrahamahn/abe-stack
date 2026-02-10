@@ -303,11 +303,10 @@ export function apiResultSchema<T>(dataSchema: Schema<T>): Schema<ApiResultEnvel
 // Other Helpers
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EmptyBody {}
+export type EmptyBody = Record<string, never>;
 
 export const emptyBodySchema: Schema<EmptyBody> = createSchema((_data: unknown) => {
-  return {};
+  return {} as EmptyBody;
 });
 
 export function createErrorCodeSchema(errorCodes: Record<string, string>): Schema<string> {

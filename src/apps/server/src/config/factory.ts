@@ -45,10 +45,8 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   const envResult = EnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
-    /* eslint-disable no-console */
-    console.error('\n❌ ABE-STACK: Environment Validation Failed');
-    console.error(`   ↳ ${envResult.error.message}`);
-    /* eslint-enable no-console */
+    process.stderr.write('\n❌ ABE-STACK: Environment Validation Failed\n');
+    process.stderr.write(`   ↳ ${envResult.error.message}\n`);
     process.exit(1);
   }
 
@@ -133,13 +131,12 @@ function validate(config: AppConfig): void {
 
   if (errors.length > 0) {
     const report = errors.map((e) => `  ↳ ❌ ${e}`).join('\n');
-    /* eslint-disable no-console */
-    console.error('\n' + '='.repeat(50));
-    console.error('  ABE-STACK CONFIGURATION ERROR');
-    console.error('='.repeat(50));
-    console.error(report);
-    console.error('='.repeat(50) + '\n');
-    /* eslint-enable no-console */
+    const separator = '='.repeat(50);
+    process.stderr.write(`\n${separator}\n`);
+    process.stderr.write('  ABE-STACK CONFIGURATION ERROR\n');
+    process.stderr.write(`${separator}\n`);
+    process.stderr.write(`${report}\n`);
+    process.stderr.write(`${separator}\n\n`);
 
     throw new Error(`Server failed to start: Invalid Configuration\n${errors.join('\n')}`);
   }
