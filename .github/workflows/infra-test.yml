@@ -27,11 +27,11 @@ jobs:
     # Optional repo variables:
     # - INFRA_TEST_ENABLED: "true" (default) or "false"
     # - ACTIVE_CLOUD_PROVIDER: "digitalocean" | "gcp" | "all" (default: no filter)
-    if: ${{ vars.INFRA_TEST_ENABLED != 'false' && (vars.ACTIVE_CLOUD_PROVIDER == '' || vars.ACTIVE_CLOUD_PROVIDER == 'all' || matrix.provider == vars.ACTIVE_CLOUD_PROVIDER) }}
+    if: ${{ vars.INFRA_TEST_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        provider: ${{ fromJSON(inputs.provider == 'all' && '["digitalocean", "gcp"]' || format('["{0}"]', inputs.provider || 'digitalocean')) }}
+        provider: ${{ fromJSON((inputs.provider == 'digitalocean' && '["digitalocean"]') || (inputs.provider == 'gcp' && '["gcp"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'digitalocean' && '["digitalocean"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'gcp' && '["gcp"]') || '["digitalocean","gcp"]') }}
 
     steps:
       - name: Checkout repository
