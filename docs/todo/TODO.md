@@ -1519,19 +1519,14 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Service: exclude users with active sessions (edge case: logged in but unverified)
 - [ ] Service: log cleanup counts to metrics
 
-**Token + Session Cleanup (Appendix C scheduled jobs):**
-
-- [ ] Cron: purge expired login attempts (older than retention period)
-- [ ] Cron: purge expired magic link tokens
-- [ ] Cron: purge stale push subscriptions (no activity > 30 days)
-- [ ] Cron: purge expired password reset tokens
-- [ ] Cron: purge expired email verification tokens
-
 **Tests:**
 
 - [ ] Unit: anonymization rules, grace period calculation, foreign key safety checks
 - [ ] Integration: soft-delete user → cron runs → PII anonymized → audit trail intact
 - [ ] Integration: create unverified user → wait past threshold → cron deletes → user gone
+
+> **Note:** Token/session cleanup crons (login-cleanup, magic-link-cleanup, push-cleanup, etc.)
+> are consolidated in Sprint 3.18 (Backend Infrastructure). This slice owns only PII/data hygiene.
 
 ---
 
