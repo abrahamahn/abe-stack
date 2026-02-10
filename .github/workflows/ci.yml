@@ -70,7 +70,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: Format Check
-        run: pnpm format:check
+        run: pnpm format:check:ci
 
       - name: Lint
         run: pnpm lint
