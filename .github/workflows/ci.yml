@@ -39,34 +39,6 @@ jobs:
             echo "is_full_build=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            src/apps/*/node_modules
-            src/server/*/node_modules
-            src/client/*/node_modules
-            src/shared/node_modules
-            src/tools/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
   sanity-checks:
     runs-on: ubuntu-latest
     needs: setup
@@ -156,9 +128,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run CI Verify (headers + build + tests)
-        run: pnpm ci:verify
-
       - name: Cache Turbo
         uses: actions/cache@v4
         with:
@@ -166,6 +135,9 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+
+      - name: Run CI Verify (headers + build + tests)
+        run: pnpm ci:verify
 
   docker-build-publish:
     runs-on: ubuntu-latest
