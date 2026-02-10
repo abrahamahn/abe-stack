@@ -1,6 +1,6 @@
 # ⚙️ Configuration Architecture
 
-This directory (`.config/`) acts as the **Central Command** for development tooling in the ABE Stack. Instead of cluttering the root directory with dozens of dotfiles, we consolidate tool-specific configurations here to maintain a clean workspace and centralized management.
+This directory (`config/`) acts as the **Central Command** for development tooling in the ABE Stack. Instead of cluttering the root directory with dozens of dotfiles, we consolidate tool-specific configurations here to maintain a clean workspace and centralized management.
 
 ## 📌 Philosophy: "Clean Root, Central Control"
 
@@ -14,7 +14,7 @@ This directory (`.config/`) acts as the **Central Command** for development tool
 
 This manual documents every configuration file tracked in our system.
 
-### 1. **`.config/`** - The Central Hub
+### 1. **`config/`** - The Central Hub
 
 These files are the single source of truth for tooling.
 
@@ -159,7 +159,7 @@ This manual covers the following files (exported via `tools/scripts/export/expor
 - `eslint.config.ts`, `package.json`, `pnpm-workspace.yaml`
 - `tsconfig.json`, `turbo.json`, `vitest.config.ts`
 
-**Config Directory (`.config/`):**
+**Config Directory (`config/`):**
 
 - `.editorconfig`, `playwright.config.ts`, `README.md`
 - `tsconfig.eslint.json`, `tsconfig.node.json`, `tsconfig.react.json`

@@ -12,14 +12,15 @@ on:
         default: false
         type: boolean
   schedule:
-    # Nightly full build at 2am UTC
     - cron: '0 2 * * *'
 
-# CI Sanity Mode:
-# - PRs: Fast checks only (lint, type-check, critical tests)
-# - Push to main/dev: Full build
-# - Nightly: Full build with all tests
-# - Manual: Option to run full build
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   setup:
@@ -30,15 +31,12 @@ jobs:
       - name: Determine CI Mode
         id: check-mode
         run: |
-          # Full build for: pushes to main/dev, nightly, or manual with full_build=true
           if [[ "${{ github.event_name }}" == "push" ]] || \
              [[ "${{ github.event_name }}" == "schedule" ]] || \
              [[ "${{ github.event.inputs.full_build }}" == "true" ]]; then
-            echo "is_full_build=true" >> $GITHUB_OUTPUT
-            echo "🔨 Running FULL build"
+            echo "is_full_build=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_full_build=false" >> $GITHUB_OUTPUT
-            echo "⚡ Running FAST sanity checks (PR mode)"
+            echo "is_full_build=false" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/checkout@v4
@@ -69,7 +67,6 @@ jobs:
             src/tools/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
-  # Fast sanity checks for PRs
   sanity-checks:
     runs-on: ubuntu-latest
     needs: setup
@@ -109,12 +106,11 @@ jobs:
       - name: Cache Turbo
         uses: actions/cache@v4
         with:
-          path: .cache/turbo
+          path: node_modules/.cache/turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      # Fast checks: format, lint, type-check (no full test suite)
       - name: Format Check
         run: pnpm format:check
 
@@ -124,17 +120,9 @@ jobs:
       - name: Type Check
         run: pnpm type-check
 
-      # Run only critical/changed tests for PRs
-      - name: Run Critical Tests
+      - name: Run Tests
         run: pnpm test
 
-      - name: PR Sanity Summary
-        run: |
-          echo "## ⚡ PR Sanity Checks Passed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Fast checks completed. Full test suite runs on merge to main/dev." >> $GITHUB_STEP_SUMMARY
-
-  # Full build for pushes and nightly
   build-and-verify:
     runs-on: ubuntu-latest
     needs: setup
@@ -174,28 +162,89 @@ jobs:
       - name: Cache Turbo
         uses: actions/cache@v4
         with:
-          path: .cache/turbo
+          path: node_modules/.cache/turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
       - name: Run Full Build and Verification Pipeline
-        run: pnpm build # format -> lint -> test -> type-check -> theme:build -> turbo build
+        run: pnpm build
 
-      - name: Archive production artifacts
-        if: success()
+  docker-build-publish:
+    runs-on: ubuntu-latest
+    needs: build-and-verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve image variables
+        id: image-vars
+        run: |
+          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
+          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+          if [[ "$IMAGE_NAME_RAW" != */* ]]; then
+            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+          else
+            IMAGE_NAME="$IMAGE_NAME_RAW"
+          fi
+          API_TAG="${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}-api"
+          WEB_TAG="${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}-web"
+          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "api_tag=$API_TAG" >> "$GITHUB_OUTPUT"
+          echo "web_tag=$WEB_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.image-vars.outputs.registry }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push API image
+        id: build-api
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infra/docker/Dockerfile
+          push: true
+          tags: ${{ steps.image-vars.outputs.api_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Web image
+        id: build-web
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infra/docker/Dockerfile.web
+          push: true
+          tags: ${{ steps.image-vars.outputs.web_tag }}
+          build-args: |
+            VITE_API_URL=
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Write deployment image artifact
+        run: |
+          cat > deployment-images.json << EOF
+          {
+            "commit_sha": "${GITHUB_SHA}",
+            "registry": "${{ steps.image-vars.outputs.registry }}",
+            "image_name": "${{ steps.image-vars.outputs.image_name }}",
+            "api_image": "${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}@${{ steps.build-api.outputs.digest }}",
+            "web_image": "${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}@${{ steps.build-web.outputs.digest }}",
+            "api_tag": "${{ steps.image-vars.outputs.api_tag }}",
+            "web_tag": "${{ steps.image-vars.outputs.web_tag }}"
+          }
+          EOF
+
+      - name: Upload deployment image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: |
-            src/apps/*/dist
-            src/server/*/dist
-            src/client/*/dist
-            src/shared/dist
+          name: deployment-images
+          path: deployment-images.json
           retention-days: 7
-
-      - name: Full Build Summary
-        run: |
-          echo "## 🔨 Full Build Completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All checks passed including full test suite." >> $GITHUB_STEP_SUMMARY

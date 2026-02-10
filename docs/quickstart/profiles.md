@@ -36,10 +36,10 @@ The lightest configuration. Auth + database + local providers. No billing, no ad
 ### 1. Configure environment
 
 ```bash
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 ```
 
-Add these overrides to `.config/env/.env.local` (or edit `.env.development`):
+Add these overrides to `config/env/.env.local` (or edit `.env.development`):
 
 ```bash
 # Minimal Profile
@@ -107,10 +107,10 @@ For products that charge customers. Adds Stripe/PayPal billing with subscription
 ### 2. Configure environment
 
 ```bash
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 ```
 
-Add to `.config/env/.env.local`:
+Add to `config/env/.env.local`:
 
 ```bash
 # SaaS Profile
@@ -174,10 +174,10 @@ Internal tools and back-office applications. Admin dashboard for user management
 ### 1. Configure environment
 
 ```bash
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 ```
 
-Add to `.config/env/.env.local`:
+Add to `config/env/.env.local`:
 
 ```bash
 # Admin Profile
@@ -233,10 +233,10 @@ docker compose -f ops/docker/development/docker-compose.dev.yml up -d
 ### 2. Configure environment
 
 ```bash
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 ```
 
-Add to `.config/env/.env.local`:
+Add to `config/env/.env.local`:
 
 ```bash
 # Advanced Profile — everything enabled

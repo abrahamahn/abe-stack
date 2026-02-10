@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx --conditions source src/main.ts",
-    "start": "node --env-file=../../../.config/env/.env.production dist/main.js",
+    "start": "node --env-file=../../../config/env/.env.production dist/main.js",
     "build": "tsc",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",

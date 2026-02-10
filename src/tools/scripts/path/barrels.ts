@@ -23,7 +23,7 @@ const EXCLUDED_DIRS = new Set([
   '.cache',
   '.tmp',
   '.pnpm-store',
-  '.config',
+  'config',
   '.github',
 ]);
 

@@ -6,6 +6,11 @@ set -e
 
 echo "🔍 Validating Terraform configuration..."
 
+# Support both legacy infra layout and current infra/cloud layout.
+if [ -d "cloud" ] && [ -f "cloud/main.tf" ]; then
+    cd cloud
+fi
+
 # Check if terraform is installed
 if ! command -v terraform &> /dev/null; then
     echo "❌ Terraform is not installed. Please install Terraform >= 1.0"

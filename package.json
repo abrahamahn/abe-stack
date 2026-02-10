@@ -13,14 +13,17 @@
     "lint": "turbo run lint --continue",
     "lint:fix": "turbo run lint --continue -- --fix",
     "type-check": "turbo run type-check --continue",
-    "format": "prettier --config .prettierrc --ignore-path .prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write .",
-    "format:check": "prettier --config .prettierrc --ignore-path .prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --check .",
+    "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write .",
+    "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --check .",
     "test": "turbo run test --output-logs=errors-only --continue",
     "test:verbose": "turbo run test --continue",
     "test:parallel": "turbo run test --output-logs=errors-only --continue",
-    "test:e2e": "playwright test --config .config/playwright.config.ts",
+    "test:e2e": "playwright test --config config/playwright.config.ts",
     "build": "turbo run build lint type-check --output-logs=errors-only && turbo run test --filter=!@abe-stack/server --output-logs=errors-only",
     "build:headers": "node --import tsx src/tools/sync/sync-file-headers.ts",
+    "sync:headers": "node --import tsx src/tools/sync/sync-file-headers.ts",
+    "sync:headers:check": "node --import tsx src/tools/sync/sync-file-headers.ts --check --quiet",
+    "sync:headers:watch": "node --import tsx src/tools/sync/sync-file-headers.ts --watch",
     "build:theme": "node --import tsx src/tools/sync/sync-css-theme.ts",
     "sync:imports": "tsx src/tools/sync/sync-import-aliases.ts",
     "sync:ts": "tsx src/tools/sync/sync-ts-references.ts",
@@ -36,12 +39,24 @@
     "db:bootstrap": "node --import tsx src/tools/scripts/dev/bootstrap.ts",
     "db:reset": "node --import tsx src/tools/scripts/db/reset.ts",
     "db:bootstrap:admin": "node --import tsx src/tools/scripts/db/bootstrap-admin.ts",
-    "docker:dev": "docker compose --env-file .config/env/.env.local -f infra/docker/development/docker-compose.dev.yml up --build",
+    "docker:dev": "docker compose --env-file config/env/.env.local -f infra/docker/development/docker-compose.dev.yml up --build",
     "docker:dev:down": "docker compose -f infra/docker/development/docker-compose.dev.yml down",
-    "docker:prod": "docker compose --env-file .config/env/.env.production -f infra/docker/production/docker-compose.prod.yml up -d --build",
+    "docker:prod": "docker compose --env-file config/env/.env.production -f infra/docker/production/docker-compose.prod.yml up -d --build",
     "docker:prod:down": "docker compose -f infra/docker/production/docker-compose.prod.yml down",
-    "pre-commit": "pnpm build:theme && pnpm format && pnpm lint && pnpm type-check",
+    "prepare": "pnpm hooks:install",
+    "hooks:install": "git config --local core.hooksPath infra/git-hooks && chmod +x infra/git-hooks/pre-commit infra/git-hooks/pre-push",
+    "pre-commit": "lint-staged",
+    "check:all": "pnpm build:theme && pnpm format && pnpm lint && pnpm type-check",
     "pre-push": "node --import tsx src/tools/scripts/dev/pre-push.ts"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write",
+      "eslint --fix --no-warn-ignored --ignore-pattern config/playwright.config.ts"
+    ],
+    "*.{json,css,md}": [
+      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write"
+    ]
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.1",
@@ -63,6 +78,7 @@
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^17.3.0",
     "jsdom": "^27.4.0",
+    "lint-staged": "^16.1.5",
     "prettier": "^3.8.0",
     "tsx": "^4.21.0",
     "turbo": "^2.7.5",

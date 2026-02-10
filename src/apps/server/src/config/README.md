@@ -14,12 +14,12 @@ This directory houses the **Configuration Factory**, the central "brain" of the 
 
 The ABE Stack configuration system spans **three directories** that work together:
 
-### 1. **`.config/env/`** - Environment Files
+### 1. **`config/env/`** - Environment Files
 
 The source of truth for all environment variables.
 
 ```
-.config/env/
+config/env/
 ├── .env.development     # Development settings
 ├── .env.production      # Production settings
 ├── .env.test            # Test settings
@@ -27,7 +27,7 @@ The source of truth for all environment variables.
 ```
 
 **Purpose:** Store environment-specific values  
-**Documentation:** [.config/env/README.md](/.config/env/README.md)
+**Documentation:** [config/env/README.md](/config/env/README.md)
 
 ### 2. **`packages/core/src/config/`** - Core System
 
@@ -62,7 +62,7 @@ apps/server/src/config/
 ### 🔄 How They Work Together
 
 ```
-1. .config/env/*.env files
+1. config/env/*.env files
          ↓
 2. packages/core/src/config/env.loader.ts (loads)
          ↓
@@ -83,14 +83,14 @@ The ABE Stack supports a sophisticated loading strategy with **six priority leve
 | -------- | ---------------------- | --------------------------------------- | ------------------- |
 | **1**    | **System Environment** | Runtime/Cloud vars (Vercel, AWS, etc.)  | Deployment platform |
 | **2**    | **ENV_FILE**           | Explicit file path via env variable     | Custom path         |
-| **3**    | **`.env.local`**       | Local overrides and developer secrets   | `.config/env/`      |
-| **4**    | **`.env.{NODE_ENV}`**  | Stage-specific (dev/prod/test)          | `.config/env/`      |
-| **5**    | **`.env`**             | Shared base defaults                    | `.config/env/`      |
+| **3**    | **`.env.local`**       | Local overrides and developer secrets   | `config/env/`       |
+| **4**    | **`.env.{NODE_ENV}`**  | Stage-specific (dev/prod/test)          | `config/env/`       |
+| **5**    | **`.env`**             | Shared base defaults                    | `config/env/`       |
 | **6**    | **Root Fallbacks**     | `.env.local`, `.env.{NODE_ENV}`, `.env` | Repository root     |
 
 **Priority rules:** Higher numbers override lower numbers. System environment always wins.
 
-**Why root fallbacks?** Some deployment platforms expect `.env` files in the repository root. The loader checks both `.config/env/` (preferred) and root (fallback) for maximum flexibility.
+**Why root fallbacks?** Some deployment platforms expect `.env` files in the repository root. The loader checks both `config/env/` (preferred) and root (fallback) for maximum flexibility.
 
 ---
 
@@ -204,7 +204,7 @@ To add a new variable, follow the **Triple-Point Update**:
 
 1. **Schema:** Add the variable and Zod rules to `packages/core/src/config/env.schema.ts`.
 2. **Factory:** Update the relevant loader in `apps/server/src/config/` (e.g., `infra/database.ts`) to map the new variable.
-3. **Template:** Add the variable with documentation to `.config/env/.env.*.example` files.
+3. **Template:** Add the variable with documentation to `config/env/.env.*.example` files.
 
 ---
 

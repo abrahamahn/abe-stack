@@ -75,7 +75,7 @@ pnpm --filter @abe-stack/server db:seed    # seed data only
 
 Default connection: `postgresql://postgres:postgres@localhost:5432/abe_stack_dev`
 
-Override in `.config/env/.env.local`:
+Override in `config/env/.env.local`:
 
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
@@ -160,7 +160,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/abe_stack_dev
 JWT_SECRET=this_is_a_development_secret_that_is_long_enough_for_development_purposes
 ```
 
-Everything else has sensible defaults for development. See `.config/env/.env.development.example` for the full list.
+Everything else has sensible defaults for development. See `config/env/.env.development.example` for the full list.
 
 Key provider switches (all default to local/dev mode):
 

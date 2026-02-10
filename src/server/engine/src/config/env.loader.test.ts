@@ -18,7 +18,7 @@ vi.mock('node:path', async () => {
 describe('Env Loader (Unit)', () => {
   const originalEnv = { ...process.env };
   const mockRepoRoot = '/mock/repo';
-  const mockConfigDir = path.join(mockRepoRoot, '.config');
+  const mockConfigDir = path.join(mockRepoRoot, 'config');
   const mockEnvDir = path.join(mockConfigDir, 'env');
 
   beforeEach(() => {
@@ -51,9 +51,9 @@ describe('Env Loader (Unit)', () => {
     vi.clearAllMocks();
   });
 
-  test('should load from .config/env/.env (Base)', () => {
+  test('should load from config/env/.env (Base)', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
-      if (String(p).endsWith('.config/env/.env')) {
+      if (String(p).endsWith('config/env/.env')) {
         return 'TEST_VAR=base_value';
       }
       return '';
@@ -69,7 +69,7 @@ describe('Env Loader (Unit)', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
       const pStr = String(p);
       if (pStr.endsWith('.env.development')) return 'TEST_VAR=stage_value';
-      if (pStr.endsWith('.config/env/.env.local')) return 'TEST_VAR=local_value';
+      if (pStr.endsWith('config/env/.env.local')) return 'TEST_VAR=local_value';
       return '';
     });
 
@@ -83,7 +83,7 @@ describe('Env Loader (Unit)', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
       const pStr = String(p);
       if (pStr.endsWith('.env.production')) return 'TEST_VAR=prod_value';
-      if (pStr.endsWith('.config/env/.env')) return 'TEST_VAR=base_value';
+      if (pStr.endsWith('config/env/.env')) return 'TEST_VAR=base_value';
       return '';
     });
 
@@ -93,7 +93,7 @@ describe('Env Loader (Unit)', () => {
 
   test('should handle quoted values correctly', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
-      if (String(p).endsWith('.config/env/.env')) {
+      if (String(p).endsWith('config/env/.env')) {
         return 'VAR1="double quotes"\nVAR2=\'single quotes\'';
       }
       return '';
@@ -106,7 +106,7 @@ describe('Env Loader (Unit)', () => {
 
   test('should strip inline comments for unquoted values', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
-      if (String(p).endsWith('.config/env/.env')) {
+      if (String(p).endsWith('config/env/.env')) {
         return `FLAG=false  # options: true | false\nNUM=123 # trailing`;
       }
       return '';
@@ -119,7 +119,7 @@ describe('Env Loader (Unit)', () => {
 
   test('should not strip # inside quoted values', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
-      if (String(p).endsWith('.config/env/.env')) {
+      if (String(p).endsWith('config/env/.env')) {
         return `TOKEN="abc #def"\nTOKEN2='abc #def'`;
       }
       return '';
@@ -130,7 +130,7 @@ describe('Env Loader (Unit)', () => {
     expect(process.env['TOKEN2']).toBe('abc #def');
   });
 
-  test('should fallback to root .env if .config/env/.env is missing', () => {
+  test('should fallback to root .env if config/env/.env is missing', () => {
     vi.mocked(fs.readFileSync).mockImplementation((p) => {
       const pStr = String(p);
       if (pStr === path.join(mockRepoRoot, '.env')) return 'TEST_VAR=root_value';

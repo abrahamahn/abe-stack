@@ -55,9 +55,9 @@ Environment files in ``:
 
 ```text
 
-├── .config/env/.env.development    # Development settings
-├── .config/env/.env.production     # Production settings
-└── .config/env/.env.test           # Test settings
+├── config/env/.env.development    # Development settings
+├── config/env/.env.production     # Production settings
+└── config/env/.env.test           # Test settings
 ```
 
 ---
@@ -394,12 +394,12 @@ pnpm docker:logs  # View logs
 
 GitHub Actions workflows in `.github/workflows/`:
 
-| Workflow                         | Purpose                                          |
-| -------------------------------- | ------------------------------------------------ |
-| `ci.yml`                         | Main CI pipeline (build, lint, test, type-check) |
-| `security.yml`                   | Security scanning                                |
-| `audit.yml`                      | Dependency auditing                              |
-| `auto-merge.yml`                 | Auto-merge main and Claude session branches → dev |
+| Workflow         | Purpose                                           |
+| ---------------- | ------------------------------------------------- |
+| `ci.yml`         | Main CI pipeline (build, lint, test, type-check)  |
+| `security.yml`   | Security scanning                                 |
+| `audit.yml`      | Dependency auditing                               |
+| `auto-merge.yml` | Auto-merge main and Claude session branches → dev |
 
 ### CI Pipeline (`ci.yml`)
 

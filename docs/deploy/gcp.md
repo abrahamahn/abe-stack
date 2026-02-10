@@ -192,22 +192,22 @@ git clone https://github.com/your-org/abe-stack.git
 cd abe-stack
 
 # Create production environment file
-cp .config/env/.env.production.example .config/env/.env.production
+cp config/env/.env.production.example config/env/.env.production
 ```
 
 ### Generate Secrets
 
 ```bash
 # Generate secure secrets
-echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" >> .config/env/.env.production
-echo "JWT_SECRET=$(openssl rand -base64 32)" >> .config/env/.env.production
-echo "SESSION_SECRET=$(openssl rand -base64 32)" >> .config/env/.env.production
+echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" >> config/env/.env.production
+echo "JWT_SECRET=$(openssl rand -base64 32)" >> config/env/.env.production
+echo "SESSION_SECRET=$(openssl rand -base64 32)" >> config/env/.env.production
 ```
 
 ### Edit Environment File
 
 ```bash
-nano .config/env/.env.production
+nano config/env/.env.production
 ```
 
 Update these values:
@@ -225,7 +225,7 @@ EMAIL_PROVIDER=smtp
 Secure the file:
 
 ```bash
-chmod 600 .config/env/.env.production
+chmod 600 config/env/.env.production
 ```
 
 ---
@@ -239,7 +239,7 @@ cd ~/abe-stack
 
 # Build and start all services
 docker compose -f infra/docker/production/docker-compose.prod.yml \
-  --env-file .config/env/.env.production \
+  --env-file config/env/.env.production \
   up -d --build
 
 # View logs
@@ -278,7 +278,7 @@ Type=oneshot
 RemainAfterExit=yes
 User=deploy
 WorkingDirectory=/home/deploy/abe-stack
-ExecStart=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml --env-file .config/env/.env.production up -d
+ExecStart=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml --env-file config/env/.env.production up -d
 ExecStop=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml down
 TimeoutStartSec=0
 
@@ -399,7 +399,7 @@ git pull
 
 # Rebuild and restart
 docker compose -f infra/docker/production/docker-compose.prod.yml \
-  --env-file .config/env/.env.production \
+  --env-file config/env/.env.production \
   up -d --build
 ```
 

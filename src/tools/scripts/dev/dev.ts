@@ -215,7 +215,7 @@ function runEnvPreflight(filter?: string): void {
   // `pnpm dev web` should be able to start without a fully configured backend.
   if (filter === 'web') return;
 
-  // Ensure we load `.config/env/.env.development` by default.
+  // Ensure we load `config/env/.env.development` by default.
   process.env['NODE_ENV'] ??= 'development';
 
   logLine('env', 'Validating environment files');
@@ -246,7 +246,7 @@ async function ensureDatabaseConnection(filter?: string): Promise<void> {
     '1) Use Docker Postgres (recommended): stop local Postgres if it is using port 5432, then run `pnpm docker:dev`.\n',
   );
   process.stderr.write(
-    '2) Use local Postgres: update `.config/env/.env.development` to match your local user/password, or set the role password to match `POSTGRES_PASSWORD`.\n',
+    '2) Use local Postgres: update `config/env/.env.development` to match your local user/password, or set the role password to match `POSTGRES_PASSWORD`.\n',
   );
   process.exit(1);
 }

@@ -103,7 +103,7 @@ ALTER TABLE users DROP COLUMN IF EXISTS new_column;
 | PostgreSQL database | `pg_dump` (gzipped)             | `/home/deploy/backups/`      |
 | File uploads        | Volume backup or S3 (if remote) | `abe-stack-uploads-data` vol |
 | TLS certificates    | Caddy auto-renews; volume data  | `abe-stack-caddy-data` vol   |
-| Environment secrets | Stored in CI secrets + server   | `~/.config/env/`             |
+| Environment secrets | Stored in CI secrets + server   | `~/config/env/`              |
 
 ### Automated Daily Backup
 
@@ -408,7 +408,7 @@ $COMPOSE down --timeout 30
 git checkout <previous-good-tag>
 
 # 4. Rebuild and restart
-$COMPOSE --env-file .config/env/.env.production up -d --build
+$COMPOSE --env-file config/env/.env.production up -d --build
 
 # 5. Verify health
 curl -s http://localhost:8080/health/ready
@@ -451,7 +451,7 @@ $COMPOSE ps api
 $COMPOSE logs --tail=100 api
 
 # 3. Common causes:
-#    - Missing environment variables → check .config/env/.env.production
+#    - Missing environment variables → check config/env/.env.production
 #    - Database not ready → $COMPOSE ps postgres (should be "healthy")
 #    - Migration not run → $COMPOSE exec api pnpm db:migrate
 #    - Port conflict → lsof -i :8080

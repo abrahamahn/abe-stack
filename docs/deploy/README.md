@@ -31,8 +31,8 @@ Access:
 
 ```bash
 # 1. Create production environment file
-cp .config/env/.env.production.example .config/env/.env.production
-# Edit .config/env/.env.production with production values
+cp config/env/.env.production.example config/env/.env.production
+# Edit config/env/.env.production with production values
 
 # 2. Set required environment variables
 export DOMAIN=example.com
@@ -42,7 +42,7 @@ export JWT_SECRET=$(openssl rand -base64 32)
 export SESSION_SECRET=$(openssl rand -base64 32)
 
 # 3. Build and start (includes Caddy reverse proxy with auto TLS)
-docker compose -f infra/docker/production/docker-compose.prod.yml --env-file .config/env/.env.production up -d
+docker compose -f infra/docker/production/docker-compose.prod.yml --env-file config/env/.env.production up -d
 
 # 4. Run migrations (first deploy only)
 docker compose -f infra/docker/production/docker-compose.prod.yml exec api pnpm db:migrate
@@ -144,7 +144,7 @@ In production, only Caddy ports (80/443) are exposed to the internet.
 | `STORAGE_PROVIDER` | `local`   | `local` or `s3`     |
 | `EMAIL_PROVIDER`   | `console` | `console` or `smtp` |
 
-See `.config/env/.env.production.example` for the complete list.
+See `config/env/.env.production.example` for the complete list.
 
 ---
 
@@ -206,11 +206,11 @@ For custom deployment scenarios, use the traditional Docker Compose approach:
 
 ```bash
 # 1. Configure environment
-cp .config/env/.env.production.example .config/env/.env.production
-# Edit .config/env/.env.production with production values
+cp config/env/.env.production.example config/env/.env.production
+# Edit config/env/.env.production with production values
 
 # 2. Build and deploy
-docker compose -f infra/docker/production/docker-compose.prod.yml --env-file .config/env/.env.production up -d --build
+docker compose -f infra/docker/production/docker-compose.prod.yml --env-file config/env/.env.production up -d --build
 
 # 3. Run migrations (first deploy only)
 docker compose -f infra/docker/production/docker-compose.prod.yml exec api pnpm db:migrate
@@ -315,7 +315,7 @@ infra/
         ├── Caddyfile              # Production Caddy config (TLS)
         └── Caddyfile.dev          # Development Caddy config (HTTP)
 
-.config/env/
+config/env/
 ├── .env.production.example    # Production environment template
 ├── .env.development.example   # Development environment template
 ├── .env.development           # Development settings

@@ -39,6 +39,7 @@ export default [
       '**/vitest.config.js',
       '**/vitest.config.ts',
       '**/drizzle.config.ts',
+      '**/playwright.config.ts',
       '**/eslint.config.ts',
       '**/*.d.ts',
       '**/*.d.ts.map',
@@ -93,7 +94,7 @@ export default [
         '**/docs/**',
         '**/src/tools/**',
         '**/ops/**',
-        '**/.config/**',
+        'config/**',
         '**/.github/**',
       ],
       'boundaries/elements': [
@@ -170,10 +171,24 @@ export default [
           ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
           tsconfigRootDir,
           project: ['./tsconfig.json'],
+          noWarnOnMultipleProjects: true,
         },
       },
     }),
   ),
+  {
+    // This file lives outside TS project references; lint with default project service.
+    files: ['config/playwright.config.ts', '**/config/playwright.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir,
+        project: false,
+        projectService: {
+          allowDefaultProject: ['config/playwright.config.ts', '**/config/playwright.config.ts'],
+        },
+      },
+    },
+  },
   {
     files: ['src/apps/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {

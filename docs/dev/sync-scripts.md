@@ -224,7 +224,7 @@ Located in `shared/ui/src/theme/`:
 ### How It Works
 
 1. **Computes SHA-256 hash** of all input files
-2. **Checks cache** at `.cache/theme-css.hash`
+2. **Checks cache** at `node_modules/.cache/theme-css.hash`
 3. **If hash matches and output exists:** Skip rebuild
 4. **Otherwise:**
    - Calls `generateThemeCss()` from `buildThemeCss.ts`

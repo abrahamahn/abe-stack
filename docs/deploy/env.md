@@ -1,6 +1,6 @@
 # Environment Variables
 
-This document explains every environment variable used by the server config. Use `.config/env/.env.production.example` as the canonical template and copy it to `.config/env/.env.development`, `.config/env/.env.test`, or `.config/env/.env.production`.
+This document explains every environment variable used by the server config. Use `config/env/.env.production.example` as the canonical template and copy it to `config/env/.env.development`, `config/env/.env.test`, or `config/env/.env.production`.
 
 Notes:
 

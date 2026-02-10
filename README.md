@@ -82,8 +82,8 @@ For exact progress and gaps, see `docs/CHECKLIST.md`.
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 pnpm install
-cp .config/env/.env.development.example .config/env/.env.development
-docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+cp config/env/.env.development.example config/env/.env.development
+docker compose --env-file config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
 pnpm db:push
 pnpm db:seed
 pnpm dev
@@ -94,9 +94,9 @@ pnpm dev
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 pnpm install
-cp .config/env/.env.local.example .config/env/.env.local
-ENV_FILE=.config/env/.env.local pnpm db:push
-ENV_FILE=.config/env/.env.local pnpm db:seed
+cp config/env/.env.local.example config/env/.env.local
+ENV_FILE=config/env/.env.local pnpm db:push
+ENV_FILE=config/env/.env.local pnpm db:seed
 pnpm dev
 ```
 
@@ -133,10 +133,10 @@ Copy the example environment files:
 
 ```bash
 # Development environment (Docker Postgres)
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 
 # Local Postgres (VM-like dev)
-cp .config/env/.env.local.example .config/env/.env.local
+cp config/env/.env.local.example config/env/.env.local
 ```
 
 **Default configurations:**
@@ -147,14 +147,14 @@ cp .config/env/.env.local.example .config/env/.env.local
 - Storage: Local filesystem (`apps/server/uploads`)
 - All other services: Local/mock providers
 
-**Need to customize?** Edit the env file you’re using. See [.config/env/README.md](.config/env/README.md) for details.
+**Need to customize?** Edit the env file you’re using. See [config/env/README.md](config/env/README.md) for details.
 
 ### 4. Initialize Database
 
 Docker Postgres:
 
 ```bash
-docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+docker compose --env-file config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
 pnpm db:push
 pnpm db:seed
 ```
@@ -163,8 +163,8 @@ Local Postgres:
 
 ```bash
 createdb abe_stack_dev
-ENV_FILE=.config/env/.env.local pnpm db:push
-ENV_FILE=.config/env/.env.local pnpm db:seed
+ENV_FILE=config/env/.env.local pnpm db:push
+ENV_FILE=config/env/.env.local pnpm db:seed
 ```
 
 ### 5. Start Development
@@ -189,9 +189,9 @@ pnpm dev
 **Troubleshooting:**
 
 - **Database connection error?** Ensure PostgreSQL is running and credentials match
-- **Port already in use?** Change `APP_PORT` or `API_PORT` in `.config/env/.env.local`
+- **Port already in use?** Change `APP_PORT` or `API_PORT` in `config/env/.env.local`
 - **Module not found?** Run `pnpm install` again
-- **More help?** See [.config/env/README.md](.config/env/README.md#troubleshooting)
+- **More help?** See [config/env/README.md](config/env/README.md#troubleshooting)
 
 ---
 

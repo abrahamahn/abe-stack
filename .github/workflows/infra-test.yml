@@ -51,13 +51,13 @@ jobs:
 
       - name: Validate Terraform Configuration
         run: |
-          cd infra
-          echo "🔧 Validating Terraform configuration..."
+          cd infra/cloud/${{ matrix.provider }}
+          echo "🔧 Validating ${{ matrix.provider }} Terraform configuration..."
           terraform init -backend=false
           if terraform validate; then
-            echo "✅ Terraform configuration is valid"
+            echo "✅ ${{ matrix.provider }} Terraform configuration is valid"
           else
-            echo "❌ Terraform configuration validation failed"
+            echo "❌ ${{ matrix.provider }} Terraform configuration validation failed"
             exit 1
           fi
 
@@ -76,7 +76,7 @@ jobs:
 
       - name: Test Provider-Specific Configuration
         run: |
-          cd infra/${{ matrix.provider }}
+          cd infra/cloud/${{ matrix.provider }}
           echo "🔧 Testing ${{ matrix.provider }} configuration..."
 
           # Initialize terraform for this provider
@@ -135,10 +135,10 @@ jobs:
           fi
 
           # Check for example configuration
-          if [ -f "terraform.tfvars.example" ]; then
+          if [ -f "cloud/terraform.tfvars.example" ]; then
             echo "✅ Terraform example configuration exists"
           else
-            echo "❌ terraform.tfvars.example is missing"
+            echo "❌ cloud/terraform.tfvars.example is missing"
             exit 1
           fi
 
@@ -147,13 +147,13 @@ jobs:
           echo "🏗️ Validating module structure..."
 
           for provider in digitalocean gcp; do
-            if [ -d "infra/$provider" ]; then
+            if [ -d "infra/cloud/$provider" ]; then
               echo "Checking $provider module..."
 
               # Check for required files
               required_files=("main.tf" "variables.tf" "outputs.tf")
               for file in "${required_files[@]}"; do
-                if [ -f "infra/$provider/$file" ]; then
+                if [ -f "infra/cloud/$provider/$file" ]; then
                   echo "✅ $provider/$file exists"
                 else
                   echo "❌ $provider/$file is missing"

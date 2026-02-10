@@ -6,7 +6,7 @@ on:
       environment:
         description: 'Deployment environment to rollback'
         required: true
-        default: 'staging'
+        default: 'production'
         type: choice
         options:
           - staging
@@ -20,7 +20,16 @@ on:
           - digitalocean
           - gcp
       target_tag:
-        description: 'Docker image tag to rollback to (leave empty for previous deployment)'
+        description: 'Docker image tag to rollback to (required)'
+        required: true
+        type: string
+      app_name:
+        description: 'Application slug used in deployment path and compose project'
+        required: false
+        default: 'abe-stack'
+        type: string
+      instance_ip:
+        description: 'Optional target server IP (used if deployment artifact is unavailable)'
         required: false
         type: string
 
@@ -30,7 +39,7 @@ permissions:
 jobs:
   rollback-deployment:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'staging' }}
+    environment: ${{ inputs.environment || 'production' }}
 
     steps:
       - name: Checkout repository
@@ -39,40 +48,48 @@ jobs:
       - name: Download Deployment Info
         uses: actions/download-artifact@v4
         with:
-          name: deployment-info-${{ inputs.environment }}-${{ inputs.provider }}
+          name: deployment-info-${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}
           path: .deploy/
+        continue-on-error: true
 
       - name: Extract Infrastructure Information
         id: get-deployment-info
         run: |
-          DEPLOY_FILE=".deploy/${{ inputs.environment }}-${{ inputs.provider }}.json"
+          DEPLOY_FILE=".deploy/${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}.json"
+          MANUAL_INSTANCE_IP="${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}"
+          SSH_USER="${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}"
 
           if [ -f "$DEPLOY_FILE" ]; then
             INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
+            SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
+          elif [ -n "$MANUAL_INSTANCE_IP" ]; then
+            INSTANCE_IP="$MANUAL_INSTANCE_IP"
+            SSH_CONNECTION="ssh $SSH_USER@$MANUAL_INSTANCE_IP"
+          else
+            echo "❌ No deployment info found for rollback and no manual instance_ip provided."
+            exit 1
+          fi
+
+          if [ -z "$INSTANCE_IP" ] || [ "$INSTANCE_IP" = "N/A" ]; then
+            echo "❌ Instance IP is empty."
+            exit 1
+          fi
+
             echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
 
             echo "## 🔄 Rollback Target Infrastructure" >> $GITHUB_STEP_SUMMARY
             echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
             echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
             echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ No deployment info found for rollback"
-            exit 1
-          fi
+            echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Determine Rollback Tag
         id: get-rollback-tag
         run: |
-          if [ -n "${{ inputs.target_tag }}" ]; then
-            ROLLBACK_TAG="${{ inputs.target_tag }}"
-          else
-            # Try to find previous deployment tag from GitHub releases/tags
-            # This is a simplified approach - in production you might want more sophisticated logic
-            echo "Finding previous deployment tag..."
-            ROLLBACK_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
-            if [ -z "$ROLLBACK_TAG" ]; then
-              ROLLBACK_TAG="main"
-            fi
+          ROLLBACK_TAG="${{ inputs.target_tag }}"
+          if [ -z "$ROLLBACK_TAG" ]; then
+            echo "❌ target_tag is required for deterministic rollback."
+            exit 1
           fi
 
           echo "rollback_tag=$ROLLBACK_TAG" >> $GITHUB_OUTPUT
@@ -89,20 +106,35 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ steps.get-deployment-info.outputs.instance_ip }}
-          username: ${{ vars.SSH_USERNAME || 'root' }}
+          username: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ vars.SSH_PORT || 22 }}
+          port: ${{ vars.SSH_PORT || secrets.SERVER_PORT || 22 }}
           script: |
             # Set rollback environment variables
             export DEPLOY_ENV="${{ inputs.environment }}"
             export ROLLBACK_TAG="${{ steps.get-rollback-tag.outputs.rollback_tag }}"
-            export REGISTRY="${{ vars.REGISTRY }}"
-            export IMAGE_NAME="${{ vars.IMAGE_NAME }}"
+            export REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
+            export IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
+
+            if [[ "$IMAGE_NAME_RAW" != */* ]]; then
+              export IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+            else
+              export IMAGE_NAME="$IMAGE_NAME_RAW"
+            fi
+
+            APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
+            if [ -z "$APP_NAME" ]; then
+              APP_NAME="abe-stack"
+            fi
+            export APP_NAME
+            export COMPOSE_PROJECT_NAME="${APP_NAME}-${DEPLOY_ENV}"
+            export DEPLOY_ROOT="$HOME/deployments/$APP_NAME/$DEPLOY_ENV"
 
             echo "🔄 Starting rollback to $ROLLBACK_TAG..."
 
             # Navigate to deployment directory
-            cd ~/abe-stack-deploy
+            cd "$DEPLOY_ROOT"
 
             # Check if docker-compose file exists
             if [ ! -f "docker-compose.prod.yml" ]; then
@@ -119,7 +151,7 @@ jobs:
 
             # Stop existing containers gracefully
             echo "🛑 Stopping current containers..."
-            docker compose -f docker-compose.prod.yml down --timeout 30
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml down --timeout 30
 
             # Pull rollback images
             echo "📥 Pulling rollback Docker images..."
@@ -128,7 +160,7 @@ jobs:
 
             # Start rollback containers
             echo "🚀 Starting rollback containers..."
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml up -d
 
             # Wait for services to be healthy
             echo "🏥 Waiting for rollback services to be healthy..."
@@ -136,8 +168,8 @@ jobs:
             elapsed=0
 
             while [ \$elapsed -lt \$timeout ]; do
-              healthy_count=\$(docker compose -f docker-compose.prod.yml ps | grep -c "healthy")
-              total_services=\$(docker compose -f docker-compose.prod.yml ps | grep -c "Up")
+              healthy_count=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "healthy")
+              total_services=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "Up")
 
               if [ "\$healthy_count" -eq "\$total_services" ] && [ "\$total_services" -gt 0 ]; then
                 echo "✅ Rollback completed successfully!"
@@ -152,7 +184,7 @@ jobs:
 
             if [ \$elapsed -ge \$timeout ]; then
               echo "❌ Rollback failed - timeout waiting for services"
-              docker compose -f docker-compose.prod.yml logs
+              docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml logs
               exit 1
             fi
 
@@ -161,7 +193,7 @@ jobs:
             docker image prune -f
 
             echo "✅ Rollback to $ROLLBACK_TAG completed successfully!"
-            docker compose -f docker-compose.prod.yml ps
+            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps
 
       - name: Rollback Summary
         run: |
@@ -169,6 +201,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Rolled back to:** ${{ steps.get-rollback-tag.outputs.rollback_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "**Rollback completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

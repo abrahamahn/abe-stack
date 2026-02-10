@@ -25,11 +25,7 @@
       "persistent": true
     },
     "lint": {
-      "inputs": [
-        "**/*.{ts,tsx,js,jsx,cjs,mjs}",
-        "eslint.config.ts",
-        ".config/tsconfig.eslint.json"
-      ],
+      "inputs": ["**/*.{ts,tsx,js,jsx,cjs,mjs}", "eslint.config.ts", "config/tsconfig.eslint.json"],
       "cache": true
     },
     "type-check": {
@@ -53,8 +49,8 @@
   "globalDependencies": [
     "pnpm-lock.yaml",
     "tsconfig.json",
-    ".config/env/.env.*",
-    ".prettierrc",
+    "config/env/.env.*",
+    "config/.prettierrc",
     "eslint.config.ts",
     ".editorconfig",
     ".pnpmrc"

@@ -592,7 +592,7 @@ const STATEMENTS: string[] = [
  * @complexity O(n) where n = number of SQL statements
  */
 export async function pushSchema(): Promise<void> {
-  // Load + validate `.config/env` files (prefers `.env.local` when present).
+  // Load + validate `config/env` files (prefers `.env.local` when present).
   loadServerEnv();
 
   const connectionString = buildConnectionString();

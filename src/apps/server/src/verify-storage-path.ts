@@ -1,3 +1,4 @@
+// src/apps/server/src/verify-storage-path.ts
 import path from 'path';
 
 import { load } from './config/factory';

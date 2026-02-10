@@ -67,7 +67,7 @@ export const TEST_USERS: SeedUser[] = [
  * @complexity O(n) where n = number of test users
  */
 export async function seed(): Promise<void> {
-  // Load + validate `.config/env` files (prefers `.env.local` when present).
+  // Load + validate `config/env` files (prefers `.env.local` when present).
   loadServerEnv();
 
   // Safety check: refuse to seed in production

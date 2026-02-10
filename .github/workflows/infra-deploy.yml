@@ -61,12 +61,12 @@ jobs:
 
       - name: Terraform Format Check
         run: |
-          cd infra
+          cd infra/cloud
           terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: |
-          cd infra
+          cd infra/cloud/${{ inputs.provider }}
           terraform init -backend=false
           terraform validate
 
@@ -111,7 +111,7 @@ jobs:
       # Create terraform.tfvars file
       - name: Create Terraform Variables File
         run: |
-          cd infra
+          cd infra/cloud
           cat > terraform.tfvars << EOF
           # Environment Configuration
           environment = "${{ inputs.environment || 'staging' }}"
@@ -128,8 +128,6 @@ jobs:
           # Add provider-specific variables
           if [ "${{ inputs.provider }}" = "digitalocean" ]; then
             cat >> terraform.tfvars << EOF
-          digitalocean_token = "${{ secrets.DIGITALOCEAN_TOKEN }}"
-
           # DigitalOcean Configuration
           region = "${{ vars.DO_REGION || 'nyc1' }}"
           instance_size = "${{ vars.DO_INSTANCE_SIZE || 's-1vcpu-1gb' }}"
@@ -138,7 +136,7 @@ jobs:
           EOF
           elif [ "${{ inputs.provider }}" = "gcp" ]; then
             cat >> terraform.tfvars << EOF
-          gcp_project_id = "${{ vars.GCP_PROJECT_ID }}"
+          project_id = "${{ vars.GCP_PROJECT_ID }}"
 
           # GCP Configuration
           region = "${{ vars.GCP_REGION || 'us-central1' }}"
@@ -153,13 +151,13 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           terraform init
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           terraform plan -out=tfplan -var-file=../terraform.tfvars
 
           # Save plan output for summary
@@ -167,7 +165,7 @@ jobs:
 
       - name: Terraform Plan Summary
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           echo "## Terraform Plan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
@@ -179,7 +177,7 @@ jobs:
       - name: Terraform Apply
         if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           terraform apply -auto-approve tfplan
 
       - name: Terraform Apply (Manual Approval Required)
@@ -199,7 +197,7 @@ jobs:
         if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
         id: outputs
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
 
           # Extract outputs and create deployment info
           echo "## 🚀 Infrastructure Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
@@ -221,8 +219,8 @@ jobs:
           echo "DOMAIN=$DOMAIN" >> $GITHUB_OUTPUT
 
           # Save deployment info to file for other workflows
-          mkdir -p ../../.deploy
-          cat > ../../.deploy/${{ inputs.environment }}-${{ inputs.provider }}.json << EOF
+          mkdir -p ../../../.deploy
+          cat > ../../../.deploy/${{ inputs.environment }}-${{ inputs.provider }}.json << EOF
           {
             "environment": "${{ inputs.environment }}",
             "provider": "${{ inputs.provider }}",
@@ -239,7 +237,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state-${{ inputs.environment }}-${{ inputs.provider }}
-          path: infra/${{ inputs.provider }}/.terraform/
+          path: |
+            infra/cloud/${{ inputs.provider }}/terraform.tfstate
+            infra/cloud/${{ inputs.provider }}/terraform.tfstate.backup
+            infra/cloud/${{ inputs.provider }}/.terraform.lock.hcl
           retention-days: 30
 
       - name: Upload Deployment Info

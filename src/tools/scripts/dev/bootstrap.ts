@@ -51,7 +51,7 @@ export function bootstrap(): void {
   console.log('🚀 Starting Database Bootstrap...\n');
 
   // Load environment variables
-  const envPath = resolve(process.cwd(), '.config/env/.env.development');
+  const envPath = resolve(process.cwd(), 'config/env/.env.development');
   const envVars = parseEnv(envPath);
   console.log('✅ Loaded environment variables\n');
 

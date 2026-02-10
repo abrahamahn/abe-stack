@@ -1,7 +1,7 @@
 // src/tools/scripts/path/config.ts
 /**
  * Exports configuration and infrastructure files to .tmp/PATH-config.md
- * Target folders: Root, tools, infra, .config, .github, client/ui/src/styles
+ * Target folders: Root, tools, infra, config, .github, client/ui/src/styles
  * @module tools/scripts/path/config
  */
 import fs from 'fs';
@@ -27,14 +27,7 @@ const EXCLUDED_DIRS = new Set([
 ]);
 
 /** Target directories for config files */
-const CONFIG_DIRECTORIES = [
-  'src/tools',
-  'infra',
-  'config',
-  '.config',
-  '.github',
-  'src/client/ui/src/styles',
-];
+const CONFIG_DIRECTORIES = ['src/tools', 'infra', 'config', '.github', 'src/client/ui/src/styles'];
 
 /** Root-level file extensions to include */
 const ROOT_FILE_EXTENSIONS = new Set([

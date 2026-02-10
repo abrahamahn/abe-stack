@@ -83,7 +83,7 @@ interface EnvConfig {
 // =============================================================================
 
 const ROOT = process.cwd();
-const ENV_DEV = resolve(ROOT, '.config/env/.env.development');
+const ENV_DEV = resolve(ROOT, 'config/env/.env.development');
 const DOCKER_COMPOSE = resolve(ROOT, 'config/docker/docker-compose.yml');
 const JSON_DB_DIR = resolve(ROOT, '.data');
 
@@ -689,14 +689,14 @@ function installDependencies(pm: PackageManager, step: number, total: number): v
 async function setupEnvironment(envConfig: EnvConfig, step: number, total: number): Promise<void> {
   logStep(step, total, 'Creating environment file...');
 
-  // Check if .config/env/.env.development already exists
+  // Check if config/env/.env.development already exists
   if (existsSync(ENV_DEV)) {
     const overwrite = await promptYesNo(
-      '.config/env/.env.development already exists. Overwrite with new configuration?',
+      'config/env/.env.development already exists. Overwrite with new configuration?',
       false,
     );
     if (!overwrite) {
-      logInfo('Keeping existing .config/env/.env.development');
+      logInfo('Keeping existing config/env/.env.development');
       return;
     }
   }
@@ -711,7 +711,7 @@ async function setupEnvironment(envConfig: EnvConfig, step: number, total: numbe
 
   const content = generateEnvFileContent(envConfig);
   writeFileSync(ENV_DEV, content);
-  logSuccess('Created .config/env/.env.development with your configuration');
+  logSuccess('Created config/env/.env.development with your configuration');
 }
 
 async function setupDocker(envConfig: EnvConfig, step: number, total: number): Promise<void> {
@@ -776,7 +776,7 @@ async function setupDocker(envConfig: EnvConfig, step: number, total: number): P
 function skipDockerStep(step: number, total: number): void {
   logStep(step, total, 'Skipping Docker setup...');
   logWarning('Make sure your PostgreSQL database is running and accessible');
-  logInfo('The connection will use the settings from .config/env/.env.development');
+  logInfo('The connection will use the settings from config/env/.env.development');
 }
 
 function pushDatabaseSchema(pm: PackageManager, step: number, total: number): void {

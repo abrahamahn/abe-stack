@@ -24,7 +24,7 @@ on:
           - digitalocean
           - gcp
       image_tag:
-        description: 'Docker image tag to deploy (leave empty for latest commit SHA)'
+        description: 'Fallback Docker image tag (manual runs only)'
         required: false
         type: string
       app_name:
@@ -43,7 +43,11 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  actions: read
+
+concurrency:
+  group: deploy-${{ inputs.environment || 'production' }}-${{ inputs.app_name || 'abe-stack' }}
+  cancel-in-progress: false
 
 jobs:
   get-infrastructure-info:
@@ -52,50 +56,40 @@ jobs:
     environment: ${{ inputs.environment || 'production' }}
     outputs:
       instance_ip: ${{ steps.get-deployment-info.outputs.instance_ip }}
-      ssh_connection: ${{ steps.get-deployment-info.outputs.ssh_connection }}
       domain: ${{ steps.get-deployment-info.outputs.domain }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Download Deployment Info
+      - name: Download deployment info artifact
         uses: actions/download-artifact@v4
         with:
           name: deployment-info-${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}
           path: .deploy/
         continue-on-error: true
-      - name: Extract Infrastructure Information
+
+      - name: Extract infrastructure information
         id: get-deployment-info
         run: |
           DEPLOY_FILE=".deploy/${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}.json"
           MANUAL_INSTANCE_IP="${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}"
           MANUAL_DOMAIN="${{ inputs.domain || vars.DOMAIN || secrets.DOMAIN || '' }}"
-          SSH_USER="${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}"
 
           if [ -f "$DEPLOY_FILE" ]; then
-            echo "📋 Found deployment info for ${{ inputs.environment }} on ${{ inputs.provider }}"
-            INFO_SOURCE="artifact"
-
             INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
-            SSH_CONNECTION=$(jq -r '.ssh_connection // empty' "$DEPLOY_FILE")
             DOMAIN=$(jq -r '.domain // empty' "$DEPLOY_FILE")
           elif [ -n "$MANUAL_INSTANCE_IP" ]; then
-            echo "⚠️ Deployment artifact not found. Falling back to manual instance IP."
-            INFO_SOURCE="manual"
-
             INSTANCE_IP="$MANUAL_INSTANCE_IP"
-            SSH_CONNECTION="ssh $SSH_USER@$MANUAL_INSTANCE_IP"
             DOMAIN="$MANUAL_DOMAIN"
           else
-            echo "❌ Deployment info not found for ${{ inputs.environment }} on ${{ inputs.provider }}."
-            echo "Provide workflow input 'instance_ip' (or repository variable INSTANCE_IP/DEPLOY_HOST),"
-            echo "or run 'Infrastructure Deploy' first to generate deployment-info artifact."
+            echo "No deployment info artifact found and no manual host provided."
             exit 1
           fi
 
           if [ -z "$INSTANCE_IP" ] || [ "$INSTANCE_IP" = "N/A" ]; then
-            echo "❌ Instance IP is empty."
+            echo "Instance IP is empty."
             exit 1
           fi
 
@@ -103,68 +97,27 @@ jobs:
             DOMAIN="$INSTANCE_IP"
           fi
 
-          echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
-          echo "ssh_connection=$SSH_CONNECTION" >> $GITHUB_OUTPUT
-          echo "domain=$DOMAIN" >> $GITHUB_OUTPUT
+          echo "instance_ip=$INSTANCE_IP" >> "$GITHUB_OUTPUT"
+          echo "domain=$DOMAIN" >> "$GITHUB_OUTPUT"
 
-          echo "## 🚀 Target Infrastructure" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Info Source:** $INFO_SOURCE" >> $GITHUB_STEP_SUMMARY
-          echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
-          echo "**Domain:** $DOMAIN" >> $GITHUB_STEP_SUMMARY
-          echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
-
-  build-and-deploy:
+  deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'production' }}
     needs: get-infrastructure-info
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Check configuration
-        run: pnpm config:generate:check
-
-      - name: Check file headers
-        run: pnpm sync:headers:check
-
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .cache/turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Run build and verification pipeline
-        run: pnpm build
-
-      - name: Resolve deployment variables
-        id: deploy-vars
+      - name: Resolve image variables
+        id: image-vars
         run: |
           REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
           IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
           COMMIT_SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          IMAGE_TAG="${{ inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}"
 
           if [[ "$IMAGE_NAME_RAW" != */* ]]; then
             IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
@@ -175,59 +128,50 @@ jobs:
           echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "commit_sha=$COMMIT_SHA" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
+      - name: Download CI deployment image artifact
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
         with:
-          registry: ${{ steps.deploy-vars.outputs.registry }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+          name: deployment-images
+          path: .deploy-image/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ steps.deploy-vars.outputs.registry }}/${{ steps.deploy-vars.outputs.image_name }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=raw,value=${{ inputs.image_tag || steps.deploy-vars.outputs.commit_sha }}
-            type=raw,value=deploy-${{ inputs.environment || 'production' }}
+      - name: Resolve deployment image references
+        id: image-refs
+        run: |
+          ARTIFACT_FILE=".deploy-image/deployment-images.json"
+          DEFAULT_API_IMAGE="${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:${{ steps.image-vars.outputs.image_tag }}-api"
+          DEFAULT_WEB_IMAGE="${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:${{ steps.image-vars.outputs.image_tag }}-web"
 
-      - name: Build and push API Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./infra/docker/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}-api
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          if [ -f "$ARTIFACT_FILE" ]; then
+            API_IMAGE=$(jq -r '.api_image // empty' "$ARTIFACT_FILE")
+            WEB_IMAGE=$(jq -r '.web_image // empty' "$ARTIFACT_FILE")
+            SOURCE="ci-artifact"
+          else
+            API_IMAGE="$DEFAULT_API_IMAGE"
+            WEB_IMAGE="$DEFAULT_WEB_IMAGE"
+            SOURCE="fallback-tag"
+          fi
 
-      - name: Build and push Web Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./infra/docker/Dockerfile.web
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}-web
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VITE_API_URL=
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          if [ -z "$API_IMAGE" ] || [ -z "$WEB_IMAGE" ]; then
+            echo "Could not resolve image references."
+            exit 1
+          fi
+
+          echo "api_image=$API_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "web_image=$WEB_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
 
       - name: Prepare SSH key for deployment
         run: |
-          # Create SSH key file from secret
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ needs.get-infrastructure-info.outputs.instance_ip }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ needs.get-infrastructure-info.outputs.instance_ip }}" >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
@@ -237,85 +181,53 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ vars.SSH_PORT || secrets.SERVER_PORT || 22 }}
           script: |
-            # Set deployment environment variables
             export DEPLOY_ENV="${{ inputs.environment || 'production' }}"
-            export IMAGE_TAG="${{ inputs.image_tag || steps.deploy-vars.outputs.commit_sha }}"
-            export REGISTRY="${{ steps.deploy-vars.outputs.registry }}"
-            export IMAGE_NAME="${{ steps.deploy-vars.outputs.image_name }}"
             export DOMAIN="${{ needs.get-infrastructure-info.outputs.domain }}"
             export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
-            export DEPLOY_COMMIT_SHA="${{ steps.deploy-vars.outputs.commit_sha }}"
+            export DEPLOY_COMMIT_SHA="${{ steps.image-vars.outputs.commit_sha }}"
+            export API_IMAGE="${{ steps.image-refs.outputs.api_image }}"
+            export WEB_IMAGE="${{ steps.image-refs.outputs.web_image }}"
 
-            # Normalize app name for filesystem/compose project safety
             APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
             if [ -z "$APP_NAME" ]; then
               APP_NAME="abe-stack"
             fi
+
             export APP_NAME
             export COMPOSE_PROJECT_NAME="${APP_NAME}-${DEPLOY_ENV}"
-
-            # Create deployment directory if it doesn't exist
             DEPLOY_ROOT="$HOME/deployments/$APP_NAME/$DEPLOY_ENV"
             mkdir -p "$DEPLOY_ROOT"
-
-            # Navigate to deployment directory
             cd "$DEPLOY_ROOT"
 
-            echo "🚀 Starting deployment of $APP_NAME:$IMAGE_TAG to $DEPLOY_ENV environment..."
-
-            # Download docker-compose.prod.yml
-            echo "📦 Downloading production docker-compose file..."
             curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/\${DEPLOY_COMMIT_SHA}/infra/docker/production/docker-compose.prod.yml" -o docker-compose.prod.yml
-
-            # Download Caddyfile
-            echo "🔐 Downloading Caddyfile..."
             curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/\${DEPLOY_COMMIT_SHA}/infra/runtime/caddy/Caddyfile" -o Caddyfile
 
-            # Create environment file
-            echo "⚙️ Creating environment configuration..."
             cat > ".env" << EOF
-            # Deployment metadata
             APP_NAME=\${APP_NAME}
             COMPOSE_PROJECT_NAME=\${COMPOSE_PROJECT_NAME}
-
-            # Domain Configuration
             DOMAIN=\${DOMAIN}
             ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-
-            # Database Secrets
             POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD || secrets.POSTGRES_PASSWORD }}
             POSTGRES_DB=abe_stack
             POSTGRES_USER=postgres
-
-            # Application Secrets
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-
-            # Trust Proxy (for correct IP extraction)
             TRUST_PROXY=true
             TRUSTED_PROXIES=172.16.0.0/12,10.0.0.0/8
             MAX_PROXY_DEPTH=1
-
-            # Storage Configuration
             STORAGE_PROVIDER=local
             STORAGE_LOCAL_PATH=/app/uploads
             STORAGE_LOCAL_PUBLIC_URL=/uploads
-
-            # Email Configuration (disabled for now)
             EMAIL_PROVIDER=console
             EMAIL_FROM_NAME=ABE Stack
             EMAIL_FROM_ADDRESS=noreply@\${DOMAIN}
             EOF
 
-            # Make compose file reusable for namespaced multi-app deploys
-            # - Remove hardcoded project/container/volume names that collide
-            # - Use local Caddyfile path in deployment directory
             sed -i '/^name:/d' docker-compose.prod.yml
             sed -i '/container_name:/d' docker-compose.prod.yml
             sed -i '/^[[:space:]]\{2,\}name:[[:space:]]/d' docker-compose.prod.yml
             sed -i 's|../caddy/Caddyfile:|./Caddyfile:|g' docker-compose.prod.yml
 
-            # Optional env_file paths in source compose are repo-specific and not valid on target host
             awk '
               BEGIN { skip = 0 }
               /^    env_file:$/ { skip = 1; next }
@@ -324,17 +236,15 @@ jobs:
               { print }
             ' docker-compose.prod.yml > docker-compose.prod.tmp && mv docker-compose.prod.tmp docker-compose.prod.yml
 
-            # Update docker-compose to use deployed images
-            echo "🐳 Updating docker-compose with deployed images..."
-            awk -v reg="$REGISTRY" -v img="$IMAGE_NAME" -v tag="$IMAGE_TAG" '
+            awk -v api="$API_IMAGE" -v web="$WEB_IMAGE" '
               BEGIN { in_api=0; in_web=0; in_build=0 }
               /^  api:$/ { in_api=1; in_web=0; print; next }
               /^  web:$/ { in_web=1; in_api=0; print; next }
               /^  [a-zA-Z0-9_-]+:$/ { in_api=0; in_web=0 }
               (in_api || in_web) && /^    build:$/ {
                 in_build=1
-                if (in_api) print "    image: " reg "/" img ":" tag "-api"
-                if (in_web) print "    image: " reg "/" img ":" tag "-web"
+                if (in_api) print "    image: " api
+                if (in_web) print "    image: " web
                 next
               }
               in_build && /^      / { next }
@@ -343,95 +253,46 @@ jobs:
               { print }
             ' docker-compose.prod.yml > docker-compose.prod.tmp && mv docker-compose.prod.tmp docker-compose.prod.yml
 
-            # Stop existing containers gracefully
-            echo "🛑 Stopping existing containers..."
             docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml down --timeout 30 || true
-
-            # Pull latest images
-            echo "📥 Pulling latest Docker images..."
-            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-api
-            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-web
-
-            # Start new containers
-            echo "🚀 Starting new containers..."
+            docker pull "$API_IMAGE"
+            docker pull "$WEB_IMAGE"
             docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml up -d
 
-            # Wait for services to be healthy
-            echo "🏥 Waiting for services to be healthy..."
             timeout=600
             elapsed=0
-
-            while [ \$elapsed -lt \$timeout ]; do
-              healthy_count=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "healthy")
-              total_services=\$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "Up")
-
-              if [ "\$healthy_count" -eq "\$total_services" ] && [ "\$total_services" -gt 0 ]; then
-                echo "✅ All \$total_services services are healthy!"
+            while [ "$elapsed" -lt "$timeout" ]; do
+              healthy_count=$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "healthy")
+              total_services=$(docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps | grep -c "Up")
+              if [ "$healthy_count" -eq "$total_services" ] && [ "$total_services" -gt 0 ]; then
                 break
               fi
-
-              echo "⏳ Waiting... (\$healthy_count/\$total_services services healthy, \$elapsed/\$timeout seconds)"
               sleep 10
-              elapsed=\$((elapsed + 10))
+              elapsed=$((elapsed + 10))
             done
 
-            if [ \$elapsed -ge \$timeout ]; then
-              echo "❌ Timeout waiting for services to be healthy"
+            if [ "$elapsed" -ge "$timeout" ]; then
               docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml logs
-              echo "🔄 Attempting rollback..."
-              # TODO: Implement rollback to previous version
               exit 1
             fi
 
-            # Clean up old images
-            echo "🧹 Cleaning up old Docker images..."
-            docker image prune -f
-
-            echo "🎉 Deployment completed successfully!"
-            echo "🌐 Application is available at: https://\${DOMAIN}"
-            echo "🧩 Compose project: \${COMPOSE_PROJECT_NAME}"
-            echo "📁 Deploy path: \${DEPLOY_ROOT}"
-            echo "📊 Deployment summary:"
-            docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps
-
       - name: Verify Deployment
         run: |
-          echo "🔍 Verifying deployment..."
           TARGET="${{ needs.get-infrastructure-info.outputs.domain }}"
-          HEALTH_URL="https://$TARGET/health"
-
-          # Wait a moment for DNS propagation if needed
+          HTTPS_URL="https://$TARGET/health"
+          HTTP_URL="http://$TARGET/health"
           sleep 10
-
-          # Test health endpoint
-          if curl -f -s "$HEALTH_URL" > /dev/null; then
-            echo "✅ Application health check passed"
-          else
-            FALLBACK_URL="http://$TARGET/health"
-            if curl -f -s "$FALLBACK_URL" > /dev/null; then
-              echo "✅ Application health check passed over HTTP fallback"
-            else
-              echo "⚠️ Health check failed on both HTTPS and HTTP"
-            fi
+          if curl -f -s "$HTTPS_URL" >/dev/null; then
+            exit 0
           fi
+          curl -f -s "$HTTP_URL" >/dev/null
 
       - name: Deployment Summary
         run: |
-          echo "## 🎉 Deployment Completed Successfully!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
-          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Domain:** https://${{ needs.get-infrastructure-info.outputs.domain }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Image Tag:** ${{ inputs.image_tag || github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployed at:** $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application:** https://${{ needs.get-infrastructure-info.outputs.domain }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Health Check:** https://${{ needs.get-infrastructure-info.outputs.domain }}/health" >> $GITHUB_STEP_SUMMARY
-          echo "- **API Docs:** https://${{ needs.get-infrastructure-info.outputs.domain }}/api/docs" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Deployment Status" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Infrastructure: Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Docker Images: Built & Pushed" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Application: Deployed & Running" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Completed Successfully" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Environment:** ${{ inputs.environment || 'production' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Image Source:** ${{ steps.image-refs.outputs.source }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**API Image:** \`${{ steps.image-refs.outputs.api_image }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Web Image:** \`${{ steps.image-refs.outputs.web_image }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Domain:** https://${{ needs.get-infrastructure-info.outputs.domain }}" >> "$GITHUB_STEP_SUMMARY"

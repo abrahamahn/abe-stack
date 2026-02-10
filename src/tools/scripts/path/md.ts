@@ -116,7 +116,7 @@ function exportMarkdownFiles(): void {
     'docs/deploy',
     'docs/reference',
     'docs/specs',
-    '.config',
+    'config',
     '.github',
     'infra',
     'src/shared',

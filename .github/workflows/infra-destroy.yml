@@ -77,26 +77,58 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: terraform-state-${{ inputs.environment }}-${{ inputs.provider }}
-          path: infra/${{ inputs.provider }}/.terraform/
+          path: infra/cloud/${{ inputs.provider }}/
+        continue-on-error: true
+
+      - name: Create Terraform Variables File
+        run: |
+          cd infra/cloud
+          cat > terraform.tfvars << EOF
+          # Environment Configuration
+          environment = "${{ inputs.environment || 'staging' }}"
+
+          # Domain Configuration
+          domain = "${{ secrets.DOMAIN }}"
+
+          # SSH Configuration
+          ssh_public_key = "${{ secrets.SSH_PUBLIC_KEY }}"
+
+          # Provider-specific configuration
+          EOF
+
+          if [ "${{ inputs.provider }}" = "digitalocean" ]; then
+            cat >> terraform.tfvars << EOF
+          region = "${{ vars.DO_REGION || 'nyc1' }}"
+          instance_size = "${{ vars.DO_INSTANCE_SIZE || 's-1vcpu-1gb' }}"
+          enable_managed_database = ${{ vars.DO_ENABLE_MANAGED_DB || 'false' }}
+          database_size = "${{ vars.DO_DATABASE_SIZE || 'db-s-1vcpu-1gb' }}"
+          EOF
+          elif [ "${{ inputs.provider }}" = "gcp" ]; then
+            cat >> terraform.tfvars << EOF
+          project_id = "${{ vars.GCP_PROJECT_ID }}"
+          region = "${{ vars.GCP_REGION || 'us-central1' }}"
+          zone = "${{ vars.GCP_ZONE || 'us-central1-a' }}"
+          instance_size = "${{ vars.GCP_INSTANCE_SIZE || 'e2-small' }}"
+          enable_managed_database = ${{ vars.GCP_ENABLE_MANAGED_DB || 'false' }}
+          database_size = "${{ vars.GCP_DATABASE_SIZE || 'db-f1-micro' }}"
+          database_username = "${{ secrets.GCP_DB_USERNAME || 'abe_user' }}"
+          database_password = "${{ secrets.GCP_DB_PASSWORD }}"
+          EOF
+          fi
 
       - name: Terraform Init
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           terraform init
-
-      - name: Terraform Workspace Select
-        run: |
-          cd infra/${{ inputs.provider }}
-          terraform workspace select ${{ inputs.environment }} 2>/dev/null || terraform workspace new ${{ inputs.environment }}
 
       - name: Terraform Plan Destroy
         run: |
-          cd infra/${{ inputs.provider }}
-          terraform plan -destroy -out=tfplan-destroy
+          cd infra/cloud/${{ inputs.provider }}
+          terraform plan -destroy -var-file=../terraform.tfvars -out=tfplan-destroy
 
       - name: Terraform Destroy
         run: |
-          cd infra/${{ inputs.provider }}
+          cd infra/cloud/${{ inputs.provider }}
           terraform apply -auto-approve tfplan-destroy
 
       - name: Clean up Deployment Artifacts
@@ -105,7 +137,7 @@ jobs:
           rm -f .deploy/${{ inputs.environment }}-${{ inputs.provider }}.json
 
           # Clean up terraform state artifacts
-          rm -rf infra/${{ inputs.provider }}/.terraform/
+          rm -rf infra/cloud/${{ inputs.provider }}/.terraform/
 
       - name: Infrastructure Destruction Summary
         run: |

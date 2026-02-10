@@ -1,7 +1,7 @@
 // src/tools/scripts/path/all.ts
 /**
  * Exports ALL project files to .tmp/PATH-all.md in a categorized format.
- * Categories: Root, docs, infra, .config, .github, src/apps/*, src/client/*, src/server/*, src/shared, src/tools, Styles, Barrels, Markdown
+ * Categories: Root, docs, infra, config, .github, src/apps/*, src/client/*, src/server/*, src/shared, src/tools, Styles, Barrels, Markdown
  * @module tools/scripts/path/all
  */
 import fs from 'fs';
@@ -154,7 +154,6 @@ function categorizeFiles(allFiles: string[]): CategorizedFiles {
         result.infra.push(file);
         break;
       case 'config':
-      case '.config':
         result.config.push(file);
         break;
       case '.github':
@@ -220,7 +219,7 @@ function exportAllFiles(): void {
   output += buildSection('infra', categorized.infra);
   count += categorized.infra.length;
 
-  output += buildSection('.config', categorized.config);
+  output += buildSection('config', categorized.config);
   count += categorized.config.length;
 
   output += buildSection('.github', categorized.github);

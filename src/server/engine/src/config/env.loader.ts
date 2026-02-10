@@ -56,9 +56,9 @@ export function initEnv(): void {
   let currentDir = process.cwd();
   let configDir: string | null = null;
 
-  // Locate .config/env
+  // Locate config/env
   for (let i = 0; i < 5; i++) {
-    const candidate = path.join(currentDir, '.config');
+    const candidate = path.join(currentDir, 'config');
     if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
       configDir = candidate;
       break;
@@ -69,7 +69,7 @@ export function initEnv(): void {
   if (configDir === null) {
     if (process.env['NODE_ENV'] !== 'test') {
       process.stdout.write(
-        '[EnvLoader] Warning: .config directory not found. Environment files skipped.\n',
+        '[EnvLoader] Warning: config directory not found. Environment files skipped.\n',
       );
     }
     return;

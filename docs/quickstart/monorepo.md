@@ -46,7 +46,7 @@ pnpm install
 ### 2. Configure environment
 
 ```bash
-cp .config/env/.env.development.example .config/env/.env.development
+cp config/env/.env.development.example config/env/.env.development
 ```
 
 Defaults work out of the box:
@@ -57,7 +57,7 @@ Defaults work out of the box:
 - **Cache:** In-memory
 - **Search:** SQL-based
 
-For custom settings, create `.config/env/.env.local` (gitignored). See [.config/env/README.md](../../.config/env/README.md).
+For custom settings, create `config/env/.env.local` (gitignored). See [config/env/README.md](../../config/env/README.md).
 
 ### 3. Initialize database
 
@@ -141,10 +141,10 @@ Runs PostgreSQL, API server, and web frontend in containers.
 ## Troubleshooting
 
 **Database connection error:**
-Ensure PostgreSQL is running and credentials in `.config/env/.env.development` match. Default expects `postgres:postgres` on `localhost:5432`.
+Ensure PostgreSQL is running and credentials in `config/env/.env.development` match. Default expects `postgres:postgres` on `localhost:5432`.
 
 **Port already in use:**
-`pnpm dev` auto-kills ports 5173, 8080, and 3000 on startup. If issues persist, override `APP_PORT` or `API_PORT` in `.config/env/.env.local`.
+`pnpm dev` auto-kills ports 5173, 8080, and 3000 on startup. If issues persist, override `APP_PORT` or `API_PORT` in `config/env/.env.local`.
 
 **Module not found:**
 Run `pnpm install` again. If workspace packages are missing, try `pnpm install --force`.

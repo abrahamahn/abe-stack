@@ -20,7 +20,7 @@ import { loadServerEnv } from '@abe-stack/server-engine';
  * @throws {Error} If database connection or truncate fails
  */
 export async function reset(): Promise<void> {
-  // Load + validate `.config/env` files (prefers `.env.local` when present).
+  // Load + validate `config/env` files (prefers `.env.local` when present).
   loadServerEnv();
 
   // Safety check: refuse to reset in production

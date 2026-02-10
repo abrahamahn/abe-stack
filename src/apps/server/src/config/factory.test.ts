@@ -42,12 +42,12 @@ describe('Configuration Factory', () => {
     // Mock filesystem
     vi.mocked(fs.existsSync).mockImplementation((p) => {
       const pStr = String(p);
-      return pStr.includes('.config') || pStr.includes('.env');
+      return pStr.includes('config') || pStr.includes('.env');
     });
 
     vi.mocked(fs.statSync).mockImplementation((p) => {
       const pStr = String(p);
-      if (pStr.endsWith('.config')) {
+      if (pStr.endsWith('config')) {
         return { isDirectory: () => true } as fs.Stats;
       }
       return { isDirectory: () => false } as fs.Stats;
@@ -99,7 +99,7 @@ describe('Configuration Factory', () => {
       vi.mocked(fs.readFileSync).mockImplementation((p) => {
         const pStr = String(p);
         if (pStr.endsWith('.env.development')) return stageEnv;
-        if (pStr.endsWith('.config/env/.env')) return baseEnv;
+        if (pStr.endsWith('config/env/.env')) return baseEnv;
         return '';
       });
 

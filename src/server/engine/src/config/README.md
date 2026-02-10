@@ -44,9 +44,9 @@ The `initEnv()` function searches for `.env` files and loads them into `process.
 
 1. **System Environment** - Runtime variables from your deployment platform (Vercel, AWS, Docker, etc.)
 2. **ENV_FILE** - Explicit file path set via `ENV_FILE` environment variable
-3. **`.env.local`** - Local developer overrides (in `.config/env/` directory)
-4. **`.env.{NODE_ENV}`** - Stage-specific files like `.env.development`, `.env.production`, `.env.test` (in `.config/env/` directory)
-5. **`.env`** - Base configuration file (in `.config/env/` directory)
+3. **`.env.local`** - Local developer overrides (in `config/env/` directory)
+4. **`.env.{NODE_ENV}`** - Stage-specific files like `.env.development`, `.env.production`, `.env.test` (in `config/env/` directory)
+5. **`.env`** - Base configuration file (in `config/env/` directory)
 6. **Root Fallbacks** - `.env.local`, `.env.{NODE_ENV}`, and `.env` in repository root (for deployment flexibility)
 
 **Why this order?** Higher priority sources override lower ones. This allows you to:
@@ -64,11 +64,11 @@ The `initEnv()` function searches for `.env` files and loads them into `process.
 ├─────────────────────────────────────────────────────────────┤
 │  2. ENV_FILE (explicit path)                                │
 ├─────────────────────────────────────────────────────────────┤
-│  3. .config/env/.env.local (local overrides)                │
+│  3. config/env/.env.local (local overrides)                │
 ├─────────────────────────────────────────────────────────────┤
-│  4. .config/env/.env.{NODE_ENV} (stage-specific)            │
+│  4. config/env/.env.{NODE_ENV} (stage-specific)            │
 ├─────────────────────────────────────────────────────────────┤
-│  5. .config/env/.env (base configuration)                   │
+│  5. config/env/.env (base configuration)                   │
 ├─────────────────────────────────────────────────────────────┤
 │  6. Root fallbacks (.env.local, .env.{NODE_ENV}, .env)      │  ← Lowest Priority
 └─────────────────────────────────────────────────────────────┘
@@ -262,7 +262,7 @@ export const MyServiceEnvSchema: Schema<MyServiceEnv> = createSchema<MyServiceEn
 );
 ```
 
-**2. Add to environment files** (`.config/env/.env.development.example`):
+**2. Add to environment files** (`config/env/.env.development.example`):
 
 ```bash
 # My New Service
@@ -314,7 +314,7 @@ export type { AnalyticsConfig } from './analytics';
 
 ## 📚 Related Documentation
 
-- **Environment Files:** [.config/env/README.md](../../../../.config/env/README.md) - How to set up and manage .env files
+- **Environment Files:** [config/env/README.md](../../../../config/env/README.md) - How to set up and manage .env files
 - **Server Config:** [apps/server/src/config/README.md](../../../apps/server/src/config/README.md) - How the server transforms env into domain configs
 - **Deployment Guide:** [docs/deploy/env.md](../../../../docs/deploy/env.md) - Production deployment configuration
 

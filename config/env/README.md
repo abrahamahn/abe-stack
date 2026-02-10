@@ -9,8 +9,8 @@ This directory contains all environment variable files for ABE Stack. The config
 1. Copy the example files:
 
    ```bash
-   cp .config/env/.env.development.example .config/env/.env.development
-   cp .config/env/.env.local.example .config/env/.env.local
+   cp config/env/.env.development.example config/env/.env.development
+   cp config/env/.env.local.example config/env/.env.local
    ```
 
 2. Choose your development method:
@@ -19,15 +19,15 @@ This directory contains all environment variable files for ABE Stack. The config
 
    ```bash
    pnpm install
-   ENV_FILE=.config/env/.env.local pnpm db:push
-   ENV_FILE=.config/env/.env.local pnpm db:seed
+   ENV_FILE=config/env/.env.local pnpm db:push
+   ENV_FILE=config/env/.env.local pnpm db:seed
    pnpm dev
    ```
 
    **Option B: Docker Postgres (recommended default)**
 
    ```bash
-   docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+   docker compose --env-file config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
    pnpm db:push
    pnpm db:seed
    ```
@@ -39,7 +39,7 @@ This directory contains all environment variable files for ABE Stack. The config
 ## 📁 File Structure
 
 ```
-.config/env/
+config/env/
 ├── .env.development.example  # Template for development
 ├── .env.production.example   # Template for production
 ├── .env.test.example         # Template for testing
@@ -116,7 +116,7 @@ You can override the default file loading with the `ENV_FILE` variable:
 
 ```bash
 # Use a custom environment file
-ENV_FILE=.config/env/.env.production pnpm dev
+ENV_FILE=config/env/.env.production pnpm dev
 ```
 
 ### Setting NODE_ENV
@@ -136,7 +136,7 @@ NODE_ENV=test pnpm test
 
 ### Customizing Environment Directory Location
 
-**Current default:** `.config/env/` (with repository root as fallback)
+**Current default:** `config/env/` (with repository root as fallback)
 
 **To change the directory:**
 
@@ -191,9 +191,9 @@ The configuration system validates all environment variables on startup. If you 
 3. Ensure required variables are set for your environment
 4. Check variable formats (URLs should include protocol, ports should be numbers, etc.)
 
-### "Cannot find .config directory"
+### "Cannot find config directory"
 
-The loader searches up to 5 parent directories for `.config/`. Ensure you're running commands from the repository root or a subdirectory.
+The loader searches up to 5 parent directories for `config/`. Ensure you're running commands from the repository root or a subdirectory.
 
 ### Variables Not Loading
 

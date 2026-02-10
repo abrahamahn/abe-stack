@@ -3,7 +3,7 @@
  * SMTP Env Sanity Check
  *
  * Run with:
- *   ENV_FILE=.config/env/.env.local node --import tsx src/tools/scripts/audit/check-smtp-env.ts
+ *   ENV_FILE=config/env/.env.local node --import tsx src/tools/scripts/audit/check-smtp-env.ts
  */
 
 import { initEnv, loadServerEnv } from '@abe-stack/server-engine';

@@ -18,7 +18,7 @@ resource "google_compute_instance" "abe_stack" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64" # Latest LTS Ubuntu
+      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"  # Latest LTS Ubuntu
       size  = 50
       type  = "pd-balanced"
     }
@@ -110,7 +110,7 @@ resource "google_compute_firewall" "abe_stack_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"] # Restrict in production
+  source_ranges = ["0.0.0.0/0"]  # Restrict in production
   target_tags   = ["abe-stack"]
 }
 
@@ -139,7 +139,9 @@ resource "google_dns_record_set" "abe_stack_a" {
   managed_zone = google_dns_managed_zone.abe_stack.name
   type         = "A"
   ttl          = 300
-  rrdatas      = [google_compute_instance.abe_stack.network_interface[0].access_config[0].nat_ip]
+  rrdatas = [
+    google_compute_instance.abe_stack.network_interface[0].access_config[0].nat_ip
+  ]
 }
 
 # Optional Cloud SQL PostgreSQL database
@@ -163,7 +165,7 @@ resource "google_sql_database_instance" "abe_stack" {
     }
 
     maintenance_window {
-      day  = 7 # Sunday
+      day  = 7  # Sunday
       hour = 2
     }
 
