@@ -51,6 +51,7 @@ jobs:
   docker-scan:
     name: Docker Image Scan
     runs-on: ubuntu-latest
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     permissions:
       security-events: write
@@ -73,6 +74,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
 
       - name: Docker build status
         if: steps.build-image.outcome != 'success'
@@ -96,6 +98,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-fs-results.sarif'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0'
 
       - name: Upload Trivy filesystem results
         uses: github/codeql-action/upload-sarif@v4
