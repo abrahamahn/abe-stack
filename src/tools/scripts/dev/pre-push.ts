@@ -37,7 +37,7 @@ function main(): void {
   // We run 'validate' pipeline which includes lint, type-check, and test
   // This is defined in turbo.json
   try {
-    run('npx turbo run validate --output-logs=new-only');
+    run('pnpm exec turbo run validate --output-logs=new-only');
   } catch {
     console.error('\n❌ Pre-push checks failed. Please fix the errors above.');
     process.exit(1);

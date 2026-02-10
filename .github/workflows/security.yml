@@ -51,8 +51,10 @@ jobs:
   docker-scan:
     name: Docker Image Scan
     runs-on: ubuntu-latest
+    # Default behavior: run on manual/scheduled scans.
+    # To enable on every push, set repo variable SECURITY_DOCKER_SCAN_ON_PUSH=true.
     continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'push' && vars.SECURITY_DOCKER_SCAN_ON_PUSH == 'true')
     permissions:
       security-events: write
       actions: read
