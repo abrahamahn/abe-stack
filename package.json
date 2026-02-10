@@ -45,17 +45,18 @@
     "docker:prod:down": "docker compose -f infra/docker/production/docker-compose.prod.yml down",
     "prepare": "pnpm hooks:install",
     "hooks:install": "git config --local core.hooksPath infra/git-hooks && chmod +x infra/git-hooks/pre-commit infra/git-hooks/pre-push",
+    "hooks:cache:maintain": "node --import tsx src/tools/scripts/dev/maintain-local-caches.ts",
     "pre-commit": "lint-staged",
     "check:all": "pnpm build:theme && pnpm format && pnpm lint && pnpm type-check",
     "pre-push": "node --import tsx src/tools/scripts/dev/pre-push.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write",
-      "eslint --fix --no-warn-ignored --ignore-pattern config/playwright.config.ts"
+      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write",
+      "eslint --cache --cache-location node_modules/.cache/eslint/.cache --fix --max-warnings=0 --no-warn-ignored --ignore-pattern config/playwright.config.ts"
     ],
     "*.{json,css,md}": [
-      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write"
+      "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write"
     ]
   },
   "devDependencies": {

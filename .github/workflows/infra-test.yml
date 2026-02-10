@@ -24,6 +24,10 @@ permissions:
 
 jobs:
   test-infrastructure:
+    # Optional repo variables:
+    # - INFRA_TEST_ENABLED: "true" (default) or "false"
+    # - ACTIVE_CLOUD_PROVIDER: "digitalocean" | "gcp" | "all" (default: no filter)
+    if: ${{ vars.INFRA_TEST_ENABLED != 'false' && (vars.ACTIVE_CLOUD_PROVIDER == '' || vars.ACTIVE_CLOUD_PROVIDER == 'all' || matrix.provider == vars.ACTIVE_CLOUD_PROVIDER) }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,12 +44,13 @@ jobs:
 
       - name: Check Terraform Formatting
         run: |
-          cd infra
+          cd infra/cloud
           echo "🔍 Checking Terraform formatting..."
-          if terraform fmt -check -recursive; then
+          if terraform fmt -check main.tf providers.tf variables.tf outputs.tf && \
+             terraform fmt -check -recursive "${{ matrix.provider }}"; then
             echo "✅ Terraform files are properly formatted"
           else
-            echo "❌ Terraform files need formatting. Run 'terraform fmt -recursive' in the infra directory."
+            echo "❌ Terraform files need formatting for shared config or provider '${{ matrix.provider }}'."
             exit 1
           fi
 

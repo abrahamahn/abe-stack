@@ -9,7 +9,6 @@
     "declaration": true,
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.realtime.tsbuildinfo",
-    "paths": {},
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*"],
