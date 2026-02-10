@@ -11,19 +11,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WriteService, createWriteService, type WriteServiceOptions } from './write-service';
 
 import type { WriteBatch, WriteOperation } from './types';
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '../client';
 import type { SubscriptionManager } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Modules
 // ============================================================================
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('../builder/types/types', () => ({
   escapeIdentifier: vi.fn((id: string) => `"${id}"`),
+}));
+
+vi.mock('../utils/transaction', () => ({
   withTransaction: vi.fn(async (db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
     return fn(db);
   }),
-  isInTransaction: vi.fn(() => false),
 }));
 
 vi.mock('@abe-stack/shared', () => ({
