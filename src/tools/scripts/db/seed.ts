@@ -99,11 +99,13 @@ export async function seed(): Promise<void> {
     try {
       const canonical = canonicalizeEmail(user.email);
       const sql = `
-        INSERT INTO ${USERS_TABLE} (email, canonical_email, password_hash, name, role, email_verified_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
+        INSERT INTO ${USERS_TABLE} (email, canonical_email, password_hash, name, role, email_verified_at, email_verified)
+        VALUES ($1, $2, $3, $4, $5, NOW(), true)
         ON CONFLICT (email) DO UPDATE SET
           canonical_email = EXCLUDED.canonical_email,
-          email_verified_at = COALESCE(${USERS_TABLE}.email_verified_at, EXCLUDED.email_verified_at)
+          password_hash = EXCLUDED.password_hash,
+          email_verified_at = COALESCE(${USERS_TABLE}.email_verified_at, EXCLUDED.email_verified_at),
+          email_verified = true
       `;
 
       await db.execute({
