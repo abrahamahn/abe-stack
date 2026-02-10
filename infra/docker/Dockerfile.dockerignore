@@ -20,8 +20,8 @@ out
 # Environment files (use docker secrets/env vars instead)
 .env*
 !.env.example
-**
-!.env.example
+**/.env*
+!**/.env.example
 
 # Testing
 coverage
