@@ -1,6 +1,6 @@
 # Development Log
 
-**Last Updated: February 8, 2026**
+**Last Updated: February 10, 2026**
 
 Weekly changelog files for the ABE Stack project. This replaces the previous monolithic `CHANGELOG.md`.
 
@@ -10,6 +10,7 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 | Week                 | Dates     | Highlights                                                                             |
 | -------------------- | --------- | -------------------------------------------------------------------------------------- |
+| [W07](./2026-W07.md) | Feb 9-15  | CI/workflow stabilization, infra test gating, cache invalidation hardening             |
 | [W06](./2026-W06.md) | Feb 2-8   | Monorepo restructure, shared/db audits, server-engine + media refactors                |
 | [W05](./2026-W05.md) | Jan 26-31 | Hexagonal package extraction (18 packages), BaseContext contract, server decomposition |
 | [W04](./2026-W04.md) | Jan 20-25 | Billing (Stripe/PayPal), admin center, 73% bundle reduction, IaC, 7,517 tests          |
@@ -20,6 +21,14 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 ---
 
 ## Recent Changes (This Week)
+
+### 2026-02-10
+
+- **CI**: Fixed invalid infra-test workflow expression, improved provider gating, and refined infra/security workflow behavior
+- **Infra**: Clarified DigitalOcean-first workflow with provider-scoped infrastructure test controls
+- **Consistency**: Reproduced CI lint failures locally and corrected tsconfig alias/path overrides driving type-resolution cascades
+- **Cache**: Moved cache maintenance state under `node_modules/.cache` and expanded Turbo global dependency invalidation for config changes
+- **Hooks**: Kept pre-commit lightweight and retained full validation at pre-push/CI
 
 ### 2026-02-08
 

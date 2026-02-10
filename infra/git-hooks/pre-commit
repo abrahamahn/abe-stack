@@ -1,3 +1,2 @@
 #!/usr/bin/env sh
-pnpm hooks:cache:maintain || exit 1
 pnpm pre-commit
