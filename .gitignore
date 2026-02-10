@@ -17,6 +17,10 @@ out/
 vitest.config.d.ts
 vitest.config.d.ts.map
 
+# Keep postbuild helper script tracked (path includes "/build/")
+!src/tools/scripts/build/
+!src/tools/scripts/build/ensure-js-extensions.ts
+
 # Allow Vite config for web build
 !config/build/
 !config/build/vite.config.ts
