@@ -4,6 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { HomePage } from './HomePage';
 
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  };
+});
+
 vi.mock('./components', () => ({
   ['HomeDocViewer']: (): React.ReactElement => <div data-testid="home-doc-viewer">DocViewer</div>,
 }));

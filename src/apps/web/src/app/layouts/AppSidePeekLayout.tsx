@@ -1,6 +1,7 @@
 // src/apps/web/src/app/layouts/AppSidePeekLayout.tsx
 import { SidePeek } from '@abe-stack/ui';
 import { SidePeekUILibraryContent } from '@ui-library/components';
+import { useCallback, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
@@ -10,17 +11,28 @@ export interface AppSidePeekLayoutProps {
 }
 
 export const AppSidePeekLayout = ({ open, onClose }: AppSidePeekLayoutProps): ReactElement => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleExpand = useCallback((): void => {
+    setIsFullscreen((prev) => !prev);
+  }, []);
+
   return (
-    <SidePeek.Root open={open} onClose={onClose} size="md">
+    <SidePeek.Root open={open} onClose={onClose} size={isFullscreen ? 'full' : 'md'}>
       <SidePeek.Header>
         <SidePeek.Title>Side Peek UI Library</SidePeek.Title>
-        <div className="flex gap-2">
-          <SidePeek.Expand to="/side-peek-ui-library" />
-          <SidePeek.Close />
-        </div>
+        <button
+          type="button"
+          onClick={handleExpand}
+          aria-label="Toggle fullscreen"
+          className="side-peek-close"
+        >
+          {isFullscreen ? '⤡' : '⤢'}
+        </button>
+        <SidePeek.Close />
       </SidePeek.Header>
       <SidePeek.Content>
-        <SidePeekUILibraryContent actionLabel="Close this panel" onAction={onClose} />
+        <SidePeekUILibraryContent />
       </SidePeek.Content>
     </SidePeek.Root>
   );

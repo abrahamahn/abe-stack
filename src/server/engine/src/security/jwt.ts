@@ -35,6 +35,10 @@ export interface SignOptions {
   expiresIn?: string | number; // e.g., '15m', '7d', 3600
 }
 
+export interface VerifyOptions {
+  clockToleranceSeconds?: number; // Seconds of clock skew to tolerate (default: 0)
+}
+
 // ============================================================================
 // Errors
 // ============================================================================
@@ -145,7 +149,7 @@ export function sign(payload: object, secret: string, options?: SignOptions): st
  * Verify a JWT token and return the payload
  * Throws JwtError if token is invalid, expired, or signature doesn't match
  */
-export function verify(token: string, secret: string): JwtPayload {
+export function verify(token: string, secret: string, options?: VerifyOptions): JwtPayload {
   if (typeof token !== 'string') {
     throw new JwtError('Token must be a string', 'INVALID_TOKEN');
   }
@@ -226,10 +230,11 @@ export function verify(token: string, secret: string): JwtPayload {
     throw new JwtError('Malformed token payload', 'MALFORMED_TOKEN');
   }
 
-  // Check expiration
+  // Check expiration (with optional clock skew tolerance)
   if (payload.exp !== undefined) {
     const now = nowInSeconds();
-    if (now >= payload.exp) {
+    const tolerance = options?.clockToleranceSeconds ?? 0;
+    if (now >= payload.exp + tolerance) {
       throw new JwtError('Token has expired', 'TOKEN_EXPIRED');
     }
   }
@@ -268,8 +273,8 @@ export function jwtSign(payload: object, secret: string, options?: SignOptions):
 /**
  * Async wrapper for verify function (for compatibility with async interfaces)
  */
-export function jwtVerify(token: string, secret: string): JwtPayload {
-  return verify(token, secret);
+export function jwtVerify(token: string, secret: string, options?: VerifyOptions): JwtPayload {
+  return verify(token, secret, options);
 }
 
 /**

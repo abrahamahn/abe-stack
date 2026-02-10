@@ -7,10 +7,10 @@
  * @module handlers/login
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { EmailNotVerifiedError, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { isCaptchaRequired, sendNewLoginAlert, verifyCaptchaToken } from '../security';
-import { authenticateUser } from '../service';
+import { authenticateUser, resendVerificationEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
@@ -97,6 +97,32 @@ export async function handleLogin(
       };
     }
 
+    // Enforce max concurrent sessions: evict oldest if limit reached
+    const maxSessions = ctx.config.auth.sessions?.maxConcurrentSessions ?? 10;
+    const activeFamilies = await ctx.repos.refreshTokenFamilies.findActiveByUserId(result.user.id);
+    if (activeFamilies.length >= maxSessions) {
+      // Sort by creation date ascending, revoke oldest
+      const sorted = [...activeFamilies].sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      );
+      const toEvict = sorted.slice(0, activeFamilies.length - maxSessions + 1);
+      for (const family of toEvict) {
+        await ctx.repos.refreshTokenFamilies.revoke(family.id, 'Session limit exceeded');
+      }
+      ctx.log.info(
+        { userId: result.user.id, evicted: toEvict.length },
+        'Evicted oldest sessions due to max concurrent session limit',
+      );
+    }
+
+    // New device detection: compare current IP + user agent against known sessions
+    const isNewDevice = !activeFamilies.some(
+      (f) => f.ipAddress === ipAddress && f.userAgent === userAgent,
+    );
+    if (isNewDevice) {
+      ctx.log.info({ userId: result.user.id, ipAddress, userAgent }, 'New device login detected');
+    }
+
     // Set refresh token as HTTP-only cookie
     setRefreshTokenCookie(reply, result.refreshToken, ctx.config.auth);
 
@@ -118,6 +144,20 @@ export async function handleLogin(
       },
     };
   } catch (error) {
+    // Auto-resend verification email when login blocked by unverified email
+    if (error instanceof EmailNotVerifiedError) {
+      const baseUrl = ctx.config.server.appBaseUrl;
+      resendVerificationEmail(
+        ctx.db,
+        ctx.repos,
+        ctx.email,
+        ctx.emailTemplates,
+        error.email,
+        baseUrl,
+      ).catch((err: unknown) => {
+        ctx.log.warn({ err, email: error.email }, 'Failed to resend verification email on login');
+      });
+    }
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
 }

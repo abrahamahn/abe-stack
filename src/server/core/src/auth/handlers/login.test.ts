@@ -22,44 +22,55 @@ import type { LoginRequest } from '@abe-stack/shared';
 // ============================================================================
 
 // Create mock functions via vi.hoisted to be available before vi.mock hoisting
-const { mockAuthenticateUser, mockSetRefreshTokenCookie, mockMapErrorToResponse } = vi.hoisted(
-  () => ({
-    mockAuthenticateUser: vi.fn(),
-    mockSetRefreshTokenCookie: vi.fn(),
-    // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
-    mockMapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
-      if (error instanceof Error) {
-        switch (error.name) {
-          case 'AccountLockedError':
-            return {
-              status: 429,
-              body: { message: 'Account temporarily locked due to too many failed attempts' },
-            };
-          case 'EmailNotVerifiedError':
-            return {
-              status: 401,
-              body: {
-                message:
-                  (error as Error & { email?: string }).message !== ''
-                    ? (error as Error & { email?: string }).message
-                    : 'Please verify your email',
-                code: 'EMAIL_NOT_VERIFIED',
-              },
-            };
-          case 'InvalidCredentialsError':
-            return { status: 401, body: { message: 'Invalid email or password' } };
-          default:
-            return { status: 500, body: { message: 'Internal server error' } };
-        }
+const {
+  mockAuthenticateUser,
+  mockResendVerificationEmail,
+  mockSetRefreshTokenCookie,
+  mockMapErrorToHttpResponse,
+  mockSendNewLoginAlert,
+  mockIsCaptchaRequired,
+  mockVerifyCaptchaToken,
+} = vi.hoisted(() => ({
+  mockAuthenticateUser: vi.fn(),
+  mockResendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+  mockSetRefreshTokenCookie: vi.fn(),
+  mockSendNewLoginAlert: vi.fn().mockResolvedValue(undefined),
+  mockIsCaptchaRequired: vi.fn(() => false),
+  mockVerifyCaptchaToken: vi.fn().mockResolvedValue({ success: true, errorCodes: [] }),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToHttpResponse: vi.fn((error: unknown, _ctx: unknown) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'AccountLockedError':
+          return {
+            status: 429,
+            body: { message: 'Account temporarily locked due to too many failed attempts' },
+          };
+        case 'EmailNotVerifiedError':
+          return {
+            status: 401,
+            body: {
+              message:
+                (error as Error & { email?: string }).message !== ''
+                  ? (error as Error & { email?: string }).message
+                  : 'Please verify your email',
+              code: 'EMAIL_NOT_VERIFIED',
+            },
+          };
+        case 'InvalidCredentialsError':
+          return { status: 401, body: { message: 'Invalid email or password' } };
+        default:
+          return { status: 500, body: { message: 'Internal server error' } };
       }
-      return { status: 500, body: { message: 'Internal server error' } };
-    }),
+    }
+    return { status: 500, body: { message: 'Internal server error' } };
   }),
-);
+}));
 
 // Mock the service module
 vi.mock('../service', () => ({
   authenticateUser: mockAuthenticateUser,
+  resendVerificationEmail: mockResendVerificationEmail,
 }));
 
 // Mock utils module
@@ -67,12 +78,18 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
+vi.mock('../security', () => ({
+  sendNewLoginAlert: mockSendNewLoginAlert,
+  isCaptchaRequired: mockIsCaptchaRequired,
+  verifyCaptchaToken: mockVerifyCaptchaToken,
+}));
+
 // Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
 vi.mock('@abe-stack/shared', async (importOriginal) => {
   const original = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...original,
-    mapErrorToResponse: mockMapErrorToResponse,
+    mapErrorToHttpResponse: mockMapErrorToHttpResponse,
   };
 });
 
@@ -83,8 +100,14 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
-    repos: {} as AppContext['repos'],
+    repos: {
+      refreshTokenFamilies: {
+        findActiveByUserId: vi.fn().mockResolvedValue([]),
+        revoke: vi.fn().mockResolvedValue(undefined),
+      },
+    } as unknown as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {} as AppContext['emailTemplates'],
     config: {
       auth: {
         jwt: {
@@ -161,6 +184,9 @@ describe('handleLogin', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsCaptchaRequired.mockReturnValue(false);
+    mockVerifyCaptchaToken.mockResolvedValue({ success: true, errorCodes: [] });
+    mockSendNewLoginAlert.mockResolvedValue(undefined);
   });
 
   describe('successful login', () => {
@@ -399,6 +425,41 @@ describe('handleLogin', () => {
 
       expect(result.status).toBe(401);
       expect((result.body as { message: string }).message).toContain('verify your email');
+    });
+
+    test('should auto-resend verification email when login blocked by unverified email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockResendVerificationEmail).toHaveBeenCalledWith(
+        ctx.db,
+        ctx.repos,
+        ctx.email,
+        ctx.emailTemplates,
+        'test@example.com',
+        'http://localhost:8080',
+      );
+    });
+
+    test('should not crash if resend verification email fails on login', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+      mockResendVerificationEmail.mockRejectedValue(new Error('SMTP error'));
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(401);
+      expect(mockResendVerificationEmail).toHaveBeenCalled();
     });
 
     test('should return 500 for unexpected errors', async () => {

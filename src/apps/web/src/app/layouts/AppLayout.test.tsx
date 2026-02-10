@@ -144,21 +144,13 @@ describe('AppLayout', () => {
     expect(screen.getByTestId('auth-modal')).toHaveTextContent('true:login');
   });
 
-  it('handles keyboard shortcuts for pane and visual toggles', () => {
+  it('handles keyboard shortcuts for visual toggles', () => {
     render(<AppLayout leftSidebar={<div>Test Left</div>} rightSidebar={<div>Test Right</div>} />);
 
-    fireEvent.keyDown(window, { key: 'ArrowUp' });
-    fireEvent.keyDown(window, { key: 'ArrowDown' });
-    fireEvent.keyDown(window, { key: 'ArrowLeft' });
-    fireEvent.keyDown(window, { key: 'ArrowRight' });
     fireEvent.keyDown(window, { key: 't' });
     fireEvent.keyDown(window, { key: 'd' });
     fireEvent.keyDown(window, { key: 'c' });
 
-    expect(mockTogglePane).toHaveBeenCalledWith('top');
-    expect(mockTogglePane).toHaveBeenCalledWith('bottom');
-    expect(mockTogglePane).toHaveBeenCalledWith('left');
-    expect(mockTogglePane).toHaveBeenCalledWith('right');
     expect(mockCycleTheme).toHaveBeenCalledTimes(1);
     expect(mockCycleDensity).toHaveBeenCalledTimes(1);
     expect(mockCycleContrastMode).toHaveBeenCalledTimes(1);

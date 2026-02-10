@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, type ReactElement, type ReactNode } from 'rea
 
 import '../styles/components.css';
 
+/** Popover placement relative to the trigger element. */
 type Placement = 'bottom' | 'right';
 
 type PopoverProps = {

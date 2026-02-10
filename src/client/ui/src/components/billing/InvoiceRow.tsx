@@ -1,10 +1,4 @@
 // src/client/ui/src/components/billing/InvoiceRow.tsx
-/**
- * InvoiceRow Component
- *
- * Displays a single invoice in a list/table format.
- */
-
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';

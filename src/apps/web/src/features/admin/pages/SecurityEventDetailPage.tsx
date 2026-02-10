@@ -5,7 +5,7 @@
  * Admin page for viewing a single security event in detail.
  */
 
-import { Button, Heading, PageContainer, Text, useNavigate, useParams } from '@abe-stack/ui';
+import { Alert, Button, Heading, PageContainer, Text, useNavigate, useParams } from '@abe-stack/ui';
 
 import { SecurityEventCard } from '../components';
 import { useSecurityEvent } from '../hooks';
@@ -65,7 +65,7 @@ export const SecurityEventDetailPage = (): JSX.Element => {
 
         {/* Error State */}
         {isError && (
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg p-4">
+          <Alert tone="danger">
             <Heading as="h3" size="sm" className="mb-2">
               Error Loading Event
             </Heading>
@@ -73,7 +73,7 @@ export const SecurityEventDetailPage = (): JSX.Element => {
             <Button variant="secondary" onClick={handleBack} className="mt-4">
               Return to Events List
             </Button>
-          </div>
+          </Alert>
         )}
 
         {/* Event Details */}

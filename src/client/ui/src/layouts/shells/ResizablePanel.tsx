@@ -154,6 +154,10 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
     } = props;
     const [isDragging, setIsDragging] = useState(false);
     const startPosRef = useRef<number>(0);
+    const onResizeRef = useRef(onResize);
+    onResizeRef.current = onResize;
+    const onDragEndRef = useRef(onDragEnd);
+    onDragEndRef.current = onDragEnd;
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>): void => {
       e.preventDefault();
@@ -208,12 +212,12 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
         const currentPos = direction === 'horizontal' ? e.clientX : e.clientY;
         const delta = currentPos - startPosRef.current;
         startPosRef.current = currentPos;
-        onResize?.(delta);
+        onResizeRef.current?.(delta);
       };
 
       const handleMouseUp = (): void => {
         setIsDragging(false);
-        onDragEnd?.();
+        onDragEndRef.current?.();
       };
 
       document.addEventListener('mousemove', handleMouseMove);
@@ -223,7 +227,7 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
-    }, [isDragging, direction, onResize, onDragEnd]);
+    }, [isDragging, direction]);
 
     // Generate accessible label
     const defaultLabel = direction === 'horizontal' ? 'Resize panel width' : 'Resize panel height';
@@ -286,6 +290,7 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
   const isControlled = controlledSize !== undefined;
   const [internalSize, setInternalSize] = useState(defaultSize);
   const [isDragging, setIsDragging] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const size = isControlled ? controlledSize : internalSize;
 
@@ -299,8 +304,16 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
       if (unit === 'px') {
         newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
       } else {
-        const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
-        const deltaPercent = (adjustedDelta / container) * 100;
+        const containerEl = panelRef.current?.parentElement;
+        const containerSize =
+          containerEl != null
+            ? direction === 'horizontal'
+              ? containerEl.clientWidth
+              : containerEl.clientHeight
+            : direction === 'horizontal'
+              ? window.innerWidth
+              : window.innerHeight;
+        const deltaPercent = (adjustedDelta / containerSize) * 100;
         newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
       }
 
@@ -347,10 +360,23 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
   // Extract any non-DOM attributes to avoid React warnings
   const domProps = rest;
 
+  // Merge forwarded ref with internal panelRef
+  const mergedRef = useCallback(
+    (node: HTMLDivElement | null): void => {
+      (panelRef as { current: HTMLDivElement | null }).current = node;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref !== null) {
+        (ref as { current: HTMLDivElement | null }).current = node;
+      }
+    },
+    [ref],
+  );
+
   return (
     <>
       <div
-        ref={ref}
+        ref={mergedRef}
         className={`resizable-panel ${className}`.trim()}
         style={panelStyle}
         {...domProps}

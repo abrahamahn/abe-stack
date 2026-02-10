@@ -14,6 +14,7 @@ import { JwtError, sign as jwtSign, verify as jwtVerify } from '@abe-stack/serve
 
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../types';
 
+import type { VerifyOptions } from '@abe-stack/server-engine';
 import type { AppRole } from '@abe-stack/shared';
 
 // ============================================================================
@@ -79,12 +80,12 @@ export function createAccessToken(
  * @throws {JwtError} If token is invalid or expired
  * @complexity O(1)
  */
-export function verifyToken(token: string, secret: string): TokenPayload {
+export function verifyToken(token: string, secret: string, options?: VerifyOptions): TokenPayload {
   if (secret === '' || secret.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 
-  const payload: unknown = jwtVerify(token, secret);
+  const payload: unknown = jwtVerify(token, secret, options);
   if (!isTokenPayload(payload)) {
     throw new JwtError('Invalid token payload', 'INVALID_TOKEN');
   }

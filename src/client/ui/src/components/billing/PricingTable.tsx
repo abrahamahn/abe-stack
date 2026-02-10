@@ -1,10 +1,4 @@
 // src/client/ui/src/components/billing/PricingTable.tsx
-/**
- * PricingTable Component
- *
- * Displays a grid of pricing plans with interval toggle.
- */
-
 import {
   forwardRef,
   useState,

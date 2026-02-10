@@ -49,6 +49,11 @@ vi.mock('@abe-stack/ui', () => ({
     mockSkeletonFn(props);
     return <div data-testid="skeleton" />;
   },
+  ['Text']: (props: { children?: ReactNode; tone?: string; size?: string; className?: string }) => (
+    <span data-tone={props.tone} className={props.className}>
+      {props.children}
+    </span>
+  ),
 }));
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';

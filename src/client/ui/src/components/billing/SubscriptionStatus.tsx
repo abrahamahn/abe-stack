@@ -1,10 +1,4 @@
 // src/client/ui/src/components/billing/SubscriptionStatus.tsx
-/**
- * SubscriptionStatus Component
- *
- * Displays the current subscription status with actions.
- */
-
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';

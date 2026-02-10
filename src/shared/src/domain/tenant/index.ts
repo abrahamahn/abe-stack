@@ -16,3 +16,14 @@ export {
   type MaybeWorkspaceContext,
   type WorkspaceContext,
 } from './tenant.workspace';
+
+export {
+  getWorkspaceContext,
+  hasRequiredWorkspaceRole,
+  isAdmin,
+  isOwner,
+  WORKSPACE_ID_HEADER,
+  WORKSPACE_ROLE_HEADER,
+} from './tenant.logic';
+
+export { extractEmailDomain, isEmailDomainAllowed } from './domain-restrictions';

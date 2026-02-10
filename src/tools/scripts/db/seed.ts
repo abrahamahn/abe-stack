@@ -19,6 +19,7 @@
 import { hashPassword } from '@abe-stack/core/auth';
 import { buildConnectionString, createDbClient, USERS_TABLE } from '@abe-stack/db';
 import { loadServerEnv } from '@abe-stack/server-engine';
+import { canonicalizeEmail } from '@abe-stack/shared';
 
 /** Supported user roles for seed data */
 type SeedUserRole = 'admin' | 'user';
@@ -96,15 +97,18 @@ export async function seed(): Promise<void> {
     const passwordHash = await hashPassword(user.password);
 
     try {
+      const canonical = canonicalizeEmail(user.email);
       const sql = `
-        INSERT INTO ${USERS_TABLE} (email, password_hash, name, role)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (email) DO NOTHING
+        INSERT INTO ${USERS_TABLE} (email, canonical_email, password_hash, name, role, email_verified_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (email) DO UPDATE SET
+          canonical_email = EXCLUDED.canonical_email,
+          email_verified_at = COALESCE(${USERS_TABLE}.email_verified_at, EXCLUDED.email_verified_at)
       `;
 
       await db.execute({
         text: sql,
-        values: [user.email, passwordHash, user.name, user.role],
+        values: [user.email, canonical, passwordHash, user.name, user.role],
       });
 
       console.log(`  ✓ ${user.email} (${user.role})`);

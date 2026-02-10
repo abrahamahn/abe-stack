@@ -7,17 +7,7 @@ import { AppSidePeekPage } from './AppSidePeekPage';
 const mockNavigate = vi.hoisted(() => vi.fn());
 
 vi.mock('@ui-library/components', () => {
-  const sidePeekUILibraryContent = ({
-    actionLabel,
-    onAction,
-  }: {
-    actionLabel: string;
-    onAction: () => void;
-  }) => (
-    <button type="button" onClick={onAction}>
-      {actionLabel}
-    </button>
-  );
+  const sidePeekUILibraryContent = () => <div>SidePeek content</div>;
 
   return {
     SidePeekUILibraryContent: sidePeekUILibraryContent,

@@ -36,6 +36,18 @@ export interface AuthUser {
   dateOfBirth: string | null;
   /** User's gender */
   gender: string | null;
+  /** User's bio/about text */
+  bio: string | null;
+  /** User's city */
+  city: string | null;
+  /** User's state/province */
+  state: string | null;
+  /** User's country */
+  country: string | null;
+  /** User's preferred language */
+  language: string | null;
+  /** User's website URL */
+  website: string | null;
   /** ISO 8601 string of when the user was created */
   createdAt: string;
   /** ISO 8601 string of when the user was last updated */
@@ -83,6 +95,12 @@ export function createAuthResponse(
     phoneVerified?: boolean | null;
     dateOfBirth?: Date | string | null;
     gender?: string | null;
+    bio?: string | null;
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+    language?: string | null;
+    website?: string | null;
     createdAt: Date | string;
     updatedAt: Date | string;
   },
@@ -112,6 +130,12 @@ export function createAuthResponse(
       phoneVerified: user.phoneVerified ?? null,
       dateOfBirth,
       gender: user.gender ?? null,
+      bio: user.bio ?? null,
+      city: user.city ?? null,
+      state: user.state ?? null,
+      country: user.country ?? null,
+      language: user.language ?? null,
+      website: user.website ?? null,
       createdAt,
       updatedAt,
     },

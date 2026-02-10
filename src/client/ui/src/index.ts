@@ -43,6 +43,7 @@ export {
 // Components - Composed multi-part components
 export {
   Accordion,
+  AuthFormLayout,
   Card,
   DelayedFallback,
   Dialog,

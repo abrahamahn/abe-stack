@@ -8,6 +8,8 @@
  * @module utils/password
  */
 
+import { randomInt, randomUUID } from 'node:crypto';
+
 import argon2 from 'argon2';
 
 import type { Argon2Config } from '@abe-stack/shared/config';
@@ -121,7 +123,7 @@ export async function initDummyHashPool(
   const hashPromises: Promise<string>[] = [];
   for (let i = 0; i < DUMMY_HASH_POOL_SIZE; i++) {
     // Use unique dummy passwords to ensure different salts/hashes
-    const dummyPassword = `dummy_password_${String(i)}_${String(Date.now())}_${String(Math.random())}`;
+    const dummyPassword = `dummy_password_${String(i)}_${String(Date.now())}_${randomUUID()}`;
     hashPromises.push(hashPassword(dummyPassword, config));
   }
 
@@ -139,12 +141,12 @@ export async function initDummyHashPool(
  */
 async function getRandomDummyHash(config: Argon2Config = DEFAULT_ARGON2_CONFIG): Promise<string> {
   if (dummyHashPool.length > 0) {
-    const randomIndex = Math.floor(Math.random() * dummyHashPool.length);
+    const randomIndex = randomInt(dummyHashPool.length);
     return dummyHashPool[randomIndex] as string;
   }
 
   // Fallback: generate hash on-the-fly (less optimal but secure)
-  return hashPassword(`fallback_dummy_${String(Date.now())}`, config);
+  return hashPassword(`fallback_dummy_${String(Date.now())}_${randomUUID()}`, config);
 }
 
 /**

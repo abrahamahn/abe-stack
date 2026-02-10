@@ -5,6 +5,7 @@ import {
   AdminLayout,
   JobMonitorPage,
   PlanManagementPage,
+  RouteManifestPage,
   SecurityEventDetailPage,
   SecurityEventsPage,
   UserDetailPage,
@@ -29,6 +30,11 @@ import {
 import { DashboardPage } from '@pages/DashboardPage';
 import { HomePage } from '@pages/HomePage';
 import { SettingsPage } from '@pages/SettingsPage';
+import {
+  AcceptInvitationPage,
+  WorkspaceDetailPage,
+  WorkspaceListPage,
+} from '@pages/WorkspacePages';
 import { UILibraryPage } from '@ui-library';
 
 import { AppLayout, AppSidePeekPage } from './layouts';
@@ -135,6 +141,18 @@ export const appRoutes: AppRoute[] = [
             path: 'billing/cancel',
             element: CheckoutCancelPage,
           },
+          {
+            path: 'workspaces',
+            element: WorkspaceListPage,
+          },
+          {
+            path: 'workspaces/:id',
+            element: WorkspaceDetailPage,
+          },
+          {
+            path: 'invitations/accept',
+            element: AcceptInvitationPage,
+          },
         ],
       },
       {
@@ -168,6 +186,10 @@ export const appRoutes: AppRoute[] = [
           {
             path: 'billing/plans',
             element: PlanManagementPage,
+          },
+          {
+            path: 'routes',
+            element: RouteManifestPage,
           },
         ],
       },

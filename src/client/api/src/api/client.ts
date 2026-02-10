@@ -39,10 +39,23 @@ import type {
   User,
 } from '@abe-stack/shared';
 
+/** Payload emitted when the server requires ToS acceptance (403 TOS_ACCEPTANCE_REQUIRED) */
+export interface TosRequiredPayload {
+  documentId: string;
+  requiredVersion: number;
+}
+
 export interface ApiClientConfig {
   baseUrl: string;
   getToken?: () => string | null;
   fetchImpl?: typeof fetch;
+  /**
+   * Called when the server returns 403 with code TOS_ACCEPTANCE_REQUIRED.
+   * The promise should resolve after the user accepts the ToS,
+   * allowing the original request to be retried automatically.
+   * If not provided, the 403 error is thrown normally.
+   */
+  onTosRequired?: (payload: TosRequiredPayload) => Promise<void>;
 }
 
 export interface ApiClient {
@@ -75,8 +88,16 @@ export interface ApiClient {
 
 const API_PREFIX = '/api';
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end--;
+  }
+  return value.slice(0, end);
+}
+
 export function createApiClient(config: ApiClientConfig): ApiClient {
-  const baseUrl = config.baseUrl.replace(/\/+$/, ''); // trim trailing slashes
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
@@ -112,6 +133,23 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     })) as Record<string, unknown>;
 
     if (!response.ok) {
+      // Intercept 403 TOS_ACCEPTANCE_REQUIRED: allow caller to show ToS modal and retry
+      if (
+        response.status === 403 &&
+        data['code'] === 'TOS_ACCEPTANCE_REQUIRED' &&
+        config.onTosRequired !== undefined
+      ) {
+        const documentId = typeof data['documentId'] === 'string' ? data['documentId'] : '';
+        const requiredVersion =
+          typeof data['requiredVersion'] === 'number' ? data['requiredVersion'] : 0;
+
+        if (documentId !== '') {
+          // Wait for the user to accept ToS, then retry the original request
+          await config.onTosRequired({ documentId, requiredVersion });
+          return request<T>(path, options);
+        }
+      }
+
       const errorBody: ApiErrorBody = {};
       if (typeof data['message'] === 'string') {
         errorBody.message = data['message'];

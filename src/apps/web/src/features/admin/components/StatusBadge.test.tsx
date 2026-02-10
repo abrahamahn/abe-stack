@@ -13,8 +13,7 @@ describe('StatusBadge', () => {
 
       const badge = screen.getByText('Active');
       expect(badge).toBeInTheDocument();
-      expect(badge.className).toContain('bg-green-100');
-      expect(badge.className).toContain('text-green-800');
+      expect(badge).toHaveAttribute('data-tone', 'success');
     });
 
     it('should render locked status with correct styling', () => {
@@ -22,8 +21,7 @@ describe('StatusBadge', () => {
 
       const badge = screen.getByText('Locked');
       expect(badge).toBeInTheDocument();
-      expect(badge.className).toContain('bg-red-100');
-      expect(badge.className).toContain('text-red-800');
+      expect(badge).toHaveAttribute('data-tone', 'danger');
     });
 
     it('should render unverified status with correct styling', () => {
@@ -31,8 +29,7 @@ describe('StatusBadge', () => {
 
       const badge = screen.getByText('Unverified');
       expect(badge).toBeInTheDocument();
-      expect(badge.className).toContain('bg-yellow-100');
-      expect(badge.className).toContain('text-yellow-800');
+      expect(badge).toHaveAttribute('data-tone', 'warning');
     });
   });
 

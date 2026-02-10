@@ -77,8 +77,8 @@ describe('AppMainLayout', () => {
       </AppMainLayout>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Collapse left panel' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Collapse right panel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle Left panel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle Right panel' }));
 
     expect(togglePane).toHaveBeenCalledWith('left');
     expect(togglePane).toHaveBeenCalledWith('right');

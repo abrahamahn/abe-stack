@@ -28,7 +28,7 @@ import {
   useNavigate,
 } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { PaymentMethod } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
@@ -44,10 +44,13 @@ export const BillingSettingsPage = (): ReactElement => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [deleteMethodId, setDeleteMethodId] = useState<string | null>(null);
 
-  const clientConfig: BillingClientConfig = {
-    baseUrl: config.apiUrl,
-    getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
-  };
+  const clientConfig: BillingClientConfig = useMemo(
+    () => ({
+      baseUrl: config.apiUrl,
+      getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
+    }),
+    [config.apiUrl],
+  );
 
   // Hooks
   const subscriptionResult = useSubscription(clientConfig);

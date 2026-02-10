@@ -62,7 +62,7 @@ export const ExportDialog = ({ isOpen, onClose, filter }: ExportDialogProps): JS
           </div>
 
           {Object.keys(filter as Record<string, unknown>).length > 0 && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+            <div className="bg-surface rounded-lg p-3">
               <Text size="sm" tone="muted">
                 Active filters will be applied to the export.
               </Text>
@@ -70,8 +70,10 @@ export const ExportDialog = ({ isOpen, onClose, filter }: ExportDialogProps): JS
           )}
 
           {isError && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg p-3">
-              <Text size="sm">Export failed: {error?.message ?? 'Unknown error'}</Text>
+            <div className="bg-danger-muted rounded-lg p-3">
+              <Text size="sm" tone="danger">
+                Export failed: {error?.message ?? 'Unknown error'}
+              </Text>
             </div>
           )}
 

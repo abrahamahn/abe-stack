@@ -1,5 +1,6 @@
 // src/apps/web/src/features/home/components/HomeSidePeek.tsx
 import { SidePeek, Text } from '@abe-stack/ui';
+import { useCallback, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
@@ -9,14 +10,25 @@ export interface HomeSidePeekProps {
 }
 
 export const HomeSidePeek = ({ open, onClose }: HomeSidePeekProps): ReactElement => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleExpand = useCallback((): void => {
+    setIsFullscreen((prev) => !prev);
+  }, []);
+
   return (
-    <SidePeek.Root open={open} onClose={onClose} size="md">
+    <SidePeek.Root open={open} onClose={onClose} size={isFullscreen ? 'full' : 'md'}>
       <SidePeek.Header>
         <SidePeek.Title>Side Peek UI Library</SidePeek.Title>
-        <div className="flex gap-2">
-          <SidePeek.Expand to="/side-peek-ui-library" />
-          <SidePeek.Close />
-        </div>
+        <button
+          type="button"
+          onClick={handleExpand}
+          aria-label="Toggle fullscreen"
+          className="side-peek-close"
+        >
+          {isFullscreen ? '⤡' : '⤢'}
+        </button>
+        <SidePeek.Close />
       </SidePeek.Header>
       <SidePeek.Content>
         <Text tone="muted">Side peek content</Text>

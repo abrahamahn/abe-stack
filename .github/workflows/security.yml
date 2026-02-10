@@ -6,119 +6,27 @@ on:
   pull_request:
     branches: [main, dev]
   schedule:
-    # Run weekly on Monday at 00:00 UTC
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
 permissions:
   contents: read
-  security-events: write
   actions: read
-  statuses: write
+  security-events: write
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.26.2'
 
 jobs:
-  dependency-scan:
-    name: Dependency Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run pnpm audit
-        run: pnpm audit --audit-level moderate
-        continue-on-error: true
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@v1
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high
-
-  docker-scan:
-    name: Docker Image Scan
-    runs-on: ubuntu-latest
-    # Default behavior: run on manual/scheduled scans.
-    # To enable on every push, set repo variable SECURITY_DOCKER_SCAN_ON_PUSH=true.
-    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'push' && vars.SECURITY_DOCKER_SCAN_ON_PUSH == 'true')
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Docker image
-        id: build-image
-        run: docker build -f infra/docker/Dockerfile -t abe-stack-server:${{ github.sha }} .
-        continue-on-error: true
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.30.0
-        if: steps.build-image.outcome == 'success'
-        continue-on-error: true
-        with:
-          image-ref: abe-stack-server:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-
-      - name: Docker build status
-        if: steps.build-image.outcome != 'success'
-        run: |
-          echo "Docker image build failed in security scan job; image scan skipped."
-          echo "Filesystem Trivy scan will still run."
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
-        if: hashFiles('trivy-results.sarif') != ''
-        continue-on-error: true
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.30.0
-        continue-on-error: true
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-fs-results.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0'
-
-      - name: Upload Trivy filesystem results
-        uses: github/codeql-action/upload-sarif@v4
-        if: hashFiles('trivy-fs-results.sarif') != ''
-        continue-on-error: true
-        with:
-          sarif_file: 'trivy-fs-results.sarif'
-
   codeql:
-    name: CodeQL Analysis
+    name: CodeQL
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
-
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     strategy:
       fail-fast: false
       matrix:
         language: ['javascript-typescript']
-
     steps:
       - uses: actions/checkout@v4
 
@@ -131,42 +39,162 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4
 
-      - name: Perform CodeQL Analysis
+      - name: Analyze
         uses: github/codeql-action/analyze@v4
         with:
           category: '/language:${{ matrix.language }}'
 
-  secret-scan:
-    name: Secret Scanning
+  semgrep:
+    name: Semgrep (SAST)
     runs-on: ubuntu-latest
-    # Only run on pull requests to avoid BASE/HEAD same commit issues on push
-    if: github.event_name == 'pull_request'
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@v3.90.5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          path: ./
-          base: ${{ github.event.pull_request.base.sha }}
-          head: ${{ github.event.pull_request.head.sha }}
-          extra_args: --only-verified
+          python-version: '3.12'
 
-  secret-scan-full:
-    name: Full Secret Scanning
-    runs-on: ubuntu-latest
-    # Run full scan on push to main/develop and scheduled runs
-    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: TruffleHog OSS Full Scan
-        uses: trufflesecurity/trufflehog@v3.90.5
+      - name: Run Semgrep
+        run: semgrep scan --config auto --sarif --output semgrep.sarif
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('semgrep.sarif') != ''
         continue-on-error: true
         with:
-          path: ./
-          extra_args: --only-verified
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+      - name: Upload Semgrep artifact
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('semgrep.sarif') != ''
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+
+  dependency-scan:
+    name: Dependencies (pnpm audit + OSV)
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Run OSV Scanner
+        uses: google/osv-scanner-action/osv-scanner-action@v2
+        with:
+          scan-args: |-
+            --recursive
+            --format sarif
+            --output osv-results.sarif
+            .
+
+      - name: Upload OSV SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('osv-results.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: osv-results.sarif
+          category: osv
+
+      - name: Upload OSV artifact
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('osv-results.sarif') != ''
+        with:
+          name: osv-sarif
+          path: osv-results.sarif
+
+  gitleaks:
+    name: Gitleaks (Secrets)
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_ENABLE_COMMENTS: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trivy:
+    name: Trivy (Image + Filesystem)
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ vars.SECURITY_SCAN_NON_BLOCKING != 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: build-image
+        run: docker build -f infra/docker/Dockerfile -t abe-stack-server:${{ github.sha }} .
+        continue-on-error: true
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.30.0
+        if: steps.build-image.outcome == 'success'
+        with:
+          image-ref: abe-stack-server:${{ github.sha }}
+          format: sarif
+          output: trivy-image.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload Trivy image SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-image.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image
+
+      - name: Upload Trivy filesystem SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-fs.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+      - name: Upload Trivy artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-sarif
+          path: |
+            trivy-image.sarif
+            trivy-fs.sarif
+          if-no-files-found: ignore

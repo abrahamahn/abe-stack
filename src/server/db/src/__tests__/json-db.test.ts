@@ -1,4 +1,4 @@
-// backend/db/src/testing/json-db.test.ts
+// src/server/db/src/__tests__/json-db.test.ts
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -66,7 +66,7 @@ describe('JsonDatabase', () => {
       const existingData = {
         users: [{ id: '1', email: 'test@example.com' }],
       };
-      writeFileSync(filePath, JSON.stringify(existingData));
+      writeFileSync(filePath, JSON.stringify(existingData), { mode: 0o600 });
 
       const db = new JsonDatabase({ provider: 'json', filePath, persistOnWrite: false });
 
@@ -76,7 +76,7 @@ describe('JsonDatabase', () => {
     });
 
     test('should handle corrupted JSON file gracefully', () => {
-      writeFileSync(filePath, 'not valid json {{{');
+      writeFileSync(filePath, 'not valid json {{{', { mode: 0o600 });
 
       const db = new JsonDatabase({ provider: 'json', filePath, persistOnWrite: false });
 

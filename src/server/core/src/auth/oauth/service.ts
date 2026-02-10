@@ -83,6 +83,12 @@ export interface OAuthAuthResult {
     phoneVerified: boolean | null;
     dateOfBirth: string | null;
     gender: string | null;
+    bio: string | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+    language: string | null;
+    website: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -490,6 +496,12 @@ async function authenticateOrCreateWithOAuth(
         phoneVerified: user.phoneVerified ?? null,
         dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
         gender: user.gender ?? null,
+        bio: user.bio ?? null,
+        city: user.city ?? null,
+        state: user.state ?? null,
+        country: user.country ?? null,
+        language: user.language ?? null,
+        website: user.website ?? null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       },
@@ -594,6 +606,12 @@ async function authenticateOrCreateWithOAuth(
           ? result.user.dateOfBirth.toISOString().slice(0, 10)
           : null,
       gender: result.user.gender ?? null,
+      bio: result.user.bio ?? null,
+      city: result.user.city ?? null,
+      state: result.user.state ?? null,
+      country: result.user.country ?? null,
+      language: result.user.language ?? null,
+      website: result.user.website ?? null,
       createdAt: result.user.createdAt.toISOString(),
       updatedAt: result.user.updatedAt.toISOString(),
     },

@@ -130,7 +130,7 @@ export const SessionCard = ({
             {session.isCurrent && <Badge tone="success">Current Session</Badge>}
           </div>
 
-          <div className="text-sm text-gray-500 space-y-0.5">
+          <div className="text-sm text-muted space-y-0.5">
             {session.ipAddress !== null && session.ipAddress.length > 0 && (
               <p>IP: {session.ipAddress}</p>
             )}
@@ -144,7 +144,7 @@ export const SessionCard = ({
             size="small"
             onClick={onRevoke}
             disabled={isRevoking}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+            className="text-danger"
           >
             {isRevoking ? 'Revoking...' : 'Revoke'}
           </Button>

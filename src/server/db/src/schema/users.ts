@@ -59,6 +59,10 @@ export interface User {
   bio: string | null;
   language: string | null;
   website: string | null;
+  lastUsernameChange: Date | null;
+  deactivatedAt: Date | null;
+  deletedAt: Date | null;
+  deletionGracePeriodEnds: Date | null;
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -94,6 +98,10 @@ export interface NewUser {
   bio?: string | null;
   language?: string | null;
   website?: string | null;
+  lastUsernameChange?: Date | null;
+  deactivatedAt?: Date | null;
+  deletedAt?: Date | null;
+  deletionGracePeriodEnds?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
   version?: number;
@@ -128,6 +136,10 @@ export interface UpdateUser {
   bio?: string | null;
   language?: string | null;
   website?: string | null;
+  lastUsernameChange?: Date | null;
+  deactivatedAt?: Date | null;
+  deletedAt?: Date | null;
+  deletionGracePeriodEnds?: Date | null;
   updatedAt?: Date;
   version?: number;
 }
@@ -194,6 +206,10 @@ export const USER_COLUMNS = {
   bio: 'bio',
   language: 'language',
   website: 'website',
+  lastUsernameChange: 'last_username_change',
+  deactivatedAt: 'deactivated_at',
+  deletedAt: 'deleted_at',
+  deletionGracePeriodEnds: 'deletion_grace_period_ends',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   version: 'version',

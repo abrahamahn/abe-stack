@@ -10,10 +10,22 @@ import { createPortal } from 'react-dom';
 import '../../styles/elements.css';
 
 type OverlayProps = ComponentPropsWithoutRef<'div'> & {
+  /** Whether the overlay is visible */
   open: boolean;
+  /** Callback invoked when the overlay is clicked (typically to dismiss) */
   onClick?: () => void;
 };
 
+/**
+ * A full-screen semi-transparent backdrop rendered into a portal.
+ * Used behind modals, side peeks, and other layered UI to dim background content
+ * and optionally capture clicks for dismissal.
+ *
+ * @example
+ * ```tsx
+ * <Overlay open={isOpen} onClick={() => setIsOpen(false)} />
+ * ```
+ */
 const OverlayRenderFn = (
   props: OverlayProps,
   ref: React.Ref<HTMLDivElement>,

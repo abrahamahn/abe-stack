@@ -113,8 +113,8 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (18) + ToS routes (2) + Magic-link routes (2) + OAuth routes (13) = 35
-      expect(routeKeys).toHaveLength(35);
+      // Core auth routes (19) + ToS routes (2) + Magic-link routes (2) + OAuth routes (13) = 36
+      expect(routeKeys).toHaveLength(36);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -140,6 +140,7 @@ describe('Auth Routes', () => {
       // Terms of Service routes
       expect(routeKeys).toContain('auth/tos/status');
       expect(routeKeys).toContain('auth/tos/accept');
+      expect(routeKeys).toContain('auth/sudo');
 
       // Email change routes
       expect(routeKeys).toContain('auth/change-email');
@@ -289,6 +290,12 @@ describe('Auth Routes', () => {
               phoneVerified: null,
               dateOfBirth: null,
               gender: null,
+              bio: null,
+              city: null,
+              state: null,
+              country: null,
+              language: null,
+              website: null,
               createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
               updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
             },
@@ -576,6 +583,12 @@ describe('Auth Routes', () => {
               phoneVerified: null,
               dateOfBirth: null,
               gender: null,
+              bio: null,
+              city: null,
+              state: null,
+              country: null,
+              language: null,
+              website: null,
               createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
               updatedAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
             },
@@ -894,10 +907,10 @@ describe('Route Protection', () => {
   test('should have expected protected routes', () => {
     const protectedRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => !def.isPublic);
 
-    // 7 core protected (logout-all, set-password, totp/setup, totp/enable, totp/disable, totp/status, change-email)
+    // 8 core protected (logout-all, set-password, totp/setup, totp/enable, totp/disable, totp/status, sudo, change-email)
     // + 2 ToS protected (tos/status, tos/accept)
-    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 16 protected routes
-    expect(protectedRoutes).toHaveLength(16);
+    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 17 protected routes
+    expect(protectedRoutes).toHaveLength(17);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -907,6 +920,7 @@ describe('Route Protection', () => {
     expect(protectedRouteNames).toContain('auth/totp/enable');
     expect(protectedRouteNames).toContain('auth/totp/disable');
     expect(protectedRouteNames).toContain('auth/totp/status');
+    expect(protectedRouteNames).toContain('auth/sudo');
     expect(protectedRouteNames).toContain('auth/change-email');
     // ToS protected routes
     expect(protectedRouteNames).toContain('auth/tos/status');

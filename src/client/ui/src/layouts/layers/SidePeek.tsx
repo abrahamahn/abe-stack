@@ -36,7 +36,6 @@ import {
   useContext,
   useEffect,
   useId,
-  useRef,
   useState,
   type ComponentPropsWithoutRef,
   type ReactElement,
@@ -80,8 +79,11 @@ function useSidePeekContext(): SidePeekContextValue {
 // ============================================================================
 
 type SidePeekRootProps = {
+  /** Whether the side peek panel is visible */
   open: boolean;
+  /** Callback invoked when the panel requests to close */
   onClose?: () => void;
+  /** Panel content (use SidePeek.Header, SidePeek.Content, SidePeek.Footer compound components) */
   children: ReactNode;
   /** Panel width: sm (320px), md (480px), lg (640px), xl (800px), full (100%) */
   size?: SidePeekSize;
@@ -91,6 +93,7 @@ type SidePeekRootProps = {
   closeOnEscape?: boolean;
 };
 
+/** Root container that manages open/close state, animations, focus trapping, and body scroll lock. */
 const SidePeekRoot = ({
   open,
   onClose,
@@ -125,9 +128,15 @@ const SidePeekRoot = ({
         clearTimeout(timer);
       };
     }
+    // Start slide-out animation
     setIsAnimating(false);
-    setShouldRender(false);
-    return undefined;
+    // Wait for CSS transition to complete before unmounting (matches 0.2s in CSS)
+    const timer = setTimeout(() => {
+      setShouldRender(false);
+    }, 200);
+    return (): void => {
+      clearTimeout(timer);
+    };
   }, [open]);
 
   // Handle escape key
@@ -206,6 +215,7 @@ const SidePeekRoot = ({
 
 type SidePeekHeaderProps = ComponentPropsWithoutRef<'div'>;
 
+/** Container for the panel header area, typically holding a title and close/expand buttons. */
 const SidePeekHeader = ({
   children,
   className = '',
@@ -224,6 +234,7 @@ const SidePeekHeader = ({
 
 type SidePeekTitleProps = ComponentPropsWithoutRef<'h2'>;
 
+/** Renders an `<h2>` that automatically registers with the panel for `aria-labelledby`. */
 const SidePeekTitle = ({ children, className = '', ...rest }: SidePeekTitleProps): ReactElement => {
   const { setTitleId } = useSidePeekContext();
   const id = useId();
@@ -248,6 +259,7 @@ const SidePeekTitle = ({ children, className = '', ...rest }: SidePeekTitleProps
 
 type SidePeekDescriptionProps = ComponentPropsWithoutRef<'p'>;
 
+/** Renders a `<p>` that automatically registers with the panel for `aria-describedby`. */
 const SidePeekDescription = ({
   children,
   className = '',
@@ -276,6 +288,7 @@ const SidePeekDescription = ({
 
 type SidePeekContentProps = ComponentPropsWithoutRef<'div'>;
 
+/** Scrollable content area for the panel's primary content. */
 const SidePeekContent = ({
   children,
   className = '',
@@ -294,6 +307,7 @@ const SidePeekContent = ({
 
 type SidePeekFooterProps = ComponentPropsWithoutRef<'div'>;
 
+/** Container for action buttons at the bottom of the panel. */
 const SidePeekFooter = ({
   children,
   className = '',
@@ -312,6 +326,7 @@ const SidePeekFooter = ({
 
 type SidePeekCloseProps = ComponentPropsWithoutRef<'button'>;
 
+/** A button that invokes the panel's `onClose` callback. Defaults to a close icon if no children provided. */
 const SidePeekClose = ({ children, className = '', ...rest }: SidePeekCloseProps): ReactElement => {
   const { onClose } = useSidePeekContext();
 
@@ -329,51 +344,6 @@ const SidePeekClose = ({ children, className = '', ...rest }: SidePeekCloseProps
 };
 
 // ============================================================================
-// Expand Button Component (open in full page)
-// ============================================================================
-
-type SidePeekExpandProps = ComponentPropsWithoutRef<'button'> & {
-  /** Path to navigate to when expanding to full page */
-  to?: string;
-  onExpand?: () => void;
-};
-
-const SidePeekExpand = ({
-  children,
-  className = '',
-  to,
-  onExpand,
-  ...rest
-}: SidePeekExpandProps): ReactElement => {
-  const { onClose } = useSidePeekContext();
-  const expandRef = useRef<HTMLButtonElement>(null);
-
-  const handleExpand = useCallback((): void => {
-    if (onExpand != null) {
-      onExpand();
-    } else if (to != null && to !== '') {
-      // Navigate to full page and close peek
-      window.history.pushState(null, '', to);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    }
-    onClose?.();
-  }, [onExpand, to, onClose]);
-
-  return (
-    <button
-      ref={expandRef}
-      type="button"
-      onClick={handleExpand}
-      aria-label="Open in full page"
-      className={`side-peek-expand ${className}`.trim()}
-      {...rest}
-    >
-      {children ?? '⤢'}
-    </button>
-  );
-};
-
-// ============================================================================
 // Export
 // ============================================================================
 
@@ -385,14 +355,12 @@ export const SidePeek = {
   Content: SidePeekContent,
   Footer: SidePeekFooter,
   Close: SidePeekClose,
-  Expand: SidePeekExpand,
 };
 
 export type {
   SidePeekCloseProps,
   SidePeekContentProps,
   SidePeekDescriptionProps,
-  SidePeekExpandProps,
   SidePeekFooterProps,
   SidePeekHeaderProps,
   SidePeekRootProps,

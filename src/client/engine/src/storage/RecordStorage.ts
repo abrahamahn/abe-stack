@@ -955,6 +955,16 @@ export function createRecordMap<Tables extends string, R extends VersionedRecord
   const map: RecordMap<Tables, R> = {};
 
   for (const { table, id, record } of records) {
+    if (
+      table === '__proto__' ||
+      table === 'constructor' ||
+      table === 'prototype' ||
+      id === '__proto__' ||
+      id === 'constructor' ||
+      id === 'prototype'
+    ) {
+      continue;
+    }
     if (map[table] === undefined) {
       (map as Record<Tables, Record<string, R>>)[table] = {};
     }

@@ -23,6 +23,7 @@
  */
 
 import {
+  applyApiCacheHeaders,
   applyCors,
   applySecurityHeaders,
   getProductionSecurityDefaults,
@@ -226,6 +227,11 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     // Security headers (replaces @fastify/helmet)
     // Use stricter defaults (including CSP) in production
     applySecurityHeaders(res, isProd ? getProductionSecurityDefaults() : {});
+
+    // Prevent caching of API responses (back-button data leak protection)
+    if (typeof req.url === 'string' && req.url.startsWith('/api/')) {
+      applyApiCacheHeaders(res);
+    }
 
     // CORS (replaces @fastify/cors)
     applyCors(req, res, {

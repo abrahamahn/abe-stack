@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
 import '../styles/components.css';
 
+/** Menu placement relative to the trigger element. */
 type Placement = 'bottom' | 'right';
 
 type DropdownProps = {

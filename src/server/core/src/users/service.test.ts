@@ -60,6 +60,10 @@ describe('Users Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);
@@ -79,6 +83,12 @@ describe('Users Service', () => {
         phoneVerified: false,
         dateOfBirth: null,
         gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });
@@ -121,6 +131,10 @@ describe('Users Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);
@@ -140,6 +154,12 @@ describe('Users Service', () => {
         phoneVerified: true,
         dateOfBirth: '1990-05-15',
         gender: 'male',
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });

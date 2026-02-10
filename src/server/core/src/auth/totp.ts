@@ -271,7 +271,7 @@ export async function verifyTotpForLogin(
 /**
  * Verify a TOTP code against a secret.
  */
-function verifyTotpCode(secretBase32: string, code: string, window: number): boolean {
+export function verifyTotpCode(secretBase32: string, code: string, window: number): boolean {
   const totp = new otpAuth.TOTP({
     algorithm: TOTP_ALGORITHM,
     digits: TOTP_DIGITS,

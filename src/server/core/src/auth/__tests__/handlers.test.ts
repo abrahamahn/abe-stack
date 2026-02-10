@@ -92,6 +92,7 @@ interface MockUser {
   bio: string | null;
   language: string | null;
   website: string | null;
+  lastUsernameChange: Date | null;
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -124,6 +125,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
     bio: null,
     language: null,
     website: null,
+    lastUsernameChange: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -165,7 +167,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
       },
       refreshTokenFamilies: {
         findById: vi.fn() as Mock,
-        findActiveByUserId: vi.fn() as Mock,
+        findActiveByUserId: vi.fn().mockResolvedValue([]) as Mock,
         create: vi.fn() as Mock,
         revoke: vi.fn() as Mock,
         revokeAllForUser: vi.fn() as Mock,
@@ -265,6 +267,11 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         subject: 'Account locked',
         text: 'locked',
         html: '<p>locked</p>',
+      })),
+      newLoginAlert: vi.fn(() => ({
+        subject: 'New login detected',
+        text: 'login alert',
+        html: '<p>login alert</p>',
       })),
     },
     config: {

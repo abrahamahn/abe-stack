@@ -3,12 +3,6 @@ import { forwardRef, useCallback, type ComponentPropsWithoutRef } from 'react';
 
 import '../styles/elements.css';
 
-/**
- * Props for the SkipLink component.
- *
- * @param targetId - ID of the element to skip to (default: 'main-content')
- * @param label - Visible text for the skip link (default: 'Skip to main content')
- */
 type SkipLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'href'> & {
   /** ID of the target element to focus (default: 'main-content') */
   targetId?: string;
@@ -22,9 +16,6 @@ type SkipLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'href'> & {
  * Visually hidden until focused (via Tab key), then appears at the top
  * of the viewport. Clicking or pressing Enter moves focus to the target
  * element, allowing keyboard users to bypass repetitive navigation.
- *
- * @param props - SkipLink component props
- * @returns An anchor element that skips to the target content
  *
  * @example
  * ```tsx

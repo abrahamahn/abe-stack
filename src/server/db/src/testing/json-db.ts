@@ -223,7 +223,7 @@ export class JsonDatabase {
       mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
+    writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), { mode: 0o600 });
   }
 
   // ===========================================================================
@@ -381,6 +381,9 @@ export class JsonDatabase {
     data: Partial<T>,
     where: WhereCondition<T>,
   ): Promise<T[]> {
+    if (table === '__proto__' || table === 'constructor' || table === 'prototype') {
+      return [];
+    }
     return this.writeMutex.withLock(() => {
       const updated: T[] = [];
       const tableData = this.data[table] ?? [];

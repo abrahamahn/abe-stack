@@ -8,10 +8,12 @@
  * @module settings/components
  */
 
-import { Alert, Button, Input } from '@abe-stack/ui';
+import { Alert, Button, Input, Text } from '@abe-stack/ui';
 import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 import { useTotpManagement } from '../hooks/useTotpManagement';
+
+import { TotpQrCode } from './TotpQrCode';
 
 // ============================================================================
 // Types
@@ -86,25 +88,36 @@ export const TotpManagement = ({ onStatusChange }: TotpManagementProps): ReactEl
   if (state === 'loading') {
     return (
       <div className="animate-pulse space-y-3">
-        <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
-        <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+        <div className="h-5 w-48 bg-surface rounded" />
+        <div className="h-10 w-32 bg-surface rounded" />
       </div>
     );
   }
 
-  // Setup in progress — show secret, backup codes, and verify form
+  // Setup in progress — show QR code, secret, backup codes, and verify form
   if (state === 'setup-in-progress' && setupData !== null) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Add this account to your authenticator app using the secret below.
-        </p>
+        <Text size="sm" tone="muted">
+          Add this account to your authenticator app by scanning the QR code, or enter the secret
+          key manually.
+        </Text>
+
+        {/* QR Code */}
+        {'otpauthUrl' in setupData && setupData.otpauthUrl !== '' && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted">QR Code</label>
+            <div className="inline-block p-4 bg-primary rounded-lg border">
+              <TotpQrCode url={setupData.otpauthUrl} size={200} />
+            </div>
+          </div>
+        )}
 
         {/* Secret */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Secret Key</label>
+          <label className="text-sm font-medium text-muted">Secret Key</label>
           <div className="flex items-center gap-2">
-            <code className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded text-sm font-mono break-all select-all">
+            <code className="flex-1 px-3 py-2 bg-surface rounded text-sm font-mono break-all select-all">
               {setupData.secret}
             </code>
             <Button
@@ -121,13 +134,11 @@ export const TotpManagement = ({ onStatusChange }: TotpManagementProps): ReactEl
 
         {/* Backup Codes */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Backup Codes
-          </label>
-          <p className="text-xs text-gray-500">
+          <label className="text-sm font-medium text-muted">Backup Codes</label>
+          <Text size="xs" tone="muted">
             Save these codes in a safe place. Each code can only be used once.
-          </p>
-          <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded">
+          </Text>
+          <div className="grid grid-cols-2 gap-1 px-3 py-2 bg-surface rounded">
             {setupData.backupCodes.map((code) => (
               <code key={code} className="text-sm font-mono py-0.5">
                 {code}
@@ -186,10 +197,10 @@ export const TotpManagement = ({ onStatusChange }: TotpManagementProps): ReactEl
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 bg-green-500 rounded-full" />
-          <span className="text-sm font-medium text-green-700 dark:text-green-400">
+          <span className="inline-block w-2 h-2 rounded-full bg-success" />
+          <Text size="sm" className="font-medium text-success">
             Two-factor authentication is enabled
-          </span>
+          </Text>
         </div>
 
         {showDisableForm ? (
@@ -255,16 +266,19 @@ export const TotpManagement = ({ onStatusChange }: TotpManagementProps): ReactEl
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <span className="inline-block w-2 h-2 bg-gray-400 rounded-full" />
-        <span className="text-sm text-gray-600 dark:text-gray-400">
+        <span
+          className="inline-block w-2 h-2 rounded-full text-muted"
+          style={{ background: 'currentColor' }}
+        />
+        <Text size="sm" tone="muted">
           Two-factor authentication is not enabled
-        </span>
+        </Text>
       </div>
 
-      <p className="text-sm text-gray-500">
+      <Text size="sm" tone="muted">
         Add an extra layer of security to your account by requiring a verification code from your
         authenticator app when signing in.
-      </p>
+      </Text>
 
       {error !== null && <Alert tone="danger">{error}</Alert>}
 

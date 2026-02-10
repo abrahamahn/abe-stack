@@ -8,13 +8,6 @@ import type { ReactElement } from 'react';
 /** Position options for the fixed-position toast container */
 export type ToasterPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 
-/**
- * Props for the Toaster component.
- *
- * @param messages - Array of toast messages to display
- * @param onDismiss - Callback when a toast is dismissed (auto or manual)
- * @param position - Fixed position on the viewport (default: 'top-right')
- */
 export type ToasterProps = {
   /** Array of toast messages to display */
   messages: ToastMessage[];
@@ -29,9 +22,6 @@ export type ToasterProps = {
  *
  * Renders toast notifications in a fixed corner of the viewport.
  * The inner `ToastContainer` provides `aria-live` announcements for assistive technology.
- *
- * @param props - Toaster component props
- * @returns A fixed-position toast container element
  *
  * @example
  * ```tsx

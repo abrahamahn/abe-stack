@@ -124,7 +124,7 @@ export const AvatarUpload = ({
           {displayUrl !== null && displayUrl.length > 0 ? (
             <Avatar src={displayUrl} alt={userName ?? 'User avatar'} className="w-20 h-20" />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl font-medium text-gray-600 dark:text-gray-300">
+            <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center text-2xl font-medium text-muted">
               {initials}
             </div>
           )}
@@ -164,7 +164,7 @@ export const AvatarUpload = ({
                   variant="text"
                   onClick={handleDelete}
                   disabled={isLoading}
-                  className="text-red-600 hover:text-red-700"
+                  className="text-danger"
                 >
                   Remove
                 </Button>

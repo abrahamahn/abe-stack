@@ -10,6 +10,14 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
 /**
  * A minimal close button for panels, cards, and overlays.
  * Positioned for top-right corner placement in flex containers.
+ *
+ * @example
+ * ```tsx
+ * <CloseButton onClick={handleClose} />
+ *
+ * // With custom aria-label
+ * <CloseButton aria-label="Dismiss notification" onClick={handleDismiss} />
+ * ```
  */
 const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>((props, ref) => {
   const { children, className = '', 'aria-label': ariaLabel = 'Close', ...rest } = props;

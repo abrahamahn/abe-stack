@@ -9,7 +9,7 @@ type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   /** Visual style variant */
   variant?: 'primary' | 'secondary' | 'text';
   /** Button size */
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'inline';
 };
 
 /**

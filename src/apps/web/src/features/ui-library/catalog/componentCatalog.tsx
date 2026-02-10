@@ -29,7 +29,10 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         description: 'Default vertical layout',
         code: '<Box padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
         render: () => (
-          <Box padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+          <Box
+            padding="var(--ui-gap-lg)"
+            style={{ gap: 'var(--ui-gap-sm)', border: '1px dashed var(--ui-color-border)' }}
+          >
             <Button>Item 1</Button>
             <Button>Item 2</Button>
           </Box>
@@ -40,7 +43,11 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         description: 'Horizontal row layout',
         code: '<Box flexDirection="row" padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
         render: () => (
-          <Box flexDirection="row" padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+          <Box
+            flexDirection="row"
+            padding="var(--ui-gap-lg)"
+            style={{ gap: 'var(--ui-gap-sm)', border: '1px dashed var(--ui-color-border)' }}
+          >
             <Button>Item 1</Button>
             <Button>Item 2</Button>
           </Box>
@@ -174,27 +181,61 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         description: 'All slots provided',
         code: '<AppShell header="..." sidebar="..." aside="..." footer="...">Content</AppShell>',
         render: (): ReactElement => (
-          <div style={{ height: '300px', border: '1px solid #ddd', overflow: 'hidden' }}>
+          <div
+            style={{
+              height: '300px',
+              border: '1px solid var(--ui-color-border)',
+              overflow: 'hidden',
+            }}
+          >
             <AppShell
               header={
-                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
+                <div
+                  style={{
+                    background: 'var(--ui-color-surface)',
+                    padding: 'var(--ui-gap-sm)',
+                    textAlign: 'center',
+                  }}
+                >
                   Header
                 </div>
               }
               footer={
-                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
+                <div
+                  style={{
+                    background: 'var(--ui-color-surface)',
+                    padding: 'var(--ui-gap-sm)',
+                    textAlign: 'center',
+                  }}
+                >
                   Footer
                 </div>
               }
               sidebar={
-                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Sidebar</div>
+                <div
+                  style={{
+                    background: 'var(--ui-color-surface)',
+                    padding: 'var(--ui-gap-sm)',
+                    width: '100px',
+                  }}
+                >
+                  Sidebar
+                </div>
               }
               aside={
-                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Aside</div>
+                <div
+                  style={{
+                    background: 'var(--ui-color-surface)',
+                    padding: 'var(--ui-gap-sm)',
+                    width: '100px',
+                  }}
+                >
+                  Aside
+                </div>
               }
               style={{ minHeight: '100%', height: '100%' }}
             >
-              <div style={{ padding: '16px' }}>Main Content</div>
+              <div style={{ padding: 'var(--ui-gap-lg)' }}>Main Content</div>
             </AppShell>
           </div>
         ),
@@ -285,7 +326,9 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         name: 'Default',
         description: 'Default loading container',
         code: '<LoadingContainer />',
-        render: () => <LoadingContainer style={{ padding: '24px', minHeight: '100px' }} />,
+        render: () => (
+          <LoadingContainer style={{ padding: 'var(--ui-gap-2xl)', minHeight: '100px' }} />
+        ),
       },
       {
         name: 'Custom Text',
@@ -294,7 +337,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         render: () => (
           <LoadingContainer
             text="Fetching data..."
-            style={{ padding: '24px', minHeight: '100px' }}
+            style={{ padding: 'var(--ui-gap-2xl)', minHeight: '100px' }}
           />
         ),
       },
@@ -306,7 +349,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
           <LoadingContainer
             size="lg"
             text="Please wait..."
-            style={{ padding: '24px', minHeight: '100px' }}
+            style={{ padding: 'var(--ui-gap-2xl)', minHeight: '100px' }}
           />
         ),
       },

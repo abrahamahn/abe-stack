@@ -63,6 +63,52 @@ describe('parseMarkdown', () => {
     expect(result).toHaveLength(1);
     render(<div>{result}</div>);
   });
+
+  it('should parse simple tables', () => {
+    const md = '| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |';
+    const result = parseMarkdown(md);
+    expect(result).toHaveLength(1);
+    const { container } = render(<div>{result}</div>);
+    expect(container.querySelector('table')).not.toBeNull();
+    expect(container.querySelectorAll('th')).toHaveLength(2);
+    expect(container.querySelectorAll('td')).toHaveLength(4);
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(2);
+  });
+
+  it('should parse tables with alignment', () => {
+    const md = '| Left | Center | Right |\n| :--- | :---: | ---: |\n| a | b | c |';
+    const result = parseMarkdown(md);
+    const { container } = render(<div>{result}</div>);
+    const headers = container.querySelectorAll('th');
+    expect(headers).toHaveLength(3);
+    expect(headers[1]?.style.textAlign).toBe('center');
+    expect(headers[2]?.style.textAlign).toBe('right');
+  });
+
+  it('should parse inline formatting inside table cells', () => {
+    const md = '| Header |\n| --- |\n| **bold** text |';
+    const result = parseMarkdown(md);
+    const { container } = render(<div>{result}</div>);
+    expect(container.querySelector('strong')?.textContent).toBe('bold');
+  });
+
+  it('should parse tables followed by other content', () => {
+    const md = '| A | B |\n| --- | --- |\n| 1 | 2 |\n\nParagraph after table';
+    const result = parseMarkdown(md);
+    expect(result).toHaveLength(2);
+    const { container } = render(<div>{result}</div>);
+    expect(container.querySelector('table')).not.toBeNull();
+    expect(container.querySelector('p')?.textContent).toBe('Paragraph after table');
+  });
+
+  it('should parse inline formatting with 3+ patterns', () => {
+    const md = 'Use `code` with **bold** and *italic* text';
+    const result = parseMarkdown(md);
+    const { container } = render(<div>{result}</div>);
+    expect(container.querySelector('code')?.textContent).toBe('code');
+    expect(container.querySelector('strong')?.textContent).toBe('bold');
+    expect(container.querySelector('em')?.textContent).toBe('italic');
+  });
 });
 
 describe('Markdown component', () => {

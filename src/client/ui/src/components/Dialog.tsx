@@ -23,12 +23,19 @@ import { cn } from '../utils/cn';
 import '../styles/components.css';
 
 type DialogContextValue = {
+  /** Whether the dialog is currently open */
   open: boolean;
+  /** Sets the open state of the dialog */
   setOpen: (open: boolean) => void;
+  /** ID of the element labeling the dialog */
   labelledBy?: string;
+  /** ID of the element describing the dialog */
   describedBy?: string;
+  /** Registers the aria-labelledby ID */
   setLabelledBy: (id?: string) => void;
+  /** Registers the aria-describedby ID */
   setDescribedBy: (id?: string) => void;
+  /** Ref to the trigger button for focus restoration */
   triggerRef: RefObject<HTMLButtonElement | null>;
 };
 
@@ -155,6 +162,7 @@ export const DialogRoot = ({
   );
 };
 
+/** Props for the Dialog trigger button. */
 type DialogTriggerProps = ComponentPropsWithoutRef<'button'>;
 
 /** Trigger button to open the dialog. */
@@ -175,6 +183,7 @@ export const DialogTrigger = (props: DialogTriggerProps): ReactElement => {
   );
 };
 
+/** Props for the Dialog background overlay. */
 type DialogOverlayProps = ComponentPropsWithoutRef<'div'>;
 
 /** Background overlay displayed behind the dialog. */
@@ -257,6 +266,7 @@ export const DialogContent = (props: DialogContentProps): ReactElement | null =>
   );
 };
 
+/** Props for the Dialog description element. */
 type DialogDescriptionProps = ComponentPropsWithoutRef<'div'>;
 
 /** Dialog description (sets aria-describedby). */
@@ -275,6 +285,7 @@ export const DialogDescription = (props: DialogDescriptionProps): ReactElement =
   return <div id={id} className={className} {...rest} />;
 };
 
+/** Props for the Dialog title element. */
 type DialogTitleProps = ComponentPropsWithoutRef<'div'>;
 
 /** Dialog title element (sets aria-labelledby). */

@@ -3,7 +3,7 @@
 
 // API Client
 export { createApiClient } from './api/client';
-export type { ApiClient, ApiClientConfig } from './api/client';
+export type { ApiClient, ApiClientConfig, TosRequiredPayload } from './api/client';
 export { clearApiClient, getApiClient } from './api/instance';
 export type { ApiClientOptions } from './api/types';
 export type {

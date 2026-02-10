@@ -104,10 +104,27 @@ vi.mock('@abe-stack/ui', () => {
     Field: mockInputField,
   };
 
+  const mockText = ({
+    children,
+    tone,
+    size,
+    className,
+  }: {
+    children: ReactNode;
+    tone?: string;
+    size?: string;
+    className?: string;
+  }) => (
+    <span data-testid="text" data-tone={tone} data-size={size} className={className}>
+      {children}
+    </span>
+  );
+
   return {
     Alert: mockAlert,
     Button: mockButton,
     Input: mockInput,
+    Text: mockText,
   };
 });
 
@@ -188,7 +205,7 @@ describe('TotpManagement', () => {
 
       const skeleton = container.querySelector('.animate-pulse');
       expect(skeleton).toBeInTheDocument();
-      expect(container.querySelectorAll('.bg-gray-200').length).toBeGreaterThan(0);
+      expect(container.querySelectorAll('.bg-surface').length).toBeGreaterThan(0);
     });
 
     it('should not render any buttons in loading state', () => {
@@ -226,10 +243,10 @@ describe('TotpManagement', () => {
       expect(screen.getByText('Two-factor authentication is not enabled')).toBeInTheDocument();
     });
 
-    it('should render gray status indicator dot', () => {
+    it('should render muted status indicator dot', () => {
       const { container } = render(<TotpManagement />);
 
-      const statusDot = container.querySelector('.bg-gray-400.rounded-full');
+      const statusDot = container.querySelector('.text-muted.rounded-full');
       expect(statusDot).toBeInTheDocument();
     });
 
@@ -613,10 +630,10 @@ describe('TotpManagement', () => {
       expect(screen.getByText('Two-factor authentication is enabled')).toBeInTheDocument();
     });
 
-    it('should render green status indicator dot', () => {
+    it('should render success status indicator dot', () => {
       const { container } = render(<TotpManagement />);
 
-      const statusDot = container.querySelector('.bg-green-500.rounded-full');
+      const statusDot = container.querySelector('.bg-success.rounded-full');
       expect(statusDot).toBeInTheDocument();
     });
 

@@ -10,6 +10,7 @@ export { adminRoutes } from './routes';
 
 // Handlers
 export { handleAdminUnlock } from './handlers';
+export { handleGetRouteManifest } from './route-manifest';
 export {
   handleAdminCreatePlan,
   handleAdminDeactivatePlan,

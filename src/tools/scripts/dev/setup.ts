@@ -19,8 +19,8 @@
 
 import { execSync, spawnSync } from 'child_process';
 import { randomFillSync } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
 import { createInterface } from 'readline';
 
 // =============================================================================
@@ -660,6 +660,16 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function writeFileAtomic(targetPath: string, content: string): void {
+  const directory = dirname(targetPath);
+  const suffixBytes = new Uint8Array(4);
+  randomFillSync(suffixBytes);
+  const suffixHex = Buffer.from(suffixBytes).toString('hex');
+  const tempPath = resolve(directory, `.tmp-${process.pid}-${Date.now()}-${suffixHex}.env`);
+  writeFileSync(tempPath, content, { mode: 0o600 });
+  renameSync(tempPath, targetPath);
+}
+
 // =============================================================================
 // Installation Steps
 // =============================================================================
@@ -701,16 +711,14 @@ async function setupEnvironment(envConfig: EnvConfig, step: number, total: numbe
     }
   }
 
-  // Create .data directory for JSON database if needed
+  // Create .data directory for JSON database if needed (recursive is idempotent)
   if (envConfig.databaseProvider === 'json') {
-    if (!existsSync(JSON_DB_DIR)) {
-      mkdirSync(JSON_DB_DIR, { recursive: true });
-      logSuccess('Created .data directory for JSON database');
-    }
+    mkdirSync(JSON_DB_DIR, { recursive: true });
+    logSuccess('Created .data directory for JSON database');
   }
 
   const content = generateEnvFileContent(envConfig);
-  writeFileSync(ENV_DEV, content);
+  writeFileAtomic(ENV_DEV, content);
   logSuccess('Created config/env/.env.development with your configuration');
 }
 

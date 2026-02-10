@@ -58,11 +58,12 @@ describe('App', () => {
 
       await waitFor(() => {
         // HomePage renders navigation links
-        expect(document.querySelector('a[href="/auth"]')).toBeInTheDocument();
-        expect(document.querySelector('a[href="/settings/accounts"]')).toBeInTheDocument();
+        expect(document.querySelector('a[href="/"]')).toBeInTheDocument();
         expect(document.querySelector('a[href="/settings"]')).toBeInTheDocument();
         expect(document.querySelector('a[href="/dashboard"]')).toBeInTheDocument();
+        expect(document.querySelector('a[href="/pricing"]')).toBeInTheDocument();
         expect(document.querySelector('a[href="/admin"]')).toBeInTheDocument();
+        expect(document.querySelector('a[href="/ui-library"]')).toBeInTheDocument();
       });
     });
   });

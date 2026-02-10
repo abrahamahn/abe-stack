@@ -1,5 +1,5 @@
 // src/apps/web/src/features/ui-library/components/SidePeekUILibraryContent.tsx
-import { Button, Markdown } from '@abe-stack/ui';
+import { Markdown } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 
@@ -9,7 +9,7 @@ const SIDE_PEEK_MARKDOWN = `This is a **Notion-style side peek** panel. It slide
 - URL-synced state (try refreshing!)
 - Smooth CSS transitions
 - Click overlay or press Escape to close
-- Expand button to open in full page
+- Fullscreen toggle button in header
 - Multiple size variants (sm, md, lg, xl, full)
 - Focus trap for accessibility
 
@@ -34,23 +34,10 @@ const { isOpen, open, close } = useSidePeek();
 </SidePeek.Root>
 \`\`\``;
 
-export interface SidePeekUILibraryContentProps {
-  actionLabel: string;
-  onAction: () => void;
-}
-
-export const SidePeekUILibraryContent = ({
-  actionLabel,
-  onAction,
-}: SidePeekUILibraryContentProps): ReactElement => {
+export const SidePeekUILibraryContent = (): ReactElement => {
   return (
     <div className="space-y-4">
       <Markdown className="markdown-content">{SIDE_PEEK_MARKDOWN}</Markdown>
-      <div className="pt-4">
-        <Button variant="primary" onClick={onAction}>
-          {actionLabel}
-        </Button>
-      </div>
     </div>
   );
 };

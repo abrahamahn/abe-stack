@@ -3,6 +3,7 @@ import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
+  applyApiCacheHeaders,
   applyCors,
   applySecurityHeaders,
   getProductionSecurityDefaults,
@@ -527,6 +528,20 @@ describe('HTTP Security', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body) as { received: Record<string, unknown> };
       expect(body.received).toEqual(safePayload);
+    });
+  });
+
+  describe('applyApiCacheHeaders', () => {
+    test('should set Cache-Control and Pragma headers', () => {
+      const mockReply = { header: vi.fn() };
+
+      applyApiCacheHeaders(mockReply as never);
+
+      expect(mockReply.header).toHaveBeenCalledWith(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate',
+      );
+      expect(mockReply.header).toHaveBeenCalledWith('Pragma', 'no-cache');
     });
   });
 });

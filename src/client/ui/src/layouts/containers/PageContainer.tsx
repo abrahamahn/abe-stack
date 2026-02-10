@@ -5,11 +5,26 @@ import '../../styles/layouts.css';
 import type { CSSProperties, ComponentPropsWithoutRef, ReactElement } from 'react';
 
 type PageContainerProps = ComponentPropsWithoutRef<'main'> & {
+  /** Maximum width in pixels for the page content area */
   maxWidth?: number;
+  /** CSS padding value (e.g., '1rem', '16px 24px') */
   padding?: string;
+  /** Vertical gap between child elements, as pixels (number) or CSS value (string) */
   gap?: number | string;
 };
 
+/**
+ * A semantic `<main>` container for page-level content with configurable
+ * max-width, padding, and gap via CSS custom properties.
+ *
+ * @example
+ * ```tsx
+ * <PageContainer maxWidth={960} padding="2rem" gap={24}>
+ *   <PageHeader />
+ *   <PageBody />
+ * </PageContainer>
+ * ```
+ */
 export const PageContainer = ({
   maxWidth,
   padding,

@@ -221,10 +221,13 @@ Note: rollback currently uses tag-based refs, while normal deploy prefers digest
 
 ### Jobs
 
-- dependency vulnerability scanning (`pnpm audit`, `snyk`)
+- CodeQL v4 (`javascript-typescript`)
+- Semgrep SAST scan
+- dependency vulnerability scanning (`pnpm audit`, `OSV-Scanner`)
+- Gitleaks secret scanning
 - Docker Trivy image/filesystem scanning
-- CodeQL v4 (`javascript-typescript` unified target)
-- TruffleHog secret scans (PR delta + full scan)
+
+Security jobs are non-blocking by default and can be made blocking with repo variable `SECURITY_SCAN_NON_BLOCKING=false`.
 
 ## 5) Infra Workflows
 

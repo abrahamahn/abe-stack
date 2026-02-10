@@ -1,20 +1,4 @@
 // src/client/ui/src/components/PeekLink.tsx
-/**
- * PeekLink - A link that opens content in a side-peek panel.
- *
- * Works like a regular anchor tag but adds the path to `?peek=` param instead
- * of navigating directly. Use with SidePeek.Root to render the peeked content.
- *
- * @example
- * // Opens /users/123 in side peek
- * <PeekLink to="/users/123">View User</PeekLink>
- *
- * // With custom styling
- * <PeekLink to="/settings" className="text-blue-500">
- *   Open Settings
- * </PeekLink>
- */
-
 import { useSidePeek } from '@abe-stack/react/hooks';
 import {
   useCallback,
@@ -26,11 +10,27 @@ import {
 export interface PeekLinkProps extends Omit<ComponentPropsWithoutRef<'a'>, 'href'> {
   /** The path to open in the side peek */
   to: string;
+  /** Link content (text, icons, or other elements) */
   children: ReactNode;
   /** If true, toggles the peek (closes if already open with same path) */
   toggle?: boolean;
 }
 
+/**
+ * A link that opens content in a side-peek panel instead of navigating.
+ *
+ * Renders as a standard `<a>` tag with an `href` pointing to `?peek=<path>`,
+ * but intercepts clicks to open the path in the side peek. Modifier-key
+ * clicks (Ctrl, Meta, etc.) fall through to default browser behavior.
+ *
+ * @example
+ * ```tsx
+ * <PeekLink to="/users/123">View User</PeekLink>
+ *
+ * // Toggle mode (closes if same path is already open)
+ * <PeekLink to="/settings" toggle>Open Settings</PeekLink>
+ * ```
+ */
 export const PeekLink = ({
   to,
   children,

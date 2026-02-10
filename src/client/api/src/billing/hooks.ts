@@ -91,7 +91,7 @@ export function usePlans(clientConfig: BillingClientConfig): PlansState {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
 
   const fetchPlans = useCallback(async (): Promise<void> => {
     try {
@@ -191,7 +191,7 @@ export function useSubscription(clientConfig: BillingClientConfig): Subscription
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
 
   const fetchSubscription = useCallback(async (): Promise<void> => {
     try {
@@ -352,7 +352,7 @@ export function useInvoices(clientConfig: BillingClientConfig): InvoicesState {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
 
   const fetchInvoices = useCallback(async (): Promise<void> => {
     try {
@@ -459,7 +459,7 @@ export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMet
   const [setupIntentSecret, setSetupIntentSecret] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
 
   const fetchPaymentMethods = useCallback(async (): Promise<void> => {
     try {

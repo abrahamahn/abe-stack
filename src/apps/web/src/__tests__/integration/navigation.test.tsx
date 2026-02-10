@@ -187,25 +187,25 @@ describe('Navigation Integration', () => {
       expect(screen.getByRole('button', { name: /^login$/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /^register$/i })).toBeInTheDocument();
       // Navigation links in right-side Home menu
-      expect(screen.getByRole('link', { name: 'Auth' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Pricing' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Admin' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'UI Library' })).toBeInTheDocument();
     });
 
     it('should have correct navigation link destinations', () => {
       renderAppAtRoute('/', createMockEnvironment());
 
       // Use href-based queries for navigation links
-      expect(screen.getByRole('link', { name: 'Auth' })).toHaveAttribute('href', '/auth');
-      expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute(
-        'href',
-        '/settings/accounts',
-      );
       expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
       expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
+      expect(screen.getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '/pricing');
       expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin');
+      expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute(
+        'href',
+        '/ui-library',
+      );
     });
 
     it('should navigate to dashboard when dashboard link is clicked', async () => {
@@ -223,18 +223,17 @@ describe('Navigation Integration', () => {
       const dashboardLink = screen.getByRole('link', { name: 'Dashboard' });
       expect(dashboardLink).not.toBeNull();
       await user.click(dashboardLink);
-      expect(screen.getByRole('heading', { name: /ABE Stack Dashboard/i })).toBeInTheDocument();
       expect(window.location.pathname).toBe('/dashboard');
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
-    it('should navigate to auth page when auth link is clicked', async () => {
+    it('should navigate to admin page when admin link is clicked', async () => {
       const { user } = renderAppAtRoute('/', createMockEnvironment());
 
-      const authLink = screen.getByRole('link', { name: 'Auth' });
-      expect(authLink).not.toBeNull();
-      await user.click(authLink);
-      expect(screen.getByRole('heading', { name: /ABE Stack Auth/i })).toBeInTheDocument();
-      expect(window.location.pathname).toBe('/auth');
+      const adminLink = screen.getByRole('link', { name: 'Admin' });
+      expect(adminLink).not.toBeNull();
+      await user.click(adminLink);
+      expect(window.location.pathname).toBe('/login');
     });
   });
 
@@ -312,8 +311,8 @@ describe('Navigation Integration', () => {
       await user.click(dashboardLink);
 
       // Should still be authenticated
-      expect(screen.getByRole('heading', { name: /ABE Stack Dashboard/i })).toBeInTheDocument();
       expect(window.location.pathname).toBe('/dashboard');
+      expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
     });
 
     it('should handle navigation to non-existent routes gracefully', () => {

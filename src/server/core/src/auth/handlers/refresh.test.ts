@@ -94,7 +94,11 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
-    repos: {} as AppContext['repos'],
+    repos: {
+      refreshTokens: {
+        findByToken: vi.fn().mockResolvedValue(null),
+      },
+    } as unknown as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
       emailVerification: vi.fn(() => ({
@@ -186,6 +190,7 @@ function createMockRequest(
 describe('handleRefresh', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSendTokenReuseAlert.mockResolvedValue(undefined);
   });
 
   describe('successful refresh', () => {

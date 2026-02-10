@@ -31,8 +31,8 @@ export interface AudioMetadata {
  */
 export async function parseAudioMetadata(filePath: string): Promise<AudioMetadata> {
   try {
-    const stat = await fs.stat(filePath);
-    if (stat.size > MAX_AUDIO_FILE_SIZE) {
+    const fileStat = await fs.stat(filePath);
+    if (fileStat.size > MAX_AUDIO_FILE_SIZE) {
       return {};
     }
 

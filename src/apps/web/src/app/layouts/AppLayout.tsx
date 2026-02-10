@@ -3,9 +3,10 @@ import { Outlet, ResizablePanelGroup, useContrast, useDensity, useSidePeek } fro
 import { AuthModal } from '@auth/components';
 import { useAuth } from '@auth/hooks';
 import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AppBottomLayout } from './AppBottomLayout';
+import { AppLayoutContext } from './AppLayoutContext';
 import { AppLeftMenu } from './AppLeftMenu';
 import { AppMainLayout } from './AppMainLayout';
 import { AppRightInfo } from './AppRightInfo';
@@ -26,9 +27,10 @@ export const AppLayout = ({
   leftSidebar,
   rightSidebar,
 }: AppLayoutProps): ReactElement => {
+  const [rightSidebarOverride, setRightSidebarOverride] = useState<ReactNode | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
   const { isOpen: sidePeekOpen, close: closeSidePeek } = useSidePeek();
 
   const { cycleTheme, getThemeIcon, getThemeLabel, resolvedTheme } =
@@ -63,6 +65,12 @@ export const AppLayout = ({
     return 'Normal';
   }, [density]);
 
+  const setRightSidebar = useCallback((content: ReactNode | null): void => {
+    setRightSidebarOverride(content);
+  }, []);
+
+  const layoutContextValue = useMemo(() => ({ setRightSidebar }), [setRightSidebar]);
+
   const getContrastLabel = useCallback((): string => {
     if (contrastMode === 'high') return 'High';
     if (contrastMode === 'normal') return 'Normal';
@@ -81,22 +89,6 @@ export const AppLayout = ({
       }
 
       switch (event.key.toUpperCase()) {
-        case 'ARROWUP':
-          event.preventDefault();
-          togglePane('top');
-          break;
-        case 'ARROWDOWN':
-          event.preventDefault();
-          togglePane('bottom');
-          break;
-        case 'ARROWLEFT':
-          event.preventDefault();
-          togglePane('left');
-          break;
-        case 'ARROWRIGHT':
-          event.preventDefault();
-          togglePane('right');
-          break;
         case 'T':
           event.preventDefault();
           cycleTheme();
@@ -116,7 +108,7 @@ export const AppLayout = ({
     return (): void => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [togglePane, cycleTheme, cycleDensity, cycleContrastMode]);
+  }, [cycleTheme, cycleDensity, cycleContrastMode]);
 
   return (
     <>
@@ -126,6 +118,7 @@ export const AppLayout = ({
             size={paneConfig.top.size}
             visible={paneConfig.top.visible}
             onResize={onTopResize}
+            isAuthLoading={isAuthLoading}
             isAuthenticated={isAuthenticated}
             user={user}
             onLogout={logout}
@@ -146,16 +139,18 @@ export const AppLayout = ({
               getContrastLabel={getContrastLabel}
             />
 
-            <AppMainLayout
-              paneConfig={paneConfig}
-              togglePane={togglePane}
-              handlePaneResize={handlePaneResize}
-              resetLayout={resetLayout}
-              leftSidebar={leftSidebar ?? <AppLeftMenu />}
-              rightSidebar={rightSidebar ?? <AppRightInfo />}
-            >
-              {children ?? <Outlet />}
-            </AppMainLayout>
+            <AppLayoutContext.Provider value={layoutContextValue}>
+              <AppMainLayout
+                paneConfig={paneConfig}
+                togglePane={togglePane}
+                handlePaneResize={handlePaneResize}
+                resetLayout={resetLayout}
+                leftSidebar={leftSidebar ?? <AppLeftMenu />}
+                rightSidebar={rightSidebarOverride ?? rightSidebar ?? <AppRightInfo />}
+              >
+                {children ?? <Outlet />}
+              </AppMainLayout>
+            </AppLayoutContext.Provider>
           </ResizablePanelGroup>
         </ResizablePanelGroup>
       </div>

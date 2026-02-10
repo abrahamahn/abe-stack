@@ -131,6 +131,7 @@ export {
   type JwtRotationHandler,
   type RotatingJwtOptions,
   type SignOptions,
+  type VerifyOptions,
 } from './security/crypto';
 
 // ============================================================================
@@ -335,20 +336,39 @@ export {
 } from './system';
 
 // ============================================================================
+// SMS (Stub — provider not yet selected)
+// ============================================================================
+
+export {
+  ConsoleSmsProvider,
+  createSmsProvider,
+  type SmsConfig,
+  type SmsOptions,
+  type SmsProvider,
+  type SmsResult,
+} from './sms';
+
+// ============================================================================
 // Routing (Fastify-specific)
 // ============================================================================
 
 export {
+  clearRegistry,
   createRouteMap,
+  getRegisteredRoutes,
   protectedRoute,
   publicRoute,
+  registerRoute,
   registerRouteMap,
   type AuthGuardFactory,
   type HandlerContext,
   type HttpMethod,
+  type JsonSchemaObject,
   type RouteDefinition,
   type RouteHandler,
   type RouteMap,
+  type RouteOpenApiMeta,
+  type RouteRegistryEntry,
   type RouteResult,
   type RouteSchema,
   type RouterOptions,

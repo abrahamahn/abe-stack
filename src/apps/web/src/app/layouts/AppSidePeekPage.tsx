@@ -14,12 +14,15 @@ export const AppSidePeekPage = (): ReactElement => {
           <Heading as="h1" size="lg">
             Side Peek UI Library
           </Heading>
-          <SidePeekUILibraryContent
-            actionLabel="Back to UI Library"
-            onAction={() => {
+          <button
+            type="button"
+            onClick={() => {
               navigate('/ui-library');
             }}
-          />
+          >
+            Back to UI Library
+          </button>
+          <SidePeekUILibraryContent />
         </div>
       </PageContainer>
     </div>

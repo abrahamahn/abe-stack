@@ -147,10 +147,13 @@ async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
 
-    // Cache successful GET responses
+    // Cache successful GET responses (unless server says no-store)
     if (networkResponse.ok && request.method === 'GET') {
-      const cache = await caches.open(API_CACHE);
-      cache.put(request, networkResponse.clone());
+      const cacheControl = networkResponse.headers.get('Cache-Control') || '';
+      if (!cacheControl.includes('no-store')) {
+        const cache = await caches.open(API_CACHE);
+        cache.put(request, networkResponse.clone());
+      }
     }
 
     return networkResponse;
@@ -291,6 +294,9 @@ self.addEventListener('fetch', (event) => {
  * Message event - handle communication from main thread
  */
 self.addEventListener('message', (event) => {
+  // Verify message source is a valid client (same-origin by service worker scope)
+  if (!event.source) return;
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

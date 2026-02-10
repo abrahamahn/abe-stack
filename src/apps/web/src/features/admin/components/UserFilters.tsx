@@ -115,7 +115,7 @@ export const UserFilters = ({
     filters.status !== undefined;
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+    <div className="space-y-4 p-4 bg-surface rounded-lg">
       {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-2">
         <Input
@@ -137,10 +137,7 @@ export const UserFilters = ({
       <div className="flex flex-wrap gap-4 items-center">
         {/* Role Filter */}
         <div className="flex items-center gap-2">
-          <label
-            htmlFor="role-filter"
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <label htmlFor="role-filter" className="text-sm font-medium text-muted">
             Role:
           </label>
           <Select
@@ -159,10 +156,7 @@ export const UserFilters = ({
 
         {/* Status Filter */}
         <div className="flex items-center gap-2">
-          <label
-            htmlFor="status-filter"
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <label htmlFor="status-filter" className="text-sm font-medium text-muted">
             Status:
           </label>
           <Select
@@ -181,10 +175,7 @@ export const UserFilters = ({
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <label
-            htmlFor="sort-filter"
-            className="text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <label htmlFor="sort-filter" className="text-sm font-medium text-muted">
             Sort by:
           </label>
           <Select

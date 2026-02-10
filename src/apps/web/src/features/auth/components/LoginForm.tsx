@@ -1,9 +1,10 @@
 // src/apps/web/src/features/auth/components/LoginForm.tsx
-import { Button, Input, Link, PasswordInput } from '@abe-stack/ui';
+import { AuthFormLayout, Button, Input, Link, PasswordInput, Spinner, Text } from '@abe-stack/ui';
 import { TotpChallengeError } from '@auth/services/AuthService';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
+import { TurnstileWidget } from './TurnstileWidget';
 
 import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/shared';
 import type { AuthMode } from '@abe-stack/ui';
@@ -30,17 +31,26 @@ export const LoginForm = ({
 }: LoginFormProps): ReactElement => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
   const [totpChallenge, setTotpChallenge] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [totpError, setTotpError] = useState<string | null>(null);
   const [totpLoading, setTotpLoading] = useState(false);
+
+  const handleCaptchaToken = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onLogin === undefined) return;
 
     try {
-      await onLogin({ identifier, password });
+      await onLogin({
+        identifier,
+        password,
+        ...(captchaToken !== undefined ? { captchaToken } : {}),
+      });
       onSuccess?.();
     } catch (err) {
       if (err instanceof TotpChallengeError) {
@@ -89,14 +99,14 @@ export const LoginForm = ({
   // TOTP verification step
   if (totpChallenge !== null) {
     return (
-      <div className="auth-form">
-        <div className="auth-form-content">
-          <div className="auth-form-header">
-            <h2 className="auth-form-title">Two-Factor Authentication</h2>
-            <p className="auth-form-subtitle">
+      <AuthFormLayout>
+        <AuthFormLayout.Content>
+          <AuthFormLayout.Header>
+            <AuthFormLayout.Title>Two-Factor Authentication</AuthFormLayout.Title>
+            <AuthFormLayout.Subtitle>
               Enter the 6-digit code from your authenticator app, or a backup code
-            </p>
-          </div>
+            </AuthFormLayout.Subtitle>
+          </AuthFormLayout.Header>
 
           <form
             onSubmit={(e) => {
@@ -119,11 +129,11 @@ export const LoginForm = ({
               autoFocus
             />
 
-            <p className="text-xs text-muted">
+            <Text size="xs" tone="muted">
               Lost your authenticator? Enter one of your backup codes instead.
-            </p>
+            </Text>
 
-            {totpError !== null && <div className="auth-form-error">{totpError}</div>}
+            {totpError !== null && <AuthFormLayout.Error>{totpError}</AuthFormLayout.Error>}
 
             <Button type="submit" className="w-full" disabled={totpLoading || totpCode.length < 6}>
               {totpLoading ? 'Verifying...' : 'Verify'}
@@ -135,19 +145,19 @@ export const LoginForm = ({
               Back to login
             </Button>
           </div>
-        </div>
-      </div>
+        </AuthFormLayout.Content>
+      </AuthFormLayout>
     );
   }
 
   // Standard login form
   return (
-    <div className="auth-form">
-      <div className="auth-form-content">
-        <div className="auth-form-header">
-          <h2 className="auth-form-title">Welcome back</h2>
-          <p className="auth-form-subtitle">Sign in to your account</p>
-        </div>
+    <AuthFormLayout>
+      <AuthFormLayout.Content>
+        <AuthFormLayout.Header>
+          <AuthFormLayout.Title>Welcome back</AuthFormLayout.Title>
+          <AuthFormLayout.Subtitle>Sign in to your account</AuthFormLayout.Subtitle>
+        </AuthFormLayout.Header>
 
         <OAuthButtons mode="login" {...(isLoading !== undefined && { disabled: isLoading })} />
 
@@ -179,10 +189,20 @@ export const LoginForm = ({
             disabled={isLoading}
           />
 
-          {error !== undefined && error !== null && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && (
+            <AuthFormLayout.Error>{error}</AuthFormLayout.Error>
+          )}
+
+          <TurnstileWidget onToken={handleCaptchaToken} />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading === true ? 'Signing in...' : 'Sign in'}
+            {isLoading === true ? (
+              <Text as="span" className="flex items-center gap-2">
+                <Spinner size="14px" /> Signing in...
+              </Text>
+            ) : (
+              'Sign in'
+            )}
           </Button>
         </form>
 
@@ -192,7 +212,7 @@ export const LoginForm = ({
           </Button>
         </div>
 
-        <div className="auth-form-footer">
+        <AuthFormLayout.Footer>
           Don't have an account?{' '}
           {onModeChange !== undefined ? (
             <Button
@@ -200,15 +220,15 @@ export const LoginForm = ({
               onClick={() => {
                 onModeChange('register');
               }}
-              style={{ padding: 0, minHeight: 'auto' }}
+              size="inline"
             >
               Sign up
             </Button>
           ) : (
             <Link to="/auth?mode=register">Sign up</Link>
           )}
-        </div>
-      </div>
-    </div>
+        </AuthFormLayout.Footer>
+      </AuthFormLayout.Content>
+    </AuthFormLayout>
   );
 };

@@ -61,6 +61,14 @@ export interface AdminBillingClient {
 
 const API_PREFIX = '/api';
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end--;
+  }
+  return value.slice(0, end);
+}
+
 /**
  * Create an admin billing API client
  *
@@ -89,7 +97,7 @@ const API_PREFIX = '/api';
  * ```
  */
 export function createAdminBillingClient(config: AdminBillingClientConfig): AdminBillingClient {
-  const baseUrl = config.baseUrl.replace(/\/+$/, '');
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   /**

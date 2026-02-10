@@ -279,6 +279,10 @@ function createMockUser(overrides?: Partial<User>): User {
     bio: null,
     language: null,
     website: null,
+    lastUsernameChange: null,
+    deactivatedAt: null,
+    deletedAt: null,
+    deletionGracePeriodEnds: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -444,11 +448,11 @@ describe('registerUser', () => {
     });
   });
 
-  describe('when user already exists', () => {
+  describe('when verified user already exists', () => {
     it('should send notification email and return pending status', async () => {
       const email = 'existing@example.com';
       const password = 'StrongPass123!';
-      const existingUser = createMockUser({ email });
+      const existingUser = createMockUser({ email, emailVerified: true });
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
 
@@ -481,7 +485,7 @@ describe('registerUser', () => {
     it('should not throw if notification email fails', async () => {
       const email = 'existing@example.com';
       const password = 'StrongPass123!';
-      const existingUser = createMockUser({ email });
+      const existingUser = createMockUser({ email, emailVerified: true });
 
       vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
@@ -497,6 +501,99 @@ describe('registerUser', () => {
         'existinguser',
         'Existing',
         'User',
+      );
+
+      expect(result).toEqual({
+        status: 'pending_verification',
+        message: expect.stringContaining('check your email'),
+        email,
+      });
+    });
+  });
+
+  describe('when unverified user already exists', () => {
+    it('should resend verification email instead of registration attempt notification', async () => {
+      const email = 'unverified@example.com';
+      const password = 'StrongPass123!';
+      const baseUrl = 'http://localhost:3000';
+      const existingUser = createMockUser({ email, emailVerified: false });
+
+      vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
+
+      const result = await registerUser(
+        db,
+        repos,
+        emailService,
+        templates,
+        config,
+        email,
+        password,
+        'newuser',
+        'New',
+        'User',
+        baseUrl,
+      );
+
+      expect(result).toEqual({
+        status: 'pending_verification',
+        message: expect.stringContaining('check your email'),
+        email,
+      });
+      // Should send verification email, not registration attempt notification
+      expect(templates.emailVerification).toHaveBeenCalled();
+      expect(templates.existingAccountRegistrationAttempt).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to registration attempt notification if baseUrl is missing', async () => {
+      const email = 'unverified@example.com';
+      const password = 'StrongPass123!';
+      const existingUser = createMockUser({ email, emailVerified: false });
+
+      vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
+
+      const result = await registerUser(
+        db,
+        repos,
+        emailService,
+        templates,
+        config,
+        email,
+        password,
+        'newuser',
+        'New',
+        'User',
+      );
+
+      expect(result).toEqual({
+        status: 'pending_verification',
+        message: expect.stringContaining('check your email'),
+        email,
+      });
+      // Without baseUrl, falls back to registration attempt notification
+      expect(templates.existingAccountRegistrationAttempt).toHaveBeenCalled();
+    });
+
+    it('should not throw if resend verification email fails', async () => {
+      const email = 'unverified@example.com';
+      const password = 'StrongPass123!';
+      const baseUrl = 'http://localhost:3000';
+      const existingUser = createMockUser({ email, emailVerified: false });
+
+      vi.mocked(repos.users.findByEmail).mockResolvedValue(existingUser);
+      vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP error'));
+
+      const result = await registerUser(
+        db,
+        repos,
+        emailService,
+        templates,
+        config,
+        email,
+        password,
+        'newuser',
+        'New',
+        'User',
+        baseUrl,
       );
 
       expect(result).toEqual({

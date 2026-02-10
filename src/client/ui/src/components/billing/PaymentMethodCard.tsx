@@ -1,10 +1,4 @@
 // src/client/ui/src/components/billing/PaymentMethodCard.tsx
-/**
- * PaymentMethodCard Component
- *
- * Displays a single payment method with actions.
- */
-
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';

@@ -88,6 +88,10 @@ function createMockUser(overrides: Partial<User> = {}): User {
     bio: null,
     language: null,
     website: null,
+    lastUsernameChange: null,
+    deactivatedAt: null,
+    deletedAt: null,
+    deletionGracePeriodEnds: null,
     version: 1,
     ...overrides,
   };

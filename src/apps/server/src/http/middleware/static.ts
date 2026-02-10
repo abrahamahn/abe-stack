@@ -7,7 +7,7 @@
  */
 
 import { createReadStream, statSync } from 'node:fs';
-import { join, normalize, extname } from 'node:path';
+import { extname, isAbsolute, join, normalize, relative, resolve } from 'node:path';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -67,11 +67,37 @@ function getMimeType(filePath: string): string {
  */
 function isSafePath(rootPath: string, requestedPath: string): boolean {
   const normalizedPath = normalize(requestedPath);
-  const fullPath = join(rootPath, normalizedPath);
-  const resolvedRoot = normalize(rootPath);
+  const fullPath = resolve(rootPath, normalizedPath);
+  const resolvedRoot = resolve(rootPath);
+  const rel = relative(resolvedRoot, fullPath);
+  return rel !== '' && !rel.startsWith('..') && !isAbsolute(rel);
+}
 
-  // Ensure the resolved path starts with the root path
-  return fullPath.startsWith(resolvedRoot);
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 240;
+const staticRateLimit = new Map<string, { count: number; resetAt: number }>();
+
+function getRequesterId(req: FastifyRequest): string {
+  const headers = (req as { headers?: Record<string, unknown> }).headers;
+  const forwardedFor = headers?.['x-forwarded-for'];
+  if (typeof forwardedFor === 'string' && forwardedFor !== '') {
+    return forwardedFor.split(',')[0]?.trim() ?? req.ip;
+  }
+  return typeof req.ip === 'string' && req.ip !== '' ? req.ip : 'unknown';
+}
+
+function isRateLimited(requester: string): boolean {
+  const now = Date.now();
+  const current = staticRateLimit.get(requester);
+  if (current == null || current.resetAt <= now) {
+    staticRateLimit.set(requester, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return false;
+  }
+  current.count += 1;
+  return current.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
 export interface StaticServeOptions {
@@ -97,6 +123,10 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
 
   // Register route for static files
   server.get(`${normalizedPrefix}*`, async (req: FastifyRequest, reply: FastifyReply) => {
+    if (isRateLimited(getRequesterId(req))) {
+      return reply.status(429).send({ error: 'Too many requests' });
+    }
+
     const url = req.url;
 
     // Extract file path from URL (remove prefix)

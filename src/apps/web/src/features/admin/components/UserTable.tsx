@@ -89,7 +89,7 @@ export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProp
           {data.data.map((user: AdminUserLocal) => (
             <TableRow
               key={user.id}
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover-row"
               onClick={() => {
                 handleRowClick(user);
               }}

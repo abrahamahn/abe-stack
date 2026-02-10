@@ -151,8 +151,7 @@ src/
 │   │   ├── components/       # UILibraryTopBar, UILibraryBottomBar, UILibraryMainLayout, etc.
 │   │   ├── hooks/            # useUILibraryKeyboard, useUILibraryTheme, useUILibraryPanes
 │   │   ├── pages/            # UILibraryPage
-│   │   ├── types/            # ComponentDemo types
-│   │   └── utils/            # lazyDocs
+│   │   └── types/            # ComponentDemo types
 │   └── notifications/        # (empty - future feature)
 ├── pages/
 │   └── HomePage.tsx          # landing page

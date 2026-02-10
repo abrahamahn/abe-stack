@@ -5,7 +5,7 @@
  * Form for changing user password with validation.
  */
 
-import { Alert, Button, FormField, PasswordInput } from '@abe-stack/ui';
+import { Alert, Button, FormField, PasswordInput, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
 import { usePasswordChange } from '../hooks';
@@ -17,48 +17,6 @@ import { usePasswordChange } from '../hooks';
 export interface PasswordChangeFormProps {
   onSuccess?: () => void;
 }
-
-// ============================================================================
-// Password Strength Indicator
-// ============================================================================
-
-const PasswordStrengthIndicator = ({ password }: { password: string }): ReactElement => {
-  const getStrength = (): { score: number; label: string; color: string } => {
-    if (password.length === 0) return { score: 0, label: 'Enter a password', color: 'bg-gray-300' };
-
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (password.length >= 12) score++;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-    if (/\d/.test(password)) score++;
-    if (/[^a-zA-Z0-9]/.test(password)) score++;
-
-    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-red-500' };
-    if (score === 2) return { score: 2, label: 'Fair', color: 'bg-orange-500' };
-    if (score === 3) return { score: 3, label: 'Good', color: 'bg-yellow-500' };
-    if (score >= 4) return { score: 4, label: 'Strong', color: 'bg-green-500' };
-
-    return { score: 0, label: '', color: 'bg-gray-300' };
-  };
-
-  const strength = getStrength();
-
-  return (
-    <div className="mt-2 space-y-1">
-      <div className="flex gap-1">
-        {[1, 2, 3, 4].map((level) => (
-          <div
-            key={level}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              level <= strength.score ? strength.color : 'bg-gray-200 dark:bg-gray-700'
-            }`}
-          />
-        ))}
-      </div>
-      {password.length > 0 && <p className="text-xs text-gray-500">{strength.label}</p>}
-    </div>
-  );
-};
 
 // ============================================================================
 // Component
@@ -121,7 +79,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
     newPassword === confirmPassword;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <FormField label="Current Password" htmlFor="currentPassword" required>
         <PasswordInput
           id="currentPassword"
@@ -143,8 +101,8 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
           }}
           placeholder="Enter new password"
           autoComplete="new-password"
+          showStrength
         />
-        <PasswordStrengthIndicator password={newPassword} />
       </FormField>
 
       <FormField label="Confirm New Password" htmlFor="confirmPassword" required>
@@ -158,7 +116,9 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
           autoComplete="new-password"
         />
         {confirmPassword.length > 0 && newPassword !== confirmPassword && (
-          <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
+          <Text size="sm" tone="danger">
+            Passwords do not match
+          </Text>
         )}
       </FormField>
 

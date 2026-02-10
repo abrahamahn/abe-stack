@@ -11,6 +11,8 @@
  * @module middleware
  */
 
+import { ForbiddenError, UnauthorizedError } from '@abe-stack/shared';
+
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
 import type { UserRole } from '@abe-stack/shared';
@@ -41,7 +43,11 @@ type AuthenticatedFastifyRequest = FastifyRequest & {
  * @returns Decoded token payload or null if invalid
  * @complexity O(1)
  */
-export function extractTokenPayload(request: FastifyRequest, secret: string): TokenPayload | null {
+export function extractTokenPayload(
+  request: FastifyRequest,
+  secret: string,
+  options?: { clockToleranceSeconds?: number },
+): TokenPayload | null {
   const authHeader = request.headers.authorization;
   if (typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
     return null;
@@ -49,7 +55,7 @@ export function extractTokenPayload(request: FastifyRequest, secret: string): To
 
   try {
     const token = authHeader.substring(7);
-    return verifyToken(token, secret);
+    return verifyToken(token, secret, options);
   } catch {
     return null;
   }
@@ -132,4 +138,31 @@ export function createAuthGuard(secret: string, ...allowedRoles: UserRole[]): Au
     return createRequireAuth(secret);
   }
   return createRequireRole(secret, ...allowedRoles);
+}
+
+// ============================================================================
+// Active User Assertion
+// ============================================================================
+
+/**
+ * Assert that a user account is active (not suspended/banned).
+ * Call this in sensitive handlers (password change, TOTP, sudo, admin actions)
+ * to prevent zombie access tokens from being used after account suspension.
+ *
+ * @param getUserById - Repository function to look up user by ID
+ * @param userId - The user ID to check
+ * @throws {UnauthorizedError} If user not found
+ * @throws {ForbiddenError} If user account is suspended (lockedUntil in the future)
+ */
+export async function assertUserActive(
+  getUserById: (id: string) => Promise<{ lockedUntil: Date | null } | null>,
+  userId: string,
+): Promise<void> {
+  const user = await getUserById(userId);
+  if (user === null) {
+    throw new UnauthorizedError('User not found');
+  }
+  if (user.lockedUntil !== null && user.lockedUntil > new Date()) {
+    throw new ForbiddenError('Account suspended', 'ACCOUNT_SUSPENDED');
+  }
 }

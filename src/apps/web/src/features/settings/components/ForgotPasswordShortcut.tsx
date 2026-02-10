@@ -6,7 +6,7 @@
  */
 
 import { getApiClient } from '@abe-stack/api';
-import { Alert, Button } from '@abe-stack/ui';
+import { Alert, Button, Text } from '@abe-stack/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 export interface ForgotPasswordShortcutProps {
@@ -52,11 +52,10 @@ export const ForgotPasswordShortcut = ({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-500">
+      <Text size="sm" tone="muted">
         Forgot your current password? We can email a reset link to{' '}
-        <span className="font-medium text-gray-700 dark:text-gray-200">{email}</span>. You can stay
-        logged in while you reset it.
-      </p>
+        <span className="font-medium">{email}</span>. You can stay logged in while you reset it.
+      </Text>
 
       {error !== null && <Alert tone="danger">{error}</Alert>}
       {successMessage !== null && successMessage.length > 0 && (

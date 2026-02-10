@@ -1,5 +1,5 @@
 // src/client/ui/src/layouts/layers/ProtectedRoute.tsx
-import { Navigate, Outlet } from '@abe-stack/react/router';
+import { Navigate, Outlet, useLocation } from '@abe-stack/react/router';
 
 import { LoadingContainer } from '../../components/LoadingContainer';
 import '../../styles/components.css';
@@ -22,6 +22,8 @@ export type ProtectedRouteProps = {
 /**
  * A route wrapper that checks authentication status and shows a loading state
  * while fetching auth state. Redirects to the specified path if not authenticated.
+ * Preserves the original path as a `returnTo` query parameter so the user can
+ * be redirected back after login.
  *
  * @example
  * ```tsx
@@ -46,6 +48,8 @@ export const ProtectedRoute = ({
   loadingComponent,
   children,
 }: ProtectedRouteProps): ReactElement => {
+  const location = useLocation();
+
   if (isLoading) {
     return (loadingComponent ?? (
       <div className="flex-center h-screen">
@@ -55,7 +59,13 @@ export const ProtectedRoute = ({
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
+    const currentPath = location.pathname + location.search;
+    // Append returnTo param so login can redirect back (skip for root path)
+    const target =
+      currentPath !== '/' && currentPath !== ''
+        ? `${redirectTo}?returnTo=${encodeURIComponent(currentPath)}`
+        : redirectTo;
+    return <Navigate to={target} replace />;
   }
 
   return children !== undefined && children !== null ? <>{children}</> : <Outlet />;

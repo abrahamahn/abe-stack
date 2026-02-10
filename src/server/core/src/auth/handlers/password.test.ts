@@ -193,7 +193,11 @@ function createMockContext(overrides?: AppContextOverrides): AppContext {
   };
   return {
     db: {} as AppContext['db'],
-    repos: {} as AppContext['repos'],
+    repos: {
+      users: {
+        findById: vi.fn().mockResolvedValue({ lockedUntil: null }),
+      },
+    } as unknown as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
       emailVerification: vi.fn(() => ({

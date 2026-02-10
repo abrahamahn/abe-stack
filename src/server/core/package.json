@@ -36,6 +36,11 @@
       "source": "./src/users/index.ts",
       "types": "./dist/users/index.d.ts",
       "default": "./dist/users/index.js"
+    },
+    "./tenants": {
+      "source": "./src/tenants/index.ts",
+      "types": "./dist/tenants/index.d.ts",
+      "default": "./dist/tenants/index.js"
     }
   },
   "scripts": {

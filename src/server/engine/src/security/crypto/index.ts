@@ -12,7 +12,7 @@
 // ============================================================================
 
 export { decode, JwtError, sign, verify } from '../jwt';
-export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions } from '../jwt';
+export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from '../jwt';
 
 // ============================================================================
 // JWT Rotation

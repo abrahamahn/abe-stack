@@ -34,6 +34,9 @@ export type {
 export { useQueueStats } from './useQueueStats';
 export type { UseQueueStatsOptions, UseQueueStatsResult } from './useQueueStats';
 
+export { useRouteManifest } from './useRouteManifest';
+export type { UseRouteManifestOptions, UseRouteManifestResult } from './useRouteManifest';
+
 export { useSecurityEvent } from './useSecurityEvent';
 export type { UseSecurityEventOptions, UseSecurityEventResult } from './useSecurityEvent';
 

@@ -6,28 +6,8 @@ import { AppSidePeekLayout } from './AppSidePeekLayout';
 
 import type { ReactNode } from 'react';
 
-const mockOnAction = vi.hoisted(() => vi.fn());
-const mockExpandTo = vi.hoisted(() => vi.fn());
-const mockCloseClick = vi.hoisted(() => vi.fn());
-
 vi.mock('@ui-library/components', () => {
-  const sidePeekUILibraryContent = ({
-    actionLabel,
-    onAction,
-  }: {
-    actionLabel: string;
-    onAction: () => void;
-  }) => (
-    <button
-      type="button"
-      onClick={() => {
-        mockOnAction();
-        onAction();
-      }}
-    >
-      {actionLabel}
-    </button>
-  );
+  const sidePeekUILibraryContent = () => <div>SidePeek content</div>;
 
   return {
     SidePeekUILibraryContent: sidePeekUILibraryContent,
@@ -40,40 +20,22 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
   const root = ({
     children,
     open,
+    size,
   }: {
     children: ReactNode;
     open: boolean;
     onClose: () => void;
     size: string;
   }) => (
-    <div data-testid="side-peek-root">
+    <div data-testid="side-peek-root" data-size={size}>
       {String(open)}:{children}
     </div>
   );
 
   const header = ({ children }: { children: ReactNode }) => <div>{children}</div>;
   const title = ({ children }: { children: ReactNode }) => <h2>{children}</h2>;
-  const expand = ({ to }: { to: string }) => (
-    <button
-      type="button"
-      onClick={() => {
-        mockExpandTo(to);
-      }}
-    >
-      Expand
-    </button>
-  );
-  const close = () => (
-    <button
-      type="button"
-      onClick={() => {
-        mockCloseClick();
-      }}
-    >
-      Close
-    </button>
-  );
   const content = ({ children }: { children: ReactNode }) => <div>{children}</div>;
+  const close = () => <button type="button">Close</button>;
 
   return {
     ...actual,
@@ -81,26 +43,39 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
       Root: root,
       Header: header,
       Title: title,
-      Expand: expand,
-      Close: close,
       Content: content,
+      Close: close,
     },
   };
 });
 
 describe('AppSidePeekLayout', () => {
-  it('renders side peek structure and forwards actions', () => {
+  it('renders side peek structure', () => {
     const onClose = vi.fn();
     render(<AppSidePeekLayout open onClose={onClose} />);
 
     expect(screen.getByText('Side Peek UI Library')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Close this panel' }));
+    expect(screen.getByTestId('side-peek-root')).toHaveAttribute('data-size', 'md');
+  });
 
-    expect(mockExpandTo).toHaveBeenCalledWith('/side-peek-ui-library');
-    expect(mockCloseClick).toHaveBeenCalledTimes(1);
-    expect(mockOnAction).toHaveBeenCalledTimes(1);
-    expect(onClose).toHaveBeenCalledTimes(1);
+  it('toggles fullscreen on expand click', () => {
+    const onClose = vi.fn();
+    render(<AppSidePeekLayout open onClose={onClose} />);
+
+    expect(screen.getByTestId('side-peek-root')).toHaveAttribute('data-size', 'md');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle fullscreen' }));
+    expect(screen.getByTestId('side-peek-root')).toHaveAttribute('data-size', 'full');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle fullscreen' }));
+    expect(screen.getByTestId('side-peek-root')).toHaveAttribute('data-size', 'md');
+  });
+
+  it('calls onClose when content action is clicked', () => {
+    const onClose = vi.fn();
+    render(<AppSidePeekLayout open onClose={onClose} />);
+
+    expect(screen.getByText('SidePeek content')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

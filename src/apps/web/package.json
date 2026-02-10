@@ -4,7 +4,7 @@
   "description": "React web application for abe-stack",
   "type": "module",
   "scripts": {
-    "dev": "vite --open",
+    "dev": "vite",
     "build": "vite build",
     "start": "vite preview --port 4173",
     "api:index": "node scripts/generate-api-index.mjs",

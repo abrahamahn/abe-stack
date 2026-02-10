@@ -46,11 +46,21 @@ interface BootstrapResult {
  */
 function generateSecurePassword(length = 24): string {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  const bytes = randomBytes(length);
+  const maxUnbiased = 256 - (256 % chars.length);
   let password = '';
+  let bytes = randomBytes(length);
+  let offset = 0;
 
-  for (let i = 0; i < length; i++) {
-    const byteValue: number = bytes[i] ?? 0;
+  while (password.length < length) {
+    if (offset >= bytes.length) {
+      bytes = randomBytes(length - password.length);
+      offset = 0;
+    }
+    const byteValue = bytes[offset] ?? 0;
+    offset++;
+    if (byteValue >= maxUnbiased) {
+      continue;
+    }
     const char: string = chars[byteValue % chars.length] ?? '';
     password += char;
   }

@@ -6,10 +6,12 @@ import { Text } from './Text';
 import '../styles/elements.css';
 
 type FileInputProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
+  /** Input type override (always 'file') */
   type?: 'file';
 };
 
 type FileInputFieldProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
+  /** Input type override (always 'file') */
   type?: 'file';
   /** Visible label text for the input */
   label?: string;
@@ -38,6 +40,14 @@ const FileInputRoot = forwardRef<HTMLInputElement, FileInputProps>((props, ref) 
 
 FileInputRoot.displayName = 'FileInput';
 
+/**
+ * A file input with integrated label, description, and error message support.
+ *
+ * @example
+ * ```tsx
+ * <FileInput.Field label="Upload avatar" accept="image/*" error={errors.avatar} />
+ * ```
+ */
 const FileInputField = forwardRef<HTMLInputElement, FileInputFieldProps>((props, ref) => {
   const { label, hideLabel, description, error, className, id, type = 'file', ...rest } = props;
   const inputId = id ?? `file-input-${Math.random().toString(36).slice(2, 7)}`;

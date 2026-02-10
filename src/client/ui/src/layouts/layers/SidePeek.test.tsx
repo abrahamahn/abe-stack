@@ -1,7 +1,7 @@
 // src/client/ui/src/layouts/layers/SidePeek.test.tsx
 /** @vitest-environment jsdom */
 import { SidePeek } from '@layers/SidePeek';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -203,94 +203,6 @@ describe('SidePeek', () => {
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Close' })).toHaveTextContent('×');
       });
-    });
-  });
-
-  describe('happy path - Expand button', () => {
-    it('calls onExpand callback when provided', async () => {
-      const user = userEvent.setup();
-      const handleExpand = vi.fn();
-
-      render(
-        <SidePeek.Root open onClose={vi.fn()}>
-          <SidePeek.Header>
-            <SidePeek.Expand onExpand={handleExpand}>Expand</SidePeek.Expand>
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByRole('button', { name: 'Open in full page' }));
-      expect(handleExpand).toHaveBeenCalledTimes(1);
-    });
-
-    it('renders default Expand button text', async () => {
-      render(
-        <SidePeek.Root open onClose={vi.fn()}>
-          <SidePeek.Header>
-            <SidePeek.Expand />
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Open in full page' })).toHaveTextContent('⤢');
-      });
-    });
-
-    it('navigates to path when "to" prop provided', async () => {
-      const user = userEvent.setup();
-      const handleClose = vi.fn();
-      const pushStateSpy = vi.spyOn(window.history, 'pushState');
-
-      render(
-        <SidePeek.Root open onClose={handleClose}>
-          <SidePeek.Header>
-            <SidePeek.Expand to="/full-page">Expand</SidePeek.Expand>
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByRole('button', { name: 'Open in full page' }));
-
-      expect(pushStateSpy).toHaveBeenCalledWith(null, '', '/full-page');
-      expect(handleClose).toHaveBeenCalledTimes(1);
-
-      pushStateSpy.mockRestore();
-    });
-
-    it('does not navigate when "to" is empty string', async () => {
-      const user = userEvent.setup();
-      const pushStateSpy = vi.spyOn(window.history, 'pushState');
-
-      render(
-        <SidePeek.Root open onClose={vi.fn()}>
-          <SidePeek.Header>
-            <SidePeek.Expand to="">Expand</SidePeek.Expand>
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByRole('button', { name: 'Open in full page' }));
-
-      expect(pushStateSpy).not.toHaveBeenCalled();
-
-      pushStateSpy.mockRestore();
     });
   });
 
@@ -534,6 +446,7 @@ describe('SidePeek', () => {
     });
 
     it('handles rapid prop changes', () => {
+      vi.useFakeTimers();
       const { rerender } = render(
         <SidePeek.Root open onClose={vi.fn()}>
           <SidePeek.Content>Content 1</SidePeek.Content>
@@ -549,8 +462,12 @@ describe('SidePeek', () => {
         );
       }
 
-      // Should be closed after 10 iterations (even number)
+      // After the close transition completes, panel should be unmounted
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      vi.useRealTimers();
     });
 
     it('handles multiple onClose calls', async () => {
@@ -946,22 +863,6 @@ describe('SidePeek', () => {
       });
     });
 
-    it('Expand button has aria-label', async () => {
-      render(
-        <SidePeek.Root open onClose={vi.fn()}>
-          <SidePeek.Header>
-            <SidePeek.Expand>Custom Text</SidePeek.Expand>
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        const expandButton = screen.getByRole('button', { name: 'Open in full page' });
-        expect(expandButton).toHaveAttribute('aria-label', 'Open in full page');
-      });
-    });
-
     it('focuses first focusable element when opened', async () => {
       render(
         <SidePeek.Root open onClose={vi.fn()}>
@@ -1038,16 +939,6 @@ describe('SidePeek', () => {
       spy.mockRestore();
     });
 
-    it('throws error when Expand used outside Root', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-      expect(() => {
-        render(<SidePeek.Expand>Expand</SidePeek.Expand>);
-      }).toThrow('SidePeek compound components must be used within SidePeek.Root');
-
-      spy.mockRestore();
-    });
-
     it('allows Header, Content, Footer outside Root (no context required)', () => {
       expect(() => {
         render(<SidePeek.Header>Header</SidePeek.Header>);
@@ -1106,17 +997,19 @@ describe('SidePeek', () => {
       });
     });
 
-    it('removes open class when closing', async () => {
+    it('removes open class when closing and unmounts after transition', () => {
+      vi.useFakeTimers();
       const { rerender } = render(
         <SidePeek.Root open onClose={vi.fn()}>
           <SidePeek.Content>Content</SidePeek.Content>
         </SidePeek.Root>,
       );
 
-      await waitFor(() => {
-        const dialog = screen.getByRole('dialog');
-        expect(dialog).toHaveClass('side-peek--open');
+      // Wait for open animation to start
+      act(() => {
+        vi.advanceTimersByTime(10);
       });
+      expect(screen.getByRole('dialog')).toHaveClass('side-peek--open');
 
       rerender(
         <SidePeek.Root open={false} onClose={vi.fn()}>
@@ -1124,10 +1017,16 @@ describe('SidePeek', () => {
         </SidePeek.Root>,
       );
 
-      // Should remove open class immediately
-      await waitFor(() => {
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      // Panel should still be in DOM but without --open class (slide-out animation)
+      expect(screen.getByRole('dialog')).not.toHaveClass('side-peek--open');
+
+      // After transition duration, panel should be unmounted
+      act(() => {
+        vi.advanceTimersByTime(200);
       });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      vi.useRealTimers();
     });
 
     it('applies open class to overlay when animating in', async () => {
@@ -1167,16 +1066,18 @@ describe('SidePeek', () => {
       expect(document.body.style.overflow).not.toBe('hidden');
     });
 
-    it('restores body overflow when closing', async () => {
+    it('restores body overflow when closing', () => {
+      vi.useFakeTimers();
       const { rerender } = render(
         <SidePeek.Root open onClose={vi.fn()}>
           <SidePeek.Content>Content</SidePeek.Content>
         </SidePeek.Root>,
       );
 
-      await waitFor(() => {
-        expect(document.body.style.overflow).toBe('hidden');
+      act(() => {
+        vi.advanceTimersByTime(10);
       });
+      expect(document.body.style.overflow).toBe('hidden');
 
       rerender(
         <SidePeek.Root open={false} onClose={vi.fn()}>
@@ -1184,14 +1085,18 @@ describe('SidePeek', () => {
         </SidePeek.Root>,
       );
 
-      await waitFor(() => {
-        expect(document.body.style.overflow).not.toBe('hidden');
+      // Wait for close transition to complete
+      act(() => {
+        vi.advanceTimersByTime(200);
       });
+      expect(document.body.style.overflow).not.toBe('hidden');
+      vi.useRealTimers();
     });
   });
 
   describe('real-world chaos - aggressive bug hunting', () => {
     it('survives opening and closing rapidly 20 times', () => {
+      vi.useFakeTimers();
       const { rerender } = render(
         <SidePeek.Root open={false} onClose={vi.fn()}>
           <SidePeek.Content>Content</SidePeek.Content>
@@ -1206,8 +1111,12 @@ describe('SidePeek', () => {
         );
       }
 
-      // Should be closed after 20 iterations
+      // After close transition completes, should be unmounted
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      vi.useRealTimers();
     });
 
     it('handles alternating onClose callbacks', async () => {
@@ -1365,34 +1274,6 @@ describe('SidePeek', () => {
         expect(dialog).not.toHaveClass('side-peek--sm');
         expect(dialog).toHaveClass('side-peek--xl');
       });
-    });
-
-    it('handles Close and Expand buttons together', async () => {
-      const user = userEvent.setup();
-      const handleClose = vi.fn();
-      const handleExpand = vi.fn();
-
-      render(
-        <SidePeek.Root open onClose={handleClose}>
-          <SidePeek.Header>
-            <SidePeek.Close>Close</SidePeek.Close>
-            <SidePeek.Expand onExpand={handleExpand}>Expand</SidePeek.Expand>
-          </SidePeek.Header>
-          <SidePeek.Content>Content</SidePeek.Content>
-        </SidePeek.Root>,
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      await user.click(screen.getByRole('button', { name: 'Close' }));
-      expect(handleClose).toHaveBeenCalledTimes(1);
-      expect(handleExpand).not.toHaveBeenCalled();
-
-      await user.click(screen.getByRole('button', { name: 'Open in full page' }));
-      expect(handleExpand).toHaveBeenCalledTimes(1);
-      expect(handleClose).toHaveBeenCalledTimes(2); // Also closes on expand
     });
   });
 });

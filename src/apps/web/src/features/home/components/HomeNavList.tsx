@@ -9,10 +9,9 @@ type HomeMenuLink = {
 };
 
 const HOME_MENU_LINKS: HomeMenuLink[] = [
-  { label: 'Auth', to: '/auth' },
-  { label: 'Profile', to: '/settings/accounts' },
-  { label: 'Settings', to: '/settings' },
   { label: 'Dashboard', to: '/dashboard' },
+  { label: 'Settings', to: '/settings' },
+  { label: 'Pricing', to: '/pricing' },
   { label: 'Admin', to: '/admin' },
 ];
 

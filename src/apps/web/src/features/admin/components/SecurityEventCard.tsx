@@ -5,7 +5,7 @@
  * Displays detailed information about a single security event.
  */
 
-import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { Badge, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { JSX } from 'react';
 
@@ -48,18 +48,18 @@ function hasValidMetadata(
 // Helper Functions
 // ============================================================================
 
-function getSeverityBadgeClass(severity: string): string {
+function severityToTone(severity: string): 'danger' | 'warning' | 'success' | 'info' {
   switch (severity) {
     case 'critical':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      return 'danger';
     case 'high':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      return 'danger';
     case 'medium':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      return 'warning';
     case 'low':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      return 'success';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+      return 'info';
   }
 }
 
@@ -84,7 +84,7 @@ interface DetailRowProps {
 const DetailRow = ({ label, value, isLoading }: DetailRowProps): JSX.Element => {
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-1 py-2 border-b border-gray-100 dark:border-gray-700">
+      <div className="flex flex-col gap-1 py-2 border-b">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-5 w-48" />
       </div>
@@ -92,7 +92,7 @@ const DetailRow = ({ label, value, isLoading }: DetailRowProps): JSX.Element => 
   }
 
   return (
-    <div className="flex flex-col gap-1 py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+    <div className="flex flex-col gap-1 py-2 border-b last:border-b-0">
       <Text tone="muted" size="sm" className="font-medium">
         {label}
       </Text>
@@ -129,11 +129,7 @@ export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps):
             label="Severity"
             value={
               event !== undefined ? (
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityBadgeClass(event.severity)}`}
-                >
-                  {event.severity.toUpperCase()}
-                </span>
+                <Badge tone={severityToTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
               ) : undefined
             }
             isLoading={isLoading}
@@ -177,7 +173,7 @@ export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps):
             Additional Metadata
           </Heading>
 
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto">
+          <div className="bg-surface rounded-lg p-4 overflow-auto">
             <pre className="text-sm font-mono">{JSON.stringify(event.metadata, null, 2)}</pre>
           </div>
         </Card>

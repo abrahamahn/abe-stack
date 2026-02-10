@@ -26,4 +26,10 @@ export {
   handleConfirmEmailChange,
   handleRevertEmailChange,
 } from './email-change';
+export {
+  handleSudoElevate,
+  verifySudoToken,
+  SUDO_TOKEN_HEADER,
+  SUDO_TOKEN_TTL_MINUTES,
+} from './sudo';
 export { handleAcceptTos, handleTosStatus } from './tos';

@@ -37,9 +37,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              border: '1px solid var(--color-border)',
-              padding: '20px',
-              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-xl)',
+              backgroundColor: 'var(--ui-color-surface)',
             }}
           >
             <Container size="sm">
@@ -66,9 +66,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              border: '1px solid var(--color-border)',
-              padding: '20px',
-              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-xl)',
+              backgroundColor: 'var(--ui-color-surface)',
             }}
           >
             <Container size="md">
@@ -95,9 +95,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              border: '1px solid var(--color-border)',
-              padding: '20px',
-              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-xl)',
+              backgroundColor: 'var(--ui-color-surface)',
             }}
           >
             <Container size="lg">
@@ -122,13 +122,13 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Container size="lg">Large (1200px)</Container>
 </>`,
         render: (): ReactElement => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)' }}>
             <Container size="sm">
               <div
                 style={{
-                  backgroundColor: '#e3f2fd',
-                  padding: '16px',
-                  border: '2px solid #2196f3',
+                  backgroundColor: 'var(--ui-alert-info-bg)',
+                  padding: 'var(--ui-gap-lg)',
+                  border: '2px solid var(--ui-color-primary)',
                 }}
               >
                 <Text>Small (640px)</Text>
@@ -137,9 +137,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
             <Container size="md">
               <div
                 style={{
-                  backgroundColor: '#f3e5f5',
-                  padding: '16px',
-                  border: '2px solid #9c27b0',
+                  backgroundColor: 'var(--ui-alert-warning-bg)',
+                  padding: 'var(--ui-gap-lg)',
+                  border: '2px solid var(--ui-color-warning)',
                 }}
               >
                 <Text>Medium (960px)</Text>
@@ -148,9 +148,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
             <Container size="lg">
               <div
                 style={{
-                  backgroundColor: '#fff3e0',
-                  padding: '16px',
-                  border: '2px solid #ff9800',
+                  backgroundColor: 'var(--ui-alert-success-bg)',
+                  padding: 'var(--ui-gap-lg)',
+                  border: '2px solid var(--ui-color-success)',
                 }}
               >
                 <Text>Large (1200px)</Text>
@@ -179,9 +179,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Sign In</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '350px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '350px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout title="Welcome Back" description="Sign in to your account to continue">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}>
                 <Input placeholder="Email" type="email" />
                 <Input placeholder="Password" type="password" />
                 <Button variant="primary">Sign In</Button>
@@ -204,9 +204,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Create Account</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '380px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '380px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout title="Create Account" description="Sign up to get started">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}>
                 <Input placeholder="Full Name" />
                 <Input placeholder="Email" type="email" />
                 <Input placeholder="Password" type="password" />
@@ -227,9 +227,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Send Reset Link</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '300px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '300px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}>
                 <Heading as="h3" size="sm">
                   Reset Password
                 </Heading>
@@ -259,7 +259,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Text>Page content with consistent padding and max-width</Text>
 </PageContainer>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid var(--color-border)', minHeight: '200px' }}>
+          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '200px' }}>
             <PageContainer>
               <Heading as="h2" size="md">
                 Page Title
@@ -283,7 +283,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Text>Content with narrower max-width</Text>
 </PageContainer>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid var(--color-border)', minHeight: '150px' }}>
+          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '150px' }}>
             <PageContainer maxWidth={600}>
               <Heading as="h3" size="sm">
                 Narrow Content
@@ -315,15 +315,23 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Text>Your page content goes here</Text>
 </AppShell>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', height: '300px', overflow: 'hidden' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              height: '300px',
+              overflow: 'hidden',
+            }}
+          >
             <AppShell
               sidebar={
                 <LeftSidebarLayout width="180px" bordered>
-                  <div style={{ padding: '8px' }}>
-                    <Heading as="h4" size="sm" style={{ marginBottom: '16px' }}>
+                  <div style={{ padding: 'var(--ui-gap-sm)' }}>
+                    <Heading as="h4" size="sm" style={{ marginBottom: 'var(--ui-gap-lg)' }}>
                       Navigation
                     </Heading>
-                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <nav
+                      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-sm)' }}
+                    >
                       <Button variant="text" style={{ justifyContent: 'flex-start' }}>
                         Dashboard
                       </Button>
@@ -340,12 +348,12 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               sidebarWidth="180px"
               style={{ height: '100%' }}
             >
-              <div style={{ padding: '16px' }}>
+              <div style={{ padding: 'var(--ui-gap-lg)' }}>
                 <Heading as="h2" size="md">
                   Main Content Area
                 </Heading>
                 <Text>This is the main content area with a fixed-width sidebar on the left.</Text>
-                <Card style={{ marginTop: '16px' }}>
+                <Card style={{ marginTop: 'var(--ui-gap-lg)' }}>
                   <Text>Content cards and other components work well in the main area.</Text>
                 </Card>
               </div>
@@ -363,10 +371,21 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Text>Main content</Text>
 </AppShell>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', height: '300px', overflow: 'hidden' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              height: '300px',
+              overflow: 'hidden',
+            }}
+          >
             <AppShell
               header={
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #ddd' }}>
+                <div
+                  style={{
+                    padding: 'var(--ui-gap-md) var(--ui-gap-lg)',
+                    borderBottom: '1px solid var(--ui-color-border)',
+                  }}
+                >
                   <Heading as="h3" size="sm">
                     Dashboard
                   </Heading>
@@ -374,8 +393,10 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               }
               sidebar={
                 <LeftSidebarLayout width="150px" bordered>
-                  <div style={{ padding: '8px' }}>
-                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ padding: 'var(--ui-gap-sm)' }}>
+                    <nav
+                      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-sm)' }}
+                    >
                       <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
                         Home
                       </Button>
@@ -390,9 +411,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               headerHeight="50px"
               style={{ height: '100%' }}
             >
-              <div style={{ padding: '16px' }}>
+              <div style={{ padding: 'var(--ui-gap-lg)' }}>
                 <Text>Main content area with header bar above.</Text>
-                <Card style={{ marginTop: '16px' }}>
+                <Card style={{ marginTop: 'var(--ui-gap-lg)' }}>
                   <Text>The header appears above the main content.</Text>
                 </Card>
               </div>
@@ -418,8 +439,8 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--ui-color-border)',
+              backgroundColor: 'var(--ui-color-surface)',
             }}
           >
             <StackedLayout>
@@ -430,7 +451,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
                 StackedLayout provides a simple stacked layout with a centered container and
                 padding.
               </Text>
-              <Card style={{ marginTop: '16px' }}>
+              <Card style={{ marginTop: 'var(--ui-gap-lg)' }}>
                 <Text>Content is centered with a medium-width container.</Text>
               </Card>
             </StackedLayout>
@@ -453,24 +474,31 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-surface)',
+              border: '1px solid var(--ui-color-border)',
+              backgroundColor: 'var(--ui-color-surface)',
             }}
           >
             <StackedLayout
               hero={
                 <div
                   style={{
-                    padding: '24px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: '8px',
-                    color: 'white',
+                    padding: 'var(--ui-gap-2xl)',
+                    backgroundColor: 'var(--ui-color-primary)',
+                    borderRadius: 'var(--ui-radius-lg)',
+                    color: 'var(--ui-color-text-inverse)',
                   }}
                 >
-                  <Heading as="h2" size="md" style={{ color: 'white', marginBottom: '8px' }}>
+                  <Heading
+                    as="h2"
+                    size="md"
+                    style={{
+                      color: 'var(--ui-color-text-inverse)',
+                      marginBottom: 'var(--ui-gap-sm)',
+                    }}
+                  >
                     Welcome to Our Platform
                   </Heading>
-                  <Text style={{ color: 'white', opacity: 0.9 }}>
+                  <Text style={{ color: 'var(--ui-color-text-inverse)', opacity: 0.9 }}>
                     This is the hero section - perfect for landing pages.
                   </Text>
                 </div>
@@ -480,7 +508,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
                 Main Content
               </Heading>
               <Text>The hero section appears above with extra spacing.</Text>
-              <Card style={{ marginTop: '16px' }}>
+              <Card style={{ marginTop: 'var(--ui-gap-lg)' }}>
                 <Text>Regular content follows the hero section.</Text>
               </Card>
             </StackedLayout>
@@ -516,7 +544,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
                 <Heading as="h4" size="sm" style={{ margin: 0 }}>
                   App Name
                 </Heading>
-                <nav style={{ display: 'flex', gap: '8px' }}>
+                <nav style={{ display: 'flex', gap: 'var(--ui-gap-sm)' }}>
                   <Button variant="text" size="small">
                     Home
                   </Button>
@@ -556,7 +584,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               height: '200px',
             }}
           >
-            <div style={{ padding: '16px' }}>
+            <div style={{ padding: 'var(--ui-gap-lg)' }}>
               <Text>Content area above bottom bar</Text>
             </div>
             <BottombarLayout>
@@ -603,12 +631,12 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               display: 'flex',
             }}
           >
-            <div style={{ flex: 1, padding: '16px' }}>
+            <div style={{ flex: 1, padding: 'var(--ui-gap-lg)' }}>
               <Text>Main content area</Text>
             </div>
             <RightSidebarLayout width="180px" bordered>
-              <div style={{ padding: '8px' }}>
-                <Heading as="h4" size="sm" style={{ marginBottom: '12px' }}>
+              <div style={{ padding: 'var(--ui-gap-sm)' }}>
+                <Heading as="h4" size="sm" style={{ marginBottom: 'var(--ui-gap-md)' }}>
                   Details
                 </Heading>
                 <Text tone="muted">Sidebar info here</Text>

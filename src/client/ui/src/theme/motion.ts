@@ -1,4 +1,14 @@
 // src/client/ui/src/theme/motion.ts
+/**
+ * Motion design tokens for transitions and animations.
+ *
+ * Contains two groups:
+ * - **durations** -- timing values from fast micro-interactions to slow shimmer effects
+ * - **easing** -- cubic-bezier curves following Material Design motion principles
+ *
+ * These tokens are consumed by {@link buildThemeCss} to generate
+ * `--ui-motion-duration-*` and `--ui-motion-ease-*` CSS custom properties.
+ */
 export const motion = {
   durations: {
     fast: '120ms',

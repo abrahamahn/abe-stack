@@ -28,6 +28,8 @@
     "sync:headers:watch": "node --import tsx src/tools/sync/sync-file-headers.ts --watch",
     "ci:verify": "pnpm -w run sync:headers:check && pnpm build",
     "build:theme": "node --import tsx src/tools/sync/sync-css-theme.ts",
+    "sync:docs": "node --import tsx src/tools/sync/sync-docs.ts",
+    "sync:docs:watch": "node --import tsx src/tools/sync/sync-docs.ts --watch",
     "sync:imports": "tsx src/tools/sync/sync-import-aliases.ts",
     "sync:ts": "tsx src/tools/sync/sync-ts-references.ts",
     "health-check": "node --import tsx src/tools/scripts/audit/health-check.ts",

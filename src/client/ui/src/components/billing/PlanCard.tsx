@@ -1,10 +1,4 @@
 // src/client/ui/src/components/billing/PlanCard.tsx
-/**
- * PlanCard Component
- *
- * Displays a single pricing plan with features and CTA.
- */
-
 import {
   forwardRef,
   type ComponentPropsWithoutRef,

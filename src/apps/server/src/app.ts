@@ -58,12 +58,7 @@ export class App implements IServiceContainer {
   private _server: FastifyInstance | null = null;
   private _fallbackLogger: FastifyBaseLogger | null = null;
 
-  private readonly moduleInfo = {
-    auth: { routes: 5 },
-    users: { routes: 1 },
-    admin: { routes: 1 },
-    health: { routes: 4 },
-  };
+  // Route count is now derived dynamically from the route registry
 
   constructor(options: AppOptions) {
     this.config = options.config;
@@ -154,7 +149,7 @@ export class App implements IServiceContainer {
 
       await listen(this._server, this.config);
 
-      const routeCount = Object.values(this.moduleInfo).reduce((sum, m) => sum + m.routes, 0);
+      const routeCount = this.countRegisteredRoutes();
       await logStartupSummary(
         this.context,
         {
@@ -221,6 +216,19 @@ export class App implements IServiceContainer {
       this.config.server.logLevel,
     ) as unknown as FastifyBaseLogger;
     return this._fallbackLogger;
+  }
+
+  private countRegisteredRoutes(): number {
+    if (this._server === null) return 0;
+    const maybePrintRoutes = (this._server as { printRoutes?: () => unknown }).printRoutes;
+    if (typeof maybePrintRoutes !== 'function') return 0;
+
+    const routes = maybePrintRoutes();
+    if (typeof routes !== 'string') return 0;
+
+    return routes
+      .split('\n')
+      .filter((line) => line.trim().startsWith('│') || line.trim().startsWith('└')).length;
   }
 }
 

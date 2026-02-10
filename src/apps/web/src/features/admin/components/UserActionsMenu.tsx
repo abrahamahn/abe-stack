@@ -142,7 +142,7 @@ export const UserActionsMenu = ({
             <div>
               <label
                 htmlFor="edit-first-name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-muted mb-1"
               >
                 First Name
               </label>
@@ -159,10 +159,7 @@ export const UserActionsMenu = ({
             </div>
 
             <div>
-              <label
-                htmlFor="edit-last-name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
+              <label htmlFor="edit-last-name" className="block text-sm font-medium text-muted mb-1">
                 Last Name
               </label>
               <Input
@@ -178,10 +175,7 @@ export const UserActionsMenu = ({
             </div>
 
             <div>
-              <label
-                htmlFor="edit-role"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
+              <label htmlFor="edit-role" className="block text-sm font-medium text-muted mb-1">
                 Role
               </label>
               <Select
@@ -234,7 +228,7 @@ export const UserActionsMenu = ({
               <div>
                 <label
                   htmlFor="unlock-reason"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-sm font-medium text-muted mb-1"
                 >
                   Reason for unlocking
                 </label>
@@ -272,10 +266,7 @@ export const UserActionsMenu = ({
               className="space-y-4"
             >
               <div>
-                <label
-                  htmlFor="lock-reason"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
+                <label htmlFor="lock-reason" className="block text-sm font-medium text-muted mb-1">
                   Reason for locking
                 </label>
                 <TextArea
@@ -293,7 +284,7 @@ export const UserActionsMenu = ({
               <div>
                 <label
                   htmlFor="lock-duration"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  className="block text-sm font-medium text-muted mb-1"
                 >
                   Lock Duration
                 </label>

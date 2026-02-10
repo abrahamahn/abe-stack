@@ -127,7 +127,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {
       users: {
-        findById: vi.fn(),
+        findById: vi.fn().mockResolvedValue({ lockedUntil: null }),
       },
     } as unknown as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],

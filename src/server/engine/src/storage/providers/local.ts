@@ -25,7 +25,7 @@ export class LocalStorageProvider implements StorageProvider {
     const finalKey = key !== '' ? key : randomUUID();
     const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, data);
+    await writeFile(filePath, data, { mode: 0o600 });
     return finalKey;
   }
 

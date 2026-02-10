@@ -208,16 +208,14 @@ describe('SecurityEventCard', () => {
       render(<SecurityEventCard event={criticalEvent} isLoading={false} />);
 
       const badge = screen.getByText('CRITICAL');
-      expect(badge.className).toContain('bg-red-100');
-      expect(badge.className).toContain('text-red-800');
+      expect(badge).toHaveAttribute('data-tone', 'danger');
     });
 
     it('should apply high styling for high severity', () => {
       render(<SecurityEventCard event={mockEvent} isLoading={false} />);
 
       const badge = screen.getByText('HIGH');
-      expect(badge.className).toContain('bg-orange-100');
-      expect(badge.className).toContain('text-orange-800');
+      expect(badge).toHaveAttribute('data-tone', 'danger');
     });
 
     it('should apply medium styling for medium severity', () => {
@@ -229,8 +227,7 @@ describe('SecurityEventCard', () => {
       render(<SecurityEventCard event={mediumEvent} isLoading={false} />);
 
       const badge = screen.getByText('MEDIUM');
-      expect(badge.className).toContain('bg-yellow-100');
-      expect(badge.className).toContain('text-yellow-800');
+      expect(badge).toHaveAttribute('data-tone', 'warning');
     });
 
     it('should apply low styling for low severity', () => {
@@ -242,8 +239,7 @@ describe('SecurityEventCard', () => {
       render(<SecurityEventCard event={lowEvent} isLoading={false} />);
 
       const badge = screen.getByText('LOW');
-      expect(badge.className).toContain('bg-green-100');
-      expect(badge.className).toContain('text-green-800');
+      expect(badge).toHaveAttribute('data-tone', 'success');
     });
   });
 

@@ -41,6 +41,19 @@ export async function handleRefresh(
   const { ipAddress, userAgent } = request.requestInfo;
 
   try {
+    // Idle timeout check: reject if the old token was created too long ago
+    // (token creation time approximates last activity since tokens rotate on each refresh)
+    const idleTimeoutMinutes = ctx.config.auth.sessions?.idleTimeoutMinutes ?? 30;
+    const tokenRecord = await ctx.repos.refreshTokens.findByToken(oldRefreshToken);
+
+    if (tokenRecord !== null && tokenRecord !== undefined) {
+      const idleMs = Date.now() - tokenRecord.createdAt.getTime();
+      if (idleMs > idleTimeoutMinutes * 60 * 1000) {
+        clearRefreshTokenCookie(reply);
+        return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+      }
+    }
+
     const result = await refreshUserTokens(
       ctx.db,
       ctx.repos,

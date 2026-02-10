@@ -9,7 +9,6 @@ export type {
   SidePeekCloseProps,
   SidePeekContentProps,
   SidePeekDescriptionProps,
-  SidePeekExpandProps,
   SidePeekFooterProps,
   SidePeekHeaderProps,
   SidePeekRootProps,

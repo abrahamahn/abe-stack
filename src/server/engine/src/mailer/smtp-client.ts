@@ -338,8 +338,11 @@ export class SmtpClient {
   }
 
   private extractEmail(address: string): string {
-    const match = address.match(/<([^>]+)>/);
-    return match?.[1] ?? address;
+    const start = address.indexOf('<');
+    if (start < 0) return address;
+    const end = address.indexOf('>', start + 1);
+    if (end < 0 || end <= start + 1) return address;
+    return address.slice(start + 1, end);
   }
 
   private async quit(): Promise<void> {

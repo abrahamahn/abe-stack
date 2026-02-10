@@ -22,6 +22,7 @@ import {
   type TotpVerifyResponse,
 } from '@abe-stack/shared';
 
+import { assertUserActive } from '../middleware';
 import { disableTotp, enableTotp, getTotpStatus, setupTotp, verifyTotpForLogin } from '../totp';
 import {
   createErrorMapperLogger,
@@ -50,6 +51,8 @@ export async function handleTotpSetup(
       return { status: 401, body: { message: 'Authentication required' } };
     }
 
+    await assertUserActive((id) => ctx.repos.users.findById(id), userId);
+
     const email = request.user?.email ?? '';
     const result = await setupTotp(ctx.db, userId, email, ctx.config.auth);
 
@@ -72,6 +75,8 @@ export async function handleTotpEnable(
     if (userId === undefined) {
       return { status: 401, body: { message: 'Authentication required' } };
     }
+
+    await assertUserActive((id) => ctx.repos.users.findById(id), userId);
 
     const result = await enableTotp(ctx.db, userId, body.code, ctx.config.auth);
 
@@ -98,6 +103,8 @@ export async function handleTotpDisable(
     if (userId === undefined) {
       return { status: 401, body: { message: 'Authentication required' } };
     }
+
+    await assertUserActive((id) => ctx.repos.users.findById(id), userId);
 
     const result = await disableTotp(ctx.db, userId, body.code, ctx.config.auth);
 

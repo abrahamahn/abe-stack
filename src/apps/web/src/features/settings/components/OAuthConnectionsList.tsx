@@ -10,7 +10,7 @@ import {
   useOAuthConnections,
   type ApiClientConfig,
 } from '@abe-stack/client-engine';
-import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
+import { Alert, Button, Card, Skeleton, Text } from '@abe-stack/ui';
 import { useMemo, useState, type ReactElement } from 'react';
 
 // ============================================================================
@@ -119,9 +119,9 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
   // No providers enabled
   if (enabledProviders.length === 0) {
     return (
-      <p className="text-gray-500 text-sm">
+      <Text size="sm" tone="muted">
         No OAuth providers are configured for this application.
-      </p>
+      </Text>
     );
   }
 
@@ -160,9 +160,9 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
       ))}
 
       {connections.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-2">
+        <Text size="sm" tone="muted" className="text-center py-2">
           Connect an account for easier sign-in.
-        </p>
+        </Text>
       )}
     </div>
   );
@@ -195,13 +195,15 @@ const ProviderCard = ({
     <Card className="p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-medium">
+          <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center font-medium">
             {info.icon}
           </div>
           <div>
             <p className="font-medium">{info.name}</p>
             {connected && connection !== null && (
-              <p className="text-sm text-gray-500">{connection.providerEmail}</p>
+              <Text size="sm" tone="muted">
+                {connection.providerEmail}
+              </Text>
             )}
           </div>
         </div>
@@ -212,7 +214,7 @@ const ProviderCard = ({
             size="small"
             onClick={onDisconnect}
             disabled={isDisconnecting}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+            className="text-danger"
           >
             {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
           </Button>

@@ -32,13 +32,23 @@ export type RadioGroupProps = {
 };
 
 type RadioGroupContextType = {
+  /** Shared HTML name attribute for all radio inputs in the group */
   name: string;
+  /** Currently selected value */
   value?: string;
+  /** Callback to update the selected value */
   onValueChange: (value: string) => void;
 };
 
 const RadioGroupContext = createContext<RadioGroupContextType | null>(null);
 
+/**
+ * Returns the nearest RadioGroup context, or `null` when rendered outside a RadioGroup.
+ *
+ * Used internally by the Radio component to read the group name and current value.
+ *
+ * @returns The radio group context value, or null if not inside a RadioGroup
+ */
 export function useRadioGroupContext(): RadioGroupContextType | null {
   return useContext(RadioGroupContext);
 }

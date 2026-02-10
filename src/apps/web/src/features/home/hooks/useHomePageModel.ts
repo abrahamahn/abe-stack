@@ -6,14 +6,12 @@ import { useState } from 'react';
 import { useDocContent } from './useDocContent';
 import { useHomeKeyboard } from './useHomeKeyboard';
 
-import type { DocKey } from '../types';
-
 export type HomePageModel = {
   paneConfig: ReturnType<typeof useUILibraryPanes>['paneConfig'];
   togglePane: ReturnType<typeof useUILibraryPanes>['togglePane'];
   handlePaneResize: ReturnType<typeof useUILibraryPanes>['handlePaneResize'];
   resetLayout: ReturnType<typeof useUILibraryPanes>['resetLayout'];
-  selectedDoc: DocKey | null;
+  selectedDoc: string | null;
   content: string | null;
   isLoading: boolean;
   sidePeekOpen: boolean;
@@ -26,7 +24,7 @@ export const useHomePageModel = (): HomePageModel => {
   const { cycleContrastMode } = useContrast('app-contrast', resolvedTheme);
   const { paneConfig, togglePane, handlePaneResize, resetLayout } =
     useUILibraryPanes('home-pane-config');
-  const [selectedDoc, setSelectedDoc] = useState<DocKey | null>('readme');
+  const [selectedDoc, setSelectedDoc] = useState<string | null>('readme');
   const { isOpen: sidePeekOpen, close: closeSidePeek } = useSidePeek();
 
   const { content, isLoading } = useDocContent(selectedDoc ?? 'readme');

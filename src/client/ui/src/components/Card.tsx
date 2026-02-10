@@ -14,6 +14,7 @@ type CardRootProps = ComponentPropsWithoutRef<'div'> & {
   /** The HTML element or React component to render as */
   as?: ElementType;
 };
+/** Props for Card section sub-components (Header, Body, Footer). */
 type CardSectionProps = ComponentPropsWithoutRef<'div'>;
 
 /**

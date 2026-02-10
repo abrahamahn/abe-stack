@@ -109,3 +109,6 @@ export {
   verifyTurnstileToken,
   type CaptchaVerifyResult,
 } from './captcha';
+
+// Sudo Mode
+export { createRequireSudo } from './sudo';

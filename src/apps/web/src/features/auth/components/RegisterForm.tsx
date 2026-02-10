@@ -1,8 +1,18 @@
 // src/apps/web/src/features/auth/components/RegisterForm.tsx
-import { Button, Input, Link, PasswordInput, Text, useResendCooldown } from '@abe-stack/ui';
-import { useState } from 'react';
+import {
+  AuthFormLayout,
+  Button,
+  Input,
+  Link,
+  PasswordInput,
+  Spinner,
+  Text,
+  useResendCooldown,
+} from '@abe-stack/ui';
+import { useCallback, useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
+import { TurnstileWidget } from './TurnstileWidget';
 
 import type {
   RegisterRequest,
@@ -45,10 +55,15 @@ export const RegisterForm = ({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
   const [registrationResult, setRegistrationResult] = useState<RegisterResponseLocal | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const { cooldown, isOnCooldown, startCooldown } = useResendCooldown();
+
+  const handleCaptchaToken = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -61,6 +76,7 @@ export const RegisterForm = ({
         firstName,
         lastName,
         password,
+        ...(captchaToken !== undefined ? { captchaToken } : {}),
       });
       setRegistrationResult(result);
     } catch {
@@ -94,11 +110,11 @@ export const RegisterForm = ({
   // Show success message after registration
   if (registrationResult !== null) {
     return (
-      <div className="auth-form">
-        <div className="auth-form-content">
-          <div className="auth-form-header">
-            <h2 className="auth-form-title">Check your email</h2>
-          </div>
+      <AuthFormLayout>
+        <AuthFormLayout.Content>
+          <AuthFormLayout.Header>
+            <AuthFormLayout.Title>Check your email</AuthFormLayout.Title>
+          </AuthFormLayout.Header>
 
           <div className="status-icon bg-success-muted mx-auto">
             <svg
@@ -124,9 +140,9 @@ export const RegisterForm = ({
 
           <Text tone="muted" className="text-xs text-center">
             Sent to:{' '}
-            <strong>
+            <Text as="strong">
               {registrationResult.email.length > 0 ? registrationResult.email : email}
-            </strong>
+            </Text>
           </Text>
 
           {resendMessage !== null && resendMessage.length > 0 && (
@@ -156,7 +172,7 @@ export const RegisterForm = ({
             </div>
           )}
 
-          <div className="auth-form-footer">
+          <AuthFormLayout.Footer>
             Already verified?{' '}
             {onModeChange !== undefined ? (
               <Button
@@ -164,26 +180,26 @@ export const RegisterForm = ({
                 onClick={() => {
                   onModeChange('login');
                 }}
-                style={{ padding: 0, minHeight: 'auto' }}
+                size="inline"
               >
                 Sign in
               </Button>
             ) : (
               <Link to="/auth?mode=login">Sign in</Link>
             )}
-          </div>
-        </div>
-      </div>
+          </AuthFormLayout.Footer>
+        </AuthFormLayout.Content>
+      </AuthFormLayout>
     );
   }
 
   return (
-    <div className="auth-form">
-      <div className="auth-form-content">
-        <div className="auth-form-header">
-          <h2 className="auth-form-title">Create account</h2>
-          <p className="auth-form-subtitle">Sign up for a new account</p>
-        </div>
+    <AuthFormLayout>
+      <AuthFormLayout.Content>
+        <AuthFormLayout.Header>
+          <AuthFormLayout.Title>Create account</AuthFormLayout.Title>
+          <AuthFormLayout.Subtitle>Sign up for a new account</AuthFormLayout.Subtitle>
+        </AuthFormLayout.Header>
 
         <OAuthButtons mode="register" {...(isLoading === true && { disabled: true })} />
 
@@ -248,14 +264,24 @@ export const RegisterForm = ({
             disabled={isLoading}
           />
 
-          {error !== undefined && error !== null && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && (
+            <AuthFormLayout.Error>{error}</AuthFormLayout.Error>
+          )}
+
+          <TurnstileWidget onToken={handleCaptchaToken} />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading === true ? 'Creating account...' : 'Create account'}
+            {isLoading === true ? (
+              <Text as="span" className="flex items-center gap-2">
+                <Spinner size="14px" /> Creating account...
+              </Text>
+            ) : (
+              'Create account'
+            )}
           </Button>
         </form>
 
-        <div className="auth-form-footer">
+        <AuthFormLayout.Footer>
           Already have an account?{' '}
           {onModeChange !== undefined ? (
             <Button
@@ -263,15 +289,15 @@ export const RegisterForm = ({
               onClick={() => {
                 onModeChange('login');
               }}
-              style={{ padding: 0, minHeight: 'auto' }}
+              size="inline"
             >
               Sign in
             </Button>
           ) : (
             <Link to="/auth?mode=login">Sign in</Link>
           )}
-        </div>
-      </div>
-    </div>
+        </AuthFormLayout.Footer>
+      </AuthFormLayout.Content>
+    </AuthFormLayout>
   );
 };

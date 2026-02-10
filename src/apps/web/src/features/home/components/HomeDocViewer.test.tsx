@@ -51,13 +51,6 @@ vi.mock('@abe-stack/ui', () => {
   };
 });
 
-vi.mock('../data', () => ({
-  docsMeta: {
-    readme: { label: 'README', category: 'root' },
-    web: { label: 'Web', category: 'apps' },
-  },
-}));
-
 describe('HomeDocViewer', () => {
   it('renders welcome message when no doc is selected', () => {
     const props: HomeDocViewerProps = {
@@ -91,14 +84,15 @@ describe('HomeDocViewer', () => {
     expect(screen.getByText('# Hello World')).toBeInTheDocument();
   });
 
-  it('renders category breadcrumb for selected doc', () => {
+  it('renders content without category breadcrumb', () => {
     const props: HomeDocViewerProps = {
       selectedDoc: 'readme',
       content: '# Hello',
       isLoading: false,
     };
     render(<HomeDocViewer {...props} />);
-    expect(screen.getByText('root / README')).toBeInTheDocument();
+    expect(screen.getByText('# Hello')).toBeInTheDocument();
+    expect(screen.queryByText('root / README')).not.toBeInTheDocument();
   });
 
   it('renders markdown-content class on the markdown container', () => {
@@ -111,14 +105,14 @@ describe('HomeDocViewer', () => {
     expect(container.querySelector('.markdown-content')).toBeInTheDocument();
   });
 
-  it('renders empty string when content is null but not loading', () => {
+  it('renders empty markdown when content is null but not loading', () => {
     const props: HomeDocViewerProps = {
       selectedDoc: 'readme',
       content: null,
       isLoading: false,
     };
-    render(<HomeDocViewer {...props} />);
+    const { container } = render(<HomeDocViewer {...props} />);
     // Markdown component receives '' when content is null
-    expect(screen.getByText('root / README')).toBeInTheDocument();
+    expect(container.querySelector('.markdown-content')).toBeInTheDocument();
   });
 });

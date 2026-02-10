@@ -50,16 +50,16 @@ const MetricItem = ({
   const getVariantClass = (): string => {
     switch (variant) {
       case 'critical':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-danger';
       case 'high':
-        return 'text-orange-600 dark:text-orange-400';
+        return 'text-warning';
       case 'medium':
-        return 'text-yellow-600 dark:text-yellow-400';
+        return 'text-warning';
       case 'low':
-        return 'text-green-600 dark:text-green-400';
+        return 'text-success';
       case 'default':
       default:
-        return 'text-gray-900 dark:text-gray-100';
+        return '';
     }
   };
 
@@ -120,7 +120,7 @@ export const SecurityMetricsCard = ({
         />
       </div>
 
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-6 pt-4 border-t">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <MetricItem
             label="Token Reuse"
@@ -144,7 +144,7 @@ export const SecurityMetricsCard = ({
       </div>
 
       {metrics !== undefined && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 pt-4 border-t">
           <Text tone="muted" size="xs">
             Period: {new Date(metrics.periodStart).toLocaleString()} -{' '}
             {new Date(metrics.periodEnd).toLocaleString()}

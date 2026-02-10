@@ -21,8 +21,5 @@ describe('AppRightInfo', () => {
 
     expect(screen.getByText('Current Route')).toBeInTheDocument();
     expect(screen.getByText('/settings/accounts')).toBeInTheDocument();
-    expect(
-      screen.getByText('Persistent app shell panel shared across all pages.'),
-    ).toBeInTheDocument();
   });
 });

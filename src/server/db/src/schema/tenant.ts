@@ -48,6 +48,7 @@ export interface Tenant {
   ownerId: string;
   isActive: boolean;
   metadata: Record<string, unknown>;
+  allowedEmailDomains: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +65,7 @@ export interface NewTenant {
   ownerId: string;
   isActive?: boolean;
   metadata?: Record<string, unknown>;
+  allowedEmailDomains?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -78,6 +80,7 @@ export interface UpdateTenant {
   logoUrl?: string | null;
   isActive?: boolean;
   metadata?: Record<string, unknown>;
+  allowedEmailDomains?: string[];
   updatedAt?: Date;
 }
 
@@ -179,6 +182,7 @@ export const TENANT_COLUMNS = {
   ownerId: 'owner_id',
   isActive: 'is_active',
   metadata: 'metadata',
+  allowedEmailDomains: 'allowed_email_domains',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 } as const;

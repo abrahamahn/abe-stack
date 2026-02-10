@@ -1,6 +1,7 @@
 // src/apps/web/src/app/layouts/index.ts
 export { AppLayout } from './AppLayout';
 export type { AppLayoutProps } from './AppLayout';
+export { AppLayoutContext, useAppRightSidebar } from './AppLayoutContext';
 export { AppBottomLayout } from './AppBottomLayout';
 export type { AppBottomLayoutProps } from './AppBottomLayout';
 export { AppLeftLayout } from './AppLeftLayout';

@@ -84,6 +84,14 @@ export interface BillingClient {
 
 const API_PREFIX = '/api';
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end--;
+  }
+  return value.slice(0, end);
+}
+
 /**
  * Create a billing API client
  *
@@ -109,7 +117,7 @@ const API_PREFIX = '/api';
  * ```
  */
 export function createBillingClient(config: BillingClientConfig): BillingClient {
-  const baseUrl = config.baseUrl.replace(/\/+$/, ''); // trim trailing slashes
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   /**

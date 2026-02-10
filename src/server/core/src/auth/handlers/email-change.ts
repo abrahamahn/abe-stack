@@ -15,6 +15,7 @@ import {
   initiateEmailChange,
   revertEmailChange,
 } from '../email-change';
+import { assertUserActive } from '../middleware';
 import { sendEmailChangedAlert } from '../security';
 import { createErrorMapperLogger } from '../types';
 
@@ -42,6 +43,8 @@ export async function handleChangeEmail(
     if (userId === undefined) {
       return { status: 401, body: { message: 'Authentication required' } };
     }
+
+    await assertUserActive((id) => ctx.repos.users.findById(id), userId);
 
     const result = await initiateEmailChange(
       ctx.db,

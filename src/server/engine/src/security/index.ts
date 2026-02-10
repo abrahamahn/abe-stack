@@ -32,6 +32,7 @@ export {
   type JwtRotationHandler,
   type RotatingJwtOptions,
   type SignOptions,
+  type VerifyOptions,
 } from './crypto';
 
 // ============================================================================

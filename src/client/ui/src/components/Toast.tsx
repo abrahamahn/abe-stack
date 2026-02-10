@@ -5,13 +5,7 @@ import type { ToastMessage } from '@abe-stack/react';
 
 import '../styles/components.css';
 
-/**
- * Props for a single Toast notification.
- *
- * @param message - Toast message data including optional tone
- * @param duration - Auto-dismiss duration in milliseconds (default 3500)
- * @param onDismiss - Callback invoked when the toast is dismissed (auto or manual)
- */
+/** Props for a single Toast notification. */
 type ToastProps = {
   /** Toast message data */
   message: ToastMessage;
@@ -26,9 +20,6 @@ type ToastProps = {
  *
  * Supports `tone` from ToastMessage: `'info'`, `'success'`, `'danger'`, `'warning'`.
  * Defaults to `'info'` when no tone is specified. Auto-dismisses after `duration` ms.
- *
- * @param props - Toast component props
- * @returns A styled toast card element
  *
  * @example
  * ```tsx
@@ -75,12 +66,7 @@ export const Toast = ({ message, duration = 3500, onDismiss }: ToastProps): Reac
   );
 };
 
-/**
- * Props for the ToastContainer component.
- *
- * @param messages - Array of toast messages to display
- * @param onDismiss - Callback when a toast is dismissed
- */
+/** Props for the ToastContainer component. */
 type ToastContainerProps = {
   /** Array of toast messages to display */
   messages: ToastMessage[];
@@ -93,9 +79,6 @@ type ToastContainerProps = {
  *
  * Wraps individual Toast components and provides an `aria-live` region
  * for screen reader announcements of new notifications.
- *
- * @param props - ToastContainer component props
- * @returns A list of toast notifications
  *
  * @example
  * ```tsx

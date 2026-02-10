@@ -13,6 +13,7 @@ import {
   avatarUploadResponseSchema,
   changePasswordRequestSchema,
   changePasswordResponseSchema,
+  profileCompletenessResponseSchema,
   revokeAllSessionsResponseSchema,
   revokeSessionResponseSchema,
   sessionsListResponseSchema,
@@ -50,6 +51,16 @@ export const usersContract = {
       401: errorResponseSchema,
     },
     summary: 'Update current user profile',
+  },
+
+  profileCompleteness: {
+    method: 'GET' as const,
+    path: '/api/users/me/profile-completeness',
+    responses: {
+      200: successResponseSchema(profileCompletenessResponseSchema),
+      401: errorResponseSchema,
+    },
+    summary: 'Get profile completeness percentage and missing fields',
   },
 
   changePassword: {

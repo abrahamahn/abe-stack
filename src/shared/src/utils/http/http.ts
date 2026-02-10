@@ -25,7 +25,8 @@ export interface CookieSerializeOptions extends CookieOptions {
  * @returns A record of cookie names and their values.
  */
 export function parseCookies(cookieHeader: string | undefined | null): Record<string, string> {
-  const cookies: Record<string, string> = {};
+  const cookies: Record<string, string> = Object.create(null) as Record<string, string>;
+  const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
   if (cookieHeader === undefined || cookieHeader === null || cookieHeader === '') {
     return cookies;
@@ -38,6 +39,9 @@ export function parseCookies(cookieHeader: string | undefined | null): Record<st
     if (eqIdx < 0) continue;
 
     const key = pair.slice(0, eqIdx).trim();
+    if (key === '' || blockedKeys.has(key.toLowerCase())) {
+      continue;
+    }
     let value = pair.slice(eqIdx + 1).trim();
 
     // Remove quotes if present

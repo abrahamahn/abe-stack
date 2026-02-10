@@ -24,6 +24,14 @@ export const oauthQueryKeys = {
   connections: () => [...oauthQueryKeys.all, 'connections'] as const,
 } as const;
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end--;
+  }
+  return value.slice(0, end);
+}
+
 // ============================================================================
 // useEnabledOAuthProviders
 // ============================================================================
@@ -238,7 +246,7 @@ export function useOAuthConnections(clientConfig: ApiClientConfig): OAuthConnect
  * @returns URL to redirect browser to
  */
 export function getOAuthLoginUrl(baseUrl: string, provider: OAuthProvider): string {
-  const normalizedBase = baseUrl.replace(/\/+$/, '');
+  const normalizedBase = trimTrailingSlashes(baseUrl);
   const providerStr = provider as string;
   return `${normalizedBase}/api/auth/oauth/${providerStr}`;
 }

@@ -8,14 +8,22 @@
 import { createApiError, NetworkError } from '@abe-stack/client-engine';
 
 import type {
+  AccountLifecycleResponse,
   AvatarDeleteResponse,
   AvatarUploadResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
+  DeactivateAccountRequest,
+  DeleteAccountRequest,
+  ProfileCompletenessResponse,
   RevokeAllSessionsResponse,
   RevokeSessionResponse,
   SessionsListResponse,
+  SudoRequest,
+  SudoResponse,
   UpdateProfileRequest,
+  UpdateUsernameRequest,
+  UpdateUsernameResponse,
   User,
 } from '@abe-stack/shared';
 
@@ -32,6 +40,8 @@ export interface SettingsApiConfig {
 export interface SettingsApi {
   // Profile
   updateProfile: (data: UpdateProfileRequest) => Promise<User>;
+  updateUsername: (data: UpdateUsernameRequest) => Promise<UpdateUsernameResponse>;
+  getProfileCompleteness: () => Promise<ProfileCompletenessResponse>;
 
   // Password
   changePassword: (data: ChangePasswordRequest) => Promise<ChangePasswordResponse>;
@@ -44,6 +54,20 @@ export interface SettingsApi {
   listSessions: () => Promise<SessionsListResponse>;
   revokeSession: (sessionId: string) => Promise<RevokeSessionResponse>;
   revokeAllSessions: () => Promise<RevokeAllSessionsResponse>;
+
+  // Sudo
+  sudo: (data: SudoRequest) => Promise<SudoResponse>;
+
+  // Account Lifecycle
+  deactivateAccount: (
+    data: DeactivateAccountRequest,
+    sudoToken?: string,
+  ) => Promise<AccountLifecycleResponse>;
+  requestDeletion: (
+    data: DeleteAccountRequest,
+    sudoToken?: string,
+  ) => Promise<AccountLifecycleResponse>;
+  reactivateAccount: () => Promise<AccountLifecycleResponse>;
 }
 
 const API_PREFIX = '/api';
@@ -144,6 +168,67 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
         method: 'POST',
       });
     },
+
+    // Username
+    async updateUsername(data: UpdateUsernameRequest): Promise<UpdateUsernameResponse> {
+      return request<UpdateUsernameResponse>('/users/me/username', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+
+    // Profile Completeness
+    async getProfileCompleteness(): Promise<ProfileCompletenessResponse> {
+      return request<ProfileCompletenessResponse>('/users/me/profile-completeness', {
+        method: 'GET',
+      });
+    },
+
+    // Sudo
+    async sudo(data: SudoRequest): Promise<SudoResponse> {
+      return request<SudoResponse>('/auth/sudo', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    // Account Lifecycle
+    async deactivateAccount(
+      data: DeactivateAccountRequest,
+      sudoToken?: string,
+    ): Promise<AccountLifecycleResponse> {
+      const headers: Record<string, string> = {};
+      if (sudoToken !== undefined) {
+        headers['x-sudo-token'] = sudoToken;
+      }
+      return request<AccountLifecycleResponse>('/users/me/deactivate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers,
+      });
+    },
+
+    async requestDeletion(
+      data: DeleteAccountRequest,
+      sudoToken?: string,
+    ): Promise<AccountLifecycleResponse> {
+      const headers: Record<string, string> = {};
+      if (sudoToken !== undefined) {
+        headers['x-sudo-token'] = sudoToken;
+      }
+      return request<AccountLifecycleResponse>('/users/me/delete-request', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers,
+      });
+    },
+
+    async reactivateAccount(): Promise<AccountLifecycleResponse> {
+      return request<AccountLifecycleResponse>('/users/me/reactivate', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
   };
 }
 
@@ -153,14 +238,22 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
 
 export type { ApiError } from '@abe-stack/client-engine';
 export type {
+  AccountLifecycleResponse,
   AvatarDeleteResponse,
   AvatarUploadResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
+  DeactivateAccountRequest,
+  DeleteAccountRequest,
+  ProfileCompletenessResponse,
   RevokeAllSessionsResponse,
   RevokeSessionResponse,
   Session,
   SessionsListResponse,
+  SudoRequest,
+  SudoResponse,
   UpdateProfileRequest,
+  UpdateUsernameRequest,
+  UpdateUsernameResponse,
   User,
 } from '@abe-stack/shared';

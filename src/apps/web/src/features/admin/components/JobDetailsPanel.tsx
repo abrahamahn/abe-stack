@@ -134,14 +134,14 @@ export const JobDetailsPanel = ({
         <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
           Arguments
         </Text>
-        <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-auto max-h-48">
+        <pre className="bg-surface p-2 rounded text-xs overflow-auto max-h-48">
           {JSON.stringify(job.args, null, 2)}
         </pre>
       </Card>
 
       {/* Error (if any) */}
       {job.error !== null && (
-        <Card className="p-3 border-red-200 dark:border-red-800">
+        <Card className="p-3 border-current text-danger">
           <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
             Error
           </Text>
@@ -149,7 +149,7 @@ export const JobDetailsPanel = ({
             {job.error.name}: {job.error.message}
           </Text>
           {job.error.stack !== undefined && job.error.stack !== '' && (
-            <pre className="bg-red-50 dark:bg-red-900/20 p-2 rounded text-xs overflow-auto max-h-32 mt-2">
+            <pre className="bg-danger-muted p-2 rounded text-xs overflow-auto max-h-32 mt-2">
               {job.error.stack}
             </pre>
           )}
@@ -160,7 +160,7 @@ export const JobDetailsPanel = ({
       {job.deadLetterReason !== undefined &&
         job.deadLetterReason !== null &&
         job.deadLetterReason !== '' && (
-          <Card className="p-3 border-red-200 dark:border-red-800">
+          <Card className="p-3 border-current text-danger">
             <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
               Dead Letter Reason
             </Text>

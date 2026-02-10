@@ -1,5 +1,5 @@
 // src/apps/web/src/features/auth/components/ResetPasswordForm.tsx
-import { Button, Link, PasswordInput } from '@abe-stack/ui';
+import { AuthFormLayout, Button, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
 
 import type { ResetPasswordRequest } from '@abe-stack/shared';
@@ -40,10 +40,12 @@ export const ResetPasswordForm = ({
 
   if (token === '' || token.length === 0) {
     return (
-      <div className="auth-form">
-        <div className="auth-form-content text-center">
-          <h2 className="auth-form-title text-danger">Invalid reset link</h2>
-          <p className="auth-form-subtitle">This password reset link is invalid or has expired.</p>
+      <AuthFormLayout>
+        <AuthFormLayout.Content className="text-center">
+          <AuthFormLayout.Title className="text-danger">Invalid reset link</AuthFormLayout.Title>
+          <AuthFormLayout.Subtitle>
+            This password reset link is invalid or has expired.
+          </AuthFormLayout.Subtitle>
           {onModeChange !== undefined ? (
             <Button
               variant="secondary"
@@ -58,18 +60,18 @@ export const ResetPasswordForm = ({
               <Button variant="secondary">Request a new reset link</Button>
             </Link>
           )}
-        </div>
-      </div>
+        </AuthFormLayout.Content>
+      </AuthFormLayout>
     );
   }
 
   return (
-    <div className="auth-form">
-      <div className="auth-form-content">
-        <div className="auth-form-header">
-          <h2 className="auth-form-title">Set new password</h2>
-          <p className="auth-form-subtitle">Enter your new password</p>
-        </div>
+    <AuthFormLayout>
+      <AuthFormLayout.Content>
+        <AuthFormLayout.Header>
+          <AuthFormLayout.Title>Set new password</AuthFormLayout.Title>
+          <AuthFormLayout.Subtitle>Enter your new password</AuthFormLayout.Subtitle>
+        </AuthFormLayout.Header>
 
         <form
           onSubmit={(e) => {
@@ -88,7 +90,7 @@ export const ResetPasswordForm = ({
           />
 
           {error !== undefined && error !== null && error.length > 0 && (
-            <div className="auth-form-error">{error}</div>
+            <AuthFormLayout.Error>{error}</AuthFormLayout.Error>
           )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
@@ -96,22 +98,22 @@ export const ResetPasswordForm = ({
           </Button>
         </form>
 
-        <div className="auth-form-footer">
+        <AuthFormLayout.Footer>
           {onModeChange !== undefined ? (
             <Button
               variant="text"
               onClick={() => {
                 onModeChange('login');
               }}
-              style={{ padding: 0, minHeight: 'auto' }}
+              size="inline"
             >
               Back to sign in
             </Button>
           ) : (
             <Link to="/auth?mode=login">Back to sign in</Link>
           )}
-        </div>
-      </div>
-    </div>
+        </AuthFormLayout.Footer>
+      </AuthFormLayout.Content>
+    </AuthFormLayout>
   );
 };

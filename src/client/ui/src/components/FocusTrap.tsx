@@ -24,7 +24,11 @@ const FOCUSABLE = [
  * </FocusTrap>
  * ```
  */
-export const FocusTrap = ({ children }: { children: ReactNode }): ReactElement => {
+export const FocusTrap = ({
+  children,
+}: {
+  /** Content in which focus will be trapped */ children: ReactNode;
+}): ReactElement => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect((): (() => void) => {

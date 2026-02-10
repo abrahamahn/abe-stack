@@ -171,7 +171,7 @@ const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element =
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
   return (
-    <TableRow className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800" onClick={onClick}>
+    <TableRow className="cursor-pointer hover-row" onClick={onClick}>
       <TableCell>
         <div>
           <Text className="font-medium">{job.name}</Text>

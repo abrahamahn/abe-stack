@@ -29,23 +29,15 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
 });
 
 describe('AppLeftMenu', () => {
-  it('renders section label and expected menu links', () => {
+  it('renders expected menu links', () => {
     render(<AppLeftMenu />);
 
-    expect(screen.getByText('Menu')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute('href', '/ui-library');
     expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
+    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute('href', '/workspaces');
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
-    expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute(
-      'href',
-      '/settings/accounts',
-    );
-    expect(screen.getByRole('link', { name: 'Billing' })).toHaveAttribute(
-      'href',
-      '/settings/billing',
-    );
-    expect(screen.getByRole('link', { name: 'Auth' })).toHaveAttribute('href', '/auth');
+    expect(screen.getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '/pricing');
     expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin');
+    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute('href', '/ui-library');
   });
 });

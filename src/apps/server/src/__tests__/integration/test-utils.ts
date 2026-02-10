@@ -1,4 +1,4 @@
-// apps/server/src/__tests__/integration/test-utils.ts
+// src/apps/server/src/__tests__/integration/test-utils.ts
 /**
  * Integration Test Utilities
  *
@@ -60,6 +60,14 @@ export interface MockDbClient {
     emailVerificationTokens: {
       findFirst: MockFn;
     };
+    legalDocuments: {
+      findFirst: MockFn;
+      findMany: MockFn;
+    };
+    userAgreements: {
+      findFirst: MockFn;
+      findMany: MockFn;
+    };
   };
 }
 
@@ -111,6 +119,14 @@ export function createMockDb(): MockDbClient {
       emailVerificationTokens: {
         findFirst: vi.fn().mockResolvedValue(null),
       },
+      legalDocuments: {
+        findFirst: vi.fn().mockResolvedValue(null),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+      userAgreements: {
+        findFirst: vi.fn().mockResolvedValue(null),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
     },
   };
 }
@@ -126,6 +142,40 @@ export interface MockEmailService {
 export function createMockEmailService(): MockEmailService {
   return {
     send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-message-id' }),
+  };
+}
+
+// ============================================================================
+// Mock Email Templates Factory
+// ============================================================================
+
+export interface MockEmailTemplates {
+  passwordReset: MockFn;
+  magicLink: MockFn;
+  emailVerification: MockFn;
+  existingAccountRegistrationAttempt: MockFn;
+  tokenReuseAlert: MockFn;
+  newLoginAlert: MockFn;
+  passwordChangedAlert: MockFn;
+  emailChangedAlert: MockFn;
+}
+
+export function createMockEmailTemplates(): MockEmailTemplates {
+  const template = {
+    subject: 'Test Subject',
+    html: '<p>Test</p>',
+    text: 'Test',
+    to: 'test@example.com',
+  };
+  return {
+    passwordReset: vi.fn().mockReturnValue(template) as MockFn,
+    magicLink: vi.fn().mockReturnValue(template) as MockFn,
+    emailVerification: vi.fn().mockReturnValue(template) as MockFn,
+    existingAccountRegistrationAttempt: vi.fn().mockReturnValue(template) as MockFn,
+    tokenReuseAlert: vi.fn().mockReturnValue(template) as MockFn,
+    newLoginAlert: vi.fn().mockReturnValue(template) as MockFn,
+    passwordChangedAlert: vi.fn().mockReturnValue(template) as MockFn,
+    emailChangedAlert: vi.fn().mockReturnValue(template) as MockFn,
   };
 }
 
@@ -208,15 +258,20 @@ export function createUnverifiedUser(overrides: Partial<TestUser> = {}): TestUse
 // ============================================================================
 
 export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
-  return {
+  const base: AppConfig = {
     env: 'test',
     server: {
       host: '127.0.0.1',
       port: 0, // Random port
       portFallbacks: [],
-      cors: { origin: '*', credentials: true, methods: ['GET', 'POST', 'PUT', 'DELETE'] },
+      cors: { origin: ['*'], credentials: true, methods: ['GET', 'POST', 'PUT', 'DELETE'] },
       trustProxy: false,
-      logLevel: 'silent',
+      logLevel: 'info',
+      maintenanceMode: false,
+      rateLimit: {
+        windowMs: 60000,
+        max: 1000,
+      },
       appBaseUrl: 'http://localhost:5173',
       apiBaseUrl: 'http://localhost:0',
     },
@@ -229,6 +284,7 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
       password: 'test',
       maxConnections: 1,
       portFallbacks: [],
+      ssl: false,
     },
     auth: {
       strategies: ['local'],
@@ -269,15 +325,161 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
     },
     email: {
       provider: 'console',
-      smtp: { host: '', port: 587, secure: false, auth: { user: '', pass: '' } },
+      smtp: {
+        host: '',
+        port: 587,
+        secure: false,
+        auth: { user: '', pass: '' },
+        connectionTimeout: 5000,
+        socketTimeout: 5000,
+      },
       from: { name: 'Test', address: 'test@test.com' },
+      replyTo: 'test@test.com',
     },
     storage: {
       provider: 'local',
       rootPath: './test-uploads',
     },
+    billing: {} as AppConfig['billing'],
+    cache: {} as AppConfig['cache'],
+    queue: {} as AppConfig['queue'],
+    notifications: {} as AppConfig['notifications'],
+    search: {} as AppConfig['search'],
+    packageManager: {} as AppConfig['packageManager'],
+  };
+
+  return {
+    ...base,
     ...overrides,
-  } as AppConfig;
+    server: {
+      ...base.server,
+      ...overrides.server,
+      cors: {
+        ...base.server.cors,
+        ...overrides.server?.cors,
+      },
+    },
+    database: {
+      ...base.database,
+      ...overrides.database,
+    },
+    auth: {
+      ...base.auth,
+      ...overrides.auth,
+      jwt: {
+        ...base.auth.jwt,
+        ...overrides.auth?.jwt,
+      },
+      refreshToken: {
+        ...base.auth.refreshToken,
+        ...overrides.auth?.refreshToken,
+      },
+      argon2: {
+        ...base.auth.argon2,
+        ...overrides.auth?.argon2,
+      },
+      password: {
+        ...base.auth.password,
+        ...overrides.auth?.password,
+      },
+      lockout: {
+        ...base.auth.lockout,
+        ...overrides.auth?.lockout,
+      },
+      proxy: {
+        ...base.auth.proxy,
+        ...overrides.auth?.proxy,
+      },
+      rateLimit: {
+        ...base.auth.rateLimit,
+        ...overrides.auth?.rateLimit,
+        login: {
+          ...base.auth.rateLimit.login,
+          ...overrides.auth?.rateLimit?.login,
+        },
+        register: {
+          ...base.auth.rateLimit.register,
+          ...overrides.auth?.rateLimit?.register,
+        },
+        forgotPassword: {
+          ...base.auth.rateLimit.forgotPassword,
+          ...overrides.auth?.rateLimit?.forgotPassword,
+        },
+        verifyEmail: {
+          ...base.auth.rateLimit.verifyEmail,
+          ...overrides.auth?.rateLimit?.verifyEmail,
+        },
+      },
+      cookie: {
+        ...base.auth.cookie,
+        ...overrides.auth?.cookie,
+      },
+      oauth: {
+        ...base.auth.oauth,
+        ...overrides.auth?.oauth,
+      },
+      magicLink: {
+        ...base.auth.magicLink,
+        ...overrides.auth?.magicLink,
+      },
+      totp: {
+        ...base.auth.totp,
+        ...overrides.auth?.totp,
+      },
+      ...(overrides.auth?.captcha !== undefined ? { captcha: overrides.auth.captcha } : {}),
+      ...(overrides.auth?.sessions !== undefined ? { sessions: overrides.auth.sessions } : {}),
+    },
+    email: {
+      ...base.email,
+      ...overrides.email,
+      smtp: {
+        ...base.email.smtp,
+        ...overrides.email?.smtp,
+        auth: {
+          user:
+            overrides.email?.smtp !== undefined && 'auth' in overrides.email.smtp
+              ? (overrides.email.smtp.auth?.user ?? '')
+              : '',
+          pass:
+            overrides.email?.smtp !== undefined && 'auth' in overrides.email.smtp
+              ? (overrides.email.smtp.auth?.pass ?? '')
+              : '',
+        },
+      },
+      from: {
+        ...base.email.from,
+        ...overrides.email?.from,
+      },
+    },
+    storage: {
+      ...base.storage,
+      ...overrides.storage,
+    },
+    billing: {
+      ...base.billing,
+      ...overrides.billing,
+    },
+    cache: {
+      ...base.cache,
+      ...overrides.cache,
+    },
+    queue: {
+      ...base.queue,
+      ...overrides.queue,
+    },
+    notifications: {
+      ...base.notifications,
+      ...overrides.notifications,
+    },
+    search: {
+      ...base.search,
+      ...overrides.search,
+    },
+    packageManager: {
+      ...base.packageManager,
+      ...overrides.packageManager,
+    },
+  };
 }
 
 // ============================================================================

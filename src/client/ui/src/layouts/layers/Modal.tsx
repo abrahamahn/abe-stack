@@ -16,10 +16,15 @@ import { createPortal } from 'react-dom';
 import '../../styles/components.css';
 
 type ModalContextValue = {
+  /** Callback to close the modal */
   onClose?: () => void;
+  /** Auto-generated ID linking the title element for aria-labelledby */
   titleId?: string;
+  /** Auto-generated ID linking the description element for aria-describedby */
   descriptionId?: string;
+  /** Registers the title element ID for accessibility */
   setTitleId: (id: string | undefined) => void;
+  /** Registers the description element ID for accessibility */
   setDescriptionId: (id: string | undefined) => void;
 };
 
@@ -31,11 +36,35 @@ const useModalCtx = (): ModalContextValue => {
 };
 
 type ModalRootProps = {
+  /** Whether the modal is visible */
   open: boolean;
+  /** Callback invoked when the modal requests to close (Escape key or overlay click) */
   onClose?: () => void;
+  /** Modal content (use Modal.Header, Modal.Body, Modal.Footer compound components) */
   children: ReactNode;
 };
 
+/**
+ * Root container for a modal dialog. Renders into a portal with an overlay backdrop,
+ * focus trapping, Escape key dismissal, and ARIA dialog attributes.
+ *
+ * Use as `Modal.Root` with compound children: `Modal.Header`, `Modal.Title`,
+ * `Modal.Description`, `Modal.Body`, `Modal.Footer`, and `Modal.Close`.
+ *
+ * @example
+ * ```tsx
+ * <Modal.Root open={isOpen} onClose={() => setIsOpen(false)}>
+ *   <Modal.Header>
+ *     <Modal.Title>Confirm Action</Modal.Title>
+ *     <Modal.Close />
+ *   </Modal.Header>
+ *   <Modal.Body>Are you sure?</Modal.Body>
+ *   <Modal.Footer>
+ *     <Button onClick={handleConfirm}>Yes</Button>
+ *   </Modal.Footer>
+ * </Modal.Root>
+ * ```
+ */
 const ModalRoot = ({ open, onClose, children }: ModalRootProps): ReactElement | null => {
   const [mounted, setMounted] = useState(false);
   const [titleId, setTitleId] = useState<string | undefined>(undefined);
@@ -93,6 +122,7 @@ const ModalRoot = ({ open, onClose, children }: ModalRootProps): ReactElement | 
   );
 };
 
+/** Renders an `<h2>` that automatically registers with the modal for `aria-labelledby`. */
 const ModalTitle = ({ children, ...rest }: ComponentPropsWithoutRef<'h2'>): ReactElement => {
   const { setTitleId } = useModalCtx();
   const id = useId();
@@ -111,6 +141,7 @@ const ModalTitle = ({ children, ...rest }: ComponentPropsWithoutRef<'h2'>): Reac
   );
 };
 
+/** Renders a `<p>` that automatically registers with the modal for `aria-describedby`. */
 const ModalDescription = ({ children, ...rest }: ComponentPropsWithoutRef<'p'>): ReactElement => {
   const { setDescriptionId } = useModalCtx();
   const id = useId();
@@ -129,6 +160,7 @@ const ModalDescription = ({ children, ...rest }: ComponentPropsWithoutRef<'p'>):
   );
 };
 
+/** Container for the modal header area, typically holding a title and close button. */
 const ModalHeader = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-header" {...rest}>
@@ -137,6 +169,7 @@ const ModalHeader = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): Re
   );
 };
 
+/** Scrollable content area for the modal's primary content. */
 const ModalBody = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-body" {...rest}>
@@ -145,6 +178,7 @@ const ModalBody = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): Reac
   );
 };
 
+/** Container for action buttons at the bottom of the modal. */
 const ModalFooter = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-footer" {...rest}>
@@ -153,6 +187,7 @@ const ModalFooter = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): Re
   );
 };
 
+/** A button that invokes the modal's `onClose` callback. Defaults to "Close" text if no children provided. */
 const ModalClose = ({ children, ...rest }: ComponentPropsWithoutRef<'button'>): ReactElement => {
   const { onClose } = useModalCtx();
   return (
@@ -162,6 +197,26 @@ const ModalClose = ({ children, ...rest }: ComponentPropsWithoutRef<'button'>): 
   );
 };
 
+/**
+ * Accessible modal dialog built with compound components.
+ * Renders in a portal with overlay, focus trapping, and Escape key support.
+ *
+ * @example
+ * ```tsx
+ * <Modal.Root open={isOpen} onClose={() => setIsOpen(false)}>
+ *   <Modal.Header>
+ *     <Modal.Title>Delete Item</Modal.Title>
+ *     <Modal.Close />
+ *   </Modal.Header>
+ *   <Modal.Body>
+ *     <Modal.Description>This action cannot be undone.</Modal.Description>
+ *   </Modal.Body>
+ *   <Modal.Footer>
+ *     <Button onClick={onDelete}>Delete</Button>
+ *   </Modal.Footer>
+ * </Modal.Root>
+ * ```
+ */
 export const Modal = {
   Root: ModalRoot,
   Title: ModalTitle,

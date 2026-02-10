@@ -1,5 +1,6 @@
 // src/apps/web/src/app/layouts/AppMainLayout.tsx
 import { Button, ResizablePanel, ResizablePanelGroup, ScrollArea } from '@abe-stack/ui';
+import { useCallback } from 'react';
 
 import { AppLeftLayout } from './AppLeftLayout';
 import { AppRightLayout } from './AppRightLayout';
@@ -66,6 +67,20 @@ export const AppMainLayout = ({
   leftSidebar,
   rightSidebar,
 }: AppMainLayoutProps): ReactElement => {
+  const onLeftResize = useCallback(
+    (size: number): void => {
+      handlePaneResize('left', size);
+    },
+    [handlePaneResize],
+  );
+
+  const onRightResize = useCallback(
+    (size: number): void => {
+      handlePaneResize('right', size);
+    },
+    [handlePaneResize],
+  );
+
   return (
     <div className="flex-1 min-h-0 flex h-full">
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-w-0 h-full">
@@ -106,29 +121,16 @@ export const AppMainLayout = ({
             minSize={10}
             maxSize={28}
             collapsed={!paneConfig.left.visible}
-            onResize={(size: number) => {
-              handlePaneResize('left', size);
-            }}
+            onResize={onLeftResize}
             className="bg-primary"
             data-testid="app-left-panel"
           >
-            <AppLeftLayout
-              onClose={() => {
-                togglePane('left');
-              }}
-            >
-              {leftSidebar}
-            </AppLeftLayout>
+            <AppLeftLayout>{leftSidebar}</AppLeftLayout>
           </ResizablePanel>
         )}
 
-        {/* Content Group - Handles Center and Right Sidebars */}
-        <ResizablePanel
-          size={
-            100 - (leftSidebar !== undefined && paneConfig.left.visible ? paneConfig.left.size : 0)
-          }
-          className="flex-1 min-w-0"
-        >
+        {/* Content Group - fills remaining space with flex */}
+        <div className="flex-1 min-w-0" style={{ minHeight: 0 }}>
           <ResizablePanelGroup direction="horizontal" reverse className="h-full w-full">
             {/* Right Panel - Optional Details/Sidebar */}
             {rightSidebar !== undefined && (
@@ -138,34 +140,22 @@ export const AppMainLayout = ({
                 maxSize={100}
                 invertResize
                 collapsed={!paneConfig.right.visible}
-                onResize={(size: number) => {
-                  handlePaneResize('right', size);
-                }}
+                onResize={onRightResize}
                 className="bg-primary"
                 data-testid="app-right-panel"
               >
-                <AppRightLayout
-                  onClose={() => {
-                    togglePane('right');
-                  }}
-                >
-                  {rightSidebar}
-                </AppRightLayout>
+                <AppRightLayout>{rightSidebar}</AppRightLayout>
               </ResizablePanel>
             )}
 
-            {/* Center Panel - Main Content Area Panel */}
-            <ResizablePanel
-              size={
-                100 -
-                (rightSidebar !== undefined && paneConfig.right.visible ? paneConfig.right.size : 0)
-              }
-              className="flex-1 min-w-0"
-            >
-              <ScrollArea className="h-full w-full">{children}</ScrollArea>
-            </ResizablePanel>
+            {/* Center Panel - fills remaining space with flex */}
+            <div className="flex-1 min-w-0" style={{ minHeight: 0 }}>
+              <ScrollArea className="h-full w-full">
+                <div className="p-4">{children}</div>
+              </ScrollArea>
+            </div>
           </ResizablePanelGroup>
-        </ResizablePanel>
+        </div>
       </ResizablePanelGroup>
     </div>
   );

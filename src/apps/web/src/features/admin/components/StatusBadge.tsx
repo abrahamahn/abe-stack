@@ -43,19 +43,6 @@ export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
   return 'active';
 }
 
-function getStatusStyles(status: UserStatusLocal): string {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'locked':
-      return 'bg-red-100 text-red-800';
-    case 'unverified':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return '';
-  }
-}
-
 function getStatusLabel(status: UserStatusLocal): string {
   switch (status) {
     case 'active':
@@ -71,9 +58,5 @@ function getStatusLabel(status: UserStatusLocal): string {
 
 export const StatusBadge = ({ status }: StatusBadgeProps): JSX.Element => {
   const tone = status === 'active' ? 'success' : status === 'locked' ? 'danger' : 'warning';
-  return (
-    <Badge tone={tone} className={getStatusStyles(status)}>
-      {getStatusLabel(status)}
-    </Badge>
-  );
+  return <Badge tone={tone}>{getStatusLabel(status)}</Badge>;
 };

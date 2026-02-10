@@ -13,6 +13,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './app/App';
+import { onTosRequired } from './app/tosHandler';
 import { registerServiceWorker } from './utils/registerServiceWorker';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
@@ -34,6 +35,7 @@ const queryCache = new QueryCache({
 
 const auth = createAuthService({
   config: clientConfig,
+  onTosRequired,
 });
 
 // ============================================================================

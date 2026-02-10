@@ -363,7 +363,7 @@ describe('SecurityEventsTable', () => {
       );
 
       const badge = screen.getByText('CRITICAL');
-      expect(badge.className).toContain('bg-red-100');
+      expect(badge).toHaveAttribute('data-tone', 'danger');
     });
 
     it('should apply high styling', () => {
@@ -377,7 +377,7 @@ describe('SecurityEventsTable', () => {
       );
 
       const badge = screen.getByText('HIGH');
-      expect(badge.className).toContain('bg-orange-100');
+      expect(badge).toHaveAttribute('data-tone', 'danger');
     });
 
     it('should apply medium styling', () => {
@@ -391,7 +391,7 @@ describe('SecurityEventsTable', () => {
       );
 
       const badge = screen.getByText('MEDIUM');
-      expect(badge.className).toContain('bg-yellow-100');
+      expect(badge).toHaveAttribute('data-tone', 'warning');
     });
   });
 

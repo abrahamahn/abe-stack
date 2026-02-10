@@ -35,6 +35,7 @@ export {
 } from './proxyValidation';
 export { registerRequestInfoHook, type RequestInfo } from './requestInfo';
 export {
+  applyApiCacheHeaders,
   applyCors,
   applySecurityHeaders,
   getProductionSecurityDefaults,

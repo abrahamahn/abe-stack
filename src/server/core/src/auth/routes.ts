@@ -63,6 +63,7 @@ import {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleSudoElevate,
   handleTosStatus,
   handleTotpDisable,
   handleTotpEnable,
@@ -329,6 +330,22 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       acceptTosRequestSchema as RouteSchema,
+    ),
+  ],
+
+  // Sudo mode
+  [
+    'auth/sudo',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleSudoElevate(
+          asAppContext(ctx),
+          body as { password?: string; totpCode?: string },
+          req as unknown as RequestWithCookies,
+        );
+      },
+      'user',
     ),
   ],
 

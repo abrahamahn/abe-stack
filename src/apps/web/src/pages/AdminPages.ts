@@ -3,6 +3,7 @@ export {
   AdminLayout,
   JobMonitorPage,
   PlanManagementPage,
+  RouteManifestPage,
   SecurityEventDetailPage,
   SecurityEventsPage,
   UserDetailPage,

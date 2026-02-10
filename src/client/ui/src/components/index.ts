@@ -1,6 +1,7 @@
 // src/client/ui/src/components/index.ts
 // Components - Composed multi-part components with complex state/behavior
 export { Accordion } from './Accordion';
+export { AuthFormLayout } from './AuthForm';
 export { Card } from './Card';
 export { DelayedFallback, type DelayedFallbackProps } from './DelayedFallback';
 export { Dialog } from './Dialog';

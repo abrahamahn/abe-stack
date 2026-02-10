@@ -5,7 +5,7 @@
  * Displays list of user sessions with revoke functionality.
  */
 
-import { Alert, Button, Skeleton } from '@abe-stack/ui';
+import { Alert, Button, Skeleton, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
@@ -139,7 +139,7 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
                 size="small"
                 onClick={handleRevokeAll}
                 disabled={isRevokingAll || isRevokingSingle}
-                className="text-red-600 hover:text-red-700"
+                className="text-danger"
               >
                 {isRevokingAll ? 'Logging out...' : 'Log out from all'}
               </Button>
@@ -162,7 +162,9 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
       )}
 
       {sessions.length === 1 && (
-        <p className="text-sm text-gray-500 text-center py-4">This is your only active session.</p>
+        <Text size="sm" tone="muted" className="text-center py-4">
+          This is your only active session.
+        </Text>
       )}
     </div>
   );

@@ -128,12 +128,18 @@ function getPath(obj: Record<string, unknown>, path: string): unknown {
  * @param value - Value to set at the path
  * @complexity O(d) where d is the depth of the path
  */
+function isSafeObjectKey(key: string): boolean {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
 function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   const lastKey = keys.pop();
   if (lastKey === undefined || lastKey === '') return;
+  if (!isSafeObjectKey(lastKey)) return;
 
   const target = keys.reduce<Record<string, unknown>>((acc, key) => {
+    if (!isSafeObjectKey(key)) return acc;
     if (!(key in acc) || typeof acc[key] !== 'object' || acc[key] === null) {
       acc[key] = {};
     }
@@ -394,6 +400,10 @@ export function applyOperations(
     // All operation types have table and id fields - extract them safely
     const table = op.table;
     const id = op.id;
+
+    if (!isSafeObjectKey(table) || !isSafeObjectKey(id)) {
+      throw new Error(`Invalid table or id: ${table}:${id}`);
+    }
 
     const record = newRecordMap[table]?.[id];
     if (record === undefined) {

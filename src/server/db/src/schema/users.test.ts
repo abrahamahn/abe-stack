@@ -97,9 +97,13 @@ describe('Schema Constants', () => {
         failedLoginAttempts: 'failed_login_attempts',
         totpSecret: 'totp_secret',
         totpEnabled: 'totp_enabled',
+        lastUsernameChange: 'last_username_change',
         phone: 'phone',
         phoneVerified: 'phone_verified',
         dateOfBirth: 'date_of_birth',
+        deactivatedAt: 'deactivated_at',
+        deletedAt: 'deleted_at',
+        deletionGracePeriodEnds: 'deletion_grace_period_ends',
         gender: 'gender',
         city: 'city',
         state: 'state',
@@ -149,7 +153,7 @@ describe('Schema Constants', () => {
       // This tests that the object is marked as const and immutable
       // The TypeScript compiler ensures this, but we verify the structure
       const keys = Object.keys(USER_COLUMNS);
-      expect(keys).toHaveLength(28);
+      expect(keys).toHaveLength(32);
       expect(keys).toContain('id');
       expect(keys).toContain('email');
       expect(keys).toContain('passwordHash');
@@ -899,9 +903,13 @@ describe('Column Mapping Consistency', () => {
       'failedLoginAttempts',
       'totpSecret',
       'totpEnabled',
+      'lastUsernameChange',
       'phone',
       'phoneVerified',
       'dateOfBirth',
+      'deactivatedAt',
+      'deletedAt',
+      'deletionGracePeriodEnds',
       'gender',
       'city',
       'state',
@@ -957,9 +965,13 @@ describe('Column Mapping Consistency', () => {
       'failedLoginAttempts',
       'totpSecret',
       'totpEnabled',
+      'lastUsernameChange',
       'phone',
       'phoneVerified',
       'dateOfBirth',
+      'deactivatedAt',
+      'deletedAt',
+      'deletionGracePeriodEnds',
       'gender',
       'city',
       'state',

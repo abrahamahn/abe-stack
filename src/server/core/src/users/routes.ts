@@ -19,14 +19,27 @@ import {
   type RouteMap,
   type RouteResult,
 } from '@abe-stack/server-engine';
-import { NotFoundError } from '@abe-stack/shared';
+import {
+  deactivateAccountRequestSchema,
+  deleteAccountRequestSchema,
+  NotFoundError,
+  updateUsernameRequestSchema,
+  type DeactivateAccountRequest,
+  type DeleteAccountRequest,
+  type UpdateUsernameRequest,
+} from '@abe-stack/shared';
 
 import { REFRESH_COOKIE_NAME } from '../auth';
 
 import {
   getSessionCount,
+  handleDeactivateAccount,
+  handleGetProfileCompleteness,
   handleListUsers,
   handleMe,
+  handleReactivateAccount,
+  handleRequestDeletion,
+  handleUpdateUsername,
   listUserSessions,
   revokeAllSessions,
   revokeSession,
@@ -93,6 +106,8 @@ async function resolveCurrentFamilyId(
  * Routes:
  * - `users/me` (GET, user) — Get current user's profile
  * - `users/list` (GET, admin) — List all users with cursor pagination
+ * - `users/me/profile-completeness` (GET, user) — Get profile completeness percentage
+ * - `users/me/username` (PATCH, user) — Update current user's username (30-day cooldown)
  * - `users/me/sessions` (GET, user) — List current user's active sessions
  * - `users/me/sessions/count` (GET, user) — Get active session count
  * - `users/me/sessions/:id` (DELETE, user) — Revoke a specific session
@@ -121,6 +136,35 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleListUsers(ctx, req as unknown as UsersRequest);
       },
       'admin', // Only admins can list users
+    ),
+  ],
+
+  // Profile completeness — returns percentage and missing fields
+  [
+    'users/me/profile-completeness',
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+        return handleGetProfileCompleteness(ctx, req as unknown as UsersRequest);
+      },
+      'user',
+    ),
+  ],
+
+  // Username update — PATCH with 30-day cooldown
+  [
+    'users/me/username',
+    protectedRoute(
+      'PATCH',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleUpdateUsername(
+          ctx,
+          body as UpdateUsernameRequest,
+          req as unknown as UsersRequest,
+        );
+      },
+      'user',
+      updateUsernameRequestSchema,
     ),
   ],
 
@@ -250,6 +294,56 @@ export const userRoutes: RouteMap = createRouteMap([
           );
           return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
         }
+      },
+      'user',
+    ),
+  ],
+
+  // ============================================================================
+  // Account Lifecycle Routes
+  // ============================================================================
+
+  // Deactivate account — preserves data but prevents login
+  [
+    'users/me/deactivate',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleDeactivateAccount(
+          ctx,
+          body as DeactivateAccountRequest,
+          req as unknown as UsersRequest,
+        );
+      },
+      'user',
+      deactivateAccountRequestSchema,
+    ),
+  ],
+
+  // Request account deletion — initiates 30-day grace period
+  [
+    'users/me/delete',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleRequestDeletion(
+          ctx,
+          body as DeleteAccountRequest,
+          req as unknown as UsersRequest,
+        );
+      },
+      'user',
+      deleteAccountRequestSchema,
+    ),
+  ],
+
+  // Reactivate account — cancel deactivation or pending deletion
+  [
+    'users/me/reactivate',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+        return handleReactivateAccount(ctx, undefined, req as unknown as UsersRequest);
       },
       'user',
     ),

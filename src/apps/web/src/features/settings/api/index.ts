@@ -15,3 +15,13 @@ export type {
   UpdateProfileRequest,
   User,
 } from './settingsApi';
+export type {
+  AccountLifecycleResponse,
+  DeactivateAccountRequest,
+  DeleteAccountRequest,
+  ProfileCompletenessResponse,
+  SudoRequest,
+  SudoResponse,
+  UpdateUsernameRequest,
+  UpdateUsernameResponse,
+} from '@abe-stack/shared';

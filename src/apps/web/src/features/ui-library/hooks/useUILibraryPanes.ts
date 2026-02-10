@@ -51,16 +51,19 @@ export function useUILibraryPanes(storageKey = 'demo-pane-config'): UseUILibrary
     [setPaneConfig],
   );
 
-  function handlePaneResize(pane: keyof UILibraryPaneConfig, size: number): void {
-    setPaneConfig((prev: UILibraryPaneConfig) => ({
-      ...prev,
-      [pane]: { ...prev[pane], size },
-    }));
-  }
+  const handlePaneResize = useCallback(
+    (pane: keyof UILibraryPaneConfig, size: number): void => {
+      setPaneConfig((prev: UILibraryPaneConfig) => ({
+        ...prev,
+        [pane]: { ...prev[pane], size },
+      }));
+    },
+    [setPaneConfig],
+  );
 
-  function resetLayout(): void {
+  const resetLayout = useCallback((): void => {
     setPaneConfig(isMobile ? MOBILE_PANE_CONFIG : DEFAULT_PANE_CONFIG);
-  }
+  }, [isMobile, setPaneConfig]);
 
   return {
     paneConfig,

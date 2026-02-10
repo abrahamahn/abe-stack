@@ -11,6 +11,8 @@
  * @module routing
  */
 
+import { registerRoute } from './route-registry';
+
 import type { BaseContext } from '@abe-stack/shared/core';
 import type {
   FastifyInstance,
@@ -56,12 +58,35 @@ export interface ValidationSchema {
 /** Union type for all accepted schema formats */
 export type RouteSchema = FastifySchema | ValidationSchema;
 
+/** JSON Schema object for OpenAPI route metadata */
+export interface JsonSchemaObject {
+  type?: string;
+  properties?: Record<string, unknown>;
+  required?: string[];
+  description?: string;
+  [key: string]: unknown;
+}
+
+/** OpenAPI metadata that can be attached to a route */
+export interface RouteOpenApiMeta {
+  summary?: string;
+  description?: string;
+  tags?: string[];
+  body?: JsonSchemaObject;
+  params?: JsonSchemaObject;
+  querystring?: JsonSchemaObject;
+  response?: Record<number, JsonSchemaObject>;
+  hide?: boolean;
+}
+
 export interface RouteDefinition {
   method: HttpMethod;
   handler: RouteHandler;
   isPublic: boolean;
   roles?: string[];
   schema?: RouteSchema;
+  /** Optional OpenAPI metadata for swagger docs */
+  openapi?: RouteOpenApiMeta;
 }
 
 export type RouteMap = Map<string, RouteDefinition>;
@@ -88,12 +113,14 @@ export function publicRoute<Body = unknown, Response = unknown>(
   method: HttpMethod,
   handler: RouteHandler<Body, Response>,
   schema?: RouteSchema,
+  openapi?: RouteOpenApiMeta,
 ): RouteDefinition {
   return {
     method,
     handler: handler as RouteHandler,
     isPublic: true,
     ...(schema !== undefined ? { schema } : {}),
+    ...(openapi !== undefined ? { openapi } : {}),
   };
 }
 
@@ -111,6 +138,7 @@ export function protectedRoute<Body = unknown, Response = unknown>(
   handler: RouteHandler<Body, Response>,
   roles: string | string[] = [],
   schema?: RouteSchema,
+  openapi?: RouteOpenApiMeta,
 ): RouteDefinition {
   return {
     method,
@@ -118,6 +146,7 @@ export function protectedRoute<Body = unknown, Response = unknown>(
     isPublic: false,
     roles: Array.isArray(roles) ? roles : roles !== '' ? [roles] : [],
     ...(schema !== undefined ? { schema } : {}),
+    ...(openapi !== undefined ? { openapi } : {}),
   };
 }
 
@@ -127,6 +156,8 @@ export interface RouterOptions {
   prefix: string;
   jwtSecret: string;
   authGuardFactory: AuthGuardFactory;
+  /** Logical module name for route registry, e.g. "auth", "users". Auto-derived from path if omitted. */
+  module?: string;
 }
 
 /**
@@ -141,6 +172,17 @@ function hasSafeParse(s: RouteSchema): s is ValidationSchema {
   if (typeof s !== 'object' || !('safeParse' in s)) return false;
   const obj = s as unknown as Record<string, unknown>;
   return typeof obj['safeParse'] === 'function';
+}
+
+/**
+ * Derive the logical module name from a route path.
+ *
+ * Strips the prefix and takes the first path segment.
+ * Example: "/api/auth/login" with prefix "/api" -> "auth"
+ */
+function deriveModule(fullPath: string, prefix: string): string {
+  const relative = fullPath.replace(prefix, '').replace(/^\/+/, '');
+  return relative.split('/')[0] ?? 'unknown';
 }
 
 /**
@@ -217,6 +259,35 @@ export function registerRouteMap(
       baseOptions.schema = route.schema as FastifySchema;
     }
 
+    // Merge OpenAPI metadata into Fastify schema for @fastify/swagger
+    if (route.openapi !== undefined) {
+      const openapi = route.openapi;
+      const schema = (baseOptions.schema ?? {}) as Record<string, unknown>;
+
+      if (openapi.summary !== undefined) schema['summary'] = openapi.summary;
+      if (openapi.description !== undefined) schema['description'] = openapi.description;
+      if (openapi.tags !== undefined) schema['tags'] = openapi.tags;
+      if (openapi.body !== undefined) schema['body'] = openapi.body;
+      if (openapi.params !== undefined) schema['params'] = openapi.params;
+      if (openapi.querystring !== undefined) schema['querystring'] = openapi.querystring;
+      if (openapi.response !== undefined) schema['response'] = openapi.response;
+      if (openapi.hide !== undefined) schema['hide'] = openapi.hide;
+
+      baseOptions.schema = schema as FastifySchema;
+    }
+
     app.route(baseOptions as RouteOptions);
+
+    // Feed the route registry
+    registerRoute({
+      path: fullPath,
+      method: route.method,
+      isPublic: route.isPublic,
+      roles: route.roles ?? [],
+      hasSchema: route.schema !== undefined,
+      module: options.module ?? deriveModule(fullPath, options.prefix),
+      ...(route.openapi?.summary !== undefined ? { summary: route.openapi.summary } : {}),
+      ...(route.openapi?.tags !== undefined ? { tags: route.openapi.tags } : {}),
+    });
   }
 }

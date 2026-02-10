@@ -7,7 +7,7 @@
  */
 
 import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@abe-stack/api';
-import { OAuthButton } from '@abe-stack/ui';
+import { AuthFormLayout, OAuthButton, Text } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
@@ -117,7 +117,7 @@ export const OAuthButtons = ({
       <div className="oauth-buttons">
         {isLoading ? (
           // Loading skeleton
-          <OAuthButton disabled style={{ opacity: 0.5 }}>
+          <OAuthButton disabled className="opacity-50">
             Loading providers...
           </OAuthButton>
         ) : (
@@ -135,9 +135,9 @@ export const OAuthButtons = ({
                 disabled={disabled}
               >
                 <IconComponent />
-                <span>
+                <Text as="span">
                   {actionText} {label}
-                </span>
+                </Text>
               </OAuthButton>
             );
           })
@@ -145,11 +145,7 @@ export const OAuthButtons = ({
       </div>
 
       {/* Divider */}
-      {!isLoading && providers.length > 0 && (
-        <div className="auth-form-divider">
-          <span className="auth-form-divider-text">or</span>
-        </div>
-      )}
+      {!isLoading && providers.length > 0 && <AuthFormLayout.Divider>or</AuthFormLayout.Divider>}
     </>
   );
 };

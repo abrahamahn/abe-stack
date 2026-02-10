@@ -10,7 +10,7 @@
 
 import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/api';
 import { OAUTH_PROVIDERS, tokenStore } from '@abe-stack/shared';
-import { Button, Card, Dialog, PageContainer } from '@abe-stack/ui';
+import { Button, Card, Dialog, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -40,7 +40,7 @@ const PROVIDER_DISPLAY: Record<
     label: 'Google',
     color: '#4285F4',
     icon: (
-      <svg viewBox="0 0 24 24" className="connected-account-icon">
+      <svg viewBox="0 0 24 24" className="icon-md">
         <path
           fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -64,7 +64,7 @@ const PROVIDER_DISPLAY: Record<
     label: 'GitHub',
     color: '#333333',
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="connected-account-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor" className="icon-md">
         <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
       </svg>
     ),
@@ -73,7 +73,7 @@ const PROVIDER_DISPLAY: Record<
     label: 'Apple',
     color: '#000000',
     icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="connected-account-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor" className="icon-md">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
       </svg>
     ),
@@ -166,45 +166,50 @@ export const ConnectedAccountsPage = (): ReactElement => {
     }).format(date);
 
   return (
-    <PageContainer className="connected-accounts-page">
-      <h1 className="connected-accounts-page__title">Connected Accounts</h1>
-      <p className="connected-accounts-page__description">
+    <PageContainer className="max-w-lg">
+      <Heading as="h1" size="xl">
+        Connected Accounts
+      </Heading>
+      <Text tone="muted" className="mb-4">
         Connect your social accounts for easier sign-in and account security.
-      </p>
+      </Text>
 
       {isLoading ? (
         <Card>
           <Card.Body>Loading connected accounts...</Card.Body>
         </Card>
       ) : (
-        <div className="connected-accounts-list">
+        <div className="flex flex-col gap-2">
           {([...OAUTH_PROVIDERS] as OAuthProviderLocal[]).map((provider: OAuthProviderLocal) => {
             const isEnabled = ([...enabledProviders] as OAuthProviderLocal[]).includes(provider);
             const connection = connectedProviderMap.get(provider);
             const display = PROVIDER_DISPLAY[provider];
 
-            // Don't show providers that aren't enabled
             if (!isEnabled) return null;
 
             return (
-              <Card key={provider} className="connected-account-card">
+              <Card key={provider}>
                 <Card.Body>
-                  <div className="connected-account-row">
-                    <div className="connected-account-info">
-                      <div className="connected-account-icon-wrapper">{display.icon}</div>
-                      <div className="connected-account-details">
-                        <span className="connected-account-name">{display.label}</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-md flex-center bg-surface border rounded-md">
+                        {display.icon}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{display.label}</span>
                         {connection !== undefined ? (
-                          <span className="connected-account-email">
+                          <Text tone="muted" className="text-sm">
                             {connection.providerEmail ?? 'Connected'} &middot; Since{' '}
                             {formatDate(new Date(connection.connectedAt))}
-                          </span>
+                          </Text>
                         ) : (
-                          <span className="connected-account-status">Not connected</span>
+                          <Text tone="muted" className="text-sm">
+                            Not connected
+                          </Text>
                         )}
                       </div>
                     </div>
-                    <div className="connected-account-action">
+                    <div>
                       {connection !== undefined ? (
                         <Button
                           variant="secondary"
@@ -238,15 +243,14 @@ export const ConnectedAccountsPage = (): ReactElement => {
           {enabledProviders.length === 0 && (
             <Card>
               <Card.Body>
-                <p>No OAuth providers are currently enabled.</p>
+                <Text>No OAuth providers are currently enabled.</Text>
               </Card.Body>
             </Card>
           )}
         </div>
       )}
 
-      {/* Refresh button for testing */}
-      <div className="connected-accounts-page__actions">
+      <div className="flex justify-end mt-3">
         <Button
           variant="text"
           onClick={() => {
@@ -268,18 +272,18 @@ export const ConnectedAccountsPage = (): ReactElement => {
         <Dialog.Content
           title={`Disconnect ${disconnectTarget !== null ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}?`}
         >
-          <p>
+          <Text>
             Are you sure you want to disconnect your{' '}
             {disconnectTarget !== null ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}{' '}
             account? You can reconnect it at any time.
-          </p>
+          </Text>
           {!canDisconnect && (
-            <p className="text-danger text-sm">
+            <Text tone="danger" className="text-sm">
               You cannot disconnect your only login method. Add a password or connect another
               account first.
-            </p>
+            </Text>
           )}
-          <div className="dialog-actions">
+          <div className="flex justify-end gap-2 mt-4">
             <Button
               variant="text"
               onClick={() => {
@@ -300,75 +304,6 @@ export const ConnectedAccountsPage = (): ReactElement => {
           </div>
         </Dialog.Content>
       </Dialog.Root>
-
-      <style>{`
-        .connected-accounts-page {
-          max-width: 600px;
-        }
-        .connected-accounts-page__title {
-          font-size: var(--ui-font-size-xl);
-          font-weight: var(--ui-font-weight-semibold);
-          margin-bottom: var(--ui-gap-xs);
-        }
-        .connected-accounts-page__description {
-          color: var(--ui-color-text-muted);
-          margin-bottom: var(--ui-gap-lg);
-        }
-        .connected-accounts-list {
-          display: flex;
-          flex-direction: column;
-          gap: var(--ui-gap-sm);
-        }
-        .connected-account-card {
-          padding: 0;
-        }
-        .connected-account-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: var(--ui-gap-md);
-        }
-        .connected-account-info {
-          display: flex;
-          align-items: center;
-          gap: var(--ui-gap-md);
-        }
-        .connected-account-icon-wrapper {
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--ui-color-surface);
-          border-radius: var(--ui-radius-md);
-          border: 1px solid var(--ui-color-border);
-        }
-        .connected-account-icon {
-          width: 24px;
-          height: 24px;
-        }
-        .connected-account-details {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .connected-account-name {
-          font-weight: var(--ui-font-weight-medium);
-        }
-        .connected-account-email {
-          font-size: var(--ui-font-size-sm);
-          color: var(--ui-color-text-muted);
-        }
-        .connected-account-status {
-          font-size: var(--ui-font-size-sm);
-          color: var(--ui-color-text-muted);
-        }
-        .connected-accounts-page__actions {
-          margin-top: var(--ui-gap-md);
-          display: flex;
-          justify-content: flex-end;
-        }
-      `}</style>
     </PageContainer>
   );
 };

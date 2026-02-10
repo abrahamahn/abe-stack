@@ -131,6 +131,22 @@ interface SecurityEventsExportResponseLocal {
   filename: string;
 }
 
+interface RouteRegistryEntryLocal {
+  path: string;
+  method: string;
+  isPublic: boolean;
+  roles: string[];
+  hasSchema: boolean;
+  module: string;
+  summary?: string;
+  tags?: string[];
+}
+
+export interface RouteManifestResponseLocal {
+  routes: RouteRegistryEntryLocal[];
+  count: number;
+}
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -165,6 +181,9 @@ export interface AdminApiClient {
   getQueueStats: () => Promise<QueueStatsLocal>;
   retryJob: (jobId: string) => Promise<JobActionResponseLocal>;
   cancelJob: (jobId: string) => Promise<JobActionResponseLocal>;
+
+  // API introspection
+  getRouteManifest: () => Promise<RouteManifestResponseLocal>;
 }
 
 // ============================================================================
@@ -319,6 +338,10 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
       return request<JobActionResponseLocal>(`/admin/jobs/${jobId}/cancel`, {
         method: 'POST',
       });
+    },
+
+    async getRouteManifest(): Promise<RouteManifestResponseLocal> {
+      return request<RouteManifestResponseLocal>('/admin/routes');
     },
   };
 }

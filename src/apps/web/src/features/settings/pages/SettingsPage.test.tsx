@@ -15,6 +15,7 @@ vi.mock('@auth/hooks', () => ({
 
 vi.mock('../components', () => {
   const mockAvatarUpload = () => <div data-testid="avatar-upload">Avatar Upload</div>;
+  const mockDangerZone = () => <div data-testid="danger-zone">Danger Zone</div>;
   const mockEmailChangeForm = () => <div data-testid="email-change-form">Email Change Form</div>;
   const mockForgotPasswordShortcut = () => (
     <div data-testid="forgot-password-shortcut">Forgot Password Shortcut</div>
@@ -23,23 +24,32 @@ vi.mock('../components', () => {
     <div data-testid="oauth-connections">OAuth Connections</div>
   );
   const mockPasswordChangeForm = () => <div data-testid="password-form">Password Form</div>;
+  const mockProfileCompleteness = () => (
+    <div data-testid="profile-completeness">Profile Completeness</div>
+  );
   const mockProfileForm = () => <div data-testid="profile-form">Profile Form</div>;
   const mockSessionsList = () => <div data-testid="sessions-list">Sessions List</div>;
   const mockTotpManagement = () => <div data-testid="totp-management">TOTP Management</div>;
+  const mockUsernameForm = () => <div data-testid="username-form">Username Form</div>;
 
   return {
     AvatarUpload: mockAvatarUpload,
+    DangerZone: mockDangerZone,
     EmailChangeForm: mockEmailChangeForm,
     ForgotPasswordShortcut: mockForgotPasswordShortcut,
     OAuthConnectionsList: mockOAuthConnectionsList,
     PasswordChangeForm: mockPasswordChangeForm,
+    ProfileCompleteness: mockProfileCompleteness,
     ProfileForm: mockProfileForm,
     SessionsList: mockSessionsList,
     TotpManagement: mockTotpManagement,
+    UsernameForm: mockUsernameForm,
   };
 });
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+
   const mockButton = ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>
   );
@@ -66,6 +76,7 @@ vi.mock('@abe-stack/ui', () => {
   );
 
   return {
+    ...actual,
     Button: mockButton,
     Card: mockCard,
     Container: mockContainer,
@@ -106,8 +117,7 @@ describe('SettingsPage', () => {
       } as any);
 
       const { container } = render(<SettingsPage />);
-      // The component shows a skeleton loader with animate-pulse class
-      const loadingElement = container.querySelector('.animate-pulse');
+      const loadingElement = container.querySelector('.skeleton');
       expect(loadingElement).toBeInTheDocument();
     });
   });

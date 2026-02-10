@@ -214,7 +214,13 @@ export function isCommonPassword(password: string): boolean {
   }
 
   // Check without trailing numbers
-  const withoutTrailingNumbers = lower.replace(/\d+$/, '');
+  let trimIndex = lower.length;
+  while (trimIndex > 0) {
+    const code = lower.charCodeAt(trimIndex - 1);
+    if (code < 48 || code > 57) break;
+    trimIndex--;
+  }
+  const withoutTrailingNumbers = lower.slice(0, trimIndex);
   if (withoutTrailingNumbers.length >= 4 && COMMON_PASSWORDS.has(withoutTrailingNumbers)) {
     return true;
   }

@@ -8,6 +8,7 @@
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { clearRegistry, getRegisteredRoutes } from './route-registry';
 import { createRouteMap, protectedRoute, publicRoute, registerRouteMap } from './routing';
 
 import type {
@@ -200,6 +201,7 @@ describe('registerRouteMap', () => {
     const mock = createMockFastify();
     app = mock.app;
     routes = mock.routes;
+    clearRegistry();
     vi.clearAllMocks();
   });
 
@@ -482,5 +484,90 @@ describe('registerRouteMap', () => {
     // status is a string, not a number — should be returned raw
     expect(result).toEqual({ status: 'active', body: 'not-a-response-pattern' });
     expect(reply.sentStatus).toBeNull();
+  });
+
+  test('should feed route registry with metadata for each registered route', () => {
+    const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
+    const schema: ValidationSchema = { parse: vi.fn(), safeParse: vi.fn() };
+    const routeMap = createRouteMap([
+      ['auth/login', publicRoute('POST', handler, schema)],
+      ['admin/users', protectedRoute('GET', handler, ['admin'])],
+    ]);
+
+    registerRouteMap(app, mockCtx, routeMap, defaultOptions);
+
+    const registry = getRegisteredRoutes();
+    expect(registry).toHaveLength(2);
+
+    expect(registry[0]).toEqual({
+      path: '/api/auth/login',
+      method: 'POST',
+      isPublic: true,
+      roles: [],
+      hasSchema: true,
+      module: 'auth',
+    });
+
+    expect(registry[1]).toEqual({
+      path: '/api/admin/users',
+      method: 'GET',
+      isPublic: false,
+      roles: ['admin'],
+      hasSchema: false,
+      module: 'admin',
+    });
+  });
+
+  test('should use explicit module from options when provided', () => {
+    const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
+    const routeMap = createRouteMap([['health', publicRoute('GET', handler)]]);
+
+    registerRouteMap(app, mockCtx, routeMap, { ...defaultOptions, module: 'system' });
+
+    const registry = getRegisteredRoutes();
+    expect(registry).toHaveLength(1);
+    expect(registry[0]!.module).toBe('system');
+  });
+
+  test('should merge OpenAPI metadata into Fastify schema', () => {
+    const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
+    const routeMap = createRouteMap([
+      [
+        'health',
+        publicRoute('GET', handler, undefined, {
+          summary: 'Health check',
+          tags: ['system'],
+          response: { 200: { type: 'object', properties: { status: { type: 'string' } } } },
+        }),
+      ],
+    ]);
+
+    registerRouteMap(app, mockCtx, routeMap, defaultOptions);
+
+    const route = routes[0];
+    if (route === undefined) throw new Error('Route not registered');
+    const schema = route.schema as Record<string, unknown>;
+    expect(schema['summary']).toBe('Health check');
+    expect(schema['tags']).toEqual(['system']);
+    expect(schema['response']).toBeDefined();
+  });
+
+  test('should pass OpenAPI summary and tags to route registry', () => {
+    const handler: RouteHandler = vi.fn(() => Promise.resolve(undefined));
+    const routeMap = createRouteMap([
+      [
+        'test',
+        publicRoute('GET', handler, undefined, {
+          summary: 'Test endpoint',
+          tags: ['test'],
+        }),
+      ],
+    ]);
+
+    registerRouteMap(app, mockCtx, routeMap, defaultOptions);
+
+    const registry = getRegisteredRoutes();
+    expect(registry[0]!.summary).toBe('Test endpoint');
+    expect(registry[0]!.tags).toEqual(['test']);
   });
 });

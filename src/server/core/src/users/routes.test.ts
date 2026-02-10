@@ -34,10 +34,15 @@ describe('User Routes Definition', () => {
       const expectedRoutes = [
         'users/me',
         'users/list',
+        'users/me/profile-completeness',
+        'users/me/username',
         'users/me/sessions',
         'users/me/sessions/count',
         'users/me/sessions/:id',
         'users/me/sessions/revoke-all',
+        'users/me/deactivate',
+        'users/me/delete',
+        'users/me/reactivate',
       ];
 
       for (const route of expectedRoutes) {
@@ -46,7 +51,7 @@ describe('User Routes Definition', () => {
     });
 
     test('should have correct number of routes', () => {
-      expect(userRoutes.size).toBe(6);
+      expect(userRoutes.size).toBe(11);
     });
   });
 
@@ -61,6 +66,14 @@ describe('User Routes Definition', () => {
 
     test('users/me/sessions should be GET', () => {
       expect(userRoutes.get('users/me/sessions')!.method).toBe('GET');
+    });
+
+    test('users/me/profile-completeness should be GET', () => {
+      expect(userRoutes.get('users/me/profile-completeness')!.method).toBe('GET');
+    });
+
+    test('users/me/username should be PATCH', () => {
+      expect(userRoutes.get('users/me/username')!.method).toBe('PATCH');
     });
 
     test('users/me/sessions/count should be GET', () => {
@@ -95,6 +108,18 @@ describe('User Routes Definition', () => {
       expect(route.roles).toContain('user');
     });
 
+    test('users/me/profile-completeness should require user authentication', () => {
+      const route = userRoutes.get('users/me/profile-completeness')!;
+      expect(route.isPublic).toBe(false);
+      expect(route.roles).toContain('user');
+    });
+
+    test('users/me/username should require user authentication', () => {
+      const route = userRoutes.get('users/me/username')!;
+      expect(route.isPublic).toBe(false);
+      expect(route.roles).toContain('user');
+    });
+
     test('users/me/sessions/count should require user authentication', () => {
       const route = userRoutes.get('users/me/sessions/count')!;
       expect(route.isPublic).toBe(false);
@@ -124,6 +149,7 @@ describe('User Routes Definition', () => {
     });
 
     test('session routes should not have request body schemas', () => {
+      expect(userRoutes.get('users/me/profile-completeness')!.schema).toBeUndefined();
       expect(userRoutes.get('users/me/sessions')!.schema).toBeUndefined();
       expect(userRoutes.get('users/me/sessions/count')!.schema).toBeUndefined();
       expect(userRoutes.get('users/me/sessions/:id')!.schema).toBeUndefined();
@@ -135,6 +161,8 @@ describe('User Routes Definition', () => {
     test('should have handler function defined for all routes', () => {
       expect(typeof userRoutes.get('users/me')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/list')!.handler).toBe('function');
+      expect(typeof userRoutes.get('users/me/profile-completeness')!.handler).toBe('function');
+      expect(typeof userRoutes.get('users/me/username')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/me/sessions')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/me/sessions/count')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/me/sessions/:id')!.handler).toBe('function');

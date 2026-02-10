@@ -1,4 +1,4 @@
-// apps/server/src/__tests__/integration/auth.integration.test.ts
+// src/apps/server/src/__tests__/integration/auth.integration.test.ts
 /**
  * Auth API Integration Tests
  *
@@ -124,6 +124,14 @@ function createMockRepos() {
     invoices: { findByUserId: vi.fn().mockResolvedValue([]) },
     paymentMethods: { findByUserId: vi.fn().mockResolvedValue([]) },
     billingEvents: { create: vi.fn().mockResolvedValue({ id: 'be-1' }) },
+    legalDocuments: {
+      findLatestByType: vi.fn().mockResolvedValue(null),
+      findById: vi.fn().mockResolvedValue(null),
+    },
+    userAgreements: {
+      findByUserAndDocument: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({ id: 'ua-1', agreedAt: new Date() }),
+    },
   };
 }
 
@@ -162,6 +170,9 @@ function createMockEmailTemplates() {
     emailVerification: vi.fn().mockReturnValue(template),
     existingAccountRegistrationAttempt: vi.fn().mockReturnValue(template),
     tokenReuseAlert: vi.fn().mockReturnValue(template),
+    newLoginAlert: vi.fn().mockReturnValue(template),
+    passwordChangedAlert: vi.fn().mockReturnValue(template),
+    emailChangedAlert: vi.fn().mockReturnValue(template),
   };
 }
 

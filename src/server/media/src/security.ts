@@ -51,7 +51,6 @@ export class BasicSecurityScanner {
     };
 
     try {
-      // Basic file validation
       const stats = await fs.stat(filePath);
       result.metadata.fileSize = stats.size;
 
@@ -72,7 +71,7 @@ export class BasicSecurityScanner {
 
       // Read first 1KB for basic content analysis
       const fd = await fs.open(filePath, 'r');
-      const buffer = Buffer.alloc(1024);
+      const buffer: Buffer = Buffer.alloc(1024);
       try {
         await fd.read(buffer, 0, 1024, 0);
       } finally {

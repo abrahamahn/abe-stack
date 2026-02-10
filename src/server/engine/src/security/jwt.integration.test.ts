@@ -520,6 +520,52 @@ describe('JWT Integration', () => {
     });
   });
 
+  describe('Clock skew tolerance', () => {
+    it('should accept token expired within tolerance window', () => {
+      const token = sign({ userId: '123' }, SECRET, { expiresIn: '15m' });
+
+      // Advance past expiration by 15 seconds
+      vi.advanceTimersByTime(15 * 60 * 1000 + 15 * 1000);
+
+      // Without tolerance: should fail
+      expect(() => verify(token, SECRET)).toThrow('Token has expired');
+
+      // With 30s tolerance: should pass
+      const payload = verify(token, SECRET, { clockToleranceSeconds: 30 });
+      expect(payload['userId']).toBe('123');
+    });
+
+    it('should reject token expired beyond tolerance window', () => {
+      const token = sign({ userId: '123' }, SECRET, { expiresIn: '15m' });
+
+      // Advance past expiration by 31 seconds (beyond 30s tolerance)
+      vi.advanceTimersByTime(15 * 60 * 1000 + 31 * 1000);
+
+      expect(() => verify(token, SECRET, { clockToleranceSeconds: 30 })).toThrow(
+        'Token has expired',
+      );
+    });
+
+    it('should work with zero tolerance (default behavior)', () => {
+      const token = sign({ userId: '123' }, SECRET, { expiresIn: '1s' });
+
+      vi.advanceTimersByTime(2000);
+
+      expect(() => verify(token, SECRET, { clockToleranceSeconds: 0 })).toThrow(
+        'Token has expired',
+      );
+    });
+
+    it('should accept non-expired token regardless of tolerance', () => {
+      const token = sign({ userId: '123' }, SECRET, { expiresIn: '15m' });
+
+      vi.advanceTimersByTime(10 * 60 * 1000); // 10 minutes - still valid
+
+      const payload = verify(token, SECRET, { clockToleranceSeconds: 30 });
+      expect(payload['userId']).toBe('123');
+    });
+  });
+
   describe('Edge cases', () => {
     it('should handle empty payload', () => {
       const token = sign({}, SECRET);

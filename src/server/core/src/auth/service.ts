@@ -121,6 +121,12 @@ export interface AuthResult {
     phoneVerified: boolean | null;
     dateOfBirth: string | null;
     gender: string | null;
+    bio: string | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+    language: string | null;
+    website: string | null;
     createdAt: string;
     updatedAt: string;
   };
@@ -206,14 +212,28 @@ export async function registerUser(
   const existingUser = await repos.users.findByEmail(canonicalEmail);
 
   if (existingUser !== null) {
-    // If user exists, send an email to them to notify about the new registration attempt
-    // and return a generic success message to prevent user enumeration.
-    try {
-      const emailTemplate = emailTemplates.existingAccountRegistrationAttempt(existingUser.email);
-      await emailService.send(buildEmailOptions(existingUser.email, emailTemplate));
-    } catch {
-      // Log the error but don't expose it to the client
-      // A monitoring/alerting system should be in place for such errors
+    if (!existingUser.emailVerified && baseUrl !== undefined && baseUrl !== '') {
+      // Unverified account exists — resend verification email so user can complete registration
+      try {
+        await resendVerificationEmail(
+          db,
+          repos,
+          emailService,
+          emailTemplates,
+          existingUser.email,
+          baseUrl,
+        );
+      } catch {
+        // Log the error but don't expose it to the client
+      }
+    } else {
+      // Verified account — notify about registration attempt (prevents enumeration)
+      try {
+        const emailTemplate = emailTemplates.existingAccountRegistrationAttempt(existingUser.email);
+        await emailService.send(buildEmailOptions(existingUser.email, emailTemplate));
+      } catch {
+        // Log the error but don't expose it to the client
+      }
     }
     return {
       status: 'pending_verification',

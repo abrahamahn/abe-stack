@@ -6,6 +6,7 @@
  */
 
 import {
+  Badge,
   Button,
   Pagination,
   Skeleton,
@@ -56,18 +57,18 @@ export interface SecurityEventsTableProps {
 // Helper Functions
 // ============================================================================
 
-function getSeverityBadgeClass(severity: string): string {
+function severityToTone(severity: string): 'danger' | 'warning' | 'info' | 'success' {
   switch (severity) {
     case 'critical':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      return 'danger';
     case 'high':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      return 'danger';
     case 'medium':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      return 'warning';
     case 'low':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      return 'success';
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+      return 'info';
   }
 }
 
@@ -138,7 +139,7 @@ export const SecurityEventsTable = ({
           {data.data.map((event) => (
             <TableRow
               key={event.id}
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover-row"
               onClick={() => {
                 handleRowClick(event);
               }}
@@ -150,11 +151,7 @@ export const SecurityEventsTable = ({
                 <Text size="sm">{formatEventType(event.eventType)}</Text>
               </TableCell>
               <TableCell>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityBadgeClass(event.severity)}`}
-                >
-                  {event.severity.toUpperCase()}
-                </span>
+                <Badge tone={severityToTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
               </TableCell>
               <TableCell>
                 <Text size="sm">{event.email ?? '-'}</Text>

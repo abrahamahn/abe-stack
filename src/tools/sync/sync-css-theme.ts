@@ -47,12 +47,13 @@ async function build(): Promise<void> {
   await fs.promises.mkdir(cacheDir, { recursive: true });
 
   const existingHash = await fs.promises.readFile(themeHashPath, 'utf8').catch((): null => null);
-  const hasThemeCss = await fs.promises
-    .stat(themeCssPath)
+  // Use readFile instead of stat to avoid TOCTOU race condition
+  const existingCss = await fs.promises
+    .readFile(themeCssPath, 'utf8')
     .then(() => true)
     .catch(() => false);
 
-  if (hasThemeCss && existingHash?.trim() === inputHash) {
+  if (existingCss && existingHash?.trim() === inputHash) {
     log('Theme CSS is up to date; skipping rebuild.');
     return;
   }

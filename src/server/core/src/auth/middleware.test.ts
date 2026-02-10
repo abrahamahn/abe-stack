@@ -1,7 +1,9 @@
 // src/server/core/src/auth/middleware.test.ts
+import { ForbiddenError, UnauthorizedError } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
+  assertUserActive,
   createAuthGuard,
   createRequireAuth,
   createRequireRole,
@@ -91,7 +93,7 @@ describe('extractTokenPayload', () => {
     const result = extractTokenPayload(request as FastifyRequest, TEST_SECRET);
 
     expect(result).toEqual(mockPayload);
-    expect(verifyToken).toHaveBeenCalledWith('valid-token', TEST_SECRET);
+    expect(verifyToken).toHaveBeenCalledWith('valid-token', TEST_SECRET, undefined);
   });
 
   test('should return null when token verification fails', () => {
@@ -115,7 +117,7 @@ describe('extractTokenPayload', () => {
 
     extractTokenPayload(request as FastifyRequest, TEST_SECRET);
 
-    expect(verifyToken).toHaveBeenCalledWith('my.jwt.token', TEST_SECRET);
+    expect(verifyToken).toHaveBeenCalledWith('my.jwt.token', TEST_SECRET, undefined);
   });
 });
 
@@ -355,5 +357,40 @@ describe('createAuthGuard', () => {
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });
+  });
+});
+
+// ============================================================================
+// Tests: assertUserActive
+// ============================================================================
+
+describe('assertUserActive', () => {
+  test('should pass when user is active (lockedUntil is null)', async () => {
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: null });
+
+    await expect(assertUserActive(getUserById, 'user-123')).resolves.toBeUndefined();
+    expect(getUserById).toHaveBeenCalledWith('user-123');
+  });
+
+  test('should pass when user lock has expired (lockedUntil in the past)', async () => {
+    const pastDate = new Date(Date.now() - 60_000); // 1 minute ago
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: pastDate });
+
+    await expect(assertUserActive(getUserById, 'user-123')).resolves.toBeUndefined();
+  });
+
+  test('should throw ForbiddenError when user is locked (lockedUntil in the future)', async () => {
+    const futureDate = new Date(Date.now() + 3_600_000); // 1 hour from now
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: futureDate });
+
+    await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow(ForbiddenError);
+    await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow('Account suspended');
+  });
+
+  test('should throw UnauthorizedError when user is not found', async () => {
+    const getUserById = vi.fn().mockResolvedValue(null);
+
+    await expect(assertUserActive(getUserById, 'nonexistent')).rejects.toThrow(UnauthorizedError);
+    await expect(assertUserActive(getUserById, 'nonexistent')).rejects.toThrow('User not found');
   });
 });

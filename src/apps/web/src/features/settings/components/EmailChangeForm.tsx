@@ -10,7 +10,7 @@
  */
 
 import { getApiClient } from '@abe-stack/api';
-import { Alert, Button, FormField, Input, PasswordInput } from '@abe-stack/ui';
+import { Alert, Button, FormField, Input, PasswordInput, Text } from '@abe-stack/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 // ============================================================================
@@ -85,12 +85,12 @@ export const EmailChangeForm = ({ onSuccess }: EmailChangeFormProps): ReactEleme
       onSubmit={(e) => {
         void handleSubmit(e);
       }}
-      className="space-y-4"
+      className="space-y-5"
     >
-      <p className="text-sm text-gray-500">
+      <Text size="sm" tone="muted">
         A confirmation link will be sent to your new email address. Your email will not change until
         you click the link.
-      </p>
+      </Text>
 
       <FormField label="New Email Address" htmlFor="newEmail" required>
         <Input

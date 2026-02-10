@@ -91,6 +91,12 @@ export interface MagicLinkResult {
     phoneVerified: boolean | null;
     dateOfBirth: string | null;
     gender: string | null;
+    bio: string | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+    language: string | null;
+    website: string | null;
     createdAt: string;
     updatedAt: string;
   };

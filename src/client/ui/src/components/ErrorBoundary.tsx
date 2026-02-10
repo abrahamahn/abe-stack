@@ -6,19 +6,12 @@ import '../styles/components.css';
 /**
  * Render prop signature for custom error fallback UI.
  *
- * @param error - The error that was caught
- * @param reset - Function to reset the error boundary and retry rendering
- * @returns React node to render as fallback
+ * Receives the caught error and a reset function, and returns the
+ * fallback UI to render.
  */
 type ErrorFallbackRender = (error: Error, reset: () => void) => ReactNode;
 
-/**
- * Props for the ErrorBoundary component.
- *
- * @param children - Child components to render when no error is present
- * @param fallback - Static fallback node or render function for custom error UI
- * @param onError - Callback invoked when an error is caught (for logging/reporting)
- */
+/** Props for the ErrorBoundary component. */
 export type ErrorBoundaryProps = {
   /** Child components to render */
   children: ReactNode;
@@ -29,6 +22,7 @@ export type ErrorBoundaryProps = {
 };
 
 type ErrorBoundaryState = {
+  /** The caught error, or null when no error has occurred */
   error: Error | null;
 };
 

@@ -74,6 +74,18 @@ export interface User {
   dateOfBirth: string | null;
   /** User's gender */
   gender: string | null;
+  /** User's bio/about text */
+  bio?: string | null | undefined;
+  /** User's city */
+  city?: string | null | undefined;
+  /** User's state/province */
+  state?: string | null | undefined;
+  /** User's country */
+  country?: string | null | undefined;
+  /** User's preferred language */
+  language?: string | null | undefined;
+  /** User's website URL */
+  website?: string | null | undefined;
   /** ISO 8601 string of when the user was created */
   createdAt: string;
   /** ISO 8601 string of when the user was last updated */
@@ -88,6 +100,20 @@ export interface UpdateProfileRequest {
   phone?: string | null | undefined;
   dateOfBirth?: string | null | undefined;
   gender?: string | null | undefined;
+  bio?: string | null | undefined;
+  city?: string | null | undefined;
+  state?: string | null | undefined;
+  country?: string | null | undefined;
+  language?: string | null | undefined;
+  website?: string | null | undefined;
+}
+
+/** Profile completeness response */
+export interface ProfileCompletenessResponse {
+  /** Percentage of profile fields that are filled (0-100) */
+  percentage: number;
+  /** List of field names that are not yet filled */
+  missingFields: string[];
 }
 
 /** Change password request */
@@ -160,6 +186,12 @@ export const userSchema: Schema<User> = createSchema((data: unknown) => {
     phoneVerified: parseNullable(obj['phoneVerified'], (v) => parseBoolean(v, 'phoneVerified')),
     dateOfBirth: parseNullable(obj['dateOfBirth'], (v) => parseString(v, 'dateOfBirth')),
     gender: parseNullable(obj['gender'], (v) => parseString(v, 'gender')),
+    bio: parseNullableOptional(obj['bio'], (v) => parseString(v, 'bio')),
+    city: parseNullableOptional(obj['city'], (v) => parseString(v, 'city')),
+    state: parseNullableOptional(obj['state'], (v) => parseString(v, 'state')),
+    country: parseNullableOptional(obj['country'], (v) => parseString(v, 'country')),
+    language: parseNullableOptional(obj['language'], (v) => parseString(v, 'language')),
+    website: parseNullableOptional(obj['website'], (v) => parseString(v, 'website')),
     createdAt: isoDateTimeSchema.parse(obj['createdAt']),
     updatedAt: isoDateTimeSchema.parse(obj['updatedAt']),
   };
@@ -180,6 +212,33 @@ export const updateProfileRequestSchema: Schema<UpdateProfileRequest> = createSc
       phone: parseNullableOptional(obj['phone'], (v) => parseString(v, 'phone')),
       dateOfBirth: parseNullableOptional(obj['dateOfBirth'], (v) => parseString(v, 'dateOfBirth')),
       gender: parseNullableOptional(obj['gender'], (v) => parseString(v, 'gender')),
+      bio: parseNullableOptional(obj['bio'], (v) => parseString(v, 'bio', { max: 500 })),
+      city: parseNullableOptional(obj['city'], (v) => parseString(v, 'city', { max: 100 })),
+      state: parseNullableOptional(obj['state'], (v) => parseString(v, 'state', { max: 100 })),
+      country: parseNullableOptional(obj['country'], (v) =>
+        parseString(v, 'country', { max: 100 }),
+      ),
+      language: parseNullableOptional(obj['language'], (v) =>
+        parseString(v, 'language', { max: 100 }),
+      ),
+      website: parseNullableOptional(obj['website'], (v) =>
+        parseString(v, 'website', { url: true }),
+      ),
+    };
+  },
+);
+
+export const profileCompletenessResponseSchema: Schema<ProfileCompletenessResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      percentage: parseNumber(obj['percentage'], 'percentage'),
+      missingFields: Array.isArray(obj['missingFields'])
+        ? obj['missingFields'].map((item: unknown) => parseString(item, 'missingFields[]'))
+        : ((): never => {
+            throw new Error('missingFields must be an array');
+          })(),
     };
   },
 );

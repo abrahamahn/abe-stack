@@ -47,6 +47,7 @@ import {
   handleListJobs,
   handleRetryJob,
 } from './jobsHandlers';
+import { handleGetRouteManifest } from './route-manifest';
 import {
   handleExportSecurityEvents,
   handleGetSecurityEvent,
@@ -170,6 +171,13 @@ export const adminRoutes: RouteMap = createRouteMap([
   ['admin/jobs/:jobId', adminProtectedRoute('GET', handleGetJobDetails)],
   ['admin/jobs/:jobId/retry', adminProtectedRoute('POST', handleRetryJob)],
   ['admin/jobs/:jobId/cancel', adminProtectedRoute('POST', handleCancelJob)],
+
+  // ============================================================================
+  // API Introspection Routes
+  // ============================================================================
+
+  // Route manifest — lists all registered API routes
+  ['admin/routes', adminProtectedRoute('GET', handleGetRouteManifest)],
 
   // ============================================================================
   // Billing Admin Routes

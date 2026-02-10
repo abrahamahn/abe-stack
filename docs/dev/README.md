@@ -13,6 +13,7 @@ Workflow, testing, configuration, and tooling documentation for ABE Stack.
 | [Testing](./testing.md)             | Test strategy, TDD, React testing patterns | Writing tests                |
 | [Sync Scripts](./sync-scripts.md)   | DX automation scripts                      | Understanding automation     |
 | [Security](./security.md)           | Auth, tokens, rate limiting, auditing      | Security-related changes     |
+| [Security CI](./security-ci.md)     | CodeQL, Semgrep, OSV, Gitleaks, Trivy      | Security pipeline & triage   |
 | [Performance](./performance.md)     | Database and frontend optimization         | Performance issues           |
 
 ---
@@ -37,12 +38,14 @@ Workflow, testing, configuration, and tooling documentation for ABE Stack.
 | Document                          | Description                                                       |
 | --------------------------------- | ----------------------------------------------------------------- |
 | [Sync Scripts](./sync-scripts.md) | DX automation (path aliases, barrel exports, file headers, theme) |
+| [Security CI](./security-ci.md)   | CI security scanning pipeline and tuning (private repo friendly)  |
 
 ### Production
 
 | Document                        | Description                                                 |
 | ------------------------------- | ----------------------------------------------------------- |
 | [Security](./security.md)       | Password hashing, JWT tokens, refresh tokens, rate limiting |
+| [Security CI](./security-ci.md) | Code scanning pipeline, severity tuning, blocking strategy  |
 | [Performance](./performance.md) | Database optimization, N+1 fixes, frontend code splitting   |
 
 ---

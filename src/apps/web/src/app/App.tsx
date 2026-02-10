@@ -29,10 +29,14 @@ import {
   useRouteFocusAnnounce,
 } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
-import { useEffect, type ReactElement, Suspense } from 'react';
+import { TosAcceptanceModal } from '@features/auth/components';
+import { useCallback, useEffect, useRef, useState, type ReactElement, Suspense } from 'react';
 
 import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
 import { appRoutes, type AppRoute } from './routes'; // Import appRoutes and AppRoute type
+import { setTosHandler } from './tosHandler';
+
+import type { TosRequiredPayload } from '@abe-stack/api';
 
 // ============================================================================
 // Types for Persistence (re-added)
@@ -116,8 +120,7 @@ const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
       );
     }
 
-    const routeProps: { key: number; element: ReactElement; path?: string; index?: boolean } = {
-      key: index,
+    const routeProps: { element: ReactElement; path?: string; index?: boolean } = {
       element: elementToRender,
     };
 
@@ -135,7 +138,11 @@ const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
         ? renderRoutes(route.children)
         : null;
 
-    return <Route {...routeProps}>{childRoutes}</Route>;
+    return (
+      <Route key={index} {...routeProps}>
+        {childRoutes}
+      </Route>
+    );
   });
 };
 
@@ -227,6 +234,89 @@ function useQueryPersistence(environment: ClientEnvironment): void {
   }, [queryCache, maxAge, throttleTime, persister]);
 }
 
+// ============================================================================
+// ToS Acceptance State
+// ============================================================================
+
+interface TosModalState {
+  open: boolean;
+  documentId: string | null;
+  requiredVersion: number | null;
+}
+
+const TOS_INITIAL_STATE: TosModalState = {
+  open: false,
+  documentId: null,
+  requiredVersion: null,
+};
+
+/**
+ * useTosAcceptance - Manages ToS acceptance modal state.
+ *
+ * Registers a handler with the tosHandler module so the API client's
+ * onTosRequired callback can trigger the modal from any API call.
+ */
+function useTosAcceptance(environment: ClientEnvironment): {
+  state: TosModalState;
+  handleAccept: (documentId: string) => Promise<void>;
+  handleDismiss: () => void;
+} {
+  const [state, setState] = useState<TosModalState>(TOS_INITIAL_STATE);
+  const resolveRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    const cleanup = setTosHandler((payload: TosRequiredPayload) => {
+      return new Promise<void>((resolve) => {
+        resolveRef.current = resolve;
+        setState({
+          open: true,
+          documentId: payload.documentId,
+          requiredVersion: payload.requiredVersion,
+        });
+      });
+    });
+    return cleanup;
+  }, []);
+
+  const handleAccept = useCallback(
+    async (documentId: string) => {
+      const { apiUrl } = environment.config;
+      const baseUrl = apiUrl.replace(/\/+$/, '');
+      const token = localStorage.getItem('accessToken');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token !== null) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${baseUrl}/api/auth/tos/accept`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ documentId }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as { message?: string };
+        throw new Error(data.message ?? 'Failed to accept Terms of Service');
+      }
+
+      // Close modal and resolve the pending promise so the original request retries
+      setState(TOS_INITIAL_STATE);
+      resolveRef.current?.();
+      resolveRef.current = null;
+    },
+    [environment.config],
+  );
+
+  const handleDismiss = useCallback(() => {
+    setState(TOS_INITIAL_STATE);
+    // Don't resolve - the original request will remain rejected
+    resolveRef.current = null;
+  }, []);
+
+  return { state, handleAccept, handleDismiss };
+}
+
 /**
  * useAuthInitialization - Restores authentication session on app mount
  *
@@ -264,6 +354,13 @@ export const App = ({ environment }: AppProps): ReactElement => {
   // Restore authentication session from cookies
   useAuthInitialization(environment);
 
+  // ToS acceptance modal state
+  const {
+    state: tosState,
+    handleAccept: handleTosAccept,
+    handleDismiss: handleTosDismiss,
+  } = useTosAcceptance(environment);
+
   return (
     <ErrorBoundary>
       <QueryCacheProvider cache={environment.queryCache}>
@@ -279,6 +376,13 @@ export const App = ({ environment }: AppProps): ReactElement => {
                       <AppRoutes />
                     </div>
                     <AppToaster />
+                    <TosAcceptanceModal
+                      open={tosState.open}
+                      documentId={tosState.documentId}
+                      requiredVersion={tosState.requiredVersion}
+                      onAccept={handleTosAccept}
+                      onDismiss={handleTosDismiss}
+                    />
                   </div>
                 </LiveRegion>
               </HistoryProvider>

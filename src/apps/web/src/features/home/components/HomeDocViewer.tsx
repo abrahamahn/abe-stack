@@ -1,15 +1,12 @@
 // src/apps/web/src/features/home/components/HomeDocViewer.tsx
 import { Heading, Markdown, Skeleton, Text, useDelayedFlag } from '@abe-stack/ui';
 
-import { docsMeta } from '../data';
-
-import type { DocKey } from '../types';
 import type { ReactElement } from 'react';
 
 /** Props for the HomeDocViewer component. */
 export interface HomeDocViewerProps {
   /** Currently selected document key, or null for welcome screen */
-  selectedDoc: DocKey | null;
+  selectedDoc: string | null;
   /** Loaded markdown content, or null if not yet loaded */
   content: string | null;
   /** Whether content is currently being fetched */
@@ -34,7 +31,7 @@ export const HomeDocViewer = ({
 
   if (selectedDoc === null) {
     return (
-      <div className="p-6 flex flex-col gap-3">
+      <div className="p-2 flex flex-col gap-3">
         <Heading as="h2" size="lg">
           Welcome
         </Heading>
@@ -43,10 +40,8 @@ export const HomeDocViewer = ({
     );
   }
 
-  const meta = docsMeta[selectedDoc];
-
   return (
-    <div className="p-6">
+    <div className="p-2">
       {showSkeleton ? (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-8 w-48" />
@@ -56,9 +51,6 @@ export const HomeDocViewer = ({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <Text tone="muted" className="text-xs uppercase tracking-wide">
-            {meta.category} / {meta.label}
-          </Text>
           <Markdown className="markdown-content">{content ?? ''}</Markdown>
         </div>
       )}

@@ -48,25 +48,140 @@ export interface SanitizationResult {
  * @param input - The string to sanitize
  * @returns The sanitized string
  */
+function stripScriptBlocks(value: string): string {
+  let output = value;
+  let lower = output.toLowerCase();
+  for (;;) {
+    const start = lower.indexOf('<script');
+    if (start < 0) {
+      return output;
+    }
+    const openEnd = lower.indexOf('>', start + 7);
+    if (openEnd < 0) {
+      output = output.slice(0, start);
+      return output;
+    }
+    const closeStart = lower.indexOf('</script>', openEnd + 1);
+    if (closeStart < 0) {
+      output = output.slice(0, start);
+      return output;
+    }
+    output = output.slice(0, start) + output.slice(closeStart + 9);
+    lower = output.toLowerCase();
+  }
+}
+
+function isWordChar(code: number): boolean {
+  return (
+    (code >= 48 && code <= 57) ||
+    (code >= 65 && code <= 90) ||
+    (code >= 97 && code <= 122) ||
+    code === 95
+  );
+}
+
+function isWhitespace(code: number): boolean {
+  return code === 9 || code === 10 || code === 13 || code === 32;
+}
+
+function stripEventHandlers(value: string): string {
+  let out = '';
+  let i = 0;
+  while (i < value.length) {
+    const first = value.charCodeAt(i);
+    const second = value.charCodeAt(i + 1);
+    if ((first === 79 || first === 111) && (second === 78 || second === 110)) {
+      let j = i + 2;
+      while (j < value.length && isWordChar(value.charCodeAt(j))) {
+        j++;
+      }
+      if (j > i + 2) {
+        let k = j;
+        while (k < value.length && isWhitespace(value.charCodeAt(k))) {
+          k++;
+        }
+        if (k < value.length && value.charCodeAt(k) === 61) {
+          i = k + 1;
+          continue;
+        }
+      }
+    }
+    out += value[i] as string;
+    i++;
+  }
+  return out;
+}
+
+function stripJavaScriptScheme(value: string): string {
+  let output = value;
+  let lower = output.toLowerCase();
+  for (;;) {
+    const idx = lower.indexOf('javascript:');
+    if (idx < 0) {
+      return output;
+    }
+    output = output.slice(0, idx) + output.slice(idx + 'javascript:'.length);
+    lower = output.toLowerCase();
+  }
+}
+
+function isAllowedDataImagePrefix(lower: string, index: number): boolean {
+  const allowedPrefixes = [
+    'data:image/png',
+    'data:image/jpg',
+    'data:image/jpeg',
+    'data:image/gif',
+    'data:image/webp',
+    'data:image/svg+xml',
+  ];
+  for (const prefix of allowedPrefixes) {
+    if (lower.startsWith(prefix, index)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function stripDangerousDataUrls(value: string): string {
+  let output = value;
+  let lower = output.toLowerCase();
+  let idx = lower.indexOf('data:');
+  while (idx >= 0) {
+    if (isAllowedDataImagePrefix(lower, idx)) {
+      idx = lower.indexOf('data:', idx + 5);
+      continue;
+    }
+    const comma = output.indexOf(',', idx);
+    if (comma < 0) {
+      output = output.slice(0, idx);
+      return output;
+    }
+    output = output.slice(0, idx) + output.slice(comma + 1);
+    lower = output.toLowerCase();
+    idx = lower.indexOf('data:', idx);
+  }
+  return output;
+}
+
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') return '';
 
-  return (
-    input
-      // Remove null bytes
-      .replace(/\0/g, '')
-      // Remove potential script tags
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      // Remove potential event handlers
-      .replace(/on\w+\s*=/gi, '')
-      // Remove javascript: URLs
-      .replace(/javascript:/gi, '')
-      // Remove data: URLs that aren't images
-      .replace(/data:(?!image\/(?:png|jpg|jpeg|gif|webp|svg\+xml))[^;]+;[^,]+,/gi, '')
-      // Trim whitespace
-      .trim()
-  );
+  let filtered = '';
+  const trimmed = input.trim();
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i] as string;
+    const code = trimmed.charCodeAt(i);
+    if (code === 9 || code === 10 || code === 13 || (code >= 32 && code !== 127)) {
+      filtered += char;
+    }
+  }
+
+  filtered = stripScriptBlocks(filtered);
+  filtered = stripEventHandlers(filtered);
+  filtered = stripJavaScriptScheme(filtered);
+  filtered = stripDangerousDataUrls(filtered);
+
+  return filtered;
 }
 
 /**

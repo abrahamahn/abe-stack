@@ -6,7 +6,7 @@
  * Uses internal state management for user data, token store for persistence.
  */
 
-import { getApiClient } from '@abe-stack/api';
+import { getApiClient, NetworkError } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
 import { createAuthRoute, type AuthRouteClient } from '@api/auth/route';
 
@@ -129,7 +129,10 @@ export class AuthService {
   /** Whether auth is currently initializing (restoring session on app load) */
   private isInitializing = false;
 
-  constructor(args: { config: ClientConfig }) {
+  constructor(args: {
+    config: ClientConfig;
+    onTosRequired?: (payload: { documentId: string; requiredVersion: number }) => Promise<void>;
+  }) {
     this.config = args.config;
 
     this.tokenStore = tokenStore as TokenStore;
@@ -137,6 +140,7 @@ export class AuthService {
     const apiClient = getApiClient({
       baseUrl: this.config.apiUrl,
       getToken: (): string | null => this.tokenStore.get(),
+      ...(args.onTosRequired !== undefined ? { onTosRequired: args.onTosRequired } : {}),
     });
     this.api = createAuthRoute(apiClient);
 
@@ -309,7 +313,15 @@ export class AuthService {
         return true;
       }
       throw new Error('Invalid response format from refresh API');
-    } catch {
+    } catch (error: unknown) {
+      // Network errors and timeouts: keep session, let backoff retry
+      if (
+        error instanceof NetworkError ||
+        (error instanceof Error && error.message.includes('timed out'))
+      ) {
+        return false;
+      }
+      // Auth errors (401, invalid token, etc.): clear session
       this.clearAuth();
       return false;
     }
@@ -442,7 +454,7 @@ export class AuthService {
       this.scheduleNextRefresh();
     } else {
       // On failure, increment backoff and reschedule if we still have a token
-      // (refreshToken() calls clearAuth() on failure, but we check anyway)
+      // (network errors preserve the token; auth errors clear it)
       const stillHasToken: string | null = this.tokenStore.get();
       if (stillHasToken !== null) {
         this.incrementRefreshBackoff();
@@ -469,6 +481,9 @@ export class AuthService {
 // Factory
 // ============================================================================
 
-export function createAuthService(args: { config: ClientConfig }): AuthService {
+export function createAuthService(args: {
+  config: ClientConfig;
+  onTosRequired?: (payload: { documentId: string; requiredVersion: number }) => Promise<void>;
+}): AuthService {
   return new AuthService(args);
 }

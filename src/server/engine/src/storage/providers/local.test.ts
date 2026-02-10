@@ -45,7 +45,9 @@ describe('LocalStorageProvider', () => {
 
       expect(result).toBe('test/file.txt');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads/test', { recursive: true });
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', params.body);
+      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', params.body, {
+        mode: 0o600,
+      });
     });
 
     it('should generate a UUID key when no key is provided', async () => {
@@ -60,7 +62,9 @@ describe('LocalStorageProvider', () => {
 
       expect(result).toBe('mock-uuid-1234');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads', { recursive: true });
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', params.body);
+      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', params.body, {
+        mode: 0o600,
+      });
     });
 
     it('should strip leading slashes from keys for file path', async () => {
@@ -76,7 +80,9 @@ describe('LocalStorageProvider', () => {
       // Returns the original key (not normalized)
       expect(result).toBe('/leading/slash.txt');
       // But writes to normalized path
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', params.body);
+      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', params.body, {
+        mode: 0o600,
+      });
     });
 
     it('should strip parent directory references for security', async () => {
@@ -90,7 +96,9 @@ describe('LocalStorageProvider', () => {
       await provider.upload(params.key, params.body, params.contentType);
 
       // The normalizeStorageKey with stripParentRefs=true removes ".." sequences
-      expect(writeFile).toHaveBeenCalledWith(expect.not.stringContaining('..'), params.body);
+      expect(writeFile).toHaveBeenCalledWith(expect.not.stringContaining('..'), params.body, {
+        mode: 0o600,
+      });
     });
 
     it('should handle string body', async () => {
@@ -103,7 +111,9 @@ describe('LocalStorageProvider', () => {
 
       await provider.upload(params.key, params.body, params.contentType);
 
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'string content');
+      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'string content', {
+        mode: 0o600,
+      });
     });
 
     it('should handle Uint8Array body', async () => {
@@ -117,7 +127,7 @@ describe('LocalStorageProvider', () => {
 
       await provider.upload(params.key, params.body, params.contentType);
 
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/binary.bin', body);
+      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/binary.bin', body, { mode: 0o600 });
     });
   });
 

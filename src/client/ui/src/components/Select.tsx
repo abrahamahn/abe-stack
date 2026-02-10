@@ -29,7 +29,14 @@ type SelectProps = Omit<
   children: ReactNode;
 };
 
-type OptionShape = { value: string; label: ReactNode; disabled?: boolean };
+type OptionShape = {
+  /** The option's value */
+  value: string;
+  /** Display content for the option */
+  label: ReactNode;
+  /** Whether the option is disabled */
+  disabled?: boolean;
+};
 
 /**
  * A custom select dropdown with keyboard navigation.

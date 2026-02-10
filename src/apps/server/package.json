@@ -19,13 +19,15 @@
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",
-    "@abe-stack/server-engine": "workspace:*",
     "@abe-stack/db": "workspace:*",
     "@abe-stack/realtime": "workspace:*",
+    "@abe-stack/server-engine": "workspace:*",
+    "@abe-stack/shared": "workspace:*",
     "@abe-stack/websocket": "workspace:*",
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.5",
     "fastify": "^5.7.4",
-    "ws": "^8.19.0",
-    "@abe-stack/shared": "workspace:*"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "vite-tsconfig-paths": "^6.0.5"

@@ -73,13 +73,10 @@ export const SecurityEventsFilters = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+    <div className="bg-surface p-4 rounded-lg border">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <div>
-          <label
-            htmlFor="event-type-select"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="event-type-select" className="block text-sm font-medium text-muted mb-1">
             Event Type
           </label>
           <Select
@@ -98,10 +95,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="severity-select"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="severity-select" className="block text-sm font-medium text-muted mb-1">
             Severity
           </label>
           <Select
@@ -120,10 +114,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="email-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="email-input" className="block text-sm font-medium text-muted mb-1">
             Email
           </label>
           <Input
@@ -138,10 +129,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="ip-address-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="ip-address-input" className="block text-sm font-medium text-muted mb-1">
             IP Address
           </label>
           <Input
@@ -156,10 +144,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="start-date-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="start-date-input" className="block text-sm font-medium text-muted mb-1">
             Start Date
           </label>
           <Input
@@ -173,10 +158,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="end-date-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="end-date-input" className="block text-sm font-medium text-muted mb-1">
             End Date
           </label>
           <Input
@@ -190,10 +172,7 @@ export const SecurityEventsFilters = ({
         </div>
 
         <div>
-          <label
-            htmlFor="user-id-input"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="user-id-input" className="block text-sm font-medium text-muted mb-1">
             User ID
           </label>
           <Input

@@ -356,6 +356,7 @@ async function main(): Promise<void> {
   }
 
   // Start all sync watchers silently in background
+  // Note: sync-docs removed — docs are now discovered via import.meta.glob at build time
   const watchers = [
     startWatcher('src/tools/sync/sync-file-headers.ts'),
     startWatcher('src/tools/sync/sync-css-theme.ts'),

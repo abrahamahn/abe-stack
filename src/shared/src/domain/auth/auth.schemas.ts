@@ -99,6 +99,17 @@ export interface TosStatusResponse {
   documentId: string | null;
 }
 
+// Sudo Mode
+export interface SudoRequest {
+  password?: string;
+  totpCode?: string;
+}
+
+export interface SudoResponse {
+  sudoToken: string;
+  expiresAt: string;
+}
+
 export interface TotpVerifyRequest {
   code: string;
 }
@@ -303,6 +314,28 @@ export const revertEmailChangeRequestSchema: Schema<RevertEmailChangeRequest> = 
 export const acceptTosRequestSchema: Schema<AcceptTosRequest> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
   return { documentId: parseString(obj['documentId'], 'documentId', { min: 1 }) };
+});
+
+// Sudo Mode
+export const sudoRequestSchema: Schema<SudoRequest> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const password = typeof obj['password'] === 'string' ? obj['password'] : undefined;
+  const totpCode = typeof obj['totpCode'] === 'string' ? obj['totpCode'] : undefined;
+  if (password === undefined && totpCode === undefined) {
+    throw new Error('Either password or totpCode is required');
+  }
+  return {
+    ...(password !== undefined ? { password } : {}),
+    ...(totpCode !== undefined ? { totpCode } : {}),
+  };
+});
+
+export const sudoResponseSchema: Schema<SudoResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return {
+    sudoToken: parseString(obj['sudoToken'], 'sudoToken'),
+    expiresAt: parseString(obj['expiresAt'], 'expiresAt'),
+  };
 });
 
 // TOTP (2FA)

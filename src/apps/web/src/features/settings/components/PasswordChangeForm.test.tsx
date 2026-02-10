@@ -67,28 +67,63 @@ vi.mock('@abe-stack/ui', async () => {
     </div>
   );
 
+  const getStrengthLabel = (v: string): string => {
+    if (v.length === 0) return '';
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (v.length >= 12) score++;
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^a-zA-Z0-9]/.test(v)) score++;
+    if (score <= 1) return 'Weak';
+    if (score === 2) return 'Fair';
+    if (score === 3) return 'Good';
+    return 'Strong';
+  };
+
   const mockPasswordInput = ({
     id,
     value,
     onChange,
     placeholder,
     autoComplete,
+    showStrength,
   }: {
     id: string;
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
     placeholder: string;
     autoComplete: string;
+    showStrength?: boolean;
   }) => (
-    <input
-      data-testid={`password-input-${id}`}
-      id={id}
-      type="password"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      autoComplete={autoComplete}
-    />
+    <div>
+      <input
+        data-testid={`password-input-${id}`}
+        id={id}
+        type="password"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+      />
+      {showStrength === true && value.length > 0 && (
+        <span data-testid="strength-label">{getStrengthLabel(value)}</span>
+      )}
+    </div>
+  );
+
+  const mockText = ({
+    children,
+    tone,
+    size,
+  }: {
+    children: ReactNode;
+    tone?: string;
+    size?: string;
+  }) => (
+    <p data-tone={tone} data-size={size}>
+      {children}
+    </p>
   );
 
   return {
@@ -97,6 +132,7 @@ vi.mock('@abe-stack/ui', async () => {
     Button: mockButton,
     FormField: mockFormField,
     PasswordInput: mockPasswordInput,
+    Text: mockText,
   };
 });
 

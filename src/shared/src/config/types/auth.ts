@@ -65,6 +65,8 @@ export interface AuthConfig {
     issuer: string;
     /** Token audience claim */
     audience: string;
+    /** Clock skew tolerance in seconds for token verification (default: 30) */
+    clockToleranceSeconds?: number;
   };
 
   /** Refresh token configuration */
@@ -195,6 +197,17 @@ export interface AuthConfig {
     siteKey: string;
     /** Secret key (server-side, for verification API calls) */
     secretKey: string;
+  };
+
+  /**
+   * Session management settings.
+   * Controls idle timeout and concurrent session limits.
+   */
+  sessions?: {
+    /** Idle timeout in minutes. Sessions inactive longer are rejected on refresh. Default: 30 */
+    idleTimeoutMinutes?: number;
+    /** Maximum concurrent sessions per user. Oldest evicted when exceeded. Default: 10 */
+    maxConcurrentSessions?: number;
   };
 }
 

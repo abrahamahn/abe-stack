@@ -20,7 +20,8 @@ export function slugify(str: string): string {
     .trim()
     .replace(/[^\w\s-]/g, '') // Remove non-word characters
     .replace(/[\s_-]+/g, '-') // Replace spaces, underscores, and multiple hyphens with single hyphen
-    .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+    .replace(/^-+/g, '') // Remove leading hyphens
+    .replace(/-+$/g, ''); // Remove trailing hyphens
 }
 
 /**

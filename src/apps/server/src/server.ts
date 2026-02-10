@@ -15,9 +15,12 @@ import path from 'node:path';
 
 import { RateLimiter } from '@abe-stack/server-engine';
 import { createConsoleLogger, isAppError } from '@abe-stack/shared';
+import swagger from '@fastify/swagger';
+import swaggerUI from '@fastify/swagger-ui';
 import fastify from 'fastify';
 
 import { registerPlugins, type AppErrorInfo } from './http/plugins';
+import { swaggerThemeCss } from './http/swagger-theme';
 
 import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 import type { DbClient } from '@abe-stack/db';
@@ -106,6 +109,38 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     ...(config.storage.provider === 'local'
       ? { staticServe: { root: path.resolve(config.storage.rootPath), prefix: '/uploads/' } }
       : {}),
+  });
+
+  // Register OpenAPI/Swagger documentation
+  await server.register(swagger, {
+    openapi: {
+      info: {
+        title: 'ABE Stack API',
+        description: 'API documentation for the ABE Stack application',
+        version: '1.0.0',
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+  });
+
+  await server.register(swaggerUI, {
+    routePrefix: '/api/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: true,
+    },
+    theme: {
+      title: 'ABE Stack API',
+      css: [{ filename: 'theme.css', content: swaggerThemeCss }],
+    },
   });
 
   return server;

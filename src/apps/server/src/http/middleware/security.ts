@@ -171,6 +171,18 @@ export function applySecurityHeaders(res: FastifyReply, options: SecurityHeaderO
   res.header('Server', undefined);
 }
 
+/**
+ * Apply Cache-Control headers to prevent sensitive data from being cached.
+ * Should be applied to API routes only (not static assets).
+ *
+ * Prevents back-button data leak: after logout, pressing back won't show
+ * cached authenticated responses.
+ */
+export function applyApiCacheHeaders(res: FastifyReply): void {
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.header('Pragma', 'no-cache');
+}
+
 // ============================================================================
 // CORS Headers (Replaces @fastify/cors)
 // ============================================================================
@@ -211,22 +223,26 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
   };
 
   const requestOrigin = req.headers.origin;
+  let allowOrigin: string | null = null;
 
-  // Determine if origin should be allowed
   if (allowedOrigin === '*') {
-    // Wildcard - allow any origin (development only)
-    res.header('Access-Control-Allow-Origin', requestOrigin ?? '*');
+    // Credentials must never be combined with wildcard origin.
+    // Reflect concrete origin when available, otherwise fallback to wildcard.
+    allowOrigin = requestOrigin ?? '*';
   } else if (requestOrigin === allowedOrigin) {
-    // Exact match
-    res.header('Access-Control-Allow-Origin', requestOrigin);
+    allowOrigin = requestOrigin;
   } else if (requestOrigin != null && isOriginAllowed(requestOrigin, allowedOrigin)) {
-    // Pattern match (comma-separated origins)
-    res.header('Access-Control-Allow-Origin', requestOrigin);
+    allowOrigin = requestOrigin;
   }
-  // If no match, don't set the header (browser will block the request)
 
-  // Credentials
-  if (credentials) {
+  if (allowOrigin != null) {
+    res.header('Access-Control-Allow-Origin', allowOrigin);
+    if (allowOrigin !== '*') {
+      res.header('Vary', 'Origin');
+    }
+  }
+
+  if (credentials && allowOrigin != null && allowOrigin !== '*') {
     res.header('Access-Control-Allow-Credentials', 'true');
   }
 

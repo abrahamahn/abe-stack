@@ -12,3 +12,7 @@ export type { RegisterFormProps } from './RegisterForm';
 export { ResetPasswordForm } from './ResetPasswordForm';
 export type { ResetPasswordFormProps } from './ResetPasswordForm';
 export { AuthModal } from './AuthModal';
+export { TosAcceptanceModal } from './TosAcceptanceModal';
+export type { TosAcceptanceModalProps } from './TosAcceptanceModal';
+export { TurnstileWidget } from './TurnstileWidget';
+export type { TurnstileWidgetProps } from './TurnstileWidget';

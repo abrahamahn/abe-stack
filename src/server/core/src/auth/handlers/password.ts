@@ -12,6 +12,7 @@ import {
   mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
+import { assertUserActive } from '../middleware';
 import { sendPasswordChangedAlert } from '../security';
 import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { createErrorMapperLogger } from '../types';
@@ -123,6 +124,9 @@ export async function handleSetPassword(
         body: { message: 'Authentication required' },
       };
     }
+
+    // Verify user account is not suspended
+    await assertUserActive((id) => ctx.repos.users.findById(id), userId);
 
     const { password } = body;
     await setPassword(ctx.db, ctx.repos, ctx.config.auth, userId, password);

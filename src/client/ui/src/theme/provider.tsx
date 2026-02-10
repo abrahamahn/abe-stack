@@ -8,10 +8,21 @@ import type { Density } from './density';
 import type { ContrastMode } from '@abe-stack/react';
 import type { ReactElement, ReactNode } from 'react';
 
+/**
+ * Combined context value exposing theme mode, density, and contrast state.
+ *
+ * Merges return types from `useThemeMode`, `useDensity`, and `useContrast`
+ * so consumers get a single unified API via {@link useTheme}.
+ */
 export type ThemeContextValue = UseThemeModeReturn & UseDensityReturn & UseContrastReturn;
 
+/**
+ * Internal React context. Consumers should use the {@link useTheme} hook
+ * rather than accessing this context directly.
+ */
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+/** Configuration props for the {@link ThemeProvider} component. */
 export type ThemeProviderProps = {
   /**
    * The children to render within the theme provider

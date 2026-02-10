@@ -7,6 +7,7 @@ import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/
 import { tokenStore } from '@abe-stack/shared';
 import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useMemo } from 'react';
 
 import type { PlanId } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
@@ -19,10 +20,13 @@ export const PricingPage = (): ReactElement => {
   const navigate = useNavigate();
   const { config } = useClientEnvironment();
 
-  const clientConfig: BillingClientConfig = {
-    baseUrl: config.apiUrl,
-    getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
-  };
+  const clientConfig: BillingClientConfig = useMemo(
+    () => ({
+      baseUrl: config.apiUrl,
+      getToken: (): string | null => (tokenStore as { get: () => string | null }).get(),
+    }),
+    [config.apiUrl],
+  );
 
   const plansResult = usePlans(clientConfig);
   const { plans, isLoading: plansLoading, error: plansError } = plansResult;

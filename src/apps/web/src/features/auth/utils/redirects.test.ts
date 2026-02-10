@@ -90,6 +90,61 @@ describe('getPostLoginRedirect', () => {
     });
   });
 
+  describe('returnTo parameter', () => {
+    it('should honor valid returnTo path', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), '/dashboard');
+      expect(redirect).toBe('/dashboard');
+    });
+
+    it('should honor returnTo with query params', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), '/settings?tab=security');
+      expect(redirect).toBe('/settings?tab=security');
+    });
+
+    it('should honor returnTo over admin default', () => {
+      const redirect = getPostLoginRedirect(createUser('admin'), '/dashboard');
+      expect(redirect).toBe('/dashboard');
+    });
+
+    it('should accept deep nested path', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), '/workspace/123/settings');
+      expect(redirect).toBe('/workspace/123/settings');
+    });
+
+    it('should reject protocol-relative URL (open redirect)', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), '//evil.com');
+      expect(redirect).toBe('/settings');
+    });
+
+    it('should reject javascript: protocol', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), 'javascript:alert(1)');
+      expect(redirect).toBe('/settings');
+    });
+
+    it('should reject data: protocol', () => {
+      const redirect = getPostLoginRedirect(
+        createUser('user'),
+        'data:text/html,<script>alert(1)</script>',
+      );
+      expect(redirect).toBe('/settings');
+    });
+
+    it('should reject absolute URL', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), 'https://evil.com');
+      expect(redirect).toBe('/settings');
+    });
+
+    it('should reject empty returnTo', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), '');
+      expect(redirect).toBe('/settings');
+    });
+
+    it('should reject null returnTo', () => {
+      const redirect = getPostLoginRedirect(createUser('user'), null);
+      expect(redirect).toBe('/settings');
+    });
+  });
+
   describe('return values', () => {
     it('should always return a string', () => {
       const testCases: Array<User | null | undefined> = [

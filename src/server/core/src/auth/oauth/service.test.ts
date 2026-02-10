@@ -439,6 +439,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
 
@@ -508,6 +512,16 @@ describe('OAuth Service', () => {
         phoneVerified: false,
         dateOfBirth: null,
         gender: null,
+        city: null,
+        state: null,
+        country: null,
+        bio: null,
+        language: null,
+        website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
 
@@ -572,6 +586,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
 
@@ -630,6 +648,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -714,6 +736,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -785,6 +811,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue({
@@ -843,6 +873,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -916,6 +950,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
 
@@ -975,6 +1013,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
@@ -1047,6 +1089,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
 
@@ -1101,6 +1147,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       };
 
@@ -1232,6 +1282,10 @@ describe('OAuth Service', () => {
         bio: null,
         language: null,
         website: null,
+        lastUsernameChange: null,
+        deactivatedAt: null,
+        deletedAt: null,
+        deletionGracePeriodEnds: null,
         version: 1,
       });
 

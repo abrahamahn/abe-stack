@@ -1,9 +1,10 @@
 // src/apps/web/src/app/layouts/AppTopLayout.tsx
 import { toastStore } from '@abe-stack/react';
-import { Button, Heading, ResizablePanel, Text, useLocation, useSidePeek } from '@abe-stack/ui';
-import { useMemo, type ReactElement } from 'react';
+import { Button, Heading, ResizablePanel, Skeleton, Text, useSidePeek } from '@abe-stack/ui';
+import { TenantSwitcher } from '@features/workspace/components';
 
 import type { AuthMode } from '@abe-stack/ui';
+import type { ReactElement } from 'react';
 
 /** Props for the AppTopLayout component. */
 export interface AppTopLayoutProps {
@@ -13,6 +14,8 @@ export interface AppTopLayoutProps {
   visible: boolean;
   /** Callback when panel is resized via drag */
   onResize: (size: number) => void;
+  /** Whether auth state is still being resolved */
+  isAuthLoading: boolean;
   /** Whether the user is authenticated */
   isAuthenticated: boolean;
   /** Current user info (email for display) */
@@ -35,33 +38,13 @@ export const AppTopLayout = ({
   size,
   visible,
   onResize,
+  isAuthLoading,
   isAuthenticated,
   user,
   onLogout,
   onOpenAuthModal,
 }: AppTopLayoutProps): ReactElement => {
   const { toggle, isOpen } = useSidePeek();
-  const { pathname } = useLocation();
-  const pageTitle = useMemo((): string => {
-    if (pathname === '/' || pathname === '/clean') return 'ABE Stack Home';
-    if (pathname.startsWith('/ui-library') || pathname.startsWith('/side-peek-ui-library')) {
-      return 'ABE Stack UI Library';
-    }
-    if (pathname.startsWith('/dashboard')) return 'ABE Stack Dashboard';
-    if (pathname.startsWith('/settings')) return 'ABE Stack Settings';
-    if (
-      pathname === '/auth' ||
-      pathname === '/login' ||
-      pathname === '/register' ||
-      pathname.startsWith('/auth/')
-    ) {
-      return 'ABE Stack Auth';
-    }
-    if (pathname.startsWith('/admin')) return 'ABE Stack Admin';
-    if (pathname.startsWith('/billing') || pathname.startsWith('/pricing'))
-      return 'ABE Stack Billing';
-    return 'ABE Stack';
-  }, [pathname]);
 
   return (
     <ResizablePanel
@@ -97,12 +80,18 @@ export const AppTopLayout = ({
         </div>
         <div className="flex-1 flex-center">
           <Heading as="h1" size="lg" className="m-0">
-            {pageTitle}
+            ABE Stack
           </Heading>
         </div>
         <div className="w-auto min-w-88 flex items-center gap-2 justify-end">
-          {isAuthenticated ? (
+          {isAuthLoading ? (
             <>
+              <Skeleton width={140} height={16} radius={4} className="hide-mobile" />
+              <Skeleton width={56} height={28} radius={6} />
+            </>
+          ) : isAuthenticated ? (
+            <>
+              <TenantSwitcher className="hide-mobile" />
               <Text size="sm" tone="muted" className="hide-mobile">
                 {user?.email}
               </Text>

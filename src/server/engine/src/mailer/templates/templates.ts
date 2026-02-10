@@ -490,4 +490,48 @@ If you need assistance, please contact our support team immediately.
       ),
     };
   },
+
+  /**
+   * Workspace invitation email
+   * Sent when a user is invited to join a workspace.
+   */
+  workspaceInvitation(
+    acceptUrl: string,
+    workspaceName: string,
+    inviterName: string,
+    role: string,
+    expiresInDays = 7,
+  ): EmailOptions & { to: '' } {
+    const expiry = String(expiresInDays);
+    return {
+      to: '',
+      subject: `You've been invited to join ${workspaceName}`,
+      text: `
+You've been invited to join ${workspaceName}
+
+${inviterName} has invited you to join the "${workspaceName}" workspace as a ${role}.
+
+Click the link below to accept the invitation:
+${acceptUrl}
+
+This invitation will expire in ${expiry} days.
+
+If you did not expect this invitation, you can safely ignore this email.
+      `.trim(),
+      html: renderLayout(
+        'Workspace Invitation',
+        `
+        <h2 style="${styles.heading}">You've been invited to join ${workspaceName}</h2>
+        <p style="${styles.text}"><strong>${inviterName}</strong> has invited you to join the <strong>${workspaceName}</strong> workspace as a <strong>${role}</strong>.</p>
+        <p>
+          <a href="${acceptUrl}" style="${styles.buttonSuccess}">
+            Accept Invitation
+          </a>
+        </p>
+        <p style="${styles.subtext}">This invitation will expire in ${expiry} days.</p>
+        <p style="${styles.footer}">If you did not expect this invitation, you can safely ignore this email.</p>
+        `,
+      ),
+    };
+  },
 };

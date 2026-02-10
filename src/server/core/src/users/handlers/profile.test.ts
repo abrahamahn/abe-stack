@@ -99,6 +99,12 @@ describe('Profile Handlers', () => {
         phoneVerified: null,
         dateOfBirth: null,
         gender: null,
+        bio: null,
+        city: null,
+        state: null,
+        country: null,
+        language: null,
+        website: null,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       });

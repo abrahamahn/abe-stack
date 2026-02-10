@@ -36,3 +36,28 @@ export {
   type TotpState,
   type UseTotpManagementResult,
 } from './useTotpManagement';
+
+export { useSudo, type UseSudoOptions, type UseSudoResult } from './useSudo';
+
+export {
+  useUsernameUpdate,
+  type UseUsernameUpdateOptions,
+  type UseUsernameUpdateResult,
+} from './useUsername';
+
+export {
+  useProfileCompleteness,
+  type UseProfileCompletenessResult,
+} from './useProfileCompleteness';
+
+export {
+  useDeactivateAccount,
+  useDeleteAccount,
+  useReactivateAccount,
+  type UseDeactivateAccountOptions,
+  type UseDeactivateAccountResult,
+  type UseDeleteAccountOptions,
+  type UseDeleteAccountResult,
+  type UseReactivateAccountOptions,
+  type UseReactivateAccountResult,
+} from './useAccountLifecycle';

@@ -5,7 +5,7 @@
  * Admin page for listing and managing users.
  */
 
-import { Alert, Button, Heading, PageContainer } from '@abe-stack/ui';
+import { Alert, Button, Heading, PageContainer, Text } from '@abe-stack/ui';
 
 import { UserFilters, UserTable } from '../components';
 import { useAdminUsers } from '../hooks';
@@ -38,7 +38,9 @@ export const UserListPage = (): JSX.Element => {
             <Heading as="h1" size="xl">
               User Management
             </Heading>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage user accounts</p>
+            <Text tone="muted" className="mt-1">
+              View and manage user accounts
+            </Text>
           </div>
           <Button
             onClick={() => {

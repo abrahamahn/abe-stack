@@ -5,19 +5,22 @@
  * Main settings page with tabs for Profile, Security, Sessions, and Billing.
  */
 
-import { Button, Card, Heading, Tabs } from '@abe-stack/ui';
+import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useMemo, type ReactElement } from 'react';
 
 import {
   AvatarUpload,
+  DangerZone,
   EmailChangeForm,
   ForgotPasswordShortcut,
   OAuthConnectionsList,
   PasswordChangeForm,
+  ProfileCompleteness,
   ProfileForm,
   SessionsList,
   TotpManagement,
+  UsernameForm,
 } from '../components';
 
 import type { User } from '@abe-stack/shared';
@@ -36,11 +39,20 @@ const ProfileTab = ({ user }: { user: UserLocal }): ReactElement => {
   const displayName = `${user.firstName} ${user.lastName}`.trim();
   return (
     <div className="space-y-6">
+      <ProfileCompleteness className="mb-4" />
+
       <div>
         <Heading as="h3" size="md" className="mb-4">
           Avatar
         </Heading>
         <AvatarUpload currentAvatarUrl={user.avatarUrl ?? ''} userName={displayName} />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
+          Username
+        </Heading>
+        <UsernameForm currentUsername={user.username} />
       </div>
 
       <div className="border-t pt-6">
@@ -96,11 +108,27 @@ const SessionsTab = (): ReactElement => {
       <Heading as="h3" size="md" className="mb-4">
         Active Sessions
       </Heading>
-      <p className="text-gray-500 text-sm mb-4">
+      <Text tone="muted" size="sm" className="mb-4">
         Manage your active sessions across devices. Revoking a session will log you out from that
         device.
-      </p>
+      </Text>
       <SessionsList />
+    </div>
+  );
+};
+
+const AccountTab = (): ReactElement => {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Heading as="h3" size="md" className="mb-4">
+          Account Management
+        </Heading>
+        <Text tone="muted" size="sm" className="mb-4">
+          Manage your account status. Destructive actions require password confirmation.
+        </Text>
+      </div>
+      <DangerZone />
     </div>
   );
 };
@@ -111,15 +139,17 @@ const BillingTab = (): ReactElement => {
       <Heading as="h3" size="md" className="mb-4">
         Billing
       </Heading>
-      <p className="text-gray-500 text-sm mb-4">Manage your subscription and billing details.</p>
+      <Text tone="muted" size="sm" className="mb-4">
+        Manage your subscription and billing details.
+      </Text>
       <Card className="p-4">
-        <p className="text-gray-500">
+        <Text tone="muted">
           Visit the{' '}
-          <a href="/billing" className="text-blue-600 hover:text-blue-700 underline">
+          <a href="/billing" className="text-link">
             Billing page
           </a>{' '}
           to manage your subscription.
-        </p>
+        </Text>
       </Card>
     </div>
   );
@@ -173,6 +203,11 @@ export const SettingsPage = (): ReactElement => {
         content: <SessionsTab />,
       },
       {
+        id: 'account',
+        label: 'Account',
+        content: <AccountTab />,
+      },
+      {
         id: 'billing',
         label: 'Billing',
         content: <BillingTab />,
@@ -184,11 +219,9 @@ export const SettingsPage = (): ReactElement => {
   // Loading state
   if (status === 'pending') {
     return (
-      <div className="py-8 max-w-3xl mx-auto px-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
-          <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg" />
-        </div>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
@@ -200,44 +233,32 @@ export const SettingsPage = (): ReactElement => {
       (errorMessage?.includes('401') ?? false) || (errorMessage?.includes('Unauthorized') ?? false);
 
     return (
-      <div className="py-8 max-w-3xl mx-auto px-4">
-        <Card className="p-6 text-center">
-          <Heading as="h2" size="lg" className="mb-4">
-            {isAuthError ? 'Session Expired' : 'Unable to Load Settings'}
-          </Heading>
-          <p className="text-gray-500 mb-4">
-            {isAuthError
-              ? 'Your session has expired. Please log in again to access your settings.'
-              : (errorMessage ?? 'Failed to load your profile. Please try again.')}
-          </p>
-          <Button
-            type="button"
-            variant="text"
-            onClick={() => {
-              if (isAuthError) {
-                window.location.href = '/login';
-              } else {
-                refetch();
-              }
-            }}
-            className="underline"
-          >
-            {isAuthError ? 'Go to Login' : 'Try Again'}
-          </Button>
-        </Card>
-      </div>
+      <Card className="p-6 text-center">
+        <Heading as="h2" size="lg" className="mb-4">
+          {isAuthError ? 'Session Expired' : 'Unable to Load Settings'}
+        </Heading>
+        <Text tone="muted" className="mb-4">
+          {isAuthError
+            ? 'Your session has expired. Please log in again to access your settings.'
+            : (errorMessage ?? 'Failed to load your profile. Please try again.')}
+        </Text>
+        <Button
+          type="button"
+          variant="text"
+          onClick={() => {
+            if (isAuthError) {
+              window.location.href = '/login';
+            } else {
+              refetch();
+            }
+          }}
+          className="underline"
+        >
+          {isAuthError ? 'Go to Login' : 'Try Again'}
+        </Button>
+      </Card>
     );
   }
 
-  return (
-    <div className="py-8 max-w-3xl mx-auto px-4">
-      <Heading as="h1" size="xl" className="mb-6">
-        Settings
-      </Heading>
-
-      <Card className="p-6">
-        <Tabs items={tabs} />
-      </Card>
-    </div>
-  );
+  return <Tabs items={tabs} />;
 };

@@ -15,24 +15,45 @@ import type { ReactNode } from 'react';
 // Types
 // ============================================================================
 
+/** Props for the {@link SyntaxHighlighter} React component. */
 export interface SyntaxHighlighterProps {
+  /** Programming language identifier (e.g. `'typescript'`, `'python'`, `'json'`). */
   language: string;
+  /** Source code string to highlight. */
   children: string;
+  /** When true, displays line numbers in the left gutter. @default false */
   showLineNumbers?: boolean;
+  /** Starting line number when `showLineNumbers` is enabled. @default 1 */
   startingLineNumber?: number;
+  /** Color theme -- pass `'light'` or `'dark'` for built-in themes, or a custom {@link SyntaxTheme}. @default 'dark' */
   theme?: 'light' | 'dark' | SyntaxTheme;
+  /** Optional CSS class name applied to the outermost container element. */
   className?: string;
 }
 
+/**
+ * Custom color theme for syntax highlighting.
+ *
+ * Each property maps to a token category and accepts any valid CSS color value.
+ */
 export interface SyntaxTheme {
+  /** Background color of the code container. */
   background: string;
+  /** Default foreground (text) color for unclassified tokens. */
   foreground: string;
+  /** Color for language keywords (`const`, `if`, `return`, etc.). */
   keywords: string;
+  /** Color for string literals. */
   strings: string;
+  /** Color for comments. */
   comments: string;
+  /** Color for function names. */
   functions: string;
+  /** Color for variable identifiers. */
   variables: string;
+  /** Color for numeric literals. */
   numbers: string;
+  /** Color for operators (`+`, `===`, `&&`, etc.). */
   operators: string;
 }
 
@@ -40,6 +61,7 @@ export interface SyntaxTheme {
 // Built-in Themes
 // ============================================================================
 
+/** Built-in light syntax theme with VS Code-inspired colors. */
 const lightTheme: SyntaxTheme = {
   background: '#f8f8f8',
   foreground: '#333333',
@@ -52,6 +74,7 @@ const lightTheme: SyntaxTheme = {
   operators: '#000000',
 };
 
+/** Built-in dark syntax theme with VS Code Dark+-inspired colors. */
 const darkTheme: SyntaxTheme = {
   background: '#1e1e1e',
   foreground: '#d4d4d4',
@@ -68,15 +91,33 @@ const darkTheme: SyntaxTheme = {
 // Language Definitions
 // ============================================================================
 
+/**
+ * Definition of a programming language's syntax rules used by the tokenizer.
+ *
+ * Each supported language provides its own keyword list, operator set,
+ * and regular expressions for matching comments and strings.
+ */
 interface LanguageDefinition {
+  /** Reserved keywords that receive keyword-colored highlighting. */
   keywords: string[];
+  /** Built-in function names (currently unused for coloring but available for extension). */
   builtinFunctions?: string[];
+  /** Built-in type names (currently unused for coloring but available for extension). */
   builtinTypes?: string[];
+  /** Operator symbols, sorted longest-first during tokenization. */
   operators: string[];
+  /** Regular expression matching single-line and multi-line comments. */
   commentRegex: RegExp;
+  /** Regular expression matching string literals (single, double, template). */
   stringRegex: RegExp;
 }
 
+/**
+ * Built-in language definitions for syntax highlighting.
+ *
+ * Supported languages: `javascript`, `typescript`, `python`, `json`.
+ * Unknown languages fall back to the JavaScript definition.
+ */
 const languages: Record<string, LanguageDefinition> = {
   javascript: {
     keywords: [
@@ -439,6 +480,22 @@ const languages: Record<string, LanguageDefinition> = {
 // Syntax Highlighter Implementation
 // ============================================================================
 
+/**
+ * Tokenizes and highlights source code, returning an array of styled React `<span>` elements.
+ *
+ * For code exceeding 10,000 characters, the input is returned as a single
+ * unstyled span to avoid performance issues.
+ *
+ * @param code - The source code string to highlight
+ * @param language - Language identifier (case-insensitive). Falls back to JavaScript if unknown.
+ * @param theme - The color theme to apply to tokens
+ * @returns Array of React elements with inline color styles
+ *
+ * @example
+ * ```ts
+ * const elements = highlightCode('const x = 1;', 'typescript', darkTheme);
+ * ```
+ */
 export function highlightCode(code: string, language: string, theme: SyntaxTheme): ReactNode[] {
   if (code === '') return [];
   const langDef = languages[language.toLowerCase()] ?? languages['javascript'];
@@ -451,7 +508,7 @@ export function highlightCode(code: string, language: string, theme: SyntaxTheme
     color: theme.foreground,
     backgroundColor: 'transparent',
     fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-    fontSize: '14px',
+    fontSize: 'var(--ui-font-size-sm)',
     lineHeight: '1.4',
   };
 
@@ -481,11 +538,26 @@ export function highlightCode(code: string, language: string, theme: SyntaxTheme
   return elements;
 }
 
+/** A classified fragment of source code produced by the tokenizer. */
 interface Token {
+  /** The semantic category of this token, used to select a theme color. */
   type: 'keyword' | 'string' | 'comment' | 'function' | 'number' | 'operator' | 'plain';
+  /** The raw source text of this token. */
   value: string;
 }
 
+/**
+ * Splits source code into an ordered list of classified tokens.
+ *
+ * Walks the code character-by-character, trying matchers in priority
+ * order: newlines, comments, strings, numbers, words (keywords vs plain),
+ * and operators.
+ *
+ * @param code - Source code to tokenize
+ * @param language - Normalized language identifier
+ * @param langDef - The language definition providing keywords and patterns
+ * @returns Ordered array of tokens covering the entire input
+ */
 function tokenizeCode(code: string, language: string, langDef: LanguageDefinition): Token[] {
   const tokens: Token[] = [];
   const operators = [...new Set(langDef.operators)].sort((a, b) => b.length - a.length);
@@ -545,6 +617,16 @@ function tokenizeCode(code: string, language: string, langDef: LanguageDefinitio
   return tokens;
 }
 
+/**
+ * Attempts to match a comment starting at the given index.
+ *
+ * Supports `//` and `/* ... * /` for C-style languages, and `#` for Python.
+ *
+ * @param code - Full source code string
+ * @param index - Position to start matching from
+ * @param language - Language identifier (determines comment syntax)
+ * @returns The matched comment string, or null if no comment starts here
+ */
 function matchComment(code: string, index: number, language: string): string | null {
   if (language === 'python') {
     if (code[index] === '#') {
@@ -567,6 +649,18 @@ function matchComment(code: string, index: number, language: string): string | n
   return null;
 }
 
+/**
+ * Attempts to match a string literal starting at the given index.
+ *
+ * Handles single quotes, double quotes, and template literals (backticks).
+ * For Python, also handles triple-quoted strings (`"""` / `'''`).
+ * Respects backslash escapes within strings.
+ *
+ * @param code - Full source code string
+ * @param index - Position to start matching from
+ * @param language - Language identifier (affects triple-quote handling)
+ * @returns The matched string literal including delimiters, or null
+ */
 function matchString(code: string, index: number, language: string): string | null {
   const char = code[index];
   if ((char ?? '') === '' || !['"', "'", '`'].includes(char as string)) {
@@ -602,6 +696,15 @@ function matchString(code: string, index: number, language: string): string | nu
   return code.slice(index);
 }
 
+/**
+ * Matches an identifier (word) starting at the given index.
+ *
+ * Uses a sticky regex to match `[A-Za-z_$][\w$]*`.
+ *
+ * @param code - Full source code string
+ * @param index - Position to start matching from
+ * @returns The matched word string, or null
+ */
 function matchWordAt(code: string, index: number): string | null {
   const wordRegex = /[A-Za-z_$][\w$]*/y;
   wordRegex.lastIndex = index;
@@ -609,6 +712,13 @@ function matchWordAt(code: string, index: number): string | null {
   return match != null ? match[0] : null;
 }
 
+/**
+ * Matches a numeric literal (integer or decimal) starting at the given index.
+ *
+ * @param code - Full source code string
+ * @param index - Position to start matching from
+ * @returns The matched number string, or null
+ */
 function matchNumberAt(code: string, index: number): string | null {
   const numberRegex = /\d+(?:\.\d+)?/y;
   numberRegex.lastIndex = index;
@@ -616,6 +726,17 @@ function matchNumberAt(code: string, index: number): string | null {
   return match != null ? match[0] : null;
 }
 
+/**
+ * Matches an operator starting at the given index.
+ *
+ * Operators are checked longest-first to ensure multi-character operators
+ * (e.g. `===`) are matched before shorter prefixes (e.g. `==`).
+ *
+ * @param code - Full source code string
+ * @param index - Position to start matching from
+ * @param operators - Pre-sorted operator list (longest first)
+ * @returns The matched operator string, or null
+ */
 function matchOperatorAt(code: string, index: number, operators: string[]): string | null {
   for (const op of operators) {
     if (code.startsWith(op, index)) {
@@ -625,6 +746,13 @@ function matchOperatorAt(code: string, index: number, operators: string[]): stri
   return null;
 }
 
+/**
+ * Maps a token type to its corresponding theme color.
+ *
+ * @param type - The semantic token type
+ * @param theme - The active syntax theme
+ * @returns CSS color string for the token
+ */
 function getTokenColor(type: Token['type'], theme: SyntaxTheme): string {
   switch (type) {
     case 'keyword':
@@ -649,6 +777,20 @@ function getTokenColor(type: Token['type'], theme: SyntaxTheme): string {
 // React Component
 // ============================================================================
 
+/**
+ * Renders syntax-highlighted source code as a styled React element.
+ *
+ * A lightweight, zero-dependency alternative to `react-syntax-highlighter`.
+ * Supports JavaScript, TypeScript, Python, and JSON with built-in light
+ * and dark themes. Optionally displays line numbers.
+ *
+ * @example
+ * ```tsx
+ * <SyntaxHighlighter language="typescript" theme="dark" showLineNumbers>
+ *   {'const greeting: string = "hello";'}
+ * </SyntaxHighlighter>
+ * ```
+ */
 export const SyntaxHighlighter = ({
   language,
   children,
@@ -666,10 +808,10 @@ export const SyntaxHighlighter = ({
   const containerStyle: React.CSSProperties = {
     backgroundColor: resolvedTheme.background,
     color: resolvedTheme.foreground,
-    padding: '16px',
-    borderRadius: '6px',
+    padding: 'var(--ui-gap-lg)',
+    borderRadius: 'var(--ui-radius-md)',
     fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-    fontSize: '14px',
+    fontSize: 'var(--ui-font-size-sm)',
     lineHeight: '1.4',
     overflow: 'auto',
   };
@@ -688,7 +830,7 @@ export const SyntaxHighlighter = ({
                   <td
                     style={{
                       color: resolvedTheme.comments,
-                      paddingRight: '16px',
+                      paddingRight: 'var(--ui-gap-lg)',
                       textAlign: 'right',
                       userSelect: 'none',
                       borderRight: `1px solid ${resolvedTheme.foreground}20`,
@@ -696,7 +838,7 @@ export const SyntaxHighlighter = ({
                   >
                     {lineNumber}
                   </td>
-                  <td style={{ paddingLeft: '16px' }}>{lineHighlighted}</td>
+                  <td style={{ paddingLeft: 'var(--ui-gap-lg)' }}>{lineHighlighted}</td>
                 </tr>
               );
             })}

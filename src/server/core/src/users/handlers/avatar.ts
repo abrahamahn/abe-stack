@@ -8,6 +8,8 @@
  * @module handlers/avatar
  */
 
+import { createHash } from 'node:crypto';
+
 import {
   ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
   BadRequestError,
@@ -91,6 +93,18 @@ export interface UpdateProfileData {
   dateOfBirth?: string | null;
   /** Gender (nullable) */
   gender?: string | null;
+  /** Bio/about text (nullable) */
+  bio?: string | null;
+  /** City (nullable) */
+  city?: string | null;
+  /** State/province (nullable) */
+  state?: string | null;
+  /** Country (nullable) */
+  country?: string | null;
+  /** Preferred language (nullable) */
+  language?: string | null;
+  /** Website URL (nullable) */
+  website?: string | null;
 }
 
 // ============================================================================
@@ -136,6 +150,12 @@ export async function updateProfile(
   if ('phone' in data) updatePayload['phone'] = data.phone;
   if ('dateOfBirth' in data) updatePayload['dateOfBirth'] = data.dateOfBirth;
   if ('gender' in data) updatePayload['gender'] = data.gender;
+  if ('bio' in data) updatePayload['bio'] = data.bio;
+  if ('city' in data) updatePayload['city'] = data.city;
+  if ('state' in data) updatePayload['state'] = data.state;
+  if ('country' in data) updatePayload['country'] = data.country;
+  if ('language' in data) updatePayload['language'] = data.language;
+  if ('website' in data) updatePayload['website'] = data.website;
 
   // Only update if there are changes
   if (Object.keys(updatePayload).length > 0) {
@@ -233,6 +253,53 @@ export async function changePassword(
 // ============================================================================
 // Avatar Management
 // ============================================================================
+
+// ============================================================================
+// Avatar Fallback Chain
+// ============================================================================
+
+/**
+ * Get the avatar URL for a user with fallback chain:
+ * 1. Custom uploaded avatar (stored in storage)
+ * 2. Gravatar (based on email hash)
+ * 3. Initials-based avatar (generated from name)
+ */
+export function getAvatarFallbackUrl(email: string, _firstName: string, _lastName: string): string {
+  // Use Gravatar with initials fallback as default
+  const gravatarUrl = getGravatarUrl(email, 80, 'blank');
+  // If Gravatar returns blank, the UI can fall back to initials
+  return gravatarUrl;
+}
+
+/**
+ * Generate a Gravatar URL from an email address.
+ * Uses MD5 hash of the lowercased, trimmed email.
+ */
+export function getGravatarUrl(
+  email: string,
+  size = 80,
+  defaultImg: 'blank' | 'identicon' | 'mp' | '404' = 'identicon',
+): string {
+  const hash = createHash('md5').update(email.trim().toLowerCase()).digest('hex');
+  return `https://www.gravatar.com/avatar/${hash}?s=${String(size)}&d=${defaultImg}`;
+}
+
+/**
+ * Generate an initials-based avatar URL using UI Avatars service.
+ */
+export function getInitialsAvatarUrl(firstName: string, lastName: string, size = 80): string {
+  const name = encodeURIComponent(`${firstName} ${lastName}`.trim());
+  return `https://ui-avatars.com/api/?name=${name}&size=${String(size)}&background=random&bold=true`;
+}
+
+/**
+ * Append a cache-busting query parameter to an avatar URL.
+ */
+export function cacheBustAvatarUrl(url: string, version: number | Date): string {
+  const v = version instanceof Date ? String(version.getTime()) : String(version);
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}v=${v}`;
+}
 
 /** Storage key prefix for avatar files */
 const AVATAR_PATH_PREFIX = 'avatars';

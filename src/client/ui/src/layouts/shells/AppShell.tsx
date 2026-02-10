@@ -74,7 +74,9 @@ export type AppShellProps = {
   /** Callback when footer is resized */
   onFooterResize?: (size: number) => void;
 
+  /** Additional CSS class */
   className?: string;
+  /** Additional inline styles */
   style?: CSSProperties;
 };
 

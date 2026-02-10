@@ -344,6 +344,12 @@ describe('createAuthResponse', () => {
         'phoneVerified',
         'dateOfBirth',
         'gender',
+        'bio',
+        'city',
+        'state',
+        'country',
+        'language',
+        'website',
         'createdAt',
         'updatedAt',
       ]);

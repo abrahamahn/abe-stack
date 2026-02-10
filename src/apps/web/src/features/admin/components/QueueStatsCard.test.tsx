@@ -212,7 +212,7 @@ describe('QueueStatsCard', () => {
       render(<QueueStatsCard stats={mockStats} isLoading={false} isError={false} error={null} />);
 
       const failedText = screen.getByText('3');
-      expect(failedText.className).toContain('red');
+      expect(failedText.className).toContain('text-danger');
     });
 
     it('should apply danger styling to dead letter count when > 0', () => {
@@ -231,7 +231,7 @@ describe('QueueStatsCard', () => {
       );
 
       const deadLetterText = screen.getByText('2');
-      expect(deadLetterText.className).toContain('red');
+      expect(deadLetterText.className).toContain('text-danger');
     });
 
     it('should apply danger styling to failure rate when > 10%', () => {
@@ -250,7 +250,7 @@ describe('QueueStatsCard', () => {
       );
 
       const failureRateText = screen.getByText('15.0%');
-      expect(failureRateText.className).toContain('red');
+      expect(failureRateText.className).toContain('text-danger');
     });
   });
 

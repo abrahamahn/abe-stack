@@ -154,42 +154,42 @@ describe('SecurityMetricsCard', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const criticalValue = screen.getByText('5');
-      expect(criticalValue.className).toContain('text-red');
+      expect(criticalValue.className).toContain('text-danger');
     });
 
     it('should apply high styling to high events', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const highValue = screen.getByText('15');
-      expect(highValue.className).toContain('text-orange');
+      expect(highValue.className).toContain('text-warning');
     });
 
     it('should apply medium styling to medium events', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const mediumValue = screen.getByText('30');
-      expect(mediumValue.className).toContain('text-yellow');
+      expect(mediumValue.className).toContain('text-warning');
     });
 
     it('should apply critical styling to token reuse', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const tokenReuseValue = screen.getByText('2');
-      expect(tokenReuseValue.className).toContain('text-red');
+      expect(tokenReuseValue.className).toContain('text-danger');
     });
 
     it('should apply high styling to account lockouts', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const lockoutsValue = screen.getByText('8');
-      expect(lockoutsValue.className).toContain('text-orange');
+      expect(lockoutsValue.className).toContain('text-warning');
     });
 
     it('should apply medium styling to suspicious logins', () => {
       render(<SecurityMetricsCard metrics={mockMetrics} isLoading={false} />);
 
       const suspiciousValue = screen.getByText('12');
-      expect(suspiciousValue.className).toContain('text-yellow');
+      expect(suspiciousValue.className).toContain('text-warning');
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { createReadStream, createWriteStream } from 'node:fs';
-import { stat, mkdir } from 'node:fs/promises';
+import { open, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
@@ -30,7 +30,35 @@ function isValidFilename(filename: string): boolean {
 function isPathContained(filePath: string, uploadDir: string): boolean {
   const resolvedPath = path.resolve(filePath);
   const resolvedUploadDir = path.resolve(uploadDir);
-  return resolvedPath.startsWith(resolvedUploadDir + path.sep);
+  const relativePath = path.relative(resolvedUploadDir, resolvedPath);
+  return relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+}
+
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 180;
+const uploadRateLimit = new Map<string, { count: number; resetAt: number }>();
+
+function getRequesterId(request: FastifyRequest): string {
+  const forwardedFor = request.headers['x-forwarded-for'];
+  if (typeof forwardedFor === 'string' && forwardedFor !== '') {
+    return forwardedFor.split(',')[0]?.trim() ?? request.ip;
+  }
+  return request.ip;
+}
+
+function isRateLimited(request: FastifyRequest): boolean {
+  const requester = getRequesterId(request);
+  const now = Date.now();
+  const current = uploadRateLimit.get(requester);
+  if (current == null || current.resetAt <= now) {
+    uploadRateLimit.set(requester, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return false;
+  }
+  current.count += 1;
+  return current.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
 import { verifySignature } from './signatures';
@@ -132,6 +160,10 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
       bodyLimit: config.maxFileSize,
     },
     async (request, reply) => {
+      if (isRateLimited(request)) {
+        void reply.status(429).send('Too many requests.');
+        return;
+      }
       if (!verifyFileRequest(config, request, reply)) return;
 
       const { id, filename } = request.params;
@@ -157,13 +189,21 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
         await mkdir(fileDir, { recursive: true });
 
         if (Buffer.isBuffer(request.body)) {
+          if (request.body.length > config.maxFileSize) {
+            void reply.status(413).send('File too large.');
+            return;
+          }
           const { writeFile } = await import('node:fs/promises');
-          await writeFile(filePath, request.body);
+          await writeFile(filePath, request.body, { mode: 0o600 });
         } else if (typeof request.body === 'string') {
+          if (Buffer.byteLength(request.body) > config.maxFileSize) {
+            void reply.status(413).send('File too large.');
+            return;
+          }
           const { writeFile } = await import('node:fs/promises');
-          await writeFile(filePath, request.body);
+          await writeFile(filePath, request.body, { mode: 0o600 });
         } else {
-          const writeStream = createWriteStream(filePath);
+          const writeStream = createWriteStream(filePath, { mode: 0o600 });
           await pipeline(request.raw, writeStream);
         }
 
@@ -178,6 +218,10 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
   app.get<{ Params: FileRouteParams; Querystring: FileRouteQuery }>(
     '/uploads/:id/:filename',
     async (request, reply) => {
+      if (isRateLimited(request)) {
+        void reply.status(429).send('Too many requests.');
+        return;
+      }
       if (!verifyFileRequest(config, request, reply)) return;
 
       const { id, filename } = request.params;
@@ -202,19 +246,25 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
       const expiration = 60 * SECONDS_PER_DAY;
 
       try {
-        const fileStat = await stat(filePath);
+        // Use a single file handle for stat and read to avoid TOCTOU race
+        const fd = await open(filePath, 'r');
+        const fileStat = await fd.stat();
 
         const SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
         if (fileStat.size <= SIZE_THRESHOLD) {
-          const { readFile: fsReadFile } = await import('node:fs/promises');
-          const fileBuffer = await fsReadFile(filePath);
+          const fileBuffer = await fd.readFile();
+          await fd.close();
           void reply
             .header('Cache-Control', `private, max-age=${String(expiration)}`)
             .header('Content-Type', getMimeType(filename))
-            .header('Content-Length', String(fileStat.size))
+            .header('Content-Length', String(fileBuffer.length))
             .send(fileBuffer);
         } else {
-          const fileStream = createReadStream(filePath);
+          // createReadStream takes ownership of the fd and closes it via autoClose
+          const fileStream = createReadStream('', {
+            fd: fd.fd,
+            autoClose: true,
+          });
           void reply
             .header('Cache-Control', `private, max-age=${String(expiration)}`)
             .header('Content-Type', getMimeType(filename))

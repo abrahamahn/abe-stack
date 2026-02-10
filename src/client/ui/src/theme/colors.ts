@@ -1,182 +1,196 @@
 // src/client/ui/src/theme/colors.ts
 /**
- * Theme color tokens
- * Single source of truth for all colors used in the UI
+ * Theme color tokens — Chrome-inspired color scheme.
+ *
+ * Single source of truth for every color used in the UI design system.
+ * Colors are organized into semantic groups (core, background, border,
+ * text, control, effect, alert, badge) with light and dark variants.
+ *
+ * Consumed by {@link buildThemeCss} to generate CSS custom properties
+ * and by the ThemeProvider at runtime.
  */
 
-/** Core semantic colors */
+/** Core semantic colors for the light theme (brand, status, accent). */
 const coreLight = {
-  primary: '#2563eb',
-  accent: '#2563eb',
-  primaryMuted: '#dbeafe',
-  danger: '#dc2626',
-  success: '#16a34a',
-  warning: '#f59e0b',
-  neutral: '#111827',
-  muted: '#6b7280',
+  primary: '#1a73e8',
+  accent: '#1a73e8',
+  primaryMuted: '#d2e3fc',
+  danger: '#d93025',
+  success: '#188038',
+  warning: '#f9ab00',
+  neutral: '#202124',
+  muted: '#5f6368',
 } as const;
 
+/** Core semantic colors for the dark theme (brand, status, accent). */
 const coreDark = {
-  primary: '#3b82f6',
-  accent: '#2563eb',
-  primaryMuted: '#1e3a8a',
-  danger: '#f87171',
-  success: '#34d399',
-  warning: '#fbbf24',
-  neutral: '#e5e7eb',
-  muted: '#9ca3af',
+  primary: '#8ab4f8',
+  accent: '#8ab4f8',
+  primaryMuted: '#394457',
+  danger: '#f28b82',
+  success: '#81c995',
+  warning: '#fdd663',
+  neutral: '#e8eaed',
+  muted: '#9aa0a6',
 } as const;
 
-/** Background and surface colors */
+/** Background and surface colors for the light theme. */
 const backgroundLight = {
   bg: '#ffffff',
-  surface: '#f7f7f8',
-  surfaceStrong: '#0f172a',
+  surface: '#f1f3f4',
+  surfaceStrong: '#202124',
 } as const;
 
+/** Background and surface colors for the dark theme. */
 const backgroundDark = {
-  bg: '#0b1220',
-  surface: '#111827',
-  surfaceStrong: '#0f172a',
+  bg: '#202124',
+  surface: '#292a2d',
+  surfaceStrong: '#171717',
 } as const;
 
-/** Border colors */
+/** Border colors for the light theme. */
 const borderLight = {
-  border: '#e2e5e9',
+  border: '#dadce0',
 } as const;
 
+/** Border colors for the dark theme. */
 const borderDark = {
-  border: '#1f2937',
+  border: '#3c4043',
 } as const;
 
-/** Text colors */
+/** Text colors for the light theme (primary, muted, inverse). */
 const textLight = {
-  text: '#0f172a',
-  textMuted: '#4b5563',
-  textInverse: '#e2e8f0',
+  text: '#202124',
+  textMuted: '#5f6368',
+  textInverse: '#e8eaed',
 } as const;
 
+/** Text colors for the dark theme (primary, muted, inverse). */
 const textDark = {
-  text: '#f8fafc',
-  textMuted: '#d5dde7',
-  textInverse: '#0b1220',
+  text: '#e8eaed',
+  textMuted: '#9aa0a6',
+  textInverse: '#202124',
 } as const;
 
-/** Control colors (switches, sliders, etc.) */
+/** Control colors for the light theme (switch thumbs, slider handles, etc.). */
 const controlLight = {
   controlThumb: '#ffffff',
 } as const;
 
+/** Control colors for the dark theme (switch thumbs, slider handles, etc.). */
 const controlDark = {
-  controlThumb: '#e5e7eb',
+  controlThumb: '#e8eaed',
 } as const;
 
-/** Effect colors (shadows, focus rings) */
+/** Effect colors for the light theme (box shadows, focus ring outlines). */
 const effectLight = {
-  shadow: '0 10px 30px rgba(18, 38, 63, 0.08)',
-  focus: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+  shadow: '0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.1)',
+  focus: '0 0 0 2px rgba(26, 115, 232, 0.4)',
 } as const;
 
+/** Effect colors for the dark theme (box shadows, focus ring outlines). */
 const effectDark = {
-  shadow: '0 16px 48px rgba(0, 0, 0, 0.45)',
-  focus: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+  shadow: '0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.25)',
+  focus: '0 0 0 2px rgba(138, 180, 248, 0.4)',
 } as const;
 
-/** Alert semantic colors */
+/** Alert semantic colors for the light theme (info, success, danger, warning). */
 const alertLight = {
   info: {
-    bg: '#eff6ff',
-    border: '#cbdcff',
-    text: '#1e3a8a',
+    bg: '#e8f0fe',
+    border: '#aecbfa',
+    text: '#174ea6',
   },
   success: {
-    bg: '#ecfdf3',
-    border: '#bbf7d0',
-    text: '#166534',
+    bg: '#e6f4ea',
+    border: '#a8dab5',
+    text: '#137333',
   },
   danger: {
-    bg: '#fef2f2',
-    border: '#fecdd3',
-    text: '#7f1d1d',
+    bg: '#fce8e6',
+    border: '#f5b7b1',
+    text: '#c5221f',
   },
   warning: {
-    bg: '#fffbeb',
-    border: '#fde68a',
-    text: '#92400e',
+    bg: '#fef7e0',
+    border: '#fdd663',
+    text: '#ea8600',
   },
 } as const;
 
+/** Alert semantic colors for the dark theme (info, success, danger, warning). */
 const alertDark = {
   info: {
-    bg: '#1e3a8a',
-    border: '#3b82f6',
-    text: '#e0f2fe',
+    bg: '#303c4d',
+    border: '#8ab4f8',
+    text: '#d2e3fc',
   },
   success: {
-    bg: '#0f3f2b',
-    border: '#34d399',
-    text: '#bbf7d0',
+    bg: '#2d4a37',
+    border: '#81c995',
+    text: '#ceead6',
   },
   danger: {
-    bg: '#3b0d0d',
-    border: '#f87171',
-    text: '#fecaca',
+    bg: '#4a2828',
+    border: '#f28b82',
+    text: '#f5c6c2',
   },
   warning: {
-    bg: '#422006',
-    border: '#fbbf24',
-    text: '#fef3c7',
+    bg: '#4a3f20',
+    border: '#fdd663',
+    text: '#fef7e0',
   },
 } as const;
 
-/** Badge semantic colors */
+/** Badge semantic colors for the light theme (primary, success, danger, warning, neutral). */
 const badgeLight = {
   primary: {
-    bg: '#e0e7ff',
-    border: '#c7d2fe',
+    bg: '#e8f0fe',
+    border: '#aecbfa',
   },
   success: {
-    bg: '#e0f7ec',
-    border: '#a7f3d0',
+    bg: '#e6f4ea',
+    border: '#a8dab5',
   },
   danger: {
-    bg: '#fee2e2',
-    border: '#fecdd3',
+    bg: '#fce8e6',
+    border: '#f5b7b1',
   },
   warning: {
-    bg: '#fef3c7',
-    border: '#fcd34d',
+    bg: '#fef7e0',
+    border: '#fdd663',
   },
   neutral: {
-    bg: '#f1f5f9',
-    border: '#e2e8f0',
+    bg: '#f1f3f4',
+    border: '#dadce0',
   },
 } as const;
 
+/** Badge semantic colors for the dark theme (primary, success, danger, warning, neutral). */
 const badgeDark = {
   primary: {
-    bg: '#1e3a8a',
-    border: '#3b82f6',
+    bg: '#394457',
+    border: '#5c8bc4',
   },
   success: {
-    bg: '#0f3f2b',
-    border: '#34d399',
+    bg: '#2d4a37',
+    border: '#5b9a6e',
   },
   danger: {
-    bg: '#3b0d0d',
-    border: '#f87171',
+    bg: '#4a2828',
+    border: '#b86c6c',
   },
   warning: {
-    bg: '#422006',
-    border: '#fbbf24',
+    bg: '#4a3f20',
+    border: '#c4a84a',
   },
   neutral: {
-    bg: '#1f2937',
-    border: '#334155',
+    bg: '#3c4043',
+    border: '#5f6368',
   },
 } as const;
 
-/** Complete light theme colors */
+/** Complete light theme color set, composed from all semantic groups. */
 export const lightColors = {
   ...coreLight,
   ...backgroundLight,
@@ -188,7 +202,7 @@ export const lightColors = {
   badge: badgeLight,
 } as const;
 
-/** Complete dark theme colors */
+/** Complete dark theme color set, composed from all semantic groups. */
 export const darkColors = {
   ...coreDark,
   ...backgroundDark,
@@ -200,13 +214,15 @@ export const darkColors = {
   badge: badgeDark,
 } as const;
 
-/** Theme colors with light and dark variants */
+/** Top-level color map containing both light and dark theme variants. */
 export const colors = {
   light: lightColors,
   dark: darkColors,
 } as const;
 
-/** Type definitions */
+/** Inferred type of the complete light color set. */
 export type LightColors = typeof lightColors;
+/** Inferred type of the complete dark color set. */
 export type DarkColors = typeof darkColors;
+/** Inferred type of the combined color map with both variants. */
 export type ThemeColors = typeof colors;

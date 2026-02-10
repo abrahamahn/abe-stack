@@ -1,87 +1,130 @@
 // src/apps/web/src/features/home/data/docsMeta.ts
-
 import type { DocCategoryDef, DocKey, DocMeta } from '../types';
 
-/**
- * Metadata record mapping each DocKey to its display label and category.
- * Content is lazy-loaded on demand via `loadDocContent`.
- *
- * @complexity O(1) - constant-size record lookup
- */
-export const docsMeta: Record<DocKey, DocMeta> = {
-  // Root
-  readme: { label: 'README', category: 'root' },
+// ---------------------------------------------------------------------------
+// Vite build-time discovery of all markdown files under docs/
+// ---------------------------------------------------------------------------
 
-  // Apps
-  web: { label: 'Web', category: 'apps' },
-  desktop: { label: 'Desktop', category: 'apps' },
+const DOCS_PREFIX = '../../../../../../../docs/';
 
-  // Packages
-  core: { label: 'Core', category: 'packages' },
-  ui: { label: 'UI', category: 'packages' },
+/** Glob-discovered doc loaders (lazy, on-demand) */
+const docGlob = import.meta.glob<string>('../../../../../../../docs/**/*.md', {
+  query: '?raw',
+  import: 'default',
+});
 
-  // Dev docs
-  architecture: { label: 'Architecture', category: 'dev' },
-  principles: { label: 'Principles', category: 'dev' },
-  devEnvironment: { label: 'Dev Environment', category: 'dev' },
-  configSetup: { label: 'Config Setup', category: 'dev' },
-  testing: { label: 'Testing', category: 'dev' },
-  security: { label: 'Security', category: 'dev' },
-  syncScripts: { label: 'Sync Scripts', category: 'dev' },
-  performance: { label: 'Performance', category: 'dev' },
-  legacy: { label: 'Legacy', category: 'dev' },
+/** Root README.md loader */
+const rootReadmeGlob = import.meta.glob<string>('../../../../../../../README.md', {
+  query: '?raw',
+  import: 'default',
+});
 
-  // Logs
-  logW01: { label: 'Week 01', category: 'logs' },
-  logW02: { label: 'Week 02', category: 'logs' },
-  logW03: { label: 'Week 03', category: 'logs' },
-  logW04: { label: 'Week 04', category: 'logs' },
+// ---------------------------------------------------------------------------
+// Label & key derivation helpers
+// ---------------------------------------------------------------------------
+
+const CATEGORY_LABELS: Record<string, string> = {
+  root: 'Home',
+  docs: 'Docs',
+  deploy: 'Deployment',
+  dev: 'Development',
+  log: 'Changelog',
+  quickstart: 'Quick Start',
+  reference: 'Reference',
+  specs: 'Specifications',
+  todo: 'Roadmap',
 };
 
-/**
- * Ordered category definitions for rendering the sidebar navigation groups.
- *
- * @complexity O(1) - fixed-size array
- */
-export const docCategories: DocCategoryDef[] = [
-  { key: 'root', label: 'Home' },
-  { key: 'apps', label: 'Apps' },
-  { key: 'packages', label: 'Packages' },
-  { key: 'dev', label: 'Dev Docs' },
-  { key: 'logs', label: 'Changelog' },
+const CATEGORY_ORDER = [
+  'root',
+  'docs',
+  'quickstart',
+  'specs',
+  'dev',
+  'deploy',
+  'reference',
+  'todo',
+  'log',
 ];
 
+function formatLabel(filename: string): string {
+  const name = filename.replace(/\.md$/, '');
+  if (name === 'README') return 'Overview';
+  // Convert kebab-case to Title Case: "ci-cd" → "Ci Cd", "sync-scripts" → "Sync Scripts"
+  return name
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function deriveKey(relativePath: string): string {
+  const withoutExt = relativePath.replace(/\.md$/, '');
+  const parts = withoutExt.split('/');
+  // Top-level docs files get a 'docs-' prefix to avoid collision with root README
+  if (parts.length === 1) {
+    return 'docs-' + (parts[0] ?? '').toLowerCase();
+  }
+  return parts.join('-').toLowerCase();
+}
+
+// ---------------------------------------------------------------------------
+// Build docsMeta, loaderMap, and docCategories from glob entries
+// ---------------------------------------------------------------------------
+
+const loaderMap = new Map<DocKey, () => Promise<string>>();
+const metaRecord: Record<DocKey, DocMeta> = {};
+
+// Process root README
+for (const [globPath, loader] of Object.entries(rootReadmeGlob)) {
+  void globPath;
+  const key = 'readme';
+  loaderMap.set(key, loader);
+  metaRecord[key] = { label: 'Readme', category: 'root' };
+}
+
+// Process docs/**/*.md
+for (const [globPath, loader] of Object.entries(docGlob)) {
+  // globPath looks like "../../../../../../../docs/dev/testing.md"
+  const relativePath = globPath.slice(DOCS_PREFIX.length); // "dev/testing.md"
+  const parts = relativePath.split('/');
+
+  let category: string;
+  let filename: string;
+
+  if (parts.length === 1) {
+    // Top-level doc: docs/README.md → category "docs"
+    category = 'docs';
+    filename = parts[0] ?? '';
+  } else {
+    // Nested doc: docs/dev/testing.md → category "dev"
+    category = parts[0] ?? 'docs';
+    filename = parts[parts.length - 1] ?? '';
+  }
+
+  const key = deriveKey(relativePath);
+  loaderMap.set(key, loader);
+  metaRecord[key] = { label: formatLabel(filename), category };
+}
+
+/** Metadata for all discovered docs, keyed by derived doc key */
+export const docsMeta: Record<DocKey, DocMeta> = metaRecord;
+
+/** Ordered category definitions for sidebar rendering */
+export const docCategories: DocCategoryDef[] = CATEGORY_ORDER.filter((cat) =>
+  Object.values(metaRecord).some((m) => m.category === cat),
+).map((cat) => ({
+  key: cat,
+  label: CATEGORY_LABELS[cat] ?? cat.charAt(0).toUpperCase() + cat.slice(1),
+}));
+
 /**
- * Lazy-loads markdown content for a given doc key using Vite's dynamic import.
- * Each doc is loaded on demand and resolved as a raw string.
- *
- * @param key - The document identifier to load
- * @returns The raw markdown string content
- * @throws When the import fails (file not found, network error)
- * @complexity O(1) - single record lookup + async import
+ * Lazily load the raw markdown content for a given doc key.
+ * Uses the Vite glob loader to fetch on demand.
  */
 export async function loadDocContent(key: DocKey): Promise<string> {
-  const loaders: Record<DocKey, () => Promise<{ default: string }>> = {
-    readme: () => import('../../../../../../../README.md?raw'),
-    web: () => import('../../../../README.md?raw'),
-    desktop: () => import('../../../../../desktop/README.md?raw'),
-    core: () => import('../../../../../../../config/README.md?raw'),
-    ui: () => import('../../../../../../client/ui/README.md?raw'),
-    architecture: () => import('../../../../../../../config/README.md?raw'),
-    principles: () => import('../../../../../../../config/README.md?raw'),
-    devEnvironment: () => import('../../../../../../../config/README.md?raw'),
-    configSetup: () => import('../../../../../../../config/README.md?raw'),
-    testing: () => import('../../../../../../../config/README.md?raw'),
-    security: () => import('../../../../../../../config/README.md?raw'),
-    syncScripts: () => import('../../../../../../../config/README.md?raw'),
-    performance: () => import('../../../../../../../config/README.md?raw'),
-    legacy: () => import('../../../../../../../config/README.md?raw'),
-    logW01: () => import('../../../../../../../config/README.md?raw'),
-    logW02: () => import('../../../../../../../config/README.md?raw'),
-    logW03: () => import('../../../../../../../config/README.md?raw'),
-    logW04: () => import('../../../../../../../config/README.md?raw'),
-  };
-
-  const module = await loaders[key]();
-  return module.default;
+  const loader = loaderMap.get(key);
+  if (loader === undefined) {
+    throw new Error(`Unknown doc key: ${key}`);
+  }
+  return loader();
 }

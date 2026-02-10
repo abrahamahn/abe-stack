@@ -40,6 +40,22 @@ export const systemRoutes: RouteMap = createRouteMap([
           database: dbStatus,
         };
       },
+      undefined,
+      {
+        summary: 'Health check',
+        description: 'Returns server health status including database connectivity',
+        tags: ['system'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              status: { type: 'string', enum: ['ok', 'degraded'] },
+              timestamp: { type: 'string', format: 'date-time' },
+              database: { type: 'object' },
+            },
+          },
+        },
+      },
     ),
   ],
   [
@@ -83,6 +99,21 @@ export const systemRoutes: RouteMap = createRouteMap([
           status: 'alive',
           uptime: process.uptime(),
         };
+      },
+      undefined,
+      {
+        summary: 'Liveness probe',
+        description: 'Kubernetes-compatible liveness probe returning uptime',
+        tags: ['system'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              status: { type: 'string', enum: ['alive'] },
+              uptime: { type: 'number' },
+            },
+          },
+        },
       },
     ),
   ],

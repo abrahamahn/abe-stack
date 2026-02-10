@@ -68,24 +68,15 @@ describe('HomeNavList', () => {
 
   it('renders app menu links', () => {
     render(<HomeNavList />);
-    expect(screen.getByText('Auth')).toBeInTheDocument();
-    expect(screen.getByText('Profile')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByText('Pricing')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
-  it('renders Auth link with correct href', () => {
+  it('renders Pricing link with correct href', () => {
     render(<HomeNavList />);
-    expect(screen.getByRole('link', { name: /auth/i })).toHaveAttribute('href', '/auth');
-  });
-
-  it('renders Profile link with correct href', () => {
-    render(<HomeNavList />);
-    expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
-      'href',
-      '/settings/accounts',
-    );
+    expect(screen.getByRole('link', { name: /pricing/i })).toHaveAttribute('href', '/pricing');
   });
 
   it('renders Settings link with correct href', () => {

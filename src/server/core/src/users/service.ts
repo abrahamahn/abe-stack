@@ -45,6 +45,18 @@ export interface User {
   dateOfBirth: string | null;
   /** Gender (free text) */
   gender: string | null;
+  /** User's bio/about text */
+  bio: string | null;
+  /** User's city */
+  city: string | null;
+  /** User's state/province */
+  state: string | null;
+  /** User's country */
+  country: string | null;
+  /** User's preferred language */
+  language: string | null;
+  /** User's website URL */
+  website: string | null;
   /** Date when the user was created */
   createdAt: Date;
   /** Date when the user was last updated */
@@ -96,6 +108,12 @@ export async function getUserById(userRepo: UserRepository, userId: string): Pro
     phoneVerified: user.phoneVerified,
     dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
     gender: user.gender ?? null,
+    bio: user.bio ?? null,
+    city: user.city ?? null,
+    state: user.state ?? null,
+    country: user.country ?? null,
+    language: user.language ?? null,
+    website: user.website ?? null,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -144,6 +162,12 @@ export async function listUsers(
       phoneVerified: user.phoneVerified,
       dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
       gender: user.gender ?? null,
+      bio: user.bio ?? null,
+      city: user.city ?? null,
+      state: user.state ?? null,
+      country: user.country ?? null,
+      language: user.language ?? null,
+      website: user.website ?? null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })),

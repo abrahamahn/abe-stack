@@ -11,9 +11,18 @@ import { radius } from './radius';
 import { spacing } from './spacing';
 import { typography } from './typography';
 
+/** Union of light or dark color definitions used when generating tokens. */
 type ColorTheme = LightColors | DarkColors;
 
-/** Generate CSS custom properties from theme tokens */
+/**
+ * Builds a flat record of CSS custom property names to their values
+ * for the given color theme. Covers radius, spacing, border, outline,
+ * motion, typography, core colors, backgrounds, borders, effects, text,
+ * controls, alerts, and badges.
+ *
+ * @param colors - A complete light or dark color set
+ * @returns Record mapping CSS custom property names (e.g. `--ui-color-primary`) to values
+ */
 function buildThemeTokens(colors: ColorTheme): Record<string, string> {
   const tokens: Record<string, string> = {};
 
@@ -126,14 +135,41 @@ function buildThemeTokens(colors: ColorTheme): Record<string, string> {
   return tokens;
 }
 
-/** Serialize tokens to CSS declarations */
+/**
+ * Serializes a token record into indented CSS declaration lines.
+ *
+ * @param tokens - Record of CSS custom property name/value pairs
+ * @returns A string of CSS declarations, each indented with two spaces
+ *
+ * @example
+ * ```ts
+ * serializeTokens({ '--ui-radius-sm': '0.25rem' });
+ * // "  --ui-radius-sm: 0.25rem;"
+ * ```
+ */
 function serializeTokens(tokens: Record<string, string>): string {
   return Object.entries(tokens)
     .map(([key, value]) => `  ${key}: ${value};`)
     .join('\n');
 }
 
-/** Generate complete theme CSS */
+/**
+ * Generates a complete CSS string containing all theme custom properties.
+ *
+ * Produces four rule blocks:
+ * 1. `:root` -- light tokens as default
+ * 2. `:root[data-theme='light']` -- explicit light mode
+ * 3. `:root[data-theme='dark']` -- explicit dark mode
+ * 4. `@media (prefers-color-scheme: dark)` -- OS-level dark preference fallback
+ *
+ * @returns A CSS string ready to be written to a `.css` file
+ *
+ * @example
+ * ```ts
+ * import { writeFileSync } from 'fs';
+ * writeFileSync('theme.css', generateThemeCss());
+ * ```
+ */
 export function generateThemeCss(): string {
   const lightTokens = buildThemeTokens(lightColors);
   const darkTokens = buildThemeTokens(darkColors);

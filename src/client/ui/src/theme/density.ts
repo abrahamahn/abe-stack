@@ -8,16 +8,27 @@
  * - `comfortable`: Looser spacing (1.25x), more breathing room
  */
 
+/**
+ * Available density levels for the UI.
+ *
+ * - `compact` -- tighter spacing for data-dense views
+ * - `normal` -- balanced default
+ * - `comfortable` -- extra breathing room
+ */
 export type Density = 'compact' | 'normal' | 'comfortable';
 
-/** Multipliers for each density level */
+/**
+ * Numeric multipliers applied to base spacing for each density level.
+ *
+ * Compact compresses spacing to 75%, comfortable expands to 125%.
+ */
 export const densityMultipliers = {
   compact: 0.75,
   normal: 1,
   comfortable: 1.25,
 } as const;
 
-/** Base spacing values in rem */
+/** Base spacing scale in rem units (used as input before density scaling). */
 const baseSpacing = {
   xs: 0.25, // 4px
   sm: 0.5, // 8px
@@ -29,7 +40,19 @@ const baseSpacing = {
 } as const;
 
 /**
- * Generate spacing values for a given density
+ * Generates rem spacing values scaled by the given density level.
+ *
+ * Each base spacing value is multiplied by the density multiplier and
+ * formatted as a rem string with trailing zeros stripped.
+ *
+ * @param density - The density level to compute spacing for
+ * @returns A record mapping spacing scale names (xs through 3xl) to rem strings
+ *
+ * @example
+ * ```ts
+ * getSpacingForDensity('compact');
+ * // { xs: '0.188rem', sm: '0.375rem', md: '0.563rem', ... }
+ * ```
  */
 export function getSpacingForDensity(density: Density): Record<keyof typeof baseSpacing, string> {
   const multiplier = densityMultipliers[density];
@@ -44,7 +67,19 @@ export function getSpacingForDensity(density: Density): Record<keyof typeof base
 }
 
 /**
- * Generate CSS custom properties for density-scaled spacing
+ * Generates a record of CSS custom property name/value pairs for
+ * density-scaled spacing tokens.
+ *
+ * Suitable for applying as inline styles or injecting into a stylesheet.
+ *
+ * @param density - The density level to generate variables for
+ * @returns Record mapping CSS variable names (e.g. `--ui-gap-sm`) to rem values
+ *
+ * @example
+ * ```ts
+ * const vars = getDensityCssVariables('comfortable');
+ * // { '--ui-gap-xs': '0.313rem', '--ui-gap-sm': '0.625rem', ... }
+ * ```
  */
 export function getDensityCssVariables(density: Density): Record<string, string> {
   const spacing = getSpacingForDensity(density);
@@ -60,7 +95,5 @@ export function getDensityCssVariables(density: Density): Record<string, string>
   };
 }
 
-/**
- * Default density setting
- */
+/** Default density setting used when no user preference is stored. */
 export const DEFAULT_DENSITY: Density = 'normal';

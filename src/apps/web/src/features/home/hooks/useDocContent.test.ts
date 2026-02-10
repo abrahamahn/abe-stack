@@ -10,8 +10,6 @@ import { loadDocContent } from '../data';
 
 import { useDocContent } from './useDocContent';
 
-import type { DocKey } from '../types';
-
 describe('useDocContent', () => {
   it('should start in loading state', () => {
     vi.mocked(loadDocContent).mockReturnValue(new Promise(() => {}));
@@ -43,7 +41,7 @@ describe('useDocContent', () => {
   it('should use cached content on subsequent renders with same key', async () => {
     vi.mocked(loadDocContent).mockResolvedValue('# Cached');
     const { result, rerender } = renderHook(({ key }) => useDocContent(key), {
-      initialProps: { key: 'readme' as DocKey },
+      initialProps: { key: 'readme' },
     });
 
     await waitFor(() => {
@@ -61,10 +59,10 @@ describe('useDocContent', () => {
   });
 
   it('should load new content when key changes', async () => {
-    vi.mocked(loadDocContent).mockResolvedValueOnce('# README').mockResolvedValueOnce('# Web App');
+    vi.mocked(loadDocContent).mockResolvedValueOnce('# README').mockResolvedValueOnce('# Docs');
 
-    const { result, rerender } = renderHook(({ key }: { key: DocKey }) => useDocContent(key), {
-      initialProps: { key: 'readme' as DocKey },
+    const { result, rerender } = renderHook(({ key }: { key: string }) => useDocContent(key), {
+      initialProps: { key: 'readme' },
     });
 
     await waitFor(() => {
@@ -72,11 +70,11 @@ describe('useDocContent', () => {
     });
 
     act(() => {
-      rerender({ key: 'web' });
+      rerender({ key: 'dev-testing' });
     });
 
     await waitFor(() => {
-      expect(result.current.content).toBe('# Web App');
+      expect(result.current.content).toBe('# Docs');
     });
   });
 });

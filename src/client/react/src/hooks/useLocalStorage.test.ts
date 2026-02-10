@@ -10,6 +10,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useLocalStorage } from './useLocalStorage';
 
+/** Create a StorageEvent-compatible event without relying on the 2-arg StorageEvent constructor */
+function createStorageEvent(init: {
+  key?: string | null;
+  newValue?: string | null;
+  oldValue?: string | null;
+  storageArea?: Storage | null;
+}): Event {
+  const event = new Event('storage');
+  Object.defineProperties(event, {
+    key: { value: init.key ?? null },
+    newValue: { value: init.newValue ?? null },
+    oldValue: { value: init.oldValue ?? null },
+    storageArea: { value: init.storageArea ?? null },
+  });
+  return event;
+}
+
 describe('useLocalStorage', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -205,13 +222,14 @@ describe('useLocalStorage', () => {
       expect(result.current[0]).toBe('initial');
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'sync-key',
-          newValue: JSON.stringify('from-other-tab'),
-          oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'sync-key',
+            newValue: JSON.stringify('from-other-tab'),
+            oldValue: JSON.stringify('initial'),
+            storageArea: localStorage,
+          }),
+        );
       });
 
       expect(result.current[0]).toBe('from-other-tab');
@@ -221,12 +239,13 @@ describe('useLocalStorage', () => {
       const { result } = renderHook(() => useLocalStorage('key-a', 'value-a'));
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'key-b',
-          newValue: JSON.stringify('value-b'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'key-b',
+            newValue: JSON.stringify('value-b'),
+            storageArea: localStorage,
+          }),
+        );
       });
 
       expect(result.current[0]).toBe('value-a');
@@ -236,13 +255,14 @@ describe('useLocalStorage', () => {
       const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'test-key',
-          newValue: null,
-          oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'test-key',
+            newValue: null,
+            oldValue: JSON.stringify('initial'),
+            storageArea: localStorage,
+          }),
+        );
       });
 
       expect(result.current[0]).toBe('initial');
@@ -252,12 +272,13 @@ describe('useLocalStorage', () => {
       const { result } = renderHook(() => useLocalStorage('test-key', 'initial'));
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'test-key',
-          newValue: 'invalid-json',
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'test-key',
+            newValue: 'invalid-json',
+            storageArea: localStorage,
+          }),
+        );
       });
 
       expect(result.current[0]).toBe('initial');
@@ -269,12 +290,13 @@ describe('useLocalStorage', () => {
       const complexValue = { b: 2, c: { d: 3 } };
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'complex',
-          newValue: JSON.stringify(complexValue),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'complex',
+            newValue: JSON.stringify(complexValue),
+            storageArea: localStorage,
+          }),
+        );
       });
 
       expect(result.current[0]).toEqual(complexValue);
@@ -298,12 +320,13 @@ describe('useLocalStorage', () => {
       unmount();
 
       act(() => {
-        const event = new StorageEvent('storage', {
-          key: 'test-key',
-          newValue: JSON.stringify('after-unmount'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(event);
+        window.dispatchEvent(
+          createStorageEvent({
+            key: 'test-key',
+            newValue: JSON.stringify('after-unmount'),
+            storageArea: localStorage,
+          }),
+        );
       });
 
       // Value should not change

@@ -119,11 +119,33 @@ const BillingIcon = (): ReactElement => {
 // Navigation Items
 // ============================================================================
 
+const RoutesIcon = (): ReactElement => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h16" />
+      <path d="M4 12h16" />
+      <path d="M4 20h10" />
+      <circle cx="18" cy="20" r="2" />
+    </svg>
+  );
+};
+
 const NAV_ITEMS: NavItem[] = [
   { label: 'Users', path: '/admin/users', icon: <UsersIcon /> },
   { label: 'Security', path: '/admin/security', icon: <ShieldIcon /> },
   { label: 'Jobs', path: '/admin/jobs', icon: <QueueIcon /> },
   { label: 'Billing', path: '/admin/billing/plans', icon: <BillingIcon /> },
+  { label: 'API Routes', path: '/admin/routes', icon: <RoutesIcon /> },
 ];
 
 // ============================================================================

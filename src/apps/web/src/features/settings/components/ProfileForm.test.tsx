@@ -336,10 +336,12 @@ describe('ProfileForm', () => {
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({
-        firstName: 'Jane',
-        lastName: 'Smith',
-      });
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'Jane',
+          lastName: 'Smith',
+        }),
+      );
     });
 
     it('should prevent default form submission', async () => {
@@ -759,10 +761,12 @@ describe('ProfileForm', () => {
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({
-        firstName: longFirstName,
-        lastName: 'Doe',
-      });
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: longFirstName,
+          lastName: 'Doe',
+        }),
+      );
     });
 
     it('should handle firstName with special characters', async () => {
@@ -777,10 +781,12 @@ describe('ProfileForm', () => {
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({
-        firstName: specialFirstName,
-        lastName: 'Doe',
-      });
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: specialFirstName,
+          lastName: 'Doe',
+        }),
+      );
     });
 
     it('should handle lastName with unicode characters', async () => {
@@ -795,10 +801,12 @@ describe('ProfileForm', () => {
 
       fireEvent.submit(screen.getByTestId('submit-button').closest('form')!);
 
-      expect(mockUpdateProfile).toHaveBeenCalledWith({
-        firstName: 'John',
-        lastName: unicodeLastName,
-      });
+      expect(mockUpdateProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'John',
+          lastName: unicodeLastName,
+        }),
+      );
     });
 
     it('should handle form submission via button click', async () => {

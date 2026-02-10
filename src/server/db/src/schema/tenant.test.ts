@@ -72,6 +72,7 @@ describe('Tenant Schema - Tenant Columns', () => {
       ownerId: 'owner_id',
       isActive: 'is_active',
       metadata: 'metadata',
+      allowedEmailDomains: 'allowed_email_domains',
       createdAt: 'created_at',
       updatedAt: 'updated_at',
     });
@@ -101,6 +102,7 @@ describe('Tenant Schema - Tenant Columns', () => {
       'ownerId',
       'isActive',
       'metadata',
+      'allowedEmailDomains',
       'createdAt',
       'updatedAt',
     ];
@@ -1025,6 +1027,7 @@ describe('Tenant Schema - Type Consistency', () => {
       ownerId: 'ownerId',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -1067,6 +1070,7 @@ describe('Tenant Schema - Column Mapping Consistency', () => {
       'ownerId',
       'isActive',
       'metadata',
+      'allowedEmailDomains',
       'createdAt',
       'updatedAt',
     ];
@@ -1124,6 +1128,7 @@ describe('Tenant Schema - Column Mapping Consistency', () => {
       'ownerId',
       'isActive',
       'metadata',
+      'allowedEmailDomains',
       'createdAt',
       'updatedAt',
     ];

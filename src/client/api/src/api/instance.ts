@@ -37,7 +37,8 @@ function hasConfigChanged(newConfig: ApiClientConfig): boolean {
   return (
     newConfig.baseUrl !== currentConfig.baseUrl ||
     newConfig.getToken !== currentConfig.getToken ||
-    newConfig.fetchImpl !== currentConfig.fetchImpl
+    newConfig.fetchImpl !== currentConfig.fetchImpl ||
+    newConfig.onTosRequired !== currentConfig.onTosRequired
   );
 }
 

@@ -134,7 +134,7 @@ interface StatItemProps {
 }
 
 const StatItem = ({ label, value, tone }: StatItemProps): JSX.Element => {
-  const valueClass = tone === 'danger' ? 'text-red-600 dark:text-red-400' : '';
+  const valueClass = tone === 'danger' ? 'text-danger' : '';
 
   return (
     <div>

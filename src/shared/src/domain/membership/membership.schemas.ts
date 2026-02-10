@@ -68,6 +68,12 @@ export interface UpdateMembershipRole {
   role: TenantRole;
 }
 
+/** Input for directly adding a member to a workspace */
+export interface AddMember {
+  userId: string;
+  role: TenantRole;
+}
+
 /** Input for accepting an invitation */
 export interface AcceptInvitation {
   token: string;
@@ -128,6 +134,15 @@ export const updateMembershipRoleSchema: Schema<UpdateMembershipRole> = createSc
     };
   },
 );
+
+export const addMemberSchema: Schema<AddMember> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  return {
+    userId: parseString(obj['userId'], 'userId', { min: 1 }),
+    role: tenantRoleSchema.parse(obj['role']),
+  };
+});
 
 export const acceptInvitationSchema: Schema<AcceptInvitation> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;

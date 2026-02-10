@@ -200,7 +200,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         name: 'With Custom Style',
         description: 'Divider with custom styling',
         code: '<Divider style={{ margin: "20px 0" }} />',
-        render: () => <Divider style={{ margin: '20px 0' }} />,
+        render: () => <Divider style={{ margin: 'var(--ui-gap-xl) 0' }} />,
       },
     ],
   },
@@ -217,7 +217,9 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         render: () => (
           <Dropdown trigger={<Button>Open Menu</Button>}>
             {(close: () => void) => (
-              <div style={{ padding: '8px', display: 'grid', gap: '4px' }}>
+              <div
+                style={{ padding: 'var(--ui-gap-sm)', display: 'grid', gap: 'var(--ui-gap-xs)' }}
+              >
                 <Button variant="text" onClick={close}>
                   Item 1
                 </Button>
@@ -271,7 +273,13 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Default menu item',
         code: '<MenuItem>Item Content</MenuItem>',
         render: () => (
-          <div style={{ width: '200px', border: '1px solid #eee', padding: '4px' }}>
+          <div
+            style={{
+              width: '200px',
+              border: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-xs)',
+            }}
+          >
             <MenuItem>Menu Item 1</MenuItem>
             <MenuItem>Menu Item 2</MenuItem>
           </div>
@@ -307,11 +315,11 @@ export const elementCatalog: Record<string, ComponentDemo> = {
                     setOpen(false);
                   }}
                 >
-                  <div style={{ padding: '24px' }}>
+                  <div style={{ padding: 'var(--ui-gap-2xl)' }}>
                     <Modal.Title>Modal Title</Modal.Title>
                     <Text>Modal content goes here</Text>
                     <Modal.Close>
-                      <Button style={{ marginTop: '16px' }}>Close</Button>
+                      <Button style={{ marginTop: 'var(--ui-gap-lg)' }}>Close</Button>
                     </Modal.Close>
                   </div>
                 </Modal.Root>
@@ -385,7 +393,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         code: '<Popover trigger={<Button>Click</Button>}>Content</Popover>',
         render: () => (
           <Popover trigger={<Button>Open Popover</Button>}>
-            <div style={{ padding: '12px' }}>
+            <div style={{ padding: 'var(--ui-gap-md)' }}>
               <Text>Popover content here</Text>
             </div>
           </Popover>
@@ -754,11 +762,11 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         render: () => (
           <ResizablePanelGroup direction="horizontal" style={{ height: '200px' }}>
             <ResizablePanel defaultSize={50}>
-              <div style={{ padding: '16px' }}>
+              <div style={{ padding: 'var(--ui-gap-lg)' }}>
                 <Text>Left Panel</Text>
               </div>
             </ResizablePanel>
-            <div style={{ padding: '16px' }}>
+            <div style={{ padding: 'var(--ui-gap-lg)' }}>
               <Text>Right Panel</Text>
             </div>
           </ResizablePanelGroup>
@@ -777,10 +785,16 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Basic scroll area',
         code: '<ScrollArea style={{ height: 200 }}>...</ScrollArea>',
         render: () => (
-          <ScrollArea style={{ height: 200, border: '1px solid #ddd', padding: '12px' }}>
+          <ScrollArea
+            style={{
+              height: 200,
+              border: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-md)',
+            }}
+          >
             <div>
               {Array.from({ length: 20 }, (_, i) => (
-                <Text key={i} style={{ display: 'block', marginBottom: '8px' }}>
+                <Text key={i} style={{ display: 'block', marginBottom: 'var(--ui-gap-sm)' }}>
                   Scrollable content line {i + 1}
                 </Text>
               ))}
@@ -827,7 +841,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
           <Image
             src="https://via.placeholder.com/150"
             alt="Placeholder image"
-            style={{ borderRadius: '8px' }}
+            style={{ borderRadius: 'var(--ui-radius-lg)' }}
           />
         ),
       },
@@ -844,7 +858,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Default close button',
         code: '<CloseButton onClick={() => {}} />',
         render: () => (
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--ui-gap-lg)', alignItems: 'center' }}>
             <CloseButton
               onClick={() => {
                 alert('Close clicked');
@@ -906,7 +920,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Modifier key combination',
         code: '<Kbd>⌘</Kbd> + <Kbd>K</Kbd>',
         render: () => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ui-gap-xs)' }}>
             <Kbd>⌘</Kbd>
             <Text tone="muted">+</Text>
             <Kbd>K</Kbd>

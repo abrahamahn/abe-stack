@@ -13,6 +13,7 @@ export { authRoutes } from './routes';
 
 // Middleware factories (use these to create guards with your JWT secret)
 export {
+  assertUserActive,
   createAuthGuard,
   createRequireAuth,
   createRequireRole,
@@ -34,6 +35,7 @@ export {
   handleResendVerification,
   handleResetPassword,
   handleSetPassword,
+  handleSudoElevate,
   handleTosStatus,
   handleTotpDisable,
   handleTotpEnable,
@@ -41,6 +43,9 @@ export {
   handleTotpSetup,
   handleTotpStatus,
   handleVerifyEmail,
+  SUDO_TOKEN_HEADER,
+  SUDO_TOKEN_TTL_MINUTES,
+  verifySudoToken,
 } from './handlers';
 
 // Magic Link
@@ -141,6 +146,7 @@ export {
   setupTotp,
   verifyTotpForLogin,
   type TotpSetupResult,
+  verifyTotpCode,
   type TotpVerifyResult,
 } from './totp';
 
@@ -225,6 +231,7 @@ export {
   unlockAccount,
 } from './security';
 
+export { createRequireSudo } from './security';
 export { isCaptchaRequired, verifyCaptchaToken, verifyTurnstileToken } from './security';
 
 export type {
