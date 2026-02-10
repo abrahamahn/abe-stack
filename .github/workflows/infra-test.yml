@@ -30,8 +30,9 @@ jobs:
     if: ${{ vars.INFRA_TEST_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        provider: ${{ fromJSON((inputs.provider == 'digitalocean' && '["digitalocean"]') || (inputs.provider == 'gcp' && '["gcp"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'digitalocean' && '["digitalocean"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'gcp' && '["gcp"]') || '["digitalocean","gcp"]') }}
+        provider: ${{ fromJSON((github.event_name == 'workflow_dispatch' && inputs.provider == 'digitalocean' && '["digitalocean"]') || (github.event_name == 'workflow_dispatch' && inputs.provider == 'gcp' && '["gcp"]') || (github.event_name == 'workflow_dispatch' && inputs.provider == 'all' && '["digitalocean","gcp"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'digitalocean' && '["digitalocean"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'gcp' && '["gcp"]') || (vars.ACTIVE_CLOUD_PROVIDER == 'all' && '["digitalocean","gcp"]') || '["digitalocean"]') }}
 
     steps:
       - name: Checkout repository
@@ -41,6 +42,17 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '~1.0'
+
+      - name: Configure DigitalOcean Credentials
+        if: matrix.provider == 'digitalocean' && secrets.DIGITALOCEAN_TOKEN != ''
+        run: |
+          echo "DIGITALOCEAN_TOKEN=${{ secrets.DIGITALOCEAN_TOKEN }}" >> "$GITHUB_ENV"
+
+      - name: Authenticate to Google Cloud
+        if: matrix.provider == 'gcp' && secrets.GCP_SA_KEY != ''
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Check Terraform Formatting
         run: |
@@ -84,6 +96,16 @@ jobs:
           cd infra/cloud/${{ matrix.provider }}
           echo "🔧 Testing ${{ matrix.provider }} configuration..."
 
+          if [ "${{ matrix.provider }}" = "digitalocean" ] && [ -z "${DIGITALOCEAN_TOKEN:-}" ]; then
+            echo "⚠️ Skipping DigitalOcean plan test: DIGITALOCEAN_TOKEN is not available in this context."
+            exit 0
+          fi
+
+          if [ "${{ matrix.provider }}" = "gcp" ] && [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "⚠️ Skipping GCP plan test: GCP_SA_KEY is not available in this context."
+            exit 0
+          fi
+
           # Initialize terraform for this provider
           terraform init -backend=false
 
@@ -114,7 +136,7 @@ jobs:
           fi
 
           # Test terraform plan with test variables
-          if terraform plan -var-file=test.tfvars -out=tfplan-test >/dev/null 2>&1; then
+          if terraform plan -var-file=test.tfvars -out=tfplan-test; then
             echo "✅ ${{ matrix.provider }} terraform plan succeeded"
             # Clean up test plan
             rm -f tfplan-test
