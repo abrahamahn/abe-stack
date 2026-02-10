@@ -109,11 +109,6 @@ jobs:
             exit 0
           fi
 
-          if [ "${{ matrix.provider }}" = "digitalocean" ] && { [ -z "${DOMAIN:-}" ] || [ -z "${SSH_PUBLIC_KEY:-}" ]; }; then
-            echo "⚠️ Skipping DigitalOcean plan test: DOMAIN and/or SSH_PUBLIC_KEY secret is missing."
-            exit 0
-          fi
-
           if [ "${{ matrix.provider }}" = "gcp" ] && [ -z "${GCP_SA_KEY:-}" ]; then
             echo "⚠️ Skipping GCP plan test: GCP_SA_KEY is not available in this context."
             exit 0
@@ -125,8 +120,8 @@ jobs:
           # Test with minimal variables for validation
           cat > test.tfvars << EOF
 environment = "production"
-domain = "${DOMAIN:-example.com}"
-ssh_public_key = "${SSH_PUBLIC_KEY:-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXn3QpXrUNQqXWnB6I6Q8r8j4NQFizH8hK2w5fQ8wz1 ci@test}"
+domain = "example.com"
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXn3QpXrUNQqXWnB6I6Q8r8j4NQFizH8hK2w5fQ8wz1 ci@test"
 app_name = "abe-stack-test"
 app_port = 3000
 EOF
@@ -150,12 +145,15 @@ EOF
           fi
 
           # Test terraform plan with test variables
-          if terraform plan -no-color -var-file=test.tfvars -out=tfplan-test; then
+          if terraform plan -no-color -var-file=test.tfvars -out=tfplan-test > tfplan.log 2>&1; then
             echo "✅ ${{ matrix.provider }} terraform plan succeeded"
             # Clean up test plan
             rm -f tfplan-test
           else
             echo "❌ ${{ matrix.provider }} terraform plan failed"
+            echo "------ terraform plan output ------"
+            cat tfplan.log
+            echo "-----------------------------------"
             echo "------ test.tfvars used ------"
             cat test.tfvars
             echo "------------------------------"
@@ -163,7 +161,7 @@ EOF
           fi
 
           # Clean up test files
-          rm -f test.tfvars
+          rm -f test.tfvars tfplan.log
 
       - name: Check for Required Documentation
         run: |
