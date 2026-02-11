@@ -46,7 +46,7 @@ export async function handleRefresh(
     const idleTimeoutMinutes = ctx.config.auth.sessions?.idleTimeoutMinutes ?? 30;
     const tokenRecord = await ctx.repos.refreshTokens.findByToken(oldRefreshToken);
 
-    if (tokenRecord !== null && tokenRecord !== undefined) {
+    if (tokenRecord != null) {
       const idleMs = Date.now() - tokenRecord.createdAt.getTime();
       if (idleMs > idleTimeoutMinutes * 60 * 1000) {
         clearRefreshTokenCookie(reply);

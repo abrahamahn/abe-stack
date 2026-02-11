@@ -2,20 +2,24 @@
 /**
  * Settings Page
  *
- * Main settings page with tabs for Profile, Security, Sessions, and Billing.
+ * Main settings page with tabs for Profile, Security, Sessions, Preferences, and more.
  */
 
-import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
+import { Button, Card, Heading, Link, Skeleton, Tabs, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useMemo, type ReactElement } from 'react';
 
 import {
+  ApiKeysManagement,
   AvatarUpload,
+  DataControlsSection,
   DangerZone,
   EmailChangeForm,
   ForgotPasswordShortcut,
+  NotificationPreferencesForm,
   OAuthConnectionsList,
   PasswordChangeForm,
+  PreferencesSection,
   ProfileCompleteness,
   ProfileForm,
   SessionsList,
@@ -98,6 +102,10 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
         </Heading>
         <OAuthConnectionsList />
       </div>
+
+      <div className="border-t pt-6">
+        <ApiKeysManagement />
+      </div>
     </div>
   );
 };
@@ -113,6 +121,20 @@ const SessionsTab = (): ReactElement => {
         device.
       </Text>
       <SessionsList />
+    </div>
+  );
+};
+
+const NotificationsTab = (): ReactElement => {
+  return (
+    <div>
+      <Heading as="h3" size="md" className="mb-4">
+        Notification Preferences
+      </Heading>
+      <Text tone="muted" size="sm" className="mb-4">
+        Control how and when you receive notifications.
+      </Text>
+      <NotificationPreferencesForm />
     </div>
   );
 };
@@ -145,9 +167,9 @@ const BillingTab = (): ReactElement => {
       <Card className="p-4">
         <Text tone="muted">
           Visit the{' '}
-          <a href="/billing" className="text-link">
+          <Link to="/billing" className="text-link">
             Billing page
-          </a>{' '}
+          </Link>{' '}
           to manage your subscription.
         </Text>
       </Card>
@@ -203,9 +225,44 @@ export const SettingsPage = (): ReactElement => {
         content: <SessionsTab />,
       },
       {
+        id: 'notifications',
+        label: 'Notifications',
+        content: <NotificationsTab />,
+      },
+      {
+        id: 'preferences',
+        label: 'Preferences',
+        content: (
+          <div>
+            <Heading as="h3" size="md" className="mb-4">
+              Preferences
+            </Heading>
+            <Text tone="muted" size="sm" className="mb-4">
+              Customize the application appearance and behavior.
+            </Text>
+            <PreferencesSection />
+          </div>
+        ),
+      },
+      {
         id: 'account',
         label: 'Account',
         content: <AccountTab />,
+      },
+      {
+        id: 'data-controls',
+        label: 'Data Controls',
+        content: (
+          <div>
+            <Heading as="h3" size="md" className="mb-4">
+              Data Controls
+            </Heading>
+            <Text tone="muted" size="sm" className="mb-4">
+              Manage your account status and personal data.
+            </Text>
+            <DataControlsSection />
+          </div>
+        ),
       },
       {
         id: 'billing',

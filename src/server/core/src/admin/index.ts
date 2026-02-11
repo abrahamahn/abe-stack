@@ -10,6 +10,7 @@ export { adminRoutes } from './routes';
 
 // Handlers
 export { handleAdminUnlock } from './handlers';
+export { handleListAuditEvents } from './auditHandlers';
 export { handleGetRouteManifest } from './route-manifest';
 export {
   handleAdminCreatePlan,
@@ -26,6 +27,7 @@ export {
   handleListJobs,
   handleRetryJob,
 } from './jobsHandlers';
+export { handleGetMetrics } from './metricsHandler';
 export {
   handleExportSecurityEvents,
   handleGetSecurityEvent,
@@ -33,9 +35,17 @@ export {
   handleListSecurityEvents,
 } from './securityHandlers';
 export {
+  handleGetTenantDetail,
+  handleListAllTenants,
+  handleSuspendTenant,
+  handleUnsuspendTenant,
+} from './tenantHandlers';
+export {
   handleGetUser,
+  handleHardBan,
   handleListUsers,
   handleLockUser,
+  handleSearchUsers,
   handleUnlockUser,
   handleUpdateUser,
 } from './userHandlers';
@@ -54,12 +64,29 @@ export {
   type UpdatePlanParams,
 } from './billingService';
 export {
+  getTenantDetail,
+  listAllTenants,
+  suspendTenant,
+  TenantNotFoundError,
+  unsuspendTenant,
+  type AdminTenant,
+  type AdminTenantDetail,
+  type AdminTenantListResponse,
+  type ListTenantsOptions,
+  type TenantSuspendResult,
+} from './tenantService';
+export {
   getUserById,
   getUserStatus,
+  hardBanUser,
   listUsers,
   lockUser,
+  searchUsers,
   unlockUser,
   updateUser,
+  type HardBanResult,
+  type SearchUsersOptions,
+  type SearchUsersResponse,
 } from './userService';
 export {
   cancelJob,

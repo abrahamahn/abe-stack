@@ -54,6 +54,12 @@ export interface PasswordResetTokenRepository {
    * @returns Number of deleted tokens
    */
   deleteExpiredByUserId(userId: string): Promise<number>;
+
+  /**
+   * Delete all expired tokens globally
+   * @returns Number of deleted tokens
+   */
+  deleteExpired(): Promise<number>;
 }
 
 // ============================================================================
@@ -116,6 +122,12 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
         deleteFrom(PASSWORD_RESET_TOKENS_TABLE)
           .where(and(eq('user_id', userId), lt('expires_at', new Date())))
           .toSql(),
+      );
+    },
+
+    async deleteExpired(): Promise<number> {
+      return db.execute(
+        deleteFrom(PASSWORD_RESET_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
       );
     },
   };

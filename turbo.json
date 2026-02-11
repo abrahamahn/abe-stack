@@ -28,6 +28,10 @@
       "inputs": ["**/*.{ts,tsx,js,jsx,cjs,mjs}", "eslint.config.ts", "config/tsconfig.eslint.json"],
       "cache": true
     },
+    "lint:css": {
+      "inputs": ["src/client/ui/src/styles/**/*.css", "src/tools/scripts/lint/lint-css-tokens.ts"],
+      "cache": true
+    },
     "type-check": {
       "dependsOn": ["^build", "@abe-stack/web#build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],

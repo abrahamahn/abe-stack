@@ -131,6 +131,7 @@ export type User = DomainUser;
 export interface AuthResponse {
   token: string;
   user: User;
+  isNewDevice?: boolean;
 }
 
 export interface RegisterResponse {
@@ -366,6 +367,7 @@ export const authResponseSchema: Schema<AuthResponse> = createSchema((data: unkn
   return {
     token: parseString(obj['token'], 'token'),
     user: userSchema.parse(obj['user']),
+    ...(typeof obj['isNewDevice'] === 'boolean' ? { isNewDevice: obj['isNewDevice'] } : {}),
   };
 });
 

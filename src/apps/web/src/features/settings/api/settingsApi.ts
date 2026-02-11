@@ -28,6 +28,43 @@ import type {
 } from '@abe-stack/shared';
 
 // ============================================================================
+// API Key Types
+// ============================================================================
+
+export interface ApiKeyLocal {
+  id: string;
+  tenantId: string | null;
+  userId: string;
+  name: string;
+  keyPrefix: string;
+  scopes: string[];
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateApiKeyRequest {
+  name: string;
+  scopes?: string[];
+  expiresAt?: string;
+}
+
+export interface CreateApiKeyResponse {
+  apiKey: ApiKeyLocal;
+  plaintext: string;
+}
+
+export interface ListApiKeysResponse {
+  apiKeys: ApiKeyLocal[];
+}
+
+export interface RevokeApiKeyResponse {
+  apiKey: ApiKeyLocal;
+}
+
+// ============================================================================
 // Settings API Client
 // ============================================================================
 
@@ -68,6 +105,12 @@ export interface SettingsApi {
     sudoToken?: string,
   ) => Promise<AccountLifecycleResponse>;
   reactivateAccount: () => Promise<AccountLifecycleResponse>;
+
+  // API Keys
+  listApiKeys: () => Promise<ListApiKeysResponse>;
+  createApiKey: (data: CreateApiKeyRequest) => Promise<CreateApiKeyResponse>;
+  revokeApiKey: (keyId: string) => Promise<RevokeApiKeyResponse>;
+  deleteApiKey: (keyId: string) => Promise<{ message: string }>;
 }
 
 const API_PREFIX = '/api';
@@ -227,6 +270,30 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
       return request<AccountLifecycleResponse>('/users/me/reactivate', {
         method: 'POST',
         body: JSON.stringify({}),
+      });
+    },
+
+    // API Keys
+    async listApiKeys(): Promise<ListApiKeysResponse> {
+      return request<ListApiKeysResponse>('/users/me/api-keys');
+    },
+
+    async createApiKey(data: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
+      return request<CreateApiKeyResponse>('/users/me/api-keys/create', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async revokeApiKey(keyId: string): Promise<RevokeApiKeyResponse> {
+      return request<RevokeApiKeyResponse>(`/users/me/api-keys/${keyId}/revoke`, {
+        method: 'POST',
+      });
+    },
+
+    async deleteApiKey(keyId: string): Promise<{ message: string }> {
+      return request<{ message: string }>(`/users/me/api-keys/${keyId}`, {
+        method: 'DELETE',
       });
     },
   };

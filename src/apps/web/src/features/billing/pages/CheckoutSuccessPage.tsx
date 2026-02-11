@@ -3,7 +3,7 @@
  * CheckoutSuccessPage - Displayed after successful checkout.
  */
 
-import { Button, Card, PageContainer, useNavigate } from '@abe-stack/ui';
+import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
@@ -39,14 +39,16 @@ export const CheckoutSuccessPage = (): ReactElement => {
           <div className="checkout-result-page__icon checkout-result-page__icon--success">
             {'\u2713'}
           </div>
-          <h1 className="checkout-result-page__title">Payment Successful!</h1>
-          <p className="checkout-result-page__message">
+          <Heading as="h1" className="checkout-result-page__title">
+            Payment Successful!
+          </Heading>
+          <Text className="checkout-result-page__message">
             Thank you for subscribing. Your account has been upgraded and you now have access to all
             premium features.
-          </p>
-          <p className="checkout-result-page__countdown">
+          </Text>
+          <Text className="checkout-result-page__countdown">
             Redirecting to billing settings in {countdown} seconds...
-          </p>
+          </Text>
           <div className="checkout-result-page__actions">
             <Button
               onClick={() => {

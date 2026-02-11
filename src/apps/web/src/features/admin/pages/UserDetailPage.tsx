@@ -25,6 +25,7 @@ interface AdminUserLocal {
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   lockedUntil: string | null;
+  lockReason: string | null;
   failedLoginAttempts: number;
   phone: string | null;
   phoneVerified: boolean;

@@ -29,6 +29,7 @@ export type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isNewDevice: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
@@ -38,6 +39,7 @@ export type AuthContextType = {
   verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
   resendVerification: (data: ResendVerificationRequest) => Promise<void>;
   verifyTotpLogin: (challengeToken: string, code: string) => Promise<void>;
+  dismissNewDeviceBanner: () => void;
 };
 
 /**
@@ -125,10 +127,15 @@ export function useAuth(): AuthContextType {
     [auth],
   );
 
+  const dismissNewDeviceBanner = useCallback((): void => {
+    auth.dismissNewDeviceBanner();
+  }, [auth]);
+
   return {
     user: state.user,
     isLoading: state.isLoading,
     isAuthenticated: state.isAuthenticated,
+    isNewDevice: state.isNewDevice,
     login,
     register,
     logout,
@@ -138,5 +145,6 @@ export function useAuth(): AuthContextType {
     verifyEmail,
     resendVerification,
     verifyTotpLogin,
+    dismissNewDeviceBanner,
   };
 }

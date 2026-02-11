@@ -24,10 +24,7 @@ function main(): void {
   // If no files changed, this should be near-instant.
   // If files changed, it ensures strict compliance.
 
-  // 1. Run full suite (Lint, Type-Check, Test)
-  // We use the `check:all` alias but run it via Turbo to ensure parallelism and caching
-  // actually, `check:all` in package.json is a serial script.
-  // Let's invoke turbo directly for maximum speed.
+  // 1. Run full suite (Lint, Type-Check, Test) via Turbo for parallelism and caching.
 
   console.log('🧾 Verifying header sync...');
   run('pnpm sync:headers:check');

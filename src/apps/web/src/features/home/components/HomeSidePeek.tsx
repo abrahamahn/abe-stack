@@ -1,5 +1,5 @@
 // src/apps/web/src/features/home/components/HomeSidePeek.tsx
-import { SidePeek, Text } from '@abe-stack/ui';
+import { Button, SidePeek, Text } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
 import type { ReactElement } from 'react';
@@ -20,14 +20,15 @@ export const HomeSidePeek = ({ open, onClose }: HomeSidePeekProps): ReactElement
     <SidePeek.Root open={open} onClose={onClose} size={isFullscreen ? 'full' : 'md'}>
       <SidePeek.Header>
         <SidePeek.Title>Side Peek UI Library</SidePeek.Title>
-        <button
+        <Button
           type="button"
+          variant="text"
           onClick={handleExpand}
           aria-label="Toggle fullscreen"
           className="side-peek-close"
         >
           {isFullscreen ? '⤡' : '⤢'}
-        </button>
+        </Button>
         <SidePeek.Close />
       </SidePeek.Header>
       <SidePeek.Content>

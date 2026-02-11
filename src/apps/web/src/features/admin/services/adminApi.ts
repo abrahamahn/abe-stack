@@ -148,6 +148,74 @@ export interface RouteManifestResponseLocal {
 }
 
 // ============================================================================
+// Feature Flag Types
+// ============================================================================
+
+export interface FeatureFlagLocal {
+  key: string;
+  description: string | null;
+  isEnabled: boolean;
+  defaultValue: unknown;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFeatureFlagRequest {
+  key: string;
+  description?: string;
+  isEnabled?: boolean;
+  defaultValue?: unknown;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateFeatureFlagRequest {
+  description?: string | null;
+  isEnabled?: boolean;
+  defaultValue?: unknown;
+  metadata?: Record<string, unknown>;
+}
+
+export interface FeatureFlagListResponse {
+  flags: FeatureFlagLocal[];
+}
+
+export interface FeatureFlagResponse {
+  flag: FeatureFlagLocal;
+}
+
+export interface FeatureFlagDeleteResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface AuditEventLocal {
+  id: string;
+  tenantId: string | null;
+  actorId: string | null;
+  action: string;
+  category: 'security' | 'admin' | 'system' | 'billing';
+  severity: 'info' | 'warn' | 'error' | 'critical';
+  resource: string;
+  resourceId: string | null;
+  metadata: Record<string, unknown>;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+}
+
+export interface AuditEventsFilterLocal {
+  tenantId?: string;
+  actorId?: string;
+  action?: string;
+  limit?: number;
+}
+
+export interface AuditEventsResponseLocal {
+  events: AuditEventLocal[];
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -184,6 +252,15 @@ export interface AdminApiClient {
 
   // API introspection
   getRouteManifest: () => Promise<RouteManifestResponseLocal>;
+
+  // Audit events
+  listAuditEvents: (filter?: AuditEventsFilterLocal) => Promise<AuditEventsResponseLocal>;
+
+  // Feature flags
+  listFeatureFlags: () => Promise<FeatureFlagListResponse>;
+  createFeatureFlag: (data: CreateFeatureFlagRequest) => Promise<FeatureFlagResponse>;
+  updateFeatureFlag: (key: string, data: UpdateFeatureFlagRequest) => Promise<FeatureFlagResponse>;
+  deleteFeatureFlag: (key: string) => Promise<FeatureFlagDeleteResponse>;
 }
 
 // ============================================================================
@@ -342,6 +419,48 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
 
     async getRouteManifest(): Promise<RouteManifestResponseLocal> {
       return request<RouteManifestResponseLocal>('/admin/routes');
+    },
+
+    async listAuditEvents(filter?: AuditEventsFilterLocal): Promise<AuditEventsResponseLocal> {
+      const params = new URLSearchParams();
+      if (filter !== undefined) {
+        if (filter.tenantId !== undefined) params.set('tenantId', filter.tenantId);
+        if (filter.actorId !== undefined) params.set('actorId', filter.actorId);
+        if (filter.action !== undefined) params.set('action', filter.action);
+        if (filter.limit !== undefined) params.set('limit', String(filter.limit));
+      }
+      const queryString = params.toString();
+      const path =
+        queryString !== '' ? `/admin/audit-events?${queryString}` : '/admin/audit-events';
+      return request<AuditEventsResponseLocal>(path);
+    },
+
+    // Feature flags
+    async listFeatureFlags(): Promise<FeatureFlagListResponse> {
+      return request<FeatureFlagListResponse>('/admin/feature-flags');
+    },
+
+    async createFeatureFlag(data: CreateFeatureFlagRequest): Promise<FeatureFlagResponse> {
+      return request<FeatureFlagResponse>('/admin/feature-flags/create', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async updateFeatureFlag(
+      key: string,
+      data: UpdateFeatureFlagRequest,
+    ): Promise<FeatureFlagResponse> {
+      return request<FeatureFlagResponse>(`/admin/feature-flags/${key}/update`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    async deleteFeatureFlag(key: string): Promise<FeatureFlagDeleteResponse> {
+      return request<FeatureFlagDeleteResponse>(`/admin/feature-flags/${key}/delete`, {
+        method: 'POST',
+      });
     },
   };
 }

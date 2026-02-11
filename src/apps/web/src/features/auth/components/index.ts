@@ -14,5 +14,6 @@ export type { ResetPasswordFormProps } from './ResetPasswordForm';
 export { AuthModal } from './AuthModal';
 export { TosAcceptanceModal } from './TosAcceptanceModal';
 export type { TosAcceptanceModalProps } from './TosAcceptanceModal';
+export { NewDeviceBanner } from './NewDeviceBanner';
 export { TurnstileWidget } from './TurnstileWidget';
 export type { TurnstileWidgetProps } from './TurnstileWidget';

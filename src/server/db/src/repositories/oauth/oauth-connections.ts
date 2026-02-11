@@ -8,7 +8,7 @@
  * @module
  */
 
-import { and, eq, select, insert, update, deleteFrom } from '../../builder/index';
+import { and, eq, isNotNull, lt, select, insert, update, deleteFrom } from '../../builder/index';
 import {
   type NewOAuthConnection,
   type OAuthConnection,
@@ -74,6 +74,14 @@ export interface OAuthConnectionRepository {
    * @returns True if a connection was deleted
    */
   deleteByUserIdAndProvider(userId: string, provider: string): Promise<boolean>;
+
+  /**
+   * Find connections with tokens expiring before the given date that have a refresh token.
+   * Used by the OAuth refresh cron to proactively renew expiring tokens.
+   * @param before - Expiry threshold date
+   * @returns Array of OAuth connections with expiring tokens
+   */
+  findExpiringSoon(before: Date): Promise<OAuthConnection[]>;
 }
 
 // ============================================================================
@@ -163,6 +171,15 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
           .toSql(),
       );
       return count > 0;
+    },
+
+    async findExpiringSoon(before: Date): Promise<OAuthConnection[]> {
+      const results = await db.query(
+        select(OAUTH_CONNECTIONS_TABLE)
+          .where(and(lt('expires_at', before), isNotNull('refresh_token')))
+          .toSql(),
+      );
+      return results.map(transformConnection);
     },
   };
 }

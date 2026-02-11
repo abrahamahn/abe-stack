@@ -37,6 +37,7 @@ function createMinimalAppConfig(): AppConfig {
       trustProxy: false,
       logLevel: 'info',
       maintenanceMode: false,
+      auditRetentionDays: 90,
       appBaseUrl: 'http://localhost:3000',
       apiBaseUrl: 'http://localhost:8080',
       rateLimit: {

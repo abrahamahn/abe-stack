@@ -112,5 +112,20 @@ describe('Server Configuration', () => {
       expect(normal.maintenanceMode).toBe(false);
       expect(maintenance.maintenanceMode).toBe(true);
     });
+
+    test('should default audit retention to 90 days', () => {
+      const config = loadServerConfig(createBaseEnv());
+      expect(config.auditRetentionDays).toBe(90);
+    });
+
+    test('should use custom audit retention when set', () => {
+      const config = loadServerConfig(createBaseEnv({ AUDIT_RETENTION_DAYS: 30 }));
+      expect(config.auditRetentionDays).toBe(30);
+    });
+
+    test('should allow 0 for unlimited audit retention', () => {
+      const config = loadServerConfig(createBaseEnv({ AUDIT_RETENTION_DAYS: 0 }));
+      expect(config.auditRetentionDays).toBe(0);
+    });
   });
 });

@@ -159,6 +159,7 @@ export {
   type CheckoutResponse,
   type FeatureKey,
   type Invoice,
+  type InvoiceResponse,
   type InvoiceStatus,
   type InvoicesListResponse,
   type PaymentMethod,
@@ -192,6 +193,15 @@ export {
   type ProviderPaymentMethod,
   type ProviderSubscription,
   type SetupIntentResult,
+  assertEntitled,
+  assertWithinLimit,
+  hasActiveSubscription,
+  isEntitled,
+  resolveEntitlements,
+  type EntitlementInput,
+  type FeatureEntitlement,
+  type ResolvedEntitlements,
+  type SubscriptionState,
 } from './billing';
 
 export {

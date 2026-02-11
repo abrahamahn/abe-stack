@@ -8,7 +8,7 @@
  * @module
  */
 
-import { eq, select, insert, deleteFrom } from '../../builder/index';
+import { and, eq, isNotNull, lt, select, insert, deleteFrom } from '../../builder/index';
 import {
   type NewPushSubscription,
   type PushSubscription,
@@ -55,6 +55,12 @@ export interface PushSubscriptionRepository {
    * @returns True if a subscription was deleted
    */
   deleteByEndpoint(endpoint: string): Promise<boolean>;
+
+  /**
+   * Delete push subscriptions that have expired (expiration_time < now)
+   * @returns Number of deleted subscriptions
+   */
+  deleteExpired(): Promise<number>;
 }
 
 // ============================================================================
@@ -114,6 +120,14 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
         deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).toSql(),
       );
       return count > 0;
+    },
+
+    async deleteExpired(): Promise<number> {
+      return db.execute(
+        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE)
+          .where(and(isNotNull('expiration_time'), lt('expiration_time', new Date())))
+          .toSql(),
+      );
     },
   };
 }

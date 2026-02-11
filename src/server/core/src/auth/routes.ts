@@ -182,8 +182,12 @@ const coreAuthEntries: [string, RouteDefinition][] = [
     'auth/forgot-password',
     publicRoute(
       'POST',
-      async (ctx: HandlerContext, body: unknown) => {
-        return handleForgotPassword(asAppContext(ctx), body as ForgotPasswordRequest);
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleForgotPassword(
+          asAppContext(ctx),
+          body as ForgotPasswordRequest,
+          req as unknown as RequestWithCookies,
+        );
       },
       forgotPasswordRequestSchema,
     ),

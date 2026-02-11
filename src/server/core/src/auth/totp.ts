@@ -11,7 +11,7 @@
 
 import { randomBytes } from 'node:crypto';
 
-import * as otpAuth from 'otpauth';
+import { Secret, TOTP } from 'otpauth';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
 
@@ -81,9 +81,9 @@ export async function setupTotp(
   config: AuthConfig,
 ): Promise<TotpSetupResult> {
   // Generate a new TOTP secret
-  const secret = new otpAuth.Secret({ size: 20 });
+  const secret = new Secret({ size: 20 });
 
-  const totp = new otpAuth.TOTP({
+  const totp = new TOTP({
     issuer: config.totp.issuer,
     label: userEmail,
     algorithm: TOTP_ALGORITHM,
@@ -272,11 +272,11 @@ export async function verifyTotpForLogin(
  * Verify a TOTP code against a secret.
  */
 export function verifyTotpCode(secretBase32: string, code: string, window: number): boolean {
-  const totp = new otpAuth.TOTP({
+  const totp = new TOTP({
     algorithm: TOTP_ALGORITHM,
     digits: TOTP_DIGITS,
     period: TOTP_PERIOD,
-    secret: otpAuth.Secret.fromBase32(secretBase32),
+    secret: Secret.fromBase32(secretBase32),
   });
 
   const delta = totp.validate({ token: code, window });

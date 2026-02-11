@@ -74,7 +74,7 @@ export const AppTopLayout = ({
               <span aria-hidden className="text-base">
                 {isOpen ? '✕' : '🪟'}
               </span>
-              <span>{isOpen ? 'Close Peek' : 'Side Peek'}</span>
+              <Text as="span">{isOpen ? 'Close Peek' : 'Side Peek'}</Text>
             </span>
           </Button>
         </div>

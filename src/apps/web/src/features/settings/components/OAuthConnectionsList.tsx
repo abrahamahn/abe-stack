@@ -199,7 +199,7 @@ const ProviderCard = ({
             {info.icon}
           </div>
           <div>
-            <p className="font-medium">{info.name}</p>
+            <Text className="font-medium">{info.name}</Text>
             {connected && connection !== null && (
               <Text size="sm" tone="muted">
                 {connection.providerEmail}

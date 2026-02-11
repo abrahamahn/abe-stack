@@ -5,7 +5,7 @@
  * Displays information about a user session.
  */
 
-import { Badge, Button, Card } from '@abe-stack/ui';
+import { Badge, Button, Card, Text } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 
@@ -124,17 +124,17 @@ export const SessionCard = ({
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">
+            <Text as="span" className="font-medium">
               {browser} on {os}
-            </span>
+            </Text>
             {session.isCurrent && <Badge tone="success">Current Session</Badge>}
           </div>
 
           <div className="text-sm text-muted space-y-0.5">
             {session.ipAddress !== null && session.ipAddress.length > 0 && (
-              <p>IP: {session.ipAddress}</p>
+              <Text>IP: {session.ipAddress}</Text>
             )}
-            <p>Started: {formatDate(session.createdAt)}</p>
+            <Text>Started: {formatDate(session.createdAt)}</Text>
           </div>
         </div>
 

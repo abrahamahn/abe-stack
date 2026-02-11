@@ -268,6 +268,7 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
       trustProxy: false,
       logLevel: 'info',
       maintenanceMode: false,
+      auditRetentionDays: 90,
       rateLimit: {
         windowMs: 60000,
         max: 1000,

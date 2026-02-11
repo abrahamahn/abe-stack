@@ -44,6 +44,7 @@ function createMockRepos(): Repositories {
     securityEvents: {} as Repositories['securityEvents'],
     totpBackupCodes: {} as Repositories['totpBackupCodes'],
     emailChangeTokens: {} as Repositories['emailChangeTokens'],
+    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
     magicLinkTokens: {} as Repositories['magicLinkTokens'],
     oauthConnections: {} as Repositories['oauthConnections'],
     apiKeys: {} as Repositories['apiKeys'],
@@ -70,6 +71,7 @@ function createMockRepos(): Repositories {
     userAgreements: {} as Repositories['userAgreements'],
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
+    activities: {} as Repositories['activities'],
   };
 }
 

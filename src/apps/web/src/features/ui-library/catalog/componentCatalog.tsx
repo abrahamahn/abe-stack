@@ -27,7 +27,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Vertical (Column)',
         description: 'Default vertical layout',
-        code: '<Box padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
+        code: '<Box padding="var(--ui-gap-lg)" style={{ gap: "var(--ui-gap-sm)" }}><Button>1</Button><Button>2</Button></Box>',
         render: () => (
           <Box
             padding="var(--ui-gap-lg)"
@@ -41,7 +41,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Horizontal (Row)',
         description: 'Horizontal row layout',
-        code: '<Box flexDirection="row" padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
+        code: '<Box flexDirection="row" padding="var(--ui-gap-lg)" style={{ gap: "var(--ui-gap-sm)" }}><Button>1</Button><Button>2</Button></Box>',
         render: () => (
           <Box
             flexDirection="row"
@@ -183,7 +183,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         render: (): ReactElement => (
           <div
             style={{
-              height: '300px',
+              height: '18.75rem',
               border: '1px solid var(--ui-color-border)',
               overflow: 'hidden',
             }}
@@ -216,7 +216,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
                   style={{
                     background: 'var(--ui-color-surface)',
                     padding: 'var(--ui-gap-sm)',
-                    width: '100px',
+                    width: '6.25rem',
                   }}
                 >
                   Sidebar
@@ -227,7 +227,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
                   style={{
                     background: 'var(--ui-color-surface)',
                     padding: 'var(--ui-gap-sm)',
-                    width: '100px',
+                    width: '6.25rem',
                   }}
                 >
                   Aside
@@ -366,7 +366,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         description: 'Toast container (typically placed at app root)',
         code: '<ToastContainer messages={[]} />',
         render: () => (
-          <div style={{ position: 'relative', height: '80px' }}>
+          <div style={{ position: 'relative', height: '5rem' }}>
             <Text tone="muted">ToastContainer is placed at app root to render notifications.</Text>
             <ToastContainer messages={[]} />
           </div>
@@ -377,7 +377,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         description: 'Toast container with sample messages',
         code: '<ToastContainer messages={[{ id: "1", title: "Success", description: "Operation completed" }]} />',
         render: () => (
-          <div style={{ position: 'relative', height: '100px' }}>
+          <div style={{ position: 'relative', height: '6.25rem' }}>
             <ToastContainer
               messages={[
                 { id: '1', title: 'Success', description: 'Operation completed successfully' },

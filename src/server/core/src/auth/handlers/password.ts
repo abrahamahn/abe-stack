@@ -13,12 +13,12 @@ import {
 } from '@abe-stack/shared';
 
 import { assertUserActive } from '../middleware';
-import { sendPasswordChangedAlert } from '../security';
+import { isCaptchaRequired, sendPasswordChangedAlert, verifyCaptchaToken } from '../security';
 import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { createErrorMapperLogger } from '../types';
 
 import type { AppContext, RequestWithCookies } from '../types';
-import type { HttpErrorResponse } from '@abe-stack/shared';
+import type { ForgotPasswordRequest, HttpErrorResponse } from '@abe-stack/shared';
 
 /**
  * Handle forgot password request.
@@ -31,9 +31,23 @@ import type { HttpErrorResponse } from '@abe-stack/shared';
  */
 export async function handleForgotPassword(
   ctx: AppContext,
-  body: { email: string },
+  body: ForgotPasswordRequest,
+  request: RequestWithCookies,
 ): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
   try {
+    // Verify CAPTCHA token if enabled
+    if (isCaptchaRequired(ctx.config.auth)) {
+      const { ipAddress } = request.requestInfo;
+      const captchaToken = body.captchaToken ?? '';
+      const captchaResult = await verifyCaptchaToken(ctx.config.auth, captchaToken, ipAddress);
+      if (!captchaResult.success) {
+        return {
+          status: 400,
+          body: { message: 'CAPTCHA verification failed' },
+        };
+      }
+    }
+
     const { email } = body;
     const baseUrl = ctx.config.server.appBaseUrl;
     await requestPasswordReset(ctx.db, ctx.repos, ctx.email, ctx.emailTemplates, email, baseUrl);

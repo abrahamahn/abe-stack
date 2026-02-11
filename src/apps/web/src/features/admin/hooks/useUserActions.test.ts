@@ -53,6 +53,7 @@ const mockUpdateResponse: AdminUpdateUserResponse = {
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00Z',
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     phone: null,
     phoneVerified: false,

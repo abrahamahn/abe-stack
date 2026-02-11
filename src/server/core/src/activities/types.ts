@@ -1,0 +1,46 @@
+// src/server/core/src/activities/types.ts
+/**
+ * Activities Module Types
+ *
+ * Narrow dependency interfaces for the activities package.
+ * Decouples activity logic from concrete server implementations,
+ * keeping the package framework-agnostic.
+ *
+ * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * duplicate Logger and request interfaces across packages.
+ */
+
+import type { ActivityRepository, AuditEventRepository } from '@abe-stack/db';
+import type { BaseContext, RequestContext } from '@abe-stack/shared/core';
+
+// ============================================================================
+// Handler Context
+// ============================================================================
+
+/**
+ * Application context for activity handlers.
+ *
+ * Extends `BaseContext` with activity-specific repository access.
+ * The server's `AppContext` structurally satisfies this -- no casting needed.
+ *
+ * @param repos - Database repositories including activities
+ * @param log - Logger instance
+ */
+export interface ActivityAppContext extends BaseContext {
+  readonly repos: {
+    readonly activities: ActivityRepository;
+    readonly auditEvents?: AuditEventRepository;
+  };
+}
+
+// ============================================================================
+// Request Context
+// ============================================================================
+
+/**
+ * Request interface for activity handlers.
+ *
+ * Re-exports `RequestContext` from shared contracts for consistency
+ * with other modules.
+ */
+export type ActivityRequest = RequestContext;

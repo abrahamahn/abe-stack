@@ -40,3 +40,9 @@ export {
   createEmailChangeTokenRepository,
   type EmailChangeTokenRepository,
 } from './email-change-tokens';
+
+// Email Change Revert Tokens
+export {
+  createEmailChangeRevertTokenRepository,
+  type EmailChangeRevertTokenRepository,
+} from './email-change-revert-tokens';

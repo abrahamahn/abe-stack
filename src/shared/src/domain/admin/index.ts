@@ -11,8 +11,11 @@ export { adminContract } from './admin.contracts';
 export {
   USER_STATUSES,
   adminActionResponseSchema,
+  adminHardBanRequestSchema,
+  adminHardBanResponseSchema,
   adminLockUserRequestSchema,
   adminLockUserResponseSchema,
+  adminSuspendTenantRequestSchema,
   adminUpdateUserRequestSchema,
   adminUpdateUserResponseSchema,
   adminUserListFiltersSchema,
@@ -25,8 +28,11 @@ export {
 
 export type {
   AdminActionResponse,
+  AdminHardBanRequest,
+  AdminHardBanResponse,
   AdminLockUserRequest,
   AdminLockUserResponse,
+  AdminSuspendTenantRequest,
   AdminUpdateUserRequest,
   AdminUpdateUserResponse,
   AdminUser,

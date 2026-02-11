@@ -31,3 +31,5 @@ export {
   handleResendInvitation,
   handleRevokeInvitation,
 } from './invitations';
+
+export { handleListTenantAuditEvents } from './audit';

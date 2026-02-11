@@ -367,6 +367,46 @@ describe('createServer', () => {
     });
   });
 
+  describe('swagger UI registration', () => {
+    it('should register swagger UI in non-production environments', async () => {
+      const config = createMockConfig({ env: 'development' });
+      const db = createMockDb();
+
+      await createServer({ config, db });
+
+      const registerCalls = (mockFastifyInstance.register as ReturnType<typeof vi.fn>).mock.calls;
+      // swagger + swaggerUI = 2 register calls
+      expect(registerCalls.length).toBe(2);
+      const swaggerUICall = registerCalls.find(
+        (call) =>
+          call[1] !== undefined &&
+          typeof call[1] === 'object' &&
+          'routePrefix' in call[1] &&
+          call[1].routePrefix === '/api/docs',
+      );
+      expect(swaggerUICall).toBeDefined();
+    });
+
+    it('should not register swagger UI in production', async () => {
+      const config = createMockConfig({ env: 'production' });
+      const db = createMockDb();
+
+      await createServer({ config, db });
+
+      const registerCalls = (mockFastifyInstance.register as ReturnType<typeof vi.fn>).mock.calls;
+      // Only swagger (OpenAPI spec) should be registered, not swaggerUI
+      expect(registerCalls.length).toBe(1);
+      const swaggerUICall = registerCalls.find(
+        (call) =>
+          call[1] !== undefined &&
+          typeof call[1] === 'object' &&
+          'routePrefix' in call[1] &&
+          call[1].routePrefix === '/api/docs',
+      );
+      expect(swaggerUICall).toBeUndefined();
+    });
+  });
+
   describe('return value', () => {
     it('should return configured Fastify instance', async () => {
       const config = createMockConfig();

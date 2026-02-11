@@ -7,6 +7,8 @@
  * of binding to Fastify or any specific HTTP framework.
  */
 
+import { record } from '../audit/service';
+
 import { createBillingProvider } from './factory';
 import {
   addPaymentMethod,
@@ -14,6 +16,7 @@ import {
   createCheckoutSession,
   createSetupIntent,
   getActivePlans,
+  getUserInvoice,
   getUserInvoices,
   getUserPaymentMethods,
   getUserSubscription,
@@ -24,6 +27,7 @@ import {
 } from './service';
 
 import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
+import type { AuditRecordParams } from '../audit/types';
 import type { Plan as DbPlan, Subscription as DbSubscription } from '@abe-stack/db';
 import type {
   AddPaymentMethodRequest,
@@ -31,6 +35,7 @@ import type {
   CheckoutRequest,
   CheckoutResponse,
   Invoice,
+  InvoiceResponse,
   InvoicesListResponse,
   PaymentMethod,
   PaymentMethodResponse,
@@ -66,6 +71,22 @@ function getBillingRepos(ctx: BillingAppContext): BillingRepositories {
     invoices: ctx.repos.invoices,
     paymentMethods: ctx.repos.paymentMethods,
   };
+}
+
+/**
+ * Fire-and-forget an audit event. Silently swallows errors so audit
+ * failures never affect billing operations.
+ *
+ * @param ctx - Application context (must have auditEvents on repos)
+ * @param params - Audit event parameters
+ * @complexity O(1)
+ */
+function tryAudit(ctx: BillingAppContext, params: AuditRecordParams): void {
+  const auditEvents = ctx.repos.auditEvents;
+  if (auditEvents === undefined) return;
+  record({ auditEvents }, params).catch((err: unknown) => {
+    ctx.log.warn({ err }, 'Failed to record audit event');
+  });
 }
 
 /**
@@ -195,6 +216,7 @@ function handleError(
       'SubscriptionNotFoundError',
       'PaymentMethodNotFoundError',
       'CustomerNotFoundError',
+      'InvoiceNotFoundError',
     ];
     if (notFoundErrors.includes(error.name)) {
       return { status: 404, body: { message: error.message } };
@@ -384,6 +406,15 @@ export async function handleCancelSubscription(
 
     await cancelSubscription(repos, provider, user.userId, body.immediately);
 
+    tryAudit(ctx, {
+      actorId: user.userId,
+      action: 'billing.subscription_canceled',
+      resource: 'subscription',
+      metadata: { immediately: body.immediately },
+      ipAddress: request.ip ?? null,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+
     return {
       status: 200,
       body: {
@@ -428,6 +459,14 @@ export async function handleResumeSubscription(
 
     await resumeSubscription(repos, provider, user.userId);
 
+    tryAudit(ctx, {
+      actorId: user.userId,
+      action: 'billing.subscription_resumed',
+      resource: 'subscription',
+      ipAddress: request.ip ?? null,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+
     return {
       status: 200,
       body: {
@@ -471,6 +510,15 @@ export async function handleUpdateSubscription(
     const provider = createBillingProvider(ctx.config.billing);
 
     await updateSubscription(repos, provider, user.userId, body.planId);
+
+    tryAudit(ctx, {
+      actorId: user.userId,
+      action: 'billing.plan_changed',
+      resource: 'subscription',
+      metadata: { newPlanId: body.planId },
+      ipAddress: request.ip ?? null,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
 
     return {
       status: 200,
@@ -517,6 +565,43 @@ export async function handleListInvoices(
       body: {
         invoices: invoices.map(formatInvoice),
         hasMore,
+      },
+    };
+  } catch (error: unknown) {
+    return handleError(error, ctx);
+  }
+}
+
+/**
+ * Get a single invoice by ID for the current user.
+ *
+ * @param ctx - Application context with repositories
+ * @param invoiceId - Invoice identifier from the URL path
+ * @param request - HTTP request with authenticated user
+ * @returns 200 with invoice data, or error response
+ * @complexity O(1) - database lookup by primary key
+ */
+export async function handleGetInvoice(
+  ctx: BillingAppContext,
+  invoiceId: string,
+  request: BillingRequest,
+): Promise<
+  | { status: 200; body: InvoiceResponse }
+  | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
+> {
+  const user = request.user;
+  if (user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const repos = getBillingRepos(ctx);
+    const invoice = await getUserInvoice(repos, user.userId, invoiceId);
+
+    return {
+      status: 200,
+      body: {
+        invoice: formatInvoice(invoice),
       },
     };
   } catch (error: unknown) {
@@ -601,6 +686,15 @@ export async function handleAddPaymentMethod(
       body.paymentMethodId,
     );
 
+    tryAudit(ctx, {
+      actorId: user.userId,
+      action: 'billing.payment_method_added',
+      resource: 'payment_method',
+      resourceId: paymentMethod.id,
+      ipAddress: request.ip ?? null,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
+
     return {
       status: 200,
       body: {
@@ -643,6 +737,15 @@ export async function handleRemovePaymentMethod(
     const provider = createBillingProvider(ctx.config.billing);
 
     await removePaymentMethod(repos, provider, user.userId, paymentMethodId);
+
+    tryAudit(ctx, {
+      actorId: user.userId,
+      action: 'billing.payment_method_removed',
+      resource: 'payment_method',
+      resourceId: paymentMethodId,
+      ipAddress: request.ip ?? null,
+      userAgent: request.headers['user-agent'] ?? null,
+    });
 
     return {
       status: 200,

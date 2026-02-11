@@ -7,8 +7,10 @@
  */
 
 import type {
+  AuditEventRepository,
   DbClient,
   PlanRepository,
+  Repositories,
   SubscriptionRepository,
   UserRepository,
 } from '@abe-stack/db';
@@ -38,6 +40,9 @@ export interface AdminAppContext
     readonly users: UserRepository;
     readonly plans: PlanRepository;
     readonly subscriptions: SubscriptionRepository;
+    readonly auditEvents: AuditEventRepository;
+    readonly tenants: Repositories['tenants'];
+    readonly memberships: Repositories['memberships'];
   };
   readonly config: {
     readonly billing: BillingConfig;

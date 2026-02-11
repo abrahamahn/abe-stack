@@ -1,0 +1,122 @@
+// src/apps/web/src/features/activities/components/ActivityFeed.tsx
+/**
+ * ActivityFeed
+ *
+ * A timeline component that displays recent user activities.
+ */
+
+import { Alert, Badge, Spinner, Text } from '@abe-stack/ui';
+
+import { useActivities } from '../hooks';
+
+import type { ActivityLocal } from '../api';
+import type { ReactElement } from 'react';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface ActivityFeedProps {
+  limit?: number;
+  className?: string;
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+const ACTOR_TYPE_TONES: Record<string, 'info' | 'success' | 'warning'> = {
+  user: 'info',
+  system: 'warning',
+  api_key: 'success',
+};
+
+function formatTimeAgo(iso: string): string {
+  try {
+    const date = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) return `${String(diffDays)}d ago`;
+    if (diffHours > 0) return `${String(diffHours)}h ago`;
+    if (diffMins > 0) return `${String(diffMins)}m ago`;
+    return 'just now';
+  } catch {
+    return iso;
+  }
+}
+
+function ActivityItem({ activity }: { activity: ActivityLocal }): ReactElement {
+  const actorTone = ACTOR_TYPE_TONES[activity.actorType] ?? 'info';
+
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border last:border-b-0">
+      <div className="flex-shrink-0 mt-0.5">
+        <Badge tone={actorTone}>{activity.actorType}</Badge>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <Text size="sm" className="font-medium">
+            {activity.action}
+          </Text>
+          <Text size="sm" tone="muted">
+            {activity.resourceType}
+            {activity.resourceId !== '' ? ` #${activity.resourceId.slice(0, 8)}` : ''}
+          </Text>
+        </div>
+        {activity.description !== null && (
+          <Text size="sm" tone="muted" className="mt-0.5">
+            {activity.description}
+          </Text>
+        )}
+      </div>
+      <Text size="sm" tone="muted" className="flex-shrink-0">
+        {formatTimeAgo(activity.createdAt)}
+      </Text>
+    </div>
+  );
+}
+
+// ============================================================================
+// Component
+// ============================================================================
+
+export function ActivityFeed({ limit = 20, className }: ActivityFeedProps): ReactElement {
+  const { activities, isLoading, isError, error } = useActivities({ limit });
+
+  if (isLoading) {
+    return (
+      <div className={className}>
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={className}>
+        <Alert tone="danger">{error?.message ?? 'Failed to load activities'}</Alert>
+      </div>
+    );
+  }
+
+  if (activities.length === 0) {
+    return (
+      <div className={className}>
+        <Text tone="muted">No recent activity.</Text>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      {activities.map((activity) => (
+        <ActivityItem key={activity.id} activity={activity} />
+      ))}
+    </div>
+  );
+}

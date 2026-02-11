@@ -7,8 +7,8 @@
  * Identifies slow imports, large dependencies, and optimization opportunities
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 interface ImportAnalysis {
   file: string;
@@ -37,7 +37,7 @@ function analyzeImports(filePath: string): ImportAnalysis['imports'] {
   const imports: ImportAnalysis['imports'] = [];
 
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, 'utf-8');
 
     // Static imports
     const staticImportRegex = /import\s+{[^}]*}\s+from\s+['"]([^'"]+)['"]/g;
@@ -120,18 +120,18 @@ function analyzeBuildPerformance(): BuildAnalysis {
     optimizationSuggestions: [],
   };
 
-  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
+  const rootDir = resolve(__dirname, '..', '..', '..', '..');
 
   // Analyze source files
   const sourceDirs = [
-    path.join(rootDir, 'src', 'apps', 'web', 'src'),
-    path.join(rootDir, 'src', 'client', 'ui', 'src'),
-    path.join(rootDir, 'src', 'client', 'engine', 'src'),
-    path.join(rootDir, 'src', 'server', 'core', 'src'),
+    join(rootDir, 'src', 'apps', 'web', 'src'),
+    join(rootDir, 'src', 'client', 'ui', 'src'),
+    join(rootDir, 'src', 'client', 'engine', 'src'),
+    join(rootDir, 'src', 'server', 'core', 'src'),
   ];
 
   for (const dir of sourceDirs) {
-    if (!fs.existsSync(dir)) continue;
+    if (!existsSync(dir)) continue;
 
     const files = getAllSourceFiles(dir);
 
@@ -147,7 +147,7 @@ function analyzeBuildPerformance(): BuildAnalysis {
         if (imp.size && imp.size > 100) {
           // > 100KB
           analysis.largeImports.push({
-            file: path.relative(rootDir, file),
+            file: relative(rootDir, file),
             import: imp.source,
             size: imp.size,
           });
@@ -160,7 +160,7 @@ function analyzeBuildPerformance(): BuildAnalysis {
           // Large static imports from node_modules
           if (imp.size && imp.size > 50) {
             analysis.slowImports.push({
-              file: path.relative(rootDir, file),
+              file: relative(rootDir, file),
               import: imp.source,
               reason: 'Large static import from node_modules',
             });
@@ -170,7 +170,7 @@ function analyzeBuildPerformance(): BuildAnalysis {
         // Deep path imports
         if (imp.source.split('/').length > 4) {
           analysis.slowImports.push({
-            file: path.relative(rootDir, file),
+            file: relative(rootDir, file),
             import: imp.source,
             reason: 'Deep import path may cause slow resolution',
           });
@@ -189,11 +189,11 @@ function getAllSourceFiles(dir: string): string[] {
   const files: string[] = [];
 
   function walk(currentDir: string): void {
-    const items = fs.readdirSync(currentDir);
+    const items = readdirSync(currentDir);
 
     for (const item of items) {
-      const fullPath = path.join(currentDir, item);
-      const stat = fs.statSync(fullPath);
+      const fullPath = join(currentDir, item);
+      const stat = statSync(fullPath);
 
       if (
         stat.isDirectory() &&
@@ -306,12 +306,12 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    const outputDir = join(__dirname, '..', '..', '..', '..', '.tmp');
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
     }
-    const reportPath = path.join(outputDir, 'build-performance-report.md');
-    fs.writeFileSync(reportPath, report);
+    const reportPath = join(outputDir, 'build-performance-report.md');
+    writeFileSync(reportPath, report);
     console.log(`\n📄 Report saved to: ${reportPath}`);
   } catch (error) {
     console.error('❌ Build analysis failed:', error);

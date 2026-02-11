@@ -75,6 +75,7 @@ function createMockUser(overrides: Partial<User> = {}): User {
     emailVerified: true,
     emailVerifiedAt: new Date('2024-01-01'),
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,
@@ -128,6 +129,7 @@ function createMockRepos(): Repositories {
     securityEvents: {} as Repositories['securityEvents'],
     totpBackupCodes: {} as Repositories['totpBackupCodes'],
     emailChangeTokens: {} as Repositories['emailChangeTokens'],
+    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
     magicLinkTokens: {} as Repositories['magicLinkTokens'],
     oauthConnections: {} as Repositories['oauthConnections'],
     apiKeys: {} as Repositories['apiKeys'],
@@ -156,6 +158,7 @@ function createMockRepos(): Repositories {
     userAgreements: {} as Repositories['userAgreements'],
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
+    activities: {} as Repositories['activities'],
   };
 }
 

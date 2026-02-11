@@ -8,7 +8,7 @@
  * @module
  */
 
-import { and, eq, select, insert } from '../../builder/index';
+import { and, deleteFrom, eq, insert, lt, select } from '../../builder/index';
 import {
   type AuditEvent,
   type NewAuditEvent,
@@ -81,6 +81,13 @@ export interface AuditEventRepository {
    * @returns Array of audit events, most recent first
    */
   findByResource(resource: string, resourceId: string, limit?: number): Promise<AuditEvent[]>;
+
+  /**
+   * Delete audit events older than the given cutoff date
+   * @param cutoff - ISO date string; events with created_at < cutoff are deleted
+   * @returns Number of deleted rows
+   */
+  deleteOlderThan(cutoff: string): Promise<number>;
 }
 
 // ============================================================================
@@ -172,6 +179,10 @@ export function createAuditEventRepository(db: RawDb): AuditEventRepository {
           .toSql(),
       );
       return results.map(transformAuditEvent);
+    },
+
+    async deleteOlderThan(cutoff: string): Promise<number> {
+      return db.execute(deleteFrom(AUDIT_EVENTS_TABLE).where(lt('created_at', cutoff)).toSql());
     },
   };
 }

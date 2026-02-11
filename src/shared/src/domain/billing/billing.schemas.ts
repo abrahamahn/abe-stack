@@ -203,6 +203,10 @@ export interface Invoice {
   createdAt: string;
 }
 
+export interface InvoiceResponse {
+  invoice: Invoice;
+}
+
 export interface InvoicesListResponse {
   invoices: Invoice[];
   hasMore: boolean;

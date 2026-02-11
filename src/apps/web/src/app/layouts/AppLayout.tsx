@@ -1,6 +1,6 @@
 // src/apps/web/src/app/layouts/AppLayout.tsx
 import { Outlet, ResizablePanelGroup, useContrast, useDensity, useSidePeek } from '@abe-stack/ui';
-import { AuthModal } from '@auth/components';
+import { AuthModal, NewDeviceBanner } from '@auth/components';
 import { useAuth } from '@auth/hooks';
 import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -124,6 +124,8 @@ export const AppLayout = ({
             onLogout={logout}
             onOpenAuthModal={handleOpenAuthModal}
           />
+
+          <NewDeviceBanner />
 
           <ResizablePanelGroup direction="vertical" reverse className="flex-1 min-h-0">
             <AppBottomLayout

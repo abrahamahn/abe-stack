@@ -7,8 +7,8 @@
  * Tracks changes over time and alerts on significant increases
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 interface BundleInfo {
   name: string;
@@ -31,11 +31,11 @@ interface BundleReport {
 
 function estimatePackageBundleSize(packageName: string, packagePath: string): BundleInfo[] {
   const bundles: BundleInfo[] = [];
-  const packageJsonPath = path.join(packagePath, 'package.json');
+  const packageJsonPath = join(packagePath, 'package.json');
 
-  if (!fs.existsSync(packageJsonPath)) return bundles;
+  if (!existsSync(packageJsonPath)) return bundles;
 
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as {
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
   };
@@ -116,11 +116,11 @@ function generateBundleReport(): BundleReport {
   const packages: Record<string, BundleInfo[]> = {};
   const totals: Record<string, { size: number; gzipSize: number }> = {};
 
-  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
+  const rootDir = resolve(__dirname, '..', '..', '..', '..');
 
   // Analyze web app
-  const webPath = path.join(rootDir, 'src', 'apps', 'web');
-  if (fs.existsSync(webPath)) {
+  const webPath = join(rootDir, 'src', 'apps', 'web');
+  if (existsSync(webPath)) {
     const bundles = estimatePackageBundleSize('@abe-stack/web', webPath);
     packages['@abe-stack/web'] = bundles;
 
@@ -137,13 +137,13 @@ function generateBundleReport(): BundleReport {
   // Analyze packages across src/client/*, src/server/*, src/shared
   const packageLayers = ['src/client', 'src/server'];
   for (const layer of packageLayers) {
-    const layerDir = path.join(rootDir, layer);
-    if (!fs.existsSync(layerDir)) continue;
+    const layerDir = join(rootDir, layer);
+    if (!existsSync(layerDir)) continue;
 
-    const packageDirs = fs.readdirSync(layerDir);
+    const packageDirs = readdirSync(layerDir);
     for (const pkgName of packageDirs) {
-      const pkgPath = path.join(layerDir, pkgName);
-      if (fs.existsSync(path.join(pkgPath, 'package.json'))) {
+      const pkgPath = join(layerDir, pkgName);
+      if (existsSync(join(pkgPath, 'package.json'))) {
         const bundles = estimatePackageBundleSize(`@abe-stack/${pkgName}`, pkgPath);
         packages[`@abe-stack/${pkgName}`] = bundles;
 
@@ -160,8 +160,8 @@ function generateBundleReport(): BundleReport {
   }
 
   // Analyze src/shared
-  const sharedPath = path.join(rootDir, 'src', 'shared');
-  if (fs.existsSync(path.join(sharedPath, 'package.json'))) {
+  const sharedPath = join(rootDir, 'src', 'shared');
+  if (existsSync(join(sharedPath, 'package.json'))) {
     const bundles = estimatePackageBundleSize('@abe-stack/shared', sharedPath);
     packages['@abe-stack/shared'] = bundles;
 
@@ -187,20 +187,20 @@ function generateBundleReport(): BundleReport {
 // ============================================================================
 
 function getOutputDir(): string {
-  return path.join(__dirname, '..', '..', '..', '..', '.tmp');
+  return join(__dirname, '..', '..', '..', '..', '.tmp');
 }
 
 function getReportPath(): string {
-  return path.join(getOutputDir(), '.bundle-sizes.json');
+  return join(getOutputDir(), '.bundle-sizes.json');
 }
 
 function loadPreviousReport(): BundleReport | null {
   const reportPath = getReportPath();
 
-  if (!fs.existsSync(reportPath)) return null;
+  if (!existsSync(reportPath)) return null;
 
   try {
-    const data = fs.readFileSync(reportPath, 'utf-8');
+    const data = readFileSync(reportPath, 'utf-8');
     const reports = JSON.parse(data) as BundleReport[];
     return reports[reports.length - 1] ?? null;
   } catch {
@@ -213,14 +213,14 @@ function saveReport(report: BundleReport): void {
   const reportPath = getReportPath();
 
   // Ensure .tmp directory exists
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
   }
 
   let reports: BundleReport[] = [];
-  if (fs.existsSync(reportPath)) {
+  if (existsSync(reportPath)) {
     try {
-      reports = JSON.parse(fs.readFileSync(reportPath, 'utf-8')) as BundleReport[];
+      reports = JSON.parse(readFileSync(reportPath, 'utf-8')) as BundleReport[];
     } catch {
       reports = [];
     }
@@ -233,7 +233,7 @@ function saveReport(report: BundleReport): void {
     reports = reports.slice(-10);
   }
 
-  fs.writeFileSync(reportPath, JSON.stringify(reports, null, 2));
+  writeFileSync(reportPath, JSON.stringify(reports, null, 2));
 }
 
 // ============================================================================

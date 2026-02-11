@@ -1,8 +1,11 @@
 // src/apps/web/src/app/routes.tsx
 import { Outlet, ProtectedRoute } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
+import { ActivityFeedPage } from '@pages/ActivityPages';
 import {
   AdminLayout,
+  AuditEventsPage,
+  FeatureFlagsPage,
   JobMonitorPage,
   PlanManagementPage,
   RouteManifestPage,
@@ -126,6 +129,10 @@ export const appRoutes: AppRoute[] = [
             element: DashboardPage,
           },
           {
+            path: 'activities',
+            element: ActivityFeedPage,
+          },
+          {
             path: 'settings/accounts',
             element: ConnectedAccountsPage,
           },
@@ -190,6 +197,14 @@ export const appRoutes: AppRoute[] = [
           {
             path: 'routes',
             element: RouteManifestPage,
+          },
+          {
+            path: 'audit',
+            element: AuditEventsPage,
+          },
+          {
+            path: 'feature-flags',
+            element: FeatureFlagsPage,
           },
         ],
       },

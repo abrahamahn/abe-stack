@@ -75,6 +75,7 @@ export default mergeConfig(baseConfig, {
         replacement: `${infraPkg}/config/index.ts`,
       },
       // Shared subpath exports (must come before main package catch-all)
+      { find: '@abe-stack/shared/domain', replacement: `${corePkg}/domain/index.ts` },
       { find: '@abe-stack/shared/config', replacement: `${corePkg}/config/index.ts` },
       {
         find: '@abe-stack/shared/pubsub/postgres',

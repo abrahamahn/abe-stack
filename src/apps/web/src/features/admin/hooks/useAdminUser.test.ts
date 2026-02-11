@@ -41,6 +41,7 @@ describe('useAdminUser', () => {
     emailVerifiedAt: '2024-01-01T00:00:00Z',
     failedLoginAttempts: 0,
     lockedUntil: null,
+    lockReason: null,
     phone: null,
     phoneVerified: false,
     createdAt: '2024-01-01T00:00:00Z',

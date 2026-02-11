@@ -10,11 +10,21 @@ import { UserNotFoundError } from '@abe-stack/shared';
 
 import { ERROR_MESSAGES } from '../auth';
 
-import { getUserById, listUsers, lockUser, unlockUser, updateUser } from './userService';
+import {
+  getUserById,
+  hardBanUser,
+  listUsers,
+  lockUser,
+  searchUsers,
+  unlockUser,
+  updateUser,
+} from './userService';
 
 import type { AdminAppContext } from './types';
+import type { HardBanResult, SearchUsersResponse } from './userService';
 import type { UserRole } from '@abe-stack/db';
 import type {
+  AdminHardBanRequest,
   AdminLockUserRequest,
   AdminLockUserResponse,
   AdminUpdateUserRequest,
@@ -294,6 +304,109 @@ export async function handleUnlockUser(
         message: 'User account unlocked successfully',
         user,
       },
+    };
+  } catch (error) {
+    if (error instanceof UserNotFoundError) {
+      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+    }
+
+    ctx.log.error(toError(error));
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+// ============================================================================
+// Search Users Handler
+// ============================================================================
+
+/**
+ * Handle GET /api/admin/users/search
+ */
+export async function handleSearchUsers(
+  ctx: AdminAppContext,
+  _body: undefined,
+  request: FastifyRequest,
+  _reply: FastifyReply,
+): Promise<{ status: number; body: SearchUsersResponse | { message: string } }> {
+  const user = (request as { user?: { userId: string; role: string } }).user;
+  if (user === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    const query = (request.query ?? {}) as Record<string, unknown>;
+
+    const q = typeof query['q'] === 'string' ? query['q'].trim() : '';
+    if (q === '') {
+      return { status: 400, body: { message: 'Search query "q" is required' } };
+    }
+
+    const limit =
+      query['limit'] !== undefined && query['limit'] !== null ? Number(query['limit']) : 20;
+    const offset =
+      query['offset'] !== undefined && query['offset'] !== null ? Number(query['offset']) : 0;
+
+    const result = await searchUsers(ctx.repos.users, q, { limit, offset });
+
+    ctx.log.info(
+      { adminId: user.userId, query: q, resultCount: result.users.length },
+      'Admin searched users',
+    );
+
+    return { status: 200, body: result };
+  } catch (error) {
+    ctx.log.error(toError(error));
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+// ============================================================================
+// Hard Ban Handler
+// ============================================================================
+
+/**
+ * Handle POST /api/admin/users/:id/hard-ban
+ */
+export async function handleHardBan(
+  ctx: AdminAppContext,
+  body: AdminHardBanRequest,
+  request: FastifyRequest,
+  _reply: FastifyReply,
+): Promise<{ status: number; body: HardBanResult | { message: string } }> {
+  const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
+  if (authUser === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    // Get user ID from route params
+    const params = request.params as { id: string };
+    const userId = params.id;
+
+    if (userId === '') {
+      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+    }
+
+    // Prevent admin from banning themselves
+    if (userId === authUser.userId) {
+      return { status: 400, body: { message: 'Cannot ban your own account' } };
+    }
+
+    const result = await hardBanUser(ctx.db, ctx.repos.users, userId, authUser.userId, body.reason);
+
+    ctx.log.info(
+      {
+        adminId: authUser.userId,
+        targetUserId: userId,
+        reason: body.reason,
+        gracePeriodEnds: result.gracePeriodEnds,
+      },
+      'Admin hard-banned user account',
+    );
+
+    return {
+      status: 200,
+      body: result,
     };
   } catch (error) {
     if (error instanceof UserNotFoundError) {

@@ -8,8 +8,8 @@
  */
 
 import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 interface Vulnerability {
   package: string;
@@ -56,7 +56,7 @@ function scanVulnerabilities(): AuditResult {
     // Run npm audit in JSON format
     const auditOutput = execSync('npm audit --audit-level=moderate --json', {
       encoding: 'utf-8',
-      cwd: path.resolve(__dirname, '..', '..', '..', '..'),
+      cwd: resolve(__dirname, '..', '..', '..', '..'),
       timeout: 60000, // 1 minute timeout
     });
 
@@ -164,7 +164,7 @@ function checkOutdatedDependencies(): Array<{
   try {
     const outdatedOutput = execSync('npm outdated --json', {
       encoding: 'utf-8',
-      cwd: path.resolve(__dirname, '..', '..', '..', '..'),
+      cwd: resolve(__dirname, '..', '..', '..', '..'),
       timeout: 30000,
     });
 
@@ -280,12 +280,12 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    const outputDir = join(__dirname, '..', '..', '..', '..', '.tmp');
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
     }
-    const reportPath = path.join(outputDir, 'security-audit-report.md');
-    fs.writeFileSync(reportPath, report);
+    const reportPath = join(outputDir, 'security-audit-report.md');
+    writeFileSync(reportPath, report);
     console.log(`\n📄 Report saved to: ${reportPath}`);
 
     // Exit with error code if critical/high vulnerabilities found

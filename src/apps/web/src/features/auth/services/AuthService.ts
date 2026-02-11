@@ -42,6 +42,7 @@ export type AuthState = {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isNewDevice: boolean;
 };
 
 /**
@@ -128,6 +129,8 @@ export class AuthService {
   private isLoadingUser = false;
   /** Whether auth is currently initializing (restoring session on app load) */
   private isInitializing = false;
+  /** Whether the current login was from a new/unrecognized device */
+  private newDevice = false;
 
   constructor(args: {
     config: ClientConfig;
@@ -213,7 +216,14 @@ export class AuthService {
       user: this.user,
       isLoading: this.isInitializing || (hasToken && this.isLoadingUser),
       isAuthenticated: Boolean(this.user),
+      isNewDevice: this.newDevice,
     };
+  }
+
+  /** Dismiss the new device banner */
+  dismissNewDeviceBanner(): void {
+    this.newDevice = false;
+    this.notifyListeners();
   }
 
   /** Subscribe to auth state changes */
@@ -248,6 +258,12 @@ export class AuthService {
     }
 
     this.handleAuthSuccess(response);
+
+    // Track new device flag for banner display
+    if (response.isNewDevice === true) {
+      this.newDevice = true;
+      this.notifyListeners();
+    }
   }
 
   /**
@@ -425,6 +441,7 @@ export class AuthService {
     this.tokenStore.clear();
     this.user = null;
     this.isLoadingUser = false;
+    this.newDevice = false;
     this.notifyListeners();
   }
 

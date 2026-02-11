@@ -7,7 +7,7 @@
  * @module
  */
 
-import { and, eq, gt, isNull, select, insert, update } from '../../builder/index';
+import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom } from '../../builder/index';
 import {
   type EmailVerificationToken,
   type NewEmailVerificationToken,
@@ -47,6 +47,12 @@ export interface EmailVerificationTokenRepository {
    * @returns The updated token or null if not found
    */
   markAsUsed(id: string): Promise<EmailVerificationToken | null>;
+
+  /**
+   * Delete all expired tokens globally
+   * @returns Number of deleted tokens
+   */
+  deleteExpired(): Promise<number>;
 }
 
 // ============================================================================
@@ -104,6 +110,12 @@ export function createEmailVerificationTokenRepository(
           .toSql(),
       );
       return result !== null ? transformToken(result) : null;
+    },
+
+    async deleteExpired(): Promise<number> {
+      return db.execute(
+        deleteFrom(EMAIL_VERIFICATION_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
+      );
     },
   };
 }

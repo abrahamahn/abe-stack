@@ -11,6 +11,7 @@
  */
 
 import type {
+  AuditEventRepository,
   BillingEventRepository,
   CustomerMappingRepository,
   InvoiceRepository,
@@ -162,6 +163,7 @@ export interface BillingAppContext extends BaseContext {
   };
   readonly repos: BillingRepositories & {
     readonly billingEvents: BillingEventRepository;
+    readonly auditEvents?: AuditEventRepository;
   };
   readonly log: BillingLogger;
 }

@@ -29,6 +29,7 @@ export {
   createSecurityEventRepository,
   createTotpBackupCodeRepository,
   createEmailChangeTokenRepository,
+  createEmailChangeRevertTokenRepository,
   type RefreshTokenRepository,
   type RefreshTokenFamilyRepository,
   type LoginAttemptRepository,
@@ -37,6 +38,7 @@ export {
   type SecurityEventRepository,
   type TotpBackupCodeRepository,
   type EmailChangeTokenRepository,
+  type EmailChangeRevertTokenRepository,
 } from './auth';
 
 // API Keys

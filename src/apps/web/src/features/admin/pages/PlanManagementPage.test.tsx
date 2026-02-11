@@ -105,6 +105,8 @@ vi.mock('@abe-stack/ui', () => {
   const tableHeader = ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>;
   const tableRow = ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>;
 
+  const heading = ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>;
+
   return {
     Badge: badge,
     Button: button,
@@ -113,6 +115,7 @@ vi.mock('@abe-stack/ui', () => {
       Root: dialogRoot,
       Content: dialogContent,
     },
+    Heading: heading,
     Input: input,
     PageContainer: pageContainer,
     Select: select,

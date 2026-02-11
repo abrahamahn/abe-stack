@@ -65,6 +65,7 @@ const baseConfig: AppConfig = {
     trustProxy: false,
     logLevel: 'fatal',
     maintenanceMode: false,
+    auditRetentionDays: 90,
     appBaseUrl: 'http://localhost:3000',
     apiBaseUrl: 'http://localhost:3000',
     rateLimit: { windowMs: 60000, max: 1000 },

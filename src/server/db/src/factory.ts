@@ -9,9 +9,11 @@
  */
 
 import { createRawDb, type RawDb } from './client';
+import { createActivityRepository, type ActivityRepository } from './repositories/activities';
 import { createApiKeyRepository, type ApiKeyRepository } from './repositories/api-keys';
 import {
   createEmailChangeTokenRepository,
+  createEmailChangeRevertTokenRepository,
   createEmailVerificationTokenRepository,
   createLoginAttemptRepository,
   createPasswordResetTokenRepository,
@@ -20,6 +22,7 @@ import {
   createSecurityEventRepository,
   createTotpBackupCodeRepository,
   type EmailChangeTokenRepository,
+  type EmailChangeRevertTokenRepository,
   type EmailVerificationTokenRepository,
   type LoginAttemptRepository,
   type PasswordResetTokenRepository,
@@ -108,7 +111,7 @@ import { createUserRepository, type UserRepository } from './repositories/users'
 // ============================================================================
 
 /**
- * Flat 37-key repository container.
+ * Flat 38-key repository container.
  * This is the canonical consumer API.
  */
 export interface Repositories {
@@ -124,6 +127,7 @@ export interface Repositories {
   securityEvents: SecurityEventRepository;
   totpBackupCodes: TotpBackupCodeRepository;
   emailChangeTokens: EmailChangeTokenRepository;
+  emailChangeRevertTokens: EmailChangeRevertTokenRepository;
 
   // Magic Link
   magicLinkTokens: MagicLinkTokenRepository;
@@ -162,6 +166,9 @@ export interface Repositories {
   jobs: JobRepository;
   webhooks: WebhookRepository;
   webhookDeliveries: WebhookDeliveryRepository;
+
+  // Activities
+  activities: ActivityRepository;
 
   // Features
   featureFlags: FeatureFlagRepository;
@@ -215,6 +222,7 @@ export function createRepositories(connectionString: string): RepositoryContext 
       securityEvents: createSecurityEventRepository(raw),
       totpBackupCodes: createTotpBackupCodeRepository(raw),
       emailChangeTokens: createEmailChangeTokenRepository(raw),
+      emailChangeRevertTokens: createEmailChangeRevertTokenRepository(raw),
 
       // Magic Link
       magicLinkTokens: createMagicLinkTokenRepository(raw),
@@ -253,6 +261,9 @@ export function createRepositories(connectionString: string): RepositoryContext 
       jobs: createJobRepository(raw),
       webhooks: createWebhookRepository(raw),
       webhookDeliveries: createWebhookDeliveryRepository(raw),
+
+      // Activities
+      activities: createActivityRepository(raw),
 
       // Features
       featureFlags: createFeatureFlagRepository(raw),

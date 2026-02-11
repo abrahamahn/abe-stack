@@ -5,7 +5,7 @@
 
 import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
-import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
+import { Heading, PageContainer, PricingTable, Text, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
@@ -67,10 +67,12 @@ export const PricingPage = (): ReactElement => {
   return (
     <PageContainer className="pricing-page">
       <div className="pricing-page__header">
-        <h1 className="pricing-page__title">Simple, Transparent Pricing</h1>
-        <p className="pricing-page__subtitle">
+        <Heading as="h1" className="pricing-page__title">
+          Simple, Transparent Pricing
+        </Heading>
+        <Text className="pricing-page__subtitle">
           Choose the plan that works best for you. All plans include a free trial.
-        </p>
+        </Text>
       </div>
 
       <PricingTable

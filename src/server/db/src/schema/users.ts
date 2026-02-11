@@ -46,6 +46,7 @@ export interface User {
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
   lockedUntil: Date | null;
+  lockReason: string | null;
   failedLoginAttempts: number;
   totpSecret: string | null;
   totpEnabled: boolean;
@@ -85,6 +86,7 @@ export interface NewUser {
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
   lockedUntil?: Date | null;
+  lockReason?: string | null;
   failedLoginAttempts?: number;
   totpSecret?: string | null;
   totpEnabled?: boolean;
@@ -123,6 +125,7 @@ export interface UpdateUser {
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
   lockedUntil?: Date | null;
+  lockReason?: string | null;
   failedLoginAttempts?: number;
   totpSecret?: string | null;
   totpEnabled?: boolean;
@@ -193,6 +196,7 @@ export const USER_COLUMNS = {
   emailVerified: 'email_verified',
   emailVerifiedAt: 'email_verified_at',
   lockedUntil: 'locked_until',
+  lockReason: 'lock_reason',
   failedLoginAttempts: 'failed_login_attempts',
   totpSecret: 'totp_secret',
   totpEnabled: 'totp_enabled',

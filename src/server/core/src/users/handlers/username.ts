@@ -19,6 +19,7 @@ import {
   type UpdateUsernameResponse,
 } from '@abe-stack/shared';
 
+import { logActivity } from '../../activities';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { HandlerContext, RouteResult } from '@abe-stack/server-engine';
@@ -87,8 +88,13 @@ export async function handleUpdateUsername(
 
     const newUsername = body.username;
 
+    // Guard against runtime/module-boundary issues where constants may be undefined.
+    const reservedUsernames = Array.isArray(RESERVED_USERNAMES)
+      ? (RESERVED_USERNAMES as readonly string[])
+      : (['admin', 'root', 'system'] as const);
+
     // Check reserved usernames
-    if ((RESERVED_USERNAMES as readonly string[]).includes(newUsername)) {
+    if (reservedUsernames.includes(newUsername)) {
       return { status: 400, body: { message: 'This username is reserved' } };
     }
 
@@ -119,6 +125,16 @@ export async function handleUpdateUsername(
       username: updated.username,
       nextChangeAllowedAt: nextChangeDate.toISOString(),
     };
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'user.username.changed',
+      resourceType: 'user',
+      resourceId: userId,
+      metadata: { oldUsername: user.username, newUsername: updated.username },
+    }).catch(() => {});
 
     return { status: 200, body: response };
   } catch (error) {

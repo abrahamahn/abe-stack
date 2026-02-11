@@ -1,4 +1,30 @@
 // src/apps/web/src/features/admin/hooks/index.ts
+// Audit events
+export { useAuditEvents } from './useAuditEvents';
+export type { UseAuditEventsOptions, UseAuditEventsResult } from './useAuditEvents';
+
+// Feature flag evaluation
+export { useFeatureFlag } from './useFeatureFlag';
+export type { UseFeatureFlagOptions, UseFeatureFlagResult } from './useFeatureFlag';
+
+// Feature flags admin CRUD
+export {
+  useCreateFeatureFlag,
+  useDeleteFeatureFlag,
+  useFeatureFlags,
+  useUpdateFeatureFlag,
+} from './useFeatureFlags';
+export type {
+  UseCreateFeatureFlagOptions,
+  UseCreateFeatureFlagResult,
+  UseDeleteFeatureFlagOptions,
+  UseDeleteFeatureFlagResult,
+  UseFeatureFlagsOptions,
+  UseFeatureFlagsResult,
+  UseUpdateFeatureFlagOptions,
+  UseUpdateFeatureFlagResult,
+} from './useFeatureFlags';
+
 // User management hooks
 export { useAdminUser } from './useAdminUser';
 export type { UseAdminUserResult, UseAdminUserState } from './useAdminUser';

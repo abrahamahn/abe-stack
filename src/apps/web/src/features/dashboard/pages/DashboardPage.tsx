@@ -1,6 +1,7 @@
 // src/apps/web/src/features/dashboard/pages/DashboardPage.tsx
 import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 import { useAuth } from '@auth';
+import { ActivityFeed } from '@features/activities';
 
 import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
@@ -64,6 +65,13 @@ export const DashboardPage = (): JSX.Element => {
           This is a protected route that requires authentication. You can only access this page when
           logged in with a valid JWT token.
         </Text>
+      </Card>
+
+      <Card>
+        <Heading as="h3" size="sm" className="mb-3">
+          Recent Activity
+        </Heading>
+        <ActivityFeed limit={10} />
       </Card>
     </PageContainer>
   );

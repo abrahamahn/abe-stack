@@ -1,5 +1,5 @@
 // src/apps/web/src/app/layouts/AppSidePeekPage.tsx
-import { Heading, PageContainer, useNavigate } from '@abe-stack/ui';
+import { Button, Heading, PageContainer, useNavigate } from '@abe-stack/ui';
 import { SidePeekUILibraryContent } from '@ui-library/components';
 
 import type { ReactElement } from 'react';
@@ -14,14 +14,15 @@ export const AppSidePeekPage = (): ReactElement => {
           <Heading as="h1" size="lg">
             Side Peek UI Library
           </Heading>
-          <button
+          <Button
             type="button"
+            variant="text"
             onClick={() => {
               navigate('/ui-library');
             }}
           >
             Back to UI Library
-          </button>
+          </Button>
           <SidePeekUILibraryContent />
         </div>
       </PageContainer>

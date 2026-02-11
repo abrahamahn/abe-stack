@@ -39,6 +39,7 @@ export interface AdminUser {
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   lockedUntil: string | null;
+  lockReason: string | null;
   failedLoginAttempts: number;
   phone: string | null;
   phoneVerified: boolean;
@@ -73,6 +74,22 @@ export interface AdminLockUserRequest {
 /** Unlock user account with reason */
 export interface UnlockAccountRequest {
   email?: string | undefined;
+  reason: string;
+}
+
+/** Hard ban a user account with reason */
+export interface AdminHardBanRequest {
+  reason: string;
+}
+
+/** Response for admin hard ban operations */
+export interface AdminHardBanResponse {
+  message: string;
+  gracePeriodEnds: string;
+}
+
+/** Suspend a tenant with reason */
+export interface AdminSuspendTenantRequest {
   reason: string;
 }
 
@@ -126,6 +143,7 @@ export const adminUserSchema: Schema<AdminUser> = createSchema((data: unknown) =
     emailVerified: parseBoolean(obj['emailVerified'], 'emailVerified'),
     emailVerifiedAt: parseNullable(obj['emailVerifiedAt'], (v) => isoDateTimeSchema.parse(v)),
     lockedUntil: parseNullable(obj['lockedUntil'], (v) => isoDateTimeSchema.parse(v)),
+    lockReason: parseNullable(obj['lockReason'], (v) => parseString(v, 'lockReason')),
     failedLoginAttempts: parseNumber(obj['failedLoginAttempts'], 'failedLoginAttempts', {
       int: true,
     }),
@@ -206,6 +224,25 @@ export const unlockAccountRequestSchema: Schema<UnlockAccountRequest> = createSc
   },
 );
 
+export const adminHardBanRequestSchema: Schema<AdminHardBanRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      reason: parseString(obj['reason'], 'reason', { min: 1, max: 500 }),
+    };
+  },
+);
+
+export const adminHardBanResponseSchema: Schema<AdminHardBanResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      message: parseString(obj['message'], 'message'),
+      gracePeriodEnds: isoDateTimeSchema.parse(obj['gracePeriodEnds']),
+    };
+  },
+);
+
 export const adminActionResponseSchema: Schema<AdminActionResponse> = createSchema(
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
@@ -257,6 +294,15 @@ export const unlockAccountResponseSchema: Schema<UnlockAccountResponse> = create
     return {
       message: parseString(obj['message'], 'message'),
       email: emailSchema.parse(obj['email']),
+    };
+  },
+);
+
+export const adminSuspendTenantRequestSchema: Schema<AdminSuspendTenantRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      reason: parseString(obj['reason'], 'reason', { min: 1, max: 500 }),
     };
   },
 );

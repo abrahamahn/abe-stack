@@ -6,7 +6,7 @@
  * Uses native fetch() - no external SDK required.
  */
 
-import * as crypto from 'crypto';
+import { createHmac } from 'node:crypto';
 
 import type { SubscriptionStatus } from '@abe-stack/db';
 import type {
@@ -552,10 +552,7 @@ export class PayPalProvider implements BillingService {
 
       // Compute expected signature for local verification
       // In production, you should also call PayPal's verify-webhook-signature API
-      const computedHash = crypto
-        .createHmac('sha256', this.webhookId)
-        .update(payload)
-        .digest('base64');
+      const computedHash = createHmac('sha256', this.webhookId).update(payload).digest('base64');
 
       // Log for debugging (remove in production)
       void computedHash; // Acknowledge computed hash exists

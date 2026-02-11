@@ -141,7 +141,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Card with all sections',
         code: '<Card><Card.Header>...</Card.Header>...</Card>',
         render: () => (
-          <Card style={{ width: '300px' }}>
+          <Card style={{ width: '18.75rem' }}>
             <Card.Header>
               <Heading as="h4" size="sm">
                 Header
@@ -275,7 +275,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         render: () => (
           <div
             style={{
-              width: '200px',
+              width: '12.5rem',
               border: '1px solid var(--ui-color-border)',
               padding: 'var(--ui-gap-xs)',
             }}
@@ -512,14 +512,14 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Text',
         description: 'Text skeleton',
-        code: '<Skeleton style={{ width: 200, height: 16 }} />',
-        render: () => <Skeleton style={{ width: 200, height: 16 }} />,
+        code: '<Skeleton style={{ width: "12.5rem", height: "1rem" }} />',
+        render: () => <Skeleton style={{ width: '12.5rem', height: '1rem' }} />,
       },
       {
         name: 'Block',
         description: 'Block skeleton',
-        code: '<Skeleton style={{ width: 300, height: 100 }} />',
-        render: () => <Skeleton style={{ width: 300, height: 100 }} />,
+        code: '<Skeleton style={{ width: "18.75rem", height: "6.25rem" }} />',
+        render: () => <Skeleton style={{ width: '18.75rem', height: '6.25rem' }} />,
       },
     ],
   },
@@ -760,7 +760,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Horizontal resizable panels',
         code: '<ResizablePanelGroup>...</ResizablePanelGroup>',
         render: () => (
-          <ResizablePanelGroup direction="horizontal" style={{ height: '200px' }}>
+          <ResizablePanelGroup direction="horizontal" style={{ height: '12.5rem' }}>
             <ResizablePanel defaultSize={50}>
               <div style={{ padding: 'var(--ui-gap-lg)' }}>
                 <Text>Left Panel</Text>
@@ -783,11 +783,11 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic scroll area',
-        code: '<ScrollArea style={{ height: 200 }}>...</ScrollArea>',
+        code: '<ScrollArea style={{ height: "12.5rem" }}>...</ScrollArea>',
         render: () => (
           <ScrollArea
             style={{
-              height: 200,
+              height: '12.5rem',
               border: '1px solid var(--ui-color-border)',
               padding: 'var(--ui-gap-md)',
             }}
@@ -966,7 +966,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Toaster component (renders toast notifications)',
         code: '<Toaster messages={[]} onDismiss={() => {}} position="top-right" />',
         render: () => (
-          <div style={{ position: 'relative', height: '100px' }}>
+          <div style={{ position: 'relative', height: '6.25rem' }}>
             <Text tone="muted">
               Toaster is a container component. Use with Toast for notifications.
             </Text>
@@ -979,7 +979,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Toaster with sample notifications',
         code: '<Toaster messages={[{ id: "1", title: "Info" }]} onDismiss={() => {}} />',
         render: () => (
-          <div style={{ position: 'relative', height: '100px' }}>
+          <div style={{ position: 'relative', height: '6.25rem' }}>
             <Toaster
               messages={[{ id: '1', title: 'Info', description: 'This is a notification' }]}
               onDismiss={() => {}}

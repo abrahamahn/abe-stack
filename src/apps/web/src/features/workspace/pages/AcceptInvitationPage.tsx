@@ -16,7 +16,7 @@ import {
   useNavigate,
   useSearchParams,
 } from '@abe-stack/ui';
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 
 import { useAcceptInvitation } from '../hooks';
 
@@ -38,12 +38,13 @@ export const AcceptInvitationPage = (): ReactElement => {
     },
   });
 
+  const hasAccepted = useRef(false);
   useEffect(() => {
-    if (token !== null && token.length > 0) {
+    if (!hasAccepted.current && token !== null && token.length > 0) {
+      hasAccepted.current = true;
       accept(token);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run once on mount
-  }, []);
+  }, [token, accept]);
 
   if (token === null || token.length === 0) {
     return (

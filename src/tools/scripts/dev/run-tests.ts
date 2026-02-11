@@ -7,7 +7,7 @@
  */
 
 import { execFileSync } from 'child_process';
-import * as path from 'path';
+import { join } from 'node:path';
 
 interface PackageResult {
   name: string;
@@ -84,7 +84,7 @@ function parseVitestOutput(output: string): Omit<PackageResult, 'name' | 'succes
  */
 function runPackageTests(name: string, packagePath: string, verbose: boolean): PackageResult {
   const projectRoot = process.cwd();
-  const pkgDir = path.join(projectRoot, packagePath);
+  const pkgDir = join(projectRoot, packagePath);
 
   let output = '';
   let success = true;

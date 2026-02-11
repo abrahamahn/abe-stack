@@ -86,8 +86,10 @@ function createMockRepos(): Repositories {
     consentLogs: {} as never,
     totpBackupCodes: {} as never,
     emailChangeTokens: {} as never,
+    emailChangeRevertTokens: {} as never,
     apiKeys: {} as never,
     dataExportRequests: {} as never,
+    activities: {} as never,
   } as Repositories;
 }
 

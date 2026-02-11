@@ -51,7 +51,11 @@ export type {
 export {
   useAdminUser,
   useAdminUsers,
+  useAuditEvents,
+  useCreateFeatureFlag,
+  useDeleteFeatureFlag,
   useExportEvents,
+  useFeatureFlags,
   useJobActions,
   useJobDetails,
   useJobsList,
@@ -60,6 +64,7 @@ export {
   useSecurityEvent,
   useSecurityEvents,
   useSecurityMetrics,
+  useUpdateFeatureFlag,
   useUserActions,
 } from './hooks';
 export type {
@@ -71,7 +76,15 @@ export type {
   UseAdminUsersActions,
   UseAdminUsersResult,
   UseAdminUsersState,
+  UseAuditEventsOptions,
+  UseAuditEventsResult,
+  UseCreateFeatureFlagOptions,
+  UseCreateFeatureFlagResult,
+  UseDeleteFeatureFlagOptions,
+  UseDeleteFeatureFlagResult,
   UseExportEventsResult,
+  UseFeatureFlagsOptions,
+  UseFeatureFlagsResult,
   UseJobActionsResult,
   UseJobDetailsOptions,
   UseJobDetailsResult,
@@ -87,12 +100,16 @@ export type {
   UseSecurityEventsResult,
   UseSecurityMetricsOptions,
   UseSecurityMetricsResult,
+  UseUpdateFeatureFlagOptions,
+  UseUpdateFeatureFlagResult,
   UseUserActionsResult,
   UseUserActionsState,
 } from './hooks';
 
 // Pages
 export {
+  AuditEventsPage,
+  FeatureFlagsPage,
   JobMonitorPage,
   PlanManagementPage,
   RouteManifestPage,

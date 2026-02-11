@@ -32,6 +32,7 @@ import {
   handleGetTenant,
   handleListInvitations,
   handleListMembers,
+  handleListTenantAuditEvents,
   handleListTenants,
   handleRemoveMember,
   handleResendInvitation,
@@ -166,6 +167,36 @@ export const tenantRoutes: RouteMap = createRouteMap([
           deps,
           tenantId,
           body as { newOwnerId: string },
+          req as unknown as TenantsRequest,
+        );
+      },
+      'user',
+    ),
+  ],
+
+  // ============================================================================
+  // Audit Events Route
+  // ============================================================================
+
+  // List workspace audit events
+  [
+    'tenants/:id/audit-events',
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+        const deps = asTenantsDeps(ctx);
+        const tenantId = (req.params as { id: string }).id;
+        const query = (req.query ?? {}) as Record<string, string | undefined>;
+        return handleListTenantAuditEvents(
+          deps,
+          tenantId,
+          {
+            limit: query['limit'],
+            action: query['action'],
+            actorId: query['actorId'],
+            startDate: query['startDate'],
+            endDate: query['endDate'],
+          },
           req as unknown as TenantsRequest,
         );
       },

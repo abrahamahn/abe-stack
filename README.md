@@ -4,122 +4,69 @@
 
 I got tired of spending weeks on every new project just setting up the same things: monorepo config, auth, database, UI components, testing, Docker, CI... only to finally start building what actually mattered.
 
-So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Let you (and me) go from idea to deployed app in days instead of months.
-
-https://github.com/abrahamahn/abe-stack
+So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Go from idea to deployed app in days instead of months.
 
 ---
 
-## Why I Built This
+## Why ABE Stack
 
-- **One codebase, multiple platforms** → Web (Vite + React), Desktop (Electron), and a Fastify backend
-- **No framework lock-in** → React is just the renderer. All real logic lives in shared packages — swap UI layers later if you want
-- **Speed without chaos** → Turborepo caching, parallel builds, minimal config
-- **Production-ready from day one** → Secure defaults, Docker, strict types, env validation
-- **Joyful development** → Fast feedback, zero config fatigue, everything just works
+|                                      |                                                                 |
+| ------------------------------------ | --------------------------------------------------------------- |
+| **One codebase, multiple platforms** | Web (Vite + React), Desktop (Electron), Fastify backend         |
+| **No framework lock-in**             | React is just the renderer — all logic lives in shared packages |
+| **Speed without chaos**              | Turborepo caching, parallel builds, minimal config              |
+| **Production-ready from day one**    | Secure defaults, Docker, strict types, env validation           |
+| **Joyful development**               | Fast feedback, zero config fatigue, everything just works       |
 
 ---
 
 ## What's Inside
 
-### Core Stack
+### Architecture
 
-- Monorepo powered by **Turborepo + pnpm** workspaces
-- Frontend: **React 19** (web via Vite, desktop via Electron)
-- Backend: **Fastify + Drizzle ORM + PostgreSQL**
-- API: Type-safe contracts with **ts-rest + Zod**
-- Auth: JWT with refresh rotation, password reset, email verification, role-based access
-- Pagination: Cursor-based pagination for feeds and lists (50k+ users ready)
+- **Monorepo** — Turborepo + pnpm workspaces
+- **Frontend** — React 19 (web via Vite, desktop via Electron)
+- **Backend** — Fastify + Drizzle ORM + PostgreSQL
+- **Contracts** — Type-safe API with ts-rest + Zod
+- **Pagination** — Cursor-based for feeds and lists (50k+ users ready)
 
-### Security (Enterprise Grade)
+### Auth & Security
 
-- **Security Headers**: CSP with nonce-based execution, COEP/COOP/CORP cross-origin isolation, HSTS
-- **Rate Limiting**: Role-based limits (Admin: 1000/min, Premium: 500/min, Basic: 50/min) with progressive delays
-- **CSRF Protection**: AES-256-GCM encrypted tokens with timing-safe comparison
-- **Input Validation**: XSS prevention, SQL/NoSQL injection detection, comprehensive sanitization
-- **Audit Logging**: Security event tracking, intrusion detection, risk scoring (0-100)
-- **File Uploads**: HMAC-signed URLs, content validation, size limits
+- **Authentication** — JWT with refresh rotation, password reset, email verification, OAuth, TOTP 2FA
+- **RBAC** — Role-based access with multi-tenant workspaces
+- **Security Headers** — CSP with nonce-based execution, COEP/COOP/CORP, HSTS
+- **Rate Limiting** — Role-based limits with progressive delays
+- **CSRF Protection** — AES-256-GCM encrypted tokens with timing-safe comparison
+- **Input Validation** — XSS prevention, SQL/NoSQL injection detection, comprehensive sanitization
+- **Audit Logging** — Security event tracking, intrusion detection, risk scoring (0–100)
 
-### Deployment & Infrastructure
+### Infrastructure
 
-- **Infrastructure as Code**: Terraform modules for DigitalOcean and Google Cloud
-- **CI/CD Pipelines**: GitHub Actions for automated testing, building, and deployment
-- **Multi-Environment**: Staging and production environment support
-- **Container Ready**: Docker Compose for local development and production deployment
-- **One-Click Deploy**: From code to production in minutes
+- **Terraform** — Modules for DigitalOcean and Google Cloud
+- **CI/CD** — GitHub Actions for testing, building, and deployment
+- **Multi-Environment** — Staging and production support
+- **Docker** — Compose for local development and production
 
-### Quality & Developer Experience
+### Developer Experience
 
-- Full **TypeScript strict mode** with end-to-end type safety
-- **5,300+ tests** (Vitest unit tests + Playwright E2E)
-- ESLint + Prettier + git hooks (no bad code slips through)
-- Shared UI library: 16 components, 25 elements, 13 hooks, 14 layouts (browse at `/ui-library`)
-- State: React Query for server state, offline mutation queue
-- Theming, hooks, layouts, resizable panels — all reusable
+- **TypeScript strict mode** with end-to-end type safety
+- **5,300+ tests** — Vitest unit + Playwright E2E
+- **ESLint + Prettier + git hooks** — enforced quality gates
+- **Shared UI library** — components, hooks, layouts (browse at `/ui-library`)
+- **Theming** — CSS custom properties with dark/light mode support
 
 ---
 
-## Feature Guide
+## Getting Started
 
-This repo tracks detailed status in `docs/CHECKLIST.md`. At a high level, it includes:
-
-- Auth + security (email verify, reset, OAuth, 2FA, session management)
-- Accounts + profiles (settings UI, avatars, password change, lifecycle scaffolding)
-- RBAC + multi-tenant foundations (roles, memberships, invitations, policies)
-- Billing + subscriptions (Stripe/PayPal plumbing, plans, UI + API clients)
-- Notifications + audit (email/notification infra, security events, admin views)
-- Realtime + media + storage (websocket transport, media processing, file storage)
-- Compliance + ops (GDPR scaffolding, admin surfaces, CI/CD + infra tooling)
-
-For exact progress and gaps, see `docs/CHECKLIST.md`.
-
----
-
-## Quick Start
-
-### Option 1: Docker Postgres (Default)
+### Prerequisites
 
 ```bash
-git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
-pnpm install
-cp config/env/.env.development.example config/env/.env.development
-docker compose --env-file config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
-pnpm db:push
-pnpm db:seed
-pnpm dev
+node --version   # 20.x or higher
+pnpm --version   # 10.x or higher
 ```
 
-### Option 2: Local Postgres (VM-like Dev)
-
-```bash
-git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
-pnpm install
-cp config/env/.env.local.example config/env/.env.local
-ENV_FILE=config/env/.env.local pnpm db:push
-ENV_FILE=config/env/.env.local pnpm db:seed
-pnpm dev
-```
-
----
-
-## First-Time Setup
-
-**New to ABE Stack?** Here's everything you need to get started:
-
-### 1. Prerequisites
-
-Ensure you have these installed:
-
-```bash
-# Node.js 20+ and pnpm
-node --version  # Should be 20.x or higher
-pnpm --version  # Should be 10.x or higher
-
-# PostgreSQL (optional for local Postgres dev)
-pg_isready  # Check if PostgreSQL is running
-```
-
-### 2. Clone and Install
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git
@@ -127,39 +74,32 @@ cd abe-stack
 pnpm install
 ```
 
-### 3. Configure Environment
-
-Copy the example environment files:
+### 2. Configure environment
 
 ```bash
-# Development environment (Docker Postgres)
+# Docker Postgres (recommended)
 cp config/env/.env.development.example config/env/.env.development
 
-# Local Postgres (VM-like dev)
+# — OR — Local Postgres
 cp config/env/.env.local.example config/env/.env.local
 ```
 
-**Default configurations:**
+**Defaults:** PostgreSQL on localhost, console email (logs to terminal), local file storage. See [config/env/README.md](config/env/README.md) for details.
 
-- Docker Postgres: `postgresql://postgres:development@localhost:5432/abe_stack_dev`
-- Local Postgres: `postgresql://postgres:postgres@localhost:5433/abe_stack_dev`
-- Email: Console (logs to terminal)
-- Storage: Local filesystem (`apps/server/uploads`)
-- All other services: Local/mock providers
+### 3. Start the database
 
-**Need to customize?** Edit the env file you’re using. See [config/env/README.md](config/env/README.md) for details.
-
-### 4. Initialize Database
-
-Docker Postgres:
+**Docker Postgres:**
 
 ```bash
-docker compose --env-file config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up -d
+docker compose \
+  --env-file config/env/.env.development \
+  -f infra/docker/development/docker-compose.dev.yml \
+  up -d
 pnpm db:push
 pnpm db:seed
 ```
 
-Local Postgres:
+**Local Postgres:**
 
 ```bash
 createdb abe_stack_dev
@@ -167,31 +107,32 @@ ENV_FILE=config/env/.env.local pnpm db:push
 ENV_FILE=config/env/.env.local pnpm db:seed
 ```
 
-### 5. Start Development
+### 4. Start development
 
 ```bash
 pnpm dev
 ```
 
-**What runs:**
+| Service     | URL                                            |
+| ----------- | ---------------------------------------------- |
+| Web app     | [http://localhost:5173](http://localhost:5173) |
+| API server  | [http://localhost:8080](http://localhost:8080) |
+| Desktop app | Electron window (optional)                     |
 
-- Web app: [http://localhost:5173](http://localhost:5173)
-- API server: [http://localhost:8080](http://localhost:8080)
-- Desktop app: Electron window (optional)
-
-### 6. Verify Everything Works
+### 5. Verify it works
 
 1. Open [http://localhost:5173](http://localhost:5173)
-2. Click "Register" and create an account
-3. Check your terminal for the verification email (console provider)
+2. Register an account
+3. Check your terminal for the verification email
 4. Log in and explore the UI library at `/ui-library`
 
-**Troubleshooting:**
+### Troubleshooting
 
-- **Database connection error?** Ensure PostgreSQL is running and credentials match
-- **Port already in use?** Change `APP_PORT` or `API_PORT` in `config/env/.env.local`
-- **Module not found?** Run `pnpm install` again
-- **More help?** See [config/env/README.md](config/env/README.md#troubleshooting)
+| Problem                   | Fix                                                              |
+| ------------------------- | ---------------------------------------------------------------- |
+| Database connection error | Ensure PostgreSQL is running and credentials match your env file |
+| Port already in use       | Change `APP_PORT` or `API_PORT` in your env file                 |
+| Module not found          | Run `pnpm install` again                                         |
 
 ---
 
@@ -206,12 +147,15 @@ pnpm dev
 | `pnpm dev:server`  | Start server only            |
 | `pnpm dev:desktop` | Start desktop app only       |
 
-### Build
+### Build & Quality
 
 | Command           | Description                                 |
 | ----------------- | ------------------------------------------- |
 | `pnpm build`      | Full build with lint, type-check, and tests |
 | `pnpm build:fast` | Build without tests                         |
+| `pnpm lint`       | Check linting (max 0 warnings)              |
+| `pnpm type-check` | Run TypeScript type checking                |
+| `pnpm format`     | Format with Prettier                        |
 
 ### Testing
 
@@ -221,14 +165,6 @@ pnpm dev
 | `pnpm test:watch`    | Run tests in watch mode        |
 | `pnpm test:coverage` | Run tests with coverage report |
 | `pnpm test:e2e`      | Run Playwright E2E tests       |
-
-### Quality
-
-| Command           | Description                    |
-| ----------------- | ------------------------------ |
-| `pnpm lint`       | Check linting (max 0 warnings) |
-| `pnpm type-check` | Run TypeScript type checking   |
-| `pnpm format`     | Format with Prettier           |
 
 ### Database
 
@@ -240,12 +176,18 @@ pnpm dev
 
 ---
 
-## Roadmap
+## Feature Coverage
 
-See [`apps/docs/todo/ROADMAP.md`](apps/docs/todo/ROADMAP.md) for planned features:
+ABE Stack ships with production-ready implementations across these domains:
 
-- **MFA** — TOTP support with authenticator apps
-- **Data handling templates** — GDPR/HIPAA patterns
+- **Identity & Access** — Registration, login, email verification, password reset, OAuth, TOTP 2FA, session management
+- **Teams & Workspaces** — Multi-tenant with roles, memberships, invitations, permission gating
+- **Billing** — Stripe/PayPal plumbing, plan definitions, pricing UI, checkout flows
+- **Notifications & Audit** — Email infrastructure, security event tracking, admin views
+- **Realtime & Media** — WebSocket transport, media processing, file storage
+- **Compliance & Ops** — GDPR scaffolding, admin surfaces, CI/CD tooling
+
+For detailed progress, see [`docs/todo/TODO.md`](docs/todo/TODO.md). For deferred features (real-time sync, WebAuthn, API versioning), see [`docs/todo/ROADMAP.md`](docs/todo/ROADMAP.md).
 
 ---
 

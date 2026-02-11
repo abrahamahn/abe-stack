@@ -8,7 +8,7 @@
  * @module
  */
 
-import { and, eq, gt, select, insert } from '../../builder/index';
+import { and, eq, gt, lt, select, insert, deleteFrom } from '../../builder/index';
 import {
   type LoginAttempt,
   type NewLoginAttempt,
@@ -50,6 +50,13 @@ export interface LoginAttemptRepository {
    * @returns Number of attempts
    */
   countRecentByIp(ipAddress: string, since: Date): Promise<number>;
+
+  /**
+   * Delete login attempts older than the given cutoff date
+   * @param cutoff - ISO date string; attempts with created_at < cutoff are deleted
+   * @returns Number of deleted rows
+   */
+  deleteOlderThan(cutoff: string): Promise<number>;
 }
 
 // ============================================================================
@@ -106,6 +113,10 @@ export function createLoginAttemptRepository(db: RawDb): LoginAttemptRepository 
       );
       const count = result?.['count'];
       return typeof count === 'number' ? count : 0;
+    },
+
+    async deleteOlderThan(cutoff: string): Promise<number> {
+      return db.execute(deleteFrom(LOGIN_ATTEMPTS_TABLE).where(lt('created_at', cutoff)).toSql());
     },
   };
 }

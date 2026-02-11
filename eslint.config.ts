@@ -298,7 +298,7 @@ export default [
     files: ['src/server/core/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/core/tsconfig.json', './src/shared/tsconfig.json'],
+        project: ['./src/server/core/tsconfig.lint.json', './src/shared/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -451,6 +451,17 @@ export default [
         },
       ],
 
+      // Ban all TS escape-hatch comments (overrides strictTypeChecked which allows @ts-expect-error with description)
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {
+          'ts-expect-error': true,
+          'ts-ignore': true,
+          'ts-check': false,
+          'ts-nocheck': true,
+        },
+      ],
+
       // Template expressions
       '@typescript-eslint/restrict-template-expressions': [
         'error',
@@ -514,12 +525,26 @@ export default [
       '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
+  // Ban inline eslint-disable comments — use config-level overrides instead
+  {
+    linterOptions: { noInlineConfig: true },
+  },
   {
     // General JS/TS rules for all files
     rules: {
       'no-console': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
+      // Ban wildcard exports — use explicit named exports
+      // Allows: export * as Namespace from (namespace re-exports) and export type * from (type-only)
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportAllDeclaration:not([exported]):not([exportKind="type"])',
+          message:
+            'Wildcard exports (export *) are banned. Use explicit named exports or "export * as Namespace".',
+        },
+      ],
       'no-restricted-imports': [
         'error',
         {
@@ -591,6 +616,86 @@ export default [
         // and you've overridden the global naming-convention. Otherwise, they might be lost.
         // For simplicity, let's just assume the default applies to others unless specified.
         // But for a full solution, one might merge with the general naming-convention rules.
+      ],
+    },
+  },
+  // Ban raw HTML elements in apps/web — use @abe-stack/ui components instead
+  // Allowed structural elements: div, nav, section, main, header, footer, form, label, span, ul, ol, li
+  {
+    files: ['src/apps/web/**/*.tsx'],
+    ignores: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportAllDeclaration:not([exported]):not([exportKind="type"])',
+          message:
+            'Wildcard exports (export *) are banned. Use explicit named exports or "export * as Namespace".',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="button"]',
+          message: 'Use <Button> from @abe-stack/ui instead of raw <button>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="input"]',
+          message: 'Use <Input>/<Checkbox>/<Switch> from @abe-stack/ui instead of raw <input>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="textarea"]',
+          message: 'Use <TextArea> from @abe-stack/ui instead of raw <textarea>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="select"]',
+          message: 'Use <Select> from @abe-stack/ui instead of raw <select>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="a"]',
+          message: 'Use <Link> from @abe-stack/ui instead of raw <a>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="img"]',
+          message: 'Use <Image> from @abe-stack/ui instead of raw <img>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h1"]',
+          message: 'Use <Heading as="h1"> from @abe-stack/ui instead of raw <h1>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h2"]',
+          message: 'Use <Heading as="h2"> from @abe-stack/ui instead of raw <h2>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h3"]',
+          message: 'Use <Heading as="h3"> from @abe-stack/ui instead of raw <h3>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h4"]',
+          message: 'Use <Heading as="h4"> from @abe-stack/ui instead of raw <h4>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h5"]',
+          message: 'Use <Heading as="h5"> from @abe-stack/ui instead of raw <h5>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="h6"]',
+          message: 'Use <Heading as="h6"> from @abe-stack/ui instead of raw <h6>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="p"]',
+          message: 'Use <Text> from @abe-stack/ui instead of raw <p>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="hr"]',
+          message: 'Use <Divider> from @abe-stack/ui instead of raw <hr>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="table"]',
+          message: 'Use <Table> from @abe-stack/ui instead of raw <table>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="progress"]',
+          message: 'Use <Progress> from @abe-stack/ui instead of raw <progress>.',
+        },
       ],
     },
   },
@@ -674,6 +779,21 @@ export default [
     },
   },
 
+  // Config-level overrides replacing former inline eslint-disable comments
+  {
+    // QR code generator uses non-null assertions on mathematically-bounded array access (canvas rendering)
+    files: ['src/apps/web/src/features/settings/components/TotpQrCode.tsx'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+    },
+  },
+  {
+    // String sanitizer intentionally matches control characters
+    files: ['src/shared/src/utils/string/string.ts'],
+    rules: {
+      'no-control-regex': 'off',
+    },
+  },
   {
     // Test files: Relax rules for mocking and test setup
     files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
@@ -702,6 +822,10 @@ export default [
       '@typescript-eslint/unbound-method': 'off',
       // Allow throwing non-Error values (testing error handling)
       '@typescript-eslint/only-throw-error': 'off',
+      // Allow non-standard naming in test data (e.g., PostgreSQL ?column?, external API shapes)
+      '@typescript-eslint/naming-convention': 'off',
+      // Allow @ts-expect-error in tests for intentional type-error testing
+      '@typescript-eslint/ban-ts-comment': 'off',
 
       // KEEP STRICT: You MUST handle promises in tests
       '@typescript-eslint/no-floating-promises': 'error',

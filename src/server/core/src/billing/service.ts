@@ -13,6 +13,7 @@ import {
   BillingSubscriptionNotFoundError,
   CannotRemoveDefaultPaymentMethodError,
   CustomerNotFoundError,
+  InvoiceNotFoundError,
   PaymentMethodNotFoundError,
   PlanNotActiveError,
   PlanNotFoundError,
@@ -329,6 +330,30 @@ export async function getUserInvoices(
   const invoices = hasMore ? result.items.slice(0, limit) : result.items;
 
   return { invoices, hasMore };
+}
+
+/**
+ * Get a single invoice by ID, verifying it belongs to the user.
+ *
+ * @param repos - Billing repositories containing the invoices repository
+ * @param userId - User requesting the invoice (for ownership verification)
+ * @param invoiceId - Invoice identifier to retrieve
+ * @returns The invoice if found and owned by the user
+ * @throws InvoiceNotFoundError if invoice does not exist or belongs to another user
+ * @complexity O(1) database lookup by primary key
+ */
+export async function getUserInvoice(
+  repos: BillingRepositories,
+  userId: string,
+  invoiceId: string,
+): Promise<DbInvoice> {
+  const invoice = await repos.invoices.findById(invoiceId);
+
+  if (invoice?.userId !== userId) {
+    throw new InvoiceNotFoundError(invoiceId);
+  }
+
+  return invoice;
 }
 
 // ============================================================================

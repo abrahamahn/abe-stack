@@ -225,6 +225,7 @@ describe('handleLogin', () => {
       expect(result.body).toEqual({
         token: 'access-token-123',
         user: mockAuthResult.user,
+        isNewDevice: true,
       });
     });
 

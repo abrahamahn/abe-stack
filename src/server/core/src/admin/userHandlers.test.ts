@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   handleGetUser,
+  handleHardBan,
   handleListUsers,
   handleLockUser,
   handleUnlockUser,
@@ -45,6 +46,8 @@ vi.mock('./userService', () => ({
   updateUser: vi.fn(),
   lockUser: vi.fn(),
   unlockUser: vi.fn(),
+  hardBanUser: vi.fn(),
+  searchUsers: vi.fn(),
 }));
 
 // ============================================================================
@@ -62,6 +65,7 @@ function createMockAdminUser(overrides: Partial<AdminUser> = {}): AdminUser {
     emailVerified: true,
     emailVerifiedAt: '2024-01-01T00:00:00.000Z',
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     phone: null,
     phoneVerified: false,
@@ -381,6 +385,76 @@ describe('Admin User Handlers', () => {
       );
 
       expect(result.status).toBe(401);
+    });
+  });
+
+  describe('handleHardBan', () => {
+    test('should return 200 with ban result', async () => {
+      const gracePeriodEnds = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      vi.mocked(userService.hardBanUser).mockResolvedValue({
+        message: 'User has been permanently banned',
+        gracePeriodEnds,
+      });
+
+      const req = createMockRequest({}, { id: 'user-123' });
+      const result = await handleHardBan(
+        mockCtx,
+        { reason: 'Severe ToS violation' },
+        req,
+        createMockReply(),
+      );
+
+      expect(result.status).toBe(200);
+      expect('body' in result && 'gracePeriodEnds' in result.body).toBe(true);
+    });
+
+    test('should return 400 when trying to ban self', async () => {
+      const req = createMockRequest(
+        { user: { userId: 'user-123', email: 'admin@example.com', role: 'admin' } },
+        { id: 'user-123' },
+      );
+      const result = await handleHardBan(mockCtx, { reason: 'Test' }, req, createMockReply());
+
+      expect(result.status).toBe(400);
+      expect('body' in result && 'message' in result.body).toBe(true);
+      expect((result.body as { message: string }).message).toBe('Cannot ban your own account');
+    });
+
+    test('should return 404 when user not found', async () => {
+      vi.mocked(userService.hardBanUser).mockRejectedValue(
+        new MockUserNotFoundError('User not found'),
+      );
+
+      const req = createMockRequest({}, { id: 'nonexistent' });
+      const result = await handleHardBan(mockCtx, { reason: 'Test' }, req, createMockReply());
+
+      expect(result.status).toBe(404);
+    });
+
+    test('should return 401 when not authenticated', async () => {
+      const req = createUnauthenticatedRequest({ id: 'user-123' });
+      const result = await handleHardBan(mockCtx, { reason: 'Test' }, req, createMockReply());
+
+      expect(result.status).toBe(401);
+    });
+
+    test('should pass correct parameters to hardBanUser', async () => {
+      const gracePeriodEnds = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      vi.mocked(userService.hardBanUser).mockResolvedValue({
+        message: 'User has been permanently banned',
+        gracePeriodEnds,
+      });
+
+      const req = createMockRequest({}, { id: 'target-user' });
+      await handleHardBan(mockCtx, { reason: 'Spam and abuse' }, req, createMockReply());
+
+      expect(userService.hardBanUser).toHaveBeenCalledWith(
+        mockCtx.db,
+        mockCtx.repos.users,
+        'target-user',
+        'admin-123',
+        'Spam and abuse',
+      );
     });
   });
 });

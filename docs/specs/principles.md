@@ -83,8 +83,6 @@ Comprehensive guide to principles, coding standards, patterns, and anti-patterns
 ### TypeScript
 
 - **Strict mode required** - No `any`, no `@ts-ignore` without explanation
-- **Zod validation** - All external data validated at runtime
-- **Infer types from schemas** - `type User = z.infer<typeof userSchema>`
 
 ### File Naming
 

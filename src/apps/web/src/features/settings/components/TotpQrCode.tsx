@@ -1,5 +1,4 @@
 // src/apps/web/src/features/settings/components/TotpQrCode.tsx
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * TOTP QR Code Component
  *

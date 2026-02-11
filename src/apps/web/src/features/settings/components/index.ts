@@ -1,4 +1,5 @@
 // src/apps/web/src/features/settings/components/index.ts
+export { ApiKeysManagement, type ApiKeysManagementProps } from './ApiKeysManagement';
 export { AvatarUpload, type AvatarUploadProps } from './AvatarUpload';
 export { EmailChangeForm, type EmailChangeFormProps } from './EmailChangeForm';
 export { ForgotPasswordShortcut, type ForgotPasswordShortcutProps } from './ForgotPasswordShortcut';
@@ -13,3 +14,9 @@ export { SudoModal, type SudoModalProps } from './SudoModal';
 export { UsernameForm, type UsernameFormProps } from './UsernameForm';
 export { ProfileCompleteness, type ProfileCompletenessProps } from './ProfileCompleteness';
 export { DangerZone, type DangerZoneProps } from './DangerZone';
+export {
+  NotificationPreferencesForm,
+  type NotificationPreferencesFormProps,
+} from './NotificationPreferencesForm';
+export { PreferencesSection, type PreferencesSectionProps } from './PreferencesSection';
+export { DataControlsSection, type DataControlsSectionProps } from './DataControlsSection';

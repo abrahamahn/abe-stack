@@ -8,13 +8,20 @@
  *   pnpm sync:headers:check    # Check mode
  *   pnpm sync:headers:watch    # Watch mode
  */
-import * as fs from 'fs';
-import * as path from 'path';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  watch as fsWatch,
+  writeFileSync,
+} from 'node:fs';
+import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '../../..');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '../../..');
 
 const isQuiet = process.argv.includes('--quiet');
 function log(...args: unknown[]): void {
@@ -41,11 +48,11 @@ interface SyncResult {
 }
 
 function shouldSkipDir(dirPath: string): boolean {
-  return EXCLUDE_DIRS.has(path.basename(dirPath));
+  return EXCLUDE_DIRS.has(basename(dirPath));
 }
 
 function shouldProcessFile(filePath: string): boolean {
-  if (!FILE_EXTENSIONS.has(path.extname(filePath))) return false;
+  if (!FILE_EXTENSIONS.has(extname(filePath))) return false;
   if (filePath.endsWith('.d.ts')) return false;
   return true;
 }
@@ -83,12 +90,12 @@ function ensureHeader(content: string, header: string): { updated: boolean; next
 function syncFile(filePath: string, checkOnly: boolean): SyncResult {
   if (!shouldProcessFile(filePath)) return { path: filePath, status: 'skipped' };
 
-  const relativePath = path.relative(ROOT, filePath).replace(/\\/g, '/');
-  const content = fs.readFileSync(filePath, 'utf-8');
+  const relativePath = relative(ROOT, filePath).replace(/\\/g, '/');
+  const content = readFileSync(filePath, 'utf-8');
   const { updated, next } = ensureHeader(content, relativePath);
 
   if (updated && !checkOnly) {
-    fs.writeFileSync(filePath, next);
+    writeFileSync(filePath, next);
   }
 
   return { path: relativePath, status: updated ? 'updated' : 'ok' };
@@ -102,9 +109,9 @@ function collectFiles(dirPath: string): string[] {
     const current = stack.pop();
     if (typeof current !== 'string') continue;
     if (shouldSkipDir(current)) continue;
-    const entries = fs.readdirSync(current, { withFileTypes: true });
+    const entries = readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
-      const fullPath = path.join(current, entry.name);
+      const fullPath = join(current, entry.name);
       if (entry.isDirectory()) {
         stack.push(fullPath);
       } else if (entry.isFile()) {
@@ -119,8 +126,8 @@ function collectFiles(dirPath: string): string[] {
 function syncAll(checkOnly: boolean): { ok: SyncResult[]; updated: SyncResult[] } {
   const results: SyncResult[] = [];
   for (const dir of SCAN_DIRS) {
-    const fullPath = path.join(ROOT, dir);
-    if (!fs.existsSync(fullPath)) continue;
+    const fullPath = join(ROOT, dir);
+    if (!existsSync(fullPath)) continue;
     for (const file of collectFiles(fullPath)) {
       results.push(syncFile(file, checkOnly));
     }
@@ -144,8 +151,8 @@ function getStagedFiles(): string[] {
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line !== '')
-      .map((relativePath) => path.join(ROOT, relativePath))
-      .filter((fullPath) => fs.existsSync(fullPath) && fs.statSync(fullPath).isFile());
+      .map((relativePath) => join(ROOT, relativePath))
+      .filter((fullPath) => existsSync(fullPath) && statSync(fullPath).isFile());
   } catch {
     return [];
   }
@@ -173,14 +180,14 @@ function watchFiles(): void {
 
   let syncTimeout: NodeJS.Timeout | null = null;
   for (const dir of SCAN_DIRS) {
-    const fullPath = path.join(ROOT, dir);
-    if (!fs.existsSync(fullPath)) continue;
-    const watcher = fs.watch(fullPath, { recursive: true }, (_event, filename) => {
+    const fullPath = join(ROOT, dir);
+    if (!existsSync(fullPath)) continue;
+    const watcher = fsWatch(fullPath, { recursive: true }, (_event, filename) => {
       if (typeof filename !== 'string' || filename === '') return;
       if (syncTimeout) clearTimeout(syncTimeout);
       syncTimeout = setTimeout(() => {
-        const filePath = path.join(fullPath, filename);
-        if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const filePath = join(fullPath, filename);
+        if (existsSync(filePath) && statSync(filePath).isFile()) {
           const result = syncFile(filePath, false);
           if (result.status === 'updated') {
             log(`[sync-file-headers] Updated: ${result.path}`);

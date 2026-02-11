@@ -149,20 +149,35 @@ export function createAuthGuard(secret: string, ...allowedRoles: UserRole[]): Au
  * Call this in sensitive handlers (password change, TOTP, sudo, admin actions)
  * to prevent zombie access tokens from being used after account suspension.
  *
+ * If the lock has expired (lockedUntil is in the past), the account is
+ * auto-unlocked by clearing the lock fields via the provided unlock callback.
+ *
  * @param getUserById - Repository function to look up user by ID
  * @param userId - The user ID to check
+ * @param onAutoUnlock - Optional callback to clear expired lock fields in the database
  * @throws {UnauthorizedError} If user not found
  * @throws {ForbiddenError} If user account is suspended (lockedUntil in the future)
  */
 export async function assertUserActive(
-  getUserById: (id: string) => Promise<{ lockedUntil: Date | null } | null>,
+  getUserById: (
+    id: string,
+  ) => Promise<{ lockedUntil: Date | null; lockReason: string | null } | null>,
   userId: string,
+  onAutoUnlock?: (userId: string) => Promise<void>,
 ): Promise<void> {
   const user = await getUserById(userId);
   if (user === null) {
     throw new UnauthorizedError('User not found');
   }
-  if (user.lockedUntil !== null && user.lockedUntil > new Date()) {
-    throw new ForbiddenError('Account suspended', 'ACCOUNT_SUSPENDED');
+  if (user.lockedUntil !== null) {
+    if (user.lockedUntil > new Date()) {
+      // Account is still locked -- include lock reason in the error message
+      const reason = user.lockReason ?? 'Account suspended';
+      throw new ForbiddenError(`Account locked: ${reason}`, 'ACCOUNT_SUSPENDED');
+    }
+    // Lock has expired -- auto-unlock
+    if (onAutoUnlock !== undefined) {
+      await onAutoUnlock(userId);
+    }
   }
 }

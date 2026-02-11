@@ -94,6 +94,7 @@ describe('Schema Constants', () => {
         emailVerified: 'email_verified',
         emailVerifiedAt: 'email_verified_at',
         lockedUntil: 'locked_until',
+        lockReason: 'lock_reason',
         failedLoginAttempts: 'failed_login_attempts',
         totpSecret: 'totp_secret',
         totpEnabled: 'totp_enabled',
@@ -153,7 +154,7 @@ describe('Schema Constants', () => {
       // This tests that the object is marked as const and immutable
       // The TypeScript compiler ensures this, but we verify the structure
       const keys = Object.keys(USER_COLUMNS);
-      expect(keys).toHaveLength(32);
+      expect(keys).toHaveLength(33);
       expect(keys).toContain('id');
       expect(keys).toContain('email');
       expect(keys).toContain('passwordHash');
@@ -900,6 +901,7 @@ describe('Column Mapping Consistency', () => {
       'emailVerified',
       'emailVerifiedAt',
       'lockedUntil',
+      'lockReason',
       'failedLoginAttempts',
       'totpSecret',
       'totpEnabled',
@@ -962,6 +964,7 @@ describe('Column Mapping Consistency', () => {
       'emailVerified',
       'emailVerifiedAt',
       'lockedUntil',
+      'lockReason',
       'failedLoginAttempts',
       'totpSecret',
       'totpEnabled',

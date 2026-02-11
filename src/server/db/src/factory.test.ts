@@ -2,7 +2,7 @@
 /**
  * Tests for Repository Factory
  *
- * Validates that createRepositories returns all 37 repository keys
+ * Validates that createRepositories returns all repository keys
  * and that getRepositoryContext provides singleton behavior in development.
  */
 
@@ -38,7 +38,7 @@ describe('createRepositories', () => {
     expect(ctx.repos).toBeDefined();
   });
 
-  it('should create all 37 repository keys', () => {
+  it('should create all repository keys', () => {
     const ctx = createRepositories(testConnectionString);
     const repos = ctx.repos;
 
@@ -108,11 +108,11 @@ describe('createRepositories', () => {
     expect(repos.dataExportRequests).toBeDefined();
   });
 
-  it('should have exactly 37 keys in repos', () => {
+  it('should have exactly 39 keys in repos', () => {
     const ctx = createRepositories(testConnectionString);
     const repoKeys = Object.keys(ctx.repos);
 
-    expect(repoKeys).toHaveLength(37);
+    expect(repoKeys).toHaveLength(39);
   });
 
   it('should expose repository methods', () => {

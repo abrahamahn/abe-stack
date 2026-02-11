@@ -1,14 +1,14 @@
 // src/tools/sync/sync-ts-references.ts
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, '../../..', '..');
+const __dirname = dirname(__filename);
+const ROOT = resolve(__dirname, '../../..', '..');
 
-const TSCONFIG_PATH = path.join(ROOT, 'tsconfig.json');
+const TSCONFIG_PATH = join(ROOT, 'tsconfig.json');
 const SCAN_DIRS = ['src/apps', 'src/client', 'src/server', 'src/shared'];
 
 interface ProjectReference {
@@ -17,18 +17,18 @@ interface ProjectReference {
 
 function findProjects(dir: string): string[] {
   const results: string[] = [];
-  const fullPath = path.join(ROOT, dir);
+  const fullPath = join(ROOT, dir);
 
-  if (!fs.existsSync(fullPath)) return [];
+  if (!existsSync(fullPath)) return [];
 
-  const entries = fs.readdirSync(fullPath, { withFileTypes: true });
+  const entries = readdirSync(fullPath, { withFileTypes: true });
 
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      const projectPath = path.join(fullPath, entry.name);
-      const tsconfigPath = path.join(projectPath, 'tsconfig.json');
+      const projectPath = join(fullPath, entry.name);
+      const tsconfigPath = join(projectPath, 'tsconfig.json');
 
-      if (fs.existsSync(tsconfigPath)) {
+      if (existsSync(tsconfigPath)) {
         results.push(`./${dir}/${entry.name}`);
       }
     }
@@ -55,7 +55,7 @@ function main(): void {
   // 2. Read root tsconfig
   let tsconfig: TsConfig;
   try {
-    const content = fs.readFileSync(TSCONFIG_PATH, 'utf-8');
+    const content = readFileSync(TSCONFIG_PATH, 'utf-8');
     // Simple JSON parse (comments might break this if present, but strict JSON is expected)
     // If comments exist, we need a lenient parser or regex.
     // For this controlled env, let's assume valid JSON or strip comments.
@@ -88,7 +88,7 @@ function main(): void {
 
     // Strategy: Use regex to replace the references block content strictly.
 
-    const rawContent = fs.readFileSync(TSCONFIG_PATH, 'utf-8');
+    const rawContent = readFileSync(TSCONFIG_PATH, 'utf-8');
     const refsString = JSON.stringify(newRefs, null, 4)
       .split('\n')
       .map((line, i) => (i === 0 ? line : '    ' + line)) // Indent
@@ -102,7 +102,7 @@ function main(): void {
       `"references": ${refsString}`,
     );
 
-    fs.writeFileSync(TSCONFIG_PATH, updatedContent);
+    writeFileSync(TSCONFIG_PATH, updatedContent);
     console.log('✅ Updated references in tsconfig.json');
   } else {
     console.log('✓ References are already up to date.');

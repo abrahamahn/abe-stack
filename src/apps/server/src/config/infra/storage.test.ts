@@ -12,7 +12,7 @@ describe('Storage Configuration', () => {
 
       expect(config.provider).toBe('local');
       if (config.provider === 'local') {
-        expect(config.rootPath).toContain('apps/server/uploads');
+        expect(config.rootPath).toContain('src/apps/server/uploads');
       }
     });
 

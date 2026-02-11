@@ -8,7 +8,17 @@
  * @module
  */
 
-import { and, eq, isNull, select, insert, update, deleteFrom } from '../../builder/index';
+import {
+  and,
+  eq,
+  isNotNull,
+  isNull,
+  lt,
+  select,
+  insert,
+  update,
+  deleteFrom,
+} from '../../builder/index';
 import {
   type NewUserSession,
   type UpdateUserSession,
@@ -78,6 +88,13 @@ export interface UserSessionRepository {
    * @returns Number of sessions deleted
    */
   deleteByUserId(userId: string): Promise<number>;
+
+  /**
+   * Delete revoked sessions older than the given cutoff date
+   * @param cutoff - ISO date string; revoked sessions with revoked_at < cutoff are deleted
+   * @returns Number of deleted rows
+   */
+  deleteRevokedBefore(cutoff: string): Promise<number>;
 }
 
 // ============================================================================
@@ -162,6 +179,14 @@ export function createUserSessionRepository(db: RawDb): UserSessionRepository {
 
     async deleteByUserId(userId: string): Promise<number> {
       return db.execute(deleteFrom(USER_SESSIONS_TABLE).where(eq('user_id', userId)).toSql());
+    },
+
+    async deleteRevokedBefore(cutoff: string): Promise<number> {
+      return db.execute(
+        deleteFrom(USER_SESSIONS_TABLE)
+          .where(and(isNotNull('revoked_at'), lt('revoked_at', cutoff)))
+          .toSql(),
+      );
     },
   };
 }

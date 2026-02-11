@@ -1,5 +1,5 @@
 // src/apps/desktop/src/electron/main.ts
-import * as path from 'path';
+import { join } from 'node:path';
 
 import { waitForPort } from '@abe-stack/shared';
 import { app, BrowserWindow, nativeTheme } from 'electron';
@@ -35,7 +35,7 @@ const createWindow = async (): Promise<void> => {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
@@ -63,7 +63,7 @@ const createWindow = async (): Promise<void> => {
       console.error('[Main] Failed to load renderer:', error);
     }
   } else {
-    void mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
   mainWindow.on('closed', () => {

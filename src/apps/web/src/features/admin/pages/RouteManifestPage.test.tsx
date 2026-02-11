@@ -58,6 +58,15 @@ vi.mock('@abe-stack/ui', () => {
     TableHead: ({ children }: { children: any }) => <th>{children}</th>,
     TableHeader: ({ children }: { children: any }) => <thead>{children}</thead>,
     TableRow: ({ children }: { children: any }) => <tr>{children}</tr>,
+    Checkbox: ({
+      checked,
+      onChange,
+    }: {
+      checked?: boolean;
+      onChange?: (checked: boolean) => void;
+    }) => (
+      <input type="checkbox" checked={checked} onChange={(e) => onChange?.(e.target.checked)} />
+    ),
     Text: ({ children }: { children: any }) => <span>{children}</span>,
   };
 });

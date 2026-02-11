@@ -15,6 +15,8 @@ import {
   type HttpErrorResponse,
 } from '@abe-stack/shared';
 
+import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import {
   acceptInvitation,
   createInvitation,
@@ -65,6 +67,31 @@ export async function handleCreateInvitation(
 
     const invitation = await createInvitation(deps.repos, tenantId, userId, body.email, body.role);
 
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.invitation_created',
+        resource: 'invitation',
+        resourceId: (invitation as { id?: string }).id ?? null,
+        tenantId,
+        metadata: { email: body.email, role: body.role },
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    const invId = (invitation as { id?: string }).id ?? '';
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'invitation.created',
+      resourceType: 'invitation',
+      resourceId: invId,
+      tenantId,
+      metadata: { email: body.email, role: body.role },
+    }).catch(() => {});
+
     // TODO: Send invitation email (D1 email integration)
     // The email would include a link to accept the invitation.
     // For now, the invitation is created and can be accepted via API.
@@ -114,6 +141,31 @@ export async function handleAcceptInvitation(
     }
 
     const invitation = await acceptInvitation(deps.repos, invitationId, userId, userEmail);
+
+    // Fire-and-forget audit logging
+    const invTenantId = (invitation as { tenantId?: string }).tenantId;
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.invitation_accepted',
+        resource: 'invitation',
+        resourceId: invitationId,
+        tenantId: invTenantId ?? null,
+        metadata: { email: userEmail },
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'invitation.accepted',
+      resourceType: 'invitation',
+      resourceId: invitationId,
+      tenantId: invTenantId ?? null,
+    }).catch(() => {});
+
     return { status: 200, body: invitation };
   } catch (error) {
     return mapErrorToHttpResponse(error, createLogAdapter(deps.log));
@@ -137,6 +189,29 @@ export async function handleRevokeInvitation(
     }
 
     const invitation = await revokeInvitation(deps.repos, tenantId, invitationId, userId);
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.invitation_revoked',
+        resource: 'invitation',
+        resourceId: invitationId,
+        tenantId,
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'invitation.revoked',
+      resourceType: 'invitation',
+      resourceId: invitationId,
+      tenantId,
+    }).catch(() => {});
+
     return { status: 200, body: invitation };
   } catch (error) {
     return mapErrorToHttpResponse(error, createLogAdapter(deps.log));

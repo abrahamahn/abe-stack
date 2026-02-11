@@ -131,17 +131,22 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     },
   });
 
-  await server.register(swaggerUI, {
-    routePrefix: '/api/docs',
-    uiConfig: {
-      docExpansion: 'list',
-      deepLinking: true,
-    },
-    theme: {
-      title: 'ABE Stack API',
-      css: [{ filename: 'theme.css', content: swaggerThemeCss }],
-    },
-  });
+  // Swagger UI is only available in non-production environments.
+  // In production, the OpenAPI spec is still accessible for API clients
+  // but the interactive docs UI is disabled to reduce attack surface.
+  if (!isProd) {
+    await server.register(swaggerUI, {
+      routePrefix: '/api/docs',
+      uiConfig: {
+        docExpansion: 'list',
+        deepLinking: true,
+      },
+      theme: {
+        title: 'ABE Stack API',
+        css: [{ filename: 'theme.css', content: swaggerThemeCss }],
+      },
+    });
+  }
 
   return server;
 }

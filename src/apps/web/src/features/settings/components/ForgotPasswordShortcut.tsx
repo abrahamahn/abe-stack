@@ -54,7 +54,10 @@ export const ForgotPasswordShortcut = ({
     <div className="space-y-3">
       <Text size="sm" tone="muted">
         Forgot your current password? We can email a reset link to{' '}
-        <span className="font-medium">{email}</span>. You can stay logged in while you reset it.
+        <Text as="span" className="font-medium">
+          {email}
+        </Text>
+        . You can stay logged in while you reset it.
       </Text>
 
       {error !== null && <Alert tone="danger">{error}</Alert>}

@@ -4,13 +4,24 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   getUserById,
   getUserStatus,
+  hardBanUser,
   listUsers,
   lockUser,
+  searchUsers,
   unlockUser,
   updateUser,
 } from './userService';
 
-import type { User as DbUser, UserRepository } from '@abe-stack/db';
+import type { DbClient, User as DbUser, UserRepository } from '@abe-stack/db';
+
+// Mock external dependencies used by hardBanUser
+vi.mock('../auth/utils', () => ({
+  revokeAllUserTokens: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../auth/security/events', () => ({
+  logSecurityEvent: vi.fn().mockResolvedValue(undefined),
+}));
 
 // ============================================================================
 // Mock Factory
@@ -30,6 +41,7 @@ function createMockUser(overrides: Partial<DbUser> = {}): DbUser {
     emailVerified: true,
     emailVerifiedAt: new Date('2024-01-01'),
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,
@@ -165,6 +177,7 @@ describe('Admin User Service', () => {
         emailVerified: mockUser.emailVerified,
         emailVerifiedAt: mockUser.emailVerifiedAt?.toISOString() ?? null,
         lockedUntil: null,
+        lockReason: null,
         failedLoginAttempts: mockUser.failedLoginAttempts,
         phone: null,
         phoneVerified: false,
@@ -309,6 +322,7 @@ describe('Admin User Service', () => {
         emailVerified: true,
         emailVerifiedAt: null,
         lockedUntil: futureDate,
+        lockReason: null,
         failedLoginAttempts: 0,
         phone: null,
         phoneVerified: false,
@@ -330,6 +344,7 @@ describe('Admin User Service', () => {
         emailVerified: false,
         emailVerifiedAt: null,
         lockedUntil: null,
+        lockReason: null,
         failedLoginAttempts: 0,
         phone: null,
         phoneVerified: false,
@@ -351,6 +366,7 @@ describe('Admin User Service', () => {
         emailVerified: true,
         emailVerifiedAt: new Date().toISOString(),
         lockedUntil: null,
+        lockReason: null,
         failedLoginAttempts: 0,
         phone: null,
         phoneVerified: false,
@@ -373,6 +389,7 @@ describe('Admin User Service', () => {
         emailVerified: true,
         emailVerifiedAt: new Date().toISOString(),
         lockedUntil: pastDate,
+        lockReason: null,
         failedLoginAttempts: 0,
         phone: null,
         phoneVerified: false,
@@ -381,6 +398,163 @@ describe('Admin User Service', () => {
       });
 
       expect(result).toBe('active');
+    });
+  });
+
+  describe('searchUsers', () => {
+    test('should search by partial text and return paginated results', async () => {
+      const mockUsers = [createMockUser()];
+      vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
+        items: mockUsers,
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      });
+
+      const result = await searchUsers(mockRepo, 'test');
+
+      expect(result.users).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(result.limit).toBe(20);
+      expect(result.offset).toBe(0);
+      expect(mockRepo.listWithFilters).toHaveBeenCalledWith({
+        search: 'test',
+        page: 1,
+        limit: 20,
+      });
+    });
+
+    test('should perform exact ID match for UUID queries', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      const mockUser = createMockUser({ id: uuid });
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+
+      const result = await searchUsers(mockRepo, uuid);
+
+      expect(result.users).toHaveLength(1);
+      expect(result.users[0]?.id).toBe(uuid);
+      expect(result.total).toBe(1);
+      expect(mockRepo.findById).toHaveBeenCalledWith(uuid);
+      // Should not call listWithFilters for UUID queries
+      expect(mockRepo.listWithFilters).not.toHaveBeenCalled();
+    });
+
+    test('should return empty results for UUID that does not match', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      vi.mocked(mockRepo.findById).mockResolvedValue(null);
+
+      const result = await searchUsers(mockRepo, uuid);
+
+      expect(result.users).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+
+    test('should respect custom limit and offset', async () => {
+      vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 2,
+        limit: 10,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      });
+
+      const result = await searchUsers(mockRepo, 'john', { limit: 10, offset: 10 });
+
+      expect(result.limit).toBe(10);
+      expect(result.offset).toBe(10);
+      expect(mockRepo.listWithFilters).toHaveBeenCalledWith({
+        search: 'john',
+        page: 2,
+        limit: 10,
+      });
+    });
+
+    test('should convert offset to page number', async () => {
+      vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 3,
+        limit: 5,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      });
+
+      await searchUsers(mockRepo, 'test', { limit: 5, offset: 10 });
+
+      expect(mockRepo.listWithFilters).toHaveBeenCalledWith({
+        search: 'test',
+        page: 3,
+        limit: 5,
+      });
+    });
+  });
+
+  describe('hardBanUser', () => {
+    const mockDb = {} as DbClient;
+
+    test('should revoke tokens, lock account, and schedule deletion', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const result = await hardBanUser(
+        mockDb,
+        mockRepo,
+        'user-123',
+        'admin-456',
+        'Severe ToS violation',
+      );
+
+      expect(result.message).toBe('User has been permanently banned');
+      expect(result.gracePeriodEnds).toBeDefined();
+
+      // Verify lock was called with permanent date and reason
+      expect(mockRepo.lockAccount).toHaveBeenCalledWith(
+        'user-123',
+        new Date('2099-12-31T23:59:59.999Z'),
+        'Severe ToS violation',
+      );
+
+      // Verify deletion scheduling
+      expect(mockRepo.update).toHaveBeenCalledWith(
+        'user-123',
+        expect.objectContaining({
+          deletedAt: expect.any(Date) as Date,
+          deletionGracePeriodEnds: expect.any(Date) as Date,
+        }),
+      );
+    });
+
+    test('should set grace period to 7 days from now', async () => {
+      const mockUser = createMockUser();
+      vi.mocked(mockRepo.findById).mockResolvedValue(mockUser);
+      vi.mocked(mockRepo.lockAccount).mockResolvedValue();
+      vi.mocked(mockRepo.update).mockResolvedValue(mockUser);
+
+      const before = Date.now();
+      const result = await hardBanUser(mockDb, mockRepo, 'user-123', 'admin-456', 'Spam');
+      const after = Date.now();
+
+      const gracePeriodEnd = new Date(result.gracePeriodEnds).getTime();
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+      // Grace period should be approximately 7 days from now
+      expect(gracePeriodEnd).toBeGreaterThanOrEqual(before + sevenDaysMs);
+      expect(gracePeriodEnd).toBeLessThanOrEqual(after + sevenDaysMs);
+    });
+
+    test('should throw UserNotFoundError when user not found', async () => {
+      vi.mocked(mockRepo.findById).mockResolvedValue(null);
+
+      await expect(
+        hardBanUser(mockDb, mockRepo, 'nonexistent', 'admin-456', 'Test'),
+      ).rejects.toThrow('User not found');
     });
   });
 });

@@ -366,7 +366,7 @@ describe('createAuthGuard', () => {
 
 describe('assertUserActive', () => {
   test('should pass when user is active (lockedUntil is null)', async () => {
-    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: null });
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: null, lockReason: null });
 
     await expect(assertUserActive(getUserById, 'user-123')).resolves.toBeUndefined();
     expect(getUserById).toHaveBeenCalledWith('user-123');
@@ -374,17 +374,53 @@ describe('assertUserActive', () => {
 
   test('should pass when user lock has expired (lockedUntil in the past)', async () => {
     const pastDate = new Date(Date.now() - 60_000); // 1 minute ago
-    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: pastDate });
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: pastDate, lockReason: 'old' });
 
     await expect(assertUserActive(getUserById, 'user-123')).resolves.toBeUndefined();
   });
 
+  test('should call onAutoUnlock when lock has expired', async () => {
+    const pastDate = new Date(Date.now() - 60_000); // 1 minute ago
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: pastDate, lockReason: 'old' });
+    const onAutoUnlock = vi.fn().mockResolvedValue(undefined);
+
+    await assertUserActive(getUserById, 'user-123', onAutoUnlock);
+
+    expect(onAutoUnlock).toHaveBeenCalledWith('user-123');
+  });
+
+  test('should not call onAutoUnlock when lock is still active', async () => {
+    const futureDate = new Date(Date.now() + 3_600_000);
+    const getUserById = vi
+      .fn()
+      .mockResolvedValue({ lockedUntil: futureDate, lockReason: 'Terms violation' });
+    const onAutoUnlock = vi.fn().mockResolvedValue(undefined);
+
+    await expect(assertUserActive(getUserById, 'user-123', onAutoUnlock)).rejects.toThrow(
+      ForbiddenError,
+    );
+    expect(onAutoUnlock).not.toHaveBeenCalled();
+  });
+
   test('should throw ForbiddenError when user is locked (lockedUntil in the future)', async () => {
     const futureDate = new Date(Date.now() + 3_600_000); // 1 hour from now
-    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: futureDate });
+    const getUserById = vi
+      .fn()
+      .mockResolvedValue({ lockedUntil: futureDate, lockReason: 'Terms violation' });
 
     await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow(ForbiddenError);
-    await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow('Account suspended');
+    await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow(
+      'Account locked: Terms violation',
+    );
+  });
+
+  test('should include default reason when lockReason is null', async () => {
+    const futureDate = new Date(Date.now() + 3_600_000);
+    const getUserById = vi.fn().mockResolvedValue({ lockedUntil: futureDate, lockReason: null });
+
+    await expect(assertUserActive(getUserById, 'user-123')).rejects.toThrow(
+      'Account locked: Account suspended',
+    );
   });
 
   test('should throw UnauthorizedError when user is not found', async () => {

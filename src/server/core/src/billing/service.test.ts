@@ -17,6 +17,7 @@ import {
   getActivePlans,
   getCustomerId,
   getPlanById,
+  getUserInvoice,
   getUserInvoices,
   getUserPaymentMethods,
   getUserSubscription,
@@ -771,6 +772,44 @@ describe('getUserInvoices', () => {
     expect(result).toEqual({
       invoices: [],
       hasMore: false,
+    });
+  });
+});
+
+describe('getUserInvoice', () => {
+  let repos: BillingRepositories;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    repos = createMockBillingRepos();
+  });
+
+  it('should return invoice when found and owned by user', async () => {
+    const invoice = createMockInvoice();
+    vi.mocked(repos.invoices.findById).mockResolvedValue(invoice);
+
+    const result = await getUserInvoice(repos, 'user-1', 'inv-1');
+
+    expect(result).toBe(invoice);
+    expect(repos.invoices.findById).toHaveBeenCalledWith('inv-1');
+  });
+
+  it('should throw InvoiceNotFoundError when invoice does not exist', async () => {
+    vi.mocked(repos.invoices.findById).mockResolvedValue(null);
+
+    await expect(getUserInvoice(repos, 'user-1', 'inv-nonexistent')).rejects.toMatchObject({
+      name: 'InvoiceNotFoundError',
+      message: 'Invoice not found: inv-nonexistent',
+    });
+  });
+
+  it('should throw InvoiceNotFoundError when invoice belongs to different user', async () => {
+    const invoice = createMockInvoice({ userId: 'user-other' });
+    vi.mocked(repos.invoices.findById).mockResolvedValue(invoice);
+
+    await expect(getUserInvoice(repos, 'user-1', 'inv-1')).rejects.toMatchObject({
+      name: 'InvoiceNotFoundError',
+      message: 'Invoice not found: inv-1',
     });
   });
 });

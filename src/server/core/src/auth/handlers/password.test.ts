@@ -51,12 +51,27 @@ const { mockRequestPasswordReset, mockResetPassword, mockSetPassword, mockMapErr
     }),
   }));
 
+const { mockIsCaptchaRequired, mockVerifyCaptchaToken } = vi.hoisted(() => ({
+  mockIsCaptchaRequired: vi.fn().mockReturnValue(false),
+  mockVerifyCaptchaToken: vi.fn().mockResolvedValue({ success: true }),
+}));
+
 // Mock the service module
 vi.mock('../service', () => ({
   requestPasswordReset: mockRequestPasswordReset,
   resetPassword: mockResetPassword,
   setPassword: mockSetPassword,
 }));
+
+// Mock the security module for CAPTCHA
+vi.mock('../security', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../security')>();
+  return {
+    ...original,
+    isCaptchaRequired: mockIsCaptchaRequired,
+    verifyCaptchaToken: mockVerifyCaptchaToken,
+  };
+});
 
 // Mock @abe-stack/shared to intercept mapErrorToHttpResponse
 vi.mock('@abe-stack/shared', async (importOriginal) => {
@@ -81,6 +96,7 @@ const baseConfig: AppConfig = {
     trustProxy: false,
     logLevel: 'fatal',
     maintenanceMode: false,
+    auditRetentionDays: 90,
     appBaseUrl: 'http://localhost:8080',
     apiBaseUrl: 'http://localhost:8080',
     rateLimit: { windowMs: 60000, max: 1000 },
@@ -272,7 +288,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockResolvedValue(undefined);
 
-      const result = await handleForgotPassword(ctx, body);
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(200);
       expect(result.body.message).toBe('Password reset email sent');
@@ -284,7 +300,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockResolvedValue(undefined);
 
-      await handleForgotPassword(ctx, body);
+      await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(mockRequestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
@@ -311,7 +327,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockResolvedValue(undefined);
 
-      await handleForgotPassword(ctx, body);
+      await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(mockRequestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
@@ -334,7 +350,7 @@ describe('handleForgotPassword', () => {
       for (const email of emails) {
         mockRequestPasswordReset.mockResolvedValue(undefined);
 
-        const result = await handleForgotPassword(ctx, { email });
+        const result = await handleForgotPassword(ctx, { email }, createMockRequest());
 
         expect(result.status).toBe(200);
         expect(mockRequestPasswordReset).toHaveBeenCalledWith(
@@ -359,7 +375,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockRejectedValue(emailError);
 
-      const result = await handleForgotPassword(ctx, body);
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(200);
       expect(result.body.message).toBe('Password reset email sent');
@@ -374,7 +390,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockRejectedValue(emailError);
 
-      await handleForgotPassword(ctx, body);
+      await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(ctx.log.error).toHaveBeenCalledWith(
         {
@@ -393,7 +409,7 @@ describe('handleForgotPassword', () => {
 
       mockRequestPasswordReset.mockRejectedValue(emailError);
 
-      const result = await handleForgotPassword(ctx, body);
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(200);
       expect(ctx.log.error).toHaveBeenCalledWith(
@@ -414,7 +430,7 @@ describe('handleForgotPassword', () => {
       const dbError = new Error('Database connection failed');
       mockRequestPasswordReset.mockRejectedValue(dbError);
 
-      const result = await handleForgotPassword(ctx, body);
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
 
       expect(result.status).toBe(500);
       expect(result.body.message).toBe('Internal server error');
@@ -428,10 +444,70 @@ describe('handleForgotPassword', () => {
       error.name = 'InvalidTokenError';
       mockRequestPasswordReset.mockRejectedValue(error);
 
-      const result = await handleForgotPassword(ctx, body);
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
 
       // Should be mapped by mapErrorToResponse
       expect(result.status).toBeGreaterThanOrEqual(400);
+    });
+  });
+
+  describe('CAPTCHA verification', () => {
+    test('should verify CAPTCHA when enabled', async () => {
+      mockIsCaptchaRequired.mockReturnValue(true);
+      mockVerifyCaptchaToken.mockResolvedValue({ success: true });
+      mockRequestPasswordReset.mockResolvedValue(undefined);
+
+      const ctx = createMockContext();
+      const body = { email: 'test@example.com', captchaToken: 'valid-token' };
+
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
+
+      expect(result.status).toBe(200);
+      expect(mockVerifyCaptchaToken).toHaveBeenCalledWith(
+        ctx.config.auth,
+        'valid-token',
+        '127.0.0.1',
+      );
+    });
+
+    test('should return 400 when CAPTCHA verification fails', async () => {
+      mockIsCaptchaRequired.mockReturnValue(true);
+      mockVerifyCaptchaToken.mockResolvedValue({ success: false });
+
+      const ctx = createMockContext();
+      const body = { email: 'test@example.com', captchaToken: 'invalid-token' };
+
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
+
+      expect(result.status).toBe(400);
+      expect(result.body.message).toBe('CAPTCHA verification failed');
+      expect(mockRequestPasswordReset).not.toHaveBeenCalled();
+    });
+
+    test('should skip CAPTCHA when not required', async () => {
+      mockIsCaptchaRequired.mockReturnValue(false);
+      mockRequestPasswordReset.mockResolvedValue(undefined);
+
+      const ctx = createMockContext();
+      const body = { email: 'test@example.com' };
+
+      const result = await handleForgotPassword(ctx, body, createMockRequest());
+
+      expect(result.status).toBe(200);
+      expect(mockVerifyCaptchaToken).not.toHaveBeenCalled();
+    });
+
+    test('should use empty string when captchaToken is undefined', async () => {
+      mockIsCaptchaRequired.mockReturnValue(true);
+      mockVerifyCaptchaToken.mockResolvedValue({ success: true });
+      mockRequestPasswordReset.mockResolvedValue(undefined);
+
+      const ctx = createMockContext();
+      const body = { email: 'test@example.com' };
+
+      await handleForgotPassword(ctx, body, createMockRequest());
+
+      expect(mockVerifyCaptchaToken).toHaveBeenCalledWith(ctx.config.auth, '', '127.0.0.1');
     });
   });
 });

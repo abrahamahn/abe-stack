@@ -14,7 +14,9 @@ import {
   type RouteMap,
   type RouteResult,
   type ValidationSchema,
+  adminHardBanRequestSchema,
   adminLockUserRequestSchema,
+  adminSuspendTenantRequestSchema,
   adminUpdateUserRequestSchema,
   createPlanRequestSchema,
   securityEventsExportRequestSchema,
@@ -31,6 +33,7 @@ import {
   type UpdatePlanRequest,
 } from '@abe-stack/shared';
 
+import { handleListAuditEvents } from './auditHandlers';
 import {
   handleAdminCreatePlan,
   handleAdminDeactivatePlan,
@@ -47,6 +50,7 @@ import {
   handleListJobs,
   handleRetryJob,
 } from './jobsHandlers';
+import { handleGetMetrics } from './metricsHandler';
 import { handleGetRouteManifest } from './route-manifest';
 import {
   handleExportSecurityEvents,
@@ -55,9 +59,17 @@ import {
   handleListSecurityEvents,
 } from './securityHandlers';
 import {
+  handleGetTenantDetail,
+  handleListAllTenants,
+  handleSuspendTenant,
+  handleUnsuspendTenant,
+} from './tenantHandlers';
+import {
   handleGetUser,
+  handleHardBan,
   handleListUsers,
   handleLockUser,
+  handleSearchUsers,
   handleUnlockUser,
   handleUpdateUser,
 } from './userHandlers';
@@ -106,6 +118,9 @@ export const adminRoutes: RouteMap = createRouteMap([
   // List users with filtering and pagination
   ['admin/users', adminProtectedRoute('GET', handleListUsers)],
 
+  // Search users (multi-field: email, name, UUID)
+  ['admin/users/search', adminProtectedRoute('GET', handleSearchUsers)],
+
   // Get single user
   ['admin/users/:id', adminProtectedRoute('GET', handleGetUser)],
 
@@ -122,6 +137,12 @@ export const adminRoutes: RouteMap = createRouteMap([
   [
     'admin/users/:id/unlock',
     adminProtectedRoute('POST', handleUnlockUser, unlockAccountRequestSchema),
+  ],
+
+  // Hard ban user (permanent ban with session revocation and scheduled deletion)
+  [
+    'admin/users/:id/hard-ban',
+    adminProtectedRoute('POST', handleHardBan, adminHardBanRequestSchema),
   ],
 
   // ============================================================================
@@ -163,6 +184,12 @@ export const adminRoutes: RouteMap = createRouteMap([
   ],
 
   // ============================================================================
+  // Audit Event Routes
+  // ============================================================================
+
+  ['admin/audit-events', adminProtectedRoute('GET', handleListAuditEvents)],
+
+  // ============================================================================
   // Job Monitoring Routes
   // ============================================================================
 
@@ -173,11 +200,37 @@ export const adminRoutes: RouteMap = createRouteMap([
   ['admin/jobs/:jobId/cancel', adminProtectedRoute('POST', handleCancelJob)],
 
   // ============================================================================
+  // Metrics Routes
+  // ============================================================================
+
+  // Request metrics and queue stats
+  ['admin/metrics', adminProtectedRoute('GET', handleGetMetrics)],
+
+  // ============================================================================
   // API Introspection Routes
   // ============================================================================
 
   // Route manifest — lists all registered API routes
   ['admin/routes', adminProtectedRoute('GET', handleGetRouteManifest)],
+
+  // ============================================================================
+  // Tenant Management Routes
+  // ============================================================================
+
+  // List all tenants with optional search
+  ['admin/tenants', adminProtectedRoute('GET', handleListAllTenants)],
+
+  // Get tenant detail
+  ['admin/tenants/:id', adminProtectedRoute('GET', handleGetTenantDetail)],
+
+  // Suspend a tenant
+  [
+    'admin/tenants/:id/suspend',
+    adminProtectedRoute('POST', handleSuspendTenant, adminSuspendTenantRequestSchema),
+  ],
+
+  // Unsuspend a tenant
+  ['admin/tenants/:id/unsuspend', adminProtectedRoute('POST', handleUnsuspendTenant)],
 
   // ============================================================================
   // Billing Admin Routes

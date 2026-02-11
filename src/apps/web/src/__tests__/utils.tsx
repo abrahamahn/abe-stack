@@ -1,4 +1,4 @@
-// apps/web/src/__tests__/utils.tsx
+// src/apps/web/src/__tests__/utils.tsx
 /**
  * Test utilities for integration testing.
  *
@@ -145,7 +145,7 @@ export function createMockAuthService(options: MockAuthServiceOptions = {}): Aut
     logoutError,
   } = options;
 
-  const state: AuthState = { user, isLoading, isAuthenticated };
+  const state: AuthState = { user, isLoading, isAuthenticated, isNewDevice: false };
   const listeners = new Set<() => void>();
 
   const updateState = (newState: Partial<AuthState>): void => {
@@ -194,6 +194,10 @@ export function createMockAuthService(options: MockAuthServiceOptions = {}): Aut
         user: mockUser,
       }),
     resendVerification: () => Promise.resolve({ message: 'Verification email sent' }),
+    verifyTotpLogin: () => Promise.resolve(),
+    dismissNewDeviceBanner: () => {
+      updateState({ isNewDevice: false });
+    },
     destroy: () => {
       listeners.clear();
     },

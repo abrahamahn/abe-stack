@@ -44,7 +44,7 @@ describe('billingRoutes', () => {
   it('should have exactly 10 routes', () => {
     const routeCount = Object.keys(billingRoutes).length;
 
-    expect(routeCount).toBe(10);
+    expect(routeCount).toBe(11);
   });
 });
 
@@ -199,7 +199,7 @@ describe('authentication requirements', () => {
       ([, route]) => route.auth === 'user',
     );
 
-    expect(protectedRoutes).toHaveLength(9);
+    expect(protectedRoutes).toHaveLength(10);
   });
 
   it('should not have any admin-only routes', () => {

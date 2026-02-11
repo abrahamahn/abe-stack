@@ -1,8 +1,8 @@
 // src/tools/scripts/audit/health-check.ts
 
 import { spawn, spawnSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 async function runAudit() {
   console.log('🔍 Starting Monorepo Health Audit...');
@@ -99,7 +99,7 @@ function parseOutput(fullLog: string) {
       const files = findProc.stdout.split('\n').filter(Boolean);
       for (const f of files) {
         try {
-          const pkgContent = fs.readFileSync(path.resolve(process.cwd(), f), 'utf-8');
+          const pkgContent = readFileSync(resolve(process.cwd(), f), 'utf-8');
           const pkg = JSON.parse(pkgContent) as PnpmPackageInfo;
           if (pkg.name && pkg.name !== '@abe-stack/root') {
             packageStats[pkg.name] = { lint: 0, type: 0, test: 0 };

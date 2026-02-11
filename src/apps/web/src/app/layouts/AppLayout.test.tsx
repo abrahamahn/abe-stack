@@ -29,6 +29,7 @@ vi.mock('@auth/components', () => ({
     initialMode: string;
     onOpenChange: (open: boolean) => void;
   }) => <div data-testid="auth-modal">{`${String(open)}:${initialMode}`}</div>,
+  NewDeviceBanner: () => null,
 }));
 
 vi.mock('@ui-library/hooks', () => ({

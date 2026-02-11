@@ -251,6 +251,8 @@ export interface ServerConfig {
   appBaseUrl: string;
   /** API server URL (used for OAuth callbacks, webhooks) */
   apiBaseUrl: string;
+  /** Number of days to retain audit events (0 = unlimited, default 90) */
+  auditRetentionDays: number;
   /** Global rate limiting settings */
   rateLimit: {
     /** Time window for rate limiting (milliseconds) */

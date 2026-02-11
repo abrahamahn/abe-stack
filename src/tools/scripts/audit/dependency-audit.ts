@@ -11,8 +11,8 @@
  */
 
 import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 interface PackageInfo {
   name: string;
@@ -36,7 +36,7 @@ interface AuditResult {
 
 function getAllPackages(): PackageInfo[] {
   const packages: PackageInfo[] = [];
-  const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
+  const rootDir = resolve(__dirname, '..', '..', '..', '..');
 
   // Root package
   interface PackageJson {
@@ -46,7 +46,7 @@ function getAllPackages(): PackageInfo[] {
     devDependencies?: Record<string, string>;
   }
   const rootPackageJson = JSON.parse(
-    fs.readFileSync(path.join(rootDir, 'package.json'), 'utf-8'),
+    readFileSync(join(rootDir, 'package.json'), 'utf-8'),
   ) as PackageJson;
   packages.push({
     name: rootPackageJson.name ?? 'unknown',
@@ -58,19 +58,19 @@ function getAllPackages(): PackageInfo[] {
 
   // Scan monorepo layer directories: src/apps, src/client, src/server
   const layerDirs = [
-    path.join(rootDir, 'src', 'apps'),
-    path.join(rootDir, 'src', 'client'),
-    path.join(rootDir, 'src', 'server'),
+    join(rootDir, 'src', 'apps'),
+    join(rootDir, 'src', 'client'),
+    join(rootDir, 'src', 'server'),
   ];
 
   for (const layerDir of layerDirs) {
-    if (!fs.existsSync(layerDir)) continue;
-    const subdirs = fs.readdirSync(layerDir);
+    if (!existsSync(layerDir)) continue;
+    const subdirs = readdirSync(layerDir);
     for (const subdir of subdirs) {
-      const pkgPath = path.join(layerDir, subdir);
-      const packageJsonPath = path.join(pkgPath, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
+      const pkgPath = join(layerDir, subdir);
+      const packageJsonPath = join(pkgPath, 'package.json');
+      if (existsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
         packages.push({
           name: packageJson.name ?? 'unknown',
           version: packageJson.version ?? '0.0.0',
@@ -83,10 +83,10 @@ function getAllPackages(): PackageInfo[] {
   }
 
   // Shared (standalone package at src/shared)
-  const sharedPath = path.join(rootDir, 'src', 'shared');
-  const sharedPackageJsonPath = path.join(sharedPath, 'package.json');
-  if (fs.existsSync(sharedPackageJsonPath)) {
-    const packageJson = JSON.parse(fs.readFileSync(sharedPackageJsonPath, 'utf-8')) as PackageJson;
+  const sharedPath = join(rootDir, 'src', 'shared');
+  const sharedPackageJsonPath = join(sharedPath, 'package.json');
+  if (existsSync(sharedPackageJsonPath)) {
+    const packageJson = JSON.parse(readFileSync(sharedPackageJsonPath, 'utf-8')) as PackageJson;
     packages.push({
       name: packageJson.name ?? 'unknown',
       version: packageJson.version ?? '0.0.0',
@@ -105,9 +105,9 @@ function getAllPackages(): PackageInfo[] {
 
 function findUnusedDependencies(packageInfo: PackageInfo): string[] {
   const unused: string[] = [];
-  const srcDir = path.join(packageInfo.path, 'src');
+  const srcDir = join(packageInfo.path, 'src');
 
-  if (!fs.existsSync(srcDir)) return unused;
+  if (!existsSync(srcDir)) return unused;
 
   // Get all source files
   const sourceFiles = getAllSourceFiles(srcDir);
@@ -126,11 +126,11 @@ function getAllSourceFiles(dir: string): string[] {
   const files: string[] = [];
 
   function walk(currentDir: string): void {
-    const items = fs.readdirSync(currentDir);
+    const items = readdirSync(currentDir);
 
     for (const item of items) {
-      const fullPath = path.join(currentDir, item);
-      const stat = fs.statSync(fullPath);
+      const fullPath = join(currentDir, item);
+      const stat = statSync(fullPath);
 
       if (
         stat.isDirectory() &&
@@ -168,7 +168,7 @@ function isDependencyUsed(depName: string, sourceFiles: string[]): boolean {
 
   for (const file of sourceFiles) {
     try {
-      const content = fs.readFileSync(file, 'utf-8');
+      const content = readFileSync(file, 'utf-8');
       for (const pattern of patterns) {
         if (new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g').test(content)) {
           return true;
@@ -352,12 +352,12 @@ function main(): void {
     console.log(report);
 
     // Save report to .tmp directory
-    const outputDir = path.join(__dirname, '..', '..', '..', '..', '.tmp');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    const outputDir = join(__dirname, '..', '..', '..', '..', '.tmp');
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir, { recursive: true });
     }
-    const reportPath = path.join(outputDir, 'dependency-audit-report.md');
-    fs.writeFileSync(reportPath, report);
+    const reportPath = join(outputDir, 'dependency-audit-report.md');
+    writeFileSync(reportPath, report);
     console.log(`📄 Report saved to: ${reportPath}`);
 
     // Summary

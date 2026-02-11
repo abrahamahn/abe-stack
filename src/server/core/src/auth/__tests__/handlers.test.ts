@@ -513,6 +513,7 @@ describe('handleLogin', () => {
     expect(result.body).toEqual({
       token: 'access-token',
       user: mockUser,
+      isNewDevice: true,
     });
     expect(setRefreshTokenCookieSpy).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
     // expect(authenticateUserSpy).toHaveBeenCalledWith(
@@ -597,6 +598,11 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-refresh-token' });
     const reply = createMockReply();
 
+    // Mock findByToken to return a recent token record (idle timeout check)
+    (ctx.repos.refreshTokens.findByToken as Mock).mockResolvedValue({
+      createdAt: new Date(),
+    });
+
     refreshUserTokensSpy.mockResolvedValue({
       accessToken: 'new-access-token',
       refreshToken: 'new-refresh-token',
@@ -633,6 +639,9 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
     const reply = createMockReply();
 
+    // Mock findByToken to return null (token not found in DB, but exists in cookie)
+    (ctx.repos.refreshTokens.findByToken as Mock).mockResolvedValue(null);
+
     refreshUserTokensSpy.mockRejectedValue(new InvalidTokenError());
 
     const result = await handleRefresh(ctx, request, reply);
@@ -646,6 +655,9 @@ describe('handleRefresh', () => {
     const ctx = createMockContext();
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
     const reply = createMockReply();
+
+    // Mock findByToken to return null so idle check passes
+    (ctx.repos.refreshTokens.findByToken as Mock).mockResolvedValue(null);
 
     refreshUserTokensSpy.mockRejectedValue(new Error('Database error'));
 
@@ -720,10 +732,13 @@ describe('handleLogout', () => {
 
 describe('handleForgotPassword', () => {
   let requestPasswordResetSpy: Mock;
+  let isCaptchaRequiredSpy: Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
     requestPasswordResetSpy = vi.spyOn(service, 'requestPasswordReset') as Mock;
+    isCaptchaRequiredSpy = vi.spyOn(security, 'isCaptchaRequired') as Mock;
+    isCaptchaRequiredSpy.mockReturnValue(false);
   });
 
   test('should return success response for valid request', async () => {
@@ -732,7 +747,7 @@ describe('handleForgotPassword', () => {
 
     requestPasswordResetSpy.mockResolvedValue(undefined);
 
-    const result = await handleForgotPassword(ctx, body);
+    const result = await handleForgotPassword(ctx, body, createMockRequest());
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
@@ -752,7 +767,7 @@ describe('handleForgotPassword', () => {
 
     requestPasswordResetSpy.mockRejectedValue(new Error('Database error'));
 
-    const result = await handleForgotPassword(ctx, body);
+    const result = await handleForgotPassword(ctx, body, createMockRequest());
 
     expect(result.status).toBe(500);
     expect(result.body).toEqual({ message: HTTP_ERROR_MESSAGES.InternalError });

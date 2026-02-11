@@ -8,9 +8,12 @@
  * No re-exports — consumers import directly from source packages.
  */
 
+import { activityRoutes } from '@abe-stack/core/activities';
 import { adminRoutes } from '@abe-stack/core/admin';
+import { apiKeyRoutes } from '@abe-stack/core/api-keys';
 import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/core/billing';
+import { featureFlagRoutes } from '@abe-stack/core/feature-flags';
 import { notificationRoutes } from '@abe-stack/core/notifications';
 import { tenantRoutes } from '@abe-stack/core/tenants';
 import { userRoutes } from '@abe-stack/core/users';
@@ -141,6 +144,18 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, handlerCtx, tenantRoutes as unknown as DbRouteMap, {
     ...routerOptions,
     module: 'tenants',
+  });
+  registerRouteMap(app, handlerCtx, apiKeyRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'api-keys',
+  });
+  registerRouteMap(app, handlerCtx, activityRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'activities',
+  });
+  registerRouteMap(app, handlerCtx, featureFlagRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'feature-flags',
   });
   registerRouteMap(app, handlerCtx, realtimeRoutes as unknown as DbRouteMap, {
     ...routerOptions,

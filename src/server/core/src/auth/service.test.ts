@@ -266,6 +266,7 @@ function createMockUser(overrides?: Partial<User>): User {
     emailVerified: true,
     emailVerifiedAt: new Date(),
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,

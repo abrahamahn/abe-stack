@@ -6,17 +6,17 @@
  * All values come from the source files - no hardcoded values here.
  */
 import { createHash } from 'crypto';
-import * as fs from 'fs';
-import path from 'path';
+import { promises as fsPromises, watch as fsWatch } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'url';
 
 import { format } from 'prettier';
 import { generateThemeCss } from '../../client/ui/src/theme/buildThemeCss';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../client/ui/src/styles/theme.css');
-const cacheDir = path.resolve(__dirname, '../../node_modules/.cache');
-const themeHashPath = path.join(cacheDir, 'theme-css.hash');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const themeCssPath = resolve(__dirname, '../../client/ui/src/styles/theme.css');
+const cacheDir = resolve(__dirname, '../../node_modules/.cache');
+const themeHashPath = join(cacheDir, 'theme-css.hash');
 
 const isQuiet = process.argv.includes('--quiet');
 function log(message: string): void {
@@ -24,18 +24,18 @@ function log(message: string): void {
 }
 
 const themeSourceFiles = [
-  path.resolve(__dirname, '../../client/ui/src/theme/colors.ts'),
-  path.resolve(__dirname, '../../client/ui/src/theme/motion.ts'),
-  path.resolve(__dirname, '../../client/ui/src/theme/radius.ts'),
-  path.resolve(__dirname, '../../client/ui/src/theme/spacing.ts'),
-  path.resolve(__dirname, '../../client/ui/src/theme/typography.ts'),
-  path.resolve(__dirname, '../../client/ui/src/theme/buildThemeCss.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/colors.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/motion.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/radius.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/spacing.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/typography.ts'),
+  resolve(__dirname, '../../client/ui/src/theme/buildThemeCss.ts'),
 ];
 
 async function computeInputHash(paths: string[]): Promise<string> {
   const hash = createHash('sha256');
   for (const filePath of paths) {
-    const content = await fs.promises.readFile(filePath, 'utf8');
+    const content = await fsPromises.readFile(filePath, 'utf8');
     hash.update(filePath);
     hash.update(content);
   }
@@ -44,11 +44,11 @@ async function computeInputHash(paths: string[]): Promise<string> {
 
 async function build(): Promise<void> {
   const inputHash = await computeInputHash(themeSourceFiles);
-  await fs.promises.mkdir(cacheDir, { recursive: true });
+  await fsPromises.mkdir(cacheDir, { recursive: true });
 
-  const existingHash = await fs.promises.readFile(themeHashPath, 'utf8').catch((): null => null);
+  const existingHash = await fsPromises.readFile(themeHashPath, 'utf8').catch((): null => null);
   // Use readFile instead of stat to avoid TOCTOU race condition
-  const existingCss = await fs.promises
+  const existingCss = await fsPromises
     .readFile(themeCssPath, 'utf8')
     .then(() => true)
     .catch(() => false);
@@ -60,8 +60,8 @@ async function build(): Promise<void> {
 
   const css = generateThemeCss();
   const formatted = await format(css, { parser: 'css' });
-  await fs.promises.writeFile(themeCssPath, formatted, 'utf8');
-  await fs.promises.writeFile(themeHashPath, inputHash, 'utf8');
+  await fsPromises.writeFile(themeCssPath, formatted, 'utf8');
+  await fsPromises.writeFile(themeHashPath, inputHash, 'utf8');
 
   log(`Generated theme CSS at ${themeCssPath}`);
 }
@@ -80,7 +80,7 @@ function watch(): void {
   };
 
   for (const filePath of themeSourceFiles) {
-    fs.watch(filePath, () => {
+    fsWatch(filePath, () => {
       debounce();
     });
   }

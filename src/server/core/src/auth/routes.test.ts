@@ -487,7 +487,7 @@ describe('Auth Routes', () => {
 
         await forgotPasswordRoute.handler(ctx, body, req as never, reply as never);
 
-        expect(handleForgotPassword).toHaveBeenCalledWith(ctx, body);
+        expect(handleForgotPassword).toHaveBeenCalledWith(ctx, body, req);
       });
     });
   });

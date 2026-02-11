@@ -14,16 +14,28 @@ vi.mock('@auth/hooks', () => ({
 }));
 
 vi.mock('../components', () => {
+  const mockApiKeysManagement = () => (
+    <div data-testid="api-keys-management">API Keys Management</div>
+  );
   const mockAvatarUpload = () => <div data-testid="avatar-upload">Avatar Upload</div>;
   const mockDangerZone = () => <div data-testid="danger-zone">Danger Zone</div>;
+  const mockDataControlsSection = () => (
+    <div data-testid="data-controls-section">Data Controls Section</div>
+  );
   const mockEmailChangeForm = () => <div data-testid="email-change-form">Email Change Form</div>;
   const mockForgotPasswordShortcut = () => (
     <div data-testid="forgot-password-shortcut">Forgot Password Shortcut</div>
+  );
+  const mockNotificationPreferencesForm = () => (
+    <div data-testid="notification-preferences">Notification Preferences</div>
   );
   const mockOAuthConnectionsList = () => (
     <div data-testid="oauth-connections">OAuth Connections</div>
   );
   const mockPasswordChangeForm = () => <div data-testid="password-form">Password Form</div>;
+  const mockPreferencesSection = () => (
+    <div data-testid="preferences-section">Preferences Section</div>
+  );
   const mockProfileCompleteness = () => (
     <div data-testid="profile-completeness">Profile Completeness</div>
   );
@@ -33,12 +45,16 @@ vi.mock('../components', () => {
   const mockUsernameForm = () => <div data-testid="username-form">Username Form</div>;
 
   return {
+    ApiKeysManagement: mockApiKeysManagement,
     AvatarUpload: mockAvatarUpload,
     DangerZone: mockDangerZone,
+    DataControlsSection: mockDataControlsSection,
     EmailChangeForm: mockEmailChangeForm,
     ForgotPasswordShortcut: mockForgotPasswordShortcut,
+    NotificationPreferencesForm: mockNotificationPreferencesForm,
     OAuthConnectionsList: mockOAuthConnectionsList,
     PasswordChangeForm: mockPasswordChangeForm,
+    PreferencesSection: mockPreferencesSection,
     ProfileCompleteness: mockProfileCompleteness,
     ProfileForm: mockProfileForm,
     SessionsList: mockSessionsList,
@@ -75,12 +91,17 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
     </div>
   );
 
+  const mockLink = ({ children, href }: { children: ReactNode; href?: string }) => (
+    <a href={href}>{children}</a>
+  );
+
   return {
     ...actual,
     Button: mockButton,
     Card: mockCard,
     Container: mockContainer,
     Heading: mockHeading,
+    Link: mockLink,
     Tabs: mockTabs,
   };
 });
@@ -165,6 +186,10 @@ describe('SettingsPage', () => {
       expect(screen.getByTestId('tab-profile')).toBeInTheDocument();
       expect(screen.getByTestId('tab-security')).toBeInTheDocument();
       expect(screen.getByTestId('tab-sessions')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-notifications')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-preferences')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-account')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-data-controls')).toBeInTheDocument();
       expect(screen.getByTestId('tab-billing')).toBeInTheDocument();
     });
 
@@ -186,6 +211,16 @@ describe('SettingsPage', () => {
     it('should render sessions tab content', () => {
       render(<SettingsPage />);
       expect(screen.getByTestId('sessions-list')).toBeInTheDocument();
+    });
+
+    it('should render preferences tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('preferences-section')).toBeInTheDocument();
+    });
+
+    it('should render data controls tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('data-controls-section')).toBeInTheDocument();
     });
 
     it('should render billing tab with link', () => {

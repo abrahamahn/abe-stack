@@ -160,6 +160,7 @@ function createMockRepositories(): Repositories {
     securityEvents: {} as Repositories['securityEvents'],
     totpBackupCodes: {} as Repositories['totpBackupCodes'],
     emailChangeTokens: {} as Repositories['emailChangeTokens'],
+    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
     magicLinkTokens: {
       findValidByTokenHash: vi.fn(),
       create: vi.fn(),
@@ -194,6 +195,7 @@ function createMockRepositories(): Repositories {
     userAgreements: {} as Repositories['userAgreements'],
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
+    activities: {} as Repositories['activities'],
   };
 }
 
@@ -267,6 +269,7 @@ function createMockUser(overrides?: Partial<User>): User {
     emailVerified: true,
     emailVerifiedAt: new Date(),
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,

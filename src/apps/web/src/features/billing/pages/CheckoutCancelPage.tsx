@@ -3,7 +3,7 @@
  * CheckoutCancelPage - Displayed after checkout is canceled.
  */
 
-import { Button, Card, PageContainer, useNavigate } from '@abe-stack/ui';
+import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 
@@ -21,11 +21,13 @@ export const CheckoutCancelPage = (): ReactElement => {
           <div className="checkout-result-page__icon checkout-result-page__icon--canceled">
             {'\u2717'}
           </div>
-          <h1 className="checkout-result-page__title">Checkout Canceled</h1>
-          <p className="checkout-result-page__message">
+          <Heading as="h1" className="checkout-result-page__title">
+            Checkout Canceled
+          </Heading>
+          <Text className="checkout-result-page__message">
             Your checkout was canceled and you have not been charged. Feel free to try again when
             you&apos;re ready.
-          </p>
+          </Text>
           <div className="checkout-result-page__actions">
             <Button
               onClick={() => {

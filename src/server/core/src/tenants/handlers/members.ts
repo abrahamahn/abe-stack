@@ -15,6 +15,8 @@ import {
   type TenantRole,
 } from '@abe-stack/shared';
 
+import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import { addMember, listMembers, removeMember, updateMemberRole } from '../membership-service';
 import { ERROR_MESSAGES, type TenantsModuleDeps, type TenantsRequest } from '../types';
 
@@ -93,6 +95,31 @@ export async function handleAddMember(
     }
 
     const member = await addMember(deps.repos, tenantId, userId, body.userId, body.role);
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.member_added',
+        resource: 'membership',
+        resourceId: body.userId,
+        tenantId,
+        metadata: { role: body.role },
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'member.added',
+      resourceType: 'membership',
+      resourceId: body.userId,
+      tenantId,
+      metadata: { role: body.role },
+    }).catch(() => {});
+
     return { status: 201, body: member };
   } catch (error) {
     return mapErrorToHttpResponse(error, createLogAdapter(deps.log));
@@ -117,6 +144,31 @@ export async function handleUpdateMemberRole(
     }
 
     const member = await updateMemberRole(deps.repos, tenantId, userId, targetUserId, body.role);
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'role.changed',
+        resource: 'membership',
+        resourceId: targetUserId,
+        tenantId,
+        metadata: { newRole: body.role },
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'member.role_changed',
+      resourceType: 'membership',
+      resourceId: targetUserId,
+      tenantId,
+      metadata: { newRole: body.role },
+    }).catch(() => {});
+
     return { status: 200, body: member };
   } catch (error) {
     return mapErrorToHttpResponse(error, createLogAdapter(deps.log));
@@ -140,6 +192,29 @@ export async function handleRemoveMember(
     }
 
     await removeMember(deps.repos, tenantId, userId, targetUserId);
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.member_removed',
+        resource: 'membership',
+        resourceId: targetUserId,
+        tenantId,
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'member.removed',
+      resourceType: 'membership',
+      resourceId: targetUserId,
+      tenantId,
+    }).catch(() => {});
+
     return { status: 200, body: { message: 'Member removed' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createLogAdapter(deps.log));

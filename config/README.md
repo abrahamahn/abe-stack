@@ -34,7 +34,7 @@ Files located at the repository root that manage the workspace.
 
 | File                      | Purpose                     | Major Tweaks                                                                              |
 | :------------------------ | :-------------------------- | :---------------------------------------------------------------------------------------- |
-| **`package.json`**        | Workspace definition        | scripts: `type-check` uses `tsc --build` for speed; `build:headers` syncs file headers.   |
+| **`package.json`**        | Workspace definition        | scripts: `type-check` uses `tsc --build` for speed; `sync:headers` syncs file headers.    |
 | **`pnpm-workspace.yaml`** | Package linking             | Defines `apps/*`, `backend/*`, `premium/*`, and `client/*` as members.                    |
 | **`turbo.json`**          | Build Pipeline              | Configured dependencies (`^build`), output caching (`dist/**`, `.next/**`), and env vars. |
 | **`eslint.config.ts`**    | Linting Rules (Flat Config) | Uses `@eslint/compat` to respect `.gitignore`. Strict TS rules enabled.                   |

@@ -70,6 +70,9 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
     appBaseUrl,
     apiBaseUrl,
 
+    // Audit retention (0 = unlimited)
+    auditRetentionDays: env.AUDIT_RETENTION_DAYS ?? 90,
+
     // Global Rate Limiting (Infrastructure layer)
     rateLimit: {
       windowMs: env.RATE_LIMIT_WINDOW_MS ?? 60000,

@@ -94,8 +94,27 @@ export {
   USERS_TABLE,
   USER_SESSION_COLUMNS,
   USER_SESSIONS_TABLE,
+  AUDIT_EVENT_COLUMNS,
+  AUDIT_EVENTS_TABLE,
+  // Activity schema
+  ACTIVITY_COLUMNS,
+  ACTIVITIES_TABLE,
+  // Feature flag schema
+  FEATURE_FLAG_COLUMNS,
+  FEATURE_FLAGS_TABLE,
+  TENANT_FEATURE_OVERRIDE_COLUMNS,
+  TENANT_FEATURE_OVERRIDES_TABLE,
   // Types
+  type Activity,
+  type NewActivity,
+  type AuditEvent,
   type ApiKey,
+  type FeatureFlag,
+  type NewFeatureFlag,
+  type UpdateFeatureFlag,
+  type TenantFeatureOverride,
+  type NewTenantFeatureOverride,
+  type UpdateTenantFeatureOverride,
   type BillingEvent,
   type BillingEventType,
   type BillingProvider,
@@ -110,6 +129,7 @@ export {
   type InvoiceStatus,
   type LoginAttempt,
   type MagicLinkToken,
+  type NewAuditEvent,
   type NewApiKey,
   type NewBillingEvent,
   type NewCustomerMapping,
@@ -170,15 +190,23 @@ export {
 
 // Repositories (functional-style)
 export {
+  // Activities
+  createActivityRepository,
   // API Keys
   createApiKeyRepository,
+  // Audit
+  createAuditEventRepository,
   // Auth
   createBillingEventRepository,
   createCustomerMappingRepository,
   // Compliance
   createDataExportRequestRepository,
   createEmailChangeTokenRepository,
+  createEmailChangeRevertTokenRepository,
   createEmailVerificationTokenRepository,
+  // Features
+  createFeatureFlagRepository,
+  createTenantFeatureOverrideRepository,
   createInvoiceRepository,
   createLoginAttemptRepository,
   // Magic Link
@@ -196,16 +224,22 @@ export {
   createSecurityEventRepository,
   createSubscriptionRepository,
   createTotpBackupCodeRepository,
+  // Sessions
+  createUserSessionRepository,
   // Users
   createUserRepository,
   // Types
+  type ActivityRepository,
   type AdminUserListFilters,
   type ApiKeyRepository,
+  type AuditEventRepository,
   type BillingEventRepository,
   type CustomerMappingRepository,
   type DataExportRequestRepository,
   type EmailChangeTokenRepository,
+  type EmailChangeRevertTokenRepository,
   type EmailVerificationTokenRepository,
+  type FeatureFlagRepository,
   type InvoiceFilters,
   type InvoiceRepository,
   type LoginAttemptRepository,
@@ -224,9 +258,11 @@ export {
   type SecurityEventRepository,
   type SubscriptionFilters,
   type SubscriptionRepository,
+  type TenantFeatureOverrideRepository,
   type TimeRangeFilter,
   type TotpBackupCodeRepository,
   type UserRepository,
+  type UserSessionRepository,
 } from './repositories';
 
 // Factory

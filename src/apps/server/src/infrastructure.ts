@@ -176,6 +176,48 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
         const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         await queueStore.clearCompleted(cutoff);
       },
+      cleanupAuditEvents: async () => {
+        const retentionDays = config.server.auditRetentionDays;
+        if (retentionDays > 0) {
+          const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString();
+          const deleted = await repos.auditEvents.deleteOlderThan(cutoff);
+          if (deleted > 0) {
+            log.info({ deleted, retentionDays }, 'Cleaned up old audit events');
+          }
+        }
+      },
+      cleanupSessions: async () => {
+        const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const deleted = await repos.userSessions.deleteRevokedBefore(cutoff);
+        if (deleted > 0) {
+          log.info({ deleted }, 'Cleaned up revoked sessions older than 30 days');
+        }
+      },
+      cleanupPasswordResetTokens: async () => {
+        const deleted = await repos.passwordResetTokens.deleteExpired();
+        if (deleted > 0) {
+          log.info({ deleted }, 'Cleaned up expired password reset tokens');
+        }
+      },
+      cleanupEmailVerificationTokens: async () => {
+        const deleted = await repos.emailVerificationTokens.deleteExpired();
+        if (deleted > 0) {
+          log.info({ deleted }, 'Cleaned up expired email verification tokens');
+        }
+      },
+      cleanupLoginAttempts: async () => {
+        const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        const deleted = await repos.loginAttempts.deleteOlderThan(cutoff);
+        if (deleted > 0) {
+          log.info({ deleted }, 'Cleaned up login attempts older than 90 days');
+        }
+      },
+      cleanupPushSubscriptions: async () => {
+        const deleted = await repos.pushSubscriptions.deleteExpired();
+        if (deleted > 0) {
+          log.info({ deleted }, 'Cleaned up expired push subscriptions');
+        }
+      },
     },
     config: config.queue,
     log: loggerAdapter,

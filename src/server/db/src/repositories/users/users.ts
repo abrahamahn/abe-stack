@@ -158,9 +158,10 @@ export interface UserRepository {
    * Lock a user account until a specified date
    * @param userId - The user ID to lock
    * @param lockedUntil - The date/time when the lock expires
+   * @param reason - The reason for locking the account
    * @returns void (use findById to retrieve updated user)
    */
-  lockAccount(userId: string, lockedUntil: Date): Promise<void>;
+  lockAccount(userId: string, lockedUntil: Date, reason: string): Promise<void>;
 
   /**
    * Unlock a user account by clearing locked_until and resetting failed_login_attempts
@@ -341,10 +342,10 @@ export function createUserRepository(db: RawDb): UserRepository {
       };
     },
 
-    async lockAccount(userId: string, lockedUntil: Date): Promise<void> {
+    async lockAccount(userId: string, lockedUntil: Date, reason: string): Promise<void> {
       await db.execute(
         update(USERS_TABLE)
-          .set({ ['locked_until']: lockedUntil })
+          .set({ ['locked_until']: lockedUntil, ['lock_reason']: reason })
           .where(eq('id', userId))
           .toSql(),
       );
@@ -353,7 +354,7 @@ export function createUserRepository(db: RawDb): UserRepository {
     async unlockAccount(userId: string): Promise<void> {
       await db.execute(
         update(USERS_TABLE)
-          .set({ ['locked_until']: null, ['failed_login_attempts']: 0 })
+          .set({ ['locked_until']: null, ['lock_reason']: null, ['failed_login_attempts']: 0 })
           .where(eq('id', userId))
           .toSql(),
       );

@@ -39,6 +39,7 @@ export {
   type CheckoutResponse,
   type FeatureKey,
   type Invoice,
+  type InvoiceResponse,
   type InvoiceStatus,
   type InvoicesListResponse,
   type PaymentMethod,

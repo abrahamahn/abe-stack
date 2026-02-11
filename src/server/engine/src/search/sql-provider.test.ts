@@ -320,7 +320,6 @@ describe('SqlSearchProvider', () => {
 
   describe('healthCheck', () => {
     test('should return true when database is accessible', async () => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- PostgreSQL returns ?column? for unnamed columns
       mockRaw.mockResolvedValue([{ '?column?': 1 }]);
 
       const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);

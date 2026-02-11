@@ -601,13 +601,13 @@ describe('createAuditEventRepository', () => {
       expect('update' in repo).toBe(false);
     });
 
-    it('should not have delete method', () => {
+    it('should not have a generic delete method', () => {
       const repo = createAuditEventRepository(mockDb);
 
       expect('delete' in repo).toBe(false);
     });
 
-    it('should only support create and read operations', () => {
+    it('should support create, read, and retention cleanup operations', () => {
       const repo = createAuditEventRepository(mockDb);
       const methods = Object.keys(repo);
 
@@ -618,8 +618,36 @@ describe('createAuditEventRepository', () => {
       expect(methods).toContain('findByTenantId');
       expect(methods).toContain('findByAction');
       expect(methods).toContain('findByResource');
+      expect(methods).toContain('deleteOlderThan');
       expect(methods).not.toContain('update');
       expect(methods).not.toContain('delete');
+    });
+  });
+
+  describe('deleteOlderThan', () => {
+    it('should delete events older than the cutoff date', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(5);
+
+      const repo = createAuditEventRepository(mockDb);
+      const cutoff = new Date('2025-01-01T00:00:00.000Z').toISOString();
+      const deleted = await repo.deleteOlderThan(cutoff);
+
+      expect(deleted).toBe(5);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('DELETE FROM'),
+        }),
+      );
+    });
+
+    it('should return 0 when no events are older than cutoff', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(0);
+
+      const repo = createAuditEventRepository(mockDb);
+      const cutoff = new Date('2020-01-01T00:00:00.000Z').toISOString();
+      const deleted = await repo.deleteOlderThan(cutoff);
+
+      expect(deleted).toBe(0);
     });
   });
 });

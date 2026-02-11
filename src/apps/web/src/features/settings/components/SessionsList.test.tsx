@@ -1,5 +1,6 @@
 // src/apps/web/src/features/settings/components/SessionsList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
+import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Hoist mock fn references so they are available when vi.mock factories execute
@@ -48,6 +49,9 @@ vi.mock('@abe-stack/ui', () => ({
   ['Skeleton']: (props: Record<string, unknown>) => {
     mockSkeletonFn(props);
     return <div data-testid="skeleton" />;
+  },
+  ['Heading']: (props: { children?: ReactNode; as?: string; className?: string }) => {
+    return createElement(props.as ?? 'h2', { className: props.className }, props.children);
   },
   ['Text']: (props: { children?: ReactNode; tone?: string; size?: string; className?: string }) => (
     <span data-tone={props.tone} className={props.className}>

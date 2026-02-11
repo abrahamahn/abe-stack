@@ -25,6 +25,7 @@ export {
   cancelSubscription,
   resumeSubscription,
   updateSubscription,
+  getUserInvoice,
   getUserInvoices,
   getUserPaymentMethods,
   createSetupIntent,
@@ -60,6 +61,7 @@ export {
   handleCancelSubscription,
   handleResumeSubscription,
   handleUpdateSubscription,
+  handleGetInvoice,
   handleListInvoices,
   handleListPaymentMethods,
   handleAddPaymentMethod,
@@ -67,6 +69,9 @@ export {
   handleSetDefaultPaymentMethod,
   handleCreateSetupIntent,
 } from './handlers';
+
+// Middleware
+export { requireEntitlement, type EntitlementMiddlewareOptions } from './middleware';
 
 // Routes
 export { billingRoutes } from './routes';

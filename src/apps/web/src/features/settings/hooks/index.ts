@@ -1,5 +1,19 @@
 // src/apps/web/src/features/settings/hooks/index.ts
 export {
+  useApiKeys,
+  useCreateApiKey,
+  useDeleteApiKey,
+  useRevokeApiKey,
+  type UseApiKeysResult,
+  type UseCreateApiKeyOptions,
+  type UseCreateApiKeyResult,
+  type UseDeleteApiKeyOptions,
+  type UseDeleteApiKeyResult,
+  type UseRevokeApiKeyOptions,
+  type UseRevokeApiKeyResult,
+} from './useApiKeys';
+
+export {
   useAvatarDelete,
   useAvatarUpload,
   type UseAvatarDeleteOptions,

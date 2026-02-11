@@ -19,6 +19,7 @@ import {
   WeakPasswordError,
 } from '@abe-stack/shared';
 
+import { logActivity } from '../../activities';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 
 import type { UsersAuthConfig } from '../types';
@@ -163,6 +164,16 @@ export async function updateProfile(
     if (updated === null) {
       throw new Error('Failed to update user profile');
     }
+
+    // Fire-and-forget activity log
+    logActivity(repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'user.profile.updated',
+      resourceType: 'user',
+      resourceId: userId,
+      metadata: { fields: Object.keys(updatePayload) },
+    }).catch(() => {});
 
     return {
       id: updated.id,
@@ -361,6 +372,16 @@ export async function uploadAvatar(
   // Update user with new avatar URL (store the key, not the signed URL)
   await repos.users.update(userId, { avatarUrl: storedKey });
 
+  // Fire-and-forget activity log
+  logActivity(repos.activities, {
+    actorId: userId,
+    actorType: 'user',
+    action: 'user.avatar.uploaded',
+    resourceType: 'user',
+    resourceId: userId,
+    metadata: { mimeType: file.mimetype },
+  }).catch(() => {});
+
   return avatarUrl;
 }
 
@@ -395,6 +416,15 @@ export async function deleteAvatar(
 
   // Clear avatar URL from user
   await repos.users.update(userId, { avatarUrl: null });
+
+  // Fire-and-forget activity log
+  logActivity(repos.activities, {
+    actorId: userId,
+    actorType: 'user',
+    action: 'user.avatar.deleted',
+    resourceType: 'user',
+    resourceId: userId,
+  }).catch(() => {});
 }
 
 /**

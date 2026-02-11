@@ -15,8 +15,8 @@
  *   pnpm db:audit -- --db
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
 import { initEnv } from '@abe-stack/server-engine';
@@ -74,24 +74,23 @@ function extractTablesFromSql(sql: string): string[] {
 }
 
 function extractTablesFromMigrations(migrationsDir: string): string[] {
-  if (!fs.existsSync(migrationsDir)) return [];
-  const files = fs
-    .readdirSync(migrationsDir)
+  if (!existsSync(migrationsDir)) return [];
+  const files = readdirSync(migrationsDir)
     .filter((f) => f.endsWith('.sql'))
     .sort((a, b) => a.localeCompare(b));
 
   const tables: string[] = [];
   for (const f of files) {
-    const full = path.join(migrationsDir, f);
-    const sql = fs.readFileSync(full, 'utf-8');
+    const full = join(migrationsDir, f);
+    const sql = readFileSync(full, 'utf-8');
     tables.push(...extractTablesFromSql(sql));
   }
   return uniqSorted(tables);
 }
 
 function extractTablesFromDbPush(dbPushPath: string): string[] {
-  if (!fs.existsSync(dbPushPath)) return [];
-  const content = fs.readFileSync(dbPushPath, 'utf-8');
+  if (!existsSync(dbPushPath)) return [];
+  const content = readFileSync(dbPushPath, 'utf-8');
   return uniqSorted(extractTablesFromSql(content));
 }
 
@@ -138,8 +137,8 @@ async function run(): Promise<void> {
   const repoRoot = process.cwd();
   const required = uniqSorted(REQUIRED_TABLES);
 
-  const migrationsDir = path.join(repoRoot, 'src/server/db/migrations');
-  const dbPushPath = path.join(repoRoot, 'src/tools/scripts/db/db-push.ts');
+  const migrationsDir = join(repoRoot, 'src/server/db/migrations');
+  const dbPushPath = join(repoRoot, 'src/tools/scripts/db/push.ts');
 
   const migrationTables = extractTablesFromMigrations(migrationsDir);
   const dbPushTables = extractTablesFromDbPush(dbPushPath);

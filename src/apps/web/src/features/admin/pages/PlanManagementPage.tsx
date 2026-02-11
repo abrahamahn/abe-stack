@@ -17,6 +17,7 @@ import {
   Button,
   Card,
   Dialog,
+  Heading,
   Input,
   PageContainer,
   Select,
@@ -27,6 +28,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Text,
 } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useState, useCallback } from 'react';
@@ -455,7 +457,9 @@ export const PlanManagementPage = (): ReactElement => {
   return (
     <PageContainer className="plan-management-page">
       <div className="plan-management-page__header">
-        <h1 className="plan-management-page__title">Plan Management</h1>
+        <Heading as="h1" className="plan-management-page__title">
+          Plan Management
+        </Heading>
         <Button onClick={handleOpenCreate}>Create Plan</Button>
       </div>
 
@@ -489,7 +493,9 @@ export const PlanManagementPage = (): ReactElement => {
                   <TableCell>
                     <strong>{plan.name}</strong>
                     {plan.description !== null && plan.description !== '' && (
-                      <span className="text-muted block text-sm">{plan.description}</span>
+                      <Text as="span" className="text-muted block text-sm">
+                        {plan.description}
+                      </Text>
                     )}
                   </TableCell>
                   <TableCell>{formatPrice(plan.priceInCents, plan.currency)}</TableCell>

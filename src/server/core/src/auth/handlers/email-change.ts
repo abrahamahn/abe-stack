@@ -86,6 +86,7 @@ export async function handleConfirmEmailChange(
 
     const revertToken = await createEmailChangeRevertToken(
       ctx.db,
+      ctx.repos,
       userId,
       previousEmail,
       result.email,

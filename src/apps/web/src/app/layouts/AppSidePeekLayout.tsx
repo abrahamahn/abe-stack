@@ -1,5 +1,5 @@
 // src/apps/web/src/app/layouts/AppSidePeekLayout.tsx
-import { SidePeek } from '@abe-stack/ui';
+import { Button, SidePeek } from '@abe-stack/ui';
 import { SidePeekUILibraryContent } from '@ui-library/components';
 import { useCallback, useState } from 'react';
 
@@ -21,14 +21,15 @@ export const AppSidePeekLayout = ({ open, onClose }: AppSidePeekLayoutProps): Re
     <SidePeek.Root open={open} onClose={onClose} size={isFullscreen ? 'full' : 'md'}>
       <SidePeek.Header>
         <SidePeek.Title>Side Peek UI Library</SidePeek.Title>
-        <button
+        <Button
           type="button"
+          variant="text"
           onClick={handleExpand}
           aria-label="Toggle fullscreen"
           className="side-peek-close"
         >
           {isFullscreen ? '⤡' : '⤢'}
-        </button>
+        </Button>
         <SidePeek.Close />
       </SidePeek.Header>
       <SidePeek.Content>

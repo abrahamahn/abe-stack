@@ -1,4 +1,6 @@
 // src/apps/web/src/features/admin/pages/index.ts
+export { AuditEventsPage } from './AuditEventsPage';
+export { FeatureFlagsPage } from './FeatureFlagsPage';
 export { JobMonitorPage } from './JobMonitorPage';
 export { PlanManagementPage } from './PlanManagementPage';
 export { RouteManifestPage } from './RouteManifestPage';

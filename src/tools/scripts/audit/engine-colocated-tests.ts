@@ -14,8 +14,8 @@
  *   pnpm audit:engine-tests
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 type AuditResult = {
   root: string;
@@ -27,8 +27,8 @@ type AuditResult = {
 
 function walk(dir: string): string[] {
   const out: string[] = [];
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, ent.name);
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, ent.name);
     if (ent.isDirectory()) out.push(...walk(p));
     else out.push(p);
   }
@@ -36,7 +36,7 @@ function walk(dir: string): string[] {
 }
 
 function rel(p: string): string {
-  return path.relative(process.cwd(), p).replaceAll(path.sep, '/');
+  return relative(process.cwd(), p).replaceAll(sep, '/');
 }
 
 function isTestFile(p: string): boolean {
@@ -49,7 +49,7 @@ function isTestFile(p: string): boolean {
 }
 
 function shouldIgnoreSource(p: string): boolean {
-  const base = path.basename(p);
+  const base = basename(p);
   if (base === 'index.ts' || base === 'types.ts') return true;
   if (base.endsWith('.d.ts')) return true;
   if (isTestFile(p)) return true;
@@ -57,19 +57,19 @@ function shouldIgnoreSource(p: string): boolean {
 }
 
 function hasColocatedTest(sourcePath: string): boolean {
-  const dir = path.dirname(sourcePath);
-  const base = path.basename(sourcePath, '.ts');
+  const dir = dirname(sourcePath);
+  const base = basename(sourcePath, '.ts');
   const candidates = [
-    path.join(dir, `${base}.test.ts`),
-    path.join(dir, `${base}.integration.test.ts`),
-    path.join(dir, `${base}.spec.ts`),
+    join(dir, `${base}.test.ts`),
+    join(dir, `${base}.integration.test.ts`),
+    join(dir, `${base}.spec.ts`),
   ];
-  return candidates.some((c) => fs.existsSync(c));
+  return candidates.some((c) => existsSync(c));
 }
 
 function sourcePeerForTest(testPath: string): string {
-  const dir = path.dirname(testPath);
-  const name = path.basename(testPath);
+  const dir = dirname(testPath);
+  const name = basename(testPath);
 
   let base = name;
   for (const suffix of ['.integration.test.ts', '.test.ts', '.spec.ts', '.bench.ts']) {
@@ -78,11 +78,11 @@ function sourcePeerForTest(testPath: string): string {
       break;
     }
   }
-  return path.join(dir, `${base}.ts`);
+  return join(dir, `${base}.ts`);
 }
 
 function audit(rootDir: string): AuditResult {
-  const rootAbs = path.resolve(rootDir);
+  const rootAbs = resolve(rootDir);
   const files = walk(rootAbs);
 
   const sources = files.filter((p) => p.endsWith('.ts') && !shouldIgnoreSource(p));
@@ -98,7 +98,7 @@ function audit(rootDir: string): AuditResult {
   const orphanTests: string[] = [];
   for (const t of tests) {
     const peer = sourcePeerForTest(t);
-    if (!fs.existsSync(peer)) orphanTests.push(t);
+    if (!existsSync(peer)) orphanTests.push(t);
   }
 
   return {

@@ -12,6 +12,7 @@ import {
   handleCancelSubscription,
   handleCreateCheckout,
   handleCreateSetupIntent,
+  handleGetInvoice,
   handleGetSubscription,
   handleListInvoices,
   handleListPaymentMethods,
@@ -203,6 +204,23 @@ export const billingRoutes: BillingRouteMap = createBillingRouteMap([
         req: BillingRequest,
       ): Promise<BillingRouteResult> => {
         return handleListInvoices(ctx, req);
+      },
+      'user',
+    ),
+  ],
+
+  // Invoice detail (dynamic route with path parameter)
+  [
+    'billing/invoices/:id',
+    billingProtectedRoute(
+      'GET',
+      async (
+        ctx: BillingAppContext,
+        _body: unknown,
+        req: BillingRequest,
+      ): Promise<BillingRouteResult> => {
+        const invoiceId = (req as BillingRequest & { params?: { id?: string } }).params?.id ?? '';
+        return handleGetInvoice(ctx, invoiceId, req);
       },
       'user',
     ),

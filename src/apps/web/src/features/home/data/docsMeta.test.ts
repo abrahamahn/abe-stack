@@ -15,16 +15,20 @@ describe('docsMeta', () => {
     expect(readme?.category).toBe('root');
   });
 
-  it('should include docs-level entries with docs- prefix', () => {
-    const docsReadme = docsMeta['docs-readme'];
-    expect(docsReadme).toBeDefined();
-    expect(docsReadme?.category).toBe('docs');
+  it('should use normalized kebab-case keys for all discovered docs', () => {
+    for (const key of Object.keys(docsMeta)) {
+      expect(key).toMatch(/^[a-z0-9-]+$/);
+    }
   });
 
-  it('should include nested entries with folder-file key', () => {
-    const devTesting = docsMeta['dev-testing'];
-    expect(devTesting).toBeDefined();
-    expect(devTesting?.category).toBe('dev');
+  it('should prefix top-level docs entries with docs-', () => {
+    const topLevelDocsEntries = Object.entries(docsMeta).filter(
+      ([key, meta]) => meta.category === 'docs' && key !== 'readme',
+    );
+
+    for (const [key] of topLevelDocsEntries) {
+      expect(key.startsWith('docs-')).toBe(true);
+    }
   });
 
   it('should have a label and category for every entry', () => {

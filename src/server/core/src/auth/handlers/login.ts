@@ -141,6 +141,7 @@ export async function handleLogin(
       body: {
         token: result.accessToken,
         user: result.user,
+        ...(isNewDevice ? { isNewDevice: true } : {}),
       },
     };
   } catch (error) {

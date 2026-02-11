@@ -97,7 +97,9 @@ export const AppBottomLayout = ({
             className="flex items-center gap-2 p-1 px-2"
           >
             <span aria-hidden>📏</span>
-            <span className="text-xs">{getDensityLabel()}</span>
+            <Text as="span" className="text-xs">
+              {getDensityLabel()}
+            </Text>
           </Button>
           <Button
             variant="secondary"
@@ -108,7 +110,9 @@ export const AppBottomLayout = ({
             className="flex items-center gap-2 p-1 px-2"
           >
             <span aria-hidden>🌗</span>
-            <span className="text-xs">{getContrastLabel()}</span>
+            <Text as="span" className="text-xs">
+              {getContrastLabel()}
+            </Text>
           </Button>
           <Button
             variant="secondary"
@@ -119,7 +123,9 @@ export const AppBottomLayout = ({
             className="flex items-center gap-2 p-1 px-2"
           >
             <span>{getThemeIcon()}</span>
-            <span className="text-xs hide-mobile">{getThemeLabel()}</span>
+            <Text as="span" className="text-xs hide-mobile">
+              {getThemeLabel()}
+            </Text>
           </Button>
         </div>
       </div>

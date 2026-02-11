@@ -5,7 +5,7 @@
  * Displays list of user sessions with revoke functionality.
  */
 
-import { Alert, Button, Skeleton, Text } from '@abe-stack/ui';
+import { Alert, Button, Heading, Skeleton, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
@@ -133,7 +133,9 @@ export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactEleme
         <>
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">Other Devices ({otherSessions.length})</h3>
+              <Heading as="h3" className="font-medium">
+                Other Devices ({otherSessions.length})
+              </Heading>
               <Button
                 variant="text"
                 size="small"

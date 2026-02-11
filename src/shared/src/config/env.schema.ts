@@ -204,6 +204,7 @@ export interface ServerEnv {
   CORS_ORIGIN?: string | undefined;
   CORS_ORIGINS?: string | undefined;
   LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
+  AUDIT_RETENTION_DAYS?: number | undefined;
 }
 
 /** Search environment variables */
@@ -764,6 +765,9 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
     CORS_ORIGINS: parseOptional(obj['CORS_ORIGINS'], (v) => parseString(v, 'CORS_ORIGINS')),
     LOG_LEVEL: createEnumSchema(['debug', 'info', 'warn', 'error'] as const, 'LOG_LEVEL').parse(
       withDefault(obj['LOG_LEVEL'], 'info'),
+    ),
+    AUDIT_RETENTION_DAYS: parseOptional(obj['AUDIT_RETENTION_DAYS'], (v) =>
+      coerceNumber(v, 'AUDIT_RETENTION_DAYS'),
     ),
   };
 });

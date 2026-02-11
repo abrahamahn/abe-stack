@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 // src/tools/scripts/audit/bundle-size.ts
 import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 
 /**
  * Bundle Size Benchmark Tool
@@ -30,9 +30,9 @@ type BenchmarkResult = {
   totals: Record<string, { size: number; gzipSize: number }>;
 };
 
-const ROOT_DIR = path.resolve(__dirname, '..', '..', '..', '..');
-const OUTPUT_DIR = path.join(ROOT_DIR, '.tmp');
-const BENCHMARK_FILE = path.join(OUTPUT_DIR, '.bundle-sizes.json');
+const ROOT_DIR = resolve(__dirname, '..', '..', '..', '..');
+const OUTPUT_DIR = join(ROOT_DIR, '.tmp');
+const BENCHMARK_FILE = join(OUTPUT_DIR, '.bundle-sizes.json');
 
 // ANSI color codes
 const colors = {
@@ -70,7 +70,7 @@ function getGzipSize(filePath: string): number {
 
 function getFileSize(filePath: string): number {
   try {
-    const stats = fs.statSync(filePath);
+    const stats = statSync(filePath);
     return stats.size;
   } catch {
     return 0;
@@ -88,14 +88,14 @@ function getGitCommit(): string | undefined {
 function findFiles(dir: string, extensions: string[]): string[] {
   const files: string[] = [];
 
-  if (!fs.existsSync(dir)) {
+  if (!existsSync(dir)) {
     return files;
   }
 
   function walkDir(currentDir: string): void {
-    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    const entries = readdirSync(currentDir, { withFileTypes: true });
     for (const entry of entries) {
-      const fullPath = path.join(currentDir, entry.name);
+      const fullPath = join(currentDir, entry.name);
       if (entry.isDirectory()) {
         // Skip node_modules and hidden directories
         if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
@@ -122,7 +122,7 @@ function measurePackage(name: string, distPath: string): BundleInfo[] {
     const size = getFileSize(file);
     if (size > 0) {
       bundles.push({
-        name: path.relative(distPath, file),
+        name: relative(distPath, file),
         path: file,
         size,
         gzipSize: getGzipSize(file),
@@ -182,12 +182,12 @@ function printTable(bundles: BundleInfo[], packageName: string): void {
 }
 
 function compareWithPrevious(current: BenchmarkResult): void {
-  if (!fs.existsSync(BENCHMARK_FILE)) {
+  if (!existsSync(BENCHMARK_FILE)) {
     return;
   }
 
   try {
-    const history = JSON.parse(fs.readFileSync(BENCHMARK_FILE, 'utf-8')) as BenchmarkResult[];
+    const history = JSON.parse(readFileSync(BENCHMARK_FILE, 'utf-8')) as BenchmarkResult[];
     if (history.length === 0) return;
 
     const previous = history[history.length - 1];
@@ -233,9 +233,9 @@ function compareWithPrevious(current: BenchmarkResult): void {
 function saveBenchmark(result: BenchmarkResult): void {
   let history: BenchmarkResult[] = [];
 
-  if (fs.existsSync(BENCHMARK_FILE)) {
+  if (existsSync(BENCHMARK_FILE)) {
     try {
-      history = JSON.parse(fs.readFileSync(BENCHMARK_FILE, 'utf-8')) as BenchmarkResult[];
+      history = JSON.parse(readFileSync(BENCHMARK_FILE, 'utf-8')) as BenchmarkResult[];
     } catch {
       history = [];
     }
@@ -248,10 +248,10 @@ function saveBenchmark(result: BenchmarkResult): void {
   }
 
   // Ensure .tmp directory exists
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  if (!existsSync(OUTPUT_DIR)) {
+    mkdirSync(OUTPUT_DIR, { recursive: true });
   }
-  fs.writeFileSync(BENCHMARK_FILE, JSON.stringify(history, null, 2));
+  writeFileSync(BENCHMARK_FILE, JSON.stringify(history, null, 2));
   console.log(`\n${colors.green}✓ Benchmark saved to ${BENCHMARK_FILE}${colors.reset}`);
 }
 
@@ -263,19 +263,19 @@ function main(): void {
   const packages: Record<string, { name: string; distPath: string }> = {
     ui: {
       name: '@abe-stack/ui',
-      distPath: path.join(ROOT_DIR, 'src', 'client', 'ui', 'dist'),
+      distPath: join(ROOT_DIR, 'src', 'client', 'ui', 'dist'),
     },
     shared: {
       name: '@abe-stack/shared',
-      distPath: path.join(ROOT_DIR, 'src', 'shared', 'dist'),
+      distPath: join(ROOT_DIR, 'src', 'shared', 'dist'),
     },
     'client-engine': {
       name: '@abe-stack/client-engine',
-      distPath: path.join(ROOT_DIR, 'src', 'client', 'engine', 'dist'),
+      distPath: join(ROOT_DIR, 'src', 'client', 'engine', 'dist'),
     },
     web: {
       name: '@abe-stack/web',
-      distPath: path.join(ROOT_DIR, 'src', 'apps', 'web', 'dist'),
+      distPath: join(ROOT_DIR, 'src', 'apps', 'web', 'dist'),
     },
   };
 

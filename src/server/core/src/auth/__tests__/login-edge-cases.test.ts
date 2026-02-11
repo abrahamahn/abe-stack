@@ -253,6 +253,7 @@ interface MockUser {
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
   lockedUntil: Date | null;
+  lockReason: string | null;
   failedLoginAttempts: number;
   totpSecret: string | null;
   totpEnabled: boolean;
@@ -289,6 +290,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
     emailVerified: true,
     emailVerifiedAt: new Date(),
     lockedUntil: null,
+    lockReason: null,
     failedLoginAttempts: 0,
     totpSecret: null,
     totpEnabled: false,
@@ -486,6 +488,7 @@ describe('Parallel Login Requests', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -556,6 +559,7 @@ describe('Parallel Login Requests', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -658,6 +662,7 @@ describe('Password Change Session Invalidation', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -718,6 +723,7 @@ describe('Password Change Session Invalidation', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -892,6 +898,7 @@ describe('Progressive Delay Timing', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -950,6 +957,7 @@ describe('Progressive Delay Timing', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -1020,6 +1028,7 @@ describe('Lockout Counter Reset', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -1080,6 +1089,7 @@ describe('Lockout Counter Reset', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -1190,6 +1200,7 @@ describe('Email Verification Auto-Login', () => {
       emailVerified: true,
       emailVerifiedAt: new Date(),
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,
@@ -1305,6 +1316,7 @@ describe('Timing-Safe Operations', () => {
       role: 'user',
       avatarUrl: null,
       lockedUntil: null,
+      lockReason: null,
       failedLoginAttempts: 0,
       totpSecret: null,
       totpEnabled: false,

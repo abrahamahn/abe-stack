@@ -43,16 +43,17 @@ export const TenantSwitcher = ({ className }: TenantSwitcherProps): ReactElement
       >
         <div className="flex flex-col">
           {workspaces.map((workspace) => (
-            <button
+            <Button
               key={workspace.id}
               type="button"
+              variant="text"
               className="menu-item text-left"
               onClick={(): void => {
                 setCurrentWorkspace(workspace.id);
               }}
             >
               {workspace.name}
-            </button>
+            </Button>
           ))}
         </div>
       </Dropdown>

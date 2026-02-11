@@ -227,7 +227,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Send Reset Link</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '300px', backgroundColor: 'var(--ui-color-surface)' }}>
+          <div style={{ minHeight: '18.75rem', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}>
                 <Heading as="h3" size="sm">
@@ -259,7 +259,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Text>Page content with consistent padding and max-width</Text>
 </PageContainer>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '200px' }}>
+          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '12.5rem' }}>
             <PageContainer>
               <Heading as="h2" size="md">
                 Page Title
@@ -318,7 +318,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
           <div
             style={{
               border: '1px solid var(--ui-color-border)',
-              height: '300px',
+              height: '18.75rem',
               overflow: 'hidden',
             }}
           >
@@ -374,7 +374,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
           <div
             style={{
               border: '1px solid var(--ui-color-border)',
-              height: '300px',
+              height: '18.75rem',
               overflow: 'hidden',
             }}
           >
@@ -581,7 +581,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
             style={{
               border: '1px solid var(--ui-color-border)',
               position: 'relative',
-              height: '200px',
+              height: '12.5rem',
             }}
           >
             <div style={{ padding: 'var(--ui-gap-lg)' }}>
@@ -627,7 +627,7 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
           <div
             style={{
               border: '1px solid var(--ui-color-border)',
-              height: '200px',
+              height: '12.5rem',
               display: 'flex',
             }}
           >

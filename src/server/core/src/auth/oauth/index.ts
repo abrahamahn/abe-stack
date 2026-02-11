@@ -44,6 +44,9 @@ export {
   type AppleProviderConfig,
 } from './providers';
 
+// Refresh
+export { refreshExpiringOAuthTokens, type OAuthRefreshResult } from './refresh';
+
 // Types
 export type {
   OAuthConnectionInfo,

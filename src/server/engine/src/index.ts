@@ -331,7 +331,11 @@ export {
   checkStorageStatus,
   checkWebSocketStatus,
   getDetailedHealth,
+  getMetricsCollector,
   logStartupSummary,
+  MetricsCollector,
+  resetMetricsCollector,
+  type MetricsSummary,
   type SystemContext,
 } from './system';
 

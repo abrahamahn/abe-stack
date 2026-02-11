@@ -16,11 +16,33 @@ export {
 export { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './http-mapper';
 export type { ErrorMapperLogger, ErrorMapperOptions, HttpErrorResponse } from './http-mapper';
 
-export * from './cookies';
-export * from './jwt';
-
-export * from './password';
-export * from './refresh-token';
-export * from './request';
-export * from './response';
-export * from './username';
+export { setRefreshTokenCookie, clearRefreshTokenCookie } from './cookies';
+export type { TokenPayload } from './jwt';
+export {
+  JwtError,
+  createAccessToken,
+  verifyToken,
+  createRefreshToken,
+  getRefreshTokenExpiry,
+} from './jwt';
+export {
+  hashPassword,
+  verifyPassword,
+  needsRehash,
+  initDummyHashPool,
+  isDummyHashPoolInitialized,
+  resetDummyHashPool,
+  verifyPasswordSafe,
+} from './password';
+export {
+  createRefreshTokenFamily,
+  rotateRefreshToken,
+  revokeTokenFamily,
+  revokeAllUserTokens,
+  cleanupExpiredTokens,
+} from './refresh-token';
+export type { RequestInfo, RequestWithClientInfo } from './request';
+export { extractRequestInfo } from './request';
+export type { AuthUser, AuthResponseData } from './response';
+export { createAuthResponse } from './response';
+export { generateUniqueUsername, splitFullName } from './username';

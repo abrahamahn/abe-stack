@@ -12,10 +12,10 @@
  */
 
 import { execSync, spawn } from 'child_process';
-import * as net from 'net';
+import { Socket } from 'node:net';
 import { Buffer } from 'node:buffer';
 import process from 'node:process';
-import * as path from 'path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'url';
 
 import { buildConnectionString, canReachDatabase } from '@abe-stack/db';
@@ -23,8 +23,8 @@ import { loadServerEnv } from '@abe-stack/server-engine';
 
 import type { ChildProcess } from 'child_process';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '../../../../');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '../../../../');
 const USE_COLOR = process.stdout.isTTY;
 
 const COLORS = {
@@ -163,7 +163,7 @@ function killPorts(ports: number[]): void {
 
 function isPortOpen(port: number): Promise<boolean> {
   return new Promise((resolve) => {
-    const socket = new net.Socket();
+    const socket = new Socket();
     socket.setTimeout(1000);
     socket.once('connect', () => {
       socket.destroy();
@@ -259,7 +259,7 @@ function startWatcher(script: string): ChildProcess {
   });
 
   watcher.on('error', (err) => {
-    logLine('watch', `${path.basename(script)} failed to start: ${String(err)}`, 'error');
+    logLine('watch', `${basename(script)} failed to start: ${String(err)}`, 'error');
   });
 
   return watcher;

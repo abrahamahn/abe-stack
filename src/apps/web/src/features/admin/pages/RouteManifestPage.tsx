@@ -7,6 +7,7 @@
 
 import {
   Badge,
+  Checkbox,
   Heading,
   Input,
   PageContainer,
@@ -173,11 +174,10 @@ export const RouteManifestPage = (): JSX.Element => {
           </Select>
 
           <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={groupByModule}
-              onChange={(event) => {
-                setGroupByModule(event.target.checked);
+              onChange={(checked) => {
+                setGroupByModule(checked);
               }}
             />
             Group by module
@@ -238,7 +238,9 @@ function RouteTable({ routes }: { routes: RouteEntry[] }): JSX.Element {
               {route.hasSchema ? (
                 <Badge>Yes</Badge>
               ) : (
-                <span className="text-text-muted text-sm">-</span>
+                <Text as="span" className="text-text-muted text-sm">
+                  -
+                </Text>
               )}
             </TableCell>
           </TableRow>

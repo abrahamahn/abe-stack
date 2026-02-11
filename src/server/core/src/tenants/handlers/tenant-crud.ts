@@ -9,6 +9,7 @@
 
 import { mapErrorToHttpResponse } from '@abe-stack/shared';
 
+import { logActivity } from '../../activities';
 import {
   createTenant,
   deleteTenant,
@@ -58,6 +59,19 @@ export async function handleCreateTenant(
       name: body.name,
       slug: body.slug,
     });
+
+    // Fire-and-forget activity log
+    const tenantResult = tenant as { id?: string };
+    const tenantId = tenantResult.id ?? '';
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'tenant.created',
+      resourceType: 'tenant',
+      resourceId: tenantId,
+      tenantId,
+      metadata: { name: body.name },
+    }).catch(() => {});
 
     return { status: 201, body: tenant };
   } catch (error) {
@@ -151,6 +165,18 @@ export async function handleUpdateTenant(
     }
 
     const tenant = await updateTenant(deps.repos, tenantId, userId, body);
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'tenant.updated',
+      resourceType: 'tenant',
+      resourceId: tenantId,
+      tenantId,
+      metadata: { fields: Object.keys(body) },
+    }).catch(() => {});
+
     return { status: 200, body: tenant };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
@@ -184,6 +210,17 @@ export async function handleDeleteTenant(
     }
 
     await deleteTenant(deps.db, deps.repos, tenantId, userId);
+
+    // Fire-and-forget activity log
+    logActivity(deps.repos.activities, {
+      actorId: userId,
+      actorType: 'user',
+      action: 'tenant.deleted',
+      resourceType: 'tenant',
+      resourceId: tenantId,
+      tenantId,
+    }).catch(() => {});
+
     return { status: 200, body: { message: 'Workspace deleted' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, {

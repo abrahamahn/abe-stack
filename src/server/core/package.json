@@ -41,6 +41,26 @@
       "source": "./src/tenants/index.ts",
       "types": "./dist/tenants/index.d.ts",
       "default": "./dist/tenants/index.js"
+    },
+    "./api-keys": {
+      "source": "./src/api-keys/index.ts",
+      "types": "./dist/api-keys/index.d.ts",
+      "default": "./dist/api-keys/index.js"
+    },
+    "./activities": {
+      "source": "./src/activities/index.ts",
+      "types": "./dist/activities/index.d.ts",
+      "default": "./dist/activities/index.js"
+    },
+    "./feature-flags": {
+      "source": "./src/feature-flags/index.ts",
+      "types": "./dist/feature-flags/index.d.ts",
+      "default": "./dist/feature-flags/index.js"
+    },
+    "./audit": {
+      "source": "./src/audit/index.ts",
+      "types": "./dist/audit/index.d.ts",
+      "default": "./dist/audit/index.js"
     }
   },
   "scripts": {
