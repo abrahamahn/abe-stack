@@ -24,7 +24,8 @@ interface UserLocal {
 
 export const LoginPage = (): JSX.Element => {
   const authResult = useAuth();
-  const { login, forgotPassword, isAuthenticated } = authResult;
+  const { login, forgotPassword, verifyTotpLogin, sendSmsCode, verifySmsLogin, isAuthenticated } =
+    authResult;
   const user = authResult.user as UserLocal | null;
   const { isLoading, error, wrapHandler } = useFormState();
   const { navigateToMode } = useAuthModeNavigation();
@@ -41,6 +42,9 @@ export const LoginPage = (): JSX.Element => {
   const formProps: AuthFormProps = {
     mode: 'login',
     onLogin: wrapHandler(login),
+    onTotpVerify: verifyTotpLogin,
+    onSmsVerify: verifySmsLogin,
+    onSmsSendCode: sendSmsCode,
     onForgotPassword: wrapHandler(forgotPassword),
     onModeChange: navigateToMode,
     isLoading,

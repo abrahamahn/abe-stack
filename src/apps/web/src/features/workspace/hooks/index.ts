@@ -57,3 +57,9 @@ export {
   type Subscription,
   type SubscriptionResponse,
 } from './useWorkspaceBilling';
+export {
+  useAuditLog,
+  type UseAuditLogResult,
+  type AuditEvent,
+  type AuditEventsResponse,
+} from './useAuditLog';

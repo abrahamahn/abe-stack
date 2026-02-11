@@ -15,6 +15,8 @@ import type {
   EmailVerificationRequest,
   ForgotPasswordRequest,
   LoginRequest,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
   RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
@@ -39,6 +41,10 @@ export type AuthContextType = {
   verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
   resendVerification: (data: ResendVerificationRequest) => Promise<void>;
   verifyTotpLogin: (challengeToken: string, code: string) => Promise<void>;
+  sendSmsCode: (challengeToken: string) => Promise<void>;
+  verifySmsLogin: (challengeToken: string, code: string) => Promise<void>;
+  requestMagicLink: (data: MagicLinkRequest) => Promise<MagicLinkRequestResponse>;
+  verifyMagicLink: (data: { token: string }) => Promise<void>;
   dismissNewDeviceBanner: () => void;
 };
 
@@ -127,6 +133,34 @@ export function useAuth(): AuthContextType {
     [auth],
   );
 
+  const sendSmsCode = useCallback(
+    async (challengeToken: string): Promise<void> => {
+      await auth.sendSmsCode(challengeToken);
+    },
+    [auth],
+  );
+
+  const verifySmsLogin = useCallback(
+    async (challengeToken: string, code: string): Promise<void> => {
+      await auth.verifySmsLogin(challengeToken, code);
+    },
+    [auth],
+  );
+
+  const requestMagicLink = useCallback(
+    async (data: MagicLinkRequest): Promise<MagicLinkRequestResponse> => {
+      return auth.requestMagicLink(data);
+    },
+    [auth],
+  );
+
+  const verifyMagicLink = useCallback(
+    async (data: { token: string }): Promise<void> => {
+      await auth.verifyMagicLink(data);
+    },
+    [auth],
+  );
+
   const dismissNewDeviceBanner = useCallback((): void => {
     auth.dismissNewDeviceBanner();
   }, [auth]);
@@ -145,6 +179,10 @@ export function useAuth(): AuthContextType {
     verifyEmail,
     resendVerification,
     verifyTotpLogin,
+    sendSmsCode,
+    verifySmsLogin,
+    requestMagicLink,
+    verifyMagicLink,
     dismissNewDeviceBanner,
   };
 }

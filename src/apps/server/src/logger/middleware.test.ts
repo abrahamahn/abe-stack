@@ -177,19 +177,16 @@ describe('registerLoggingMiddleware', () => {
   });
 
   describe('onResponse hook', () => {
-    test('should log request completion with details', async () => {
+    test('should log request completion with IP and userAgent by default', async () => {
       registerLoggingMiddleware(server as unknown as FastifyInstance);
 
-      const request = createMockRequest();
+      const request = createMockRequest({
+        headers: { 'user-agent': 'TestAgent/1.0' },
+      } as Partial<FastifyRequest>);
       const reply = createMockReply({ statusCode: 201, elapsedTime: 123.456 });
 
-      // First run onRequest to set up logger
       await getHook(server, 'onRequest')(request, reply);
-
-      // Spy on the logger
       const loggerInfoSpy = vi.spyOn(request.logger, 'info');
-
-      // Then run onResponse
       await getHook(server, 'onResponse')(request, reply);
 
       expect(loggerInfoSpy).toHaveBeenCalledWith('Request completed', {
@@ -197,32 +194,97 @@ describe('registerLoggingMiddleware', () => {
         path: '/api/test',
         statusCode: 201,
         duration: 123,
+        ip: '127.0.0.1',
+        userAgent: 'TestAgent/1.0',
+      });
+    });
+
+    test('should omit IP and userAgent when requestContext is false', async () => {
+      registerLoggingMiddleware(server as unknown as FastifyInstance, {
+        clientErrorLevel: 'warn',
+        requestContext: false,
+      });
+
+      const request = createMockRequest({
+        headers: { 'user-agent': 'TestAgent/1.0' },
+      } as Partial<FastifyRequest>);
+      const reply = createMockReply({ statusCode: 200, elapsedTime: 50 });
+
+      await getHook(server, 'onRequest')(request, reply);
+      const loggerInfoSpy = vi.spyOn(request.logger, 'info');
+      await getHook(server, 'onResponse')(request, reply);
+
+      expect(loggerInfoSpy).toHaveBeenCalledWith('Request completed', {
+        method: 'GET',
+        path: '/api/test',
+        statusCode: 200,
+        duration: 50,
       });
     });
   });
 
   describe('onError hook', () => {
-    test('should log error with request details', async () => {
+    test('should log 5xx errors at error level with stack trace and context', async () => {
       registerLoggingMiddleware(server as unknown as FastifyInstance);
 
-      const request = createMockRequest();
+      const request = createMockRequest({
+        headers: { 'user-agent': 'TestAgent/1.0' },
+      } as Partial<FastifyRequest>);
       const reply = createMockReply({ statusCode: 500 });
       const error = new Error('Test error');
 
-      // First run onRequest to set up logger
       await getHook(server, 'onRequest')(request, reply);
-
-      // Spy on the logger
       const loggerErrorSpy = vi.spyOn(request.logger, 'error');
-
-      // Then run onError
       await getHook(server, 'onError')(request, reply, error);
 
       expect(loggerErrorSpy).toHaveBeenCalledWith(error, {
         method: 'GET',
         path: '/api/test',
         statusCode: 500,
+        ip: '127.0.0.1',
+        userAgent: 'TestAgent/1.0',
       });
+    });
+
+    test('should log 4xx errors at warn level by default with summary only', async () => {
+      registerLoggingMiddleware(server as unknown as FastifyInstance);
+
+      const request = createMockRequest();
+      const reply = createMockReply({ statusCode: 404 });
+      const error = Object.assign(new Error('Not found'), { code: 'NOT_FOUND' });
+
+      await getHook(server, 'onRequest')(request, reply);
+      const loggerWarnSpy = vi.spyOn(request.logger, 'warn');
+      await getHook(server, 'onError')(request, reply, error);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith('Client error', {
+        method: 'GET',
+        path: '/api/test',
+        statusCode: 404,
+        code: 'NOT_FOUND',
+        message: 'Not found',
+        correlationId: request.correlationId,
+      });
+    });
+
+    test('should respect clientErrorLevel config for 4xx errors', async () => {
+      registerLoggingMiddleware(server as unknown as FastifyInstance, {
+        clientErrorLevel: 'info',
+        requestContext: true,
+      });
+
+      const request = createMockRequest();
+      const reply = createMockReply({ statusCode: 400 });
+      const error = new Error('Bad request');
+
+      await getHook(server, 'onRequest')(request, reply);
+      const loggerInfoSpy = vi.spyOn(request.logger, 'info');
+      await getHook(server, 'onError')(request, reply, error);
+
+      expect(loggerInfoSpy).toHaveBeenCalledWith('Client error', expect.objectContaining({
+        statusCode: 400,
+        message: 'Bad request',
+      }));
     });
   });
 });

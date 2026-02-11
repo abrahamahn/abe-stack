@@ -309,6 +309,10 @@ function createMockContext(billingEnabled = false): AppContext {
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         },
         logLevel: 'info' as const,
+        logging: {
+          clientErrorLevel: 'warn' as const,
+          requestContext: true,
+        },
         maintenanceMode: false,
         auditRetentionDays: 90,
         rateLimit: {
@@ -442,7 +446,7 @@ describe('registerRoutes', () => {
 
       // Core routes use /api prefix; system routes use empty prefix
       const apiCalls = mockRegisterRouteMap.mock.calls.filter(
-        (call) => (call[3] as { prefix: string }).prefix === '/api',
+        (call) => (call[3] as { prefix: string }).prefix === '/api/v1',
       );
       const systemCalls = mockRegisterRouteMap.mock.calls.filter(
         (call) => (call[3] as { prefix: string }).prefix === '',
@@ -452,7 +456,7 @@ describe('registerRoutes', () => {
       expect(apiCalls.length).toBeGreaterThan(0);
       for (const call of apiCalls) {
         const options = call[3] as { prefix: string; jwtSecret: string };
-        expect(options.prefix).toBe('/api');
+        expect(options.prefix).toBe('/api/v1');
         expect(options.jwtSecret).toBe('test-jwt-secret');
       }
     });
@@ -487,7 +491,7 @@ describe('registerRoutes', () => {
 
       expect(billingCall).toBeDefined();
       expect(billingCall![3]).toMatchObject({
-        prefix: '/api',
+        prefix: '/api/v1',
         jwtSecret: 'test-jwt-secret',
       });
     });
@@ -711,7 +715,7 @@ describe('registerRoutes', () => {
           continue;
         }
         expect(options).toMatchObject({
-          prefix: '/api',
+          prefix: '/api/v1',
           jwtSecret: 'test-jwt-secret',
         });
         expect(typeof options.authGuardFactory).toBe('function');
@@ -743,7 +747,7 @@ describe('registerRoutes', () => {
 
       const options = billingCall![3] as { prefix: string; jwtSecret: string };
       expect(options).toMatchObject({
-        prefix: '/api',
+        prefix: '/api/v1',
         jwtSecret: 'test-jwt-secret',
       });
     });

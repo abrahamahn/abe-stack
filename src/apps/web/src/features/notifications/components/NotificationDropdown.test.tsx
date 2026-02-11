@@ -26,7 +26,7 @@ vi.mock('@abe-stack/ui', async () => {
       </button>
     ),
     Heading: ({ children }: { children: ReactNode }) => <h3>{children}</h3>,
-    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Skeleton: (props: Record<string, unknown>) => <div data-testid="skeleton" style={props as React.CSSProperties} />,
     Text: ({ children, tone }: { children: ReactNode; tone?: string }) => (
       <span data-tone={tone}>{children}</span>
     ),
@@ -74,16 +74,17 @@ describe('NotificationDropdown', () => {
     expect(screen.getByText('Notifications')).toBeInTheDocument();
   });
 
-  it('should show spinner when loading', () => {
+  it('should show skeleton loaders when loading', () => {
     render(<NotificationDropdown {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    expect(screen.getAllByTestId('skeleton')).toHaveLength(3);
   });
 
-  it('should show empty message when no notifications', () => {
+  it('should show empty state when no notifications', () => {
     render(<NotificationDropdown {...defaultProps} />);
 
-    expect(screen.getByText('No notifications')).toBeInTheDocument();
+    expect(screen.getByText('All caught up')).toBeInTheDocument();
+    expect(screen.getByText('No new notifications')).toBeInTheDocument();
   });
 
   it('should render notification titles', () => {

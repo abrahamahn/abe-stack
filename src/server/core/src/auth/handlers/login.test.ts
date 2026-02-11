@@ -30,6 +30,9 @@ const {
   mockSendNewLoginAlert,
   mockIsCaptchaRequired,
   mockVerifyCaptchaToken,
+  mockGenerateDeviceFingerprint,
+  mockIsKnownDevice,
+  mockRecordDeviceAccess,
 } = vi.hoisted(() => ({
   mockAuthenticateUser: vi.fn(),
   mockResendVerificationEmail: vi.fn().mockResolvedValue(undefined),
@@ -37,6 +40,9 @@ const {
   mockSendNewLoginAlert: vi.fn().mockResolvedValue(undefined),
   mockIsCaptchaRequired: vi.fn(() => false),
   mockVerifyCaptchaToken: vi.fn().mockResolvedValue({ success: true, errorCodes: [] }),
+  mockGenerateDeviceFingerprint: vi.fn().mockReturnValue('mock-fingerprint'),
+  mockIsKnownDevice: vi.fn().mockResolvedValue(false),
+  mockRecordDeviceAccess: vi.fn().mockResolvedValue(undefined),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
   mockMapErrorToHttpResponse: vi.fn((error: unknown, _ctx: unknown) => {
     if (error instanceof Error) {
@@ -82,6 +88,9 @@ vi.mock('../security', () => ({
   sendNewLoginAlert: mockSendNewLoginAlert,
   isCaptchaRequired: mockIsCaptchaRequired,
   verifyCaptchaToken: mockVerifyCaptchaToken,
+  generateDeviceFingerprint: mockGenerateDeviceFingerprint,
+  isKnownDevice: mockIsKnownDevice,
+  recordDeviceAccess: mockRecordDeviceAccess,
 }));
 
 // Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
@@ -104,6 +113,9 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
       refreshTokenFamilies: {
         findActiveByUserId: vi.fn().mockResolvedValue([]),
         revoke: vi.fn().mockResolvedValue(undefined),
+      },
+      memberships: {
+        findByUserId: vi.fn().mockResolvedValue([]),
       },
     } as unknown as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],

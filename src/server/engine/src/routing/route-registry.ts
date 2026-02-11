@@ -27,6 +27,8 @@ export interface RouteRegistryEntry {
   hasSchema: boolean;
   /** Logical module name, e.g. "auth", "users", "admin" */
   module: string;
+  /** Whether the route is deprecated */
+  deprecated?: boolean;
   /** Short description for OpenAPI docs */
   summary?: string;
   /** OpenAPI tags */

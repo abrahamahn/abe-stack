@@ -17,6 +17,10 @@ export type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+  MagicLinkVerifyRequest,
+  MagicLinkVerifyResponse,
   OAuthConnectionsResponse,
   OAuthEnabledProvidersResponse,
   OAuthProvider,
@@ -27,6 +31,7 @@ export type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   TotpLoginVerifyRequest,
   TotpSetupResponse,
@@ -100,6 +105,18 @@ export type {
   UseNotificationPreferencesOptions,
   UsePushSubscriptionOptions,
 } from './notifications/hooks';
+
+// Devices
+export { createDeviceClient } from './devices/client';
+export type { DeviceClient, DeviceClientConfig, DeviceItem } from './devices/client';
+export { useDevices } from './devices/hooks';
+export type { DevicesState, UseDevicesOptions } from './devices/hooks';
+
+// Phone/SMS
+export { createPhoneClient } from './phone/client';
+export type { PhoneClient, PhoneClientConfig } from './phone/client';
+export { usePhone } from './phone/hooks';
+export type { PhoneState, UsePhoneOptions } from './phone/hooks';
 
 // OAuth
 export {

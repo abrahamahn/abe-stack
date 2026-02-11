@@ -9,6 +9,7 @@
 import { createReadStream, statSync } from 'node:fs';
 import { extname, isAbsolute, join, normalize, relative, resolve } from 'node:path';
 
+import { HTTP_STATUS } from '@abe-stack/shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 /**
@@ -124,7 +125,7 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
   // Register route for static files
   server.get(`${normalizedPrefix}*`, async (req: FastifyRequest, reply: FastifyReply) => {
     if (isRateLimited(getRequesterId(req))) {
-      return reply.status(429).send({ error: 'Too many requests' });
+      return reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({ error: 'Too many requests' });
     }
 
     const url = req.url;
@@ -137,12 +138,12 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
     try {
       decodedPath = decodeURIComponent(relativePath);
     } catch {
-      return reply.status(400).send({ error: 'Invalid path encoding' });
+      return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid path encoding' });
     }
 
     // Security: Check for path traversal
     if (!isSafePath(root, decodedPath)) {
-      return reply.status(403).send({ error: 'Forbidden' });
+      return reply.status(HTTP_STATUS.FORBIDDEN).send({ error: 'Forbidden' });
     }
 
     const fullPath = join(root, decodedPath);
@@ -152,7 +153,7 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
       const stats = statSync(fullPath);
 
       if (!stats.isFile()) {
-        return await reply.status(404).send({ error: 'Not found' });
+        return await reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
       }
 
       // Set headers
@@ -168,10 +169,10 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
     } catch (err) {
       const error = err as NodeJS.ErrnoException;
       if (error.code === 'ENOENT') {
-        return reply.status(404).send({ error: 'Not found' });
+        return reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
       }
       server.log.error({ err, path: fullPath }, 'Static file serve error');
-      return reply.status(500).send({ error: 'Internal server error' });
+      return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Internal server error' });
     }
   });
 

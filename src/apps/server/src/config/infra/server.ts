@@ -78,5 +78,11 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
       windowMs: env.RATE_LIMIT_WINDOW_MS ?? 60000,
       max: env.RATE_LIMIT_MAX ?? (isProd ? 100 : 1000),
     },
+
+    // Logging behavior
+    logging: {
+      clientErrorLevel: env.LOG_CLIENT_ERROR_LEVEL ?? 'warn',
+      requestContext: env.LOG_REQUEST_CONTEXT !== 'false',
+    },
   };
 }

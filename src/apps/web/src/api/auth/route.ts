@@ -7,6 +7,10 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+  MagicLinkVerifyRequest,
+  MagicLinkVerifyResponse,
   RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
@@ -28,6 +32,8 @@ export interface AuthRouteClient {
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
   resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
+  magicLinkRequest: (data: MagicLinkRequest) => Promise<MagicLinkRequestResponse>;
+  magicLinkVerify: (data: MagicLinkVerifyRequest) => Promise<MagicLinkVerifyResponse>;
 }
 
 export const createAuthRoute = (api: ApiClient): AuthRouteClient => ({
@@ -41,4 +47,6 @@ export const createAuthRoute = (api: ApiClient): AuthRouteClient => ({
   resetPassword: (data) => api.resetPassword(data),
   verifyEmail: (data) => api.verifyEmail(data),
   resendVerification: (data) => api.resendVerification(data),
+  magicLinkRequest: (data) => api.magicLinkRequest(data),
+  magicLinkVerify: (data) => api.magicLinkVerify(data),
 });

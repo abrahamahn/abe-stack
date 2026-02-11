@@ -8,7 +8,7 @@ import {
 
 import { cn } from '../../utils/cn';
 
-import type { Plan, PlanFeature } from '@abe-stack/shared';
+import type { Plan, PlanFeature, PlanInterval } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -41,7 +41,7 @@ export interface PlanCardProps extends Omit<ComponentPropsWithoutRef<'div'>, 'ch
 // Default Formatters
 // ============================================================================
 
-function defaultFormatPrice(priceInCents: number, currency: string, interval: string): string {
+function defaultFormatPrice(priceInCents: number, currency: string, interval: PlanInterval): string {
   const price = priceInCents / 100;
   const currencySymbol = currency.toUpperCase() === 'USD' ? '$' : currency.toUpperCase();
   return `${currencySymbol}${price.toFixed(2)}/${interval === 'month' ? 'mo' : 'yr'}`;

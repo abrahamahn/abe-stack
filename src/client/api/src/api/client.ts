@@ -17,6 +17,10 @@ import type {
   ForgotPasswordResponse,
   LoginRequest,
   LogoutResponse,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+  MagicLinkVerifyRequest,
+  MagicLinkVerifyResponse,
   OAuthConnectionsResponse,
   OAuthEnabledProvidersResponse,
   OAuthProvider,
@@ -30,6 +34,7 @@ import type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   TotpLoginVerifyRequest,
   TotpSetupResponse,
@@ -59,7 +64,9 @@ export interface ApiClientConfig {
 }
 
 export interface ApiClient {
-  login: (data: LoginRequest) => Promise<AuthResponse | TotpLoginChallengeResponse>;
+  login: (
+    data: LoginRequest,
+  ) => Promise<AuthResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse>;
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
   refresh: () => Promise<RefreshResponse>;
   logout: () => Promise<LogoutResponse>;
@@ -74,6 +81,12 @@ export interface ApiClient {
   totpDisable: (data: TotpVerifyRequest) => Promise<TotpVerifyResponse>;
   totpStatus: () => Promise<TotpStatusResponse>;
   totpVerifyLogin: (data: TotpLoginVerifyRequest) => Promise<AuthResponse>;
+  // SMS 2FA methods
+  smsSendCode: (data: { challengeToken: string }) => Promise<{ message: string }>;
+  smsVerifyLogin: (data: { challengeToken: string; code: string }) => Promise<AuthResponse>;
+  // Magic link methods
+  magicLinkRequest: (data: MagicLinkRequest) => Promise<MagicLinkRequestResponse>;
+  magicLinkVerify: (data: MagicLinkVerifyRequest) => Promise<MagicLinkVerifyResponse>;
   // Email change methods
   changeEmail: (data: ChangeEmailRequest) => Promise<ChangeEmailResponse>;
   confirmEmailChange: (data: ConfirmEmailChangeRequest) => Promise<ConfirmEmailChangeResponse>;
@@ -167,11 +180,13 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   };
 
   return {
-    async login(data: LoginRequest): Promise<AuthResponse | TotpLoginChallengeResponse> {
-      return request<AuthResponse | TotpLoginChallengeResponse>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+    async login(
+      data: LoginRequest,
+    ): Promise<AuthResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse> {
+      return request<AuthResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse>(
+        '/auth/login',
+        { method: 'POST', body: JSON.stringify(data) },
+      );
     },
     async register(data: RegisterRequest): Promise<RegisterResponse> {
       return request<RegisterResponse>('/auth/register', {
@@ -242,6 +257,35 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     async totpVerifyLogin(data: TotpLoginVerifyRequest): Promise<AuthResponse> {
       return request<AuthResponse>('/auth/totp/verify-login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    // SMS 2FA methods
+    async smsSendCode(data: { challengeToken: string }): Promise<{ message: string }> {
+      return request<{ message: string }>('/auth/sms/send', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async smsVerifyLogin(data: {
+      challengeToken: string;
+      code: string;
+    }): Promise<AuthResponse> {
+      return request<AuthResponse>('/auth/sms/verify', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    // Magic link methods
+    async magicLinkRequest(data: MagicLinkRequest): Promise<MagicLinkRequestResponse> {
+      return request<MagicLinkRequestResponse>('/auth/magic-link/request', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async magicLinkVerify(data: MagicLinkVerifyRequest): Promise<MagicLinkVerifyResponse> {
+      return request<MagicLinkVerifyResponse>('/auth/magic-link/verify', {
         method: 'POST',
         body: JSON.stringify(data),
       });

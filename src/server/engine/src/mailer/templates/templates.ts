@@ -492,6 +492,43 @@ If you need assistance, please contact our support team immediately.
   },
 
   /**
+   * Welcome email sent after successful email verification.
+   * Includes greeting with name, brief product intro, and CTA to log in.
+   */
+  welcome(firstName: string, loginUrl: string): EmailOptions & { to: '' } {
+    return {
+      to: '',
+      subject: 'Welcome to ABE Stack!',
+      text: `
+Hi ${firstName}, welcome to ABE Stack!
+
+Your email has been verified and your account is ready to go.
+
+ABE Stack gives you a complete, production-ready foundation for building modern applications — authentication, billing, notifications, and more, all out of the box.
+
+Sign in to get started:
+${loginUrl}
+
+If you have any questions, reply to this email. We're happy to help.
+      `.trim(),
+      html: renderLayout(
+        'Welcome',
+        `
+        <h2 style="${styles.heading}">Welcome to ABE Stack!</h2>
+        <p style="${styles.text}">Hi <strong>${firstName}</strong>, your email has been verified and your account is ready to go.</p>
+        <p style="${styles.text}">ABE Stack gives you a complete, production-ready foundation for building modern applications &mdash; authentication, billing, notifications, and more, all out of the box.</p>
+        <p>
+          <a href="${loginUrl}" style="${styles.buttonSuccess}">
+            Get Started
+          </a>
+        </p>
+        <p style="${styles.footer}">If you have any questions, reply to this email. We're happy to help.</p>
+        `,
+      ),
+    };
+  },
+
+  /**
    * Workspace invitation email
    * Sent when a user is invited to join a workspace.
    */

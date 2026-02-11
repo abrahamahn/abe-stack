@@ -12,6 +12,7 @@ import {
   signToken,
   validateCsrfToken,
 } from '@abe-stack/server-engine';
+import { HTTP_STATUS } from '@abe-stack/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -162,7 +163,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     // Get token from cookie
     const cookieToken = req.cookies[cookieName];
     if (cookieToken == null || cookieToken === '') {
-      reply.status(403).send({
+      reply.status(HTTP_STATUS.FORBIDDEN).send({
         error: 'Forbidden',
         message: 'Missing CSRF token',
       });
@@ -178,7 +179,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
       ((req.body as Record<string, unknown> | null)?.['_csrf'] as string | undefined);
 
     if (headerToken == null || headerToken === '') {
-      reply.status(403).send({
+      reply.status(HTTP_STATUS.FORBIDDEN).send({
         error: 'Forbidden',
         message: 'Missing CSRF token in request',
       });
@@ -193,7 +194,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     });
 
     if (!isValid) {
-      reply.status(403).send({
+      reply.status(HTTP_STATUS.FORBIDDEN).send({
         error: 'Forbidden',
         message: 'CSRF token mismatch',
       });

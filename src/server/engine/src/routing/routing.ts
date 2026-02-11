@@ -79,6 +79,14 @@ export interface RouteOpenApiMeta {
   hide?: boolean;
 }
 
+/** Deprecation metadata for sunset routes */
+export interface RouteDeprecation {
+  /** ISO 8601 date when the route will be removed */
+  sunset?: string;
+  /** Human-readable deprecation message */
+  message?: string;
+}
+
 export interface RouteDefinition {
   method: HttpMethod;
   handler: RouteHandler;
@@ -87,6 +95,8 @@ export interface RouteDefinition {
   schema?: RouteSchema;
   /** Optional OpenAPI metadata for swagger docs */
   openapi?: RouteOpenApiMeta;
+  /** Mark route as deprecated — adds Sunset and Deprecation response headers */
+  deprecated?: RouteDeprecation;
 }
 
 export type RouteMap = Map<string, RouteDefinition>;
@@ -276,6 +286,22 @@ export function registerRouteMap(
       baseOptions.schema = schema as FastifySchema;
     }
 
+    // Add deprecation headers via onSend hook if route is deprecated
+    if (route.deprecated !== undefined) {
+      const deprecation = route.deprecated;
+      app.addHook('onSend', async (request, reply) => {
+        if (request.url === fullPath || request.routeOptions?.url === path) {
+          reply.header('Deprecation', 'true');
+          if (deprecation.sunset !== undefined) {
+            reply.header('Sunset', deprecation.sunset);
+          }
+          if (deprecation.message !== undefined) {
+            reply.header('X-Deprecation-Notice', deprecation.message);
+          }
+        }
+      });
+    }
+
     app.route(baseOptions as RouteOptions);
 
     // Feed the route registry
@@ -286,6 +312,7 @@ export function registerRouteMap(
       roles: route.roles ?? [],
       hasSchema: route.schema !== undefined,
       module: options.module ?? deriveModule(fullPath, options.prefix),
+      deprecated: route.deprecated !== undefined,
       ...(route.openapi?.summary !== undefined ? { summary: route.openapi.summary } : {}),
       ...(route.openapi?.tags !== undefined ? { tags: route.openapi.tags } : {}),
     });

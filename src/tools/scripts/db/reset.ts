@@ -2,63 +2,92 @@
 /**
  * Database Reset Script
  *
- * Truncates the users table and all dependent tables (cascading).
+ * Drops all tables, recreates the schema, and seeds dev data.
  * Run with: pnpm db:reset
  *
- * Environment variables are loaded via Node's native --env-file flag in package.json scripts.
+ * Supports --force flag to skip confirmation prompt.
  *
- * WARNING: This script is for DEVELOPMENT ONLY. It deletes data.
+ * WARNING: This script is for DEVELOPMENT ONLY. It destroys all data.
  */
+
+import { createInterface } from 'node:readline';
 
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
 import { loadServerEnv } from '@abe-stack/server-engine';
 
+import { pushSchema } from './push';
+import { seed } from './seed';
+
 /**
- * Reset the database by truncating the users table.
+ * Prompt the user for confirmation via stdin.
+ *
+ * @param message - The confirmation message to display
+ * @returns True if the user confirms (y/Y), false otherwise
+ */
+async function confirm(message: string): Promise<boolean> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`${message} (y/N) `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'y');
+    });
+  });
+}
+
+/**
+ * Reset the database: DROP schema → recreate → push → seed.
  *
  * @throws {Error} If NODE_ENV is 'production' (exits with code 1)
- * @throws {Error} If database connection or truncate fails
+ * @throws {Error} If database connection or operations fail
  */
 export async function reset(): Promise<void> {
-  // Load + validate `config/env` files (prefers `.env.local` when present).
   loadServerEnv();
 
-  // Safety check: refuse to reset in production
   if (process.env['NODE_ENV'] === 'production') {
-    console.error('');
-    console.error('ERROR: Cannot run reset script in production!');
-    console.error('');
-    console.error('This script deletes all user data and is intended');
-    console.error('for development environments only.');
-    console.error('');
+    process.stderr.write('\nERROR: Cannot run reset script in production!\n');
+    process.stderr.write('This script destroys all data and is intended for development only.\n\n');
     process.exit(1);
   }
 
-  console.log('🗑️  Resetting database...\n');
+  const force = process.argv.includes('--force');
+
+  if (!force) {
+    const confirmed = await confirm(
+      '\n⚠️  This will DROP all tables and data. Continue?',
+    );
+    if (!confirmed) {
+      process.stdout.write('Aborted.\n');
+      process.exit(0);
+    }
+  }
+
+  process.stdout.write('\n🗑️  Resetting database...\n\n');
 
   try {
     const connectionString = buildConnectionString();
     const db = createDbClient(connectionString);
 
-    console.log('⚠️  Truncating users table (CASCADE)...');
+    // 1. Drop everything
+    process.stdout.write('  Dropping schema...\n');
+    await db.execute({ text: 'DROP SCHEMA public CASCADE', values: [] });
+    await db.execute({ text: 'CREATE SCHEMA public', values: [] });
 
-    // Truncate users table, cascading to all dependent tables (sessions, tokens, etc.)
-    // RESTART IDENTITY resets serial sequences
-    await db.execute({
-      text: 'TRUNCATE TABLE users RESTART IDENTITY CASCADE',
-      values: [],
-    });
+    // 2. Recreate tables
+    process.stdout.write('  Pushing schema...\n');
+    await pushSchema();
 
-    console.log('✅ Database reset successfully!\n');
+    // 3. Seed dev data
+    process.stdout.write('  Seeding data...\n');
+    await seed();
+
+    process.stdout.write('\n✅ Database reset successfully!\n\n');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Reset failed:', error);
+    process.stderr.write(`\n❌ Reset failed: ${String(error)}\n`);
     process.exit(1);
   }
 }
 
-// Only run when executed directly (not imported for testing)
-// We check if this file is the main module being executed
 const isMainModule =
   typeof process !== 'undefined' &&
   process.argv[1] !== undefined &&
@@ -67,7 +96,7 @@ const isMainModule =
 
 if (isMainModule) {
   reset().catch((error: unknown) => {
-    console.error('❌ Reset failed:', error);
+    process.stderr.write(`❌ Reset failed: ${String(error)}\n`);
     process.exit(1);
   });
 }

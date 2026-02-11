@@ -5,6 +5,8 @@ export { Can, meetsRoleRequirement, RequireWorkspaceRole } from './components';
 export type { CanProps, RequireWorkspaceRoleProps } from './components';
 export { WorkspaceList, CreateWorkspaceDialog, WorkspaceSettingsForm } from './components';
 export { MembersList, InviteMemberDialog, InvitationsList, TenantSwitcher } from './components';
+export { MemberDetailPanel, WorkspaceAuditLog } from './components';
+export type { MemberDetailPanelProps, MemberDetail, WorkspaceAuditLogProps } from './components';
 
 // Hooks
 export { usePermissions } from './hooks';
@@ -19,6 +21,8 @@ export {
   useResendInvitation,
   useAcceptInvitation,
 } from './hooks';
+export { useAuditLog } from './hooks';
+export type { UseAuditLogResult, AuditEvent } from './hooks';
 
 // Pages
 export { WorkspaceListPage, WorkspaceDetailPage, AcceptInvitationPage } from './pages';

@@ -89,6 +89,10 @@ function createMockConfig(): AppConfig {
       trustProxy: false,
       apiBaseUrl: 'http://localhost:3000',
       appBaseUrl: 'http://localhost:3001',
+      logging: {
+        clientErrorLevel: 'warn' as const,
+        requestContext: true,
+      },
     },
     database: {
       provider: 'postgresql',

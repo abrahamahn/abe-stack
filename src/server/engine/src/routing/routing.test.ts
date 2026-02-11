@@ -506,6 +506,7 @@ describe('registerRouteMap', () => {
       roles: [],
       hasSchema: true,
       module: 'auth',
+      deprecated: false,
     });
 
     expect(registry[1]).toEqual({
@@ -515,6 +516,7 @@ describe('registerRouteMap', () => {
       roles: ['admin'],
       hasSchema: false,
       module: 'admin',
+      deprecated: false,
     });
   });
 

@@ -14,11 +14,13 @@ import {
   AvatarUpload,
   DataControlsSection,
   DangerZone,
+  DevicesList,
   EmailChangeForm,
   ForgotPasswordShortcut,
   NotificationPreferencesForm,
   OAuthConnectionsList,
   PasswordChangeForm,
+  PhoneManagement,
   PreferencesSection,
   ProfileCompleteness,
   ProfileForm,
@@ -81,6 +83,13 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
 
       <div className="border-t pt-6">
         <Heading as="h3" size="md" className="mb-4">
+          SMS Authentication
+        </Heading>
+        <PhoneManagement user={user} baseUrl="" getToken={undefined} />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
           Change Password
         </Heading>
         <PasswordChangeForm />
@@ -112,15 +121,28 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
 
 const SessionsTab = (): ReactElement => {
   return (
-    <div>
-      <Heading as="h3" size="md" className="mb-4">
-        Active Sessions
-      </Heading>
-      <Text tone="muted" size="sm" className="mb-4">
-        Manage your active sessions across devices. Revoking a session will log you out from that
-        device.
-      </Text>
-      <SessionsList />
+    <div className="space-y-6">
+      <div>
+        <Heading as="h3" size="md" className="mb-4">
+          Active Sessions
+        </Heading>
+        <Text tone="muted" size="sm" className="mb-4">
+          Manage your active sessions across devices. Revoking a session will log you out from that
+          device.
+        </Text>
+        <SessionsList />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
+          Known Devices
+        </Heading>
+        <Text tone="muted" size="sm" className="mb-4">
+          Devices are tracked when you log in. You can trust devices to skip new device alerts, or
+          remove devices you no longer use.
+        </Text>
+        <DevicesList baseUrl="" getToken={undefined} />
+      </div>
     </div>
   );
 };

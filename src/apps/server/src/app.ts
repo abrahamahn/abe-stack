@@ -10,7 +10,12 @@ import { registerRoutes } from '@routes';
 import { createInfrastructure } from './infrastructure';
 
 import type { DbClient, PostgresPubSub, Repositories } from '@abe-stack/db';
-import type { QueueServer, ServerSearchProvider, WriteService } from '@abe-stack/server-engine';
+import type {
+  QueueServer,
+  ServerSearchProvider,
+  SmsProvider,
+  WriteService,
+} from '@abe-stack/server-engine';
 import type { BillingService, CacheProvider, EmailService, StorageClient } from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
 import type { AppContext, IServiceContainer } from '@shared';
@@ -53,6 +58,7 @@ export class App implements IServiceContainer {
   public readonly pubsub: SubscriptionManager;
   public readonly cache: CacheProvider;
   public readonly emailTemplates: IServiceContainer['emailTemplates'];
+  public readonly sms?: SmsProvider | undefined;
 
   private readonly _pgPubSub: PostgresPubSub | null = null;
   private _server: FastifyInstance | null = null;
@@ -118,6 +124,7 @@ export class App implements IServiceContainer {
     this.write = options.write ?? infra.write;
     this.cache = options.cache ?? infra.cache;
     this.emailTemplates = infra.emailTemplates;
+    this.sms = infra.sms;
 
     this._pgPubSub = infra.pgPubSub;
   }
@@ -201,6 +208,7 @@ export class App implements IServiceContainer {
       pubsub: this.pubsub,
       cache: this.cache,
       emailTemplates: this.emailTemplates,
+      sms: this.sms,
       log: this.log,
     };
   }

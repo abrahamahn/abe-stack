@@ -83,6 +83,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   // Register plugins (dependency-injected — server owns the config mapping)
   registerPlugins(server, {
     env: config.env,
+    clientErrorLevel: config.server.logging.clientErrorLevel as 'debug' | 'info' | 'warn' | 'error',
     corsOrigin: config.server.cors.origin.join(','),
     corsCredentials: config.server.cors.credentials,
     corsMethods: config.server.cors.methods,

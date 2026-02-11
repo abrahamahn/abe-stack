@@ -146,6 +146,19 @@ export interface TotpChallengeResult {
 }
 
 /**
+ * Result returned when the user has SMS 2FA enabled (phone verified, no TOTP).
+ * Contains a signed JWT challenge token (5-minute expiry) with the user ID.
+ */
+export interface SmsChallengeResult {
+  /** Discriminant — always true for SMS challenge responses */
+  requiresSms: true;
+  /** Signed JWT challenge token (purpose: sms_challenge, userId, 5-min expiry) */
+  challengeToken: string;
+  /** Human-readable message */
+  message: string;
+}
+
+/**
  * Token refresh result.
  */
 export interface RefreshResult {
@@ -351,7 +364,7 @@ export async function authenticateUser(
   ipAddress?: string,
   userAgent?: string,
   onPasswordRehash?: (userId: string, error?: Error) => void,
-): Promise<AuthResult | TotpChallengeResult> {
+): Promise<AuthResult | TotpChallengeResult | SmsChallengeResult> {
   // Resolve identifier: email (contains '@') or username
   const isEmail = identifier.includes('@');
   const normalizedIdentifier = isEmail ? normalizeEmail(identifier) : identifier;
@@ -449,6 +462,35 @@ export async function authenticateUser(
     };
   }
 
+  // Check if SMS 2FA is active (phone verified, TOTP not enabled)
+  if (user.phoneVerified === true) {
+    await logLoginAttempt(
+      db,
+      lockoutKey,
+      true,
+      ipAddress,
+      userAgent,
+      LOGIN_FAILURE_REASON.SMS_REQUIRED,
+    );
+
+    // Check if password hash needs upgrading (background task)
+    if (needsRehash(user.passwordHash)) {
+      rehashPassword(db, config, user.id, password, logger, onPasswordRehash);
+    }
+
+    const challengeToken = jwtSign(
+      { userId: user.id, purpose: 'sms_challenge' },
+      config.jwt.secret,
+      { expiresIn: '5m' },
+    );
+
+    return {
+      requiresSms: true,
+      challengeToken,
+      message: 'SMS verification required. Please request a code.',
+    };
+  }
+
   // Create tokens and log success atomically
   const { refreshToken } = await withTransaction(db, async (tx) => {
     await logLoginAttempt(tx, lockoutKey, true, ipAddress, userAgent);
@@ -501,7 +543,7 @@ export async function authenticateUser(
  */
 export async function refreshUserTokens(
   db: DbClient,
-  _repos: Repositories,
+  repos: Repositories,
   config: AuthConfig,
   oldRefreshToken: string,
   ipAddress?: string,
@@ -520,13 +562,20 @@ export async function refreshUserTokens(
     throw new InvalidTokenError();
   }
 
-  // Create new access token
+  // Check token version: reject if all sessions were invalidated
+  const user = await repos.users.findById(result.userId);
+  if (user === null) {
+    throw new InvalidTokenError();
+  }
+
+  // Create new access token with current tokenVersion
   const accessToken = createAccessToken(
     result.userId,
     result.email,
     result.role,
     config.jwt.secret,
     config.jwt.accessTokenExpiry,
+    user.tokenVersion,
   );
 
   return {

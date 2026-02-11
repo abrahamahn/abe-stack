@@ -39,7 +39,9 @@ vi.mock('@abe-stack/ui', () => ({
       {children}
     </select>
   ),
-  Spinner: () => <div data-testid="spinner">Loading...</div>,
+  Skeleton: (props: { width?: string | number; height?: string | number }) => (
+    <div data-testid="skeleton" style={{ width: props.width, height: props.height }} />
+  ),
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
   TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
@@ -94,7 +96,7 @@ const mockEvents = [
 ];
 
 describe('AuditEventsPage', () => {
-  it('should show loading spinner while data is loading', () => {
+  it('should show skeleton placeholders while data is loading', () => {
     mockUseAuditEvents.mockReturnValue({
       data: undefined,
       isLoading: true,
@@ -104,7 +106,7 @@ describe('AuditEventsPage', () => {
     });
 
     render(<AuditEventsPage />);
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
   it('should show error message on failure', () => {

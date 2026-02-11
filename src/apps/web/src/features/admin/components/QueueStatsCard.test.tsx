@@ -28,13 +28,12 @@ const mockStats: QueueStats = {
 
 describe('QueueStatsCard', () => {
   describe('loading state', () => {
-    it('should show spinner when loading', () => {
+    it('should show skeleton placeholders when loading', () => {
       const { container } = render(
         <QueueStatsCard stats={undefined} isLoading={true} isError={false} error={null} />,
       );
 
-      // Spinner has .spinner class, not role="status"
-      expect(container.querySelector('.spinner')).toBeInTheDocument();
+      expect(container.querySelector('.skeleton')).toBeInTheDocument();
     });
 
     it('should not show stats when loading', () => {

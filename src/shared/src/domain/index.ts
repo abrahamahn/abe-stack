@@ -91,6 +91,7 @@ export {
   type ResetPasswordResponse,
   type SetPasswordRequest,
   type SetPasswordResponse,
+  type SmsLoginChallengeResponse,
   type TotpLoginChallengeResponse,
   type TotpLoginVerifyRequest,
   type TotpSetupResponse,

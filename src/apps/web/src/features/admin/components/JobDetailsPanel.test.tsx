@@ -48,7 +48,7 @@ describe('JobDetailsPanel', () => {
   });
 
   describe('loading state', () => {
-    it('should show spinner when loading', () => {
+    it('should show skeleton placeholders when loading', () => {
       const { container } = render(
         <JobDetailsPanel
           job={undefined}
@@ -59,8 +59,7 @@ describe('JobDetailsPanel', () => {
         />,
       );
 
-      const spinner = container.querySelector('.spinner');
-      expect(spinner).toBeInTheDocument();
+      expect(container.querySelector('.skeleton')).toBeInTheDocument();
     });
 
     it('should not show job details when loading', () => {

@@ -74,10 +74,23 @@ const USERS_ME_PATH = 'users/me';
  */
 export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   const routerOptions = {
-    prefix: '/api',
+    prefix: '/api/v1',
     jwtSecret: ctx.config.auth.jwt.secret,
     authGuardFactory: createAuthGuard as AuthGuardFactory,
   };
+
+  // Backward compatibility: redirect /api/* to /api/v1/* (except versioned and docs paths)
+  app.addHook('onRequest', async (request, reply) => {
+    const url = request.url;
+    if (
+      url.startsWith('/api/') &&
+      !url.startsWith('/api/v1') &&
+      !url.startsWith('/api/docs')
+    ) {
+      const redirectUrl = url.replace('/api/', '/api/v1/');
+      void reply.redirect(redirectUrl);
+    }
+  });
 
   // Cast AppContext to HandlerContext for route registration
   // AppContext structurally satisfies HandlerContext (verified via AppContextSatisfiesBaseContext)

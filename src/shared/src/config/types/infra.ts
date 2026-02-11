@@ -260,6 +260,19 @@ export interface ServerConfig {
     /** Maximum requests per window */
     max: number;
   };
+  /** Logging behavior configuration */
+  logging: LoggingConfig;
+}
+
+/**
+ * Logging behavior configuration.
+ * Controls what context is included in log entries and severity thresholds.
+ */
+export interface LoggingConfig {
+  /** Severity level for 4xx client errors (default: 'warn') */
+  clientErrorLevel: LogLevel;
+  /** Include IP, user-agent in log output (default: true) */
+  requestContext: boolean;
 }
 
 // ============================================================================

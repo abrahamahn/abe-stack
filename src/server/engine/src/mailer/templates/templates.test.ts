@@ -115,6 +115,50 @@ describe('emailTemplates', () => {
     });
   });
 
+  describe('welcome', () => {
+    test('should generate welcome email with name and login URL', () => {
+      const loginUrl = 'https://example.com/login';
+      const result = emailTemplates.welcome('Alice', loginUrl);
+
+      expect(result.subject).toBe('Welcome to ABE Stack!');
+      expect(result.text).toContain('Alice');
+      expect(result.text).toContain(loginUrl);
+      expect(result.html).toContain('Alice');
+      expect(result.html).toContain(loginUrl);
+      expect(result.to).toBe('');
+    });
+
+    test('should include product intro in text and HTML', () => {
+      const result = emailTemplates.welcome('Bob', 'https://example.com/login');
+
+      expect(result.text).toContain('production-ready foundation');
+      expect(result.html).toContain('production-ready foundation');
+    });
+
+    test('should include Get Started CTA in HTML', () => {
+      const loginUrl = 'https://example.com/login';
+      const result = emailTemplates.welcome('Carol', loginUrl);
+
+      expect(result.html).toContain(`href="${loginUrl}"`);
+      expect(result.html).toContain('Get Started');
+    });
+
+    test('should have plain text alternative without HTML tags', () => {
+      const result = emailTemplates.welcome('Dave', 'https://example.com/login');
+
+      const textWithoutUrl = result.text?.replace(/https?:\/\/[^\s]+/g, '') ?? '';
+      expect(textWithoutUrl).not.toMatch(/<[a-z]+/i);
+    });
+
+    test('should generate valid HTML structure', () => {
+      const result = emailTemplates.welcome('Eve', 'https://example.com/login');
+
+      expect(result.html).toContain('<!DOCTYPE html>');
+      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('</html>');
+    });
+  });
+
   describe('template HTML structure', () => {
     test('should generate valid HTML with DOCTYPE', () => {
       const result = emailTemplates.passwordReset('https://example.com');

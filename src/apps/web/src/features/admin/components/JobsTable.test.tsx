@@ -60,7 +60,7 @@ describe('JobsTable', () => {
   });
 
   describe('loading state', () => {
-    it('should show spinner when loading', () => {
+    it('should show skeleton placeholders when loading', () => {
       const { container } = render(
         <JobsTable
           data={undefined}
@@ -76,8 +76,7 @@ describe('JobsTable', () => {
         />,
       );
 
-      // Spinner is rendered (has .spinner class)
-      expect(container.querySelector('.spinner')).toBeInTheDocument();
+      expect(container.querySelector('.skeleton')).toBeInTheDocument();
     });
 
     it('should not show table when loading', () => {
@@ -141,7 +140,7 @@ describe('JobsTable', () => {
   });
 
   describe('empty state', () => {
-    it('should show no jobs message when data array is empty', () => {
+    it('should show empty state when data array is empty', () => {
       render(
         <JobsTable
           data={createMockResponse({ data: [] })}
@@ -158,6 +157,7 @@ describe('JobsTable', () => {
       );
 
       expect(screen.getByText('No jobs found')).toBeInTheDocument();
+      expect(screen.getByText('Jobs will appear here when they are created')).toBeInTheDocument();
     });
   });
 

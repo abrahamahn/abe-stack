@@ -5,7 +5,7 @@
  * Displays queue statistics in a card format with alert banners.
  */
 
-import { Alert, Card, Heading, Spinner, Text } from '@abe-stack/ui';
+import { Alert, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { JSX } from 'react';
 
@@ -51,8 +51,12 @@ export const QueueStatsCard = ({
   if (isLoading) {
     return (
       <Card className="p-4">
-        <div className="flex items-center justify-center py-8">
-          <Spinner />
+        <Skeleton width="10rem" height="1.25rem" className="mb-4" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <Skeleton width="100%" height="3rem" />
+          <Skeleton width="100%" height="3rem" />
+          <Skeleton width="100%" height="3rem" />
+          <Skeleton width="100%" height="3rem" />
         </div>
       </Card>
     );

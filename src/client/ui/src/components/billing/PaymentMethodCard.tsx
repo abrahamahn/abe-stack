@@ -3,7 +3,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 're
 
 import { cn } from '../../utils/cn';
 
-import type { PaymentMethod } from '@abe-stack/shared';
+import type { PaymentMethod, PaymentMethodType } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -56,7 +56,7 @@ function getCardBrandIcon(brand: string): string {
   }
 }
 
-function getPaymentMethodIcon(type: string): string {
+function getPaymentMethodIcon(type: PaymentMethodType): string {
   switch (type) {
     case 'card':
       return '\u{1F4B3}'; // Credit card emoji

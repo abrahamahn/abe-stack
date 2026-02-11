@@ -7,16 +7,8 @@ import { ActivityFeed } from '@features/activities';
 import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
 
-interface UserLocal {
-  id?: string;
-  email?: string;
-  name?: string | null;
-}
-
 export const DashboardPage = (): JSX.Element => {
-  const authResult = useAuth();
-  const user = authResult.user as UserLocal | null;
-  const logout = authResult.logout;
+  const { user, logout } = useAuth();
   const navigate: NavigateFunction = useNavigate();
 
   const handleLogout = async (): Promise<void> => {
@@ -51,7 +43,10 @@ export const DashboardPage = (): JSX.Element => {
               <strong>Email:</strong> {user?.email}
             </Text>
             <Text>
-              <strong>Name:</strong> {user?.name ?? 'Not provided'}
+              <strong>Name:</strong>{' '}
+              {user !== null && (user.firstName.length > 0 || user.lastName.length > 0)
+                ? `${user.firstName} ${user.lastName}`.trim()
+                : 'Not provided'}
             </Text>
             <Text>
               <strong>User ID:</strong> {user?.id}

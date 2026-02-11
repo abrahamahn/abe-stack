@@ -10,7 +10,6 @@
 
 import { createHash } from 'node:crypto';
 
-
 import {
   ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
   BadRequestError,
@@ -20,13 +19,11 @@ import {
   WeakPasswordError,
 } from '@abe-stack/shared';
 
-
 import { logActivity } from '../../activities';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
+import { ERROR_MESSAGES } from '../types';
 
-import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest    } from '../types';
-import type { UsersAuthConfig    } from '../types';
-
+import type { UsersAuthConfig, UsersModuleDeps, UsersRequest } from '../types';
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { HandlerContext, RouteResult } from '@abe-stack/server-engine';
 import type { UserRole } from '@abe-stack/shared';

@@ -63,6 +63,7 @@ import {
   handleConfirmEmailChange,
   handleRevertEmailChange,
   handleForgotPassword,
+  handleInvalidateSessions,
   handleListDevices,
   handleLogin,
   handleLogout,
@@ -477,6 +478,21 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         return handleRemovePhone(asAppContext(ctx), req as unknown as RequestWithCookies);
       },
       'user',
+    ),
+  ],
+
+  // Session invalidation (token version bump + revoke all)
+  [
+    'auth/invalidate-sessions',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+        return handleInvalidateSessions(
+          asAppContext(ctx),
+          req as unknown as RequestWithCookies,
+          reply as unknown as ReplyWithCookies,
+        );
+      },
     ),
   ],
 

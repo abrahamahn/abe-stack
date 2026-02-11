@@ -14,5 +14,14 @@ export { MembersList, type MembersListProps } from './MembersList';
 export { InviteMemberDialog, type InviteMemberDialogProps } from './InviteMemberDialog';
 export { InvitationsList, type InvitationsListProps } from './InvitationsList';
 export { TenantSwitcher, type TenantSwitcherProps } from './TenantSwitcher';
-export { WorkspaceFeatureOverrides, type WorkspaceFeatureOverridesProps } from './WorkspaceFeatureOverrides';
+export {
+  WorkspaceFeatureOverrides,
+  type WorkspaceFeatureOverridesProps,
+} from './WorkspaceFeatureOverrides';
 export { WorkspaceBilling, type WorkspaceBillingProps } from './WorkspaceBilling';
+export {
+  MemberDetailPanel,
+  type MemberDetailPanelProps,
+  type MemberDetail,
+} from './MemberDetailPanel';
+export { WorkspaceAuditLog, type WorkspaceAuditLogProps } from './WorkspaceAuditLog';

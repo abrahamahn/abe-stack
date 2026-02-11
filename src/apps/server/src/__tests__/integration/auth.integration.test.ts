@@ -8,6 +8,10 @@
 
 import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
 import { registerRouteMap } from '@abe-stack/server-engine';
+import {
+  AUTH_SUCCESS_MESSAGES,
+  HTTP_ERROR_MESSAGES,
+} from '@abe-stack/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
@@ -777,6 +781,197 @@ describe('Auth API Integration Tests', () => {
         url: '/api/auth/logout-all',
       });
       expect(response.statusCode).toBe(401);
+    });
+  });
+
+  // ==========================================================================
+  // Mock-Repo Business Logic Tests
+  // ==========================================================================
+
+  describe('mock-repo business logic', () => {
+    it('POST /api/auth/login returns 429 for locked account', async () => {
+      // User exists but account is locked (too many failed attempts)
+      mockRepos.users.findByEmail.mockResolvedValue({
+        id: 'user-locked',
+        email: 'locked@example.com',
+        canonicalEmail: 'locked@example.com',
+        username: 'lockeduser',
+        passwordHash: '$argon2id$placeholder',
+        role: 'user',
+        emailVerified: true,
+        failedLoginAttempts: 10,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        tokenVersion: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+      });
+
+      // lockout check: countFailedAttempts → db.queryOne returns count >= maxAttempts (10)
+      mockDb.queryOne.mockResolvedValueOnce({ count: 10 });
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'locked@example.com', password: 'AnyPassword123!' },
+      });
+
+      expect(response.statusCode).toBe(429);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
+    });
+
+    it('POST /api/auth/register returns 201 for duplicate verified email (anti-enumeration)', async () => {
+      // Existing verified user - register should NOT reveal that email exists
+      mockRepos.users.findByEmail.mockResolvedValue({
+        id: 'user-existing',
+        email: 'existing@example.com',
+        canonicalEmail: 'existing@example.com',
+        username: 'existing',
+        passwordHash: '$argon2id$placeholder',
+        role: 'user',
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        tokenVersion: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+      });
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/register',
+        payload: {
+          email: 'existing@example.com',
+          username: 'newuser',
+          firstName: 'Test',
+          lastName: 'User',
+          password: 'StrongP@ssword123!',
+        },
+      });
+
+      // Anti-enumeration: returns success even for existing email
+      expect(response.statusCode).toBe(201);
+      const body = parseJsonResponse(response) as { status: string };
+      expect(body.status).toBe('pending_verification');
+
+      // Should send "existing account registration attempt" notification
+      expect(mockEmail.existingAccountRegistrationAttempt).toHaveBeenCalled();
+    });
+
+    it('POST /api/auth/register returns 201 for duplicate unverified email (resends verification)', async () => {
+      // Existing unverified user - should resend verification email
+      mockRepos.users.findByEmail.mockResolvedValue({
+        id: 'user-unverified',
+        email: 'unverified@example.com',
+        canonicalEmail: 'unverified@example.com',
+        username: 'unverified',
+        passwordHash: '$argon2id$placeholder',
+        role: 'user',
+        emailVerified: false,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        tokenVersion: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+      });
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/register',
+        payload: {
+          email: 'unverified@example.com',
+          username: 'newuser2',
+          firstName: 'Test',
+          lastName: 'User',
+          password: 'StrongP@ssword123!',
+        },
+      });
+
+      // Anti-enumeration: same response for unverified duplicate
+      expect(response.statusCode).toBe(201);
+      const body = parseJsonResponse(response) as { status: string };
+      expect(body.status).toBe('pending_verification');
+    });
+
+    it('POST /api/auth/forgot-password with valid email returns 200 and sends email', async () => {
+      // User exists - should create reset token and send email
+      mockRepos.users.findByEmail.mockResolvedValue({
+        id: 'user-forgot',
+        email: 'forgot@example.com',
+        canonicalEmail: 'forgot@example.com',
+        username: 'forgotuser',
+        passwordHash: '$argon2id$placeholder',
+        role: 'user',
+        emailVerified: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        totpEnabled: false,
+        totpSecret: null,
+        tokenVersion: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+      });
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/forgot-password',
+        payload: { email: 'forgot@example.com' },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBe(AUTH_SUCCESS_MESSAGES.PASSWORD_RESET_SENT);
+
+      // Password reset template should have been called
+      expect(mockEmail.passwordReset).toHaveBeenCalled();
+
+      // Email should have been sent
+      expect(testServer.email.send).toHaveBeenCalled();
+    });
+
+    it('POST /api/auth/forgot-password with non-existent email does NOT send email', async () => {
+      // User does not exist - should NOT send email but still return 200
+      mockRepos.users.findByEmail.mockResolvedValue(null);
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/forgot-password',
+        payload: { email: 'nonexistent@example.com' },
+      });
+
+      // Anti-enumeration: always returns 200
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBe(AUTH_SUCCESS_MESSAGES.PASSWORD_RESET_SENT);
+
+      // No email should be sent for non-existent user
+      expect(mockEmail.passwordReset).not.toHaveBeenCalled();
+      expect(testServer.email.send).not.toHaveBeenCalled();
+    });
+
+    it('POST /api/auth/login with non-existent user returns 401', async () => {
+      mockRepos.users.findByEmail.mockResolvedValue(null);
+      mockRepos.users.findByUsername.mockResolvedValue(null);
+
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: { identifier: 'nobody@example.com', password: 'SomePassword123!' },
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBe(HTTP_ERROR_MESSAGES.InvalidCredentials);
     });
   });
 });

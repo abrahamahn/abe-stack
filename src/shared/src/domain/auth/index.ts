@@ -117,6 +117,7 @@ export {
   type SetPasswordResponse,
   type SudoRequest,
   type SudoResponse,
+  type SmsLoginChallengeResponse,
   type TotpLoginChallengeResponse,
   type TotpLoginVerifyRequest,
   type TotpSetupResponse,

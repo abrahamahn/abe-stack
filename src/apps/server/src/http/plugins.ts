@@ -144,6 +144,9 @@ export interface PluginOptions {
    */
   getErrorInfo: (error: unknown) => AppErrorInfo;
 
+  /** Severity level for 4xx client errors in global error handler */
+  clientErrorLevel?: 'debug' | 'info' | 'warn' | 'error';
+
   /** Static file serving configuration (omit to disable) */
   staticServe?: StaticServeConfig;
 }
@@ -179,6 +182,7 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     rateLimiter,
     isAppError,
     getErrorInfo,
+    clientErrorLevel,
     staticServe,
   } = options;
 
@@ -285,8 +289,25 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     // Get correlation ID for error tracking (set by registerCorrelationIdHook)
     const correlationId = request.correlationId;
 
-    // Always log the full error server-side for debugging with correlation ID
-    server.log.error({ err: error, correlationId }, 'Request error');
+    // Severity-based server-side logging
+    // Determine status early for logging (before full error classification below)
+    const errStatusCode =
+      (error as { statusCode?: number }).statusCode ??
+      (isAppError(error) ? getErrorInfo(error).statusCode : 500);
+    if (errStatusCode >= 500) {
+      server.log.error({ err: error, correlationId }, 'Request error');
+    } else {
+      const logLevel = clientErrorLevel ?? 'warn';
+      server.log[logLevel](
+        {
+          code: (error as { code?: string }).code,
+          message: (error as Error).message,
+          statusCode: errStatusCode,
+          correlationId,
+        },
+        'Client error',
+      );
+    }
 
     let statusCode = 500;
     let code = 'INTERNAL_ERROR';

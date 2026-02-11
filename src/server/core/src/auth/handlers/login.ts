@@ -9,29 +9,36 @@
 
 import { EmailNotVerifiedError, mapErrorToHttpResponse } from '@abe-stack/shared';
 
-import { isCaptchaRequired, sendNewLoginAlert, verifyCaptchaToken } from '../security';
+import {
+  generateDeviceFingerprint,
+  isCaptchaRequired,
+  isKnownDevice,
+  recordDeviceAccess,
+  sendNewLoginAlert,
+  verifyCaptchaToken,
+} from '../security';
 import { authenticateUser, resendVerificationEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
-import type { AuthResult, TotpChallengeResult } from '../service';
+import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   AuthResponse,
   HttpErrorResponse,
   LoginRequest,
+  SmsChallengeResponse,
   TotpLoginChallengeResponse,
 } from '@abe-stack/shared';
 
-/**
- * Type guard that determines whether the login result requires TOTP verification.
- *
- * @param result - The result from authenticateUser
- * @returns True if the result is a TOTP challenge, false if it's a normal auth result
- * @complexity O(1)
- */
-function isTotpChallenge(result: AuthResult | TotpChallengeResult): result is TotpChallengeResult {
+type LoginResult = AuthResult | TotpChallengeResult | SmsChallengeResult;
+
+function isTotpChallenge(result: LoginResult): result is TotpChallengeResult {
   return 'requiresTotp' in result && result.requiresTotp;
+}
+
+function isSmsChallenge(result: LoginResult): result is SmsChallengeResult {
+  return 'requiresSms' in result && result.requiresSms;
 }
 
 /**
@@ -51,7 +58,7 @@ export async function handleLogin(
   reply: ReplyWithCookies,
 ): Promise<
   | { status: 200; body: AuthResponse }
-  | { status: 202; body: TotpLoginChallengeResponse }
+  | { status: 202; body: TotpLoginChallengeResponse | SmsChallengeResponse }
   | HttpErrorResponse
 > {
   const { ipAddress, userAgent } = request.requestInfo;
@@ -97,6 +104,18 @@ export async function handleLogin(
       };
     }
 
+    // SMS challenge — user must verify SMS code before getting tokens
+    if (isSmsChallenge(result)) {
+      return {
+        status: 202,
+        body: {
+          requiresSms: true,
+          challengeToken: result.challengeToken,
+          message: result.message,
+        },
+      };
+    }
+
     // Enforce max concurrent sessions: evict oldest if limit reached
     const maxSessions = ctx.config.auth.sessions?.maxConcurrentSessions ?? 10;
     const activeFamilies = await ctx.repos.refreshTokenFamilies.findActiveByUserId(result.user.id);
@@ -115,10 +134,17 @@ export async function handleLogin(
       );
     }
 
-    // New device detection: compare current IP + user agent against known sessions
-    const isNewDevice = !activeFamilies.some(
-      (f) => f.ipAddress === ipAddress && f.userAgent === userAgent,
+    // Device fingerprint-based detection using trusted_devices table
+    const fingerprint = generateDeviceFingerprint(ipAddress, userAgent ?? '');
+    const isNewDevice = !(await isKnownDevice(ctx.repos, result.user.id, fingerprint));
+
+    // Record device access (upserts: creates new or updates lastSeenAt)
+    recordDeviceAccess(ctx.repos, result.user.id, fingerprint, ipAddress, userAgent ?? '').catch(
+      (err: unknown) => {
+        ctx.log.warn({ err }, 'Failed to record device access');
+      },
     );
+
     if (isNewDevice) {
       ctx.log.info({ userId: result.user.id, ipAddress, userAgent }, 'New device login detected');
     }

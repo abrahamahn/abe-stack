@@ -6,7 +6,7 @@
  * mark-as-read and mark-all-read actions.
  */
 
-import { Button, EmptyState, Heading, Spinner, Text } from '@abe-stack/ui';
+import { Button, EmptyState, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { Notification } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
@@ -121,8 +121,10 @@ export function NotificationDropdown({
 
       {/* Content */}
       {isLoading && (
-        <div className="flex items-center justify-center p-4">
-          <Spinner />
+        <div className="flex flex-col gap-2 p-4">
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
         </div>
       )}
 

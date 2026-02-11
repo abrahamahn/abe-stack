@@ -32,6 +32,8 @@ export type {
   JsonDatabaseConfig,
   // Storage
   LocalStorageConfig,
+  // Logging
+  LoggingConfig,
   // Server
   LogLevel,
   MongoConfig,

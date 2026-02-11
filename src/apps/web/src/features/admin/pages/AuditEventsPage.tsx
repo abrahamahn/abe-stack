@@ -13,7 +13,7 @@ import {
   Input,
   PageContainer,
   Select,
-  Spinner,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -85,8 +85,14 @@ export function AuditEventsPage(): ReactElement {
   if (isLoading) {
     return (
       <PageContainer>
-        <div className="flex items-center justify-center p-12">
-          <Spinner />
+        <div className="flex flex-col gap-3 py-4">
+          <Skeleton width="8rem" height="1.75rem" />
+          <Skeleton width="100%" height="2.5rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
         </div>
       </PageContainer>
     );

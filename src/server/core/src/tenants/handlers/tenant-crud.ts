@@ -7,7 +7,7 @@
  * @module handlers/tenant-crud
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';
 import {
@@ -52,7 +52,7 @@ export async function handleCreateTenant(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const tenant = await createTenant(deps.db, deps.repos, userId, {
@@ -73,7 +73,7 @@ export async function handleCreateTenant(
       metadata: { name: body.name },
     }).catch(() => {});
 
-    return { status: 201, body: tenant };
+    return { status: HTTP_STATUS.CREATED, body: tenant };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -101,17 +101,17 @@ export async function handleListTenants(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
-    const tenants = await getUserTenants(deps.repos, userId);
-    return { status: 200, body: tenants };
+    const tenants = await getUserTenants(deps.db, userId);
+    return { status: HTTP_STATUS.OK, body: tenants };
   } catch (error) {
     deps.log.error(
       error instanceof Error ? error : new Error(String(error)),
       'Failed to list tenants',
     );
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -127,11 +127,11 @@ export async function handleGetTenant(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const tenant = await getTenantById(deps.repos, tenantId, userId);
-    return { status: 200, body: tenant };
+    return { status: HTTP_STATUS.OK, body: tenant };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -161,7 +161,7 @@ export async function handleUpdateTenant(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const tenant = await updateTenant(deps.repos, tenantId, userId, body);
@@ -177,7 +177,7 @@ export async function handleUpdateTenant(
       metadata: { fields: Object.keys(body) },
     }).catch(() => {});
 
-    return { status: 200, body: tenant };
+    return { status: HTTP_STATUS.OK, body: tenant };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -206,7 +206,7 @@ export async function handleDeleteTenant(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     await deleteTenant(deps.db, deps.repos, tenantId, userId);
@@ -221,7 +221,7 @@ export async function handleDeleteTenant(
       tenantId,
     }).catch(() => {});
 
-    return { status: 200, body: { message: 'Workspace deleted' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Workspace deleted' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {

@@ -326,6 +326,10 @@ function createMockConfig(): AppConfig {
       trustProxy: false,
       behindProxy: false,
       portFallbacks: [],
+      logging: {
+        clientErrorLevel: 'warn' as const,
+        requestContext: true,
+      },
     },
     database: {
       provider: 'postgresql',

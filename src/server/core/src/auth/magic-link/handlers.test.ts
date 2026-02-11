@@ -69,6 +69,7 @@ const baseConfig: AppConfig = {
     appBaseUrl: 'http://localhost:3000',
     apiBaseUrl: 'http://localhost:3000',
     rateLimit: { windowMs: 60000, max: 1000 },
+    logging: { clientErrorLevel: 'warn' as const, requestContext: true },
   },
   database: {
     provider: 'postgresql',

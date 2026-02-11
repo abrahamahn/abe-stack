@@ -35,4 +35,5 @@ export {
 export { handleAcceptTos, handleTosStatus } from './tos';
 export { handleListDevices, handleTrustDevice, handleRevokeDevice } from './devices';
 export { handleSetPhone, handleVerifyPhone, handleRemovePhone } from './phone';
+export { handleInvalidateSessions } from './invalidate-sessions';
 export { handleSendSmsCode, handleVerifySmsCode } from './sms-challenge';

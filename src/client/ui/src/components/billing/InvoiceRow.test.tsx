@@ -221,16 +221,18 @@ describe('InvoiceList', () => {
   });
 
   describe('loading state', () => {
-    it('should show loading message when loading with empty invoices', () => {
-      render(<InvoiceList invoices={[]} isLoading />);
+    it('should show skeleton loaders when loading with empty invoices', () => {
+      const { container } = render(<InvoiceList invoices={[]} isLoading />);
 
-      expect(screen.getByText('Loading invoices...')).toBeInTheDocument();
+      const skeletons = container.querySelectorAll('.skeleton');
+      expect(skeletons.length).toBe(3);
     });
 
-    it('should not show loading message when loading with existing invoices', () => {
-      render(<InvoiceList invoices={mockInvoices} isLoading />);
+    it('should not show skeletons when loading with existing invoices', () => {
+      const { container } = render(<InvoiceList invoices={mockInvoices} isLoading />);
 
-      expect(screen.queryByText('Loading invoices...')).not.toBeInTheDocument();
+      const skeletons = container.querySelectorAll('.skeleton');
+      expect(skeletons.length).toBe(0);
       expect(screen.getAllByText('Paid')).toHaveLength(3);
     });
   });
@@ -256,13 +258,14 @@ describe('InvoiceList', () => {
   });
 
   describe('empty state', () => {
-    it('should show empty message when no invoices', () => {
+    it('should show empty state when no invoices', () => {
       render(<InvoiceList invoices={[]} />);
 
       expect(screen.getByText('No invoices yet')).toBeInTheDocument();
+      expect(screen.getByText('Invoices will appear here after your first payment')).toBeInTheDocument();
     });
 
-    it('should not show empty message when invoices exist', () => {
+    it('should not show empty state when invoices exist', () => {
       render(<InvoiceList invoices={mockInvoices} />);
 
       expect(screen.queryByText('No invoices yet')).not.toBeInTheDocument();

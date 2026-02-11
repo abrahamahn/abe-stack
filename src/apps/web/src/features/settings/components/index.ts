@@ -21,3 +21,5 @@ export {
 } from './NotificationPreferencesForm';
 export { PreferencesSection, type PreferencesSectionProps } from './PreferencesSection';
 export { DataControlsSection, type DataControlsSectionProps } from './DataControlsSection';
+export { DevicesList } from './DevicesList';
+export { PhoneManagement } from './PhoneManagement';

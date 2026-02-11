@@ -8,7 +8,7 @@
  * @module service
  */
 
-import { deleteFrom, eq, insert, toCamelCase, update, withTransaction } from '@abe-stack/db';
+import { deleteFrom, eq, insert, select, toCamelCase, update, withTransaction } from '@abe-stack/db';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
@@ -213,42 +213,50 @@ export async function createTenant(
 
 /**
  * Get all tenants for a user with their role in each.
+ * Uses a single JOIN query to avoid N+1 performance issues.
  *
- * @param repos - Repository container
+ * @param db - Database client for direct query
  * @param userId - ID of the user
  * @returns Array of tenants with the user's role
  */
 export async function getUserTenants(
-  repos: Repositories,
+  db: DbClient,
   userId: string,
 ): Promise<TenantWithRole[]> {
-  const memberships = await repos.memberships.findByUserId(userId);
+  const query = select(TENANTS_TABLE)
+    .columns(
+      'tenants.id',
+      'tenants.name',
+      'tenants.slug',
+      'tenants.logo_url',
+      'tenants.owner_id',
+      'tenants.is_active',
+      'tenants.metadata',
+      'tenants.created_at',
+      'tenants.updated_at',
+      'memberships.role',
+    )
+    .innerJoin(
+      MEMBERSHIPS_TABLE,
+      { text: 'memberships.tenant_id = tenants.id', values: [] },
+    )
+    .where(eq('memberships.user_id', userId))
+    .toSql();
 
-  if (memberships.length === 0) {
-    return [];
-  }
+  const rows = await db.query(query);
 
-  const results: TenantWithRole[] = [];
-
-  for (const membership of memberships) {
-    const tenant = await repos.tenants.findById(membership.tenantId);
-    if (tenant !== null) {
-      results.push({
-        id: tenant.id,
-        name: tenant.name,
-        slug: tenant.slug,
-        logoUrl: tenant.logoUrl,
-        ownerId: tenant.ownerId,
-        isActive: tenant.isActive,
-        metadata: tenant.metadata,
-        createdAt: tenant.createdAt,
-        updatedAt: tenant.updatedAt,
-        role: membership.role,
-      });
-    }
-  }
-
-  return results;
+  return rows.map((row) => ({
+    id: row['id'] as string,
+    name: row['name'] as string,
+    slug: row['slug'] as string,
+    logoUrl: (row['logo_url'] as string | null) ?? null,
+    ownerId: row['owner_id'] as string,
+    isActive: row['is_active'] as boolean,
+    metadata: row['metadata'] as Record<string, unknown>,
+    createdAt: row['created_at'] as Date,
+    updatedAt: row['updated_at'] as Date,
+    role: row['role'] as TenantRole,
+  }));
 }
 
 /**

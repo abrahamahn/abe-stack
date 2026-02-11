@@ -63,13 +63,11 @@ export async function handleSetPhone(
     }
 
     // Get the SMS provider from context (may not be configured)
-    const smsProvider = (
-      ctx as unknown as { sms: import('@abe-stack/server-engine').SmsProvider | undefined }
-    ).sms;
-    if (smsProvider === undefined) {
+    if (ctx.sms === undefined) {
       ctx.log.error('SMS provider not configured');
       return { status: 500, body: { message: 'SMS service unavailable' } };
     }
+    const smsProvider = ctx.sms;
 
     // Send verification code
     const result = await sendSms2faCode(ctx.db, smsProvider, userId, body.phone);

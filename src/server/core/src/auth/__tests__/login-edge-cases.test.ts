@@ -24,7 +24,6 @@ import {
 import { authenticateUser, refreshUserTokens, verifyEmail } from '../service';
 import { LOGIN_FAILURE_REASON, type AuthLogger } from '../types';
 
-import type { AuthResult, TotpChallengeResult } from '../service';
 import type { RawDb, Repositories } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
 
@@ -365,7 +364,8 @@ describe('Account Lockout Expiration', () => {
     const result = await authenticateUser(db, repos, TEST_CONFIG, email, password, logger);
 
     expect('requiresTotp' in result).toBe(false);
-    if (!('requiresTotp' in result)) {
+    expect('requiresSms' in result).toBe(false);
+    if (!('requiresTotp' in result) && !('requiresSms' in result)) {
       expect(result.accessToken).toBe('access-token');
       expect(result.user.email).toBe(email);
     }
@@ -461,10 +461,10 @@ describe('Parallel Login Requests', () => {
 
     // All should succeed with valid tokens
     expect(results).toHaveLength(3);
-    results.forEach((result: AuthResult | TotpChallengeResult) => {
-      // ADDED TYPE HERE
+    results.forEach((result) => {
       expect('requiresTotp' in result).toBe(false);
-      if (!('requiresTotp' in result)) {
+      expect('requiresSms' in result).toBe(false);
+      if (!('requiresTotp' in result) && !('requiresSms' in result)) {
         expect(result.accessToken).toBe('access-token');
         expect(result.user.email).toBe(email);
       }
@@ -702,7 +702,8 @@ describe('Password Change Session Invalidation', () => {
     const result = await authenticateUser(db, repos, TEST_CONFIG, email, newPassword, logger);
 
     expect('requiresTotp' in result).toBe(false);
-    if (!('requiresTotp' in result)) {
+    expect('requiresSms' in result).toBe(false);
+    if (!('requiresTotp' in result) && !('requiresSms' in result)) {
       expect(result.accessToken).toBe('access-token');
       expect(result.user.email).toBe(email);
     }

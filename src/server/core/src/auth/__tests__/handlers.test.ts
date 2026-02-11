@@ -244,6 +244,9 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         upsert: vi.fn() as Mock,
         delete: vi.fn() as Mock,
       },
+      memberships: {
+        findByUserId: vi.fn().mockResolvedValue([]) as Mock,
+      },
     } as unknown as Repositories, // Cast only at the very end
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     emailTemplates: {
@@ -478,6 +481,9 @@ describe('handleLogin', () => {
   let isCaptchaRequiredSpy: Mock;
   let verifyCaptchaTokenSpy: Mock;
   let sendNewLoginAlertSpy: Mock;
+  let generateDeviceFingerprintSpy: Mock;
+  let isKnownDeviceSpy: Mock;
+  let recordDeviceAccessSpy: Mock;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -486,10 +492,16 @@ describe('handleLogin', () => {
     isCaptchaRequiredSpy = vi.spyOn(security, 'isCaptchaRequired') as Mock;
     verifyCaptchaTokenSpy = vi.spyOn(security, 'verifyCaptchaToken') as Mock;
     sendNewLoginAlertSpy = vi.spyOn(security, 'sendNewLoginAlert') as Mock;
+    generateDeviceFingerprintSpy = vi.spyOn(security, 'generateDeviceFingerprint') as Mock;
+    isKnownDeviceSpy = vi.spyOn(security, 'isKnownDevice') as Mock;
+    recordDeviceAccessSpy = vi.spyOn(security, 'recordDeviceAccess') as Mock;
 
     isCaptchaRequiredSpy.mockReturnValue(false);
     verifyCaptchaTokenSpy.mockResolvedValue({ success: true });
     sendNewLoginAlertSpy.mockResolvedValue(undefined);
+    generateDeviceFingerprintSpy.mockReturnValue('mock-fingerprint');
+    isKnownDeviceSpy.mockResolvedValue(false);
+    recordDeviceAccessSpy.mockResolvedValue(undefined);
   });
 
   test('should return 200 with auth response on successful login', async () => {

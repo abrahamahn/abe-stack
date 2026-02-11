@@ -15,6 +15,7 @@ export {
   type HttpMethod,
   type JsonSchemaObject,
   type RouteDefinition,
+  type RouteDeprecation,
   type RouteHandler,
   type RouteMap,
   type RouteOpenApiMeta,

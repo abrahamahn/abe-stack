@@ -146,7 +146,7 @@ describe('handleListTenants', () => {
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual(tenants);
-    expect(mockGetUserTenants).toHaveBeenCalledWith(deps.repos, 'user-1');
+    expect(mockGetUserTenants).toHaveBeenCalledWith(deps.db, 'user-1');
   });
 
   it('should return 500 on service error', async () => {

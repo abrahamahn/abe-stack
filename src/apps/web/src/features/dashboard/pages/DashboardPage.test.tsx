@@ -67,9 +67,7 @@ describe('DashboardPage', () => {
     it('should display user name', () => {
       renderDashboardPage();
 
-      // Dashboard component displays "Not provided" because it looks for user.name
-      // which doesn't exist (user has firstName/lastName instead)
-      expect(screen.getByText(/not provided/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test User/)).toBeInTheDocument();
     });
 
     it('should display user ID', () => {
@@ -95,9 +93,7 @@ describe('DashboardPage', () => {
     it('should display user full name', () => {
       renderDashboardPage();
 
-      // Dashboard component displays "Not provided" because it looks for user.name
-      // which doesn't exist (user has firstName/lastName instead)
-      expect(screen.getByText(/not provided/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test User/)).toBeInTheDocument();
     });
   });
 
@@ -211,9 +207,8 @@ describe('DashboardPage', () => {
         },
       });
 
-      // Dashboard component displays "Not provided" because it looks for user.name
-      // The firstName field is not displayed currently
-      expect(screen.getByText(/not provided/i)).toBeInTheDocument();
+      // React escapes HTML — rendered as text, not executed
+      expect(screen.getByText(/<script>alert\("xss"\)<\/script> User/)).toBeInTheDocument();
     });
 
     it('should handle user with unicode firstName', () => {
@@ -225,9 +220,7 @@ describe('DashboardPage', () => {
         },
       });
 
-      // Dashboard component displays "Not provided" because it looks for user.name
-      // The firstName/lastName fields are not displayed currently
-      expect(screen.getByText(/not provided/i)).toBeInTheDocument();
+      expect(screen.getByText(/用户名 🎉/)).toBeInTheDocument();
     });
 
     it('should handle user with extremely long firstName', () => {

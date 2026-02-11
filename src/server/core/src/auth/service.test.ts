@@ -922,6 +922,12 @@ describe('refreshUserTokens', () => {
       email,
       role,
     });
+    vi.mocked(repos.users.findById).mockResolvedValue({
+      id: userId,
+      email,
+      role,
+      tokenVersion: 1,
+    } as Awaited<ReturnType<typeof repos.users.findById>>);
     vi.mocked(createAccessToken).mockReturnValue('new-access-token');
 
     const result = await refreshUserTokens(db, repos, config, oldRefreshToken);
@@ -951,6 +957,12 @@ describe('refreshUserTokens', () => {
       email: 'test@example.com',
       role: 'user',
     });
+    vi.mocked(repos.users.findById).mockResolvedValue({
+      id: 'user-id',
+      email: 'test@example.com',
+      role: 'user',
+      tokenVersion: 1,
+    } as Awaited<ReturnType<typeof repos.users.findById>>);
     vi.mocked(createAccessToken).mockReturnValue('new-access-token');
 
     await refreshUserTokens(db, repos, config, oldRefreshToken, ipAddress, userAgent);

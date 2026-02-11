@@ -60,12 +60,16 @@ export function createAccessToken(
   role: AppRole,
   secret: string,
   expiresIn: string | number = '15m',
+  tokenVersion?: number,
 ): string {
   if (secret === '' || secret.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 
   const payload: TokenPayload = { userId, email, role };
+  if (tokenVersion !== undefined) {
+    payload['tokenVersion'] = tokenVersion;
+  }
 
   return jwtSign(payload, secret, { expiresIn });
 }

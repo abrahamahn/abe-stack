@@ -20,6 +20,7 @@ import {
   ErrorBoundary,
   HistoryProvider,
   LiveRegion,
+  LoadingContainer,
   ProtectedRoute,
   Route,
   Routes,
@@ -30,7 +31,15 @@ import {
 } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 import { TosAcceptanceModal } from '@features/auth/components';
-import { useCallback, useEffect, useRef, useState, type ReactElement, Suspense } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ElementType,
+  type ReactElement,
+  Suspense,
+} from 'react';
 
 import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
 import { NetworkStatus } from './components';
@@ -105,21 +114,22 @@ const RouteFocusAnnouncer = (): null => {
   return null;
 };
 
+/** Wraps a page component with auth protection using hooks properly */
+const ProtectedPage = ({ Component }: { Component: ElementType }): ReactElement => {
+  const { isAuthenticated, isLoading } = useAuth();
+  return (
+    <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+      <Component />
+    </ProtectedRoute>
+  );
+};
+
 // Helper function to render routes recursively
 const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
   return routes.map((route: AppRoute, index) => {
     const Element = route.element;
-    let elementToRender = <Element />;
-
-    // Apply ProtectedRoute if 'protected' is true
-    if (route.protected === true) {
-      const { isAuthenticated, isLoading } = useAuth();
-      elementToRender = (
-        <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-          <Element />
-        </ProtectedRoute>
-      );
-    }
+    const elementToRender =
+      route.protected === true ? <ProtectedPage Component={Element} /> : <Element />;
 
     const routeProps: { element: ReactElement; path?: string; index?: boolean } = {
       element: elementToRender,
@@ -133,7 +143,6 @@ const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
       routeProps.index = route.index;
     }
 
-    // Safely check for children before mapping
     const childRoutes =
       Array.isArray(route.children) && route.children.length > 0
         ? renderRoutes(route.children)
@@ -149,7 +158,7 @@ const renderRoutes = (routes: AppRoute[]): ReactElement[] => {
 
 const AppRoutes = (): ReactElement => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingContainer />}>
       <Routes>{renderRoutes(appRoutes)}</Routes>
     </Suspense>
   );

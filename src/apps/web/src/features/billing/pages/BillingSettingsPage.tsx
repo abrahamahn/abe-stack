@@ -19,10 +19,12 @@ import {
   Button,
   Card,
   Dialog,
+  EmptyState,
   Heading,
   InvoiceList,
   PageContainer,
   PaymentMethodCard,
+  Skeleton,
   SubscriptionStatus,
   Text,
   useNavigate,
@@ -137,7 +139,14 @@ export const BillingSettingsPage = (): ReactElement => {
         </Heading>
         {subLoading ? (
           <Card>
-            <Card.Body>Loading subscription...</Card.Body>
+            <Card.Body>
+              <div className="flex flex-col gap-3">
+                <Skeleton width="6rem" height="1.5rem" radius="var(--ui-radius-full)" />
+                <Skeleton width="100%" height="1rem" />
+                <Skeleton width="75%" height="1rem" />
+                <Skeleton width="8rem" height="2.25rem" radius="var(--ui-radius-md)" />
+              </div>
+            </Card.Body>
           </Card>
         ) : (
           <SubscriptionStatus
@@ -174,23 +183,21 @@ export const BillingSettingsPage = (): ReactElement => {
         </div>
 
         {pmLoading ? (
-          <Card>
-            <Card.Body>Loading payment methods...</Card.Body>
-          </Card>
+          <div className="flex flex-col gap-3">
+            <Skeleton width="100%" height="4.5rem" radius="var(--ui-radius-md)" />
+            <Skeleton width="100%" height="4.5rem" radius="var(--ui-radius-md)" />
+          </div>
         ) : paymentMethods.length === 0 ? (
-          <Card>
-            <Card.Body>
-              <Text>No payment methods saved.</Text>
-              <Button
-                onClick={() => {
-                  void handleAddPaymentMethod();
-                }}
-                className="mt-4"
-              >
-                Add Your First Card
-              </Button>
-            </Card.Body>
-          </Card>
+          <EmptyState
+            title="No payment methods"
+            description="Add a card to manage your subscription"
+            action={{
+              label: 'Add Payment Method',
+              onClick: () => {
+                void handleAddPaymentMethod();
+              },
+            }}
+          />
         ) : (
           <div className="billing-settings-page__payment-methods">
             {paymentMethods.map((pm: PaymentMethod) => (

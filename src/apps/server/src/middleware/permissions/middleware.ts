@@ -15,6 +15,7 @@ import {
   type PermissionType,
   type RecordPointer,
 } from '@abe-stack/server-engine';
+import { HTTP_STATUS } from '@abe-stack/shared';
 
 import type { UserRole } from '@abe-stack/db';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -153,7 +154,7 @@ function defaultGetOperation(request: FastifyRequest): 'create' | 'update' | 'de
  * @param reason - The denial reason
  */
 function defaultOnDenied(_request: FastifyRequest, reply: FastifyReply, reason: string): void {
-  void reply.status(403).send({
+  void reply.status(HTTP_STATUS.FORBIDDEN).send({
     message: 'Forbidden',
     error: reason,
   });
@@ -281,7 +282,7 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
   function createPermissionGuard(guardOptions: PermissionGuardOptions): PreHandlerHook {
     return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       if (request.user === undefined || request.user.userId === '') {
-        void reply.status(401).send({ message: 'Unauthorized' });
+        void reply.status(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Unauthorized' });
         return;
       }
 

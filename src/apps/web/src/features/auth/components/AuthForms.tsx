@@ -22,6 +22,9 @@ export interface AuthFormProps {
   onForgotPassword?: (data: ForgotPasswordRequest) => Promise<void>;
   onResetPassword?: (data: ResetPasswordRequest) => Promise<void>;
   onResendVerification?: (data: ResendVerificationRequest) => Promise<void>;
+  onTotpVerify?: (challengeToken: string, code: string) => Promise<void>;
+  onSmsVerify?: (challengeToken: string, code: string) => Promise<void>;
+  onSmsSendCode?: (challengeToken: string) => Promise<void>;
   onSuccess?: () => void;
   onModeChange?: (mode: AuthMode) => void;
   initialData?: Record<string, unknown>;
@@ -37,6 +40,9 @@ export const AuthForm = (props: AuthFormProps): ReactElement => {
     onForgotPassword,
     onResetPassword,
     onResendVerification,
+    onTotpVerify,
+    onSmsVerify,
+    onSmsSendCode,
     onSuccess,
     onModeChange,
     initialData,
@@ -50,6 +56,9 @@ export const AuthForm = (props: AuthFormProps): ReactElement => {
         <LoginForm
           {...(onLogin !== undefined && { onLogin })}
           {...(onForgotPassword !== undefined && { onForgotPassword })}
+          {...(onTotpVerify !== undefined && { onTotpVerify })}
+          {...(onSmsVerify !== undefined && { onSmsVerify })}
+          {...(onSmsSendCode !== undefined && { onSmsSendCode })}
           {...(onSuccess !== undefined && { onSuccess })}
           {...(onModeChange !== undefined && { onModeChange })}
           {...(isLoading !== undefined && { isLoading })}
@@ -93,6 +102,9 @@ export const AuthForm = (props: AuthFormProps): ReactElement => {
         <LoginForm
           {...(onLogin !== undefined && { onLogin })}
           {...(onForgotPassword !== undefined && { onForgotPassword })}
+          {...(onTotpVerify !== undefined && { onTotpVerify })}
+          {...(onSmsVerify !== undefined && { onSmsVerify })}
+          {...(onSmsSendCode !== undefined && { onSmsSendCode })}
           {...(onSuccess !== undefined && { onSuccess })}
           {...(onModeChange !== undefined && { onModeChange })}
           {...(isLoading !== undefined && { isLoading })}

@@ -2,6 +2,8 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
+import { EmptyState } from '../EmptyState';
+import { Skeleton } from '../../elements/Skeleton';
 
 import type { Invoice, InvoiceStatus } from '@abe-stack/shared';
 
@@ -239,7 +241,11 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
     if (isLoading && invoices.length === 0) {
       return (
         <div ref={ref} className={cn('invoice-list', 'invoice-list--loading', className)} {...rest}>
-          <div className="invoice-list__loading">Loading invoices...</div>
+          <div className="flex flex-col gap-2 p-4">
+            <Skeleton width="100%" height="2.5rem" />
+            <Skeleton width="100%" height="2.5rem" />
+            <Skeleton width="100%" height="2.5rem" />
+          </div>
         </div>
       );
     }
@@ -255,7 +261,7 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
     if (invoices.length === 0) {
       return (
         <div ref={ref} className={cn('invoice-list', 'invoice-list--empty', className)} {...rest}>
-          <div className="invoice-list__empty">No invoices yet</div>
+          <EmptyState title="No invoices yet" description="Invoices will appear here after your first payment" />
         </div>
       );
     }

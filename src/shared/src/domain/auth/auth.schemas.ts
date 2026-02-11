@@ -140,6 +140,8 @@ export interface SmsChallengeRequest {
 }
 
 export interface SmsChallengeResponse {
+  requiresSms: true;
+  challengeToken: string;
   message: string;
 }
 
@@ -150,6 +152,12 @@ export interface SmsVerifyRequest {
 
 export interface TotpLoginChallengeResponse {
   requiresTotp: true;
+  challengeToken: string;
+  message: string;
+}
+
+export interface SmsLoginChallengeResponse {
+  requiresSms: true;
   challengeToken: string;
   message: string;
 }

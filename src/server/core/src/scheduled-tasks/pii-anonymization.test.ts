@@ -27,10 +27,14 @@ function createMockRepos(): Pick<Repositories, 'users'> {
 }
 
 function createMockLogger(): ScheduledTaskLogger {
-  return {
+  const logger: ScheduledTaskLogger = {
     info: vi.fn(),
+    warn: vi.fn(),
     error: vi.fn(),
+    debug: vi.fn(),
+    child: vi.fn().mockReturnThis(),
   };
+  return logger;
 }
 
 // ============================================================================

@@ -33,8 +33,10 @@ export const LOGIN_FAILURE_REASON = {
   UNVERIFIED_EMAIL: 'UNVERIFIED_EMAIL',
   /** Correct credentials but account is locked/suspended */
   ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
-  /** Correct credentials but 2FA challenge needed (not a failure) */
+  /** Correct credentials but TOTP 2FA challenge needed (not a failure) */
   TOTP_REQUIRED: 'TOTP_REQUIRED',
+  /** Correct credentials but SMS 2FA challenge needed (not a failure) */
+  SMS_REQUIRED: 'SMS_REQUIRED',
   /** Wrong TOTP code during 2FA challenge */
   TOTP_INVALID: 'TOTP_INVALID',
   /** Bot protection (CAPTCHA) check failed */
@@ -56,6 +58,7 @@ export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGI
  */
 
 import type { DbClient, Repositories } from '@abe-stack/db';
+import type { SmsProvider } from '@abe-stack/server-engine';
 import type { EmailOptions, SendResult } from '@abe-stack/shared';
 import type {
   AuthenticatedUser,
@@ -346,6 +349,8 @@ export interface AppContext extends BaseContext {
   readonly storage: unknown;
   /** Pub/sub for events */
   readonly pubsub: unknown;
+  /** SMS provider for phone verification (optional) */
+  readonly sms?: SmsProvider | undefined;
   /** Application configuration */
   readonly config: {
     readonly auth: import('@abe-stack/server-engine/config').AuthConfig;

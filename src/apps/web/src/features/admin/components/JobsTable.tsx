@@ -8,7 +8,8 @@
 import {
   Button,
   Pagination,
-  Spinner,
+  EmptyState,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -107,15 +108,16 @@ export const JobsTable = ({
 
       {/* Table Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Spinner />
+        <div className="flex flex-col gap-3 py-4">
+          <Skeleton width="100%" height="2.5rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
         </div>
       ) : isError ? (
         <Text tone="danger">{error?.message ?? 'Failed to load jobs'}</Text>
       ) : (data?.data.length ?? 0) === 0 ? (
-        <Text tone="muted" className="py-8 text-center">
-          No jobs found
-        </Text>
+        <EmptyState title="No jobs found" description="Jobs will appear here when they are created" />
       ) : data !== undefined ? (
         <>
           <Table>

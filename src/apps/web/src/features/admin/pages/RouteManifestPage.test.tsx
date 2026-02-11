@@ -51,7 +51,9 @@ vi.mock('@abe-stack/ui', () => {
         {children}
       </select>
     ),
-    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Skeleton: (props: { width?: string | number; height?: string | number }) => (
+      <div data-testid="skeleton" style={{ width: props.width, height: props.height }} />
+    ),
     Table: ({ children }: { children: any }) => <table>{children}</table>,
     TableBody: ({ children }: { children: any }) => <tbody>{children}</tbody>,
     TableCell: ({ children }: { children: any }) => <td>{children}</td>,
@@ -104,7 +106,7 @@ const mockRoutes = [
 ];
 
 describe('RouteManifestPage', () => {
-  it('should show loading spinner while data is loading', () => {
+  it('should show skeleton placeholders while data is loading', () => {
     mockUseRouteManifest.mockReturnValue({
       data: undefined,
       isLoading: true,
@@ -114,7 +116,7 @@ describe('RouteManifestPage', () => {
     });
 
     render(<RouteManifestPage />);
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
   });
 
   it('should show error message on failure', () => {

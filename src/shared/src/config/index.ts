@@ -36,6 +36,7 @@ export type {
   JwtRotationConfig,
   KnockConfig,
   LocalStorageConfig,
+  LoggingConfig,
   LogLevel,
   MongoConfig,
   MySqlConfig,

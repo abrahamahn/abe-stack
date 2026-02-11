@@ -7,7 +7,7 @@
  */
 
 import { useNotificationPreferences } from '@abe-stack/api';
-import { Alert, Checkbox, Heading, Input, Spinner, Switch, Text } from '@abe-stack/ui';
+import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } from '@abe-stack/ui';
 import { useMemo, useState } from 'react';
 
 import type { NotificationClientConfig } from '@abe-stack/api';
@@ -124,7 +124,13 @@ export function NotificationPreferencesForm({
   if (isLoading) {
     return (
       <div className={className}>
-        <Spinner />
+        <div className="flex flex-col gap-4">
+          <Skeleton width="10rem" height="1.25rem" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+        </div>
       </div>
     );
   }
@@ -140,7 +146,7 @@ export function NotificationPreferencesForm({
   if (preferences === null) {
     return (
       <div className={className}>
-        <Text tone="muted">No notification preferences found.</Text>
+        <EmptyState title="No preferences found" description="Notification preferences will appear once configured" />
       </div>
     );
   }

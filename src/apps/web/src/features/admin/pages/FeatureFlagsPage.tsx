@@ -12,7 +12,7 @@ import {
   Button,
   Heading,
   Input,
-  Spinner,
+  Skeleton,
   Switch,
   Table,
   TableBody,
@@ -104,8 +104,11 @@ export function FeatureFlagsPage(): ReactElement {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <Spinner />
+      <div className="flex flex-col gap-4 py-4">
+        <Skeleton width="12rem" height="1.75rem" />
+        <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
+        <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
+        <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
       </div>
     );
   }

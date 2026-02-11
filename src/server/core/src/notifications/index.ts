@@ -33,6 +33,7 @@ export type { NotificationLogger, NotificationModuleDeps, NotificationRequest } 
 export {
   clearAllData,
   cleanupExpiredSubscriptions,
+  createNotificationForEvent,
   getActiveSubscriptionCount,
   getAllActiveSubscriptions,
   getPreferences,
@@ -45,6 +46,7 @@ export {
   subscribe,
   unsubscribe,
   updatePreferences,
+  type NotificationEventType,
 } from './service';
 
 // Handlers

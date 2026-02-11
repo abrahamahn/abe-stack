@@ -65,4 +65,9 @@ describe('Notification Service', { timeout: 30000 }, () => {
     expect(typeof getSubscriptionStats).toBe('function');
     expect(typeof clearAllData).toBe('function');
   });
+
+  it('should export event-driven notification function', async () => {
+    const { createNotificationForEvent } = await import('./service');
+    expect(typeof createNotificationForEvent).toBe('function');
+  });
 });

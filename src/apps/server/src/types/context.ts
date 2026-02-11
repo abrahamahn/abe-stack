@@ -2,7 +2,12 @@
 
 import type { AuthEmailTemplates } from '@abe-stack/core/auth';
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { QueueServer, ServerSearchProvider, WriteService } from '@abe-stack/server-engine';
+import type {
+  QueueServer,
+  ServerSearchProvider,
+  SmsProvider,
+  WriteService,
+} from '@abe-stack/server-engine';
 import type {
   BaseContext,
   BillingService,
@@ -109,6 +114,9 @@ export interface IServiceContainer {
 
   /** Auth email templates (used by auth package handlers) */
   readonly emailTemplates: AuthEmailTemplates;
+
+  /** SMS provider for phone verification (optional — gracefully degrades) */
+  readonly sms?: SmsProvider | undefined;
 }
 
 /**

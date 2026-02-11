@@ -51,7 +51,7 @@ describe('User Routes Definition', () => {
     });
 
     test('should have correct number of routes', () => {
-      expect(userRoutes.size).toBe(11);
+      expect(userRoutes.size).toBe(13);
     });
   });
 

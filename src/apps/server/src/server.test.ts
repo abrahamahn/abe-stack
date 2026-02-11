@@ -88,6 +88,10 @@ function createMockConfig(overrides?: Partial<AppConfig>): AppConfig {
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       },
+      logging: {
+        clientErrorLevel: 'warn' as const,
+        requestContext: true,
+      },
     },
     database: {
       provider: 'postgresql',

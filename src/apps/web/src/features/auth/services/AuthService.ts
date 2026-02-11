@@ -18,12 +18,15 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
   RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   User,
 } from '@abe-stack/api';
@@ -63,16 +66,28 @@ export class TotpChallengeError extends Error {
 }
 
 /**
- * Type guard for TOTP challenge response.
- *
- * @param response - Login response to check
- * @returns True if the response is a TOTP challenge
- * @complexity O(1)
+ * Error thrown when login requires SMS verification.
+ * Contains the challenge token that must be sent with the SMS code.
  */
-function isTotpChallengeResponse(
-  response: AuthResponse | TotpLoginChallengeResponse,
-): response is TotpLoginChallengeResponse {
+export class SmsChallengeError extends Error {
+  /** Challenge JWT token to send back with the SMS code */
+  readonly challengeToken: string;
+
+  constructor(challengeToken: string) {
+    super('SMS verification required');
+    this.name = 'SmsChallengeError';
+    this.challengeToken = challengeToken;
+  }
+}
+
+type LoginResponse = AuthResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse;
+
+function isTotpChallengeResponse(response: LoginResponse): response is TotpLoginChallengeResponse {
   return 'requiresTotp' in response && response.requiresTotp;
+}
+
+function isSmsChallengeResponse(response: LoginResponse): response is SmsLoginChallengeResponse {
+  return 'requiresSms' in response && response.requiresSms;
 }
 
 // ============================================================================
@@ -257,6 +272,10 @@ export class AuthService {
       throw new TotpChallengeError(response.challengeToken);
     }
 
+    if (isSmsChallengeResponse(response)) {
+      throw new SmsChallengeError(response.challengeToken);
+    }
+
     this.handleAuthSuccess(response);
 
     // Track new device flag for banner display
@@ -275,6 +294,20 @@ export class AuthService {
    */
   async verifyTotpLogin(challengeToken: string, code: string): Promise<void> {
     const response = await this.api.totpVerifyLogin({ challengeToken, code });
+    this.handleAuthSuccess(response);
+  }
+
+  /** Send SMS verification code during login challenge. */
+  async sendSmsCode(challengeToken: string): Promise<void> {
+    await this.api.smsSendCode({ challengeToken });
+  }
+
+  /**
+   * Verify SMS code during login challenge.
+   * Called after login throws SmsChallengeError and user enters the code.
+   */
+  async verifySmsLogin(challengeToken: string, code: string): Promise<void> {
+    const response = await this.api.smsVerifyLogin({ challengeToken, code });
     this.handleAuthSuccess(response);
   }
 
@@ -423,6 +456,17 @@ export class AuthService {
   /** Resend verification email */
   resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
     return this.api.resendVerification(data);
+  }
+
+  /** Request magic link for passwordless login */
+  requestMagicLink(data: MagicLinkRequest): Promise<MagicLinkRequestResponse> {
+    return this.api.magicLinkRequest(data);
+  }
+
+  /** Verify magic link token and login */
+  async verifyMagicLink(data: { token: string }): Promise<void> {
+    const response = await this.api.magicLinkVerify(data);
+    this.handleAuthSuccess({ token: response.token, user: response.user });
   }
 
   // ==========================================================================

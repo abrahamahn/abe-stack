@@ -56,6 +56,9 @@ describe('Email Verification Handlers', () => {
         findById: vi.fn(),
         findByEmail: vi.fn(),
       },
+      memberships: {
+        findByUserId: vi.fn().mockResolvedValue([]),
+      },
     },
     email: {},
     emailTemplates: {

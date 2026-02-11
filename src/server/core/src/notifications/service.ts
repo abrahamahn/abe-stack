@@ -14,6 +14,7 @@
 import {
   NOTIFICATION_PREFERENCES_TABLE,
   NOTIFICATION_PREFERENCE_COLUMNS,
+  NOTIFICATIONS_TABLE,
   PUSH_SUBSCRIPTIONS_TABLE,
   PUSH_SUBSCRIPTION_COLUMNS,
   and,
@@ -26,6 +27,7 @@ import {
   toCamelCase,
   update,
   type DbClient,
+  type NewNotification,
   type NotificationPreference as DbNotificationPreference,
   type PushSubscription as DbPushSubscription,
   type QuietHoursConfig,
@@ -36,6 +38,7 @@ import { DEFAULT_NOTIFICATION_PREFERENCES } from '@abe-stack/shared';
 import { PushSubscriptionExistsError } from './errors';
 
 import type {
+  NotificationLevel,
   NotificationPreferences,
   NotificationType,
   PushSubscription,
@@ -610,6 +613,93 @@ export async function getSubscriptionStats(db: DbClient): Promise<{
     inactive: total - active,
     expiringSoon,
   };
+}
+
+// ============================================================================
+// Event-Driven Notifications
+// ============================================================================
+
+/**
+ * Event types that can trigger in-app notifications.
+ */
+export type NotificationEventType =
+  | 'invite_received'
+  | 'payment_success'
+  | 'payment_failed'
+  | 'security_alert'
+  | 'plan_changed';
+
+/**
+ * Map event types to notification categories for preference checks.
+ */
+const EVENT_TYPE_TO_NOTIFICATION_TYPE: Record<NotificationEventType, NotificationType> = {
+  invite_received: 'social',
+  payment_success: 'transactional',
+  payment_failed: 'transactional',
+  security_alert: 'security',
+  plan_changed: 'transactional',
+};
+
+/**
+ * Map event types to in-app notification severity levels.
+ */
+const EVENT_TYPE_TO_LEVEL: Record<NotificationEventType, NotificationLevel> = {
+  invite_received: 'info',
+  payment_success: 'success',
+  payment_failed: 'error',
+  security_alert: 'warning',
+  plan_changed: 'info',
+};
+
+/**
+ * Create an in-app notification for a system event.
+ * Called by other modules when key events occur.
+ *
+ * Checks user preferences before creating the notification.
+ * If the user has disabled the relevant notification type, no record is created.
+ *
+ * @param db - Database client
+ * @param userId - Target user ID
+ * @param event - Event details including type, title, message, and optional metadata
+ * @complexity O(1) - preference check + conditional insert
+ */
+export async function createNotificationForEvent(
+  db: DbClient,
+  userId: string,
+  event: {
+    type: NotificationEventType;
+    title: string;
+    message: string;
+    metadata?: Record<string, unknown>;
+  },
+): Promise<void> {
+  // Check if user wants notifications for this event type
+  const notificationType = EVENT_TYPE_TO_NOTIFICATION_TYPE[event.type];
+  const allowed = await shouldSendNotification(db, userId, notificationType);
+  if (!allowed) {
+    return;
+  }
+
+  const level = EVENT_TYPE_TO_LEVEL[event.type];
+  const notification: NewNotification = {
+    userId,
+    type: level,
+    title: event.title,
+    message: event.message,
+    data: event.metadata ?? null,
+  };
+
+  await db.execute(
+    insert(NOTIFICATIONS_TABLE)
+      .values({
+        user_id: notification.userId,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        data: notification.data,
+      })
+      .toSql(),
+  );
 }
 
 // ============================================================================

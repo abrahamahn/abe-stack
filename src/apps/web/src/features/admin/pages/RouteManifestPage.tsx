@@ -12,7 +12,7 @@ import {
   Input,
   PageContainer,
   Select,
-  Spinner,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -107,8 +107,14 @@ export const RouteManifestPage = (): JSX.Element => {
   if (isLoading) {
     return (
       <PageContainer>
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="large" />
+        <div className="flex flex-col gap-3 py-4">
+          <Skeleton width="8rem" height="1.75rem" />
+          <Skeleton width="100%" height="2.5rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
+          <Skeleton width="100%" height="2rem" />
         </div>
       </PageContainer>
     );

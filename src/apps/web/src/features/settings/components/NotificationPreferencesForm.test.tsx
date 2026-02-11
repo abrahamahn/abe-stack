@@ -50,7 +50,15 @@ vi.mock('@abe-stack/ui', async () => {
         {children}
       </div>
     ),
-    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Skeleton: (props: { width?: string | number; height?: string | number }) => (
+      <div data-testid="skeleton" style={{ width: props.width, height: props.height }} />
+    ),
+    EmptyState: ({ title, description }: { title: string; description?: string }) => (
+      <div data-testid="empty-state">
+        <h3>{title}</h3>
+        {description != null && <p>{description}</p>}
+      </div>
+    ),
     Checkbox: ({
       checked,
       onChange,
@@ -104,12 +112,12 @@ describe('NotificationPreferencesForm', () => {
   });
 
   describe('loading state', () => {
-    it('should render spinner when loading', () => {
+    it('should render skeleton placeholders when loading', () => {
       mockState.isLoading = true;
 
       render(<NotificationPreferencesForm />);
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
     });
   });
 
@@ -125,12 +133,13 @@ describe('NotificationPreferencesForm', () => {
   });
 
   describe('empty state', () => {
-    it('should show empty message when no preferences found', () => {
+    it('should show empty state when no preferences found', () => {
       mockState.preferences = null;
 
       render(<NotificationPreferencesForm />);
 
-      expect(screen.getByText('No notification preferences found.')).toBeInTheDocument();
+      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+      expect(screen.getByText('No preferences found')).toBeInTheDocument();
     });
   });
 

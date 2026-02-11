@@ -8,9 +8,8 @@
  * @module
  */
 
-
-import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 import { expireStaleInvitations } from '../tenants/invitation-cleanup';
+import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 
 import { anonymizeDeletedUsers } from './pii-anonymization';
 

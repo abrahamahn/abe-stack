@@ -178,68 +178,53 @@ describe('createTenant', () => {
 });
 
 describe('getUserTenants', () => {
-  let repos: Repositories;
+  let db: DbClient;
 
   beforeEach(() => {
-    repos = createMockRepos();
+    db = createMockDb();
   });
 
   it('returns empty array when user has no memberships', async () => {
-    vi.mocked(repos.memberships.findByUserId).mockResolvedValue([]);
+    vi.mocked(db.query).mockResolvedValue([]);
 
-    const result = await getUserTenants(repos, 'user-1');
+    const result = await getUserTenants(db, 'user-1');
     expect(result).toEqual([]);
   });
 
-  it('returns tenants with roles for all memberships', async () => {
-    vi.mocked(repos.memberships.findByUserId).mockResolvedValue([
+  it('returns tenants with roles from joined query', async () => {
+    const now = new Date();
+    vi.mocked(db.query).mockResolvedValue([
       {
-        id: 'm-1',
-        tenantId: 't-1',
-        userId: 'user-1',
-        role: 'owner',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 'm-2',
-        tenantId: 't-2',
-        userId: 'user-1',
-        role: 'member',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]);
-
-    vi.mocked(repos.tenants.findById)
-      .mockResolvedValueOnce({
         id: 't-1',
         name: 'Workspace 1',
         slug: 'ws-1',
-        logoUrl: null,
-        ownerId: 'user-1',
-        isActive: true,
+        logo_url: null,
+        owner_id: 'user-1',
+        is_active: true,
         metadata: {},
-        allowedEmailDomains: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .mockResolvedValueOnce({
+        created_at: now,
+        updated_at: now,
+        role: 'owner',
+      },
+      {
         id: 't-2',
         name: 'Workspace 2',
         slug: 'ws-2',
-        logoUrl: null,
-        ownerId: 'other-user',
-        isActive: true,
+        logo_url: null,
+        owner_id: 'other-user',
+        is_active: true,
         metadata: {},
-        allowedEmailDomains: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+        created_at: now,
+        updated_at: now,
+        role: 'member',
+      },
+    ]);
 
-    const result = await getUserTenants(repos, 'user-1');
+    const result = await getUserTenants(db, 'user-1');
     expect(result).toHaveLength(2);
+    expect(result[0]?.name).toBe('Workspace 1');
     expect(result[0]?.role).toBe('owner');
+    expect(result[1]?.name).toBe('Workspace 2');
     expect(result[1]?.role).toBe('member');
   });
 });

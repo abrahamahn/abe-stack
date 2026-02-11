@@ -267,6 +267,10 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
       cors: { origin: ['*'], credentials: true, methods: ['GET', 'POST', 'PUT', 'DELETE'] },
       trustProxy: false,
       logLevel: 'info',
+      logging: {
+        clientErrorLevel: 'warn' as const,
+        requestContext: true,
+      },
       maintenanceMode: false,
       auditRetentionDays: 90,
       rateLimit: {

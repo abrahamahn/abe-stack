@@ -1,6 +1,4 @@
 // src/apps/web/src/app/routes.tsx
-import { Outlet, ProtectedRoute } from '@abe-stack/ui';
-import { useAuth } from '@features/auth';
 import { ActivityFeedPage } from '@pages/ActivityPages';
 import {
   AdminLayout,
@@ -45,7 +43,7 @@ import { UILibraryPage } from '@ui-library';
 
 import { AppLayout, AppSidePeekPage } from './layouts';
 
-import type { ElementType, ReactElement } from 'react';
+import type { ElementType } from 'react';
 
 // Define a type for our route objects to ensure consistency
 export interface AppRoute {
@@ -54,16 +52,6 @@ export interface AppRoute {
   element: ElementType;
   children?: AppRoute[];
   protected?: boolean; // Custom property for ProtectedRoute
-}
-
-// Wrapper component to apply ProtectedRoute logic
-function ProtectedRouteWrapper(): ReactElement {
-  const { isAuthenticated, isLoading } = useAuth();
-  return (
-    <ProtectedRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
-      <Outlet />
-    </ProtectedRoute>
-  );
 }
 
 export const appRoutes: AppRoute[] = [
@@ -124,50 +112,54 @@ export const appRoutes: AppRoute[] = [
         element: PricingPage,
       },
       {
-        element: ProtectedRouteWrapper, // Use a wrapper to handle isAuthenticated/isLoading
-        protected: true, // Indicate that this route requires protection
-        children: [
-          {
-            path: 'dashboard',
-            element: DashboardPage,
-          },
-          {
-            path: 'activities',
-            element: ActivityFeedPage,
-          },
-          {
-            path: 'settings/accounts',
-            element: ConnectedAccountsPage,
-          },
-          {
-            path: 'settings/billing',
-            element: BillingSettingsPage,
-          },
-          {
-            path: 'billing/success',
-            element: CheckoutSuccessPage,
-          },
-          {
-            path: 'billing/cancel',
-            element: CheckoutCancelPage,
-          },
-          {
-            path: 'workspaces',
-            element: WorkspaceListPage,
-          },
-          {
-            path: 'workspaces/:id',
-            element: WorkspaceDetailPage,
-          },
-          {
-            path: 'invitations/accept',
-            element: AcceptInvitationPage,
-          },
-          {
-            path: 'onboarding',
-            element: OnboardingPage,
-          },
-        ],
+        path: 'dashboard',
+        element: DashboardPage,
+        protected: true,
+      },
+      {
+        path: 'activities',
+        element: ActivityFeedPage,
+        protected: true,
+      },
+      {
+        path: 'settings/accounts',
+        element: ConnectedAccountsPage,
+        protected: true,
+      },
+      {
+        path: 'settings/billing',
+        element: BillingSettingsPage,
+        protected: true,
+      },
+      {
+        path: 'billing/success',
+        element: CheckoutSuccessPage,
+        protected: true,
+      },
+      {
+        path: 'billing/cancel',
+        element: CheckoutCancelPage,
+        protected: true,
+      },
+      {
+        path: 'workspaces',
+        element: WorkspaceListPage,
+        protected: true,
+      },
+      {
+        path: 'workspaces/:id',
+        element: WorkspaceDetailPage,
+        protected: true,
+      },
+      {
+        path: 'invitations/accept',
+        element: AcceptInvitationPage,
+        protected: true,
+      },
+      {
+        path: 'onboarding',
+        element: OnboardingPage,
+        protected: true,
       },
       {
         path: 'forbidden',

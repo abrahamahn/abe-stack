@@ -64,7 +64,9 @@ vi.mock('@abe-stack/ui', async () => {
       onChange?: (e: { target: { value: string } }) => void;
       placeholder?: string;
     }) => <input value={value} onChange={onChange} placeholder={placeholder} />,
-    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Skeleton: (props: { width?: string | number; height?: string | number }) => (
+      <div data-testid="skeleton" style={{ width: props.width, height: props.height }} />
+    ),
     Switch: ({
       checked,
       onChange,
@@ -153,7 +155,7 @@ describe('FeatureFlagsPage', () => {
   // ============================================================================
 
   describe('loading state', () => {
-    it('should render spinner when loading', () => {
+    it('should render skeleton placeholders when loading', () => {
       vi.mocked(useFeatureFlags).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -164,7 +166,7 @@ describe('FeatureFlagsPage', () => {
 
       render(<FeatureFlagsPage />);
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0);
     });
   });
 

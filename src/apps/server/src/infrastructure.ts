@@ -16,6 +16,7 @@ import {
   createOwnerRule,
   createPermissionChecker,
   createQueueServer,
+  createSmsProvider,
   createStorage,
   createWriteService,
   emailTemplates as engineEmailTemplates,
@@ -25,6 +26,7 @@ import {
   type PermissionChecker,
   type QueueServer,
   type ServerSearchProvider,
+  type SmsProvider,
   type StorageConfig,
   type WriteService,
   type WriteServiceOptions,
@@ -65,6 +67,7 @@ export interface Infrastructure {
   permissions: PermissionChecker;
   pgPubSub: PostgresPubSub; // PostgresPubSub is an adapter, not a SubscriptionManager
   emailTemplates: AuthEmailTemplates;
+  sms: SmsProvider;
 }
 
 /**
@@ -269,6 +272,9 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     },
   });
 
+  // SMS — console provider by default (no env config needed for dev)
+  const sms: SmsProvider = createSmsProvider({ enabled: true, provider: 'console' });
+
   // Email Templates — use production templates from server-engine
   const emailTemplates: AuthEmailTemplates = engineEmailTemplates;
 
@@ -286,5 +292,6 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     permissions,
     pgPubSub,
     emailTemplates,
+    sms,
   };
 }

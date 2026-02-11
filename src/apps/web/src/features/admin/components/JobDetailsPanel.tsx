@@ -5,7 +5,7 @@
  * Displays detailed information about a job in a side panel.
  */
 
-import { Button, Card, Heading, Spinner, Text } from '@abe-stack/ui';
+import { Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
@@ -56,10 +56,12 @@ export const JobDetailsPanel = ({
 }: JobDetailsPanelProps): JSX.Element => {
   if (isLoading) {
     return (
-      <div className="p-4">
-        <div className="flex items-center justify-center py-8">
-          <Spinner />
-        </div>
+      <div className="p-4 space-y-4">
+        <Skeleton width="60%" height="1.5rem" />
+        <Skeleton width="40%" height="1rem" />
+        <Skeleton width="100%" height="5rem" radius="var(--ui-radius-md)" />
+        <Skeleton width="100%" height="3rem" radius="var(--ui-radius-md)" />
+        <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
       </div>
     );
   }

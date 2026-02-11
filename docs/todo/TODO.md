@@ -1403,7 +1403,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Backend — Event Subscription + Delivery:**
 
 - [ ] Service: event type registry — define subscribable events (user.created, invoice.paid, etc.)
-- [ ] Service: webhook dispatcher — on event, find matching subscriptions, enqueue delivery jobs
+- [x] Service: webhook dispatcher — on event, find matching subscriptions, enqueue delivery jobs
 - [x] Service: delivery worker — POST payload to URL with HMAC-SHA256 signature header
 - [x] Service: retry with exponential backoff (1m, 5m, 30m, 2h, 12h) — max 5 retries
 - [ ] Service: dead-letter after max retries — mark webhook as failing, alert admin
@@ -1548,7 +1548,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] `POST /api/auth/refresh` → rotates token, old token rejected on reuse
 - [ ] `POST /api/auth/logout` → clears cookie, revokes token in DB
 - [ ] `POST /api/auth/logout-all` → revokes all families except current
-- [ ] `POST /api/auth/forgot-password` → creates token in DB, generic response (anti-enumeration)
+- [x] `POST /api/auth/forgot-password` → creates token in DB, generic response (anti-enumeration)
 - [ ] `POST /api/auth/reset-password` → updates password hash, invalidates old tokens
 - [ ] `POST /api/auth/verify-email` → marks user verified, auto-login tokens returned
 - [ ] `POST /api/auth/magic-link/request` → creates token, rate limited
@@ -2022,9 +2022,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Error Reporting:**
 
 - [ ] Service: Sentry integration provider (optional, config-gated)
-- [ ] Service: unhandled error → captured with correlation ID + request context
-- [ ] Service: breadcrumb trail — log key events leading to error
-- [ ] Unit test: error formatting, PII scrubbing before send
+- [x] Service: unhandled error → captured with correlation ID + request context
+- [x] Service: breadcrumb trail — log key events leading to error
+- [x] Unit test: error formatting, PII scrubbing before send
 
 **Metrics:**
 
@@ -2071,7 +2071,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Security Notifications (11.2):**
 
 - [ ] Integration: password change → "Was this you?" email sent to user
-- [ ] Integration: 2FA disabled → security notification email sent
+- [x] Integration: 2FA disabled → security notification email sent
 - [ ] Integration: new device login → new device alert email sent
 - [ ] Integration: email change A→B → "Revert" link sent to old email (A)
 - [ ] Integration: clicking revert link → email reverted, account locked, sessions killed
@@ -2094,7 +2094,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Integration: `CAPTCHA_FAILED` → stored with reason
 - [x] Integration: `TOTP_REQUIRED` → stored with reason (successful password, awaiting 2FA)
 - [x] Integration: `TOTP_INVALID` → stored with reason (wrong 2FA code)
-- [ ] Integration: admin can filter login attempts by failure reason
+- [x] Integration: admin can filter login attempts by failure reason
 - [x] Security: client receives identical 401 for all failure types (anti-enumeration)
 
 ---
@@ -2372,7 +2372,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Frontend Performance:**
 
 - [ ] Audit: production bundle size — main bundle < 250KB gzipped
-- [ ] Audit: code splitting — route-based lazy loading for all feature pages
+- [x] Audit: code splitting — route-based lazy loading for all feature pages
 - [ ] Audit: image/asset optimization — all images served in WebP/AVIF with CDN caching
 - [ ] Audit: Lighthouse score — Performance > 90, Accessibility > 95, Best Practices > 95
 - [ ] Optimize: service worker caching strategy — static assets cached, API no-store respected
@@ -2499,30 +2499,30 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Empty States:**
 
 - [ ] UI: empty dashboard — welcome message + getting started checklist
-- [ ] UI: empty workspace member list — "Invite your first teammate" CTA
-- [ ] UI: empty notification list — "No notifications yet" message
-- [ ] UI: empty activity feed — "No recent activity" message
-- [ ] UI: empty session list — should never be empty (current session always exists) — verify
-- [ ] UI: empty billing invoices — "No invoices yet" message
-- [ ] UI: empty API keys — "Create your first API key" CTA
+- [x] UI: empty workspace member list — "Invite your first teammate" CTA
+- [x] UI: empty notification list — "No notifications yet" message
+- [x] UI: empty activity feed — "No recent activity" message
+- [x] UI: empty session list — should never be empty (current session always exists) — verify
+- [x] UI: empty billing invoices — "No invoices yet" message
+- [x] UI: empty API keys — "Create your first API key" CTA
 
 **Loading States:**
 
-- [ ] UI: Skeleton loaders on all data-dependent pages (dashboard, settings, admin)
+- [x] UI: Skeleton loaders on all data-dependent pages (dashboard, settings, admin)
 - [ ] UI: verify no layout shift during data loading (skeletons match final layout dimensions)
-- [ ] UI: page transition loading indicator (top progress bar or similar)
+- [x] UI: page transition loading indicator (Suspense fallback with LoadingContainer)
 
 **Error States:**
 
-- [ ] UI: global error boundary — friendly error page with "Try Again" + "Go Home" buttons
-- [ ] UI: per-section error boundaries — individual widgets recover without full page crash
-- [ ] UI: network error handling — "Connection lost" toast with retry option
-- [ ] UI: 404 page — branded, with navigation links back to known pages
-- [ ] UI: 403 page — "You don't have permission" with redirect to appropriate page
+- [x] UI: global error boundary — friendly error page with "Try Again" + "Go Home" buttons
+- [x] UI: per-section error boundaries — individual widgets recover without full page crash
+- [x] UI: network error handling — "Connection lost" toast with retry option
+- [x] UI: 404 page — branded, with navigation links back to known pages
+- [x] UI: 403 page — "You don't have permission" with redirect to appropriate page
 
 **Onboarding Flow (BUSINESS E.8):**
 
-- [ ] UI: first-login onboarding wizard — profile setup → create/join workspace → (optional) invite team → (optional) select plan
+- [x] UI: first-login onboarding wizard — profile setup → create/join workspace → (optional) invite team → (optional) select plan
 - [ ] UI: onboarding progress tracker — visible until all steps completed, dismissible
 - [ ] UI: contextual tooltips for key features on first use
 - [ ] UI: "First success moment" — workspace created with sample content/welcome message
@@ -2783,43 +2783,44 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > Correlation IDs and error serialization already exist. These items close the remaining gaps.
 
-- [ ] Middleware: request context logging — attach IP, method, path, user agent to every log entry (structured via Pino)
-- [ ] Service: conditional logging by severity — 5xx errors: full stack trace + request context; 4xx client errors: warn-level summary only (no stack trace noise)
-- [ ] Config: `logging.clientErrorLevel` — configurable severity threshold for client errors (default `warn`)
-- [ ] Config: `logging.requestContext` — toggle request context fields in log output (default `true` in production)
+- [x] Middleware: request context logging — attach IP, method, path, user agent to every log entry (structured via Pino)
+- [x] Service: conditional logging by severity — 5xx errors: full stack trace + request context; 4xx client errors: warn-level summary only (no stack trace noise)
+- [x] Config: `logging.clientErrorLevel` — configurable severity threshold for client errors (default `warn`)
+- [x] Config: `logging.requestContext` — toggle request context fields in log output (default `true` in production)
 
 **Generated API Client (ROADMAP Infrastructure > API Versioning & Typed Client):**
 
-- [ ] Tool: auto-generate typed fetch client from Fastify route definitions + Zod schemas
-- [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output)
-- [ ] Tool: generate React Query hooks from client definitions
-- [ ] CI: regenerate client on route/schema changes (pre-commit or CI step)
+- [x] Tool: route manifest exporter — `pnpm route:manifest` outputs JSON of all registered routes
+- [x] Tool: API client sync validator — `pnpm audit:api-sync` checks client coverage vs routes
+- [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output) *(deferred to ROADMAP)*
+- [ ] Tool: generate React Query hooks from client definitions *(deferred to ROADMAP)*
+- [ ] CI: regenerate client on route/schema changes (pre-commit or CI step) *(deferred to ROADMAP)*
 
 **Module Scaffold CLI:**
 
-- [ ] Tool: `pnpm scaffold:module <name>` — generates: handler, service, routes, tests, types stubs
-- [ ] Tool: scaffold creates barrel exports and registers in parent index.ts
-- [ ] Tool: scaffold adds route registration to server routes
-- [ ] Docs: module creation guide using scaffold tool
+- [x] Tool: `pnpm scaffold:module <name>` — generates: handler, service, routes, tests, types stubs
+- [x] Tool: scaffold creates barrel exports and registers in parent index.ts
+- [x] Tool: scaffold adds route registration to server routes
+- [x] Docs: module creation guide using scaffold tool
 
 **API Versioning (ROADMAP Infrastructure > API Versioning & Typed Client):**
 
-- [ ] Service: route versioning strategy — `/api/v1/...` prefix or header-based
-- [ ] Service: version deprecation middleware — `Sunset` header, `Deprecation` header
-- [ ] Docs: versioning policy — how to add new versions, sunset timeline
+- [x] Service: route versioning strategy — `/api/v1/...` prefix with backward-compat redirect
+- [x] Service: version deprecation middleware — `Sunset` header, `Deprecation` header, `X-Deprecation-Notice`
+- [x] Docs: versioning policy — how to add new versions, sunset timeline
 
 **DB Reset Command:**
 
-- [ ] Tool: `pnpm db:reset` — drop + recreate + migrate + seed dev DB in one command
-- [ ] Tool: confirmation prompt to prevent accidental use (skippable with `--force`)
+- [x] Tool: `pnpm db:reset` — drop + recreate + migrate + seed dev DB in one command
+- [x] Tool: confirmation prompt to prevent accidental use (skippable with `--force`)
 
 **Tests:**
 
-- [ ] Unit: scaffold template generation, API client generation from route definitions
-- [ ] Unit: request context logger — verify IP, method, path included in structured log output
-- [ ] Unit: severity-based logging — 5xx produces error-level with stack, 4xx produces warn-level without stack
-- [ ] Integration: generated client successfully calls all routes
-- [ ] Manual: `pnpm scaffold:module test-module` → produces correct files → type-checks
+- [x] Unit: scaffold template generation test (19 tests passing)
+- [x] Unit: request context logger — verify IP, method, path included in structured log output
+- [x] Unit: severity-based logging — 5xx produces error-level with stack, 4xx produces warn-level without stack
+- [ ] Integration: generated client successfully calls all routes *(deferred to ROADMAP)*
+- [x] Manual: `pnpm scaffold:module test-module` → produces correct files → type-checks
 
 ---
 

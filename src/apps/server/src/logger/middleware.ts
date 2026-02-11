@@ -15,6 +15,7 @@ import {
 import { createRequestLogger } from './logger';
 
 import type { RequestContext } from '@abe-stack/shared';
+import type { LoggingConfig } from '@abe-stack/shared/config';
 import type { Logger } from '@abe-stack/shared/core';
 import type { FastifyInstance } from 'fastify';
 
@@ -34,7 +35,10 @@ declare module 'fastify' {
  *
  * @param server - The Fastify server instance to add hooks to
  */
-export function registerLoggingMiddleware(server: FastifyInstance): void {
+export function registerLoggingMiddleware(
+  server: FastifyInstance,
+  loggingConfig?: LoggingConfig,
+): void {
   // Add correlation ID and request logger to each request
   server.addHook('onRequest', async (request, reply) => {
     // Get or create correlation ID
@@ -67,25 +71,56 @@ export function registerLoggingMiddleware(server: FastifyInstance): void {
     request.logger = createRequestLogger(server.log, requestContext);
   });
 
-  // Log request completion
+  // Log request completion with optional request context
   server.addHook('onResponse', async (request, reply) => {
     const duration = reply.elapsedTime;
+    const includeContext = loggingConfig?.requestContext !== false;
 
-    request.logger.info('Request completed', {
+    const logData: Record<string, unknown> = {
       method: request.method,
       path: request.url,
       statusCode: reply.statusCode,
       duration: Math.round(duration),
-    });
+    };
+
+    if (includeContext) {
+      logData['ip'] = request.ip;
+      logData['userAgent'] = request.headers['user-agent'];
+    }
+
+    request.logger.info('Request completed', logData);
   });
 
-  // Log errors
+  // Log errors with severity-based routing
   server.addHook('onError', async (request, reply, error) => {
-    request.logger.error(error, {
-      method: request.method,
-      path: request.url,
-      statusCode: reply.statusCode,
-    });
+    const statusCode = reply.statusCode;
+    const method = request.method;
+    const path = request.url;
+
+    if (statusCode >= 500) {
+      // 5xx: error level with full error object + request context
+      request.logger.error(error, {
+        method,
+        path,
+        statusCode,
+        ip: request.ip,
+        userAgent: request.headers['user-agent'],
+      });
+    } else {
+      // 4xx: configurable level with summary only (no stack trace)
+      const level = loggingConfig?.clientErrorLevel ?? 'warn';
+      const clientErrorLevel: 'info' | 'warn' | 'error' | 'debug' =
+        level === 'info' || level === 'warn' || level === 'error' || level === 'debug' ? level : 'warn';
+      const code = (error as { code?: string }).code;
+      request.logger[clientErrorLevel]('Client error', {
+        method,
+        path,
+        statusCode,
+        code,
+        message: error.message,
+        correlationId: request.correlationId,
+      });
+    }
   });
 }
 
