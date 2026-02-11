@@ -139,19 +139,19 @@ jobs:
           # Add provider-specific test variables
           if [ "${{ matrix.provider }}" = "digitalocean" ]; then
             cat >> test.tfvars << EOF
-            region = "${DO_REGION:-nyc1}"
-            instance_size = "${DO_INSTANCE_SIZE:-s-1vcpu-1gb}"
-            enable_managed_database = ${DO_MANAGED_DB}
-            database_size = "${DO_DATABASE_SIZE:-db-s-1vcpu-1gb}"
-            EOF
+          region = "${DO_REGION:-nyc1}"
+          instance_size = "${DO_INSTANCE_SIZE:-s-1vcpu-1gb}"
+          enable_managed_database = ${DO_MANAGED_DB}
+          database_size = "${DO_DATABASE_SIZE:-db-s-1vcpu-1gb}"
+          EOF
           elif [ "${{ matrix.provider }}" = "gcp" ]; then
             cat >> test.tfvars << EOF
-            project_id = "test-project-123456"
-            region = "us-central1"
-            zone = "us-central1-a"
-            instance_size = "e2-small"
-            enable_managed_database = false
-            EOF
+          project_id = "test-project-123456"
+          region = "us-central1"
+          zone = "us-central1-a"
+          instance_size = "e2-small"
+          enable_managed_database = false
+          EOF
           fi
 
           # Test terraform plan with test variables
