@@ -15,6 +15,8 @@ import { getPreferences, subscribe, unsubscribe, updatePreferences } from './ser
 
 import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
+  BaseMarkAsReadRequest,
+  Notification,
   PreferencesResponse,
   SubscribeRequest,
   SubscribeResponse,
@@ -338,4 +340,189 @@ export function handleSendNotification(
       code: 'PROVIDER_NOT_CONFIGURED',
     },
   };
+}
+
+// ============================================================================
+// In-App Notification Handlers
+// ============================================================================
+
+/** Response shape for the list notifications endpoint */
+interface NotificationsListBody {
+  notifications: Notification[];
+  unreadCount: number;
+}
+
+/**
+ * List in-app notifications for the authenticated user.
+ *
+ * GET /api/notifications/list
+ *
+ * Query params: limit (default 20), offset (default 0)
+ *
+ * @param ctx - Notification module dependencies
+ * @param _body - Unused (GET request)
+ * @param req - Request with authenticated user information
+ * @returns HandlerResult with notifications array and unread count
+ */
+export async function handleListNotifications(
+  ctx: NotificationModuleDeps,
+  _body: undefined,
+  req: NotificationRequest,
+): Promise<HandlerResult<NotificationsListBody>> {
+  if (req.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    // Extract query params from the runtime request (FastifyRequest at runtime)
+    const query = (req as unknown as { query: Record<string, string | undefined> }).query;
+    const limitStr = query['limit'];
+    const offsetStr = query['offset'];
+    const parsedLimit = limitStr !== undefined ? parseInt(limitStr, 10) : NaN;
+    const parsedOffset = offsetStr !== undefined ? parseInt(offsetStr, 10) : NaN;
+    const limit = !isNaN(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 100) : 20;
+    const offset = !isNaN(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
+    const [notifications, unreadCount] = await Promise.all([
+      ctx.repos.notifications.findByUserId(req.user.userId, limit, offset),
+      ctx.repos.notifications.countUnread(req.user.userId),
+    ]);
+
+    // Format DB dates to ISO strings for API response
+    const formatted: Notification[] = notifications.map((n) => ({
+      id: n.id as Notification['id'],
+      userId: n.userId as Notification['userId'],
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      data: n.data ?? undefined,
+      isRead: n.isRead,
+      readAt: n.readAt instanceof Date ? n.readAt.toISOString() : undefined,
+      createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
+    }));
+
+    return {
+      status: 200,
+      body: { notifications: formatted, unreadCount },
+    };
+  } catch (error) {
+    ctx.log.error(
+      { err: error as Error, handler: 'handleListNotifications', userId: req.user.userId },
+      'Failed to list notifications',
+    );
+    return { status: 500, body: { message: 'Failed to list notifications' } };
+  }
+}
+
+/**
+ * Mark specific notifications as read.
+ *
+ * POST /api/notifications/mark-read
+ *
+ * @param ctx - Notification module dependencies
+ * @param body - Request body with notification IDs
+ * @param req - Request with authenticated user information
+ * @returns HandlerResult with success message
+ */
+export async function handleMarkAsRead(
+  ctx: NotificationModuleDeps,
+  body: BaseMarkAsReadRequest,
+  req: NotificationRequest,
+): Promise<HandlerResult<{ message: string; count: number }>> {
+  if (req.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    let count = 0;
+    for (const id of body.ids) {
+      const result = await ctx.repos.notifications.markAsRead(id);
+      if (result !== null) count++;
+    }
+
+    return {
+      status: 200,
+      body: { message: `Marked ${String(count)} notifications as read`, count },
+    };
+  } catch (error) {
+    ctx.log.error(
+      { err: error as Error, handler: 'handleMarkAsRead', userId: req.user.userId },
+      'Failed to mark notifications as read',
+    );
+    return { status: 500, body: { message: 'Failed to mark notifications as read' } };
+  }
+}
+
+/**
+ * Mark all notifications as read for the authenticated user.
+ *
+ * POST /api/notifications/mark-all-read
+ *
+ * @param ctx - Notification module dependencies
+ * @param _body - Unused
+ * @param req - Request with authenticated user information
+ * @returns HandlerResult with count of marked notifications
+ */
+export async function handleMarkAllAsRead(
+  ctx: NotificationModuleDeps,
+  _body: undefined,
+  req: NotificationRequest,
+): Promise<HandlerResult<{ message: string; count: number }>> {
+  if (req.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const count = await ctx.repos.notifications.markAllAsRead(req.user.userId);
+
+    return {
+      status: 200,
+      body: { message: `Marked ${String(count)} notifications as read`, count },
+    };
+  } catch (error) {
+    ctx.log.error(
+      { err: error as Error, handler: 'handleMarkAllAsRead', userId: req.user.userId },
+      'Failed to mark all notifications as read',
+    );
+    return { status: 500, body: { message: 'Failed to mark all notifications as read' } };
+  }
+}
+
+/**
+ * Delete a specific notification.
+ *
+ * POST /api/notifications/delete
+ *
+ * @param ctx - Notification module dependencies
+ * @param body - Request body with notification ID
+ * @param req - Request with authenticated user information
+ * @returns HandlerResult with success status
+ */
+export async function handleDeleteNotification(
+  ctx: NotificationModuleDeps,
+  body: { id: string },
+  req: NotificationRequest,
+): Promise<HandlerResult<{ message: string }>> {
+  if (req.user === undefined) {
+    return { status: 401, body: { message: 'Unauthorized' } };
+  }
+
+  try {
+    const deleted = await ctx.repos.notifications.delete(body.id);
+
+    if (!deleted) {
+      return { status: 404, body: { message: 'Notification not found' } };
+    }
+
+    return {
+      status: 200,
+      body: { message: 'Notification deleted' },
+    };
+  } catch (error) {
+    ctx.log.error(
+      { err: error as Error, handler: 'handleDeleteNotification', userId: req.user.userId },
+      'Failed to delete notification',
+    );
+    return { status: 500, body: { message: 'Failed to delete notification' } };
+  }
 }

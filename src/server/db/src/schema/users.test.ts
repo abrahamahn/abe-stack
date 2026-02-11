@@ -105,6 +105,7 @@ describe('Schema Constants', () => {
         deactivatedAt: 'deactivated_at',
         deletedAt: 'deleted_at',
         deletionGracePeriodEnds: 'deletion_grace_period_ends',
+        tokenVersion: 'token_version',
         gender: 'gender',
         city: 'city',
         state: 'state',
@@ -154,7 +155,7 @@ describe('Schema Constants', () => {
       // This tests that the object is marked as const and immutable
       // The TypeScript compiler ensures this, but we verify the structure
       const keys = Object.keys(USER_COLUMNS);
-      expect(keys).toHaveLength(33);
+      expect(keys).toHaveLength(34);
       expect(keys).toContain('id');
       expect(keys).toContain('email');
       expect(keys).toContain('passwordHash');
@@ -912,6 +913,7 @@ describe('Column Mapping Consistency', () => {
       'deactivatedAt',
       'deletedAt',
       'deletionGracePeriodEnds',
+      'tokenVersion',
       'gender',
       'city',
       'state',
@@ -975,6 +977,7 @@ describe('Column Mapping Consistency', () => {
       'deactivatedAt',
       'deletedAt',
       'deletionGracePeriodEnds',
+      'tokenVersion',
       'gender',
       'city',
       'state',

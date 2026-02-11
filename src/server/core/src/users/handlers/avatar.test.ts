@@ -93,6 +93,7 @@ function createMockUser(overrides: Partial<User> = {}): User {
     deactivatedAt: null,
     deletedAt: null,
     deletionGracePeriodEnds: null,
+    tokenVersion: 0,
     version: 1,
     ...overrides,
   };
@@ -120,6 +121,7 @@ function createMockRepos(): Repositories {
       listWithFilters: vi.fn(),
       lockAccount: vi.fn(),
       unlockAccount: vi.fn(),
+      incrementTokenVersion: vi.fn(),
     },
     refreshTokens: {} as Repositories['refreshTokens'],
     refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
@@ -159,6 +161,8 @@ function createMockRepos(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    trustedDevices: {} as Repositories['trustedDevices'],
+    files: {} as Repositories['files'],
   };
 }
 

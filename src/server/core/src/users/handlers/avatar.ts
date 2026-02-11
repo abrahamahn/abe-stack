@@ -10,6 +10,7 @@
 
 import { createHash } from 'node:crypto';
 
+
 import {
   ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
   BadRequestError,
@@ -19,12 +20,17 @@ import {
   WeakPasswordError,
 } from '@abe-stack/shared';
 
+
 import { logActivity } from '../../activities';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 
-import type { UsersAuthConfig } from '../types';
+import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest    } from '../types';
+import type { UsersAuthConfig    } from '../types';
+
 import type { DbClient, Repositories } from '@abe-stack/db';
+import type { HandlerContext, RouteResult } from '@abe-stack/server-engine';
 import type { UserRole } from '@abe-stack/shared';
+import type { FastifyRequest } from 'fastify';
 
 /**
  * Storage service interface for file operations.
@@ -455,4 +461,127 @@ export async function getAvatarUrl(
 
   // Otherwise return as-is (might be an external URL)
   return avatarUrl;
+}
+
+// ============================================================================
+// Context Bridge
+// ============================================================================
+
+/**
+ * Narrow HandlerContext to UsersModuleDeps.
+ *
+ * @param ctx - Generic handler context from router
+ * @returns Narrowed UsersModuleDeps
+ * @complexity O(1)
+ */
+function asUsersDeps(ctx: HandlerContext): UsersModuleDeps {
+  return ctx as unknown as UsersModuleDeps;
+}
+
+// ============================================================================
+// HTTP Handlers
+// ============================================================================
+
+/**
+ * Handle avatar upload.
+ * Expects pre-parsed multipart body with buffer/mimetype/size.
+ *
+ * PUT /api/users/me/avatar
+ *
+ * @param ctx - Handler context (narrowed to UsersModuleDeps)
+ * @param body - Parsed multipart file data
+ * @param req - Fastify request with authenticated user
+ * @returns 200 with avatarUrl, or error response
+ * @complexity O(1) - single upload + database update
+ */
+export async function handleUploadAvatar(
+  ctx: HandlerContext,
+  body: unknown,
+  req: FastifyRequest,
+): Promise<RouteResult> {
+  const deps = asUsersDeps(ctx);
+  const request = req as unknown as UsersRequest;
+
+  if (request.user === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    const fileData = body as
+      | {
+          buffer?: Buffer | Uint8Array;
+          mimetype?: string;
+          size?: number;
+        }
+      | null
+      | undefined;
+
+    if (fileData?.buffer === undefined || fileData.mimetype === undefined) {
+      return { status: 400, body: { message: 'No file uploaded' } };
+    }
+
+    const buffer = Buffer.isBuffer(fileData.buffer)
+      ? fileData.buffer
+      : Buffer.from(fileData.buffer);
+
+    const storage = deps.storage as unknown as StorageProvider;
+    const avatarUrl = await uploadAvatar(deps.repos, storage, request.user.userId, {
+      buffer,
+      mimetype: fileData.mimetype,
+      size: fileData.size ?? buffer.length,
+    });
+
+    return { status: 200, body: { avatarUrl } };
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      return { status: 400, body: { message: error.message } };
+    }
+    if (error instanceof NotFoundError) {
+      return { status: 404, body: { message: error.message } };
+    }
+    deps.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      'Failed to upload avatar',
+    );
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+/**
+ * Handle avatar deletion.
+ *
+ * DELETE /api/users/me/avatar
+ *
+ * @param ctx - Handler context (narrowed to UsersModuleDeps)
+ * @param _body - Unused request body
+ * @param req - Fastify request with authenticated user
+ * @returns 200 on success, or error response
+ * @complexity O(1) - single database lookup and update
+ */
+export async function handleDeleteAvatar(
+  ctx: HandlerContext,
+  _body: undefined,
+  req: FastifyRequest,
+): Promise<RouteResult> {
+  const deps = asUsersDeps(ctx);
+  const request = req as unknown as UsersRequest;
+
+  if (request.user === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    const storage = deps.storage as unknown as StorageProvider;
+    await deleteAvatar(deps.repos, storage, request.user.userId);
+    return { status: 200, body: { message: 'Avatar deleted' } };
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return { status: 404, body: { message: error.message } };
+    }
+    deps.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      'Failed to delete avatar',
+    );
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
 }

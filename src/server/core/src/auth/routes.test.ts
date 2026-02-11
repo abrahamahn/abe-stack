@@ -32,16 +32,35 @@ vi.mock('@abe-stack/db', async () => {
 });
 
 vi.mock('./handlers', () => ({
+  handleAcceptTos: vi.fn(),
+  handleChangeEmail: vi.fn(),
+  handleConfirmEmailChange: vi.fn(),
   handleForgotPassword: vi.fn(),
+  handleListDevices: vi.fn(),
   handleLogin: vi.fn(),
   handleLogout: vi.fn(),
   handleLogoutAll: vi.fn(),
   handleRefresh: vi.fn(),
   handleRegister: vi.fn(),
+  handleRemovePhone: vi.fn(),
   handleResendVerification: vi.fn(),
   handleResetPassword: vi.fn(),
+  handleRevertEmailChange: vi.fn(),
+  handleRevokeDevice: vi.fn(),
+  handleSendSmsCode: vi.fn(),
   handleSetPassword: vi.fn(),
+  handleSetPhone: vi.fn(),
+  handleSudoElevate: vi.fn(),
+  handleTosStatus: vi.fn(),
+  handleTotpDisable: vi.fn(),
+  handleTotpEnable: vi.fn(),
+  handleTotpLoginVerify: vi.fn(),
+  handleTotpSetup: vi.fn(),
+  handleTotpStatus: vi.fn(),
+  handleTrustDevice: vi.fn(),
   handleVerifyEmail: vi.fn(),
+  handleVerifyPhone: vi.fn(),
+  handleVerifySmsCode: vi.fn(),
 }));
 
 import { authRoutes } from './routes';
@@ -113,8 +132,10 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (19) + ToS routes (2) + Magic-link routes (2) + OAuth routes (13) = 36
-      expect(routeKeys).toHaveLength(36);
+      // Core auth routes (19) + ToS routes (2) + Device routes (3) + Phone routes (2*) + SMS routes (2)
+      // + Magic-link routes (2) + OAuth routes (13) = 43
+      // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
+      expect(routeKeys).toHaveLength(43);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -146,6 +167,19 @@ describe('Auth Routes', () => {
       expect(routeKeys).toContain('auth/change-email');
       expect(routeKeys).toContain('auth/change-email/confirm');
       expect(routeKeys).toContain('auth/change-email/revert');
+
+      // Device management routes
+      expect(routeKeys).toContain('users/me/devices');
+      expect(routeKeys).toContain('users/me/devices/:id/trust');
+      expect(routeKeys).toContain('users/me/devices/:id');
+
+      // Phone management routes
+      expect(routeKeys).toContain('users/me/phone');
+      expect(routeKeys).toContain('users/me/phone/verify');
+
+      // SMS 2FA challenge routes
+      expect(routeKeys).toContain('auth/sms/send');
+      expect(routeKeys).toContain('auth/sms/verify');
 
       // OAuth routes
       expect(routeKeys).toContain('auth/oauth/google');
@@ -909,8 +943,10 @@ describe('Route Protection', () => {
 
     // 8 core protected (logout-all, set-password, totp/setup, totp/enable, totp/disable, totp/status, sudo, change-email)
     // + 2 ToS protected (tos/status, tos/accept)
-    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 17 protected routes
-    expect(protectedRoutes).toHaveLength(17);
+    // + 3 device protected (devices, devices/:id/trust, devices/:id)
+    // + 2 phone protected (phone, phone/verify) — phone POST overwritten by DELETE in Map
+    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 22 protected routes
+    expect(protectedRoutes).toHaveLength(22);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -925,6 +961,13 @@ describe('Route Protection', () => {
     // ToS protected routes
     expect(protectedRouteNames).toContain('auth/tos/status');
     expect(protectedRouteNames).toContain('auth/tos/accept');
+    // Device management protected routes
+    expect(protectedRouteNames).toContain('users/me/devices');
+    expect(protectedRouteNames).toContain('users/me/devices/:id/trust');
+    expect(protectedRouteNames).toContain('users/me/devices/:id');
+    // Phone management protected routes
+    expect(protectedRouteNames).toContain('users/me/phone');
+    expect(protectedRouteNames).toContain('users/me/phone/verify');
     // OAuth protected routes
     expect(protectedRouteNames).toContain('auth/oauth/google/link');
     expect(protectedRouteNames).toContain('auth/oauth/github/link');
@@ -943,8 +986,8 @@ describe('Route Protection', () => {
   test('should have all other routes as public', () => {
     const publicRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => def.isPublic);
 
-    // 11 core public + 2 magic-link + 6 OAuth (3 initiate + 3 callback) = 19 public routes
-    expect(publicRoutes).toHaveLength(19);
+    // 11 core public + 2 SMS public + 2 magic-link + 6 OAuth (3 initiate + 3 callback) = 21 public routes
+    expect(publicRoutes).toHaveLength(21);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
     // Core public routes
@@ -959,6 +1002,9 @@ describe('Route Protection', () => {
     expect(publicRouteNames).toContain('auth/change-email/confirm');
     expect(publicRouteNames).toContain('auth/change-email/revert');
     expect(publicRouteNames).toContain('auth/totp/verify-login');
+    // SMS 2FA public routes
+    expect(publicRouteNames).toContain('auth/sms/send');
+    expect(publicRouteNames).toContain('auth/sms/verify');
     // Magic-link public routes
     expect(publicRouteNames).toContain('auth/magic-link/request');
     expect(publicRouteNames).toContain('auth/magic-link/verify');

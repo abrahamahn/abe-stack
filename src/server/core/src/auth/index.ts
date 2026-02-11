@@ -32,9 +32,12 @@ export {
   handleLogoutAll,
   handleRefresh,
   handleRegister,
+  handleRemovePhone,
   handleResendVerification,
   handleResetPassword,
+  handleSendSmsCode,
   handleSetPassword,
+  handleSetPhone,
   handleSudoElevate,
   handleTosStatus,
   handleTotpDisable,
@@ -43,6 +46,8 @@ export {
   handleTotpSetup,
   handleTotpStatus,
   handleVerifyEmail,
+  handleVerifyPhone,
+  handleVerifySmsCode,
   SUDO_TOKEN_HEADER,
   SUDO_TOKEN_TTL_MINUTES,
   verifySudoToken,
@@ -151,6 +156,24 @@ export {
   verifyTotpCode,
   type TotpVerifyResult,
 } from './totp';
+
+// SMS 2FA
+export {
+  checkSmsRateLimit,
+  getSmsVerificationCode,
+  sendSms2faCode,
+  verifySms2faCode,
+  SMS_CODE_EXPIRY_MS,
+  SMS_MAX_ATTEMPTS,
+  SMS_RATE_LIMIT_DAILY,
+  SMS_RATE_LIMIT_HOURLY,
+  type SetPhoneRequest,
+  type SmsChallengeRequest,
+  type SmsRateLimitResult,
+  type SmsVerificationCode,
+  type SmsVerifyRequest,
+  type VerifyPhoneRequest,
+} from './sms-2fa';
 
 // Email Change
 export {

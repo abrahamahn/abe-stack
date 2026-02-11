@@ -15,6 +15,7 @@ import type {
   BillingEventRepository,
   CustomerMappingRepository,
   InvoiceRepository,
+  NotificationRepository,
   PaymentMethodRepository,
   PlanRepository,
   SubscriptionRepository,
@@ -164,6 +165,7 @@ export interface BillingAppContext extends BaseContext {
   readonly repos: BillingRepositories & {
     readonly billingEvents: BillingEventRepository;
     readonly auditEvents?: AuditEventRepository;
+    readonly notifications?: NotificationRepository;
   };
   readonly log: BillingLogger;
 }

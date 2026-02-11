@@ -162,7 +162,7 @@ describe('ApiKeysManagement', () => {
   // ============================================================================
 
   describe('loading state', () => {
-    it('should render spinner when loading', () => {
+    it('should render skeleton loaders when loading', () => {
       vi.mocked(useApiKeys).mockReturnValue({
         apiKeys: [],
         isLoading: true,
@@ -173,7 +173,8 @@ describe('ApiKeysManagement', () => {
 
       render(<ApiKeysManagement />);
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      const skeletons = document.querySelectorAll('.skeleton');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
   });
 
@@ -227,7 +228,9 @@ describe('ApiKeysManagement', () => {
 
       render(<ApiKeysManagement />);
 
-      expect(screen.getByText('No API keys yet. Create one to get started.')).toBeInTheDocument();
+      expect(screen.getByText('No API keys yet')).toBeInTheDocument();
+      expect(screen.getByText('Create one to get started')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Create API Key' })).toBeInTheDocument();
     });
   });
 

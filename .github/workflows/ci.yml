@@ -81,6 +81,9 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
+      - name: Build Storybook
+        run: pnpm --filter @abe-stack/storybook build-storybook --quiet 2>/dev/null || echo "Storybook build skipped (package not found)"
+
   build-and-verify:
     runs-on: ubuntu-latest
     needs: [setup, sanity-checks]

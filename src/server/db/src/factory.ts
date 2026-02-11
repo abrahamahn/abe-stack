@@ -21,6 +21,7 @@ import {
   createRefreshTokenRepository,
   createSecurityEventRepository,
   createTotpBackupCodeRepository,
+  createTrustedDeviceRepository,
   type EmailChangeTokenRepository,
   type EmailChangeRevertTokenRepository,
   type EmailVerificationTokenRepository,
@@ -30,6 +31,7 @@ import {
   type RefreshTokenRepository,
   type SecurityEventRepository,
   type TotpBackupCodeRepository,
+  type TrustedDeviceRepository,
 } from './repositories/auth';
 import {
   createBillingEventRepository,
@@ -61,6 +63,7 @@ import {
   type FeatureFlagRepository,
   type TenantFeatureOverrideRepository,
 } from './repositories/features';
+import { createFileRepository, type FileRepository } from './repositories/files';
 import {
   createMagicLinkTokenRepository,
   type MagicLinkTokenRepository,
@@ -128,6 +131,7 @@ export interface Repositories {
   totpBackupCodes: TotpBackupCodeRepository;
   emailChangeTokens: EmailChangeTokenRepository;
   emailChangeRevertTokens: EmailChangeRevertTokenRepository;
+  trustedDevices: TrustedDeviceRepository;
 
   // Magic Link
   magicLinkTokens: MagicLinkTokenRepository;
@@ -169,6 +173,9 @@ export interface Repositories {
 
   // Activities
   activities: ActivityRepository;
+
+  // Files
+  files: FileRepository;
 
   // Features
   featureFlags: FeatureFlagRepository;
@@ -223,6 +230,7 @@ export function createRepositories(connectionString: string): RepositoryContext 
       totpBackupCodes: createTotpBackupCodeRepository(raw),
       emailChangeTokens: createEmailChangeTokenRepository(raw),
       emailChangeRevertTokens: createEmailChangeRevertTokenRepository(raw),
+      trustedDevices: createTrustedDeviceRepository(raw),
 
       // Magic Link
       magicLinkTokens: createMagicLinkTokenRepository(raw),
@@ -264,6 +272,9 @@ export function createRepositories(connectionString: string): RepositoryContext 
 
       // Activities
       activities: createActivityRepository(raw),
+
+      // Files
+      files: createFileRepository(raw),
 
       // Features
       featureFlags: createFeatureFlagRepository(raw),

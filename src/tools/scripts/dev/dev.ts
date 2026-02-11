@@ -6,8 +6,9 @@
  * Runs all sync watchers silently in background, then starts turbo dev.
  *
  * Usage:
- *   pnpm dev              # Start all
- *   pnpm dev web          # Start web only
+ *   pnpm dev              # Start server + web
+ *   pnpm dev:desktop      # Start server + desktop
+ *   pnpm dev:all          # Start server + web + desktop
  *   pnpm dev server       # Start server only
  */
 
@@ -80,10 +81,13 @@ function centerLine(text: string, width: number): string {
   return `${' '.repeat(left)}${text}${' '.repeat(right)}`;
 }
 
-function renderStartupBanner(filter?: string): void {
+function renderStartupBanner(filters: string[]): void {
   const title = 'ABE Stack';
   const subtitle = 'Development Environment';
-  const mode = filter ? `Mode: @abe-stack/${filter}` : 'Mode: full workspace';
+  const mode =
+    filters.length > 0
+      ? `Mode: ${filters.map((f) => `@abe-stack/${f}`).join(' + ')}`
+      : 'Mode: full workspace';
   const hint = 'Press Ctrl+C to stop all dev processes';
   const timestamp = `Started: ${new Date().toLocaleString()}`;
 
@@ -210,10 +214,10 @@ async function ensurePostgres(): Promise<void> {
   }
 }
 
-function runEnvPreflight(filter?: string): void {
+function runEnvPreflight(filters: string[]): void {
   // Only validate server env when the server might run.
   // `pnpm dev web` should be able to start without a fully configured backend.
-  if (filter === 'web') return;
+  if (filters.length > 0 && !filters.includes('server')) return;
 
   // Ensure we load `config/env/.env.development` by default.
   process.env['NODE_ENV'] ??= 'development';
@@ -228,9 +232,9 @@ function redactDbUrl(url: string): string {
   return url.replace(/:(?:[^:@/]+)@/g, ':****@');
 }
 
-async function ensureDatabaseConnection(filter?: string): Promise<void> {
+async function ensureDatabaseConnection(filters: string[]): Promise<void> {
   // Only check DB connectivity when the server might run.
-  if (filter && filter !== 'server') return;
+  if (filters.length > 0 && !filters.includes('server')) return;
 
   const connectionString = buildConnectionString(process.env as Record<string, string | undefined>);
   const ok = await canReachDatabase(connectionString);
@@ -265,10 +269,10 @@ function startWatcher(script: string): ChildProcess {
   return watcher;
 }
 
-function startTurboDev(filter?: string): ChildProcess {
+function startTurboDev(filters: string[]): ChildProcess {
   const args = ['turbo', 'run', 'dev', '--log-order=stream', '--log-prefix=task'];
-  if (filter) {
-    args.push(`--filter=@abe-stack/${filter}`);
+  for (const f of filters) {
+    args.push(`--filter=@abe-stack/${f}`);
   }
 
   const turbo = spawn('pnpm', args, {
@@ -323,27 +327,31 @@ function startTurboDev(filter?: string): ChildProcess {
 }
 
 async function main(): Promise<void> {
-  const filter = process.argv[2];
+  const filters = process.argv.slice(2);
 
-  renderStartupBanner(filter);
+  renderStartupBanner(filters);
 
   // Best-effort port cleanup (matches previous root `pnpm dev` behavior).
   // Keep this before the env preflight, so old servers don't mask env/db issues.
-  const portsToClean =
-    filter === 'web' ? [5173] : filter === 'server' ? [8080, 3000] : [5173, 8080, 3000];
-  killPorts(portsToClean);
+  const needsServer = filters.length === 0 || filters.includes('server');
+  const needsWeb = filters.length === 0 || filters.includes('web');
+  const portsToClean = [
+    ...(needsWeb ? [5173] : []),
+    ...(needsServer ? [8080, 3000] : []),
+  ];
+  if (portsToClean.length > 0) killPorts(portsToClean);
 
   logHeader('Development Environment', 'Preparing local services and watchers');
-  if (filter) {
-    logLine('dev', `Filter: @abe-stack/${filter}`);
+  if (filters.length > 0) {
+    logLine('dev', `Filter: ${filters.map((f) => `@abe-stack/${f}`).join(', ')}`);
   }
 
-  runEnvPreflight(filter);
+  runEnvPreflight(filters);
 
-  // Ensure PostgreSQL is running (skip for web-only or desktop-only)
-  if (!filter || filter === 'server') {
+  // Ensure PostgreSQL is running (skip when server is not included)
+  if (needsServer) {
     await ensurePostgres();
-    await ensureDatabaseConnection(filter);
+    await ensureDatabaseConnection(filters);
 
     // Auto-migrate database schema (safe to run repeatedly)
     logLine('db', 'Verifying database schema...');
@@ -367,7 +375,7 @@ async function main(): Promise<void> {
   // Give watchers a moment to do initial sync
   setTimeout(() => {
     logLine('turbo', 'Starting Turbo dev tasks');
-    const turbo = startTurboDev(filter);
+    const turbo = startTurboDev(filters);
 
     const cleanup = (): void => {
       console.log('');

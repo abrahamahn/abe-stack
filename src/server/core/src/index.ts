@@ -16,5 +16,7 @@
 export { adminRoutes } from './admin';
 export { authRoutes, createAuthGuard, verifyToken } from './auth';
 export { billingRoutes, registerWebhookRoutes } from './billing';
+export { fileRoutes } from './files';
 export { notificationRoutes } from './notifications';
 export { userRoutes } from './users';
+export { webhookRoutes } from './webhooks';

@@ -61,6 +61,9 @@ export {
   type InvitationInfo,
 } from './invitation-service';
 
+// Invitation Cleanup
+export { expireStaleInvitations, type InvitationCleanupResult } from './invitation-cleanup';
+
 // Middleware
 export {
   buildAuthContext,
@@ -73,6 +76,12 @@ export {
 } from './middleware';
 
 // Types (module dependency types)
-export type { TenantsLogger, TenantsModuleDeps, TenantsRequest } from './types';
+export type {
+  TenantsEmailOptions,
+  TenantsEmailTemplates,
+  TenantsLogger,
+  TenantsModuleDeps,
+  TenantsRequest,
+} from './types';
 
 export { ERROR_MESSAGES } from './types';

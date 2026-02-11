@@ -59,6 +59,10 @@ export {
   totpLoginVerifyRequestSchema,
   totpVerifyRequestSchema,
   totpVerifyResponseSchema,
+  setPhoneRequestSchema,
+  verifyPhoneRequestSchema,
+  smsChallengeRequestSchema,
+  smsVerifyRequestSchema,
   type ErrorMapperLogger,
   type ErrorMapperOptions,
   type ErrorStatusCode,
@@ -93,6 +97,14 @@ export {
   type TotpStatusResponse,
   type TotpVerifyRequest,
   type TotpVerifyResponse,
+  type SetPhoneRequest,
+  type SetPhoneResponse,
+  type VerifyPhoneRequest,
+  type VerifyPhoneResponse,
+  type RemovePhoneResponse,
+  type SmsChallengeRequest,
+  type SmsChallengeResponse,
+  type SmsVerifyRequest,
 } from './auth';
 
 export {

@@ -55,14 +55,64 @@ test.describe('Auth Page Navigation', () => {
   });
 });
 
+test.describe('Standalone Auth Routes', () => {
+  test('/login renders login form', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+    await expect(page.getByLabel(/password/i)).toBeVisible();
+  });
+
+  test('/register renders register form', async ({ page }) => {
+    await page.goto('/register');
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+    await expect(page.getByLabel(/password/i)).toBeVisible();
+  });
+
+  test('/auth/reset-password renders without crash', async ({ page }) => {
+    await page.goto('/auth/reset-password');
+    // Reset password page should render — may show "invalid token" state
+    await expect(page.locator('main')).toBeVisible();
+  });
+
+  test('/auth/confirm-email renders without crash', async ({ page }) => {
+    await page.goto('/auth/confirm-email');
+    await expect(page.locator('main')).toBeVisible();
+  });
+});
+
 test.describe('Protected Route Redirects', () => {
   test('dashboard redirects to auth when not logged in', async ({ page }) => {
     await page.goto('/dashboard');
-    await expect(page).toHaveURL(/\/(auth|login)/);
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
   });
 
-  test('settings redirects to auth when not logged in', async ({ page }) => {
-    await page.goto('/settings');
-    await expect(page).toHaveURL(/\/(auth|login)/);
+  test('activities redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/activities');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
+  });
+
+  test('settings/accounts redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/settings/accounts');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
+  });
+
+  test('settings/billing redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/settings/billing');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
+  });
+
+  test('workspaces redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/workspaces');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
+  });
+
+  test('billing/success redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/billing/success');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
+  });
+
+  test('billing/cancel redirects to auth when not logged in', async ({ page }) => {
+    await page.goto('/billing/cancel');
+    await expect(page).toHaveURL(/\/(auth|login)/, { timeout: 5000 });
   });
 });

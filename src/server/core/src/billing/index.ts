@@ -70,6 +70,35 @@ export {
   handleCreateSetupIntent,
 } from './handlers';
 
+// Subscription Lifecycle
+export {
+  checkTrialExpiry,
+  getTrialDaysRemaining,
+  getValidEvents,
+  isValidTransition,
+  transitionSubscriptionState,
+  type LifecycleState,
+  type SubscriptionEvent,
+  type TransitionResult,
+  type TrialSubscription,
+} from './subscription-lifecycle';
+
+// Plan Changes
+export {
+  determinePlanChangeDirection,
+  downgradeSubscription,
+  upgradeSubscription,
+  type PlanChangeDirection,
+  type PlanChangeResult,
+} from './plan-changes';
+
+// Entitlements (server-side)
+export {
+  assertUsageWithinLimit,
+  resolveEntitlementsForUser,
+  type UsageCounter,
+} from './entitlements';
+
 // Middleware
 export { requireEntitlement, type EntitlementMiddlewareOptions } from './middleware';
 

@@ -340,17 +340,32 @@ export {
 } from './system';
 
 // ============================================================================
-// SMS (Stub — provider not yet selected)
+// SMS
 // ============================================================================
 
 export {
   ConsoleSmsProvider,
   createSmsProvider,
+  TwilioSmsProvider,
+  type TwilioConfig,
   type SmsConfig,
   type SmsOptions,
   type SmsProvider,
   type SmsResult,
 } from './sms';
+
+// ============================================================================
+// Geo-IP
+// ============================================================================
+
+export {
+  createGeoIpProvider,
+  IpApiGeoIpProvider,
+  NoopGeoIpProvider,
+  type GeoIpConfig,
+  type GeoIpProvider,
+  type GeoIpResult,
+} from './geo-ip';
 
 // ============================================================================
 // Routing (Fastify-specific)
@@ -378,3 +393,22 @@ export {
   type RouterOptions,
   type ValidationSchema,
 } from './routing';
+
+// ============================================================================
+// Observability
+// ============================================================================
+
+export {
+  addBreadcrumb,
+  captureError,
+  ConsoleErrorTrackingProvider,
+  createErrorTracker,
+  initSentry,
+  NoopErrorTrackingProvider,
+  setUserContext,
+  type Breadcrumb,
+  type BreadcrumbLevel,
+  type ErrorContext,
+  type ErrorTrackingConfig,
+  type ErrorTrackingProvider,
+} from './observability';

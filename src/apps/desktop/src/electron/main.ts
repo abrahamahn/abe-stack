@@ -4,7 +4,11 @@ import { join } from 'node:path';
 import { waitForPort } from '@abe-stack/shared';
 import { app, BrowserWindow, nativeTheme } from 'electron';
 
+import { initAutoUpdater } from './auto-updater';
+import { handleDeepLink, registerDeepLinkProtocol } from './deep-links';
 import { registerIPCHandlers } from './ipc';
+import { createApplicationMenu } from './menu';
+import { createTray } from './tray';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -19,12 +23,53 @@ function getMainWindow(): BrowserWindow | null {
 app.disableHardwareAcceleration();
 
 // Register all IPC handlers
-// Register all IPC handlers
 registerIPCHandlers(getMainWindow);
+
+// Register deep link protocol (abe-stack://)
+registerDeepLinkProtocol('abe-stack');
 
 // Force system theme detection
 nativeTheme.themeSource = 'system';
 console.log(`[Main] System theme detected: ${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}`);
+
+// ============================================================================
+// Deep Link Handling — macOS
+// ============================================================================
+
+// macOS delivers deep links via the open-url event
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  if (mainWindow !== null) {
+    handleDeepLink(url, mainWindow);
+  }
+});
+
+// ============================================================================
+// Deep Link Handling — Windows / Linux (single-instance lock)
+// ============================================================================
+
+// Ensure single instance so deep links on Windows/Linux reach the running app
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, commandLine) => {
+    // The deep link URL is the last argument in the command line
+    const deepLinkUrl = commandLine.find((arg) => arg.startsWith('abe-stack://'));
+    if (deepLinkUrl !== undefined && mainWindow !== null) {
+      handleDeepLink(deepLinkUrl, mainWindow);
+    }
+
+    // Focus the existing window
+    if (mainWindow !== null) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+  });
+}
 
 // ============================================================================
 // Window Management
@@ -41,6 +86,17 @@ const createWindow = async (): Promise<void> => {
       sandbox: true,
     },
   });
+
+  // Set up native menu
+  createApplicationMenu(mainWindow);
+
+  // Set up system tray
+  createTray(mainWindow);
+
+  // Initialize auto-updater (production only — dev builds have no update feed)
+  if (process.env['NODE_ENV'] !== 'development') {
+    initAutoUpdater(mainWindow);
+  }
 
   // Load the app
   if (process.env['NODE_ENV'] === 'development') {

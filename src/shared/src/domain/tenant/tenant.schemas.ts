@@ -55,6 +55,7 @@ export interface Tenant {
   createdAt: string;
   updatedAt: string;
   metadata: Record<string, unknown>;
+  allowedEmailDomains?: string[] | undefined;
 }
 
 /** Input for creating a new tenant */
@@ -69,6 +70,7 @@ export interface UpdateTenantInput {
   name?: string | undefined;
   logoUrl?: string | null | undefined;
   metadata?: Record<string, unknown> | undefined;
+  allowedEmailDomains?: string[] | undefined;
 }
 
 // ============================================================================
@@ -96,6 +98,10 @@ export const tenantSchema: Schema<Tenant> = createSchema((data: unknown) => {
       withDefault(obj['metadata'], {}) !== undefined
         ? parseRecord(withDefault(obj['metadata'], {}), 'metadata')
         : {},
+    allowedEmailDomains: parseOptional(obj['allowedEmailDomains'], (v) => {
+      if (!Array.isArray(v)) throw new Error('allowedEmailDomains must be an array');
+      return v.map((item) => parseString(item, 'allowedEmailDomains[]', { min: 1, max: 253 }));
+    }),
   };
 });
 
@@ -127,5 +133,9 @@ export const updateTenantSchema: Schema<UpdateTenantInput> = createSchema((data:
     name: parseOptional(obj['name'], (v) => parseString(v, 'name', { min: 1, max: 100 })),
     logoUrl: parseNullableOptional(obj['logoUrl'], (v) => parseString(v, 'logoUrl', { url: true })),
     metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
+    allowedEmailDomains: parseOptional(obj['allowedEmailDomains'], (v) => {
+      if (!Array.isArray(v)) throw new Error('allowedEmailDomains must be an array');
+      return v.map((item) => parseString(item, 'allowedEmailDomains[]', { min: 1, max: 253 }));
+    }),
   };
 });

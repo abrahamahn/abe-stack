@@ -103,7 +103,7 @@ describe('Notification Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(notificationRoutes.keys());
-      expect(routeKeys).toHaveLength(7);
+      expect(routeKeys).toHaveLength(11);
 
       expect(routeKeys).toContain('notifications/vapid-key');
       expect(routeKeys).toContain('notifications/subscribe');
@@ -112,10 +112,14 @@ describe('Notification Routes', () => {
       expect(routeKeys).toContain('notifications/preferences/update');
       expect(routeKeys).toContain('notifications/test');
       expect(routeKeys).toContain('notifications/send');
+      expect(routeKeys).toContain('notifications/list');
+      expect(routeKeys).toContain('notifications/mark-read');
+      expect(routeKeys).toContain('notifications/mark-all-read');
+      expect(routeKeys).toContain('notifications/delete');
     });
 
-    test('should have exactly 7 routes', () => {
-      expect(notificationRoutes.size).toBe(7);
+    test('should have exactly 11 routes', () => {
+      expect(notificationRoutes.size).toBe(11);
     });
   });
 
@@ -1236,13 +1240,13 @@ describe('Route Protection', () => {
     expect(publicRoutes[0]![0]).toBe('notifications/vapid-key');
   });
 
-  test('should have exactly 5 user-protected routes', () => {
+  test('should have exactly 9 user-protected routes', () => {
     const userRoutes = Array.from(notificationRoutes.entries()).filter(
       ([_, def]: [string, RouteDefinition]) =>
         !def.isPublic && def.roles?.includes('user') === true,
     );
 
-    expect(userRoutes).toHaveLength(5);
+    expect(userRoutes).toHaveLength(9);
 
     const userRouteNames = userRoutes.map(([name]) => name);
     expect(userRouteNames).toContain('notifications/subscribe');
@@ -1250,6 +1254,10 @@ describe('Route Protection', () => {
     expect(userRouteNames).toContain('notifications/preferences');
     expect(userRouteNames).toContain('notifications/preferences/update');
     expect(userRouteNames).toContain('notifications/test');
+    expect(userRouteNames).toContain('notifications/list');
+    expect(userRouteNames).toContain('notifications/mark-read');
+    expect(userRouteNames).toContain('notifications/mark-all-read');
+    expect(userRouteNames).toContain('notifications/delete');
   });
 
   test('should have exactly 1 admin-protected route', () => {
@@ -1271,6 +1279,10 @@ describe('Route Protection', () => {
     expect(notificationRoutes.get('notifications/test')!.isPublic).toBe(false);
     expect(notificationRoutes.get('notifications/send')!.isPublic).toBe(false);
     expect(notificationRoutes.get('notifications/send')!.roles).toContain('admin');
+    expect(notificationRoutes.get('notifications/list')!.isPublic).toBe(false);
+    expect(notificationRoutes.get('notifications/mark-read')!.isPublic).toBe(false);
+    expect(notificationRoutes.get('notifications/mark-all-read')!.isPublic).toBe(false);
+    expect(notificationRoutes.get('notifications/delete')!.isPublic).toBe(false);
   });
 });
 

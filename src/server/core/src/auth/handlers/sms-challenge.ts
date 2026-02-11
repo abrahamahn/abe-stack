@@ -1,0 +1,216 @@
+// src/server/core/src/auth/handlers/sms-challenge.ts
+/**
+ * SMS 2FA Challenge Handlers
+ *
+ * HTTP layer for SMS-based 2FA during login flow.
+ * Follows the same challenge token pattern as TOTP login verification.
+ *
+ * @module handlers/sms-challenge
+ */
+
+import { withTransaction } from '@abe-stack/db';
+import { verify as jwtVerify, JwtError } from '@abe-stack/server-engine';
+import {
+  InvalidTokenError,
+  mapErrorToHttpResponse,
+  type UserRole,
+  type AuthResponse,
+  type HttpErrorResponse,
+} from '@abe-stack/shared';
+
+import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
+import { sendSms2faCode, verifySms2faCode } from '../sms-2fa/service';
+import {
+  createErrorMapperLogger,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
+} from '../types';
+import {
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  setRefreshTokenCookie,
+} from '../utils';
+
+import type { SmsChallengeRequest, SmsVerifyRequest } from '../sms-2fa/types';
+
+// ============================================================================
+// Handlers
+// ============================================================================
+
+/**
+ * Handle sending an SMS code during the login challenge flow.
+ *
+ * POST /api/auth/sms/send
+ * Called after login returns a challenge token indicating SMS 2FA is required.
+ * Sends a verification code to the user's verified phone number.
+ */
+export async function handleSendSmsCode(
+  ctx: AppContext,
+  body: SmsChallengeRequest,
+  _request: RequestWithCookies,
+): Promise<{ status: 200; body: { message: string } } | HttpErrorResponse> {
+  try {
+    // Verify the challenge JWT
+    let payload: Record<string, unknown>;
+    try {
+      payload = jwtVerify(body.challengeToken, ctx.config.auth.jwt.secret) as Record<
+        string,
+        unknown
+      >;
+    } catch (error) {
+      if (error instanceof JwtError) {
+        throw new InvalidTokenError('Challenge token is invalid or expired');
+      }
+      throw error;
+    }
+
+    // Validate challenge token purpose and extract userId
+    if (
+      (payload['purpose'] !== 'sms_challenge' && payload['purpose'] !== 'totp_challenge') ||
+      typeof payload['userId'] !== 'string'
+    ) {
+      throw new InvalidTokenError('Invalid challenge token');
+    }
+
+    const userId = payload['userId'];
+
+    // Get user's verified phone
+    const userResult = await ctx.repos.users.findById(userId);
+    if (userResult === null) {
+      throw new InvalidTokenError('User not found');
+    }
+
+    const phone = (userResult as unknown as { phone: string | null; phoneVerified: boolean | null })
+      .phone;
+    const phoneVerified = (
+      userResult as unknown as { phone: string | null; phoneVerified: boolean | null }
+    ).phoneVerified;
+
+    if (phone === null || phoneVerified !== true) {
+      return { status: 400, body: { message: 'No verified phone number on account' } };
+    }
+
+    // Check rate limit
+    const rateLimit = await checkSmsRateLimit(ctx.db, userId);
+    if (!rateLimit.allowed) {
+      return {
+        status: 429,
+        body: { message: 'Too many SMS requests. Please try again later.' },
+      };
+    }
+
+    // Get the SMS provider from context (may not be configured)
+    const smsProvider = (
+      ctx as unknown as { sms: import('@abe-stack/server-engine').SmsProvider | undefined }
+    ).sms;
+    if (smsProvider === undefined) {
+      ctx.log.error('SMS provider not configured');
+      return { status: 500, body: { message: 'SMS service unavailable' } };
+    }
+
+    // Send code
+    const result = await sendSms2faCode(ctx.db, smsProvider, userId, phone);
+
+    if (!result.success) {
+      ctx.log.error({ error: result.error }, 'Failed to send SMS challenge code');
+      return { status: 500, body: { message: 'Failed to send verification code' } };
+    }
+
+    return { status: 200, body: { message: 'Verification code sent' } };
+  } catch (error) {
+    return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
+  }
+}
+
+/**
+ * Handle verifying an SMS code during the login challenge flow.
+ *
+ * POST /api/auth/sms/verify
+ * Verifies the SMS code and issues auth tokens on success.
+ * Follows the same pattern as handleTotpLoginVerify.
+ */
+export async function handleVerifySmsCode(
+  ctx: AppContext,
+  body: SmsVerifyRequest,
+  request: RequestWithCookies,
+  reply: ReplyWithCookies,
+): Promise<{ status: 200; body: AuthResponse } | HttpErrorResponse> {
+  try {
+    const { ipAddress, userAgent } = request.requestInfo;
+
+    // Verify the challenge JWT
+    let payload: Record<string, unknown>;
+    try {
+      payload = jwtVerify(body.challengeToken, ctx.config.auth.jwt.secret) as Record<
+        string,
+        unknown
+      >;
+    } catch (error) {
+      if (error instanceof JwtError) {
+        throw new InvalidTokenError('Challenge token is invalid or expired');
+      }
+      throw error;
+    }
+
+    // Validate challenge token purpose and extract userId
+    if (
+      (payload['purpose'] !== 'sms_challenge' && payload['purpose'] !== 'totp_challenge') ||
+      typeof payload['userId'] !== 'string'
+    ) {
+      throw new InvalidTokenError('Invalid challenge token');
+    }
+
+    const userId = payload['userId'];
+
+    // Verify SMS code
+    const verifyResult = await verifySms2faCode(ctx.db, userId, body.code);
+    if (!verifyResult.valid) {
+      return { status: 401, body: { message: verifyResult.message } };
+    }
+
+    // Fetch user for token creation
+    const user = await ctx.repos.users.findById(userId);
+    if (user === null) {
+      throw new InvalidTokenError('User not found');
+    }
+
+    // Create tokens (same pattern as TOTP login verify)
+    const { token: refreshToken } = await withTransaction(ctx.db, async (tx) => {
+      const sessionMeta: { ipAddress?: string; userAgent?: string } = { ipAddress };
+      if (userAgent !== undefined) {
+        sessionMeta.userAgent = userAgent;
+      }
+      return createRefreshTokenFamily(
+        tx,
+        user.id,
+        ctx.config.auth.refreshToken.expiryDays,
+        sessionMeta,
+      );
+    });
+
+    const accessToken = createAccessToken(
+      user.id,
+      user.email,
+      user.role as UserRole,
+      ctx.config.auth.jwt.secret,
+      ctx.config.auth.jwt.accessTokenExpiry,
+    );
+
+    // Set refresh token cookie
+    setRefreshTokenCookie(reply, refreshToken, ctx.config.auth);
+
+    const authResponse = createAuthResponse(accessToken, refreshToken, user);
+
+    return {
+      status: 200,
+      body: {
+        token: authResponse.accessToken,
+        user: authResponse.user,
+      },
+    };
+  } catch (error) {
+    return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
+  }
+}

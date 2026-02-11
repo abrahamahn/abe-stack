@@ -16,6 +16,7 @@ import {
   type RouteDefinition,
 } from '@abe-stack/server-engine';
 import {
+  baseMarkAsReadRequestSchema,
   sendNotificationRequestSchema,
   subscribeRequestSchema,
   unsubscribeRequestSchema,
@@ -23,8 +24,12 @@ import {
 } from '@abe-stack/shared';
 
 import {
+  handleDeleteNotification,
   handleGetPreferences,
   handleGetVapidKey,
+  handleListNotifications,
+  handleMarkAllAsRead,
+  handleMarkAsRead,
   handleSendNotification,
   handleSubscribe,
   handleTestNotification,
@@ -34,6 +39,7 @@ import {
 
 import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
+  BaseMarkAsReadRequest,
   SendNotificationRequest,
   SubscribeRequest,
   UnsubscribeRequest,
@@ -170,6 +176,10 @@ function notificationProtectedRoute<TBody>(
  * - PUT  notifications/preferences/update  (user)    - Update notification preferences
  * - POST notifications/test               (user)    - Send test notification
  * - POST notifications/send               (admin)   - Send notification to users
+ * - GET  notifications/list               (user)    - List in-app notifications
+ * - POST notifications/mark-read          (user)    - Mark specific notifications as read
+ * - POST notifications/mark-all-read      (user)    - Mark all notifications as read
+ * - POST notifications/delete             (user)    - Delete a notification
  */
 export const notificationRoutes = createRouteMap([
   // Public route - get VAPID key for client subscription
@@ -235,6 +245,44 @@ export const notificationRoutes = createRouteMap([
       (ctx, body, req) => handleSendNotification(ctx, body, req),
       ['admin'],
       sendNotificationRequestSchema,
+    ),
+  ],
+
+  // In-app notification routes
+  [
+    'notifications/list',
+    notificationProtectedRoute<undefined>(
+      'GET',
+      async (ctx, _body, req) => handleListNotifications(ctx, _body, req),
+      ['user'],
+    ),
+  ],
+
+  [
+    'notifications/mark-read',
+    notificationProtectedRoute<BaseMarkAsReadRequest>(
+      'POST',
+      async (ctx, body, req) => handleMarkAsRead(ctx, body, req),
+      ['user'],
+      baseMarkAsReadRequestSchema,
+    ),
+  ],
+
+  [
+    'notifications/mark-all-read',
+    notificationProtectedRoute<undefined>(
+      'POST',
+      async (ctx, _body, req) => handleMarkAllAsRead(ctx, _body, req),
+      ['user'],
+    ),
+  ],
+
+  [
+    'notifications/delete',
+    notificationProtectedRoute<{ id: string }>(
+      'POST',
+      async (ctx, body, req) => handleDeleteNotification(ctx, body, req),
+      ['user'],
     ),
   ],
 ]);

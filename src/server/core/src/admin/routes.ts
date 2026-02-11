@@ -43,6 +43,7 @@ import {
   handleAdminUpdatePlan,
 } from './billingHandlers';
 import { handleAdminUnlock } from './handlers';
+import { handleEndImpersonation, handleStartImpersonation } from './impersonationHandlers';
 import {
   handleCancelJob,
   handleGetJobDetails,
@@ -144,6 +145,16 @@ export const adminRoutes: RouteMap = createRouteMap([
     'admin/users/:id/hard-ban',
     adminProtectedRoute('POST', handleHardBan, adminHardBanRequestSchema),
   ],
+
+  // ============================================================================
+  // Impersonation Routes
+  // ============================================================================
+
+  // End impersonation session (static route must precede parameterized)
+  ['admin/impersonate/end', adminProtectedRoute('POST', handleEndImpersonation)],
+
+  // Start impersonating a user (returns scoped JWT)
+  ['admin/impersonate/:userId', adminProtectedRoute('POST', handleStartImpersonation)],
 
   // ============================================================================
   // Auth Admin Routes (legacy)

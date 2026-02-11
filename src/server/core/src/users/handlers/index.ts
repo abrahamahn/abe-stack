@@ -32,6 +32,9 @@ export {
   handleRequestDeletion,
 } from './lifecycle';
 
+// Avatar HTTP handlers
+export { handleDeleteAvatar, handleUploadAvatar } from './avatar';
+
 // Avatar and profile service functions
 export {
   cacheBustAvatarUrl,

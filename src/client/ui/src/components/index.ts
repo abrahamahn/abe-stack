@@ -5,6 +5,8 @@ export { AuthFormLayout } from './AuthForm';
 export { Card } from './Card';
 export { DelayedFallback, type DelayedFallbackProps } from './DelayedFallback';
 export { Dialog } from './Dialog';
+export { EmptyState } from './EmptyState';
+export type { EmptyStateProps } from './EmptyState';
 export { Dropdown } from './Dropdown';
 export { ErrorBoundary } from './ErrorBoundary';
 export type { ErrorBoundaryProps } from './ErrorBoundary';

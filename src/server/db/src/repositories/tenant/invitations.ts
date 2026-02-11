@@ -8,7 +8,7 @@
  * @module
  */
 
-import { and, eq, select, insert, update } from '../../builder/index';
+import { and, eq, lt, select, selectCount, insert, update } from '../../builder/index';
 import {
   type Invitation,
   type NewInvitation,
@@ -64,6 +64,20 @@ export interface InvitationRepository {
    * @returns Array of pending invitations
    */
   findPendingByEmail(email: string): Promise<Invitation[]>;
+
+  /**
+   * Count pending invitations for a tenant
+   * @param tenantId - The tenant ID
+   * @returns Number of pending invitations
+   */
+  countPendingByTenantId(tenantId: string): Promise<number>;
+
+  /**
+   * Find pending invitations past their expiry date
+   * @param limit - Max number to return
+   * @returns Array of expired pending invitations
+   */
+  findExpiredPending(limit: number): Promise<Invitation[]>;
 
   /**
    * Update an invitation (e.g., accept, revoke)
@@ -128,6 +142,26 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
           .toSql(),
       );
       return result !== null ? transformInvitation(result) : null;
+    },
+
+    async countPendingByTenantId(tenantId: string): Promise<number> {
+      const result = await db.queryOne(
+        selectCount(INVITATIONS_TABLE)
+          .where(and(eq('tenant_id', tenantId), eq('status', 'pending')))
+          .toSql(),
+      );
+      return result !== null ? Number(result['count'] ?? 0) : 0;
+    },
+
+    async findExpiredPending(limit: number): Promise<Invitation[]> {
+      const results = await db.query(
+        select(INVITATIONS_TABLE)
+          .where(and(eq('status', 'pending'), lt('expires_at', new Date())))
+          .limit(limit)
+          .orderBy('expires_at', 'asc')
+          .toSql(),
+      );
+      return results.map(transformInvitation);
     },
 
     async findPendingByEmail(email: string): Promise<Invitation[]> {

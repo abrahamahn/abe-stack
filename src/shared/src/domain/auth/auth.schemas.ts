@@ -114,6 +114,40 @@ export interface TotpVerifyRequest {
   code: string;
 }
 
+// SMS 2FA
+export interface SetPhoneRequest {
+  phone: string;
+}
+
+export interface VerifyPhoneRequest {
+  code: string;
+}
+
+export interface SetPhoneResponse {
+  message: string;
+}
+
+export interface VerifyPhoneResponse {
+  verified: boolean;
+}
+
+export interface RemovePhoneResponse {
+  message: string;
+}
+
+export interface SmsChallengeRequest {
+  challengeToken: string;
+}
+
+export interface SmsChallengeResponse {
+  message: string;
+}
+
+export interface SmsVerifyRequest {
+  challengeToken: string;
+  code: string;
+}
+
 export interface TotpLoginChallengeResponse {
   requiresTotp: true;
   challengeToken: string;
@@ -132,6 +166,7 @@ export interface AuthResponse {
   token: string;
   user: User;
   isNewDevice?: boolean;
+  defaultTenantId?: string;
 }
 
 export interface RegisterResponse {
@@ -354,6 +389,36 @@ export const totpLoginVerifyRequestSchema: Schema<TotpLoginVerifyRequest> = crea
     };
   },
 );
+
+// SMS 2FA
+export const setPhoneRequestSchema: Schema<SetPhoneRequest> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return { phone: parseString(obj['phone'], 'phone', { min: 7, trim: true }) };
+});
+
+export const verifyPhoneRequestSchema: Schema<VerifyPhoneRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return { code: parseString(obj['code'], 'code', { min: 6 }) };
+  },
+);
+
+export const smsChallengeRequestSchema: Schema<SmsChallengeRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      challengeToken: parseString(obj['challengeToken'], 'challengeToken', { min: 1 }),
+    };
+  },
+);
+
+export const smsVerifyRequestSchema: Schema<SmsVerifyRequest> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  return {
+    challengeToken: parseString(obj['challengeToken'], 'challengeToken', { min: 1 }),
+    code: parseString(obj['code'], 'code', { min: 6 }),
+  };
+});
 
 // ============================================================================
 // Response Schemas

@@ -64,6 +64,7 @@ export type {
   // Core Types
   ClientPubsubMessage,
   ConnectionState,
+  ConnectionStateListener,
   RealtimeContextValue,
   // Context Types
   RealtimeProviderConfig,

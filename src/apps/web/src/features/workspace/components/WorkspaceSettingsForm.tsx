@@ -10,6 +10,8 @@ import { useState, type ReactElement } from 'react';
 
 import { useUpdateWorkspace } from '../hooks';
 
+import { DomainAllowlistEditor } from './DomainAllowlistEditor';
+
 import type { Tenant } from '@abe-stack/shared';
 
 // ============================================================================
@@ -30,6 +32,9 @@ export const WorkspaceSettingsForm = ({
   onSuccess,
 }: WorkspaceSettingsFormProps): ReactElement => {
   const [name, setName] = useState(workspace.name);
+  const [allowedDomains, setAllowedDomains] = useState<string[]>(
+    workspace.allowedEmailDomains ?? [],
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { update, isLoading, error, reset } = useUpdateWorkspace({
@@ -46,10 +51,17 @@ export const WorkspaceSettingsForm = ({
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setSuccessMessage(null);
-    update(workspace.id, { name: name.trim() });
+    update(workspace.id, {
+      name: name.trim(),
+      allowedEmailDomains: allowedDomains,
+    });
   };
 
-  const hasChanges = name.trim() !== workspace.name;
+  const initialDomains = workspace.allowedEmailDomains ?? [];
+  const domainsChanged =
+    allowedDomains.length !== initialDomains.length ||
+    allowedDomains.some((d, i) => d !== initialDomains[i]);
+  const hasChanges = name.trim() !== workspace.name || domainsChanged;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -70,6 +82,12 @@ export const WorkspaceSettingsForm = ({
       <FormField label="Slug" htmlFor="ws-slug">
         <Input id="ws-slug" type="text" value={workspace.slug} disabled className="bg-surface" />
       </FormField>
+
+      <DomainAllowlistEditor
+        domains={allowedDomains}
+        onChange={setAllowedDomains}
+        disabled={isLoading}
+      />
 
       {error !== null && <Alert tone="danger">{error.message}</Alert>}
       {successMessage !== null && <Alert tone="success">{successMessage}</Alert>}

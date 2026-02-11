@@ -33,6 +33,7 @@ import { TosAcceptanceModal } from '@features/auth/components';
 import { useCallback, useEffect, useRef, useState, type ReactElement, Suspense } from 'react';
 
 import { ClientEnvironmentProvider, type ClientEnvironment } from './ClientEnvironment';
+import { NetworkStatus } from './components';
 import { appRoutes, type AppRoute } from './routes'; // Import appRoutes and AppRoute type
 import { setTosHandler } from './tosHandler';
 
@@ -376,6 +377,7 @@ export const App = ({ environment }: AppProps): ReactElement => {
                       <AppRoutes />
                     </div>
                     <AppToaster />
+                    <NetworkStatus />
                     <TosAcceptanceModal
                       open={tosState.open}
                       documentId={tosState.documentId}

@@ -32,8 +32,12 @@ import {
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
   setPasswordRequestSchema,
+  setPhoneRequestSchema,
+  smsChallengeRequestSchema,
+  smsVerifyRequestSchema,
   totpLoginVerifyRequestSchema,
   totpVerifyRequestSchema,
+  verifyPhoneRequestSchema,
   type AcceptTosRequest,
   type ChangeEmailRequest,
   type ConfirmEmailChangeRequest,
@@ -45,8 +49,12 @@ import {
   type ResendVerificationRequest,
   type ResetPasswordRequest,
   type SetPasswordRequest,
+  type SetPhoneRequest,
+  type SmsChallengeRequest,
+  type SmsVerifyRequest,
   type TotpLoginVerifyRequest,
   type TotpVerifyRequest,
+  type VerifyPhoneRequest,
 } from '@abe-stack/shared';
 
 import {
@@ -55,6 +63,7 @@ import {
   handleConfirmEmailChange,
   handleRevertEmailChange,
   handleForgotPassword,
+  handleListDevices,
   handleLogin,
   handleLogout,
   handleLogoutAll,
@@ -62,7 +71,11 @@ import {
   handleRegister,
   handleResendVerification,
   handleResetPassword,
+  handleRemovePhone,
+  handleRevokeDevice,
+  handleSendSmsCode,
   handleSetPassword,
+  handleSetPhone,
   handleSudoElevate,
   handleTosStatus,
   handleTotpDisable,
@@ -70,7 +83,10 @@ import {
   handleTotpLoginVerify,
   handleTotpSetup,
   handleTotpStatus,
+  handleTrustDevice,
   handleVerifyEmail,
+  handleVerifyPhone,
+  handleVerifySmsCode,
 } from './handlers';
 import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
@@ -393,6 +409,106 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         return handleRevertEmailChange(asAppContext(ctx), body as RevertEmailChangeRequest);
       },
       revertEmailChangeRequestSchema,
+    ),
+  ],
+
+  // Device management routes
+  [
+    'users/me/devices',
+    protectedRoute('GET', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      return handleListDevices(asAppContext(ctx), req as unknown as RequestWithCookies);
+    }),
+  ],
+
+  [
+    'users/me/devices/:id/trust',
+    protectedRoute('POST', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      const params = (req as unknown as { params: { id: string } }).params;
+      return handleTrustDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
+    }),
+  ],
+
+  [
+    'users/me/devices/:id',
+    protectedRoute('DELETE', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+      const params = (req as unknown as { params: { id: string } }).params;
+      return handleRevokeDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
+    }),
+  ],
+
+  // Phone management routes
+  [
+    'users/me/phone',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleSetPhone(
+          asAppContext(ctx),
+          body as SetPhoneRequest,
+          req as unknown as RequestWithCookies,
+        );
+      },
+      'user',
+      setPhoneRequestSchema,
+    ),
+  ],
+
+  [
+    'users/me/phone/verify',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleVerifyPhone(
+          asAppContext(ctx),
+          body as VerifyPhoneRequest,
+          req as unknown as RequestWithCookies,
+        );
+      },
+      'user',
+      verifyPhoneRequestSchema,
+    ),
+  ],
+
+  [
+    'users/me/phone',
+    protectedRoute(
+      'DELETE',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        return handleRemovePhone(asAppContext(ctx), req as unknown as RequestWithCookies);
+      },
+      'user',
+    ),
+  ],
+
+  // SMS 2FA challenge routes (during login flow)
+  [
+    'auth/sms/send',
+    publicRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest) => {
+        return handleSendSmsCode(
+          asAppContext(ctx),
+          body as SmsChallengeRequest,
+          req as unknown as RequestWithCookies,
+        );
+      },
+      smsChallengeRequestSchema,
+    ),
+  ],
+
+  [
+    'auth/sms/verify',
+    publicRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest, reply: FastifyReply) => {
+        return handleVerifySmsCode(
+          asAppContext(ctx),
+          body as SmsVerifyRequest,
+          req as unknown as RequestWithCookies,
+          reply as unknown as ReplyWithCookies,
+        );
+      },
+      smsVerifyRequestSchema,
     ),
   ],
 ];

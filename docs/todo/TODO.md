@@ -457,7 +457,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > Covers: CHECKLIST 1 (gaps), 2 (all gaps), 11 (all).
 > Completed: 1.1 Session UI wiring, 1.2 Session security hardening, 1.4 CAPTCHA, 1.5 Security emails, 1.6 ToS gating, 1.7 Login failure logging, 1.8 TOTP QR code.
 > **Deferred:** 1.3 Security Intelligence → Sprint 3.23 (geo-IP, trusted devices, new-login alerts).
-> **Deferred from 1.2:** Session idle timeout enforcement + max concurrent sessions limit (CHECKLIST 2.4) → Sprint 3.23 (consolidated with security intelligence).
+> **Note:** Session idle timeout + max concurrent sessions (CHECKLIST 2.4) are implemented in `refresh.ts` and `login.ts` respectively.
 
 ---
 
@@ -493,19 +493,19 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Contract + Service:**
 
-- [ ] Contract: `shared/domain/api-keys/` — request/response schemas for create, list, revoke
+- [x] Contract: `shared/domain/api-keys/` — request/response schemas for create, list, revoke
 - [x] Service: `core/api-keys/service.ts` — create (hash key, store hash only), list (mask key), revoke
 - [x] Service: key generation — crypto-random, timing-safe comparison for auth
-- [ ] Service: scope parsing + validation against allowed scope set
+- [x] Service: scope parsing + validation against allowed scope set
 
 **Routes + Middleware:**
 
 - [x] Route: `POST /api/users/me/api-keys` — create key (requires sudo), returns plaintext key ONCE
 - [x] Route: `GET /api/users/me/api-keys` — list keys (hash not exposed, shows name + scopes + last used)
 - [x] Route: `DELETE /api/users/me/api-keys/:id` — revoke key (requires sudo)
-- [ ] Middleware: `Authorization: Bearer <key>` — authenticate API key requests, timing-safe hash compare
-- [ ] Middleware: scope enforcement — reject requests outside key's allowed scopes
-- [ ] Security event: log `api_key_created`, `api_key_revoked` events
+- [x] Middleware: `Authorization: Bearer <key>` — authenticate API key requests, timing-safe hash compare
+- [x] Middleware: scope enforcement — reject requests outside key's allowed scopes
+- [x] Security event: log `api_key_created`, `api_key_revoked` events
 
 **Client + UI:**
 
@@ -625,10 +625,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **In-App Notifications (BUSINESS 4.1):**
 
-- [ ] Route: `GET /api/notifications` — list notifications (paginated, unread count)
-- [ ] Route: `PATCH /api/notifications/:id/read` — mark as read
-- [ ] Route: `POST /api/notifications/read-all` — mark all as read
-- [ ] Route: `DELETE /api/notifications/:id` — delete notification
+- [x] Route: `GET /api/notifications` — list notifications (paginated, unread count)
+- [x] Route: `PATCH /api/notifications/:id/read` — mark as read
+- [x] Route: `POST /api/notifications/read-all` — mark all as read
+- [x] Route: `DELETE /api/notifications/:id` — delete notification
 - [ ] Service: notification creation triggered by events (invite, payment, etc.)
 - [ ] UI: notification bell icon in header with unread count badge
 - [ ] UI: notification dropdown/panel with notification list
@@ -636,16 +636,16 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Push Notifications (BUSINESS 4.2):**
 
-- [ ] Route: `POST /api/push/subscribe` — register push subscription (browser/device)
-- [ ] Route: `DELETE /api/push/subscribe` — unregister
-- [ ] Service: FCM provider integration — send push on notification creation
-- [ ] Service: web push (VAPID) for browser notifications
+- [x] Route: `POST /api/push/subscribe` — register push subscription (browser/device)
+- [x] Route: `DELETE /api/push/subscribe` — unregister
+- [x] Service: FCM provider integration — send push on notification creation
+- [x] Service: web push (VAPID) for browser notifications
 
 **Notification Preferences (BUSINESS 4.4):**
 
-- [ ] Route: `GET /api/users/me/notification-preferences` — get preferences
-- [ ] Route: `PATCH /api/users/me/notification-preferences` — update preferences
-- [ ] Service: per-notification-type channel toggles (email, push, in-app)
+- [x] Route: `GET /api/users/me/notification-preferences` — get preferences
+- [x] Route: `PATCH /api/users/me/notification-preferences` — update preferences
+- [x] Service: per-notification-type channel toggles (email, push, in-app)
 - [ ] UI: preference center in settings (toggle matrix: notification type x channel)
 
 **Bounce + Unsubscribe:**
@@ -719,7 +719,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 **Feature Flags (BUSINESS 5.4):**
 
 - [x] Service: `evaluateFlag(flagKey, tenantId?)` — check flag value with tenant override
-- [ ] Middleware: Fastify preHandler — gate routes/features behind flags
+- [x] Middleware: Fastify preHandler — gate routes/features behind flags
 - [x] Route: `GET /api/admin/feature-flags` — list all flags
 - [x] Route: `POST /api/admin/feature-flags` — create flag
 - [x] Route: `PATCH /api/admin/feature-flags/:id` — update flag (enable/disable, rollout %)
@@ -805,7 +805,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Client: automatic reconnection with exponential backoff on disconnect
 - [ ] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
 - [ ] Client: missed-message recovery — request delta sync after reconnect
-- [ ] Client: connection status indicator component (connected/reconnecting/offline)
+- [x] Client: connection status indicator component (connected/reconnecting/offline)
 
 **Tests:**
 
@@ -823,16 +823,16 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Routes:**
 
-- [ ] Route: `POST /api/media/upload` — multipart upload → file type validation → queue processing job
-- [ ] Route: `GET /api/media/:id` — media metadata + processed URLs (thumbnails, transcoded)
-- [ ] Route: `DELETE /api/media/:id` — delete media + processed artifacts
-- [ ] Route: `GET /api/media/:id/status` — processing job status (pending/processing/complete/failed)
+- [x] Route: `POST /api/media/upload` — multipart upload → file type validation → queue processing job
+- [x] Route: `GET /api/media/:id` — media metadata + processed URLs (thumbnails, transcoded)
+- [x] Route: `DELETE /api/media/:id` — delete media + processed artifacts
+- [x] Route: `GET /api/media/:id/status` — processing job status (pending/processing/complete/failed)
 
 **Client Integration:**
 
-- [ ] Client API: `client/api/src/media/client.ts` + `hooks.ts` — upload, status polling, delete
-- [ ] UI: upload component with drag-and-drop + progress indicator
-- [ ] UI: processing status indicator (spinner → thumbnail preview)
+- [x] Client API: `client/api/src/media/client.ts` + `hooks.ts` — upload, status polling, delete
+- [x] UI: upload component with drag-and-drop + progress indicator
+- [x] UI: processing status indicator (spinner → thumbnail preview)
 - [ ] UI: media library/gallery component (grid of uploaded media)
 
 **Tests:**
@@ -939,8 +939,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Domain Restrictions:**
 
-- [ ] UI: allowed email domains editor (add/remove domains from allowlist)
-- [ ] UI: domain validation feedback (reject invalid domain formats)
+- [x] UI: allowed email domains editor (add/remove domains from allowlist) — `DomainAllowlistEditor.tsx`
+- [x] UI: domain validation feedback (reject invalid domain formats) — inline validation in `DomainAllowlistEditor`
 
 **Invitation Lifecycle Hardening (CHECKLIST 4.8):**
 
@@ -1104,12 +1104,12 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **PII Anonymization Cron (BUSINESS 6.4):**
 
-- [ ] Cron (daily): find users where `deleted_at > 30 days` (configurable grace period)
-- [ ] Service: anonymize PII — replace email with hash, clear first/last name, clear phone, clear bio
+- [x] Cron (daily): find users where `deleted_at > 30 days` (configurable grace period)
+- [x] Service: anonymize PII — replace email with hash, clear first/last name, clear phone, clear bio
 - [ ] Service: preserve audit log structure — replace actor names with "Deleted User (hash)"
 - [ ] Service: foreign key safety — audit logs, invoices, activity history must not break
 - [ ] Service: delete stored files (avatars, uploads) associated with anonymized users
-- [ ] Service: log cleanup counts to metrics/audit (N users anonymized per run)
+- [x] Service: log cleanup counts to metrics/audit (N users anonymized per run)
 
 **Unverified User Cleanup (CHECKLIST 9.2):**
 
@@ -1189,14 +1189,14 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
 - [x] Job: `push-cleanup` — purge stale push subscriptions (weekly)
 - [x] Job: `session-cleanup` — purge stale/expired sessions (daily)
-- [ ] Service: job registration on server boot (schedule via cron expressions)
+- [x] Service: job registration on server boot (schedule via cron expressions)
 
 **Security:**
 
-- [ ] Middleware: IP allowlisting for admin routes (configurable allowlist in config)
+- [x] Middleware: IP allowlisting for admin routes (configurable allowlist in config)
 - [ ] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
-- [ ] Service: request signing for webhook delivery (HMAC-SHA256 signature in headers)
-- [ ] Service: webhook signature verification on receiving end (example implementation)
+- [x] Service: request signing for webhook delivery (HMAC-SHA256 signature in headers)
+- [x] Service: webhook signature verification on receiving end (example implementation)
 - [ ] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
 - [ ] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
 - [ ] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
@@ -1223,11 +1223,11 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > **Existing:** Electron main process, preload script, IPC handlers, React entry point.
 > **Gap:** No auto-updater, no native menu, no deep link handling.
 
-- [ ] Feature: auto-updater integration (electron-updater or similar)
-- [ ] Feature: native menu bar (File, Edit, View, Window, Help)
-- [ ] Feature: system tray icon + menu (minimize to tray, quick actions)
-- [ ] Feature: deep link handling (`abe-stack://` protocol registration)
-- [ ] Feature: deep link routing → navigate to specific page in renderer
+- [x] Feature: auto-updater integration (electron-updater or similar)
+- [x] Feature: native menu bar (File, Edit, View, Window, Help)
+- [x] Feature: system tray icon + menu (minimize to tray, quick actions)
+- [x] Feature: deep link handling (`abe-stack://` protocol registration)
+- [x] Feature: deep link routing → navigate to specific page in renderer
 
 **Tests:**
 
@@ -1242,17 +1242,17 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Staging Environment:**
 
-- [ ] Workflow: `staging.yml` — deploy to staging on merge to `staging` branch (or manually triggered)
+- [x] Workflow: `staging.yml` — deploy to staging on merge to `staging` branch (or manually triggered)
 - [ ] Infra: staging environment Terraform config (mirrors prod, smaller resources)
-- [ ] Service: staging-specific env vars (separate DB, separate Stripe test keys)
+- [x] Service: staging-specific env vars (separate DB, separate Stripe test keys)
 - [ ] Docs: staging environment setup guide
 
 **Preview Deployments:**
 
-- [ ] Workflow: `preview.yml` — deploy PR branch to temporary preview environment
-- [ ] Service: unique preview URL per PR (e.g., `pr-123.preview.abe-stack.dev`)
-- [ ] Service: auto-cleanup preview environment on PR close/merge
-- [ ] Workflow: comment preview URL on PR automatically
+- [x] Workflow: `preview.yml` — deploy PR branch to temporary preview environment
+- [x] Service: unique preview URL per PR (e.g., `pr-123.preview.abe-stack.dev`)
+- [x] Service: auto-cleanup preview environment on PR close/merge
+- [x] Workflow: comment preview URL on PR automatically
 
 ---
 
@@ -1261,21 +1261,21 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > **Existing:** `src/apps/storybook/` directory exists but empty.
 > **Gap:** No config, no stories.
 
-- [ ] Config: Storybook setup — `main.ts`, `preview.ts`, Vite builder
-- [ ] Config: theme integration — wrap stories in `ThemeProvider`
-- [ ] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch
-- [ ] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField
+- [x] Config: Storybook setup — `main.ts`, `preview.ts`, Vite builder
+- [x] Config: theme integration — wrap stories in `ThemeProvider`
+- [x] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch
+- [x] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField
 - [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel
 - [ ] Stories: patterns — forms, navigation, data tables, loading states
-- [ ] CI: Storybook build step in CI pipeline (validate stories compile)
+- [x] CI: Storybook build step in CI pipeline (validate stories compile)
 
 ---
 
 #### 3.22 Frontend UX Polish (CHECKLIST 8 Frontend Gaps)
 
-- [ ] Slice: command palette (Ctrl+K) — search pages, actions, settings (defer if not blocking launch)
-- [ ] Verify: tenant switcher component renders correctly (built in Sprint 2.13; polish UX if needed)
-- [ ] Slice: onboarding flow — create workspace → invite teammate → pick plan → first success moment (BUSINESS Appendix E.8)
+- [x] Slice: command palette (Ctrl+K) — search pages, actions, settings (defer if not blocking launch)
+- [x] Verify: tenant switcher component renders correctly (built in Sprint 2.13; polish UX if needed)
+- [x] Slice: onboarding flow — create workspace → invite teammate → pick plan → first success moment (BUSINESS Appendix E.8)
 
 ---
 
@@ -1290,8 +1290,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Detection + Storage:**
 
-- [ ] Service: geo-IP coarse lookup — resolve IP → country/region (use MaxMind GeoLite2 or IP-API fallback)
-- [ ] Schema: `trusted_devices` table — `user_id`, `device_fingerprint` (IP + UA hash), `label`, `first_seen`, `last_seen`, `trusted_at`
+- [x] Service: geo-IP coarse lookup — resolve IP → country/region (use MaxMind GeoLite2 or IP-API fallback)
+- [x] Schema: `trusted_devices` table — `user_id`, `device_fingerprint` (IP + UA hash), `label`, `first_seen`, `last_seen`, `trusted_at`
 - [ ] Repository: `trusted_devices` CRUD — create, findByUser, markTrusted, revoke
 - [ ] Service: device fingerprint helper — deterministic hash of IP + UA (or subset)
 - [ ] Service: `isNewDevice()` → check `trusted_devices`, not just active sessions
@@ -1303,18 +1303,18 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > Note: This is distinct from Sprint 1.2's "max concurrent sessions" (limit N active sessions).
 > Token version invalidation forces ALL sessions to re-authenticate after security events.
 
-- [ ] Schema: add `token_version` column to `users` table (integer, default 0)
+- [x] Schema: add `token_version` column to `users` table (integer, default 0)
 - [ ] Service: increment `token_version` on password change, force logout, or admin action
 - [ ] Middleware: JWT validation checks `token_version` matches DB — reject stale tokens
 - [ ] Route: `POST /api/auth/invalidate-sessions` — increment version, revoke all refresh families
 
-**Session Enforcement (deferred from Sprint 1.2 — CHECKLIST 2.4):**
+**Session Enforcement (CHECKLIST 2.4) — IMPLEMENTED:**
 
-- [ ] Service: session idle timeout — reject refresh if `last_active_at` exceeds configurable idle window (e.g., 30 days)
-- [ ] Middleware: check idle timeout on token refresh, revoke session if stale
-- [ ] Service: max concurrent sessions — configurable limit per user (e.g., 5)
-- [ ] Service: evict oldest session when limit exceeded on new login
-- [ ] Config: `auth.session.idleTimeoutDays` + `auth.session.maxConcurrent` settings
+- [x] Service: session idle timeout — reject refresh if token age exceeds idle window (`refresh.ts`)
+- [x] Middleware: check idle timeout on token refresh, revoke session if stale (`refresh.ts`)
+- [x] Service: max concurrent sessions — configurable limit per user (`login.ts`)
+- [x] Service: evict oldest session when limit exceeded on new login (`login.ts`)
+- [x] Config: `auth.sessions.idleTimeoutMinutes` + `auth.sessions.maxConcurrentSessions` settings
 
 **Backend — Alerts:**
 
@@ -1327,7 +1327,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 - [ ] Client API: `devices/client.ts` — list, trust, revoke hooks
 - [ ] UI: Trusted Devices section in Settings → Sessions tab
-- [ ] UI: "New device login" banner — shown when `isNewDevice` flag is set on auth response
+- [x] UI: "New device login" banner — shown when `isNewDevice` flag is set on auth response
 - [ ] UI: Device list with location, last seen, trust/revoke actions
 
 **Tests:**
@@ -1346,11 +1346,11 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — SMS Provider:**
 
-- [ ] Service: `sms/provider.ts` — interface `SmsProvider { send(to, body): Promise<void> }`
-- [ ] Service: `sms/console-provider.ts` — dev provider that logs SMS to console
-- [ ] Service: `sms/twilio-provider.ts` — Twilio integration (env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`)
-- [ ] Config: `auth.sms` config section — `provider`, `codeLength` (6), `codeExpirySeconds` (300), `maxAttempts` (3)
-- [ ] Factory: `createSmsProvider(config)` — returns console or Twilio based on config
+- [x] Service: `sms/provider.ts` — interface `SmsProvider { send(to, body): Promise<void> }`
+- [x] Service: `sms/console-provider.ts` — dev provider that logs SMS to console
+- [x] Service: `sms/twilio-provider.ts` — Twilio integration (env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`)
+- [x] Config: `auth.sms` config section — `provider`, `codeLength` (6), `codeExpirySeconds` (300), `maxAttempts` (3)
+- [x] Factory: `createSmsProvider(config)` — returns console or Twilio based on config
 
 **Backend — Phone Number Management:**
 
@@ -1393,19 +1393,19 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Webhook Registration:**
 
-- [ ] Route: `POST /api/webhooks` — register webhook endpoint (URL, secret, event types)
-- [ ] Route: `GET /api/webhooks` — list registered webhooks for current tenant
-- [ ] Route: `GET /api/webhooks/:id` — webhook detail with delivery stats
-- [ ] Route: `PATCH /api/webhooks/:id` — update URL, events, enabled/disabled
-- [ ] Route: `DELETE /api/webhooks/:id` — remove webhook registration
-- [ ] Route: `POST /api/webhooks/:id/rotate-secret` — rotate shared secret (requires sudo)
+- [x] Route: `POST /api/webhooks` — register webhook endpoint (URL, secret, event types)
+- [x] Route: `GET /api/webhooks` — list registered webhooks for current tenant
+- [x] Route: `GET /api/webhooks/:id` — webhook detail with delivery stats
+- [x] Route: `PATCH /api/webhooks/:id` — update URL, events, enabled/disabled
+- [x] Route: `DELETE /api/webhooks/:id` — remove webhook registration
+- [x] Route: `POST /api/webhooks/:id/rotate-secret` — rotate shared secret (requires sudo)
 
 **Backend — Event Subscription + Delivery:**
 
 - [ ] Service: event type registry — define subscribable events (user.created, invoice.paid, etc.)
 - [ ] Service: webhook dispatcher — on event, find matching subscriptions, enqueue delivery jobs
-- [ ] Service: delivery worker — POST payload to URL with HMAC-SHA256 signature header
-- [ ] Service: retry with exponential backoff (1m, 5m, 30m, 2h, 12h) — max 5 retries
+- [x] Service: delivery worker — POST payload to URL with HMAC-SHA256 signature header
+- [x] Service: retry with exponential backoff (1m, 5m, 30m, 2h, 12h) — max 5 retries
 - [ ] Service: dead-letter after max retries — mark webhook as failing, alert admin
 - [ ] Service: delivery log — store request/response/status/timing per delivery attempt
 
@@ -1417,7 +1417,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [ ] Unit: signature generation, retry backoff calculation, event matching, payload serialization
+- [x] Unit: signature generation, retry backoff calculation, event matching, payload serialization
 - [ ] Integration: register webhook → trigger event → delivery queued → POST sent → logged
 - [ ] Integration: endpoint failure → retry scheduled → eventual dead-letter
 - [ ] E2E: admin → create webhook → trigger event → see delivery in log
@@ -1509,8 +1509,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Harness: real test DB lifecycle — create/destroy test database per test suite (or per file)
 - [ ] Harness: migration runner — apply all migrations to test DB before suite
 - [ ] Harness: seed helpers — minimal seed data for each domain (users, tenants, subscriptions)
-- [ ] Harness: Fastify inject factory — create configured app instance with test DB connection
-- [ ] Harness: auth helpers — generate valid JWT tokens for test requests without full login flow
+- [x] Harness: Fastify inject factory — create configured app instance with test DB connection
+- [x] Harness: auth helpers — generate valid JWT tokens for test requests without full login flow
 - [ ] Harness: tenant context helpers — set `X-Workspace-Id` header for tenant-scoped tests
 
 **CI Pipeline:**
@@ -1530,16 +1530,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] `register.test.ts` — validates input, rejects weak passwords, rejects duplicate emails, email canonicalization
-- [ ] `login.test.ts` — correct credentials succeed, wrong password fails, unverified email rejected, locked account rejected, CAPTCHA enforcement
-- [ ] `refresh.test.ts` — rotation works, reuse detection triggers family revocation, grace period honored, idle timeout enforcement
-- [ ] `password.test.ts` — token creation, token validation, token expiry, password strength enforcement, breach check
-- [ ] `magic-link/service.test.ts` — token creation, rate limiting logic, auto-create user logic, expiry
-- [ ] `oauth/service.test.ts` — state generation, callback code exchange, link/unlink logic, provider validation
-- [ ] `handlers/email-change.test.ts` — token creation, confirmation logic, reversion logic, old-email notification
-- [ ] `totp.test.ts` — setup secret generation, code validation (time window), backup code single-use enforcement
-- [ ] `utils/password.test.ts` — email canonicalization (trim, lowercase, Gmail dots, `+` alias stripping)
-- [ ] `security/lockout.test.ts` — progressive delays, threshold enforcement, reset after success, IP-based vs user-based
+- [x] `register.test.ts` — validates input, rejects weak passwords, rejects duplicate emails, email canonicalization
+- [x] `login.test.ts` — correct credentials succeed, wrong password fails, unverified email rejected, locked account rejected, CAPTCHA enforcement
+- [x] `refresh.test.ts` — rotation works, reuse detection triggers family revocation, grace period honored, idle timeout enforcement
+- [x] `password.test.ts` — token creation, token validation, token expiry, password strength enforcement, breach check
+- [x] `magic-link/service.test.ts` — token creation, rate limiting logic, auto-create user logic, expiry
+- [x] `oauth/service.test.ts` — state generation, callback code exchange, link/unlink logic, provider validation
+- [x] `handlers/email-change.test.ts` — token creation, confirmation logic, reversion logic, old-email notification
+- [x] `totp.test.ts` — setup secret generation, code validation (time window), backup code single-use enforcement
+- [x] `utils/password.test.ts` — email canonicalization (trim, lowercase, Gmail dots, `+` alias stripping)
+- [x] `security/lockout.test.ts` — progressive delays, threshold enforcement, reset after success, IP-based vs user-based
 
 **Integration Tests (`apps/server/src/__tests__/integration/auth.integration.test.ts`):**
 
@@ -1557,8 +1557,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] `GET /api/auth/oauth/:provider/callback` → exchanges code, creates/logs in user
 - [ ] `POST /api/auth/change-email` + `/confirm` → full atomic email update flow
 - [ ] `POST /api/auth/totp/setup` → `/enable` → `/disable` lifecycle against DB
-- [ ] Protected routes reject unauthenticated requests with 401
-- [ ] Anti-enumeration: all login failure types return identical 401 shape
+- [x] Protected routes reject unauthenticated requests with 401
+- [x] Anti-enumeration: all login failure types return identical 401 shape
 
 **E2E Tests (`apps/web/e2e/auth.spec.ts`):**
 
@@ -1583,21 +1583,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] `listUserSessions()` — returns sessions, marks current session correctly
-- [ ] `revokeSession()` — validates ownership, prevents revoking current session
-- [ ] `revokeAllSessions()` — keeps current, revokes rest
-- [ ] `getSessionCount()` — returns correct count
-- [ ] UA parsing — Chrome/Firefox/Safari/Edge/mobile variants produce human-readable labels
-- [ ] Idle timeout — expired idle sessions rejected on refresh
-- [ ] Max concurrent sessions — oldest session evicted when limit exceeded
-- [ ] New device detection — IP + user agent comparison against existing sessions
+- [x] `listUserSessions()` — returns sessions, marks current session correctly
+- [x] `revokeSession()` — validates ownership, prevents revoking current session
+- [x] `revokeAllSessions()` — keeps current, revokes rest
+- [x] `getSessionCount()` — returns correct count
+- [x] UA parsing — Chrome/Firefox/Safari/Edge/mobile variants produce human-readable labels
+- [x] Idle timeout — expired idle sessions rejected on refresh
+- [x] Max concurrent sessions — oldest session evicted when limit exceeded
+- [x] New device detection — IP + user agent comparison against existing sessions
 
 **Integration Tests (`apps/server/src/__tests__/integration/sessions.integration.test.ts`):**
 
-- [ ] `GET /api/users/me/sessions` → returns session list with current marker
-- [ ] `DELETE /api/users/me/sessions/:id` → revokes target session, rejects current session revocation
-- [ ] `POST /api/users/me/sessions/revoke-all` → all sessions revoked except current
-- [ ] `GET /api/users/me/sessions/count` → matches active session count
+- [x] `GET /api/users/me/sessions` → returns session list with current marker
+- [x] `DELETE /api/users/me/sessions/:id` → revokes target session, rejects current session revocation
+- [x] `POST /api/users/me/sessions/revoke-all` → all sessions revoked except current
+- [x] `GET /api/users/me/sessions/count` → matches active session count
 - [ ] Login creates `user_sessions` record with parsed UA fields
 - [ ] Session record includes IP, user agent, device label
 
@@ -1618,25 +1618,25 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Username validation — uniqueness (case-insensitive), reserved names, cooldown enforcement
-- [ ] Avatar processing — validate file type (JPEG, PNG, WebP), reject invalid, resize dimensions
-- [ ] Profile update — field validation, completeness percentage calculation
-- [ ] Account deactivation — state transition, `deactivated_at` timestamp set
-- [ ] Account deletion request — grace period calculation, orphan prevention (sole workspace owner)
-- [ ] Account reactivation — cancel deactivation within grace period, reject after grace period expiry
-- [ ] Sudo mode — token scoping, TTL enforcement, elevation for sensitive ops
+- [x] Username validation — uniqueness (case-insensitive), reserved names, cooldown enforcement
+- [x] Avatar processing — validate file type (JPEG, PNG, WebP), reject invalid, resize dimensions
+- [x] Profile update — field validation, completeness percentage calculation
+- [x] Account deactivation — state transition, `deactivated_at` timestamp set
+- [x] Account deletion request — grace period calculation, orphan prevention (sole workspace owner)
+- [x] Account reactivation — cancel deactivation within grace period, reject after grace period expiry
+- [x] Sudo mode — token scoping, TTL enforcement, elevation for sensitive ops
 
 **Integration Tests (`apps/server/src/__tests__/integration/account.integration.test.ts`):**
 
-- [ ] `PATCH /api/users/me/username` → updates username, rejects duplicates, enforces cooldown
-- [ ] `PUT /api/users/me/avatar` → processes and stores image, returns URL
-- [ ] `DELETE /api/users/me/avatar` → removes avatar
-- [ ] `PATCH /api/users/me` → updates profile fields (firstName, lastName, bio, etc.)
-- [ ] `GET /api/users/me/profile/completeness` → returns percentage and missing fields
-- [ ] `POST /api/users/me/deactivate` → sets `deactivated_at`, blocks subsequent API calls
-- [ ] `POST /api/users/me/delete` → sets `deleted_at` + grace period end, blocks login after
-- [ ] `POST /api/users/me/reactivate` → cancels pending deletion within grace period
-- [ ] `POST /api/auth/sudo` → returns sudo token; subsequent sensitive ops require it
+- [x] `PATCH /api/users/me/username` → updates username, rejects duplicates, enforces cooldown
+- [x] `PUT /api/users/me/avatar` → processes and stores image, returns URL
+- [x] `DELETE /api/users/me/avatar` → removes avatar
+- [x] `PATCH /api/users/me` → updates profile fields (firstName, lastName, bio, etc.)
+- [x] `GET /api/users/me/profile/completeness` → returns percentage and missing fields
+- [x] `POST /api/users/me/deactivate` → sets `deactivated_at`, blocks subsequent API calls
+- [x] `POST /api/users/me/delete` → sets `deleted_at` + grace period end, blocks login after
+- [x] `POST /api/users/me/reactivate` → cancels pending deletion within grace period
+- [x] `POST /api/auth/sudo` → returns sudo token; subsequent sensitive ops require it
 - [ ] Deactivated account → login attempt rejected
 - [ ] Deleted account (past grace period) → login attempt rejected
 
@@ -1659,24 +1659,24 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] `canAssignRole()` — enforces role hierarchy (owner > admin > member > viewer)
-- [ ] `canRemoveMember()` — prevents removing higher-ranked users
-- [ ] Orphan prevention — block removal of last owner, require ownership transfer
-- [ ] Invitation logic — domain restriction validation, expiry enforcement, token generation
-- [ ] Tenant scoping — `assertWorkspaceScope()` throws when context missing
-- [ ] Domain restriction — email domain matching, wildcard domains, invite-only enforcement
-- [ ] Tenant settings — per-tenant config validation, defaults
+- [x] `canAssignRole()` — enforces role hierarchy (owner > admin > member > viewer)
+- [x] `canRemoveMember()` — prevents removing higher-ranked users
+- [x] Orphan prevention — block removal of last owner, require ownership transfer
+- [x] Invitation logic — domain restriction validation, expiry enforcement, token generation
+- [x] Tenant scoping — `assertWorkspaceScope()` throws when context missing
+- [x] Domain restriction — email domain matching, wildcard domains, invite-only enforcement
+- [x] Tenant settings — per-tenant config validation, defaults
 
 **Integration Tests (`apps/server/src/__tests__/integration/tenant.integration.test.ts`):**
 
-- [ ] `POST /api/tenants` → creates tenant + owner membership in transaction
-- [ ] `GET /api/tenants` → returns only user's workspaces
-- [ ] `GET /api/tenants/:id` → returns tenant details (member only)
-- [ ] `PATCH /api/tenants/:id` → updates tenant settings (admin/owner only)
-- [ ] `POST /api/tenants/:id/invitations` → creates invite, sends email
-- [ ] `POST /api/invitations/:token/accept` → creates membership, consumes token
-- [ ] `PATCH /api/tenants/:id/members/:userId` → changes role, enforces hierarchy
-- [ ] `DELETE /api/tenants/:id/members/:userId` → removes member, blocks last owner removal
+- [x] `POST /api/tenants` → creates tenant + owner membership in transaction
+- [x] `GET /api/tenants` → returns only user's workspaces
+- [x] `GET /api/tenants/:id` → returns tenant details (member only)
+- [x] `PATCH /api/tenants/:id` → updates tenant settings (admin/owner only)
+- [x] `POST /api/tenants/:id/invitations` → creates invite, sends email
+- [x] `POST /api/invitations/:token/accept` → creates membership, consumes token
+- [x] `PATCH /api/tenants/:id/members/:userId` → changes role, enforces hierarchy
+- [x] `DELETE /api/tenants/:id/members/:userId` → removes member, blocks last owner removal
 - [ ] Tenant-scoped queries only return data for the active workspace
 - [ ] Expired invitation rejection with clear error
 - [ ] Domain-restricted tenant rejects invites to non-matching email domains
@@ -1699,16 +1699,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] `canUser()` / `isOwner()` / `isAdmin()` — permission checks for all role combinations
-- [ ] Policy engine — evaluation with multiple rules, deny overrides allow
-- [ ] Route-level role check — correct roles pass, others rejected
-- [ ] Permission batch checking — multiple permissions in one call
-- [ ] Role hierarchy inheritance — admin inherits member permissions, owner inherits admin
+- [x] `canUser()` / `isOwner()` / `isAdmin()` — permission checks for all role combinations
+- [x] Policy engine — evaluation with multiple rules, deny overrides allow
+- [x] Route-level role check — correct roles pass, others rejected
+- [x] Permission batch checking — multiple permissions in one call
+- [x] Role hierarchy inheritance — admin inherits member permissions, owner inherits admin
 
 **Integration Tests (`apps/server/src/__tests__/integration/rbac.integration.test.ts`):**
 
-- [ ] Protected routes reject unauthenticated requests (401)
-- [ ] Admin routes reject non-admin users (403)
+- [x] Protected routes reject unauthenticated requests (401)
+- [x] Admin routes reject non-admin users (403)
 - [ ] Per-tenant role enforcement — viewer cannot write, member cannot manage members
 - [ ] Resource ownership validation — user A cannot access user B's resources
 - [ ] System admin vs workspace admin distinction
@@ -1731,12 +1731,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Entitlements resolver — `resolveEntitlements(subscription, role)` returns correct flags/limits
-- [ ] Plan validation — required fields, price constraints, interval validation
-- [ ] Webhook signature verification — Stripe + PayPal signature validation logic
-- [ ] Subscription state transitions — `trialing` → `active` → `past_due` → `canceled`
-- [ ] Proration calculation — mid-cycle upgrade/downgrade amount
-- [ ] Seat-based limit enforcement — max users per plan tier
+- [x] Entitlements resolver — `resolveEntitlements(subscription, role)` returns correct flags/limits
+- [x] Plan validation — required fields, price constraints, interval validation
+- [x] Webhook signature verification — Stripe + PayPal signature validation logic
+- [x] Subscription state transitions — `trialing` → `active` → `past_due` → `canceled`
+- [x] Proration calculation — mid-cycle upgrade/downgrade amount
+- [x] Seat-based limit enforcement — max users per plan tier
 - [ ] Dunning logic — retry schedule, grace period, suspension threshold
 
 **Integration Tests (`apps/server/src/__tests__/integration/billing.integration.test.ts`):**
@@ -1770,11 +1770,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Notification service — create, mark read, mark all read, delete, count unread
-- [ ] Push provider (FCM) — payload formatting, error handling, subscription validation
-- [ ] Email template rendering — variable substitution, fallback values, HTML/text output
-- [ ] Preference evaluation — channel enabled/disabled per notification type per user
-- [ ] Notification routing — determine which channels to use based on event type + preferences
+- [x] Notification service — create, mark read, mark all read, delete, count unread
+- [x] Push provider (FCM) — payload formatting, error handling, subscription validation
+- [x] Email template rendering — variable substitution, fallback values, HTML/text output
+- [x] Preference evaluation — channel enabled/disabled per notification type per user
+- [x] Notification routing — determine which channels to use based on event type + preferences
 
 **Integration Tests (`apps/server/src/__tests__/integration/notifications.integration.test.ts`):**
 
@@ -1806,11 +1806,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Security event creation — all 18+ event types with correct severity classification
-- [ ] Audit event creation — typed events with actor/action/target/metadata
-- [ ] Event metrics aggregation — count by type, count by severity, time-series rollup
-- [ ] Event filtering — by type, severity, user, date range, IP
-- [ ] Export formatting — CSV and JSON output generation
+- [x] Security event creation — all 18+ event types with correct severity classification
+- [x] Audit event creation — typed events with actor/action/target/metadata
+- [x] Event metrics aggregation — count by type, count by severity, time-series rollup
+- [x] Event filtering — by type, severity, user, date range, IP
+- [x] Export formatting — CSV and JSON output generation
 
 **Integration Tests (`apps/server/src/__tests__/integration/audit.integration.test.ts`):**
 
@@ -1840,22 +1840,22 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Deletion logic — soft delete scheduling, grace period calculation, PII anonymization rules
-- [ ] Data export — user data aggregation from all tables (users, sessions, activities, billing)
-- [ ] Consent tracking — version comparison, acceptance recording, consent log creation
-- [ ] ToS gating — version comparison logic, stale-version detection
-- [ ] PII anonymization — field-level anonymization rules (email → hash, name → "Deleted User", etc.)
+- [x] Deletion logic — soft delete scheduling, grace period calculation, PII anonymization rules
+- [x] Data export — user data aggregation from all tables (users, sessions, activities, billing)
+- [x] Consent tracking — version comparison, acceptance recording, consent log creation
+- [x] ToS gating — version comparison logic, stale-version detection
+- [x] PII anonymization — field-level anonymization rules (email → hash, name → "Deleted User", etc.)
 
 **Integration Tests (`apps/server/src/__tests__/integration/compliance.integration.test.ts`):**
 
-- [ ] `POST /api/users/me/export` → creates data export request, background job queued
-- [ ] `GET /api/users/me/export/:id` → returns export status (pending/ready/expired)
+- [x] `POST /api/users/me/export` → creates data export request, background job queued
+- [x] `GET /api/users/me/export/:id` → returns export status (pending/ready/expired)
 - [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
-- [ ] ToS gating middleware — stale version → 403 with `TOS_ACCEPTANCE_REQUIRED`
-- [ ] `POST /api/agreements/accept` → records acceptance, unblocks user
-- [ ] `GET /api/agreements/current` → returns current ToS version
-- [ ] Hard delete cron — anonymizes PII after grace period, preserves audit trail
-- [ ] Consent log — records consent changes with timestamp + IP
+- [x] ToS gating middleware — stale version → 403 with `TOS_ACCEPTANCE_REQUIRED`
+- [x] `POST /api/agreements/accept` → records acceptance, unblocks user
+- [x] `GET /api/agreements/current` → returns current ToS version
+- [x] Hard delete cron — anonymizes PII after grace period + hard-deletes after retention (`scheduled-tasks/service.ts` + `data-hygiene.ts`)
+- [x] Consent log — records consent changes with timestamp + IP
 
 **E2E Tests (`apps/web/e2e/compliance.spec.ts`):**
 
@@ -1874,10 +1874,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Subscription handler — subscribe/unsubscribe to channels, channel validation
-- [ ] Sync handler — delta sync logic, conflict resolution
-- [ ] PubSub — message routing, channel filtering, wildcard channels
-- [ ] Connection lifecycle — connect, heartbeat, disconnect, reconnect, stale connection cleanup
+- [x] Subscription handler — subscribe/unsubscribe to channels, channel validation
+- [x] Sync handler — delta sync logic, conflict resolution
+- [x] PubSub — message routing, channel filtering, wildcard channels
+- [x] Connection lifecycle — connect, heartbeat, disconnect, reconnect, stale connection cleanup
 - [ ] Auth — WebSocket authentication handshake, token validation
 
 **Integration Tests (`apps/server/src/__tests__/integration/realtime.integration.test.ts`):**
@@ -1905,14 +1905,14 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Image processor — resize, crop, format conversion (JPEG/PNG/WebP)
-- [ ] Audio metadata extraction — duration, sample rate, channels, format detection
-- [ ] Video processor — thumbnail generation, format conversion
-- [ ] File type detection — correct MIME types for common formats, magic byte validation
-- [ ] File validation — size limits, type restrictions, security scanning (no embedded scripts)
-- [ ] Queue — job creation, retry logic, dead-letter handling
-- [ ] Local storage provider — write, read, delete, directory creation
-- [ ] Presigned URL generation — valid signature, expiry, content-type restrictions
+- [x] Image processor — resize, crop, format conversion (JPEG/PNG/WebP)
+- [x] Audio metadata extraction — duration, sample rate, channels, format detection
+- [x] Video processor — thumbnail generation, format conversion
+- [x] File type detection — correct MIME types for common formats, magic byte validation
+- [x] File validation — size limits, type restrictions, security scanning (no embedded scripts)
+- [x] Queue — job creation, retry logic, dead-letter handling
+- [x] Local storage provider — write, read, delete, directory creation
+- [x] Presigned URL generation — valid signature, expiry, content-type restrictions
 
 **Integration Tests (`apps/server/src/__tests__/integration/media.integration.test.ts`):**
 
@@ -1939,21 +1939,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Key generation — crypto-random generation, hash storage (never store plaintext)
-- [ ] Key authentication — timing-safe comparison, hash validation
-- [ ] Scope parsing — valid scope strings, invalid scope rejection
-- [ ] Scope enforcement — key with `read` scope cannot `write`
-- [ ] Key revocation — immediate invalidation, revoked key check
-- [ ] Key expiry — expired key rejected, expiry date validation
+- [x] Key generation — crypto-random generation, hash storage (never store plaintext)
+- [x] Key authentication — timing-safe comparison, hash validation
+- [x] Scope parsing — valid scope strings, invalid scope rejection
+- [x] Scope enforcement — key with `read` scope cannot `write`
+- [x] Key revocation — immediate invalidation, revoked key check
+- [x] Key expiry — expired key rejected, expiry date validation
 
 **Integration Tests (`apps/server/src/__tests__/integration/api-keys.integration.test.ts`):**
 
-- [ ] Create API key → use it to authenticate a request → success
+- [x] Create API key → use it to authenticate a request → success
 - [ ] Revoked key → 401 on subsequent requests
 - [ ] Expired key → 401 on subsequent requests
 - [ ] Scope enforcement — key with `read` scope cannot access `write` endpoints
-- [ ] `GET /api/users/me/api-keys` → lists keys (hash not exposed, shows name + scopes + last used)
-- [ ] `DELETE /api/users/me/api-keys/:id` → revokes key (requires sudo)
+- [x] `GET /api/users/me/api-keys` → lists keys (hash not exposed, shows name + scopes + last used)
+- [x] `DELETE /api/users/me/api-keys/:id` → revokes key (requires sudo)
 - [ ] Key creation requires sudo mode
 
 **E2E Tests (`apps/web/e2e/api-keys.spec.ts`):**
@@ -1972,11 +1972,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [ ] Impersonation token — scoped TTL, target user validation, admin-only gate
-- [ ] Impersonation guard — cannot impersonate another admin (safety)
-- [ ] User search — multi-field matching (email, name, UUID, stripe customer ID)
-- [ ] Ban logic — soft ban (lock account), hard ban cascade (revoke sessions, cancel subs, schedule PII deletion)
-- [ ] Route manifest — returns all registered routes with metadata
+- [x] Impersonation token — scoped TTL, target user validation, admin-only gate
+- [x] Impersonation guard — cannot impersonate another admin (safety)
+- [x] User search — multi-field matching (email, name, UUID, stripe customer ID)
+- [x] Ban logic — soft ban (lock account), hard ban cascade (revoke sessions, cancel subs, schedule PII deletion)
+- [x] Route manifest — returns all registered routes with metadata
 
 **Integration Tests (`apps/server/src/__tests__/integration/admin.integration.test.ts`):**
 
@@ -2007,16 +2007,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Health & Readiness:**
 
-- [ ] Integration: `GET /health` → returns `200` with version + uptime
-- [ ] Integration: `GET /health/live` → returns `200` (liveness probe)
-- [ ] Integration: health check includes DB connectivity status
+- [x] Integration: `GET /health` → returns `200` with version + uptime
+- [x] Integration: `GET /health/live` → returns `200` (liveness probe)
+- [x] Integration: health check includes DB connectivity status
 - [ ] Integration: health check includes queue system status
 - [ ] E2E: health endpoint accessible from browser (no auth required)
 
 **Correlation IDs:**
 
-- [ ] Integration: request with `X-Correlation-Id` header → same ID appears in response header + logs
-- [ ] Integration: request without correlation ID → server generates one, returns in response header
+- [x] Integration: request with `X-Correlation-Id` header → same ID appears in response header + logs
+- [x] Integration: request without correlation ID → server generates one, returns in response header
 - [ ] Integration: correlation ID propagated to downstream service calls and queue jobs
 
 **Error Reporting:**
@@ -2035,9 +2035,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **OpenAPI / Swagger:**
 
-- [ ] Integration: `/api/docs` serves Swagger UI
+- [x] Integration: `/api/docs` serves Swagger UI
 - [ ] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
-- [ ] Security: `/api/docs` auth-protected in non-dev environments
+- [x] Security: `/api/docs` auth-protected in non-dev environments
 - [ ] Validation: all annotated routes appear in generated spec
 
 **Deployment Sanity (Appendix D):**
@@ -2055,18 +2055,18 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Anti-Abuse (11.1):**
 
-- [ ] Integration: CAPTCHA-enabled config → public endpoints require valid token
-- [ ] Integration: CAPTCHA-disabled config → public endpoints work without token
-- [ ] Integration: invalid CAPTCHA token → 400 rejection
-- [ ] Unit test: Turnstile server-side verification (success, failure, network error, timeout)
+- [x] Integration: CAPTCHA-enabled config → public endpoints require valid token
+- [x] Integration: CAPTCHA-disabled config → public endpoints work without token
+- [x] Integration: invalid CAPTCHA token → 400 rejection
+- [x] Unit test: Turnstile server-side verification (success, failure, network error, timeout)
 
 **Rate Limiting & IP Policy (Appendix E.5):**
 
 - [ ] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
 - [ ] Integration: rate limit preset on general API endpoints (higher threshold than auth)
-- [ ] Integration: IP allowlist on admin routes (allowed IP passes, blocked IP returns 403)
+- [x] Integration: IP allowlist on admin routes (allowed IP passes, blocked IP returns 403)
 - [ ] Integration: IP blocklist (blocked IP returns 403 on all routes)
-- [ ] Unit test: rate limiter window calculation, token bucket / sliding window logic
+- [x] Unit test: rate limiter window calculation, token bucket / sliding window logic
 
 **Security Notifications (11.2):**
 
@@ -2076,26 +2076,26 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Integration: email change A→B → "Revert" link sent to old email (A)
 - [ ] Integration: clicking revert link → email reverted, account locked, sessions killed
 - [ ] Integration: new API key generated → security notification email sent
-- [ ] Unit test: email template rendering for each notification type
+- [x] Unit test: email template rendering for each notification type
 
 **ToS Gating (11.3):**
 
-- [ ] Integration: stale ToS version → all API calls return 403 except logout + accept
-- [ ] Integration: accept ToS → unblocked
+- [x] Integration: stale ToS version → all API calls return 403 except logout + accept
+- [x] Integration: accept ToS → unblocked
 - [ ] Integration: admin publishes new ToS version → users with old version blocked
 - [ ] E2E: new ToS → modal appears → accept → normal access
 
 **Login Failure Logging (11.4):**
 
-- [ ] Integration: `USER_NOT_FOUND` failure → stored in `login_attempts` with reason
-- [ ] Integration: `PASSWORD_MISMATCH` → stored with reason
-- [ ] Integration: `UNVERIFIED_EMAIL` → stored with reason
-- [ ] Integration: `ACCOUNT_LOCKED` → stored with reason
-- [ ] Integration: `CAPTCHA_FAILED` → stored with reason
-- [ ] Integration: `TOTP_REQUIRED` → stored with reason (successful password, awaiting 2FA)
-- [ ] Integration: `TOTP_INVALID` → stored with reason (wrong 2FA code)
+- [x] Integration: `USER_NOT_FOUND` failure → stored in `login_attempts` with reason
+- [x] Integration: `PASSWORD_MISMATCH` → stored with reason
+- [x] Integration: `UNVERIFIED_EMAIL` → stored with reason
+- [x] Integration: `ACCOUNT_LOCKED` → stored with reason
+- [x] Integration: `CAPTCHA_FAILED` → stored with reason
+- [x] Integration: `TOTP_REQUIRED` → stored with reason (successful password, awaiting 2FA)
+- [x] Integration: `TOTP_INVALID` → stored with reason (wrong 2FA code)
 - [ ] Integration: admin can filter login attempts by failure reason
-- [ ] Security: client receives identical 401 for all failure types (anti-enumeration)
+- [x] Security: client receives identical 401 for all failure types (anti-enumeration)
 
 ---
 
@@ -2104,13 +2104,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Queue system (QueueServer + WriteService), memory store for dev/test.
 > **Gap:** Scheduled job implementations are stubs, zero tests.
 
-- [ ] `login-cleanup.ts` — purge expired login attempts beyond retention window
-- [ ] `magic-link-cleanup.ts` — purge expired magic link tokens
-- [ ] `oauth-refresh.ts` — refresh expiring OAuth tokens before expiry
-- [ ] `push-cleanup.ts` — purge stale push subscriptions (no heartbeat in X days)
-- [ ] `hard-delete-cron.ts` — anonymize PII for accounts past deletion grace period
-- [ ] `session-cleanup.ts` — purge expired/idle sessions
-- [ ] Unit tests: each job's selection criteria, batch processing, error handling
+- [x] `login-cleanup` — purge expired login attempts (`scheduled-tasks/service.ts`)
+- [x] `magic-link-cleanup` — purge expired magic link tokens (`scheduled-tasks/service.ts`)
+- [x] `oauth-refresh.ts` — refresh expiring OAuth tokens before expiry
+- [x] `push-cleanup` — purge stale push subscriptions (`scheduled-tasks/service.ts`)
+- [x] `hard-delete-anonymized` — hard-delete anonymized user records (`data-hygiene.ts`)
+- [x] `session-cleanup` — purge revoked sessions older than 30 days (`scheduled-tasks/service.ts`)
+- [x] `audit-cleanup` — purge audit events older than 90 days (`scheduled-tasks/service.ts`)
+- [x] `invitation-cleanup` — expire stale invitations (`scheduled-tasks/service.ts`)
+- [x] `pii-anonymization` — anonymize PII for deleted users (`scheduled-tasks/service.ts`)
+- [x] Unit tests: each job's selection criteria, batch processing, error handling
 - [ ] Integration tests: job enqueued → processed → DB state updated correctly
 - [ ] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
 - [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
@@ -2125,15 +2128,15 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Client Engine:**
 
-- [ ] RecordStorage — CRUD operations, conflict resolution, sync delta calculation
-- [ ] Offline queue — operations queued while offline, replayed on reconnect
-- [ ] Sync protocol — optimistic updates, server reconciliation, rollback on conflict
+- [x] RecordStorage — CRUD operations, conflict resolution, sync delta calculation
+- [x] Offline queue — operations queued while offline, replayed on reconnect
+- [x] Sync protocol — optimistic updates, server reconciliation, rollback on conflict
 
 **Search:**
 
-- [ ] `query-builder.ts` — query construction for all field types, pagination, sorting (NEW — Appendix C gap)
-- [ ] SQL provider — full-text search, fuzzy matching, result ranking (verify existing tests adequate)
-- [ ] Search factory — provider selection based on config (verify existing tests adequate)
+- [x] `query-builder.ts` — query construction for all field types, pagination, sorting (NEW — Appendix C gap)
+- [x] SQL provider — full-text search, fuzzy matching, result ranking (verify existing tests adequate)
+- [x] Search factory — provider selection based on config (verify existing tests adequate)
 
 ---
 
@@ -2147,18 +2150,18 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Activity Tracking:**
 
-- [ ] Unit: activity event creation — typed events with actor/action/target/metadata
-- [ ] Unit: activity feed query — pagination, filtering by actor/target/type, date range
-- [ ] Integration: `POST /api/activities` → creates activity record in DB
-- [ ] Integration: `GET /api/activities` → returns paginated activity feed with filters
+- [x] Unit: activity event creation — typed events with actor/action/target/metadata
+- [x] Unit: activity feed query — pagination, filtering by actor/target/type, date range
+- [x] Integration: `POST /api/activities` → creates activity record in DB
+- [x] Integration: `GET /api/activities` → returns paginated activity feed with filters
 - [ ] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
 
 **Feature Flags:**
 
-- [ ] Unit: flag evaluation logic — enabled/disabled, percentage rollout, user targeting
-- [ ] Unit: flag defaults — missing flag returns default value, no crash
-- [ ] Integration: `GET /api/flags/:key` → returns flag value for current user/tenant
-- [ ] Integration: admin CRUD — create/update/delete flags, toggle enabled state
+- [x] Unit: flag evaluation logic — enabled/disabled, percentage rollout, user targeting
+- [x] Unit: flag defaults — missing flag returns default value, no crash
+- [x] Integration: `GET /api/flags/:key` → returns flag value for current user/tenant
+- [x] Integration: admin CRUD — create/update/delete flags, toggle enabled state
 - [ ] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
 
 **Usage Metering:**
@@ -2179,20 +2182,20 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests:**
 
-- [ ] Webhook signature generation — HMAC-SHA256 with shared secret, correct payload serialization
-- [ ] Webhook signature verification — valid signature accepted, tampered payload rejected
-- [ ] Retry logic — exponential backoff calculation, max retry count, dead-letter after exhaustion
-- [ ] Event filtering — webhook subscription with event type filter, wildcard matching
+- [x] Webhook signature generation — HMAC-SHA256 with shared secret, correct payload serialization
+- [x] Webhook signature verification — valid signature accepted, tampered payload rejected
+- [x] Retry logic — exponential backoff calculation, max retry count, dead-letter after exhaustion
+- [x] Event filtering — webhook subscription with event type filter, wildcard matching
 
 **Integration Tests:**
 
-- [ ] Register webhook endpoint → stored in DB with secret
+- [x] Register webhook endpoint → stored in DB with secret
 - [ ] Event triggered → webhook queued → delivered to endpoint → delivery logged
 - [ ] Endpoint returns 500 → retry scheduled with exponential backoff
 - [ ] Endpoint returns 200 → delivery marked successful, no retry
 - [ ] Max retries exceeded → webhook marked failed, admin notified
-- [ ] `GET /api/webhooks/:id/deliveries` → delivery log with status/response/timing
-- [ ] Webhook secret rotation → old deliveries still verifiable, new deliveries use new secret
+- [x] `GET /api/webhooks/:id/deliveries` → delivery log with status/response/timing
+- [x] Webhook secret rotation → old deliveries still verifiable, new deliveries use new secret
 - [ ] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
 
 ---
@@ -2539,7 +2542,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Cross-Feature Integration Points:**
 
-- [ ] Verify: registration → auto-create default workspace → correct membership + role
+- [x] Verify: registration → email verification → auto-create default workspace (`verify.ts` fire-and-forget)
 - [ ] Verify: user deletion → cascade to sessions, tokens, memberships, subscriptions, files
 - [ ] Verify: tenant suspension → all members blocked from workspace access
 - [ ] Verify: role change → immediate effect on permission-gated UI and API
@@ -2891,14 +2894,14 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Configuration:**
 
 - [ ] Config: Storybook 8+ setup — `main.ts`, `preview.ts`, Vite builder
-- [ ] Config: theme integration — wrap stories in `ThemeProvider`, support light/dark mode toggle
+- [x] Config: theme integration — wrap stories in `ThemeProvider`, support light/dark mode toggle
 - [ ] Config: viewport presets — mobile, tablet, desktop
 - [ ] Config: accessibility addon — a11y checks in every story
 
 **Stories:**
 
-- [ ] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch, Table, Progress
-- [ ] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField, Accordion, Pagination
+- [x] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch, Table, Progress
+- [x] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField, Accordion, Pagination
 - [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel, SidePeek
 - [ ] Stories: patterns — forms, navigation, data tables, loading states, error states, empty states
 - [ ] Stories: billing — PlanCard, PricingTable, InvoiceRow, SubscriptionStatus

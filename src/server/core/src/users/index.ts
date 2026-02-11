@@ -48,3 +48,15 @@ export type {
 } from './types';
 
 export { ERROR_MESSAGES } from './types';
+
+// Data hygiene (soft-delete enforcement + hard-delete)
+export {
+  filterDeletedUsers,
+  hardDeleteAnonymizedUsers,
+  isUserDeleted,
+  type HardDeleteResult,
+} from './data-hygiene';
+
+// Background crons
+export { anonymizeExpiredUsers, type AnonymizeResult } from './pii-anonymization';
+export { cleanupUnverifiedUsers, type CleanupResult } from './unverified-cleanup';

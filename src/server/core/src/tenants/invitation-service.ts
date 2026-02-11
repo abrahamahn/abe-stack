@@ -29,6 +29,9 @@ import type { Invitation as DomainInvitation, TenantRole } from '@abe-stack/shar
 /** Default invitation expiry: 7 days in milliseconds */
 const DEFAULT_INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Maximum number of pending invitations per tenant */
+const MAX_PENDING_INVITATIONS = 50;
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -150,6 +153,14 @@ export async function createInvitation(
   const existing = await repos.invitations.findPendingByTenantAndEmail(tenantId, email);
   if (existing !== null) {
     throw new BadRequestError('An invitation for this email is already pending');
+  }
+
+  // Enforce max pending invitations limit per tenant
+  const pendingCount = await repos.invitations.countPendingByTenantId(tenantId);
+  if (pendingCount >= MAX_PENDING_INVITATIONS) {
+    throw new BadRequestError(
+      `This workspace has reached the maximum of ${String(MAX_PENDING_INVITATIONS)} pending invitations`,
+    );
   }
 
   const expiresAt = new Date(Date.now() + DEFAULT_INVITE_EXPIRY_MS);

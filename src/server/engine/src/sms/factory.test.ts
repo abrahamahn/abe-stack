@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ConsoleSmsProvider } from './console';
 import { createSmsProvider } from './factory';
+import { TwilioSmsProvider } from './twilio';
 
 describe('createSmsProvider', () => {
   it('returns ConsoleSmsProvider when provider is console', () => {
@@ -23,13 +24,26 @@ describe('createSmsProvider', () => {
     expect(provider).toBeInstanceOf(ConsoleSmsProvider);
   });
 
-  it('throws for twilio provider (not yet implemented)', () => {
+  it('returns TwilioSmsProvider when provider is twilio and config is provided', () => {
+    const provider = createSmsProvider(
+      { enabled: true, provider: 'twilio' },
+      {
+        accountSid: 'TWILIO_ACCOUNT_SID_TEST',
+        authToken: 'test-auth-token',
+        fromNumber: '+15551234567',
+      },
+    );
+
+    expect(provider).toBeInstanceOf(TwilioSmsProvider);
+  });
+
+  it('throws for twilio provider when no config is provided', () => {
     expect(() =>
       createSmsProvider({
         enabled: true,
         provider: 'twilio',
       }),
-    ).toThrow('not yet implemented');
+    ).toThrow('Twilio configuration');
   });
 
   it('throws for aws-sns provider (not yet implemented)', () => {

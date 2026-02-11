@@ -34,12 +34,14 @@ import { REFRESH_COOKIE_NAME } from '../auth';
 import {
   getSessionCount,
   handleDeactivateAccount,
+  handleDeleteAvatar,
   handleGetProfileCompleteness,
   handleListUsers,
   handleMe,
   handleReactivateAccount,
   handleRequestDeletion,
   handleUpdateUsername,
+  handleUploadAvatar,
   listUserSessions,
   revokeAllSessions,
   revokeSession,
@@ -108,6 +110,8 @@ async function resolveCurrentFamilyId(
  * - `users/list` (GET, admin) — List all users with cursor pagination
  * - `users/me/profile-completeness` (GET, user) — Get profile completeness percentage
  * - `users/me/username` (PATCH, user) — Update current user's username (30-day cooldown)
+ * - `users/me/avatar` (PUT, user) — Upload avatar (multipart)
+ * - `users/me/avatar/delete` (POST, user) — Delete avatar
  * - `users/me/sessions` (GET, user) — List current user's active sessions
  * - `users/me/sessions/count` (GET, user) — Get active session count
  * - `users/me/sessions/:id` (DELETE, user) — Revoke a specific session
@@ -165,6 +169,34 @@ export const userRoutes: RouteMap = createRouteMap([
       },
       'user',
       updateUsernameRequestSchema,
+    ),
+  ],
+
+  // ============================================================================
+  // Avatar Routes
+  // ============================================================================
+
+  // Avatar upload — PUT with multipart file body
+  [
+    'users/me/avatar',
+    protectedRoute(
+      'PUT',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleUploadAvatar(ctx, body, req);
+      },
+      'user',
+    ),
+  ],
+
+  // Avatar delete — DELETE
+  [
+    'users/me/avatar/delete',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+        return handleDeleteAvatar(ctx, _body, req);
+      },
+      'user',
     ),
   ],
 

@@ -49,8 +49,12 @@ export {
 
 // Handlers
 export {
+  handleDeleteNotification,
   handleGetPreferences,
   handleGetVapidKey,
+  handleListNotifications,
+  handleMarkAllAsRead,
+  handleMarkAsRead,
   handleSendNotification,
   handleSubscribe,
   handleTestNotification,

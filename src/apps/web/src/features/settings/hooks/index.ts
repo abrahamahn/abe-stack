@@ -75,3 +75,13 @@ export {
   type UseReactivateAccountOptions,
   type UseReactivateAccountResult,
 } from './useAccountLifecycle';
+
+export {
+  useConsent,
+  useUpdateConsent,
+  type ConsentPreferences,
+  type UpdateConsentInput,
+  type UpdateConsentResponse,
+  type UseConsentResult,
+  type UseUpdateConsentResult,
+} from './useConsent';

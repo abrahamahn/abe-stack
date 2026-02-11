@@ -31,7 +31,10 @@ import {
   PricingPage,
 } from '@pages/BillingPages';
 import { DashboardPage } from '@pages/DashboardPage';
+import { ForbiddenPage } from '@pages/ForbiddenPage';
 import { HomePage } from '@pages/HomePage';
+import { NotFoundPage } from '@pages/NotFoundPage';
+import { OnboardingPage } from '@pages/OnboardingPage';
 import { SettingsPage } from '@pages/SettingsPage';
 import {
   AcceptInvitationPage,
@@ -160,7 +163,15 @@ export const appRoutes: AppRoute[] = [
             path: 'invitations/accept',
             element: AcceptInvitationPage,
           },
+          {
+            path: 'onboarding',
+            element: OnboardingPage,
+          },
         ],
+      },
+      {
+        path: 'forbidden',
+        element: ForbiddenPage,
       },
       {
         path: 'admin',
@@ -207,6 +218,10 @@ export const appRoutes: AppRoute[] = [
             element: FeatureFlagsPage,
           },
         ],
+      },
+      {
+        path: '*',
+        element: NotFoundPage,
       },
     ],
   },

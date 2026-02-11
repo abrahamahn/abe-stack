@@ -64,6 +64,7 @@ export interface User {
   deactivatedAt: Date | null;
   deletedAt: Date | null;
   deletionGracePeriodEnds: Date | null;
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -104,6 +105,7 @@ export interface NewUser {
   deactivatedAt?: Date | null;
   deletedAt?: Date | null;
   deletionGracePeriodEnds?: Date | null;
+  tokenVersion?: number;
   createdAt?: Date;
   updatedAt?: Date;
   version?: number;
@@ -143,6 +145,7 @@ export interface UpdateUser {
   deactivatedAt?: Date | null;
   deletedAt?: Date | null;
   deletionGracePeriodEnds?: Date | null;
+  tokenVersion?: number;
   updatedAt?: Date;
   version?: number;
 }
@@ -214,6 +217,7 @@ export const USER_COLUMNS = {
   deactivatedAt: 'deactivated_at',
   deletedAt: 'deleted_at',
   deletionGracePeriodEnds: 'deletion_grace_period_ends',
+  tokenVersion: 'token_version',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   version: 'version',

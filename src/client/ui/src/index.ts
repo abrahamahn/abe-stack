@@ -48,6 +48,7 @@ export {
   DelayedFallback,
   Dialog,
   Dropdown,
+  EmptyState,
   ErrorBoundary,
   FocusTrap,
   FormField,
@@ -76,6 +77,7 @@ export {
 export type {
   AnnouncePoliteness,
   DelayedFallbackProps,
+  EmptyStateProps,
   ErrorBoundaryProps,
   InvoiceListProps,
   LiveRegionProps,

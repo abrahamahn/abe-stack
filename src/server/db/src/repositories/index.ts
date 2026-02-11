@@ -39,6 +39,8 @@ export {
   type TotpBackupCodeRepository,
   type EmailChangeTokenRepository,
   type EmailChangeRevertTokenRepository,
+  createTrustedDeviceRepository,
+  type TrustedDeviceRepository,
 } from './auth';
 
 // API Keys

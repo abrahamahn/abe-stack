@@ -92,9 +92,32 @@ export async function handleCreateInvitation(
       metadata: { email: body.email, role: body.role },
     }).catch(() => {});
 
-    // TODO: Send invitation email (D1 email integration)
-    // The email would include a link to accept the invitation.
-    // For now, the invitation is created and can be accepted via API.
+    // Fire-and-forget notification for the inviter
+    deps.repos.notifications
+      .create({
+        userId,
+        type: 'info',
+        title: 'Invitation sent',
+        message: `Workspace invitation sent to ${body.email}`,
+        data: { email: body.email, role: body.role, tenantId },
+      })
+      .catch(() => {});
+
+    // Fire-and-forget: send invitation email
+    if (deps.mailer !== undefined && deps.emailTemplates !== undefined) {
+      const acceptUrl = `${deps.appBaseUrl ?? ''}/invitations/${invId}/accept`;
+      const actor = await deps.repos.users.findById(userId);
+      const actorName = actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
+      const tenant = await deps.repos.tenants.findById(tenantId);
+      const workspaceName = tenant?.name ?? 'the workspace';
+      const emailData = deps.emailTemplates.workspaceInvitation(
+        acceptUrl,
+        workspaceName,
+        actorName,
+        body.role,
+      );
+      deps.mailer.send({ ...emailData, to: body.email }).catch(() => {});
+    }
 
     return { status: 201, body: invitation };
   } catch (error) {
@@ -237,7 +260,24 @@ export async function handleResendInvitation(
     // Validate the invitation exists and is pending
     await resendInvitation(deps.repos, tenantId, invitationId, userId);
 
-    // TODO: Re-send the invitation email
+    // Fire-and-forget: resend invitation email
+    if (deps.mailer !== undefined && deps.emailTemplates !== undefined) {
+      const inv = await deps.repos.invitations.findById(invitationId);
+      if (inv !== null) {
+        const acceptUrl = `${deps.appBaseUrl ?? ''}/invitations/${inv.id}/accept`;
+        const actor = await deps.repos.users.findById(userId);
+        const actorName = actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
+        const tenant = await deps.repos.tenants.findById(tenantId);
+        const workspaceName = tenant?.name ?? 'the workspace';
+        const emailData = deps.emailTemplates.workspaceInvitation(
+          acceptUrl,
+          workspaceName,
+          actorName,
+          inv.role,
+        );
+        deps.mailer.send({ ...emailData, to: inv.email }).catch(() => {});
+      }
+    }
 
     return { status: 200, body: { message: 'Invitation resent' } };
   } catch (error) {

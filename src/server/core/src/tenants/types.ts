@@ -39,6 +39,29 @@ export interface TenantsLogger extends Logger {
 export type TenantsRequest = RequestContext;
 
 // ============================================================================
+// Email Types (Inline — avoids coupling to engine/mailer package)
+// ============================================================================
+
+/** Minimal email options accepted by the tenants mailer */
+export interface TenantsEmailOptions {
+  readonly to: string;
+  readonly subject: string;
+  readonly text?: string;
+  readonly html?: string;
+}
+
+/** Workspace invitation email template function */
+export interface TenantsEmailTemplates {
+  workspaceInvitation(
+    acceptUrl: string,
+    workspaceName: string,
+    inviterName: string,
+    role: string,
+    expiresInDays?: number,
+  ): TenantsEmailOptions;
+}
+
+// ============================================================================
 // Tenants Module Dependencies
 // ============================================================================
 
@@ -53,6 +76,12 @@ export interface TenantsModuleDeps extends BaseContext {
   readonly repos: Repositories;
   /** Logger instance for tenants module logging */
   readonly log: TenantsLogger;
+  /** Email service for sending invitation emails (optional — gracefully skipped when absent) */
+  readonly mailer?: { send(options: TenantsEmailOptions): Promise<unknown> };
+  /** Email templates for workspace notifications (optional) */
+  readonly emailTemplates?: TenantsEmailTemplates;
+  /** Application base URL for generating invitation links */
+  readonly appBaseUrl?: string;
 }
 
 // ============================================================================

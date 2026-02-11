@@ -2,6 +2,8 @@
 export { ExportDialog } from './ExportDialog';
 export type { ExportDialogProps } from './ExportDialog';
 
+export { ImpersonationBanner } from './ImpersonationBanner';
+
 export { JobActionsMenu } from './JobActionsMenu';
 export type { JobActionsMenuProps } from './JobActionsMenu';
 

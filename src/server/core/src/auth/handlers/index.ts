@@ -33,3 +33,6 @@ export {
   SUDO_TOKEN_TTL_MINUTES,
 } from './sudo';
 export { handleAcceptTos, handleTosStatus } from './tos';
+export { handleListDevices, handleTrustDevice, handleRevokeDevice } from './devices';
+export { handleSetPhone, handleVerifyPhone, handleRemovePhone } from './phone';
+export { handleSendSmsCode, handleVerifySmsCode } from './sms-challenge';

@@ -1,6 +1,7 @@
 // src/apps/web/src/features/settings/components/index.ts
 export { ApiKeysManagement, type ApiKeysManagementProps } from './ApiKeysManagement';
 export { AvatarUpload, type AvatarUploadProps } from './AvatarUpload';
+export { ConsentPreferences } from './ConsentPreferences';
 export { EmailChangeForm, type EmailChangeFormProps } from './EmailChangeForm';
 export { ForgotPasswordShortcut, type ForgotPasswordShortcutProps } from './ForgotPasswordShortcut';
 export { OAuthConnectionsList, type OAuthConnectionsListProps } from './OAuthConnectionsList';

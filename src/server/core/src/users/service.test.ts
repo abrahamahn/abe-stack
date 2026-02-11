@@ -24,6 +24,7 @@ describe('Users Service', () => {
     listWithFilters: vi.fn(),
     lockAccount: vi.fn(),
     unlockAccount: vi.fn(),
+    incrementTokenVersion: vi.fn(),
   };
 
   beforeEach(() => {
@@ -65,6 +66,7 @@ describe('Users Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);
@@ -137,6 +139,7 @@ describe('Users Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
       vi.mocked(mockUserRepo.findById).mockResolvedValue(mockUser);

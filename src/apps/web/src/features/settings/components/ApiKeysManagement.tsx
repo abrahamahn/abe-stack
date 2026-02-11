@@ -10,9 +10,10 @@ import {
   Alert,
   Badge,
   Button,
+  EmptyState,
   Heading,
   Input,
-  Spinner,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -101,7 +102,15 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
   if (isLoading) {
     return (
       <div className={className}>
-        <Spinner />
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-8 w-24" />
+        </div>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }, (_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -178,7 +187,11 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
       )}
 
       {apiKeys.length === 0 ? (
-        <Text tone="muted">No API keys yet. Create one to get started.</Text>
+        <EmptyState
+          title="No API keys yet"
+          description="Create one to get started"
+          action={{ label: 'Create API Key', onClick: () => { setShowCreate(true); } }}
+        />
       ) : (
         <Table>
           <TableHeader>

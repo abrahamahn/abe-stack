@@ -9,6 +9,7 @@ import {
   Alert,
   Badge,
   Button,
+  EmptyState,
   Skeleton,
   Table,
   TableBody,
@@ -136,9 +137,10 @@ export const InvitationsList = ({ tenantId }: InvitationsListProps): ReactElemen
       </Table>
 
       {invitations.length === 0 && (
-        <Text tone="muted" className="text-center py-4">
-          No invitations yet.
-        </Text>
+        <EmptyState
+          title="No pending invitations"
+          description="Invite teammates to collaborate on this workspace"
+        />
       )}
     </div>
   );

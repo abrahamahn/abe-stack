@@ -331,6 +331,15 @@ export {
   type UpdateTenantSetting,
 } from './tenant-settings';
 
+// Trusted Devices
+export {
+  type NewTrustedDevice,
+  TRUSTED_DEVICE_COLUMNS,
+  TRUSTED_DEVICES_TABLE,
+  type TrustedDevice,
+  type UpdateTrustedDevice,
+} from './trusted-devices';
+
 // Activities (Activity Feed)
 export {
   ACTIVITIES_TABLE,

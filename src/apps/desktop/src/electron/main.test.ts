@@ -11,6 +11,15 @@ const mocks = vi.hoisted(() => {
   const mockDisableHardwareAcceleration = vi.fn();
   const mockRegisterIPCHandlers = vi.fn();
   const mockWaitForPort = vi.fn().mockResolvedValue(5174);
+  const mockCreateApplicationMenu = vi.fn();
+  const mockInitAutoUpdater = vi.fn();
+  const mockCreateTray = vi.fn();
+  const mockRegisterDeepLinkProtocol = vi.fn();
+  const mockHandleDeepLink = vi.fn();
+  const mockRequestSingleInstanceLock = vi.fn().mockReturnValue(true);
+  const mockIsDefaultProtocolClient = vi.fn().mockReturnValue(true);
+  const mockSetAsDefaultProtocolClient = vi.fn().mockReturnValue(true);
+  const mockWebContentsOpenDevTools = vi.fn();
 
   return {
     mockLoadURL,
@@ -21,6 +30,15 @@ const mocks = vi.hoisted(() => {
     mockDisableHardwareAcceleration,
     mockRegisterIPCHandlers,
     mockWaitForPort,
+    mockCreateApplicationMenu,
+    mockInitAutoUpdater,
+    mockCreateTray,
+    mockRegisterDeepLinkProtocol,
+    mockHandleDeepLink,
+    mockRequestSingleInstanceLock,
+    mockIsDefaultProtocolClient,
+    mockSetAsDefaultProtocolClient,
+    mockWebContentsOpenDevTools,
   };
 });
 
@@ -30,6 +48,7 @@ vi.mock('electron', () => {
     loadURL = mocks.mockLoadURL;
     loadFile = mocks.mockLoadFile;
     on = mocks.mockWindowOn;
+    webContents = { openDevTools: mocks.mockWebContentsOpenDevTools };
 
     constructor(options: unknown) {
       this.options = options;
@@ -41,6 +60,9 @@ vi.mock('electron', () => {
       disableHardwareAcceleration: mocks.mockDisableHardwareAcceleration,
       on: mocks.mockAppOn,
       quit: mocks.mockAppQuit,
+      requestSingleInstanceLock: mocks.mockRequestSingleInstanceLock,
+      isDefaultProtocolClient: mocks.mockIsDefaultProtocolClient,
+      setAsDefaultProtocolClient: mocks.mockSetAsDefaultProtocolClient,
     },
     BrowserWindow: MockBrowserWindow,
     nativeTheme: {
@@ -52,6 +74,23 @@ vi.mock('electron', () => {
 
 vi.mock('./ipc', () => ({
   registerIPCHandlers: mocks.mockRegisterIPCHandlers,
+}));
+
+vi.mock('./menu', () => ({
+  createApplicationMenu: mocks.mockCreateApplicationMenu,
+}));
+
+vi.mock('./auto-updater', () => ({
+  initAutoUpdater: mocks.mockInitAutoUpdater,
+}));
+
+vi.mock('./tray', () => ({
+  createTray: mocks.mockCreateTray,
+}));
+
+vi.mock('./deep-links', () => ({
+  registerDeepLinkProtocol: mocks.mockRegisterDeepLinkProtocol,
+  handleDeepLink: mocks.mockHandleDeepLink,
 }));
 
 // Mock @abe-stack/shared which exports waitForPort
@@ -96,6 +135,21 @@ describe('main', () => {
       expect(mocks.mockRegisterIPCHandlers).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    it('should register deep link protocol', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      expect(mocks.mockRegisterDeepLinkProtocol).toHaveBeenCalledTimes(1);
+      expect(mocks.mockRegisterDeepLinkProtocol).toHaveBeenCalledWith('abe-stack');
+    });
+
+    it('should request single instance lock', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      expect(mocks.mockRequestSingleInstanceLock).toHaveBeenCalledTimes(1);
+    });
+
     it('should register app ready event listener', async () => {
       vi.resetModules();
       await import('./main');
@@ -115,6 +169,77 @@ describe('main', () => {
       await import('./main');
 
       expect(mocks.mockAppOn).toHaveBeenCalledWith('activate', expect.any(Function));
+    });
+
+    it('should register open-url event listener for macOS deep links', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      expect(mocks.mockAppOn).toHaveBeenCalledWith('open-url', expect.any(Function));
+    });
+
+    it('should register second-instance event listener for deep links', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      expect(mocks.mockAppOn).toHaveBeenCalledWith('second-instance', expect.any(Function));
+    });
+  });
+
+  describe('window creation', () => {
+    it('should create application menu on window creation', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready') as
+        | [string, unknown]
+        | undefined;
+      expect(readyCall).toBeDefined();
+      const readyCallback = readyCall![1] as () => Promise<void>;
+      await readyCallback();
+
+      expect(mocks.mockCreateApplicationMenu).toHaveBeenCalledTimes(1);
+    });
+
+    it('should create system tray on window creation', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready') as
+        | [string, unknown]
+        | undefined;
+      const readyCallback = readyCall![1] as () => Promise<void>;
+      await readyCallback();
+
+      expect(mocks.mockCreateTray).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not init auto-updater in development mode', async () => {
+      vi.resetModules();
+      await import('./main');
+
+      const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready') as
+        | [string, unknown]
+        | undefined;
+      const readyCallback = readyCall![1] as () => Promise<void>;
+      await readyCallback();
+
+      expect(mocks.mockInitAutoUpdater).not.toHaveBeenCalled();
+    });
+
+    it('should init auto-updater in production mode', async () => {
+      process.env['NODE_ENV'] = 'production';
+
+      vi.resetModules();
+      await import('./main');
+
+      const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready') as
+        | [string, unknown]
+        | undefined;
+      const readyCallback = readyCall![1] as () => Promise<void>;
+      await readyCallback();
+
+      expect(mocks.mockInitAutoUpdater).toHaveBeenCalledTimes(1);
     });
   });
 

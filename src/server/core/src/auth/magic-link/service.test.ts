@@ -196,6 +196,8 @@ function createMockRepositories(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    trustedDevices: {} as Repositories['trustedDevices'],
+    files: {} as Repositories['files'],
   };
 }
 
@@ -287,6 +289,7 @@ function createMockUser(overrides?: Partial<User>): User {
     deactivatedAt: null,
     deletedAt: null,
     deletionGracePeriodEnds: null,
+    tokenVersion: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,

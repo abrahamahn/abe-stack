@@ -8,9 +8,13 @@
 // Routes (for auto-registration)
 export { adminRoutes } from './routes';
 
+// Middleware
+export { createIpAllowlistMiddleware, type IpAllowlistConfig } from './ip-allowlist';
+
 // Handlers
 export { handleAdminUnlock } from './handlers';
 export { handleListAuditEvents } from './auditHandlers';
+export { handleEndImpersonation, handleStartImpersonation } from './impersonationHandlers';
 export { handleGetRouteManifest } from './route-manifest';
 export {
   handleAdminCreatePlan,
@@ -51,6 +55,19 @@ export {
 } from './userHandlers';
 
 // Service (business logic)
+export {
+  endImpersonation,
+  ImpersonationForbiddenError,
+  ImpersonationRateLimitError,
+  startImpersonation,
+  validateImpersonationToken,
+  type ImpersonationAuditLogger,
+  type ImpersonationConfig,
+  type ImpersonationEndResult,
+  type ImpersonationRepositories,
+  type ImpersonationStartResult,
+  type ImpersonationTokenPayload,
+} from './impersonation';
 export { unlockUserAccount, UserNotFoundError } from './service';
 export {
   createPlan,

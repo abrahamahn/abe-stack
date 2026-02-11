@@ -40,6 +40,8 @@ function createMockRepos(): Repositories {
       findByTenantId: vi.fn(),
       findPendingByTenantAndEmail: vi.fn(),
       findPendingByEmail: vi.fn(),
+      countPendingByTenantId: vi.fn().mockResolvedValue(0),
+      findExpiredPending: vi.fn(),
       update: vi.fn(),
     },
     users: {
@@ -81,6 +83,8 @@ function createMockRepos(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    trustedDevices: {} as Repositories['trustedDevices'],
+    files: {} as Repositories['files'],
   };
 }
 
@@ -225,6 +229,30 @@ describe('createInvitation', () => {
     await expect(
       createInvitation(repos, 't-1', 'user-1', 'invited@test.com', 'member'),
     ).rejects.toThrow('An invitation for this email is already pending');
+  });
+
+  it('throws BadRequestError when max pending invitations reached', async () => {
+    vi.mocked(repos.memberships.findByTenantAndUser).mockResolvedValue(
+      mockMembership('user-1', 'owner'),
+    );
+    vi.mocked(repos.invitations.findPendingByTenantAndEmail).mockResolvedValue(null);
+    vi.mocked(repos.invitations.countPendingByTenantId).mockResolvedValue(50);
+
+    await expect(
+      createInvitation(repos, 't-1', 'user-1', 'new@test.com', 'member'),
+    ).rejects.toThrow('maximum of 50 pending invitations');
+  });
+
+  it('allows invitation when pending count is below the limit', async () => {
+    vi.mocked(repos.memberships.findByTenantAndUser).mockResolvedValue(
+      mockMembership('user-1', 'owner'),
+    );
+    vi.mocked(repos.invitations.findPendingByTenantAndEmail).mockResolvedValue(null);
+    vi.mocked(repos.invitations.countPendingByTenantId).mockResolvedValue(49);
+    vi.mocked(repos.invitations.create).mockResolvedValue(mockInvitation());
+
+    const result = await createInvitation(repos, 't-1', 'user-1', 'new@test.com', 'member');
+    expect(result.email).toBe('invited@test.com');
   });
 });
 

@@ -47,6 +47,7 @@ function createMockUser(overrides: Partial<User> = {}): User {
     deactivatedAt: null,
     deletedAt: null,
     deletionGracePeriodEnds: null,
+    tokenVersion: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,

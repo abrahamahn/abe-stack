@@ -12,6 +12,7 @@ import {
   mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
+import { createTenant } from '../../tenants';
 import { resendVerificationEmail, verifyEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
@@ -40,6 +41,19 @@ export async function handleVerifyEmail(
 
     // Set refresh token as HTTP-only cookie for auto-login
     setRefreshTokenCookie(reply, result.refreshToken, ctx.config.auth);
+
+    // Fire-and-forget: create default workspace for users with no memberships
+    const userId = result.user.id;
+    const username = result.user.username;
+    ctx.repos.memberships.findByUserId(userId).then((memberships) => {
+      if (memberships.length === 0) {
+        const workspaceName = `${username}'s Workspace`;
+        return createTenant(ctx.db, ctx.repos, userId, { name: workspaceName });
+      }
+      return undefined;
+    }).catch((err: unknown) => {
+      ctx.log.warn({ err, userId }, 'Failed to create default workspace after email verification');
+    });
 
     return {
       status: 200,

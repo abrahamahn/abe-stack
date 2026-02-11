@@ -3,6 +3,10 @@
 export { useAuditEvents } from './useAuditEvents';
 export type { UseAuditEventsOptions, UseAuditEventsResult } from './useAuditEvents';
 
+// Impersonation
+export { useImpersonation } from './useImpersonation';
+export type { UseImpersonationResult } from './useImpersonation';
+
 // Feature flag evaluation
 export { useFeatureFlag } from './useFeatureFlag';
 export type { UseFeatureFlagOptions, UseFeatureFlagResult } from './useFeatureFlag';

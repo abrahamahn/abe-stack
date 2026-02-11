@@ -271,6 +271,7 @@ interface MockUser {
   deactivatedAt: Date | null;
   deletedAt: Date | null;
   deletionGracePeriodEnds: Date | null;
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -308,6 +309,7 @@ function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
     deactivatedAt: null,
     deletedAt: null,
     deletionGracePeriodEnds: null,
+    tokenVersion: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1,
@@ -506,6 +508,7 @@ describe('Parallel Login Requests', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -577,6 +580,7 @@ describe('Parallel Login Requests', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -680,6 +684,7 @@ describe('Password Change Session Invalidation', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -741,6 +746,7 @@ describe('Password Change Session Invalidation', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -916,6 +922,7 @@ describe('Progressive Delay Timing', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -975,6 +982,7 @@ describe('Progressive Delay Timing', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -1046,6 +1054,7 @@ describe('Lockout Counter Reset', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -1107,6 +1116,7 @@ describe('Lockout Counter Reset', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -1218,6 +1228,7 @@ describe('Email Verification Auto-Login', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,
@@ -1334,6 +1345,7 @@ describe('Timing-Safe Operations', () => {
       deactivatedAt: null,
       deletedAt: null,
       deletionGracePeriodEnds: null,
+      tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 0,

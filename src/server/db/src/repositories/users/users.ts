@@ -169,6 +169,13 @@ export interface UserRepository {
    * @returns void (use findById to retrieve updated user)
    */
   unlockAccount(userId: string): Promise<void>;
+
+  /**
+   * Increment a user's token_version, invalidating all existing tokens.
+   * @param userId - The user ID whose token version to increment
+   * @returns The new token version value
+   */
+  incrementTokenVersion(userId: string): Promise<number>;
 }
 
 // ============================================================================
@@ -358,6 +365,21 @@ export function createUserRepository(db: RawDb): UserRepository {
           .where(eq('id', userId))
           .toSql(),
       );
+    },
+
+    async incrementTokenVersion(userId: string): Promise<number> {
+      const result = await db.queryOne(
+        update(USERS_TABLE)
+          .increment('token_version', 1)
+          .where(eq('id', userId))
+          .returningAll()
+          .toSql(),
+      );
+      if (result === null) {
+        throw new Error('User not found');
+      }
+      const transformed = transformUser(result);
+      return transformed.tokenVersion;
     },
   };
 }

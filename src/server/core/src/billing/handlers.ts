@@ -415,6 +415,22 @@ export async function handleCancelSubscription(
       userAgent: request.headers['user-agent'] ?? null,
     });
 
+    // Fire-and-forget notification
+    const cancelNotifRepo = ctx.repos.notifications;
+    if (cancelNotifRepo !== undefined) {
+      cancelNotifRepo
+        .create({
+          userId: user.userId,
+          type: 'warning',
+          title: 'Subscription canceled',
+          message: body.immediately
+            ? 'Your subscription has been canceled immediately.'
+            : 'Your subscription will be canceled at the end of the billing period.',
+          data: { immediately: body.immediately },
+        })
+        .catch(() => {});
+    }
+
     return {
       status: 200,
       body: {
@@ -519,6 +535,20 @@ export async function handleUpdateSubscription(
       ipAddress: request.ip ?? null,
       userAgent: request.headers['user-agent'] ?? null,
     });
+
+    // Fire-and-forget notification
+    const updateNotifRepo = ctx.repos.notifications;
+    if (updateNotifRepo !== undefined) {
+      updateNotifRepo
+        .create({
+          userId: user.userId,
+          type: 'success',
+          title: 'Plan updated',
+          message: 'Your subscription plan has been updated successfully.',
+          data: { newPlanId: body.planId },
+        })
+        .catch(() => {});
+    }
 
     return {
       status: 200,

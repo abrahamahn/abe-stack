@@ -37,3 +37,23 @@ export {
   type UseAcceptInvitationResult,
 } from './useInvitations';
 export { useWorkspaceContext, type UseWorkspaceContextResult } from './useWorkspaceContext';
+export {
+  useWorkspaceFeatureOverrides,
+  useSetFeatureOverride,
+  type UseWorkspaceFeatureOverridesOptions,
+  type UseWorkspaceFeatureOverridesResult,
+  type UseSetFeatureOverrideOptions,
+  type UseSetFeatureOverrideResult,
+  type FlagWithOverride,
+  type TenantOverride,
+  type TenantOverridesResponse,
+  type SetOverrideRequest,
+} from './useWorkspaceFeatureOverrides';
+export {
+  useWorkspaceBilling,
+  type UseWorkspaceBillingOptions,
+  type UseWorkspaceBillingResult,
+  type Plan,
+  type Subscription,
+  type SubscriptionResponse,
+} from './useWorkspaceBilling';

@@ -136,12 +136,25 @@ export async function handleLogin(
       ctx.log.warn({ err, email: result.user.email }, 'Failed to send new login alert email');
     });
 
+    // Resolve default tenant for workspace context
+    let defaultTenantId: string | undefined;
+    try {
+      const memberships = await ctx.repos.memberships.findByUserId(result.user.id);
+      const first = memberships[0];
+      if (first !== undefined) {
+        defaultTenantId = first.tenantId;
+      }
+    } catch {
+      // Non-fatal: client can fetch workspace list separately
+    }
+
     return {
       status: 200,
       body: {
         token: result.accessToken,
         user: result.user,
         ...(isNewDevice ? { isNewDevice: true } : {}),
+        ...(defaultTenantId !== undefined ? { defaultTenantId } : {}),
       },
     };
   } catch (error) {

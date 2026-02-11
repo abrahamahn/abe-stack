@@ -8,7 +8,9 @@
   },
   "scripts": {
     "setup": "node --import tsx src/tools/scripts/dev/setup.ts",
-    "dev": "node --import tsx src/tools/scripts/dev/dev.ts",
+    "dev": "node --import tsx src/tools/scripts/dev/dev.ts server web",
+    "dev:desktop": "node --import tsx src/tools/scripts/dev/dev.ts server desktop",
+    "dev:all": "node --import tsx src/tools/scripts/dev/dev.ts",
     "start": "turbo run start --filter=@abe-stack/web --filter=@abe-stack/server",
     "lint": "turbo run lint --continue",
     "lint:fix": "turbo run lint --continue -- --fix",

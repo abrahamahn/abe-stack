@@ -112,3 +112,18 @@ export {
 
 // Sudo Mode
 export { createRequireSudo } from './sudo';
+
+// Device Fingerprint
+export {
+  generateDeviceFingerprint,
+  isKnownDevice,
+  isTrustedDevice,
+  recordDeviceAccess,
+} from './device-fingerprint';
+
+// Session Enforcement
+export {
+  enforceMaxConcurrentSessions,
+  getIdleTimeRemaining,
+  isSessionIdle,
+} from './session-enforcement';

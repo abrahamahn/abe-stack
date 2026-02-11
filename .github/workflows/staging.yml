@@ -1,0 +1,108 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: false
+        default: 'staging'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: ${{ runner.os }}-turbo-staging-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-staging-
+            ${{ runner.os }}-turbo-
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: validate
+    environment: staging
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+
+      - name: Resolve image variables
+        id: image-vars
+        run: |
+          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
+          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+          if [[ "$IMAGE_NAME_RAW" != */* ]]; then
+            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+          else
+            IMAGE_NAME="$IMAGE_NAME_RAW"
+          fi
+          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "image_name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to staging
+        env:
+          DEPLOY_ENV: staging
+          REGISTRY: ${{ steps.image-vars.outputs.registry }}
+          IMAGE_NAME: ${{ steps.image-vars.outputs.image_name }}
+          IMAGE_TAG: ${{ steps.image-vars.outputs.image_tag }}
+        run: |
+          echo "Deploying to staging environment"
+          echo "Registry: $REGISTRY"
+          echo "Image: $IMAGE_NAME:$IMAGE_TAG"
+          echo "Commit: $GITHUB_SHA"
+          # Placeholder: actual deploy command depends on infrastructure
+          # For production use, this step would:
+          # 1. Build and push Docker images (or reuse from CI)
+          # 2. SSH into staging server and pull new images
+          # 3. Run docker compose up with staging config
+          # See deploy.yml for the full production deployment pattern
+
+      - name: Deployment Summary
+        run: |
+          echo "## Staging Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Environment:** staging" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Branch:** ${{ inputs.branch || github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Deployed at:** $(date -Iseconds)" >> "$GITHUB_STEP_SUMMARY"

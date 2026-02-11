@@ -63,8 +63,28 @@ vi.mock('@abe-stack/core/feature-flags', () => ({
   featureFlagRoutes: { ['feature-flags/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
+vi.mock('@abe-stack/core/files', () => ({
+  fileRoutes: { ['files/test']: { method: 'POST', handler: vi.fn() } },
+}));
+
+vi.mock('@abe-stack/core/legal', () => ({
+  legalRoutes: { ['legal/test']: { method: 'GET', handler: vi.fn() } },
+}));
+
+vi.mock('@abe-stack/core/consent', () => ({
+  consentRoutes: { ['consent/test']: { method: 'GET', handler: vi.fn() } },
+}));
+
+vi.mock('@abe-stack/core/data-export', () => ({
+  dataExportRoutes: { ['data-export/test']: { method: 'POST', handler: vi.fn() } },
+}));
+
 vi.mock('@abe-stack/core/tenants', () => ({
   tenantRoutes: { ['tenants/test']: { method: 'GET', handler: vi.fn() } },
+}));
+
+vi.mock('@abe-stack/core/webhooks', () => ({
+  webhookRoutes: { ['webhooks/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
 vi.mock('@abe-stack/realtime', () => ({
@@ -352,8 +372,9 @@ describe('registerRoutes', () => {
       registerRoutes(app, ctx);
 
       // Verify registerRouteMap was called for each core module + system
-      // Order: auth, users, notifications, admin, tenants, api-keys, activities, feature-flags, realtime, system
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(10);
+      // Order: auth, users, notifications, admin, tenants, api-keys, activities, feature-flags,
+      //        legal, consent, data-export, files, webhooks, realtime, system
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(15);
 
       // Verify each module's routes were registered with correct options
       const calls = mockRegisterRouteMap.mock.calls;
@@ -367,8 +388,13 @@ describe('registerRoutes', () => {
       expect(routeMapHasKey(calls[5]![2], 'api-keys/test')).toBe(true);
       expect(routeMapHasKey(calls[6]![2], 'activities/test')).toBe(true);
       expect(routeMapHasKey(calls[7]![2], 'feature-flags/test')).toBe(true);
-      expect(routeMapHasKey(calls[8]![2], 'realtime/test')).toBe(true);
-      expect(routeMapHasKey(calls[9]![2], 'system/test')).toBe(true);
+      expect(routeMapHasKey(calls[8]![2], 'legal/test')).toBe(true);
+      expect(routeMapHasKey(calls[9]![2], 'consent/test')).toBe(true);
+      expect(routeMapHasKey(calls[10]![2], 'data-export/test')).toBe(true);
+      expect(routeMapHasKey(calls[11]![2], 'files/test')).toBe(true);
+      expect(routeMapHasKey(calls[12]![2], 'webhooks/test')).toBe(true);
+      expect(routeMapHasKey(calls[13]![2], 'realtime/test')).toBe(true);
+      expect(routeMapHasKey(calls[14]![2], 'system/test')).toBe(true);
     });
 
     test('should pass Fastify instance to registerRouteMap', () => {
@@ -451,8 +477,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Should call registerRouteMap 11 times (9 core + 1 system + 1 billing)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(11);
+      // Should call registerRouteMap 16 times (14 core + 1 system + 1 billing)
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(16);
 
       // Verify billing routes were registered (billing uses Map via buildRouteMap)
       const billingCall = mockRegisterRouteMap.mock.calls.find((call) => {
@@ -472,8 +498,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Should call registerRouteMap 10 times (9 core + 1 system)
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(10);
+      // Should call registerRouteMap 15 times (14 core + 1 system)
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(15);
 
       // Verify no billing routes were registered
       const billingCall = mockRegisterRouteMap.mock.calls.find((call) => {
@@ -503,7 +529,7 @@ describe('registerRoutes', () => {
       registerRoutes(app, ctx);
 
       // Should register core + system routes
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(10);
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(15);
     });
   });
 
@@ -548,7 +574,7 @@ describe('registerRoutes', () => {
 
       registerRoutes(app, ctx);
 
-      // Verify order: auth, users, notifications, admin, tenants, api-keys, activities, feature-flags, realtime, system, billing
+      // Verify order matches routes.ts registration order
       const calls = mockRegisterRouteMap.mock.calls;
 
       expect(routeMapHasKey(calls[0]![2], 'auth/test')).toBe(true);
@@ -559,9 +585,14 @@ describe('registerRoutes', () => {
       expect(routeMapHasKey(calls[5]![2], 'api-keys/test')).toBe(true);
       expect(routeMapHasKey(calls[6]![2], 'activities/test')).toBe(true);
       expect(routeMapHasKey(calls[7]![2], 'feature-flags/test')).toBe(true);
-      expect(routeMapHasKey(calls[8]![2], 'realtime/test')).toBe(true);
-      expect(routeMapHasKey(calls[9]![2], 'system/test')).toBe(true);
-      expect(routeMapHasKey(calls[10]![2], 'billing/test')).toBe(true);
+      expect(routeMapHasKey(calls[8]![2], 'legal/test')).toBe(true);
+      expect(routeMapHasKey(calls[9]![2], 'consent/test')).toBe(true);
+      expect(routeMapHasKey(calls[10]![2], 'data-export/test')).toBe(true);
+      expect(routeMapHasKey(calls[11]![2], 'files/test')).toBe(true);
+      expect(routeMapHasKey(calls[12]![2], 'webhooks/test')).toBe(true);
+      expect(routeMapHasKey(calls[13]![2], 'realtime/test')).toBe(true);
+      expect(routeMapHasKey(calls[14]![2], 'system/test')).toBe(true);
+      expect(routeMapHasKey(calls[15]![2], 'billing/test')).toBe(true);
     });
 
     test('should register webhooks after all route maps', () => {
@@ -632,8 +663,8 @@ describe('registerRoutes', () => {
       registerRoutes(app, ctx2);
 
       // Second registration should work independently
-      // 9 core + 1 system + 1 billing = 11
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(11);
+      // 14 core + 1 system + 1 billing = 16
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(16);
       expect(mockRegisterWebhookRoutes).toHaveBeenCalledTimes(1);
     });
 
@@ -648,8 +679,8 @@ describe('registerRoutes', () => {
       expect(() => {
         registerRoutes(app, ctx);
       }).not.toThrow();
-      // 9 core + 1 system + 1 billing = 11
-      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(11);
+      // 14 core + 1 system + 1 billing = 16
+      expect(mockRegisterRouteMap).toHaveBeenCalledTimes(16);
     });
 
     test('should not fail if route modules return empty route maps', () => {

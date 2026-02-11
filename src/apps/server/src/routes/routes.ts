@@ -13,10 +13,15 @@ import { adminRoutes } from '@abe-stack/core/admin';
 import { apiKeyRoutes } from '@abe-stack/core/api-keys';
 import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
 import { billingRoutes, registerWebhookRoutes } from '@abe-stack/core/billing';
+import { consentRoutes } from '@abe-stack/core/consent';
+import { dataExportRoutes } from '@abe-stack/core/data-export';
 import { featureFlagRoutes } from '@abe-stack/core/feature-flags';
+import { fileRoutes } from '@abe-stack/core/files';
+import { legalRoutes } from '@abe-stack/core/legal';
 import { notificationRoutes } from '@abe-stack/core/notifications';
 import { tenantRoutes } from '@abe-stack/core/tenants';
 import { userRoutes } from '@abe-stack/core/users';
+import { webhookRoutes } from '@abe-stack/core/webhooks';
 import { realtimeRoutes } from '@abe-stack/realtime';
 import { registerRouteMap } from '@abe-stack/server-engine';
 
@@ -84,15 +89,16 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   annotateRoutes(typedAuthRoutes, {
     [AUTH_LOGIN_PATH]: {
-      summary: 'Login with email and password',
+      summary: 'Login with email/username and password',
       tags: ['auth'],
       body: {
         type: 'object',
         properties: {
-          email: { type: 'string', format: 'email' },
+          identifier: { type: 'string' },
           password: { type: 'string' },
+          captchaToken: { type: 'string' },
         },
-        required: ['email', 'password'],
+        required: ['identifier', 'password'],
       },
       response: {
         200: {
@@ -156,6 +162,26 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, handlerCtx, featureFlagRoutes as unknown as DbRouteMap, {
     ...routerOptions,
     module: 'feature-flags',
+  });
+  registerRouteMap(app, handlerCtx, legalRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'legal',
+  });
+  registerRouteMap(app, handlerCtx, consentRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'consent',
+  });
+  registerRouteMap(app, handlerCtx, dataExportRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'data-export',
+  });
+  registerRouteMap(app, handlerCtx, fileRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'files',
+  });
+  registerRouteMap(app, handlerCtx, webhookRoutes as unknown as DbRouteMap, {
+    ...routerOptions,
+    module: 'webhooks',
   });
   registerRouteMap(app, handlerCtx, realtimeRoutes as unknown as DbRouteMap, {
     ...routerOptions,

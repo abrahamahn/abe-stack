@@ -1,0 +1,223 @@
+// src/server/core/src/scheduled-tasks/service.ts
+/**
+ * Scheduled Task Service
+ *
+ * Manages background cleanup tasks that run on regular intervals.
+ * Uses setInterval for scheduling without external dependencies.
+ *
+ * @module
+ */
+
+
+import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
+import { expireStaleInvitations } from '../tenants/invitation-cleanup';
+
+import { anonymizeDeletedUsers } from './pii-anonymization';
+
+import type { ScheduledTask, ScheduledTaskLogger, TaskTracker } from './types';
+import type { DbClient, Repositories } from '@abe-stack/db';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** One day in milliseconds */
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+/** One week in milliseconds */
+const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+
+/** Default audit log retention period in days */
+const DEFAULT_AUDIT_RETENTION_DAYS = 90;
+
+/** Default grace period for PII anonymization in days */
+const DEFAULT_PII_GRACE_PERIOD_DAYS = 30;
+
+/** Default login attempt retention period in days */
+const DEFAULT_LOGIN_ATTEMPT_RETENTION_DAYS = 90;
+
+/** Default session retention period in days after revocation */
+const DEFAULT_SESSION_RETENTION_DAYS = 30;
+
+// ============================================================================
+// Task Registry
+// ============================================================================
+
+/**
+ * Active task trackers (for cleanup on shutdown)
+ */
+const activeTaskTrackers: TaskTracker[] = [];
+
+// ============================================================================
+// Task Registration
+// ============================================================================
+
+/** Default retention period for hard-delete after anonymization in days */
+const DEFAULT_HARD_DELETE_RETENTION_DAYS = 30;
+
+/**
+ * Register and start all scheduled cleanup tasks
+ *
+ * @param repos - Repository container
+ * @param log - Logger instance
+ * @param db - Database client (optional, enables hard-delete task)
+ */
+export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLogger, db?: DbClient): void {
+  // Clear any existing tasks (for hot reload in development)
+  stopScheduledTasks();
+
+  const tasks: ScheduledTask[] = [
+    // Daily cleanup: Login attempts older than 90 days
+    {
+      name: 'login-cleanup',
+      description: 'Delete login attempts older than 90 days',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const cutoff = new Date(Date.now() - DEFAULT_LOGIN_ATTEMPT_RETENTION_DAYS * ONE_DAY_MS);
+        const count = await repos.loginAttempts.deleteOlderThan(cutoff.toISOString());
+        log.info({ task: 'login-cleanup', deleted: count }, 'Login attempts cleanup completed');
+        return count;
+      },
+    },
+
+    // Daily cleanup: Expired magic link tokens
+    {
+      name: 'magic-link-cleanup',
+      description: 'Delete expired magic link tokens',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const count = await repos.magicLinkTokens.deleteExpired();
+        log.info({ task: 'magic-link-cleanup', deleted: count }, 'Magic link tokens cleanup completed');
+        return count;
+      },
+    },
+
+    // Weekly cleanup: Expired push subscriptions
+    {
+      name: 'push-cleanup',
+      description: 'Delete expired push subscriptions',
+      schedule: 'weekly',
+      execute: async (): Promise<number> => {
+        const count = await repos.pushSubscriptions.deleteExpired();
+        log.info({ task: 'push-cleanup', deleted: count }, 'Push subscriptions cleanup completed');
+        return count;
+      },
+    },
+
+    // Daily cleanup: Revoked sessions older than 30 days
+    {
+      name: 'session-cleanup',
+      description: 'Delete revoked sessions older than 30 days',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const cutoff = new Date(Date.now() - DEFAULT_SESSION_RETENTION_DAYS * ONE_DAY_MS);
+        const count = await repos.userSessions.deleteRevokedBefore(cutoff.toISOString());
+        log.info({ task: 'session-cleanup', deleted: count }, 'Sessions cleanup completed');
+        return count;
+      },
+    },
+
+    // Daily cleanup: Audit events older than retention period
+    {
+      name: 'audit-cleanup',
+      description: 'Delete audit events older than 90 days',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const cutoff = new Date(Date.now() - DEFAULT_AUDIT_RETENTION_DAYS * ONE_DAY_MS);
+        const count = await repos.auditEvents.deleteOlderThan(cutoff.toISOString());
+        log.info({ task: 'audit-cleanup', deleted: count, retentionDays: DEFAULT_AUDIT_RETENTION_DAYS }, 'Audit events cleanup completed');
+        return count;
+      },
+    },
+
+    // Daily cleanup: Expire stale invitations
+    {
+      name: 'invitation-cleanup',
+      description: 'Mark pending invitations past expiry as expired',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const result = await expireStaleInvitations(repos, log);
+        return result.expiredCount;
+      },
+    },
+
+    // Daily job: Anonymize PII for deleted users past grace period
+    {
+      name: 'pii-anonymization',
+      description: 'Anonymize PII for users deleted longer than grace period',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        return anonymizeDeletedUsers(repos, DEFAULT_PII_GRACE_PERIOD_DAYS, log);
+      },
+    },
+
+    // Daily job: Hard-delete anonymized users past retention period
+    ...(db !== undefined
+      ? [
+          {
+            name: 'hard-delete-anonymized',
+            description: 'Permanently delete anonymized user records past retention period',
+            schedule: 'daily' as const,
+            execute: async (): Promise<number> => {
+              const result = await hardDeleteAnonymizedUsers(db, log, DEFAULT_HARD_DELETE_RETENTION_DAYS);
+              return result.deletedCount;
+            },
+          },
+        ]
+      : []),
+  ];
+
+  // Register each task with its interval
+  for (const task of tasks) {
+    const intervalMs = task.schedule === 'daily' ? ONE_DAY_MS : ONE_WEEK_MS;
+
+    // Run immediately on startup
+    void executeTask(task, log);
+
+    // Schedule recurring execution
+    const intervalId = setInterval(() => {
+      void executeTask(task, log);
+    }, intervalMs);
+
+    activeTaskTrackers.push({ task, intervalId });
+  }
+
+  log.info({ taskCount: tasks.length }, 'Scheduled tasks registered');
+}
+
+/**
+ * Execute a single task with error handling
+ *
+ * @param task - The task to execute
+ * @param log - Logger instance
+ */
+async function executeTask(task: ScheduledTask, log: ScheduledTaskLogger): Promise<void> {
+  try {
+    log.info({ task: task.name, schedule: task.schedule }, 'Starting scheduled task');
+    const affectedCount = await task.execute();
+    log.info({ task: task.name, affectedCount }, 'Scheduled task completed');
+  } catch (error) {
+    log.error(
+      {
+        task: task.name,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'Scheduled task failed',
+    );
+  }
+}
+
+// ============================================================================
+// Cleanup
+// ============================================================================
+
+/**
+ * Stop all scheduled tasks and clear intervals
+ * Should be called during graceful shutdown
+ */
+export function stopScheduledTasks(): void {
+  for (const tracker of activeTaskTrackers) {
+    clearInterval(tracker.intervalId);
+  }
+  activeTaskTrackers.length = 0;
+}

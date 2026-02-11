@@ -83,6 +83,10 @@ export {
   totpVerifyRequestSchema,
   tosStatusResponseSchema,
   totpVerifyResponseSchema,
+  setPhoneRequestSchema,
+  verifyPhoneRequestSchema,
+  smsChallengeRequestSchema,
+  smsVerifyRequestSchema,
   type AcceptTosRequest,
   type AcceptTosResponse,
   type AuthResponse,
@@ -120,6 +124,14 @@ export {
   type TotpVerifyRequest,
   type TosStatusResponse,
   type TotpVerifyResponse,
+  type SetPhoneRequest,
+  type SetPhoneResponse,
+  type VerifyPhoneRequest,
+  type VerifyPhoneResponse,
+  type RemovePhoneResponse,
+  type SmsChallengeRequest,
+  type SmsChallengeResponse,
+  type SmsVerifyRequest,
 } from './auth.schemas';
 
 export {

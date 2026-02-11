@@ -42,10 +42,35 @@ vi.mock('../invitation-service', () => ({
 // Test Helpers
 // ============================================================================
 
-function createMockDeps(): TenantsModuleDeps {
-  return {
+function createMockDeps(options?: { withMailer?: boolean }): TenantsModuleDeps {
+  const mockSend = vi.fn().mockResolvedValue({ success: true });
+  const mockWorkspaceInvitation = vi.fn().mockReturnValue({
+    to: '',
+    subject: 'You have been invited',
+    text: 'Join the workspace',
+    html: '<p>Join the workspace</p>',
+  });
+
+  const base = {
     db: {} as DbClient,
-    repos: {} as Repositories,
+    repos: {
+      notifications: { create: vi.fn().mockResolvedValue({}) },
+      auditEvents: { create: vi.fn().mockResolvedValue({}) },
+      users: {
+        findById: vi.fn().mockResolvedValue({ firstName: 'Jane', lastName: 'Doe' }),
+      },
+      tenants: {
+        findById: vi.fn().mockResolvedValue({ name: 'Acme Corp' }),
+      },
+      invitations: {
+        findById: vi.fn().mockResolvedValue({
+          id: 'inv-1',
+          email: 'invited@test.com',
+          role: 'member',
+          tenantId: 'tenant-1',
+        }),
+      },
+    } as unknown as Repositories,
     log: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -53,7 +78,18 @@ function createMockDeps(): TenantsModuleDeps {
       debug: vi.fn(),
       child: vi.fn(),
     },
-  } as unknown as TenantsModuleDeps;
+  };
+
+  if (options?.withMailer === true) {
+    return {
+      ...base,
+      mailer: { send: mockSend },
+      emailTemplates: { workspaceInvitation: mockWorkspaceInvitation },
+      appBaseUrl: 'https://app.example.com',
+    } as unknown as TenantsModuleDeps;
+  }
+
+  return base as unknown as TenantsModuleDeps;
 }
 
 function createMockRequest(user?: { userId: string; email?: string }): TenantsRequest {
@@ -112,6 +148,66 @@ describe('handleCreateInvitation', () => {
       'new@test.com',
       'member',
     );
+  });
+
+  it('should send invitation email when mailer is configured', async () => {
+    deps = createMockDeps({ withMailer: true });
+    const invitation = { id: 'inv-1', email: 'new@test.com', role: 'member' };
+    mockCreateInvitation.mockResolvedValue(invitation);
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleCreateInvitation(
+      deps,
+      'tenant-1',
+      { email: 'new@test.com', role: 'member' },
+      request,
+    );
+
+    expect(result.status).toBe(201);
+    expect(deps.emailTemplates?.workspaceInvitation).toHaveBeenCalledWith(
+      'https://app.example.com/invitations/inv-1/accept',
+      'Acme Corp',
+      'Jane Doe',
+      'member',
+    );
+    expect(deps.mailer?.send).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'new@test.com', subject: 'You have been invited' }),
+    );
+  });
+
+  it('should skip email when mailer is not configured', async () => {
+    const invitation = { id: 'inv-1', email: 'new@test.com', role: 'member' };
+    mockCreateInvitation.mockResolvedValue(invitation);
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleCreateInvitation(
+      deps,
+      'tenant-1',
+      { email: 'new@test.com', role: 'member' },
+      request,
+    );
+
+    expect(result.status).toBe(201);
+    // No mailer configured, so no email-related repo calls for user/tenant lookup
+  });
+
+  it('should not break if email send fails', async () => {
+    deps = createMockDeps({ withMailer: true });
+    const invitation = { id: 'inv-1', email: 'new@test.com', role: 'member' };
+    mockCreateInvitation.mockResolvedValue(invitation);
+    (deps.mailer as { send: ReturnType<typeof vi.fn> }).send.mockRejectedValue(
+      new Error('SMTP down'),
+    );
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleCreateInvitation(
+      deps,
+      'tenant-1',
+      { email: 'new@test.com', role: 'member' },
+      request,
+    );
+
+    expect(result.status).toBe(201);
   });
 
   it('should map service errors via mapErrorToHttpResponse', async () => {
@@ -306,6 +402,47 @@ describe('handleResendInvitation', () => {
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: 'Invitation resent' });
     expect(mockResendInvitation).toHaveBeenCalledWith(deps.repos, 'tenant-1', 'inv-1', 'user-1');
+  });
+
+  it('should resend invitation email when mailer is configured', async () => {
+    deps = createMockDeps({ withMailer: true });
+    mockResendInvitation.mockResolvedValue(undefined);
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleResendInvitation(deps, 'tenant-1', 'inv-1', request);
+
+    expect(result.status).toBe(200);
+    expect(deps.emailTemplates?.workspaceInvitation).toHaveBeenCalledWith(
+      'https://app.example.com/invitations/inv-1/accept',
+      'Acme Corp',
+      'Jane Doe',
+      'member',
+    );
+    expect(deps.mailer?.send).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'invited@test.com', subject: 'You have been invited' }),
+    );
+  });
+
+  it('should skip email on resend when mailer is not configured', async () => {
+    mockResendInvitation.mockResolvedValue(undefined);
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleResendInvitation(deps, 'tenant-1', 'inv-1', request);
+
+    expect(result.status).toBe(200);
+  });
+
+  it('should not break resend if email send fails', async () => {
+    deps = createMockDeps({ withMailer: true });
+    mockResendInvitation.mockResolvedValue(undefined);
+    (deps.mailer as { send: ReturnType<typeof vi.fn> }).send.mockRejectedValue(
+      new Error('SMTP down'),
+    );
+    const request = createMockRequest({ userId: 'user-1' });
+
+    const result = await handleResendInvitation(deps, 'tenant-1', 'inv-1', request);
+
+    expect(result.status).toBe(200);
   });
 
   it('should map service errors via mapErrorToHttpResponse', async () => {

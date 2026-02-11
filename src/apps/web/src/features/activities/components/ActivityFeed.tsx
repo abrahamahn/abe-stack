@@ -5,7 +5,7 @@
  * A timeline component that displays recent user activities.
  */
 
-import { Alert, Badge, Spinner, Text } from '@abe-stack/ui';
+import { Alert, Badge, EmptyState, Skeleton, Text } from '@abe-stack/ui';
 
 import { useActivities } from '../hooks';
 
@@ -91,7 +91,18 @@ export function ActivityFeed({ limit = 20, className }: ActivityFeedProps): Reac
   if (isLoading) {
     return (
       <div className={className}>
-        <Spinner />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="flex items-start gap-3 py-3">
+              <Skeleton className="h-6 w-16 flex-shrink-0" />
+              <div className="flex-1 space-y-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              <Skeleton className="h-3 w-12 flex-shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -107,7 +118,10 @@ export function ActivityFeed({ limit = 20, className }: ActivityFeedProps): Reac
   if (activities.length === 0) {
     return (
       <div className={className}>
-        <Text tone="muted">No recent activity.</Text>
+        <EmptyState
+          title="No recent activity"
+          description="Your recent actions will appear here"
+        />
       </div>
     );
   }

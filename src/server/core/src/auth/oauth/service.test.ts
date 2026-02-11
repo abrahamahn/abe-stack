@@ -103,6 +103,7 @@ describe('OAuth Service', () => {
         listWithFilters: vi.fn(),
         lockAccount: vi.fn(),
         unlockAccount: vi.fn(),
+        incrementTokenVersion: vi.fn(),
       } as UserRepository,
       oauthConnections: {
         findByProviderUserId: vi.fn(),
@@ -150,6 +151,8 @@ describe('OAuth Service', () => {
       apiKeys: {} as Repositories['apiKeys'],
       dataExportRequests: {} as Repositories['dataExportRequests'],
       activities: {} as Repositories['activities'],
+      trustedDevices: {} as Repositories['trustedDevices'],
+      files: {} as Repositories['files'],
     };
 
     // Mock auth config
@@ -447,6 +450,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
 
@@ -527,6 +531,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
 
@@ -596,6 +601,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
 
@@ -659,6 +665,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -748,6 +755,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -824,6 +832,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue({
@@ -887,6 +896,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
@@ -965,6 +975,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
 
@@ -1029,6 +1040,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
       vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
@@ -1106,6 +1118,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
 
@@ -1165,6 +1178,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       };
 
@@ -1301,6 +1315,7 @@ describe('OAuth Service', () => {
         deactivatedAt: null,
         deletedAt: null,
         deletionGracePeriodEnds: null,
+        tokenVersion: 0,
         version: 1,
       });
 

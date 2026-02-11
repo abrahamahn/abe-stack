@@ -25,6 +25,7 @@ export {
   WebsocketPubsubClient,
   type ClientPubsubMessage,
   type ConnectionState,
+  type ConnectionStateListener,
   type ServerPubsubMessage,
   type WebsocketPubsubClientConfig,
 } from './WebsocketPubsubClient';

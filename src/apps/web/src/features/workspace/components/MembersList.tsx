@@ -9,6 +9,7 @@ import {
   Alert,
   Badge,
   Button,
+  EmptyState,
   Skeleton,
   Table,
   TableBody,
@@ -140,9 +141,10 @@ export const MembersList = ({ tenantId, currentUserId }: MembersListProps): Reac
       </Table>
 
       {members.length === 0 && (
-        <Text tone="muted" className="text-center py-4">
-          No members yet.
-        </Text>
+        <EmptyState
+          title="No members yet"
+          description="Invite your first teammate to get started"
+        />
       )}
     </div>
   );

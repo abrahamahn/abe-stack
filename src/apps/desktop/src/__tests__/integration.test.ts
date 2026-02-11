@@ -1,4 +1,4 @@
-// apps/desktop/src/__tests__/integration.test.ts
+// src/apps/desktop/src/__tests__/integration.test.ts
 /**
  * Integration Tests for Electron Desktop App
  *
@@ -38,7 +38,7 @@ const integrationMocks = vi.hoisted(() => {
   // Mock BrowserWindow class
   class MockBrowserWindow {
     options: unknown;
-    webContents = { id: 1 };
+    webContents = { id: 1, openDevTools: vi.fn(), send: vi.fn() };
     id = 1;
 
     constructor(options: unknown) {
@@ -131,12 +131,24 @@ describe('Integration: End-to-End IPC Flow', () => {
     integrationMocks.clearAll();
     appEventHandlers.clear();
 
+    // Mock new desktop modules that main.ts imports
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
     // Mock electron module with full integration support
     vi.doMock('electron', () => ({
       app: {
         getVersion: vi.fn().mockReturnValue('2.0.0'),
         disableHardwareAcceleration: vi.fn(),
         quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
           const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
@@ -376,11 +388,23 @@ describe('Integration: Window Lifecycle Management', () => {
     appEventHandlers.clear();
     appQuitMock = vi.fn();
 
+    // Mock new desktop modules that main.ts imports
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
     vi.doMock('electron', () => ({
       app: {
         getVersion: vi.fn().mockReturnValue('1.0.0'),
         disableHardwareAcceleration: vi.fn(),
         quit: appQuitMock,
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
           const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
@@ -709,11 +733,23 @@ describe('Integration: App Initialization and Shutdown', () => {
     appEventHandlers.clear();
     disableHardwareAccelerationMock = vi.fn();
 
+    // Mock new desktop modules that main.ts imports
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
     vi.doMock('electron', () => ({
       app: {
         getVersion: vi.fn().mockReturnValue('1.0.0'),
         disableHardwareAcceleration: disableHardwareAccelerationMock,
         quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
           const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
@@ -798,7 +834,8 @@ describe('Integration: App Initialization and Shutdown', () => {
       expect(integrationMocks.ipcHandlers.size).toBeGreaterThan(0);
 
       // Step 3: Event handlers registered
-      expect(appEventHandlers.size).toBe(3);
+      // ready, window-all-closed, activate, open-url, second-instance
+      expect(appEventHandlers.size).toBe(5);
 
       // Step 4: Trigger ready event - window created
       const readyHandlers = appEventHandlers.get('ready') ?? [];
@@ -826,11 +863,22 @@ describe('Integration: App Initialization and Shutdown', () => {
       integrationMocks.clearAll();
 
       // Re-apply all mocks with custom waitForPort
+      vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+      vi.doMock('../electron/deep-links', () => ({
+        registerDeepLinkProtocol: vi.fn(),
+        handleDeepLink: vi.fn(),
+      }));
+      vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+      vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
       vi.doMock('electron', () => ({
         app: {
           getVersion: vi.fn().mockReturnValue('1.0.0'),
           disableHardwareAcceleration: disableHardwareAccelerationMock,
           quit: vi.fn(),
+          requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+          isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+          setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
           on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
             const handlers = appEventHandlers.get(event) ?? [];
             handlers.push(handler);
@@ -897,11 +945,22 @@ describe('Integration: App Initialization and Shutdown', () => {
       integrationMocks.clearAll();
 
       // Re-apply all mocks with custom waitForPort
+      vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+      vi.doMock('../electron/deep-links', () => ({
+        registerDeepLinkProtocol: vi.fn(),
+        handleDeepLink: vi.fn(),
+      }));
+      vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+      vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
       vi.doMock('electron', () => ({
         app: {
           getVersion: vi.fn().mockReturnValue('1.0.0'),
           disableHardwareAcceleration: disableHardwareAccelerationMock,
           quit: vi.fn(),
+          requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+          isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+          setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
           on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
             const handlers = appEventHandlers.get(event) ?? [];
             handlers.push(handler);
@@ -1051,11 +1110,23 @@ describe('Integration: Window Security Settings', () => {
     integrationMocks.clearAll();
     appEventHandlers.clear();
 
+    // Mock new desktop modules that main.ts imports
+    vi.doMock('../electron/auto-updater', () => ({ initAutoUpdater: vi.fn() }));
+    vi.doMock('../electron/deep-links', () => ({
+      registerDeepLinkProtocol: vi.fn(),
+      handleDeepLink: vi.fn(),
+    }));
+    vi.doMock('../electron/menu', () => ({ createApplicationMenu: vi.fn() }));
+    vi.doMock('../electron/tray', () => ({ createTray: vi.fn() }));
+
     vi.doMock('electron', () => ({
       app: {
         getVersion: vi.fn().mockReturnValue('1.0.0'),
         disableHardwareAcceleration: vi.fn(),
         quit: vi.fn(),
+        requestSingleInstanceLock: vi.fn().mockReturnValue(true),
+        isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+        setAsDefaultProtocolClient: vi.fn().mockReturnValue(true),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
           const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);

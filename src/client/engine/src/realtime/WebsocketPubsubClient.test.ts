@@ -93,6 +93,8 @@ describe('WebsocketPubsubClient', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockWebSocketInstances = [];
+    // Eliminate jitter for deterministic timing in tests
+    vi.spyOn(Math, 'random').mockReturnValue(0);
     // Mock navigator.onLine
     Object.defineProperty(navigator, 'onLine', {
       value: true,
@@ -102,6 +104,7 @@ describe('WebsocketPubsubClient', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
@@ -523,6 +526,306 @@ describe('WebsocketPubsubClient', () => {
       expect(onMessage).not.toHaveBeenCalled();
       // Debug log should have been called with parse error
       expect(onDebug).toHaveBeenCalledWith('Failed to parse message:', expect.any(Error));
+    });
+  });
+
+  describe('jitter', () => {
+    it('should add jitter to reconnection delay', async () => {
+      vi.restoreAllMocks();
+      // Math.random returns 1 (maximum jitter: 0.3 * 1000 = 300, floored)
+      vi.spyOn(Math, 'random').mockReturnValue(1);
+
+      void new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 1000,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      mockWebSocketInstances[0]?.simulateClose();
+
+      // Base delay is 1000ms, jitter = floor(1 * 0.3 * 1000) = 300ms
+      // Total: 1300ms
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(mockWebSocketInstances.length).toBe(1); // Not yet (only 1000ms)
+
+      await vi.advanceTimersByTimeAsync(300);
+      expect(mockWebSocketInstances.length).toBe(2); // Now (1300ms total)
+    });
+  });
+
+  describe('offline message queue', () => {
+    it('should queue messages when disconnected', () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      // Don't advance timers - still connecting, not open yet
+      client.subscribe('user:1');
+      client.subscribe('user:2');
+
+      // Messages should be queued
+      expect(client.getQueueSize()).toBe(2);
+
+      // Active subscriptions should be tracked
+      expect(client.getActiveSubscriptions().has('user:1')).toBe(true);
+      expect(client.getActiveSubscriptions().has('user:2')).toBe(true);
+
+      client.close();
+    });
+
+    it('should flush queue on reconnect in FIFO order', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(client.isConnected()).toBe(true);
+
+      // Simulate disconnect
+      mockWebSocketInstances[0]?.simulateClose();
+
+      // Queue messages while disconnected
+      client.subscribe('key:a');
+      client.subscribe('key:b');
+      expect(client.getQueueSize()).toBe(2);
+
+      // Wait for reconnect
+      await vi.advanceTimersByTimeAsync(100);
+
+      const ws = mockWebSocketInstances[1];
+      expect(ws).toBeDefined();
+
+      // Force the reconnection to open
+      ws?.forceConnect();
+
+      // Queue should be flushed
+      expect(client.getQueueSize()).toBe(0);
+
+      // Check that messages were sent
+      const sentMessages = ws?.getSentMessages() ?? [];
+      expect(sentMessages.some((m) => m.type === 'subscribe' && m.key === 'key:a')).toBe(true);
+      expect(sentMessages.some((m) => m.type === 'subscribe' && m.key === 'key:b')).toBe(true);
+
+      client.close();
+    });
+
+    it('should drop oldest messages when queue exceeds maxQueueSize', () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        maxQueueSize: 3,
+      });
+
+      // Don't advance timers, stay disconnected (connecting state)
+      client.subscribe('key:1');
+      client.subscribe('key:2');
+      client.subscribe('key:3');
+      client.subscribe('key:4');
+      client.subscribe('key:5');
+
+      expect(client.getQueueSize()).toBe(3);
+
+      client.close();
+    });
+
+    it('should clear queue on close', () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      client.subscribe('key:1');
+      expect(client.getQueueSize()).toBe(1);
+
+      client.close();
+
+      expect(client.getQueueSize()).toBe(0);
+    });
+  });
+
+  describe('subscription tracking', () => {
+    it('should track active subscriptions', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      client.subscribe('user:1');
+      client.subscribe('user:2');
+
+      const subs = client.getActiveSubscriptions();
+      expect(subs.has('user:1')).toBe(true);
+      expect(subs.has('user:2')).toBe(true);
+      expect(subs.size).toBe(2);
+
+      client.unsubscribe('user:1');
+      expect(client.getActiveSubscriptions().has('user:1')).toBe(false);
+      expect(client.getActiveSubscriptions().size).toBe(1);
+
+      client.close();
+    });
+
+    it('should resubscribe to all active subscriptions on reconnect', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      client.subscribe('user:1');
+      client.subscribe('user:2');
+
+      // Disconnect
+      mockWebSocketInstances[0]?.simulateClose();
+
+      // Wait for reconnect
+      await vi.advanceTimersByTimeAsync(100);
+      const ws = mockWebSocketInstances[1];
+      ws?.forceConnect();
+
+      // Check that resubscription messages were sent
+      const sentMessages = ws?.getSentMessages() ?? [];
+      const subscribeMsgs = sentMessages.filter((m) => m.type === 'subscribe');
+      expect(subscribeMsgs.some((m) => m.key === 'user:1')).toBe(true);
+      expect(subscribeMsgs.some((m) => m.key === 'user:2')).toBe(true);
+
+      client.close();
+    });
+
+    it('should not resubscribe to unsubscribed keys on reconnect', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      client.subscribe('user:1');
+      client.subscribe('user:2');
+      client.unsubscribe('user:1');
+
+      // Disconnect
+      mockWebSocketInstances[0]?.simulateClose();
+
+      // Wait for reconnect
+      await vi.advanceTimersByTimeAsync(100);
+      const ws = mockWebSocketInstances[1];
+      ws?.forceConnect();
+
+      // Only user:2 should be resubscribed
+      const sentMessages = ws?.getSentMessages() ?? [];
+      const resubUser1 = sentMessages.filter((m) => m.type === 'subscribe' && m.key === 'user:1');
+      expect(resubUser1.length).toBe(0);
+
+      const resubUser2 = sentMessages.filter((m) => m.type === 'subscribe' && m.key === 'user:2');
+      expect(resubUser2.length).toBeGreaterThanOrEqual(1);
+
+      client.close();
+    });
+
+    it('should clear subscriptions on close', async () => {
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+      client.subscribe('user:1');
+      expect(client.getActiveSubscriptions().size).toBe(1);
+
+      client.close();
+      expect(client.getActiveSubscriptions().size).toBe(0);
+    });
+  });
+
+  describe('connection state listeners', () => {
+    it('should notify listeners on state change', async () => {
+      const listener = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      client.onConnectionStateChange(listener);
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(listener).toHaveBeenCalledWith('connected');
+
+      client.close();
+    });
+
+    it('should return unsubscribe function', async () => {
+      const listener = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      const unsubscribe = client.onConnectionStateChange(listener);
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(listener).toHaveBeenCalledWith('connected');
+
+      listener.mockClear();
+      unsubscribe();
+
+      // Disconnect - listener should NOT be called
+      mockWebSocketInstances[0]?.simulateClose();
+      expect(listener).not.toHaveBeenCalled();
+
+      client.close();
+    });
+
+    it('should notify multiple listeners', async () => {
+      const listener1 = vi.fn();
+      const listener2 = vi.fn();
+      const client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+      });
+
+      client.onConnectionStateChange(listener1);
+      client.onConnectionStateChange(listener2);
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(listener1).toHaveBeenCalledWith('connected');
+      expect(listener2).toHaveBeenCalledWith('connected');
+
+      client.close();
     });
   });
 

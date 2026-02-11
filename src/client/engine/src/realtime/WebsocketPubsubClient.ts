@@ -7,6 +7,23 @@ const SECOND_MS = 1000;
 const MAX_RECONNECT_DELAY_MS = 30 * SECOND_MS;
 
 /**
+ * Default maximum number of queued messages when offline.
+ * When exceeded, oldest messages are dropped (FIFO).
+ */
+const DEFAULT_MAX_QUEUE_SIZE = 100;
+
+/**
+ * Default maximum reconnection attempts before giving up.
+ */
+const DEFAULT_MAX_RECONNECT_ATTEMPTS = 10;
+
+/**
+ * Jitter factor applied to reconnection delay.
+ * A random value between 0 and JITTER_FACTOR * delay is added.
+ */
+const JITTER_FACTOR = 0.3;
+
+/**
  * Message types sent from client to server
  */
 export type ClientPubsubMessage =
@@ -26,6 +43,11 @@ export interface ServerPubsubMessage<T = unknown> {
  * Connection states for the WebSocket client
  */
 export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+
+/**
+ * Listener for connection state changes.
+ */
+export type ConnectionStateListener = (state: ConnectionState) => void;
 
 /**
  * Configuration options for WebsocketPubsubClient
@@ -84,7 +106,7 @@ export interface WebsocketPubsubClientConfig {
   /**
    * Maximum reconnection attempts before giving up.
    * Set to 0 for unlimited attempts.
-   * Defaults to 0 (unlimited).
+   * Defaults to 10.
    */
   maxReconnectAttempts?: number;
 
@@ -93,6 +115,13 @@ export interface WebsocketPubsubClientConfig {
    * Defaults to 1000 (1 second).
    */
   baseReconnectDelayMs?: number;
+
+  /**
+   * Maximum number of messages to buffer when disconnected.
+   * When exceeded, oldest messages are dropped (FIFO).
+   * Defaults to 100.
+   */
+  maxQueueSize?: number;
 }
 
 /**
@@ -103,14 +132,24 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Calculate jitter for a given delay to prevent thundering herd.
+ * Returns a value between 0 and JITTER_FACTOR * delay.
+ */
+function calculateJitter(delay: number): number {
+  return Math.floor(Math.random() * JITTER_FACTOR * delay);
+}
+
+/**
  * WebSocket-based PubSub client with automatic reconnection.
  *
  * Features:
- * - Automatic reconnection with exponential backoff
+ * - Automatic reconnection with exponential backoff and jitter
  * - Online/offline detection for smart reconnection
+ * - Offline message queue with FIFO overflow
+ * - Active subscription tracking with auto-resubscribe on reconnect
+ * - Connection state change listeners
  * - Subscribe/unsubscribe to topics
  * - Message callback handling
- * - Connection state management
  *
  * @example
  * ```typescript
@@ -118,12 +157,9 @@ function sleep(ms: number): Promise<void> {
  *   host: 'localhost:3000',
  *   onMessage: (key, value) => {
  *     console.log(`Received update for ${key}:`, value);
- *     // Update your local cache/state
  *   },
- *   onConnect: () => {
- *     // Resubscribe to active keys
- *     subscriptionCache.keys().forEach(key => pubsub.subscribe(key));
- *   },
+ *   maxReconnectAttempts: 10,
+ *   maxQueueSize: 100,
  * });
  *
  * // Subscribe to a topic
@@ -131,6 +167,11 @@ function sleep(ms: number): Promise<void> {
  *
  * // Unsubscribe when done
  * pubsub.unsubscribe('user:123');
+ *
+ * // Listen for connection state changes
+ * const unsubscribe = pubsub.onConnectionStateChange((state) => {
+ *   console.log('Connection state:', state);
+ * });
  *
  * // Clean up when component unmounts
  * pubsub.close();
@@ -145,12 +186,28 @@ export class WebsocketPubsubClient {
   private readonly config: Required<
     Pick<
       WebsocketPubsubClientConfig,
-      'host' | 'secure' | 'debug' | 'maxReconnectAttempts' | 'baseReconnectDelayMs'
+      'host' | 'secure' | 'debug' | 'maxReconnectAttempts' | 'baseReconnectDelayMs' | 'maxQueueSize'
     >
   > &
     WebsocketPubsubClientConfig;
   private readonly webSocketConstructor: typeof WebSocket;
   private onlineHandler: (() => void) | null = null;
+
+  /**
+   * Set of active subscription keys, tracked for auto-resubscribe on reconnect.
+   */
+  private readonly activeSubscriptions = new Set<string>();
+
+  /**
+   * Queue of messages buffered while disconnected.
+   * Flushed in FIFO order on reconnect.
+   */
+  private readonly offlineQueue: ClientPubsubMessage[] = [];
+
+  /**
+   * Set of listeners notified on connection state changes.
+   */
+  private readonly stateListeners = new Set<ConnectionStateListener>();
 
   constructor(config: WebsocketPubsubClientConfig) {
     // Determine secure default: use secure if page is loaded over HTTPS
@@ -160,8 +217,9 @@ export class WebsocketPubsubClient {
       ...config,
       secure: config.secure ?? isSecureDefault,
       debug: config.debug ?? false,
-      maxReconnectAttempts: config.maxReconnectAttempts ?? 0,
+      maxReconnectAttempts: config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS,
       baseReconnectDelayMs: config.baseReconnectDelayMs ?? SECOND_MS,
+      maxQueueSize: config.maxQueueSize ?? DEFAULT_MAX_QUEUE_SIZE,
     };
 
     this.webSocketConstructor = config.WebSocketImpl ?? WebSocket;
@@ -199,21 +257,51 @@ export class WebsocketPubsubClient {
   /**
    * Subscribe to a topic.
    * Messages for this topic will be delivered to the onMessage callback.
+   * If disconnected, the subscription is tracked and the subscribe message is queued.
    */
   subscribe(key: string): void {
-    this.send({ type: 'subscribe', key });
+    this.activeSubscriptions.add(key);
+    this.sendOrQueue({ type: 'subscribe', key });
   }
 
   /**
    * Unsubscribe from a topic.
+   * If disconnected, the unsubscription is tracked and the message is queued.
    */
   unsubscribe(key: string): void {
-    this.send({ type: 'unsubscribe', key });
+    this.activeSubscriptions.delete(key);
+    this.sendOrQueue({ type: 'unsubscribe', key });
+  }
+
+  /**
+   * Get the set of currently active subscription keys.
+   */
+  getActiveSubscriptions(): ReadonlySet<string> {
+    return this.activeSubscriptions;
+  }
+
+  /**
+   * Get the current number of messages in the offline queue.
+   */
+  getQueueSize(): number {
+    return this.offlineQueue.length;
+  }
+
+  /**
+   * Register a listener for connection state changes.
+   * Returns an unsubscribe function.
+   */
+  onConnectionStateChange(listener: ConnectionStateListener): () => void {
+    this.stateListeners.add(listener);
+    return () => {
+      this.stateListeners.delete(listener);
+    };
   }
 
   /**
    * Close the WebSocket connection.
    * Call this when you no longer need the pubsub client.
+   * Clears the offline queue and active subscriptions.
    */
   close(): void {
     this.isClosedIntentionally = true;
@@ -234,6 +322,11 @@ export class WebsocketPubsubClient {
       this.ws.close();
       this.ws = null;
     }
+
+    // Clear offline queue and subscriptions on close
+    this.offlineQueue.length = 0;
+    this.activeSubscriptions.clear();
+    this.stateListeners.clear();
 
     this.setConnectionState('disconnected');
   }
@@ -277,6 +370,13 @@ export class WebsocketPubsubClient {
       this.log('Connected!');
       this.reconnectAttempt = 0;
       this.setConnectionState('connected');
+
+      // Re-subscribe to all tracked subscriptions
+      this.resubscribeAll();
+
+      // Flush the offline queue
+      this.flushQueue();
+
       this.config.onConnect?.();
     };
 
@@ -327,11 +427,13 @@ export class WebsocketPubsubClient {
 
     this.reconnectAttempt++;
 
-    // Calculate delay with exponential backoff: baseDelay * 2^attempt, capped at max
-    const delay = Math.min(
+    // Calculate delay with exponential backoff + jitter, capped at max
+    const baseDelay = Math.min(
       this.config.baseReconnectDelayMs * Math.pow(2, this.reconnectAttempt - 1),
       MAX_RECONNECT_DELAY_MS,
     );
+    const jitter = calculateJitter(baseDelay);
+    const delay = baseDelay + jitter;
 
     this.log(`Reconnecting in ${String(delay)}ms (attempt ${String(this.reconnectAttempt)})...`);
     this.setConnectionState('reconnecting');
@@ -342,17 +444,80 @@ export class WebsocketPubsubClient {
     this.connect();
   }
 
-  private send(message: ClientPubsubMessage): void {
+  /**
+   * Send a message immediately if connected, otherwise add to offline queue.
+   */
+  private sendOrQueue(message: ClientPubsubMessage): void {
     if (this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
       this.log('>', message.type, message.key);
       this.ws.send(JSON.stringify(message));
     } else {
-      this.log('Cannot send, not connected:', message.type, message.key);
+      this.enqueue(message);
+    }
+  }
+
+  /**
+   * Add a message to the offline queue.
+   * Drops the oldest message if the queue exceeds maxQueueSize.
+   */
+  private enqueue(message: ClientPubsubMessage): void {
+    this.log('Queued (offline):', message.type, message.key);
+    this.offlineQueue.push(message);
+
+    // Drop oldest if over capacity
+    while (this.offlineQueue.length > this.config.maxQueueSize) {
+      const dropped = this.offlineQueue.shift();
+      if (dropped !== undefined) {
+        this.log('Dropped oldest queued message:', dropped.type, dropped.key);
+      }
+    }
+  }
+
+  /**
+   * Flush all queued messages in FIFO order.
+   * Called after a successful reconnection.
+   */
+  private flushQueue(): void {
+    if (this.offlineQueue.length === 0) return;
+
+    this.log(`Flushing ${String(this.offlineQueue.length)} queued messages`);
+
+    while (this.offlineQueue.length > 0) {
+      const message = this.offlineQueue.shift();
+      if (message !== undefined && this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
+        this.log('> (flushed)', message.type, message.key);
+        this.ws.send(JSON.stringify(message));
+      }
+    }
+  }
+
+  /**
+   * Re-subscribe to all active subscriptions.
+   * Called after a successful reconnection.
+   */
+  private resubscribeAll(): void {
+    if (this.activeSubscriptions.size === 0) return;
+
+    this.log(`Resubscribing to ${String(this.activeSubscriptions.size)} active subscriptions`);
+
+    for (const key of this.activeSubscriptions) {
+      if (this.ws !== null && this.ws.readyState === WebSocket.OPEN) {
+        this.log('> (resubscribe)', 'subscribe', key);
+        this.ws.send(JSON.stringify({ type: 'subscribe', key }));
+      }
     }
   }
 
   private setConnectionState(state: ConnectionState): void {
+    const previousState = this.connectionState;
     this.connectionState = state;
+
+    // Only notify listeners if state actually changed
+    if (previousState !== state) {
+      for (const listener of this.stateListeners) {
+        listener(state);
+      }
+    }
   }
 
   private log(...args: unknown[]): void {

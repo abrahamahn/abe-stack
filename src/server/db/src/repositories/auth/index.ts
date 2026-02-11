@@ -46,3 +46,9 @@ export {
   createEmailChangeRevertTokenRepository,
   type EmailChangeRevertTokenRepository,
 } from './email-change-revert-tokens';
+
+// Trusted Devices
+export {
+  createTrustedDeviceRepository,
+  type TrustedDeviceRepository,
+} from './trusted-devices';
