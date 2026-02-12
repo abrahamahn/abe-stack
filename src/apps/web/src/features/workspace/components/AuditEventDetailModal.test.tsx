@@ -228,7 +228,9 @@ describe('AuditEventDetailModal', () => {
     it('should call onClose when footer close button is clicked', () => {
       const onClose = vi.fn();
 
-      renderWithProviders(<AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />);
+      renderWithProviders(
+        <AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />,
+      );
 
       // Get all close buttons and click the last one (footer button)
       const closeButtons = screen.getAllByRole('button', { name: /close/i });
@@ -240,7 +242,9 @@ describe('AuditEventDetailModal', () => {
     it('should call onClose when Modal.Close is clicked', () => {
       const onClose = vi.fn();
 
-      renderWithProviders(<AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />);
+      renderWithProviders(
+        <AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />,
+      );
 
       // Modal.Close renders a close button in the header
       // Find it by aria-label (assuming Modal.Close has appropriate aria)
@@ -342,9 +346,7 @@ describe('AuditEventDetailModal', () => {
       expect(screen.queryByText('Audit Event Details')).not.toBeInTheDocument();
 
       // Update to show event
-      rerender(
-        <AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />,
-      );
+      rerender(<AuditEventDetailModal event={mockEvent} open={true} onClose={onClose} />);
 
       // Now modal should be visible
       expect(screen.getByText('Audit Event Details')).toBeInTheDocument();
@@ -361,9 +363,7 @@ describe('AuditEventDetailModal', () => {
       expect(screen.getByText('Audit Event Details')).toBeInTheDocument();
 
       // Close modal
-      rerender(
-        <AuditEventDetailModal event={mockEvent} open={false} onClose={onClose} />,
-      );
+      rerender(<AuditEventDetailModal event={mockEvent} open={false} onClose={onClose} />);
 
       // Modal should not be visible
       expect(screen.queryByText('Audit Event Details')).not.toBeInTheDocument();

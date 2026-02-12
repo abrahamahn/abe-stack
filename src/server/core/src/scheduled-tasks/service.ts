@@ -28,7 +28,6 @@ const ONE_DAY_MS = MS_PER_DAY;
 /** One week in milliseconds */
 const ONE_WEEK_MS = DAYS_PER_WEEK * MS_PER_DAY;
 
-
 // ============================================================================
 // Task Registry
 // ============================================================================
@@ -42,7 +41,6 @@ const activeTaskTrackers: TaskTracker[] = [];
 // Task Registration
 // ============================================================================
 
-
 /**
  * Register and start all scheduled cleanup tasks
  *
@@ -50,7 +48,11 @@ const activeTaskTrackers: TaskTracker[] = [];
  * @param log - Logger instance
  * @param db - Database client (optional, enables hard-delete task)
  */
-export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLogger, db?: DbClient): void {
+export function registerScheduledTasks(
+  repos: Repositories,
+  log: ScheduledTaskLogger,
+  db?: DbClient,
+): void {
   // Clear any existing tasks (for hot reload in development)
   stopScheduledTasks();
 
@@ -75,7 +77,10 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       schedule: 'daily',
       execute: async (): Promise<number> => {
         const count = await repos.magicLinkTokens.deleteExpired();
-        log.info({ task: 'magic-link-cleanup', deleted: count }, 'Magic link tokens cleanup completed');
+        log.info(
+          { task: 'magic-link-cleanup', deleted: count },
+          'Magic link tokens cleanup completed',
+        );
         return count;
       },
     },
@@ -113,7 +118,10 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       execute: async (): Promise<number> => {
         const cutoff = new Date(Date.now() - RETENTION_PERIODS.AUDIT_DAYS * ONE_DAY_MS);
         const count = await repos.auditEvents.deleteOlderThan(cutoff.toISOString());
-        log.info({ task: 'audit-cleanup', deleted: count, retentionDays: RETENTION_PERIODS.AUDIT_DAYS }, 'Audit events cleanup completed');
+        log.info(
+          { task: 'audit-cleanup', deleted: count, retentionDays: RETENTION_PERIODS.AUDIT_DAYS },
+          'Audit events cleanup completed',
+        );
         return count;
       },
     },
@@ -147,7 +155,11 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
             description: 'Permanently delete anonymized user records past retention period',
             schedule: 'daily' as const,
             execute: async (): Promise<number> => {
-              const result = await hardDeleteAnonymizedUsers(db, log, RETENTION_PERIODS.HARD_DELETE_DAYS);
+              const result = await hardDeleteAnonymizedUsers(
+                db,
+                log,
+                RETENTION_PERIODS.HARD_DELETE_DAYS,
+              );
               return result.deletedCount;
             },
           },

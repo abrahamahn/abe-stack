@@ -125,7 +125,10 @@ function handleError(
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
+  return {
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    body: { message: 'An error occurred processing your request' },
+  };
 }
 
 // ============================================================================
@@ -247,7 +250,10 @@ export async function handlePublishLegal(
 
     const effectiveAt = new Date(data.effectiveAt);
     if (isNaN(effectiveAt.getTime())) {
-      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'effectiveAt must be a valid date' } };
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: 'effectiveAt must be a valid date' },
+      };
     }
 
     const document = await publishLegalDocument(

@@ -42,12 +42,7 @@ describe('EmptyState', () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
 
-    render(
-      <EmptyState
-        title="No items"
-        action={{ label: 'Create Item', onClick }}
-      />,
-    );
+    render(<EmptyState title="No items" action={{ label: 'Create Item', onClick }} />);
 
     const button = screen.getByRole('button', { name: 'Create Item' });
     expect(button).toBeInTheDocument();

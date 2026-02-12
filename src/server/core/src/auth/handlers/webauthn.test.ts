@@ -43,13 +43,10 @@ const {
   mockCreateRefreshTokenFamily: vi.fn(),
   mockSetRefreshTokenCookie: vi.fn(),
   mockWithTransaction: vi.fn(),
-  mockMapErrorToHttpResponse: vi.fn(
-    (error: unknown) =>
-      ({
-        status: 500,
-        body: { message: error instanceof Error ? error.message : 'Internal server error' },
-      }),
-  ),
+  mockMapErrorToHttpResponse: vi.fn((error: unknown) => ({
+    status: 500,
+    body: { message: error instanceof Error ? error.message : 'Internal server error' },
+  })),
   mockAssertUserActive: vi.fn(),
 }));
 
@@ -205,11 +202,7 @@ describe('WebAuthn Handlers', () => {
       const ctx = createMockContext();
       const req = createAuthRequest();
 
-      const result = await handleWebauthnRegisterVerify(
-        ctx,
-        { credential: { id: 'test' } },
-        req,
-      );
+      const result = await handleWebauthnRegisterVerify(ctx, { credential: { id: 'test' } }, req);
 
       expect(result.status).toBe(200);
       expect((result.body as { credentialId: string }).credentialId).toBe('new-cred');
@@ -219,11 +212,7 @@ describe('WebAuthn Handlers', () => {
       const ctx = createMockContext();
       const req = createUnauthRequest();
 
-      const result = await handleWebauthnRegisterVerify(
-        ctx,
-        { credential: {} },
-        req,
-      );
+      const result = await handleWebauthnRegisterVerify(ctx, { credential: {} }, req);
 
       expect(result.status).toBe(401);
     });
@@ -386,7 +375,9 @@ describe('WebAuthn Handlers', () => {
       const result = await handleRenamePasskey(ctx, { name: 'New Name' }, req);
 
       expect(result.status).toBe(200);
-      const repos = ctx.repos as unknown as { webauthnCredentials: { updateName: ReturnType<typeof vi.fn> } };
+      const repos = ctx.repos as unknown as {
+        webauthnCredentials: { updateName: ReturnType<typeof vi.fn> };
+      };
       expect(repos.webauthnCredentials.updateName).toHaveBeenCalledWith('pk-1', 'New Name');
     });
 
@@ -421,7 +412,9 @@ describe('WebAuthn Handlers', () => {
       const result = await handleDeletePasskey(ctx, {}, req);
 
       expect(result.status).toBe(200);
-      const repos = ctx.repos as unknown as { webauthnCredentials: { delete: ReturnType<typeof vi.fn> } };
+      const repos = ctx.repos as unknown as {
+        webauthnCredentials: { delete: ReturnType<typeof vi.fn> };
+      };
       expect(repos.webauthnCredentials.delete).toHaveBeenCalledWith('pk-1');
     });
 

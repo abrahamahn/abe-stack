@@ -27,17 +27,21 @@ export interface ErrorTrackingConfig {
 /** Additional context to attach to error reports */
 export interface ErrorContext {
   /** User-related context */
-  user?: {
-    id?: string | undefined;
-    email?: string | undefined;
-    username?: string | undefined;
-  } | undefined;
+  user?:
+    | {
+        id?: string | undefined;
+        email?: string | undefined;
+        username?: string | undefined;
+      }
+    | undefined;
   /** Request-related context */
-  request?: {
-    url?: string | undefined;
-    method?: string | undefined;
-    headers?: Record<string, string> | undefined;
-  } | undefined;
+  request?:
+    | {
+        url?: string | undefined;
+        method?: string | undefined;
+        headers?: Record<string, string> | undefined;
+      }
+    | undefined;
   /** Custom tags for categorization */
   tags?: Record<string, string> | undefined;
   /** Additional arbitrary data */

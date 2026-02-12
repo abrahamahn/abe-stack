@@ -528,9 +528,10 @@ export class PayPalProvider implements BillingService {
     try {
       // Parse the signature header parts (use null-prototype object to prevent pollution)
       const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
-      const initialAcc: Record<string, string | undefined> = Object.create(
-        null,
-      ) as Record<string, string | undefined>;
+      const initialAcc: Record<string, string | undefined> = Object.create(null) as Record<
+        string,
+        string | undefined
+      >;
       const parts = signature.split(',').reduce<Record<string, string | undefined>>((acc, part) => {
         const [key, value] = part.trim().split('=');
         if (

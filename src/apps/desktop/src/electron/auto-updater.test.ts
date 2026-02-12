@@ -86,7 +86,7 @@ describe('initAutoUpdater', () => {
     initAutoUpdater(mainWindow);
 
     const updateAvailableHandler = mocks.autoUpdaterOn.mock.calls.find(
-      (call) => call[0] ==='update-available',
+      (call) => call[0] === 'update-available',
     )![1] as () => void;
 
     updateAvailableHandler();
@@ -99,7 +99,7 @@ describe('initAutoUpdater', () => {
     initAutoUpdater(mainWindow);
 
     const updateDownloadedHandler = mocks.autoUpdaterOn.mock.calls.find(
-      (call) => call[0] ==='update-downloaded',
+      (call) => call[0] === 'update-downloaded',
     )![1] as (_event: unknown, _notes: unknown, name: string) => void;
 
     updateDownloadedHandler(null, null, 'v2.0.0');
@@ -113,7 +113,7 @@ describe('initAutoUpdater', () => {
     initAutoUpdater(mainWindow);
 
     const updateAvailableHandler = mocks.autoUpdaterOn.mock.calls.find(
-      (call) => call[0] ==='update-available',
+      (call) => call[0] === 'update-available',
     )![1] as () => void;
 
     updateAvailableHandler();
@@ -138,9 +138,9 @@ describe('initAutoUpdater', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     initAutoUpdater(mainWindow);
 
-    const errorHandler = mocks.autoUpdaterOn.mock.calls.find(
-      (call) => call[0] ==='error',
-    )![1] as (error: Error) => void;
+    const errorHandler = mocks.autoUpdaterOn.mock.calls.find((call) => call[0] === 'error')![1] as (
+      error: Error,
+    ) => void;
 
     errorHandler(new Error('Network failure'));
 

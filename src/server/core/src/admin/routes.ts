@@ -43,7 +43,7 @@ import {
   handleAdminUpdatePlan,
 } from './billingHandlers';
 import { handleAdminUnlock } from './handlers';
-import { handleGetAdminHealth } from './healthHandler';
+import { handleGetAdminHealth, type AdminHealthBody } from './healthHandler';
 import { handleEndImpersonation, handleStartImpersonation } from './impersonationHandlers';
 import {
   handleCancelJob,
@@ -226,7 +226,7 @@ export const adminRoutes: RouteMap = createRouteMap([
   // System health summary
   [
     'admin/health',
-    adminProtectedRoute(
+    adminProtectedRoute<undefined, AdminHealthBody | { message: string }>(
       'GET',
       async (ctx: AdminAppContext, _body: undefined, req: FastifyRequest) => {
         return handleGetAdminHealth(ctx, _body, req as unknown as AdminRequest);

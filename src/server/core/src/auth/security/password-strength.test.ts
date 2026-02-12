@@ -2,7 +2,6 @@
 import { estimatePasswordStrength } from '@abe-stack/shared';
 import { describe, expect, test } from 'vitest';
 
-
 describe('estimatePasswordStrength', () => {
   describe('score calculation', () => {
     test('should return score 0 for very weak passwords', () => {

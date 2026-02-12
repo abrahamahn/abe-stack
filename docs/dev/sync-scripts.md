@@ -4,12 +4,12 @@ DX automation scripts that keep the codebase consistent. All scripts live in `sr
 
 ## Overview
 
-| Script | Command | Purpose |
-|---|---|---|
-| `sync-file-headers.ts` | `pnpm sync:headers` | Ensures every source file starts with a path comment |
-| `sync-css-theme.ts` | `pnpm build:theme` | Generates `theme.css` from TypeScript theme source |
-| `sync-ts-references.ts` | `pnpm sync:ts` | Updates root `tsconfig.json` project references |
-| `sync-docs.ts` | `pnpm sync:docs` | No-op (docs now discovered via `import.meta.glob`) |
+| Script                  | Command             | Purpose                                              |
+| ----------------------- | ------------------- | ---------------------------------------------------- |
+| `sync-file-headers.ts`  | `pnpm sync:headers` | Ensures every source file starts with a path comment |
+| `sync-css-theme.ts`     | `pnpm build:theme`  | Generates `theme.css` from TypeScript theme source   |
+| `sync-ts-references.ts` | `pnpm sync:ts`      | Updates root `tsconfig.json` project references      |
+| `sync-docs.ts`          | `pnpm sync:docs`    | No-op (docs now discovered via `import.meta.glob`)   |
 
 ## sync-file-headers
 

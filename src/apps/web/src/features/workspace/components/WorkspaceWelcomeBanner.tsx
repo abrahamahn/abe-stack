@@ -19,8 +19,8 @@ export const WorkspaceWelcomeBanner = ({
       Welcome to {workspaceName}!
     </Heading>
     <Text size="sm" className="mb-4">
-      Your workspace is ready. Invite team members to start collaborating, or explore the settings to
-      customize your workspace.
+      Your workspace is ready. Invite team members to start collaborating, or explore the settings
+      to customize your workspace.
     </Text>
     <div className="flex gap-2">
       <Button type="button" size="small" onClick={onInviteMembers}>

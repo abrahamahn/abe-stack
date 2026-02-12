@@ -780,7 +780,9 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
       coerceNumber(v, 'AUDIT_RETENTION_DAYS'),
     ),
     LOG_CLIENT_ERROR_LEVEL: parseOptional(obj['LOG_CLIENT_ERROR_LEVEL'], (v) =>
-      createEnumSchema(['debug', 'info', 'warn', 'error'] as const, 'LOG_CLIENT_ERROR_LEVEL').parse(v),
+      createEnumSchema(['debug', 'info', 'warn', 'error'] as const, 'LOG_CLIENT_ERROR_LEVEL').parse(
+        v,
+      ),
     ),
     LOG_REQUEST_CONTEXT: parseOptional(obj['LOG_REQUEST_CONTEXT'], (v) => trueFalseSchema.parse(v)),
   };

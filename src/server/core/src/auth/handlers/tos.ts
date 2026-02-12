@@ -40,7 +40,10 @@ export async function handleAcceptTos(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     const { ipAddress } = request.requestInfo;
@@ -75,7 +78,10 @@ export async function handleTosStatus(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     const status = await checkTosAcceptance(ctx.repos, userId);

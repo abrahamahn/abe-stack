@@ -8,12 +8,12 @@ ABE Stack uses **Argon2id** (OWASP recommended) for password hashing.
 
 Default parameters match OWASP guidelines (`src/server/core/src/auth/utils/password.ts`):
 
-| Parameter | Value | Purpose |
-|---|---|---|
-| Algorithm | Argon2id (type 2) | Hybrid of Argon2i + Argon2d, resistant to side-channel and GPU attacks |
-| Memory cost | 19,456 KiB (19 MiB) | Increases GPU attack cost |
-| Time cost | 2 iterations | Balances security vs. login latency |
-| Parallelism | 1 | Single-threaded hash computation |
+| Parameter   | Value               | Purpose                                                                |
+| ----------- | ------------------- | ---------------------------------------------------------------------- |
+| Algorithm   | Argon2id (type 2)   | Hybrid of Argon2i + Argon2d, resistant to side-channel and GPU attacks |
+| Memory cost | 19,456 KiB (19 MiB) | Increases GPU attack cost                                              |
+| Time cost   | 2 iterations        | Balances security vs. login latency                                    |
+| Parallelism | 1                   | Single-threaded hash computation                                       |
 
 ### Password Flow
 
@@ -36,12 +36,12 @@ Passwords are validated using custom entropy-based estimation (`src/server/core/
 
 Short-lived access tokens carry user identity and role.
 
-| Property | Value |
-|---|---|
-| Algorithm | HS256 (HMAC-SHA256) |
-| Default expiry | 15 minutes |
-| Payload | `userId`, `email`, `role`, optional `tokenVersion` |
-| Secret minimum | 32 characters |
+| Property       | Value                                              |
+| -------------- | -------------------------------------------------- |
+| Algorithm      | HS256 (HMAC-SHA256)                                |
+| Default expiry | 15 minutes                                         |
+| Payload        | `userId`, `email`, `role`, optional `tokenVersion` |
+| Secret minimum | 32 characters                                      |
 
 Tokens are created via `createAccessToken()` and verified via `verifyToken()` in `src/server/core/src/auth/utils/jwt.ts`.
 
@@ -59,6 +59,7 @@ Refresh tokens use **family-based rotation** with reuse detection (`src/server/c
 ### Token Reuse Attack Response
 
 When reuse is detected:
+
 1. Security event is logged to the audit trail
 2. Entire token family is revoked (all tokens in the family)
 3. User session is invalidated
@@ -72,13 +73,13 @@ Configurable per deployment (default: 10). When the limit is reached, the oldest
 
 Refresh tokens are stored in HTTP-only cookies (`src/server/core/src/auth/utils/cookies.ts`).
 
-| Setting | Development | Production |
-|---|---|---|
-| `httpOnly` | true | true |
-| `secure` | false | true |
-| `sameSite` | lax | strict |
-| `path` | / | / |
-| `signed` | true | true |
+| Setting    | Development | Production |
+| ---------- | ----------- | ---------- |
+| `httpOnly` | true        | true       |
+| `secure`   | false       | true       |
+| `sameSite` | lax         | strict     |
+| `path`     | /           | /          |
+| `signed`   | true        | true       |
 
 Cookie secret is injected via environment configuration and used for both signing and CSRF token encryption.
 
@@ -92,18 +93,18 @@ Applied to all requests via the HTTP plugin stack (`src/apps/server/src/http/plu
 
 Stricter per-endpoint limits defined in `src/server/core/src/auth/security/rateLimitPresets.ts`:
 
-| Endpoint | Max Requests | Window |
-|---|---|---|
-| Login | 5 | 1 minute |
-| Register | 3 | 1 hour |
-| Forgot password | 3 | 1 hour |
-| Reset password | 5 | 1 hour |
-| Verify email | 5 | 1 hour |
-| Resend verification | 3 | 1 hour |
-| Token refresh | 30 | 1 minute |
-| OAuth initiate | 10 | 1 minute |
-| OAuth callback | 20 | 1 minute |
-| OAuth link/unlink | 5 | 1 hour |
+| Endpoint            | Max Requests | Window   |
+| ------------------- | ------------ | -------- |
+| Login               | 5            | 1 minute |
+| Register            | 3            | 1 hour   |
+| Forgot password     | 3            | 1 hour   |
+| Reset password      | 5            | 1 hour   |
+| Verify email        | 5            | 1 hour   |
+| Resend verification | 3            | 1 hour   |
+| Token refresh       | 30           | 1 minute |
+| OAuth initiate      | 10           | 1 minute |
+| OAuth callback      | 20           | 1 minute |
+| OAuth link/unlink   | 5            | 1 hour   |
 
 All auth rate limiters use progressive delay with exponential backoff (1s base, 30s max, 2x factor).
 
@@ -129,15 +130,15 @@ Explicit CORS handling replaces `@fastify/cors` (`src/apps/server/src/http/middl
 
 Explicit headers replace `@fastify/helmet`:
 
-| Header | Value | Purpose |
-|---|---|---|
-| `X-Frame-Options` | DENY | Prevent clickjacking |
-| `X-Content-Type-Options` | nosniff | Prevent MIME sniffing |
-| `X-XSS-Protection` | 1; mode=block | XSS protection for older browsers |
-| `Strict-Transport-Security` | max-age=31536000 | Enforce HTTPS (1 year) |
-| `Referrer-Policy` | strict-origin-when-cross-origin | Control referrer leakage |
-| `Permissions-Policy` | geolocation=(), microphone=(), camera=() | Restrict browser APIs |
-| `Content-Security-Policy` | (production only) | Restrict resource loading |
+| Header                      | Value                                    | Purpose                           |
+| --------------------------- | ---------------------------------------- | --------------------------------- |
+| `X-Frame-Options`           | DENY                                     | Prevent clickjacking              |
+| `X-Content-Type-Options`    | nosniff                                  | Prevent MIME sniffing             |
+| `X-XSS-Protection`          | 1; mode=block                            | XSS protection for older browsers |
+| `Strict-Transport-Security` | max-age=31536000                         | Enforce HTTPS (1 year)            |
+| `Referrer-Policy`           | strict-origin-when-cross-origin          | Control referrer leakage          |
+| `Permissions-Policy`        | geolocation=(), microphone=(), camera=() | Restrict browser APIs             |
+| `Content-Security-Policy`   | (production only)                        | Restrict resource loading         |
 
 Production enables CSP with `getProductionSecurityDefaults()`. API routes also get `Cache-Control: no-store` to prevent back-button data leaks after logout.
 
@@ -168,6 +169,7 @@ The validation middleware (`src/apps/server/src/http/middleware/validation.ts`) 
 ## New Login Alerts
 
 On each successful login, the system:
+
 1. Generates a device fingerprint from IP + User-Agent
 2. Checks if the device is known (via `trusted_devices` table)
 3. Records device access (upsert)

@@ -29,8 +29,12 @@ describe('sanitizeString', () => {
   });
 
   test('should neutralize script tags', () => {
-    expect(sanitizeString('<script>alert("xss")</script>')).toBe('&lt;script>alert("xss")&lt;/script>');
-    expect(sanitizeString('hello<script>evil()</script>world')).toBe('hello&lt;script>evil()&lt;/script>world');
+    expect(sanitizeString('<script>alert("xss")</script>')).toBe(
+      '&lt;script>alert("xss")&lt;/script>',
+    );
+    expect(sanitizeString('hello<script>evil()</script>world')).toBe(
+      'hello&lt;script>evil()&lt;/script>world',
+    );
     expect(sanitizeString('<SCRIPT>ALERT(1)</SCRIPT>')).toBe('&lt;SCRIPT>ALERT(1)&lt;/SCRIPT>');
   });
 
@@ -536,7 +540,11 @@ describe('registerInputValidation middleware', () => {
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.body) as { body: { items: string[] } };
-      expect(result.body.items).toEqual(['&lt;script>1&lt;/script>item1', 'item2', '&lt;script>2&lt;/script>item3']);
+      expect(result.body.items).toEqual([
+        '&lt;script>1&lt;/script>item1',
+        'item2',
+        '&lt;script>2&lt;/script>item3',
+      ]);
     });
 
     test('should preserve valid data structures', async () => {

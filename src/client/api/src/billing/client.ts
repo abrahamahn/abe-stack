@@ -170,16 +170,24 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
     },
 
     async removePaymentMethod(paymentMethodId: string): Promise<SubscriptionActionResponse> {
-      return apiRequest<SubscriptionActionResponse>(factory, `/billing/payment-methods/${paymentMethodId}`, {
-        method: 'DELETE',
-      });
+      return apiRequest<SubscriptionActionResponse>(
+        factory,
+        `/billing/payment-methods/${paymentMethodId}`,
+        {
+          method: 'DELETE',
+        },
+      );
     },
 
     async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethodResponse> {
-      return apiRequest<PaymentMethodResponse>(factory, `/billing/payment-methods/${paymentMethodId}/default`, {
-        method: 'POST',
-        body: JSON.stringify({}),
-      });
+      return apiRequest<PaymentMethodResponse>(
+        factory,
+        `/billing/payment-methods/${paymentMethodId}/default`,
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+      );
     },
 
     async createSetupIntent(): Promise<SetupIntentResponse> {

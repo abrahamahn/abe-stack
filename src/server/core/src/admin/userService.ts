@@ -327,7 +327,6 @@ export function getUserStatus(user: AdminUser): UserStatus {
 // Hard Ban
 // ============================================================================
 
-
 /**
  * Result of a hard ban operation
  */

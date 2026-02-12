@@ -31,7 +31,9 @@ import type { MediaUploadResponse } from '../../media/api';
 // ============================================================================
 
 const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
-const mockLargeFile = new File(['x'.repeat(3 * 1024 * 1024)], 'large-image.png', { type: 'image/png' });
+const mockLargeFile = new File(['x'.repeat(3 * 1024 * 1024)], 'large-image.png', {
+  type: 'image/png',
+});
 const mockInvalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
 
 // Mock FileReader
@@ -40,7 +42,9 @@ class MockFileReader {
   readAsDataURL(_file: Blob): void {
     setTimeout(() => {
       if (this.onload !== null) {
-        this.onload({ target: { result: 'data:image/png;base64,mock' } } as ProgressEvent<FileReader>);
+        this.onload({
+          target: { result: 'data:image/png;base64,mock' },
+        } as ProgressEvent<FileReader>);
       }
     }, 0);
   }

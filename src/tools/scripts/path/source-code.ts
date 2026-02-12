@@ -114,9 +114,9 @@ function groupByTopLevel(files: string[]): Map<string, string[]> {
       parts.length === 1
         ? 'Root'
         : parts[0] === 'src' && parts.length >= 3
-          ? (parts[1] === 'shared' || parts[1] === 'tools'
-              ? `src/${parts[1]}`
-              : `src/${parts[1]}/${parts[2]}`)
+          ? parts[1] === 'shared' || parts[1] === 'tools'
+            ? `src/${parts[1]}`
+            : `src/${parts[1]}/${parts[2]}`
           : parts[0];
 
     const existing = groups.get(key) ?? [];

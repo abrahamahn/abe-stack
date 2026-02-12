@@ -314,10 +314,7 @@ export function patchRoutesFile(name: string, routesFilePath: string = ROUTES_FI
   const lastCoreImport = content.lastIndexOf("from '@abe-stack/core/");
   const nextNewline = content.indexOf('\n', lastCoreImport);
   const withImport =
-    content.slice(0, nextNewline + 1) +
-    importLine +
-    '\n' +
-    content.slice(nextNewline + 1);
+    content.slice(0, nextNewline + 1) + importLine + '\n' + content.slice(nextNewline + 1);
 
   // Add registerRouteMap call before the system routes comment
   const registrationLine = `  registerRouteMap(app, handlerCtx, ${camel}Routes as unknown as DbRouteMap, {\n    ...routerOptions,\n    module: '${name}',\n  });`;
@@ -325,15 +322,14 @@ export function patchRoutesFile(name: string, routesFilePath: string = ROUTES_FI
   const insertionIdx = withImport.indexOf(systemRoutesMarker);
 
   if (insertionIdx === -1) {
-    console.warn('⚠️  Could not find system routes marker in routes.ts. Skipping route registration.');
+    console.warn(
+      '⚠️  Could not find system routes marker in routes.ts. Skipping route registration.',
+    );
     return;
   }
 
   const patched =
-    withImport.slice(0, insertionIdx) +
-    registrationLine +
-    '\n' +
-    withImport.slice(insertionIdx);
+    withImport.slice(0, insertionIdx) + registrationLine + '\n' + withImport.slice(insertionIdx);
 
   fs.writeFileSync(routesFilePath, patched, 'utf-8');
 }

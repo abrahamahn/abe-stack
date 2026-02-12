@@ -281,10 +281,13 @@ describe('registerLoggingMiddleware', () => {
       const loggerInfoSpy = vi.spyOn(request.logger, 'info');
       await getHook(server, 'onError')(request, reply, error);
 
-      expect(loggerInfoSpy).toHaveBeenCalledWith('Client error', expect.objectContaining({
-        statusCode: 400,
-        message: 'Bad request',
-      }));
+      expect(loggerInfoSpy).toHaveBeenCalledWith(
+        'Client error',
+        expect.objectContaining({
+          statusCode: 400,
+          message: 'Bad request',
+        }),
+      );
     });
   });
 });

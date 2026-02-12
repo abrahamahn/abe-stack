@@ -125,7 +125,6 @@ export interface WebsocketPubsubClientConfig {
   maxQueueSize?: number;
 }
 
-
 /**
  * Calculate jitter for a given delay to prevent thundering herd.
  * Returns a value between 0 and JITTER_FACTOR * delay.
@@ -431,7 +430,9 @@ export class WebsocketPubsubClient {
     const jitter = calculateJitter(baseDelay);
     const reconnectDelay = baseDelay + jitter;
 
-    this.log(`Reconnecting in ${String(reconnectDelay)}ms (attempt ${String(this.reconnectAttempt)})...`);
+    this.log(
+      `Reconnecting in ${String(reconnectDelay)}ms (attempt ${String(this.reconnectAttempt)})...`,
+    );
     this.setConnectionState('reconnecting');
 
     await delay(reconnectDelay);

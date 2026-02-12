@@ -138,7 +138,10 @@ export async function handleListActivities(
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list activities' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to list activities' },
+    };
   }
 }
 
@@ -196,6 +199,9 @@ export async function handleListTenantActivities(
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list tenant activities' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to list tenant activities' },
+    };
   }
 }

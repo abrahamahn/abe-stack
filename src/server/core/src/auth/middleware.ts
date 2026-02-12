@@ -11,7 +11,12 @@
  * @module middleware
  */
 
-import { ForbiddenError, HTTP_STATUS, UnauthorizedError, extractBearerToken } from '@abe-stack/shared';
+import {
+  ForbiddenError,
+  HTTP_STATUS,
+  UnauthorizedError,
+  extractBearerToken,
+} from '@abe-stack/shared';
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
@@ -100,7 +105,9 @@ export function createRequireRole(secret: string, ...allowedRoles: UserRole[]) {
     }
 
     if (!allowedRoles.includes(payload.role)) {
-      void reply.status(HTTP_STATUS.FORBIDDEN).send({ message: 'Forbidden: insufficient permissions' });
+      void reply
+        .status(HTTP_STATUS.FORBIDDEN)
+        .send({ message: 'Forbidden: insufficient permissions' });
       return;
     }
 

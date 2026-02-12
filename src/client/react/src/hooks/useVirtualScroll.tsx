@@ -47,12 +47,15 @@ export function useVirtualScroll(
   const getVisibleRange = useCallback((): { startIndex: number; endIndex: number } => {
     const startIndex = Math.max(
       0,
-      Math.floor(scrollTop / (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT)) - overscan,
+      Math.floor(
+        scrollTop / (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT),
+      ) - overscan,
     );
     const endIndex = Math.min(
       itemCount - 1,
       Math.ceil(
-        (scrollTop + containerHeight) / (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT),
+        (scrollTop + containerHeight) /
+          (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT),
       ) + overscan,
     );
 

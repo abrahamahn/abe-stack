@@ -78,10 +78,23 @@ export const DEFAULT_THUMBNAIL_SIZE = 300;
 
 // --- Extension categories ---
 
-export const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'tiff', 'bmp'] as const;
+export const IMAGE_EXTENSIONS = [
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'avif',
+  'tiff',
+  'bmp',
+] as const;
 export const AUDIO_EXTENSIONS = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'] as const;
 export const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'webm', 'flv', 'wmv'] as const;
-export const ALL_MEDIA_EXTENSIONS = [...IMAGE_EXTENSIONS, ...AUDIO_EXTENSIONS, ...VIDEO_EXTENSIONS] as const;
+export const ALL_MEDIA_EXTENSIONS = [
+  ...IMAGE_EXTENSIONS,
+  ...AUDIO_EXTENSIONS,
+  ...VIDEO_EXTENSIONS,
+] as const;
 
 // --- MIME type mappings (single source of truth) ---
 

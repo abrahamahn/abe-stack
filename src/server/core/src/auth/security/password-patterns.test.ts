@@ -10,7 +10,6 @@ import {
 } from '@abe-stack/shared';
 import { describe, expect, it } from 'vitest';
 
-
 describe('Password Patterns', () => {
   describe('COMMON_PASSWORDS', () => {
     it('should contain known common passwords', () => {

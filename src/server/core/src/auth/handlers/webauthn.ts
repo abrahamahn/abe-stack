@@ -71,9 +71,7 @@ export async function handleWebauthnRegisterVerify(
   ctx: AppContext,
   body: { credential: Record<string, unknown>; name?: string },
   request: RequestWithCookies,
-): Promise<
-  { status: 200; body: { credentialId: string; message: string } } | HttpErrorResponse
-> {
+): Promise<{ status: 200; body: { credentialId: string; message: string } } | HttpErrorResponse> {
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {

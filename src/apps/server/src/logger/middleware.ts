@@ -110,7 +110,9 @@ export function registerLoggingMiddleware(
       // 4xx: configurable level with summary only (no stack trace)
       const level = loggingConfig?.clientErrorLevel ?? 'warn';
       const clientErrorLevel: 'info' | 'warn' | 'error' | 'debug' =
-        level === 'info' || level === 'warn' || level === 'error' || level === 'debug' ? level : 'warn';
+        level === 'info' || level === 'warn' || level === 'error' || level === 'debug'
+          ? level
+          : 'warn';
       const code = (error as { code?: string }).code;
       request.logger[clientErrorLevel]('Client error', {
         method,

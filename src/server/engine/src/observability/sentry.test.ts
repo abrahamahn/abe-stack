@@ -168,7 +168,11 @@ describe('Sentry facade', () => {
 
       sentry.addBreadcrumb('Page loaded', 'navigation');
 
-      expect(mockProvider.addBreadcrumb).toHaveBeenCalledWith('Page loaded', 'navigation', undefined);
+      expect(mockProvider.addBreadcrumb).toHaveBeenCalledWith(
+        'Page loaded',
+        'navigation',
+        undefined,
+      );
     });
 
     it('should be a no-op when not initialized', async () => {

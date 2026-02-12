@@ -221,4 +221,3 @@ const DetailItem = ({ label, value }: DetailItemProps): JSX.Element => {
     </div>
   );
 };
-

@@ -22,8 +22,7 @@ export function PasskeyLoginButton({
   const { login, isLoading, error } = useLoginWithPasskey(onSuccess);
 
   // Only show when WebAuthn is available
-  const isWebAuthnSupported =
-    typeof window !== 'undefined' && 'PublicKeyCredential' in window;
+  const isWebAuthnSupported = typeof window !== 'undefined' && 'PublicKeyCredential' in window;
   if (!isWebAuthnSupported) {
     return null;
   }

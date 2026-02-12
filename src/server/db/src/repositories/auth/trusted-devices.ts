@@ -144,9 +144,7 @@ export function createTrustedDeviceRepository(db: RawDb): TrustedDeviceRepositor
     },
 
     async findById(id: string): Promise<TrustedDevice | null> {
-      const result = await db.queryOne(
-        select(TRUSTED_DEVICES_TABLE).where(eq('id', id)).toSql(),
-      );
+      const result = await db.queryOne(select(TRUSTED_DEVICES_TABLE).where(eq('id', id)).toSql());
       return result !== null ? transformTrustedDevice(result) : null;
     },
 
@@ -162,9 +160,7 @@ export function createTrustedDeviceRepository(db: RawDb): TrustedDeviceRepositor
     },
 
     async revoke(id: string): Promise<boolean> {
-      const count = await db.execute(
-        deleteFrom(TRUSTED_DEVICES_TABLE).where(eq('id', id)).toSql(),
-      );
+      const count = await db.execute(deleteFrom(TRUSTED_DEVICES_TABLE).where(eq('id', id)).toSql());
       return count > 0;
     },
 
@@ -174,11 +170,7 @@ export function createTrustedDeviceRepository(db: RawDb): TrustedDeviceRepositor
         TRUSTED_DEVICE_COLUMNS,
       );
       const result = await db.queryOne(
-        update(TRUSTED_DEVICES_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(TRUSTED_DEVICES_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result !== null ? transformTrustedDevice(result) : null;
     },

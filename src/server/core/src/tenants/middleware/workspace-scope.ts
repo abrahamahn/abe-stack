@@ -9,7 +9,14 @@
  * @module middleware/workspace-scope
  */
 
-import { can, ERROR_MESSAGES, ForbiddenError, HTTP_STATUS, ROLE_LEVELS, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
+import {
+  can,
+  ERROR_MESSAGES,
+  ForbiddenError,
+  HTTP_STATUS,
+  ROLE_LEVELS,
+  WORKSPACE_ID_HEADER,
+} from '@abe-stack/shared';
 
 import type { Repositories } from '@abe-stack/db';
 import type {
@@ -91,7 +98,9 @@ export function createWorkspaceScopeMiddleware(options: WorkspaceScopeOptions) {
     // Get authenticated user from request
     const user = (request as WorkspaceScopedRequest & { user?: { userId: string } }).user;
     if (user?.userId === undefined) {
-      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED });
+      reply
+        .code(HTTP_STATUS.UNAUTHORIZED)
+        .send({ message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED });
       return;
     }
 

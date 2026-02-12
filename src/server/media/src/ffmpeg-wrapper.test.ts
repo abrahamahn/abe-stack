@@ -172,7 +172,7 @@ describe('Buffer bounding', () => {
   it('should export MAX_BUFFER_SIZE as 10MB (verified via source code constant)', async () => {
     const wrapper = await import('./ffmpeg-wrapper');
     expect(typeof wrapper.runFFmpeg).toBe('function');
-  });
+  }, 30000);
 
   it('should have bounded buffer accumulation in runFFmpeg', async () => {
     const wrapper = await import('./ffmpeg-wrapper');

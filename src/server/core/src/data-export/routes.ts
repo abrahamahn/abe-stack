@@ -56,7 +56,10 @@ export const dataExportRoutes: RouteMap = createRouteMap([
   // Request a data export
   [
     'users/me/export',
-    userRoute('POST', handleRequestExport, { summary: 'Request data export', tags: ['Data Export'] }),
+    userRoute('POST', handleRequestExport, {
+      summary: 'Request data export',
+      tags: ['Data Export'],
+    }),
   ],
 
   // Check export status

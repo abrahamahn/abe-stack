@@ -42,6 +42,7 @@ vi.mock('@/config', () => ({
 }));
 
 vi.mock('@abe-stack/db', () => ({
+  USERS_TABLE: 'users',
   createDbClient: vi.fn(() => ({
     query: vi.fn(),
     execute: vi.fn(),

@@ -107,7 +107,8 @@ export async function handleCreateInvitation(
     if (deps.mailer !== undefined && deps.emailTemplates !== undefined) {
       const acceptUrl = `${deps.appBaseUrl ?? ''}/invitations/${invId}/accept`;
       const actor = await deps.repos.users.findById(userId);
-      const actorName = actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
+      const actorName =
+        actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
       const tenant = await deps.repos.tenants.findById(tenantId);
       const workspaceName = tenant?.name ?? 'the workspace';
       const emailData = deps.emailTemplates.workspaceInvitation(
@@ -266,7 +267,8 @@ export async function handleResendInvitation(
       if (inv !== null) {
         const acceptUrl = `${deps.appBaseUrl ?? ''}/invitations/${inv.id}/accept`;
         const actor = await deps.repos.users.findById(userId);
-        const actorName = actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
+        const actorName =
+          actor !== null ? `${actor.firstName} ${actor.lastName}`.trim() : 'A team member';
         const tenant = await deps.repos.tenants.findById(tenantId);
         const workspaceName = tenant?.name ?? 'the workspace';
         const emailData = deps.emailTemplates.workspaceInvitation(

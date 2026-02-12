@@ -104,7 +104,10 @@ export function createWebauthnCredentialRepository(db: RawDb): WebauthnCredentia
 
     async updateName(id: string, name: string): Promise<void> {
       await db.execute(
-        update(WEBAUTHN_CREDENTIALS_TABLE).set({ ['name']: name }).where(eq('id', id)).toSql(),
+        update(WEBAUTHN_CREDENTIALS_TABLE)
+          .set({ ['name']: name })
+          .where(eq('id', id))
+          .toSql(),
       );
     },
 

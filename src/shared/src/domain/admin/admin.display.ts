@@ -37,7 +37,9 @@ export function getUserStatusTone(status: UserStatus): 'info' | 'success' | 'war
 /**
  * Get the badge tone for a security event severity.
  */
-export function getSecuritySeverityTone(severity: string): 'info' | 'success' | 'warning' | 'danger' {
+export function getSecuritySeverityTone(
+  severity: string,
+): 'info' | 'success' | 'warning' | 'danger' {
   switch (severity) {
     case 'critical':
     case 'high':

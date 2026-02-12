@@ -6,7 +6,6 @@
  * filtering, and upsert logic for billing invoice records.
  */
 
-
 import { encodeCursor } from '@abe-stack/shared';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 

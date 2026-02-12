@@ -59,14 +59,14 @@ export const UndoHistoryPanel = ({ onUndoToIndex }: UndoHistoryPanelProps): Reac
           className="flex items-center justify-between gap-2 p-2 rounded border"
           role="listitem"
         >
-          <Text style={{ fontSize: 'var(--ui-font-size-sm)' }}>
-            {formatTransactionLabel(tx)}
-          </Text>
+          <Text style={{ fontSize: 'var(--ui-font-size-sm)' }}>{formatTransactionLabel(tx)}</Text>
           {onUndoToIndex !== undefined && (
             <Button
               variant="text"
               size="small"
-              onClick={() => { onUndoToIndex(index + 1); }}
+              onClick={() => {
+                onUndoToIndex(index + 1);
+              }}
             >
               Undo to here
             </Button>

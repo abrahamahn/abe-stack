@@ -17,6 +17,8 @@ const LEVEL_TONES: Record<NotificationLevel, 'primary' | 'success' | 'warning' |
  * Get the semantic tone for a notification level.
  * Maps to a semantic color name (e.g. 'primary', 'danger') for UI styling.
  */
-export function getNotificationLevelTone(level: NotificationLevel): 'primary' | 'success' | 'warning' | 'danger' {
+export function getNotificationLevelTone(
+  level: NotificationLevel,
+): 'primary' | 'success' | 'warning' | 'danger' {
   return LEVEL_TONES[level];
 }

@@ -48,10 +48,7 @@ export {
 } from './email-change-revert-tokens';
 
 // Trusted Devices
-export {
-  createTrustedDeviceRepository,
-  type TrustedDeviceRepository,
-} from './trusted-devices';
+export { createTrustedDeviceRepository, type TrustedDeviceRepository } from './trusted-devices';
 
 // WebAuthn Credentials
 export {

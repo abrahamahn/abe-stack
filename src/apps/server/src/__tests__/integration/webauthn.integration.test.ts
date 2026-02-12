@@ -348,10 +348,10 @@ describe('WebAuthn API Integration Tests', () => {
       expect(response.statusCode).not.toBe(404);
     });
 
-    it('DELETE /api/users/me/passkeys/pk-1 responds (not 404)', async () => {
+    it('DELETE /api/users/me/passkeys/pk-1/delete responds (not 404)', async () => {
       const response = await testServer.inject({
         method: 'DELETE',
-        url: '/api/users/me/passkeys/pk-1',
+        url: '/api/users/me/passkeys/pk-1/delete',
       });
       expect(response.statusCode).not.toBe(404);
     });
@@ -398,10 +398,10 @@ describe('WebAuthn API Integration Tests', () => {
       expect(response.statusCode).toBe(401);
     });
 
-    it('DELETE /api/users/me/passkeys/pk-1 returns 401 without token', async () => {
+    it('DELETE /api/users/me/passkeys/pk-1/delete returns 401 without token', async () => {
       const response = await testServer.inject({
         method: 'DELETE',
-        url: '/api/users/me/passkeys/pk-1',
+        url: '/api/users/me/passkeys/pk-1/delete',
       });
       expect(response.statusCode).toBe(401);
     });

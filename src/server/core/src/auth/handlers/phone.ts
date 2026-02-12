@@ -41,7 +41,10 @@ export async function handleSetPhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -65,7 +68,10 @@ export async function handleSetPhone(
     // Get the SMS provider from context (may not be configured)
     if (ctx.sms === undefined) {
       ctx.log.error('SMS provider not configured');
-      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'SMS service unavailable' } };
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'SMS service unavailable' },
+      };
     }
     const smsProvider = ctx.sms;
 
@@ -74,7 +80,10 @@ export async function handleSetPhone(
 
     if (!result.success) {
       ctx.log.error({ error: result.error }, 'Failed to send SMS verification code');
-      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to send verification code' } };
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'Failed to send verification code' },
+      };
     }
 
     return { status: HTTP_STATUS.OK, body: { message: 'Verification code sent' } };
@@ -97,7 +106,10 @@ export async function handleVerifyPhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -147,7 +159,10 @@ export async function handleRemovePhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);

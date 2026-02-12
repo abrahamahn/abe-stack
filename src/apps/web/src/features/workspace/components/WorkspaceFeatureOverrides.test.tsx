@@ -8,7 +8,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 // ============================================================================
 // Mocks
 // ============================================================================
@@ -18,12 +17,14 @@ vi.mock('../hooks/useWorkspaceFeatureOverrides', () => ({
   useSetFeatureOverride: vi.fn(),
 }));
 
-import { useSetFeatureOverride, useWorkspaceFeatureOverrides } from '../hooks/useWorkspaceFeatureOverrides';
+import {
+  useSetFeatureOverride,
+  useWorkspaceFeatureOverrides,
+} from '../hooks/useWorkspaceFeatureOverrides';
 
 import { WorkspaceFeatureOverrides } from './WorkspaceFeatureOverrides';
 
 import type { FlagWithOverride } from '../hooks/useWorkspaceFeatureOverrides';
-
 
 // ============================================================================
 // Test Setup

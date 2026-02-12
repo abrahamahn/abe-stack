@@ -56,7 +56,6 @@ export function filterDeletedUsers<T extends Pick<User, 'deletedAt'>>(users: T[]
 // Hard-Delete Anonymized Users
 // ============================================================================
 
-
 /** Pattern matching anonymized email addresses (SHA-256 hex @ anonymized.local) */
 export const ANONYMIZED_EMAIL_PATTERN = /^[a-f0-9]{64}@anonymized\.local$/;
 
@@ -100,12 +99,7 @@ export async function hardDeleteAnonymizedUsers(
   // Find soft-deleted users whose deleted_at is older than the retention cutoff
   const rows = await db.query(
     select(USERS_TABLE)
-      .where(
-        and(
-          isNotNull('deleted_at'),
-          lt('deleted_at', cutoff),
-        ),
-      )
+      .where(and(isNotNull('deleted_at'), lt('deleted_at', cutoff)))
       .toSql(),
   );
 
@@ -118,9 +112,7 @@ export async function hardDeleteAnonymizedUsers(
 
   for (const user of usersToDelete) {
     try {
-      const deleted = await db.execute(
-        deleteFrom(USERS_TABLE).where(eq('id', user.id)).toSql(),
-      );
+      const deleted = await db.execute(deleteFrom(USERS_TABLE).where(eq('id', user.id)).toSql());
 
       if (deleted > 0) {
         deletedCount++;

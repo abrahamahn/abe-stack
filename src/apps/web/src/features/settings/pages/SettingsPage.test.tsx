@@ -48,9 +48,7 @@ vi.mock('../components', () => {
   const mockUsernameForm = () => <div data-testid="username-form">Username Form</div>;
 
   const mockDevicesList = () => <div data-testid="devices-list">Devices List</div>;
-  const mockPhoneManagement = () => (
-    <div data-testid="phone-management">Phone Management</div>
-  );
+  const mockPhoneManagement = () => <div data-testid="phone-management">Phone Management</div>;
 
   return {
     ApiKeysManagement: mockApiKeysManagement,

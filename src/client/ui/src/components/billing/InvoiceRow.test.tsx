@@ -262,7 +262,9 @@ describe('InvoiceList', () => {
       render(<InvoiceList invoices={[]} />);
 
       expect(screen.getByText('No invoices yet')).toBeInTheDocument();
-      expect(screen.getByText('Invoices will appear here after your first payment')).toBeInTheDocument();
+      expect(
+        screen.getByText('Invoices will appear here after your first payment'),
+      ).toBeInTheDocument();
     });
 
     it('should not show empty state when invoices exist', () => {

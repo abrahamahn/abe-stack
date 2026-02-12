@@ -50,8 +50,6 @@ interface SharpInstance {
 
 type SharpFunction = (input: string) => SharpInstance;
 
-
-
 /**
  * Streaming media processor for handling large files without exhausting memory.
  * Uses Sharp for images and the internal FFmpeg wrapper for video,

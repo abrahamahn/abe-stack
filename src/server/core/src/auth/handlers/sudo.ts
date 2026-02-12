@@ -68,7 +68,10 @@ export async function handleSudoElevate(
       }
     } else if (body.totpCode !== undefined) {
       if (!user.totpEnabled) {
-        return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'TOTP is not enabled for this account' } };
+        return {
+          status: HTTP_STATUS.BAD_REQUEST,
+          body: { message: 'TOTP is not enabled for this account' },
+        };
       }
       if (user.totpSecret === null) {
         return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'TOTP is not configured' } };
@@ -79,7 +82,10 @@ export async function handleSudoElevate(
         return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Invalid TOTP code' } };
       }
     } else {
-      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Either password or totpCode is required' } };
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: 'Either password or totpCode is required' },
+      };
     }
 
     // Issue sudo token

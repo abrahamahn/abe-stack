@@ -29,7 +29,9 @@ export interface CookieConsentBannerProps {
 // Component
 // ============================================================================
 
-export const CookieConsentBanner = ({ className }: CookieConsentBannerProps): ReactElement | null => {
+export const CookieConsentBanner = ({
+  className,
+}: CookieConsentBannerProps): ReactElement | null => {
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
   const { updateConsent } = useUpdateConsent();

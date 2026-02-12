@@ -220,7 +220,12 @@ describe('Profile Handlers', () => {
         type: 'cursor' as const,
         cursor: { limit: 20, cursor: undefined },
         helpers: {
-          createCursorResult: <T>(data: T[], nextCursor: string | null, hasNext: boolean, limit: number) => ({
+          createCursorResult: <T>(
+            data: T[],
+            nextCursor: string | null,
+            hasNext: boolean,
+            limit: number,
+          ) => ({
             data,
             pagination: { nextCursor, hasNext, limit },
           }),
@@ -311,10 +316,10 @@ describe('Profile Handlers', () => {
 
       await handleListUsers(mockCtx as never, requestWithCursor as never);
 
-      expect(mockListUsers).toHaveBeenCalledWith(
-        mockCtx.repos.users,
-        { limit: 10, cursor: 'abc123' },
-      );
+      expect(mockListUsers).toHaveBeenCalledWith(mockCtx.repos.users, {
+        limit: 10,
+        cursor: 'abc123',
+      });
     });
 
     test('should return 500 on unexpected error', async () => {

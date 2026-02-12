@@ -5,7 +5,7 @@
  * Comprehensive tests for session card component covering:
  * - Component rendering with session data
  * - User agent parsing (browser and OS detection)
- * - Date formatting (relative time display)
+ * - Date formatting (short date display)
  * - Current session badge display
  * - Revoke button functionality
  * - Loading/revoking states
@@ -387,7 +387,7 @@ describe('SessionCard', () => {
   // ============================================================================
 
   describe('date formatting', () => {
-    it('should show "Just now" for dates within the current minute', () => {
+    it('should show formatted date for dates within the current minute', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-15T11:59:30Z').toISOString(), // 30 seconds ago
@@ -395,10 +395,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/Just now/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
-    it('should show minutes ago for dates within the hour', () => {
+    it('should show formatted date for dates within the hour', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-15T11:45:00Z').toISOString(), // 15 minutes ago
@@ -406,10 +406,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/15 minutes ago/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
-    it('should show singular "minute" for 1 minute ago', () => {
+    it('should show formatted date for 1 minute ago', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-15T11:59:00Z').toISOString(), // 1 minute ago
@@ -417,10 +417,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/1 minute ago/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
-    it('should show hours ago for dates within the day', () => {
+    it('should show formatted date for dates within the day', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-15T09:00:00Z').toISOString(), // 3 hours ago
@@ -428,10 +428,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/3 hours ago/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
-    it('should show singular "hour" for 1 hour ago', () => {
+    it('should show formatted date for 1 hour ago', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-15T11:00:00Z').toISOString(), // 1 hour ago
@@ -439,10 +439,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/1 hour ago/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
-    it('should show "Yesterday" for dates from yesterday', () => {
+    it('should show formatted date for yesterday', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-14T12:00:00Z').toISOString(), // 1 day ago
@@ -450,10 +450,10 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/Yesterday/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 14, 2024/)).toBeInTheDocument();
     });
 
-    it('should show days ago for dates within the week', () => {
+    it('should show formatted date for dates within the week', () => {
       const session: Session = {
         ...baseSession,
         createdAt: new Date('2024-01-10T12:00:00Z').toISOString(), // 5 days ago
@@ -461,7 +461,7 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/5 days ago/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 10, 2024/)).toBeInTheDocument();
     });
 
     it('should show full date for dates older than a week', () => {
@@ -584,7 +584,7 @@ describe('SessionCard', () => {
 
       render(<SessionCard {...defaultProps} session={session} />);
 
-      expect(screen.getByText(/Just now/)).toBeInTheDocument();
+      expect(screen.getByText(/Jan 15, 2024/)).toBeInTheDocument();
     });
 
     it('should handle IP address with special characters', () => {

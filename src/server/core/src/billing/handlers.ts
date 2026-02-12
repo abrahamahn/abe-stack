@@ -240,12 +240,18 @@ function handleError(
     }
 
     if (error.name === 'ProviderNotConfiguredError') {
-      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Billing service is not configured' } };
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'Billing service is not configured' },
+      };
     }
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
+  return {
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    body: { message: 'An error occurred processing your request' },
+  };
 }
 
 // ============================================================================

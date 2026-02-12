@@ -26,7 +26,9 @@ vi.mock('@abe-stack/ui', async () => {
       </button>
     ),
     Heading: ({ children }: { children: ReactNode }) => <h3>{children}</h3>,
-    Skeleton: (props: Record<string, unknown>) => <div data-testid="skeleton" style={props as React.CSSProperties} />,
+    Skeleton: (props: Record<string, unknown>) => (
+      <div data-testid="skeleton" style={props as React.CSSProperties} />
+    ),
     Text: ({ children, tone }: { children: ReactNode; tone?: string }) => (
       <span data-tone={tone}>{children}</span>
     ),

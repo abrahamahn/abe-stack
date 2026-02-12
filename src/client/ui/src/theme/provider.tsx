@@ -116,9 +116,7 @@ const ThemeProvider = ({
 
   return (
     <ThemeContext.Provider value={contextValue}>
-      <div className="theme">
-        {children}
-      </div>
+      <div className="theme">{children}</div>
     </ThemeContext.Provider>
   );
 };

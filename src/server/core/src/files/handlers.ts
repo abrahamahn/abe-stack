@@ -67,7 +67,10 @@ function handleError(
   }
 
   appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
+  return {
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    body: { message: 'An error occurred processing your request' },
+  };
 }
 
 // ============================================================================

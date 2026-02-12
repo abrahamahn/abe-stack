@@ -115,10 +115,14 @@ export function createAdminBillingClient(config: AdminBillingClientConfig): Admi
     },
 
     async deactivatePlan(planId: string): Promise<SubscriptionActionResponse> {
-      return apiRequest<SubscriptionActionResponse>(factory, `/admin/billing/plans/${planId}/deactivate`, {
-        method: 'POST',
-        body: JSON.stringify({}),
-      });
+      return apiRequest<SubscriptionActionResponse>(
+        factory,
+        `/admin/billing/plans/${planId}/deactivate`,
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+      );
     },
   };
 }

@@ -49,7 +49,10 @@ export async function handleTotpSetup(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -74,7 +77,10 @@ export async function handleTotpEnable(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -102,7 +108,10 @@ export async function handleTotpDisable(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -130,7 +139,10 @@ export async function handleTotpStatus(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
+      return {
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      };
     }
 
     const result = await getTotpStatus(ctx.db, userId);

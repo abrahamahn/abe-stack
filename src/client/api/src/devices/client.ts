@@ -42,8 +42,7 @@ export function createDeviceClient(config: DeviceClientConfig): DeviceClient {
   const factory = createRequestFactory(config);
 
   return {
-    listDevices: () =>
-      apiRequest<{ devices: DeviceItem[] }>(factory, '/users/me/devices'),
+    listDevices: () => apiRequest<{ devices: DeviceItem[] }>(factory, '/users/me/devices'),
     trustDevice: (deviceId) =>
       apiRequest<{ device: DeviceItem }>(factory, `/users/me/devices/${deviceId}/trust`, {
         method: 'POST',

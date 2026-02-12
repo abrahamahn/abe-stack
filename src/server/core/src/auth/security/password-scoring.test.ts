@@ -9,7 +9,6 @@ import {
 } from '@abe-stack/shared';
 import { describe, expect, it } from 'vitest';
 
-
 describe('Password Scoring', () => {
   describe('getCharsetSize', () => {
     it('should return 26 for lowercase only', () => {

@@ -16,7 +16,6 @@ import {
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 
-
 import type { Repositories } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
@@ -179,8 +178,11 @@ export async function verifyRegistration(
     throw new Error('WebAuthn registration verification failed');
   }
 
-  const { credential: regCredential, credentialDeviceType, credentialBackedUp } =
-    verification.registrationInfo;
+  const {
+    credential: regCredential,
+    credentialDeviceType,
+    credentialBackedUp,
+  } = verification.registrationInfo;
 
   // Extract transports from the credential response
   const responseObj = credential['response'] as Record<string, unknown> | undefined;
@@ -281,7 +283,9 @@ export async function verifyAuthentication(
   const storedTransports = parseTransports(storedCred.transports);
 
   const verification = await verifyAuthenticationResponse({
-    response: credential as unknown as Parameters<typeof verifyAuthenticationResponse>[0]['response'],
+    response: credential as unknown as Parameters<
+      typeof verifyAuthenticationResponse
+    >[0]['response'],
     expectedChallenge,
     expectedOrigin: config.origin,
     expectedRPID: config.rpId,

@@ -1,9 +1,5 @@
 // src/client/ui/src/components/billing/PaymentMethodCard.tsx
-import {
-  getCardBrandLabel,
-  getPaymentMethodIcon,
-  getPaymentMethodLabel,
-} from '@abe-stack/shared';
+import { getCardBrandLabel, getPaymentMethodIcon, getPaymentMethodLabel } from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
@@ -106,9 +102,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
               </span>
             </>
           ) : (
-            <span className="payment-method-card__type">
-              {getPaymentMethodLabel(type)}
-            </span>
+            <span className="payment-method-card__type">{getPaymentMethodLabel(type)}</span>
           )}
         </div>
 

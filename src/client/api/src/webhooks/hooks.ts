@@ -77,7 +77,10 @@ export interface WebhookDetailState {
   refresh: () => Promise<void>;
 }
 
-export function useWebhook(clientConfig: WebhookClientConfig, id: string | null): WebhookDetailState {
+export function useWebhook(
+  clientConfig: WebhookClientConfig,
+  id: string | null,
+): WebhookDetailState {
   const [webhook, setWebhook] = useState<WebhookWithDeliveries | null>(null);
   const [isLoading, setIsLoading] = useState(id !== null);
   const [error, setError] = useState<Error | null>(null);

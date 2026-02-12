@@ -30,12 +30,12 @@ The root config enforces strict TypeScript:
   "module": "ESNext",
   "moduleResolution": "bundler",
   "strict": true,
-  "noUncheckedIndexedAccess": true,    // Index signatures return T | undefined
+  "noUncheckedIndexedAccess": true, // Index signatures return T | undefined
   "noImplicitOverride": true,
-  "exactOptionalPropertyTypes": true,  // Distinguish undefined from missing
-  "verbatimModuleSyntax": true,        // Enforces explicit type imports
-  "composite": true,                   // Required for project references
-  "incremental": true                  // Build caching
+  "exactOptionalPropertyTypes": true, // Distinguish undefined from missing
+  "verbatimModuleSyntax": true, // Enforces explicit type imports
+  "composite": true, // Required for project references
+  "incremental": true, // Build caching
 }
 ```
 
@@ -45,13 +45,13 @@ Build cache is stored at `node_modules/.cache/typescript/tsconfig.tsbuildinfo`.
 
 Defined in the root `tsconfig.json` `compilerOptions.paths`:
 
-| Alias | Source |
-|---|---|
-| `@abe-stack/shared` | `./src/shared/src/index.ts` |
-| `@abe-stack/ui` | `./src/client/ui/src/index.ts` |
-| `@abe-stack/api` | `./src/client/api/src/index.ts` |
-| `@abe-stack/core` | `./src/server/core/src/index.ts` |
-| `@abe-stack/db` | `./src/server/db/src/index.ts` |
+| Alias                      | Source                             |
+| -------------------------- | ---------------------------------- |
+| `@abe-stack/shared`        | `./src/shared/src/index.ts`        |
+| `@abe-stack/ui`            | `./src/client/ui/src/index.ts`     |
+| `@abe-stack/api`           | `./src/client/api/src/index.ts`    |
+| `@abe-stack/core`          | `./src/server/core/src/index.ts`   |
+| `@abe-stack/db`            | `./src/server/db/src/index.ts`     |
 | `@abe-stack/server-engine` | `./src/server/engine/src/index.ts` |
 
 Subpath aliases (e.g., `@abe-stack/shared/*`) map to the corresponding source directories.
@@ -62,16 +62,16 @@ Web app path aliases are defined in both `tsconfig.json` and `vite.config.ts`. T
 
 Common aliases in `src/apps/web/`:
 
-| Alias | Path |
-|---|---|
-| `@` | `./src/*` |
-| `@app` | `./src/app` |
-| `@auth` | `./src/features/auth` |
-| `@features` | `./src/features` |
-| `@config` | `./src/config` |
+| Alias        | Path                       |
+| ------------ | -------------------------- |
+| `@`          | `./src/*`                  |
+| `@app`       | `./src/app`                |
+| `@auth`      | `./src/features/auth`      |
+| `@features`  | `./src/features`           |
+| `@config`    | `./src/config`             |
 | `@dashboard` | `./src/features/dashboard` |
-| `@settings` | `./src/features/settings` |
-| `@billing` | `./src/features/billing` |
+| `@settings`  | `./src/features/settings`  |
+| `@billing`   | `./src/features/billing`   |
 
 New aliases are auto-created when you add a directory with an `index.ts` barrel file.
 
@@ -127,18 +127,18 @@ Environment variables are validated at startup using Zod schemas defined in `src
 // Example: accessing validated config
 import { config } from '@abe-stack/shared/config';
 
-config.server.port;        // number, validated
-config.auth.jwtSecret;     // string, validated length >= 32
+config.server.port; // number, validated
+config.auth.jwtSecret; // string, validated length >= 32
 config.db.connectionString; // string, validated format
 ```
 
 Environment files are stored in `config/env/`:
 
-| File | Purpose |
-|---|---|
-| `.env.local` | Local development (not committed) |
-| `.env.development` | Development defaults |
-| `.env.production` | Production defaults |
+| File               | Purpose                           |
+| ------------------ | --------------------------------- |
+| `.env.local`       | Local development (not committed) |
+| `.env.development` | Development defaults              |
+| `.env.production`  | Production defaults               |
 
 ## Turbo Configuration
 

@@ -99,7 +99,10 @@ export async function handleListJobs(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -134,7 +137,10 @@ export async function handleGetJobDetails(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -162,7 +168,10 @@ export async function handleGetQueueStats(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -200,7 +209,10 @@ export async function handleRetryJob(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -238,6 +250,9 @@ export async function handleCancelJob(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }

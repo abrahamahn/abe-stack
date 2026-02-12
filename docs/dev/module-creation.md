@@ -53,7 +53,10 @@ Thin HTTP layer using the `asAppContext` pattern:
 
 ```typescript
 export async function handleListMyFeature(
-  ctx: HandlerContext, _body: unknown, request: FastifyRequest, reply: FastifyReply,
+  ctx: HandlerContext,
+  _body: unknown,
+  request: FastifyRequest,
+  reply: FastifyReply,
 ): Promise<{ status: 200; body: { items: unknown[] } }> {
   const appCtx = asAppContext(ctx);
   const items = await listMyFeature(appCtx);
@@ -83,11 +86,11 @@ After scaffolding:
 
 ## Naming Conventions
 
-| Input (kebab-case) | PascalCase | camelCase | Usage |
-|---|---|---|---|
-| `my-feature` | `MyFeature` | `myFeature` | Types, variables |
-| `api-keys` | `ApiKeys` | `apiKeys` | Types, variables |
-| `analytics` | `Analytics` | `analytics` | Types, variables |
+| Input (kebab-case) | PascalCase  | camelCase   | Usage            |
+| ------------------ | ----------- | ----------- | ---------------- |
+| `my-feature`       | `MyFeature` | `myFeature` | Types, variables |
+| `api-keys`         | `ApiKeys`   | `apiKeys`   | Types, variables |
+| `analytics`        | `Analytics` | `analytics` | Types, variables |
 
 ## Validation Rules
 

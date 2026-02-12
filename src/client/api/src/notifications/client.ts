@@ -160,7 +160,9 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   // Convert base64url to base64 if needed
   const base64 = base64String.replace(/-/g, '+').replace(/_/g, '/');
   const BASE64_BLOCK_SIZE = 4;
-  const padding = '='.repeat((BASE64_BLOCK_SIZE - (base64.length % BASE64_BLOCK_SIZE)) % BASE64_BLOCK_SIZE);
+  const padding = '='.repeat(
+    (BASE64_BLOCK_SIZE - (base64.length % BASE64_BLOCK_SIZE)) % BASE64_BLOCK_SIZE,
+  );
   const rawData = atob(base64 + padding);
   const outputArray = new Uint8Array(rawData.length);
 

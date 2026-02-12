@@ -46,6 +46,7 @@ const items = await db.query(
 ```
 
 Key rules:
+
 - Default limit: 20 items
 - Maximum limit cap: 100 items (prevents full-table scans)
 - Always use `ORDER BY` with pagination for deterministic results
@@ -57,9 +58,7 @@ Expired tokens and stale data are cleaned up periodically:
 
 ```typescript
 // Delete expired refresh tokens
-await db.execute(
-  deleteFrom(REFRESH_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
-);
+await db.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql());
 ```
 
 Use `lt('expires_at', now)` with an index on `expires_at` for efficient batch deletion.
@@ -103,6 +102,7 @@ build: {
 ```
 
 Key decisions:
+
 - **vendor-react**: React and ReactDOM are extracted into a stable chunk that changes rarely (good cache hit rate)
 - **chunkSizeWarningLimit: 300**: Aggressive threshold catches bundle bloat early
 - **cssCodeSplit: true**: Each route loads only its own CSS

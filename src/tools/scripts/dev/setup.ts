@@ -19,7 +19,15 @@
 
 import { execSync, spawnSync } from 'child_process';
 import { randomFillSync } from 'crypto';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from 'fs';
+import {
+  closeSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  renameSync,
+  writeSync,
+} from 'fs';
 import { dirname, resolve } from 'path';
 import { createInterface } from 'readline';
 

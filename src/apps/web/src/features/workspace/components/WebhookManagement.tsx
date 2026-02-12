@@ -6,11 +6,7 @@
  * Follows the same CRUD management pattern as ApiKeysManagement.
  */
 
-import {
-  useCreateWebhook,
-  useDeleteWebhook,
-  useWebhooks,
-} from '@abe-stack/api';
+import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@abe-stack/api';
 import {
   Alert,
   Badge,
@@ -29,7 +25,6 @@ import {
   Text,
 } from '@abe-stack/ui';
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
-
 
 import { WebhookDetailView } from './WebhookDetailView';
 
@@ -199,7 +194,9 @@ export const WebhookManagement = ({ className }: WebhookManagementProps): ReactE
             size="small"
             className="mt-3"
             onClick={handleCreate}
-            disabled={createWebhook.isLoading || newUrl.trim() === '' || selectedEvents.length === 0}
+            disabled={
+              createWebhook.isLoading || newUrl.trim() === '' || selectedEvents.length === 0
+            }
           >
             {createWebhook.isLoading ? 'Creating...' : 'Create Webhook'}
           </Button>

@@ -22,4 +22,8 @@ export {
 } from './stats';
 
 // Types (re-exported from shared — canonical definitions live in @abe-stack/shared)
-export type { SubscriptionKey, WebSocket as PubSubWebSocket, WebSocketStats } from '@abe-stack/shared';
+export type {
+  SubscriptionKey,
+  WebSocket as PubSubWebSocket,
+  WebSocketStats,
+} from '@abe-stack/shared';

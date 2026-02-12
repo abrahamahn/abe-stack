@@ -146,7 +146,10 @@ export function NotificationPreferencesForm({
   if (preferences === null) {
     return (
       <div className={className}>
-        <EmptyState title="No preferences found" description="Notification preferences will appear once configured" />
+        <EmptyState
+          title="No preferences found"
+          description="Notification preferences will appear once configured"
+        />
       </div>
     );
   }

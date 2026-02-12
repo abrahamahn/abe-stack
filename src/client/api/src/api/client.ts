@@ -269,10 +269,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         body: JSON.stringify(data),
       });
     },
-    async smsVerifyLogin(data: {
-      challengeToken: string;
-      code: string;
-    }): Promise<AuthResponse> {
+    async smsVerifyLogin(data: { challengeToken: string; code: string }): Promise<AuthResponse> {
       return request<AuthResponse>('/auth/sms/verify', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -345,10 +342,10 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       credential: Record<string, unknown>;
       name?: string;
     }): Promise<{ credentialId: string; message: string }> {
-      return request<{ credentialId: string; message: string }>(
-        '/auth/webauthn/register/verify',
-        { method: 'POST', body: JSON.stringify(data) },
-      );
+      return request<{ credentialId: string; message: string }>('/auth/webauthn/register/verify', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
     async webauthnLoginOptions(email?: string): Promise<{ options: Record<string, unknown> }> {
       return request<{ options: Record<string, unknown> }>('/auth/webauthn/login/options', {
@@ -375,7 +372,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       });
     },
     async deletePasskey(id: string): Promise<{ message: string }> {
-      return request<{ message: string }>(`/users/me/passkeys/${id}`, {
+      return request<{ message: string }>(`/users/me/passkeys/${id}/delete`, {
         method: 'DELETE',
       });
     },

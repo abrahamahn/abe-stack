@@ -400,9 +400,7 @@ describe('Job Operations Flow Integration Tests', () => {
         { status: 'failed', count: '3' },
         { status: 'dead_letter', count: '1' },
       ]);
-      mockDb.raw.mockResolvedValueOnce([
-        { completed: '10', failed: '1' },
-      ]);
+      mockDb.raw.mockResolvedValueOnce([{ completed: '10', failed: '1' }]);
 
       const adminJwt = createAdminJwt();
       const response = await testServer.inject(

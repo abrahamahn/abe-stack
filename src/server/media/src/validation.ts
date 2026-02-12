@@ -108,7 +108,11 @@ export function validateUploadConfig(config: {
     errors.push('timeout must be positive');
   }
 
-  if (config.timeout !== undefined && config.timeout !== 0 && config.timeout > MAX_UPLOAD_TIMEOUT_MS) {
+  if (
+    config.timeout !== undefined &&
+    config.timeout !== 0 &&
+    config.timeout > MAX_UPLOAD_TIMEOUT_MS
+  ) {
     errors.push('timeout cannot exceed 1 hour');
   }
 

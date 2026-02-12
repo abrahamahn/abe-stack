@@ -53,9 +53,7 @@ function getCooldownInfo(lastChangeAt: string | null | undefined): {
     return { isActive: false, nextChangeDate: null };
   }
   const lastChange = new Date(lastChangeAt);
-  const nextChange = new Date(
-    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY,
-  );
+  const nextChange = new Date(lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY);
   return {
     isActive: new Date() < nextChange,
     nextChangeDate: nextChange,

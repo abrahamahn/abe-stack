@@ -102,8 +102,7 @@ const PasskeyRow = ({ passkey, onRename, onDelete }: PasskeyRowProps): ReactElem
             </div>
             <Text size="sm" className="text-muted">
               Created {formatDateTime(passkey.createdAt)}
-              {passkey.lastUsedAt !== null &&
-                ` · Last used ${formatDateTime(passkey.lastUsedAt)}`}
+              {passkey.lastUsedAt !== null && ` · Last used ${formatDateTime(passkey.lastUsedAt)}`}
             </Text>
           </div>
         )}
@@ -161,9 +160,7 @@ export function PasskeyManagement({ className }: PasskeyManagementProps): ReactE
   if (!isSupported) {
     return (
       <div className={className}>
-        <Text className="text-muted">
-          Passkeys are not supported in this browser.
-        </Text>
+        <Text className="text-muted">Passkeys are not supported in this browser.</Text>
       </div>
     );
   }
@@ -180,10 +177,14 @@ export function PasskeyManagement({ className }: PasskeyManagementProps): ReactE
   return (
     <div className={className}>
       {error !== null && (
-        <Text tone="danger" className="mb-4">{error}</Text>
+        <Text tone="danger" className="mb-4">
+          {error}
+        </Text>
       )}
       {registerError !== null && (
-        <Text tone="danger" className="mb-4">{registerError}</Text>
+        <Text tone="danger" className="mb-4">
+          {registerError}
+        </Text>
       )}
 
       <div className="flex flex-col gap-3 mb-4">

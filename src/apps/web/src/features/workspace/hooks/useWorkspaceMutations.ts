@@ -109,7 +109,9 @@ export function useUpdateWorkspace(options?: UseUpdateWorkspaceOptions): UseUpda
   }
   const currentWorkspaceId = workspaceRef.current['id'];
   const undoPathWorkspaceId =
-    typeof currentWorkspaceId === 'string' && currentWorkspaceId !== '' ? currentWorkspaceId : 'unknown';
+    typeof currentWorkspaceId === 'string' && currentWorkspaceId !== ''
+      ? currentWorkspaceId
+      : 'unknown';
 
   const mutation = useUndoableMutation<Tenant, Error, { id: string; data: UpdateTenantInput }>({
     mutationFn: async ({ id, data }): Promise<Tenant> => {

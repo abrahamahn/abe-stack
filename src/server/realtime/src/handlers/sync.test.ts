@@ -130,7 +130,10 @@ describe('Realtime Sync Handler', () => {
         const result = await handleWrite(ctx, body, req);
 
         expect(result.status).toBe(403);
-        expect(result.body).toEqual({ code: 'FORBIDDEN', message: 'Author ID must match authenticated user' });
+        expect(result.body).toEqual({
+          code: 'FORBIDDEN',
+          message: 'Author ID must match authenticated user',
+        });
         expect(ctx.log.warn).toHaveBeenCalled();
       });
     });

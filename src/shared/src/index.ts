@@ -1184,7 +1184,13 @@ export {
 } from './utils/crypto/crypto';
 
 // --- Date ---
-export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly, toISOStringOrNull } from './utils/date';
+export {
+  formatDate,
+  formatDateTime,
+  formatTimeAgo,
+  toISODateOnly,
+  toISOStringOrNull,
+} from './utils/date';
 
 // --- HTTP ---
 export {

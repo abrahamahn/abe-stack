@@ -9,7 +9,6 @@
 import { formatDateTime } from '@abe-stack/shared';
 import { Alert, Badge, Button, Card, Heading, Text } from '@abe-stack/ui';
 
-
 import { useDataExport } from '../hooks/useDataExport';
 
 import type { ExportStatus } from '../hooks/useDataExport';
@@ -108,10 +107,7 @@ export const DataExportSection = ({ className }: DataExportSectionProps): ReactE
               <> Estimated ready by {formatDateTime(exportInfo.estimatedReadyAt)}.</>
             )}
             {exportInfo.requestedAt !== null && (
-              <>
-                {' '}
-                Requested on {formatDateTime(exportInfo.requestedAt)}.
-              </>
+              <> Requested on {formatDateTime(exportInfo.requestedAt)}.</>
             )}
           </Alert>
         )}

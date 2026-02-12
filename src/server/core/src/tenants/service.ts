@@ -8,8 +8,22 @@
  * @module service
  */
 
-import { deleteFrom, eq, insert, select, toCamelCase, update, withTransaction } from '@abe-stack/db';
-import { BadRequestError, ForbiddenError, generateSecureId, NotFoundError, slugify } from '@abe-stack/shared';
+import {
+  deleteFrom,
+  eq,
+  insert,
+  select,
+  toCamelCase,
+  update,
+  withTransaction,
+} from '@abe-stack/db';
+import {
+  BadRequestError,
+  ForbiddenError,
+  generateSecureId,
+  NotFoundError,
+  slugify,
+} from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
 
@@ -207,10 +221,7 @@ export async function createTenant(
  * @param userId - ID of the user
  * @returns Array of tenants with the user's role
  */
-export async function getUserTenants(
-  db: DbClient,
-  userId: string,
-): Promise<TenantWithRole[]> {
+export async function getUserTenants(db: DbClient, userId: string): Promise<TenantWithRole[]> {
   const query = select(TENANTS_TABLE)
     .columns(
       'tenants.id',
@@ -224,10 +235,7 @@ export async function getUserTenants(
       'tenants.updated_at',
       'memberships.role',
     )
-    .innerJoin(
-      MEMBERSHIPS_TABLE,
-      { text: 'memberships.tenant_id = tenants.id', values: [] },
-    )
+    .innerJoin(MEMBERSHIPS_TABLE, { text: 'memberships.tenant_id = tenants.id', values: [] })
     .where(eq('memberships.user_id', userId))
     .toSql();
 

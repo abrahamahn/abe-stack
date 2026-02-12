@@ -76,9 +76,7 @@ export async function enforceMaxConcurrentSessions(
   }
 
   // Sort by creation date ascending (oldest first)
-  const sorted = [...activeFamilies].sort(
-    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-  );
+  const sorted = [...activeFamilies].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   // Revoke the oldest sessions that exceed the limit
   const excessCount = activeFamilies.length - maxSessions;

@@ -180,10 +180,7 @@ describe('enforceMaxConcurrentSessions', () => {
   });
 
   it('should not revoke any sessions when under the limit', async () => {
-    const families = [
-      createMockFamily({ id: 'family-1' }),
-      createMockFamily({ id: 'family-2' }),
-    ];
+    const families = [createMockFamily({ id: 'family-1' }), createMockFamily({ id: 'family-2' })];
     vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(families);
 
     const count = await enforceMaxConcurrentSessions(repos, 'user-1', 5);

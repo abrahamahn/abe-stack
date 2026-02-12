@@ -86,7 +86,10 @@ export async function handleSendSmsCode(
     const phoneVerified = userResult.phoneVerified;
 
     if (phone === null || phoneVerified !== true) {
-      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'No verified phone number on account' } };
+      return {
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { message: 'No verified phone number on account' },
+      };
     }
 
     // Check rate limit
@@ -101,7 +104,10 @@ export async function handleSendSmsCode(
     // Get the SMS provider from context (may not be configured)
     if (ctx.sms === undefined) {
       ctx.log.error('SMS provider not configured');
-      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'SMS service unavailable' } };
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'SMS service unavailable' },
+      };
     }
     const smsProvider = ctx.sms;
 
@@ -110,7 +116,10 @@ export async function handleSendSmsCode(
 
     if (!result.success) {
       ctx.log.error({ error: result.error }, 'Failed to send SMS challenge code');
-      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to send verification code' } };
+      return {
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        body: { message: 'Failed to send verification code' },
+      };
     }
 
     return { status: HTTP_STATUS.OK, body: { message: 'Verification code sent' } };

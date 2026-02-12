@@ -32,7 +32,7 @@ export const WorkspaceListPage = (): ReactElement => {
     if (isFirstWorkspace) {
       toastStore.getState().show({
         title: 'Your first workspace!',
-        description: 'You\'re all set to start collaborating with your team.',
+        description: "You're all set to start collaborating with your team.",
         tone: 'success',
       });
       navigate(`/workspaces/${tenantId}?welcome=1`);

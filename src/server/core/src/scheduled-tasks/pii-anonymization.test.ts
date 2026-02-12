@@ -64,7 +64,13 @@ describe('anonymizeDeletedUsers', () => {
           bio: 'Bio text',
           phone: '123-456-7890',
           avatarUrl: 'https://example.com/avatar.jpg',
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
       ],
       total: 1,
       page: 1,
@@ -96,7 +102,13 @@ describe('anonymizeDeletedUsers', () => {
           id: 'user-1',
           email: 'user1@example.com',
           deletedAt: recentDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
       ],
       total: 1,
       page: 1,
@@ -121,7 +133,13 @@ describe('anonymizeDeletedUsers', () => {
           id: 'user-1',
           email: 'deleted-abc123@anonymized.local',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
       ],
       total: 1,
       page: 1,
@@ -144,7 +162,13 @@ describe('anonymizeDeletedUsers', () => {
           id: 'user-1',
           email: 'active@example.com',
           deletedAt: null,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
       ],
       total: 1,
       page: 1,
@@ -169,12 +193,24 @@ describe('anonymizeDeletedUsers', () => {
           id: 'user-1',
           email: 'user1@example.com',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
         {
           id: 'user-2',
           email: 'user2@example.com',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends {
+          listWithFilters: (...args: unknown[]) => Promise<infer R>;
+        }
+          ? R extends { data: (infer T)[] }
+            ? T
+            : never
+          : never,
       ],
       total: 2,
       page: 1,

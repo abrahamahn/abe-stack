@@ -96,14 +96,10 @@ export async function apiRequest<T>(
     });
   } catch (error: unknown) {
     const cause = error instanceof Error ? error : new Error(String(error));
-    throw new NetworkError(
-      `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
-      cause,
-    ) as Error;
+    throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
   }
 
-  const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
-    Record<string, unknown>;
+  const data = (await response.json().catch(() => ({}))) as ApiErrorBody & Record<string, unknown>;
 
   if (!response.ok) {
     throw createApiError(response.status, data);

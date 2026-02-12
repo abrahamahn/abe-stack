@@ -8,7 +8,6 @@
 import { Spinner, Text } from '@abe-stack/ui';
 import React from 'react';
 
-
 import { useMediaStatus } from '../hooks';
 
 // ============================================================================
@@ -23,9 +22,7 @@ export interface MediaStatusIndicatorProps {
 // Component
 // ============================================================================
 
-export function MediaStatusIndicator({
-  mediaId,
-}: MediaStatusIndicatorProps): React.JSX.Element {
+export function MediaStatusIndicator({ mediaId }: MediaStatusIndicatorProps): React.JSX.Element {
   const { status, isLoading, isError } = useMediaStatus({
     id: mediaId,
     enabled: true,

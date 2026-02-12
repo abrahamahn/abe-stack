@@ -100,7 +100,10 @@ export async function handleListUsers(
     return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -142,7 +145,10 @@ export async function handleGetUser(
     }
 
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -199,7 +205,10 @@ export async function handleUpdateUser(
     }
 
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -260,7 +269,10 @@ export async function handleLockUser(
     }
 
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -311,7 +323,10 @@ export async function handleUnlockUser(
     }
 
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -356,7 +371,10 @@ export async function handleSearchUsers(
     return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -414,6 +432,9 @@ export async function handleHardBan(
     }
 
     ctx.log.error(toError(error));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }

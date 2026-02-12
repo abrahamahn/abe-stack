@@ -48,10 +48,7 @@ describe('AppLeftMenu', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '/pricing');
-    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute(
-      'href',
-      '/ui-library',
-    );
+    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute('href', '/ui-library');
 
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Activities' })).toBeNull();
@@ -71,19 +68,10 @@ describe('AppLeftMenu', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '/pricing');
-    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute(
-      'href',
-      '/ui-library',
-    );
+    expect(screen.getByRole('link', { name: 'UI Library' })).toHaveAttribute('href', '/ui-library');
     expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
-    expect(screen.getByRole('link', { name: 'Activities' })).toHaveAttribute(
-      'href',
-      '/activities',
-    );
-    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute(
-      'href',
-      '/workspaces',
-    );
+    expect(screen.getByRole('link', { name: 'Activities' })).toHaveAttribute('href', '/activities');
+    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute('href', '/workspaces');
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
 
     expect(screen.queryByRole('link', { name: 'Admin' })).toBeNull();
@@ -100,14 +88,8 @@ describe('AppLeftMenu', () => {
 
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
-    expect(screen.getByRole('link', { name: 'Activities' })).toHaveAttribute(
-      'href',
-      '/activities',
-    );
-    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute(
-      'href',
-      '/workspaces',
-    );
+    expect(screen.getByRole('link', { name: 'Activities' })).toHaveAttribute('href', '/activities');
+    expect(screen.getByRole('link', { name: 'Workspaces' })).toHaveAttribute('href', '/workspaces');
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
     expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin');
   });

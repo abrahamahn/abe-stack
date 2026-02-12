@@ -161,16 +161,12 @@ export const WorkspaceDetailPage = (): ReactElement => {
       {
         id: 'feature-overrides',
         label: 'Feature Overrides',
-        content:
-          workspaceId !== null ? <WorkspaceFeatureOverrides tenantId={workspaceId} /> : null,
+        content: workspaceId !== null ? <WorkspaceFeatureOverrides tenantId={workspaceId} /> : null,
       },
       {
         id: 'webhooks',
         label: 'Webhooks',
-        content:
-          workspaceId !== null ? (
-            <WebhookManagement tenantId={workspaceId} />
-          ) : null,
+        content: workspaceId !== null ? <WebhookManagement tenantId={workspaceId} /> : null,
       },
     ],
     [navigate, workspaceId, user?.id],

@@ -213,7 +213,10 @@ describe('WebSocket Lifecycle', () => {
       // handleUpgrade should have been called (CSRF passed)
       expect(mockHandleUpgrade).toHaveBeenCalled();
       // When no token is provided, the WebSocket should be closed with code 1008
-      expect(mockWs.close).toHaveBeenCalledWith(WS_CLOSE_POLICY_VIOLATION, 'Authentication required');
+      expect(mockWs.close).toHaveBeenCalledWith(
+        WS_CLOSE_POLICY_VIOLATION,
+        'Authentication required',
+      );
     });
 
     test('should accept connection with token in subprotocol header', () => {
@@ -446,7 +449,9 @@ describe('WebSocket Lifecycle', () => {
       registerWebSocket(mockServer as never, mockCtx, { verifyToken: mockVerifyToken });
 
       // Should have registered without error in production mode
-      expect(mockCtx.log.info).toHaveBeenCalledWith(`WebSocket support registered on ${WEBSOCKET_PATH}`);
+      expect(mockCtx.log.info).toHaveBeenCalledWith(
+        `WebSocket support registered on ${WEBSOCKET_PATH}`,
+      );
     });
   });
 });

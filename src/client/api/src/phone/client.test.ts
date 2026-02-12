@@ -489,7 +489,9 @@ describe('createPhoneClient', () => {
 
       const client = createClient('test-token');
 
-      await expect(client.setPhone('+1234567890')).rejects.toThrow('Failed to fetch POST /users/me/phone');
+      await expect(client.setPhone('+1234567890')).rejects.toThrow(
+        'Failed to fetch POST /users/me/phone',
+      );
     });
 
     it('should throw NetworkError for DNS failures', async () => {
@@ -497,7 +499,9 @@ describe('createPhoneClient', () => {
 
       const client = createClient('test-token');
 
-      await expect(client.verifyPhone('123456')).rejects.toThrow('Failed to fetch POST /users/me/phone/verify');
+      await expect(client.verifyPhone('123456')).rejects.toThrow(
+        'Failed to fetch POST /users/me/phone/verify',
+      );
     });
 
     it('should handle JSON parse failure in error response', async () => {

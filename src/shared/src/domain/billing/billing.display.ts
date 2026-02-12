@@ -1,6 +1,11 @@
 // src/shared/src/domain/billing/billing.display.ts
 
-import type { InvoiceStatus, PaymentMethodType, PlanInterval, SubscriptionStatus } from './billing.schemas';
+import type {
+  InvoiceStatus,
+  PaymentMethodType,
+  PlanInterval,
+  SubscriptionStatus,
+} from './billing.schemas';
 
 // ============================================================================
 // Types

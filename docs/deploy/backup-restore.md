@@ -23,12 +23,12 @@ Managed providers typically run automated daily backups with 7-day retention. Ex
 
 ## Recommended Schedule
 
-| Backup type      | Frequency | Retention |
-|------------------|-----------|-----------|
-| Automated daily  | Daily     | 30 days   |
-| Pre-migration    | Before each migration | Until next successful migration |
-| Pre-deployment   | Before major releases | 7 days    |
-| Manual snapshot  | On demand | As needed |
+| Backup type     | Frequency             | Retention                       |
+| --------------- | --------------------- | ------------------------------- |
+| Automated daily | Daily                 | 30 days                         |
+| Pre-migration   | Before each migration | Until next successful migration |
+| Pre-deployment  | Before major releases | 7 days                          |
+| Manual snapshot | On demand             | As needed                       |
 
 ## Manual Backup Commands
 

@@ -137,7 +137,7 @@ vi.mock('@abe-stack/ui', () => {
 // ============================================================================
 
 function createMockUser(overrides: Partial<User> = {}): User {
-  return ({
+  return {
     id: 'user-1' as const,
     email: 'test@example.com',
     username: 'testuser',
@@ -152,7 +152,7 @@ function createMockUser(overrides: Partial<User> = {}): User {
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
-  }) as unknown as User;
+  } as unknown as User;
 }
 
 const defaultHookReturn: PhoneState = {

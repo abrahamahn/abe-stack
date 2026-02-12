@@ -34,7 +34,12 @@ import {
 import { DAYS_PER_WEEK, MS_PER_DAY } from '@abe-stack/shared';
 
 import type { AuthEmailTemplates } from '@abe-stack/core/auth';
-import type { BillingService, EmailService, StorageClient, SubscriptionKey } from '@abe-stack/shared';
+import type {
+  BillingService,
+  EmailService,
+  StorageClient,
+  SubscriptionKey,
+} from '@abe-stack/shared';
 import type { AppConfig, FullEnv } from '@abe-stack/shared/config';
 import type { FastifyBaseLogger } from 'fastify';
 

@@ -3,7 +3,6 @@
  * PhoneManagement — Add, verify, and remove a phone number for SMS 2FA.
  */
 
-
 import { usePhone } from '@abe-stack/api';
 import { Alert, Button, Card, Input, Text } from '@abe-stack/ui';
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
@@ -145,7 +144,9 @@ export const PhoneManagement = ({
             type="text"
             placeholder="6-digit code"
             value={code}
-            onChange={(e) => { setCode(e.target.value); }}
+            onChange={(e) => {
+              setCode(e.target.value);
+            }}
             maxLength={6}
           />
           <Button
@@ -185,7 +186,9 @@ export const PhoneManagement = ({
           type="tel"
           placeholder="+1 555 123 4567"
           value={phone}
-          onChange={(e) => { setPhoneInput(e.target.value); }}
+          onChange={(e) => {
+            setPhoneInput(e.target.value);
+          }}
         />
         <Button
           type="button"

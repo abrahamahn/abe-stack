@@ -1,7 +1,7 @@
 // src/client/engine/src/storage/storage.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { localStorageQueue } from '../storage';
+import { localStorageQueue } from './storage';
 
 // Mock localStorage
 const createMockLocalStorage = (): {

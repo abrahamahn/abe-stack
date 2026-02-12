@@ -8,11 +8,13 @@ import type { RawDb } from './client';
 vi.mock('./client', () => {
   let callCount = 0;
   return {
-    createRawDb: vi.fn().mockImplementation((urlOrConfig: string | { connectionString: string }) => {
-      callCount += 1;
-      const url = typeof urlOrConfig === 'string' ? urlOrConfig : urlOrConfig.connectionString;
-      return { __mockId: callCount, __url: url } as unknown as RawDb;
-    }),
+    createRawDb: vi
+      .fn()
+      .mockImplementation((urlOrConfig: string | { connectionString: string }) => {
+        callCount += 1;
+        const url = typeof urlOrConfig === 'string' ? urlOrConfig : urlOrConfig.connectionString;
+        return { __mockId: callCount, __url: url } as unknown as RawDb;
+      }),
   };
 });
 

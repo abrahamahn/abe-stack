@@ -26,12 +26,7 @@ const API_CLIENT_PATH = path.resolve('src/client/api/src/api/client.ts');
  * (webhooks, internal, system routes, etc.)
  */
 const EXCLUDED_MODULES = new Set(['system', 'webhooks']);
-const EXCLUDED_PATTERNS = [
-  /\/health$/,
-  /\/readiness$/,
-  /\/docs/,
-  /\/webhook/,
-];
+const EXCLUDED_PATTERNS = [/\/health$/, /\/readiness$/, /\/docs/, /\/webhook/];
 
 // ============================================================================
 // Client Method Extraction
@@ -54,7 +49,8 @@ export function extractClientPaths(clientPath: string = API_CLIENT_PATH): Set<st
   const paths = new Set<string>();
 
   // Match URL patterns like '/api/v1/auth/login', `/auth/login`, 'auth/login'
-  const urlPattern = /['"`](?:\/api(?:\/v\d+)?)?\/([a-z][a-z0-9/-]*(?:\$\{[^}]+\}[a-z0-9/-]*)*)['"`]/g;
+  const urlPattern =
+    /['"`](?:\/api(?:\/v\d+)?)?\/([a-z][a-z0-9/-]*(?:\$\{[^}]+\}[a-z0-9/-]*)*)['"`]/g;
   let match: RegExpExecArray | null;
 
   while ((match = urlPattern.exec(content)) !== null) {
@@ -108,10 +104,7 @@ export interface SyncResult {
  * @param clientPath - Path to ApiClient source (for testing)
  * @returns Sync check results
  */
-export function checkSync(
-  manifest: RouteManifestEntry[],
-  clientPath?: string,
-): SyncResult {
+export function checkSync(manifest: RouteManifestEntry[], clientPath?: string): SyncResult {
   const clientPaths = extractClientPaths(clientPath);
   const uncovered: RouteManifestEntry[] = [];
   let excluded = 0;
@@ -160,9 +153,7 @@ if (isMainModule) {
     process.exit(1);
   }
 
-  const manifest: RouteManifestEntry[] = JSON.parse(
-    fs.readFileSync(manifestPath, 'utf-8'),
-  );
+  const manifest: RouteManifestEntry[] = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 
   const result = checkSync(manifest);
 

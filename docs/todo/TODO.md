@@ -2851,9 +2851,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 - [x] Tool: route manifest exporter — `pnpm route:manifest` outputs JSON of all registered routes
 - [x] Tool: API client sync validator — `pnpm audit:api-sync` checks client coverage vs routes
-- [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output) *(deferred to ROADMAP)*
-- [ ] Tool: generate React Query hooks from client definitions *(deferred to ROADMAP)*
-- [ ] CI: regenerate client on route/schema changes (pre-commit or CI step) *(deferred to ROADMAP)*
+- [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output) _(deferred to ROADMAP)_
+- [ ] Tool: generate React Query hooks from client definitions _(deferred to ROADMAP)_
+- [ ] CI: regenerate client on route/schema changes (pre-commit or CI step) _(deferred to ROADMAP)_
 
 **Module Scaffold CLI:**
 
@@ -2878,7 +2878,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Unit: scaffold template generation test (19 tests passing)
 - [x] Unit: request context logger — verify IP, method, path included in structured log output
 - [x] Unit: severity-based logging — 5xx produces error-level with stack, 4xx produces warn-level without stack
-- [ ] Integration: generated client successfully calls all routes *(deferred to ROADMAP)*
+- [ ] Integration: generated client successfully calls all routes _(deferred to ROADMAP)_
 - [x] Manual: `pnpm scaffold:module test-module` → produces correct files → type-checks
 
 ---

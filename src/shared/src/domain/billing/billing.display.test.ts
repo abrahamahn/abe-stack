@@ -14,10 +14,20 @@ import {
   getSubscriptionStatusLabel,
   getSubscriptionStatusVariant,
 } from './billing.display';
-import { INVOICE_STATUSES, PAYMENT_METHOD_TYPES, PLAN_INTERVALS, SUBSCRIPTION_STATUSES } from './billing.schemas';
+import {
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+} from './billing.schemas';
 
 import type { StatusVariant } from './billing.display';
-import type { InvoiceStatus, PaymentMethodType, PlanInterval, SubscriptionStatus } from './billing.schemas';
+import type {
+  InvoiceStatus,
+  PaymentMethodType,
+  PlanInterval,
+  SubscriptionStatus,
+} from './billing.schemas';
 
 describe('billing.display', () => {
   describe('formatPrice', () => {

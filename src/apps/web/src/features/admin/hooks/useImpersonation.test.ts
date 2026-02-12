@@ -88,9 +88,7 @@ describe('useImpersonation', () => {
 
     const { result } = renderHook(() => useImpersonation());
 
-    await expect(result.current.endImpersonation()).rejects.toThrow(
-      'Failed to end impersonation',
-    );
+    await expect(result.current.endImpersonation()).rejects.toThrow('Failed to end impersonation');
   });
 
   it('should throw error if startImpersonation fails', async () => {

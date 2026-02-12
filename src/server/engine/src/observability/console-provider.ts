@@ -24,7 +24,12 @@ export class ConsoleErrorTrackingProvider implements ErrorTrackingProvider {
   private readonly log: LogFn;
   private config: ErrorTrackingConfig | null = null;
   private userContext: { userId: string; email?: string } | null = null;
-  private readonly breadcrumbs: Array<{ message: string; category: string; data?: Record<string, unknown>; timestamp: string }> = [];
+  private readonly breadcrumbs: Array<{
+    message: string;
+    category: string;
+    data?: Record<string, unknown>;
+    timestamp: string;
+  }> = [];
 
   constructor(log?: LogFn) {
     this.log = log ?? defaultLog;
@@ -81,7 +86,10 @@ export class ConsoleErrorTrackingProvider implements ErrorTrackingProvider {
 
   setUserContext(userId: string, email?: string): void {
     this.userContext = email !== undefined ? { userId, email } : { userId };
-    this.log('[ErrorTracking] User context set', email !== undefined ? { userId, email } : { userId });
+    this.log(
+      '[ErrorTracking] User context set',
+      email !== undefined ? { userId, email } : { userId },
+    );
   }
 
   addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {

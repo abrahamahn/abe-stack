@@ -293,9 +293,9 @@ describe('processDataExport', () => {
     vi.mocked(userRepo.findById).mockResolvedValue(createMockUser());
 
     const memberships = {
-      findByUserId: vi.fn().mockResolvedValue([
-        { tenantId: 't-1', role: 'admin', createdAt: new Date('2026-01-10') },
-      ]),
+      findByUserId: vi
+        .fn()
+        .mockResolvedValue([{ tenantId: 't-1', role: 'admin', createdAt: new Date('2026-01-10') }]),
       findByTenantAndUser: vi.fn(),
       findByTenantId: vi.fn(),
       create: vi.fn(),
@@ -303,10 +303,7 @@ describe('processDataExport', () => {
       delete: vi.fn(),
     };
 
-    const result = await processDataExport(
-      { ...makeRepos(), memberships } as never,
-      'export-1',
-    );
+    const result = await processDataExport({ ...makeRepos(), memberships } as never, 'export-1');
 
     expect(result.memberships).toHaveLength(1);
     expect(result.memberships?.[0]?.tenantId).toBe('t-1');
@@ -344,9 +341,7 @@ describe('processDataExport', () => {
     vi.mocked(exportRepo.update).mockResolvedValue(createMockExportRequest({ status: 'failed' }));
     vi.mocked(userRepo.findById).mockResolvedValue(null);
 
-    await expect(processDataExport(makeRepos(), 'export-1')).rejects.toThrow(
-      'User not found',
-    );
+    await expect(processDataExport(makeRepos(), 'export-1')).rejects.toThrow('User not found');
 
     expect(exportRepo.update).toHaveBeenCalledWith(
       'export-1',

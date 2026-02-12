@@ -8,10 +8,11 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { useQuery as useQueryBase, useInfiniteQuery as useInfiniteQueryBase } from '../query';
+import { useInfiniteQuery as useInfiniteQueryBase } from '../query/useInfiniteQuery';
+import { useQuery as useQueryBase } from '../query/useQuery';
 
 import { type ClientSearchQueryBuilder, fromClientSearchQuery } from './query-builder';
-import { serializeToURLParams, deserializeFromURLParams } from './serialization';
+import { deserializeFromURLParams, serializeToURLParams } from './serialization';
 
 import type {
   CursorSearchResult,

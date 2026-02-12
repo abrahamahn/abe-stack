@@ -64,7 +64,6 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps): React.JSX.E
     }
   };
 
-
   // Call onUploadComplete callback when upload succeeds
   React.useEffect(() => {
     if (data !== undefined && onUploadComplete !== undefined) {
@@ -90,7 +89,8 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps): React.JSX.E
           borderRadius: 'var(--ui-radius-md)',
           padding: 'var(--ui-gap-xl)',
           backgroundColor: isDragging ? 'var(--ui-color-surface)' : 'transparent',
-          transition: 'border-color var(--ui-motion-duration-fast), background-color var(--ui-motion-duration-fast)',
+          transition:
+            'border-color var(--ui-motion-duration-fast), background-color var(--ui-motion-duration-fast)',
         }}
       >
         <FileInput
@@ -156,9 +156,7 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps): React.JSX.E
           >
             ✓
           </span>
-          <Text style={{ color: 'var(--ui-alert-success-text)' }}>
-            File uploaded successfully
-          </Text>
+          <Text style={{ color: 'var(--ui-alert-success-text)' }}>File uploaded successfully</Text>
         </div>
       )}
 

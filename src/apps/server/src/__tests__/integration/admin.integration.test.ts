@@ -968,9 +968,7 @@ describe('Admin API Integration Tests', () => {
       };
 
       // First call: check user exists; second call: return updated user
-      mockRepos.users.findById
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(lockedUser);
+      mockRepos.users.findById.mockResolvedValueOnce(mockUser).mockResolvedValueOnce(lockedUser);
       mockRepos.users.lockAccount.mockResolvedValueOnce(undefined);
 
       const adminJwt = createAdminJwt();

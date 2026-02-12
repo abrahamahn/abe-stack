@@ -37,12 +37,10 @@ describe('cacheAside', () => {
     mockCache.set.mockResolvedValue(undefined);
     const loader = vi.fn().mockResolvedValue({ id: '1', name: 'Alice' });
 
-    const result = await cacheAside(
-      mockCache as unknown as CacheProvider,
-      'user:1',
-      loader,
-      { ttl: 300_000, tags: ['user:1'] },
-    );
+    const result = await cacheAside(mockCache as unknown as CacheProvider, 'user:1', loader, {
+      ttl: 300_000,
+      tags: ['user:1'],
+    });
 
     expect(result).toEqual({ id: '1', name: 'Alice' });
     expect(mockCache.get).toHaveBeenCalledWith('user:1');
@@ -57,11 +55,7 @@ describe('cacheAside', () => {
     mockCache.get.mockResolvedValue({ id: '1', name: 'Alice' });
     const loader = vi.fn();
 
-    const result = await cacheAside(
-      mockCache as unknown as CacheProvider,
-      'user:1',
-      loader,
-    );
+    const result = await cacheAside(mockCache as unknown as CacheProvider, 'user:1', loader);
 
     expect(result).toEqual({ id: '1', name: 'Alice' });
     expect(mockCache.get).toHaveBeenCalledWith('user:1');
@@ -74,18 +68,15 @@ describe('cacheAside', () => {
     mockCache.set.mockResolvedValue(undefined);
     const loader = vi.fn().mockResolvedValue(['flag-a', 'flag-b']);
 
-    await cacheAside(
-      mockCache as unknown as CacheProvider,
-      'flags:tenant-1',
-      loader,
-      { ttl: 60_000, tags: ['feature-flags'] },
-    );
+    await cacheAside(mockCache as unknown as CacheProvider, 'flags:tenant-1', loader, {
+      ttl: 60_000,
+      tags: ['feature-flags'],
+    });
 
-    expect(mockCache.set).toHaveBeenCalledWith(
-      'flags:tenant-1',
-      ['flag-a', 'flag-b'],
-      { ttl: 60_000, tags: ['feature-flags'] } satisfies CacheSetOptions,
-    );
+    expect(mockCache.set).toHaveBeenCalledWith('flags:tenant-1', ['flag-a', 'flag-b'], {
+      ttl: 60_000,
+      tags: ['feature-flags'],
+    } satisfies CacheSetOptions);
   });
 
   it('does not cache undefined loader result', async () => {
@@ -93,11 +84,7 @@ describe('cacheAside', () => {
     mockCache.set.mockResolvedValue(undefined);
     const loader = vi.fn().mockResolvedValue(undefined);
 
-    const result = await cacheAside(
-      mockCache as unknown as CacheProvider,
-      'user:missing',
-      loader,
-    );
+    const result = await cacheAside(mockCache as unknown as CacheProvider, 'user:missing', loader);
 
     expect(result).toBeUndefined();
     expect(loader).toHaveBeenCalledOnce();
@@ -109,11 +96,7 @@ describe('cacheAside', () => {
     mockCache.set.mockResolvedValue(undefined);
     const loader = vi.fn().mockResolvedValue('value');
 
-    const result = await cacheAside(
-      mockCache as unknown as CacheProvider,
-      'key',
-      loader,
-    );
+    const result = await cacheAside(mockCache as unknown as CacheProvider, 'key', loader);
 
     expect(result).toBe('value');
     expect(mockCache.set).toHaveBeenCalledWith('key', 'value', {

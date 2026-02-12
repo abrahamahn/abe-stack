@@ -8,7 +8,16 @@
  * @module
  */
 
-import { deleteFrom, eq, isNotNull, lt, select, toCamelCase, USER_COLUMNS, USERS_TABLE } from '@abe-stack/db';
+import {
+  deleteFrom,
+  eq,
+  isNotNull,
+  lt,
+  select,
+  toCamelCase,
+  USER_COLUMNS,
+  USERS_TABLE,
+} from '@abe-stack/db';
 
 import { ANONYMIZED_EMAIL_PATTERN } from '../users';
 
@@ -37,10 +46,7 @@ export async function hardDeleteAnonymizedUsersTask(
 
   // Find soft-deleted users whose deleted_at is older than the retention cutoff
   const rows = await db.query(
-    select(USERS_TABLE)
-      .where(isNotNull('deleted_at'))
-      .where(lt('deleted_at', cutoff))
-      .toSql(),
+    select(USERS_TABLE).where(isNotNull('deleted_at')).where(lt('deleted_at', cutoff)).toSql(),
   );
 
   const users = rows.map((row) => toCamelCase<User>(row, USER_COLUMNS));
@@ -55,9 +61,7 @@ export async function hardDeleteAnonymizedUsersTask(
 
   for (const user of usersToDelete) {
     try {
-      const deleted = await db.execute(
-        deleteFrom(USERS_TABLE).where(eq('id', user.id)).toSql(),
-      );
+      const deleted = await db.execute(deleteFrom(USERS_TABLE).where(eq('id', user.id)).toSql());
 
       if (deleted > 0) {
         deletedCount++;

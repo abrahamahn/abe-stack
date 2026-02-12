@@ -59,57 +59,62 @@ export const WorkspaceAuditLog = ({ tenantId }: WorkspaceAuditLogProps): ReactEl
   }
 
   if (events.length === 0) {
-    return <EmptyState title="No audit events" description="Audit events will appear here as actions are recorded" />;
+    return (
+      <EmptyState
+        title="No audit events"
+        description="Audit events will appear here as actions are recorded"
+      />
+    );
   }
 
   return (
     <>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Action</TableHead>
-          <TableHead>Actor</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Details</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {events.map((event) => (
-          <TableRow
-            key={event.id}
-            className="cursor-pointer hover-row"
-            onClick={() => {
-              setSelectedEvent(event);
-            }}
-          >
-            <TableCell>
-              <Badge tone={getAuditActionTone(event.action)}>{event.action}</Badge>
-            </TableCell>
-            <TableCell>
-              <Text size="sm">{event.actorId}</Text>
-            </TableCell>
-            <TableCell>
-              <Text size="sm" tone="muted">
-                {new Date(event.createdAt).toLocaleString()}
-              </Text>
-            </TableCell>
-            <TableCell>
-              <Text size="sm" tone="muted">
-                {event.details}
-              </Text>
-            </TableCell>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Action</TableHead>
+            <TableHead>Actor</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Details</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {events.map((event) => (
+            <TableRow
+              key={event.id}
+              className="cursor-pointer hover-row"
+              onClick={() => {
+                setSelectedEvent(event);
+              }}
+            >
+              <TableCell>
+                <Badge tone={getAuditActionTone(event.action)}>{event.action}</Badge>
+              </TableCell>
+              <TableCell>
+                <Text size="sm">{event.actorId}</Text>
+              </TableCell>
+              <TableCell>
+                <Text size="sm" tone="muted">
+                  {new Date(event.createdAt).toLocaleString()}
+                </Text>
+              </TableCell>
+              <TableCell>
+                <Text size="sm" tone="muted">
+                  {event.details}
+                </Text>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
-    <AuditEventDetailModal
-      event={selectedEvent}
-      open={selectedEvent !== null}
-      onClose={() => {
-        setSelectedEvent(null);
-      }}
-    />
-  </>
+      <AuditEventDetailModal
+        event={selectedEvent}
+        open={selectedEvent !== null}
+        onClose={() => {
+          setSelectedEvent(null);
+        }}
+      />
+    </>
   );
 };

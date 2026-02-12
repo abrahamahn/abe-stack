@@ -181,7 +181,10 @@ export async function handleCreateApiKey(
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to create API key' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to create API key' },
+    };
   }
 }
 
@@ -223,7 +226,10 @@ export async function handleListApiKeys(
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list API keys' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to list API keys' },
+    };
   }
 }
 
@@ -289,7 +295,10 @@ export async function handleRevokeApiKey(
       return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'API key is already revoked' } };
     }
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to revoke API key' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to revoke API key' },
+    };
   }
 }
 

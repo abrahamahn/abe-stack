@@ -33,7 +33,9 @@ type AdminWebhookDelivery = {
   createdAt: string;
 };
 
-function hasUser(request: FastifyRequest): request is FastifyRequest & { user: { userId: string } } {
+function hasUser(
+  request: FastifyRequest,
+): request is FastifyRequest & { user: { userId: string } } {
   return Boolean((request as { user?: unknown }).user);
 }
 
@@ -122,9 +124,7 @@ export async function handleListAdminWebhookDeliveries(
   _body: unknown,
   request: FastifyRequest,
   _reply: FastifyReply,
-): Promise<
-  { status: number; body: { deliveries: AdminWebhookDelivery[] } | { message: string } }
-> {
+): Promise<{ status: number; body: { deliveries: AdminWebhookDelivery[] } | { message: string } }> {
   if (!hasUser(request)) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
@@ -143,7 +143,10 @@ export async function handleListAdminWebhookDeliveries(
   const statusFilter = query?.status;
 
   const deliveries = await webhookDeliveries.findByWebhookId(params.id, limit);
-  const filtered = typeof statusFilter === 'string' ? deliveries.filter((d) => d.status === statusFilter) : deliveries;
+  const filtered =
+    typeof statusFilter === 'string'
+      ? deliveries.filter((d) => d.status === statusFilter)
+      : deliveries;
 
   return {
     status: 200,

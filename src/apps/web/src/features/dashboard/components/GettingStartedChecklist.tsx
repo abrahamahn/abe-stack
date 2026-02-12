@@ -20,9 +20,7 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
   const { data: workspaces } = useWorkspaces();
   const navigate = useNavigate();
 
-  const [dismissed, setDismissed] = useState(
-    () => localStorage.getItem(DISMISSED_KEY) === 'true',
-  );
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === 'true');
 
   const handleDismiss = useCallback(() => {
     localStorage.setItem(DISMISSED_KEY, 'true');
@@ -32,10 +30,7 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
   const items: ChecklistItem[] = [
     {
       label: 'Complete your profile',
-      complete:
-        user !== null &&
-        user.firstName.length > 0 &&
-        user.lastName.length > 0,
+      complete: user !== null && user.firstName.length > 0 && user.lastName.length > 0,
       action: 'Go to Settings',
       path: '/settings/profile',
     },
@@ -96,12 +91,8 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
                 width: '1.25rem',
                 height: '1.25rem',
                 borderRadius: 'var(--ui-radius-full)',
-                border: item.complete
-                  ? 'none'
-                  : '1px solid var(--ui-color-border)',
-                backgroundColor: item.complete
-                  ? 'var(--ui-color-success)'
-                  : 'transparent',
+                border: item.complete ? 'none' : '1px solid var(--ui-color-border)',
+                backgroundColor: item.complete ? 'var(--ui-color-success)' : 'transparent',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -116,9 +107,7 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
               style={{
                 flex: 1,
                 textDecoration: item.complete ? 'line-through' : 'none',
-                color: item.complete
-                  ? 'var(--ui-color-text-muted)'
-                  : 'var(--ui-color-text)',
+                color: item.complete ? 'var(--ui-color-text-muted)' : 'var(--ui-color-text)',
               }}
             >
               {item.label}
@@ -127,7 +116,9 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
               <Button
                 variant="text"
                 size="small"
-                onClick={() => { navigate(item.path); }}
+                onClick={() => {
+                  navigate(item.path);
+                }}
               >
                 {item.action}
               </Button>

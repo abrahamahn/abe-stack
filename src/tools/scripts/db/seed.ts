@@ -123,7 +123,15 @@ export async function seed(): Promise<void> {
 
       await db.execute({
         text: sql,
-        values: [user.email, canonical, passwordHash, user.username, user.firstName, user.lastName, user.role],
+        values: [
+          user.email,
+          canonical,
+          passwordHash,
+          user.username,
+          user.firstName,
+          user.lastName,
+          user.role,
+        ],
       });
 
       console.log(`  ✓ ${user.email} (${user.role})`);

@@ -69,7 +69,12 @@ describe('useUndoHandler', () => {
     const { result } = renderHook(() => useUndoHandler());
 
     const tx = createTransaction([
-      { type: 'listInsert' as const, path: ['users', 'me', 'tags'], value: 'new', position: 'append' as const },
+      {
+        type: 'listInsert' as const,
+        path: ['users', 'me', 'tags'],
+        value: 'new',
+        position: 'append' as const,
+      },
     ]);
 
     await result.current.apply(tx);
@@ -80,9 +85,7 @@ describe('useUndoHandler', () => {
   it('ignores set operations with unknown domain', async () => {
     const { result } = renderHook(() => useUndoHandler());
 
-    const tx = createTransaction([
-      createSetOperation(['unknown', 'id', 'field'], 'value', 'old'),
-    ]);
+    const tx = createTransaction([createSetOperation(['unknown', 'id', 'field'], 'value', 'old')]);
 
     await result.current.apply(tx);
 

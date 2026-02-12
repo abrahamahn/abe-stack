@@ -9,7 +9,6 @@
 import { MS_PER_SECOND } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
-
 import { hashQueryKey } from './QueryCache';
 import { useQueryCache } from './QueryCacheProvider';
 

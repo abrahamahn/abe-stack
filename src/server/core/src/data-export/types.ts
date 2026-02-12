@@ -48,9 +48,19 @@ export type DataExportRequest = RequestContext;
  * Requires users + dataExportRequests. All other repositories are optional —
  * the export includes whatever data is available.
  */
-export type DataExportRepositories =
-  Pick<Repositories, 'dataExportRequests' | 'users'> &
-  Partial<Pick<Repositories, 'memberships' | 'subscriptions' | 'activities' | 'files' | 'notifications' | 'userSessions' | 'consentLogs'>>;
+export type DataExportRepositories = Pick<Repositories, 'dataExportRequests' | 'users'> &
+  Partial<
+    Pick<
+      Repositories,
+      | 'memberships'
+      | 'subscriptions'
+      | 'activities'
+      | 'files'
+      | 'notifications'
+      | 'userSessions'
+      | 'consentLogs'
+    >
+  >;
 
 // ============================================================================
 // Data Export Result Types

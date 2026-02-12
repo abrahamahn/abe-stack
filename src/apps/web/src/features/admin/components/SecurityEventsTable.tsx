@@ -5,7 +5,11 @@
  * Displays security events in a table format with pagination.
  */
 
-import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@abe-stack/shared';
+import {
+  formatDateTime,
+  formatSecurityEventType,
+  getSecuritySeverityTone,
+} from '@abe-stack/shared';
 import {
   Badge,
   Button,
@@ -125,7 +129,9 @@ export const SecurityEventsTable = ({
                 <Text size="sm">{formatSecurityEventType(event.eventType)}</Text>
               </TableCell>
               <TableCell>
-                <Badge tone={getSecuritySeverityTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
+                <Badge tone={getSecuritySeverityTone(event.severity)}>
+                  {event.severity.toUpperCase()}
+                </Badge>
               </TableCell>
               <TableCell>
                 <Text size="sm">{event.email ?? '-'}</Text>

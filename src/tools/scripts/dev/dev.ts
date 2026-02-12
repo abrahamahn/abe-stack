@@ -335,10 +335,7 @@ async function main(): Promise<void> {
   // Keep this before the env preflight, so old servers don't mask env/db issues.
   const needsServer = filters.length === 0 || filters.includes('server');
   const needsWeb = filters.length === 0 || filters.includes('web');
-  const portsToClean = [
-    ...(needsWeb ? [5173] : []),
-    ...(needsServer ? [8080, 3000] : []),
-  ];
+  const portsToClean = [...(needsWeb ? [5173] : []), ...(needsServer ? [8080, 3000] : [])];
   if (portsToClean.length > 0) killPorts(portsToClean);
 
   logHeader('Development Environment', 'Preparing local services and watchers');

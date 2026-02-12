@@ -124,7 +124,10 @@ export async function handleListTenants(
       error instanceof Error ? error : new Error(String(error)),
       'Failed to list tenants',
     );
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 

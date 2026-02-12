@@ -63,9 +63,12 @@ export const MediaGallery = ({
 }: MediaGalleryProps): ReactElement => {
   const [selectedItem, setSelectedItem] = useState<MediaMetadata | null>(null);
   const { mutate: deleteMedia, isLoading: isDeleting } = useDeleteMedia();
-  const handleUploadComplete = useCallback((_mediaId: string): void => {
-    onUploadSuccess?.();
-  }, [onUploadSuccess]);
+  const handleUploadComplete = useCallback(
+    (_mediaId: string): void => {
+      onUploadSuccess?.();
+    },
+    [onUploadSuccess],
+  );
 
   const handleDelete = (id: string): void => {
     deleteMedia(id);
@@ -95,17 +98,12 @@ export const MediaGallery = ({
     <div className={className}>
       <div className="mb-4">
         <MediaUpload
-          {...(onUploadSuccess !== undefined
-            ? { onUploadComplete: handleUploadComplete }
-            : {})}
+          {...(onUploadSuccess !== undefined ? { onUploadComplete: handleUploadComplete } : {})}
         />
       </div>
 
       {items.length === 0 ? (
-        <EmptyState
-          title="No media files"
-          description="Upload files to see them here"
-        />
+        <EmptyState title="No media files" description="Upload files to see them here" />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
@@ -137,9 +135,7 @@ export const MediaGallery = ({
                   <Text size="sm" tone="muted">
                     {formatBytes(item.sizeBytes)}
                   </Text>
-                  <Badge tone={getStatusTone(item.processingStatus)}>
-                    {item.processingStatus}
-                  </Badge>
+                  <Badge tone={getStatusTone(item.processingStatus)}>{item.processingStatus}</Badge>
                 </div>
               </div>
             </Card>
@@ -174,26 +170,38 @@ export const MediaGallery = ({
 
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Text size="sm" tone="muted">Type</Text>
+                  <Text size="sm" tone="muted">
+                    Type
+                  </Text>
                   <Text size="sm">{selectedItem.mimeType}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text size="sm" tone="muted">Size</Text>
+                  <Text size="sm" tone="muted">
+                    Size
+                  </Text>
                   <Text size="sm">{formatBytes(selectedItem.sizeBytes)}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text size="sm" tone="muted">Status</Text>
+                  <Text size="sm" tone="muted">
+                    Status
+                  </Text>
                   <Badge tone={getStatusTone(selectedItem.processingStatus)}>
                     {selectedItem.processingStatus}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <Text size="sm" tone="muted">Uploaded</Text>
+                  <Text size="sm" tone="muted">
+                    Uploaded
+                  </Text>
                   <Text size="sm">{new Date(selectedItem.createdAt).toLocaleString()}</Text>
                 </div>
                 <div className="flex justify-between">
-                  <Text size="sm" tone="muted">ID</Text>
-                  <Text size="sm" className="font-mono">{selectedItem.id}</Text>
+                  <Text size="sm" tone="muted">
+                    ID
+                  </Text>
+                  <Text size="sm" className="font-mono">
+                    {selectedItem.id}
+                  </Text>
                 </div>
               </div>
             </div>

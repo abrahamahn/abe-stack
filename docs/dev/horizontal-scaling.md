@@ -26,10 +26,10 @@ CACHE_PROVIDER=redis    # Redis-backed cache (multi-instance)
 
 ### When to use each
 
-| Provider | Use Case | Pros | Cons |
-|----------|----------|------|------|
-| `local` | Single instance, development | Zero dependencies, fastest | Cache not shared across instances |
-| `redis` | Multi-instance, production | Shared cache, persistence | Requires Redis server |
+| Provider | Use Case                     | Pros                       | Cons                              |
+| -------- | ---------------------------- | -------------------------- | --------------------------------- |
+| `local`  | Single instance, development | Zero dependencies, fastest | Cache not shared across instances |
+| `redis`  | Multi-instance, production   | Shared cache, persistence  | Requires Redis server             |
 
 ### Redis Configuration
 
@@ -62,6 +62,7 @@ When set, read operations (search, listings) use the replica while writes always
 ### How it works
 
 The `ReadReplicaClient` wrapper exposes:
+
 - `write` / `primary` — always the primary database
 - `read` / `replica` — the replica (or primary if no replica configured)
 
@@ -94,14 +95,14 @@ Each server generates a unique `instanceId` on startup. Messages include this ID
 
 The server stores no request-scoped state between requests:
 
-| Concern | Storage | Stateless? |
-|---------|---------|------------|
-| Authentication | JWT tokens (client-side) | Yes |
-| Session tracking | `user_sessions` DB table | Yes |
-| WebSocket subscriptions | In-memory per instance | Yes (rebuilt on reconnect) |
-| Cache | Memory or Redis | Yes (cache is optimization, not source of truth) |
-| Background jobs | PostgreSQL `jobs` table | Yes |
-| File uploads | S3 or local filesystem | Yes |
+| Concern                 | Storage                  | Stateless?                                       |
+| ----------------------- | ------------------------ | ------------------------------------------------ |
+| Authentication          | JWT tokens (client-side) | Yes                                              |
+| Session tracking        | `user_sessions` DB table | Yes                                              |
+| WebSocket subscriptions | In-memory per instance   | Yes (rebuilt on reconnect)                       |
+| Cache                   | Memory or Redis          | Yes (cache is optimization, not source of truth) |
+| Background jobs         | PostgreSQL `jobs` table  | Yes                                              |
+| File uploads            | S3 or local filesystem   | Yes                                              |
 
 ### What this means for deployment
 

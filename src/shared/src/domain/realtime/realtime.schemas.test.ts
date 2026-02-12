@@ -178,9 +178,7 @@ describe('listInsertOperationSchema', () => {
   });
 
   it('should reject non-object', () => {
-    expect(() => listInsertOperationSchema.parse(null)).toThrow(
-      'Invalid listInsert operation',
-    );
+    expect(() => listInsertOperationSchema.parse(null)).toThrow('Invalid listInsert operation');
   });
 });
 
@@ -530,8 +528,6 @@ describe('getRecordsResponseSchema', () => {
   });
 
   it('should reject non-object', () => {
-    expect(() => getRecordsResponseSchema.parse(null)).toThrow(
-      'Invalid get records response',
-    );
+    expect(() => getRecordsResponseSchema.parse(null)).toThrow('Invalid get records response');
   });
 });

@@ -25,17 +25,20 @@ describe('parseUserAgent', () => {
     });
 
     it('detects Safari (without Chrome)', () => {
-      const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15';
+      const ua =
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15';
       expect(parseUserAgent(ua).browser).toBe('Safari');
     });
 
     it('detects Edge over Chrome', () => {
-      const ua = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0';
+      const ua =
+        'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0';
       expect(parseUserAgent(ua).browser).toBe('Edge');
     });
 
     it('detects Opera over Chrome', () => {
-      const ua = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0';
+      const ua =
+        'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0';
       expect(parseUserAgent(ua).browser).toBe('Opera');
     });
   });

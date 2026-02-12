@@ -32,7 +32,10 @@ import {
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { PaymentMethod, SubscriptionStatus as SubscriptionStatusType } from '@abe-stack/shared';
+import type {
+  PaymentMethod,
+  SubscriptionStatus as SubscriptionStatusType,
+} from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

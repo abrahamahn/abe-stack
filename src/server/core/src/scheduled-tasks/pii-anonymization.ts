@@ -37,9 +37,7 @@ export async function anonymizeDeletedUsers(
   const allUsers = await repos.users.listWithFilters({ limit: 10000 });
   const usersToAnonymize = allUsers.data.filter(
     (user) =>
-      user.deletedAt !== null &&
-      user.deletedAt < cutoffDate &&
-      !user.email.startsWith('deleted-'),
+      user.deletedAt !== null && user.deletedAt < cutoffDate && !user.email.startsWith('deleted-'),
   );
 
   if (usersToAnonymize.length === 0) {

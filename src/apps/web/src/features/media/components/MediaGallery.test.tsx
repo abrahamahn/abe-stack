@@ -192,9 +192,9 @@ describe('MediaGallery', () => {
     it('should display file sizes in correct format', () => {
       renderComponent({ items: mockMediaItems });
 
-      expect(screen.getByText('100.0 KB')).toBeInTheDocument();
-      expect(screen.getByText('2.0 MB')).toBeInTheDocument();
-      expect(screen.getByText('10.0 MB')).toBeInTheDocument();
+      expect(screen.getByText('100 KB')).toBeInTheDocument();
+      expect(screen.getByText('2 MB')).toBeInTheDocument();
+      expect(screen.getByText('10 MB')).toBeInTheDocument();
     });
 
     it('should display bytes for small files', () => {

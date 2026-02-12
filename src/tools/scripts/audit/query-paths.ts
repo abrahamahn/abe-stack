@@ -97,9 +97,10 @@ function analyzeFile(filePath: string, relativeName: string): HandlerAnalysis | 
       let repoMatch: RegExpExecArray | null = null;
       REPO_CALL_REGEX.lastIndex = 0;
       while ((repoMatch = REPO_CALL_REGEX.exec(line)) !== null) {
-        const call = repoMatch[1] && repoMatch[2]
-          ? `${repoMatch[1]}.${repoMatch[2]}`
-          : repoMatch[3] ?? 'unknown';
+        const call =
+          repoMatch[1] && repoMatch[2]
+            ? `${repoMatch[1]}.${repoMatch[2]}`
+            : (repoMatch[3] ?? 'unknown');
         currentFn.repoCalls.push(call);
       }
     }
@@ -155,7 +156,9 @@ function printReport(analyses: HandlerAnalysis[]): boolean {
       const flag = fn.overLimit ? ' [OVER LIMIT]' : '';
       if (fn.overLimit) hasViolation = true;
 
-      console.log(`  ${fn.name}() (line ${String(fn.line)}): ${String(fn.totalQueries)} queries${flag}`);
+      console.log(
+        `  ${fn.name}() (line ${String(fn.line)}): ${String(fn.totalQueries)} queries${flag}`,
+      );
       for (const call of fn.repoCalls) {
         console.log(`    - ${call}`);
       }

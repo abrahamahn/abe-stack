@@ -180,7 +180,6 @@ function generateId(): string {
   return `${Date.now().toString(36)}-${generateSecureId(7)}`;
 }
 
-
 // ============================================================================
 // TransactionQueue Class
 // ============================================================================
@@ -498,7 +497,10 @@ export class TransactionQueue {
       }
 
       // Validation error - rollback
-      if (response.status === HTTP_STATUS.BAD_REQUEST || response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+      if (
+        response.status === HTTP_STATUS.BAD_REQUEST ||
+        response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY
+      ) {
         const error = new BadRequestError(
           response.message ?? 'Validation failed',
           'VALIDATION_ERROR',

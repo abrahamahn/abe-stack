@@ -132,10 +132,10 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Array.from(authRoutes.keys());
-      // Core auth routes (19) + ToS routes (2) + Device routes (3) + Phone routes (2*) + SMS routes (2)
-      // + Magic-link routes (2) + OAuth routes (13) = 43
+      // Core auth routes (19) + ToS routes (2) + Device routes (3) + Phone routes (2*)
+      // + SMS routes (2) + Magic-link routes (2) + OAuth routes (13) + WebAuthn routes (8) = 50+
       // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
-      expect(routeKeys).toHaveLength(44);
+      expect(routeKeys).toHaveLength(51);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -945,8 +945,9 @@ describe('Route Protection', () => {
     // + 2 ToS protected (tos/status, tos/accept)
     // + 3 device protected (devices, devices/:id/trust, devices/:id)
     // + 2 phone protected (phone, phone/verify) — phone POST overwritten by DELETE in Map
-    // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 22 protected routes
-    expect(protectedRoutes).toHaveLength(23);
+    // + 7 OAuth protected (3 link + 3 unlink + 1 connections)
+    // + 6 WebAuthn protected (register options/verify + passkey management)
+    expect(protectedRoutes).toHaveLength(28);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes
@@ -986,8 +987,9 @@ describe('Route Protection', () => {
   test('should have all other routes as public', () => {
     const publicRoutes = Array.from(authRoutes.entries()).filter(([_, def]) => def.isPublic);
 
-    // 11 core public + 2 SMS public + 2 magic-link + 6 OAuth (3 initiate + 3 callback) = 21 public routes
-    expect(publicRoutes).toHaveLength(21);
+    // 11 core public + 2 SMS public + 2 magic-link + 6 OAuth (3 initiate + 3 callback)
+    // + 2 WebAuthn public (login options/verify)
+    expect(publicRoutes).toHaveLength(23);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
     // Core public routes

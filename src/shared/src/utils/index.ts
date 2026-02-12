@@ -8,7 +8,13 @@ export * as Monitor from './monitor';
 export * as PubSub from './pubsub';
 export * as Search from './search';
 
-export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly, toISOStringOrNull } from './date';
+export {
+  formatDate,
+  formatDateTime,
+  formatTimeAgo,
+  toISODateOnly,
+  toISOStringOrNull,
+} from './date';
 
 export { deepEqual } from './comparison';
 

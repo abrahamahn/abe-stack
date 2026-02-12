@@ -9,12 +9,12 @@
 
 ## Test File Placement
 
-| Test type | Location | Example |
-|---|---|---|
-| Unit tests | Colocated with source | `service.ts` + `service.test.ts` |
-| Handler tests | Colocated with handler | `login.ts` + `login.test.ts` |
-| Integration tests | Central folder | `src/apps/server/src/__tests__/integration/` |
-| E2E tests | Playwright config | `config/playwright.config.ts` |
+| Test type         | Location               | Example                                      |
+| ----------------- | ---------------------- | -------------------------------------------- |
+| Unit tests        | Colocated with source  | `service.ts` + `service.test.ts`             |
+| Handler tests     | Colocated with handler | `login.ts` + `login.test.ts`                 |
+| Integration tests | Central folder         | `src/apps/server/src/__tests__/integration/` |
+| E2E tests         | Playwright config      | `config/playwright.config.ts`                |
 
 ## Running Tests
 
@@ -68,9 +68,13 @@ The reference setup file is `src/apps/web/src/__tests__/setup.ts`. Every web tes
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: (query: string): MediaQueryList => ({
-    matches: false, media: query, onchange: null,
-    addListener: vi.fn(), removeListener: vi.fn(),
-    addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(() => false),
   }),
 });
@@ -89,19 +93,22 @@ Object.defineProperty(window, 'scroll', { writable: true, value: vi.fn() });
 The setup provides a default fetch mock that rejects with a helpful error. Individual tests override it:
 
 ```typescript
-vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-  ok: true,
-  json: () => Promise.resolve({ data: 'test' }),
-}));
+vi.stubGlobal(
+  'fetch',
+  vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ data: 'test' }),
+  }),
+);
 ```
 
 ### Lifecycle Hooks
 
 ```typescript
 afterEach(() => {
-  cleanup();            // RTL DOM cleanup
-  vi.clearAllMocks();   // Prevent mock state leakage
-  vi.useRealTimers();   // Reset fake timers
+  cleanup(); // RTL DOM cleanup
+  vi.clearAllMocks(); // Prevent mock state leakage
+  vi.useRealTimers(); // Reset fake timers
 });
 ```
 

@@ -108,11 +108,11 @@ describe('createRepositories', () => {
     expect(repos.dataExportRequests).toBeDefined();
   });
 
-  it('should have exactly 41 keys in repos', () => {
+  it('should have exactly 42 keys in repos', () => {
     const ctx = createRepositories(testConnectionString);
     const repoKeys = Object.keys(ctx.repos);
 
-    expect(repoKeys).toHaveLength(41);
+    expect(repoKeys).toHaveLength(42);
   });
 
   it('should expose repository methods', () => {

@@ -94,19 +94,27 @@ export const WebhookDetailView = ({
         {webhook !== null && (
           <div className="space-y-4">
             <div>
-              <Text size="sm" tone="muted">URL</Text>
-              <Text size="sm" className="font-mono break-all">{webhook.url}</Text>
+              <Text size="sm" tone="muted">
+                URL
+              </Text>
+              <Text size="sm" className="font-mono break-all">
+                {webhook.url}
+              </Text>
             </div>
 
             <div>
-              <Text size="sm" tone="muted">Status</Text>
+              <Text size="sm" tone="muted">
+                Status
+              </Text>
               <Badge tone={webhook.isActive ? 'success' : 'warning'}>
                 {webhook.isActive ? 'Active' : 'Inactive'}
               </Badge>
             </div>
 
             <div>
-              <Text size="sm" tone="muted">Events</Text>
+              <Text size="sm" tone="muted">
+                Events
+              </Text>
               <div className="flex flex-wrap gap-1 mt-1">
                 {webhook.events.map((event: string) => (
                   <Badge key={event} tone="info">
@@ -117,7 +125,9 @@ export const WebhookDetailView = ({
             </div>
 
             <div>
-              <Text size="sm" tone="muted">Secret</Text>
+              <Text size="sm" tone="muted">
+                Secret
+              </Text>
               <div className="flex items-center gap-2 mt-1">
                 <Input
                   value={rotateSecret.newSecret ?? webhook.secret.slice(0, 8) + '...'}
@@ -152,18 +162,26 @@ export const WebhookDetailView = ({
                 </Text>
               )}
               {rotateSecret.error !== null && (
-                <Alert tone="danger" className="mt-1">{rotateSecret.error.message}</Alert>
+                <Alert tone="danger" className="mt-1">
+                  {rotateSecret.error.message}
+                </Alert>
               )}
             </div>
 
             <div>
-              <Text size="sm" tone="muted">Created</Text>
+              <Text size="sm" tone="muted">
+                Created
+              </Text>
               <Text size="sm">{new Date(webhook.createdAt).toLocaleString()}</Text>
             </div>
 
             <div>
-              <Text size="sm" tone="muted">ID</Text>
-              <Text size="sm" className="font-mono">{webhook.id}</Text>
+              <Text size="sm" tone="muted">
+                ID
+              </Text>
+              <Text size="sm" className="font-mono">
+                {webhook.id}
+              </Text>
             </div>
 
             {webhook.recentDeliveries.length > 0 && (

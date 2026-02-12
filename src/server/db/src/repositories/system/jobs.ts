@@ -9,7 +9,14 @@
  */
 
 import { and, eq, rawCondition, select, insert, update, deleteFrom } from '../../builder/index';
-import { type Job, JOB_STATUSES, type NewJob, type UpdateJob, JOB_COLUMNS, JOBS_TABLE } from '../../schema/index';
+import {
+  type Job,
+  JOB_STATUSES,
+  type NewJob,
+  type UpdateJob,
+  JOB_COLUMNS,
+  JOBS_TABLE,
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { RawDb } from '../../client';

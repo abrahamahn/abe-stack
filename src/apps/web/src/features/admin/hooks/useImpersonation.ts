@@ -79,35 +79,38 @@ export function useImpersonation(): UseImpersonationResult {
     }
   }, [refreshToken]);
 
-  const startImpersonation = useCallback(async (userId: string): Promise<void> => {
-    try {
-      // Call the start impersonation endpoint
-      const response = await fetch(`/api/admin/impersonate/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  const startImpersonation = useCallback(
+    async (userId: string): Promise<void> => {
+      try {
+        // Call the start impersonation endpoint
+        const response = await fetch(`/api/admin/impersonate/${userId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!response.ok) {
-        const errorData = (await response.json()) as { message?: string };
-        throw new Error(errorData.message ?? 'Failed to start impersonation');
+        if (!response.ok) {
+          const errorData = (await response.json()) as { message?: string };
+          throw new Error(errorData.message ?? 'Failed to start impersonation');
+        }
+
+        const data = (await response.json()) as { token: string };
+
+        // Store the impersonation token
+        // This assumes the tokenStore is accessible - in production, we'd need
+        // to trigger this through the auth service
+        if (typeof data.token === 'string') {
+          // Refresh auth state with the new impersonation token
+          await refreshToken();
+        }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to start impersonation: ${message}`);
       }
-
-      const data = (await response.json()) as { token: string };
-
-      // Store the impersonation token
-      // This assumes the tokenStore is accessible - in production, we'd need
-      // to trigger this through the auth service
-      if (typeof data.token === 'string') {
-        // Refresh auth state with the new impersonation token
-        await refreshToken();
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Failed to start impersonation: ${message}`);
-    }
-  }, [refreshToken]);
+    },
+    [refreshToken],
+  );
 
   return {
     isImpersonating,

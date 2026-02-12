@@ -51,9 +51,7 @@ describe('CookieConsentBanner', () => {
       render(<CookieConsentBanner />);
 
       expect(screen.getByTestId('cookie-consent-banner')).toBeInTheDocument();
-      expect(
-        screen.getByText(/We use cookies to improve your experience/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/We use cookies to improve your experience/i)).toBeInTheDocument();
     });
 
     it('should render banner when localStorage is explicitly null', () => {

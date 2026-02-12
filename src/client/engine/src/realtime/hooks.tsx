@@ -1,4 +1,4 @@
-// src/client/engine/src/realtime/hooks.ts
+// src/client/engine/src/realtime/hooks.tsx
 /**
  * Realtime React Hooks
  *
@@ -187,7 +187,7 @@ export function useRecords<T extends VersionedRecord = VersionedRecord>(
         unsub();
       }
     };
-  }, [recordCache, table, ids.join(','), skipSubscription, subscribe]);
+  }, [recordCache, table, ids, skipSubscription, subscribe]);
 
   // Get current data
   const data = useMemo((): Array<T | undefined> => {

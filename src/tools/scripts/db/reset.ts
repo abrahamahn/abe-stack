@@ -52,9 +52,7 @@ export async function reset(): Promise<void> {
   const force = process.argv.includes('--force');
 
   if (!force) {
-    const confirmed = await confirm(
-      '\n⚠️  This will DROP all tables and data. Continue?',
-    );
+    const confirmed = await confirm('\n⚠️  This will DROP all tables and data. Continue?');
     if (!confirmed) {
       process.stdout.write('Aborted.\n');
       process.exit(0);

@@ -161,10 +161,7 @@ export const DataControlsSection = ({
   const isAnyLoading = isDeactivating || isDeleting || isReactivating;
   const deletionDaysLeft =
     deletionScheduledAt !== undefined
-      ? Math.max(
-          0,
-          Math.ceil((new Date(deletionScheduledAt).getTime() - Date.now()) / MS_PER_DAY),
-        )
+      ? Math.max(0, Math.ceil((new Date(deletionScheduledAt).getTime() - Date.now()) / MS_PER_DAY))
       : null;
 
   return (

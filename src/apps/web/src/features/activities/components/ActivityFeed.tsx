@@ -94,10 +94,7 @@ export function ActivityFeed({ limit = 20, className }: ActivityFeedProps): Reac
   if (activities.length === 0) {
     return (
       <div className={className}>
-        <EmptyState
-          title="No recent activity"
-          description="Your recent actions will appear here"
-        />
+        <EmptyState title="No recent activity" description="Your recent actions will appear here" />
       </div>
     );
   }

@@ -59,9 +59,7 @@ export function useDevices(options: UseDevicesOptions): DevicesState {
     async (deviceId: string) => {
       try {
         const result = await client.trustDevice(deviceId);
-        setDevices((prev) =>
-          prev.map((d) => (d.id === deviceId ? result.device : d)),
-        );
+        setDevices((prev) => prev.map((d) => (d.id === deviceId ? result.device : d)));
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
         throw err;

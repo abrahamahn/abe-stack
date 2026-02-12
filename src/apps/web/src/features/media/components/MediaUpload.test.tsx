@@ -240,7 +240,7 @@ describe('MediaUpload', () => {
 
     fireEvent.change(input, { target: { files: [file] } });
 
-    expect(screen.getByText(/1.0 MB/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 MB/i)).toBeInTheDocument();
   });
 
   it('should disable upload button during upload', async () => {

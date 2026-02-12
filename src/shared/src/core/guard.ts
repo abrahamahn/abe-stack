@@ -106,7 +106,9 @@ export function isSafeObjectKey(key: string): boolean {
  */
 export function isAuthenticatedRequest<T extends { readonly user?: unknown }>(
   req: T,
-): req is T & { readonly user: { readonly userId: string; readonly email: string; readonly role: string } } {
+): req is T & {
+  readonly user: { readonly userId: string; readonly email: string; readonly role: string };
+} {
   if (req.user === undefined || typeof req.user !== 'object') {
     return false;
   }

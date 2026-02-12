@@ -8,7 +8,11 @@
 
 import redisConstructor, { type Redis, type RedisOptions } from 'ioredis';
 
-import { CacheConnectionError, CacheDeserializationError, CacheSerializationError } from '../errors';
+import {
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheSerializationError,
+} from '../errors';
 
 import type {
   CacheDeleteOptions,

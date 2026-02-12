@@ -13,18 +13,18 @@ The `pnpm dev` command runs sync scripts (file headers, theme CSS) alongside the
 
 ## Core Commands
 
-| Command | Purpose |
-|---|---|
-| `pnpm dev` | Start dev servers (web + API) |
-| `pnpm build` | Full build: compile + lint + type-check + test |
-| `pnpm test` | Run all tests (turbo cached, errors-only output) |
-| `pnpm test:verbose` | Run all tests with full output |
-| `pnpm lint` | Lint all packages via turbo |
-| `pnpm lint:fix` | Lint with auto-fix |
-| `pnpm type-check` | Type-check all packages via turbo |
-| `pnpm format` | Format all files with Prettier |
-| `pnpm format:check` | Check formatting without writing |
-| `pnpm clean` | Remove all dist/build/node_modules |
+| Command             | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
+| `pnpm dev`          | Start dev servers (web + API)                    |
+| `pnpm build`        | Full build: compile + lint + type-check + test   |
+| `pnpm test`         | Run all tests (turbo cached, errors-only output) |
+| `pnpm test:verbose` | Run all tests with full output                   |
+| `pnpm lint`         | Lint all packages via turbo                      |
+| `pnpm lint:fix`     | Lint with auto-fix                               |
+| `pnpm type-check`   | Type-check all packages via turbo                |
+| `pnpm format`       | Format all files with Prettier                   |
+| `pnpm format:check` | Check formatting without writing                 |
+| `pnpm clean`        | Remove all dist/build/node_modules               |
 
 ### Targeted Checks (During Development)
 
@@ -113,6 +113,7 @@ pnpm docker:prod:down     # Stop prod containers
 ```
 
 Docker files are in `infra/docker/`:
+
 - `Dockerfile` -- API server image
 - `Dockerfile.web` -- Web client image
 - `development/docker-compose.dev.yml` -- Dev compose stack
@@ -138,9 +139,9 @@ pnpm db:audit             # Audit database schema
 
 ## Verification Gates
 
-| Gate | When | Command |
-|---|---|---|
-| Pre-commit | Every commit | `pnpm pre-commit` (format + lint staged files) |
-| Pre-push | Every push | `turbo run validate` (lint + type-check + test) |
-| CI (PR) | Pull requests | Sanity checks (format + lint + type-check + test) |
-| CI (merge) | Push to main/dev | Full `pnpm ci:verify` (headers + build + tests) |
+| Gate       | When             | Command                                           |
+| ---------- | ---------------- | ------------------------------------------------- |
+| Pre-commit | Every commit     | `pnpm pre-commit` (format + lint staged files)    |
+| Pre-push   | Every push       | `turbo run validate` (lint + type-check + test)   |
+| CI (PR)    | Pull requests    | Sanity checks (format + lint + type-check + test) |
+| CI (merge) | Push to main/dev | Full `pnpm ci:verify` (headers + build + tests)   |

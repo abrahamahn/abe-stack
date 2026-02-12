@@ -410,7 +410,10 @@ export async function handleListNotifications(
       { err: error as Error, handler: 'handleListNotifications', userId: req.user.userId },
       'Failed to list notifications',
     );
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list notifications' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to list notifications' },
+    };
   }
 }
 
@@ -449,7 +452,10 @@ export async function handleMarkAsRead(
       { err: error as Error, handler: 'handleMarkAsRead', userId: req.user.userId },
       'Failed to mark notifications as read',
     );
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to mark notifications as read' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to mark notifications as read' },
+    };
   }
 }
 
@@ -484,7 +490,10 @@ export async function handleMarkAllAsRead(
       { err: error as Error, handler: 'handleMarkAllAsRead', userId: req.user.userId },
       'Failed to mark all notifications as read',
     );
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to mark all notifications as read' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to mark all notifications as read' },
+    };
   }
 }
 
@@ -523,6 +532,9 @@ export async function handleDeleteNotification(
       { err: error as Error, handler: 'handleDeleteNotification', userId: req.user.userId },
       'Failed to delete notification',
     );
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to delete notification' } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: 'Failed to delete notification' },
+    };
   }
 }

@@ -48,7 +48,9 @@ export class ApiError extends AppError {
    * Check if this is a client error (4xx)
    */
   isClientError(): boolean {
-    return this.status >= HTTP_STATUS.BAD_REQUEST && this.status < HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    return (
+      this.status >= HTTP_STATUS.BAD_REQUEST && this.status < HTTP_STATUS.INTERNAL_SERVER_ERROR
+    );
   }
 
   /**
@@ -63,7 +65,8 @@ export class ApiError extends AppError {
    */
   isRetryable(): boolean {
     return (
-      this.status === HTTP_STATUS.TOO_MANY_REQUESTS || this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
+      this.status === HTTP_STATUS.TOO_MANY_REQUESTS ||
+      this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
     );
   }
 }
@@ -88,7 +91,12 @@ export class TimeoutError extends AppError {
     message = 'Request timed out',
     public readonly timeoutMs?: number,
   ) {
-    super(message, 0, ERROR_CODES.TIMEOUT_ERROR, timeoutMs !== undefined ? { timeoutMs } : undefined);
+    super(
+      message,
+      0,
+      ERROR_CODES.TIMEOUT_ERROR,
+      timeoutMs !== undefined ? { timeoutMs } : undefined,
+    );
   }
 }
 

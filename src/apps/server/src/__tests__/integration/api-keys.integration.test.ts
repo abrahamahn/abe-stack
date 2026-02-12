@@ -106,6 +106,7 @@ function createInMemoryApiKeyRepo() {
       if (existing !== undefined) {
         store.set(id, { ...existing, lastUsedAt: new Date(), updatedAt: new Date() });
       }
+      return Promise.resolve(undefined);
     }),
 
     delete: vi.fn().mockImplementation((id: string) => {

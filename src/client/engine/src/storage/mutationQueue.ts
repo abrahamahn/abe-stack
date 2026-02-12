@@ -266,7 +266,6 @@ export class MutationQueue {
   private notifyStatusChange(): void {
     this.options.onStatusChange(this.getStatus());
   }
-
 }
 
 // ============================================================================

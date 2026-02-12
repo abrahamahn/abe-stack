@@ -15,7 +15,13 @@ const mockRequestExport = vi.fn();
 const mockRefetch = vi.fn();
 
 const defaultMockReturn: UseDataExportResult = {
-  exportInfo: { status: 'none', requestedAt: null, estimatedReadyAt: null, downloadUrl: null, expiresAt: null },
+  exportInfo: {
+    status: 'none',
+    requestedAt: null,
+    estimatedReadyAt: null,
+    downloadUrl: null,
+    expiresAt: null,
+  },
   isLoading: false,
   error: null,
   requestExport: mockRequestExport,

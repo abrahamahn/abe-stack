@@ -54,9 +54,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>((props, ref) => 
     const isDown = event.key === 'ArrowLeft' || event.key === 'ArrowDown';
     if (!isUp && !isDown) return;
 
-    const nextValue = isUp
-      ? Math.min(max, sliderValue + step)
-      : Math.max(min, sliderValue - step);
+    const nextValue = isUp ? Math.min(max, sliderValue + step) : Math.max(min, sliderValue - step);
 
     if (nextValue !== sliderValue) {
       event.preventDefault();

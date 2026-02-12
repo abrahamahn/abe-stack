@@ -129,9 +129,7 @@ describe('Toast', () => {
   it('renders action button when action is provided', () => {
     const onClick = vi.fn();
     render(
-      <Toast
-        message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }}
-      />,
+      <Toast message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }} />,
     );
 
     expect(screen.getByText('Redo')).toBeInTheDocument();
@@ -140,9 +138,7 @@ describe('Toast', () => {
   it('calls action onClick when action button is clicked', () => {
     const onClick = vi.fn();
     render(
-      <Toast
-        message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }}
-      />,
+      <Toast message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }} />,
     );
 
     fireEvent.click(screen.getByText('Redo'));

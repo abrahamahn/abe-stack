@@ -9,7 +9,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 // ============================================================================
 // Mocks
 // ============================================================================
@@ -23,7 +22,6 @@ import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
 import { WorkspaceBilling } from './WorkspaceBilling';
 
 import type { Plan, Subscription } from '../hooks/useWorkspaceBilling';
-
 
 const mockNavigate = vi.fn();
 vi.mock('@abe-stack/ui', async () => {
@@ -110,7 +108,9 @@ describe('WorkspaceBilling', () => {
 
     expect(screen.getByText('Current Plan:')).toBeInTheDocument();
     expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.getByText('Upgrade to unlock premium features and increased limits.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Upgrade to unlock premium features and increased limits.'),
+    ).toBeInTheDocument();
   });
 
   it('should render active subscription details', () => {

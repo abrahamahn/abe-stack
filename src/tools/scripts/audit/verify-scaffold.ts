@@ -68,10 +68,7 @@ function verifyHelpers(): void {
   check('toPascalCase("my-module") === "MyModule"', toPascalCase('my-module') === 'MyModule');
   check('toCamelCase("my-module") === "myModule"', toCamelCase('my-module') === 'myModule');
   check('validateModuleName("valid-name") === null', validateModuleName('valid-name') === null);
-  check(
-    'validateModuleName("INVALID") returns error',
-    validateModuleName('INVALID') !== null,
-  );
+  check('validateModuleName("INVALID") returns error', validateModuleName('INVALID') !== null);
 }
 
 function verifyTemplateGeneration(): void {

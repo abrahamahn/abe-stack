@@ -66,7 +66,11 @@ export function setUserContext(userId: string, email?: string): void {
  * @param category - Category for grouping related breadcrumbs
  * @param data - Additional structured data
  */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
+export function addBreadcrumb(
+  message: string,
+  category: string,
+  data?: Record<string, unknown>,
+): void {
   if (errorTracker === null) {
     return;
   }

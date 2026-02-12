@@ -32,9 +32,7 @@ export interface RouteManifestEntry {
  * @param routes - Optional array of routes (defaults to global registry)
  * @returns Array of manifest entries sorted by path
  */
-export function generateManifest(
-  routes?: readonly RouteRegistryEntry[],
-): RouteManifestEntry[] {
+export function generateManifest(routes?: readonly RouteRegistryEntry[]): RouteManifestEntry[] {
   const entries = routes ?? getRegisteredRoutes();
 
   return entries
@@ -66,7 +64,9 @@ if (isMainModule) {
 
   if (manifest.length === 0) {
     console.log('⚠️  No routes registered. Run after server startup to see routes.');
-    console.log('   Hint: Import and call registerRoutes() first, or use the admin manifest endpoint.');
+    console.log(
+      '   Hint: Import and call registerRoutes() first, or use the admin manifest endpoint.',
+    );
   } else {
     console.log(JSON.stringify(manifest, null, 2));
   }

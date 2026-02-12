@@ -166,7 +166,9 @@ describe('assertWorkspaceScope', () => {
     it('should throw for empty object', () => {
       const context: MaybeWorkspaceContext = {};
 
-      expect(() => { assertWorkspaceScope(context); }).toThrow(ForbiddenError);
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).toThrow(ForbiddenError);
     });
 
     it('should throw for context with both fields undefined', () => {
@@ -175,7 +177,9 @@ describe('assertWorkspaceScope', () => {
         userId: undefined,
       };
 
-      expect(() => { assertWorkspaceScope(context); }).toThrow(ForbiddenError);
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).toThrow(ForbiddenError);
     });
 
     it('should throw for context with both fields empty strings', () => {
@@ -184,7 +188,9 @@ describe('assertWorkspaceScope', () => {
         userId: '',
       };
 
-      expect(() => { assertWorkspaceScope(context); }).toThrow(ForbiddenError);
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).toThrow(ForbiddenError);
     });
   });
 
@@ -195,7 +201,9 @@ describe('assertWorkspaceScope', () => {
         userId: 'user-456',
       };
 
-      expect(() => { assertWorkspaceScope(context); }).not.toThrow();
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).not.toThrow();
     });
 
     it('should not throw for valid context with role', () => {
@@ -205,7 +213,9 @@ describe('assertWorkspaceScope', () => {
         role: 'admin',
       };
 
-      expect(() => { assertWorkspaceScope(context); }).not.toThrow();
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).not.toThrow();
     });
 
     it('should narrow type correctly after assertion', () => {
@@ -229,7 +239,9 @@ describe('assertWorkspaceScope', () => {
         role: 'viewer',
       };
 
-      expect(() => { assertWorkspaceScope(context); }).toThrow(ForbiddenError);
+      expect(() => {
+        assertWorkspaceScope(context);
+      }).toThrow(ForbiddenError);
     });
 
     it('should handle whitespace-only strings as invalid', () => {
@@ -241,7 +253,9 @@ describe('assertWorkspaceScope', () => {
       // Whitespace is not empty string, so this should pass workspaceId check
       // but fail if implementation trims
       // Based on implementation, it only checks for '', not whitespace
-      expect(() => { assertWorkspaceScope(context1); }).not.toThrow();
+      expect(() => {
+        assertWorkspaceScope(context1);
+      }).not.toThrow();
 
       const context2: MaybeWorkspaceContext = {
         workspaceId: 'workspace-123',
@@ -249,7 +263,9 @@ describe('assertWorkspaceScope', () => {
       };
 
       // Same for userId
-      expect(() => { assertWorkspaceScope(context2); }).not.toThrow();
+      expect(() => {
+        assertWorkspaceScope(context2);
+      }).not.toThrow();
     });
   });
 });

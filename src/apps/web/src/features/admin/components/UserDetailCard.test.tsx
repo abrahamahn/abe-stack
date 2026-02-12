@@ -155,7 +155,7 @@ describe('UserDetailCard', () => {
       expect(screen.getByText('No')).toBeInTheDocument();
     });
 
-    it('should display Never for email verified at when null', () => {
+    it('should display empty email verified at when null', () => {
       const unverifiedUser: AdminUser = {
         ...mockUser,
         emailVerified: false,
@@ -164,10 +164,10 @@ describe('UserDetailCard', () => {
 
       render(<UserDetailCard user={unverifiedUser} isLoading={false} />);
 
-      expect(screen.getByText('Never')).toBeInTheDocument();
+      expect(screen.queryByText('Never')).not.toBeInTheDocument();
     });
 
-    it('should display Never for email verified at when empty string', () => {
+    it('should not display Never for email verified at when empty string', () => {
       const unverifiedUser: AdminUser = {
         ...mockUser,
         emailVerified: false,
@@ -176,7 +176,7 @@ describe('UserDetailCard', () => {
 
       render(<UserDetailCard user={unverifiedUser} isLoading={false} />);
 
-      expect(screen.getByText('Never')).toBeInTheDocument();
+      expect(screen.queryByText('Never')).not.toBeInTheDocument();
     });
   });
 
@@ -211,7 +211,7 @@ describe('UserDetailCard', () => {
   });
 
   describe('date formatting edge cases', () => {
-    it('should handle Never for null dates', () => {
+    it('should handle null dates without showing Never', () => {
       const user: AdminUser = {
         ...mockUser,
         emailVerifiedAt: null,
@@ -220,10 +220,10 @@ describe('UserDetailCard', () => {
       render(<UserDetailCard user={user} isLoading={false} />);
 
       expect(screen.getByText('Email Verified At')).toBeInTheDocument();
-      expect(screen.getByText('Never')).toBeInTheDocument();
+      expect(screen.queryByText('Never')).not.toBeInTheDocument();
     });
 
-    it('should handle Never for empty string dates', () => {
+    it('should handle empty string dates without showing Never', () => {
       const user: AdminUser = {
         ...mockUser,
         emailVerifiedAt: '',
@@ -231,7 +231,7 @@ describe('UserDetailCard', () => {
 
       render(<UserDetailCard user={user} isLoading={false} />);
 
-      expect(screen.getByText('Never')).toBeInTheDocument();
+      expect(screen.queryByText('Never')).not.toBeInTheDocument();
     });
   });
 

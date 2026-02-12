@@ -8,7 +8,12 @@
  * @module handlers/subscribe
  */
 
-import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS, isAuthenticatedRequest } from '@abe-stack/shared';
+import {
+  ERROR_CODES,
+  ERROR_MESSAGES,
+  HTTP_STATUS,
+  isAuthenticatedRequest,
+} from '@abe-stack/shared';
 
 import { isTableAllowed, loadRecords } from '../service';
 import { REALTIME_ERRORS } from '../types';
@@ -55,7 +60,10 @@ export async function handleGetRecords(
     if (!isTableAllowed(pointer.table)) {
       return {
         status: HTTP_STATUS.BAD_REQUEST,
-        body: { code: ERROR_CODES.BAD_REQUEST, message: REALTIME_ERRORS.tableNotAllowed(pointer.table) },
+        body: {
+          code: ERROR_CODES.BAD_REQUEST,
+          message: REALTIME_ERRORS.tableNotAllowed(pointer.table),
+        },
       };
     }
   }

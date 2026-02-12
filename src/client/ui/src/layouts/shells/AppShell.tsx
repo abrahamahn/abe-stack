@@ -217,9 +217,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
               {sidebar}
             </ResizablePanel>
           )}
-          <div className="app-shell-main">
-            {children}
-          </div>
+          <div className="app-shell-main">{children}</div>
           {showAside && (
             <ResizablePanel
               defaultSize={asideDefaultSize}
@@ -260,9 +258,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
               {header}
             </ResizablePanel>
           )}
-          <div className="app-shell-content">
-            {renderHorizontalContent()}
-          </div>
+          <div className="app-shell-content">{renderHorizontalContent()}</div>
           {showFooter && (
             <ResizablePanel
               defaultSize={footerDefaultSize}

@@ -4,18 +4,19 @@ Security scanning pipeline defined in `.github/workflows/security.yml` and `.git
 
 ## Overview
 
-| Scanner | Type | What It Finds |
-|---|---|---|
-| CodeQL | SAST | Code-level vulnerabilities (XSS, injection, auth flaws) |
-| Semgrep | SAST | Pattern-based security issues with auto-config rules |
-| OSV Scanner | SCA | Known vulnerabilities in dependencies |
-| pnpm audit | SCA | npm advisory database matches |
-| Gitleaks | Secrets | Leaked credentials, API keys, tokens in git history |
-| Trivy | Container + FS | OS-level CVEs in Docker images + filesystem vulnerabilities |
+| Scanner     | Type           | What It Finds                                               |
+| ----------- | -------------- | ----------------------------------------------------------- |
+| CodeQL      | SAST           | Code-level vulnerabilities (XSS, injection, auth flaws)     |
+| Semgrep     | SAST           | Pattern-based security issues with auto-config rules        |
+| OSV Scanner | SCA            | Known vulnerabilities in dependencies                       |
+| pnpm audit  | SCA            | npm advisory database matches                               |
+| Gitleaks    | Secrets        | Leaked credentials, API keys, tokens in git history         |
+| Trivy       | Container + FS | OS-level CVEs in Docker images + filesystem vulnerabilities |
 
 ## Security Scanning Workflow
 
 **Triggers:**
+
 - Push to `main` or `dev`
 - Pull requests to `main` or `dev`
 - Weekly schedule (Monday 00:00 UTC)
@@ -109,13 +110,13 @@ Each scanner uploads to a distinct category (`codeql`, `semgrep`, `osv`, `trivy-
 
 ### Priority Matrix
 
-| Severity | Scanner | Action |
-|---|---|---|
-| Critical | Any | Fix immediately, block merge |
-| High | CodeQL/Semgrep | Fix before next release |
-| High | Trivy/OSV | Update dependency or assess exploitability |
-| Medium | Any | Track in backlog, fix within sprint |
-| Low/Info | Any | Review, dismiss if non-applicable |
+| Severity | Scanner        | Action                                     |
+| -------- | -------------- | ------------------------------------------ |
+| Critical | Any            | Fix immediately, block merge               |
+| High     | CodeQL/Semgrep | Fix before next release                    |
+| High     | Trivy/OSV      | Update dependency or assess exploitability |
+| Medium   | Any            | Track in backlog, fix within sprint        |
+| Low/Info | Any            | Review, dismiss if non-applicable          |
 
 ### Common False Positives
 

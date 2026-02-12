@@ -136,7 +136,10 @@ export async function handleMe(
     return { status: HTTP_STATUS.OK, body };
   } catch (error) {
     deps.log.error(toError(error), 'Users operation failed');
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }
 
@@ -202,6 +205,9 @@ export async function handleListUsers(
     };
   } catch (error) {
     deps.log.error(toError(error), 'Users operation failed');
-    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+    };
   }
 }

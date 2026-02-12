@@ -77,10 +77,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
     publicRoute(
       'POST',
       async (ctx: HandlerContext, body: unknown) => {
-        return handleWebauthnLoginOptions(
-          asAppContext(ctx),
-          body as { email?: string },
-        );
+        return handleWebauthnLoginOptions(asAppContext(ctx), body as { email?: string });
       },
       undefined,
       { summary: 'Generate WebAuthn authentication options', tags: ['Auth', 'WebAuthn'] },
@@ -140,7 +137,7 @@ export const webauthnRouteEntries: [string, RouteDefinition][] = [
   ],
 
   [
-    'users/me/passkeys/:id',
+    'users/me/passkeys/:id/delete',
     protectedRoute(
       'DELETE',
       async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {

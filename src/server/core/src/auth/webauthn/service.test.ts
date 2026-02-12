@@ -87,7 +87,9 @@ function getCredRepo(repos: Repositories): {
   create: ReturnType<typeof vi.fn>;
   updateCounter: ReturnType<typeof vi.fn>;
 } {
-  return (repos as unknown as Record<string, unknown>)['webauthnCredentials'] as ReturnType<typeof getCredRepo>;
+  return (repos as unknown as Record<string, unknown>)['webauthnCredentials'] as ReturnType<
+    typeof getCredRepo
+  >;
 }
 
 // ============================================================================
@@ -130,9 +132,9 @@ describe('WebAuthn Service', () => {
       mockGenerateRegistrationOptions.mockResolvedValue({ challenge: 'c' });
       const repos = createMockRepos({
         webauthnCredentials: {
-          findByUserId: vi.fn().mockResolvedValue([
-            { credentialId: 'existing-1', transports: 'internal,hybrid' },
-          ]),
+          findByUserId: vi
+            .fn()
+            .mockResolvedValue([{ credentialId: 'existing-1', transports: 'internal,hybrid' }]),
           findByCredentialId: vi.fn(),
           create: vi.fn(),
           updateCounter: vi.fn(),
@@ -146,9 +148,7 @@ describe('WebAuthn Service', () => {
 
       expect(mockGenerateRegistrationOptions).toHaveBeenCalledWith(
         expect.objectContaining({
-          excludeCredentials: [
-            { id: 'existing-1', transports: ['internal', 'hybrid'] },
-          ],
+          excludeCredentials: [{ id: 'existing-1', transports: ['internal', 'hybrid'] }],
         }),
       );
     });
@@ -206,9 +206,9 @@ describe('WebAuthn Service', () => {
 
     test('throws when challenge is missing/expired', async () => {
       const repos = createMockRepos();
-      await expect(
-        verifyRegistration(repos, 'user-1', {}, testAuthConfig),
-      ).rejects.toThrow('Registration challenge expired or not found');
+      await expect(verifyRegistration(repos, 'user-1', {}, testAuthConfig)).rejects.toThrow(
+        'Registration challenge expired or not found',
+      );
     });
 
     test('throws when verification fails', async () => {
@@ -218,9 +218,9 @@ describe('WebAuthn Service', () => {
 
       mockVerifyRegistrationResponse.mockResolvedValue({ verified: false });
 
-      await expect(
-        verifyRegistration(repos, 'user-1', {}, testAuthConfig),
-      ).rejects.toThrow('WebAuthn registration verification failed');
+      await expect(verifyRegistration(repos, 'user-1', {}, testAuthConfig)).rejects.toThrow(
+        'WebAuthn registration verification failed',
+      );
     });
 
     test('defaults name to Passkey when not provided', async () => {
@@ -268,9 +268,7 @@ describe('WebAuthn Service', () => {
       const repos = createMockRepos({
         users: { findByEmail: vi.fn().mockResolvedValue({ id: 'user-42' }) },
         webauthnCredentials: {
-          findByUserId: vi.fn().mockResolvedValue([
-            { credentialId: 'cred-a', transports: 'usb' },
-          ]),
+          findByUserId: vi.fn().mockResolvedValue([{ credentialId: 'cred-a', transports: 'usb' }]),
           findByCredentialId: vi.fn(),
           create: vi.fn(),
           updateCounter: vi.fn(),
@@ -390,9 +388,9 @@ describe('WebAuthn Service', () => {
       clearChallengeStore();
 
       // Now verification should fail since challenge was cleared
-      await expect(
-        verifyRegistration(repos, 'u1', {}, testAuthConfig),
-      ).rejects.toThrow('Registration challenge expired or not found');
+      await expect(verifyRegistration(repos, 'u1', {}, testAuthConfig)).rejects.toThrow(
+        'Registration challenge expired or not found',
+      );
     });
   });
 });

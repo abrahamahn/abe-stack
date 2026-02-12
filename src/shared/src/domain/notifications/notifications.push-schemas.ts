@@ -448,7 +448,11 @@ export const notificationPayloadSchema: Schema<NotificationPayload> = createSche
       throw new Error('title must be 1-128 characters');
     }
 
-    if (typeof obj['body'] !== 'string' || obj['body'].length < 1 || obj['body'].length > NOTIFICATION_PAYLOAD_MAX_SIZE) {
+    if (
+      typeof obj['body'] !== 'string' ||
+      obj['body'].length < 1 ||
+      obj['body'].length > NOTIFICATION_PAYLOAD_MAX_SIZE
+    ) {
       throw new Error(`body must be 1-${String(NOTIFICATION_PAYLOAD_MAX_SIZE)} characters`);
     }
 

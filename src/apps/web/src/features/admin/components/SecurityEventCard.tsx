@@ -5,7 +5,11 @@
  * Displays detailed information about a single security event.
  */
 
-import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@abe-stack/shared';
+import {
+  formatDateTime,
+  formatSecurityEventType,
+  getSecuritySeverityTone,
+} from '@abe-stack/shared';
 import { Badge, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { JSX } from 'react';
@@ -103,7 +107,9 @@ export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps):
             label="Severity"
             value={
               event !== undefined ? (
-                <Badge tone={getSecuritySeverityTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
+                <Badge tone={getSecuritySeverityTone(event.severity)}>
+                  {event.severity.toUpperCase()}
+                </Badge>
               ) : undefined
             }
             isLoading={isLoading}

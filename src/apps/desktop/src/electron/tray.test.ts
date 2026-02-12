@@ -106,8 +106,8 @@ describe('createTray', () => {
       mocks.isVisible.mockReturnValue(true);
       createTray(mainWindow);
 
-      const template =
-        mocks.menuBuildFromTemplate.mock.calls[0]![0] as MenuItemConstructorOptions[];
+      const template = mocks.menuBuildFromTemplate.mock
+        .calls[0]![0] as MenuItemConstructorOptions[];
       const showHideItem = template.find((item) => item.label === 'Show / Hide Window')!;
       (showHideItem.click as () => void)();
 
@@ -119,8 +119,8 @@ describe('createTray', () => {
       mocks.isVisible.mockReturnValue(false);
       createTray(mainWindow);
 
-      const template =
-        mocks.menuBuildFromTemplate.mock.calls[0]![0] as MenuItemConstructorOptions[];
+      const template = mocks.menuBuildFromTemplate.mock
+        .calls[0]![0] as MenuItemConstructorOptions[];
       const showHideItem = template.find((item) => item.label === 'Show / Hide Window')!;
       (showHideItem.click as () => void)();
 
@@ -134,8 +134,8 @@ describe('createTray', () => {
       const mainWindow = createMockWindow();
       createTray(mainWindow);
 
-      const template =
-        mocks.menuBuildFromTemplate.mock.calls[0]![0] as MenuItemConstructorOptions[];
+      const template = mocks.menuBuildFromTemplate.mock
+        .calls[0]![0] as MenuItemConstructorOptions[];
       const dashboardItem = template.find((item) => item.label === 'Open Dashboard')!;
       (dashboardItem.click as () => void)();
 
@@ -153,8 +153,8 @@ describe('createTray', () => {
       const mainWindow = createMockWindow();
       createTray(mainWindow);
 
-      const template =
-        mocks.menuBuildFromTemplate.mock.calls[0]![0] as MenuItemConstructorOptions[];
+      const template = mocks.menuBuildFromTemplate.mock
+        .calls[0]![0] as MenuItemConstructorOptions[];
       const quitItem = template.find((item) => item.label === 'Quit')!;
       (quitItem.click as () => void)();
 

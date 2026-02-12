@@ -69,8 +69,8 @@ export const WorkspaceDangerZone = ({
           Delete Workspace
         </Heading>
         <Text size="sm" tone="muted" className="mb-3">
-          Permanently delete <strong>{workspaceName}</strong> and all its data. This action cannot be
-          undone.
+          Permanently delete <strong>{workspaceName}</strong> and all its data. This action cannot
+          be undone.
         </Text>
 
         {showConfirm && (

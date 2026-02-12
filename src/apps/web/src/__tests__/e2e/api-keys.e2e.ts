@@ -34,7 +34,10 @@ test.describe('API keys flow', () => {
 
     await page.getByLabel(/email/i).fill(email ?? '');
     await page.getByLabel(/password/i).fill(password ?? '');
-    await page.getByRole('button', { name: /login|sign in/i }).first().click();
+    await page
+      .getByRole('button', { name: /login|sign in/i })
+      .first()
+      .click();
 
     await page.goto(`${baseURL}/settings`);
     await page.getByRole('tab', { name: /security/i }).click();

@@ -208,12 +208,22 @@ describe('ConsentPreferences', () => {
   it('should show "Saving..." while update is in progress', async () => {
     let resolveUpdate: () => void;
     const updatePromise = new Promise<{
-      preferences: { analytics: boolean | null; marketing_email: boolean | null; third_party_sharing: boolean | null; profiling: boolean | null };
+      preferences: {
+        analytics: boolean | null;
+        marketing_email: boolean | null;
+        third_party_sharing: boolean | null;
+        profiling: boolean | null;
+      };
       updated: number;
     }>((resolve) => {
       resolveUpdate = () => {
         resolve({
-          preferences: { analytics: false, marketing_email: false, third_party_sharing: false, profiling: false },
+          preferences: {
+            analytics: false,
+            marketing_email: false,
+            third_party_sharing: false,
+            profiling: false,
+          },
           updated: 1,
         });
       };

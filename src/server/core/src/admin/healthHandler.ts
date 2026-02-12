@@ -9,7 +9,7 @@ import type { AdminAppContext, AdminRequest } from './types';
 
 type ServiceStatus = 'up' | 'down' | 'unknown';
 
-interface AdminHealthBody {
+export interface AdminHealthBody {
   status: 'healthy' | 'degraded' | 'down';
   services: {
     database: ServiceStatus;

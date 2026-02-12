@@ -98,7 +98,9 @@ describe('WorkspaceAuditLog', () => {
     render(<WorkspaceAuditLog tenantId="tenant-1" />);
 
     expect(screen.getByText('No audit events')).toBeInTheDocument();
-    expect(screen.getByText('Audit events will appear here as actions are recorded')).toBeInTheDocument();
+    expect(
+      screen.getByText('Audit events will appear here as actions are recorded'),
+    ).toBeInTheDocument();
   });
 
   it('should render audit events in a table', () => {

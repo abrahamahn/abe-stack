@@ -7,7 +7,11 @@
  * @module handlers/refresh
  */
 
-import { AUTH_ERROR_MESSAGES as ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import {
+  AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
+  HTTP_STATUS,
+  mapErrorToHttpResponse,
+} from '@abe-stack/shared';
 
 import { sendTokenReuseAlert } from '../security';
 import { refreshUserTokens } from '../service';
@@ -50,7 +54,10 @@ export async function handleRefresh(
       const idleMs = Date.now() - tokenRecord.createdAt.getTime();
       if (idleMs > idleTimeoutMinutes * 60 * 1000) {
         clearRefreshTokenCookie(reply);
-        return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+        return {
+          status: HTTP_STATUS.UNAUTHORIZED,
+          body: { message: ERROR_MESSAGES.INVALID_TOKEN },
+        };
       }
     }
 
@@ -76,7 +83,10 @@ export async function handleRefresh(
       // Clear cookie on invalid token before returning error
       if (error.name === 'InvalidTokenError') {
         clearRefreshTokenCookie(reply);
-        return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+        return {
+          status: HTTP_STATUS.UNAUTHORIZED,
+          body: { message: ERROR_MESSAGES.INVALID_TOKEN },
+        };
       }
 
       // Handle token reuse detection - send security alert email
@@ -111,7 +121,10 @@ export async function handleRefresh(
           });
         }
 
-        return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+        return {
+          status: HTTP_STATUS.UNAUTHORIZED,
+          body: { message: ERROR_MESSAGES.INVALID_TOKEN },
+        };
       }
     }
 

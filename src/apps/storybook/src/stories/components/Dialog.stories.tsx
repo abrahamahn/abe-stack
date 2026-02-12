@@ -28,7 +28,9 @@ export const WithDescription: Story = {
       <Dialog.Trigger className="btn btn-primary btn-medium">Confirm Action</Dialog.Trigger>
       <Dialog.Content title="Are you sure?">
         <Dialog.Description>
-          <Text>This action cannot be undone. All associated data will be permanently removed.</Text>
+          <Text>
+            This action cannot be undone. All associated data will be permanently removed.
+          </Text>
         </Dialog.Description>
         <div className="flex gap-2" style={{ marginTop: 'var(--ui-gap-md)' }}>
           <Button variant="secondary" size="small">

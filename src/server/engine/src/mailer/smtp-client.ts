@@ -106,7 +106,6 @@ export class SmtpClient {
     };
   }
 
-
   private async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {

@@ -15,6 +15,7 @@ GET  /api/v1/activities
 Requests to `/api/*` (without version) are automatically redirected to `/api/v1/*` via a 302 redirect. This ensures existing clients continue to work during the transition.
 
 Exceptions (not redirected):
+
 - `/api/v1/*` — already versioned
 - `/api/docs` — Swagger UI
 
@@ -53,11 +54,11 @@ const deprecatedRoute: RouteDefinition = {
 
 When a route is marked deprecated, these headers are added to every response:
 
-| Header | Value | Purpose |
-|---|---|---|
-| `Deprecation` | `true` | Signals the endpoint is deprecated (RFC 8594) |
-| `Sunset` | HTTP-date | When the endpoint will be removed |
-| `X-Deprecation-Notice` | String | Human-readable migration instructions |
+| Header                 | Value     | Purpose                                       |
+| ---------------------- | --------- | --------------------------------------------- |
+| `Deprecation`          | `true`    | Signals the endpoint is deprecated (RFC 8594) |
+| `Sunset`               | HTTP-date | When the endpoint will be removed             |
+| `X-Deprecation-Notice` | String    | Human-readable migration instructions         |
 
 ## When to Create v2
 
@@ -68,6 +69,7 @@ Create a new API version (`/api/v2/`) only when:
 3. **Authentication changes** that require different client behavior
 
 Do **not** create v2 for:
+
 - Adding new fields to responses (backward-compatible)
 - Adding new endpoints
 - Deprecating endpoints (use the `deprecated` field instead)

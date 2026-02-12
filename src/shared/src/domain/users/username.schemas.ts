@@ -67,9 +67,7 @@ export const updateUsernameRequestSchema: Schema<UpdateUsernameRequest> = create
  */
 export function isUsernameChangeCooldownActive(lastChange: Date | null): boolean {
   if (lastChange === null) return false;
-  const cooldownEnd = new Date(
-    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY,
-  );
+  const cooldownEnd = new Date(lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY);
   return new Date() < cooldownEnd;
 }
 

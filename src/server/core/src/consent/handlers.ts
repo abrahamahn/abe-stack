@@ -7,7 +7,6 @@
  * of binding to Fastify or any specific HTTP framework.
  */
 
-
 import { record } from '../audit/service';
 
 import { getUserConsent, updateUserConsent } from './service';

@@ -116,7 +116,9 @@ export const RadioGroup = (props: RadioGroupProps): ReactElement => {
         case 'ArrowUp':
         case 'ArrowLeft':
           event.preventDefault();
-          return currentIndex === -1 ? radios.length - 1 : (currentIndex - 1 + radios.length) % radios.length;
+          return currentIndex === -1
+            ? radios.length - 1
+            : (currentIndex - 1 + radios.length) % radios.length;
         case 'Home':
           event.preventDefault();
           return 0;

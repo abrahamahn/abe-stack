@@ -17,17 +17,17 @@ git push origin my-branch:staging
 
 Staging uses the GitHub `staging` environment, which requires its own set of secrets and variables. These mirror production but point to isolated resources:
 
-| Variable / Secret | Description |
-|---|---|
-| `REGISTRY` | Container registry (defaults to `ghcr.io`) |
-| `IMAGE_NAME` | Docker image name |
-| `SSH_PRIVATE_KEY` | SSH key for staging server |
-| `INSTANCE_IP` | Staging server IP (or via deployment artifact) |
-| `DB_PASSWORD` | Staging database password (separate from production) |
-| `JWT_SECRET` | Staging JWT secret (separate from production) |
-| `SESSION_SECRET` | Staging session secret (separate from production) |
-| `STRIPE_SECRET_KEY` | Stripe **test mode** key |
-| `STRIPE_WEBHOOK_SECRET` | Stripe test webhook secret |
+| Variable / Secret       | Description                                          |
+| ----------------------- | ---------------------------------------------------- |
+| `REGISTRY`              | Container registry (defaults to `ghcr.io`)           |
+| `IMAGE_NAME`            | Docker image name                                    |
+| `SSH_PRIVATE_KEY`       | SSH key for staging server                           |
+| `INSTANCE_IP`           | Staging server IP (or via deployment artifact)       |
+| `DB_PASSWORD`           | Staging database password (separate from production) |
+| `JWT_SECRET`            | Staging JWT secret (separate from production)        |
+| `SESSION_SECRET`        | Staging session secret (separate from production)    |
+| `STRIPE_SECRET_KEY`     | Stripe **test mode** key                             |
+| `STRIPE_WEBHOOK_SECRET` | Stripe test webhook secret                           |
 
 ### Accessing Staging
 

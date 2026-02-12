@@ -87,7 +87,9 @@ export function useRegisterPasskey(onSuccess?: () => void): RegisterPasskeyState
       try {
         const api = getApiClient();
         const { options } = await api.webauthnRegisterOptions();
-        const optionsJSON = options as unknown as Parameters<typeof startRegistration>[0]['optionsJSON'];
+        const optionsJSON = options as unknown as Parameters<
+          typeof startRegistration
+        >[0]['optionsJSON'];
         const credential = await startRegistration({
           optionsJSON,
         });
@@ -133,7 +135,9 @@ export function useLoginWithPasskey(onSuccess?: () => void): LoginWithPasskeySta
         const api = getApiClient();
         const { options } = await api.webauthnLoginOptions(email);
         const sessionKey = options['sessionKey'] as string;
-        const optionsJSON = options as unknown as Parameters<typeof startAuthentication>[0]['optionsJSON'];
+        const optionsJSON = options as unknown as Parameters<
+          typeof startAuthentication
+        >[0]['optionsJSON'];
         const credential = await startAuthentication({
           optionsJSON,
         });

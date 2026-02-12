@@ -118,7 +118,10 @@ export const JobsTable = ({
       ) : isError ? (
         <Text tone="danger">{error?.message ?? 'Failed to load jobs'}</Text>
       ) : (data?.data.length ?? 0) === 0 ? (
-        <EmptyState title="No jobs found" description="Jobs will appear here when they are created" />
+        <EmptyState
+          title="No jobs found"
+          description="Jobs will appear here when they are created"
+        />
       ) : data !== undefined ? (
         <>
           <Table>
@@ -231,4 +234,3 @@ const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element =
     </TableRow>
   );
 };
-

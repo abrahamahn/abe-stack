@@ -733,7 +733,12 @@ describe('getUserInvoices', () => {
 
   it('should return invoices with hasMore false when less than limit', async () => {
     const invoices = [createMockInvoice({ id: 'inv-1' }), createMockInvoice({ id: 'inv-2' })];
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({ data: invoices, nextCursor: null, hasNext: false, limit: 11 });
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({
+      data: invoices,
+      nextCursor: null,
+      hasNext: false,
+      limit: 11,
+    });
 
     const result = await getUserInvoices(repos, 'user-1', 10);
 
@@ -748,7 +753,12 @@ describe('getUserInvoices', () => {
     const invoices = Array.from({ length: 11 }, (_, i) =>
       createMockInvoice({ id: `inv-${String(i)}` }),
     );
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({ data: invoices, nextCursor: null, hasNext: false, limit: 11 });
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({
+      data: invoices,
+      nextCursor: null,
+      hasNext: false,
+      limit: 11,
+    });
 
     const result = await getUserInvoices(repos, 'user-1', 10);
 
@@ -757,7 +767,12 @@ describe('getUserInvoices', () => {
   });
 
   it('should use default limit of 10', async () => {
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({ data: [], nextCursor: null, hasNext: false, limit: 11 });
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({
+      data: [],
+      nextCursor: null,
+      hasNext: false,
+      limit: 11,
+    });
 
     await getUserInvoices(repos, 'user-1');
 
@@ -765,7 +780,12 @@ describe('getUserInvoices', () => {
   });
 
   it('should return empty array when user has no invoices', async () => {
-    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({ data: [], nextCursor: null, hasNext: false, limit: 11 });
+    vi.mocked(repos.invoices.findByUserId).mockResolvedValue({
+      data: [],
+      nextCursor: null,
+      hasNext: false,
+      limit: 11,
+    });
 
     const result = await getUserInvoices(repos, 'user-1');
 

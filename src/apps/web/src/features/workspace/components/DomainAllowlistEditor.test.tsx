@@ -34,9 +34,7 @@ describe('DomainAllowlistEditor', () => {
   });
 
   it('should display existing domains as badges', () => {
-    render(
-      <DomainAllowlistEditor domains={['example.com', 'acme.org']} onChange={onChange} />,
-    );
+    render(<DomainAllowlistEditor domains={['example.com', 'acme.org']} onChange={onChange} />);
     expect(screen.getByText('example.com')).toBeInTheDocument();
     expect(screen.getByText('acme.org')).toBeInTheDocument();
   });
@@ -83,9 +81,7 @@ describe('DomainAllowlistEditor', () => {
   });
 
   it('should show error for duplicate domain', () => {
-    render(
-      <DomainAllowlistEditor domains={['existing.com']} onChange={onChange} />,
-    );
+    render(<DomainAllowlistEditor domains={['existing.com']} onChange={onChange} />);
 
     const input = screen.getByPlaceholderText('example.com');
     fireEvent.change(input, { target: { value: 'existing.com' } });
@@ -96,12 +92,7 @@ describe('DomainAllowlistEditor', () => {
   });
 
   it('should remove a domain when X button is clicked', () => {
-    render(
-      <DomainAllowlistEditor
-        domains={['keep.com', 'remove.com']}
-        onChange={onChange}
-      />,
-    );
+    render(<DomainAllowlistEditor domains={['keep.com', 'remove.com']} onChange={onChange} />);
 
     const removeButton = screen.getByLabelText('Remove remove.com');
     fireEvent.click(removeButton);
@@ -120,9 +111,7 @@ describe('DomainAllowlistEditor', () => {
   });
 
   it('should disable input and button when disabled prop is true', () => {
-    render(
-      <DomainAllowlistEditor domains={['test.com']} onChange={onChange} disabled />,
-    );
+    render(<DomainAllowlistEditor domains={['test.com']} onChange={onChange} disabled />);
 
     expect(screen.getByPlaceholderText('example.com')).toBeDisabled();
     expect(screen.queryByLabelText('Remove test.com')).not.toBeInTheDocument();

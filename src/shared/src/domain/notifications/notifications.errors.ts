@@ -48,7 +48,10 @@ export class SubscriptionExistsError extends ConflictError {
   }
 }
 
-export { SubscriptionExistsError as PushSubscriptionExistsError, SubscriptionNotFoundError as PushSubscriptionNotFoundError };
+export {
+  SubscriptionExistsError as PushSubscriptionExistsError,
+  SubscriptionNotFoundError as PushSubscriptionNotFoundError,
+};
 
 /**
  * Invalid push subscription data

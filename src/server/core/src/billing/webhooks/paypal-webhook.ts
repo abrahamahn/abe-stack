@@ -7,7 +7,11 @@
  * to track which events have already been processed.
  */
 
-import { MS_PER_DAY, WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/shared';
+import {
+  MS_PER_DAY,
+  WebhookEventAlreadyProcessedError,
+  WebhookSignatureError,
+} from '@abe-stack/shared';
 
 import { PayPalProvider } from '../paypal-provider';
 

@@ -145,15 +145,15 @@ describe('oauthCallbackResponseSchema', () => {
   });
 
   it('should reject missing token', () => {
-    expect(() =>
-      oauthCallbackResponseSchema.parse({ user: validUser, isNewUser: false }),
-    ).toThrow('Token must be a string');
+    expect(() => oauthCallbackResponseSchema.parse({ user: validUser, isNewUser: false })).toThrow(
+      'Token must be a string',
+    );
   });
 
   it('should reject missing isNewUser', () => {
-    expect(() =>
-      oauthCallbackResponseSchema.parse({ token: 'tok', user: validUser }),
-    ).toThrow('isNewUser must be a boolean');
+    expect(() => oauthCallbackResponseSchema.parse({ token: 'tok', user: validUser })).toThrow(
+      'isNewUser must be a boolean',
+    );
   });
 
   it('should reject non-object', () => {
@@ -176,15 +176,11 @@ describe('oauthLinkResponseSchema', () => {
   });
 
   it('should reject invalid URL', () => {
-    expect(() => oauthLinkResponseSchema.parse({ url: 'bad' })).toThrow(
-      'URL must be a valid URL',
-    );
+    expect(() => oauthLinkResponseSchema.parse({ url: 'bad' })).toThrow('URL must be a valid URL');
   });
 
   it('should reject non-object', () => {
-    expect(() => oauthLinkResponseSchema.parse(undefined)).toThrow(
-      'Invalid OAuth link response',
-    );
+    expect(() => oauthLinkResponseSchema.parse(undefined)).toThrow('Invalid OAuth link response');
   });
 });
 
@@ -232,9 +228,7 @@ describe('oauthUnlinkResponseSchema', () => {
   });
 
   it('should reject non-object', () => {
-    expect(() => oauthUnlinkResponseSchema.parse(null)).toThrow(
-      'Invalid OAuth unlink response',
-    );
+    expect(() => oauthUnlinkResponseSchema.parse(null)).toThrow('Invalid OAuth unlink response');
   });
 });
 

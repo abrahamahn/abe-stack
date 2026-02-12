@@ -6,7 +6,10 @@ import type { JobStatus } from './jobs.schemas';
 // Job Status Display
 // ============================================================================
 
-const JOB_STATUS_CONFIG: Record<JobStatus, { label: string; tone: 'info' | 'success' | 'warning' | 'danger' }> = {
+const JOB_STATUS_CONFIG: Record<
+  JobStatus,
+  { label: string; tone: 'info' | 'success' | 'warning' | 'danger' }
+> = {
   pending: { label: 'Pending', tone: 'info' },
   processing: { label: 'Processing', tone: 'warning' },
   completed: { label: 'Completed', tone: 'success' },

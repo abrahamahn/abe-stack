@@ -38,7 +38,10 @@ describe('LocalStorageProvider', () => {
   const mockedOpen = vi.mocked(open);
 
   /** Get the mock fd methods from the last open() call */
-  async function getMockFd(): Promise<{ writeFile: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn> }> {
+  async function getMockFd(): Promise<{
+    writeFile: ReturnType<typeof vi.fn>;
+    close: ReturnType<typeof vi.fn>;
+  }> {
     const fd = await mockedOpen.mock.results[0]?.value;
     return fd as { writeFile: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn> };
   }

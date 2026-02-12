@@ -38,8 +38,16 @@ export const WorkspaceLogoUpload = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const { mutateAsync: uploadMediaAsync, isLoading: isUploading, error: uploadError } = useUploadMedia();
-  const { update, isLoading: isUpdating, error: updateError } = useUpdateWorkspace({
+  const {
+    mutateAsync: uploadMediaAsync,
+    isLoading: isUploading,
+    error: uploadError,
+  } = useUploadMedia();
+  const {
+    update,
+    isLoading: isUpdating,
+    error: updateError,
+  } = useUpdateWorkspace({
     onSuccess: () => {
       setPreviewUrl(null);
       setSelectedFile(null);

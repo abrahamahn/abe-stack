@@ -87,10 +87,7 @@ describe('HTTP Security', () => {
 
       applyCors(mockRequest as never, mockReply as never, { origin: '*' });
 
-      expect(mockReply.header).toHaveBeenCalledWith(
-        'Access-Control-Allow-Origin',
-        '*',
-      );
+      expect(mockReply.header).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*');
     });
 
     test('should allow exact origin match', () => {

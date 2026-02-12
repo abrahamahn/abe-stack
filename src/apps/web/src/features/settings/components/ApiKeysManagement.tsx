@@ -186,7 +186,9 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
             size="small"
             className="mt-3"
             onClick={handleCreate}
-            disabled={createApiKey.isLoading || newKeyName.trim() === '' || selectedScopes.length === 0}
+            disabled={
+              createApiKey.isLoading || newKeyName.trim() === '' || selectedScopes.length === 0
+            }
           >
             {createApiKey.isLoading ? 'Creating...' : 'Create'}
           </Button>
@@ -197,7 +199,12 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
         <EmptyState
           title="No API keys yet"
           description="Create one to get started"
-          action={{ label: 'Create API Key', onClick: () => { setShowCreate(true); } }}
+          action={{
+            label: 'Create API Key',
+            onClick: () => {
+              setShowCreate(true);
+            },
+          }}
         />
       ) : (
         <Table>
@@ -226,7 +233,9 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
                   <Text size="sm">{formatDate(key.createdAt)}</Text>
                 </TableCell>
                 <TableCell>
-                  <Text size="sm">{key.lastUsedAt === null ? 'Never' : formatDate(key.lastUsedAt)}</Text>
+                  <Text size="sm">
+                    {key.lastUsedAt === null ? 'Never' : formatDate(key.lastUsedAt)}
+                  </Text>
                 </TableCell>
                 <TableCell>
                   {key.revokedAt !== null ? (

@@ -142,9 +142,7 @@ function printReport(violations: Violation[], fileCount: number): void {
     console.log(location.padEnd(60) + v.loopType.padStart(15) + `  ${v.dbCall}`);
   }
 
-  console.log(
-    '\nReview these locations to determine if they are true N+1 patterns.',
-  );
+  console.log('\nReview these locations to determine if they are true N+1 patterns.');
   console.log('Some may be intentional (batch processing) or already optimized.');
 }
 

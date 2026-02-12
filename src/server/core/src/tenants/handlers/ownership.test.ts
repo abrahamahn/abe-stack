@@ -170,7 +170,12 @@ describe('handleTransferOwnership', () => {
     mockTransferOwnership.mockRejectedValue(new NotFoundError('Workspace not found'));
     const request = createMockRequest({ userId: 'user-1' });
 
-    const result = await handleTransferOwnership(deps, 'tenant-1', { newOwnerId: 'user-2' }, request);
+    const result = await handleTransferOwnership(
+      deps,
+      'tenant-1',
+      { newOwnerId: 'user-2' },
+      request,
+    );
 
     expect(result.status).toBe(500);
   });
@@ -180,7 +185,12 @@ describe('handleTransferOwnership', () => {
     mockTransferOwnership.mockRejectedValue(new ForbiddenError('Not the owner'));
     const request = createMockRequest({ userId: 'user-1' });
 
-    const result = await handleTransferOwnership(deps, 'tenant-1', { newOwnerId: 'user-2' }, request);
+    const result = await handleTransferOwnership(
+      deps,
+      'tenant-1',
+      { newOwnerId: 'user-2' },
+      request,
+    );
 
     expect(result.status).toBe(500);
   });
@@ -190,7 +200,12 @@ describe('handleTransferOwnership', () => {
     mockRecord.mockRejectedValue(new Error('Audit DB down'));
     const request = createMockRequest({ userId: 'user-1' });
 
-    const result = await handleTransferOwnership(deps, 'tenant-1', { newOwnerId: 'user-2' }, request);
+    const result = await handleTransferOwnership(
+      deps,
+      'tenant-1',
+      { newOwnerId: 'user-2' },
+      request,
+    );
 
     expect(result.status).toBe(200);
   });
@@ -200,7 +215,12 @@ describe('handleTransferOwnership', () => {
     mockLogActivity.mockRejectedValue(new Error('Activity DB down'));
     const request = createMockRequest({ userId: 'user-1' });
 
-    const result = await handleTransferOwnership(deps, 'tenant-1', { newOwnerId: 'user-2' }, request);
+    const result = await handleTransferOwnership(
+      deps,
+      'tenant-1',
+      { newOwnerId: 'user-2' },
+      request,
+    );
 
     expect(result.status).toBe(200);
   });

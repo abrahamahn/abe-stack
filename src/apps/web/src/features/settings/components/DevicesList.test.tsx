@@ -9,7 +9,6 @@ import { useDevices } from '@abe-stack/api';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-
 import { DevicesList } from './DevicesList';
 
 import type { DeviceItem, DevicesState } from '@abe-stack/api';
@@ -393,7 +392,7 @@ describe('DevicesList', () => {
       expect(screen.getByText('Edge')).toBeInTheDocument();
     });
 
-    it('should display "Unknown device" for null UA', () => {
+    it('should display "Unknown browser" for null UA', () => {
       vi.mocked(useDevices).mockReturnValue({
         ...defaultHookReturn,
         devices: [createMockDevice({ userAgent: null })],
@@ -403,7 +402,7 @@ describe('DevicesList', () => {
 
       render(<DevicesList baseUrl="" />);
 
-      expect(screen.getByText('Unknown device')).toBeInTheDocument();
+      expect(screen.getByText('Unknown browser')).toBeInTheDocument();
     });
   });
 });
