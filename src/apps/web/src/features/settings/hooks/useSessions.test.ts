@@ -6,7 +6,8 @@
  * of the settings API and query cache invalidation.
  */
 
-import { QueryCache, QueryCacheProvider } from '@abe-stack/client-engine';
+import { QueryCache } from '@abe-stack/client-engine';
+import { QueryCacheProvider } from '@abe-stack/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

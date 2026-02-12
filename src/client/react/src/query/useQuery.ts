@@ -1,4 +1,4 @@
-// src/client/engine/src/query/useQuery.ts
+// src/client/react/src/query/useQuery.ts
 /**
  * useQuery - React hook for data fetching with caching.
  *
@@ -9,10 +9,10 @@
 import { MS_PER_SECOND } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
-import { hashQueryKey } from './QueryCache';
+import { hashQueryKey } from '@abe-stack/client-engine';
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey, QueryState } from './QueryCache';
+import type { QueryKey, QueryState } from '@abe-stack/client-engine';
 
 // ============================================================================
 // Types

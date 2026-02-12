@@ -5,7 +5,7 @@
  * Hook for fetching the list of workspaces the user belongs to.
  */
 
-import { useQuery, useQueryCache } from '@abe-stack/client-engine';
+import { useQuery, useQueryCache } from '@abe-stack/react';
 
 import { createWorkspaceApi } from '../api';
 

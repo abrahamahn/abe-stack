@@ -1,4 +1,4 @@
-// src/client/engine/src/query/useMutation.ts
+// src/client/react/src/query/useMutation.ts
 /**
  * useMutation - React hook for data mutations.
  *
@@ -10,7 +10,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey } from './QueryCache';
+import type { QueryKey } from '@abe-stack/client-engine';
 
 // ============================================================================
 // Types

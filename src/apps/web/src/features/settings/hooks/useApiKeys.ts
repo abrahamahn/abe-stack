@@ -5,7 +5,7 @@
  * Hooks for listing, creating, revoking, and deleting API keys.
  */
 
-import { useMutation, useQuery } from '@abe-stack/client-engine';
+import { useMutation, useQuery } from '@abe-stack/react';
 
 import { createSettingsApi } from '../api';
 

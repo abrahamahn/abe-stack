@@ -5,7 +5,7 @@
  * Validates security events listing with filters, pagination, and state management.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,7 +17,7 @@ import type { SecurityEventsFilter, SecurityEventsListResponse } from '@abe-stac
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@abe-stack/react', () => ({
   useQuery: vi.fn(),
 }));
 

@@ -8,12 +8,8 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import {
-  createQueryPersister,
-  QueryCacheProvider,
-  type QueryKey,
-  type QueryState,
-} from '@abe-stack/client-engine';
+import { createQueryPersister, type QueryKey, type QueryState } from '@abe-stack/client-engine';
+import { QueryCacheProvider } from '@abe-stack/react';
 import { LiveRegion, toastStore } from '@abe-stack/react';
 import { ACCESS_TOKEN_COOKIE_NAME, trimTrailingSlashes } from '@abe-stack/shared';
 import { HistoryProvider, useRouteFocusAnnounce } from '@abe-stack/react/hooks';

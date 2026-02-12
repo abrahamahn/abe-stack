@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
   mockExportSecurityEvents: vi.fn(),
 }));
 
-vi.mock('@abe-stack/client-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client-engine')>();
+vi.mock('@abe-stack/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/react')>();
   return {
     ...actual,
     useMutation: mocks.mockUseMutation,
@@ -38,7 +38,7 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
 // Import after mocks are set up
 import { useExportEvents } from './useExportEvents';
 
-import type { UseMutationResult } from '@abe-stack/client-engine';
+import type { UseMutationResult } from '@abe-stack/react';
 import type { SecurityEventsExportResponse } from '@abe-stack/shared';
 
 describe('useExportEvents', () => {

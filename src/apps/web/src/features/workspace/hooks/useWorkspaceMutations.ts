@@ -5,7 +5,7 @@
  * Hooks for creating, updating, and deleting workspaces.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/client-engine';
+import { useMutation, useQueryCache } from '@abe-stack/react';
 import { useUndoableMutation } from '@abe-stack/react/hooks';
 import { useRef } from 'react';
 

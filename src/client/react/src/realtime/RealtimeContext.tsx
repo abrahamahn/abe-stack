@@ -1,4 +1,4 @@
-// src/client/engine/src/realtime/RealtimeContext.tsx
+// src/client/react/src/realtime/RealtimeContext.tsx
 /**
  * RealtimeProvider - React context that integrates all realtime components
  *
@@ -14,6 +14,20 @@
 
 import { generateSecureId } from '@abe-stack/shared';
 import {
+  RecordStorage,
+  SubscriptionCache,
+  TransactionQueue,
+  UndoRedoStack,
+  WebsocketPubsubClient,
+  type ConnectionState,
+  type QueuedTransaction,
+  type RecordCache,
+  type RecordMap,
+  type TableMap,
+  type UndoableOperation,
+  type UndoRedoState,
+} from '@abe-stack/client-engine';
+import {
   createContext,
   useCallback,
   useContext,
@@ -25,14 +39,6 @@ import {
   type ReactElement,
 } from 'react';
 
-import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
-import { RecordStorage, type RecordMap } from '../storage/RecordStorage';
-import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
-
-import { SubscriptionCache } from './SubscriptionCache';
-import { WebsocketPubsubClient, type ConnectionState } from './WebsocketPubsubClient';
-
-import type { RecordCache, TableMap } from '../cache/RecordCache';
 import type { RealtimeOperation, VersionedRecord } from '@abe-stack/shared';
 
 // ============================================================================

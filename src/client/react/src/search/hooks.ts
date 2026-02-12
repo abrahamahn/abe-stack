@@ -1,4 +1,4 @@
-// src/client/engine/src/search/hooks.ts
+// src/client/react/src/search/hooks.ts
 /**
  * Search React Hooks
  *
@@ -11,8 +11,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useInfiniteQuery as useInfiniteQueryBase } from '../query/useInfiniteQuery';
 import { useQuery as useQueryBase } from '../query/useQuery';
 
-import { type ClientSearchQueryBuilder, fromClientSearchQuery } from './query-builder';
-import { deserializeFromURLParams, serializeToURLParams } from './serialization';
+import { type ClientSearchQueryBuilder, fromClientSearchQuery } from '@abe-stack/client-engine';
+import { deserializeFromURLParams, serializeToURLParams } from '@abe-stack/shared';
 
 import type {
   CursorSearchResult,

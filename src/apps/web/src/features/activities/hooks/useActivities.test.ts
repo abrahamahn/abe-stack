@@ -1,5 +1,5 @@
 // src/apps/web/src/features/activities/hooks/useActivities.test.ts
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -7,9 +7,9 @@ import { createActivitiesApi } from '../api/activitiesApi';
 
 import { useActivities, useTenantActivities } from './useActivities';
 
-import type { UseQueryResult } from '@abe-stack/client-engine';
+import type { UseQueryResult } from '@abe-stack/react';
 
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@abe-stack/react', () => ({
   useQuery: vi.fn(),
 }));
 

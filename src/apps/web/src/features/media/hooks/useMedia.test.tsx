@@ -11,7 +11,7 @@
  * correctly across tests.
  */
 
-import { QueryCacheProvider } from '@abe-stack/client-engine';
+import { QueryCacheProvider } from '@abe-stack/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -6,7 +6,7 @@
  * for marking as read, marking all as read, and deleting.
  */
 
-import { useMutation, useQuery } from '@abe-stack/client-engine';
+import { useMutation, useQuery } from '@abe-stack/react';
 import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo } from 'react';

@@ -9,7 +9,7 @@
  * delegate to the current globalThis.fetch, allowing vi.stubGlobal to work.
  */
 
-import { QueryCacheProvider } from '@abe-stack/client-engine';
+import { QueryCacheProvider } from '@abe-stack/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

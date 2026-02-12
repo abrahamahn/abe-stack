@@ -296,7 +296,7 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
 // Type Re-exports for Convenience
 // ============================================================================
 
-export type { ApiError } from '@abe-stack/client-engine';
+export type { ApiError } from '@abe-stack/api';
 export type {
   AccountLifecycleResponse,
   AvatarDeleteResponse,

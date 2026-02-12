@@ -10,7 +10,7 @@
  * - User confirmations and error handling
  */
 
-import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/client-engine';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/api';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,7 +19,7 @@ import { OAuthConnectionsList, type OAuthConnectionsListProps } from './OAuthCon
 import type { OAuthConnection, OAuthProvider } from '@abe-stack/shared';
 
 // Mock the SDK hooks
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@abe-stack/api', () => ({
   useEnabledOAuthProviders: vi.fn(),
   useOAuthConnections: vi.fn(),
 }));

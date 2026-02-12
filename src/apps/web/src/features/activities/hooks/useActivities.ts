@@ -5,7 +5,7 @@
  * Query hooks for fetching user and tenant activity feeds.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 
 import { createActivitiesApi } from '../api/activitiesApi';
 

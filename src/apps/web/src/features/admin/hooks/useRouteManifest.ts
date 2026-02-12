@@ -5,7 +5,7 @@
  * Fetch the API route manifest for the admin routes page.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';

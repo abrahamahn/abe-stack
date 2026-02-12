@@ -5,7 +5,7 @@
  * Hooks for account deactivation, deletion request, and reactivation.
  */
 
-import { useMutation } from '@abe-stack/client-engine';
+import { useMutation } from '@abe-stack/react';
 
 import { createSettingsApi } from '../api';
 

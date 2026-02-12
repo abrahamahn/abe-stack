@@ -1,4 +1,4 @@
-// src/client/engine/src/realtime/hooks.tsx
+// src/client/react/src/realtime/hooks.tsx
 /**
  * Realtime React Hooks
  *
@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback, useSyncExternalStore, useMemo } from 
 
 import { useRealtime, type WriteOperation, type WriteOptions } from './RealtimeContext';
 
-import type { RecordChangeListener } from '../cache/RecordCache';
+import type { RecordChangeListener } from '@abe-stack/client-engine';
 import type { VersionedRecord } from '@abe-stack/shared';
 
 // ============================================================================

@@ -5,7 +5,7 @@
  * Hooks for listing and managing workspace members.
  */
 
-import { useMutation, useQuery, useQueryCache } from '@abe-stack/client-engine';
+import { useMutation, useQuery, useQueryCache } from '@abe-stack/react';
 
 import { createWorkspaceApi } from '../api';
 

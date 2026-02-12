@@ -5,7 +5,7 @@
  * Fetch paginated security events with filtering support.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';

@@ -1,6 +1,4 @@
 // src/client/engine/src/search/query-builder.test.ts
-import { describe, expect, test } from 'vitest';
-
 import {
   contains,
   deserializeFromURLParams,
@@ -11,6 +9,7 @@ import {
   neq,
   serializeToURLParams,
 } from '@abe-stack/shared';
+import { describe, expect, test } from 'vitest';
 
 import {
   ClientSearchQueryBuilder,

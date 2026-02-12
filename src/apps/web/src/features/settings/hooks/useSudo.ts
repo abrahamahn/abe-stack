@@ -5,7 +5,7 @@
  * Hook for sudo re-authentication (elevated privilege confirmation).
  */
 
-import { useMutation } from '@abe-stack/client-engine';
+import { useMutation } from '@abe-stack/react';
 
 import { createSettingsApi } from '../api';
 

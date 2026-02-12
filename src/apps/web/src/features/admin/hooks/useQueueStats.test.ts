@@ -1,5 +1,5 @@
 // src/apps/web/src/features/admin/hooks/useQueueStats.test.ts
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -7,9 +7,9 @@ import { createAdminApiClient } from './../services/adminApi';
 import { useQueueStats } from './useQueueStats';
 
 import type { AdminApiClient } from './../services/adminApi';
-import type { UseQueryResult } from '@abe-stack/client-engine';
+import type { UseQueryResult } from '@abe-stack/react';
 
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@abe-stack/react', () => ({
   useQuery: vi.fn(),
 }));
 

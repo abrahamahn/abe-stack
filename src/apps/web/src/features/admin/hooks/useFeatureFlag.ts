@@ -6,11 +6,11 @@
  * for the current user. Uses the public flag evaluation endpoint.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { addAuthHeader, trimTrailingSlashes, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
-import type { UseQueryResult } from '@abe-stack/client-engine';
+import type { UseQueryResult } from '@abe-stack/react';
 
 // ============================================================================
 // Types

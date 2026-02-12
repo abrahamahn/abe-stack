@@ -5,7 +5,7 @@
  * Hook for updating the user's username.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/client-engine';
+import { useMutation, useQueryCache } from '@abe-stack/react';
 
 import { createSettingsApi } from '../api';
 

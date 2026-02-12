@@ -5,7 +5,7 @@
  * Query and mutation hooks for media upload and retrieval.
  */
 
-import { useMutation, useQuery } from '@abe-stack/client-engine';
+import { useMutation, useQuery } from '@abe-stack/react';
 import { useEffect } from 'react';
 
 import { createMediaApi } from '../api';

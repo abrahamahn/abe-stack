@@ -1,5 +1,5 @@
 // src/apps/web/src/features/admin/hooks/useFeatureFlags.test.ts
-import { useMutation, useQuery } from '@abe-stack/client-engine';
+import { useMutation, useQuery } from '@abe-stack/react';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -12,9 +12,9 @@ import {
   useUpdateFeatureFlag,
 } from './useFeatureFlags';
 
-import type { UseMutationResult, UseQueryResult } from '@abe-stack/client-engine';
+import type { UseMutationResult, UseQueryResult } from '@abe-stack/react';
 
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@abe-stack/react', () => ({
   useQuery: vi.fn(),
   useMutation: vi.fn(),
 }));

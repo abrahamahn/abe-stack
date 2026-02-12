@@ -5,7 +5,7 @@
  * Hooks for listing, creating, revoking, and resending workspace invitations.
  */
 
-import { useMutation, useQuery, useQueryCache } from '@abe-stack/client-engine';
+import { useMutation, useQuery, useQueryCache } from '@abe-stack/react';
 
 import { createWorkspaceApi } from '../api';
 

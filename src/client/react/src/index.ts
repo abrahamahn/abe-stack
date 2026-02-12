@@ -191,6 +191,74 @@ export { createFormHandler } from './utils/createFormHandler';
 export type { FormHandlerOptions } from './utils/createFormHandler';
 
 // ============================================================================
+// Query
+// ============================================================================
+
+export { QueryCacheProvider, useQueryCache } from './query/QueryCacheProvider';
+export type { QueryCacheProviderProps } from './query/QueryCacheProvider';
+export { useQuery } from './query/useQuery';
+export type { UseQueryOptions, UseQueryResult } from './query/useQuery';
+export { useMutation } from './query/useMutation';
+export type { MutationStatus, UseMutationOptions, UseMutationResult } from './query/useMutation';
+export { useInfiniteQuery } from './query/useInfiniteQuery';
+export type {
+  InfiniteData,
+  InfinitePageParam,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
+} from './query/useInfiniteQuery';
+
+// ============================================================================
+// Realtime
+// ============================================================================
+
+export {
+  RealtimeProvider,
+  useRealtime,
+  type RealtimeContextValue,
+  type RealtimeProviderConfig,
+  type RealtimeProviderProps,
+  type UndoableWrite,
+  type WriteOperation,
+  type WriteOptions,
+} from './realtime/RealtimeContext';
+
+export {
+  useConnectionState,
+  useIsOnline,
+  useIsPendingWrite,
+  useRecord,
+  useRecords,
+  useUndoRedo,
+  useWrite,
+  type UseRecordOptions,
+  type UseRecordResult,
+  type UseRecordsResult,
+  type UseUndoRedoResult,
+  type UseWriteResult,
+  type WriteFn,
+} from './realtime/hooks';
+
+// ============================================================================
+// Search
+// ============================================================================
+
+export {
+  useDebounceSearch,
+  useInfiniteSearch,
+  useSearch,
+  useSearchParams as useSearchQueryParams,
+} from './search/hooks';
+export type {
+  CursorSearchFn,
+  SearchFn,
+  UseInfiniteSearchOptions,
+  UseInfiniteSearchResult,
+  UseSearchOptions,
+  UseSearchResult,
+} from './search/hooks';
+
+// ============================================================================
 // Version
 // ============================================================================
 

@@ -5,10 +5,10 @@
  * Hook for fetching workspace audit events.
  */
 
-import { useQuery } from '@abe-stack/client-engine';
+import { useQuery } from '@abe-stack/react';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
-import type { UseQueryResult } from '@abe-stack/client-engine';
+import type { UseQueryResult } from '@abe-stack/react';
 
 // ============================================================================
 // Types

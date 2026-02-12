@@ -5,12 +5,12 @@
  * Hooks for managing tenant-specific feature flag overrides.
  */
 
-import { useMutation, useQuery } from '@abe-stack/client-engine';
+import { useMutation, useQuery } from '@abe-stack/react';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import { createAdminApiClient } from '../../admin/services/adminApi';
 
-import type { UseQueryResult } from '@abe-stack/client-engine';
+import type { UseQueryResult } from '@abe-stack/react';
 
 // ============================================================================
 // Types

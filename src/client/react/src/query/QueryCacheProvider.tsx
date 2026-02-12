@@ -1,4 +1,4 @@
-// src/client/engine/src/query/QueryCacheProvider.tsx
+// src/client/react/src/query/QueryCacheProvider.tsx
 /**
  * QueryCacheProvider - React context for QueryCache.
  *
@@ -7,9 +7,9 @@
 
 import { createContext, useContext, useMemo } from 'react';
 
-import { QueryCache } from './QueryCache';
+import { QueryCache } from '@abe-stack/client-engine';
 
-import type { QueryCacheOptions } from './QueryCache';
+import type { QueryCacheOptions } from '@abe-stack/client-engine';
 import type { ReactNode } from 'react';
 
 // ============================================================================

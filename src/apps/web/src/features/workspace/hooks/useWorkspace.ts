@@ -5,7 +5,7 @@
  * Hook for fetching a single workspace by ID.
  */
 
-import { useQuery, useQueryCache } from '@abe-stack/client-engine';
+import { useQuery, useQueryCache } from '@abe-stack/react';
 
 import { createWorkspaceApi } from '../api';
 

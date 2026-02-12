@@ -5,7 +5,7 @@
  * Hook for managing user profile updates with undo/redo support.
  */
 
-import { useQueryCache } from '@abe-stack/client-engine';
+import { useQueryCache } from '@abe-stack/react';
 import { useUndoableMutation } from '@abe-stack/react/hooks';
 import { useRef } from 'react';
 

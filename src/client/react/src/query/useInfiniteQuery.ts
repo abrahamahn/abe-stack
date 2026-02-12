@@ -1,4 +1,4 @@
-// src/client/engine/src/query/useInfiniteQuery.ts
+// src/client/react/src/query/useInfiniteQuery.ts
 /**
  * useInfiniteQuery - React hook for paginated data fetching.
  *
@@ -8,10 +8,10 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-import { hashQueryKey } from './QueryCache';
+import { hashQueryKey } from '@abe-stack/client-engine';
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey, QueryState } from './QueryCache';
+import type { QueryKey, QueryState } from '@abe-stack/client-engine';
 
 // ============================================================================
 // Types
