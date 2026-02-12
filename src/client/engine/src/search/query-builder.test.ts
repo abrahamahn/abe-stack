@@ -2,17 +2,20 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-  ClientSearchQueryBuilder,
   contains,
-  createClientSearchQuery,
+  deserializeFromURLParams,
   eq,
-  fromClientSearchQuery,
   gt,
   inArray,
   lt,
   neq,
-  queryToURLSearchParams,
-  urlSearchParamsToQuery,
+  serializeToURLParams,
+} from '@abe-stack/shared';
+
+import {
+  ClientSearchQueryBuilder,
+  createClientSearchQuery,
+  fromClientSearchQuery,
 } from './query-builder';
 
 describe('ClientSearchQueryBuilder', () => {
@@ -191,200 +194,46 @@ describe('ClientSearchQueryBuilder', () => {
     });
   });
 
-  describe('queryToURLSearchParams', () => {
-    test('should serialize empty query', () => {
-      const params = queryToURLSearchParams({});
-      expect(params.toString()).toBe('');
+  describe('roundtrip tests', () => {
+    test('should roundtrip basic query through URL params', () => {
+      const original = createClientSearchQuery()
+        .whereEq('status', 'active')
+        .orderByDesc('createdAt')
+        .page(2)
+        .limit(25)
+        .build();
+
+      const params = serializeToURLParams(original);
+      const restored = deserializeFromURLParams(params);
+
+      expect(restored.page).toBe(original.page);
+      expect(restored.limit).toBe(original.limit);
+      expect(restored.sort).toEqual(original.sort);
     });
 
-    test('should serialize filters as JSON', () => {
-      const params = queryToURLSearchParams({
-        filters: { field: 'status', operator: 'eq', value: 'active' },
-      });
+    test('should roundtrip complex filters', () => {
+      interface TestRecord {
+        status: string;
+        age: number;
+      }
 
-      expect(params.has('filters')).toBe(true);
-      const filtersValue = params.get('filters');
-      if (filtersValue === null) throw new Error('filters is null');
-      const parsed = JSON.parse(filtersValue);
-      expect(parsed.f).toBe('status');
-    });
+      const builder = createClientSearchQuery<TestRecord>();
+      const original = builder
+        .and((b) => b.whereEq('status', 'active').whereGte('age', 18))
+        .build();
 
-    test('should serialize sort as colon-separated string', () => {
-      const params = queryToURLSearchParams({
-        sort: [
-          { field: 'createdAt', order: 'desc' },
-          { field: 'name', order: 'asc' },
-        ],
-      });
+      const params = serializeToURLParams(original);
+      const restored = deserializeFromURLParams<TestRecord>(params);
 
-      expect(params.get('sort')).toBe('createdAt:desc,name:asc');
-    });
+      const originalFilters = original.filters as { operator: string; conditions: unknown[] };
+      const restoredFilters = restored.filters as { operator: string; conditions: unknown[] };
 
-    test('should serialize search query', () => {
-      const params = queryToURLSearchParams({
-        search: { query: 'test', fields: ['title'], fuzziness: 0.5 },
-      });
-
-      expect(params.get('q')).toBe('test');
-      expect(params.get('searchFields')).toBe('title');
-      expect(params.get('fuzziness')).toBe('0.5');
-    });
-
-    test('should skip page=1', () => {
-      const params = queryToURLSearchParams({ page: 1 });
-      expect(params.has('page')).toBe(false);
-    });
-
-    test('should include page > 1', () => {
-      const params = queryToURLSearchParams({ page: 2 });
-      expect(params.get('page')).toBe('2');
-    });
-
-    test('should serialize includeCount as 1', () => {
-      const params = queryToURLSearchParams({ includeCount: true });
-      expect(params.get('includeCount')).toBe('1');
-    });
-
-    test('should serialize Date values with $d marker', () => {
-      const date = new Date('2024-01-15T00:00:00.000Z');
-      const params = queryToURLSearchParams({
-        filters: { field: 'createdAt', operator: 'gte', value: date },
-      });
-
-      const filtersValue = params.get('filters');
-      if (filtersValue === null) throw new Error('filters is null');
-      const parsed = JSON.parse(filtersValue);
-      expect(parsed.v.$d).toBe('2024-01-15T00:00:00.000Z');
-    });
-
-    test('should serialize range values with $r marker', () => {
-      const params = queryToURLSearchParams({
-        filters: { field: 'price', operator: 'between', value: { min: 10, max: 100 } },
-      });
-
-      const filtersValue = params.get('filters');
-      if (filtersValue === null) throw new Error('filters is null');
-      const parsed = JSON.parse(filtersValue);
-      expect(parsed.v.$r).toEqual({ min: 10, max: 100 });
+      expect(restoredFilters.operator).toBe(originalFilters.operator);
+      expect(restoredFilters.conditions).toHaveLength(originalFilters.conditions.length);
     });
   });
 
-  describe('urlSearchParamsToQuery', () => {
-    test('should parse empty params', () => {
-      const query = urlSearchParamsToQuery(new URLSearchParams());
-      expect(query).toEqual({});
-    });
-
-    test('should parse filters JSON', () => {
-      const params = new URLSearchParams();
-      params.set('filters', JSON.stringify({ f: 'status', o: 'eq', v: 'active' }));
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.filters).toEqual({
-        field: 'status',
-        operator: 'eq',
-        value: 'active',
-        caseSensitive: undefined,
-      });
-    });
-
-    test('should parse sort string', () => {
-      const params = new URLSearchParams();
-      params.set('sort', 'createdAt:desc,name:asc');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.sort).toEqual([
-        { field: 'createdAt', order: 'desc' },
-        { field: 'name', order: 'asc' },
-      ]);
-    });
-
-    test('should parse search params', () => {
-      const params = new URLSearchParams();
-      params.set('q', 'test search');
-      params.set('searchFields', 'title,description');
-      params.set('fuzziness', '0.8');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.search).toEqual({
-        query: 'test search',
-        fields: ['title', 'description'],
-        fuzziness: 0.8,
-      });
-    });
-
-    test('should parse pagination', () => {
-      const params = new URLSearchParams();
-      params.set('page', '3');
-      params.set('limit', '50');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.page).toBe(3);
-      expect(query.limit).toBe(50);
-    });
-
-    test('should parse cursor', () => {
-      const params = new URLSearchParams();
-      params.set('cursor', 'abc123');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.cursor).toBe('abc123');
-    });
-
-    test('should parse select', () => {
-      const params = new URLSearchParams();
-      params.set('select', 'id,name,email');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.select).toEqual(['id', 'name', 'email']);
-    });
-
-    test('should parse includeCount', () => {
-      const params = new URLSearchParams();
-      params.set('includeCount', '1');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.includeCount).toBe(true);
-
-      params.set('includeCount', 'true');
-      const query2 = urlSearchParamsToQuery(params);
-      expect(query2.includeCount).toBe(true);
-    });
-
-    test('should handle invalid filters JSON gracefully', () => {
-      const params = new URLSearchParams();
-      params.set('filters', 'not-json');
-
-      const query = urlSearchParamsToQuery(params);
-      expect(query.filters).toBeUndefined();
-    });
-
-    test('should deserialize Date values', () => {
-      const params = new URLSearchParams();
-      params.set(
-        'filters',
-        JSON.stringify({ f: 'createdAt', o: 'gte', v: { $d: '2024-01-15T00:00:00.000Z' } }),
-      );
-
-      const query = urlSearchParamsToQuery(params);
-      const filter = query.filters as { value: Date };
-      expect(filter.value).toBeInstanceOf(Date);
-    });
-
-    test('should deserialize range values', () => {
-      const params = new URLSearchParams();
-      params.set(
-        'filters',
-        JSON.stringify({ f: 'price', o: 'between', v: { $r: { min: 10, max: 100 } } }),
-      );
-
-      const query = urlSearchParamsToQuery(params);
-      const filter = query.filters as { value: { min: number; max: number } };
-      expect(filter.value).toEqual({ min: 10, max: 100 });
-    });
-  });
-
-  describe('Quick filter helpers', () => {
+  describe('Quick filter helpers (from shared)', () => {
     describe('eq', () => {
       test('should create equality filter', () => {
         const filter = eq('status', 'active');
@@ -393,21 +242,6 @@ describe('ClientSearchQueryBuilder', () => {
           operator: 'eq',
           value: 'active',
         });
-      });
-
-      test('should handle number values', () => {
-        const filter = eq('age', 25);
-        expect(filter.value).toBe(25);
-      });
-
-      test('should handle boolean values', () => {
-        const filter = eq('isActive', true);
-        expect(filter.value).toBe(true);
-      });
-
-      test('should handle null values', () => {
-        const filter = eq('deletedAt', null);
-        expect(filter.value).toBe(null);
       });
     });
 
@@ -430,12 +264,6 @@ describe('ClientSearchQueryBuilder', () => {
           operator: 'gt',
           value: 18,
         });
-      });
-
-      test('should handle Date values', () => {
-        const date = new Date('2024-01-01');
-        const filter = gt('createdAt', date);
-        expect(filter.value).toEqual(date);
       });
     });
 
@@ -470,50 +298,6 @@ describe('ClientSearchQueryBuilder', () => {
           value: ['active', 'pending'],
         });
       });
-
-      test('should handle number arrays', () => {
-        const filter = inArray('categoryId', [1, 2, 3]);
-        expect(filter.value).toEqual([1, 2, 3]);
-      });
-    });
-  });
-
-  describe('roundtrip tests', () => {
-    test('should roundtrip basic query through URL params', () => {
-      const original = createClientSearchQuery()
-        .whereEq('status', 'active')
-        .orderByDesc('createdAt')
-        .page(2)
-        .limit(25)
-        .build();
-
-      const params = queryToURLSearchParams(original);
-      const restored = urlSearchParamsToQuery(params);
-
-      expect(restored.page).toBe(original.page);
-      expect(restored.limit).toBe(original.limit);
-      expect(restored.sort).toEqual(original.sort);
-    });
-
-    test('should roundtrip complex filters', () => {
-      interface TestRecord {
-        status: string;
-        age: number;
-      }
-
-      const builder = createClientSearchQuery<TestRecord>();
-      const original = builder
-        .and((b) => b.whereEq('status', 'active').whereGte('age', 18))
-        .build();
-
-      const params = queryToURLSearchParams(original);
-      const restored = urlSearchParamsToQuery<TestRecord>(params);
-
-      const originalFilters = original.filters as { operator: string; conditions: unknown[] };
-      const restoredFilters = restored.filters as { operator: string; conditions: unknown[] };
-
-      expect(restoredFilters.operator).toBe(originalFilters.operator);
-      expect(restoredFilters.conditions).toHaveLength(originalFilters.conditions.length);
     });
   });
 });
