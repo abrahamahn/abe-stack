@@ -5,6 +5,12 @@ import { ConsoleSmsProvider } from './console';
 import { createSmsProvider } from './factory';
 import { TwilioSmsProvider } from './twilio';
 
+const TEST_TWILIO_ACCOUNT_SID =
+  process.env['TEST_TWILIO_ACCOUNT_SID'] ?? 'AC_TEST_ACCOUNT_SID_PLACEHOLDER';
+const TEST_TWILIO_AUTH_TOKEN =
+  process.env['TEST_TWILIO_AUTH_TOKEN'] ?? 'test-auth-token-placeholder';
+const TEST_TWILIO_FROM_NUMBER = process.env['TEST_TWILIO_FROM_NUMBER'] ?? '+15551234567';
+
 describe('createSmsProvider', () => {
   it('returns ConsoleSmsProvider when provider is console', () => {
     const provider = createSmsProvider({
@@ -28,9 +34,9 @@ describe('createSmsProvider', () => {
     const provider = createSmsProvider(
       { enabled: true, provider: 'twilio' },
       {
-        accountSid: 'TWILIO_ACCOUNT_SID_TEST',
-        authToken: 'test-auth-token',
-        fromNumber: '+15551234567',
+        accountSid: TEST_TWILIO_ACCOUNT_SID,
+        authToken: TEST_TWILIO_AUTH_TOKEN,
+        fromNumber: TEST_TWILIO_FROM_NUMBER,
       },
     );
 

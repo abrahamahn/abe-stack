@@ -1,9 +1,9 @@
 // src/apps/web/src/features/home/HomePage.tsx
 import { useSearchParams } from '@abe-stack/ui';
 
-import { HomeDocViewer } from './components';
-import { docsMeta } from './data';
-import { useDocContent } from './hooks';
+import { HomeDocViewer } from './components/HomeDocViewer';
+import { docsMeta } from './data/docsMeta';
+import { useDocContent } from './hooks/useDocContent';
 
 import type { DocKey } from './types';
 

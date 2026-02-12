@@ -9,11 +9,17 @@ import type { TwilioConfig } from './twilio';
 // Test Helpers
 // ============================================================================
 
+const TEST_TWILIO_ACCOUNT_SID =
+  process.env['TEST_TWILIO_ACCOUNT_SID'] ?? 'AC_TEST_ACCOUNT_SID_PLACEHOLDER';
+const TEST_TWILIO_AUTH_TOKEN =
+  process.env['TEST_TWILIO_AUTH_TOKEN'] ?? 'test-auth-token-placeholder';
+const TEST_TWILIO_FROM_NUMBER = process.env['TEST_TWILIO_FROM_NUMBER'] ?? '+15551234567';
+
 function createConfig(overrides?: Partial<TwilioConfig>): TwilioConfig {
   return {
-    accountSid: 'TWILIO_ACCOUNT_SID_TEST',
-    authToken: 'test-auth-token-1234567890abcdef',
-    fromNumber: '+15551234567',
+    accountSid: TEST_TWILIO_ACCOUNT_SID,
+    authToken: TEST_TWILIO_AUTH_TOKEN,
+    fromNumber: TEST_TWILIO_FROM_NUMBER,
     ...overrides,
   };
 }
