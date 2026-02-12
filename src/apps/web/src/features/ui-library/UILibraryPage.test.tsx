@@ -55,7 +55,7 @@ const mockComponents: ComponentDemo[] = [
 const mockCategories: ComponentCategory[] = ['elements', 'components', 'layouts'];
 
 // Mock the catalog index used by UILibraryPage
-vi.mock('@catalog/index', () => ({
+vi.mock('@catalog/catalog', () => ({
   componentCatalog: {},
   getComponentsByCategory: (category: string): ComponentDemo[] =>
     mockComponents.filter((c) => c.category === category),

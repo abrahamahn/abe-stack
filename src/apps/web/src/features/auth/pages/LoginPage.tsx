@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
-import { useAuth } from '@auth/hooks';
+import { useAuth } from '@auth/hooks/useAuth';
 import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect } from 'react';
 

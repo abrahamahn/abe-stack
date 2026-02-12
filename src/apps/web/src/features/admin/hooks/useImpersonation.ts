@@ -6,7 +6,7 @@
  * Allows admins to view the app as a specific user for debugging.
  */
 
-import { useAuth } from '@auth/hooks';
+import { useAuth } from '@auth/hooks/useAuth';
 import { useCallback, useMemo } from 'react';
 
 // ============================================================================

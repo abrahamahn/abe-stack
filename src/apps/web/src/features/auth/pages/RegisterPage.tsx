@@ -1,7 +1,7 @@
 // src/apps/web/src/features/auth/pages/RegisterPage.tsx
 import { AuthLayout, useAuthModeNavigation, useFormState } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
-import { useAuth } from '@auth/hooks';
+import { useAuth } from '@auth/hooks/useAuth';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { JSX } from 'react';

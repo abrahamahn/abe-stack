@@ -6,29 +6,27 @@
  */
 
 import { Button, Card, Heading, Link, Skeleton, Tabs, Text } from '@abe-stack/ui';
-import { useAuth } from '@auth/hooks';
+import { useAuth } from '@auth/hooks/useAuth';
 import { useMemo, type ReactElement } from 'react';
 
-import {
-  ApiKeysManagement,
-  AvatarUpload,
-  DataControlsSection,
-  DangerZone,
-  DevicesList,
-  EmailChangeForm,
-  ForgotPasswordShortcut,
-  NotificationPreferencesForm,
-  OAuthConnectionsList,
-  PasskeyManagement,
-  PasswordChangeForm,
-  PhoneManagement,
-  PreferencesSection,
-  ProfileCompleteness,
-  ProfileForm,
-  SessionsList,
-  TotpManagement,
-  UsernameForm,
-} from '../components';
+import { ApiKeysManagement } from '../components/ApiKeysManagement';
+import { AvatarUpload } from '../components/AvatarUpload';
+import { DangerZone } from '../components/DangerZone';
+import { DataControlsSection } from '../components/DataControlsSection';
+import { DevicesList } from '../components/DevicesList';
+import { EmailChangeForm } from '../components/EmailChangeForm';
+import { ForgotPasswordShortcut } from '../components/ForgotPasswordShortcut';
+import { NotificationPreferencesForm } from '../components/NotificationPreferencesForm';
+import { OAuthConnectionsList } from '../components/OAuthConnectionsList';
+import { PasskeyManagement } from '../components/PasskeyManagement';
+import { PasswordChangeForm } from '../components/PasswordChangeForm';
+import { PhoneManagement } from '../components/PhoneManagement';
+import { PreferencesSection } from '../components/PreferencesSection';
+import { ProfileCompleteness } from '../components/ProfileCompleteness';
+import { ProfileForm } from '../components/ProfileForm';
+import { SessionsList } from '../components/SessionsList';
+import { TotpManagement } from '../components/TotpManagement';
+import { UsernameForm } from '../components/UsernameForm';
 
 import type { User } from '@abe-stack/shared';
 

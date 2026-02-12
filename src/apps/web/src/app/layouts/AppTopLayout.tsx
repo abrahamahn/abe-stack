@@ -1,7 +1,7 @@
 // src/apps/web/src/app/layouts/AppTopLayout.tsx
 import { toastStore } from '@abe-stack/react';
 import { Button, Heading, ResizablePanel, Skeleton, Text, useSidePeek } from '@abe-stack/ui';
-import { TenantSwitcher } from '@features/workspace/components';
+import { TenantSwitcher } from '@features/workspace/components/TenantSwitcher';
 
 import { AppUndoRedo } from './AppUndoRedo';
 
