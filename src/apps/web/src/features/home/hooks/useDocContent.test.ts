@@ -2,11 +2,11 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('../data', () => ({
+vi.mock('../data/docsMeta', () => ({
   loadDocContent: vi.fn(),
 }));
 
-import { loadDocContent } from '../data';
+import { loadDocContent } from '../data/docsMeta';
 
 import { useDocContent } from './useDocContent';
 

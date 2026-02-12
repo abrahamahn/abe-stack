@@ -12,11 +12,11 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
   };
 });
 
-vi.mock('./components', () => ({
+vi.mock('./components/HomeDocViewer', () => ({
   ['HomeDocViewer']: (): React.ReactElement => <div data-testid="home-doc-viewer">DocViewer</div>,
 }));
 
-vi.mock('./hooks', () => ({
+vi.mock('./hooks/useDocContent', () => ({
   useDocContent: () => ({ content: '# README', isLoading: false }),
 }));
 

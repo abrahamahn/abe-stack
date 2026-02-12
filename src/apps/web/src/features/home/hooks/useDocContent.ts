@@ -1,7 +1,7 @@
 // src/apps/web/src/features/home/hooks/useDocContent.ts
 import { useEffect, useState } from 'react';
 
-import { loadDocContent } from '../data';
+import { loadDocContent } from '../data/docsMeta';
 
 import type { DocKey } from '../types';
 
