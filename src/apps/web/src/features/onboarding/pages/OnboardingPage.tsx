@@ -8,8 +8,8 @@
 
 import { PageContainer, useNavigate } from '@abe-stack/ui';
 
-import { OnboardingWizard } from '../components';
-import { useOnboarding } from '../hooks';
+import { OnboardingWizard } from '../components/OnboardingWizard';
+import { useOnboarding } from '../hooks/useOnboarding';
 
 import type { ReactElement } from 'react';
 

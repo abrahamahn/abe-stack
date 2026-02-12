@@ -10,7 +10,7 @@
 
 import { Button, Card, Heading, Input, Text } from '@abe-stack/ui';
 
-import type { UseOnboardingResult } from '../hooks';
+import type { UseOnboardingResult } from '../hooks/useOnboarding';
 import type { ReactElement } from 'react';
 
 // ============================================================================

@@ -2,7 +2,7 @@
 import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
-import { GettingStartedChecklist } from '@dashboard/components';
+import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
 
 import type { NavigateFunction } from '@abe-stack/ui';

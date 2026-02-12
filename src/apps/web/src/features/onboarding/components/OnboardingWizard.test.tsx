@@ -6,7 +6,7 @@ import { renderWithProviders } from '../../../__tests__/utils';
 
 import { OnboardingWizard } from './OnboardingWizard';
 
-import type { UseOnboardingResult } from '../hooks';
+import type { UseOnboardingResult } from '../hooks/useOnboarding';
 
 // ============================================================================
 // Mock Onboarding State Factory
