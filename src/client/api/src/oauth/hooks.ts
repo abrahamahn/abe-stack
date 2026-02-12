@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createApiClient } from '../api/client';
+import { API_PREFIX, trimTrailingSlashes } from '../utils';
 
 import type { ApiClientConfig } from '../api/client';
 import type { OAuthConnection, OAuthProvider } from '@abe-stack/shared';
@@ -23,14 +24,6 @@ export const oauthQueryKeys = {
   enabledProviders: () => [...oauthQueryKeys.all, 'enabled-providers'] as const,
   connections: () => [...oauthQueryKeys.all, 'connections'] as const,
 } as const;
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
-    end--;
-  }
-  return value.slice(0, end);
-}
 
 // ============================================================================
 // useEnabledOAuthProviders
@@ -248,5 +241,5 @@ export function useOAuthConnections(clientConfig: ApiClientConfig): OAuthConnect
 export function getOAuthLoginUrl(baseUrl: string, provider: OAuthProvider): string {
   const normalizedBase = trimTrailingSlashes(baseUrl);
   const providerStr = provider as string;
-  return `${normalizedBase}/api/auth/oauth/${providerStr}`;
+  return `${normalizedBase}${API_PREFIX}/auth/oauth/${providerStr}`;
 }

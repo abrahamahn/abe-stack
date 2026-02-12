@@ -607,3 +607,29 @@ export const totpLoginChallengeResponseSchema: Schema<TotpLoginChallengeResponse
     };
   },
 );
+
+// ============================================================================
+// WebAuthn / Passkey Types
+// ============================================================================
+
+/** Passkey list item returned by GET /api/users/me/passkeys */
+export interface PasskeyListItem {
+  id: string;
+  name: string;
+  deviceType: string | null;
+  backedUp: boolean;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+/** Request to rename a passkey */
+export interface RenamePasskeyRequest {
+  name: string;
+}
+
+export const renamePasskeyRequestSchema: Schema<RenamePasskeyRequest> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return { name: parseString(obj['name'], 'name', { min: 1, max: 64, trim: true }) };
+  },
+);

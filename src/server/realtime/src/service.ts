@@ -10,6 +10,7 @@
  */
 
 import { and, eq, inArray, insert, select, update, USERS_TABLE } from '@abe-stack/db';
+import { deepEqual, getFieldValue, isSafeObjectKey } from '@abe-stack/shared';
 
 import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type { DbClient, User } from '@abe-stack/db';
@@ -88,6 +89,19 @@ export function registerRealtimeTable(table: string, tableName?: string): void {
 }
 
 /**
+ * Resolve a logical table name to its database table identifier.
+ * Returns undefined if the table is not registered for realtime operations.
+ *
+ * @param logicalName - Logical table name (e.g. 'users')
+ * @returns Database table name, or undefined if not registered
+ * @complexity O(1)
+ */
+export function resolveTableName(logicalName: string): string | undefined {
+  if (!ALLOWED_TABLES.has(logicalName)) return undefined;
+  return tableNameMap[logicalName];
+}
+
+/**
  * Check if a field can be modified through realtime operations.
  *
  * @param field - Field name to check
@@ -103,23 +117,6 @@ export function isFieldMutable(field: string): boolean {
 // ============================================================================
 
 /**
- * Get a nested value from an object by dot-separated path.
- *
- * @param obj - Source object
- * @param path - Dot-separated path (e.g., "metadata.key")
- * @returns The value at the path, or undefined if not found
- * @complexity O(d) where d is the depth of the path
- */
-function getPath(obj: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce<unknown>((acc, key) => {
-    if (acc !== null && acc !== undefined && typeof acc === 'object' && key in acc) {
-      return (acc as Record<string, unknown>)[key];
-    }
-    return undefined;
-  }, obj);
-}
-
-/**
  * Set a nested value on an object by dot-separated path.
  * Creates intermediate objects if they do not exist.
  *
@@ -128,59 +125,26 @@ function getPath(obj: Record<string, unknown>, path: string): unknown {
  * @param value - Value to set at the path
  * @complexity O(d) where d is the depth of the path
  */
-function isSafeObjectKey(key: string): boolean {
-  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
-}
-
 function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   const lastKey = keys.pop();
   if (lastKey === undefined || lastKey === '') return;
   if (!isSafeObjectKey(lastKey)) return;
 
-  const target = keys.reduce<Record<string, unknown>>((acc, key) => {
-    if (!isSafeObjectKey(key)) return acc;
-    if (!(key in acc) || typeof acc[key] !== 'object' || acc[key] === null) {
-      acc[key] = {};
+  let target: Record<string, unknown> = obj;
+  for (const key of keys) {
+    if (!isSafeObjectKey(key)) return;
+    const existing = Object.hasOwn(target, key) ? target[key] : undefined;
+    if (existing === undefined || existing === null || typeof existing !== 'object') {
+      const nested: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
+      target[key] = nested;
+      target = nested;
+    } else {
+      target = existing as Record<string, unknown>;
     }
-    return acc[key] as Record<string, unknown>;
-  }, obj);
-
-  target[lastKey] = value;
-}
-
-/**
- * Deep equality comparison for record values.
- * Used by list operations to find matching items.
- *
- * @param a - First value
- * @param b - Second value
- * @returns Whether the values are deeply equal
- * @complexity O(n) where n is the total number of nested properties
- */
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a === null || b === null) return false;
-  if (typeof a === 'object' && typeof b === 'object') {
-    if (Array.isArray(a) !== Array.isArray(b)) return false;
-
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-
-    if (keysA.length !== keysB.length) return false;
-
-    for (const key of keysA) {
-      const objA = a as Record<string, unknown>;
-      const objB = b as Record<string, unknown>;
-      if (!keysB.includes(key) || !deepEqual(objA[key], objB[key])) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
-  return false;
+  target[lastKey] = value;
 }
 
 // ============================================================================
@@ -336,7 +300,7 @@ function applySetNowOp(record: RealtimeRecord, op: SetNowOperation): void {
  * @param op - List insert operation with key, value, and position
  */
 function applyListInsertOp(record: RealtimeRecord, op: RealtimeListInsertOperation): void {
-  const currentValue = getPath(record, op.key);
+  const currentValue = getFieldValue(record, op.key);
   const list = Array.isArray(currentValue) ? [...(currentValue as unknown[])] : [];
 
   // Remove duplicates first
@@ -366,7 +330,7 @@ function applyListInsertOp(record: RealtimeRecord, op: RealtimeListInsertOperati
  * @param op - List remove operation with key and value to remove
  */
 function applyListRemoveOp(record: RealtimeRecord, op: RealtimeListRemoveOperation): void {
-  const currentValue = getPath(record, op.key);
+  const currentValue = getFieldValue(record, op.key);
   if (!Array.isArray(currentValue)) {
     return;
   }
@@ -414,9 +378,20 @@ export function applyOperations(
     let tableRecords = newRecordMap[table];
     if (tableRecords === undefined) {
       tableRecords = {};
-      newRecordMap[table] = tableRecords;
+      // Use defineProperty to prevent prototype pollution via dynamic keys
+      Object.defineProperty(newRecordMap, table, {
+        value: tableRecords,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    tableRecords[id] = newRecord;
+    Object.defineProperty(tableRecords, id, {
+      value: newRecord,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
 
     // Track modified records without duplicates - O(m) where m = modified count
     if (!modifiedRecords.some((p) => p.table === table && p.id === id)) {

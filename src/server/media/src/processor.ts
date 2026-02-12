@@ -10,6 +10,14 @@
 
 import path from 'path';
 
+import {
+  ALL_MEDIA_EXTENSIONS,
+  AUDIO_EXTENSIONS,
+  DEFAULT_MAX_MEDIA_FILE_SIZE,
+  DEFAULT_PROCESSING_TIMEOUT_MS,
+  IMAGE_EXTENSIONS,
+  VIDEO_EXTENSIONS,
+} from './constants';
 import { AudioProcessor } from './processors/audio';
 import { ImageProcessor } from './processors/image';
 import { VideoProcessor } from './processors/video';
@@ -98,10 +106,10 @@ export class MediaProcessingOrchestrator {
     _securityOptions?: Record<string, unknown>,
   ) {
     this.limits = {
-      maxDuration: 5 * 60 * 1000, // 5 minutes
-      maxFileSize: 100 * 1024 * 1024, // 100MB
+      maxDuration: DEFAULT_PROCESSING_TIMEOUT_MS,
+      maxFileSize: DEFAULT_MAX_MEDIA_FILE_SIZE,
       maxConcurrentJobs: 5,
-      allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'mp4', 'mov'],
+      allowedFormats: [...ALL_MEDIA_EXTENSIONS],
       ...limits,
     };
 
@@ -208,13 +216,13 @@ export class MediaProcessingOrchestrator {
     // Route to type-specific processor based on file extension
     let result: ProcessingResult;
 
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'tiff', 'bmp'].includes(ext)) {
+    if ((IMAGE_EXTENSIONS as readonly string[]).includes(ext)) {
       const outputPath = `${this.getBasePath(job)}_processed.${ext}`;
       result = await this.imageProcessor.process(job.filePath, outputPath);
-    } else if (['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'].includes(ext)) {
+    } else if ((AUDIO_EXTENSIONS as readonly string[]).includes(ext)) {
       const outputPath = `${this.getBasePath(job)}_processed.${ext}`;
       result = await this.audioProcessor.process(job.filePath, outputPath);
-    } else if (['mp4', 'avi', 'mov', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) {
+    } else if ((VIDEO_EXTENSIONS as readonly string[]).includes(ext)) {
       const outputPath = `${this.getBasePath(job)}_processed.${ext}`;
       result = await this.videoProcessor.process(job.filePath, outputPath);
     } else {

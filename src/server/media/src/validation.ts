@@ -5,9 +5,16 @@
  * Validation helpers for media files and upload configurations.
  */
 
-import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 
+import { generateUUID } from '@abe-stack/shared';
+
+import {
+  MAX_CHUNK_SIZE,
+  MAX_FILENAME_LENGTH,
+  MAX_UPLOAD_FILE_SIZE,
+  MAX_UPLOAD_TIMEOUT_MS,
+} from './constants';
 import { detectFileTypeFromFile, isAllowedFileType } from './file-type';
 
 import type { FileTypeResult, MediaProcessingOptions } from './types';
@@ -80,9 +87,8 @@ export function validateUploadConfig(config: {
   if (
     config.maxFileSize !== undefined &&
     config.maxFileSize !== 0 &&
-    config.maxFileSize > 1000 * 1024 * 1024
+    config.maxFileSize > MAX_UPLOAD_FILE_SIZE
   ) {
-    // 1GB
     errors.push('maxFileSize cannot exceed 1GB');
   }
 
@@ -93,9 +99,8 @@ export function validateUploadConfig(config: {
   if (
     config.chunkSize !== undefined &&
     config.chunkSize !== 0 &&
-    config.chunkSize > 10 * 1024 * 1024
+    config.chunkSize > MAX_CHUNK_SIZE
   ) {
-    // 10MB
     errors.push('chunkSize cannot exceed 10MB');
   }
 
@@ -103,8 +108,7 @@ export function validateUploadConfig(config: {
     errors.push('timeout must be positive');
   }
 
-  if (config.timeout !== undefined && config.timeout !== 0 && config.timeout > 3600000) {
-    // 1 hour
+  if (config.timeout !== undefined && config.timeout !== 0 && config.timeout > MAX_UPLOAD_TIMEOUT_MS) {
     errors.push('timeout cannot exceed 1 hour');
   }
 
@@ -148,11 +152,11 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.trim().replace(/^\.+|\.+$/g, '');
 
   // Limit length
-  if (sanitized.length > 255) {
+  if (sanitized.length > MAX_FILENAME_LENGTH) {
     const ext = sanitized.split('.').pop();
     const name = sanitized.slice(
       0,
-      255 - (ext !== undefined && ext.length > 0 ? ext.length + 1 : 0),
+      MAX_FILENAME_LENGTH - (ext !== undefined && ext.length > 0 ? ext.length + 1 : 0),
     );
     sanitized = ext !== undefined && ext.length > 0 ? `${name}.${ext}` : name;
   }
@@ -176,5 +180,5 @@ export function sanitizeFilename(filename: string): string {
  * @complexity O(1)
  */
 export function generateFileId(): string {
-  return randomUUID().replace(/-/g, '');
+  return generateUUID().replace(/-/g, '');
 }

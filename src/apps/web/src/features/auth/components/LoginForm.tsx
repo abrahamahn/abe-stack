@@ -1,9 +1,11 @@
 // src/apps/web/src/features/auth/components/LoginForm.tsx
 import { AuthFormLayout, Button, Input, Link, PasswordInput, Spinner, Text } from '@abe-stack/ui';
-import { TotpChallengeError } from '@auth/services/AuthService';
+import { SmsChallengeError, TotpChallengeError } from '@auth/services/AuthService';
 import { useCallback, useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
+import { PasskeyLoginButton } from './PasskeyLoginButton';
+import { SmsChallenge } from './SmsChallenge';
 import { TurnstileWidget } from './TurnstileWidget';
 
 import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/shared';
@@ -14,6 +16,8 @@ export interface LoginFormProps {
   onLogin?: (data: LoginRequest) => Promise<void>;
   onForgotPassword?: (data: ForgotPasswordRequest) => Promise<void>;
   onTotpVerify?: (challengeToken: string, code: string) => Promise<void>;
+  onSmsVerify?: (challengeToken: string, code: string) => Promise<void>;
+  onSmsSendCode?: (challengeToken: string) => Promise<void>;
   onSuccess?: () => void;
   onModeChange?: (mode: AuthMode) => void;
   isLoading?: boolean;
@@ -24,6 +28,8 @@ export const LoginForm = ({
   onLogin,
   onForgotPassword,
   onTotpVerify,
+  onSmsVerify,
+  onSmsSendCode,
   onModeChange,
   isLoading,
   error,
@@ -36,6 +42,7 @@ export const LoginForm = ({
   const [totpCode, setTotpCode] = useState('');
   const [totpError, setTotpError] = useState<string | null>(null);
   const [totpLoading, setTotpLoading] = useState(false);
+  const [smsChallenge, setSmsChallenge] = useState<string | null>(null);
 
   const handleCaptchaToken = useCallback((token: string) => {
     setCaptchaToken(token);
@@ -56,6 +63,10 @@ export const LoginForm = ({
       if (err instanceof TotpChallengeError) {
         setTotpChallenge(err.challengeToken);
         setTotpError(null);
+        return;
+      }
+      if (err instanceof SmsChallengeError) {
+        setSmsChallenge(err.challengeToken);
         return;
       }
       // Other errors handled by parent component via error prop
@@ -84,7 +95,25 @@ export const LoginForm = ({
     setTotpChallenge(null);
     setTotpCode('');
     setTotpError(null);
+    setSmsChallenge(null);
   };
+
+  const handleSmsVerify = useCallback(
+    async (challengeToken: string, code: string): Promise<void> => {
+      if (onSmsVerify === undefined) return;
+      await onSmsVerify(challengeToken, code);
+      onSuccess?.();
+    },
+    [onSmsVerify, onSuccess],
+  );
+
+  const handleSmsSendCode = useCallback(
+    async (challengeToken: string): Promise<void> => {
+      if (onSmsSendCode === undefined) return;
+      await onSmsSendCode(challengeToken);
+    },
+    [onSmsSendCode],
+  );
 
   const handleForgotPassword = (): void => {
     const emailValue = identifier.includes('@') ? identifier : '';
@@ -150,6 +179,22 @@ export const LoginForm = ({
     );
   }
 
+  // SMS verification step
+  if (smsChallenge !== null) {
+    return (
+      <AuthFormLayout>
+        <AuthFormLayout.Content>
+          <SmsChallenge
+            challengeToken={smsChallenge}
+            onVerify={handleSmsVerify}
+            onSendCode={handleSmsSendCode}
+            onCancel={handleBackToLogin}
+          />
+        </AuthFormLayout.Content>
+      </AuthFormLayout>
+    );
+  }
+
   // Standard login form
   return (
     <AuthFormLayout>
@@ -160,6 +205,8 @@ export const LoginForm = ({
         </AuthFormLayout.Header>
 
         <OAuthButtons mode="login" {...(isLoading !== undefined && { disabled: isLoading })} />
+
+        <PasskeyLoginButton onSuccess={onSuccess} disabled={isLoading} />
 
         <form
           onSubmit={(e) => {

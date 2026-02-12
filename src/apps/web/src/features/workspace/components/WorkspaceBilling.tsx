@@ -6,6 +6,7 @@
  * Shows current plan, billing period, and provides quick actions.
  */
 
+import { formatDate } from '@abe-stack/shared';
 import { Badge, Button, Card, Heading, Skeleton, Text, useNavigate } from '@abe-stack/ui';
 
 import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
@@ -18,18 +19,6 @@ import type { ReactElement } from 'react';
 
 export interface WorkspaceBillingProps {
   tenantId: string;
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 }
 
 function formatPrice(price: number, currency: string): string {

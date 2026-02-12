@@ -12,6 +12,7 @@
  * 4. Each instance forwards to its local WebSocket clients
  */
 
+import { generateSecureId, MS_PER_SECOND } from '@abe-stack/shared';
 import postgres, { type Options } from 'postgres';
 
 import type { SubscriptionKey } from '@abe-stack/shared';
@@ -81,7 +82,7 @@ export class PostgresPubSub {
         max: 1,
       };
       listenOpts['idle_timeout'] = 0; // Never timeout - keep connection open
-      listenOpts['connect_timeout'] = 10000;
+      listenOpts['connect_timeout'] = 10 * MS_PER_SECOND;
       listenOpts['onclose'] = (): void => {
         this.onError(new Error('Postgres PubSub connection closed (attempting reconnection)'));
       };
@@ -95,7 +96,7 @@ export class PostgresPubSub {
       const notifyOpts: Record<string, unknown> = {
         max: 3,
       };
-      notifyOpts['idle_timeout'] = 30000;
+      notifyOpts['idle_timeout'] = 30 * MS_PER_SECOND;
       this.notifyClient = postgres(
         this.connectionString,
         notifyOpts as Options<Record<string, never>>,
@@ -200,8 +201,7 @@ export class PostgresPubSub {
   private generateInstanceId(): string {
     // Unique ID for this server instance
     const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).slice(2, 8);
-    return `${timestamp}-${random}`;
+    return `${timestamp}-${generateSecureId(6)}`;
   }
 }
 

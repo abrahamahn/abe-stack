@@ -11,7 +11,7 @@
  * request provides a tenantId, tenant overrides and targeting apply.
  */
 
-import { evaluateFlag, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
+import { ERROR_MESSAGES, evaluateFlag, HTTP_STATUS, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
 
 import type { FeatureFlagRepository, TenantFeatureOverrideRepository } from '@abe-stack/db';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -56,8 +56,8 @@ export function createFeatureFlagGuard(flagKey: string, options: FeatureFlagGuar
     try {
       flag = await repos.featureFlags.findByKey(flagKey);
     } catch {
-      reply.code(500).send({
-        message: 'Internal server error',
+      reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+        message: ERROR_MESSAGES.INTERNAL_ERROR,
         code: 'FEATURE_FLAG_ERROR',
       });
       return;
@@ -65,7 +65,7 @@ export function createFeatureFlagGuard(flagKey: string, options: FeatureFlagGuar
 
     // Unknown flags default to disabled -- return 404
     if (flag === null) {
-      reply.code(404).send({
+      reply.code(HTTP_STATUS.NOT_FOUND).send({
         message: 'Feature not available',
         code: 'FEATURE_DISABLED',
       });
@@ -83,7 +83,7 @@ export function createFeatureFlagGuard(flagKey: string, options: FeatureFlagGuar
         const override = await repos.tenantFeatureOverrides.findByTenantAndKey(tenantId, flagKey);
         if (override !== null) {
           if (!override.isEnabled) {
-            reply.code(404).send({
+            reply.code(HTTP_STATUS.NOT_FOUND).send({
               message: 'Feature not available',
               code: 'FEATURE_DISABLED',
             });
@@ -92,8 +92,8 @@ export function createFeatureFlagGuard(flagKey: string, options: FeatureFlagGuar
           return;
         }
       } catch {
-        reply.code(500).send({
-          message: 'Internal server error',
+        reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+          message: ERROR_MESSAGES.INTERNAL_ERROR,
           code: 'FEATURE_FLAG_ERROR',
         });
         return;
@@ -128,7 +128,7 @@ export function createFeatureFlagGuard(flagKey: string, options: FeatureFlagGuar
     );
 
     if (!enabled) {
-      reply.code(404).send({
+      reply.code(HTTP_STATUS.NOT_FOUND).send({
         message: 'Feature not available',
         code: 'FEATURE_DISABLED',
       });

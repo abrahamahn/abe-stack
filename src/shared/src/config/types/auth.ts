@@ -209,6 +209,18 @@ export interface AuthConfig {
     /** Maximum concurrent sessions per user. Oldest evicted when exceeded. Default: 10 */
     maxConcurrentSessions?: number;
   };
+
+  /** WebAuthn/Passkey configuration */
+  webauthn?: {
+    /** Relying Party display name shown during registration */
+    rpName: string;
+    /** Relying Party ID (typically the domain, e.g. 'example.com') */
+    rpId: string;
+    /** Expected origin (e.g. 'https://example.com') */
+    origin: string;
+    /** Attestation preference. Default: 'none' */
+    attestation?: 'none' | 'direct';
+  };
 }
 
 // ============================================================================

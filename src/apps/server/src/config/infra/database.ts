@@ -93,6 +93,11 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
         config.connectionString = connectionString;
       }
 
+      const replicaUrl = env.DATABASE_READ_REPLICA_URL;
+      if (replicaUrl !== undefined && replicaUrl !== '') {
+        config.readReplicaConnectionString = replicaUrl;
+      }
+
       return config;
     }
   }

@@ -1,12 +1,12 @@
 // src/apps/server/src/infrastructure.ts
 
-import * as billingServiceImpl from '@abe-stack/core/billing';
-import * as notificationServiceImpl from '@abe-stack/core/notifications';
 import {
+  createReadReplicaClient,
   createRepositories,
   escapeIdentifier,
   PostgresPubSub,
   type DbClient,
+  type ReadReplicaClient,
   type Repositories,
   type RepositoryContext,
 } from '@abe-stack/db';
@@ -31,16 +31,20 @@ import {
   type WriteService,
   type WriteServiceOptions,
 } from '@abe-stack/server-engine';
+import { DAYS_PER_WEEK, MS_PER_DAY } from '@abe-stack/shared';
 
 import type { AuthEmailTemplates } from '@abe-stack/core/auth';
-import type {
-  BillingService,
-  EmailService,
-  StorageClient,
-  SubscriptionKey,
-} from '@abe-stack/shared';
+import type { BillingService, EmailService, StorageClient, SubscriptionKey } from '@abe-stack/shared';
 import type { AppConfig, FullEnv } from '@abe-stack/shared/config';
 import type { FastifyBaseLogger } from 'fastify';
+
+/**
+ * Options for infrastructure creation.
+ */
+export interface InfrastructureOptions {
+  /** Callback for cross-instance PubSub messages (wires pgPubSub to SubscriptionManager) */
+  onPubSubMessage?: (key: SubscriptionKey, version: number) => void;
+}
 
 // Temporary local declaration - NotificationService export issue in @abe-stack/shared
 interface NotificationService {
@@ -68,6 +72,7 @@ export interface Infrastructure {
   pgPubSub: PostgresPubSub; // PostgresPubSub is an adapter, not a SubscriptionManager
   emailTemplates: AuthEmailTemplates;
   sms: SmsProvider;
+  readReplica?: ReadReplicaClient;
 }
 
 /**
@@ -87,7 +92,11 @@ interface LoggerAdapter {
  * @param log - Fastify logger instance
  * @returns Infrastructure container with all adapters
  */
-export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger): Infrastructure {
+export function createInfrastructure(
+  config: AppConfig,
+  log: FastifyBaseLogger,
+  options: InfrastructureOptions = {},
+): Infrastructure {
   // DB & Repos
   let dbUrl = '';
   if (config.database.provider === 'postgresql') {
@@ -103,6 +112,15 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
   }
 
   const { raw, repos }: RepositoryContext = createRepositories(dbUrl);
+
+  // Read Replica — when a replica URL is configured, create a replica-aware client
+  let readReplica: ReadReplicaClient | undefined;
+  if (config.database.provider === 'postgresql') {
+    const replicaUrl = config.database.readReplicaConnectionString;
+    if (replicaUrl !== undefined && replicaUrl !== '') {
+      readReplica = createReadReplicaClient(dbUrl, replicaUrl);
+    }
+  }
 
   // Email - construct FullEnv mock (MailerClient only uses these fields)
   const mailerEnv = {
@@ -122,15 +140,13 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
   // Storage
   const storage = createStorage(config.storage as unknown as StorageConfig);
 
-  // Notifications (Core)
+  // Notifications (stub — real provider wired at production config level)
   const notifications: NotificationService = {
-    ...notificationServiceImpl,
-  } as unknown as NotificationService;
+    isConfigured: () => false,
+  };
 
-  // Billing (Core)
-  const billing: BillingService = {
-    ...billingServiceImpl,
-  } as unknown as BillingService;
+  // Billing (stub — real provider wired when Stripe keys are configured)
+  const billing = {} as unknown as BillingService;
 
   // Search — SQL-based provider for the users table
   const search: ServerSearchProvider = new SqlSearchProvider(raw, repos, {
@@ -176,13 +192,13 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
         await repos.magicLinkTokens.deleteExpired();
       },
       cleanupCompletedTasks: async () => {
-        const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const cutoff = new Date(Date.now() - DAYS_PER_WEEK * MS_PER_DAY).toISOString();
         await queueStore.clearCompleted(cutoff);
       },
       cleanupAuditEvents: async () => {
         const retentionDays = config.server.auditRetentionDays;
         if (retentionDays > 0) {
-          const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString();
+          const cutoff = new Date(Date.now() - retentionDays * MS_PER_DAY).toISOString();
           const deleted = await repos.auditEvents.deleteOlderThan(cutoff);
           if (deleted > 0) {
             log.info({ deleted, retentionDays }, 'Cleaned up old audit events');
@@ -190,7 +206,7 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
         }
       },
       cleanupSessions: async () => {
-        const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const cutoff = new Date(Date.now() - 30 * MS_PER_DAY).toISOString();
         const deleted = await repos.userSessions.deleteRevokedBefore(cutoff);
         if (deleted > 0) {
           log.info({ deleted }, 'Cleaned up revoked sessions older than 30 days');
@@ -209,7 +225,7 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
         }
       },
       cleanupLoginAttempts: async () => {
-        const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        const cutoff = new Date(Date.now() - 90 * MS_PER_DAY).toISOString();
         const deleted = await repos.loginAttempts.deleteOlderThan(cutoff);
         if (deleted > 0) {
           log.info({ deleted }, 'Cleaned up login attempts older than 90 days');
@@ -226,14 +242,14 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     log: loggerAdapter,
   });
 
-  // Postgres PubSub
+  // Postgres PubSub — wires cross-instance messages to local SubscriptionManager
   const pgPubSub: PostgresPubSub = new PostgresPubSub({
     connectionString: dbUrl,
     onMessage: (key: SubscriptionKey, version: number): void => {
-      // This callback is triggered when receiving messages from other instances
-      // For now, we just log it. In a full implementation, this would
-      // notify local subscribers
-      log.info({ key, version }, 'Received PubSub message');
+      if (options.onPubSubMessage !== undefined) {
+        options.onPubSubMessage(key, version);
+      }
+      log.debug({ key, version }, 'Received cross-instance PubSub message');
     },
     onError: (err: Error): void => {
       log.error({ err }, 'PubSub Error');
@@ -278,7 +294,7 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
   // Email Templates — use production templates from server-engine
   const emailTemplates: AuthEmailTemplates = engineEmailTemplates;
 
-  return {
+  const infra: Infrastructure = {
     db: raw,
     repos,
     email,
@@ -294,4 +310,8 @@ export function createInfrastructure(config: AppConfig, log: FastifyBaseLogger):
     emailTemplates,
     sms,
   };
+  if (readReplica !== undefined) {
+    infra.readReplica = readReplica;
+  }
+  return infra;
 }

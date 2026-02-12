@@ -1,4 +1,5 @@
 // src/tools/scripts/dev/maintain-local-caches.ts
+import { MS_PER_DAY } from '@abe-stack/shared';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +15,7 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '../../../..');
 const stateFile = path.join(repoRoot, 'node_modules', '.cache', 'hooks-cache-state.json');
 const legacyStateFile = path.join(repoRoot, '.cache', 'hooks-cache-state.json');
-const oneDayMs = 24 * 60 * 60 * 1000;
+const oneDayMs = MS_PER_DAY;
 
 const fingerprintInputs = [
   'package.json',

@@ -20,6 +20,7 @@ import {
 } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { HandlerContext, RouteResult } from '@abe-stack/server-engine';
@@ -125,6 +126,18 @@ export async function handleUpdateUsername(
       username: updated.username,
       nextChangeAllowedAt: nextChangeDate.toISOString(),
     };
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'user.username_changed',
+        resource: 'user',
+        resourceId: userId,
+        metadata: { oldUsername: user.username, newUsername: updated.username },
+      },
+    ).catch(() => {});
 
     // Fire-and-forget activity log
     logActivity(deps.repos.activities, {

@@ -32,10 +32,22 @@ import type { RouteDefinition } from '@abe-stack/server-engine';
  */
 const activityRouteEntries: [string, RouteDefinition][] = [
   // List activities for the authenticated user
-  ['activities', protectedRoute('GET', handleListActivities, 'user')],
+  [
+    'activities',
+    protectedRoute('GET', handleListActivities, 'user', undefined, {
+      summary: 'List user activities',
+      tags: ['Activities'],
+    }),
+  ],
 
   // List activities for a specific tenant
-  ['tenants/:tenantId/activities', protectedRoute('GET', handleListTenantActivities, 'user')],
+  [
+    'tenants/:tenantId/activities',
+    protectedRoute('GET', handleListTenantActivities, 'user', undefined, {
+      summary: 'List tenant activities',
+      tags: ['Activities'],
+    }),
+  ],
 ];
 
 /**

@@ -17,13 +17,18 @@ import type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   User,
 } from '@abe-stack/api';
 
 export interface AuthRouteClient {
-  login: (credentials: LoginRequest) => Promise<AuthResponse | TotpLoginChallengeResponse>;
+  login: (
+    credentials: LoginRequest,
+  ) => Promise<AuthResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse>;
   totpVerifyLogin: (args: { challengeToken: string; code: string }) => Promise<AuthResponse>;
+  smsSendCode: (args: { challengeToken: string }) => Promise<{ message: string }>;
+  smsVerifyLogin: (args: { challengeToken: string; code: string }) => Promise<AuthResponse>;
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
   logout: () => Promise<unknown>;
   refresh: () => Promise<unknown>;
@@ -39,6 +44,8 @@ export interface AuthRouteClient {
 export const createAuthRoute = (api: ApiClient): AuthRouteClient => ({
   login: (credentials) => api.login(credentials),
   totpVerifyLogin: (args) => api.totpVerifyLogin(args),
+  smsSendCode: (args) => api.smsSendCode(args),
+  smsVerifyLogin: (args) => api.smsVerifyLogin(args),
   register: (data) => api.register(data),
   logout: () => api.logout(),
   refresh: () => api.refresh(),

@@ -5,6 +5,7 @@
  * File upload component with drag-and-drop support for media files.
  */
 
+import { formatBytes } from '@abe-stack/shared';
 import { Button, FileInput, Spinner, Text } from '@abe-stack/ui';
 import React, { useState } from 'react';
 
@@ -71,12 +72,6 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps): React.JSX.E
     }
   }, [data, onUploadComplete]);
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
   return (
     <div
       style={{
@@ -115,7 +110,7 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps): React.JSX.E
               textAlign: 'center',
             }}
           >
-            {selectedFile.name} ({formatFileSize(selectedFile.size)})
+            {selectedFile.name} ({formatBytes(selectedFile.size)})
           </Text>
         )}
       </div>

@@ -1,8 +1,9 @@
 // src/server/core/src/auth/handlers/sudo.test.ts
 import { sign } from '@abe-stack/server-engine';
+import { SUDO_TOKEN_HEADER } from '@abe-stack/shared';
 import { describe, expect, it } from 'vitest';
 
-import { verifySudoToken, SUDO_TOKEN_HEADER, SUDO_TOKEN_TTL_MINUTES } from './sudo';
+import { verifySudoToken, SUDO_TOKEN_TTL_MINUTES } from './sudo';
 
 const TEST_SECRET = 'a-very-long-secret-that-is-at-least-32-chars!!';
 

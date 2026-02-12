@@ -46,7 +46,7 @@ function createWrapper(): (props: { children: ReactNode }) => ReactNode {
   const queryCache = new QueryCache();
 
   return (props: { children: ReactNode }) => {
-    return createElement(QueryCacheProvider, { cache: queryCache }, props.children);
+    return createElement(QueryCacheProvider, { cache: queryCache, children: props.children });
   };
 }
 
@@ -150,9 +150,13 @@ describe('useWorkspaceFeatureOverrides', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+    // useQuery retries 3 times with exponential backoff (1s, 2s, 4s)
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 15000 },
+    );
 
     expect(result.current.flags).toEqual([]);
     expect(result.current.error).not.toBe(null);

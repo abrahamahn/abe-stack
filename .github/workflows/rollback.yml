@@ -54,10 +54,15 @@ jobs:
 
       - name: Extract Infrastructure Information
         id: get-deployment-info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment || 'production' }}
+          INPUT_PROVIDER: ${{ inputs.provider || 'digitalocean' }}
+          INPUT_INSTANCE_IP: ${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}
+          INPUT_SSH_USER: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}
         run: |
-          DEPLOY_FILE=".deploy/${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}.json"
-          MANUAL_INSTANCE_IP="${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}"
-          SSH_USER="${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}"
+          DEPLOY_FILE=".deploy/${INPUT_ENVIRONMENT}-${INPUT_PROVIDER}.json"
+          MANUAL_INSTANCE_IP="$INPUT_INSTANCE_IP"
+          SSH_USER="$INPUT_SSH_USER"
 
           if [ -f "$DEPLOY_FILE" ]; then
             INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
@@ -78,15 +83,17 @@ jobs:
             echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
 
             echo "## 🔄 Rollback Target Infrastructure" >> $GITHUB_STEP_SUMMARY
-            echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Environment:** $INPUT_ENVIRONMENT" >> $GITHUB_STEP_SUMMARY
+            echo "**Provider:** $INPUT_PROVIDER" >> $GITHUB_STEP_SUMMARY
             echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
             echo "**SSH:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Determine Rollback Tag
         id: get-rollback-tag
+        env:
+          INPUT_TARGET_TAG: ${{ inputs.target_tag }}
         run: |
-          ROLLBACK_TAG="${{ inputs.target_tag }}"
+          ROLLBACK_TAG="$INPUT_TARGET_TAG"
           if [ -z "$ROLLBACK_TAG" ]; then
             echo "❌ target_tag is required for deterministic rollback."
             exit 1
@@ -96,11 +103,14 @@ jobs:
           echo "**Rollback Tag:** $ROLLBACK_TAG" >> $GITHUB_STEP_SUMMARY
 
       - name: Prepare SSH key for rollback
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          INSTANCE_IP: ${{ steps.get-deployment-info.outputs.instance_ip }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ steps.get-deployment-info.outputs.instance_ip }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
 
       - name: Execute Rollback
         uses: appleboy/ssh-action@v1.0.3
@@ -196,13 +206,18 @@ jobs:
             docker compose --project-name "$COMPOSE_PROJECT_NAME" -f docker-compose.prod.yml ps
 
       - name: Rollback Summary
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+          INPUT_PROVIDER: ${{ inputs.provider }}
+          INPUT_APP_NAME: ${{ inputs.app_name || 'abe-stack' }}
+          ROLLBACK_TAG: ${{ steps.get-rollback-tag.outputs.rollback_tag }}
         run: |
           echo "## 🔄 Rollback Completed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
-          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Rolled back to:** ${{ steps.get-rollback-tag.outputs.rollback_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** $INPUT_ENVIRONMENT" >> $GITHUB_STEP_SUMMARY
+          echo "**Provider:** $INPUT_PROVIDER" >> $GITHUB_STEP_SUMMARY
+          echo "**App Name:** $INPUT_APP_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "**Rolled back to:** $ROLLBACK_TAG" >> $GITHUB_STEP_SUMMARY
           echo "**Rollback completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### ⚠️ Next Steps" >> $GITHUB_STEP_SUMMARY

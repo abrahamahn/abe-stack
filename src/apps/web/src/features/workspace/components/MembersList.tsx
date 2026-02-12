@@ -5,6 +5,7 @@
  * Table of workspace members with role badges and action controls.
  */
 
+import { getRoleLevel, getTenantRoleTone } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -35,17 +36,6 @@ export interface MembersListProps {
 }
 
 // ============================================================================
-// Helpers
-// ============================================================================
-
-const ROLE_COLORS: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
-  owner: 'danger',
-  admin: 'warning',
-  member: 'info',
-  viewer: 'success',
-};
-
-// ============================================================================
 // Component
 // ============================================================================
 
@@ -58,9 +48,20 @@ export const MembersList = ({ tenantId, currentUserId }: MembersListProps): Reac
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div>
+        <div className="flex gap-4 border-b pb-2 mb-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20" />
+        </div>
         {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
+          <div key={i} className="flex gap-4 py-3 border-b">
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-5 w-20" />
+          </div>
         ))}
       </div>
     );
@@ -86,7 +87,7 @@ export const MembersList = ({ tenantId, currentUserId }: MembersListProps): Reac
         <TableBody>
           {members.map((member) => {
             const isCurrentUser = member.userId === currentUserId;
-            const roleTone = ROLE_COLORS[member.role] ?? 'info';
+            const roleTone = getTenantRoleTone(member.role);
 
             return (
               <TableRow key={member.id}>
@@ -114,11 +115,12 @@ export const MembersList = ({ tenantId, currentUserId }: MembersListProps): Reac
                         variant="secondary"
                         disabled={isUpdating}
                         onClick={() => {
-                          const nextRole: TenantRole = member.role === 'admin' ? 'member' : 'admin';
+                          const isAdminLevel = getRoleLevel(member.role) >= getRoleLevel('admin');
+                          const nextRole: TenantRole = isAdminLevel ? 'member' : 'admin';
                           updateRole(member.userId, { role: nextRole });
                         }}
                       >
-                        {member.role === 'admin' ? 'Demote' : 'Promote'}
+                        {getRoleLevel(member.role) >= getRoleLevel('admin') ? 'Demote' : 'Promote'}
                       </Button>
                       <Button
                         size="small"

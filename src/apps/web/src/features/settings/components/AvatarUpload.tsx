@@ -5,6 +5,7 @@
  * Component for uploading and managing user avatar.
  */
 
+import { MAX_IMAGE_SIZE } from '@abe-stack/shared';
 import { Alert, Avatar, Button, FileInput, Spinner } from '@abe-stack/ui';
 import { useRef, useState, type ReactElement } from 'react';
 
@@ -67,7 +68,7 @@ export const AvatarUpload = ({
     }
 
     // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_IMAGE_SIZE) {
       alert('File size must be less than 5MB');
       return;
     }

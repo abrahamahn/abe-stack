@@ -11,6 +11,8 @@
 
 import { createHash } from 'node:crypto';
 
+import { MS_PER_DAY } from '@abe-stack/shared';
+
 import type { ScheduledTaskLogger } from './types';
 import type { Repositories } from '@abe-stack/db';
 
@@ -27,13 +29,13 @@ export async function anonymizeDeletedUsers(
   gracePeriodDays: number,
   log: ScheduledTaskLogger,
 ): Promise<number> {
-  const cutoffDate = new Date(Date.now() - gracePeriodDays * 24 * 60 * 60 * 1000);
+  const cutoffDate = new Date(Date.now() - gracePeriodDays * MS_PER_DAY);
 
   // Find users that are soft-deleted and past grace period, but not yet anonymized
   // We use listWithFilters with no filters to get all users, then filter in memory
   // Note: A future optimization would be to add a dedicated repository method
   const allUsers = await repos.users.listWithFilters({ limit: 10000 });
-  const usersToAnonymize = allUsers.items.filter(
+  const usersToAnonymize = allUsers.data.filter(
     (user) =>
       user.deletedAt !== null &&
       user.deletedAt < cutoffDate &&

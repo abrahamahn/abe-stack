@@ -72,6 +72,7 @@ function createMockRepos(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    webauthnCredentials: {} as Repositories['webauthnCredentials'],
     trustedDevices: {} as Repositories['trustedDevices'],
     files: {} as Repositories['files'],
   };
@@ -288,6 +289,25 @@ describe('getTenantById', () => {
 
     await expect(getTenantById(repos, 't-1', 'user-1')).rejects.toThrow(
       'You are not a member of this workspace',
+    );
+  });
+
+  it('throws ForbiddenError when tenant is suspended', async () => {
+    vi.mocked(repos.tenants.findById).mockResolvedValue({
+      id: 't-1',
+      name: 'Workspace',
+      slug: 'ws',
+      logoUrl: null,
+      ownerId: 'user-1',
+      isActive: false,
+      metadata: {},
+      allowedEmailDomains: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await expect(getTenantById(repos, 't-1', 'user-1')).rejects.toThrow(
+      'This workspace has been suspended',
     );
   });
 });

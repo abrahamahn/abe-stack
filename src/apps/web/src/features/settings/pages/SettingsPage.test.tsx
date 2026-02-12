@@ -33,6 +33,9 @@ vi.mock('../components', () => {
     <div data-testid="oauth-connections">OAuth Connections</div>
   );
   const mockPasswordChangeForm = () => <div data-testid="password-form">Password Form</div>;
+  const mockPasskeyManagement = () => (
+    <div data-testid="passkey-management">Passkey Management</div>
+  );
   const mockPreferencesSection = () => (
     <div data-testid="preferences-section">Preferences Section</div>
   );
@@ -44,16 +47,24 @@ vi.mock('../components', () => {
   const mockTotpManagement = () => <div data-testid="totp-management">TOTP Management</div>;
   const mockUsernameForm = () => <div data-testid="username-form">Username Form</div>;
 
+  const mockDevicesList = () => <div data-testid="devices-list">Devices List</div>;
+  const mockPhoneManagement = () => (
+    <div data-testid="phone-management">Phone Management</div>
+  );
+
   return {
     ApiKeysManagement: mockApiKeysManagement,
     AvatarUpload: mockAvatarUpload,
     DangerZone: mockDangerZone,
     DataControlsSection: mockDataControlsSection,
+    DevicesList: mockDevicesList,
     EmailChangeForm: mockEmailChangeForm,
     ForgotPasswordShortcut: mockForgotPasswordShortcut,
     NotificationPreferencesForm: mockNotificationPreferencesForm,
     OAuthConnectionsList: mockOAuthConnectionsList,
     PasswordChangeForm: mockPasswordChangeForm,
+    PasskeyManagement: mockPasskeyManagement,
+    PhoneManagement: mockPhoneManagement,
     PreferencesSection: mockPreferencesSection,
     ProfileCompleteness: mockProfileCompleteness,
     ProfileForm: mockProfileForm,
@@ -188,6 +199,7 @@ describe('SettingsPage', () => {
       expect(screen.getByTestId('tab-sessions')).toBeInTheDocument();
       expect(screen.getByTestId('tab-notifications')).toBeInTheDocument();
       expect(screen.getByTestId('tab-preferences')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-api-keys')).toBeInTheDocument();
       expect(screen.getByTestId('tab-account')).toBeInTheDocument();
       expect(screen.getByTestId('tab-data-controls')).toBeInTheDocument();
       expect(screen.getByTestId('tab-billing')).toBeInTheDocument();
@@ -206,6 +218,11 @@ describe('SettingsPage', () => {
       expect(screen.getByTestId('forgot-password-shortcut')).toBeInTheDocument();
       expect(screen.getByTestId('email-change-form')).toBeInTheDocument();
       expect(screen.getByTestId('oauth-connections')).toBeInTheDocument();
+    });
+
+    it('should render api keys tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('api-keys-management')).toBeInTheDocument();
     });
 
     it('should render sessions tab content', () => {

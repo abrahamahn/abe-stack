@@ -9,6 +9,8 @@
  * @module billing/subscription-lifecycle
  */
 
+import { MS_PER_DAY } from '@abe-stack/shared';
+
 import type { SubscriptionStatus } from '@abe-stack/shared/domain';
 
 // ============================================================================
@@ -208,6 +210,5 @@ export function getTrialDaysRemaining(subscription: TrialSubscription, now?: Dat
     return 0;
   }
 
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
   return Math.floor(diffMs / MS_PER_DAY);
 }

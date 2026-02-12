@@ -6,6 +6,8 @@
  * Uses narrow context interfaces from types.ts for decoupling.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { record } from '../audit/service';
 
 import { createApiKey, deleteApiKey, listApiKeys, revokeApiKey } from './service';
@@ -136,18 +138,18 @@ export async function handleCreateApiKey(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const parsed = body as { name?: string; scopes?: string[]; expiresAt?: string | null } | null;
 
   if (parsed === null || typeof parsed !== 'object') {
-    return { status: 400, body: { message: 'Request body is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Request body is required' } };
   }
 
   const name = parsed.name;
   if (typeof name !== 'string' || name.trim() === '') {
-    return { status: 400, body: { message: 'Name is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Name is required' } };
   }
 
   try {
@@ -171,7 +173,7 @@ export async function handleCreateApiKey(
     });
 
     return {
-      status: 201,
+      status: HTTP_STATUS.CREATED,
       body: {
         apiKey: toApiKeyResponse(result.apiKey),
         plaintext: result.plaintext,
@@ -179,7 +181,7 @@ export async function handleCreateApiKey(
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: 500, body: { message: 'Failed to create API key' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to create API key' } };
   }
 }
 
@@ -207,21 +209,21 @@ export async function handleListApiKeys(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const keys = await listApiKeys(appCtx.repos.apiKeys, user.userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         apiKeys: keys.map(toApiKeyResponse),
       },
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: 500, body: { message: 'Failed to list API keys' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list API keys' } };
   }
 }
 
@@ -251,14 +253,14 @@ export async function handleRevokeApiKey(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { id?: string };
   const keyId = params.id ?? '';
 
   if (keyId === '') {
-    return { status: 404, body: { message: 'API key not found' } };
+    return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'API key not found' } };
   }
 
   try {
@@ -274,20 +276,20 @@ export async function handleRevokeApiKey(
     });
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         apiKey: toApiKeyResponse(revoked),
       },
     };
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'API key not found') {
-      return { status: 404, body: { message: 'API key not found' } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'API key not found' } };
     }
     if (error instanceof Error && error.message === 'API key is already revoked') {
-      return { status: 400, body: { message: 'API key is already revoked' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'API key is already revoked' } };
     }
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: 500, body: { message: 'Failed to revoke API key' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to revoke API key' } };
   }
 }
 
@@ -316,14 +318,14 @@ export async function handleDeleteApiKey(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { id?: string };
   const keyId = params.id ?? '';
 
   if (keyId === '') {
-    return { status: 404, body: { message: 'API key not found' } };
+    return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'API key not found' } };
   }
 
   try {
@@ -344,7 +346,7 @@ export async function handleDeleteApiKey(
     };
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'API key not found') {
-      return { status: 404, body: { message: 'API key not found' } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'API key not found' } };
     }
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
     return { status: 500, body: { message: 'Failed to delete API key' } };

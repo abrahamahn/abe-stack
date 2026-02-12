@@ -21,6 +21,7 @@
 export const typography = {
   fontFamily:
     'system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji',
+  fontFamilyMono: 'Monaco, Menlo, "Ubuntu Mono", Consolas, "Courier New", monospace',
   sizes: {
     ['2xs']: '0.625rem', // 10px
     xs: '0.75rem', // 12px

@@ -1,5 +1,5 @@
 // src/apps/server/src/config/auth/auth.ts
-import { BaseError } from '@abe-stack/shared';
+import { BaseError, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
 import { getList } from '@abe-stack/shared/config';
 
 import type {
@@ -150,7 +150,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
       maxAttempts: env.LOCKOUT_MAX_ATTEMPTS,
       lockoutDurationMs: env.LOCKOUT_DURATION_MS,
       progressiveDelay: true,
-      baseDelayMs: 1000,
+      baseDelayMs: MS_PER_SECOND,
     },
 
     bffMode: env.AUTH_BFF_MODE === 'true',
@@ -164,19 +164,19 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
     rateLimit: {
       login: {
         max: env.RATE_LIMIT_LOGIN_MAX ?? (isProduction ? 5 : 100),
-        windowMs: 15 * 60 * 1000,
+        windowMs: 15 * MS_PER_MINUTE,
       },
       register: {
         max: env.RATE_LIMIT_REGISTER_MAX ?? (isProduction ? 3 : 100),
-        windowMs: 60 * 60 * 1000,
+        windowMs: MS_PER_HOUR,
       },
       forgotPassword: {
         max: env.RATE_LIMIT_FORGOT_PASSWORD_MAX ?? (isProduction ? 3 : 100),
-        windowMs: 60 * 60 * 1000,
+        windowMs: MS_PER_HOUR,
       },
       verifyEmail: {
         max: env.RATE_LIMIT_VERIFY_EMAIL_MAX ?? (isProduction ? 10 : 100),
-        windowMs: 60 * 60 * 1000,
+        windowMs: MS_PER_HOUR,
       },
     },
 

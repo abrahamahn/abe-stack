@@ -9,6 +9,12 @@
  * @module processors/image
  */
 
+import {
+  DEFAULT_IMAGE_QUALITY,
+  DEFAULT_PNG_COMPRESSION,
+  DEFAULT_THUMBNAIL_SIZE,
+} from '../constants';
+
 import type { ImageProcessingOptions, MediaMetadata, ProcessingResult } from '../types';
 
 export type { ImageProcessingOptions };
@@ -111,23 +117,23 @@ export class ImageProcessor {
         switch (options.format.format) {
           case 'jpeg':
             pipeline = pipeline.jpeg({
-              quality: options.format.quality ?? 85,
+              quality: options.format.quality ?? DEFAULT_IMAGE_QUALITY,
               progressive: options.format.progressive ?? false,
             });
             break;
           case 'png':
             pipeline = pipeline.png({
-              compressionLevel: 6,
+              compressionLevel: DEFAULT_PNG_COMPRESSION,
             });
             break;
           case 'webp':
             pipeline = pipeline.webp({
-              quality: options.format.quality ?? 85,
+              quality: options.format.quality ?? DEFAULT_IMAGE_QUALITY,
             });
             break;
           case 'avif':
             pipeline = pipeline.avif({
-              quality: options.format.quality ?? 85,
+              quality: options.format.quality ?? DEFAULT_IMAGE_QUALITY,
             });
             break;
         }
@@ -213,11 +219,11 @@ export class ImageProcessor {
     const original = await this.process(inputPath, `${baseOutputPath}_original.jpg`, {});
 
     const optimized = await this.process(inputPath, `${baseOutputPath}_optimized.jpg`, {
-      format: { format: 'jpeg', quality: 85, progressive: true },
+      format: { format: 'jpeg', quality: DEFAULT_IMAGE_QUALITY, progressive: true },
     });
 
     const thumbnail = await this.process(inputPath, `${baseOutputPath}_thumb.jpg`, {
-      resize: { width: 300, height: 300, fit: 'cover' },
+      resize: { width: DEFAULT_THUMBNAIL_SIZE, height: DEFAULT_THUMBNAIL_SIZE, fit: 'cover' },
     });
 
     return { original, optimized, thumbnail };

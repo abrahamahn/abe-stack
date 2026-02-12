@@ -1,13 +1,15 @@
 // src/client/react/src/hooks/usePaginatedQuery.ts
 import { useInfiniteQuery, useQueryCache } from '@abe-stack/client-engine';
-import { useCallback, useMemo, useRef } from 'react';
-
-import type {
-  CursorPaginatedResult,
-  CursorPaginationOptions,
-  PaginatedResult,
-  PaginationOptions,
+import {
+  DEFAULT_PAGE_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  type CursorPaginatedResult,
+  type CursorPaginationOptions,
+  type PaginatedResult,
+  type PaginationOptions,
 } from '@abe-stack/shared';
+import { useCallback, useMemo, useRef } from 'react';
 
 /**
  * Configuration for usePaginatedQuery hook
@@ -93,9 +95,9 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
 
   // Default pagination options
   const defaultOptions: CursorPaginationOptions = {
-    limit: 50,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    limit: DEFAULT_PAGE_LIMIT,
+    sortBy: DEFAULT_SORT_BY,
+    sortOrder: DEFAULT_SORT_ORDER,
     ...initialOptions,
   };
 
@@ -219,9 +221,9 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
 }: UseOffsetPaginatedQueryOptions<TData, TError>): UseOffsetPaginatedQueryResult<TData> {
   const defaultOptions: PaginationOptions = {
     page: 1,
-    limit: 50,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    limit: DEFAULT_PAGE_LIMIT,
+    sortBy: DEFAULT_SORT_BY,
+    sortOrder: DEFAULT_SORT_ORDER,
     ...initialOptions,
   };
 

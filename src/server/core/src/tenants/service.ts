@@ -9,7 +9,7 @@
  */
 
 import { deleteFrom, eq, insert, select, toCamelCase, update, withTransaction } from '@abe-stack/db';
-import { BadRequestError, ForbiddenError, NotFoundError } from '@abe-stack/shared';
+import { BadRequestError, ForbiddenError, generateSecureId, NotFoundError, slugify } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
 
@@ -80,18 +80,6 @@ export interface TenantWithRole {
 // ============================================================================
 
 /**
- * Generate a URL-safe slug from a name.
- * Lowercases, replaces spaces/special chars with hyphens, trims leading/trailing hyphens.
- */
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 100);
-}
-
-/**
  * Ensure slug uniqueness by appending a short random suffix if taken.
  */
 async function ensureUniqueSlug(repos: Repositories, slug: string): Promise<string> {
@@ -101,7 +89,7 @@ async function ensureUniqueSlug(repos: Repositories, slug: string): Promise<stri
   }
 
   // Append random suffix
-  const suffix = Math.random().toString(36).slice(2, 8);
+  const suffix = generateSecureId(6);
   const uniqueSlug = `${slug}-${suffix}`.slice(0, 100);
 
   // Verify the suffixed slug is also unique (extremely unlikely collision)
@@ -135,7 +123,7 @@ export async function createTenant(
   data: CreateTenantData,
 ): Promise<TenantWithRole> {
   const slug =
-    data.slug !== undefined && data.slug.length > 0 ? data.slug : generateSlug(data.name);
+    data.slug !== undefined && data.slug.length > 0 ? data.slug : slugify(data.name).slice(0, 100);
 
   const uniqueSlug = await ensureUniqueSlug(repos, slug);
 
@@ -277,6 +265,10 @@ export async function getTenantById(
   const tenant = await repos.tenants.findById(tenantId);
   if (tenant === null) {
     throw new NotFoundError('Workspace not found');
+  }
+
+  if (!tenant.isActive) {
+    throw new ForbiddenError('This workspace has been suspended', 'WORKSPACE_SUSPENDED');
   }
 
   const membership = await repos.memberships.findByTenantAndUser(tenantId, userId);

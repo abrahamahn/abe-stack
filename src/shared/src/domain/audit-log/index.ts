@@ -1,5 +1,7 @@
 // src/shared/src/domain/audit-log/index.ts
 
+export { getAuditActionTone, getAuditSeverityTone } from './audit-log.display';
+
 export { buildAuditEvent, sanitizeMetadata, type AuditBuilderParams } from './audit-log.logic';
 
 export {

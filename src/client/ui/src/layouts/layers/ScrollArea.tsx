@@ -161,9 +161,6 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>((props, re
       style={{
         maxHeight,
         maxWidth,
-        overflow: 'auto',
-        position: 'relative',
-        // Custom scrollbar styles for WebKit browsers
         ['--scrollbar-size' as string]: scrollbarSize,
         ...style,
       }}

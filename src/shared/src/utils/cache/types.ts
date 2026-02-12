@@ -236,6 +236,27 @@ export interface MemoryCacheConfig extends BaseCacheConfig {
 }
 
 /**
- * Cache configuration type (memory provider only).
+ * Configuration for Redis cache provider.
  */
-export type CacheConfig = MemoryCacheConfig;
+export interface RedisCacheConfig extends BaseCacheConfig {
+  provider: 'redis';
+  /** Redis server hostname */
+  host: string;
+  /** Redis server port (default: 6379) */
+  port: number;
+  /** Redis auth password */
+  password?: string;
+  /** Redis database index (default: 0) */
+  db?: number;
+  /** Enable TLS connection */
+  tls?: boolean;
+  /** Connection timeout in ms (default: 5000) */
+  connectTimeout?: number;
+  /** Command timeout in ms (default: 3000) */
+  commandTimeout?: number;
+}
+
+/**
+ * Cache configuration type (memory or Redis provider).
+ */
+export type CacheConfig = MemoryCacheConfig | RedisCacheConfig;

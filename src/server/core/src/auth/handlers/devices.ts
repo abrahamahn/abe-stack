@@ -8,7 +8,7 @@
  * @module handlers/devices
  */
 
-import { NotFoundError, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, NotFoundError, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { createErrorMapperLogger } from '../types';
 
@@ -55,7 +55,7 @@ export async function handleListDevices(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Unauthorized' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
     }
 
     const devices = await ctx.repos.trustedDevices.findByUser(userId);
@@ -72,7 +72,7 @@ export async function handleListDevices(
       createdAt: device.createdAt.toISOString(),
     }));
 
-    return { status: 200, body: { devices: deviceResponses } };
+    return { status: HTTP_STATUS.OK, body: { devices: deviceResponses } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -97,7 +97,7 @@ export async function handleTrustDevice(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Unauthorized' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
     }
 
     // Verify the device belongs to this user
@@ -115,7 +115,7 @@ export async function handleTrustDevice(
     }
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         device: {
           id: updated.id,
@@ -154,7 +154,7 @@ export async function handleRevokeDevice(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Unauthorized' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
     }
 
     // Verify the device belongs to this user
@@ -171,7 +171,7 @@ export async function handleRevokeDevice(
       throw new NotFoundError('Device not found');
     }
 
-    return { status: 200, body: { message: 'Device revoked successfully' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Device revoked successfully' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }

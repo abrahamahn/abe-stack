@@ -8,27 +8,13 @@
  * @module handlers/subscribe
  */
 
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS, isAuthenticatedRequest } from '@abe-stack/shared';
+
 import { isTableAllowed, loadRecords } from '../service';
-import { ERROR_MESSAGES } from '../types';
+import { REALTIME_ERRORS } from '../types';
 
 import type { GetRecordsResult, RealtimeModuleDeps, RealtimeRequest } from '../types';
-import type { AuthenticatedUser, RecordPointer, RouteResult } from '@abe-stack/shared';
-
-/**
- * Type guard to check if request has authenticated user.
- *
- * @param req - Request to check
- * @returns Whether the request has an authenticated user
- */
-function hasAuthenticatedUser(
-  req: RealtimeRequest,
-): req is RealtimeRequest & { readonly user: AuthenticatedUser } {
-  if (req.user === undefined || typeof req.user !== 'object') {
-    return false;
-  }
-  const user = req.user as unknown as Record<string, unknown>;
-  return 'userId' in user && typeof user['userId'] === 'string' && user['userId'] !== '';
-}
+import type { RecordPointer, RouteResult } from '@abe-stack/shared';
 
 // ============================================================================
 // Handlers
@@ -51,26 +37,25 @@ export async function handleGetRecords(
   ctx: RealtimeModuleDeps,
   body: { pointers: RecordPointer[] },
   req: RealtimeRequest,
-): Promise<RouteResult<GetRecordsResult | { message: string }>> {
+): Promise<RouteResult<GetRecordsResult | { code: string; message: string }>> {
   const { db, log } = ctx;
 
   // Require authentication using type guard
-  if (!hasAuthenticatedUser(req)) {
+  if (!isAuthenticatedRequest(req)) {
     return {
-      status: 403,
-      body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
+      status: HTTP_STATUS.FORBIDDEN,
+      body: { code: ERROR_CODES.FORBIDDEN, message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
     };
   }
 
-  // At this point TypeScript knows req.user is AuthenticatedUser
   const userId = req.user.userId;
 
   // Validate all tables are allowed
   for (const pointer of body.pointers) {
     if (!isTableAllowed(pointer.table)) {
       return {
-        status: 400,
-        body: { message: ERROR_MESSAGES.TABLE_NOT_ALLOWED(pointer.table) },
+        status: HTTP_STATUS.BAD_REQUEST,
+        body: { code: ERROR_CODES.BAD_REQUEST, message: REALTIME_ERRORS.tableNotAllowed(pointer.table) },
       };
     }
   }
@@ -84,7 +69,7 @@ export async function handleGetRecords(
     const recordMap = await loadRecords(db, body.pointers);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { recordMap },
     };
   } catch (error) {
@@ -93,8 +78,8 @@ export async function handleGetRecords(
     });
 
     return {
-      status: 500,
-      body: { message: ERROR_MESSAGES.INTERNAL_ERROR },
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      body: { code: ERROR_CODES.INTERNAL_ERROR, message: ERROR_MESSAGES.INTERNAL_ERROR },
     };
   }
 }

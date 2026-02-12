@@ -63,6 +63,7 @@ export interface DatabaseEnv {
   MONGODB_USE_UNIFIED_TOPOLOGY?: 'true' | 'false' | undefined;
   JSON_DB_PATH?: string | undefined;
   JSON_DB_PERSIST_ON_WRITE?: 'true' | 'false' | undefined;
+  DATABASE_READ_REPLICA_URL?: string | undefined;
 }
 
 /** Authentication environment variables */
@@ -174,6 +175,8 @@ export interface CacheEnv {
   CACHE_USE_REDIS?: 'true' | 'false' | undefined;
   REDIS_HOST: string;
   REDIS_PORT: number;
+  REDIS_PASSWORD?: string | undefined;
+  REDIS_DB?: number | undefined;
 }
 
 /** Queue environment variables */
@@ -372,6 +375,9 @@ export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>(
     JSON_DB_PATH: parseOptional(obj['JSON_DB_PATH'], (v) => parseString(v, 'JSON_DB_PATH')),
     JSON_DB_PERSIST_ON_WRITE: parseOptional(obj['JSON_DB_PERSIST_ON_WRITE'], (v) =>
       trueFalseSchema.parse(v),
+    ),
+    DATABASE_READ_REPLICA_URL: parseOptional(obj['DATABASE_READ_REPLICA_URL'], (v) =>
+      parseString(v, 'DATABASE_READ_REPLICA_URL'),
     ),
   };
 });
@@ -698,6 +704,8 @@ export const CacheEnvSchema: Schema<CacheEnv> = createSchema<CacheEnv>((data: un
     CACHE_USE_REDIS: parseOptional(obj['CACHE_USE_REDIS'], (v) => trueFalseSchema.parse(v)),
     REDIS_HOST: parseString(withDefault(obj['REDIS_HOST'], 'localhost'), 'REDIS_HOST'),
     REDIS_PORT: coerceNumber(withDefault(obj['REDIS_PORT'], 6379), 'REDIS_PORT'),
+    REDIS_PASSWORD: parseOptional(obj['REDIS_PASSWORD'], (v) => parseString(v, 'REDIS_PASSWORD')),
+    REDIS_DB: parseOptional(obj['REDIS_DB'], (v) => coerceNumber(v, 'REDIS_DB')),
   };
 });
 

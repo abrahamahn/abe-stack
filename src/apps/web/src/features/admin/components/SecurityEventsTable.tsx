@@ -5,6 +5,7 @@
  * Displays security events in a table format with pagination.
  */
 
+import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@abe-stack/shared';
 import {
   Badge,
   Button,
@@ -51,33 +52,6 @@ export interface SecurityEventsTableProps {
   isLoading: boolean;
   pagination: PaginationOptionsLocal;
   onPageChange: (page: number) => void;
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-function severityToTone(severity: string): 'danger' | 'warning' | 'info' | 'success' {
-  switch (severity) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'danger';
-    case 'medium':
-      return 'warning';
-    case 'low':
-      return 'success';
-    default:
-      return 'info';
-  }
-}
-
-function formatEventType(eventType: string): string {
-  return eventType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleString();
 }
 
 // ============================================================================
@@ -145,13 +119,13 @@ export const SecurityEventsTable = ({
               }}
             >
               <TableCell>
-                <Text size="sm">{formatDate(event.createdAt)}</Text>
+                <Text size="sm">{formatDateTime(event.createdAt)}</Text>
               </TableCell>
               <TableCell>
-                <Text size="sm">{formatEventType(event.eventType)}</Text>
+                <Text size="sm">{formatSecurityEventType(event.eventType)}</Text>
               </TableCell>
               <TableCell>
-                <Badge tone={severityToTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
+                <Badge tone={getSecuritySeverityTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
               </TableCell>
               <TableCell>
                 <Text size="sm">{event.email ?? '-'}</Text>

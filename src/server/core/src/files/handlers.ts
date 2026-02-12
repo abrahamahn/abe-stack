@@ -6,6 +6,8 @@
  * Uses narrow context interfaces from types.ts for decoupling.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { deleteFile, getDownloadUrl, getFileMetadata, uploadFile } from './service';
 
 import type { FileAppContext, FileMetadata, FileStorageProvider } from './types';
@@ -54,18 +56,18 @@ function handleError(
 ): { status: 400 | 403 | 404 | 500; body: { message: string } } {
   if (error instanceof Error) {
     if (error.name === 'BadRequestError') {
-      return { status: 400, body: { message: error.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: error.message } };
     }
     if (error.name === 'ForbiddenError') {
-      return { status: 403, body: { message: error.message } };
+      return { status: HTTP_STATUS.FORBIDDEN, body: { message: error.message } };
     }
     if (error.name === 'NotFoundError') {
-      return { status: 404, body: { message: error.message } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: error.message } };
     }
   }
 
   appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: 500, body: { message: 'An error occurred processing your request' } };
+  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
 }
 
 // ============================================================================
@@ -100,7 +102,7 @@ export async function handleUploadFile(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -117,7 +119,7 @@ export async function handleUploadFile(
       | undefined;
 
     if (fileData?.buffer === undefined || fileData.mimetype === undefined) {
-      return { status: 400, body: { message: 'No file provided' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'No file provided' } };
     }
 
     const storage = appCtx.storage as FileStorageProvider;
@@ -128,7 +130,7 @@ export async function handleUploadFile(
       size: fileData.size ?? fileData.buffer.length,
     });
 
-    return { status: 201, body: { file: result } };
+    return { status: HTTP_STATUS.CREATED, body: { file: result } };
   } catch (error: unknown) {
     return handleError(error, appCtx);
   }
@@ -163,14 +165,14 @@ export async function handleGetFile(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { id?: string };
   const fileId = params.id ?? '';
 
   if (fileId === '') {
-    return { status: 400, body: { message: 'File ID is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'File ID is required' } };
   }
 
   try {
@@ -183,7 +185,7 @@ export async function handleGetFile(
       user.role,
     );
 
-    return { status: 200, body: { file: result } };
+    return { status: HTTP_STATUS.OK, body: { file: result } };
   } catch (error: unknown) {
     return handleError(error, appCtx);
   }
@@ -218,21 +220,21 @@ export async function handleDeleteFile(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { id?: string };
   const fileId = params.id ?? '';
 
   if (fileId === '') {
-    return { status: 400, body: { message: 'File ID is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'File ID is required' } };
   }
 
   try {
     const storage = appCtx.storage as FileStorageProvider;
     await deleteFile(storage, { files: appCtx.repos.files }, fileId, user.userId, user.role);
 
-    return { status: 200, body: { success: true, message: 'File deleted' } };
+    return { status: HTTP_STATUS.OK, body: { success: true, message: 'File deleted' } };
   } catch (error: unknown) {
     return handleError(error, appCtx);
   }
@@ -267,14 +269,14 @@ export async function handleDownloadFile(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { id?: string };
   const fileId = params.id ?? '';
 
   if (fileId === '') {
-    return { status: 400, body: { message: 'File ID is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'File ID is required' } };
   }
 
   try {
@@ -287,7 +289,7 @@ export async function handleDownloadFile(
       user.role,
     );
 
-    return { status: 200, body: { url } };
+    return { status: HTTP_STATUS.OK, body: { url } };
   } catch (error: unknown) {
     return handleError(error, appCtx);
   }

@@ -1,5 +1,6 @@
 // src/shared/src/domain/users/username.schemas.ts
 import { createSchema, parseString } from '../../core/schema.utils';
+import { MS_PER_DAY } from '../../utils/constants/time';
 
 import type { Schema } from '../../core/api';
 
@@ -67,7 +68,7 @@ export const updateUsernameRequestSchema: Schema<UpdateUsernameRequest> = create
 export function isUsernameChangeCooldownActive(lastChange: Date | null): boolean {
   if (lastChange === null) return false;
   const cooldownEnd = new Date(
-    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY,
   );
   return new Date() < cooldownEnd;
 }
@@ -77,5 +78,5 @@ export function isUsernameChangeCooldownActive(lastChange: Date | null): boolean
  */
 export function getNextUsernameChangeDate(lastChange: Date | null): Date {
   if (lastChange === null) return new Date();
-  return new Date(lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+  return new Date(lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY);
 }

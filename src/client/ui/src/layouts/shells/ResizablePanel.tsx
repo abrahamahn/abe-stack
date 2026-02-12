@@ -443,14 +443,7 @@ export const ResizablePanelGroup = forwardRef<HTMLDivElement, ResizablePanelGrou
       <div
         ref={ref}
         className={`resizable-panel-group ${className}`.trim()}
-        style={{
-          display: 'flex',
-          flexDirection: getFlexDirection(),
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          ...style,
-        }}
+        style={{ flexDirection: getFlexDirection(), ...style }}
         {...rest}
       >
         {children}

@@ -6,13 +6,15 @@
  * filtering, and upsert logic for billing invoice records.
  */
 
+
+import { encodeCursor } from '@abe-stack/shared';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createInvoiceRepository } from './invoices';
 
 import type { RawDb } from '../../client';
 import type { Invoice, NewInvoice, UpdateInvoice, InvoiceStatus } from '../../schema/index';
-import type { PaginationOptions } from '../types';
+import type { CursorPaginationOptions } from '../types';
 
 // ============================================================================
 // Mock Database
@@ -174,23 +176,21 @@ describe('createInvoiceRepository', () => {
 
   describe('findByUserId', () => {
     it('should delegate to list with userId filter', async () => {
-      const mockResult = {
-        items: [mockInvoice],
-        nextCursor: null,
-      };
       vi.mocked(mockDb.query).mockResolvedValue([mockDbRow]);
 
       const repo = createInvoiceRepository(mockDb);
       const result = await repo.findByUserId('user-456');
 
-      expect(result).toEqual(mockResult);
+      expect(result.data).toEqual([mockInvoice]);
+      expect(result.nextCursor).toBeNull();
+      expect(result.hasNext).toBe(false);
     });
 
     it('should forward pagination options to list', async () => {
       vi.mocked(mockDb.query).mockResolvedValue([]);
 
       const repo = createInvoiceRepository(mockDb);
-      const options: PaginationOptions = { limit: 10, direction: 'asc' };
+      const options: Partial<CursorPaginationOptions> = { limit: 10, sortOrder: 'asc' };
       await repo.findByUserId('user-456', options);
 
       expect(mockDb.query).toHaveBeenCalled();
@@ -202,7 +202,7 @@ describe('createInvoiceRepository', () => {
       const repo = createInvoiceRepository(mockDb);
       const result = await repo.findByUserId('user-no-invoices');
 
-      expect(result.items).toEqual([]);
+      expect(result.data).toEqual([]);
       expect(result.nextCursor).toBeNull();
     });
   });
@@ -215,7 +215,7 @@ describe('createInvoiceRepository', () => {
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list();
 
-        expect(result.items).toEqual([mockInvoice]);
+        expect(result.data).toEqual([mockInvoice]);
         expect(result.nextCursor).toBeNull();
       });
 
@@ -354,11 +354,11 @@ describe('createInvoiceRepository', () => {
         );
       });
 
-      it('should handle ascending direction', async () => {
+      it('should handle ascending sortOrder', async () => {
         vi.mocked(mockDb.query).mockResolvedValue([]);
 
         const repo = createInvoiceRepository(mockDb);
-        await repo.list({}, { direction: 'asc' });
+        await repo.list({}, { sortOrder: 'asc' });
 
         expect(mockDb.query).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -369,43 +369,51 @@ describe('createInvoiceRepository', () => {
 
       it('should handle cursor-based pagination (descending)', async () => {
         const cursorDate = new Date('2024-01-15T00:00:00Z');
-        const cursor = `${cursorDate.toISOString()}_inv-cursor`;
+        const cursor = encodeCursor({
+          value: cursorDate,
+          tieBreaker: 'inv-cursor',
+          sortOrder: 'desc',
+        });
 
         vi.mocked(mockDb.query).mockResolvedValue([]);
 
         const repo = createInvoiceRepository(mockDb);
-        await repo.list({}, { cursor, direction: 'desc' });
+        await repo.list({}, { cursor, sortOrder: 'desc' });
 
         expect(mockDb.query).toHaveBeenCalled();
       });
 
       it('should handle cursor-based pagination (ascending)', async () => {
         const cursorDate = new Date('2024-01-15T00:00:00Z');
-        const cursor = `${cursorDate.toISOString()}_inv-cursor`;
+        const cursor = encodeCursor({
+          value: cursorDate,
+          tieBreaker: 'inv-cursor',
+          sortOrder: 'asc',
+        });
 
         vi.mocked(mockDb.query).mockResolvedValue([]);
 
         const repo = createInvoiceRepository(mockDb);
-        await repo.list({}, { cursor, direction: 'asc' });
+        await repo.list({}, { cursor, sortOrder: 'asc' });
 
         expect(mockDb.query).toHaveBeenCalled();
       });
 
       it('should return nextCursor when more items exist', async () => {
-        const items = Array.from({ length: 11 }, (_, i) =>
+        const rows = Array.from({ length: 11 }, (_, i) =>
           createMockDbRow({
             id: `inv-${i}`,
             created_at: new Date(`2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`),
           }),
         );
-        vi.mocked(mockDb.query).mockResolvedValue(items);
+        vi.mocked(mockDb.query).mockResolvedValue(rows);
 
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list({}, { limit: 10 });
 
-        expect(result.items).toHaveLength(10);
+        expect(result.data).toHaveLength(10);
         expect(result.nextCursor).toBeTruthy();
-        expect(result.nextCursor).toContain('inv-9');
+        expect(result.hasNext).toBe(true);
       });
 
       it('should return null nextCursor when no more items', async () => {
@@ -414,8 +422,9 @@ describe('createInvoiceRepository', () => {
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list({}, { limit: 10 });
 
-        expect(result.items).toHaveLength(1);
+        expect(result.data).toHaveLength(1);
         expect(result.nextCursor).toBeNull();
+        expect(result.hasNext).toBe(false);
       });
 
       it('should handle empty cursor string', async () => {
@@ -444,18 +453,18 @@ describe('createInvoiceRepository', () => {
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list();
 
-        expect(result.items).toEqual([]);
+        expect(result.data).toEqual([]);
         expect(result.nextCursor).toBeNull();
       });
 
       it('should handle exactly limit items (no more pages)', async () => {
-        const items = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${i}` }));
-        vi.mocked(mockDb.query).mockResolvedValue(items);
+        const rows = Array.from({ length: 20 }, (_, i) => createMockDbRow({ id: `inv-${i}` }));
+        vi.mocked(mockDb.query).mockResolvedValue(rows);
 
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list({}, { limit: 20 });
 
-        expect(result.items).toHaveLength(20);
+        expect(result.data).toHaveLength(20);
         expect(result.nextCursor).toBeNull();
       });
 
@@ -465,7 +474,7 @@ describe('createInvoiceRepository', () => {
         const repo = createInvoiceRepository(mockDb);
         const result = await repo.list({});
 
-        expect(result.items).toEqual([mockInvoice]);
+        expect(result.data).toEqual([mockInvoice]);
       });
     });
 

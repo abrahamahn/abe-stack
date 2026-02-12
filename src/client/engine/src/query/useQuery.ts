@@ -6,7 +6,9 @@
  * Uses useSyncExternalStore for optimal React integration.
  */
 
+import { MS_PER_SECOND } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+
 
 import { hashQueryKey } from './QueryCache';
 import { useQueryCache } from './QueryCacheProvider';
@@ -84,7 +86,7 @@ export interface UseQueryResult<TData = unknown, TError = Error> {
 // ============================================================================
 
 const DEFAULT_RETRY = 3;
-const DEFAULT_RETRY_DELAY = 1000;
+const DEFAULT_RETRY_DELAY = MS_PER_SECOND;
 
 // ============================================================================
 // Hook Implementation

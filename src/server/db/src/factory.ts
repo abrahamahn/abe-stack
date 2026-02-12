@@ -22,6 +22,7 @@ import {
   createSecurityEventRepository,
   createTotpBackupCodeRepository,
   createTrustedDeviceRepository,
+  createWebauthnCredentialRepository,
   type EmailChangeTokenRepository,
   type EmailChangeRevertTokenRepository,
   type EmailVerificationTokenRepository,
@@ -32,6 +33,7 @@ import {
   type SecurityEventRepository,
   type TotpBackupCodeRepository,
   type TrustedDeviceRepository,
+  type WebauthnCredentialRepository,
 } from './repositories/auth';
 import {
   createBillingEventRepository,
@@ -132,6 +134,7 @@ export interface Repositories {
   emailChangeTokens: EmailChangeTokenRepository;
   emailChangeRevertTokens: EmailChangeRevertTokenRepository;
   trustedDevices: TrustedDeviceRepository;
+  webauthnCredentials: WebauthnCredentialRepository;
 
   // Magic Link
   magicLinkTokens: MagicLinkTokenRepository;
@@ -231,6 +234,7 @@ export function createRepositories(connectionString: string): RepositoryContext 
       emailChangeTokens: createEmailChangeTokenRepository(raw),
       emailChangeRevertTokens: createEmailChangeRevertTokenRepository(raw),
       trustedDevices: createTrustedDeviceRepository(raw),
+      webauthnCredentials: createWebauthnCredentialRepository(raw),
 
       // Magic Link
       magicLinkTokens: createMagicLinkTokenRepository(raw),

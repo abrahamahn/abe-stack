@@ -5,20 +5,15 @@
  * Framework-agnostic client for trusted device management endpoints.
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import { apiRequest, createRequestFactory } from '../utils';
 
-import { createApiError, NetworkError } from '../errors';
-
-import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface DeviceClientConfig {
-  baseUrl: string;
-  getToken?: () => string | null;
-}
+export type DeviceClientConfig = BaseClientConfig;
 
 export interface DeviceItem {
   id: string;
@@ -44,34 +39,22 @@ export interface DeviceClient {
 // ============================================================================
 
 export function createDeviceClient(config: DeviceClientConfig): DeviceClient {
-  async function request<T>(method: string, path: string): Promise<T> {
-    const url = `${config.baseUrl}${path}`;
-    const headers = new Headers({ 'Content-Type': 'application/json' });
-    const token = config.getToken?.() ?? null;
-    addAuthHeader(headers, token);
-
-    let response: Response;
-    try {
-      response = await fetch(url, { method, headers, credentials: 'include' });
-    } catch {
-      throw new NetworkError('Failed to connect to server');
-    }
-
-    if (!response.ok) {
-      const body = (await response.json().catch(() => ({}))) as ApiErrorBody;
-      throw createApiError(response.status, body);
-    }
-
-    return (await response.json()) as T;
-  }
+  const factory = createRequestFactory(config);
 
   return {
-    listDevices: () => request<{ devices: DeviceItem[] }>('GET', '/api/users/me/devices'),
+    listDevices: () =>
+      apiRequest<{ devices: DeviceItem[] }>(factory, '/users/me/devices'),
     trustDevice: (deviceId) =>
-      request<{ device: DeviceItem }>('POST', `/api/users/me/devices/${deviceId}/trust`),
+      apiRequest<{ device: DeviceItem }>(factory, `/users/me/devices/${deviceId}/trust`, {
+        method: 'POST',
+      }),
     revokeDevice: (deviceId) =>
-      request<{ message: string }>('DELETE', `/api/users/me/devices/${deviceId}`),
+      apiRequest<{ message: string }>(factory, `/users/me/devices/${deviceId}`, {
+        method: 'DELETE',
+      }),
     invalidateSessions: () =>
-      request<{ message: string }>('POST', '/api/auth/invalidate-sessions'),
+      apiRequest<{ message: string }>(factory, '/auth/invalidate-sessions', {
+        method: 'POST',
+      }),
   };
 }

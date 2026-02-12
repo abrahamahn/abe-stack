@@ -132,6 +132,32 @@ function isOrderedListMarker(marker: string): boolean {
   return true;
 }
 
+/** Check if a string consists solely of `-`, `*`, or `_` repeated 3+ times. */
+function isHorizontalRule(s: string): boolean {
+  if (s.length < 3) return false;
+  const first = s.charCodeAt(0);
+  if (first !== 45 && first !== 42 && first !== 95) return false;
+  for (let i = 1; i < s.length; i++) {
+    if (s.charCodeAt(i) !== first) return false;
+  }
+  return true;
+}
+
+/** Check if a cell matches the table separator pattern (e.g. `---`, `:---:`, `---:`). */
+function isTableSeparatorCell(cell: string): boolean {
+  const len = cell.length;
+  if (len < 3) return false;
+  let start = 0;
+  let end = len;
+  if (cell.charCodeAt(start) === 58) start++; // leading ':'
+  if (cell.charCodeAt(end - 1) === 58) end--; // trailing ':'
+  if (end - start < 3) return false;
+  for (let i = start; i < end; i++) {
+    if (cell.charCodeAt(i) !== 45) return false; // must be '-'
+  }
+  return true;
+}
+
 /** Column alignment derived from the separator row's colon positions. */
 type TableAlignment = 'left' | 'center' | 'right' | undefined;
 
@@ -150,7 +176,7 @@ function isTableSeparatorRow(line: string): boolean {
     .split('|')
     .map((c) => c.trim());
   if (cells.length === 0) return false;
-  return cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+  return cells.every(isTableSeparatorCell);
 }
 
 /**
@@ -367,7 +393,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
     }
 
     // Handle horizontal rules
-    if (/^[-*_]{3,}$/.test(line.trim())) {
+    if (isHorizontalRule(line.trim())) {
       flushParagraph(String(i));
       flushList(String(i));
       flushBlockquote(String(i));
@@ -512,7 +538,7 @@ function parseInlineMarkdown(text: string, options: MarkdownOptions): ReactNode 
     },
     // Links
     {
-      regex: /\[([^\]]+)\]\((.+)\)/g,
+      regex: /\[([^\]]+)\]\(([^)]+)\)/g,
       replace: (groups: string[], key: string): ReactNode => (
         <a
           key={`link-${key}`}

@@ -5,11 +5,16 @@
  * Type-safe client for interacting with the billing API endpoints.
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import {
+  addPaymentMethodRequestSchema,
+  cancelSubscriptionRequestSchema,
+  checkoutRequestSchema,
+  updateSubscriptionRequestSchema,
+} from '@abe-stack/shared';
 
-import { createApiError, NetworkError } from '../errors';
+import { apiRequest, createRequestFactory } from '../utils';
 
-import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
@@ -32,14 +37,7 @@ import type {
 /**
  * Configuration for the billing client
  */
-export interface BillingClientConfig {
-  /** Base URL for API requests */
-  baseUrl: string;
-  /** Function to get the current auth token */
-  getToken?: () => string | null;
-  /** Custom fetch implementation */
-  fetchImpl?: typeof fetch;
-}
+export type BillingClientConfig = BaseClientConfig;
 
 /**
  * Billing API client interface
@@ -82,16 +80,6 @@ export interface BillingClient {
 // Client Implementation
 // ============================================================================
 
-const API_PREFIX = '/api';
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
-    end--;
-  }
-  return value.slice(0, end);
-}
-
 /**
  * Create a billing API client
  *
@@ -117,124 +105,85 @@ function trimTrailingSlashes(value: string): string {
  * ```
  */
 export function createBillingClient(config: BillingClientConfig): BillingClient {
-  const baseUrl = trimTrailingSlashes(config.baseUrl);
-  const fetcher = config.fetchImpl ?? fetch;
-
-  /**
-   * Make an authenticated request
-   */
-  const request = async <T>(
-    path: string,
-    options?: RequestInit,
-    requiresAuth = true,
-  ): Promise<T> => {
-    const headers = new Headers(options?.headers);
-    headers.set('Content-Type', 'application/json');
-
-    if (requiresAuth) {
-      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
-        headers,
-        config.getToken?.(),
-      );
-    }
-
-    const url = `${baseUrl}${API_PREFIX}${path}`;
-
-    let response: Response;
-    try {
-      response = await fetcher(url, {
-        ...options,
-        headers,
-        credentials: 'include',
-      });
-    } catch (error) {
-      const cause = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
-    }
-
-    const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
-      Record<string, unknown>;
-
-    if (!response.ok) {
-      throw createApiError(response.status, data);
-    }
-
-    return data as T;
-  };
+  const factory = createRequestFactory(config);
 
   return {
     // Plans
     async listPlans(): Promise<PlansListResponse> {
-      return request<PlansListResponse>('/billing/plans', undefined, false);
+      return apiRequest<PlansListResponse>(factory, '/billing/plans', undefined, false);
     },
 
     // Subscription
     async getSubscription(): Promise<SubscriptionResponse> {
-      return request<SubscriptionResponse>('/billing/subscription');
+      return apiRequest<SubscriptionResponse>(factory, '/billing/subscription');
     },
 
     async createCheckout(data: CheckoutRequest): Promise<CheckoutResponse> {
-      return request<CheckoutResponse>('/billing/checkout', {
+      const validated = checkoutRequestSchema.parse(data);
+      return apiRequest<CheckoutResponse>(factory, '/billing/checkout', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async cancelSubscription(
       data?: CancelSubscriptionRequest,
     ): Promise<SubscriptionActionResponse> {
-      return request<SubscriptionActionResponse>('/billing/subscription/cancel', {
+      const validated = cancelSubscriptionRequestSchema.parse(data ?? {});
+      return apiRequest<SubscriptionActionResponse>(factory, '/billing/subscription/cancel', {
         method: 'POST',
-        body: JSON.stringify(data ?? {}),
+        body: JSON.stringify(validated),
       });
     },
 
     async resumeSubscription(): Promise<SubscriptionActionResponse> {
-      return request<SubscriptionActionResponse>('/billing/subscription/resume', {
+      return apiRequest<SubscriptionActionResponse>(factory, '/billing/subscription/resume', {
         method: 'POST',
         body: JSON.stringify({}),
       });
     },
 
     async updateSubscription(data: UpdateSubscriptionRequest): Promise<SubscriptionActionResponse> {
-      return request<SubscriptionActionResponse>('/billing/subscription/update', {
+      const validated = updateSubscriptionRequestSchema.parse(data);
+      return apiRequest<SubscriptionActionResponse>(factory, '/billing/subscription/update', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     // Invoices
     async listInvoices(): Promise<InvoicesListResponse> {
-      return request<InvoicesListResponse>('/billing/invoices');
+      return apiRequest<InvoicesListResponse>(factory, '/billing/invoices');
     },
 
     // Payment Methods
     async listPaymentMethods(): Promise<PaymentMethodsListResponse> {
-      return request<PaymentMethodsListResponse>('/billing/payment-methods');
+      return apiRequest<PaymentMethodsListResponse>(factory, '/billing/payment-methods');
     },
 
     async addPaymentMethod(data: AddPaymentMethodRequest): Promise<PaymentMethodResponse> {
-      return request<PaymentMethodResponse>('/billing/payment-methods/add', {
+      const validated = addPaymentMethodRequestSchema.parse(data);
+      return apiRequest<PaymentMethodResponse>(factory, '/billing/payment-methods/add', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async removePaymentMethod(paymentMethodId: string): Promise<SubscriptionActionResponse> {
-      return request<SubscriptionActionResponse>(`/billing/payment-methods/${paymentMethodId}`, {
+      return apiRequest<SubscriptionActionResponse>(factory, `/billing/payment-methods/${paymentMethodId}`, {
         method: 'DELETE',
       });
     },
 
     async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethodResponse> {
-      return request<PaymentMethodResponse>(`/billing/payment-methods/${paymentMethodId}/default`, {
+      return apiRequest<PaymentMethodResponse>(factory, `/billing/payment-methods/${paymentMethodId}/default`, {
         method: 'POST',
         body: JSON.stringify({}),
       });
     },
 
     async createSetupIntent(): Promise<SetupIntentResponse> {
-      return request<SetupIntentResponse>('/billing/setup-intent', {
+      return apiRequest<SetupIntentResponse>(factory, '/billing/setup-intent', {
         method: 'POST',
         body: JSON.stringify({}),
       });

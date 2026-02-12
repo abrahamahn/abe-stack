@@ -13,6 +13,8 @@
  * @module @abe-stack/server-engine/security/rate-limit
  */
 
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -522,34 +524,34 @@ export function createRateLimiter(config: RateLimitConfig): RateLimiter {
 export const RateLimitPresets = {
   /** Standard API rate limit: 100 requests per minute */
   standard: {
-    windowMs: 60_000,
+    windowMs: MS_PER_MINUTE,
     max: 100,
     roleLimits: {
-      admin: { max: 1000, windowMs: 60_000 },
-      premium: { max: 500, windowMs: 60_000 },
-      basic: { max: 50, windowMs: 60_000 },
+      admin: { max: 1000, windowMs: MS_PER_MINUTE },
+      premium: { max: 500, windowMs: MS_PER_MINUTE },
+      basic: { max: 50, windowMs: MS_PER_MINUTE },
     },
     progressiveDelay: {
       enabled: true,
-      baseDelay: 1000,
-      maxDelay: 30000,
+      baseDelay: MS_PER_SECOND,
+      maxDelay: 30 * MS_PER_SECOND,
       backoffFactor: 2,
     },
   },
   /** Strict rate limit: 10 requests per minute (for sensitive endpoints) */
   strict: {
-    windowMs: 60_000,
+    windowMs: MS_PER_MINUTE,
     max: 10,
     progressiveDelay: {
       enabled: true,
-      baseDelay: 5000,
-      maxDelay: 300000,
+      baseDelay: 5 * MS_PER_SECOND,
+      maxDelay: 5 * MS_PER_MINUTE,
       backoffFactor: 2,
     },
   },
   /** Relaxed rate limit: 1000 requests per minute */
   relaxed: {
-    windowMs: 60_000,
+    windowMs: MS_PER_MINUTE,
     max: 1000,
     progressiveDelay: {
       enabled: false,

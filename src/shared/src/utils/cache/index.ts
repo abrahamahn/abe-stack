@@ -32,4 +32,5 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
+  RedisCacheConfig,
 } from './types';

@@ -1,13 +1,13 @@
 // src/server/core/src/auth/security/password.test.ts
-import { describe, expect, test } from 'vitest';
-
 import {
   defaultPasswordConfig,
   getStrengthColor,
   getStrengthLabel,
   validatePassword,
   validatePasswordBasic,
-} from './password';
+} from '@abe-stack/shared';
+import { describe, expect, test } from 'vitest';
+
 
 describe('defaultPasswordConfig', () => {
   test('should have minLength of 8', () => {

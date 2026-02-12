@@ -3,9 +3,10 @@
  * Data Controls Section
  *
  * Account status display and data management options.
- * Links to account lifecycle actions (deactivate/delete) and data export placeholder.
+ * Includes account lifecycle actions (deactivate/delete), consent preferences, and data export.
  */
 
+import { MS_PER_DAY } from '@abe-stack/shared';
 import { Alert, Badge, Button, Card, Heading, Text } from '@abe-stack/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
@@ -15,6 +16,8 @@ import {
   useReactivateAccount,
 } from '../hooks/useAccountLifecycle';
 
+import { ConsentPreferences } from './ConsentPreferences';
+import { DataExportSection } from './DataExportSection';
 import { SudoModal } from './SudoModal';
 
 // ============================================================================
@@ -24,6 +27,8 @@ import { SudoModal } from './SudoModal';
 export interface DataControlsSectionProps {
   /** Current account status */
   accountStatus?: 'active' | 'deactivated' | 'pending_deletion';
+  /** ISO date when permanent deletion is scheduled (only relevant when pending_deletion) */
+  deletionScheduledAt?: string;
   /** Called after a successful action (to reload user state) */
   onActionComplete?: () => void;
   className?: string;
@@ -67,6 +72,7 @@ function getStatusLabel(status: string): string {
 
 export const DataControlsSection = ({
   accountStatus = 'active',
+  deletionScheduledAt,
   onActionComplete,
   className,
 }: DataControlsSectionProps): ReactElement => {
@@ -153,6 +159,13 @@ export const DataControlsSection = ({
 
   const currentError = deactivateError ?? deleteError ?? reactivateError;
   const isAnyLoading = isDeactivating || isDeleting || isReactivating;
+  const deletionDaysLeft =
+    deletionScheduledAt !== undefined
+      ? Math.max(
+          0,
+          Math.ceil((new Date(deletionScheduledAt).getTime() - Date.now()) / MS_PER_DAY),
+        )
+      : null;
 
   return (
     <div className={className}>
@@ -175,6 +188,11 @@ export const DataControlsSection = ({
               {getStatusLabel(accountStatus)}
             </Badge>
           </div>
+          {accountStatus === 'pending_deletion' && deletionDaysLeft !== null && (
+            <Text size="sm" tone="danger" data-testid="deletion-countdown" className="mt-2">
+              Permanent deletion in {deletionDaysLeft} {deletionDaysLeft === 1 ? 'day' : 'days'}
+            </Text>
+          )}
         </Card>
 
         {/* Success / Error Messages */}
@@ -264,24 +282,11 @@ export const DataControlsSection = ({
           </Card>
         )}
 
+        {/* Consent Preferences */}
+        <ConsentPreferences />
+
         {/* Data Export */}
-        <Card className="p-4">
-          <Heading as="h4" size="sm" className="mb-2">
-            Export Your Data
-          </Heading>
-          <Text size="sm" tone="muted">
-            Download a copy of your personal data. This feature is coming soon.
-          </Text>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={true}
-            className="mt-3"
-            data-testid="export-button"
-          >
-            Export Data (Coming Soon)
-          </Button>
-        </Card>
+        <DataExportSection />
       </div>
 
       <SudoModal open={sudoOpen} onSuccess={handleSudoSuccess} onDismiss={handleSudoDismiss} />

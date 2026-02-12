@@ -125,6 +125,35 @@ describe('Toast', () => {
 
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
+
+  it('renders action button when action is provided', () => {
+    const onClick = vi.fn();
+    render(
+      <Toast
+        message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }}
+      />,
+    );
+
+    expect(screen.getByText('Redo')).toBeInTheDocument();
+  });
+
+  it('calls action onClick when action button is clicked', () => {
+    const onClick = vi.fn();
+    render(
+      <Toast
+        message={{ id: 'toast-1', title: 'Undone', action: { label: 'Redo', onClick } }}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('Redo'));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render action button when action is undefined', () => {
+    render(<Toast message={{ id: 'toast-1', title: 'No action' }} />);
+
+    expect(screen.queryByText('Redo')).not.toBeInTheDocument();
+  });
 });
 
 describe('ToastContainer', () => {

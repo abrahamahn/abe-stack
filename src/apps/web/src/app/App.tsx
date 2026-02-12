@@ -15,6 +15,7 @@ import {
   type QueryState,
 } from '@abe-stack/client-engine';
 import { toastStore } from '@abe-stack/react';
+import { ACCESS_TOKEN_COOKIE_NAME } from '@abe-stack/shared';
 import {
   BrowserRouter,
   ErrorBoundary,
@@ -31,6 +32,7 @@ import {
 } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 import { TosAcceptanceModal } from '@features/auth/components';
+import { CookieConsentBanner } from '@settings/components';
 import {
   useCallback,
   useEffect,
@@ -292,7 +294,7 @@ function useTosAcceptance(environment: ClientEnvironment): {
     async (documentId: string) => {
       const { apiUrl } = environment.config;
       const baseUrl = apiUrl.replace(/\/+$/, '');
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem(ACCESS_TOKEN_COOKIE_NAME);
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
       if (token !== null) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -387,6 +389,7 @@ export const App = ({ environment }: AppProps): ReactElement => {
                     </div>
                     <AppToaster />
                     <NetworkStatus />
+                    <CookieConsentBanner />
                     <TosAcceptanceModal
                       open={tosState.open}
                       documentId={tosState.documentId}

@@ -38,16 +38,40 @@ import type { RouteDefinition } from '@abe-stack/server-engine';
  */
 const fileRouteEntries: [string, RouteDefinition][] = [
   // Upload a file
-  ['files/upload', protectedRoute('POST', handleUploadFile, 'user')],
+  [
+    'files/upload',
+    protectedRoute('POST', handleUploadFile, 'user', undefined, {
+      summary: 'Upload file',
+      tags: ['Files'],
+    }),
+  ],
 
   // Get file metadata
-  ['files/:id', protectedRoute('GET', handleGetFile, 'user')],
+  [
+    'files/:id',
+    protectedRoute('GET', handleGetFile, 'user', undefined, {
+      summary: 'Get file metadata',
+      tags: ['Files'],
+    }),
+  ],
 
   // Delete a file
-  ['files/:id/delete', protectedRoute('POST', handleDeleteFile, 'user')],
+  [
+    'files/:id/delete',
+    protectedRoute('POST', handleDeleteFile, 'user', undefined, {
+      summary: 'Delete file',
+      tags: ['Files'],
+    }),
+  ],
 
   // Get download URL
-  ['files/:id/download', protectedRoute('GET', handleDownloadFile, 'user')],
+  [
+    'files/:id/download',
+    protectedRoute('GET', handleDownloadFile, 'user', undefined, {
+      summary: 'Get download URL',
+      tags: ['Files'],
+    }),
+  ],
 ];
 
 /**

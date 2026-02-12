@@ -30,13 +30,13 @@ export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';
 // Providers
 // ============================================================================
 
-export { MemoryCacheProvider } from './providers';
+export { createRedisProvider, MemoryCacheProvider, RedisCacheProvider } from './providers';
 
 // ============================================================================
 // Factory
 // ============================================================================
 
-export { createCache, createCacheFromEnv, createMemoryCache } from './factory';
+export { createCache, createCacheFromEnv, createMemoryCache, createRedisCache } from './factory';
 
 // ============================================================================
 // Errors
@@ -80,6 +80,7 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
+  RedisCacheConfig,
 } from './types';
 
 // Cache-specific types

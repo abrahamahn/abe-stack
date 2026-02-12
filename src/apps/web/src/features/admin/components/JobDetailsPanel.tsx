@@ -5,6 +5,7 @@
  * Displays detailed information about a job in a side panel.
  */
 
+import { formatDateTime } from '@abe-stack/shared';
 import { Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import { JobStatusBadge } from './JobStatusBadge';
@@ -108,11 +109,11 @@ export const JobDetailsPanel = ({
       {/* Timing */}
       <Card className="p-3">
         <div className="grid grid-cols-2 gap-4">
-          <DetailItem label="Created" value={formatDate(job.createdAt)} />
-          <DetailItem label="Scheduled" value={formatDate(job.scheduledAt)} />
+          <DetailItem label="Created" value={formatDateTime(job.createdAt)} />
+          <DetailItem label="Scheduled" value={formatDateTime(job.scheduledAt)} />
           <DetailItem
             label="Completed"
-            value={job.completedAt !== null ? formatDate(job.completedAt) : '-'}
+            value={job.completedAt !== null ? formatDateTime(job.completedAt) : '-'}
           />
           <DetailItem
             label="Duration"
@@ -221,11 +222,3 @@ const DetailItem = ({ label, value }: DetailItemProps): JSX.Element => {
   );
 };
 
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleString();
-  } catch {
-    return dateStr;
-  }
-}

@@ -446,7 +446,7 @@ describe('registerRoutes', () => {
 
       // Core routes use /api prefix; system routes use empty prefix
       const apiCalls = mockRegisterRouteMap.mock.calls.filter(
-        (call) => (call[3] as { prefix: string }).prefix === '/api/v1',
+        (call) => (call[3] as { prefix: string }).prefix === '/api',
       );
       const systemCalls = mockRegisterRouteMap.mock.calls.filter(
         (call) => (call[3] as { prefix: string }).prefix === '',
@@ -456,7 +456,7 @@ describe('registerRoutes', () => {
       expect(apiCalls.length).toBeGreaterThan(0);
       for (const call of apiCalls) {
         const options = call[3] as { prefix: string; jwtSecret: string };
-        expect(options.prefix).toBe('/api/v1');
+        expect(options.prefix).toBe('/api');
         expect(options.jwtSecret).toBe('test-jwt-secret');
       }
     });
@@ -491,7 +491,7 @@ describe('registerRoutes', () => {
 
       expect(billingCall).toBeDefined();
       expect(billingCall![3]).toMatchObject({
-        prefix: '/api/v1',
+        prefix: '/api',
         jwtSecret: 'test-jwt-secret',
       });
     });
@@ -715,7 +715,7 @@ describe('registerRoutes', () => {
           continue;
         }
         expect(options).toMatchObject({
-          prefix: '/api/v1',
+          prefix: '/api',
           jwtSecret: 'test-jwt-secret',
         });
         expect(typeof options.authGuardFactory).toBe('function');
@@ -747,7 +747,7 @@ describe('registerRoutes', () => {
 
       const options = billingCall![3] as { prefix: string; jwtSecret: string };
       expect(options).toMatchObject({
-        prefix: '/api/v1',
+        prefix: '/api',
         jwtSecret: 'test-jwt-secret',
       });
     });

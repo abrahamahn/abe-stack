@@ -40,7 +40,7 @@ function createMockRepos(): Repositories {
     },
     users: {
       listWithFilters: vi.fn().mockResolvedValue({
-        items: [],
+        data: [],
         total: 0,
         page: 1,
         limit: 10000,

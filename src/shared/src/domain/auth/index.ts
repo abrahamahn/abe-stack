@@ -17,15 +17,18 @@ export {
   calculateScore,
   estimateCrackTime,
   generateFeedback,
+  getCharsetSize,
   type PasswordPenalties,
 } from './auth.password-scoring';
 
 export {
+  COMMON_PASSWORDS,
   containsUserInput,
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
+  KEYBOARD_PATTERNS,
 } from './auth.password-patterns';
 
 export { authContract } from './auth.contracts';
@@ -133,6 +136,9 @@ export {
   type SmsChallengeRequest,
   type SmsChallengeResponse,
   type SmsVerifyRequest,
+  renamePasskeyRequestSchema,
+  type PasskeyListItem,
+  type RenamePasskeyRequest,
 } from './auth.schemas';
 
 export {

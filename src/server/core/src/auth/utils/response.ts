@@ -5,6 +5,8 @@
  * @module utils/response
  */
 
+import { toISODateOnly } from '@abe-stack/shared';
+
 import type { AppRole, UserId } from '@abe-stack/shared';
 
 /**
@@ -109,10 +111,7 @@ export function createAuthResponse(
     typeof user.createdAt === 'string' ? user.createdAt : user.createdAt.toISOString();
   const updatedAt =
     typeof user.updatedAt === 'string' ? user.updatedAt : user.updatedAt.toISOString();
-  const dateOfBirth =
-    user.dateOfBirth instanceof Date
-      ? user.dateOfBirth.toISOString().slice(0, 10)
-      : (user.dateOfBirth ?? null);
+  const dateOfBirth = toISODateOnly(user.dateOfBirth ?? null);
 
   return {
     accessToken,

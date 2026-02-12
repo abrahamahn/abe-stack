@@ -1,4 +1,6 @@
 // src/apps/server/src/config/infra/cache.ts
+import { MS_PER_MINUTE } from '@abe-stack/shared';
+
 import type { CacheConfig, FullEnv } from '@abe-stack/shared/config';
 
 /**
@@ -23,17 +25,20 @@ export function loadCacheConfig(env: FullEnv): CacheConfig {
   };
 
   if (useExternal) {
-    config.externalConfig = {
+    const extConfig: { host: string; port: number; password?: string; db?: number } = {
       host: env.REDIS_HOST !== '' ? env.REDIS_HOST : 'localhost',
       port: env.REDIS_PORT,
     };
+    if (env.REDIS_PASSWORD !== undefined) extConfig.password = env.REDIS_PASSWORD;
+    if (env.REDIS_DB !== undefined) extConfig.db = env.REDIS_DB;
+    config.externalConfig = extConfig;
   }
 
   return config;
 }
 
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {
-  ttl: 300000,
+  ttl: 5 * MS_PER_MINUTE,
   maxSize: 1000,
   useExternalProvider: false,
 };

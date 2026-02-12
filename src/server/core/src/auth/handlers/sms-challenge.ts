@@ -11,9 +11,9 @@
 import { withTransaction } from '@abe-stack/db';
 import { verify as jwtVerify, JwtError } from '@abe-stack/server-engine';
 import {
+  HTTP_STATUS,
   InvalidTokenError,
   mapErrorToHttpResponse,
-  type UserRole,
   type AuthResponse,
   type HttpErrorResponse,
 } from '@abe-stack/shared';
@@ -86,14 +86,14 @@ export async function handleSendSmsCode(
     const phoneVerified = userResult.phoneVerified;
 
     if (phone === null || phoneVerified !== true) {
-      return { status: 400, body: { message: 'No verified phone number on account' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'No verified phone number on account' } };
     }
 
     // Check rate limit
     const rateLimit = await checkSmsRateLimit(ctx.db, userId);
     if (!rateLimit.allowed) {
       return {
-        status: 429,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
         body: { message: 'Too many SMS requests. Please try again later.' },
       };
     }
@@ -101,7 +101,7 @@ export async function handleSendSmsCode(
     // Get the SMS provider from context (may not be configured)
     if (ctx.sms === undefined) {
       ctx.log.error('SMS provider not configured');
-      return { status: 500, body: { message: 'SMS service unavailable' } };
+      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'SMS service unavailable' } };
     }
     const smsProvider = ctx.sms;
 
@@ -110,10 +110,10 @@ export async function handleSendSmsCode(
 
     if (!result.success) {
       ctx.log.error({ error: result.error }, 'Failed to send SMS challenge code');
-      return { status: 500, body: { message: 'Failed to send verification code' } };
+      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to send verification code' } };
     }
 
-    return { status: 200, body: { message: 'Verification code sent' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Verification code sent' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -162,7 +162,7 @@ export async function handleVerifySmsCode(
     // Verify SMS code
     const verifyResult = await verifySms2faCode(ctx.db, userId, body.code);
     if (!verifyResult.valid) {
-      return { status: 401, body: { message: verifyResult.message } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: verifyResult.message } };
     }
 
     // Fetch user for token creation
@@ -188,7 +188,7 @@ export async function handleVerifySmsCode(
     const accessToken = createAccessToken(
       user.id,
       user.email,
-      user.role as UserRole,
+      user.role,
       ctx.config.auth.jwt.secret,
       ctx.config.auth.jwt.accessTokenExpiry,
     );
@@ -199,7 +199,7 @@ export async function handleVerifySmsCode(
     const authResponse = createAuthResponse(accessToken, refreshToken, user);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         token: authResponse.accessToken,
         user: authResponse.user,

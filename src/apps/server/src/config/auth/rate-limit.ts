@@ -1,4 +1,5 @@
 // src/apps/server/src/config/auth/rate-limit.ts
+import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { getBool, getInt } from '@abe-stack/shared/config';
 
 import type { RateLimitConfig } from '@abe-stack/shared/config';
@@ -22,9 +23,9 @@ export function loadRateLimitConfig(env: Record<string, string | undefined>): Ra
       : true;
 
   return {
-    windowMs: getInt(env['RATE_LIMIT_WINDOW_MS'], 60 * 1000),
+    windowMs: getInt(env['RATE_LIMIT_WINDOW_MS'], MS_PER_MINUTE),
     max: getInt(env['RATE_LIMIT_MAX'], isProd ? 100 : 1000),
-    cleanupIntervalMs: getInt(env['RATE_LIMIT_CLEANUP_INTERVAL_MS'], 60 * 1000),
+    cleanupIntervalMs: getInt(env['RATE_LIMIT_CLEANUP_INTERVAL_MS'], MS_PER_MINUTE),
 
     progressiveDelay: {
       enabled: progressiveDelayEnabledValue,
@@ -36,7 +37,7 @@ export function loadRateLimitConfig(env: Record<string, string | undefined>): Ra
 }
 
 export const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
-  windowMs: 60000,
+  windowMs: MS_PER_MINUTE,
   max: 100,
-  cleanupIntervalMs: 60000,
+  cleanupIntervalMs: MS_PER_MINUTE,
 };

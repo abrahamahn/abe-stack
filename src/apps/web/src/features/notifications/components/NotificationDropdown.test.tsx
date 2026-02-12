@@ -172,4 +172,48 @@ describe('NotificationDropdown', () => {
 
     expect(screen.getByLabelText('Unread')).toBeInTheDocument();
   });
+
+  it('should call onNotificationClick when clicking a notification', () => {
+    const onNotificationClick = vi.fn();
+    render(
+      <NotificationDropdown
+        {...defaultProps}
+        notifications={[unreadNotification]}
+        onNotificationClick={onNotificationClick}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('New message'));
+    expect(onNotificationClick).toHaveBeenCalledWith(unreadNotification);
+  });
+
+  it('should call onNotificationClick for read notifications too', () => {
+    const onNotificationClick = vi.fn();
+    render(
+      <NotificationDropdown
+        {...defaultProps}
+        notifications={[readNotification]}
+        onNotificationClick={onNotificationClick}
+      />,
+    );
+
+    fireEvent.click(screen.getByText('Account verified'));
+    expect(onNotificationClick).toHaveBeenCalledWith(readNotification);
+  });
+
+  it('should call onNotificationClick on Enter key press', () => {
+    const onNotificationClick = vi.fn();
+    render(
+      <NotificationDropdown
+        {...defaultProps}
+        notifications={[unreadNotification]}
+        onNotificationClick={onNotificationClick}
+      />,
+    );
+
+    fireEvent.keyDown(screen.getByText('New message').closest('[role="button"]')!, {
+      key: 'Enter',
+    });
+    expect(onNotificationClick).toHaveBeenCalledWith(unreadNotification);
+  });
 });

@@ -1,5 +1,7 @@
 // src/shared/src/domain/notifications/index.ts
 
+export { getNotificationLevelTone } from './notifications.display';
+
 export { shouldSendNotification } from './notifications.logic';
 
 export {
@@ -29,6 +31,7 @@ export {
 export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
+  NOTIFICATION_PAYLOAD_MAX_SIZE,
   NotificationRateLimitError,
   NotificationSendError,
   NotificationsDisabledError,

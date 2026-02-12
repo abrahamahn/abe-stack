@@ -24,13 +24,16 @@ import {
   type UserRole,
 } from '@abe-stack/db';
 import {
+  AUTH_EXPIRY,
   canonicalizeEmail,
   ConflictError,
   EmailAlreadyExistsError,
+  MS_PER_MINUTE,
   NotFoundError,
   normalizeEmail,
   OAuthError,
   OAuthStateMismatchError,
+  toISODateOnly,
   type UserId,
 } from '@abe-stack/shared';
 
@@ -129,7 +132,7 @@ function encryptToken(token: string, encryptionKey: string): string {
   const key = scryptSync(encryptionKey, salt, 32);
   const iv = randomBytes(IV_LENGTH);
 
-  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key, iv);
+  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key, iv, { authTagLength: 16 });
   const encrypted = Buffer.concat([cipher.update(token, 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
 
@@ -169,7 +172,7 @@ function decryptToken(encryptedData: string, encryptionKey: string): string {
   const encrypted = Buffer.from(encryptedB64, 'base64');
 
   const key = scryptSync(encryptionKey, salt, 32);
-  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);
+  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, iv, { authTagLength: 16 });
   decipher.setAuthTag(tag);
 
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
@@ -179,7 +182,7 @@ function decryptToken(encryptedData: string, encryptionKey: string): string {
 // State Management
 // ============================================================================
 
-const STATE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+const STATE_EXPIRY_MS = AUTH_EXPIRY.OAUTH_STATE_MINUTES * MS_PER_MINUTE;
 
 /**
  * Create OAuth state for CSRF protection.
@@ -494,7 +497,7 @@ async function authenticateOrCreateWithOAuth(
         emailVerified: user.emailVerified,
         phone: user.phone ?? null,
         phoneVerified: user.phoneVerified ?? null,
-        dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+        dateOfBirth: toISODateOnly(user.dateOfBirth),
         gender: user.gender ?? null,
         bio: user.bio ?? null,
         city: user.city ?? null,
@@ -601,10 +604,7 @@ async function authenticateOrCreateWithOAuth(
       emailVerified: result.user.emailVerified,
       phone: result.user.phone ?? null,
       phoneVerified: result.user.phoneVerified ?? null,
-      dateOfBirth:
-        result.user.dateOfBirth !== null
-          ? result.user.dateOfBirth.toISOString().slice(0, 10)
-          : null,
+      dateOfBirth: toISODateOnly(result.user.dateOfBirth),
       gender: result.user.gender ?? null,
       bio: result.user.bio ?? null,
       city: result.user.city ?? null,

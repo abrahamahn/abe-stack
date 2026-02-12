@@ -1,10 +1,11 @@
 // src/client/engine/src/realtime/WebsocketPubsubClient.ts
 
+import { WEBSOCKET_PATH, delay, MS_PER_SECOND } from '@abe-stack/shared';
+
 /**
  * Time constants for reconnection delays
  */
-const SECOND_MS = 1000;
-const MAX_RECONNECT_DELAY_MS = 30 * SECOND_MS;
+const MAX_RECONNECT_DELAY_MS = 30 * MS_PER_SECOND;
 
 /**
  * Default maximum number of queued messages when offline.
@@ -124,12 +125,6 @@ export interface WebsocketPubsubClientConfig {
   maxQueueSize?: number;
 }
 
-/**
- * Promise-based sleep utility for reconnection delays
- */
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /**
  * Calculate jitter for a given delay to prevent thundering herd.
@@ -210,15 +205,13 @@ export class WebsocketPubsubClient {
   private readonly stateListeners = new Set<ConnectionStateListener>();
 
   constructor(config: WebsocketPubsubClientConfig) {
-    // Determine secure default: use secure if page is loaded over HTTPS
-    const isSecureDefault = typeof window !== 'undefined' && window.location.protocol === 'https:';
-
+    // Default to secure (wss://). Only use ws:// when explicitly set to false (e.g. local dev).
     this.config = {
       ...config,
-      secure: config.secure ?? isSecureDefault,
+      secure: config.secure ?? true,
       debug: config.debug ?? false,
       maxReconnectAttempts: config.maxReconnectAttempts ?? DEFAULT_MAX_RECONNECT_ATTEMPTS,
-      baseReconnectDelayMs: config.baseReconnectDelayMs ?? SECOND_MS,
+      baseReconnectDelayMs: config.baseReconnectDelayMs ?? MS_PER_SECOND,
       maxQueueSize: config.maxQueueSize ?? DEFAULT_MAX_QUEUE_SIZE,
     };
 
@@ -355,8 +348,11 @@ export class WebsocketPubsubClient {
     this.setConnectionState(this.reconnectAttempt > 0 ? 'reconnecting' : 'connecting');
     this.log('Connecting...');
 
-    const protocol = this.config.secure ? 'wss' : 'ws';
-    const url = `${protocol}://${this.config.host}/ws`;
+    // Always use wss:// unless explicitly opted out for localhost development
+    const host = this.config.host;
+    const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+    const protocol = this.config.secure || !isLocalhost ? 'wss' : 'ws';
+    const url = `${protocol}://${host}${WEBSOCKET_PATH}`;
 
     try {
       this.ws = new this.webSocketConstructor(url);
@@ -433,12 +429,12 @@ export class WebsocketPubsubClient {
       MAX_RECONNECT_DELAY_MS,
     );
     const jitter = calculateJitter(baseDelay);
-    const delay = baseDelay + jitter;
+    const reconnectDelay = baseDelay + jitter;
 
-    this.log(`Reconnecting in ${String(delay)}ms (attempt ${String(this.reconnectAttempt)})...`);
+    this.log(`Reconnecting in ${String(reconnectDelay)}ms (attempt ${String(this.reconnectAttempt)})...`);
     this.setConnectionState('reconnecting');
 
-    await sleep(delay);
+    await delay(reconnectDelay);
 
     // Reconnect (isClosedIntentionally is checked at the start of this function)
     this.connect();

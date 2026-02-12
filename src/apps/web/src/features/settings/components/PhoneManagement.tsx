@@ -3,10 +3,10 @@
  * PhoneManagement — Add, verify, and remove a phone number for SMS 2FA.
  */
 
-import { Alert, Button, Card, Input, Text } from '@abe-stack/ui';
-import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
 import { usePhone } from '@abe-stack/api';
+import { Alert, Button, Card, Input, Text } from '@abe-stack/ui';
+import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
 import type { User } from '@abe-stack/shared';
 
@@ -31,7 +31,13 @@ export const PhoneManagement = ({
   getToken,
   onStatusChange,
 }: PhoneManagementProps): ReactElement => {
-  const clientConfig = useMemo(() => ({ baseUrl, getToken }), [baseUrl, getToken]);
+  const clientConfig = useMemo(() => {
+    const config: { baseUrl: string; getToken?: () => string | null } = { baseUrl };
+    if (getToken !== undefined) {
+      config.getToken = getToken;
+    }
+    return config;
+  }, [baseUrl, getToken]);
   const { isLoading, error, setPhone, verifyPhone, removePhone } = usePhone({ clientConfig });
 
   const [phone, setPhoneInput] = useState('');
@@ -43,8 +49,7 @@ export const PhoneManagement = ({
   const isVerified = user.phoneVerified === true;
 
   // Mask phone: show last 4 digits
-  const maskedPhone =
-    hasPhone && user.phone !== null ? `***${user.phone.slice(-4)}` : null;
+  const maskedPhone = hasPhone && user.phone !== null ? `***${user.phone.slice(-4)}` : null;
 
   const handleSetPhone = useCallback(async () => {
     if (phone.trim() === '') return;
@@ -91,7 +96,7 @@ export const PhoneManagement = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Text weight="medium">Phone Number</Text>
+              <Text>Phone Number</Text>
               <span
                 className="text-xs px-2 py-0.5 rounded-full"
                 style={{
@@ -108,16 +113,18 @@ export const PhoneManagement = ({
           </div>
           <Button
             type="button"
-            variant="danger"
-            size="sm"
-            onClick={() => void handleRemove()}
+            variant="secondary"
+            size="small"
+            onClick={() => {
+              void handleRemove();
+            }}
             disabled={isLoading}
           >
             Remove
           </Button>
         </div>
         {displayError !== null && (
-          <Alert variant="danger" className="mt-3">
+          <Alert tone="danger" className="mt-3">
             {displayError}
           </Alert>
         )}
@@ -129,7 +136,7 @@ export const PhoneManagement = ({
   if (step === 'verify') {
     return (
       <Card className="p-4 space-y-3">
-        <Text weight="medium">Enter verification code</Text>
+        <Text>Enter verification code</Text>
         <Text tone="muted" size="sm">
           A code was sent to the phone number you provided.
         </Text>
@@ -138,18 +145,20 @@ export const PhoneManagement = ({
             type="text"
             placeholder="6-digit code"
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => { setCode(e.target.value); }}
             maxLength={6}
           />
           <Button
             type="button"
-            onClick={() => void handleVerify()}
+            onClick={() => {
+              void handleVerify();
+            }}
             disabled={isLoading || code.trim().length < 6}
           >
             Verify
           </Button>
         </div>
-        {displayError !== null && <Alert variant="danger">{displayError}</Alert>}
+        {displayError !== null && <Alert tone="danger">{displayError}</Alert>}
       </Card>
     );
   }
@@ -158,7 +167,7 @@ export const PhoneManagement = ({
   if (step === 'success') {
     return (
       <Card className="p-4">
-        <Alert variant="success">Phone number verified! SMS 2FA is now active.</Alert>
+        <Alert tone="success">Phone number verified! SMS 2FA is now active.</Alert>
       </Card>
     );
   }
@@ -166,7 +175,7 @@ export const PhoneManagement = ({
   // Idle — add phone number
   return (
     <Card className="p-4 space-y-3">
-      <Text weight="medium">SMS Two-Factor Authentication</Text>
+      <Text>SMS Two-Factor Authentication</Text>
       <Text tone="muted" size="sm">
         Add a phone number to receive SMS verification codes during login. When enabled, you will
         need to enter a code sent to your phone after entering your password.
@@ -176,17 +185,19 @@ export const PhoneManagement = ({
           type="tel"
           placeholder="+1 555 123 4567"
           value={phone}
-          onChange={(e) => setPhoneInput(e.target.value)}
+          onChange={(e) => { setPhoneInput(e.target.value); }}
         />
         <Button
           type="button"
-          onClick={() => void handleSetPhone()}
+          onClick={() => {
+            void handleSetPhone();
+          }}
           disabled={isLoading || phone.trim() === ''}
         >
           Send Code
         </Button>
       </div>
-      {displayError !== null && <Alert variant="danger">{displayError}</Alert>}
+      {displayError !== null && <Alert tone="danger">{displayError}</Alert>}
     </Card>
   );
 };

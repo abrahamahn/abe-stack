@@ -11,6 +11,8 @@
  * - Easier to audit and understand
  */
 
+import { HTTP_STATUS, SECONDS_PER_DAY } from '@abe-stack/shared';
+
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -199,7 +201,7 @@ const DEFAULT_CORS_OPTIONS: Required<Omit<CorsOptions, 'origin'>> = {
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  maxAge: 86400, // 24 hours
+  maxAge: SECONDS_PER_DAY,
 };
 
 /**
@@ -226,13 +228,18 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
   let allowOrigin: string | null = null;
 
   if (allowedOrigin === '*') {
-    // Credentials must never be combined with wildcard origin.
-    // Reflect concrete origin when available, otherwise fallback to wildcard.
-    allowOrigin = requestOrigin ?? '*';
+    // Wildcard origin: use literal '*' only, never reflect arbitrary origins.
+    // Credentials cannot be used with wildcard origin per the CORS spec.
+    allowOrigin = '*';
   } else if (requestOrigin === allowedOrigin) {
-    allowOrigin = requestOrigin;
-  } else if (requestOrigin != null && isOriginAllowed(requestOrigin, allowedOrigin)) {
-    allowOrigin = requestOrigin;
+    // Exact match: use the configured value (not the request header) to avoid reflection
+    allowOrigin = allowedOrigin;
+  } else if (requestOrigin != null) {
+    // Multi-origin: check if request origin matches one in the configured allowlist
+    const matched = findAllowedOrigin(requestOrigin, allowedOrigin);
+    if (matched !== undefined) {
+      allowOrigin = matched;
+    }
   }
 
   if (allowOrigin != null) {
@@ -255,15 +262,16 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
 }
 
 /**
- * Check if origin is in a comma-separated list of allowed origins
+ * Find a matching origin from a comma-separated allowlist.
+ * Returns the configured origin value (not the request header) to avoid origin reflection.
  *
  * @param origin - The request origin to check
  * @param allowedOrigins - Comma-separated list of allowed origins
- * @returns true if the origin is allowed
+ * @returns The matched configured origin, or undefined if not found
  */
-function isOriginAllowed(origin: string, allowedOrigins: string): boolean {
+function findAllowedOrigin(origin: string, allowedOrigins: string): string | undefined {
   const origins = allowedOrigins.split(',').map((o) => o.trim());
-  return origins.includes(origin);
+  return origins.find((o) => o === origin);
 }
 
 /**
@@ -276,7 +284,7 @@ function isOriginAllowed(origin: string, allowedOrigins: string): boolean {
  */
 export function handlePreflight(req: FastifyRequest, res: FastifyReply): boolean {
   if (req.method === 'OPTIONS') {
-    res.status(204).send();
+    res.status(HTTP_STATUS.NO_CONTENT).send();
     return true;
   }
   return false;

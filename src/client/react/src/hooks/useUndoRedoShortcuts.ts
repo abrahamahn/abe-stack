@@ -1,4 +1,5 @@
 // src/client/react/src/hooks/useUndoRedoShortcuts.ts
+import { isEditableElement, isMac, matchesAnyBinding } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef } from 'react';
 
 // ============================================================================
@@ -91,140 +92,6 @@ export interface UseUndoRedoShortcutsResult {
 
 const DEFAULT_UNDO_BINDINGS = ['ctrl+z'];
 const DEFAULT_REDO_BINDINGS = ['ctrl+y', 'ctrl+shift+z'];
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-/**
- * Detect if the current platform is macOS.
- */
-function isMac(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  // Use userAgent as platform is deprecated
-  return /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
-}
-
-/**
- * Check if the target is an input element.
- */
-function isInputElement(target: EventTarget | null): boolean {
-  if (target === null || !(target instanceof HTMLElement)) return false;
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target.isContentEditable
-  );
-}
-
-/**
- * Parse a key binding string into its components.
- */
-interface ParsedBinding {
-  key: string;
-  ctrl: boolean;
-  shift: boolean;
-  alt: boolean;
-  meta: boolean;
-}
-
-function parseBinding(binding: string): ParsedBinding {
-  const parts = binding.toLowerCase().split('+');
-  const result: ParsedBinding = {
-    key: '',
-    ctrl: false,
-    shift: false,
-    alt: false,
-    meta: false,
-  };
-
-  for (const part of parts) {
-    const trimmed = part.trim();
-    switch (trimmed) {
-      case 'ctrl':
-      case 'control':
-        result.ctrl = true;
-        break;
-      case 'shift':
-        result.shift = true;
-        break;
-      case 'alt':
-      case 'option':
-        result.alt = true;
-        break;
-      case 'meta':
-      case 'cmd':
-      case 'command':
-        result.meta = true;
-        break;
-      default:
-        result.key = trimmed;
-    }
-  }
-
-  return result;
-}
-
-/**
- * Check if a keyboard event matches a parsed binding.
- */
-function matchesBinding(event: KeyboardEvent, binding: ParsedBinding): boolean {
-  // Check key match (case-insensitive)
-  if (event.key.toLowerCase() !== binding.key) {
-    return false;
-  }
-
-  // On Mac, treat Cmd as Ctrl for standard shortcuts
-  const macOS = isMac();
-
-  // Check ctrl (or meta on Mac)
-  if (binding.ctrl) {
-    if (macOS) {
-      // On Mac, Ctrl+Z means Cmd+Z
-      if (!event.metaKey && !event.ctrlKey) return false;
-    } else {
-      if (!event.ctrlKey) return false;
-    }
-  } else {
-    // If ctrl is not expected, neither should be pressed
-    if (macOS) {
-      // On Mac, don't trigger if Cmd is pressed when not expected
-      if (event.metaKey) return false;
-    } else {
-      if (event.ctrlKey) return false;
-    }
-  }
-
-  // Check shift
-  if (binding.shift !== event.shiftKey) {
-    return false;
-  }
-
-  // Check alt
-  if (binding.alt !== event.altKey) {
-    return false;
-  }
-
-  // Check meta (when explicitly specified, not for ctrl->cmd mapping)
-  if (binding.meta && !event.metaKey) {
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Check if an event matches any of the given bindings.
- */
-function matchesAnyBinding(event: KeyboardEvent, bindings: string[]): boolean {
-  for (const binding of bindings) {
-    const parsed = parseBinding(binding);
-    if (matchesBinding(event, parsed)) {
-      return true;
-    }
-  }
-  return false;
-}
 
 // ============================================================================
 // Hook
@@ -322,7 +189,7 @@ export function useUndoRedoShortcuts(
       if (!(event instanceof KeyboardEvent)) return;
 
       // Skip if user is typing in input/textarea
-      if (skipInputs && isInputElement(event.target)) {
+      if (skipInputs && isEditableElement(event.target)) {
         return;
       }
 

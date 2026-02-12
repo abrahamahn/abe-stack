@@ -6,6 +6,7 @@
  * Sends an SMS code and accepts 6-digit verification input.
  */
 
+import { MS_PER_SECOND } from '@abe-stack/shared';
 import { Alert, Button, Input, Text } from '@abe-stack/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 
@@ -48,15 +49,18 @@ export const SmsChallenge = ({
       }
     };
     void sendInitial();
+    return undefined;
   }, [challengeToken, onSendCode]);
 
   // Countdown timer for resend
   useEffect(() => {
-    if (resendCooldown <= 0) return;
+    if (resendCooldown <= 0) return undefined;
     const timer = setInterval(() => {
       setResendCooldown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
+    }, MS_PER_SECOND);
+    return (): void => {
+      clearInterval(timer);
+    };
   }, [resendCooldown]);
 
   const handleVerify = useCallback(async () => {
@@ -84,9 +88,7 @@ export const SmsChallenge = ({
 
   return (
     <div className="space-y-4">
-      <Text weight="medium" size="lg">
-        SMS Verification
-      </Text>
+      <Text size="lg">SMS Verification</Text>
       <Text tone="muted" size="sm">
         {codeSent
           ? 'Enter the 6-digit code sent to your phone.'
@@ -98,33 +100,39 @@ export const SmsChallenge = ({
           type="text"
           placeholder="000000"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+          onChange={(e): void => {
+            setCode(e.target.value.replace(/\D/g, ''));
+          }}
           maxLength={6}
           autoFocus
           disabled={!codeSent}
         />
         <Button
           type="button"
-          onClick={() => void handleVerify()}
+          onClick={(): void => {
+            void handleVerify();
+          }}
           disabled={isLoading || code.trim().length < 6}
         >
           {isLoading ? 'Verifying...' : 'Verify'}
         </Button>
       </div>
 
-      {error !== null && <Alert variant="danger">{error}</Alert>}
+      {error !== null && <Alert tone="danger">{error}</Alert>}
 
       <div className="flex items-center gap-4">
         <Button
           type="button"
           variant="text"
-          size="sm"
-          onClick={() => void handleResend()}
+          size="small"
+          onClick={(): void => {
+            void handleResend();
+          }}
           disabled={resendCooldown > 0}
         >
           {resendCooldown > 0 ? `Resend in ${String(resendCooldown)}s` : 'Resend code'}
         </Button>
-        <Button type="button" variant="text" size="sm" onClick={onCancel}>
+        <Button type="button" variant="text" size="small" onClick={onCancel}>
           Cancel
         </Button>
       </div>

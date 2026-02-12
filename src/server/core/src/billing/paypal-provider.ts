@@ -8,6 +8,8 @@
 
 import { createHmac } from 'node:crypto';
 
+import { MS_PER_DAY } from '@abe-stack/shared';
+
 import type { SubscriptionStatus } from '@abe-stack/db';
 import type {
   BillingService,
@@ -329,7 +331,7 @@ export class PayPalProvider implements BillingService {
       subscription.billing_info.next_billing_time !== undefined &&
       subscription.billing_info.next_billing_time !== ''
         ? new Date(subscription.billing_info.next_billing_time)
-        : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
+        : new Date(now.getTime() + 30 * MS_PER_DAY); // Default 30 days
 
     // Calculate period start (last payment or creation)
     const periodStart =
@@ -406,7 +408,7 @@ export class PayPalProvider implements BillingService {
     // PayPal's transaction search API
     try {
       const endDate = new Date().toISOString();
-      const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+      const startDate = new Date(Date.now() - 365 * MS_PER_DAY).toISOString();
 
       const response = await this.request<{ transaction_details?: PayPalTransaction[] }>(
         'GET',
@@ -524,14 +526,29 @@ export class PayPalProvider implements BillingService {
     // Format: algo=SHA256withRSA, timestamp=..., transmission_id=..., cert_url=...
 
     try {
-      // Parse the signature header parts
+      // Parse the signature header parts (use null-prototype object to prevent pollution)
+      const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
+      const initialAcc: Record<string, string | undefined> = Object.create(
+        null,
+      ) as Record<string, string | undefined>;
       const parts = signature.split(',').reduce<Record<string, string | undefined>>((acc, part) => {
         const [key, value] = part.trim().split('=');
-        if (key !== undefined && key !== '' && value !== undefined && value !== '') {
-          acc[key] = value;
+        if (
+          key !== undefined &&
+          key !== '' &&
+          !blockedKeys.has(key) &&
+          value !== undefined &&
+          value !== ''
+        ) {
+          Object.defineProperty(acc, key, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
         }
         return acc;
-      }, {});
+      }, initialAcc);
 
       // Basic validation that required parts exist
       if (

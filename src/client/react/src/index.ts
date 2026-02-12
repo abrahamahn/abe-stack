@@ -95,6 +95,14 @@ export { useFocusReturn } from './hooks/useFocusReturn';
 export type { UseFocusReturnOptions, UseFocusReturnResult } from './hooks/useFocusReturn';
 export { useRouteFocusAnnounce } from './hooks/useRouteFocusAnnounce';
 export type { UseRouteFocusAnnounceOptions } from './hooks/useRouteFocusAnnounce';
+export { useUndoableMutation } from './hooks/useUndoableMutation';
+export type { UseUndoableMutationOptions } from './hooks/useUndoableMutation';
+export { useUndoRedoController } from './hooks/useUndoRedoController';
+export type {
+  UndoRedoHandler,
+  UseUndoRedoControllerOptions,
+  UseUndoRedoControllerResult,
+} from './hooks/useUndoRedoController';
 
 // ============================================================================
 // Providers

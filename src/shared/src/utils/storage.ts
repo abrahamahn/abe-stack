@@ -22,6 +22,11 @@ export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as 
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 /**
+ * Maximum logo file size in bytes (2MB).
+ */
+export const MAX_LOGO_SIZE = 2 * 1024 * 1024;
+
+/**
  * Normalize a file path for storage.
  *
  * @param path - Raw file path

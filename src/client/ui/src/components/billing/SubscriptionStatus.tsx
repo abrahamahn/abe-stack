@@ -1,13 +1,15 @@
 // src/client/ui/src/components/billing/SubscriptionStatus.tsx
+import {
+  formatPlanInterval,
+  formatPrice,
+  getSubscriptionStatusLabel,
+  getSubscriptionStatusVariant,
+} from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
 
-import type {
-  PlanInterval,
-  Subscription,
-  SubscriptionStatus as SubscriptionStatusType,
-} from '@abe-stack/shared';
+import type { Subscription } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -44,60 +46,6 @@ function defaultFormatDate(dateString: string): string {
   });
 }
 
-function defaultFormatPrice(priceInCents: number, currency: string): string {
-  const price = priceInCents / 100;
-  const currencySymbol = currency.toUpperCase() === 'USD' ? '$' : currency.toUpperCase();
-  return `${currencySymbol}${price.toFixed(2)}`;
-}
-
-function getStatusLabel(status: SubscriptionStatusType): string {
-  switch (status) {
-    case 'active':
-      return 'Active';
-    case 'trialing':
-      return 'Trial';
-    case 'past_due':
-      return 'Past Due';
-    case 'canceled':
-      return 'Canceled';
-    case 'incomplete':
-      return 'Incomplete';
-    case 'incomplete_expired':
-      return 'Expired';
-    case 'paused':
-      return 'Paused';
-    case 'unpaid':
-      return 'Unpaid';
-    default:
-      return status;
-  }
-}
-
-function getStatusVariant(
-  status: SubscriptionStatusType,
-): 'success' | 'warning' | 'error' | 'neutral' {
-  switch (status) {
-    case 'active':
-      return 'success';
-    case 'trialing':
-      return 'success';
-    case 'past_due':
-      return 'warning';
-    case 'unpaid':
-      return 'warning';
-    case 'canceled':
-      return 'neutral';
-    case 'incomplete':
-      return 'warning';
-    case 'incomplete_expired':
-      return 'error';
-    case 'paused':
-      return 'neutral';
-    default:
-      return 'neutral';
-  }
-}
-
 // ============================================================================
 // Component
 // ============================================================================
@@ -125,7 +73,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
       onChangePlan,
       onManagePaymentMethods,
       formatDate = defaultFormatDate,
-      formatPrice = defaultFormatPrice,
+      formatPrice: formatPriceProp = formatPrice,
       className,
       ...rest
     },
@@ -150,7 +98,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
     }
 
     const { plan, status, currentPeriodEnd, cancelAtPeriodEnd, trialEnd } = subscription;
-    const statusVariant = getStatusVariant(status);
+    const statusVariant = getSubscriptionStatusVariant(status);
     const isTrialing = status === 'trialing';
     const isCanceling = cancelAtPeriodEnd && status !== 'canceled';
     const isCanceled = status === 'canceled';
@@ -173,13 +121,13 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
                 `subscription-status__badge--${statusVariant}`,
               )}
             >
-              {getStatusLabel(status)}
+              {getSubscriptionStatusLabel(status)}
             </span>
           </div>
           <div className="subscription-status__price">
-            {formatPrice(plan.priceInCents, plan.currency)}
+            {formatPriceProp(plan.priceInCents, plan.currency)}
             <span className="subscription-status__interval">
-              /{plan.interval === 'month' ? 'mo' : 'yr'}
+              /{formatPlanInterval(plan.interval)}
             </span>
           </div>
         </div>

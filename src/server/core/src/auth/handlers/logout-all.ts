@@ -7,7 +7,7 @@
  * @module handlers/logout-all
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { createErrorMapperLogger } from '../types';
 import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
@@ -35,7 +35,7 @@ export async function handleLogoutAll(
 
     if (userId === undefined || userId === '') {
       return {
-        status: 401,
+        status: HTTP_STATUS.UNAUTHORIZED,
         body: { message: 'Unauthorized' },
       };
     }
@@ -44,7 +44,7 @@ export async function handleLogoutAll(
     clearRefreshTokenCookie(reply);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: 'Logged out from all devices' },
     };
   } catch (error) {

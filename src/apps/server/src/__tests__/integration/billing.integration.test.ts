@@ -15,7 +15,11 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { BillingAppContext, BillingBaseRouteDefinition, BillingRequest } from '@abe-stack/core/billing';
+import type {
+  BillingAppContext,
+  BillingBaseRouteDefinition,
+  BillingRequest,
+} from '@abe-stack/core/billing';
 import type {
   AuthGuardFactory,
   HandlerContext,
@@ -267,13 +271,14 @@ describe('Billing API Integration Tests', () => {
             sandbox: true,
           },
           plans: {
-            free: { stripePriceId: '', paypalPlanId: '' },
-            pro: { stripePriceId: 'price_pro', paypalPlanId: '' },
-            enterprise: { stripePriceId: 'price_ent', paypalPlanId: '' },
+            free: 'price_free',
+            pro: 'price_pro',
+            enterprise: 'price_ent',
           },
           urls: {
-            success: 'http://localhost:5173/billing/success',
-            cancel: 'http://localhost:5173/billing/cancel',
+            portalReturnUrl: 'http://localhost:5173/billing',
+            checkoutSuccessUrl: 'http://localhost:5173/billing/success',
+            checkoutCancelUrl: 'http://localhost:5173/billing/cancel',
           },
         },
       },

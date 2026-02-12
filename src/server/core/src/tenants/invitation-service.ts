@@ -9,6 +9,7 @@
  */
 
 import {
+  AUTH_EXPIRY,
   BadRequestError,
   canAcceptInvite,
   canAssignRole,
@@ -16,7 +17,9 @@ import {
   ForbiddenError,
   isEmailDomainAllowed,
   isInviteExpired,
+  MS_PER_DAY,
   NotFoundError,
+  QUOTAS,
 } from '@abe-stack/shared';
 
 import type { Repositories } from '@abe-stack/db';
@@ -26,11 +29,8 @@ import type { Invitation as DomainInvitation, TenantRole } from '@abe-stack/shar
 // Constants
 // ============================================================================
 
-/** Default invitation expiry: 7 days in milliseconds */
-const DEFAULT_INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
-
-/** Maximum number of pending invitations per tenant */
-const MAX_PENDING_INVITATIONS = 50;
+/** Default invitation expiry in milliseconds */
+const DEFAULT_INVITE_EXPIRY_MS = AUTH_EXPIRY.INVITE_DAYS * MS_PER_DAY;
 
 // ============================================================================
 // Types
@@ -157,9 +157,9 @@ export async function createInvitation(
 
   // Enforce max pending invitations limit per tenant
   const pendingCount = await repos.invitations.countPendingByTenantId(tenantId);
-  if (pendingCount >= MAX_PENDING_INVITATIONS) {
+  if (pendingCount >= QUOTAS.MAX_PENDING_INVITATIONS) {
     throw new BadRequestError(
-      `This workspace has reached the maximum of ${String(MAX_PENDING_INVITATIONS)} pending invitations`,
+      `This workspace has reached the maximum of ${String(QUOTAS.MAX_PENDING_INVITATIONS)} pending invitations`,
     );
   }
 
@@ -372,7 +372,11 @@ export async function resendInvitation(
     throw new BadRequestError('Only pending invitations can be resent');
   }
 
-  // For resend, we just return the current invitation info
-  // The caller (handler) is responsible for re-sending the email
-  return toInvitationInfo(invitation);
+  // Refresh the expiry date so the invitation is valid for another period
+  const newExpiresAt = new Date(Date.now() + DEFAULT_INVITE_EXPIRY_MS);
+  const refreshed = await repos.invitations.update(invitation.id, {
+    expiresAt: newExpiresAt,
+  });
+
+  return toInvitationInfo(refreshed ?? invitation);
 }

@@ -410,3 +410,69 @@ export const EMAIL_CHANGE_REVERT_TOKEN_COLUMNS = {
   usedAt: 'used_at',
   createdAt: 'created_at',
 } as const;
+
+// ============================================================================
+// WebAuthn Credentials
+// ============================================================================
+
+export const WEBAUTHN_CREDENTIALS_TABLE = 'webauthn_credentials';
+
+/**
+ * WebAuthn credential record (SELECT result).
+ * Stores FIDO2/WebAuthn public key credentials for passkey authentication.
+ *
+ * @see 0027_webauthn_credentials.sql
+ */
+export interface WebauthnCredential {
+  id: string;
+  userId: string;
+  credentialId: string;
+  publicKey: string;
+  counter: number;
+  transports: string | null;
+  deviceType: string | null;
+  backedUp: boolean;
+  name: string;
+  createdAt: Date;
+  lastUsedAt: Date | null;
+}
+
+/**
+ * Fields for inserting a new WebAuthn credential (INSERT).
+ */
+export interface NewWebauthnCredential {
+  id?: string;
+  userId: string;
+  credentialId: string;
+  publicKey: string;
+  counter?: number;
+  transports?: string | null;
+  deviceType?: string | null;
+  backedUp?: boolean;
+  name?: string;
+  createdAt?: Date;
+  lastUsedAt?: Date | null;
+}
+
+/**
+ * Fields for updating a WebAuthn credential (UPDATE).
+ */
+export interface UpdateWebauthnCredential {
+  counter?: number;
+  name?: string;
+  lastUsedAt?: Date | null;
+}
+
+export const WEBAUTHN_CREDENTIAL_COLUMNS = {
+  id: 'id',
+  userId: 'user_id',
+  credentialId: 'credential_id',
+  publicKey: 'public_key',
+  counter: 'counter',
+  transports: 'transports',
+  deviceType: 'device_type',
+  backedUp: 'backed_up',
+  name: 'name',
+  createdAt: 'created_at',
+  lastUsedAt: 'last_used_at',
+} as const;

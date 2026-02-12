@@ -5,6 +5,7 @@
  * Form for changing user password with validation.
  */
 
+import { validatePasswordBasic } from '@abe-stack/shared';
 import { Alert, Button, FormField, PasswordInput, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
@@ -54,9 +55,10 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
       return;
     }
 
-    // Validate password length
-    if (newPassword.length < 8) {
-      setValidationError('Password must be at least 8 characters');
+    // Validate password
+    const passwordValidation = validatePasswordBasic(newPassword);
+    if (!passwordValidation.isValid) {
+      setValidationError(passwordValidation.errors[0] ?? 'Invalid password');
       return;
     }
 
@@ -74,7 +76,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
 
   const isValid =
     currentPassword.length > 0 &&
-    newPassword.length >= 8 &&
+    validatePasswordBasic(newPassword).isValid &&
     confirmPassword.length > 0 &&
     newPassword === confirmPassword;
 

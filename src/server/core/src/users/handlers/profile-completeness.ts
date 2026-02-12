@@ -7,6 +7,7 @@
  * @module handlers/profile-completeness
  */
 
+
 import { getUserById } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 

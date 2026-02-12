@@ -7,6 +7,8 @@
  * of binding to Fastify or any specific HTTP framework.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { record } from '../audit/service';
 
 import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } from './service';
@@ -112,18 +114,18 @@ function handleError(
 ): { status: number; body: { message: string } } {
   if (error instanceof Error) {
     if (error.message.includes('not found')) {
-      return { status: 404, body: { message: error.message } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: error.message } };
     }
     if (error.message.includes('duplicate') || error.message.includes('already exists')) {
-      return { status: 409, body: { message: error.message } };
+      return { status: HTTP_STATUS.CONFLICT, body: { message: error.message } };
     }
     if (error.message.includes('required') || error.message.includes('invalid')) {
-      return { status: 400, body: { message: error.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: error.message } };
     }
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: 500, body: { message: 'An error occurred processing your request' } };
+  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
 }
 
 // ============================================================================
@@ -149,7 +151,7 @@ export async function handleGetCurrentLegal(
   try {
     const documents = await getCurrentLegalDocuments(ctx.repos.legalDocuments);
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { documents: documents.map(formatDocument) },
     };
   } catch (error: unknown) {
@@ -180,13 +182,13 @@ export async function handleGetUserAgreements(
   const req = request as LegalRequest;
   const user = req.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const agreements = await getUserAgreements(ctx.repos.userAgreements, user.userId);
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { agreements: agreements.map(formatAgreement) },
     };
   } catch (error: unknown) {
@@ -219,7 +221,7 @@ export async function handlePublishLegal(
   const req = request as LegalRequest;
   const user = req.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -231,21 +233,21 @@ export async function handlePublishLegal(
     };
 
     if (typeof data.type !== 'string' || data.type === '') {
-      return { status: 400, body: { message: 'type is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'type is required' } };
     }
     if (typeof data.title !== 'string' || data.title === '') {
-      return { status: 400, body: { message: 'title is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'title is required' } };
     }
     if (typeof data.content !== 'string' || data.content === '') {
-      return { status: 400, body: { message: 'content is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'content is required' } };
     }
     if (typeof data.effectiveAt !== 'string' || data.effectiveAt === '') {
-      return { status: 400, body: { message: 'effectiveAt is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'effectiveAt is required' } };
     }
 
     const effectiveAt = new Date(data.effectiveAt);
     if (isNaN(effectiveAt.getTime())) {
-      return { status: 400, body: { message: 'effectiveAt must be a valid date' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'effectiveAt must be a valid date' } };
     }
 
     const document = await publishLegalDocument(
@@ -267,7 +269,7 @@ export async function handlePublishLegal(
     });
 
     return {
-      status: 201,
+      status: HTTP_STATUS.CREATED,
       body: { document: formatDocument(document) },
     };
   } catch (error: unknown) {

@@ -1,4 +1,4 @@
-// apps/web/src/__tests__/integration/dashboard.test.tsx
+// src/apps/web/src/__tests__/integration/dashboard.test.tsx
 /**
  * Integration tests for the Dashboard feature.
  *
@@ -40,9 +40,8 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      // Dashboard component currently displays "Not provided" because it looks for user.name
-      // which doesn't exist (user has firstName/lastName instead)
-      expect(screen.getByText('Not provided')).toBeInTheDocument();
+      // Dashboard displays firstName + lastName from user profile
+      expect(screen.getByText('Test User')).toBeInTheDocument();
     });
 
     it('should display user ID', () => {
@@ -65,9 +64,8 @@ describe('Dashboard Integration', () => {
       renderWithProviders(<DashboardPage />, { environment });
 
       expect(screen.getByText(mockAdminUser.email)).toBeInTheDocument();
-      // Dashboard component currently displays "Not provided" because it looks for user.name
-      // which doesn't exist (user has firstName/lastName instead)
-      expect(screen.getByText('Not provided')).toBeInTheDocument();
+      // Dashboard displays firstName + lastName from user profile
+      expect(screen.getByText('Admin User')).toBeInTheDocument();
     });
   });
 
@@ -98,7 +96,7 @@ describe('Dashboard Integration', () => {
       expect(screen.getByRole('heading', { name: 'Your Profile' })).toBeInTheDocument();
     });
 
-    it('should render welcome card', () => {
+    it('should render getting started checklist section', () => {
       const environment = createMockEnvironment({
         user: mockUser,
         isAuthenticated: true,
@@ -106,10 +104,12 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      expect(screen.getByText(/welcome to your dashboard/i)).toBeInTheDocument();
+      // Dashboard renders a GettingStartedChecklist component
+      // Verify the dashboard renders without errors when this section is present
+      expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     });
 
-    it('should display protected route information', () => {
+    it('should render recent activity section', () => {
       const environment = createMockEnvironment({
         user: mockUser,
         isAuthenticated: true,
@@ -117,8 +117,7 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      expect(screen.getByText(/protected route/i)).toBeInTheDocument();
-      expect(screen.getByText(/JWT token/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Recent Activity' })).toBeInTheDocument();
     });
   });
 
@@ -188,7 +187,7 @@ describe('Dashboard Integration', () => {
 
   describe('Edge Cases', () => {
     it('should handle user with empty string name', () => {
-      const userWithEmptyName = { ...mockUser, name: '' };
+      const userWithEmptyName = { ...mockUser, firstName: '', lastName: '' };
       const environment = createMockEnvironment({
         user: userWithEmptyName,
         isAuthenticated: true,
@@ -196,10 +195,8 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      // Empty string is not nullish, so it renders as empty string (not "Not provided")
-      // The component uses ?? which only catches null/undefined
-      // Verify the Name label exists with empty value
-      expect(screen.getByText(/^Name:$/i)).toBeInTheDocument();
+      // When both firstName and lastName are empty, component shows "Not provided"
+      expect(screen.getByText('Not provided')).toBeInTheDocument();
     });
 
     it('should handle user with long email', () => {
@@ -220,7 +217,7 @@ describe('Dashboard Integration', () => {
     });
 
     it('should handle user with special characters in name', () => {
-      const userWithSpecialName = { ...mockUser, name: "O'Brien-Smith" };
+      const userWithSpecialName = { ...mockUser, firstName: "O'Brien", lastName: 'Smith' };
       const environment = createMockEnvironment({
         user: userWithSpecialName,
         isAuthenticated: true,
@@ -228,7 +225,7 @@ describe('Dashboard Integration', () => {
 
       renderWithProviders(<DashboardPage />, { environment });
 
-      expect(screen.getByText("O'Brien-Smith")).toBeInTheDocument();
+      expect(screen.getByText("O'Brien Smith")).toBeInTheDocument();
     });
   });
 

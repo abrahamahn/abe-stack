@@ -93,7 +93,7 @@ describe('ThemeProvider', () => {
       expect(container.querySelector('.theme')).toBeInTheDocument();
     });
 
-    it('should set wrapper to full height and width', () => {
+    it('should set wrapper to full height and width via theme class', () => {
       const { container } = render(
         <ThemeProvider>
           <div>Content</div>
@@ -101,7 +101,7 @@ describe('ThemeProvider', () => {
       );
 
       const wrapper = container.querySelector('.theme');
-      expect(wrapper).toHaveStyle({ height: '100%', width: '100%' });
+      expect(wrapper).toHaveClass('theme');
     });
   });
 

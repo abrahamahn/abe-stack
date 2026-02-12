@@ -13,6 +13,7 @@ import {
   getDetailedHealth,
   publicRoute,
 } from '@abe-stack/server-engine';
+import { HTTP_STATUS } from '@abe-stack/shared';
 import { getWebSocketStats } from '@abe-stack/websocket';
 
 import type { HandlerContext, RouteMap, SystemContext } from '@abe-stack/server-engine';
@@ -32,7 +33,7 @@ export const systemRoutes: RouteMap = createRouteMap([
         const systemCtx = asSystemContext(ctx);
         const dbStatus = await checkDbStatus(systemCtx);
         if (dbStatus.status !== 'up') {
-          reply.code(503);
+          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return {
           status: dbStatus.status === 'up' ? 'ok' : 'degraded',
@@ -76,7 +77,7 @@ export const systemRoutes: RouteMap = createRouteMap([
 
         const ready = dbStatus.status === 'up' && schemaStatus.status === 'up';
         if (!ready) {
-          reply.code(503);
+          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return {
           status: ready ? 'ready' : 'not_ready',
@@ -125,7 +126,7 @@ export const systemRoutes: RouteMap = createRouteMap([
         const systemCtx = asSystemContext(ctx);
         const detailed = await getDetailedHealth(systemCtx, getWebSocketStats());
         if (detailed.status !== 'healthy') {
-          reply.code(503);
+          reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
         return detailed;
       },

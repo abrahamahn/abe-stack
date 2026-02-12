@@ -17,6 +17,7 @@ export type ToastMessage = {
   title?: string;
   description?: string;
   tone?: ToastTone;
+  action?: { label: string; onClick: () => void };
 };
 
 type ToastState = {

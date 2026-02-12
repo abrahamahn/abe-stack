@@ -7,14 +7,13 @@
  * @module @abe-stack/db/repositories
  */
 
-// Common types
-export type { PaginatedResult, PaginationOptions, TimeRangeFilter } from './types';
+// Common types (pagination types re-exported from @abe-stack/shared)
+export type { CursorPaginatedResult, CursorPaginationOptions, TimeRangeFilter } from './types';
 
 // Users
 export {
   createUserRepository,
   type AdminUserListFilters,
-  type PaginatedUserResult,
   type UserRepository,
   type UserStatus,
 } from './users';
@@ -41,6 +40,8 @@ export {
   type EmailChangeRevertTokenRepository,
   createTrustedDeviceRepository,
   type TrustedDeviceRepository,
+  createWebauthnCredentialRepository,
+  type WebauthnCredentialRepository,
 } from './auth';
 
 // API Keys

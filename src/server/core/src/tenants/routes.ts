@@ -87,6 +87,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       },
       'user',
       createTenantSchema,
+      { summary: 'Create workspace', tags: ['Tenants'] },
     ),
   ],
 
@@ -100,6 +101,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleListTenants(deps, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'List workspaces', tags: ['Tenants'] },
     ),
   ],
 
@@ -114,6 +117,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleGetTenant(deps, tenantId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'Get workspace', tags: ['Tenants'] },
     ),
   ],
 
@@ -138,6 +143,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       },
       'user',
       updateTenantSchema,
+      { summary: 'Update workspace', tags: ['Tenants'] },
     ),
   ],
 
@@ -152,6 +158,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleDeleteTenant(deps, tenantId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'Delete workspace', tags: ['Tenants'] },
     ),
   ],
 
@@ -171,6 +179,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'Transfer workspace ownership', tags: ['Tenants'] },
     ),
   ],
 
@@ -201,6 +211,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'List workspace audit events', tags: ['Tenants', 'Audit'] },
     ),
   ],
 
@@ -219,6 +231,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleListMembers(deps, tenantId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'List workspace members', tags: ['Tenants', 'Members'] },
     ),
   ],
 
@@ -239,6 +253,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       },
       'user',
       addMemberSchema,
+      { summary: 'Add workspace member', tags: ['Tenants', 'Members'] },
     ),
   ],
 
@@ -260,6 +275,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       },
       'user',
       updateMembershipRoleSchema,
+      { summary: 'Update member role', tags: ['Tenants', 'Members'] },
     ),
   ],
 
@@ -274,6 +290,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleRemoveMember(deps, params.id, params.userId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'Remove workspace member', tags: ['Tenants', 'Members'] },
     ),
   ],
 
@@ -298,6 +316,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
       },
       'user',
       createInvitationSchema,
+      { summary: 'Create invitation', tags: ['Tenants', 'Invitations'] },
     ),
   ],
 
@@ -312,6 +331,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleListInvitations(deps, tenantId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'List invitations', tags: ['Tenants', 'Invitations'] },
     ),
   ],
 
@@ -326,6 +347,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleAcceptInvitation(deps, invitationId, req as unknown as TenantsRequest);
       },
       'user',
+      undefined,
+      { summary: 'Accept invitation', tags: ['Tenants', 'Invitations'] },
     ),
   ],
 
@@ -345,6 +368,8 @@ export const tenantRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'Revoke invitation', tags: ['Tenants', 'Invitations'] },
     ),
   ],
 
@@ -364,6 +389,29 @@ export const tenantRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'Resend invitation', tags: ['Tenants', 'Invitations'] },
+    ),
+  ],
+
+  // Regenerate an invitation token/expiry (alias of resend semantics)
+  [
+    'tenants/:id/invitations/:invitationId/regenerate',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
+        const deps = asTenantsDeps(ctx);
+        const params = req.params as { id: string; invitationId: string };
+        return handleResendInvitation(
+          deps,
+          params.id,
+          params.invitationId,
+          req as unknown as TenantsRequest,
+        );
+      },
+      'user',
+      undefined,
+      { summary: 'Regenerate invitation', tags: ['Tenants', 'Invitations'] },
     ),
   ],
 ]);

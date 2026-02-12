@@ -33,7 +33,9 @@ vi.mock('@abe-stack/ui', async () => {
         {children}
       </span>
     ),
-    Spinner: () => <div data-testid="spinner">Loading...</div>,
+    Skeleton: ({ className }: { className?: string }) => (
+      <div data-testid="skeleton" className={className} />
+    ),
     Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   };
 });
@@ -73,7 +75,7 @@ describe('ActivityFeed', () => {
   });
 
   describe('loading state', () => {
-    it('should render spinner when loading', () => {
+    it('should render skeletons when loading', () => {
       vi.mocked(useActivities).mockReturnValue({
         activities: [],
         isLoading: true,
@@ -84,7 +86,8 @@ describe('ActivityFeed', () => {
 
       render(<ActivityFeed />);
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      const skeletons = screen.getAllByTestId('skeleton');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
   });
 
@@ -116,7 +119,7 @@ describe('ActivityFeed', () => {
 
       render(<ActivityFeed />);
 
-      expect(screen.getByText('No recent activity.')).toBeInTheDocument();
+      expect(screen.getByText('No recent activity')).toBeInTheDocument();
     });
   });
 

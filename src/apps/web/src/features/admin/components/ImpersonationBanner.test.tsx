@@ -98,7 +98,6 @@ describe('ImpersonationBanner', () => {
   });
 
   it('should handle error when ending session fails', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const mockEndImpersonation = vi.fn().mockRejectedValue(new Error('Network error'));
     vi.mocked(useImpersonation).mockReturnValue({
       isImpersonating: true,
@@ -113,14 +112,12 @@ describe('ImpersonationBanner', () => {
     const endButton = screen.getByRole('button', { name: /End Session/i });
     await user.click(endButton);
 
+    // Button should be re-enabled after error (error is silently caught)
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(endButton).not.toBeDisabled();
     });
 
-    // Button should be re-enabled after error
-    expect(endButton).not.toBeDisabled();
-
-    consoleErrorSpy.mockRestore();
+    expect(mockEndImpersonation).toHaveBeenCalledTimes(1);
   });
 
   it('should show "unknown user" if targetEmail is null', () => {

@@ -8,6 +8,8 @@
  * @module service
  */
 
+import { toISODateOnly } from '@abe-stack/shared';
+
 import type { UserRepository } from '@abe-stack/db';
 import type { CursorPaginationOptions } from '@abe-stack/shared';
 import type { AppRole as UserRole } from '@abe-stack/shared/domain';
@@ -106,7 +108,7 @@ export async function getUserById(userRepo: UserRepository, userId: string): Pro
     emailVerified: user.emailVerified,
     phone: user.phone ?? null,
     phoneVerified: user.phoneVerified,
-    dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+    dateOfBirth: toISODateOnly(user.dateOfBirth),
     gender: user.gender ?? null,
     bio: user.bio ?? null,
     city: user.city ?? null,
@@ -149,7 +151,7 @@ export async function listUsers(
   const nextCursor = result.hasNext ? String(page + 1) : null;
 
   return {
-    users: result.items.map((user) => ({
+    users: result.data.map((user) => ({
       id: user.id,
       email: user.email,
       username: user.username,
@@ -160,7 +162,7 @@ export async function listUsers(
       emailVerified: user.emailVerified,
       phone: user.phone ?? null,
       phoneVerified: user.phoneVerified,
-      dateOfBirth: user.dateOfBirth !== null ? user.dateOfBirth.toISOString().slice(0, 10) : null,
+      dateOfBirth: toISODateOnly(user.dateOfBirth),
       gender: user.gender ?? null,
       bio: user.bio ?? null,
       city: user.city ?? null,

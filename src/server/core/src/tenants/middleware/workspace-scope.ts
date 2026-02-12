@@ -9,7 +9,7 @@
  * @module middleware/workspace-scope
  */
 
-import { can, ForbiddenError, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
+import { can, ERROR_MESSAGES, ForbiddenError, HTTP_STATUS, ROLE_LEVELS, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
 
 import type { Repositories } from '@abe-stack/db';
 import type {
@@ -78,7 +78,7 @@ export function createWorkspaceScopeMiddleware(options: WorkspaceScopeOptions) {
     // If no workspace header, either skip or reject based on `required`
     if (typeof workspaceId !== 'string' || workspaceId === '') {
       if (required) {
-        reply.code(400).send({
+        reply.code(HTTP_STATUS.BAD_REQUEST).send({
           message: 'Missing x-workspace-id header',
           code: 'WORKSPACE_REQUIRED',
         });
@@ -91,14 +91,14 @@ export function createWorkspaceScopeMiddleware(options: WorkspaceScopeOptions) {
     // Get authenticated user from request
     const user = (request as WorkspaceScopedRequest & { user?: { userId: string } }).user;
     if (user?.userId === undefined) {
-      reply.code(401).send({ message: 'Authentication required' });
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED });
       return;
     }
 
     // Validate membership
     const membership = await repos.memberships.findByTenantAndUser(workspaceId, user.userId);
     if (membership === null) {
-      reply.code(403).send({
+      reply.code(HTTP_STATUS.FORBIDDEN).send({
         message: 'You are not a member of this workspace',
         code: 'NOT_MEMBER',
       });
@@ -125,13 +125,6 @@ export function createWorkspaceScopeMiddleware(options: WorkspaceScopeOptions) {
  * @returns Fastify preHandler hook
  */
 export function createWorkspaceRoleGuard(options: WorkspaceRoleGuardOptions) {
-  const ROLE_LEVELS: Record<TenantRole, number> = {
-    viewer: 1,
-    member: 2,
-    admin: 3,
-    owner: 4,
-  };
-
   const requiredLevel = ROLE_LEVELS[options.requiredRole];
 
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
@@ -139,7 +132,7 @@ export function createWorkspaceRoleGuard(options: WorkspaceRoleGuardOptions) {
     const ctx = scopedRequest.workspaceContext;
 
     if (ctx === undefined) {
-      reply.code(400).send({
+      reply.code(HTTP_STATUS.BAD_REQUEST).send({
         message: 'Workspace scope required',
         code: 'WORKSPACE_REQUIRED',
       });
@@ -150,7 +143,7 @@ export function createWorkspaceRoleGuard(options: WorkspaceRoleGuardOptions) {
     const currentLevel = ROLE_LEVELS[currentRole];
 
     if (currentLevel < requiredLevel) {
-      reply.code(403).send({
+      reply.code(HTTP_STATUS.FORBIDDEN).send({
         message: `Requires at least ${options.requiredRole} role`,
         code: 'INSUFFICIENT_ROLE',
       });
@@ -177,7 +170,7 @@ export function createPermissionGuard(options: PermissionGuardOptions) {
     const authCtx = buildAuthContext(request, isOwner);
 
     if (!can(authCtx, action, resource)) {
-      reply.code(403).send({
+      reply.code(HTTP_STATUS.FORBIDDEN).send({
         message: `You do not have permission to ${action} this ${resource}`,
         code: 'PERMISSION_DENIED',
       });

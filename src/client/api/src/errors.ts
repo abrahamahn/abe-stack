@@ -10,25 +10,16 @@ import {
   AppError,
   BadRequestError,
   ConflictError,
+  ERROR_CODES,
+  ERROR_MESSAGES,
   ForbiddenError,
+  HTTP_STATUS,
   InternalError,
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,
 } from '@abe-stack/shared';
-
-// HTTP Status Constants
-const HttpStatus = {
-  BadRequest: 400,
-  Unauthorized: 401,
-  Forbidden: 403,
-  NotFound: 404,
-  Conflict: 409,
-  UnprocessableEntity: 422,
-  TooManyRequests: 429,
-  InternalServerError: 500,
-} as const;
 
 /**
  * API Error response structure from the server
@@ -57,14 +48,14 @@ export class ApiError extends AppError {
    * Check if this is a client error (4xx)
    */
   isClientError(): boolean {
-    return this.status >= HttpStatus.BadRequest && this.status < HttpStatus.InternalServerError;
+    return this.status >= HTTP_STATUS.BAD_REQUEST && this.status < HTTP_STATUS.INTERNAL_SERVER_ERROR;
   }
 
   /**
    * Check if this is a server error (5xx)
    */
   isServerError(): boolean {
-    return this.status >= HttpStatus.InternalServerError;
+    return this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR;
   }
 
   /**
@@ -72,7 +63,7 @@ export class ApiError extends AppError {
    */
   isRetryable(): boolean {
     return (
-      this.status === HttpStatus.TooManyRequests || this.status >= HttpStatus.InternalServerError
+      this.status === HTTP_STATUS.TOO_MANY_REQUESTS || this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
     );
   }
 }
@@ -85,7 +76,7 @@ export class NetworkError extends AppError {
     message = 'Network request failed',
     public readonly originalError?: Error,
   ) {
-    super(message, 0, 'NETWORK_ERROR');
+    super(message, 0, ERROR_CODES.NETWORK_ERROR);
   }
 }
 
@@ -97,7 +88,7 @@ export class TimeoutError extends AppError {
     message = 'Request timed out',
     public readonly timeoutMs?: number,
   ) {
-    super(message, 0, 'TIMEOUT_ERROR', timeoutMs !== undefined ? { timeoutMs } : undefined);
+    super(message, 0, ERROR_CODES.TIMEOUT_ERROR, timeoutMs !== undefined ? { timeoutMs } : undefined);
   }
 }
 
@@ -133,29 +124,29 @@ export function createApiError(status: number, body?: ApiErrorBody): AppError {
   const details = body?.details;
 
   switch (status) {
-    case HttpStatus.BadRequest:
+    case HTTP_STATUS.BAD_REQUEST:
       return new BadRequestError(message, code, details);
 
-    case HttpStatus.Unauthorized:
+    case HTTP_STATUS.UNAUTHORIZED:
       return new UnauthorizedError(message, code);
 
-    case HttpStatus.Forbidden:
+    case HTTP_STATUS.FORBIDDEN:
       return new ForbiddenError(message, code);
 
-    case HttpStatus.NotFound:
+    case HTTP_STATUS.NOT_FOUND:
       return new NotFoundError(message, code);
 
-    case HttpStatus.Conflict:
+    case HTTP_STATUS.CONFLICT:
       return new ConflictError(message, code);
 
-    case HttpStatus.UnprocessableEntity:
+    case HTTP_STATUS.UNPROCESSABLE_ENTITY:
       return new UnprocessableError(message, code, details);
 
-    case HttpStatus.TooManyRequests:
+    case HTTP_STATUS.TOO_MANY_REQUESTS:
       return new TooManyRequestsError(message);
 
     default:
-      if (status >= HttpStatus.InternalServerError) {
+      if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
         return new InternalError(message, code);
       }
       return new ApiError(message, status, code, details);
@@ -200,5 +191,5 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  return 'An unexpected error occurred';
+  return ERROR_MESSAGES.DEFAULT;
 }

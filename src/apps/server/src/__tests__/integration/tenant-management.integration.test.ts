@@ -644,4 +644,28 @@ describe('Tenant Management API Integration Tests', () => {
       expect(response.statusCode).toBe(401);
     });
   });
+
+  // ==========================================================================
+  // POST /api/tenants/:id/invitations/:invitationId/regenerate
+  // ==========================================================================
+
+  describe('POST /api/tenants/:id/invitations/:invitationId/regenerate', () => {
+    it('responds (not 404)', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/tenants/test-id/invitations/inv-1/regenerate',
+        payload: {},
+      });
+      expect(response.statusCode).not.toBe(404);
+    });
+
+    it('returns 401 without token', async () => {
+      const response = await testServer.inject({
+        method: 'POST',
+        url: '/api/tenants/test-id/invitations/inv-1/regenerate',
+        payload: {},
+      });
+      expect(response.statusCode).toBe(401);
+    });
+  });
 });

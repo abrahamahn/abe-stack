@@ -20,6 +20,7 @@ import {
 } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 import { ERROR_MESSAGES } from '../types';
 
@@ -168,6 +169,18 @@ export async function updateProfile(
       throw new Error('Failed to update user profile');
     }
 
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'user.profile_updated',
+        resource: 'user',
+        resourceId: userId,
+        metadata: { fields: Object.keys(updatePayload) },
+      },
+    ).catch(() => {});
+
     // Fire-and-forget activity log
     logActivity(repos.activities, {
       actorId: userId,
@@ -262,6 +275,19 @@ export async function changePassword(
   const newHash = await hashPassword(newPassword, authConfig.argon2);
   await repos.users.update(userId, { passwordHash: newHash });
   await revokeAllUserTokens(db, userId);
+
+  // Fire-and-forget audit logging
+  record(
+    { auditEvents: repos.auditEvents },
+    {
+      actorId: userId,
+      action: 'user.password_changed',
+      resource: 'user',
+      resourceId: userId,
+      severity: 'warn',
+      category: 'security',
+    },
+  ).catch(() => {});
 }
 
 // ============================================================================
@@ -375,6 +401,18 @@ export async function uploadAvatar(
   // Update user with new avatar URL (store the key, not the signed URL)
   await repos.users.update(userId, { avatarUrl: storedKey });
 
+  // Fire-and-forget audit logging
+  record(
+    { auditEvents: repos.auditEvents },
+    {
+      actorId: userId,
+      action: 'user.avatar_uploaded',
+      resource: 'user',
+      resourceId: userId,
+      metadata: { mimeType: file.mimetype },
+    },
+  ).catch(() => {});
+
   // Fire-and-forget activity log
   logActivity(repos.activities, {
     actorId: userId,
@@ -419,6 +457,17 @@ export async function deleteAvatar(
 
   // Clear avatar URL from user
   await repos.users.update(userId, { avatarUrl: null });
+
+  // Fire-and-forget audit logging
+  record(
+    { auditEvents: repos.auditEvents },
+    {
+      actorId: userId,
+      action: 'user.avatar_deleted',
+      resource: 'user',
+      resourceId: userId,
+    },
+  ).catch(() => {});
 
   // Fire-and-forget activity log
   logActivity(repos.activities, {
@@ -578,6 +627,108 @@ export async function handleDeleteAvatar(
     deps.log.error(
       error instanceof Error ? error : new Error(String(error)),
       'Failed to delete avatar',
+    );
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+// ============================================================================
+// Profile & Password HTTP Handlers
+// ============================================================================
+
+/** Body shape for password change HTTP handler. */
+interface ChangePasswordBody {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * Handle profile update.
+ *
+ * PATCH /api/users/me/update
+ *
+ * @param ctx - Handler context (narrowed to UsersModuleDeps)
+ * @param body - Validated UpdateProfileRequest
+ * @param req - Fastify request with authenticated user
+ * @returns 200 with updated profile, or error response
+ * @complexity O(1) - database lookup + update
+ */
+export async function handleUpdateProfile(
+  ctx: HandlerContext,
+  body: UpdateProfileData,
+  req: FastifyRequest,
+): Promise<RouteResult> {
+  const deps = asUsersDeps(ctx);
+  const request = req as unknown as UsersRequest;
+
+  if (request.user === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    const result = await updateProfile(deps.repos, request.user.userId, body);
+    return { status: 200, body: result };
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      return { status: 400, body: { message: error.message } };
+    }
+    if (error instanceof NotFoundError) {
+      return { status: 404, body: { message: error.message } };
+    }
+    deps.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      'Failed to update profile',
+    );
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+/**
+ * Handle password change.
+ *
+ * POST /api/users/me/password
+ *
+ * @param ctx - Handler context (narrowed to UsersModuleDeps)
+ * @param body - Validated ChangePasswordRequest
+ * @param req - Fastify request with authenticated user
+ * @returns 200 on success, or error response
+ * @complexity O(1) - password verification + hash + update
+ */
+export async function handleChangePassword(
+  ctx: HandlerContext,
+  body: ChangePasswordBody,
+  req: FastifyRequest,
+): Promise<RouteResult> {
+  const deps = asUsersDeps(ctx);
+  const request = req as unknown as UsersRequest;
+
+  if (request.user === undefined) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+  }
+
+  try {
+    await changePassword(
+      deps.db,
+      deps.repos,
+      deps.config.auth,
+      request.user.userId,
+      body.currentPassword,
+      body.newPassword,
+    );
+    return { status: 200, body: { success: true, message: 'Password changed successfully' } };
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      return { status: 400, body: { message: error.message } };
+    }
+    if (error instanceof NotFoundError) {
+      return { status: 404, body: { message: error.message } };
+    }
+    if (error instanceof WeakPasswordError) {
+      return { status: 400, body: { message: error.message } };
+    }
+    deps.log.error(
+      error instanceof Error ? error : new Error(String(error)),
+      'Failed to change password',
     );
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }

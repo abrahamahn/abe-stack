@@ -10,21 +10,11 @@
  * notifications table itself.
  */
 
-// ============================================================================
-// Enums
-// ============================================================================
+import { NOTIFICATION_LEVELS, type NotificationLevel } from '@abe-stack/shared';
 
-/**
- * Severity level for in-app notifications.
- * Maps to the `notification_type` PostgreSQL enum in 0004_notifications.sql.
- *
- * Named `NotificationLevel` to avoid collision with `NotificationType`
- * exported from ./push.ts (which classifies notification categories).
- */
-export type NotificationLevel = 'info' | 'success' | 'warning' | 'error';
-
-/** All valid notification levels */
-export const NOTIFICATION_LEVELS = ['info', 'success', 'warning', 'error'] as const;
+// Re-export shared constants for consumers that import from schema
+export { NOTIFICATION_LEVELS };
+export type { NotificationLevel };
 
 // ============================================================================
 // Table Names

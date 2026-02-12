@@ -51,4 +51,11 @@ export type {
   WebhookWithStats,
 } from './types';
 
-export { ERROR_MESSAGES, MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES } from './types';
+export {
+  ERROR_MESSAGES,
+  MAX_DELIVERY_ATTEMPTS,
+  RETRY_DELAYS_MINUTES,
+  SUBSCRIBABLE_EVENT_TYPES,
+  WEBHOOK_EVENT_TYPES,
+} from './types';
+export type { WebhookEventType } from './types';

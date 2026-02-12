@@ -5,7 +5,17 @@
  * Displays workspace details with tabs for Settings, Members, and Invitations.
  */
 
-import { Button, Card, Heading, Skeleton, Tabs, Text, useNavigate, useParams } from '@abe-stack/ui';
+import {
+  Button,
+  Card,
+  Heading,
+  Skeleton,
+  Tabs,
+  Text,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 import { useMemo, useState, type ReactElement } from 'react';
 
@@ -13,15 +23,27 @@ import {
   InvitationsList,
   InviteMemberDialog,
   MembersList,
+  WebhookManagement,
+  WorkspaceAuditLog,
+  WorkspaceBilling,
+  WorkspaceDangerZone,
+  WorkspaceFeatureOverrides,
   WorkspaceSettingsForm,
+  WorkspaceWelcomeBanner,
 } from '../components';
-import { useDeleteWorkspace, useWorkspace } from '../hooks';
+import { useWorkspace } from '../hooks';
 
 // ============================================================================
 // Tab Components
 // ============================================================================
 
-const SettingsTab = ({ workspaceId }: { workspaceId: string }): ReactElement => {
+const SettingsTab = ({
+  workspaceId,
+  onDeleted,
+}: {
+  workspaceId: string;
+  onDeleted: () => void;
+}): ReactElement => {
   const { data: workspace } = useWorkspace(workspaceId);
 
   if (workspace === null) {
@@ -31,6 +53,11 @@ const SettingsTab = ({ workspaceId }: { workspaceId: string }): ReactElement => 
   return (
     <div className="space-y-6">
       <WorkspaceSettingsForm workspace={workspace} />
+      <WorkspaceDangerZone
+        workspaceId={workspaceId}
+        workspaceName={workspace.name}
+        onDeleted={onDeleted}
+      />
     </div>
   );
 };
@@ -83,22 +110,27 @@ const InvitationsTab = ({ workspaceId }: { workspaceId: string }): ReactElement 
 export const WorkspaceDetailPage = (): ReactElement => {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const workspaceId = params['id'] ?? null;
+  const showWelcome = searchParams.get('welcome') === '1';
 
   const { data: workspace, isLoading, isError, error } = useWorkspace(workspaceId);
-  const { remove, isLoading: isDeleting } = useDeleteWorkspace({
-    onSuccess: () => {
-      navigate('/workspaces');
-    },
-  });
 
   const tabs = useMemo(
     () => [
       {
         id: 'settings',
         label: 'Settings',
-        content: workspaceId !== null ? <SettingsTab workspaceId={workspaceId} /> : null,
+        content:
+          workspaceId !== null ? (
+            <SettingsTab
+              workspaceId={workspaceId}
+              onDeleted={() => {
+                navigate('/workspaces');
+              }}
+            />
+          ) : null,
       },
       {
         id: 'members',
@@ -116,8 +148,32 @@ export const WorkspaceDetailPage = (): ReactElement => {
         label: 'Invitations',
         content: workspaceId !== null ? <InvitationsTab workspaceId={workspaceId} /> : null,
       },
+      {
+        id: 'billing',
+        label: 'Billing',
+        content: workspaceId !== null ? <WorkspaceBilling tenantId={workspaceId} /> : null,
+      },
+      {
+        id: 'audit-log',
+        label: 'Audit Log',
+        content: workspaceId !== null ? <WorkspaceAuditLog tenantId={workspaceId} /> : null,
+      },
+      {
+        id: 'feature-overrides',
+        label: 'Feature Overrides',
+        content:
+          workspaceId !== null ? <WorkspaceFeatureOverrides tenantId={workspaceId} /> : null,
+      },
+      {
+        id: 'webhooks',
+        label: 'Webhooks',
+        content:
+          workspaceId !== null ? (
+            <WebhookManagement tenantId={workspaceId} />
+          ) : null,
+      },
     ],
-    [workspaceId, user?.id],
+    [navigate, workspaceId, user?.id],
   );
 
   if (workspaceId === null) {
@@ -131,8 +187,19 @@ export const WorkspaceDetailPage = (): ReactElement => {
   if (isLoading) {
     return (
       <div className="py-8 max-w-4xl mx-auto px-4">
-        <Skeleton className="h-8 w-48 mb-4" />
-        <Skeleton className="h-96 w-full" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-9 w-36 rounded-md" />
+        </div>
+        <div className="flex gap-2 border-b pb-2 mb-4">
+          {Array.from({ length: 3 }, (_, i) => (
+            <Skeleton key={i} className="h-8 w-24 rounded-md" />
+          ))}
+        </div>
+        <Skeleton className="h-48 w-full rounded-md" />
       </div>
     );
   }
@@ -157,8 +224,21 @@ export const WorkspaceDetailPage = (): ReactElement => {
     );
   }
 
+  const dismissWelcome = (): void => {
+    navigate(`/workspaces/${workspaceId}`, { replace: true });
+  };
+
   return (
     <div className="py-8 max-w-4xl mx-auto px-4">
+      {showWelcome && (
+        <WorkspaceWelcomeBanner
+          workspaceName={workspace.name}
+          onDismiss={dismissWelcome}
+          onInviteMembers={() => {
+            dismissWelcome();
+          }}
+        />
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
           <Heading as="h2" size="lg">
@@ -168,19 +248,6 @@ export const WorkspaceDetailPage = (): ReactElement => {
             {workspace.slug}
           </Text>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          className="text-danger"
-          disabled={isDeleting}
-          onClick={() => {
-            if (window.confirm('Are you sure you want to delete this workspace?')) {
-              remove(workspaceId);
-            }
-          }}
-        >
-          {isDeleting ? 'Deleting...' : 'Delete Workspace'}
-        </Button>
       </div>
 
       <Tabs items={tabs} />

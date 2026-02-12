@@ -9,6 +9,8 @@
 
 import {
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+  ERROR_MESSAGES,
+  HTTP_STATUS,
   mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
@@ -42,7 +44,7 @@ export async function handleForgotPassword(
       const captchaResult = await verifyCaptchaToken(ctx.config.auth, captchaToken, ipAddress);
       if (!captchaResult.success) {
         return {
-          status: 400,
+          status: HTTP_STATUS.BAD_REQUEST,
           body: { message: 'CAPTCHA verification failed' },
         };
       }
@@ -53,7 +55,7 @@ export async function handleForgotPassword(
     await requestPasswordReset(ctx.db, ctx.repos, ctx.email, ctx.emailTemplates, email, baseUrl);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT },
     };
   } catch (error) {
@@ -68,7 +70,7 @@ export async function handleForgotPassword(
       );
       // Return success anyway to prevent enumeration (user can retry)
       return {
-        status: 200,
+        status: HTTP_STATUS.OK,
         body: { message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT },
       };
     }
@@ -107,7 +109,7 @@ export async function handleResetPassword(
     });
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: 'Password reset successfully' },
     };
   } catch (error) {
@@ -134,8 +136,8 @@ export async function handleSetPassword(
     const userId = req.user?.userId;
     if (userId === undefined || userId === '') {
       return {
-        status: 401,
-        body: { message: 'Authentication required' },
+        status: HTTP_STATUS.UNAUTHORIZED,
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED },
       };
     }
 
@@ -146,14 +148,14 @@ export async function handleSetPassword(
     await setPassword(ctx.db, ctx.repos, ctx.config.auth, userId, password);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: 'Password set successfully' },
     };
   } catch (error) {
     // Handle specific error for user already having a password
     if (error instanceof Error && error.name === 'PasswordAlreadySetError') {
       return {
-        status: 409,
+        status: HTTP_STATUS.CONFLICT,
         body: { message: error.message },
       };
     }

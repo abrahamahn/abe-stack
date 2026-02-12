@@ -11,6 +11,8 @@
  * routes require framework-specific raw body access.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { handlePayPalWebhook } from './paypal-webhook';
 import { handleStripeWebhook } from './stripe-webhook';
 
@@ -61,15 +63,15 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: BillingAppConte
       const signature = request.headers['stripe-signature'];
 
       if (typeof signature !== 'string') {
-        return reply.status(400).send({ error: 'Missing stripe-signature header' });
+        return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Missing stripe-signature header' });
       }
 
       if (ctx.config.billing.stripe.secretKey === '') {
-        return reply.status(500).send({ error: 'Stripe not configured' });
+        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Stripe not configured' });
       }
 
       if (request.rawBody === undefined) {
-        return reply.status(400).send({ error: 'Missing request body' });
+        return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Missing request body' });
       }
 
       try {
@@ -91,19 +93,19 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: BillingAppConte
           log,
         );
 
-        return await reply.status(200).send(result);
+        return await reply.status(HTTP_STATUS.OK).send(result);
       } catch (error) {
         // Use error name/code checking for reliability across module boundaries
         const err = error instanceof Error ? error : new Error(String(error));
         if (err.name === 'WebhookSignatureError') {
-          return reply.status(400).send({ error: 'Invalid webhook signature' });
+          return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid webhook signature' });
         }
         if (err.name === 'WebhookEventAlreadyProcessedError') {
           // Return success for idempotent requests
-          return reply.status(200).send({ success: true, message: 'Event already processed' });
+          return reply.status(HTTP_STATUS.OK).send({ success: true, message: 'Event already processed' });
         }
         log.error({ error: err }, 'Stripe webhook error');
-        return reply.status(500).send({ error: 'Webhook processing failed' });
+        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Webhook processing failed' });
       }
     },
   );
@@ -133,11 +135,11 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: BillingAppConte
       });
 
       if (ctx.config.billing.paypal.clientId === '') {
-        return reply.status(500).send({ error: 'PayPal not configured' });
+        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'PayPal not configured' });
       }
 
       if (request.rawBody === undefined) {
-        return reply.status(400).send({ error: 'Missing request body' });
+        return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Missing request body' });
       }
 
       try {
@@ -160,19 +162,19 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: BillingAppConte
           log,
         );
 
-        return await reply.status(200).send(result);
+        return await reply.status(HTTP_STATUS.OK).send(result);
       } catch (error) {
         // Use error name/code checking for reliability across module boundaries
         const err = error instanceof Error ? error : new Error(String(error));
         if (err.name === 'WebhookSignatureError') {
-          return reply.status(400).send({ error: 'Invalid webhook signature' });
+          return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid webhook signature' });
         }
         if (err.name === 'WebhookEventAlreadyProcessedError') {
           // Return success for idempotent requests
-          return reply.status(200).send({ success: true, message: 'Event already processed' });
+          return reply.status(HTTP_STATUS.OK).send({ success: true, message: 'Event already processed' });
         }
         log.error({ error: err }, 'PayPal webhook error');
-        return reply.status(500).send({ error: 'Webhook processing failed' });
+        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Webhook processing failed' });
       }
     },
   );

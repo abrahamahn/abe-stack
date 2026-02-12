@@ -3,7 +3,7 @@
  * Data Controls Section Tests
  *
  * Tests for account status display, deactivation, deletion with confirmation,
- * reactivation, and data export placeholder.
+ * reactivation, consent preferences, and data export integration.
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -43,6 +43,14 @@ vi.mock('../hooks/useAccountLifecycle', () => ({
     error: null,
     reset: mockResetReactivate,
   }),
+}));
+
+vi.mock('./ConsentPreferences', () => ({
+  ConsentPreferences: () => <div data-testid="consent-preferences">Consent Preferences</div>,
+}));
+
+vi.mock('./DataExportSection', () => ({
+  DataExportSection: () => <div data-testid="data-export-section">Data Export Section</div>,
 }));
 
 vi.mock('./SudoModal', () => ({
@@ -183,16 +191,14 @@ describe('DataControlsSection', () => {
       expect(screen.queryByTestId('reactivate-button')).not.toBeInTheDocument();
     });
 
-    it('should render data export section with disabled button', () => {
+    it('should render consent preferences section', () => {
       render(<DataControlsSection accountStatus="active" />);
-      const exportButton = screen.getByTestId('export-button');
-      expect(exportButton).toBeInTheDocument();
-      expect(exportButton).toBeDisabled();
+      expect(screen.getByTestId('consent-preferences')).toBeInTheDocument();
     });
 
-    it('should render export coming soon text', () => {
+    it('should render data export section', () => {
       render(<DataControlsSection accountStatus="active" />);
-      expect(screen.getByText(/This feature is coming soon/)).toBeInTheDocument();
+      expect(screen.getByTestId('data-export-section')).toBeInTheDocument();
     });
   });
 

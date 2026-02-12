@@ -2,6 +2,20 @@
 
 export { PLAN_FEES, calculateProration, type BillingStats } from './billing.logic';
 
+export {
+  formatPlanInterval,
+  formatPrice,
+  formatPriceWithInterval,
+  getCardBrandLabel,
+  getInvoiceStatusLabel,
+  getInvoiceStatusVariant,
+  getPaymentMethodIcon,
+  getPaymentMethodLabel,
+  getSubscriptionStatusLabel,
+  getSubscriptionStatusVariant,
+  type StatusVariant,
+} from './billing.display';
+
 export { billingContract } from './billing.contracts';
 
 export {

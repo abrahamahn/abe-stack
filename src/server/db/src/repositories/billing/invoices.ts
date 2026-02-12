@@ -5,7 +5,7 @@
  * Data access layer for billing invoices table.
  */
 
-import { and, eq, gt, lt, or, select, insert, update } from '../../builder/index';
+import { and, eq, or, select, insert, update } from '../../builder/index';
 import {
   type Invoice,
   type InvoiceStatus,
@@ -15,9 +15,10 @@ import {
   INVOICES_TABLE,
 } from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
+import { buildCursorCondition, buildCursorResult, combineConditions } from '../../utils/pagination';
 
 import type { RawDb } from '../../client';
-import type { PaginatedResult, PaginationOptions } from '../types';
+import type { CursorPaginatedResult, CursorPaginationOptions } from '../types';
 
 // ============================================================================
 // Types
@@ -48,10 +49,16 @@ export interface InvoiceRepository {
   ): Promise<Invoice | null>;
 
   /** List invoices for a user */
-  findByUserId(userId: string, options?: PaginationOptions): Promise<PaginatedResult<Invoice>>;
+  findByUserId(
+    userId: string,
+    options?: Partial<CursorPaginationOptions>,
+  ): Promise<CursorPaginatedResult<Invoice>>;
 
   /** List invoices with filters */
-  list(filters?: InvoiceFilters, options?: PaginationOptions): Promise<PaginatedResult<Invoice>>;
+  list(
+    filters?: InvoiceFilters,
+    options?: Partial<CursorPaginationOptions>,
+  ): Promise<CursorPaginatedResult<Invoice>>;
 
   /** Create a new invoice */
   create(invoice: NewInvoice): Promise<Invoice>;
@@ -98,16 +105,16 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
 
     async findByUserId(
       userId: string,
-      options: PaginationOptions = {},
-    ): Promise<PaginatedResult<Invoice>> {
+      options: Partial<CursorPaginationOptions> = {},
+    ): Promise<CursorPaginatedResult<Invoice>> {
       return this.list({ userId }, options);
     },
 
     async list(
       filters: InvoiceFilters = {},
-      options: PaginationOptions = {},
-    ): Promise<PaginatedResult<Invoice>> {
-      const { limit = 20, cursor, direction = 'desc' } = options;
+      options: Partial<CursorPaginationOptions> = {},
+    ): Promise<CursorPaginatedResult<Invoice>> {
+      const { limit = 20, cursor, sortOrder = 'desc' } = options;
       const conditions = [];
 
       // Apply filters
@@ -128,69 +135,28 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
         conditions.push(eq('provider', filters.provider));
       }
 
-      // Build query
-      let query = select(INVOICES_TABLE);
-
-      if (conditions.length > 0) {
-        const [firstCondition, ...restConditions] = conditions;
-        if (firstCondition === undefined) {
-          throw new Error('Failed to build invoice query conditions');
-        }
-        const whereCondition =
-          restConditions.length === 0 ? firstCondition : and(firstCondition, ...restConditions);
-        query = query.where(whereCondition);
+      // Cursor condition
+      const cursorCondition = buildCursorCondition(cursor, sortOrder);
+      if (cursorCondition !== null) {
+        conditions.push(cursorCondition);
       }
 
-      // Cursor pagination
-      if (cursor !== undefined && cursor !== '') {
-        const parts = cursor.split('_');
-        const cursorDateStr = parts[0];
-        const cursorId = parts[1];
-        if (
-          cursorDateStr !== undefined &&
-          cursorDateStr !== '' &&
-          cursorId !== undefined &&
-          cursorId !== ''
-        ) {
-          const cursorDate = new Date(cursorDateStr);
-          if (direction === 'desc') {
-            query = query.where(
-              or(
-                lt('created_at', cursorDate),
-                and(eq('created_at', cursorDate), lt('id', cursorId)),
-              ),
-            );
-          } else {
-            query = query.where(
-              or(
-                gt('created_at', cursorDate),
-                and(eq('created_at', cursorDate), gt('id', cursorId)),
-              ),
-            );
-          }
-        }
+      // Build query
+      let query = select(INVOICES_TABLE);
+      const where = combineConditions(conditions);
+      if (where !== null) {
+        query = query.where(where);
       }
 
       query = query
-        .orderBy('created_at', direction)
-        .orderBy('id', direction)
+        .orderBy('created_at', sortOrder)
+        .orderBy('id', sortOrder)
         .limit(limit + 1);
 
       const results = await db.query(query.toSql());
-      const items: Invoice[] = results.map((row) => toCamelCase<Invoice>(row, INVOICE_COLUMNS));
+      const data: Invoice[] = results.map((row) => toCamelCase<Invoice>(row, INVOICE_COLUMNS));
 
-      const hasMore = items.length > limit;
-      if (hasMore) {
-        items.pop();
-      }
-
-      const lastItem: Invoice | undefined = items[items.length - 1];
-      const nextCursor =
-        hasMore && lastItem !== undefined
-          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
-          : null;
-
-      return { items, nextCursor };
+      return buildCursorResult(data, limit, sortOrder);
     },
 
     async create(invoice: NewInvoice): Promise<Invoice> {

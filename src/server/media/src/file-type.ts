@@ -7,6 +7,8 @@
 
 import { promises as fs } from 'fs';
 
+import { EXT_TO_MIME } from './constants';
+
 import type { FileTypeResult } from './types';
 
 /**
@@ -96,41 +98,7 @@ export function detectFileTypeFromPath(filePath: string): FileTypeResult | null 
 
   if (ext === undefined || ext.length === 0) return null;
 
-  // Extension to MIME type mapping
-  const extToMime: Record<string, string> = {
-    // Images
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    webp: 'image/webp',
-    avif: 'image/avif',
-    tiff: 'image/tiff',
-    bmp: 'image/bmp',
-
-    // Audio
-    mp3: 'audio/mpeg',
-    wav: 'audio/wav',
-    flac: 'audio/flac',
-    aac: 'audio/aac',
-    ogg: 'audio/ogg',
-    m4a: 'audio/m4a',
-
-    // Video
-    mp4: 'video/mp4',
-    avi: 'video/avi',
-    mov: 'video/quicktime',
-    mkv: 'video/x-matroska',
-    webm: 'video/webm',
-    flv: 'video/x-flv',
-
-    // Documents
-    pdf: 'application/pdf',
-    txt: 'text/plain',
-    json: 'application/json',
-  };
-
-  const mime = extToMime[ext];
+  const mime = EXT_TO_MIME[ext];
   if (mime !== undefined && mime.length > 0) {
     return { ext, mime };
   }

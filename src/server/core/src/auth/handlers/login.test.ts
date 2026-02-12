@@ -33,6 +33,7 @@ const {
   mockGenerateDeviceFingerprint,
   mockIsKnownDevice,
   mockRecordDeviceAccess,
+  mockLogNewDeviceLogin,
 } = vi.hoisted(() => ({
   mockAuthenticateUser: vi.fn(),
   mockResendVerificationEmail: vi.fn().mockResolvedValue(undefined),
@@ -43,6 +44,7 @@ const {
   mockGenerateDeviceFingerprint: vi.fn().mockReturnValue('mock-fingerprint'),
   mockIsKnownDevice: vi.fn().mockResolvedValue(false),
   mockRecordDeviceAccess: vi.fn().mockResolvedValue(undefined),
+  mockLogNewDeviceLogin: vi.fn().mockResolvedValue(undefined),
   // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
   mockMapErrorToHttpResponse: vi.fn((error: unknown, _ctx: unknown) => {
     if (error instanceof Error) {
@@ -91,6 +93,7 @@ vi.mock('../security', () => ({
   generateDeviceFingerprint: mockGenerateDeviceFingerprint,
   isKnownDevice: mockIsKnownDevice,
   recordDeviceAccess: mockRecordDeviceAccess,
+  logNewDeviceLogin: mockLogNewDeviceLogin,
 }));
 
 // Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
@@ -239,6 +242,15 @@ describe('handleLogin', () => {
         user: mockAuthResult.user,
         isNewDevice: true,
       });
+
+      // Verify security event logged for new device
+      expect(mockLogNewDeviceLogin).toHaveBeenCalledWith(
+        ctx.db,
+        mockAuthResult.user.id,
+        mockAuthResult.user.email,
+        '127.0.0.1',
+        'Test Browser',
+      );
     });
 
     test('should call authenticateUser with correct parameters', async () => {

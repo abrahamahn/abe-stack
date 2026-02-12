@@ -24,6 +24,8 @@ export { Select } from './Select';
 export { Slider } from './Slider';
 export { Tabs, type TabsProps, type TabItem } from './Tabs';
 export { Toast, ToastContainer } from './Toast';
+export { UndoRedoToolbar, type UndoRedoToolbarProps } from './UndoRedoToolbar';
+export { UndoHistoryPanel, type UndoHistoryPanelProps } from './UndoHistoryPanel';
 export { PeekLink, type PeekLinkProps } from './PeekLink';
 
 // Billing components

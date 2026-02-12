@@ -324,20 +324,12 @@ describe('createAdminBillingClient', () => {
       expect(result.plan.description).toBeNull();
     });
 
-    it('should throw BadRequestError on validation failure', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: () =>
-          Promise.resolve({
-            message: 'Validation failed',
-            details: { name: 'Name is required' },
-          }),
-      });
-
+    it('should throw Error on client-side validation failure', async () => {
       const client = createClient('admin-token');
       const invalidRequest = { ...createRequest, name: '' };
-      await expect(client.createPlan(invalidRequest)).rejects.toThrow(BadRequestError);
+      await expect(client.createPlan(invalidRequest)).rejects.toThrow(
+        'name must be at least 1 characters',
+      );
     });
 
     it('should throw InternalError on server error', async () => {

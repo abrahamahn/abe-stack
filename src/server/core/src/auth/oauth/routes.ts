@@ -67,6 +67,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
+      undefined,
+      { summary: 'Initiate Google OAuth', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -82,6 +84,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
+      undefined,
+      { summary: 'Initiate GitHub OAuth', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -97,6 +101,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthInitiate(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
+      undefined,
+      { summary: 'Initiate Apple OAuth', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -125,6 +131,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
           reply,
         );
       },
+      undefined,
+      { summary: 'Google OAuth callback', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -152,6 +160,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
           reply,
         );
       },
+      undefined,
+      { summary: 'GitHub OAuth callback', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -179,6 +189,8 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
           reply,
         );
       },
+      undefined,
+      { summary: 'Apple OAuth callback', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -195,6 +207,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Link Google account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -210,6 +225,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Link GitHub account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -225,6 +243,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthLink(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Link Apple account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -241,6 +262,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'google' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Unlink Google account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -256,6 +280,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'github' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Unlink GitHub account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -271,6 +298,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleOAuthUnlink(asAppContext(ctx), { provider: 'apple' }, req, reply);
       },
+      [],
+      undefined,
+      { summary: 'Unlink Apple account', tags: ['Auth', 'OAuth'] },
     ),
   ],
 
@@ -287,6 +317,9 @@ export const oauthRouteEntries: [string, RouteDefinition][] = [
       ): Promise<RouteResult> => {
         return handleGetConnections(asAppContext(ctx), req, reply);
       },
+      [],
+      undefined,
+      { summary: 'List OAuth connections', tags: ['Auth', 'OAuth'] },
     ),
   ],
 ];

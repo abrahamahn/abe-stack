@@ -12,7 +12,7 @@ import {
   signToken,
   validateCsrfToken,
 } from '@abe-stack/server-engine';
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { CSRF_COOKIE_NAME, HTTP_STATUS } from '@abe-stack/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -110,7 +110,7 @@ const CSRF_EXEMPT_PATHS = new Set([
  */
 export function registerCsrf(server: FastifyInstance, options: CsrfOptions): void {
   const {
-    cookieName = '_csrf',
+    cookieName = CSRF_COOKIE_NAME,
     headerName = 'x-csrf-token',
     secret,
     encrypted = false,

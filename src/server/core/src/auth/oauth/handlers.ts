@@ -8,7 +8,7 @@
  */
 
 import { OAUTH_PROVIDERS, type OAuthProvider } from '@abe-stack/db';
-import { mapErrorToHttpResponse, OAuthError, TooManyRequestsError } from '@abe-stack/shared';
+import { ERROR_MESSAGES, mapErrorToHttpResponse, OAuthError, TooManyRequestsError } from '@abe-stack/shared';
 
 import {
   authRateLimiters,
@@ -371,7 +371,7 @@ export async function handleOAuthLink(
     if (user == null) {
       return {
         status: 401,
-        body: { message: 'Authentication required', code: 'UNAUTHORIZED' },
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED, code: 'UNAUTHORIZED' },
       };
     }
 
@@ -416,7 +416,7 @@ export async function handleOAuthUnlink(
     if (user == null) {
       return {
         status: 401,
-        body: { message: 'Authentication required', code: 'UNAUTHORIZED' },
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED, code: 'UNAUTHORIZED' },
       };
     }
 
@@ -476,7 +476,7 @@ export async function handleGetConnections(
     if (user == null) {
       return {
         status: 401,
-        body: { message: 'Authentication required', code: 'UNAUTHORIZED' },
+        body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED, code: 'UNAUTHORIZED' },
       };
     }
 

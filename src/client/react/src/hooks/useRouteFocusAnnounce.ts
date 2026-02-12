@@ -1,4 +1,5 @@
 // src/client/react/src/hooks/useRouteFocusAnnounce.ts
+import { capitalize } from '@abe-stack/shared';
 import { useEffect, useRef } from 'react';
 
 import { useAnnounce } from '../components/LiveRegion';
@@ -36,7 +37,7 @@ function defaultGetTitle(pathname: string): string {
     return 'Home';
   }
   const last = segments[segments.length - 1] ?? 'Page';
-  return last.charAt(0).toUpperCase() + last.slice(1).replace(/-/g, ' ');
+  return capitalize(last.replace(/-/g, ' '));
 }
 
 /**

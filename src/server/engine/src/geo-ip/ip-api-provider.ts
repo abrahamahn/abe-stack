@@ -8,6 +8,8 @@
  * @module GeoIP
  */
 
+import { MS_PER_HOUR } from '@abe-stack/shared';
+
 import type { GeoIpProvider, GeoIpResult } from './types';
 
 // ============================================================================
@@ -31,7 +33,7 @@ interface IpApiResponse {
 // Constants
 // ============================================================================
 
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = MS_PER_HOUR;
 const MAX_CACHE_SIZE = 10000;
 const IP_API_URL = 'http://ip-api.com/json';
 const IP_API_FIELDS = 'country,regionName,city,timezone';

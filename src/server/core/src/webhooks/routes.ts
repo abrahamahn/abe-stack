@@ -77,6 +77,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'Create webhook', tags: ['Webhooks'] },
     ),
   ],
 
@@ -91,6 +93,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         return handleListWebhooks(deps, tenantId, req as unknown as WebhooksRequest);
       },
       'user',
+      undefined,
+      { summary: 'List webhooks', tags: ['Webhooks'] },
     ),
   ],
 
@@ -106,6 +110,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         return handleGetWebhook(deps, tenantId, webhookId, req as unknown as WebhooksRequest);
       },
       'user',
+      undefined,
+      { summary: 'Get webhook', tags: ['Webhooks'] },
     ),
   ],
 
@@ -127,6 +133,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         );
       },
       'user',
+      undefined,
+      { summary: 'Update webhook', tags: ['Webhooks'] },
     ),
   ],
 
@@ -142,6 +150,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         return handleDeleteWebhook(deps, tenantId, webhookId, req as unknown as WebhooksRequest);
       },
       'user',
+      undefined,
+      { summary: 'Delete webhook', tags: ['Webhooks'] },
     ),
   ],
 
@@ -157,6 +167,8 @@ export const webhookRoutes: RouteMap = createRouteMap([
         return handleRotateSecret(deps, tenantId, webhookId, req as unknown as WebhooksRequest);
       },
       'user',
+      undefined,
+      { summary: 'Rotate webhook secret', tags: ['Webhooks'] },
     ),
   ],
 ]);

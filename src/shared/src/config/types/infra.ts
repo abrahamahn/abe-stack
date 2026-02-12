@@ -46,6 +46,8 @@ export interface PostgresConfig {
   portFallbacks: number[];
   /** Enable SSL/TLS connection (required for most cloud providers) */
   ssl: boolean;
+  /** Connection string for read replica (horizontal scaling) */
+  readReplicaConnectionString?: string;
 }
 
 /**
@@ -191,6 +193,9 @@ export interface CacheConfig {
   externalConfig?: {
     host: string;
     port: number;
+    password?: string;
+    db?: number;
+    tls?: boolean;
   };
 }
 

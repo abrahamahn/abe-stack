@@ -1,6 +1,6 @@
 // src/apps/web/src/features/admin/pages/UserDetailPage.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { UserDetailPage } from './UserDetailPage';
 
@@ -66,10 +66,13 @@ vi.mock('@abe-stack/ui', () => {
   };
 });
 
-// Mock hooks
+// Mock hooks - use mutable state to allow per-test overrides
+let mockUser: Record<string, unknown> | null = null;
+const mockStartImpersonation = vi.fn();
+
 vi.mock('../hooks', () => ({
   useAdminUser: () => ({
-    user: null,
+    user: mockUser,
     isLoading: false,
     error: null,
     refresh: vi.fn(),
@@ -84,6 +87,12 @@ vi.mock('../hooks', () => ({
     isUnlocking: false,
     error: null,
     clearError: vi.fn(),
+  }),
+  useImpersonation: () => ({
+    isImpersonating: false,
+    targetEmail: null,
+    startImpersonation: mockStartImpersonation,
+    endImpersonation: vi.fn(),
   }),
 }));
 
@@ -122,5 +131,62 @@ describe('UserDetailPage', () => {
   it('should render the user detail card', () => {
     render(<UserDetailPage />);
     expect(screen.getByTestId('user-detail-card')).toBeInTheDocument();
+  });
+
+  it('should not show impersonate button when user is null', () => {
+    render(<UserDetailPage />);
+    expect(screen.queryByText('Impersonate')).not.toBeInTheDocument();
+  });
+});
+
+describe('UserDetailPage with non-admin user', () => {
+  afterEach(() => {
+    mockUser = null;
+  });
+
+  it('should show impersonate button for non-admin user', () => {
+    mockUser = {
+      id: 'user-1',
+      email: 'user@example.com',
+      username: 'testuser',
+      firstName: 'Test',
+      lastName: 'User',
+      role: 'user',
+      emailVerified: true,
+      emailVerifiedAt: '2026-01-01',
+      lockedUntil: null,
+      lockReason: null,
+      failedLoginAttempts: 0,
+      phone: null,
+      phoneVerified: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
+    };
+
+    render(<UserDetailPage />);
+    expect(screen.getByText('Impersonate')).toBeInTheDocument();
+  });
+
+  it('should not show impersonate button for admin user', () => {
+    mockUser = {
+      id: 'admin-1',
+      email: 'admin@example.com',
+      username: 'adminuser',
+      firstName: 'Admin',
+      lastName: 'User',
+      role: 'admin',
+      emailVerified: true,
+      emailVerifiedAt: '2026-01-01',
+      lockedUntil: null,
+      lockReason: null,
+      failedLoginAttempts: 0,
+      phone: null,
+      phoneVerified: false,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
+    };
+
+    render(<UserDetailPage />);
+    expect(screen.queryByText('Impersonate')).not.toBeInTheDocument();
   });
 });

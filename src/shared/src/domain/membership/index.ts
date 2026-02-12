@@ -1,6 +1,9 @@
 // src/shared/src/domain/membership/index.ts
 
+export { getInvitationStatusTone, getTenantRoleTone } from './membership.display';
+
 export {
+  ROLE_LEVELS,
   canAcceptInvite,
   canAssignRole,
   canChangeRole,

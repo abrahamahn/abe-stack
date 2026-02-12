@@ -5,6 +5,7 @@
  * Admin page for viewing and managing a single tenant/workspace.
  */
 
+import { formatDateTime } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -23,10 +24,6 @@ import { useCallback, useState } from 'react';
 import { useTenant } from '../hooks';
 
 import type { JSX } from 'react';
-
-function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleString();
-}
 
 export const TenantDetailPage = (): JSX.Element => {
   const { id } = useParams();
@@ -139,7 +136,7 @@ export const TenantDetailPage = (): JSX.Element => {
                       Allowed Email Domains
                     </Text>
                     <Text size="sm">
-                      {tenant.allowedEmailDomains.length > 0
+                      {tenant.allowedEmailDomains !== null && tenant.allowedEmailDomains.length > 0
                         ? tenant.allowedEmailDomains.join(', ')
                         : 'None'}
                     </Text>
@@ -215,7 +212,7 @@ export const TenantDetailPage = (): JSX.Element => {
               </Card>
 
               {/* Metadata Card */}
-              {Object.keys(tenant.metadata).length > 0 && (
+              {tenant.metadata !== null && Object.keys(tenant.metadata).length > 0 && (
                 <Card>
                   <Card.Header>
                     <Heading as="h2" size="md">

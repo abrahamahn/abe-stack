@@ -5,6 +5,7 @@
  * Displays detailed information about a user for admin viewing.
  */
 
+import { formatDateTime } from '@abe-stack/shared';
 import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import { RoleBadge } from './RoleBadge';
@@ -18,12 +19,6 @@ type AdminUserLocal = AdminUser;
 export interface UserDetailCardProps {
   user: AdminUserLocal | null;
   isLoading: boolean;
-}
-
-function formatDateTime(dateString: string | null): string {
-  if (dateString === null) return 'Never';
-  if (dateString.length === 0) return 'Never';
-  return new Date(dateString).toLocaleString();
 }
 
 const InfoRow = ({

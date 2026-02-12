@@ -110,16 +110,20 @@ vi.mock('@abe-stack/db', () => ({
   })),
 }));
 
-vi.mock('./utils', () => ({
-  createAuthResponse: vi.fn(),
-  createAccessToken: vi.fn(),
-  createRefreshTokenFamily: vi.fn(),
-  hashPassword: vi.fn(),
-  needsRehash: vi.fn(),
-  revokeAllUserTokens: vi.fn(),
-  rotateRefreshToken: vi.fn(),
-  verifyPasswordSafe: vi.fn(),
-}));
+vi.mock('./utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./utils')>();
+  return {
+    ...actual,
+    createAuthResponse: vi.fn(),
+    createAccessToken: vi.fn(),
+    createRefreshTokenFamily: vi.fn(),
+    hashPassword: vi.fn(),
+    needsRehash: vi.fn(),
+    revokeAllUserTokens: vi.fn(),
+    rotateRefreshToken: vi.fn(),
+    verifyPasswordSafe: vi.fn(),
+  };
+});
 
 const VALID_PASSWORD_RESULT = {
   isValid: true,

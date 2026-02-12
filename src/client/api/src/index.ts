@@ -39,6 +39,7 @@ export type {
   TotpVerifyRequest,
   TotpVerifyResponse,
   User,
+  PasskeyListItem,
 } from '@abe-stack/shared';
 
 // Billing
@@ -78,6 +79,9 @@ export {
 } from './errors';
 export type { ApiErrorBody } from './errors';
 
+// Utils
+export type { BaseClientConfig } from './utils';
+
 // Notifications
 export {
   createNotificationClient,
@@ -112,6 +116,33 @@ export type { DeviceClient, DeviceClientConfig, DeviceItem } from './devices/cli
 export { useDevices } from './devices/hooks';
 export type { DevicesState, UseDevicesOptions } from './devices/hooks';
 
+// API Keys
+export { createApiKeysClient } from './api-keys/client';
+export type {
+  ApiKeyItem,
+  ApiKeysClient,
+  ApiKeysClientConfig,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  DeleteApiKeyResponse,
+  ListApiKeysResponse,
+  RevokeApiKeyResponse,
+} from './api-keys/client';
+export {
+  apiKeysQueryKeys,
+  useApiKeys,
+  useCreateApiKey,
+  useRevokeApiKey,
+  useDeleteApiKey,
+} from './api-keys/hooks';
+export type {
+  ApiKeysState,
+  UseApiKeysOptions,
+  UseCreateApiKeyState,
+  UseDeleteApiKeyState,
+  UseRevokeApiKeyState,
+} from './api-keys/hooks';
+
 // Phone/SMS
 export { createPhoneClient } from './phone/client';
 export type { PhoneClient, PhoneClientConfig } from './phone/client';
@@ -126,3 +157,32 @@ export {
   useOAuthConnections,
 } from './oauth/hooks';
 export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth/hooks';
+
+// Webhooks
+export { createWebhookClient } from './webhooks/client';
+export type {
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  WebhookClient,
+  WebhookClientConfig,
+  WebhookDeliveryItem,
+  WebhookItem,
+  WebhookWithDeliveries,
+} from './webhooks/client';
+export {
+  useCreateWebhook,
+  useDeleteWebhook,
+  useRotateWebhookSecret,
+  useUpdateWebhook,
+  useWebhook,
+  useWebhooks,
+  webhookQueryKeys,
+} from './webhooks/hooks';
+export type {
+  CreateWebhookState,
+  DeleteWebhookState,
+  RotateWebhookSecretState,
+  UpdateWebhookState,
+  WebhookDetailState,
+  WebhooksState,
+} from './webhooks/hooks';

@@ -9,6 +9,12 @@ import {
   type ReactNode,
 } from 'react';
 
+/** Delay before setting text to force screen reader re-announcement */
+const ANNOUNCE_DELAY_MS = 50;
+
+/** Duration before auto-clearing announced text */
+const ANNOUNCE_AUTO_CLEAR_MS = 7000;
+
 /** Politeness level for screen reader announcements */
 export type AnnouncePoliteness = 'polite' | 'assertive';
 
@@ -86,14 +92,14 @@ export const LiveRegion = ({ children }: LiveRegionProps): ReactElement => {
       setter('');
       globalThis.setTimeout(() => {
         setter(message);
-      }, 50);
+      }, ANNOUNCE_DELAY_MS);
 
       // Auto-clear after announcement has been read
       clearTimerRef.current = globalThis.setTimeout(() => {
         setPoliteMessage('');
         setAssertiveMessage('');
         clearTimerRef.current = null;
-      }, 7000);
+      }, ANNOUNCE_AUTO_CLEAR_MS);
     },
     [],
   );

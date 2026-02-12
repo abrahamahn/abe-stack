@@ -20,7 +20,7 @@ const TestConsumer = (): ReactNode => {
   const cache = useQueryCache();
   const queryData = cache.getQueryData(['test-key']);
   const queryDataDisplay =
-    queryData === null || queryData === undefined
+    queryData === undefined || queryData === null
       ? 'undefined'
       : typeof queryData === 'string'
         ? queryData

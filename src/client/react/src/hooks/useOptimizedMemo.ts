@@ -18,65 +18,11 @@
  * @packageDocumentation
  */
 
+import { deepEqual, MS_PER_MINUTE } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// ============================================================================
-// Deep Comparison Utilities
-// ============================================================================
-
-/**
- * Deep equality check for objects and arrays.
- *
- * This utility is part of the public API. Use it when you need to compare
- * complex nested objects or arrays for equality. Unlike reference equality (===),
- * this function recursively compares all properties and array elements.
- *
- * @param a - First value to compare
- * @param b - Second value to compare
- * @returns true if values are deeply equal
- *
- * @example Basic usage
- * ```typescript
- * deepEqual({ a: 1, b: { c: 2 } }, { a: 1, b: { c: 2 } }); // true
- * deepEqual([1, [2, 3]], [1, [2, 3]]); // true
- * deepEqual({ a: 1 }, { a: 2 }); // false
- * ```
- *
- * @remarks
- * Performance note: Deep comparison is O(n) where n is the total number of
- * properties/elements. For large objects, consider using `shallowEqual` instead.
- */
-export function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-
-  if (a == null || b == null) return a === b;
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (!deepEqual(a[i], b[i])) return false;
-    }
-    return true;
-  }
-
-  if (typeof a === 'object' && typeof b === 'object') {
-    const objA = a as Record<string, unknown>;
-    const objB = b as Record<string, unknown>;
-    const keysA = Object.keys(objA);
-    const keysB = Object.keys(objB);
-
-    if (keysA.length !== keysB.length) return false;
-
-    for (const key of keysA) {
-      if (!(key in objB)) return false;
-      if (!deepEqual(objA[key], objB[key])) return false;
-    }
-
-    return true;
-  }
-
-  return false;
-}
+// Re-export so existing consumers of this module still get deepEqual
+export { deepEqual } from '@abe-stack/shared';
 
 /**
  * Shallow equality check for objects.
@@ -437,7 +383,7 @@ export class TTLCache<T> {
       if (this.cache.size > 0) {
         this.scheduleCleanup();
       }
-    }, 60000); // Clean up every minute
+    }, MS_PER_MINUTE); // Clean up every minute
   }
 
   private cleanup(): void {

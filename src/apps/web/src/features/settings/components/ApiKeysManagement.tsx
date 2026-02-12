@@ -6,6 +6,7 @@
  * Supports listing, creating, revoking, and deleting API keys.
  */
 
+import { formatDate } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -26,6 +27,8 @@ import { useCallback, useState } from 'react';
 
 import { useApiKeys, useCreateApiKey, useDeleteApiKey, useRevokeApiKey } from '../hooks/useApiKeys';
 
+import { ApiKeyScopeSelector } from './ApiKeyScopeSelector';
+
 import type { ReactElement } from 'react';
 
 // ============================================================================
@@ -37,19 +40,6 @@ export interface ApiKeysManagementProps {
 }
 
 // ============================================================================
-// Helpers
-// ============================================================================
-
-function formatDate(iso: string | null): string {
-  if (iso === null) return 'Never';
-  try {
-    return new Date(iso).toLocaleDateString();
-  } catch {
-    return iso;
-  }
-}
-
-// ============================================================================
 // Component
 // ============================================================================
 
@@ -57,6 +47,7 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
   const { apiKeys, isLoading, isError, error, refetch } = useApiKeys();
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
+  const [selectedScopes, setSelectedScopes] = useState<string[]>(['read']);
   const [plaintextKey, setPlaintextKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -82,8 +73,14 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
 
   const handleCreate = useCallback(() => {
     if (newKeyName.trim() === '') return;
-    createApiKey.createKey({ name: newKeyName.trim() });
-  }, [newKeyName, createApiKey]);
+    createApiKey.createKey({ name: newKeyName.trim(), scopes: selectedScopes });
+  }, [newKeyName, selectedScopes, createApiKey]);
+
+  const handleScopeToggle = useCallback((scope: string) => {
+    setSelectedScopes((prev) =>
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
+    );
+  }, []);
 
   const handleCopy = useCallback(() => {
     if (plaintextKey === null) return;
@@ -168,6 +165,16 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
               }}
             />
           </div>
+          <div className="flex flex-col gap-1 mt-3">
+            <Text as="label" size="sm" tone="muted">
+              Scopes
+            </Text>
+            <ApiKeyScopeSelector
+              selectedScopes={selectedScopes}
+              onToggleScope={handleScopeToggle}
+              disabled={createApiKey.isLoading}
+            />
+          </div>
           {createApiKey.isError && (
             <Alert tone="danger" className="mt-2">
               {createApiKey.error?.message ?? 'Failed to create key'}
@@ -179,7 +186,7 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
             size="small"
             className="mt-3"
             onClick={handleCreate}
-            disabled={createApiKey.isLoading || newKeyName.trim() === ''}
+            disabled={createApiKey.isLoading || newKeyName.trim() === '' || selectedScopes.length === 0}
           >
             {createApiKey.isLoading ? 'Creating...' : 'Create'}
           </Button>
@@ -219,7 +226,7 @@ export function ApiKeysManagement({ className }: ApiKeysManagementProps): ReactE
                   <Text size="sm">{formatDate(key.createdAt)}</Text>
                 </TableCell>
                 <TableCell>
-                  <Text size="sm">{formatDate(key.lastUsedAt)}</Text>
+                  <Text size="sm">{key.lastUsedAt === null ? 'Never' : formatDate(key.lastUsedAt)}</Text>
                 </TableCell>
                 <TableCell>
                   {key.revokedAt !== null ? (

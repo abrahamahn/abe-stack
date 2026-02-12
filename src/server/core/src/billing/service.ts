@@ -326,8 +326,8 @@ export async function getUserInvoices(
 ): Promise<{ invoices: DbInvoice[]; hasMore: boolean }> {
   const result = await repos.invoices.findByUserId(userId, { limit: limit + 1 });
 
-  const hasMore = result.items.length > limit;
-  const invoices = hasMore ? result.items.slice(0, limit) : result.items;
+  const hasMore = result.data.length > limit;
+  const invoices = hasMore ? result.data.slice(0, limit) : result.data;
 
   return { invoices, hasMore };
 }

@@ -36,6 +36,8 @@ describe('User Routes Definition', () => {
         'users/list',
         'users/me/profile-completeness',
         'users/me/username',
+        'users/me/update',
+        'users/me/password',
         'users/me/sessions',
         'users/me/sessions/count',
         'users/me/sessions/:id',
@@ -51,7 +53,7 @@ describe('User Routes Definition', () => {
     });
 
     test('should have correct number of routes', () => {
-      expect(userRoutes.size).toBe(13);
+      expect(userRoutes.size).toBe(15);
     });
   });
 
@@ -86,6 +88,14 @@ describe('User Routes Definition', () => {
 
     test('users/me/sessions/revoke-all should be POST', () => {
       expect(userRoutes.get('users/me/sessions/revoke-all')!.method).toBe('POST');
+    });
+
+    test('users/me/update should be PATCH', () => {
+      expect(userRoutes.get('users/me/update')!.method).toBe('PATCH');
+    });
+
+    test('users/me/password should be POST', () => {
+      expect(userRoutes.get('users/me/password')!.method).toBe('POST');
     });
   });
 
@@ -137,6 +147,18 @@ describe('User Routes Definition', () => {
       expect(route.isPublic).toBe(false);
       expect(route.roles).toContain('user');
     });
+
+    test('users/me/update should require user authentication', () => {
+      const route = userRoutes.get('users/me/update')!;
+      expect(route.isPublic).toBe(false);
+      expect(route.roles).toContain('user');
+    });
+
+    test('users/me/password should require user authentication', () => {
+      const route = userRoutes.get('users/me/password')!;
+      expect(route.isPublic).toBe(false);
+      expect(route.roles).toContain('user');
+    });
   });
 
   describe('Route Schema Assignments', () => {
@@ -167,6 +189,18 @@ describe('User Routes Definition', () => {
       expect(typeof userRoutes.get('users/me/sessions/count')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/me/sessions/:id')!.handler).toBe('function');
       expect(typeof userRoutes.get('users/me/sessions/revoke-all')!.handler).toBe('function');
+      expect(typeof userRoutes.get('users/me/update')!.handler).toBe('function');
+      expect(typeof userRoutes.get('users/me/password')!.handler).toBe('function');
+    });
+  });
+
+  describe('Route Schema Validation', () => {
+    test('users/me/update should have a request body schema', () => {
+      expect(userRoutes.get('users/me/update')!.schema).toBeDefined();
+    });
+
+    test('users/me/password should have a request body schema', () => {
+      expect(userRoutes.get('users/me/password')!.schema).toBeDefined();
     });
   });
 });

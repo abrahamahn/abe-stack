@@ -105,7 +105,7 @@ describe('Admin User Service', () => {
         createMockUser({ id: 'user-456', email: 'other@example.com' }),
       ];
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: mockUsers,
+        data: mockUsers,
         total: 2,
         page: 1,
         limit: 20,
@@ -124,7 +124,7 @@ describe('Admin User Service', () => {
 
     test('should pass filters to repository', async () => {
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: [],
+        data: [],
         total: 0,
         page: 1,
         limit: 20,
@@ -157,7 +157,7 @@ describe('Admin User Service', () => {
     test('should convert DB user to AdminUser format', async () => {
       const mockUser = createMockUser();
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: [mockUser],
+        data: [mockUser],
         total: 1,
         page: 1,
         limit: 20,
@@ -406,7 +406,7 @@ describe('Admin User Service', () => {
     test('should search by partial text and return paginated results', async () => {
       const mockUsers = [createMockUser()];
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: mockUsers,
+        data: mockUsers,
         total: 1,
         page: 1,
         limit: 20,
@@ -455,7 +455,7 @@ describe('Admin User Service', () => {
 
     test('should respect custom limit and offset', async () => {
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: [],
+        data: [],
         total: 0,
         page: 2,
         limit: 10,
@@ -477,7 +477,7 @@ describe('Admin User Service', () => {
 
     test('should convert offset to page number', async () => {
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
-        items: [],
+        data: [],
         total: 0,
         page: 3,
         limit: 5,

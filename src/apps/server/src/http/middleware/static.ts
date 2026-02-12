@@ -6,10 +6,12 @@
  * Replaces @fastify/static with minimal implementation.
  */
 
-import { createReadStream, statSync } from 'node:fs';
+import { createReadStream } from 'node:fs';
+import { open } from 'node:fs/promises';
 import { extname, isAbsolute, join, normalize, relative, resolve } from 'node:path';
 
 import { HTTP_STATUS } from '@abe-stack/shared';
+
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 /**
@@ -122,59 +124,83 @@ export function registerStaticServe(server: FastifyInstance, options: StaticServ
   // Ensure prefix ends with /
   const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
 
-  // Register route for static files
-  server.get(`${normalizedPrefix}*`, async (req: FastifyRequest, reply: FastifyReply) => {
+  /** Rate limiting preHandler for static file routes */
+  const rateLimitHandler = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     if (isRateLimited(getRequesterId(req))) {
-      return reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({ error: 'Too many requests' });
+      void reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({ error: 'Too many requests' });
     }
+  };
 
-    const url = req.url;
+  // Register route for static files
+  server.get(
+    `${normalizedPrefix}*`,
+    {
+      preHandler: (req, reply, done) => {
+        rateLimitHandler(req, reply)
+          .then(() => {
+            done();
+          })
+          .catch(done);
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      const url = req.url;
 
-    // Extract file path from URL (remove prefix)
-    const relativePath = url.slice(normalizedPrefix.length);
+      // Extract file path from URL (remove prefix)
+      const relativePath = url.slice(normalizedPrefix.length);
 
-    // Decode URI components (handle %20, etc.)
-    let decodedPath: string;
-    try {
-      decodedPath = decodeURIComponent(relativePath);
-    } catch {
-      return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid path encoding' });
-    }
-
-    // Security: Check for path traversal
-    if (!isSafePath(root, decodedPath)) {
-      return reply.status(HTTP_STATUS.FORBIDDEN).send({ error: 'Forbidden' });
-    }
-
-    const fullPath = join(root, decodedPath);
-
-    // Check if file exists and get stats
-    try {
-      const stats = statSync(fullPath);
-
-      if (!stats.isFile()) {
-        return await reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
+      // Decode URI components (handle %20, etc.)
+      let decodedPath: string;
+      try {
+        decodedPath = decodeURIComponent(relativePath);
+      } catch {
+        return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid path encoding' });
       }
 
-      // Set headers
-      const mimeType = getMimeType(fullPath);
-      void reply.header('Content-Type', mimeType);
-      void reply.header('Content-Length', stats.size);
-      void reply.header('Cache-Control', `public, max-age=${String(maxAge)}`);
-      void reply.header('Last-Modified', stats.mtime.toUTCString());
-
-      // Stream the file
-      const stream = createReadStream(fullPath);
-      return await reply.send(stream);
-    } catch (err) {
-      const error = err as NodeJS.ErrnoException;
-      if (error.code === 'ENOENT') {
-        return reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
+      // Security: Check for path traversal
+      if (!isSafePath(root, decodedPath)) {
+        return reply.status(HTTP_STATUS.FORBIDDEN).send({ error: 'Forbidden' });
       }
-      server.log.error({ err, path: fullPath }, 'Static file serve error');
-      return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Internal server error' });
-    }
-  });
+
+      const fullPath = join(root, decodedPath);
+
+      // Use a single file handle for stat + read to avoid TOCTOU race
+      try {
+        const fd = await open(fullPath, 'r');
+        try {
+          const stats = await fd.stat();
+
+          if (!stats.isFile()) {
+            await fd.close();
+            return await reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
+          }
+
+          // Set headers
+          const mimeType = getMimeType(fullPath);
+          void reply.header('Content-Type', mimeType);
+          void reply.header('Content-Length', stats.size);
+          void reply.header('Cache-Control', `public, max-age=${String(maxAge)}`);
+          void reply.header('Last-Modified', stats.mtime.toUTCString());
+
+          // Stream the file using the fd (createReadStream takes ownership via autoClose)
+          const stream = createReadStream('', { fd: fd.fd, autoClose: true });
+          return await reply.send(stream);
+        } catch (innerErr) {
+          await fd.close();
+          throw innerErr;
+        }
+      } catch (err) {
+        const error = err as NodeJS.ErrnoException;
+        if (error.code === 'ENOENT') {
+          return reply.status(HTTP_STATUS.NOT_FOUND).send({ error: 'Not found' });
+        }
+        server.log.error({ err, path: fullPath }, 'Static file serve error');
+        return reply
+          .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Internal server error' });
+      }
+    },
+  );
 
   server.log.info({ root, prefix: normalizedPrefix }, 'Static file serving registered');
 }

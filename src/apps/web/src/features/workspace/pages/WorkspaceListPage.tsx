@@ -5,6 +5,7 @@
  * Displays all workspaces the user belongs to with a create button.
  */
 
+import { toastStore } from '@abe-stack/react';
 import { Button, Heading, Text, useNavigate } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
@@ -27,7 +28,17 @@ export const WorkspaceListPage = (): ReactElement => {
   };
 
   const handleCreateSuccess = (tenantId: string): void => {
-    navigate(`/workspaces/${tenantId}`);
+    const isFirstWorkspace = workspaces.length === 0;
+    if (isFirstWorkspace) {
+      toastStore.getState().show({
+        title: 'Your first workspace!',
+        description: 'You\'re all set to start collaborating with your team.',
+        tone: 'success',
+      });
+      navigate(`/workspaces/${tenantId}?welcome=1`);
+    } else {
+      navigate(`/workspaces/${tenantId}`);
+    }
   };
 
   return (

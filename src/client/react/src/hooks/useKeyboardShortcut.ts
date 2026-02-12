@@ -1,23 +1,21 @@
 // src/client/react/src/hooks/useKeyboardShortcut.ts
+import {
+  formatKeyBinding,
+  isEditableElement,
+  isMac,
+  matchesModifiers,
+  parseKeyBinding,
+  type KeyModifiers,
+  type ParsedKeyBinding,
+} from '@abe-stack/shared';
 import { useCallback, useEffect, useRef } from 'react';
+
+// Re-export shared types and utilities for consumers of this module
+export { formatKeyBinding, parseKeyBinding, type KeyModifiers, type ParsedKeyBinding };
 
 // ============================================================================
 // Types
 // ============================================================================
-
-/**
- * Modifier keys that can be used in keyboard shortcuts.
- */
-export interface KeyModifiers {
-  /** Whether Ctrl (or Cmd on Mac) is required */
-  ctrl?: boolean | undefined;
-  /** Whether Alt (or Option on Mac) is required */
-  alt?: boolean | undefined;
-  /** Whether Shift is required */
-  shift?: boolean | undefined;
-  /** Whether Meta (Cmd on Mac, Win on Windows) is required */
-  meta?: boolean | undefined;
-}
 
 /**
  * Options for the useKeyboardShortcut hook.
@@ -62,155 +60,6 @@ export interface KeyboardShortcutOptions extends KeyModifiers {
    * @default 'keydown'
    */
   eventType?: 'keydown' | 'keyup' | undefined;
-}
-
-/**
- * Parsed key binding representation.
- */
-export interface ParsedKeyBinding {
-  key: string;
-  ctrl: boolean;
-  alt: boolean;
-  shift: boolean;
-  meta: boolean;
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-/**
- * Detect if the current platform is macOS.
- */
-function isMac(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  // Use userAgent as platform is deprecated
-  return /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
-}
-
-/**
- * Check if the target is an input element.
- */
-function isInputElement(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target.isContentEditable
-  );
-}
-
-/**
- * Normalize a key string for comparison.
- */
-function normalizeKey(key: string): string {
-  return key.toLowerCase();
-}
-
-/**
- * Check if the event matches the required modifiers.
- */
-function matchesModifiers(
-  event: KeyboardEvent,
-  modifiers: KeyModifiers,
-  treatCtrlAsMeta: boolean,
-): boolean {
-  const { ctrl = false, alt = false, shift = false, meta = false } = modifiers;
-
-  // On Mac, Cmd+key is typically used instead of Ctrl+key
-  // Allow ctrl option to match either ctrlKey or metaKey on Mac
-  const ctrlMatches = treatCtrlAsMeta
-    ? ctrl
-      ? event.ctrlKey || event.metaKey
-      : !event.ctrlKey && !event.metaKey
-    : ctrl
-      ? event.ctrlKey
-      : !event.ctrlKey;
-
-  const altMatches = alt ? event.altKey : !event.altKey;
-  const shiftMatches = shift ? event.shiftKey : !event.shiftKey;
-  const metaMatches = treatCtrlAsMeta
-    ? true // Already handled in ctrlMatches
-    : meta
-      ? event.metaKey
-      : !event.metaKey;
-
-  return ctrlMatches && altMatches && shiftMatches && metaMatches;
-}
-
-/**
- * Parse a key binding string like "ctrl+shift+z" into components.
- *
- * @example
- * parseKeyBinding('ctrl+z') // { key: 'z', ctrl: true, alt: false, shift: false, meta: false }
- * parseKeyBinding('ctrl+shift+z') // { key: 'z', ctrl: true, alt: false, shift: true, meta: false }
- */
-export function parseKeyBinding(binding: string): ParsedKeyBinding {
-  const parts = binding.toLowerCase().split('+');
-  const result: ParsedKeyBinding = {
-    key: '',
-    ctrl: false,
-    alt: false,
-    shift: false,
-    meta: false,
-  };
-
-  for (const part of parts) {
-    const trimmed = part.trim();
-    switch (trimmed) {
-      case 'ctrl':
-      case 'control':
-        result.ctrl = true;
-        break;
-      case 'alt':
-      case 'option':
-        result.alt = true;
-        break;
-      case 'shift':
-        result.shift = true;
-        break;
-      case 'meta':
-      case 'cmd':
-      case 'command':
-      case 'win':
-      case 'windows':
-        result.meta = true;
-        break;
-      default:
-        result.key = trimmed;
-    }
-  }
-
-  return result;
-}
-
-/**
- * Format a key binding for display.
- *
- * @example
- * formatKeyBinding({ key: 'z', ctrl: true }) // 'Ctrl+Z' or 'Cmd+Z' on Mac
- */
-export function formatKeyBinding(binding: ParsedKeyBinding, forMac?: boolean): string {
-  const useMac = forMac ?? isMac();
-  const parts: string[] = [];
-
-  if (binding.ctrl) {
-    parts.push(useMac ? 'Cmd' : 'Ctrl');
-  }
-  if (binding.meta && !binding.ctrl) {
-    parts.push(useMac ? 'Cmd' : 'Win');
-  }
-  if (binding.alt) {
-    parts.push(useMac ? 'Option' : 'Alt');
-  }
-  if (binding.shift) {
-    parts.push('Shift');
-  }
-  if (binding.key !== '') {
-    parts.push(binding.key.toUpperCase());
-  }
-
-  return parts.join('+');
 }
 
 // ============================================================================
@@ -276,14 +125,12 @@ export function useKeyboardShortcut(options: KeyboardShortcutOptions): void {
       if (!(event instanceof KeyboardEvent)) return;
 
       // Skip if user is typing in input/textarea
-      if (skipInputs && isInputElement(event.target)) {
+      if (skipInputs && isEditableElement(event.target)) {
         return;
       }
 
       // Check key match (case-insensitive)
-      const eventKey = normalizeKey(event.key);
-      const targetKey = normalizeKey(key);
-      if (eventKey !== targetKey) return;
+      if (event.key.toLowerCase() !== key.toLowerCase()) return;
 
       // Check modifier keys (treat ctrl as cmd on Mac for better UX)
       const modifiers = { ctrl, alt, shift, meta };
@@ -340,7 +187,7 @@ export function useKeyBindings(
       if (!(event instanceof KeyboardEvent)) return;
 
       // Skip if user is typing in input/textarea
-      if (restOptions.skipInputs === true && isInputElement(event.target)) {
+      if (restOptions.skipInputs === true && isEditableElement(event.target)) {
         return;
       }
 
@@ -348,8 +195,7 @@ export function useKeyBindings(
         const binding = parseKeyBinding(bindingStr);
 
         // Check key match
-        const eventKey = normalizeKey(event.key);
-        if (eventKey !== binding.key) continue;
+        if (event.key.toLowerCase() !== binding.key) continue;
 
         // Check modifiers
         const treatCtrlAsMeta = isMac() && binding.ctrl && !binding.meta;

@@ -217,7 +217,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
               {sidebar}
             </ResizablePanel>
           )}
-          <div className="app-shell-main" style={{ flex: 1, minWidth: 0 }}>
+          <div className="app-shell-main">
             {children}
           </div>
           {showAside && (
@@ -260,7 +260,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
               {header}
             </ResizablePanel>
           )}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <div className="app-shell-content">
             {renderHorizontalContent()}
           </div>
           {showFooter && (

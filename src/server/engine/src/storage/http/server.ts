@@ -10,7 +10,7 @@ import { open, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
-import { SECONDS_PER_DAY } from '@abe-stack/shared';
+import { HTTP_STATUS, MS_PER_MINUTE, SECONDS_PER_DAY } from '@abe-stack/shared';
 
 // ============================================================================
 // Path Traversal Protection
@@ -27,14 +27,18 @@ function isValidFilename(filename: string): boolean {
   return /^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9]+)?$/.test(filename);
 }
 
-function isPathContained(filePath: string, uploadDir: string): boolean {
-  const resolvedPath = path.resolve(filePath);
-  const resolvedUploadDir = path.resolve(uploadDir);
-  const relativePath = path.relative(resolvedUploadDir, resolvedPath);
-  return relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+/**
+ * Resolve and validate a file path is safely contained within the upload directory.
+ * Returns the resolved absolute path, or null if the path escapes the root.
+ */
+function resolveContainedPath(uploadDir: string, ...segments: string[]): string | null {
+  const resolvedRoot = path.resolve(uploadDir) + path.sep;
+  const resolvedPath = path.resolve(uploadDir, ...segments);
+  if (!resolvedPath.startsWith(resolvedRoot)) return null;
+  return resolvedPath;
 }
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_WINDOW_MS = MS_PER_MINUTE;
 const RATE_LIMIT_MAX_REQUESTS = 180;
 const uploadRateLimit = new Map<string, { count: number; resetAt: number }>();
 
@@ -95,20 +99,20 @@ function verifyFileRequest(
   const { id, filename } = request.params;
 
   if (typeof request.query.expiration !== 'string') {
-    void reply.status(400).send('Missing expiration param.');
+    void reply.status(HTTP_STATUS.BAD_REQUEST).send('Missing expiration param.');
     return false;
   }
 
   const expirationMs = parseInt(request.query.expiration, 10);
   const now = Date.now();
   if (expirationMs < now) {
-    void reply.status(400).send('Expired.');
+    void reply.status(HTTP_STATUS.BAD_REQUEST).send('Expired.');
     return false;
   }
 
   const signature = request.query.signature;
   if (typeof signature !== 'string') {
-    void reply.status(400).send('Missing signature param.');
+    void reply.status(HTTP_STATUS.BAD_REQUEST).send('Missing signature param.');
     return false;
   }
 
@@ -122,7 +126,7 @@ function verifyFileRequest(
   });
 
   if (!validSignature) {
-    void reply.status(400).send('Invalid signature.');
+    void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid signature.');
     return false;
   }
 
@@ -150,6 +154,13 @@ function getMimeType(filename: string): string {
   return mimeTypes[ext ?? ''] ?? 'application/octet-stream';
 }
 
+/** Rate limiting preHandler for file server routes */
+function rateLimitHandler(request: FastifyRequest, reply: FastifyReply): void {
+  if (isRateLimited(request)) {
+    void reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send('Too many requests.');
+  }
+}
+
 export function registerFileServer(config: FilesConfig, app: FastifyInstance): void {
   const uploadDir = config.uploadDir;
 
@@ -158,58 +169,55 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
     '/uploads/:id/:filename',
     {
       bodyLimit: config.maxFileSize,
+      preHandler: rateLimitHandler,
     },
     async (request, reply) => {
-      if (isRateLimited(request)) {
-        void reply.status(429).send('Too many requests.');
-        return;
-      }
       if (!verifyFileRequest(config, request, reply)) return;
 
       const { id, filename } = request.params;
 
       if (!isValidId(id)) {
-        void reply.status(400).send('Invalid file ID.');
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid file ID.');
         return;
       }
       if (!isValidFilename(filename)) {
-        void reply.status(400).send('Invalid filename.');
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid filename.');
         return;
       }
 
-      const fileDir = path.join(uploadDir, id);
-      const filePath = path.join(fileDir, filename);
+      const resolvedDir = resolveContainedPath(uploadDir, id);
+      const resolvedFile = resolveContainedPath(uploadDir, id, filename);
 
-      if (!isPathContained(filePath, uploadDir)) {
-        void reply.status(400).send('Invalid file path.');
+      if (resolvedDir === null || resolvedFile === null) {
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid file path.');
         return;
       }
 
       try {
-        await mkdir(fileDir, { recursive: true });
+        await mkdir(resolvedDir, { recursive: true });
 
         if (Buffer.isBuffer(request.body)) {
           if (request.body.length > config.maxFileSize) {
-            void reply.status(413).send('File too large.');
+            void reply.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).send('File too large.');
             return;
           }
           const { writeFile } = await import('node:fs/promises');
-          await writeFile(filePath, request.body, { mode: 0o600 });
+          await writeFile(resolvedFile, request.body, { mode: 0o600 });
         } else if (typeof request.body === 'string') {
           if (Buffer.byteLength(request.body) > config.maxFileSize) {
-            void reply.status(413).send('File too large.');
+            void reply.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).send('File too large.');
             return;
           }
           const { writeFile } = await import('node:fs/promises');
-          await writeFile(filePath, request.body, { mode: 0o600 });
+          await writeFile(resolvedFile, request.body, { mode: 0o600 });
         } else {
-          const writeStream = createWriteStream(filePath, { mode: 0o600 });
+          const writeStream = createWriteStream(resolvedFile, { mode: 0o600 });
           await pipeline(request.raw, writeStream);
         }
 
-        void reply.status(200).send('File uploaded.');
+        void reply.status(HTTP_STATUS.OK).send('File uploaded.');
       } catch {
-        void reply.status(500).send('File upload failed.');
+        void reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send('File upload failed.');
       }
     },
   );
@@ -217,29 +225,25 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
   // Handle file downloads
   app.get<{ Params: FileRouteParams; Querystring: FileRouteQuery }>(
     '/uploads/:id/:filename',
+    { preHandler: rateLimitHandler },
     async (request, reply) => {
-      if (isRateLimited(request)) {
-        void reply.status(429).send('Too many requests.');
-        return;
-      }
       if (!verifyFileRequest(config, request, reply)) return;
 
       const { id, filename } = request.params;
 
       if (!isValidId(id)) {
-        void reply.status(400).send('Invalid file ID.');
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid file ID.');
         return;
       }
       if (!isValidFilename(filename)) {
-        void reply.status(400).send('Invalid filename.');
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid filename.');
         return;
       }
 
-      const fileDir = path.join(uploadDir, id);
-      const filePath = path.join(fileDir, filename);
+      const resolvedFile = resolveContainedPath(uploadDir, id, filename);
 
-      if (!isPathContained(filePath, uploadDir)) {
-        void reply.status(400).send('Invalid file path.');
+      if (resolvedFile === null) {
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send('Invalid file path.');
         return;
       }
 
@@ -247,7 +251,7 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
 
       try {
         // Use a single file handle for stat and read to avoid TOCTOU race
-        const fd = await open(filePath, 'r');
+        const fd = await open(resolvedFile, 'r');
         const fileStat = await fd.stat();
 
         const SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
@@ -272,7 +276,7 @@ export function registerFileServer(config: FilesConfig, app: FastifyInstance): v
             .send(fileStream);
         }
       } catch {
-        void reply.status(404).send('File not found.');
+        void reply.status(HTTP_STATUS.NOT_FOUND).send('File not found.');
       }
     },
   );

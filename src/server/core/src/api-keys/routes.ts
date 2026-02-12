@@ -42,16 +42,40 @@ import type { RouteDefinition } from '@abe-stack/server-engine';
  */
 const apiKeyRouteEntries: [string, RouteDefinition][] = [
   // List all API keys for the authenticated user
-  ['users/me/api-keys', protectedRoute('GET', handleListApiKeys, 'user')],
+  [
+    'users/me/api-keys',
+    protectedRoute('GET', handleListApiKeys, 'user', undefined, {
+      summary: 'List API keys',
+      tags: ['API Keys'],
+    }),
+  ],
 
   // Create a new API key
-  ['users/me/api-keys/create', protectedRoute('POST', handleCreateApiKey, 'user')],
+  [
+    'users/me/api-keys/create',
+    protectedRoute('POST', handleCreateApiKey, 'user', undefined, {
+      summary: 'Create API key',
+      tags: ['API Keys'],
+    }),
+  ],
 
   // Revoke an API key (soft delete - sets revokedAt)
-  ['users/me/api-keys/:id/revoke', protectedRoute('POST', handleRevokeApiKey, 'user')],
+  [
+    'users/me/api-keys/:id/revoke',
+    protectedRoute('POST', handleRevokeApiKey, 'user', undefined, {
+      summary: 'Revoke API key',
+      tags: ['API Keys'],
+    }),
+  ],
 
   // Delete an API key permanently
-  ['users/me/api-keys/:id', protectedRoute('DELETE', handleDeleteApiKey, 'user')],
+  [
+    'users/me/api-keys/:id',
+    protectedRoute('DELETE', handleDeleteApiKey, 'user', undefined, {
+      summary: 'Delete API key',
+      tags: ['API Keys'],
+    }),
+  ],
 ];
 
 /**

@@ -54,6 +54,7 @@ export const magicLinkRouteEntries: [string, RouteDefinition][] = [
         );
       },
       magicLinkRequestSchema,
+      { summary: 'Request magic link', tags: ['Auth', 'Magic Link'] },
     ),
   ],
 
@@ -70,6 +71,7 @@ export const magicLinkRouteEntries: [string, RouteDefinition][] = [
         );
       },
       magicLinkVerifyRequestSchema,
+      { summary: 'Verify magic link', tags: ['Auth', 'Magic Link'] },
     ),
   ],
 ];

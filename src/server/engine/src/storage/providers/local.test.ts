@@ -1,5 +1,5 @@
 // src/server/engine/src/storage/providers/local.test.ts
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, open } from 'node:fs/promises';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,13 +12,20 @@ vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'mock-uuid-1234'),
 }));
 
-// Mock node:fs/promises
-vi.mock('node:fs/promises', () => ({
-  mkdir: vi.fn().mockResolvedValue(undefined),
-  writeFile: vi.fn().mockResolvedValue(undefined),
-  readFile: vi.fn().mockResolvedValue(Buffer.from('')),
-  unlink: vi.fn().mockResolvedValue(undefined),
-}));
+// Mock node:fs/promises — factory must be self-contained (hoisted)
+vi.mock('node:fs/promises', () => {
+  const mockWriteFile = vi.fn().mockResolvedValue(undefined);
+  const mockClose = vi.fn().mockResolvedValue(undefined);
+  return {
+    mkdir: vi.fn().mockResolvedValue(undefined),
+    open: vi.fn().mockResolvedValue({
+      writeFile: mockWriteFile,
+      close: mockClose,
+    }),
+    readFile: vi.fn().mockResolvedValue(Buffer.from('')),
+    unlink: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 describe('LocalStorageProvider', () => {
   const baseConfig: LocalStorageConfig = {
@@ -27,6 +34,14 @@ describe('LocalStorageProvider', () => {
     maxFileSize: 10 * 1024 * 1024,
     allowedTypes: ['*'],
   };
+
+  const mockedOpen = vi.mocked(open);
+
+  /** Get the mock fd methods from the last open() call */
+  async function getMockFd(): Promise<{ writeFile: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn> }> {
+    const fd = await mockedOpen.mock.results[0]?.value;
+    return fd as { writeFile: ReturnType<typeof vi.fn>; close: ReturnType<typeof vi.fn> };
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -42,12 +57,13 @@ describe('LocalStorageProvider', () => {
       };
 
       const result = await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
       expect(result).toBe('test/file.txt');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads/test', { recursive: true });
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', params.body, {
-        mode: 0o600,
-      });
+      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith(params.body);
+      expect(fd.close).toHaveBeenCalled();
     });
 
     it('should generate a UUID key when no key is provided', async () => {
@@ -59,12 +75,13 @@ describe('LocalStorageProvider', () => {
       };
 
       const result = await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
       expect(result).toBe('mock-uuid-1234');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads', { recursive: true });
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', params.body, {
-        mode: 0o600,
-      });
+      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith(params.body);
+      expect(fd.close).toHaveBeenCalled();
     });
 
     it('should strip leading slashes from keys for file path', async () => {
@@ -76,13 +93,13 @@ describe('LocalStorageProvider', () => {
       };
 
       const result = await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
       // Returns the original key (not normalized)
       expect(result).toBe('/leading/slash.txt');
-      // But writes to normalized path
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', params.body, {
-        mode: 0o600,
-      });
+      // But writes to normalized path via open()
+      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith(params.body);
     });
 
     it('should strip parent directory references for security', async () => {
@@ -94,11 +111,11 @@ describe('LocalStorageProvider', () => {
       };
 
       await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
       // The normalizeStorageKey with stripParentRefs=true removes ".." sequences
-      expect(writeFile).toHaveBeenCalledWith(expect.not.stringContaining('..'), params.body, {
-        mode: 0o600,
-      });
+      expect(mockedOpen).toHaveBeenCalledWith(expect.not.stringContaining('..'), 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith(params.body);
     });
 
     it('should handle string body', async () => {
@@ -110,10 +127,10 @@ describe('LocalStorageProvider', () => {
       };
 
       await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'string content', {
-        mode: 0o600,
-      });
+      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith('string content');
     });
 
     it('should handle Uint8Array body', async () => {
@@ -126,8 +143,10 @@ describe('LocalStorageProvider', () => {
       };
 
       await provider.upload(params.key, params.body, params.contentType);
+      const fd = await getMockFd();
 
-      expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/binary.bin', body, { mode: 0o600 });
+      expect(mockedOpen).toHaveBeenCalledWith('/tmp/uploads/binary.bin', 'w', 0o600);
+      expect(fd.writeFile).toHaveBeenCalledWith(body);
     });
   });
 

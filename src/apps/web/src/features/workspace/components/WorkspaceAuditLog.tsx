@@ -5,6 +5,7 @@
  * Displays a table of audit events for the workspace.
  */
 
+import { getAuditActionTone } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -18,10 +19,13 @@ import {
   TableRow,
   Text,
 } from '@abe-stack/ui';
+import { useState, type ReactElement } from 'react';
 
 import { useAuditLog } from '../hooks/useAuditLog';
 
-import type { ReactElement } from 'react';
+import { AuditEventDetailModal } from './AuditEventDetailModal';
+
+import type { AuditEvent } from '../hooks/useAuditLog';
 
 // ============================================================================
 // Types
@@ -32,28 +36,12 @@ export interface WorkspaceAuditLogProps {
 }
 
 // ============================================================================
-// Helpers
-// ============================================================================
-
-const ACTION_TONES: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
-  create: 'success',
-  update: 'info',
-  delete: 'danger',
-  invite: 'info',
-  remove: 'warning',
-};
-
-function getActionTone(action: string): 'info' | 'success' | 'warning' | 'danger' {
-  const prefix = action.split('.')[0] ?? '';
-  return ACTION_TONES[prefix] ?? 'info';
-}
-
-// ============================================================================
 // Component
 // ============================================================================
 
 export const WorkspaceAuditLog = ({ tenantId }: WorkspaceAuditLogProps): ReactElement => {
   const { events, isLoading, error } = useAuditLog(tenantId);
+  const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
 
   if (isLoading) {
     return (
@@ -75,6 +63,7 @@ export const WorkspaceAuditLog = ({ tenantId }: WorkspaceAuditLogProps): ReactEl
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -86,9 +75,15 @@ export const WorkspaceAuditLog = ({ tenantId }: WorkspaceAuditLogProps): ReactEl
       </TableHeader>
       <TableBody>
         {events.map((event) => (
-          <TableRow key={event.id}>
+          <TableRow
+            key={event.id}
+            className="cursor-pointer hover-row"
+            onClick={() => {
+              setSelectedEvent(event);
+            }}
+          >
             <TableCell>
-              <Badge tone={getActionTone(event.action)}>{event.action}</Badge>
+              <Badge tone={getAuditActionTone(event.action)}>{event.action}</Badge>
             </TableCell>
             <TableCell>
               <Text size="sm">{event.actorId}</Text>
@@ -107,5 +102,14 @@ export const WorkspaceAuditLog = ({ tenantId }: WorkspaceAuditLogProps): ReactEl
         ))}
       </TableBody>
     </Table>
+
+    <AuditEventDetailModal
+      event={selectedEvent}
+      open={selectedEvent !== null}
+      onClose={() => {
+        setSelectedEvent(null);
+      }}
+    />
+  </>
   );
 };

@@ -9,15 +9,20 @@
 import { adminRoutes } from '@abe-stack/core/admin';
 import { createAuthGuard } from '@abe-stack/core/auth';
 import { registerRouteMap } from '@abe-stack/server-engine';
-import {
-  SECURITY_SEVERITIES,
-} from '@abe-stack/shared';
+import { SECURITY_SEVERITIES } from '@abe-stack/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import {
+  buildAuthenticatedRequest,
+  createAdminJwt,
+  createTestJwt,
+  createTestServer,
+  parseJsonResponse,
+  type TestServer,
+} from './test-utils';
 
+import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@abe-stack/server-engine';
 import type { SecurityEventsFilter } from '@abe-stack/shared';
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
 
 // ============================================================================
 // Mock Repositories
@@ -243,7 +248,7 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
       config: testServer.config,
     };
 
-    registerRouteMap(testServer.server, ctx as never, adminRoutes, {
+    registerRouteMap(testServer.server, ctx as never, adminRoutes as unknown as DbRouteMap, {
       prefix: '/api',
       jwtSecret: testServer.config.auth.jwt.secret,
       authGuardFactory: createAuthGuard as AuthGuardFactory,
@@ -391,6 +396,273 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
       expect(response.statusCode).toBe(401);
       const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Unauthorized');
+    });
+  });
+
+  // ==========================================================================
+  // Role Enforcement Tests
+  // ==========================================================================
+
+  describe('role enforcement', () => {
+    it('POST /api/admin/security/events returns 403 for non-admin user', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: userJwt,
+          payload: { page: 1, limit: 10 },
+        }),
+      );
+      expect(response.statusCode).toBe(403);
+    });
+
+    it('GET /api/admin/security/metrics returns 403 for non-admin user', async () => {
+      const userJwt = createTestJwt({ role: 'user' });
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/metrics',
+          accessToken: userJwt,
+        }),
+      );
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Events Query
+  // ==========================================================================
+
+  describe('security events query', () => {
+    it('POST /api/admin/security/events returns paginated events with filters', async () => {
+      const mockEvent = {
+        id: 'se-1',
+        user_id: 'user-1',
+        email: 'test@example.com',
+        event_type: 'login_failure',
+        severity: 'high',
+        ip_address: '192.168.1.1',
+        user_agent: 'Mozilla/5.0',
+        metadata: null,
+        created_at: new Date(),
+      };
+
+      mockDb.query.mockResolvedValueOnce([mockEvent]);
+      mockDb.queryOne.mockResolvedValueOnce({ count: '1' });
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/events',
+          accessToken: adminJwt,
+          payload: {
+            page: 1,
+            limit: 10,
+            filter: { severity: 'high' },
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: Array<{ id: string; severity: string }>;
+        total: number;
+        page: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+      expect(body.data).toHaveLength(1);
+      expect(body.data[0]!.severity).toBe('high');
+      expect(body.total).toBe(1);
+      expect(body.page).toBe(1);
+      expect(body.hasNext).toBe(false);
+      expect(body.hasPrev).toBe(false);
+    });
+
+    it('GET /api/admin/security/events/:id returns event detail', async () => {
+      const mockEvent = {
+        id: 'se-detail-1',
+        user_id: 'user-1',
+        email: 'test@example.com',
+        event_type: 'account_locked',
+        severity: 'high',
+        ip_address: '10.0.0.1',
+        user_agent: 'Chrome/120',
+        metadata: JSON.stringify({ reason: 'Too many attempts' }),
+        created_at: new Date(),
+      };
+
+      mockDb.queryOne.mockResolvedValueOnce(mockEvent);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/events/se-detail-1',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        id: string;
+        eventType: string;
+        severity: string;
+        ipAddress: string;
+      };
+      expect(body.id).toBe('se-detail-1');
+    });
+
+    it('GET /api/admin/security/events/:id returns 404 for unknown event', async () => {
+      mockDb.queryOne.mockResolvedValueOnce(null);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/events/nonexistent',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Metrics
+  // ==========================================================================
+
+  describe('security metrics', () => {
+    it('GET /api/admin/security/metrics aggregates event counts', async () => {
+      const mockEvents = [
+        { event_type: 'login_failure', severity: 'medium' },
+        { event_type: 'login_failure', severity: 'medium' },
+        { event_type: 'account_locked', severity: 'high' },
+        { event_type: 'token_reuse', severity: 'critical' },
+        { event_type: 'suspicious_login', severity: 'high' },
+      ];
+
+      mockDb.query.mockResolvedValueOnce(mockEvents);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/admin/security/metrics?period=day',
+          accessToken: adminJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        totalEvents: number;
+        criticalEvents: number;
+        highEvents: number;
+        mediumEvents: number;
+        lowEvents: number;
+        eventsByType: Record<string, number>;
+        period: string;
+        periodStart: string;
+        periodEnd: string;
+      };
+      expect(body.totalEvents).toBe(5);
+      expect(body.criticalEvents).toBe(1);
+      expect(body.highEvents).toBe(2);
+      expect(body.mediumEvents).toBe(2);
+      expect(body.period).toBe('day');
+      expect(body.periodStart).toBeDefined();
+      expect(body.periodEnd).toBeDefined();
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Security Export
+  // ==========================================================================
+
+  describe('security export', () => {
+    it('POST /api/admin/security/export returns JSON export', async () => {
+      const mockEvents = [
+        {
+          id: 'se-exp-1',
+          user_id: null,
+          email: null,
+          event_type: 'login_failure',
+          severity: 'medium',
+          ip_address: '127.0.0.1',
+          user_agent: null,
+          metadata: null,
+          created_at: new Date(),
+        },
+        {
+          id: 'se-exp-2',
+          user_id: null,
+          email: null,
+          event_type: 'account_locked',
+          severity: 'high',
+          ip_address: '10.0.0.1',
+          user_agent: null,
+          metadata: null,
+          created_at: new Date(),
+        },
+      ];
+
+      mockDb.query.mockResolvedValueOnce(mockEvents);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'json' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: string;
+        filename: string;
+        contentType: string;
+      };
+      expect(body.contentType).toBe('application/json');
+      expect(body.filename).toContain('security-events');
+      expect(body.data).toBeDefined();
+    });
+
+    it('POST /api/admin/security/export returns CSV export', async () => {
+      mockDb.query.mockResolvedValueOnce([
+        {
+          id: 'se-csv-1',
+          user_id: null,
+          email: null,
+          event_type: 'login_failure',
+          severity: 'low',
+          ip_address: null,
+          user_agent: null,
+          metadata: null,
+          created_at: new Date(),
+        },
+      ]);
+
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/admin/security/export',
+          accessToken: adminJwt,
+          payload: { format: 'csv' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        data: string;
+        contentType: string;
+      };
+      expect(body.contentType).toBe('text/csv');
     });
   });
 });

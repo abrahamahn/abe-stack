@@ -6,6 +6,8 @@
  * Framework-agnostic: uses narrow interfaces from types.ts.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { deleteMedia, getMediaMetadata, getProcessingStatus, uploadMedia } from './service';
 
 import type {
@@ -35,15 +37,15 @@ function handleError(
 ): { status: 400 | 404 | 500; body: { message: string } } {
   if (error instanceof Error) {
     if (error.name === 'NotFoundError') {
-      return { status: 404, body: { message: error.message } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: error.message } };
     }
     if (error.name === 'BadRequestError') {
-      return { status: 400, body: { message: error.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: error.message } };
     }
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: 500, body: { message: 'An error occurred processing your request' } };
+  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
 }
 
 // ============================================================================
@@ -69,7 +71,7 @@ export async function handleUploadMedia(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -84,7 +86,7 @@ export async function handleUploadMedia(
     );
 
     return {
-      status: 201,
+      status: HTTP_STATUS.CREATED,
       body: result,
     };
   } catch (error: unknown) {
@@ -115,13 +117,13 @@ export async function handleGetMedia(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const mediaId = (request as MediaRequest & { params?: { id?: string } }).params?.id ?? '';
     if (mediaId === '') {
-      return { status: 400, body: { message: 'Media ID is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Media ID is required' } };
     }
 
     const metadata = await getMediaMetadata(
@@ -132,7 +134,7 @@ export async function handleGetMedia(
     );
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: metadata,
     };
   } catch (error: unknown) {
@@ -163,19 +165,19 @@ export async function handleDeleteMedia(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const mediaId = (request as MediaRequest & { params?: { id?: string } }).params?.id ?? '';
     if (mediaId === '') {
-      return { status: 400, body: { message: 'Media ID is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Media ID is required' } };
     }
 
     await deleteMedia(ctx.storage, { files: ctx.repos.files }, mediaId, user.userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         success: true,
         message: 'Media file deleted',
@@ -209,19 +211,19 @@ export async function handleGetMediaStatus(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const mediaId = (request as MediaRequest & { params?: { id?: string } }).params?.id ?? '';
     if (mediaId === '') {
-      return { status: 400, body: { message: 'Media ID is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Media ID is required' } };
     }
 
     const status = await getProcessingStatus({ files: ctx.repos.files }, mediaId, user.userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: status,
     };
   } catch (error: unknown) {

@@ -5,11 +5,15 @@
  * Displays a user's status (active, locked, unverified) with appropriate styling.
  */
 
+import { getUserStatusLabel, getUserStatusTone } from '@abe-stack/shared';
 import { Badge } from '@abe-stack/ui';
 
+import type { UserStatus } from '@abe-stack/shared';
 import type { JSX } from 'react';
 
-type UserStatusLocal = 'active' | 'locked' | 'unverified';
+// ============================================================================
+// Types
+// ============================================================================
 
 interface AdminUserLocal {
   lockedUntil: string | null;
@@ -17,16 +21,19 @@ interface AdminUserLocal {
 }
 
 export interface StatusBadgeProps {
-  status: UserStatusLocal;
+  status: UserStatus;
 }
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 /**
  * Determine user status from AdminUser data
  */
-export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
+export function getUserStatus(user: AdminUserLocal): UserStatus {
   const now = new Date();
 
-  // Check if locked
   if (
     user.lockedUntil !== null &&
     user.lockedUntil.length > 0 &&
@@ -35,7 +42,6 @@ export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
     return 'locked';
   }
 
-  // Check if unverified
   if (!user.emailVerified) {
     return 'unverified';
   }
@@ -43,20 +49,10 @@ export function getUserStatus(user: AdminUserLocal): UserStatusLocal {
   return 'active';
 }
 
-function getStatusLabel(status: UserStatusLocal): string {
-  switch (status) {
-    case 'active':
-      return 'Active';
-    case 'locked':
-      return 'Locked';
-    case 'unverified':
-      return 'Unverified';
-    default:
-      return 'Unknown';
-  }
-}
+// ============================================================================
+// Component
+// ============================================================================
 
 export const StatusBadge = ({ status }: StatusBadgeProps): JSX.Element => {
-  const tone = status === 'active' ? 'success' : status === 'locked' ? 'danger' : 'warning';
-  return <Badge tone={tone}>{getStatusLabel(status)}</Badge>;
+  return <Badge tone={getUserStatusTone(status)}>{getUserStatusLabel(status)}</Badge>;
 };

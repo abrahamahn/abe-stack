@@ -7,7 +7,7 @@
  * @module handlers/phone
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { assertUserActive } from '../middleware';
 import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
@@ -41,21 +41,21 @@ export async function handleSetPhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
 
     // Validate phone format
     if (!PHONE_REGEX.test(body.phone)) {
-      return { status: 400, body: { message: 'Invalid phone number format' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Invalid phone number format' } };
     }
 
     // Check rate limit
     const rateLimit = await checkSmsRateLimit(ctx.db, userId);
     if (!rateLimit.allowed) {
       return {
-        status: 429,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
         body: {
           message: 'Too many SMS requests. Please try again later.',
         },
@@ -65,7 +65,7 @@ export async function handleSetPhone(
     // Get the SMS provider from context (may not be configured)
     if (ctx.sms === undefined) {
       ctx.log.error('SMS provider not configured');
-      return { status: 500, body: { message: 'SMS service unavailable' } };
+      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'SMS service unavailable' } };
     }
     const smsProvider = ctx.sms;
 
@@ -74,10 +74,10 @@ export async function handleSetPhone(
 
     if (!result.success) {
       ctx.log.error({ error: result.error }, 'Failed to send SMS verification code');
-      return { status: 500, body: { message: 'Failed to send verification code' } };
+      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to send verification code' } };
     }
 
-    return { status: 200, body: { message: 'Verification code sent' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Verification code sent' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -97,7 +97,7 @@ export async function handleVerifyPhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -106,7 +106,7 @@ export async function handleVerifyPhone(
     const result = await verifySms2faCode(ctx.db, userId, body.code);
 
     if (!result.valid) {
-      return { status: 400, body: { message: result.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: result.message } };
     }
 
     // Get the phone number from the verified code record
@@ -119,7 +119,7 @@ export async function handleVerifyPhone(
 
     const phone = pendingCode[0]?.phone;
     if (phone === undefined) {
-      return { status: 400, body: { message: 'No phone number to verify' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'No phone number to verify' } };
     }
 
     // Update user record with verified phone
@@ -128,7 +128,7 @@ export async function handleVerifyPhone(
       [phone, userId],
     );
 
-    return { status: 200, body: { verified: true } };
+    return { status: HTTP_STATUS.OK, body: { verified: true } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -147,7 +147,7 @@ export async function handleRemovePhone(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -158,7 +158,7 @@ export async function handleRemovePhone(
       [userId],
     );
 
-    return { status: 200, body: { message: 'Phone number removed' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Phone number removed' } };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }

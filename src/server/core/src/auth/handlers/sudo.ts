@@ -9,7 +9,7 @@
  */
 
 import { sign, verify } from '@abe-stack/server-engine';
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { AUTH_EXPIRY, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { assertUserActive } from '../middleware';
 import { verifyTotpCode } from '../totp';
@@ -20,13 +20,10 @@ import type { AppContext, RequestWithCookies } from '../types';
 import type { HttpErrorResponse } from '@abe-stack/shared';
 
 /** Sudo token TTL in minutes */
-export const SUDO_TOKEN_TTL_MINUTES = 5;
+export const SUDO_TOKEN_TTL_MINUTES = AUTH_EXPIRY.SUDO_MINUTES;
 
 /** Sudo token type claim */
 const SUDO_TOKEN_TYPE = 'sudo';
-
-/** Sudo token header name */
-export const SUDO_TOKEN_HEADER = 'x-sudo-token';
 
 /** Sudo request body */
 export interface SudoElevateRequest {
@@ -51,7 +48,7 @@ export async function handleSudoElevate(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Unauthorized' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
     }
 
     // Verify user account is not suspended before allowing sudo elevation
@@ -59,7 +56,7 @@ export async function handleSudoElevate(
 
     const user = await ctx.repos.users.findById(userId);
     if (user === null) {
-      return { status: 404, body: { message: 'User not found' } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'User not found' } };
     }
 
     // Verify password
@@ -67,22 +64,22 @@ export async function handleSudoElevate(
       const valid = await verifyPasswordSafe(body.password, user.passwordHash);
       if (!valid) {
         ctx.log.warn({ userId }, 'Sudo elevation failed: invalid password');
-        return { status: 401, body: { message: 'Invalid credentials' } };
+        return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Invalid credentials' } };
       }
     } else if (body.totpCode !== undefined) {
       if (!user.totpEnabled) {
-        return { status: 400, body: { message: 'TOTP is not enabled for this account' } };
+        return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'TOTP is not enabled for this account' } };
       }
       if (user.totpSecret === null) {
-        return { status: 400, body: { message: 'TOTP is not configured' } };
+        return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'TOTP is not configured' } };
       }
       const isValid = verifyTotpCode(user.totpSecret, body.totpCode, 1);
       if (!isValid) {
         ctx.log.warn({ userId }, 'Sudo elevation failed: invalid TOTP code');
-        return { status: 401, body: { message: 'Invalid TOTP code' } };
+        return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Invalid TOTP code' } };
       }
     } else {
-      return { status: 400, body: { message: 'Either password or totpCode is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Either password or totpCode is required' } };
     }
 
     // Issue sudo token
@@ -96,7 +93,7 @@ export async function handleSudoElevate(
     ctx.log.info({ userId }, 'Sudo elevation granted');
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { sudoToken, expiresAt },
     };
   } catch (error) {

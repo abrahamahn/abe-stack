@@ -5,6 +5,8 @@
  * All environment variables and app-level constants in one place.
  */
 
+import { MS_PER_DAY, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+
 // ============================================================================
 // Environment Variables
 // ============================================================================
@@ -63,11 +65,11 @@ export function createClientConfig(): ClientConfig {
     isProd: env.PROD,
     // Empty string = relative URLs, proxied by Vite in dev, same-origin in prod
     apiUrl: (viteApiUrl ?? '').replace(/\/+$/, ''),
-    tokenRefreshInterval: 13 * 60 * 1000, // 13 minutes
+    tokenRefreshInterval: 13 * MS_PER_MINUTE,
     uiVersion: '1.1.0',
     queryPersistence: {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      throttleTime: 1000, // 1 second
+      maxAge: MS_PER_DAY,
+      throttleTime: MS_PER_SECOND,
     },
   };
 }

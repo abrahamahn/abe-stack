@@ -6,6 +6,7 @@
  */
 
 import { useQuery, useQueryCache } from '@abe-stack/client-engine';
+import { MS_PER_MINUTE } from '@abe-stack/shared';
 
 import { createSettingsApi } from '../api';
 
@@ -52,7 +53,7 @@ export function useProfileCompleteness(): UseProfileCompletenessResult {
       const api = getSettingsApi();
       return api.getProfileCompleteness();
     },
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: MS_PER_MINUTE,
   });
 
   const refetch = (): void => {

@@ -1,11 +1,8 @@
 // src/server/media/src/image-processing.ts
 import sharp from 'sharp';
 
-/**
- * Maximum allowed dimension (width or height) for image resizing.
- * Prevents OOM when callers pass extremely large values.
- */
-const MAX_IMAGE_DIMENSION = 65_536;
+import { MAX_DIMENSION } from './constants';
+import { detectFileType } from './file-type';
 
 export interface ImageResizeOptions {
   width?: number;
@@ -74,10 +71,10 @@ export async function resizeImage(buffer: Buffer, options: ImageResizeOptions): 
   }
 
   if (
-    (width !== undefined && width > MAX_IMAGE_DIMENSION) ||
-    (height !== undefined && height > MAX_IMAGE_DIMENSION)
+    (width !== undefined && width > MAX_DIMENSION) ||
+    (height !== undefined && height > MAX_DIMENSION)
   ) {
-    throw new Error(`Dimensions exceed maximum of ${String(MAX_IMAGE_DIMENSION)}px`);
+    throw new Error(`Dimensions exceed maximum of ${String(MAX_DIMENSION)}px`);
   }
 
   const roundedWidth = width !== undefined && width !== 0 ? Math.round(width) : undefined;
@@ -283,27 +280,10 @@ export async function validateImage(
 }
 
 /**
- * Detect format from buffer (helper)
+ * Detect image format from buffer using magic bytes.
+ * Delegates to the canonical `detectFileType()` from file-type.ts.
  */
 export function getImageFormat(buffer: Buffer): string {
-  if (buffer.length < 4) return 'unknown';
-
-  // Check for common image signatures
-  const header = buffer.subarray(0, 4);
-  const hex = header.toString('hex').toLowerCase();
-
-  if (hex.startsWith('89504e47')) return 'png';
-  if (hex.startsWith('ffd8ffe')) return 'jpeg'; // JPEG files start with 0xFFD8FFE
-  if (hex.startsWith('47494638')) return 'gif';
-  if (hex.startsWith('52494646') && buffer.length >= 12) {
-    const webpCheck = buffer.subarray(8, 12).toString();
-    if (webpCheck === 'WEBP') return 'webp';
-  }
-  if (hex.startsWith('424d')) return 'bmp';
-  if (hex.startsWith('000000')) {
-    const ftyp = buffer.subarray(4, 8).toString();
-    if (ftyp.includes('avif') || ftyp.includes('heic')) return 'avif';
-  }
-
-  return 'unknown';
+  const result = detectFileType(buffer);
+  return result?.ext ?? 'unknown';
 }

@@ -8,11 +8,10 @@
  * for testability and decoupled architecture.
  */
 
-import type { UserDataExport } from './types';
+import type { DataExportRepositories, UserDataExport } from './types';
 import type {
   DataExportRequest as DbDataExportRequest,
   DataExportRequestRepository,
-  UserRepository,
 } from '@abe-stack/db';
 
 // ============================================================================
@@ -83,34 +82,33 @@ export async function getExportStatus(
 /**
  * Process a data export request.
  *
- * Aggregates user data (profile info) and updates the request status.
- * The actual file archive creation is stubbed for now -- this returns
- * the aggregated data as a JSON blob.
+ * Aggregates all user data (profile, memberships, subscriptions,
+ * activities, files, notifications, sessions, consent history) and
+ * updates the request status. Additional repositories are optional —
+ * the export includes whatever data is available.
  *
- * @param exportRequests - Data export request repository
- * @param users - User repository for profile data
+ * @param repos - Repository set (users + exportRequests required, rest optional)
  * @param requestId - Export request identifier to process
  * @returns The aggregated user data export
  * @throws DataExportNotFoundError if request not found
  * @throws Error if user profile not found
- * @complexity O(1) - sequential database lookups
+ * @complexity O(n) where n is total records across all categories
  */
 export async function processDataExport(
-  exportRequests: DataExportRequestRepository,
-  users: UserRepository,
+  repos: DataExportRepositories,
   requestId: string,
 ): Promise<UserDataExport> {
-  const request = await exportRequests.findById(requestId);
+  const request = await repos.dataExportRequests.findById(requestId);
   if (request === null) {
     throw new DataExportNotFoundError(requestId);
   }
 
   // Mark as processing
-  await exportRequests.updateStatus(requestId, 'processing');
+  await repos.dataExportRequests.updateStatus(requestId, 'processing');
 
   try {
     // Aggregate user data
-    const user = await users.findById(request.userId);
+    const user = await repos.users.findById(request.userId);
     if (user === null) {
       throw new Error(`User not found: ${request.userId}`);
     }
@@ -125,12 +123,19 @@ export async function processDataExport(
         role: user.role,
         createdAt: user.createdAt.toISOString(),
       },
+      memberships: await aggregateMemberships(repos, request.userId),
+      subscriptions: await aggregateSubscriptions(repos, request.userId),
+      activities: await aggregateActivities(repos, request.userId),
+      files: await aggregateFiles(repos, request.userId),
+      notifications: await aggregateNotifications(repos, request.userId),
+      sessions: await aggregateSessions(repos, request.userId),
+      consentHistory: await aggregateConsentHistory(repos, request.userId),
       exportedAt: new Date().toISOString(),
       format: 'json',
     };
 
     // Mark as completed
-    await exportRequests.update(requestId, {
+    await repos.dataExportRequests.update(requestId, {
       status: 'completed',
       completedAt: new Date(),
       metadata: { ...request.metadata, exportedAt: exportData.exportedAt },
@@ -139,12 +144,113 @@ export async function processDataExport(
     return exportData;
   } catch (error: unknown) {
     // Mark as failed on error
-    await exportRequests.update(requestId, {
+    await repos.dataExportRequests.update(requestId, {
       status: 'failed',
       errorMessage: error instanceof Error ? error.message : 'Unknown error',
     });
     throw error;
   }
+}
+
+// ============================================================================
+// Data Aggregation Helpers
+// ============================================================================
+
+async function aggregateMemberships(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['memberships']> {
+  if (repos.memberships === undefined) return undefined;
+  const memberships = await repos.memberships.findByUserId(userId);
+  return memberships.map((m) => ({
+    tenantId: m.tenantId,
+    role: m.role,
+    createdAt: m.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateSubscriptions(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['subscriptions']> {
+  if (repos.subscriptions === undefined) return undefined;
+  const subs = await repos.subscriptions.findByUserId(userId);
+  return subs.map((s) => ({
+    id: s.id,
+    planId: s.planId,
+    status: s.status,
+    createdAt: s.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateActivities(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['activities']> {
+  if (repos.activities === undefined) return undefined;
+  const activities = await repos.activities.findByActorId(userId);
+  return activities.map((a) => ({
+    action: a.action,
+    resource: a.resourceType,
+    createdAt: a.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateFiles(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['files']> {
+  if (repos.files === undefined) return undefined;
+  const files = await repos.files.findByUserId(userId);
+  return files.map((f) => ({
+    id: f.id,
+    filename: f.filename,
+    mimeType: f.mimeType,
+    sizeBytes: f.sizeBytes,
+    createdAt: f.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateNotifications(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['notifications']> {
+  if (repos.notifications === undefined) return undefined;
+  const notifications = await repos.notifications.findByUserId(userId);
+  return notifications.map((n) => ({
+    id: n.id,
+    type: n.type,
+    title: n.title,
+    isRead: n.isRead,
+    createdAt: n.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateSessions(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['sessions']> {
+  if (repos.userSessions === undefined) return undefined;
+  const sessions = await repos.userSessions.findActiveByUserId(userId);
+  return sessions.map((s) => ({
+    id: s.id,
+    deviceName: s.deviceName ?? null,
+    lastActiveAt: s.lastActiveAt.toISOString(),
+    createdAt: s.createdAt.toISOString(),
+  }));
+}
+
+async function aggregateConsentHistory(
+  repos: DataExportRepositories,
+  userId: string,
+): Promise<UserDataExport['consentHistory']> {
+  if (repos.consentLogs === undefined) return undefined;
+  const logs = await repos.consentLogs.findByUserId(userId);
+  return logs.map((c) => ({
+    consentType: c.consentType,
+    granted: c.granted,
+    createdAt: c.createdAt.toISOString(),
+  }));
 }
 
 // ============================================================================

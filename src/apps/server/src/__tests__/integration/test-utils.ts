@@ -6,6 +6,7 @@
  * integration testing with fastify.inject().
  */
 
+import { createAccessToken } from '@abe-stack/core/auth';
 import { RateLimiter } from '@abe-stack/server-engine';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
@@ -254,7 +255,49 @@ export function createUnverifiedUser(overrides: Partial<TestUser> = {}): TestUse
 }
 
 // ============================================================================
-// Test uration
+// JWT Test Helpers
+// ============================================================================
+
+const TEST_JWT_SECRET = 'test-secret-that-is-at-least-32-chars-long!!';
+
+export interface TestJwtOptions {
+  userId?: string;
+  email?: string;
+  role?: 'user' | 'admin';
+  expiresIn?: string | number;
+}
+
+/**
+ * Create a valid JWT access token for authenticated route tests.
+ * Uses the test config's JWT secret.
+ */
+export function createTestJwt(overrides: TestJwtOptions = {}): string {
+  const user = createTestUser(overrides);
+  return createAccessToken(
+    overrides.userId ?? user.id,
+    overrides.email ?? user.email,
+    overrides.role ?? user.role,
+    TEST_JWT_SECRET,
+    overrides.expiresIn ?? '15m',
+  );
+}
+
+/**
+ * Create a valid admin JWT access token for admin route tests.
+ */
+export function createAdminJwt(overrides: TestJwtOptions = {}): string {
+  const admin = createAdminUser(overrides);
+  return createAccessToken(
+    overrides.userId ?? admin.id,
+    overrides.email ?? admin.email,
+    'admin',
+    TEST_JWT_SECRET,
+    overrides.expiresIn ?? '15m',
+  );
+}
+
+// ============================================================================
+// Test Configuration
 // ============================================================================
 
 export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
@@ -300,7 +343,7 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
         audience: 'test',
       },
       refreshToken: { expiryDays: 7, gracePeriodSeconds: 30 },
-      argon2: { type: 2, memoryCost: 1024, timeCost: 1, parallelism: 1 },
+      argon2: { type: 2, memoryCost: 1024, timeCost: 2, parallelism: 1 },
       password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
       lockout: {
         maxAttempts: 10,

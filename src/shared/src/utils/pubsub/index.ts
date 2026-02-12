@@ -10,10 +10,11 @@
  */
 
 // Types (browser-safe)
-export { SubKeys } from './types';
+export { SubKeys, parseRecordKey } from './types';
 export type {
   ClientMessage,
   ListKey,
+  ParsedRecordKey,
   RecordKey,
   ServerMessage,
   SubscriptionKey,

@@ -7,12 +7,13 @@
  * @module handlers/login
  */
 
-import { EmailNotVerifiedError, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import {
   generateDeviceFingerprint,
   isCaptchaRequired,
   isKnownDevice,
+  logNewDeviceLogin,
   recordDeviceAccess,
   sendNewLoginAlert,
   verifyCaptchaToken,
@@ -70,7 +71,7 @@ export async function handleLogin(
       const captchaResult = await verifyCaptchaToken(ctx.config.auth, captchaToken, ipAddress);
       if (!captchaResult.success) {
         return {
-          status: 400,
+          status: HTTP_STATUS.BAD_REQUEST,
           body: { message: 'CAPTCHA verification failed' },
         };
       }
@@ -95,7 +96,7 @@ export async function handleLogin(
     // TOTP challenge — user must verify 2FA code before getting tokens
     if (isTotpChallenge(result)) {
       return {
-        status: 202,
+        status: HTTP_STATUS.ACCEPTED,
         body: {
           requiresTotp: true,
           challengeToken: result.challengeToken,
@@ -107,7 +108,7 @@ export async function handleLogin(
     // SMS challenge — user must verify SMS code before getting tokens
     if (isSmsChallenge(result)) {
       return {
-        status: 202,
+        status: HTTP_STATUS.ACCEPTED,
         body: {
           requiresSms: true,
           challengeToken: result.challengeToken,
@@ -147,6 +148,12 @@ export async function handleLogin(
 
     if (isNewDevice) {
       ctx.log.info({ userId: result.user.id, ipAddress, userAgent }, 'New device login detected');
+      // Fire-and-forget: log security event for new device
+      logNewDeviceLogin(ctx.db, result.user.id, result.user.email, ipAddress, userAgent).catch(
+        (err: unknown) => {
+          ctx.log.warn({ err }, 'Failed to log new device login event');
+        },
+      );
     }
 
     // Set refresh token as HTTP-only cookie
@@ -175,7 +182,7 @@ export async function handleLogin(
     }
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         token: result.accessToken,
         user: result.user,

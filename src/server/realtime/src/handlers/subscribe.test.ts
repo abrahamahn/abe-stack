@@ -85,7 +85,7 @@ describe('Realtime Subscribe Handler', () => {
         const result = await handleGetRecords(ctx, body, req);
 
         expect(result.status).toBe(403);
-        expect(result.body).toEqual({ message: 'Authentication required' });
+        expect(result.body).toEqual({ code: 'FORBIDDEN', message: 'Authentication required' });
       });
     });
 
@@ -99,6 +99,7 @@ describe('Realtime Subscribe Handler', () => {
 
         expect(result.status).toBe(400);
         expect(result.body).toEqual({
+          code: 'BAD_REQUEST',
           message: "Table 'secret_table' is not allowed for realtime operations",
         });
       });
@@ -160,7 +161,7 @@ describe('Realtime Subscribe Handler', () => {
         const result = await handleGetRecords(ctx, body, req);
 
         expect(result.status).toBe(500);
-        expect(result.body).toEqual({ message: 'Internal server error' });
+        expect(result.body).toEqual({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
         expect(ctx.log.error).toHaveBeenCalled();
       });
     });

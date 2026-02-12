@@ -8,6 +8,8 @@
  * @module security/session-enforcement
  */
 
+import { MS_PER_DAY } from '@abe-stack/shared';
+
 import type { Repositories } from '@abe-stack/db';
 
 // ============================================================================
@@ -23,7 +25,7 @@ import type { Repositories } from '@abe-stack/db';
  * @complexity O(1)
  */
 export function isSessionIdle(lastActiveAt: Date, idleTimeoutDays: number): boolean {
-  const idleTimeoutMs = idleTimeoutDays * 24 * 60 * 60 * 1000;
+  const idleTimeoutMs = idleTimeoutDays * MS_PER_DAY;
   const idleSince = Date.now() - lastActiveAt.getTime();
   return idleSince > idleTimeoutMs;
 }
@@ -38,7 +40,7 @@ export function isSessionIdle(lastActiveAt: Date, idleTimeoutDays: number): bool
  * @complexity O(1)
  */
 export function getIdleTimeRemaining(lastActiveAt: Date, idleTimeoutDays: number): number {
-  const idleTimeoutMs = idleTimeoutDays * 24 * 60 * 60 * 1000;
+  const idleTimeoutMs = idleTimeoutDays * MS_PER_DAY;
   const elapsed = Date.now() - lastActiveAt.getTime();
   const remaining = idleTimeoutMs - elapsed;
   return remaining > 0 ? remaining : 0;

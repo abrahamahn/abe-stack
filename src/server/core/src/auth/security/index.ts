@@ -46,6 +46,8 @@ export {
   logOAuthLoginSuccessEvent,
   logOAuthUnlinkFailureEvent,
   logOAuthUnlinkSuccessEvent,
+  flagSuspiciousLogin,
+  logNewDeviceLogin,
   logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
@@ -67,40 +69,31 @@ export {
 export { registerSecurityAudit, SecurityAuditLogger } from './audit';
 export type { AuditConfig, AuditEvent, AuditStats } from './audit';
 
-// Password Validation
+// Password (validation, patterns, scoring, strength — all from shared)
 export {
-  defaultPasswordConfig,
-  getStrengthColor,
-  getStrengthLabel,
-  validatePassword,
-  validatePasswordBasic,
-} from './password';
-export type { PasswordConfig, PasswordValidationResult } from './password';
-
-// Password Patterns
-export {
+  calculateEntropy,
+  calculateScore,
   COMMON_PASSWORDS,
   containsUserInput,
+  defaultPasswordConfig,
+  estimateCrackTime,
+  estimatePasswordStrength,
+  generateFeedback,
+  getCharsetSize,
+  getStrengthColor,
+  getStrengthLabel,
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
   KEYBOARD_PATTERNS,
-} from './password-patterns';
-
-// Password Scoring
-export {
-  calculateEntropy,
-  calculateScore,
-  estimateCrackTime,
-  generateFeedback,
-  getCharsetSize,
-} from './password-scoring';
-export type { PasswordPenalties } from './password-scoring';
-
-// Password Strength Estimation
-export { estimatePasswordStrength } from './password-strength';
-export type { StrengthResult } from './password-strength';
+  validatePassword,
+  validatePasswordBasic,
+  type PasswordConfig,
+  type PasswordPenalties,
+  type PasswordValidationResult,
+  type StrengthResult,
+} from '@abe-stack/shared';
 
 // CAPTCHA Verification
 export {

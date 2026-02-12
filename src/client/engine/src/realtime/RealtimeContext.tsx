@@ -12,6 +12,7 @@
  * - Record subscriptions via SubscriptionCache
  */
 
+import { generateSecureId } from '@abe-stack/shared';
 import {
   createContext,
   useCallback,
@@ -480,7 +481,7 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
 
       // Create transaction for the queue
       const transaction: QueuedTransaction = {
-        txId: `tx-${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`,
+        txId: `tx-${String(Date.now())}-${generateSecureId(7)}`,
         authorId: userId,
         clientTimestamp: Date.now(),
         operations: flatOperations,

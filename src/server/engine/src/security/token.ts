@@ -114,7 +114,7 @@ export function verifyToken(
 export function encryptToken(token: string, secret: string): string {
   const key = createHmac('sha256', secret).update('csrf-encryption-key').digest();
   const iv = randomBytes(16);
-  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const cipher = createCipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
 
   let encrypted = cipher.update(token, 'utf8', 'base64url');
   encrypted += cipher.final('base64url');
@@ -159,7 +159,7 @@ export function decryptToken(encryptedToken: string, secret: string): string | n
     const iv = Buffer.from(ivStr, 'base64url');
     const authTag = Buffer.from(authTagStr, 'base64url');
 
-    const decipher = createDecipheriv('aes-256-gcm', key, iv);
+    const decipher = createDecipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
     decipher.setAuthTag(authTag);
 
     let decrypted = decipher.update(encryptedPart, 'base64url', 'utf8');

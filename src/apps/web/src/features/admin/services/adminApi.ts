@@ -189,6 +189,35 @@ export interface FeatureFlagDeleteResponse {
   message: string;
 }
 
+// ============================================================================
+// Tenant Management Types (Stub - Backend not implemented yet)
+// ============================================================================
+
+export interface AdminTenantLocal {
+  id: string;
+  name: string;
+  slug: string;
+  status: 'active' | 'suspended' | 'deleted';
+  isActive: boolean;
+  createdAt: string;
+  memberCount: number;
+}
+
+export interface AdminTenantDetailLocal extends AdminTenantLocal {
+  ownerId: string;
+  subscriptionId: string | null;
+  suspendedAt: string | null;
+  suspendedReason: string | null;
+  updatedAt: string;
+  allowedEmailDomains: string[] | null;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface TenantListResponse {
+  tenants: AdminTenantLocal[];
+  total: number;
+}
+
 export interface AuditEventLocal {
   id: string;
   tenantId: string | null;
@@ -232,6 +261,12 @@ export interface AdminApiClient {
   updateUser: (userId: string, data: AdminUpdateUserRequest) => Promise<AdminUpdateUserResponse>;
   lockUser: (userId: string, data: AdminLockUserRequest) => Promise<AdminLockUserResponse>;
   unlockUser: (userId: string, data: UnlockAccountRequest) => Promise<AdminLockUserResponse>;
+
+  // Tenant management (Stub - Backend not implemented yet)
+  listTenants: () => Promise<TenantListResponse>;
+  getTenant: (tenantId: string) => Promise<AdminTenantDetailLocal>;
+  suspendTenant: (tenantId: string, reason: string) => Promise<void>;
+  unsuspendTenant: (tenantId: string) => Promise<void>;
 
   // Security events
   listSecurityEvents: (
@@ -461,6 +496,23 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
       return request<FeatureFlagDeleteResponse>(`/admin/feature-flags/${key}/delete`, {
         method: 'POST',
       });
+    },
+
+    // Tenant management stubs (Backend not implemented yet)
+    listTenants(): Promise<TenantListResponse> {
+      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    },
+
+    getTenant(_tenantId: string): Promise<AdminTenantDetailLocal> {
+      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    },
+
+    suspendTenant(_tenantId: string, _reason: string): Promise<void> {
+      return Promise.reject(new Error('Tenant management API not implemented yet'));
+    },
+
+    unsuspendTenant(_tenantId: string): Promise<void> {
+      return Promise.reject(new Error('Tenant management API not implemented yet'));
     },
   };
 }

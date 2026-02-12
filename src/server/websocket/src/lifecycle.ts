@@ -9,24 +9,52 @@
  * @module websocket/lifecycle
  */
 
-import { eq, select, USERS_TABLE } from '@abe-stack/db';
+import { eq, select } from '@abe-stack/db';
 import { validateCsrfToken } from '@abe-stack/server-engine';
-import { parseCookies } from '@abe-stack/shared';
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  CSRF_COOKIE_NAME,
+  ERROR_MESSAGES,
+  HTTP_STATUS,
+  WEBSOCKET_PATH,
+  WS_CLOSE_POLICY_VIOLATION,
+  parseCookies,
+  parseRecordKey,
+} from '@abe-stack/shared';
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
 
-import type { PubSubWebSocket, SubscriptionKey } from './types';
 import type { DbClient } from '@abe-stack/db';
-import type { Logger, SubscriptionManager } from '@abe-stack/shared';
+import type {
+  Logger,
+  ServerMessage,
+  SubscriptionKey,
+  SubscriptionManager,
+  WebSocket as PubSubWebSocket,
+} from '@abe-stack/shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import type { WebSocket } from 'ws';
 
+// ============================================================================
+// Local Constants
+// ============================================================================
+
+/** Subprotocol prefix for CSRF tokens sent via Sec-WebSocket-Protocol */
+const CSRF_SUBPROTOCOL_PREFIX = 'csrf.';
+
+/** Known WebSocket subprotocol names to skip when extracting auth tokens */
+const KNOWN_SUBPROTOCOLS = new Set(['graphql', 'json', 'Bearer']);
+
+// ============================================================================
+// Types
+// ============================================================================
+
 /**
  * WebSocket module dependencies.
- * structurally compatible with AppContext but decoupled from specific modules.
+ * Structurally compatible with AppContext but decoupled from specific modules.
  */
 export interface WebSocketDeps {
   readonly db: DbClient;
@@ -43,11 +71,9 @@ export interface WebSocketDeps {
       };
     };
   };
+  /** Resolves logical table name to DB table name. Injected by the realtime module. */
+  readonly resolveTableName?: (logicalName: string) => string | undefined;
 }
-
-// ============================================================================
-// Token Verification Types
-// ============================================================================
 
 /**
  * Token verification function type.
@@ -65,28 +91,27 @@ export type TokenVerifier = (token: string, secret: string) => { userId: string 
 
 /**
  * Get version for a record in a table by id.
- * Returns undefined if the record does not exist.
+ * Uses the injected resolveTableName to map logical names to DB tables.
+ * Returns undefined if the table is not registered or the record does not exist.
  *
- * @param db - Database client
+ * @param ctx - WebSocket dependencies (provides resolveTableName and db)
  * @param table - Logical table name
  * @param id - Record ID
  * @returns The record version, or undefined if not found
  * @complexity O(1) database query
  */
 async function getRecordVersion(
-  db: WebSocketDeps['db'],
+  ctx: WebSocketDeps,
   table: string,
   id: string,
 ): Promise<number | undefined> {
-  // Map table names to their actual table names
-  const tableMap: Record<string, string> = {
-    users: USERS_TABLE,
-  };
+  const resolve = ctx.resolveTableName;
+  if (resolve == null) return undefined;
 
-  const actualTable = tableMap[table];
-  if (actualTable == null || actualTable === '') return undefined;
+  const actualTable = resolve(table);
+  if (actualTable == null) return undefined;
 
-  const row = await db.queryOne<{ version: number }>(
+  const row = await ctx.db.queryOne<{ version: number }>(
     select(actualTable).columns('version').where(eq('id', id)).limit(1).toSql(),
   );
 
@@ -149,66 +174,13 @@ function rejectUpgrade(socket: Duplex, statusCode: number, message: string): voi
 }
 
 // ============================================================================
-// Table Whitelist for WebSocket Subscriptions
+// Subscription Helpers
 // ============================================================================
-
-/**
- * Whitelist of allowed table names for WebSocket subscriptions.
- * Only tables in this set can be queried via subscription keys.
- * This prevents SQL injection and unauthorized data access.
- *
- * @complexity O(1) lookup
- */
-const ALLOWED_SUBSCRIPTION_TABLES = new Set([
-  'users',
-  'sessions',
-  'posts',
-  'comments',
-  'notifications',
-]);
-
-/**
- * Validate subscription key format and table name.
- * Key must be: record:{table}:{id}
- * - table: must be in whitelist, alphanumeric and underscores only
- * - id: must be alphanumeric, hyphens, and underscores only (UUID-safe)
- *
- * @param key - Subscription key to validate
- * @returns Validation result with parsed table and id
- * @complexity O(1)
- */
-function isValidSubscriptionKey(key: string): { valid: boolean; table?: string; id?: string } {
-  const parts = key.split(':');
-  if (parts.length !== 3 || parts[0] !== 'record') {
-    return { valid: false };
-  }
-
-  const [, table, id] = parts;
-  if (table == null || table === '' || id == null || id === '') {
-    return { valid: false };
-  }
-
-  // Validate table name format (alphanumeric and underscores)
-  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(table)) {
-    return { valid: false };
-  }
-
-  // Check table is in whitelist
-  if (!ALLOWED_SUBSCRIPTION_TABLES.has(table)) {
-    return { valid: false };
-  }
-
-  // Validate ID format (alphanumeric, hyphens, underscores - UUID safe)
-  if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
-    return { valid: false };
-  }
-
-  return { valid: true, table, id };
-}
 
 /**
  * Send initial subscription data to a newly subscribed client.
  * Fetches the current version for the record and sends it to the client.
+ * Uses parseRecordKey from shared for format validation.
  *
  * @param ctx - Realtime module dependencies
  * @param socket - WebSocket client
@@ -216,20 +188,18 @@ function isValidSubscriptionKey(key: string): { valid: boolean; table?: string; 
  * @complexity O(1) database query
  */
 async function sendInitialData(ctx: WebSocketDeps, socket: WebSocket, key: string): Promise<void> {
-  // Validate subscription key format and table whitelist
-  const validation = isValidSubscriptionKey(key);
-  if (!validation.valid || (validation.table ?? '') === '' || (validation.id ?? '') === '') {
-    ctx.log.warn('Invalid subscription key format or non-whitelisted table', { key });
+  const parsed = parseRecordKey(key);
+  if (parsed == null) {
+    ctx.log.warn('Invalid subscription key format', { key });
     return;
   }
 
-  const { table, id } = validation;
-
   try {
-    const version = await getRecordVersion(ctx.db, table ?? '', id ?? '');
+    const version = await getRecordVersion(ctx, parsed.table, parsed.id);
 
     if (version !== undefined) {
-      socket.send(JSON.stringify({ type: 'update', key, version }));
+      const msg: ServerMessage = { type: 'update', key: key as SubscriptionKey, version };
+      socket.send(JSON.stringify(msg));
     }
   } catch (err) {
     ctx.log.warn('Failed to fetch initial data for subscription', { err, key });
@@ -254,8 +224,8 @@ export interface WebSocketRegistrationOptions {
  * Register WebSocket support on a Fastify server.
  *
  * Creates a WebSocket server (noServer mode) and handles HTTP upgrade
- * requests on the /ws path. Performs CSRF validation and JWT authentication
- * before establishing the connection.
+ * requests on the WEBSOCKET_PATH. Performs CSRF validation and JWT
+ * authentication before establishing the connection.
  *
  * @param server - Fastify server instance
  * @param ctx - Realtime module dependencies
@@ -267,19 +237,15 @@ export function registerWebSocket(
   ctx: WebSocketDeps,
   options: WebSocketRegistrationOptions,
 ): void {
-  // Create WebSocket server without HTTP server (handle upgrade manually)
   const wss = new WebSocketServer({ noServer: true });
   markPluginRegistered();
 
-  // Determine CSRF encryption setting (matches server.ts configuration)
   const isProd = ctx.config.env === 'production';
 
-  // Handle upgrade requests
   server.server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
 
-    // Only handle /ws path
-    if (url.pathname !== '/ws') {
+    if (url.pathname !== WEBSOCKET_PATH) {
       socket.destroy();
       return;
     }
@@ -287,15 +253,11 @@ export function registerWebSocket(
     // =========================================================================
     // CSRF Validation
     // =========================================================================
-    // WebSocket upgrades must include a valid CSRF token to prevent cross-site
-    // WebSocket hijacking attacks.
 
-    // Extract CSRF token from cookie
     const rawCookies: unknown = parseCookies(request.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
-    const csrfCookie = cookies['_csrf'];
+    const csrfCookie = cookies[CSRF_COOKIE_NAME];
 
-    // Extract CSRF token from request (query param or subprotocol)
     let csrfToken: string | undefined;
 
     // Check query parameter first
@@ -307,13 +269,12 @@ export function registerWebSocket(
       request.headers['sec-websocket-protocol'] != null
     ) {
       const protocols = request.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
-      const csrfProtocol = protocols.find((p) => p.startsWith('csrf.'));
+      const csrfProtocol = protocols.find((p) => p.startsWith(CSRF_SUBPROTOCOL_PREFIX));
       if (csrfProtocol != null && csrfProtocol !== '') {
-        csrfToken = csrfProtocol.slice(5); // Remove 'csrf.' prefix
+        csrfToken = csrfProtocol.slice(CSRF_SUBPROTOCOL_PREFIX.length);
       }
     }
 
-    // Validate CSRF token
     const csrfValid = validateCsrfToken(csrfCookie, csrfToken, {
       secret: ctx.config.auth.cookie.secret,
       encrypted: isProd,
@@ -322,7 +283,7 @@ export function registerWebSocket(
 
     if (!csrfValid) {
       ctx.log.warn('WebSocket upgrade rejected: invalid CSRF token');
-      rejectUpgrade(socket, 403, 'Forbidden: Invalid CSRF token');
+      rejectUpgrade(socket, HTTP_STATUS.FORBIDDEN, 'Forbidden: Invalid CSRF token');
       return;
     }
 
@@ -331,7 +292,7 @@ export function registerWebSocket(
     });
   });
 
-  ctx.log.info('WebSocket support registered on /ws');
+  ctx.log.info(`WebSocket support registered on ${WEBSOCKET_PATH}`);
 }
 
 /**
@@ -364,9 +325,8 @@ function handleConnection(
   // Check protocol header (subprotocol) - primary method for browsers
   if (req.headers['sec-websocket-protocol'] != null) {
     const protocols = req.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
-    // Find token (skip known protocol names and CSRF tokens)
     token = protocols.find(
-      (p) => !['graphql', 'json', 'Bearer'].includes(p) && !p.startsWith('csrf.'),
+      (p) => !KNOWN_SUBPROTOCOLS.has(p) && !p.startsWith(CSRF_SUBPROTOCOL_PREFIX),
     );
   }
 
@@ -374,21 +334,20 @@ function handleConnection(
   if (token == null || token === '') {
     const rawCookies: unknown = parseCookies(req.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
-    const accessToken = cookies['accessToken'];
+    const accessToken = cookies[ACCESS_TOKEN_COOKIE_NAME];
     if (typeof accessToken === 'string') {
       token = accessToken;
     }
   }
 
   if (token == null || token === '') {
-    socket.close(1008, 'Authentication required');
+    socket.close(WS_CLOSE_POLICY_VIOLATION, ERROR_MESSAGES.AUTHENTICATION_REQUIRED);
     return;
   }
 
   try {
     const user = verifyToken(token, ctx.config.auth.jwt.secret);
 
-    // Track connection
     const connCount = incrementConnections();
     ctx.log.debug('WebSocket client connected', {
       userId: user.userId,
@@ -399,7 +358,6 @@ function handleConnection(
     const pubsub = ctx.pubsub;
 
     socket.on('message', (data: Buffer | ArrayBuffer | Buffer[]) => {
-      // Forward to subscription manager
       let message = '';
       if (Buffer.isBuffer(data)) {
         message = data.toString();
@@ -430,6 +388,6 @@ function handleConnection(
     });
   } catch (err) {
     ctx.log.warn('WebSocket token verification failed', { err });
-    socket.close(1008, 'Invalid token');
+    socket.close(WS_CLOSE_POLICY_VIOLATION, 'Invalid token');
   }
 }

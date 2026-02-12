@@ -79,39 +79,43 @@ vi.mock('@abe-stack/db', async () => {
   };
 });
 
-vi.mock('../utils', () => ({
-  generateUniqueUsername: vi.fn((_repos: unknown, email: string) =>
-    Promise.resolve(email.split('@')[0]),
-  ),
-  createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      username: user.username ?? user.first_name?.toLowerCase() ?? 'user',
-      firstName: user.firstName ?? user.first_name ?? 'User',
-      lastName: user.lastName ?? user.last_name ?? '',
-      avatarUrl: user.avatarUrl ?? user.avatar_url ?? null,
-      role: user.role,
-      emailVerified: user.emailVerified ?? user.email_verified ?? false,
-      phone: user.phone ?? null,
-      phoneVerified: user.phoneVerified ?? user.phone_verified ?? null,
-      dateOfBirth: user.dateOfBirth ?? user.date_of_birth ?? null,
-      gender: user.gender ?? null,
-      createdAt:
-        user.createdAt?.toISOString?.() ??
-        user.created_at?.toISOString?.() ??
-        new Date().toISOString(),
-      updatedAt:
-        user.updatedAt?.toISOString?.() ??
-        user.updated_at?.toISOString?.() ??
-        new Date().toISOString(),
-    },
-  })),
-  createAccessToken: vi.fn(() => 'mock-access-token'),
-  createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
-}));
+vi.mock('../utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils')>();
+  return {
+    ...actual,
+    generateUniqueUsername: vi.fn((_repos: unknown, email: string) =>
+      Promise.resolve(email.split('@')[0]),
+    ),
+    createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username ?? user.first_name?.toLowerCase() ?? 'user',
+        firstName: user.firstName ?? user.first_name ?? 'User',
+        lastName: user.lastName ?? user.last_name ?? '',
+        avatarUrl: user.avatarUrl ?? user.avatar_url ?? null,
+        role: user.role,
+        emailVerified: user.emailVerified ?? user.email_verified ?? false,
+        phone: user.phone ?? null,
+        phoneVerified: user.phoneVerified ?? user.phone_verified ?? null,
+        dateOfBirth: user.dateOfBirth ?? user.date_of_birth ?? null,
+        gender: user.gender ?? null,
+        createdAt:
+          user.createdAt?.toISOString?.() ??
+          user.created_at?.toISOString?.() ??
+          new Date().toISOString(),
+        updatedAt:
+          user.updatedAt?.toISOString?.() ??
+          user.updated_at?.toISOString?.() ??
+          new Date().toISOString(),
+      },
+    })),
+    createAccessToken: vi.fn(() => 'mock-access-token'),
+    createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
+  };
+});
 
 // ============================================================================
 // Test Helpers
@@ -196,6 +200,7 @@ function createMockRepositories(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    webauthnCredentials: {} as Repositories['webauthnCredentials'],
     trustedDevices: {} as Repositories['trustedDevices'],
     files: {} as Repositories['files'],
   };

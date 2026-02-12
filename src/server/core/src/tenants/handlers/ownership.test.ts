@@ -12,8 +12,8 @@ import type { DbClient, Repositories } from '@abe-stack/db';
 
 const { mockTransferOwnership, mockRecord, mockLogActivity } = vi.hoisted(() => ({
   mockTransferOwnership: vi.fn(),
-  mockRecord: vi.fn(),
-  mockLogActivity: vi.fn(),
+  mockRecord: vi.fn().mockResolvedValue(undefined),
+  mockLogActivity: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../service', () => ({

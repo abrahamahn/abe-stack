@@ -3,6 +3,12 @@
  * Media Hooks Tests
  *
  * Tests for media query and mutation hooks.
+ *
+ * Note: The useMedia hooks use a module-level singleton API client
+ * (created via createMediaApi) that captures `fetch` at creation time.
+ * We mock createMediaApi to return an API that always delegates to
+ * globalThis.fetch at call time, so vi.stubGlobal('fetch', ...) works
+ * correctly across tests.
  */
 
 import { QueryCacheProvider } from '@abe-stack/client-engine';
@@ -10,9 +16,59 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useDeleteMedia, useMedia, useMediaStatus, useUploadMedia } from './useMedia';
-
 import type { MediaMetadata, MediaStatusResponse, MediaUploadResponse } from '../api';
+
+// ============================================================================
+// Mock createMediaApi to avoid singleton fetch caching
+// ============================================================================
+
+vi.mock('../api', () => {
+  return {
+    createMediaApi: () => ({
+      async uploadMedia(file: File): Promise<MediaUploadResponse> {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await globalThis.fetch('/api/media/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = (await response.json()) as Record<string, unknown>;
+        if (!response.ok) {
+          throw new Error((data['message'] as string) ?? 'Upload failed');
+        }
+        return data as unknown as MediaUploadResponse;
+      },
+      async getMedia(id: string): Promise<MediaMetadata> {
+        const response = await globalThis.fetch(`/api/media/${id}`);
+        const data = (await response.json()) as Record<string, unknown>;
+        if (!response.ok) {
+          throw new Error((data['message'] as string) ?? 'Get media failed');
+        }
+        return data as unknown as MediaMetadata;
+      },
+      async deleteMedia(id: string): Promise<void> {
+        const response = await globalThis.fetch(`/api/media/${id}/delete`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          const data = (await response.json()) as Record<string, unknown>;
+          throw new Error((data['message'] as string) ?? 'Delete failed');
+        }
+      },
+      async getMediaStatus(id: string): Promise<MediaStatusResponse> {
+        const response = await globalThis.fetch(`/api/media/${id}/status`);
+        const data = (await response.json()) as Record<string, unknown>;
+        if (!response.ok) {
+          throw new Error((data['message'] as string) ?? 'Get status failed');
+        }
+        return data as unknown as MediaStatusResponse;
+      },
+    }),
+  };
+});
+
+// Import hooks AFTER mock is set up (vi.mock is hoisted automatically)
+const { useDeleteMedia, useMedia, useMediaStatus, useUploadMedia } = await import('./useMedia');
 
 // ============================================================================
 // Test Setup
@@ -200,9 +256,12 @@ describe('useMedia', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 15000 },
+    );
 
     expect(result.current.error).toBeTruthy();
   });
@@ -220,6 +279,7 @@ describe('useDeleteMedia', () => {
         Promise.resolve({
           ok: true,
           status: 204,
+          json: () => Promise.resolve({}),
         } as Response),
       ),
     );
@@ -317,23 +377,27 @@ describe('useMediaStatus', () => {
     vi.stubGlobal('fetch', fetchSpy);
     vi.useFakeTimers();
 
-    const { result } = renderHook(() => useMediaStatus({ id: 'file-123' }), {
+    renderHook(() => useMediaStatus({ id: 'file-123' }), {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.status?.status).toBe('processing');
+    // Flush initial fetch
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
 
     const initialCallCount = fetchSpy.mock.calls.length;
 
-    act(() => {
-      vi.advanceTimersByTime(3000);
+    // Advance past the 3000ms polling interval
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3100);
     });
 
-    await waitFor(() => {
-      expect(fetchSpy.mock.calls.length).toBeGreaterThan(initialCallCount);
-    });
+    expect(fetchSpy.mock.calls.length).toBeGreaterThan(initialCallCount);
 
     vi.useRealTimers();
   });
@@ -354,14 +418,20 @@ describe('useMediaStatus', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalled();
+    // Flush initial fetch
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
     });
 
     const callCount = fetchSpy.mock.calls.length;
 
-    act(() => {
-      vi.advanceTimersByTime(5000);
+    // Advance time - should not trigger more fetches since status is complete
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
     });
 
     expect(fetchSpy.mock.calls.length).toBe(callCount);

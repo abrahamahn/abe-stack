@@ -19,7 +19,6 @@ async function runAudit() {
   });
 
   let output = '';
-  let stderrOutput = '';
 
   child.stdout?.on('data', (data) => {
     const str = data.toString();
@@ -29,7 +28,6 @@ async function runAudit() {
 
   child.stderr?.on('data', (data) => {
     const str = data.toString();
-    stderrOutput += str;
     output += str; // Capture all for parsing
     process.stderr.write(str);
   });
@@ -163,7 +161,7 @@ function parseOutput(fullLog: string) {
     }
     // Jest/Vitest check: "Tests:       3 failed, 7 passed, 10 total"
     // Or "Tests  1 failed | 3 passed"
-    const vitestMatch = new RegExp(/Tests\s+(\d+)\s+failed/).exec(line);
+    const vitestMatch = /Tests\s+(\d+)\s+failed/.exec(line);
     if (vitestMatch) {
       const errors = parseInt(vitestMatch[1], 10);
       totalTestErrors += errors;

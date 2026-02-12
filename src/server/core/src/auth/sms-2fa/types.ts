@@ -7,6 +7,8 @@
  * @module sms-2fa
  */
 
+import { AUTH_EXPIRY, MS_PER_MINUTE, SMS_LIMITS } from '@abe-stack/shared';
+
 // ============================================================================
 // Request/Response Types
 // ============================================================================
@@ -66,13 +68,13 @@ export interface SmsVerificationCode {
 // ============================================================================
 
 /** How long an SMS verification code is valid (in milliseconds) */
-export const SMS_CODE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+export const SMS_CODE_EXPIRY_MS = AUTH_EXPIRY.SMS_CODE_MINUTES * MS_PER_MINUTE;
 
 /** Maximum number of verification attempts per code */
-export const SMS_MAX_ATTEMPTS = 3;
+export const SMS_MAX_ATTEMPTS = SMS_LIMITS.MAX_ATTEMPTS;
 
 /** Maximum SMS sends per hour per user */
-export const SMS_RATE_LIMIT_HOURLY = 3;
+export const SMS_RATE_LIMIT_HOURLY = SMS_LIMITS.RATE_LIMIT_HOURLY;
 
 /** Maximum SMS sends per day per user */
-export const SMS_RATE_LIMIT_DAILY = 10;
+export const SMS_RATE_LIMIT_DAILY = SMS_LIMITS.RATE_LIMIT_DAILY;

@@ -27,7 +27,9 @@ type SeedUserRole = 'admin' | 'user';
 export interface SeedUser {
   email: string;
   password: string;
-  name: string;
+  username: string;
+  firstName: string;
+  lastName: string;
   role: SeedUserRole;
 }
 
@@ -40,19 +42,25 @@ export const TEST_USERS: SeedUser[] = [
   {
     email: 'admin@example.com',
     password: 'password123',
-    name: 'Admin User',
+    username: 'admin',
+    firstName: 'Admin',
+    lastName: 'User',
     role: 'admin',
   },
   {
     email: 'user@example.com',
     password: 'password123',
-    name: 'Test User',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
     role: 'user',
   },
   {
     email: 'demo@example.com',
     password: 'password123',
-    name: 'Demo User',
+    username: 'demo',
+    firstName: 'Demo',
+    lastName: 'User',
     role: 'user',
   },
 ];
@@ -98,19 +106,24 @@ export async function seed(): Promise<void> {
 
     try {
       const canonical = canonicalizeEmail(user.email);
-      const sql = `
-        INSERT INTO ${USERS_TABLE} (email, canonical_email, password_hash, name, role, email_verified_at, email_verified)
-        VALUES ($1, $2, $3, $4, $5, NOW(), true)
-        ON CONFLICT (email) DO UPDATE SET
-          canonical_email = EXCLUDED.canonical_email,
-          password_hash = EXCLUDED.password_hash,
-          email_verified_at = COALESCE(${USERS_TABLE}.email_verified_at, EXCLUDED.email_verified_at),
-          email_verified = true
-      `;
+      // USERS_TABLE is a compile-time constant from @abe-stack/db (not user input)
+      const table = USERS_TABLE;
+      const sql = [
+        `INSERT INTO ${table} (email, canonical_email, password_hash, username, first_name, last_name, role, email_verified_at, email_verified)`,
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), true)',
+        'ON CONFLICT (email) DO UPDATE SET',
+        '  canonical_email = EXCLUDED.canonical_email,',
+        '  password_hash = EXCLUDED.password_hash,',
+        '  username = EXCLUDED.username,',
+        '  first_name = EXCLUDED.first_name,',
+        '  last_name = EXCLUDED.last_name,',
+        `  email_verified_at = COALESCE(${table}.email_verified_at, EXCLUDED.email_verified_at),`,
+        '  email_verified = true',
+      ].join('\n');
 
       await db.execute({
         text: sql,
-        values: [user.email, canonical, passwordHash, user.name, user.role],
+        values: [user.email, canonical, passwordHash, user.username, user.firstName, user.lastName, user.role],
       });
 
       console.log(`  ✓ ${user.email} (${user.role})`);

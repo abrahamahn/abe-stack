@@ -15,7 +15,10 @@
 import {
   BadRequestError,
   DeferredPromise,
+  delay,
   ForbiddenError,
+  generateSecureId,
+  HTTP_STATUS,
   InternalError,
   MS_PER_SECOND,
   ReactiveMap,
@@ -134,13 +137,6 @@ const DEFAULT_STORAGE_KEY = 'abe-transaction-queue';
 const DEFAULT_MAX_BATCH_SIZE = 100_000;
 const DEFAULT_MAX_RETRIES = 10;
 
-/** HTTP status codes */
-const STATUS_OK = 200;
-const STATUS_BAD_REQUEST = 400;
-const STATUS_FORBIDDEN = 403;
-const STATUS_CONFLICT = 409;
-const STATUS_UNPROCESSABLE = 422;
-const STATUS_INTERNAL_ERROR = 500;
 const STATUS_OFFLINE = 0;
 
 // ============================================================================
@@ -181,15 +177,9 @@ function extractPointers(operations: RealtimeOperation[]): TransactionRecordPoin
  * Generate a random ID for transactions.
  */
 function generateId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  return `${Date.now().toString(36)}-${generateSecureId(7)}`;
 }
 
-/**
- * Sleep for a given number of milliseconds.
- */
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // ============================================================================
 // TransactionQueue Class
@@ -503,12 +493,12 @@ export class TransactionQueue {
       const response = await this.options.submitTransaction(transaction);
 
       // Success
-      if (response.status === STATUS_OK) {
+      if (response.status === HTTP_STATUS.OK) {
         return { type: 'ok' };
       }
 
       // Validation error - rollback
-      if (response.status === STATUS_BAD_REQUEST || response.status === STATUS_UNPROCESSABLE) {
+      if (response.status === HTTP_STATUS.BAD_REQUEST || response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
         const error = new BadRequestError(
           response.message ?? 'Validation failed',
           'VALIDATION_ERROR',
@@ -517,20 +507,20 @@ export class TransactionQueue {
       }
 
       // Permission error - rollback
-      if (response.status === STATUS_FORBIDDEN) {
+      if (response.status === HTTP_STATUS.FORBIDDEN) {
         const error = new ForbiddenError(response.message ?? 'Permission denied');
         return { type: 'rollback', error };
       }
 
       // Conflict error - retry immediately (optimistic locking)
-      if (response.status === STATUS_CONFLICT) {
+      if (response.status === HTTP_STATUS.CONFLICT) {
         continue;
       }
 
       // Server error - retry with exponential backoff
-      if (response.status === STATUS_INTERNAL_ERROR) {
+      if (response.status === HTTP_STATUS.INTERNAL_SERVER_ERROR) {
         const backoffMs = Math.min(2 ** tries, 12) * 10 * MS_PER_SECOND;
-        await sleep(backoffMs);
+        await delay(backoffMs);
         continue;
       }
 

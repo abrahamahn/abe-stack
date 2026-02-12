@@ -33,7 +33,7 @@ import {
   type QuietHoursConfig,
   type TypePreferences,
 } from '@abe-stack/db';
-import { DEFAULT_NOTIFICATION_PREFERENCES } from '@abe-stack/shared';
+import { DAYS_PER_WEEK, DEFAULT_NOTIFICATION_PREFERENCES, MS_PER_DAY } from '@abe-stack/shared';
 
 import { PushSubscriptionExistsError } from './errors';
 
@@ -581,7 +581,7 @@ export async function getSubscriptionStats(db: DbClient): Promise<{
   expiringSoon: number;
 }> {
   const now = new Date();
-  const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const weekFromNow = new Date(now.getTime() + DAYS_PER_WEEK * MS_PER_DAY);
 
   const totalResult = await db.queryOne<{ count: number }>(
     selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql(),

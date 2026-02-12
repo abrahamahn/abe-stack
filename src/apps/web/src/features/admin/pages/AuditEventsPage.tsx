@@ -6,6 +6,7 @@
  * Supports filtering by action, actor, and tenant.
  */
 
+import { formatDateTime, getAuditSeverityTone, truncate } from '@abe-stack/shared';
 import {
   Badge,
   Button,
@@ -33,31 +34,8 @@ import type { ReactElement } from 'react';
 // Constants
 // ============================================================================
 
-const SEVERITY_TONES: Record<string, 'info' | 'warning' | 'danger' | 'success'> = {
-  info: 'info',
-  warn: 'warning',
-  error: 'danger',
-  critical: 'danger',
-};
-
 const CATEGORIES = ['', 'security', 'admin', 'system', 'billing'] as const;
 const LIMITS = [50, 100, 200, 500] as const;
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function formatDateTime(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
-
-function truncate(value: string, max: number): string {
-  return value.length > max ? value.slice(0, max) + '...' : value;
-}
 
 // ============================================================================
 // Component
@@ -198,7 +176,7 @@ export function AuditEventsPage(): ReactElement {
                 <Badge>{event.category}</Badge>
               </TableCell>
               <TableCell>
-                <Badge tone={SEVERITY_TONES[event.severity] ?? 'info'}>{event.severity}</Badge>
+                <Badge tone={getAuditSeverityTone(event.severity)}>{event.severity}</Badge>
               </TableCell>
               <TableCell>
                 <Text size="sm">

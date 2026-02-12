@@ -14,7 +14,7 @@
 import path from 'node:path';
 
 import { RateLimiter } from '@abe-stack/server-engine';
-import { createConsoleLogger, isAppError } from '@abe-stack/shared';
+import { createConsoleLogger, ERROR_CODES, HTTP_BODY_LIMIT, isAppError } from '@abe-stack/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastify from 'fastify';
@@ -66,7 +66,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     // This helps prevent denial-of-service attacks via large payloads.
     // Note: File upload routes should configure their own higher limits
     // (e.g., 50MB for multipart uploads) on a per-route basis.
-    bodyLimit: 1024 * 1024, // 1MB
+    bodyLimit: HTTP_BODY_LIMIT,
   });
 
   // Hybrid Context Hook (2026 Pattern)
@@ -99,7 +99,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
       };
       const info: AppErrorInfo = {
         statusCode: e.statusCode,
-        code: e.code ?? 'INTERNAL_ERROR',
+        code: e.code ?? ERROR_CODES.INTERNAL_ERROR,
         message: e.message,
       };
       if (e.details !== undefined) {
@@ -117,7 +117,22 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     openapi: {
       info: {
         title: 'ABE Stack API',
-        description: 'API documentation for the ABE Stack application',
+        description: [
+          'API documentation for the ABE Stack application.',
+          '',
+          '## Authentication',
+          'Most endpoints require a Bearer JWT token in the `Authorization` header.',
+          'Obtain a token via `POST /api/auth/login` or `POST /api/auth/register`.',
+          '',
+          '## Rate Limiting',
+          'All endpoints enforce rate limits. Response headers:',
+          '- `X-RateLimit-Limit` — max requests per window',
+          '- `X-RateLimit-Remaining` — requests remaining',
+          '- `X-RateLimit-Reset` — window reset time (Unix epoch seconds)',
+          '',
+          '## Error Format',
+          'All errors return a JSON body: `{ "code": "ERROR_CODE", "message": "Human-readable message" }`.',
+        ].join('\n'),
         version: '1.0.0',
       },
       components: {
@@ -126,6 +141,21 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
             type: 'http',
             scheme: 'bearer',
             bearerFormat: 'JWT',
+          },
+        },
+        schemas: {
+          ApiError: {
+            type: 'object',
+            properties: {
+              code: { type: 'string', description: 'Machine-readable error code' },
+              message: { type: 'string', description: 'Human-readable error message' },
+              details: {
+                type: 'object',
+                description: 'Optional field-level validation errors',
+                additionalProperties: true,
+              },
+            },
+            required: ['code', 'message'],
           },
         },
       },

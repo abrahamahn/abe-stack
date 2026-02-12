@@ -6,7 +6,11 @@ import { registerStaticServe } from './static';
 // Mock node:fs
 vi.mock('node:fs', () => ({
   createReadStream: vi.fn(() => ({ pipe: vi.fn() })),
-  statSync: vi.fn(),
+}));
+
+// Mock node:fs/promises
+vi.mock('node:fs/promises', () => ({
+  open: vi.fn(),
 }));
 
 describe('Static File Serving', () => {
@@ -33,7 +37,11 @@ describe('Static File Serving', () => {
         prefix: '/files',
       });
 
-      expect(mockServer.get).toHaveBeenCalledWith('/files/*', expect.any(Function));
+      expect(mockServer.get).toHaveBeenCalledWith(
+        '/files/*',
+        expect.objectContaining({ preHandler: expect.any(Function) }),
+        expect.any(Function),
+      );
     });
 
     test('should normalize prefix without trailing slash', () => {
@@ -42,7 +50,11 @@ describe('Static File Serving', () => {
         prefix: '/files',
       });
 
-      expect(mockServer.get).toHaveBeenCalledWith('/files/*', expect.any(Function));
+      expect(mockServer.get).toHaveBeenCalledWith(
+        '/files/*',
+        expect.objectContaining({ preHandler: expect.any(Function) }),
+        expect.any(Function),
+      );
     });
 
     test('should handle prefix with trailing slash', () => {
@@ -51,7 +63,11 @@ describe('Static File Serving', () => {
         prefix: '/files/',
       });
 
-      expect(mockServer.get).toHaveBeenCalledWith('/files/*', expect.any(Function));
+      expect(mockServer.get).toHaveBeenCalledWith(
+        '/files/*',
+        expect.objectContaining({ preHandler: expect.any(Function) }),
+        expect.any(Function),
+      );
     });
 
     test('should log registration info', () => {
@@ -76,8 +92,8 @@ describe('Static File Serving', () => {
           maxAge: 3600,
         });
         const calls = mockServer.get.mock.calls[0];
-        if (calls !== undefined && calls !== null && typeof calls[1] === 'function') {
-          routeHandler = calls[1] as (req: unknown, reply: unknown) => Promise<unknown>;
+        if (calls !== undefined && calls !== null && typeof calls[2] === 'function') {
+          routeHandler = calls[2] as (req: unknown, reply: unknown) => Promise<unknown>;
         }
       });
 
@@ -108,12 +124,10 @@ describe('Static File Serving', () => {
       });
 
       test('should return 404 when file not found', async () => {
-        const { statSync } = await import('node:fs');
-        (statSync as ReturnType<typeof vi.fn>).mockImplementation(() => {
-          const error: NodeJS.ErrnoException = new Error('ENOENT');
-          error.code = 'ENOENT';
-          throw error;
-        });
+        const { open } = await import('node:fs/promises');
+        (open as ReturnType<typeof vi.fn>).mockRejectedValue(
+          Object.assign(new Error('ENOENT'), { code: 'ENOENT' }),
+        );
 
         const mockRequest = { url: '/files/nonexistent.txt' };
         const mockReply = {
@@ -128,11 +142,15 @@ describe('Static File Serving', () => {
       });
 
       test('should return 404 when path is directory', async () => {
-        const { statSync } = await import('node:fs');
-        (statSync as ReturnType<typeof vi.fn>).mockReturnValue({
-          isFile: () => false,
-          size: 0,
-          mtime: new Date(),
+        const { open } = await import('node:fs/promises');
+        (open as ReturnType<typeof vi.fn>).mockResolvedValue({
+          stat: vi.fn().mockResolvedValue({
+            isFile: () => false,
+            size: 0,
+            mtime: new Date(),
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          fd: 3,
         });
 
         const mockRequest = { url: '/files/somedir' };
@@ -147,21 +165,27 @@ describe('Static File Serving', () => {
       });
 
       test('should serve file with correct headers', async () => {
-        const { statSync, createReadStream } = await import('node:fs');
+        const { open } = await import('node:fs/promises');
+        const { createReadStream } = await import('node:fs');
         const mockStream = { pipe: vi.fn() };
         const mtime = new Date('2024-01-01');
+        const mockFd = 3;
 
-        (statSync as ReturnType<typeof vi.fn>).mockReturnValue({
-          isFile: () => true,
-          size: 1024,
-          mtime,
+        (open as ReturnType<typeof vi.fn>).mockResolvedValue({
+          stat: vi.fn().mockResolvedValue({
+            isFile: () => true,
+            size: 1024,
+            mtime,
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          fd: mockFd,
         });
         (createReadStream as ReturnType<typeof vi.fn>).mockReturnValue(mockStream);
 
         const mockRequest = { url: '/files/image.jpg' };
         const mockReply = {
           header: vi.fn().mockReturnThis(),
-          send: vi.fn(),
+          send: vi.fn().mockResolvedValue(undefined),
         };
 
         await routeHandler(mockRequest, mockReply);
@@ -170,22 +194,28 @@ describe('Static File Serving', () => {
         expect(mockReply.header).toHaveBeenCalledWith('Content-Length', 1024);
         expect(mockReply.header).toHaveBeenCalledWith('Cache-Control', 'public, max-age=3600');
         expect(mockReply.header).toHaveBeenCalledWith('Last-Modified', mtime.toUTCString());
+        expect(createReadStream).toHaveBeenCalledWith('', { fd: mockFd, autoClose: true });
         expect(mockReply.send).toHaveBeenCalledWith(mockStream);
       });
 
       test('should handle PNG files', async () => {
-        const { statSync, createReadStream } = await import('node:fs');
-        (statSync as ReturnType<typeof vi.fn>).mockReturnValue({
-          isFile: () => true,
-          size: 2048,
-          mtime: new Date(),
+        const { open } = await import('node:fs/promises');
+        const { createReadStream } = await import('node:fs');
+        (open as ReturnType<typeof vi.fn>).mockResolvedValue({
+          stat: vi.fn().mockResolvedValue({
+            isFile: () => true,
+            size: 2048,
+            mtime: new Date(),
+          }),
+          close: vi.fn().mockResolvedValue(undefined),
+          fd: 3,
         });
         (createReadStream as ReturnType<typeof vi.fn>).mockReturnValue({ pipe: vi.fn() });
 
         const mockRequest = { url: '/files/image.png' };
         const mockReply = {
           header: vi.fn().mockReturnThis(),
-          send: vi.fn(),
+          send: vi.fn().mockResolvedValue(undefined),
         };
 
         await routeHandler(mockRequest, mockReply);
@@ -194,10 +224,8 @@ describe('Static File Serving', () => {
       });
 
       test('should return 500 on unexpected error', async () => {
-        const { statSync } = await import('node:fs');
-        (statSync as ReturnType<typeof vi.fn>).mockImplementation(() => {
-          throw new Error('Unexpected error');
-        });
+        const { open } = await import('node:fs/promises');
+        (open as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Unexpected error'));
 
         const mockRequest = { url: '/files/file.txt' };
         const mockReply = {

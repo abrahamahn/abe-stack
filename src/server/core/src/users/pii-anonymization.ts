@@ -24,15 +24,13 @@ import {
   type DbClient,
   type User,
 } from '@abe-stack/db';
+import { RETENTION_PERIODS } from '@abe-stack/shared';
 
 import type { UsersLogger } from './types';
 
 // ============================================================================
 // Constants
 // ============================================================================
-
-/** Default grace period in days after soft-delete before PII is anonymized */
-const DEFAULT_GRACE_PERIOD_DAYS = 30;
 
 /** Placeholder name for anonymized users (preserves audit trail) */
 const ANONYMIZED_NAME = 'Deleted User';
@@ -91,7 +89,7 @@ function hashEmail(email: string): string {
 export async function anonymizeExpiredUsers(
   db: DbClient,
   log: UsersLogger,
-  gracePeriodDays: number = DEFAULT_GRACE_PERIOD_DAYS,
+  gracePeriodDays: number = RETENTION_PERIODS.PII_GRACE_DAYS,
 ): Promise<AnonymizeResult> {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - gracePeriodDays);

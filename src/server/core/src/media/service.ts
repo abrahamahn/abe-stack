@@ -7,8 +7,13 @@
  * All functions accept dependencies as explicit parameters for testability.
  */
 
-import { randomUUID } from 'node:crypto';
-
+import {
+  ALLOWED_MEDIA_MIME_TYPES,
+  DEFAULT_MAX_MEDIA_FILE_SIZE,
+  generateFileId,
+  MIME_TO_EXT,
+  sanitizeFilename,
+} from '@abe-stack/media';
 import { BadRequestError, NotFoundError } from '@abe-stack/shared';
 
 import type {
@@ -29,75 +34,9 @@ import type {
 /** Storage key prefix for media files */
 const MEDIA_PATH_PREFIX = 'media';
 
-/** Maximum file size for media uploads (100MB) */
-const MAX_MEDIA_FILE_SIZE = 100 * 1024 * 1024;
-
-/** Allowed MIME types for media uploads */
-const ALLOWED_MEDIA_TYPES = [
-  // Images
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/avif',
-  // Audio
-  'audio/mpeg',
-  'audio/wav',
-  'audio/ogg',
-  'audio/flac',
-  'audio/aac',
-  'audio/mp4',
-  // Video
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-  'video/x-msvideo',
-] as const;
-
 // ============================================================================
 // Helpers
 // ============================================================================
-
-/**
- * Sanitize a filename by removing path separators and control characters.
- *
- * @param filename - Raw filename from upload
- * @returns Sanitized filename safe for storage
- * @complexity O(n) where n is filename length
- */
-function sanitizeFilename(filename: string): string {
-  // Remove path separators and special characters
-  let sanitized = filename.replace(/[/\\:*?"<>|]/g, '_');
-
-  // Trim whitespace and leading dots
-  sanitized = sanitized.trim().replace(/^\.+|\.+$/g, '');
-
-  // Limit length
-  if (sanitized.length > 255) {
-    const ext = sanitized.split('.').pop();
-    const name = sanitized.slice(
-      0,
-      255 - (ext !== undefined && ext.length > 0 ? ext.length + 1 : 0),
-    );
-    sanitized = ext !== undefined && ext.length > 0 ? `${name}.${ext}` : name;
-  }
-
-  if (sanitized.length === 0) {
-    sanitized = 'file';
-  }
-
-  return sanitized;
-}
-
-/**
- * Generate a unique file ID.
- *
- * @returns UUID string without dashes
- * @complexity O(1)
- */
-function generateFileId(): string {
-  return randomUUID().replace(/-/g, '');
-}
 
 /**
  * Derive extension from MIME type.
@@ -107,24 +46,7 @@ function generateFileId(): string {
  * @complexity O(1)
  */
 function getExtensionFromMimeType(mimeType: string): string {
-  const mimeToExt = new Map<string, string>([
-    ['image/jpeg', 'jpg'],
-    ['image/png', 'png'],
-    ['image/gif', 'gif'],
-    ['image/webp', 'webp'],
-    ['image/avif', 'avif'],
-    ['audio/mpeg', 'mp3'],
-    ['audio/wav', 'wav'],
-    ['audio/ogg', 'ogg'],
-    ['audio/flac', 'flac'],
-    ['audio/aac', 'aac'],
-    ['audio/mp4', 'm4a'],
-    ['video/mp4', 'mp4'],
-    ['video/webm', 'webm'],
-    ['video/quicktime', 'mov'],
-    ['video/x-msvideo', 'avi'],
-  ]);
-  return mimeToExt.get(mimeType) ?? 'bin';
+  return MIME_TO_EXT[mimeType] ?? 'bin';
 }
 
 /**
@@ -175,9 +97,9 @@ export async function uploadMedia(
   file: MediaUploadInput,
 ): Promise<MediaUploadResult> {
   // Validate file size
-  if (file.size > MAX_MEDIA_FILE_SIZE) {
+  if (file.size > DEFAULT_MAX_MEDIA_FILE_SIZE) {
     throw new BadRequestError(
-      `File too large. Maximum size: ${String(MAX_MEDIA_FILE_SIZE / 1024 / 1024)}MB`,
+      `File too large. Maximum size: ${String(DEFAULT_MAX_MEDIA_FILE_SIZE / 1024 / 1024)}MB`,
     );
   }
 
@@ -186,9 +108,9 @@ export async function uploadMedia(
   }
 
   // Validate MIME type
-  if (!(ALLOWED_MEDIA_TYPES as readonly string[]).includes(file.mimetype)) {
+  if (!(ALLOWED_MEDIA_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
     throw new BadRequestError(
-      `File type not allowed: ${file.mimetype}. Allowed types: ${ALLOWED_MEDIA_TYPES.join(', ')}`,
+      `File type not allowed: ${file.mimetype}. Allowed types: ${ALLOWED_MEDIA_MIME_TYPES.join(', ')}`,
     );
   }
 

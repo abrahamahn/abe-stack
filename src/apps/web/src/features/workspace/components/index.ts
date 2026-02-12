@@ -25,3 +25,15 @@ export {
   type MemberDetail,
 } from './MemberDetailPanel';
 export { WorkspaceAuditLog, type WorkspaceAuditLogProps } from './WorkspaceAuditLog';
+export {
+  AuditEventDetailModal,
+  type AuditEventDetailModalProps,
+} from './AuditEventDetailModal';
+export {
+  WorkspaceWelcomeBanner,
+  type WorkspaceWelcomeBannerProps,
+} from './WorkspaceWelcomeBanner';
+export { WorkspaceLogoUpload, type WorkspaceLogoUploadProps } from './WorkspaceLogoUpload';
+export { WorkspaceDangerZone, type WorkspaceDangerZoneProps } from './WorkspaceDangerZone';
+export { WebhookManagement, type WebhookManagementProps } from './WebhookManagement';
+export { WebhookDetailView, type WebhookDetailViewProps } from './WebhookDetailView';

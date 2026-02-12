@@ -7,15 +7,16 @@
  * the built-in /health route conflict).
  */
 
+import { registerRouteMap } from '@abe-stack/server-engine';
 import fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { registerRouteMap } from '@abe-stack/server-engine';
-
 import { systemRoutes } from '../../routes/system.routes';
+
 import { createTest } from './test-utils';
 
-import type { FastifyInstance } from 'fastify';
+import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { FastifyInstance, preHandlerHookHandler } from 'fastify';
 
 // Mock @abe-stack/websocket to avoid real WebSocket dependency
 vi.mock('@abe-stack/websocket', () => ({
@@ -96,7 +97,20 @@ describe('health integration', () => {
     };
 
     // System routes registered with empty prefix (no /api)
-    registerRouteMap(server, ctx as never, systemRoutes, { prefix: '' });
+    // System routes are public, so we provide a dummy jwtSecret and authGuardFactory
+    // (they won't be used since systemRoutes are all public)
+    const dummyAuthGuard = (): preHandlerHookHandler => {
+      const handler: preHandlerHookHandler = (_req, _reply, done) => {
+        // No-op guard for public routes
+        done();
+      };
+      return handler;
+    };
+    registerRouteMap(server, ctx as never, systemRoutes, {
+      prefix: '',
+      jwtSecret: 'test-secret',
+      authGuardFactory: dummyAuthGuard as AuthGuardFactory,
+    });
 
     await server.ready();
   });

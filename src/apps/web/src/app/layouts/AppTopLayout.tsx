@@ -3,6 +3,8 @@ import { toastStore } from '@abe-stack/react';
 import { Button, Heading, ResizablePanel, Skeleton, Text, useSidePeek } from '@abe-stack/ui';
 import { TenantSwitcher } from '@features/workspace/components';
 
+import { AppUndoRedo } from './AppUndoRedo';
+
 import type { AuthMode } from '@abe-stack/ui';
 import type { ReactElement } from 'react';
 
@@ -77,6 +79,7 @@ export const AppTopLayout = ({
               <Text as="span">{isOpen ? 'Close Peek' : 'Side Peek'}</Text>
             </span>
           </Button>
+          {isAuthenticated && <AppUndoRedo />}
         </div>
         <div className="flex-1 flex-center">
           <Heading as="h1" size="lg" className="m-0">

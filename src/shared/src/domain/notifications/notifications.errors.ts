@@ -16,6 +16,13 @@ import {
 } from '../../core/errors';
 
 // ============================================================================
+// Constants
+// ============================================================================
+
+/** Maximum notification payload size in bytes (4KB) */
+export const NOTIFICATION_PAYLOAD_MAX_SIZE = 4096;
+
+// ============================================================================
 // Subscription Errors
 // ============================================================================
 
@@ -41,8 +48,7 @@ export class SubscriptionExistsError extends ConflictError {
   }
 }
 
-export { SubscriptionExistsError as PushSubscriptionExistsError };
-export { SubscriptionNotFoundError as PushSubscriptionNotFoundError };
+export { SubscriptionExistsError as PushSubscriptionExistsError, SubscriptionNotFoundError as PushSubscriptionNotFoundError };
 
 /**
  * Invalid push subscription data
@@ -93,7 +99,7 @@ export class NotificationSendError extends AppError {
 export class PayloadTooLargeError extends BadRequestError {
   constructor(
     public readonly actualSize: number,
-    public readonly maxSize: number = 4096,
+    public readonly maxSize: number = NOTIFICATION_PAYLOAD_MAX_SIZE,
   ) {
     super(
       `Notification payload too large: ${actualSize.toString()} bytes (max: ${maxSize.toString()} bytes)`,

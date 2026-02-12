@@ -7,7 +7,7 @@
  * @module handlers/register
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { isCaptchaRequired, verifyCaptchaToken } from '../security';
 import { registerUser, type RegisterResult } from '../service';
@@ -42,7 +42,7 @@ export async function handleRegister(
       const captchaResult = await verifyCaptchaToken(ctx.config.auth, captchaToken, ipAddress);
       if (!captchaResult.success) {
         return {
-          status: 400,
+          status: HTTP_STATUS.BAD_REQUEST,
           body: { message: 'CAPTCHA verification failed' },
         };
       }
@@ -66,7 +66,7 @@ export async function handleRegister(
 
     // No cookies set - user must verify email first
     return {
-      status: 201,
+      status: HTTP_STATUS.CREATED,
       body: result,
     };
   } catch (error) {
@@ -80,7 +80,7 @@ export async function handleRegister(
         'Failed to send verification email after user creation',
       );
       return {
-        status: 201,
+        status: HTTP_STATUS.CREATED,
         body: {
           status: 'pending_verification',
           message:

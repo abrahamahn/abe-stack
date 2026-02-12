@@ -3,12 +3,21 @@
  * Database Utilities
  *
  * Helpers for working with database records and column mappings.
- * Re-exports case-conversion utilities with properly preserved generic overloads.
+ * Re-exports shared case-conversion utilities; adds DB-specific wrappers
+ * that filter undefined values and use ColumnMapping types.
  *
  * @module
  */
 
-import { Buffer } from 'node:buffer';
+import {
+  camelToSnake,
+  camelizeKeys,
+  snakeToCamel,
+  snakeifyKeys,
+} from '@abe-stack/shared';
+
+// Re-export shared casing utilities so the barrel (utils/index.ts) stays unchanged
+export { camelToSnake, camelizeKeys, snakeToCamel, snakeifyKeys };
 
 // ============================================================================
 // Column Mapping Type
@@ -20,116 +29,7 @@ import { Buffer } from 'node:buffer';
 export type ColumnMapping = Record<string, string>;
 
 // ============================================================================
-// String Case Conversion
-// ============================================================================
-
-/**
- * Convert a camelCase or PascalCase string to snake_case
- * @param str - The string to convert
- * @returns snake_case version of the string
- * @example camelToSnake('camelCase') // => 'camel_case'
- * @example camelToSnake('XMLHttpRequest') // => 'xml_http_request'
- * @complexity O(n) where n is string length
- */
-export function camelToSnake(str: string): string {
-  if (str === str.toUpperCase()) {
-    return str.toLowerCase();
-  }
-  return str
-    .replace(/([a-z\d_])([A-Z])/g, '$1_$2')
-    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, '$1_')
-    .replace(/-/g, '_')
-    .toLowerCase();
-}
-
-/**
- * Convert a snake_case or kebab-case string to camelCase
- * @param str - The string to convert
- * @returns camelCase version of the string
- * @example snakeToCamel('created_at') // => 'createdAt'
- * @example snakeToCamel('SCREAMING_SNAKE') // => 'screamingSnake'
- * @complexity O(n) where n is string length
- */
-export function snakeToCamel(str: string): string {
-  const input = str === str.toUpperCase() ? str.toLowerCase() : str;
-  return input
-    .replace(/[-_]+(.)?/g, (_, c: string | undefined) =>
-      c !== undefined && c !== '' ? c.toUpperCase() : '',
-    )
-    .replace(/^(.)/, (c: string) => c.toLowerCase());
-}
-
-// ============================================================================
-// Recursive Key Mapping
-// ============================================================================
-
-/**
- * Recursively map all string keys of an object using a converter function.
- * Handles arrays, nested objects, circular references, Date/RegExp pass-through.
- * @param obj - The value to transform
- * @param mapper - Key name converter function
- * @param seen - WeakMap for circular reference detection
- * @returns Transformed value with mapped keys
- * @complexity O(n) where n is total number of keys across all nested objects
- */
-function mapKeys(
-  obj: unknown,
-  mapper: (key: string) => string,
-  seen = new WeakMap<object, unknown>(),
-): unknown {
-  if (obj === null || obj === undefined || typeof obj !== 'object') {
-    return obj;
-  }
-  if (obj instanceof Date || obj instanceof RegExp || Buffer.isBuffer(obj)) {
-    return obj;
-  }
-  if (seen.has(obj)) {
-    return seen.get(obj);
-  }
-  if (Array.isArray(obj)) {
-    const result: unknown[] = [];
-    seen.set(obj, result);
-    obj.forEach((v) => result.push(mapKeys(v, mapper, seen)));
-    return result;
-  }
-  const result: Record<string | symbol, unknown> = {};
-  seen.set(obj, result);
-  const o = obj as Record<string, unknown>;
-  for (const key in o) {
-    if (Object.prototype.hasOwnProperty.call(o, key)) {
-      const newKey = mapper(key);
-      result[newKey] = mapKeys(o[key], mapper, seen);
-    }
-  }
-  const symKeys = Object.getOwnPropertySymbols(o);
-  for (const sym of symKeys) {
-    result[sym] = (o as Record<symbol, unknown>)[sym];
-  }
-  return result;
-}
-
-/**
- * Recursively convert all object keys to snake_case
- * @param obj - Object or value to convert
- * @returns Clone with snake_case keys
- * @complexity O(n) where n is total number of keys
- */
-export function snakeifyKeys(obj: unknown): unknown {
-  return mapKeys(obj, camelToSnake);
-}
-
-/**
- * Recursively convert all object keys to camelCase
- * @param obj - Object or value to convert
- * @returns Clone with camelCase keys
- * @complexity O(n) where n is total number of keys
- */
-export function camelizeKeys(obj: unknown): unknown {
-  return mapKeys(obj, snakeToCamel);
-}
-
-// ============================================================================
-// Case Conversion (with preserved generic overloads)
+// Case Conversion (DB-specific wrappers with ColumnMapping support)
 // ============================================================================
 
 /**

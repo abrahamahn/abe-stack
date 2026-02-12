@@ -507,7 +507,7 @@ export function highlightCode(code: string, language: string, theme: SyntaxTheme
   const baseStyle: React.CSSProperties = {
     color: theme.foreground,
     backgroundColor: 'transparent',
-    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+    fontFamily: 'var(--ui-font-family-mono, monospace)',
     fontSize: 'var(--ui-font-size-sm)',
     lineHeight: '1.4',
   };
@@ -810,7 +810,7 @@ export const SyntaxHighlighter = ({
     color: resolvedTheme.foreground,
     padding: 'var(--ui-gap-lg)',
     borderRadius: 'var(--ui-radius-md)',
-    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+    fontFamily: 'var(--ui-font-family-mono, monospace)',
     fontSize: 'var(--ui-font-size-sm)',
     lineHeight: '1.4',
     overflow: 'auto',
@@ -833,7 +833,7 @@ export const SyntaxHighlighter = ({
                       paddingRight: 'var(--ui-gap-lg)',
                       textAlign: 'right',
                       userSelect: 'none',
-                      borderRight: `1px solid ${resolvedTheme.foreground}20`,
+                      borderRight: `1px solid color-mix(in srgb, ${resolvedTheme.foreground} 12%, transparent)`,
                     }}
                   >
                     {lineNumber}

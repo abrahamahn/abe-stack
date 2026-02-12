@@ -5,6 +5,7 @@
  * Displays detailed information about a single security event.
  */
 
+import { formatDateTime, formatSecurityEventType, getSecuritySeverityTone } from '@abe-stack/shared';
 import { Badge, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { JSX } from 'react';
@@ -42,33 +43,6 @@ function hasValidMetadata(
     event.metadata !== null &&
     Object.keys(event.metadata).length > 0
   );
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-function severityToTone(severity: string): 'danger' | 'warning' | 'success' | 'info' {
-  switch (severity) {
-    case 'critical':
-      return 'danger';
-    case 'high':
-      return 'danger';
-    case 'medium':
-      return 'warning';
-    case 'low':
-      return 'success';
-    default:
-      return 'info';
-  }
-}
-
-function formatEventType(eventType: string): string {
-  return eventType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleString();
 }
 
 // ============================================================================
@@ -117,19 +91,19 @@ export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps):
           <DetailRow label="Event ID" value={event?.id} isLoading={isLoading} />
           <DetailRow
             label="Created At"
-            value={event !== undefined ? formatDate(event.createdAt) : undefined}
+            value={event !== undefined ? formatDateTime(event.createdAt) : undefined}
             isLoading={isLoading}
           />
           <DetailRow
             label="Event Type"
-            value={event !== undefined ? formatEventType(event.eventType) : undefined}
+            value={event !== undefined ? formatSecurityEventType(event.eventType) : undefined}
             isLoading={isLoading}
           />
           <DetailRow
             label="Severity"
             value={
               event !== undefined ? (
-                <Badge tone={severityToTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
+                <Badge tone={getSecuritySeverityTone(event.severity)}>{event.severity.toUpperCase()}</Badge>
               ) : undefined
             }
             isLoading={isLoading}

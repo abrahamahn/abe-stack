@@ -11,34 +11,20 @@
  * @module email-change
  */
 
-import { createHash, randomBytes } from 'node:crypto';
-
 import {
+  AUTH_EXPIRY,
   canonicalizeEmail,
   InvalidCredentialsError,
   InvalidTokenError,
+  MS_PER_HOUR,
   normalizeEmail,
 } from '@abe-stack/shared';
 
-import { revokeAllUserTokens, verifyPasswordSafe } from './utils';
+import { generateSecureToken, hashToken, revokeAllUserTokens, verifyPasswordSafe } from './utils';
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { AuthConfig } from '@abe-stack/shared/config';
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
-const EMAIL_CHANGE_REVERT_TOKEN_EXPIRY_HOURS = 48;
-
-/**
- * Hash a token using SHA-256 for deterministic lookup.
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
 
 // ============================================================================
 // Types
@@ -118,9 +104,8 @@ export async function initiateEmailChange(
   }
 
   // 3. Generate verification token
-  const plain = randomBytes(32).toString('hex');
-  const tokenHash = hashToken(plain);
-  const expiresAt = new Date(Date.now() + EMAIL_CHANGE_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+  const { plain, hash: tokenHash } = generateSecureToken();
+  const expiresAt = new Date(Date.now() + AUTH_EXPIRY.EMAIL_CHANGE_HOURS * MS_PER_HOUR);
 
   // Invalidate any existing email change tokens for this user
   await repos.emailChangeTokens.invalidateForUser(userId);
@@ -139,7 +124,7 @@ export async function initiateEmailChange(
   try {
     const template = emailTemplates.emailVerification(
       verifyUrl,
-      EMAIL_CHANGE_TOKEN_EXPIRY_HOURS * 60,
+      AUTH_EXPIRY.EMAIL_CHANGE_HOURS * 60,
     );
 
     await emailService.send({
@@ -253,9 +238,8 @@ export async function createEmailChangeRevertToken(
   oldEmail: string,
   newEmail: string,
 ): Promise<string> {
-  const plain = randomBytes(32).toString('hex');
-  const tokenHash = hashToken(plain);
-  const expiresAt = new Date(Date.now() + EMAIL_CHANGE_REVERT_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+  const { plain, hash: tokenHash } = generateSecureToken();
+  const expiresAt = new Date(Date.now() + AUTH_EXPIRY.EMAIL_CHANGE_REVERT_HOURS * MS_PER_HOUR);
 
   // Invalidate any existing revert tokens for this user
   await repos.emailChangeRevertTokens.invalidateForUser(userId);

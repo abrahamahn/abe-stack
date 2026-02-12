@@ -12,6 +12,12 @@ import { createReadStream, createWriteStream, promises as fs } from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 
+import {
+  DEFAULT_IMAGE_QUALITY,
+  DEFAULT_PNG_COMPRESSION,
+  STREAMING_THRESHOLD,
+  TEMP_FILE_MAX_AGE_MS,
+} from '../constants';
 import { runFFmpeg } from '../ffmpeg-wrapper';
 
 /**
@@ -44,8 +50,7 @@ interface SharpInstance {
 
 type SharpFunction = (input: string) => SharpInstance;
 
-/** Maximum age for temp files before cleanup (24 hours in milliseconds) */
-const TEMP_FILE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 
 /**
  * Streaming media processor for handling large files without exhausting memory.
@@ -128,13 +133,13 @@ export class StreamingMediaProcessor {
 
       // Configure format and quality
       if (operations.format !== undefined) {
-        const quality = operations.quality ?? 85;
+        const quality = operations.quality ?? DEFAULT_IMAGE_QUALITY;
         switch (operations.format) {
           case 'jpeg':
             sharpPipeline = sharpPipeline.jpeg({ quality, progressive: true });
             break;
           case 'png':
-            sharpPipeline = sharpPipeline.png({ compressionLevel: 6 });
+            sharpPipeline = sharpPipeline.png({ compressionLevel: DEFAULT_PNG_COMPRESSION });
             break;
           case 'webp':
             sharpPipeline = sharpPipeline.webp({ quality });
@@ -276,7 +281,7 @@ export class StreamingMediaProcessor {
    * @returns True if streaming should be used
    */
   shouldUseStreaming(fileSize: number): boolean {
-    return fileSize > 10 * 1024 * 1024;
+    return fileSize > STREAMING_THRESHOLD;
   }
 
   /**

@@ -7,31 +7,14 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import { parseCookies } from '@abe-stack/shared';
+import { parseCookies, serializeCookie } from '@abe-stack/shared';
 
+import type { CookieOptions, CookieSerializeOptions } from '@abe-stack/shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
-// Re-export parseCookies from core for backward compatibility
-export { parseCookies };
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface CookieOptions {
-  path?: string;
-  domain?: string;
-  maxAge?: number;
-  expires?: Date;
-  httpOnly?: boolean;
-  secure?: boolean;
-  sameSite?: 'strict' | 'lax' | 'none';
-  signed?: boolean;
-}
-
-export interface CookieSerializeOptions extends CookieOptions {
-  encode?: (value: string) => string;
-}
+// Re-export shared cookie utilities for barrel consumers
+export { parseCookies, serializeCookie };
+export type { CookieOptions, CookieSerializeOptions };
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -98,57 +81,6 @@ export function unsignCookie(
   }
 
   return { valid: false, value: null };
-}
-
-// ============================================================================
-// Cookie Serialization
-// ============================================================================
-
-/**
- * Serialize a cookie into a Set-Cookie header value
- *
- * @param name - Cookie name
- * @param value - Cookie value
- * @param options - Serialization options (path, domain, maxAge, etc.)
- * @returns Serialized Set-Cookie header string
- */
-export function serializeCookie(
-  name: string,
-  value: string,
-  options: CookieSerializeOptions = {},
-): string {
-  const encode = options.encode ?? encodeURIComponent;
-  let cookie = `${encode(name)}=${encode(value)}`;
-
-  if (options.maxAge !== undefined) {
-    cookie += `; Max-Age=${String(Math.floor(options.maxAge))}`;
-  }
-
-  if (options.expires !== undefined) {
-    cookie += `; Expires=${options.expires.toUTCString()}`;
-  }
-
-  if (options.path !== undefined) {
-    cookie += `; Path=${options.path}`;
-  }
-
-  if (options.domain != null && options.domain !== '') {
-    cookie += `; Domain=${options.domain}`;
-  }
-
-  if (options.httpOnly === true) {
-    cookie += '; HttpOnly';
-  }
-
-  if (options.secure === true) {
-    cookie += '; Secure';
-  }
-
-  if (options.sameSite !== undefined) {
-    cookie += `; SameSite=${options.sameSite.charAt(0).toUpperCase()}${options.sameSite.slice(1)}`;
-  }
-
-  return cookie;
 }
 
 // ============================================================================

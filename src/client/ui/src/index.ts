@@ -73,6 +73,8 @@ export {
   Tabs,
   Toast,
   ToastContainer,
+  UndoHistoryPanel,
+  UndoRedoToolbar,
 } from './components';
 export type {
   AnnouncePoliteness,
@@ -90,6 +92,8 @@ export type {
   SubscriptionStatusProps,
   TabItem,
   TabsProps,
+  UndoHistoryPanelProps,
+  UndoRedoToolbarProps,
   UserAction,
   UserState,
 } from './components';

@@ -1,6 +1,8 @@
 // src/client/react/src/hooks/useDelayedFlag.ts
 import { useEffect, useState } from 'react';
 
+const DEFAULT_DELAY_MS = 150;
+
 /**
  * Delay turning a boolean "on" to avoid flash-of-loading for fast transitions.
  * When active becomes false, the flag resets immediately.
@@ -11,7 +13,7 @@ import { useEffect, useState } from 'react';
  * // showSpinner only becomes true after 150ms of isLoading=true
  * ```
  */
-export function useDelayedFlag(active: boolean, delayMs = 150): boolean {
+export function useDelayedFlag(active: boolean, delayMs = DEFAULT_DELAY_MS): boolean {
   const [delayed, setDelayed] = useState(false);
 
   useEffect(() => {

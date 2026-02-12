@@ -33,6 +33,7 @@ export {
   isTableAllowed,
   loadRecords,
   registerRealtimeTable,
+  resolveTableName,
   saveRecords,
 } from './service';
 
@@ -45,10 +46,10 @@ export {
   type TokenVerifier,
   type WebSocketRegistrationOptions,
   type WebSocketStats,
-} from '../../websocket/src';
+} from '@abe-stack/websocket';
 
 // Types
-export { ERROR_MESSAGES } from './types';
+export { REALTIME_ERRORS } from './types';
 
 export type {
   AllowedTable,

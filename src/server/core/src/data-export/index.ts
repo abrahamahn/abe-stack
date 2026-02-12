@@ -22,4 +22,9 @@ export { handleRequestExport, handleGetExportStatus } from './handlers';
 export { dataExportRoutes } from './routes';
 
 // Types
-export type { DataExportAppContext, DataExportRequest, UserDataExport } from './types';
+export type {
+  DataExportAppContext,
+  DataExportRepositories,
+  DataExportRequest,
+  UserDataExport,
+} from './types';

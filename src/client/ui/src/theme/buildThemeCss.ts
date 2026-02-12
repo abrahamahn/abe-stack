@@ -60,6 +60,7 @@ function buildThemeTokens(colors: ColorTheme): Record<string, string> {
 
   // Typography
   tokens['--ui-font-family'] = typography.fontFamily;
+  tokens['--ui-font-family-mono'] = typography.fontFamilyMono;
   tokens['--ui-font-size-base'] = typography.sizes.sm;
   tokens['--ui-font-size-2xs'] = typography.sizes['2xs'];
   tokens['--ui-font-size-xs'] = typography.sizes.xs;

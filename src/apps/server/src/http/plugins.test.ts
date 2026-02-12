@@ -12,6 +12,8 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 // Mock Modules
 // ============================================================================
 
+vi.mock('@fastify/compress', () => ({ default: vi.fn() }));
+
 vi.mock('./middleware', () => ({
   applyCors: vi.fn(),
   applySecurityHeaders: vi.fn(),
@@ -62,6 +64,7 @@ function createMockFastify(): FastifyInstance {
         hooks.onResponse.push(handler as () => void);
       }
     }),
+    register: vi.fn().mockResolvedValue(undefined),
     setErrorHandler: vi.fn(),
     log: {
       debug: vi.fn(),
@@ -141,6 +144,12 @@ describe('registerPlugins', () => {
   });
 
   describe('middleware registration order', () => {
+    it('should register compression plugin', () => {
+      registerPlugins(mockFastify, mockOptions);
+
+      expect(mockFastify.register).toHaveBeenCalledWith(expect.any(Function), { global: true });
+    });
+
     it('should register prototype pollution protection first', () => {
       registerPlugins(mockFastify, mockOptions);
 

@@ -1,11 +1,12 @@
 // src/client/ui/src/components/billing/InvoiceRow.tsx
+import { formatPrice, getInvoiceStatusLabel, getInvoiceStatusVariant } from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
+import { Skeleton } from '../../elements/Skeleton';
 import { cn } from '../../utils/cn';
 import { EmptyState } from '../EmptyState';
-import { Skeleton } from '../../elements/Skeleton';
 
-import type { Invoice, InvoiceStatus } from '@abe-stack/shared';
+import type { Invoice } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -35,12 +36,6 @@ function defaultFormatDate(dateString: string): string {
   });
 }
 
-function defaultFormatPrice(amountInCents: number, currency: string): string {
-  const amount = amountInCents / 100;
-  const currencySymbol = currency.toUpperCase() === 'USD' ? '$' : currency.toUpperCase();
-  return `${currencySymbol}${amount.toFixed(2)}`;
-}
-
 function defaultFormatPeriod(start: string, end: string): string {
   const startDate = new Date(start);
   const endDate = new Date(end);
@@ -61,40 +56,6 @@ function defaultFormatPeriod(start: string, end: string): string {
     ...options,
     year: 'numeric',
   })} - ${endDate.toLocaleDateString(undefined, { ...options, year: 'numeric' })}`;
-}
-
-function getStatusLabel(status: InvoiceStatus): string {
-  switch (status) {
-    case 'paid':
-      return 'Paid';
-    case 'open':
-      return 'Open';
-    case 'draft':
-      return 'Draft';
-    case 'void':
-      return 'Void';
-    case 'uncollectible':
-      return 'Uncollectible';
-    default:
-      return status;
-  }
-}
-
-function getStatusVariant(status: InvoiceStatus): 'success' | 'warning' | 'error' | 'neutral' {
-  switch (status) {
-    case 'paid':
-      return 'success';
-    case 'open':
-      return 'warning';
-    case 'draft':
-      return 'neutral';
-    case 'void':
-      return 'neutral';
-    case 'uncollectible':
-      return 'error';
-    default:
-      return 'neutral';
-  }
 }
 
 // ============================================================================
@@ -121,7 +82,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
     {
       invoice,
       formatDate = defaultFormatDate,
-      formatPrice = defaultFormatPrice,
+      formatPrice: formatPriceProp = formatPrice,
       formatPeriod = defaultFormatPeriod,
       className,
       ...rest
@@ -139,7 +100,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
       createdAt,
     } = invoice;
     const paidDate = paidAt != null && paidAt !== '' ? paidAt : createdAt;
-    const statusVariant = getStatusVariant(status);
+    const statusVariant = getInvoiceStatusVariant(status);
 
     return (
       <div ref={ref} className={cn('invoice-row', `invoice-row--${status}`, className)} {...rest}>
@@ -152,7 +113,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
         </div>
 
         <div className="invoice-row__amount">
-          <span className="invoice-row__amount-value">{formatPrice(amountPaid, currency)}</span>
+          <span className="invoice-row__amount-value">{formatPriceProp(amountPaid, currency)}</span>
         </div>
 
         <div className="invoice-row__status">
@@ -162,7 +123,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
               `invoice-row__status-badge--${statusVariant}`,
             )}
           >
-            {getStatusLabel(status)}
+            {getInvoiceStatusLabel(status)}
           </span>
         </div>
 
@@ -261,7 +222,10 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
     if (invoices.length === 0) {
       return (
         <div ref={ref} className={cn('invoice-list', 'invoice-list--empty', className)} {...rest}>
-          <EmptyState title="No invoices yet" description="Invoices will appear here after your first payment" />
+          <EmptyState
+            title="No invoices yet"
+            description="Invoices will appear here after your first payment"
+          />
         </div>
       );
     }

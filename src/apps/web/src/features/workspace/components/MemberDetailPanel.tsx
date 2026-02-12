@@ -6,6 +6,7 @@
  * Only users with 'owner' or 'admin' roles can perform actions.
  */
 
+import { getRoleLevel } from '@abe-stack/shared';
 import { Badge, Button, Card, Modal, Select, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
@@ -48,7 +49,7 @@ const ASSIGNABLE_ROLES = [
 ];
 
 function canManageMembers(role: TenantRole): boolean {
-  return role === 'owner' || role === 'admin';
+  return getRoleLevel(role) >= getRoleLevel('admin');
 }
 
 // ============================================================================

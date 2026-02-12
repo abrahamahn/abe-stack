@@ -6,6 +6,8 @@
  * Prevents injection attacks, validates data types, and sanitizes user input.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -49,26 +51,30 @@ export interface SanitizationResult {
  * @returns The sanitized string
  */
 function stripScriptBlocks(value: string): string {
+  // Instead of removing script blocks (which can create new tags via concatenation),
+  // neutralize every '<' that begins a script tag by replacing it with '&lt;'.
   let output = value;
   let lower = output.toLowerCase();
-  for (;;) {
-    const start = lower.indexOf('<script');
-    if (start < 0) {
-      return output;
-    }
-    const openEnd = lower.indexOf('>', start + 7);
-    if (openEnd < 0) {
-      output = output.slice(0, start);
-      return output;
-    }
-    const closeStart = lower.indexOf('</script>', openEnd + 1);
-    if (closeStart < 0) {
-      output = output.slice(0, start);
-      return output;
-    }
-    output = output.slice(0, start) + output.slice(closeStart + 9);
+  let idx = lower.indexOf('<script');
+
+  while (idx >= 0) {
+    // Replace the '<' with '&lt;' to neutralize the tag
+    output = output.slice(0, idx) + '&lt;' + output.slice(idx + 1);
     lower = output.toLowerCase();
+    // Search from after the replacement to avoid re-matching
+    idx = lower.indexOf('<script', idx + 4);
   }
+
+  // Also neutralize </script> closing tags
+  lower = output.toLowerCase();
+  idx = lower.indexOf('</script');
+  while (idx >= 0) {
+    output = output.slice(0, idx) + '&lt;' + output.slice(idx + 1);
+    lower = output.toLowerCase();
+    idx = lower.indexOf('</script', idx + 4);
+  }
+
+  return output;
 }
 
 function isWordChar(code: number): boolean {
@@ -112,17 +118,22 @@ function stripEventHandlers(value: string): string {
   return out;
 }
 
-function stripJavaScriptScheme(value: string): string {
-  let output = value;
-  let lower = output.toLowerCase();
-  for (;;) {
-    const idx = lower.indexOf('javascript:');
-    if (idx < 0) {
-      return output;
-    }
-    output = output.slice(0, idx) + output.slice(idx + 'javascript:'.length);
-    lower = output.toLowerCase();
+function stripDangerousSchemes(value: string): string {
+  // Match javascript: and vbscript: with optional whitespace/control chars between letters
+  // This handles evasion attempts like "java\nscript:" or "j a v a s c r i p t :"
+  const jsPattern =
+    /j[\s\0]*a[\s\0]*v[\s\0]*a[\s\0]*s[\s\0]*c[\s\0]*r[\s\0]*i[\s\0]*p[\s\0]*t[\s\0]*:/gi;
+  const vbPattern = /v[\s\0]*b[\s\0]*s[\s\0]*c[\s\0]*r[\s\0]*i[\s\0]*p[\s\0]*t[\s\0]*:/gi;
+
+  let output = value.replace(jsPattern, '').replace(vbPattern, '');
+
+  // Final safety: if any scheme survives after stripping, encode all colons
+  const collapsed = output.toLowerCase().replace(/[\s\0]/g, '');
+  if (collapsed.includes('javascript:') || collapsed.includes('vbscript:')) {
+    output = output.replace(/:/g, '&#58;');
   }
+
+  return output;
 }
 
 function isAllowedDataImagePrefix(lower: string, index: number): boolean {
@@ -178,7 +189,7 @@ export function sanitizeString(input: string): string {
 
   filtered = stripScriptBlocks(filtered);
   filtered = stripEventHandlers(filtered);
-  filtered = stripJavaScriptScheme(filtered);
+  filtered = stripDangerousSchemes(filtered);
   filtered = stripDangerousDataUrls(filtered);
 
   return filtered;
@@ -439,7 +450,7 @@ export function registerInputValidation(
     });
 
     if (!validationResult.valid) {
-      reply.status(400).send({
+      reply.status(HTTP_STATUS.BAD_REQUEST).send({
         error: 'Validation Error',
         message: 'Invalid input data',
         details: validationResult.errors,

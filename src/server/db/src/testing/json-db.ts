@@ -25,7 +25,7 @@
  * @module
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, openSync, readFileSync, writeSync, closeSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 // =============================================================================
@@ -223,7 +223,13 @@ export class JsonDatabase {
       mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), { mode: 0o600 });
+    // Use open with mode to set permissions atomically
+    const fd = openSync(this.filePath, 'w', 0o600);
+    try {
+      writeSync(fd, JSON.stringify(this.data, null, 2));
+    } finally {
+      closeSync(fd);
+    }
   }
 
   // ===========================================================================
@@ -381,7 +387,7 @@ export class JsonDatabase {
     data: Partial<T>,
     where: WhereCondition<T>,
   ): Promise<T[]> {
-    if (table === '__proto__' || table === 'constructor' || table === 'prototype') {
+    if (!Object.hasOwn(this.data, table)) {
       return [];
     }
     return this.writeMutex.withLock(() => {
@@ -399,7 +405,8 @@ export class JsonDatabase {
 
         if (matches) {
           const updatedRecord = { ...typedRecord, ...data } as T;
-          (this.data[table] as T[])[i] = updatedRecord;
+          const arr = this.data[table] as T[];
+          arr[i] = updatedRecord;
           updated.push(updatedRecord);
         }
       });

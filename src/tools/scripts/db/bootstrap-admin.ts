@@ -18,7 +18,7 @@
  * - Outputs credentials only once (save them!)
  */
 
-import { randomBytes } from 'crypto';
+import { randomInt } from 'crypto';
 
 import {
   buildConnectionString,
@@ -47,23 +47,9 @@ interface BootstrapResult {
  */
 function generateSecurePassword(length = 24): string {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  const maxUnbiased = 256 - (256 % chars.length);
   let password = '';
-  let bytes = randomBytes(length);
-  let offset = 0;
-
-  while (password.length < length) {
-    if (offset >= bytes.length) {
-      bytes = randomBytes(length - password.length);
-      offset = 0;
-    }
-    const byteValue = bytes[offset] ?? 0;
-    offset++;
-    if (byteValue >= maxUnbiased) {
-      continue;
-    }
-    const char: string = chars[byteValue % chars.length] ?? '';
-    password += char;
+  for (let i = 0; i < length; i++) {
+    password += chars[randomInt(chars.length)];
   }
 
   return password;
@@ -114,7 +100,9 @@ export async function bootstrapAdmin(): Promise<BootstrapResult> {
         email,
         canonical_email: canonical,
         password_hash: passwordHash,
-        name,
+        username: 'admin',
+        first_name: name,
+        last_name: '',
         role: 'admin',
         email_verified: true,
         email_verified_at: new Date(),

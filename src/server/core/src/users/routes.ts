@@ -20,10 +20,13 @@ import {
   type RouteResult,
 } from '@abe-stack/server-engine';
 import {
+  changePasswordRequestSchema,
   deactivateAccountRequestSchema,
   deleteAccountRequestSchema,
   NotFoundError,
+  updateProfileRequestSchema,
   updateUsernameRequestSchema,
+  type ChangePasswordRequest,
   type DeactivateAccountRequest,
   type DeleteAccountRequest,
   type UpdateUsernameRequest,
@@ -33,6 +36,7 @@ import { REFRESH_COOKIE_NAME } from '../auth';
 
 import {
   getSessionCount,
+  handleChangePassword,
   handleDeactivateAccount,
   handleDeleteAvatar,
   handleGetProfileCompleteness,
@@ -40,11 +44,13 @@ import {
   handleMe,
   handleReactivateAccount,
   handleRequestDeletion,
+  handleUpdateProfile,
   handleUpdateUsername,
   handleUploadAvatar,
   listUserSessions,
   revokeAllSessions,
   revokeSession,
+  type UpdateProfileData,
 } from './handlers';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from './types';
 
@@ -110,6 +116,8 @@ async function resolveCurrentFamilyId(
  * - `users/list` (GET, admin) — List all users with cursor pagination
  * - `users/me/profile-completeness` (GET, user) — Get profile completeness percentage
  * - `users/me/username` (PATCH, user) — Update current user's username (30-day cooldown)
+ * - `users/me/update` (PATCH, user) — Update profile fields (name, bio, location, etc.)
+ * - `users/me/password` (POST, user) — Change password (requires current password)
  * - `users/me/avatar` (PUT, user) — Upload avatar (multipart)
  * - `users/me/avatar/delete` (POST, user) — Delete avatar
  * - `users/me/sessions` (GET, user) — List current user's active sessions
@@ -128,6 +136,8 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleMe(ctx, req as unknown as UsersRequest);
       },
       'user',
+      undefined,
+      { summary: 'Get current user profile', tags: ['Users'] },
     ),
   ],
 
@@ -139,7 +149,9 @@ export const userRoutes: RouteMap = createRouteMap([
       (ctx: HandlerContext, _body: undefined, req: FastifyRequest): Promise<RouteResult> => {
         return handleListUsers(ctx, req as unknown as UsersRequest);
       },
-      'admin', // Only admins can list users
+      'admin',
+      undefined,
+      { summary: 'List all users', tags: ['Users', 'Admin'] },
     ),
   ],
 
@@ -152,6 +164,8 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleGetProfileCompleteness(ctx, req as unknown as UsersRequest);
       },
       'user',
+      undefined,
+      { summary: 'Get profile completeness', tags: ['Users'] },
     ),
   ],
 
@@ -169,6 +183,39 @@ export const userRoutes: RouteMap = createRouteMap([
       },
       'user',
       updateUsernameRequestSchema,
+      { summary: 'Update username', tags: ['Users'] },
+    ),
+  ],
+
+  // ============================================================================
+  // Profile & Password Routes
+  // ============================================================================
+
+  // Profile update — PATCH with partial fields
+  [
+    'users/me/update',
+    protectedRoute(
+      'PATCH',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleUpdateProfile(ctx, body as UpdateProfileData, req);
+      },
+      'user',
+      updateProfileRequestSchema,
+      { summary: 'Update profile', tags: ['Users'] },
+    ),
+  ],
+
+  // Password change — POST with current + new password
+  [
+    'users/me/password',
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, body: unknown, req: FastifyRequest): Promise<RouteResult> => {
+        return handleChangePassword(ctx, body as ChangePasswordRequest, req);
+      },
+      'user',
+      changePasswordRequestSchema,
+      { summary: 'Change password', tags: ['Users'] },
     ),
   ],
 
@@ -185,6 +232,8 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleUploadAvatar(ctx, body, req);
       },
       'user',
+      undefined,
+      { summary: 'Upload avatar', tags: ['Users'] },
     ),
   ],
 
@@ -197,6 +246,8 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleDeleteAvatar(ctx, _body, req);
       },
       'user',
+      undefined,
+      { summary: 'Delete avatar', tags: ['Users'] },
     ),
   ],
 
@@ -231,6 +282,8 @@ export const userRoutes: RouteMap = createRouteMap([
         }
       },
       'user',
+      undefined,
+      { summary: 'List active sessions', tags: ['Users', 'Sessions'] },
     ),
   ],
 
@@ -259,6 +312,8 @@ export const userRoutes: RouteMap = createRouteMap([
         }
       },
       'user',
+      undefined,
+      { summary: 'Get session count', tags: ['Users', 'Sessions'] },
     ),
   ],
 
@@ -294,6 +349,8 @@ export const userRoutes: RouteMap = createRouteMap([
         }
       },
       'user',
+      undefined,
+      { summary: 'Revoke session', tags: ['Users', 'Sessions'] },
     ),
   ],
 
@@ -328,6 +385,8 @@ export const userRoutes: RouteMap = createRouteMap([
         }
       },
       'user',
+      undefined,
+      { summary: 'Revoke all sessions', tags: ['Users', 'Sessions'] },
     ),
   ],
 
@@ -349,6 +408,7 @@ export const userRoutes: RouteMap = createRouteMap([
       },
       'user',
       deactivateAccountRequestSchema,
+      { summary: 'Deactivate account', tags: ['Users', 'Account Lifecycle'] },
     ),
   ],
 
@@ -366,6 +426,7 @@ export const userRoutes: RouteMap = createRouteMap([
       },
       'user',
       deleteAccountRequestSchema,
+      { summary: 'Request account deletion', tags: ['Users', 'Account Lifecycle'] },
     ),
   ],
 
@@ -378,6 +439,8 @@ export const userRoutes: RouteMap = createRouteMap([
         return handleReactivateAccount(ctx, undefined, req as unknown as UsersRequest);
       },
       'user',
+      undefined,
+      { summary: 'Reactivate account', tags: ['Users', 'Account Lifecycle'] },
     ),
   ],
 ]);

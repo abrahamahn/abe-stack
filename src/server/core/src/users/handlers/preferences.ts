@@ -8,7 +8,10 @@
  * @module handlers/preferences
  */
 
+import { toISODateOnly } from '@abe-stack/shared';
+
 import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import { getUserById } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
@@ -164,6 +167,18 @@ export async function handleUpdatePreferences(
         return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
       }
 
+      // Fire-and-forget audit logging
+      record(
+        { auditEvents: deps.repos.auditEvents },
+        {
+          actorId: userId,
+          action: 'user.preferences_updated',
+          resource: 'user',
+          resourceId: userId,
+          metadata: { fields: Object.keys(updatePayload) },
+        },
+      ).catch(() => {});
+
       // Fire-and-forget activity log
       logActivity(deps.repos.activities, {
         actorId: userId,
@@ -181,8 +196,7 @@ export async function handleUpdatePreferences(
           country: updated.country ?? null,
           city: updated.city ?? null,
           state: updated.state ?? null,
-          dateOfBirth:
-            updated.dateOfBirth !== null ? updated.dateOfBirth.toISOString().slice(0, 10) : null,
+          dateOfBirth: toISODateOnly(updated.dateOfBirth),
           gender: updated.gender ?? null,
           bio: updated.bio ?? null,
           website: updated.website ?? null,

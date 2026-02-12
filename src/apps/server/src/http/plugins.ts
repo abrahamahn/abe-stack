@@ -22,6 +22,9 @@
  * ```
  */
 
+import { ERROR_CODES, HTTP_STATUS } from '@abe-stack/shared';
+import compress from '@fastify/compress';
+
 import {
   applyApiCacheHeaders,
   applyCors,
@@ -188,6 +191,10 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
 
   const isProd = env === 'production';
 
+  // 0. HTTP response compression (gzip/brotli/deflate)
+  // Registered early so all responses are compressed
+  void server.register(compress, { global: true });
+
   // 1. Prototype pollution protection - must be registered first to sanitize all JSON input
   // This replaces the default JSON parser with one that strips dangerous keys
   // (__proto__, constructor, prototype) to prevent prototype pollution attacks
@@ -258,7 +265,7 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     res.header('X-RateLimit-Reset', String(Math.ceil(rateLimitInfo.resetMs / 1000)));
 
     if (!rateLimitInfo.allowed) {
-      res.status(429).send({
+      res.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({
         error: 'Too Many Requests',
         message: 'Rate limit exceeded. Please try again later.',
         retryAfter: Math.ceil(rateLimitInfo.resetMs / 1000),
@@ -310,7 +317,7 @@ export function registerPlugins(server: FastifyInstance, options: PluginOptions)
     }
 
     let statusCode = 500;
-    let code = 'INTERNAL_ERROR';
+    let code: string = ERROR_CODES.INTERNAL_ERROR;
     let message = 'Internal server error';
     let details: Record<string, unknown> | undefined;
 

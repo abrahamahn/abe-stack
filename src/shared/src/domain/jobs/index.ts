@@ -1,5 +1,7 @@
 // src/shared/src/domain/jobs/index.ts
 
+export { getJobStatusLabel, getJobStatusTone } from './jobs.display';
+
 export { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './jobs.logic';
 
 export {

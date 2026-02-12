@@ -206,6 +206,11 @@ export {
   type TrustedDevice,
   type NewTrustedDevice,
   type UpdateTrustedDevice,
+  WEBAUTHN_CREDENTIAL_COLUMNS,
+  WEBAUTHN_CREDENTIALS_TABLE,
+  type WebauthnCredential,
+  type NewWebauthnCredential,
+  type UpdateWebauthnCredential,
   type UpdateApiKey,
   type UpdateDataExportRequest,
   type UpdateLegalDocument,
@@ -280,10 +285,16 @@ export {
   createTotpBackupCodeRepository,
   // Trusted Devices
   createTrustedDeviceRepository,
+  // WebAuthn Credentials
+  createWebauthnCredentialRepository,
   // Sessions
   createUserSessionRepository,
   // Users
   createUserRepository,
+  // Tenant
+  createTenantRepository,
+  createMembershipRepository,
+  createInvitationRepository,
   // Types
   type ActivityRepository,
   type AdminUserListFilters,
@@ -291,6 +302,8 @@ export {
   type AuditEventRepository,
   type BillingEventRepository,
   type ConsentLogRepository,
+  type CursorPaginatedResult,
+  type CursorPaginationOptions,
   type CustomerMappingRepository,
   type DataExportRequestRepository,
   type EmailChangeTokenRepository,
@@ -306,9 +319,6 @@ export {
   type NotificationPreferenceRepository,
   type NotificationRepository,
   type OAuthConnectionRepository,
-  type PaginatedResult,
-  type PaginatedUserResult,
-  type PaginationOptions,
   type PasswordResetTokenRepository,
   type PaymentMethodRepository,
   type PlanRepository,
@@ -322,11 +332,15 @@ export {
   type TimeRangeFilter,
   type TotpBackupCodeRepository,
   type TrustedDeviceRepository,
+  type WebauthnCredentialRepository,
   type UserAgreementRepository,
   type UserRepository,
   type UserSessionRepository,
   type WebhookRepository,
   type WebhookDeliveryRepository,
+  type TenantRepository,
+  type MembershipRepository,
+  type InvitationRepository,
 } from './repositories';
 
 // Factory
@@ -419,6 +433,13 @@ export {
   type TaskHandlers,
   type TaskResult,
 } from './queue/types/queue-types';
+
+// Read Replica
+export {
+  createReadReplicaClient,
+  type ReadReplicaClient,
+  type ReadReplicaOptions,
+} from './read-replica';
 
 // PubSub
 export { PostgresPubSub } from './pubsub/postgres-pubsub';

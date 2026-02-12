@@ -5,6 +5,7 @@
  * Displays a paginated table of jobs with filtering by status.
  */
 
+import { formatDateTime } from '@abe-stack/shared';
 import {
   Button,
   Pagination,
@@ -192,7 +193,7 @@ const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element =
       </TableCell>
       <TableCell>
         <Text tone="muted" className="text-sm">
-          {formatDate(job.createdAt)}
+          {formatDateTime(job.createdAt)}
         </Text>
       </TableCell>
       <TableCell
@@ -231,15 +232,3 @@ const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element =
   );
 };
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleString();
-  } catch {
-    return dateStr;
-  }
-}

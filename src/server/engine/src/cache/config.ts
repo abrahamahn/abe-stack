@@ -1,5 +1,7 @@
 // src/server/engine/src/cache/config.ts
-import type { CacheConfig } from './types';
+import { MS_PER_MINUTE } from '@abe-stack/shared';
+
+import type { CacheConfig, RedisCacheConfig } from './types';
 
 /**
  * Default cache configuration
@@ -7,25 +9,46 @@ import type { CacheConfig } from './types';
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {
   provider: 'memory',
   maxSize: 1000,
-  defaultTtl: 300000, // 5 minutes
+  defaultTtl: 5 * MS_PER_MINUTE, // 5 minutes
 };
 
+/** Read an env var, returning undefined for empty strings */
+function envString(key: string): string | undefined {
+  const val = process.env[key];
+  return val !== undefined && val !== '' ? val : undefined;
+}
+
+function envInt(key: string): number | undefined {
+  const val = envString(key);
+  return val !== undefined ? parseInt(val, 10) : undefined;
+}
+
 /**
- * Load cache configuration from environment variables
+ * Load cache configuration from environment variables.
+ * Selects provider based on CACHE_PROVIDER env var.
  */
 export function loadCacheConfig(): CacheConfig {
-  const providerEnv = process.env['CACHE_PROVIDER'];
-  const provider: CacheConfig['provider'] = providerEnv === 'memory' ? 'memory' : 'memory';
+  if (process.env['CACHE_PROVIDER'] === 'redis') {
+    const config: RedisCacheConfig = {
+      provider: 'redis',
+      host: envString('REDIS_HOST') ?? 'localhost',
+      port: envInt('REDIS_PORT') ?? 6379,
+      maxSize: envInt('CACHE_MAX_SIZE') ?? 1000,
+      defaultTtl: envInt('CACHE_TTL_MS') ?? 5 * MS_PER_MINUTE,
+    };
 
-  const maxSizeEnv = process.env['CACHE_MAX_SIZE'];
-  const maxSize = maxSizeEnv !== undefined && maxSizeEnv !== '' ? parseInt(maxSizeEnv, 10) : 1000;
+    const password = envString('REDIS_PASSWORD');
+    if (password !== undefined) config.password = password;
 
-  const ttlEnv = process.env['CACHE_TTL_MS'];
-  const defaultTtl = ttlEnv !== undefined && ttlEnv !== '' ? parseInt(ttlEnv, 10) : 300000;
+    const db = envInt('REDIS_DB');
+    if (db !== undefined) config.db = db;
+
+    return config;
+  }
 
   return {
-    provider,
-    maxSize,
-    defaultTtl,
+    provider: 'memory',
+    maxSize: envInt('CACHE_MAX_SIZE') ?? 1000,
+    defaultTtl: envInt('CACHE_TTL_MS') ?? 5 * MS_PER_MINUTE,
   };
 }

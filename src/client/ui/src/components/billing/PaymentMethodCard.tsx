@@ -1,9 +1,14 @@
 // src/client/ui/src/components/billing/PaymentMethodCard.tsx
+import {
+  getCardBrandLabel,
+  getPaymentMethodIcon,
+  getPaymentMethodLabel,
+} from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
 
-import type { PaymentMethod, PaymentMethodType } from '@abe-stack/shared';
+import type { PaymentMethod } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -30,43 +35,6 @@ export interface PaymentMethodCardProps extends Omit<ComponentPropsWithoutRef<'d
 
 function defaultFormatExpiry(month: number, year: number): string {
   return `${month.toString().padStart(2, '0')}/${year.toString().slice(-2)}`;
-}
-
-function getCardBrandIcon(brand: string): string {
-  const brandLower = brand.toLowerCase();
-  switch (brandLower) {
-    case 'visa':
-      return 'Visa';
-    case 'mastercard':
-      return 'MC';
-    case 'amex':
-    case 'american_express':
-      return 'Amex';
-    case 'discover':
-      return 'Disc';
-    case 'diners':
-    case 'diners_club':
-      return 'DC';
-    case 'jcb':
-      return 'JCB';
-    case 'unionpay':
-      return 'UP';
-    default:
-      return brand.charAt(0).toUpperCase() + brand.slice(1);
-  }
-}
-
-function getPaymentMethodIcon(type: PaymentMethodType): string {
-  switch (type) {
-    case 'card':
-      return '\u{1F4B3}'; // Credit card emoji
-    case 'bank_account':
-      return '\u{1F3E6}'; // Bank emoji
-    case 'paypal':
-      return 'PP';
-    default:
-      return '\u{1F4B3}';
-  }
 }
 
 // ============================================================================
@@ -125,7 +93,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
         {...rest}
       >
         <div className="payment-method-card__icon">
-          {isCard ? getCardBrandIcon(cardDetails.brand) : getPaymentMethodIcon(type)}
+          {isCard ? getCardBrandLabel(cardDetails.brand) : getPaymentMethodIcon(type)}
         </div>
 
         <div className="payment-method-card__details">
@@ -139,9 +107,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
             </>
           ) : (
             <span className="payment-method-card__type">
-              {type === 'bank_account'
-                ? 'Bank Account'
-                : type.charAt(0).toUpperCase() + type.slice(1)}
+              {getPaymentMethodLabel(type)}
             </span>
           )}
         </div>

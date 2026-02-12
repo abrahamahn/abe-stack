@@ -184,6 +184,9 @@ const shouldExtractContent = (relPath: string): boolean => {
   return false;
 };
 
+/** Keys that must not be used as object properties to prevent prototype pollution */
+const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 const generateFileTree = (files: string[]): FileTree => {
   const tree: FileTree = {};
 
@@ -193,11 +196,20 @@ const generateFileTree = (files: string[]): FileTree => {
 
     for (let i = 0; i < parts.length; i += 1) {
       const part = parts[i] as string;
+      if (BLOCKED_KEYS.has(part)) continue;
+
       if (i === parts.length - 1) {
         if (!current._files) current._files = [];
         current._files.push(part);
       } else {
-        if (!current[part]) current[part] = {};
+        if (!Object.hasOwn(current, part)) {
+          Object.defineProperty(current, part, {
+            value: {} as FileTree,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        }
         current = current[part] as FileTree;
       }
     }

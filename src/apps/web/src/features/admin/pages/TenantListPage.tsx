@@ -5,6 +5,7 @@
  * Admin page for listing and managing tenants/workspaces.
  */
 
+import { formatDate } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -26,10 +27,6 @@ import { useTenants } from '../hooks';
 
 import type { AdminTenantLocal } from '../services/adminApi';
 import type { JSX } from 'react';
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString();
-}
 
 export const TenantListPage = (): JSX.Element => {
   const { tenants, total, isLoading, error, refresh } = useTenants();

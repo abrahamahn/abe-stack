@@ -125,7 +125,7 @@ describe('useAuditLog', () => {
   });
 
   it('should return empty events on initial state', () => {
-    global.fetch = vi.fn(() => new Promise(() => {})); // never resolves
+    global.fetch = vi.fn<typeof fetch>(() => new Promise(() => {})); // never resolves
 
     const { result } = renderHook(() => useAuditLog('tenant-1'), {
       wrapper: createWrapper(),

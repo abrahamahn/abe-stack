@@ -11,6 +11,8 @@
  * @module routing
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { registerRoute } from './route-registry';
 
 import type { BaseContext } from '@abe-stack/shared/core';
@@ -77,6 +79,8 @@ export interface RouteOpenApiMeta {
   querystring?: JsonSchemaObject;
   response?: Record<number, JsonSchemaObject>;
   hide?: boolean;
+  /** OpenAPI security requirements. Set to `[]` for explicitly unsecured routes. */
+  security?: Array<Record<string, string[]>>;
 }
 
 /** Deprecation metadata for sunset routes */
@@ -230,7 +234,7 @@ export function registerRouteMap(
           if (!parseResult.success) {
             const errorMessage =
               parseResult.error instanceof Error ? parseResult.error.message : 'Validation failed';
-            void reply.status(400).send({ message: errorMessage });
+            void reply.status(HTTP_STATUS.BAD_REQUEST).send({ message: errorMessage });
             return;
           }
           body = parseResult.data;
@@ -256,8 +260,15 @@ export function registerRouteMap(
       },
     };
 
-    if (!route.isPublic) {
-      baseOptions.preHandler = options.authGuardFactory(options.jwtSecret, ...(route.roles ?? []));
+    // Determine auth requirements.  Engine RouteDefinition uses `isPublic` + `roles`.
+    // Shared BaseRouteDefinition uses `auth` ('user' | 'admin' | undefined).
+    // Support both formats so shared routes work without manual adaptation.
+    const sharedAuth = (route as unknown as { auth?: string }).auth;
+    const isPublic = route.isPublic;
+    const roles = route.roles ?? (sharedAuth !== undefined ? [sharedAuth] : []);
+
+    if (!isPublic) {
+      baseOptions.preHandler = options.authGuardFactory(options.jwtSecret, ...roles);
     }
 
     if (
@@ -286,11 +297,24 @@ export function registerRouteMap(
       baseOptions.schema = schema as FastifySchema;
     }
 
+    // Auto-inject security metadata for Swagger
+    {
+      const schema = (baseOptions.schema ?? {}) as Record<string, unknown>;
+      if (route.openapi?.security !== undefined) {
+        schema['security'] = route.openapi.security;
+      } else if (!isPublic) {
+        schema['security'] = [{ bearerAuth: [] }];
+      }
+      if (Object.keys(schema).length > 0) {
+        baseOptions.schema = schema as FastifySchema;
+      }
+    }
+
     // Add deprecation headers via onSend hook if route is deprecated
     if (route.deprecated !== undefined) {
       const deprecation = route.deprecated;
       app.addHook('onSend', async (request, reply) => {
-        if (request.url === fullPath || request.routeOptions?.url === path) {
+        if (request.url === fullPath || request.routeOptions.url === path) {
           reply.header('Deprecation', 'true');
           if (deprecation.sunset !== undefined) {
             reply.header('Sunset', deprecation.sunset);
@@ -308,8 +332,8 @@ export function registerRouteMap(
     registerRoute({
       path: fullPath,
       method: route.method,
-      isPublic: route.isPublic,
-      roles: route.roles ?? [],
+      isPublic,
+      roles,
       hasSchema: route.schema !== undefined,
       module: options.module ?? deriveModule(fullPath, options.prefix),
       deprecated: route.deprecated !== undefined,

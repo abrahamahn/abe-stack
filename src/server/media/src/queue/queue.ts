@@ -9,6 +9,16 @@
  * @module queue/queue
  */
 
+import { delay } from '@abe-stack/shared';
+
+import {
+  CLEANUP_INTERVAL_MS,
+  DEFAULT_CONCURRENCY,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_RETRY_DELAY_MS,
+  JOB_RETENTION_MS,
+} from '../constants';
+
 import type { Logger } from '@abe-stack/shared';
 
 /**
@@ -100,10 +110,10 @@ export class CustomJobQueue<T = unknown> {
    */
   constructor(options: QueueOptions) {
     this.options = {
-      concurrency: 3,
-      retryDelayMs: 1000,
-      maxRetries: 3,
-      jobRetentionMs: 60 * 60 * 1000, // 1 hour
+      concurrency: DEFAULT_CONCURRENCY,
+      retryDelayMs: DEFAULT_RETRY_DELAY_MS,
+      maxRetries: DEFAULT_MAX_RETRIES,
+      jobRetentionMs: JOB_RETENTION_MS,
       maxJobsSize: 10000,
       maxWaitingQueueSize: 1000,
       ...options,
@@ -210,14 +220,14 @@ export class CustomJobQueue<T = unknown> {
     while (this.running) {
       // Check if we can process more jobs
       if (this.activeJobs.size >= this.options.concurrency) {
-        await this.sleep(100);
+        await delay(100);
         continue;
       }
 
       // Find next job to process
       const job = this.getNextJob();
       if (job === null) {
-        await this.sleep(500);
+        await delay(500);
         continue;
       }
 
@@ -357,15 +367,6 @@ export class CustomJobQueue<T = unknown> {
   }
 
   /**
-   * Sleep utility for polling loops
-   *
-   * @param ms - Duration to sleep in milliseconds
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
    * Clean up completed/failed jobs that have exceeded retention time.
    * Also enforces maxJobsSize with LRU-style eviction (oldest finished first).
    *
@@ -417,10 +418,9 @@ export class CustomJobQueue<T = unknown> {
    * Start the periodic cleanup interval (every 5 minutes)
    */
   private startCleanupInterval(): void {
-    const cleanupIntervalMs = 5 * 60 * 1000;
     this.cleanupIntervalId = setInterval(() => {
       this.cleanupJobs();
-    }, cleanupIntervalMs);
+    }, CLEANUP_INTERVAL_MS);
 
     // Run initial cleanup
     this.cleanupJobs();

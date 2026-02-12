@@ -12,33 +12,12 @@ import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-/**
- * Maximum buffer size for stdout/stderr accumulation (10 MB).
- * Prevents unbounded memory growth when FFmpeg produces large output.
- */
-const MAX_BUFFER_SIZE = 10 * 1024 * 1024;
-
-/** Default process timeout: 5 minutes */
-const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
-
-/**
- * Validate that a file path does not contain control characters (0x00–0x1F).
- *
- * Since we use `spawn` (not `exec`), arguments are NOT interpreted by a shell,
- * so classic shell metacharacters (`;`, `|`, `$()`) are not exploitable.
- * However, null bytes and control characters can cause unexpected behavior
- * in FFmpeg's own path parsing.
- *
- * @param filePath - The path to validate
- * @param label - Human-readable label for error messages
- * @throws Error if the path contains unsafe characters
- * @complexity O(n) where n is the path length
- */
-/**
- * Maximum allowed dimension for video/image width or height.
- * Prevents resource exhaustion from absurdly large filter graphs.
- */
-const MAX_DIMENSION = 65_536;
+import {
+  DEFAULT_PROCESSING_TIMEOUT_MS,
+  FFPROBE_TIMEOUT_MS,
+  MAX_BUFFER_SIZE,
+  MAX_DIMENSION,
+} from './constants';
 
 function validatePath(filePath: string, label: string): void {
   for (let i = 0; i < filePath.length; i++) {
@@ -133,7 +112,7 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     validateDimension(options.resolution.height, 'Resolution height');
   }
 
-  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_PROCESSING_TIMEOUT_MS;
 
   return new Promise((resolve) => {
     const args: string[] = [];
@@ -389,11 +368,10 @@ async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
     let output = '';
     let killed = false;
 
-    // 30-second timeout for metadata probing
     const timer = setTimeout(() => {
       killed = true;
       ffprobe.kill('SIGKILL');
-    }, 30_000);
+    }, FFPROBE_TIMEOUT_MS);
 
     ffprobe.stdout.on('data', (data: Buffer) => {
       if (output.length < MAX_BUFFER_SIZE) {

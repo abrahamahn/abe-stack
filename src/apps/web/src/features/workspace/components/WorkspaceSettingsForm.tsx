@@ -11,6 +11,7 @@ import { useState, type ReactElement } from 'react';
 import { useUpdateWorkspace } from '../hooks';
 
 import { DomainAllowlistEditor } from './DomainAllowlistEditor';
+import { WorkspaceLogoUpload } from './WorkspaceLogoUpload';
 
 import type { Tenant } from '@abe-stack/shared';
 
@@ -65,6 +66,12 @@ export const WorkspaceSettingsForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <WorkspaceLogoUpload
+        workspaceId={workspace.id}
+        currentLogoUrl={(workspace as Tenant & { logoUrl?: string | null }).logoUrl ?? null}
+        workspaceName={workspace.name}
+      />
+
       <FormField label="Workspace Name" htmlFor="ws-name">
         <Input
           id="ws-name"

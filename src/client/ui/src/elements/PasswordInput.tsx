@@ -1,5 +1,5 @@
 // src/client/ui/src/elements/PasswordInput.tsx
-import { estimatePasswordStrength, getStrengthColor, getStrengthLabel } from '@abe-stack/shared';
+import { estimatePasswordStrength, getStrengthLabel } from '@abe-stack/shared';
 import { forwardRef, useState } from 'react';
 
 import { Button } from './Button';
@@ -114,10 +114,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
           <div className="password-strength-bar">
             <div
               className="password-strength-fill"
-              style={{
-                width: `${String((strength.score + 1) * 20)}%`,
-                backgroundColor: getStrengthColor(strength.score),
-              }}
+              data-score={strength.score}
+              style={{ width: `${String((strength.score + 1) * 20)}%` }}
             />
           </div>
           <Text tone="muted" className="password-strength-label">

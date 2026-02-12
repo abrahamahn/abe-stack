@@ -8,6 +8,7 @@
 
 import { EventEmitter } from 'node:events';
 
+import { WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } from '@abe-stack/shared';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Use vi.hoisted() to define mocks that can be referenced in vi.mock() factories
@@ -51,7 +52,6 @@ vi.mock('@abe-stack/server-engine', () => ({
   validateCsrfToken: mockValidateCsrfToken,
 }));
 
-// Import module after mocks are set up
 import { registerWebSocket } from './lifecycle';
 import { getWebSocketStats, resetStats } from './stats';
 
@@ -213,7 +213,7 @@ describe('WebSocket Lifecycle', () => {
       // handleUpgrade should have been called (CSRF passed)
       expect(mockHandleUpgrade).toHaveBeenCalled();
       // When no token is provided, the WebSocket should be closed with code 1008
-      expect(mockWs.close).toHaveBeenCalledWith(1008, 'Authentication required');
+      expect(mockWs.close).toHaveBeenCalledWith(WS_CLOSE_POLICY_VIOLATION, 'Authentication required');
     });
 
     test('should accept connection with token in subprotocol header', () => {
@@ -344,7 +344,7 @@ describe('WebSocket Lifecycle', () => {
 
       mockServer.server.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));
 
-      expect(mockWs.close).toHaveBeenCalledWith(1008, 'Invalid token');
+      expect(mockWs.close).toHaveBeenCalledWith(WS_CLOSE_POLICY_VIOLATION, 'Invalid token');
     });
   });
 
@@ -446,7 +446,7 @@ describe('WebSocket Lifecycle', () => {
       registerWebSocket(mockServer as never, mockCtx, { verifyToken: mockVerifyToken });
 
       // Should have registered without error in production mode
-      expect(mockCtx.log.info).toHaveBeenCalledWith('WebSocket support registered on /ws');
+      expect(mockCtx.log.info).toHaveBeenCalledWith(`WebSocket support registered on ${WEBSOCKET_PATH}`);
     });
   });
 });

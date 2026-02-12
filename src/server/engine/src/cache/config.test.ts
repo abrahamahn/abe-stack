@@ -50,16 +50,18 @@ describe('cache/config', () => {
     );
   });
 
-  it('parses numeric env vars and ignores unknown provider values', () => {
+  it('parses numeric env vars and selects redis provider when configured', () => {
     withEnv(
       {
-        CACHE_PROVIDER: 'redis', // unsupported -> memory
+        CACHE_PROVIDER: 'redis',
         CACHE_MAX_SIZE: '123',
         CACHE_TTL_MS: '456',
       },
       () => {
         expect(loadCacheConfig()).toEqual({
-          provider: 'memory',
+          provider: 'redis',
+          host: 'localhost',
+          port: 6379,
           maxSize: 123,
           defaultTtl: 456,
         });

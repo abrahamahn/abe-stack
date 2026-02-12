@@ -7,7 +7,7 @@
  * @module handlers/tos
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { acceptTos, checkTosAcceptance } from '../tos-gating';
 import { createErrorMapperLogger } from '../types';
@@ -40,14 +40,14 @@ export async function handleAcceptTos(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     const { ipAddress } = request.requestInfo;
     const result = await acceptTos(ctx.repos, userId, body.documentId, ipAddress);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { agreedAt: result.agreedAt.toISOString() },
     };
   } catch (error) {
@@ -75,13 +75,13 @@ export async function handleTosStatus(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     const status = await checkTosAcceptance(ctx.repos, userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         accepted: status.accepted,
         requiredVersion: status.requiredVersion,

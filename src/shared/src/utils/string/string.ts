@@ -15,13 +15,27 @@
 export function slugify(str: string): string {
   if (str === '') return '';
 
-  return str
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '') // Remove non-word characters
-    .replace(/[\s_-]+/g, '-') // Replace spaces, underscores, and multiple hyphens with single hyphen
-    .replace(/^-+/g, '') // Remove leading hyphens
-    .replace(/-+$/g, ''); // Remove trailing hyphens
+  const lower = str.toLowerCase().trim();
+  let result = '';
+  let lastWasHyphen = true; // skip leading separators
+  for (let i = 0; i < lower.length; i++) {
+    const c = lower.charCodeAt(i);
+    const char = lower[i];
+    // Keep alphanumeric characters
+    if (char !== undefined && ((c >= 97 && c <= 122) || (c >= 48 && c <= 57))) {
+      result += char;
+      lastWasHyphen = false;
+    } else if (!lastWasHyphen) {
+      // Collapse whitespace, underscores, hyphens, and other chars into single hyphen
+      result += '-';
+      lastWasHyphen = true;
+    }
+  }
+  // Remove trailing hyphen
+  if (result.endsWith('-')) {
+    result = result.slice(0, -1);
+  }
+  return result;
 }
 
 /**
@@ -241,4 +255,15 @@ export function countWords(str: string): number {
 export function countCharactersNoWhitespace(str: string): number {
   if (str === '') return 0;
   return str.replace(/\s/g, '').length;
+}
+
+/**
+ * Formats a byte count to a human-readable string (e.g. "1.5 MB").
+ */
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${String(parseFloat((bytes / Math.pow(k, i)).toFixed(2)))} ${sizes[i] ?? 'B'}`;
 }

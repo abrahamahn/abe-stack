@@ -7,6 +7,8 @@
  * of binding to Fastify or any specific HTTP framework.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { record } from '../audit/service';
 
 import { createBillingProvider } from './factory';
@@ -219,11 +221,11 @@ function handleError(
       'InvoiceNotFoundError',
     ];
     if (notFoundErrors.includes(error.name)) {
-      return { status: 404, body: { message: error.message } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: error.message } };
     }
 
     if (error.name === 'SubscriptionExistsError') {
-      return { status: 409, body: { message: error.message } };
+      return { status: HTTP_STATUS.CONFLICT, body: { message: error.message } };
     }
 
     const badRequestErrors = [
@@ -234,16 +236,16 @@ function handleError(
       'CannotRemoveDefaultPaymentMethodError',
     ];
     if (badRequestErrors.includes(error.name)) {
-      return { status: 400, body: { message: error.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: error.message } };
     }
 
     if (error.name === 'ProviderNotConfiguredError') {
-      return { status: 500, body: { message: 'Billing service is not configured' } };
+      return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Billing service is not configured' } };
     }
   }
 
   ctx.log.error(error instanceof Error ? error : new Error(String(error)));
-  return { status: 500, body: { message: 'An error occurred processing your request' } };
+  return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'An error occurred processing your request' } };
 }
 
 // ============================================================================
@@ -292,7 +294,7 @@ export async function handleGetSubscription(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -329,7 +331,7 @@ export async function handleCreateCheckout(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -393,7 +395,7 @@ export async function handleCancelSubscription(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -462,7 +464,7 @@ export async function handleResumeSubscription(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -514,7 +516,7 @@ export async function handleUpdateSubscription(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -583,7 +585,7 @@ export async function handleListInvoices(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -621,7 +623,7 @@ export async function handleGetInvoice(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -660,7 +662,7 @@ export async function handleListPaymentMethods(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -697,7 +699,7 @@ export async function handleAddPaymentMethod(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -755,7 +757,7 @@ export async function handleRemovePaymentMethod(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -808,7 +810,7 @@ export async function handleSetDefaultPaymentMethod(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {
@@ -854,7 +856,7 @@ export async function handleCreateSetupIntent(
 > {
   const user = request.user;
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   if (!ctx.config.billing.enabled) {

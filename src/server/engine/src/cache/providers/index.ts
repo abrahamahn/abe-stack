@@ -6,3 +6,4 @@
  */
 
 export { MemoryCacheProvider } from './memory';
+export { createRedisProvider, RedisCacheProvider } from './redis';

@@ -8,7 +8,7 @@
  * @module magic-link/service
  */
 
-import { createHash, randomBytes } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 
 import {
   MAGIC_LINK_TOKENS_TABLE,
@@ -28,10 +28,13 @@ import {
   type User,
 } from '@abe-stack/db';
 import {
+  AUTH_EXPIRY,
   canonicalizeEmail,
   EmailSendError,
   InvalidTokenError,
+  MS_PER_HOUR,
   normalizeEmail,
+  QUOTAS,
   TooManyRequestsError,
   type UserId,
 } from '@abe-stack/shared';
@@ -40,7 +43,9 @@ import {
   createAccessToken,
   createAuthResponse,
   createRefreshTokenFamily,
+  generateBase64UrlToken,
   generateUniqueUsername,
+  hashToken,
 } from '../utils';
 
 import type { AuthEmailService, AuthEmailTemplates } from '../types';
@@ -54,16 +59,16 @@ import type { AuthConfig } from '@abe-stack/shared/config';
 const TOKEN_BYTES = 32;
 
 /** Token expiry in minutes (default, can be overridden by config) */
-const DEFAULT_TOKEN_EXPIRY_MINUTES = 15;
+const DEFAULT_TOKEN_EXPIRY_MINUTES = AUTH_EXPIRY.MAGIC_LINK_MINUTES;
 
 /** Max requests per email per hour for rate limiting (default) */
-const DEFAULT_MAX_REQUESTS_PER_EMAIL = 3;
+const DEFAULT_MAX_REQUESTS_PER_EMAIL = QUOTAS.MAGIC_LINK_MAX_PER_EMAIL;
 
 /** Max requests per IP per hour for rate limiting */
-const DEFAULT_MAX_REQUESTS_PER_IP = 10;
+const DEFAULT_MAX_REQUESTS_PER_IP = QUOTAS.MAGIC_LINK_MAX_PER_IP;
 
 /** Rate limit window in milliseconds (1 hour) */
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const RATE_LIMIT_WINDOW_MS = MS_PER_HOUR;
 
 // ============================================================================
 // Types
@@ -115,32 +120,6 @@ export interface RequestMagicLinkResult {
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * Generate a cryptographically secure token.
- * Returns the token in base64url encoding for safe URL usage.
- *
- * @returns Base64url-encoded random token
- * @complexity O(1)
- */
-function generateToken(): string {
-  return randomBytes(TOKEN_BYTES).toString('base64url');
-}
-
-/**
- * Hash a token using SHA-256.
- * We use SHA-256 (not Argon2) because:
- * 1. Tokens are already high-entropy (32 random bytes)
- * 2. Faster lookup is acceptable for single-use tokens
- * 3. Argon2 would be overkill and slow down verification
- *
- * @param token - Token to hash
- * @returns Hex-encoded SHA-256 hash
- * @complexity O(1)
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
 
 /**
  * Check if rate limit is exceeded for an email.
@@ -250,7 +229,7 @@ export async function requestMagicLink(
   }
 
   // Generate token
-  const token = generateToken();
+  const token = generateBase64UrlToken(TOKEN_BYTES);
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + tokenExpiryMinutes * 60 * 1000);
 

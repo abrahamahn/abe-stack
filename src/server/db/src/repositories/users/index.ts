@@ -6,7 +6,6 @@
 export {
   createUserRepository,
   type AdminUserListFilters,
-  type PaginatedUserResult,
   type UserRepository,
   type UserStatus,
 } from './users';

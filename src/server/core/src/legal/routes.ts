@@ -37,11 +37,14 @@ function adminRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): import('@abe-stack/server-engine').RouteDefinition {
   return protectedRoute(
     method,
     handler as import('@abe-stack/server-engine').RouteHandler,
     'admin',
+    undefined,
+    openapi,
   );
 }
 
@@ -56,8 +59,15 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): import('@abe-stack/server-engine').RouteDefinition {
-  return protectedRoute(method, handler as import('@abe-stack/server-engine').RouteHandler, 'user');
+  return protectedRoute(
+    method,
+    handler as import('@abe-stack/server-engine').RouteHandler,
+    'user',
+    undefined,
+    openapi,
+  );
 }
 
 // ============================================================================
@@ -80,12 +90,29 @@ export const legalRoutes: RouteMap = createRouteMap([
   // Public: get current legal documents
   [
     'legal/current',
-    publicRoute('GET', handleGetCurrentLegal as import('@abe-stack/server-engine').RouteHandler),
+    publicRoute(
+      'GET',
+      handleGetCurrentLegal as import('@abe-stack/server-engine').RouteHandler,
+      undefined,
+      { summary: 'Get current legal documents', tags: ['Legal'] },
+    ),
   ],
 
   // User: get user agreements
-  ['users/me/agreements', userRoute('GET', handleGetUserAgreements)],
+  [
+    'users/me/agreements',
+    userRoute('GET', handleGetUserAgreements, {
+      summary: 'Get user legal agreements',
+      tags: ['Legal'],
+    }),
+  ],
 
   // Admin: publish new legal document version
-  ['admin/legal/publish', adminRoute('POST', handlePublishLegal)],
+  [
+    'admin/legal/publish',
+    adminRoute('POST', handlePublishLegal, {
+      summary: 'Publish legal document',
+      tags: ['Legal', 'Admin'],
+    }),
+  ],
 ]);

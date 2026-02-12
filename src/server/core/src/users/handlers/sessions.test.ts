@@ -90,6 +90,7 @@ function createMockRepos(): Repositories {
     apiKeys: {} as never,
     dataExportRequests: {} as never,
     activities: {} as never,
+    webauthnCredentials: {} as never,
     trustedDevices: {} as never,
     files: {} as never,
   } as Repositories;

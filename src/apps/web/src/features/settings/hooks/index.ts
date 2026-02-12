@@ -85,3 +85,12 @@ export {
   type UseConsentResult,
   type UseUpdateConsentResult,
 } from './useConsent';
+
+export {
+  useDataExport,
+  type DataExportInfo,
+  type ExportStatus,
+  type UseDataExportResult,
+} from './useDataExport';
+
+export { useUndoHandler } from './useUndoHandler';

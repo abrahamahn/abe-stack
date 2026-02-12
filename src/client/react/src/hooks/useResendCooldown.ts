@@ -1,4 +1,5 @@
 // src/client/react/src/hooks/useResendCooldown.ts
+import { MS_PER_SECOND, SECONDS_PER_MINUTE } from '@abe-stack/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseResendCooldownReturn {
@@ -7,8 +8,6 @@ export interface UseResendCooldownReturn {
   startCooldown: (seconds?: number) => void;
   resetCooldown: () => void;
 }
-
-const DEFAULT_COOLDOWN_SECONDS = 60;
 
 /**
  * Hook to manage a cooldown timer for resend actions (e.g., resend verification email).
@@ -36,7 +35,7 @@ const DEFAULT_COOLDOWN_SECONDS = 60;
  * ```
  */
 export function useResendCooldown(
-  initialCooldown: number = DEFAULT_COOLDOWN_SECONDS,
+  initialCooldown: number = SECONDS_PER_MINUTE,
 ): UseResendCooldownReturn {
   const [cooldown, setCooldown] = useState(0);
   const cooldownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -72,7 +71,7 @@ export function useResendCooldown(
           }
           return prev - 1;
         });
-      }, 1000);
+      }, MS_PER_SECOND);
     },
     [initialCooldown, clearCooldownInterval],
   );

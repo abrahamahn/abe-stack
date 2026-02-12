@@ -1,5 +1,8 @@
 // src/client/react/src/hooks/useCopyToClipboard.ts
+import { MS_PER_SECOND } from '@abe-stack/shared';
 import { useEffect, useRef, useState } from 'react';
+
+const COPY_FEEDBACK_MS = MS_PER_SECOND * 2;
 
 type CopyToClipboardResult = {
   copied: boolean;
@@ -42,13 +45,13 @@ export function useCopyToClipboard(): CopyToClipboardResult {
       setCopied(true);
       setError(null);
 
-      // Reset copied state after 2 seconds
+      // Reset copied state after feedback duration
       if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout((): void => {
         setCopied(false);
-      }, 2000);
+      }, COPY_FEEDBACK_MS);
     } catch (err) {
       const copyError = err instanceof Error ? err : new Error('Failed to copy');
       setError(copyError);

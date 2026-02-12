@@ -232,7 +232,7 @@ describe('Custom Syntax Highlighter', () => {
       const spans = container.querySelectorAll('span');
       spans.forEach((span) => {
         expect(span).toHaveStyle({
-          fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
+          fontFamily: 'var(--ui-font-family-mono, monospace)',
         });
       });
     });

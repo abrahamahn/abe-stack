@@ -5,11 +5,16 @@
  * Type-safe client for interacting with the push notification API endpoints.
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import {
+  sendNotificationRequestSchema,
+  subscribeRequestSchema,
+  unsubscribeRequestSchema,
+  updatePreferencesRequestSchema,
+} from '@abe-stack/shared';
 
-import { createApiError, NetworkError } from '../errors';
+import { apiRequest, createRequestFactory } from '../utils';
 
-import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 import type {
   PreferencesResponse,
   SendNotificationRequest,
@@ -22,6 +27,9 @@ import type {
   VapidKeyResponse,
 } from '@abe-stack/shared';
 
+/** localStorage key for persisting device ID across sessions */
+const DEVICE_ID_STORAGE_KEY = 'abe-stack-device-id';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -29,14 +37,7 @@ import type {
 /**
  * Configuration for the notification client
  */
-export interface NotificationClientConfig {
-  /** Base URL for API requests */
-  baseUrl: string;
-  /** Function to get the current auth token */
-  getToken?: () => string | null;
-  /** Custom fetch implementation */
-  fetchImpl?: typeof fetch;
-}
+export type NotificationClientConfig = BaseClientConfig;
 
 /**
  * Notification API client interface
@@ -61,16 +62,6 @@ export interface NotificationClient {
 // ============================================================================
 // Client Implementation
 // ============================================================================
-
-const API_PREFIX = '/api';
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
-    end--;
-  }
-  return value.slice(0, end);
-}
 
 /**
  * Create a notification API client
@@ -103,92 +94,53 @@ function trimTrailingSlashes(value: string): string {
  * ```
  */
 export function createNotificationClient(config: NotificationClientConfig): NotificationClient {
-  const baseUrl = trimTrailingSlashes(config.baseUrl);
-  const fetcher = config.fetchImpl ?? fetch;
-
-  /**
-   * Make an authenticated request
-   */
-  const request = async <T>(
-    path: string,
-    options?: RequestInit,
-    requiresAuth = true,
-  ): Promise<T> => {
-    const headers = new Headers(options?.headers);
-    headers.set('Content-Type', 'application/json');
-
-    if (requiresAuth) {
-      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
-        headers,
-        config.getToken?.(),
-      );
-    }
-
-    const url = `${baseUrl}${API_PREFIX}${path}`;
-
-    let response: Response;
-    try {
-      response = await fetcher(url, {
-        ...options,
-        headers,
-        credentials: 'include',
-      });
-    } catch (error) {
-      const cause = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
-    }
-
-    const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
-      Record<string, unknown>;
-
-    if (!response.ok) {
-      throw createApiError(response.status, data);
-    }
-
-    return data as T;
-  };
+  const factory = createRequestFactory(config);
 
   return {
     async getVapidKey(): Promise<VapidKeyResponse> {
-      return request<VapidKeyResponse>('/notifications/vapid-key', undefined, false);
+      return apiRequest<VapidKeyResponse>(factory, '/notifications/vapid-key', undefined, false);
     },
 
     async subscribe(data: SubscribeRequest): Promise<SubscribeResponse> {
-      return request<SubscribeResponse>('/notifications/subscribe', {
+      const validated = subscribeRequestSchema.parse(data);
+      return apiRequest<SubscribeResponse>(factory, '/notifications/subscribe', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async unsubscribe(data: UnsubscribeRequest): Promise<UnsubscribeResponse> {
-      return request<UnsubscribeResponse>('/notifications/unsubscribe', {
+      const validated = unsubscribeRequestSchema.parse(data);
+      return apiRequest<UnsubscribeResponse>(factory, '/notifications/unsubscribe', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async getPreferences(): Promise<PreferencesResponse> {
-      return request<PreferencesResponse>('/notifications/preferences');
+      return apiRequest<PreferencesResponse>(factory, '/notifications/preferences');
     },
 
     async updatePreferences(data: UpdatePreferencesRequest): Promise<PreferencesResponse> {
-      return request<PreferencesResponse>('/notifications/preferences/update', {
+      const validated = updatePreferencesRequestSchema.parse(data);
+      return apiRequest<PreferencesResponse>(factory, '/notifications/preferences/update', {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async testNotification(): Promise<SendNotificationResponse> {
-      return request<SendNotificationResponse>('/notifications/test', {
+      return apiRequest<SendNotificationResponse>(factory, '/notifications/test', {
         method: 'POST',
         body: JSON.stringify({}),
       });
     },
 
     async sendNotification(data: SendNotificationRequest): Promise<SendNotificationResponse> {
-      return request<SendNotificationResponse>('/notifications/send', {
+      const validated = sendNotificationRequestSchema.parse(data);
+      return apiRequest<SendNotificationResponse>(factory, '/notifications/send', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
   };
@@ -207,7 +159,8 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
 export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   // Convert base64url to base64 if needed
   const base64 = base64String.replace(/-/g, '+').replace(/_/g, '/');
-  const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+  const BASE64_BLOCK_SIZE = 4;
+  const padding = '='.repeat((BASE64_BLOCK_SIZE - (base64.length % BASE64_BLOCK_SIZE)) % BASE64_BLOCK_SIZE);
   const rawData = atob(base64 + padding);
   const outputArray = new Uint8Array(rawData.length);
 
@@ -313,12 +266,10 @@ export async function unsubscribeFromPush(): Promise<boolean> {
  * @returns Device ID string
  */
 export function getDeviceId(): string {
-  const STORAGE_KEY = 'abe-stack-device-id';
-
-  let deviceId = localStorage.getItem(STORAGE_KEY);
+  let deviceId = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
   if (deviceId === null || deviceId === '') {
     deviceId = crypto.randomUUID();
-    localStorage.setItem(STORAGE_KEY, deviceId);
+    localStorage.setItem(DEVICE_ID_STORAGE_KEY, deviceId);
   }
 
   return deviceId;

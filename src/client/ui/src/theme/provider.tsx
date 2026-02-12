@@ -116,7 +116,7 @@ const ThemeProvider = ({
 
   return (
     <ThemeContext.Provider value={contextValue}>
-      <div className="theme" style={{ height: '100%', width: '100%' }}>
+      <div className="theme">
         {children}
       </div>
     </ThemeContext.Provider>

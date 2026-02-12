@@ -1,10 +1,11 @@
 // src/apps/desktop/src/electron/auto-updater.ts
+import { MS_PER_HOUR } from '@abe-stack/shared';
 import { autoUpdater } from 'electron';
 
 import type { BrowserWindow } from 'electron';
 
 /** Interval between update checks: 4 hours in milliseconds */
-const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+const UPDATE_CHECK_INTERVAL_MS = 4 * MS_PER_HOUR;
 
 /**
  * Sends a typed IPC message to the renderer process.

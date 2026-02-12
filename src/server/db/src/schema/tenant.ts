@@ -6,6 +6,12 @@
  * Maps to migration 0001_tenant.sql.
  */
 
+import { INVITATION_STATUSES, type InvitationStatus } from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { INVITATION_STATUSES };
+export type { InvitationStatus };
+
 // ============================================================================
 // Enums
 // ============================================================================
@@ -13,14 +19,10 @@
 /** Roles within a tenant workspace */
 export type TenantRole = 'owner' | 'admin' | 'member' | 'viewer';
 
-/** All valid tenant roles */
+/**
+ * All valid tenant roles (DB-specific array; differs from shared TENANT_ROLES object structure)
+ */
 export const TENANT_ROLES = ['owner', 'admin', 'member', 'viewer'] as const;
-
-/** Lifecycle states for an invitation */
-export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
-
-/** All valid invitation statuses */
-export const INVITATION_STATUSES = ['pending', 'accepted', 'revoked', 'expired'] as const;
 
 // ============================================================================
 // Table Names
@@ -168,6 +170,7 @@ export interface NewInvitation {
 export interface UpdateInvitation {
   status?: InvitationStatus;
   acceptedAt?: Date | null;
+  expiresAt?: Date;
 }
 
 // ============================================================================

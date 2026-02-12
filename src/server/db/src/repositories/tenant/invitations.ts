@@ -11,6 +11,7 @@
 import { and, eq, lt, select, selectCount, insert, update } from '../../builder/index';
 import {
   type Invitation,
+  INVITATION_STATUSES,
   type NewInvitation,
   type UpdateInvitation,
   INVITATION_COLUMNS,
@@ -19,6 +20,9 @@ import {
 import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { RawDb } from '../../client';
+
+/** Status value for pending invitations, sourced from shared constants */
+const PENDING_STATUS = INVITATION_STATUSES[0]; // 'pending'
 
 // ============================================================================
 // Invitation Repository Interface
@@ -138,7 +142,7 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
     async findPendingByTenantAndEmail(tenantId: string, email: string): Promise<Invitation | null> {
       const result = await db.queryOne(
         select(INVITATIONS_TABLE)
-          .where(and(eq('tenant_id', tenantId), eq('email', email), eq('status', 'pending')))
+          .where(and(eq('tenant_id', tenantId), eq('email', email), eq('status', PENDING_STATUS)))
           .toSql(),
       );
       return result !== null ? transformInvitation(result) : null;
@@ -147,7 +151,7 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
     async countPendingByTenantId(tenantId: string): Promise<number> {
       const result = await db.queryOne(
         selectCount(INVITATIONS_TABLE)
-          .where(and(eq('tenant_id', tenantId), eq('status', 'pending')))
+          .where(and(eq('tenant_id', tenantId), eq('status', PENDING_STATUS)))
           .toSql(),
       );
       return result !== null ? Number(result['count'] ?? 0) : 0;
@@ -156,7 +160,7 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
     async findExpiredPending(limit: number): Promise<Invitation[]> {
       const results = await db.query(
         select(INVITATIONS_TABLE)
-          .where(and(eq('status', 'pending'), lt('expires_at', new Date())))
+          .where(and(eq('status', PENDING_STATUS), lt('expires_at', new Date())))
           .limit(limit)
           .orderBy('expires_at', 'asc')
           .toSql(),
@@ -167,7 +171,7 @@ export function createInvitationRepository(db: RawDb): InvitationRepository {
     async findPendingByEmail(email: string): Promise<Invitation[]> {
       const results = await db.query(
         select(INVITATIONS_TABLE)
-          .where(and(eq('email', email), eq('status', 'pending')))
+          .where(and(eq('email', email), eq('status', PENDING_STATUS)))
           .orderBy('created_at', 'desc')
           .toSql(),
       );

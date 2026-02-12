@@ -4,19 +4,19 @@
  * Parses query parameters and attaches pagination context to requests.
  */
 
-import { PAGINATION_ERROR_TYPES, PaginationError, SORT_ORDER } from '@abe-stack/shared';
+import { DEFAULT_PAGINATION, PAGINATION_ERROR_TYPES, PaginationError, SORT_ORDER } from '@abe-stack/shared';
 
 import { createPaginationHelpers } from './helpers';
 
 import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
-import type { CursorPaginationOptions, PaginationOptions } from '@abe-stack/shared';
+import type { CursorPaginationOptions } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 /**
  * Default pagination middleware options
  */
 const DEFAULT_OPTIONS: Required<PaginationMiddlewareOptions> = {
-  defaultLimit: 50,
-  maxLimit: 100,
+  defaultLimit: DEFAULT_PAGINATION.LIMIT,
+  maxLimit: 100, // Intentionally lower than DEFAULT_PAGINATION.MAX_LIMIT for HTTP safety
   defaultSortBy: 'createdAt',
   defaultSortOrder: SORT_ORDER.DESC,
   enableCursorPagination: true,
@@ -61,11 +61,14 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
     const pageParam = getParam(paramNames.page);
     const hasCursor = cursorParam !== undefined;
 
-    let offsetOptions: PaginationOptions | undefined;
-    let cursorOptions: CursorPaginationOptions | undefined;
-
     const paginationType: 'offset' | 'cursor' =
       hasCursor && config.enableCursorPagination ? 'cursor' : 'offset';
+
+    // Attach pagination context to request
+    const paginationContext: PaginationContext = {
+      type: paginationType,
+      helpers: createPaginationHelpers(),
+    };
 
     if (paginationType === 'cursor') {
       const cursor = Array.isArray(cursorParam) ? cursorParam[0] : cursorParam;
@@ -74,7 +77,7 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
       const sortBy = parseSortBy(getParam(paramNames.sortBy), config);
       const sortOrder = parseSortOrder(getParam(paramNames.sortOrder), config);
 
-      cursorOptions = {
+      const cursorOptions: CursorPaginationOptions = {
         limit,
         sortBy,
         sortOrder,
@@ -82,30 +85,19 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
       if (cursor !== undefined) {
         cursorOptions.cursor = cursor;
       }
+      paginationContext.cursor = cursorOptions;
     } else {
       const page = parsePage(pageParam);
       const limit = parseLimit(getParam(paramNames.limit), config);
       const sortBy = parseSortBy(getParam(paramNames.sortBy), config);
       const sortOrder = parseSortOrder(getParam(paramNames.sortOrder), config);
 
-      offsetOptions = {
+      paginationContext.offset = {
         page,
         limit,
         sortBy,
         sortOrder,
       };
-    }
-
-    // Attach pagination context to request
-    const paginationContext: PaginationContext = {
-      type: paginationType,
-      helpers: createPaginationHelpers(),
-    };
-    if (offsetOptions !== undefined) {
-      paginationContext.offset = offsetOptions;
-    }
-    if (cursorOptions !== undefined) {
-      paginationContext.cursor = cursorOptions;
     }
 
     (request as PaginationRequest).pagination = paginationContext;

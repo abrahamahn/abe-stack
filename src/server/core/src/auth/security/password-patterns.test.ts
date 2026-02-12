@@ -1,6 +1,4 @@
 // src/server/core/src/auth/security/password-patterns.test.ts
-import { describe, expect, it } from 'vitest';
-
 import {
   COMMON_PASSWORDS,
   containsUserInput,
@@ -9,7 +7,9 @@ import {
   hasSequentialChars,
   isCommonPassword,
   KEYBOARD_PATTERNS,
-} from './password-patterns';
+} from '@abe-stack/shared';
+import { describe, expect, it } from 'vitest';
+
 
 describe('Password Patterns', () => {
   describe('COMMON_PASSWORDS', () => {

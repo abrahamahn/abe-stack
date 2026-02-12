@@ -6,7 +6,7 @@
  * All handlers expect admin role (enforced by route middleware).
  */
 
-import { UserNotFoundError } from '@abe-stack/shared';
+import { HTTP_STATUS, UserNotFoundError } from '@abe-stack/shared';
 
 import { ERROR_MESSAGES } from '../auth';
 
@@ -54,7 +54,7 @@ export async function handleListUsers(
 ): Promise<{ status: number; body: AdminUserListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -97,10 +97,10 @@ export async function handleListUsers(
       'Admin listed users',
     );
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -119,7 +119,7 @@ export async function handleGetUser(
 ): Promise<{ status: number; body: AdminUser | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -128,21 +128,21 @@ export async function handleGetUser(
     const userId = params.id;
 
     if (userId === '') {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     const user = await getUserById(ctx.repos.users, userId);
 
     ctx.log.info({ adminId: authUser.userId, targetUserId: userId }, 'Admin retrieved user');
 
-    return { status: 200, body: user };
+    return { status: HTTP_STATUS.OK, body: user };
   } catch (error) {
     if (error instanceof UserNotFoundError) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -161,7 +161,7 @@ export async function handleUpdateUser(
 ): Promise<{ status: number; body: AdminUpdateUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -170,7 +170,7 @@ export async function handleUpdateUser(
     const userId = params.id;
 
     if (userId === '') {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     // Extract only defined fields to satisfy exactOptionalPropertyTypes
@@ -187,7 +187,7 @@ export async function handleUpdateUser(
     );
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         message: 'User updated successfully',
         user,
@@ -195,11 +195,11 @@ export async function handleUpdateUser(
     };
   } catch (error) {
     if (error instanceof UserNotFoundError) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -218,7 +218,7 @@ export async function handleLockUser(
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -227,12 +227,12 @@ export async function handleLockUser(
     const userId = params.id;
 
     if (userId === '') {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     // Prevent admin from locking themselves
     if (userId === authUser.userId) {
-      return { status: 400, body: { message: 'Cannot lock your own account' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Cannot lock your own account' } };
     }
 
     const user = await lockUser(ctx.repos.users, userId, body.reason, body.durationMinutes);
@@ -248,7 +248,7 @@ export async function handleLockUser(
     );
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         message: 'User account locked successfully',
         user,
@@ -256,11 +256,11 @@ export async function handleLockUser(
     };
   } catch (error) {
     if (error instanceof UserNotFoundError) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -279,7 +279,7 @@ export async function handleUnlockUser(
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -288,7 +288,7 @@ export async function handleUnlockUser(
     const userId = params.id;
 
     if (userId === '') {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     const user = await unlockUser(ctx.repos.users, userId, body.reason);
@@ -299,7 +299,7 @@ export async function handleUnlockUser(
     );
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         message: 'User account unlocked successfully',
         user,
@@ -307,11 +307,11 @@ export async function handleUnlockUser(
     };
   } catch (error) {
     if (error instanceof UserNotFoundError) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -330,7 +330,7 @@ export async function handleSearchUsers(
 ): Promise<{ status: number; body: SearchUsersResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -338,7 +338,7 @@ export async function handleSearchUsers(
 
     const q = typeof query['q'] === 'string' ? query['q'].trim() : '';
     if (q === '') {
-      return { status: 400, body: { message: 'Search query "q" is required' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Search query "q" is required' } };
     }
 
     const limit =
@@ -353,10 +353,10 @@ export async function handleSearchUsers(
       'Admin searched users',
     );
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -375,7 +375,7 @@ export async function handleHardBan(
 ): Promise<{ status: number; body: HardBanResult | { message: string } }> {
   const authUser = (request as unknown as { user?: { userId: string; role: string } }).user;
   if (authUser === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -384,12 +384,12 @@ export async function handleHardBan(
     const userId = params.id;
 
     if (userId === '') {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     // Prevent admin from banning themselves
     if (userId === authUser.userId) {
-      return { status: 400, body: { message: 'Cannot ban your own account' } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Cannot ban your own account' } };
     }
 
     const result = await hardBanUser(ctx.db, ctx.repos.users, userId, authUser.userId, body.reason);
@@ -405,15 +405,15 @@ export async function handleHardBan(
     );
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: result,
     };
   } catch (error) {
     if (error instanceof UserNotFoundError) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }

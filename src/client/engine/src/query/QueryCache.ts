@@ -107,12 +107,14 @@ interface QueryEntry<TData = unknown, TError = Error> {
   subscribers: Set<() => void>;
 }
 
+import { MS_PER_DAY, MS_PER_MINUTE } from '@abe-stack/shared';
+
 // ============================================================================
 // Constants
 // ============================================================================
 
-const DEFAULT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
-const DEFAULT_GC_TIME = 24 * 60 * 60 * 1000; // 24 hours
+const DEFAULT_STALE_TIME = 5 * MS_PER_MINUTE;
+const DEFAULT_GC_TIME = MS_PER_DAY;
 
 // ============================================================================
 // Utilities

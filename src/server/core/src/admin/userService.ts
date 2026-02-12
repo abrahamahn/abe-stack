@@ -6,7 +6,7 @@
  * All operations require admin privileges (enforced at route level).
  */
 
-import { UserNotFoundError } from '@abe-stack/shared';
+import { MS_PER_DAY, RETENTION_PERIODS, UserNotFoundError } from '@abe-stack/shared';
 
 import { logSecurityEvent } from '../auth/security/events';
 import { revokeAllUserTokens } from '../auth/utils';
@@ -107,7 +107,7 @@ export async function listUsers(
   const result = await userRepo.listWithFilters(dbFilters);
 
   return {
-    data: result.items.map(toAdminUser),
+    data: result.data.map(toAdminUser),
     total: result.total,
     page: result.page,
     limit: result.limit,
@@ -297,7 +297,7 @@ export async function searchUsers(
   });
 
   return {
-    users: result.items.map(toAdminUser),
+    users: result.data.map(toAdminUser),
     total: result.total,
     limit,
     offset,
@@ -327,8 +327,6 @@ export function getUserStatus(user: AdminUser): UserStatus {
 // Hard Ban
 // ============================================================================
 
-/** Default grace period before permanent deletion (7 days) */
-const HARD_BAN_GRACE_PERIOD_DAYS = 7;
 
 /**
  * Result of a hard ban operation
@@ -370,7 +368,7 @@ export async function hardBanUser(
 
   // Calculate deletion date (now + 7 days grace period)
   const now = new Date();
-  const deletedAt = new Date(now.getTime() + HARD_BAN_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
+  const deletedAt = new Date(now.getTime() + RETENTION_PERIODS.HARD_BAN_GRACE_DAYS * MS_PER_DAY);
 
   // Lock account permanently and schedule deletion
   // Use far-future date for lockedUntil since this is a permanent ban

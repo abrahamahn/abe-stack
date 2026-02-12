@@ -5,12 +5,12 @@
  * Type-safe client for admin billing operations (plan management).
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import { createPlanRequestSchema, updatePlanRequestSchema } from '@abe-stack/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { createApiError, NetworkError } from '../errors';
+import { apiRequest, createRequestFactory } from '../utils';
 
-import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 import type {
   AdminPlan,
   AdminPlanResponse,
@@ -28,14 +28,7 @@ import type {
 /**
  * Configuration for the admin billing client
  */
-export interface AdminBillingClientConfig {
-  /** Base URL for API requests */
-  baseUrl: string;
-  /** Function to get the current auth token */
-  getToken?: () => string | null;
-  /** Custom fetch implementation */
-  fetchImpl?: typeof fetch;
-}
+export type AdminBillingClientConfig = BaseClientConfig;
 
 /**
  * Admin Billing API client interface
@@ -58,16 +51,6 @@ export interface AdminBillingClient {
 // ============================================================================
 // Client Implementation
 // ============================================================================
-
-const API_PREFIX = '/api';
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
-    end--;
-  }
-  return value.slice(0, end);
-}
 
 /**
  * Create an admin billing API client
@@ -97,76 +80,42 @@ function trimTrailingSlashes(value: string): string {
  * ```
  */
 export function createAdminBillingClient(config: AdminBillingClientConfig): AdminBillingClient {
-  const baseUrl = trimTrailingSlashes(config.baseUrl);
-  const fetcher = config.fetchImpl ?? fetch;
-
-  /**
-   * Make an authenticated admin request
-   */
-  const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
-    const headers = new Headers(options?.headers);
-    headers.set('Content-Type', 'application/json');
-    (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
-      headers,
-      config.getToken?.(),
-    );
-
-    const url = `${baseUrl}${API_PREFIX}${path}`;
-
-    let response: Response;
-    try {
-      response = await fetcher(url, {
-        ...options,
-        headers,
-        credentials: 'include',
-      });
-    } catch (error) {
-      const cause = error instanceof Error ? error : new Error(String(error));
-      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause) as Error;
-    }
-
-    const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
-      Record<string, unknown>;
-
-    if (!response.ok) {
-      throw createApiError(response.status, data);
-    }
-
-    return data as T;
-  };
+  const factory = createRequestFactory(config);
 
   return {
     async listPlans(): Promise<AdminPlansListResponse> {
-      return request<AdminPlansListResponse>('/admin/billing/plans');
+      return apiRequest<AdminPlansListResponse>(factory, '/admin/billing/plans');
     },
 
     async getPlan(planId: string): Promise<AdminPlanResponse> {
-      return request<AdminPlanResponse>(`/admin/billing/plans/${planId}`);
+      return apiRequest<AdminPlanResponse>(factory, `/admin/billing/plans/${planId}`);
     },
 
     async createPlan(data: CreatePlanRequest): Promise<AdminPlanResponse> {
-      return request<AdminPlanResponse>('/admin/billing/plans/create', {
+      const validated = createPlanRequestSchema.parse(data);
+      return apiRequest<AdminPlanResponse>(factory, '/admin/billing/plans/create', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async updatePlan(planId: string, data: UpdatePlanRequest): Promise<AdminPlanResponse> {
-      return request<AdminPlanResponse>(`/admin/billing/plans/${planId}/update`, {
+      const validated = updatePlanRequestSchema.parse(data);
+      return apiRequest<AdminPlanResponse>(factory, `/admin/billing/plans/${planId}/update`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(validated),
       });
     },
 
     async syncPlanToStripe(planId: string): Promise<SyncStripeResponse> {
-      return request<SyncStripeResponse>(`/admin/billing/plans/${planId}/sync-stripe`, {
+      return apiRequest<SyncStripeResponse>(factory, `/admin/billing/plans/${planId}/sync-stripe`, {
         method: 'POST',
         body: JSON.stringify({}),
       });
     },
 
     async deactivatePlan(planId: string): Promise<SubscriptionActionResponse> {
-      return request<SubscriptionActionResponse>(`/admin/billing/plans/${planId}/deactivate`, {
+      return apiRequest<SubscriptionActionResponse>(factory, `/admin/billing/plans/${planId}/deactivate`, {
         method: 'POST',
         body: JSON.stringify({}),
       });

@@ -10,11 +10,10 @@
 
 import { deleteFrom, eq, isNotNull, lt, select, toCamelCase, USER_COLUMNS, USERS_TABLE } from '@abe-stack/db';
 
+import { ANONYMIZED_EMAIL_PATTERN } from '../users';
+
 import type { ScheduledTaskLogger } from './types';
 import type { DbClient, User } from '@abe-stack/db';
-
-/** Pattern matching anonymized email addresses (SHA-256 hex @ anonymized.local) */
-const ANONYMIZED_EMAIL_PATTERN = /^[a-f0-9]{64}@anonymized\.local$/;
 
 /**
  * Hard-delete anonymized users past the retention period.

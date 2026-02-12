@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@abe-stack/client-engine';
+import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import type { UseQueryResult } from '@abe-stack/client-engine';
@@ -89,7 +90,7 @@ export function useWorkspaceBilling(
 
       return response.json() as Promise<SubscriptionResponse>;
     },
-    staleTime: 60000, // Cache for 1 minute
+    staleTime: MS_PER_MINUTE,
   };
 
   if (options?.enabled !== undefined) {

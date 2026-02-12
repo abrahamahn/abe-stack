@@ -9,6 +9,8 @@
  * 4. If offline, waits for online event to flush queue
  */
 
+import { delay, generateSecureId, MS_PER_SECOND } from '@abe-stack/shared';
+
 import { localStorageQueue } from './storage';
 
 // ============================================================================
@@ -49,7 +51,7 @@ export interface QueueStatus {
 // ============================================================================
 
 const DEFAULT_MAX_RETRIES = 3;
-const DEFAULT_RETRY_DELAY = 1000;
+const DEFAULT_RETRY_DELAY = MS_PER_SECOND;
 
 // Default no-op callbacks with proper return types
 const noopProcess = async (): Promise<void> => {};
@@ -101,7 +103,7 @@ export class MutationQueue {
    */
   add(type: string, data: unknown): string {
     const mutation: QueuedMutation = {
-      id: this.generateId(),
+      id: `${String(Date.now())}-${generateSecureId(7)}`,
       type,
       data,
       timestamp: Date.now(),
@@ -216,7 +218,7 @@ export class MutationQueue {
           // Re-add to front of queue for retry
           this.queue.unshift(mutation);
           this.persistQueue();
-          await this.delay(this.options.retryDelay * mutation.retries);
+          await delay(this.options.retryDelay * mutation.retries);
         }
       }
 
@@ -265,13 +267,6 @@ export class MutationQueue {
     this.options.onStatusChange(this.getStatus());
   }
 
-  private generateId(): string {
-    return `${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`;
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
 
 // ============================================================================

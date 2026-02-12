@@ -8,6 +8,8 @@
  * @module sms-2fa
  */
 
+import { MS_PER_DAY, MS_PER_HOUR } from '@abe-stack/shared';
+
 import { SMS_RATE_LIMIT_DAILY, SMS_RATE_LIMIT_HOURLY } from './types';
 
 import type { SmsRateLimitResult } from './types';
@@ -51,8 +53,8 @@ export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<S
     const oldestCreatedAt = oldestResult[0]?.created_at;
     const retryAfter =
       oldestCreatedAt !== undefined
-        ? new Date(oldestCreatedAt.getTime() + 60 * 60 * 1000)
-        : new Date(Date.now() + 60 * 60 * 1000);
+        ? new Date(oldestCreatedAt.getTime() + MS_PER_HOUR)
+        : new Date(Date.now() + MS_PER_HOUR);
 
     return { allowed: false, retryAfter };
   }
@@ -75,8 +77,8 @@ export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<S
     const oldestCreatedAt = oldestDailyResult[0]?.created_at;
     const retryAfter =
       oldestCreatedAt !== undefined
-        ? new Date(oldestCreatedAt.getTime() + 24 * 60 * 60 * 1000)
-        : new Date(Date.now() + 24 * 60 * 60 * 1000);
+        ? new Date(oldestCreatedAt.getTime() + MS_PER_DAY)
+        : new Date(Date.now() + MS_PER_DAY);
 
     return { allowed: false, retryAfter };
   }

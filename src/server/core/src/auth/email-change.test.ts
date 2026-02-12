@@ -17,27 +17,23 @@ import type { AuthConfig } from '@abe-stack/shared/config';
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/shared', () => ({
-  canonicalizeEmail: vi.fn((e: string) => e.toLowerCase()),
-  normalizeEmail: vi.fn((e: string) => e.toLowerCase().trim()),
-  InvalidCredentialsError: class extends Error {
-    constructor() {
-      super('Invalid credentials');
-      this.name = 'InvalidCredentialsError';
-    }
-  },
-  InvalidTokenError: class extends Error {
-    constructor(msg?: string) {
-      super(msg ?? 'Invalid token');
-      this.name = 'InvalidTokenError';
-    }
-  },
-}));
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...actual,
+    canonicalizeEmail: vi.fn((e: string) => e.toLowerCase()),
+    normalizeEmail: vi.fn((e: string) => e.toLowerCase().trim()),
+  };
+});
 
-vi.mock('./utils', () => ({
-  verifyPasswordSafe: vi.fn(),
-  revokeAllUserTokens: vi.fn(),
-}));
+vi.mock('./utils', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./utils')>();
+  return {
+    ...actual,
+    verifyPasswordSafe: vi.fn(),
+    revokeAllUserTokens: vi.fn(),
+  };
+});
 
 // ============================================================================
 // Test Setup

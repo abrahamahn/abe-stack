@@ -6,10 +6,10 @@
  */
 
 import { Alert, Button, Heading, PageContainer, useNavigate, useParams } from '@abe-stack/ui';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { UserActionsMenu, UserDetailCard } from '../components';
-import { useAdminUser, useUserActions } from '../hooks';
+import { useAdminUser, useImpersonation, useUserActions } from '../hooks';
 
 import type { JSX } from 'react';
 
@@ -55,6 +55,27 @@ export const UserDetailPage = (): JSX.Element => {
     error: actionError,
     clearError,
   } = useUserActions();
+  const { startImpersonation } = useImpersonation();
+  const [isImpersonating, setIsImpersonating] = useState(false);
+  const [impersonateError, setImpersonateError] = useState<string | null>(null);
+
+  const canImpersonate = user !== null && user.role !== 'admin';
+
+  const handleImpersonate = useCallback(async () => {
+    if (id === undefined || id.length === 0 || !canImpersonate) return;
+
+    setImpersonateError(null);
+    setIsImpersonating(true);
+    try {
+      await startImpersonation(id);
+      navigate('/');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to start impersonation';
+      setImpersonateError(message);
+    } finally {
+      setIsImpersonating(false);
+    }
+  }, [id, canImpersonate, startImpersonation, navigate]);
 
   const handleUpdate = useCallback(
     async (data: { name?: string | null; role?: UserRoleLocal }) => {
@@ -115,6 +136,17 @@ export const UserDetailPage = (): JSX.Element => {
               {user !== null ? user.email : 'User Details'}
             </Heading>
           </div>
+          {canImpersonate && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void handleImpersonate();
+              }}
+              disabled={isImpersonating || isLoading}
+            >
+              {isImpersonating ? 'Impersonating...' : 'Impersonate'}
+            </Button>
+          )}
           <Button
             onClick={() => {
               void refresh();
@@ -127,6 +159,7 @@ export const UserDetailPage = (): JSX.Element => {
 
         {/* Error Alerts */}
         {loadError !== null && loadError.length > 0 && <Alert tone="danger">{loadError}</Alert>}
+        {impersonateError !== null && <Alert tone="danger">{impersonateError}</Alert>}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

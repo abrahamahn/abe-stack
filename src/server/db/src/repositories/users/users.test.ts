@@ -7,6 +7,7 @@
  * role management, paginated listing with filters, and account lock/unlock operations.
  */
 
+import { MS_PER_DAY } from '@abe-stack/shared';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createUserRepository } from './users';
@@ -926,8 +927,8 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters({});
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]).toEqual(mockUser);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toEqual(mockUser);
       expect(result.total).toBe(1);
       expect(result.page).toBe(1);
       expect(result.limit).toBe(20);
@@ -974,8 +975,8 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters(filters);
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.role).toBe('admin');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.role).toBe('admin');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('WHERE'),
@@ -984,7 +985,7 @@ describe('createUserRepository', () => {
     });
 
     it('should filter by locked status', async () => {
-      const futureDate = new Date(Date.now() + 86400000);
+      const futureDate = new Date(Date.now() + MS_PER_DAY);
       const lockedRow = { ...mockDbRow, locked_until: futureDate, failed_login_attempts: 5 };
       vi.mocked(mockDb.query).mockResolvedValue([lockedRow]);
       vi.mocked(mockDb.queryOne).mockResolvedValue({ count: '1' });
@@ -993,8 +994,8 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters(filters);
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.lockedUntil).toEqual(futureDate);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.lockedUntil).toEqual(futureDate);
     });
 
     it('should filter by unverified status', async () => {
@@ -1006,8 +1007,8 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters(filters);
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.emailVerified).toBe(false);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.emailVerified).toBe(false);
     });
 
     it('should filter by active status', async () => {
@@ -1024,9 +1025,9 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters(filters);
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]?.emailVerified).toBe(true);
-      expect(result.items[0]?.lockedUntil).toBeNull();
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.emailVerified).toBe(true);
+      expect(result.data[0]?.lockedUntil).toBeNull();
     });
 
     it('should handle pagination with page and limit', async () => {
@@ -1140,7 +1141,7 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters({});
 
-      expect(result.items).toEqual([]);
+      expect(result.data).toEqual([]);
       expect(result.total).toBe(0);
       expect(result.totalPages).toBe(0);
       expect(result.hasNext).toBe(false);
@@ -1171,9 +1172,9 @@ describe('createUserRepository', () => {
       const repo = createUserRepository(mockDb);
       const result = await repo.listWithFilters({});
 
-      expect(result.items).toHaveLength(2);
-      expect(result.items[0]?.passwordHash).toBe('$2b$10$hashedpassword');
-      expect(result.items[1]?.email).toBe('user2@example.com');
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]?.passwordHash).toBe('$2b$10$hashedpassword');
+      expect(result.data[1]?.email).toBe('user2@example.com');
     });
 
     it('should use SELECT query for data and COUNT query for total', async () => {

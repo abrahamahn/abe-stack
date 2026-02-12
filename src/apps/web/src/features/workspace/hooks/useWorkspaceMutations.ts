@@ -6,6 +6,8 @@
  */
 
 import { useMutation, useQueryCache } from '@abe-stack/client-engine';
+import { useUndoableMutation } from '@abe-stack/react/hooks';
+import { useRef } from 'react';
 
 import { createWorkspaceApi } from '../api';
 
@@ -46,6 +48,8 @@ export interface UseCreateWorkspaceResult {
 export interface UseUpdateWorkspaceOptions {
   onSuccess?: (tenant: Tenant) => void;
   onError?: (error: Error) => void;
+  /** Current workspace data for undo snapshots */
+  currentWorkspace?: Record<string, unknown>;
 }
 
 export interface UseUpdateWorkspaceResult {
@@ -98,15 +102,33 @@ export function useCreateWorkspace(options?: UseCreateWorkspaceOptions): UseCrea
 
 export function useUpdateWorkspace(options?: UseUpdateWorkspaceOptions): UseUpdateWorkspaceResult {
   const queryCache = useQueryCache();
+  const workspaceRef = useRef<Record<string, unknown>>({});
 
-  const mutation = useMutation<Tenant, Error, { id: string; data: UpdateTenantInput }>({
+  if (options?.currentWorkspace !== undefined) {
+    workspaceRef.current = options.currentWorkspace;
+  }
+  const currentWorkspaceId = workspaceRef.current['id'];
+  const undoPathWorkspaceId =
+    typeof currentWorkspaceId === 'string' && currentWorkspaceId !== '' ? currentWorkspaceId : 'unknown';
+
+  const mutation = useUndoableMutation<Tenant, Error, { id: string; data: UpdateTenantInput }>({
     mutationFn: async ({ id, data }): Promise<Tenant> => {
       const api = getWorkspaceApi();
       return api.updateTenant(id, data);
     },
+    getSnapshot: () => workspaceRef.current,
+    path: ['workspaces', undoPathWorkspaceId],
+    applyTransaction: async (data) => {
+      const id = workspaceRef.current['id'] as string | undefined;
+      if (id !== undefined) {
+        const api = getWorkspaceApi();
+        await api.updateTenant(id, data as UpdateTenantInput);
+      }
+    },
     onSuccess: (tenant) => {
       queryCache.invalidateQuery(['workspaces']);
       queryCache.invalidateQuery(['workspaces', tenant.id]);
+      workspaceRef.current = tenant as unknown as Record<string, unknown>;
       options?.onSuccess?.(tenant);
     },
     onError: (error: Error): void => {

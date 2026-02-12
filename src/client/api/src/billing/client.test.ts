@@ -360,7 +360,7 @@ describe('createBillingClient', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/api/billing/subscription/cancel',
         expect.objectContaining({
-          body: JSON.stringify({}),
+          body: JSON.stringify({ immediately: false }),
         }),
       );
     });
@@ -862,24 +862,14 @@ describe('createBillingClient', () => {
       await expect(client.getSubscription()).rejects.toThrow('Forbidden');
     });
 
-    it('should handle bad request errors', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: () =>
-          Promise.resolve({
-            message: 'Validation failed',
-            details: { planId: 'Required field' },
-          }),
-      });
-
+    it('should handle client-side validation errors', async () => {
       const client = createClient('test-token');
 
       try {
         await client.createCheckout({ planId: '' as PlanId });
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error).toHaveProperty('message', 'Validation failed');
+        expect(error).toHaveProperty('message', 'PlanId must be at least 1 characters');
       }
     });
   });

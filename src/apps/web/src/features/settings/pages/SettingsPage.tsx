@@ -19,6 +19,7 @@ import {
   ForgotPasswordShortcut,
   NotificationPreferencesForm,
   OAuthConnectionsList,
+  PasskeyManagement,
   PasswordChangeForm,
   PhoneManagement,
   PreferencesSection,
@@ -76,6 +77,13 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
     <div className="space-y-6">
       <div>
         <Heading as="h3" size="md" className="mb-4">
+          Passkeys
+        </Heading>
+        <PasskeyManagement />
+      </div>
+
+      <div className="border-t pt-6">
+        <Heading as="h3" size="md" className="mb-4">
           Two-Factor Authentication
         </Heading>
         <TotpManagement />
@@ -85,7 +93,7 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
         <Heading as="h3" size="md" className="mb-4">
           SMS Authentication
         </Heading>
-        <PhoneManagement user={user} baseUrl="" getToken={undefined} />
+        <PhoneManagement user={user} baseUrl="" />
       </div>
 
       <div className="border-t pt-6">
@@ -111,10 +119,20 @@ const SecurityTab = ({ user }: { user: UserLocal }): ReactElement => {
         </Heading>
         <OAuthConnectionsList />
       </div>
+    </div>
+  );
+};
 
-      <div className="border-t pt-6">
-        <ApiKeysManagement />
-      </div>
+const ApiKeysTab = (): ReactElement => {
+  return (
+    <div>
+      <Heading as="h3" size="md" className="mb-4">
+        API Keys
+      </Heading>
+      <Text tone="muted" size="sm" className="mb-4">
+        Create and manage API keys for programmatic access. Keys are shown once at creation time.
+      </Text>
+      <ApiKeysManagement />
     </div>
   );
 };
@@ -141,7 +159,7 @@ const SessionsTab = (): ReactElement => {
           Devices are tracked when you log in. You can trust devices to skip new device alerts, or
           remove devices you no longer use.
         </Text>
-        <DevicesList baseUrl="" getToken={undefined} />
+        <DevicesList baseUrl="" />
       </div>
     </div>
   );
@@ -267,6 +285,11 @@ export const SettingsPage = (): ReactElement => {
         ),
       },
       {
+        id: 'api-keys',
+        label: 'API Keys',
+        content: <ApiKeysTab />,
+      },
+      {
         id: 'account',
         label: 'Account',
         content: <AccountTab />,
@@ -295,12 +318,19 @@ export const SettingsPage = (): ReactElement => {
     [user],
   );
 
-  // Loading state
+  // Loading state — skeleton matches tab bar + content structure
   if (status === 'pending') {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-96 w-full" />
+        <div className="flex gap-2 border-b pb-2">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-8 w-20 rounded-md" />
+          ))}
+        </div>
+        <div className="space-y-6 pt-2">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-48 w-full rounded-md" />
+        </div>
       </div>
     );
   }

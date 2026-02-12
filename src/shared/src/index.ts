@@ -16,7 +16,29 @@ export {
   type StatusCode,
 } from './core/api';
 
-export { ERROR_CODES, HTTP_STATUS, type ErrorCode, type HttpStatusCode } from './core/constants';
+export {
+  ACCESS_TOKEN_COOKIE_NAME,
+  AUTH_EXPIRY,
+  CSRF_COOKIE_NAME,
+  CSRF_TOKEN_HEADER,
+  DEFAULT_PAGINATION,
+  ERROR_CODES,
+  ERROR_MESSAGES,
+  HTTP_BODY_LIMIT,
+  HTTP_STATUS,
+  LIMITS,
+  LOGIN_FAILURE_REASON,
+  QUOTAS,
+  REFRESH_TOKEN_COOKIE_NAME,
+  RETENTION_PERIODS,
+  SMS_LIMITS,
+  SUDO_TOKEN_HEADER,
+  WEBSOCKET_PATH,
+  WS_CLOSE_POLICY_VIOLATION,
+  type ErrorCode,
+  type HttpStatusCode,
+  type LoginFailureReason,
+} from './core/constants';
 
 export {
   AppError,
@@ -65,10 +87,12 @@ export {
   assert,
   assertDefined,
   assertNever,
+  isAuthenticatedRequest,
   isNonEmptyString,
   isNumber,
   isObjectLike,
   isPlainObject,
+  isSafeObjectKey,
   isString,
 } from './core/guard';
 
@@ -146,6 +170,8 @@ export {
 
 // Audit log
 export {
+  getAuditActionTone,
+  getAuditSeverityTone,
   AUDIT_ACTION_REGEX,
   AUDIT_CATEGORIES,
   AUDIT_SEVERITIES,
@@ -169,10 +195,15 @@ export {
   AUTH_ERROR_MESSAGES,
   AUTH_SUCCESS_MESSAGES,
   AccountLockedError,
+  COMMON_PASSWORDS,
   EmailSendError,
   HTTP_ERROR_MESSAGES,
+  KEYBOARD_PATTERNS,
   authContract,
   authResponseSchema,
+  calculateEntropy,
+  calculateScore,
+  containsUserInput,
   changeEmailRequestSchema,
   changeEmailResponseSchema,
   confirmEmailChangeRequestSchema,
@@ -184,11 +215,18 @@ export {
   defaultPasswordConfig,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
+  estimateCrackTime,
   estimatePasswordStrength,
   forgotPasswordRequestSchema,
   forgotPasswordResponseSchema,
+  generateFeedback,
+  getCharsetSize,
   getStrengthColor,
   getStrengthLabel,
+  hasKeyboardPattern,
+  hasRepeatedChars,
+  hasSequentialChars,
+  isCommonPassword,
   isKnownAuthError,
   loginRequestSchema,
   logoutResponseSchema,
@@ -245,6 +283,7 @@ export {
   type MagicLinkVerifyRequest,
   type MagicLinkVerifyResponse,
   type PasswordConfig,
+  type PasswordPenalties,
   type PasswordValidationResult,
   type RefreshResponse,
   type RegisterRequest,
@@ -273,6 +312,9 @@ export {
   type RemovePhoneResponse,
   type SmsChallengeRequest,
   type SmsChallengeResponse,
+  type PasskeyListItem,
+  type RenamePasskeyRequest,
+  renamePasskeyRequestSchema,
   type SmsVerifyRequest,
 } from './domain/auth';
 
@@ -313,6 +355,16 @@ export {
   billingContract,
   calculateProration,
   cancelSubscriptionRequestSchema,
+  formatPlanInterval,
+  formatPrice,
+  formatPriceWithInterval,
+  getCardBrandLabel,
+  getInvoiceStatusLabel,
+  getInvoiceStatusVariant,
+  getPaymentMethodIcon,
+  getPaymentMethodLabel,
+  getSubscriptionStatusLabel,
+  getSubscriptionStatusVariant,
   cardDetailsSchema,
   checkoutRequestSchema,
   checkoutResponseSchema,
@@ -363,6 +415,7 @@ export {
   type PlansListResponse,
   type SetupIntentResponse,
   type Subscription,
+  type StatusVariant,
   type SubscriptionActionResponse,
   type SubscriptionId,
   type SubscriptionResponse,
@@ -408,6 +461,8 @@ export {
 
 // Jobs
 export {
+  getJobStatusLabel,
+  getJobStatusTone,
   JOB_PRIORITIES,
   JOB_PRIORITY_VALUES,
   JOB_STATUSES,
@@ -427,7 +482,10 @@ export {
 
 // Membership
 export {
+  getInvitationStatusTone,
+  getTenantRoleTone,
   INVITATION_STATUSES,
+  ROLE_LEVELS,
   acceptInvitationSchema,
   addMemberSchema,
   canAcceptInvite,
@@ -456,9 +514,11 @@ export {
 
 // Notifications
 export {
+  getNotificationLevelTone,
   DEFAULT_NOTIFICATION_PREFERENCES,
   InvalidPreferencesError,
   InvalidSubscriptionError,
+  NOTIFICATION_LEVELS,
   NOTIFICATION_TYPES,
   NotificationRateLimitError,
   NotificationSendError,
@@ -625,7 +685,11 @@ export {
 
 // Webhooks
 export {
+  MAX_DELIVERY_ATTEMPTS,
+  RETRY_DELAYS_MINUTES,
+  SUBSCRIBABLE_EVENT_TYPES,
   WEBHOOK_DELIVERY_STATUSES,
+  WEBHOOK_EVENT_TYPES,
   calculateRetryDelay,
   createWebhookDeliverySchema,
   createWebhookSchema,
@@ -643,6 +707,7 @@ export {
   type Webhook,
   type WebhookDelivery,
   type WebhookDeliveryStatus,
+  type WebhookEventType,
 } from './domain/webhooks';
 
 // ============================================================================
@@ -651,6 +716,12 @@ export {
 
 // Admin (additional exports)
 export {
+  formatSecurityEventType,
+  getAppRoleLabel,
+  getAppRoleTone,
+  getSecuritySeverityTone,
+  getUserStatusLabel,
+  getUserStatusTone,
   USER_STATUSES,
   adminActionResponseSchema,
   adminHardBanRequestSchema,
@@ -791,6 +862,18 @@ export {
   type WriteResponse,
 } from './domain/realtime';
 
+// Activities (from domain/activities)
+export {
+  ACTOR_TYPES,
+  activitySchema,
+  actorTypeSchema,
+  createActivitySchema,
+  getActorTypeTone,
+  type Activity,
+  type ActorType,
+  type CreateActivity,
+} from './domain/activities';
+
 // Security (from domain/admin)
 export {
   SECURITY_EVENT_TYPES,
@@ -880,6 +963,7 @@ export {
   type MemoizeFunction,
   type MemoizeOptions,
   type MemoryCacheConfig,
+  type RedisCacheConfig,
 } from './utils/cache';
 
 // --- Search ---
@@ -1031,9 +1115,11 @@ export * as PubSub from './utils/pubsub';
 export {
   SubKeys,
   SubscriptionManager,
+  parseRecordKey,
   publishAfterWrite,
   type ClientMessage,
   type ListKey,
+  type ParsedRecordKey,
   type PostgresPubSub,
   type PostgresPubSubOptions,
   type PubSubMessage,
@@ -1057,6 +1143,19 @@ export {
 // NOTE: toCamelCase is exported from ./utils/string/string (string conversion).
 // For record-key conversion, import { toCamelCase } from './utils/string/casing' directly.
 
+// --- Keyboard ---
+export {
+  formatKeyBinding,
+  isEditableElement,
+  isMac,
+  matchesAnyBinding,
+  matchesKeyBinding,
+  matchesModifiers,
+  parseKeyBinding,
+  type KeyModifiers,
+  type ParsedKeyBinding,
+} from './utils/keyboard';
+
 // --- Constants ---
 export {
   DAYS_PER_WEEK,
@@ -1073,6 +1172,9 @@ export {
   type SortOrder,
 } from './utils/constants';
 
+// --- Comparison ---
+export { deepEqual } from './utils/comparison';
+
 // --- Crypto ---
 export {
   constantTimeCompare,
@@ -1081,8 +1183,12 @@ export {
   generateUUID,
 } from './utils/crypto/crypto';
 
+// --- Date ---
+export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly, toISOStringOrNull } from './utils/date';
+
 // --- HTTP ---
 export {
+  extractBearerToken,
   parseCookies,
   serializeCookie,
   type CookieOptions,
@@ -1105,6 +1211,9 @@ export { createRouteMap, protectedRoute, publicRoute } from './utils/http/routes
 
 // --- Pagination ---
 export {
+  DEFAULT_PAGE_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
   PAGINATION_ERROR_TYPES,
   PaginationError,
   buildCursorPaginationQuery,
@@ -1137,6 +1246,7 @@ export { createRateLimiter } from './utils/rate-limit';
 export {
   ALLOWED_IMAGE_TYPES,
   MAX_IMAGE_SIZE,
+  MAX_LOGO_SIZE,
   generateUniqueFilename,
   joinStoragePath,
   normalizeStoragePath,
@@ -1150,6 +1260,7 @@ export {
   countCharactersNoWhitespace,
   countWords,
   escapeHtml,
+  formatBytes,
   normalizeEmail,
   normalizeWhitespace,
   padLeft,
@@ -1161,6 +1272,9 @@ export {
   toPascalCase,
   truncate,
 } from './utils/string/string';
+
+// --- User Agent ---
+export { parseUserAgent, type ParsedUserAgent } from './utils/user-agent';
 
 // --- Token ---
 export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './utils/crypto/token';

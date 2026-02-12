@@ -6,7 +6,7 @@
  */
 
 // Configuration
-export { loadStorageConfig, validateStorage } from './config';
+export { DEFAULT_STORAGE_MAX_FILE_SIZE, loadStorageConfig, validateStorage } from './config';
 
 // Types
 export type {

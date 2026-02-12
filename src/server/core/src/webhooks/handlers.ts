@@ -8,7 +8,7 @@
  * @module handlers
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import {
   createWebhook,
@@ -45,12 +45,12 @@ export async function handleCreateWebhook(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const webhook = await createWebhook(deps.repos, tenantId, userId, body);
 
-    return { status: 201, body: webhook };
+    return { status: HTTP_STATUS.CREATED, body: webhook };
   } catch (error) {
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -79,17 +79,17 @@ export async function handleListWebhooks(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const webhooks = await listWebhooks(deps.repos, tenantId);
-    return { status: 200, body: webhooks };
+    return { status: HTTP_STATUS.OK, body: webhooks };
   } catch (error) {
     deps.log.error(
       error instanceof Error ? error : new Error(String(error)),
       'Failed to list webhooks',
     );
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -106,14 +106,14 @@ export async function handleGetWebhook(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const webhook = await getWebhook(deps.repos, webhookId, tenantId);
-    return { status: 200, body: webhook };
+    return { status: HTTP_STATUS.OK, body: webhook };
   } catch (error) {
     if (error instanceof Error && error.message === 'Webhook not found') {
-      return { status: 404, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
     }
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -144,14 +144,14 @@ export async function handleUpdateWebhook(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const webhook = await updateWebhook(deps.repos, webhookId, tenantId, body);
-    return { status: 200, body: webhook };
+    return { status: HTTP_STATUS.OK, body: webhook };
   } catch (error) {
     if (error instanceof Error && error.message === 'Webhook not found') {
-      return { status: 404, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
     }
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -181,14 +181,14 @@ export async function handleDeleteWebhook(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     await deleteWebhook(deps.repos, webhookId, tenantId);
-    return { status: 200, body: { message: 'Webhook deleted' } };
+    return { status: HTTP_STATUS.OK, body: { message: 'Webhook deleted' } };
   } catch (error) {
     if (error instanceof Error && error.message === 'Webhook not found') {
-      return { status: 404, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
     }
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {
@@ -218,14 +218,14 @@ export async function handleRotateSecret(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
     const webhook = await rotateWebhookSecret(deps.repos, webhookId, tenantId);
-    return { status: 200, body: webhook };
+    return { status: HTTP_STATUS.OK, body: webhook };
   } catch (error) {
     if (error instanceof Error && error.message === 'Webhook not found') {
-      return { status: 404, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.WEBHOOK_NOT_FOUND } };
     }
     return mapErrorToHttpResponse(error, {
       warn: (ctx: Record<string, unknown>, msg: string) => {

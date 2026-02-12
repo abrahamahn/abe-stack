@@ -1,4 +1,6 @@
 // src/apps/server/src/config/infra/queue.ts
+import { MS_PER_MINUTE } from '@abe-stack/shared';
+
 import type { FullEnv, QueueConfig } from '@abe-stack/shared/config';
 
 /**
@@ -36,5 +38,5 @@ export const DEFAULT_QUEUE_CONFIG: Required<QueueConfig> = {
   concurrency: 5,
   defaultMaxAttempts: 3,
   backoffBaseMs: 1000,
-  maxBackoffMs: 300000,
+  maxBackoffMs: 5 * MS_PER_MINUTE,
 };

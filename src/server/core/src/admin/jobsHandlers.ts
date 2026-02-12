@@ -7,7 +7,7 @@
  */
 
 import { PostgresQueueStore, type JobListOptions } from '@abe-stack/db';
-import { jobListQuerySchema } from '@abe-stack/shared';
+import { HTTP_STATUS, jobListQuerySchema } from '@abe-stack/shared';
 
 import { ERROR_MESSAGES } from '../auth';
 
@@ -56,7 +56,7 @@ export async function handleListJobs(
 ): Promise<{ status: number; body: JobListResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -99,7 +99,7 @@ export async function handleListJobs(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -114,7 +114,7 @@ export async function handleGetJobDetails(
 ): Promise<{ status: number; body: JobDetails | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -134,7 +134,7 @@ export async function handleGetJobDetails(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -149,7 +149,7 @@ export async function handleGetQueueStats(
 ): Promise<{ status: number; body: QueueStats | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -162,7 +162,7 @@ export async function handleGetQueueStats(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -177,7 +177,7 @@ export async function handleRetryJob(
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -200,7 +200,7 @@ export async function handleRetryJob(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -215,7 +215,7 @@ export async function handleCancelJob(
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = (request as { user?: { userId: string; role: string } }).user;
   if (user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
@@ -238,6 +238,6 @@ export async function handleCancelJob(
       return { status: 500, body: { message: error.message } };
     }
     ctx.log.error(toError(error));
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }

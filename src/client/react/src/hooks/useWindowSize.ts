@@ -1,6 +1,8 @@
 // src/client/react/src/hooks/useWindowSize.ts
 import { useEffect, useState } from 'react';
 
+const RESIZE_DEBOUNCE_MS = 150;
+
 type WindowSize = {
   width: number;
   height: number;
@@ -35,7 +37,7 @@ export function useWindowSize(): WindowSize {
           width: window.innerWidth,
           height: window.innerHeight,
         });
-      }, 150); // Debounce resize events
+      }, RESIZE_DEBOUNCE_MS);
     };
 
     window.addEventListener('resize', handleResize);

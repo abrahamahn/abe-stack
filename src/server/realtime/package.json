@@ -27,7 +27,6 @@
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
-    "@abe-stack/server-engine": "workspace:*",
     "@abe-stack/db": "workspace:*",
     "@abe-stack/websocket": "workspace:*",
     "@abe-stack/shared": "workspace:*"

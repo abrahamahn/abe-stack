@@ -19,7 +19,7 @@ describe('Audio Metadata', () => {
   describe('parseAudioMetadata', () => {
     it('should return empty object for non-existent file', async () => {
       const fs = await import('fs');
-      vi.mocked(fs.promises.stat).mockRejectedValueOnce(new Error('File not found'));
+      vi.mocked(fs.promises.readFile).mockRejectedValueOnce(new Error('File not found'));
 
       const result = await parseAudioMetadata('/nonexistent.mp3');
       expect(result).toEqual({});
@@ -27,23 +27,18 @@ describe('Audio Metadata', () => {
 
     it('should return empty metadata for files exceeding MAX_AUDIO_FILE_SIZE', async () => {
       const fs = await import('fs');
-      // 201 MB — exceeds the 200 MB limit
-      vi.mocked(fs.promises.stat).mockResolvedValueOnce({ size: 201 * 1024 * 1024 } as Awaited<
-        ReturnType<typeof fs.promises.stat>
-      >);
+      // Source reads the file first, then checks buffer.length against 200 MB limit
+      const oversizedBuffer = { length: 201 * 1024 * 1024 } as unknown as Buffer<ArrayBuffer>;
+      vi.mocked(fs.promises.readFile).mockResolvedValueOnce(oversizedBuffer);
 
       const result = await parseAudioMetadata('/huge.mp3');
       expect(result).toEqual({});
-      // readFile should NOT have been called
-      expect(fs.promises.readFile).not.toHaveBeenCalled();
     });
 
     it('should parse files at exactly 200 MB', async () => {
       const fs = await import('fs');
-      // Exactly 200 MB — within the limit
-      vi.mocked(fs.promises.stat).mockResolvedValueOnce({ size: 200 * 1024 * 1024 } as Awaited<
-        ReturnType<typeof fs.promises.stat>
-      >);
+      // Source reads file directly and checks buffer.length against 200 MB limit
+      // Exactly 200 MB (not over) — should proceed with parsing
       const buffer = Buffer.alloc(100);
       buffer.fill(0);
       vi.mocked(fs.promises.readFile).mockResolvedValueOnce(buffer);
@@ -51,7 +46,6 @@ describe('Audio Metadata', () => {
       const result = await parseAudioMetadata('/borderline.mp3');
       // File is at limit (not over), so it should be parsed (returns empty for unknown format)
       expect(result).toEqual({});
-      // readFile SHOULD have been called
       expect(fs.promises.readFile).toHaveBeenCalled();
     });
 

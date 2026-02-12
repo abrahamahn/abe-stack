@@ -21,5 +21,5 @@ export {
   resetStats,
 } from './stats';
 
-// Types
-export type { PubSubWebSocket, SubscriptionKey, WebSocketStats } from './types';
+// Types (re-exported from shared — canonical definitions live in @abe-stack/shared)
+export type { SubscriptionKey, WebSocket as PubSubWebSocket, WebSocketStats } from '@abe-stack/shared';

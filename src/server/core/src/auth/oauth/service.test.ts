@@ -151,6 +151,7 @@ describe('OAuth Service', () => {
       apiKeys: {} as Repositories['apiKeys'],
       dataExportRequests: {} as Repositories['dataExportRequests'],
       activities: {} as Repositories['activities'],
+      webauthnCredentials: {} as Repositories['webauthnCredentials'],
       trustedDevices: {} as Repositories['trustedDevices'],
       files: {} as Repositories['files'],
     };

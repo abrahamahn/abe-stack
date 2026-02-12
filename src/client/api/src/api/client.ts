@@ -1,10 +1,12 @@
 // src/client/api/src/api/client.ts
 
-import { addAuthHeader } from '@abe-stack/shared';
+import { addAuthHeader, ERROR_CODES, HTTP_STATUS } from '@abe-stack/shared';
 
 import { createApiError, NetworkError } from '../errors';
+import { API_PREFIX, createRequestFactory } from '../utils';
 
 import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 import type {
   AuthResponse,
   ChangeEmailRequest,
@@ -25,6 +27,7 @@ import type {
   OAuthEnabledProvidersResponse,
   OAuthProvider,
   OAuthUnlinkResponse,
+  PasskeyListItem,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
@@ -50,10 +53,7 @@ export interface TosRequiredPayload {
   requiredVersion: number;
 }
 
-export interface ApiClientConfig {
-  baseUrl: string;
-  getToken?: () => string | null;
-  fetchImpl?: typeof fetch;
+export interface ApiClientConfig extends BaseClientConfig {
   /**
    * Called when the server returns 403 with code TOS_ACCEPTANCE_REQUIRED.
    * The promise should resolve after the user accepts the ToS,
@@ -97,32 +97,33 @@ export interface ApiClient {
   unlinkOAuthProvider: (provider: OAuthProvider) => Promise<OAuthUnlinkResponse>;
   getOAuthLoginUrl: (provider: OAuthProvider) => string;
   getOAuthLinkUrl: (provider: OAuthProvider) => string;
-}
-
-const API_PREFIX = '/api';
-
-function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
-    end--;
-  }
-  return value.slice(0, end);
+  // WebAuthn/Passkey methods
+  webauthnRegisterOptions: () => Promise<{ options: Record<string, unknown> }>;
+  webauthnRegisterVerify: (data: {
+    credential: Record<string, unknown>;
+    name?: string;
+  }) => Promise<{ credentialId: string; message: string }>;
+  webauthnLoginOptions: (email?: string) => Promise<{ options: Record<string, unknown> }>;
+  webauthnLoginVerify: (data: {
+    credential: Record<string, unknown>;
+    sessionKey: string;
+  }) => Promise<AuthResponse>;
+  listPasskeys: () => Promise<PasskeyListItem[]>;
+  renamePasskey: (id: string, name: string) => Promise<{ message: string }>;
+  deletePasskey: (id: string) => Promise<{ message: string }>;
 }
 
 export function createApiClient(config: ApiClientConfig): ApiClient {
-  const baseUrl = trimTrailingSlashes(config.baseUrl);
-  const fetcher = config.fetchImpl ?? fetch;
+  const { baseUrl, fetcher } = createRequestFactory(config);
 
+  // Custom request helper with ToS interception (not shared by other clients)
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
     headers.set('Content-Type', 'application/json');
 
     const token = config.getToken?.();
     if (token !== null && token !== undefined) {
-      (addAuthHeader as (headers: Headers, token: string | null | undefined) => Headers)(
-        headers,
-        token,
-      );
+      addAuthHeader(headers, token);
     }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
@@ -148,8 +149,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     if (!response.ok) {
       // Intercept 403 TOS_ACCEPTANCE_REQUIRED: allow caller to show ToS modal and retry
       if (
-        response.status === 403 &&
-        data['code'] === 'TOS_ACCEPTANCE_REQUIRED' &&
+        response.status === HTTP_STATUS.FORBIDDEN &&
+        data['code'] === ERROR_CODES.TOS_ACCEPTANCE_REQUIRED &&
         config.onTosRequired !== undefined
       ) {
         const documentId = typeof data['documentId'] === 'string' ? data['documentId'] : '';
@@ -332,6 +333,51 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       // This returns the link initiation endpoint - must be called with auth
       const providerStr = provider as string;
       return `${baseUrl}${API_PREFIX}/auth/oauth/${providerStr}/link`;
+    },
+    // WebAuthn/Passkey methods
+    async webauthnRegisterOptions(): Promise<{ options: Record<string, unknown> }> {
+      return request<{ options: Record<string, unknown> }>('/auth/webauthn/register/options', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+    async webauthnRegisterVerify(data: {
+      credential: Record<string, unknown>;
+      name?: string;
+    }): Promise<{ credentialId: string; message: string }> {
+      return request<{ credentialId: string; message: string }>(
+        '/auth/webauthn/register/verify',
+        { method: 'POST', body: JSON.stringify(data) },
+      );
+    },
+    async webauthnLoginOptions(email?: string): Promise<{ options: Record<string, unknown> }> {
+      return request<{ options: Record<string, unknown> }>('/auth/webauthn/login/options', {
+        method: 'POST',
+        body: JSON.stringify(email !== undefined ? { email } : {}),
+      });
+    },
+    async webauthnLoginVerify(data: {
+      credential: Record<string, unknown>;
+      sessionKey: string;
+    }): Promise<AuthResponse> {
+      return request<AuthResponse>('/auth/webauthn/login/verify', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async listPasskeys(): Promise<PasskeyListItem[]> {
+      return request<PasskeyListItem[]>('/users/me/passkeys');
+    },
+    async renamePasskey(id: string, name: string): Promise<{ message: string }> {
+      return request<{ message: string }>(`/users/me/passkeys/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      });
+    },
+    async deletePasskey(id: string): Promise<{ message: string }> {
+      return request<{ message: string }>(`/users/me/passkeys/${id}`, {
+        method: 'DELETE',
+      });
     },
   };
 }

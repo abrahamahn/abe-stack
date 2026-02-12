@@ -11,7 +11,14 @@ import { notificationRoutes } from '@abe-stack/core/notifications';
 import { registerRouteMap } from '@abe-stack/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
+import {
+  buildAuthenticatedRequest,
+  createAdminJwt,
+  createTestJwt,
+  createTestServer,
+  parseJsonResponse,
+  type TestServer,
+} from './test-utils';
 
 import type { AuthGuardFactory } from '@abe-stack/server-engine';
 
@@ -487,7 +494,17 @@ describe('Notifications API Integration Tests', () => {
       expect(body.message).toBe('Unauthorized');
     });
 
-    it.todo('protected routes accept valid Bearer token');
+    it('protected routes accept valid Bearer token (not 401)', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+      expect(response.statusCode).not.toBe(401);
+    });
   });
 
   // ==========================================================================
@@ -517,6 +534,248 @@ describe('Notifications API Integration Tests', () => {
 
       // Public route: should NOT return 401
       expect(response.statusCode).not.toBe(401);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — List Notifications
+  // ==========================================================================
+
+  describe('list notifications', () => {
+    it('GET /api/notifications/list returns notifications with unread count', async () => {
+      const now = new Date();
+      const mockNotifications = [
+        {
+          id: 'n-1',
+          userId: 'user-test-123',
+          type: 'info',
+          title: 'Welcome',
+          message: 'Welcome to the app',
+          data: undefined,
+          isRead: false,
+          readAt: undefined,
+          createdAt: now,
+        },
+        {
+          id: 'n-2',
+          userId: 'user-test-123',
+          type: 'success',
+          title: 'Setup complete',
+          message: 'Your account is ready',
+          data: undefined,
+          isRead: true,
+          readAt: now,
+          createdAt: now,
+        },
+      ];
+
+      mockRepos.notifications.findByUserId.mockResolvedValueOnce(mockNotifications);
+      mockRepos.notifications.countUnread.mockResolvedValueOnce(1);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        notifications: Array<{ id: string; title: string; isRead: boolean }>;
+        unreadCount: number;
+      };
+      expect(body.notifications).toHaveLength(2);
+      expect(body.unreadCount).toBe(1);
+      expect(body.notifications[0]!.id).toBe('n-1');
+    });
+
+    it('GET /api/notifications/list returns empty array when no notifications', async () => {
+      mockRepos.notifications.findByUserId.mockResolvedValueOnce([]);
+      mockRepos.notifications.countUnread.mockResolvedValueOnce(0);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/list',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as {
+        notifications: unknown[];
+        unreadCount: number;
+      };
+      expect(body.notifications).toHaveLength(0);
+      expect(body.unreadCount).toBe(0);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Mark Notifications
+  // ==========================================================================
+
+  describe('mark notifications', () => {
+    it('POST /api/notifications/mark-read marks specified notifications as read', async () => {
+      const id1 = '00000000-0000-1000-8000-000000000001';
+      const id2 = '00000000-0000-1000-8000-000000000002';
+
+      mockRepos.notifications.markAsRead
+        .mockResolvedValueOnce({ id: id1, isRead: true })
+        .mockResolvedValueOnce({ id: id2, isRead: true });
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-read',
+          accessToken: userJwt,
+          payload: { ids: [id1, id2] },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string; count: number };
+      expect(body.count).toBe(2);
+      expect(mockRepos.notifications.markAsRead).toHaveBeenCalledTimes(2);
+    });
+
+    it('POST /api/notifications/mark-all-read marks all as read', async () => {
+      mockRepos.notifications.markAllAsRead.mockResolvedValueOnce(5);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/mark-all-read',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string; count: number };
+      expect(body.count).toBe(5);
+      expect(mockRepos.notifications.markAllAsRead).toHaveBeenCalledWith('user-test-123');
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Delete Notification
+  // ==========================================================================
+
+  describe('delete notification', () => {
+    it('POST /api/notifications/delete removes notification', async () => {
+      mockRepos.notifications.delete.mockResolvedValueOnce(true);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/delete',
+          accessToken: userJwt,
+          payload: { id: 'n-1' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { message: string };
+      expect(body.message).toBeDefined();
+    });
+
+    it('POST /api/notifications/delete returns 404 for unknown notification', async () => {
+      mockRepos.notifications.delete.mockResolvedValueOnce(false);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/delete',
+          accessToken: userJwt,
+          payload: { id: 'nonexistent' },
+        }),
+      );
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Preferences
+  // ==========================================================================
+
+  describe('notification preferences', () => {
+    it('GET /api/notifications/preferences returns user preferences', async () => {
+      const mockPrefs = {
+        user_id: 'user-test-123',
+        global_enabled: true,
+        quiet_hours: JSON.stringify({
+          enabled: false,
+          startHour: 22,
+          endHour: 7,
+          timezone: 'UTC',
+        }),
+        types: JSON.stringify({}),
+        updated_at: new Date().toISOString(),
+      };
+
+      mockDb.queryOne.mockResolvedValueOnce(mockPrefs);
+
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'GET',
+          url: '/api/notifications/preferences',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(200);
+      const body = parseJsonResponse(response) as { preferences: Record<string, unknown> };
+      expect(body.preferences).toBeDefined();
+    });
+  });
+
+  // ==========================================================================
+  // Behavioral Tests — Stubbed Routes
+  // ==========================================================================
+
+  describe('stubbed routes', () => {
+    it('POST /api/notifications/test returns 500 (provider not configured)', async () => {
+      const userJwt = createTestJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/test',
+          accessToken: userJwt,
+        }),
+      );
+
+      expect(response.statusCode).toBe(500);
+      const body = parseJsonResponse(response) as { code: string };
+      expect(body.code).toBe('PROVIDER_NOT_CONFIGURED');
+    });
+
+    it('POST /api/notifications/send returns 500 (provider not configured)', async () => {
+      const adminJwt = createAdminJwt();
+      const response = await testServer.inject(
+        buildAuthenticatedRequest({
+          method: 'POST',
+          url: '/api/notifications/send',
+          accessToken: adminJwt,
+          payload: {
+            type: 'system',
+            payload: { title: 'Test', body: 'Test notification' },
+            userIds: ['00000000-0000-1000-8000-000000000001'],
+          },
+        }),
+      );
+
+      expect(response.statusCode).toBe(500);
+      const body = parseJsonResponse(response) as { code: string };
+      expect(body.code).toBe('PROVIDER_NOT_CONFIGURED');
     });
   });
 });

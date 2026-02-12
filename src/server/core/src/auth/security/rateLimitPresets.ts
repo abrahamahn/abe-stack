@@ -15,6 +15,7 @@
  */
 
 import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '@abe-stack/server-engine';
+import { HTTP_STATUS, MS_PER_SECOND } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -176,8 +177,8 @@ class AuthRateLimiterRegistry {
         max: config.max,
         progressiveDelay: {
           enabled: true,
-          baseDelay: 1000, // 1 second base delay
-          maxDelay: 30000, // 30 seconds max delay
+          baseDelay: MS_PER_SECOND,
+          maxDelay: 30 * MS_PER_SECOND,
           backoffFactor: 2,
         },
       } satisfies RateLimitConfig);
@@ -255,7 +256,7 @@ export function createAuthRateLimitHook(endpoint: AuthEndpoint) {
     if (!rateLimitInfo.allowed) {
       const retryAfter = Math.ceil(rateLimitInfo.resetMs / 1000);
       reply.header('Retry-After', String(retryAfter));
-      reply.status(429).send({
+      reply.status(HTTP_STATUS.TOO_MANY_REQUESTS).send({
         error: 'Too Many Requests',
         message: `Rate limit exceeded for ${endpoint}. Please try again later.`,
         retryAfter,

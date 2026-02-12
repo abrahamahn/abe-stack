@@ -135,7 +135,7 @@ describe('Auth Routes', () => {
       // Core auth routes (19) + ToS routes (2) + Device routes (3) + Phone routes (2*) + SMS routes (2)
       // + Magic-link routes (2) + OAuth routes (13) = 43
       // *Note: users/me/phone POST is overwritten by DELETE in the Map, so only 2 unique phone entries
-      expect(routeKeys).toHaveLength(43);
+      expect(routeKeys).toHaveLength(44);
 
       // Core auth routes
       expect(routeKeys).toContain('auth/register');
@@ -946,7 +946,7 @@ describe('Route Protection', () => {
     // + 3 device protected (devices, devices/:id/trust, devices/:id)
     // + 2 phone protected (phone, phone/verify) — phone POST overwritten by DELETE in Map
     // + 7 OAuth protected (3 link + 3 unlink + 1 connections) = 22 protected routes
-    expect(protectedRoutes).toHaveLength(22);
+    expect(protectedRoutes).toHaveLength(23);
 
     const protectedRouteNames = protectedRoutes.map(([name]) => name);
     // Core protected routes

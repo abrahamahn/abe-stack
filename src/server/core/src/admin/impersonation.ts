@@ -13,6 +13,7 @@
  */
 
 import { sign as jwtSign, verify as jwtVerify } from '@abe-stack/server-engine';
+import { AUTH_EXPIRY, QUOTAS } from '@abe-stack/shared';
 
 import type { UserRepository } from '@abe-stack/db';
 import type { AdminUser, AppRole } from '@abe-stack/shared';
@@ -22,10 +23,10 @@ import type { AdminUser, AppRole } from '@abe-stack/shared';
 // ============================================================================
 
 /** Default TTL for impersonation tokens in minutes */
-const DEFAULT_TTL_MINUTES = 30;
+const DEFAULT_TTL_MINUTES = AUTH_EXPIRY.IMPERSONATION_MINUTES;
 
 /** Default max impersonations per admin per hour */
-const DEFAULT_MAX_PER_HOUR = 5;
+const DEFAULT_MAX_PER_HOUR = QUOTAS.IMPERSONATION_MAX_PER_HOUR;
 
 /** Token type claim for impersonation tokens */
 const IMPERSONATION_TOKEN_TYPE = 'impersonation';

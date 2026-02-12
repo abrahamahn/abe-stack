@@ -56,6 +56,11 @@ export {
   TOTP_BACKUP_CODES_TABLE,
   TOTP_BACKUP_CODE_COLUMNS,
   type TotpBackupCode,
+  WEBAUTHN_CREDENTIALS_TABLE,
+  WEBAUTHN_CREDENTIAL_COLUMNS,
+  type WebauthnCredential,
+  type NewWebauthnCredential,
+  type UpdateWebauthnCredential,
 } from './auth';
 
 // Magic Link

@@ -1,6 +1,4 @@
 // src/server/core/src/auth/security/password-scoring.test.ts
-import { describe, expect, it } from 'vitest';
-
 import {
   calculateEntropy,
   calculateScore,
@@ -8,7 +6,9 @@ import {
   generateFeedback,
   getCharsetSize,
   type PasswordPenalties,
-} from './password-scoring';
+} from '@abe-stack/shared';
+import { describe, expect, it } from 'vitest';
+
 
 describe('Password Scoring', () => {
   describe('getCharsetSize', () => {

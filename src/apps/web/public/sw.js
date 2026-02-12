@@ -296,6 +296,8 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   // Verify message source is a valid client (same-origin by service worker scope)
   if (!event.source) return;
+  // Verify origin matches our own to prevent cross-origin message injection
+  if (event.origin && event.origin !== self.location.origin) return;
 
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

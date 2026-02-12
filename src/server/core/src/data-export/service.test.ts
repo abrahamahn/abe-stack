@@ -227,10 +227,14 @@ describe('processDataExport', () => {
     userRepo = createMockUserRepo();
   });
 
+  function makeRepos() {
+    return { dataExportRequests: exportRepo, users: userRepo };
+  }
+
   it('should throw when request not found', async () => {
     vi.mocked(exportRepo.findById).mockResolvedValue(null);
 
-    await expect(processDataExport(exportRepo, userRepo, 'missing-id')).rejects.toThrow(
+    await expect(processDataExport(makeRepos(), 'missing-id')).rejects.toThrow(
       DataExportNotFoundError,
     );
   });
@@ -246,7 +250,7 @@ describe('processDataExport', () => {
     );
     vi.mocked(userRepo.findById).mockResolvedValue(createMockUser());
 
-    await processDataExport(exportRepo, userRepo, 'export-1');
+    await processDataExport(makeRepos(), 'export-1');
 
     expect(exportRepo.updateStatus).toHaveBeenCalledWith('export-1', 'processing');
     expect(exportRepo.update).toHaveBeenCalledWith(
@@ -266,7 +270,7 @@ describe('processDataExport', () => {
     );
     vi.mocked(userRepo.findById).mockResolvedValue(createMockUser());
 
-    const result = await processDataExport(exportRepo, userRepo, 'export-1');
+    const result = await processDataExport(makeRepos(), 'export-1');
 
     expect(result.profile.id).toBe('user-1');
     expect(result.profile.email).toBe('test@example.com');
@@ -275,6 +279,60 @@ describe('processDataExport', () => {
     expect(result.profile.username).toBe('testuser');
     expect(result.format).toBe('json');
     expect(result.exportedAt).toBeDefined();
+  });
+
+  it('should include memberships when repo is provided', async () => {
+    const request = createMockExportRequest();
+    vi.mocked(exportRepo.findById).mockResolvedValue(request);
+    vi.mocked(exportRepo.updateStatus).mockResolvedValue(
+      createMockExportRequest({ status: 'processing' }),
+    );
+    vi.mocked(exportRepo.update).mockResolvedValue(
+      createMockExportRequest({ status: 'completed' }),
+    );
+    vi.mocked(userRepo.findById).mockResolvedValue(createMockUser());
+
+    const memberships = {
+      findByUserId: vi.fn().mockResolvedValue([
+        { tenantId: 't-1', role: 'admin', createdAt: new Date('2026-01-10') },
+      ]),
+      findByTenantAndUser: vi.fn(),
+      findByTenantId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+
+    const result = await processDataExport(
+      { ...makeRepos(), memberships } as never,
+      'export-1',
+    );
+
+    expect(result.memberships).toHaveLength(1);
+    expect(result.memberships?.[0]?.tenantId).toBe('t-1');
+    expect(result.memberships?.[0]?.role).toBe('admin');
+  });
+
+  it('should omit optional data when repos not provided', async () => {
+    const request = createMockExportRequest();
+    vi.mocked(exportRepo.findById).mockResolvedValue(request);
+    vi.mocked(exportRepo.updateStatus).mockResolvedValue(
+      createMockExportRequest({ status: 'processing' }),
+    );
+    vi.mocked(exportRepo.update).mockResolvedValue(
+      createMockExportRequest({ status: 'completed' }),
+    );
+    vi.mocked(userRepo.findById).mockResolvedValue(createMockUser());
+
+    const result = await processDataExport(makeRepos(), 'export-1');
+
+    expect(result.memberships).toBeUndefined();
+    expect(result.subscriptions).toBeUndefined();
+    expect(result.activities).toBeUndefined();
+    expect(result.files).toBeUndefined();
+    expect(result.notifications).toBeUndefined();
+    expect(result.sessions).toBeUndefined();
+    expect(result.consentHistory).toBeUndefined();
   });
 
   it('should mark as failed when user not found', async () => {
@@ -286,7 +344,7 @@ describe('processDataExport', () => {
     vi.mocked(exportRepo.update).mockResolvedValue(createMockExportRequest({ status: 'failed' }));
     vi.mocked(userRepo.findById).mockResolvedValue(null);
 
-    await expect(processDataExport(exportRepo, userRepo, 'export-1')).rejects.toThrow(
+    await expect(processDataExport(makeRepos(), 'export-1')).rejects.toThrow(
       'User not found',
     );
 

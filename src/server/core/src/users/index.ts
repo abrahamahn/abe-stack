@@ -51,6 +51,7 @@ export { ERROR_MESSAGES } from './types';
 
 // Data hygiene (soft-delete enforcement + hard-delete)
 export {
+  ANONYMIZED_EMAIL_PATTERN,
   filterDeletedUsers,
   hardDeleteAnonymizedUsers,
   isUserDeleted,

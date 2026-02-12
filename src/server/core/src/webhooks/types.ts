@@ -8,6 +8,17 @@
  * @module types
  */
 
+import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
+
+// Re-export webhook constants from shared (canonical source)
+export {
+  MAX_DELIVERY_ATTEMPTS,
+  RETRY_DELAYS_MINUTES,
+  SUBSCRIBABLE_EVENT_TYPES,
+  WEBHOOK_EVENT_TYPES,
+  type WebhookEventType,
+} from '@abe-stack/shared';
+
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
 
@@ -104,25 +115,19 @@ export interface WebhookDispatchResult {
 }
 
 // ============================================================================
-// Retry Configuration
+// Size Limits
 // ============================================================================
 
-/**
- * Retry delay schedule in minutes.
- * Exponential backoff: 1m, 5m, 30m, 2h (120m), 12h (720m).
- */
-export const RETRY_DELAYS_MINUTES = [1, 5, 30, 120, 720] as const;
-
-/** Maximum number of delivery attempts before marking as dead */
-export const MAX_DELIVERY_ATTEMPTS = 5;
+/** Maximum length of stored webhook response body (4KB) */
+export const WEBHOOK_RESPONSE_MAX_LENGTH = 4096;
 
 // ============================================================================
 // Error Messages
 // ============================================================================
 
 export const ERROR_MESSAGES = {
-  INTERNAL_ERROR: 'Internal server error',
-  UNAUTHORIZED: 'Unauthorized',
+  INTERNAL_ERROR: SHARED_ERRORS.INTERNAL_ERROR,
+  UNAUTHORIZED: SHARED_ERRORS.UNAUTHORIZED,
   WEBHOOK_NOT_FOUND: 'Webhook not found',
   FORBIDDEN: 'You do not have permission to manage webhooks',
 } as const;

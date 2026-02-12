@@ -16,15 +16,16 @@
   "dependencies": {
     "@abe-stack/api": "workspace:*",
     "@abe-stack/client-engine": "workspace:*",
-    "@abe-stack/ui": "workspace:*",
     "@abe-stack/react": "workspace:*",
+    "@abe-stack/shared": "workspace:*",
+    "@abe-stack/ui": "workspace:*",
+    "@simplewebauthn/browser": "^13.2.2",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "@abe-stack/shared": "workspace:*"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "vite-tsconfig-paths": "^6.0.5",
     "@types/react": "^19.2.3",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "vite-tsconfig-paths": "^6.0.5"
   }
 }

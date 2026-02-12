@@ -5,27 +5,30 @@
  * Framework-agnostic client for phone verification and SMS 2FA endpoints.
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import {
+  setPhoneRequestSchema,
+  smsChallengeRequestSchema,
+  smsVerifyRequestSchema,
+  verifyPhoneRequestSchema,
+} from '@abe-stack/shared';
 
-import { createApiError, NetworkError } from '../errors';
+import { apiRequest, createRequestFactory } from '../utils';
 
-import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
+import type { User } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface PhoneClientConfig {
-  baseUrl: string;
-  getToken?: () => string | null;
-}
+export type PhoneClientConfig = BaseClientConfig;
 
 export interface PhoneClient {
   setPhone(phone: string): Promise<{ message: string }>;
   verifyPhone(code: string): Promise<{ verified: true }>;
   removePhone(): Promise<{ message: string }>;
   sendSmsCode(challengeToken: string): Promise<{ message: string }>;
-  verifySmsCode(challengeToken: string, code: string): Promise<{ token: string; user: unknown }>;
+  verifySmsCode(challengeToken: string, code: string): Promise<{ token: string; user: User }>;
 }
 
 // ============================================================================
@@ -33,53 +36,44 @@ export interface PhoneClient {
 // ============================================================================
 
 export function createPhoneClient(config: PhoneClientConfig): PhoneClient {
-  async function request<T>(
-    method: string,
-    path: string,
-    body?: Record<string, unknown>,
-  ): Promise<T> {
-    const url = `${config.baseUrl}${path}`;
-    const headers = new Headers({ 'Content-Type': 'application/json' });
-    const token = config.getToken?.() ?? null;
-    addAuthHeader(headers, token);
-
-    const init: RequestInit = { method, headers, credentials: 'include' };
-    if (body !== undefined) {
-      init.body = JSON.stringify(body);
-    }
-
-    let response: Response;
-    try {
-      response = await fetch(url, init);
-    } catch {
-      throw new NetworkError('Failed to connect to server');
-    }
-
-    if (!response.ok) {
-      const errorBody = (await response.json().catch(() => ({}))) as ApiErrorBody;
-      throw createApiError(response.status, errorBody);
-    }
-
-    return (await response.json()) as T;
-  }
+  const factory = createRequestFactory(config);
 
   return {
-    setPhone: (phone) =>
-      request<{ message: string }>('POST', '/api/users/me/phone', { phone }),
+    setPhone: (phone): Promise<{ message: string }> => {
+      const validated = setPhoneRequestSchema.parse({ phone });
+      return apiRequest<{ message: string }>(factory, '/users/me/phone', {
+        method: 'POST',
+        body: JSON.stringify(validated),
+      });
+    },
 
-    verifyPhone: (code) =>
-      request<{ verified: true }>('POST', '/api/users/me/phone/verify', { code }),
+    verifyPhone: (code): Promise<{ verified: true }> => {
+      const validated = verifyPhoneRequestSchema.parse({ code });
+      return apiRequest<{ verified: true }>(factory, '/users/me/phone/verify', {
+        method: 'POST',
+        body: JSON.stringify(validated),
+      });
+    },
 
-    removePhone: () =>
-      request<{ message: string }>('DELETE', '/api/users/me/phone'),
-
-    sendSmsCode: (challengeToken) =>
-      request<{ message: string }>('POST', '/api/auth/sms/send', { challengeToken }),
-
-    verifySmsCode: (challengeToken, code) =>
-      request<{ token: string; user: unknown }>('POST', '/api/auth/sms/verify', {
-        challengeToken,
-        code,
+    removePhone: (): Promise<{ message: string }> =>
+      apiRequest<{ message: string }>(factory, '/users/me/phone', {
+        method: 'DELETE',
       }),
+
+    sendSmsCode: (challengeToken): Promise<{ message: string }> => {
+      const validated = smsChallengeRequestSchema.parse({ challengeToken });
+      return apiRequest<{ message: string }>(factory, '/auth/sms/send', {
+        method: 'POST',
+        body: JSON.stringify(validated),
+      });
+    },
+
+    verifySmsCode: (challengeToken, code): Promise<{ token: string; user: User }> => {
+      const validated = smsVerifyRequestSchema.parse({ challengeToken, code });
+      return apiRequest<{ token: string; user: User }>(factory, '/auth/sms/verify', {
+        method: 'POST',
+        body: JSON.stringify(validated),
+      });
+    },
   };
 }

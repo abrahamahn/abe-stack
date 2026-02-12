@@ -1,5 +1,7 @@
 // src/shared/src/domain/activities/index.ts
 
+export { getActorTypeTone } from './activities.display';
+
 export {
   ACTOR_TYPES,
   activitySchema,

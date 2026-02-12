@@ -52,3 +52,9 @@ export {
   createTrustedDeviceRepository,
   type TrustedDeviceRepository,
 } from './trusted-devices';
+
+// WebAuthn Credentials
+export {
+  createWebauthnCredentialRepository,
+  type WebauthnCredentialRepository,
+} from './webauthn-credentials';

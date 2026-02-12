@@ -57,29 +57,32 @@ vi.mock('@abe-stack/db', async () => {
   };
 });
 
-vi.mock('../utils/index', () => ({
-  // MODIFIED HERE
-  createAccessToken: vi.fn().mockReturnValue('access-token'),
-  createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-    },
-  })),
-  createRefreshTokenFamily: vi
-    .fn()
-    .mockResolvedValue({ familyId: 'family-1', token: 'refresh-token' }),
-  hashPassword: vi.fn().mockResolvedValue('hashed-password'),
-  needsRehash: vi.fn().mockReturnValue(false),
-  rotateRefreshToken: vi.fn(),
-  verifyPasswordSafe: vi.fn(),
-}));
+vi.mock('../utils/index', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../utils/index')>();
+  return {
+    ...actual,
+    createAccessToken: vi.fn().mockReturnValue('access-token'),
+    createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    })),
+    createRefreshTokenFamily: vi
+      .fn()
+      .mockResolvedValue({ familyId: 'family-1', token: 'refresh-token' }),
+    hashPassword: vi.fn().mockResolvedValue('hashed-password'),
+    needsRehash: vi.fn().mockReturnValue(false),
+    rotateRefreshToken: vi.fn(),
+    verifyPasswordSafe: vi.fn(),
+  };
+});
 
 // ============================================================================
 // Test Helpers

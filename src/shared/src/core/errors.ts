@@ -6,7 +6,7 @@
  * All custom errors extend AppError for consistent error handling.
  */
 
-import { ERROR_CODES, HTTP_STATUS } from './constants';
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from './constants';
 
 /**
  * Minimal validation issue shape for error formatting.
@@ -373,7 +373,7 @@ export function toAppError(error: unknown): AppError {
     return new AppError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR);
   }
 
-  return new AppError('An unexpected error occurred', HTTP_STATUS.INTERNAL_SERVER_ERROR);
+  return new AppError(ERROR_MESSAGES.DEFAULT, HTTP_STATUS.INTERNAL_SERVER_ERROR);
 }
 
 /**
@@ -383,14 +383,14 @@ export function toAppError(error: unknown): AppError {
 export function getSafeErrorMessage(error: unknown, isProduction: boolean): string {
   if (isAppError(error)) {
     if (!isProduction) return error.message;
-    return error.expose ? error.message : 'An unexpected error occurred';
+    return error.expose ? error.message : ERROR_MESSAGES.DEFAULT;
   }
 
   if (!isProduction && error instanceof Error) {
     return error.message;
   }
 
-  return 'An unexpected error occurred';
+  return ERROR_MESSAGES.DEFAULT;
 }
 
 /**

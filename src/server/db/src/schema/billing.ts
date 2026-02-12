@@ -11,6 +11,29 @@
  * - billing_events: Webhook idempotency tracking
  */
 
+import {
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+  type BillingProvider,
+  type InvoiceStatus,
+  type PaymentMethodType,
+  type PlanInterval,
+  type SubscriptionStatus,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export {
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+};
+export type { BillingProvider, InvoiceStatus, PaymentMethodType, PlanInterval, SubscriptionStatus };
+
 // ============================================================================
 // Table Names
 // ============================================================================
@@ -21,62 +44,6 @@ export const CUSTOMER_MAPPINGS_TABLE = 'customer_mappings';
 export const INVOICES_TABLE = 'invoices';
 export const PAYMENT_METHODS_TABLE = 'payment_methods';
 export const BILLING_EVENTS_TABLE = 'billing_events';
-
-// ============================================================================
-// Enums and Constants
-// ============================================================================
-
-/**
- * Billing provider types
- */
-export type BillingProvider = 'stripe' | 'paypal';
-
-export const BILLING_PROVIDERS = ['stripe', 'paypal'] as const;
-
-/**
- * Plan billing intervals
- */
-export type PlanInterval = 'month' | 'year';
-
-export const PLAN_INTERVALS = ['month', 'year'] as const;
-
-/**
- * Subscription status values (aligned with Stripe)
- */
-export type SubscriptionStatus =
-  | 'active'
-  | 'canceled'
-  | 'incomplete'
-  | 'incomplete_expired'
-  | 'past_due'
-  | 'paused'
-  | 'trialing'
-  | 'unpaid';
-
-export const SUBSCRIPTION_STATUSES = [
-  'active',
-  'canceled',
-  'incomplete',
-  'incomplete_expired',
-  'past_due',
-  'paused',
-  'trialing',
-  'unpaid',
-] as const;
-
-/**
- * Invoice status values
- */
-export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
-
-export const INVOICE_STATUSES = ['draft', 'open', 'paid', 'void', 'uncollectible'] as const;
-
-/**
- * Payment method types
- */
-export type PaymentMethodType = 'card' | 'bank_account' | 'paypal';
-
-export const PAYMENT_METHOD_TYPES = ['card', 'bank_account', 'paypal'] as const;
 
 /**
  * Billing event types (normalized from provider webhooks)

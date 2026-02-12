@@ -1,50 +1,7 @@
 // src/server/core/src/auth/types.ts
-export const ERROR_MESSAGES = {
-  USER_NOT_FOUND: 'User not found',
-  INVALID_CREDENTIALS: 'Invalid credentials',
-  EMAIL_EXISTS: 'Email already exists',
-  INVALID_TOKEN: 'Invalid token',
-  TOKEN_EXPIRED: 'Token expired',
-  UNAUTHORIZED: 'Unauthorized',
-  INTERNAL_ERROR: 'Internal server error',
-} as const;
+// Re-export LOGIN_FAILURE_REASON from shared (canonical source)
+export { LOGIN_FAILURE_REASON, type LoginFailureReason } from '@abe-stack/shared';
 
-export const SUCCESS_MESSAGES = {
-  LOGIN_SUCCESS: 'Logged in successfully',
-  REGISTER_SUCCESS: 'Registered successfully',
-  LOGOUT_SUCCESS: 'Logged out successfully',
-  ACCOUNT_UNLOCKED: 'Account unlocked successfully',
-} as const;
-
-/**
- * Standardized login failure reason codes.
- *
- * Stored in `login_attempts.failure_reason` for structured filtering and
- * support diagnostics. NEVER exposed to the client (anti-enumeration).
- *
- * @complexity O(1) constant access
- */
-export const LOGIN_FAILURE_REASON = {
-  /** Email/username not found in database */
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
-  /** User exists but password does not match */
-  PASSWORD_MISMATCH: 'PASSWORD_MISMATCH',
-  /** Correct credentials but email not verified */
-  UNVERIFIED_EMAIL: 'UNVERIFIED_EMAIL',
-  /** Correct credentials but account is locked/suspended */
-  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
-  /** Correct credentials but TOTP 2FA challenge needed (not a failure) */
-  TOTP_REQUIRED: 'TOTP_REQUIRED',
-  /** Correct credentials but SMS 2FA challenge needed (not a failure) */
-  SMS_REQUIRED: 'SMS_REQUIRED',
-  /** Wrong TOTP code during 2FA challenge */
-  TOTP_INVALID: 'TOTP_INVALID',
-  /** Bot protection (CAPTCHA) check failed */
-  CAPTCHA_FAILED: 'CAPTCHA_FAILED',
-} as const;
-
-/** Type for login failure reason values */
-export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGIN_FAILURE_REASON];
 /**
  * Auth Module Types
  *
@@ -56,6 +13,8 @@ export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGI
  *
  * @module types
  */
+
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { SmsProvider } from '@abe-stack/server-engine';
@@ -246,6 +205,16 @@ export interface AuthEmailTemplates {
     timestamp: Date,
     revertUrl?: string,
   ): EmailTemplateResult;
+
+  /**
+   * Generic security notification email template
+   *
+   * @param type - Type of security event (e.g., "Password Changed from New Device")
+   * @param details - Description of the event
+   * @param actionUrl - URL for user to secure their account
+   * @returns Email template data
+   */
+  securityNotification(type: string, details: string, actionUrl: string): EmailTemplateResult;
 }
 
 // ============================================================================
@@ -374,10 +343,10 @@ export const REFRESH_TOKEN_BYTES = 64;
 export const REFRESH_COOKIE_NAME = 'refreshToken';
 
 /** Progressive delay window in milliseconds (5 minutes) */
-export const PROGRESSIVE_DELAY_WINDOW_MS = 5 * 60 * 1000;
+export const PROGRESSIVE_DELAY_WINDOW_MS = 5 * MS_PER_MINUTE;
 
 /** Maximum progressive delay in milliseconds (30 seconds) */
-export const MAX_PROGRESSIVE_DELAY_MS = 30 * 1000;
+export const MAX_PROGRESSIVE_DELAY_MS = 30 * MS_PER_SECOND;
 
 // ============================================================================
 // Error Response Adapter

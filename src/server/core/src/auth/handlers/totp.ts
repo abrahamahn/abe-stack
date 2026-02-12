@@ -10,9 +10,10 @@
 import { withTransaction } from '@abe-stack/db';
 import { verify as jwtVerify, JwtError } from '@abe-stack/server-engine';
 import {
+  ERROR_MESSAGES,
+  HTTP_STATUS,
   InvalidTokenError,
   mapErrorToHttpResponse,
-  type UserRole,
   type AuthResponse,
   type HttpErrorResponse,
   type TotpLoginVerifyRequest,
@@ -48,7 +49,7 @@ export async function handleTotpSetup(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -56,7 +57,7 @@ export async function handleTotpSetup(
     const email = request.user?.email ?? '';
     const result = await setupTotp(ctx.db, userId, email, ctx.config.auth);
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -73,7 +74,7 @@ export async function handleTotpEnable(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -81,10 +82,10 @@ export async function handleTotpEnable(
     const result = await enableTotp(ctx.db, userId, body.code, ctx.config.auth);
 
     if (!result.success) {
-      return { status: 400, body: { message: result.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: result.message } };
     }
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -101,7 +102,7 @@ export async function handleTotpDisable(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -109,10 +110,10 @@ export async function handleTotpDisable(
     const result = await disableTotp(ctx.db, userId, body.code, ctx.config.auth);
 
     if (!result.success) {
-      return { status: 400, body: { message: result.message } };
+      return { status: HTTP_STATUS.BAD_REQUEST, body: { message: result.message } };
     }
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -129,11 +130,11 @@ export async function handleTotpStatus(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     const result = await getTotpStatus(ctx.db, userId);
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -185,7 +186,7 @@ export async function handleTotpLoginVerify(
     // Verify TOTP code
     const isValid = await verifyTotpForLogin(ctx.db, userId, body.code, ctx.config.auth);
     if (!isValid) {
-      return { status: 401, body: { message: 'Invalid TOTP code' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Invalid TOTP code' } };
     }
 
     // Fetch user for token creation
@@ -211,7 +212,7 @@ export async function handleTotpLoginVerify(
     const accessToken = createAccessToken(
       user.id,
       user.email,
-      user.role as UserRole,
+      user.role,
       ctx.config.auth.jwt.secret,
       ctx.config.auth.jwt.accessTokenExpiry,
     );
@@ -222,7 +223,7 @@ export async function handleTotpLoginVerify(
     const authResponse = createAuthResponse(accessToken, refreshToken, user);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         token: authResponse.accessToken,
         user: authResponse.user,

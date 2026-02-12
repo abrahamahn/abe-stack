@@ -43,6 +43,7 @@ import {
   handleAdminUpdatePlan,
 } from './billingHandlers';
 import { handleAdminUnlock } from './handlers';
+import { handleGetAdminHealth } from './healthHandler';
 import { handleEndImpersonation, handleStartImpersonation } from './impersonationHandlers';
 import {
   handleCancelJob,
@@ -74,6 +75,11 @@ import {
   handleUnlockUser,
   handleUpdateUser,
 } from './userHandlers';
+import {
+  handleListAdminWebhookDeliveries,
+  handleListAdminWebhooks,
+  handleReplayAdminWebhookDelivery,
+} from './webhookHandlers';
 
 import type { AdminAppContext, AdminRequest } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -217,12 +223,34 @@ export const adminRoutes: RouteMap = createRouteMap([
   // Request metrics and queue stats
   ['admin/metrics', adminProtectedRoute('GET', handleGetMetrics)],
 
+  // System health summary
+  [
+    'admin/health',
+    adminProtectedRoute(
+      'GET',
+      async (ctx: AdminAppContext, _body: undefined, req: FastifyRequest) => {
+        return handleGetAdminHealth(ctx, _body, req as unknown as AdminRequest);
+      },
+    ),
+  ],
+
   // ============================================================================
   // API Introspection Routes
   // ============================================================================
 
   // Route manifest — lists all registered API routes
   ['admin/routes', adminProtectedRoute('GET', handleGetRouteManifest)],
+
+  // ============================================================================
+  // Webhook Monitor Routes
+  // ============================================================================
+
+  ['admin/webhooks', adminProtectedRoute('GET', handleListAdminWebhooks)],
+  ['admin/webhooks/:id/deliveries', adminProtectedRoute('GET', handleListAdminWebhookDeliveries)],
+  [
+    'admin/webhooks/:id/deliveries/:deliveryId/replay',
+    adminProtectedRoute('POST', handleReplayAdminWebhookDelivery),
+  ],
 
   // ============================================================================
   // Tenant Management Routes

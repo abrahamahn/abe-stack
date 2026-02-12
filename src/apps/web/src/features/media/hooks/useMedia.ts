@@ -111,10 +111,11 @@ export interface UseDeleteMediaResult {
 }
 
 export function useDeleteMedia(): UseDeleteMediaResult {
-  const mutationResult = useMutation<void, Error, string>({
-    mutationFn: async (id: string): Promise<void> => {
+  const mutationResult = useMutation<undefined, Error, string>({
+    mutationFn: async (id: string): Promise<undefined> => {
       const api = getMediaApi();
       await api.deleteMedia(id);
+      return undefined;
     },
   });
 

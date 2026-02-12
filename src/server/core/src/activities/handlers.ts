@@ -6,6 +6,8 @@
  * Uses narrow context interfaces from types.ts for decoupling.
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import { getActivityFeed, getTenantActivityFeed } from './service';
 
 import type { ActivityAppContext } from './types';
@@ -118,7 +120,7 @@ export async function handleListActivities(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -129,14 +131,14 @@ export async function handleListActivities(
     const activities = await getActivityFeed(appCtx.repos.activities, user.userId, limit);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         activities: activities.map(toActivityResponse),
       },
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: 500, body: { message: 'Failed to list activities' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list activities' } };
   }
 }
 
@@ -169,14 +171,14 @@ export async function handleListTenantActivities(
   const user = getUser(request);
 
   if (user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   const params = request.params as { tenantId?: string };
   const tenantId = params.tenantId ?? '';
 
   if (tenantId === '') {
-    return { status: 400, body: { message: 'Tenant ID is required' } };
+    return { status: HTTP_STATUS.BAD_REQUEST, body: { message: 'Tenant ID is required' } };
   }
 
   try {
@@ -187,13 +189,13 @@ export async function handleListTenantActivities(
     const activities = await getTenantActivityFeed(appCtx.repos.activities, tenantId, limit);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         activities: activities.map(toActivityResponse),
       },
     };
   } catch (error: unknown) {
     appCtx.log.error(error instanceof Error ? error : new Error(String(error)));
-    return { status: 500, body: { message: 'Failed to list tenant activities' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list tenant activities' } };
   }
 }

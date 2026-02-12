@@ -92,7 +92,7 @@ export class NotificationSendError extends AppError {
 export class PayloadTooLargeError extends BadRequestError {
   constructor(
     public readonly actualSize: number,
-    public readonly maxSize: number = 4096,
+    public readonly maxSize: number = DEFAULT_NOTIFICATION_PAYLOAD_MAX_SIZE,
   ) {
     super(
       `Notification payload too large: ${actualSize.toString()} bytes (max: ${maxSize.toString()} bytes)`,
@@ -217,3 +217,4 @@ export class QuietHoursActiveError extends UnprocessableError {
     });
   }
 }
+const DEFAULT_NOTIFICATION_PAYLOAD_MAX_SIZE = 4096;

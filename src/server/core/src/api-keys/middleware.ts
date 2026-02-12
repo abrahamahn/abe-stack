@@ -17,6 +17,8 @@
 
 import { createHash, timingSafeEqual } from 'node:crypto';
 
+import { HTTP_STATUS, extractBearerToken } from '@abe-stack/shared';
+
 import type { ApiKeyRepository } from '@abe-stack/db';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -82,16 +84,8 @@ export function createApiKeyAuthMiddleware(options: ApiKeyAuthMiddlewareOptions)
     const authHeader = request.headers.authorization;
 
     // Step 1: Skip if no Bearer token present
-    if (typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
-      return;
-    }
-
-    const token = authHeader.substring(7);
-
-    // Empty token after "Bearer " prefix
-    if (token === '') {
-      return;
-    }
+    const token = extractBearerToken(authHeader);
+    if (token == null) return;
 
     // Step 2: Hash the token and look it up
     const computedHash = createHash('sha256').update(token).digest('hex');
@@ -99,13 +93,13 @@ export function createApiKeyAuthMiddleware(options: ApiKeyAuthMiddlewareOptions)
 
     // Step 3: Key not found (findByKeyHash already excludes revoked keys)
     if (apiKey === null) {
-      reply.code(401).send({ message: 'Invalid API key' });
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Invalid API key' });
       return;
     }
 
     // Step 4: Check expiration
     if (apiKey.expiresAt !== null && apiKey.expiresAt <= new Date()) {
-      reply.code(401).send({ message: 'API key has expired' });
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ message: 'API key has expired' });
       return;
     }
 
@@ -119,7 +113,7 @@ export function createApiKeyAuthMiddleware(options: ApiKeyAuthMiddlewareOptions)
       storedBuffer.length !== computedBuffer.length ||
       !timingSafeEqual(storedBuffer, computedBuffer)
     ) {
-      reply.code(401).send({ message: 'Invalid API key' });
+      reply.code(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Invalid API key' });
       return;
     }
 
@@ -175,7 +169,7 @@ export function createScopeGuard(requiredScope: string) {
 
     // Check if the required scope is present
     if (!ctx.scopes.includes(requiredScope)) {
-      reply.code(403).send({
+      reply.code(HTTP_STATUS.FORBIDDEN).send({
         message: `API key lacks required scope: ${requiredScope}`,
         code: 'INSUFFICIENT_SCOPE',
       });

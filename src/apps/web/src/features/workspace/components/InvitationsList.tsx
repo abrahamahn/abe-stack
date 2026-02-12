@@ -5,6 +5,7 @@
  * Table of workspace invitations with status and action controls.
  */
 
+import { getInvitationStatusTone } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -31,17 +32,6 @@ import type { ReactElement } from 'react';
 export interface InvitationsListProps {
   tenantId: string;
 }
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-const STATUS_COLORS: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
-  pending: 'info',
-  accepted: 'success',
-  revoked: 'danger',
-  expired: 'warning',
-};
 
 // ============================================================================
 // Component
@@ -84,7 +74,7 @@ export const InvitationsList = ({ tenantId }: InvitationsListProps): ReactElemen
         </TableHeader>
         <TableBody>
           {invitations.map((invitation) => {
-            const statusTone = STATUS_COLORS[invitation.status] ?? 'info';
+            const statusTone = getInvitationStatusTone(invitation.status);
             const isPending = invitation.status === 'pending';
 
             return (

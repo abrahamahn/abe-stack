@@ -9,7 +9,7 @@
  * VAPID key, test notification, and send notification endpoints are stubbed.
  */
 
-import { isAppError } from '@abe-stack/shared';
+import { HTTP_STATUS, isAppError } from '@abe-stack/shared';
 
 import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
 
@@ -57,7 +57,7 @@ type HandlerResult<T> =
  */
 export function handleGetVapidKey(_ctx: NotificationModuleDeps): HandlerResult<VapidKeyResponse> {
   return {
-    status: 501,
+    status: HTTP_STATUS.NOT_IMPLEMENTED,
     body: {
       message: 'Web Push notifications are not available. VAPID keys not configured.',
       code: 'VAPID_NOT_CONFIGURED',
@@ -86,7 +86,7 @@ export async function handleSubscribe(
 ): Promise<HandlerResult<SubscribeResponse>> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
@@ -101,7 +101,7 @@ export async function handleSubscribe(
     );
 
     return {
-      status: 201,
+      status: HTTP_STATUS.CREATED,
       body: {
         subscriptionId,
         message: 'Successfully subscribed to push notifications',
@@ -111,7 +111,7 @@ export async function handleSubscribe(
     if (isAppError(error)) {
       const appError = error as Error & { code: string; statusCode: number };
       return {
-        status: 400,
+        status: HTTP_STATUS.BAD_REQUEST,
         body: {
           message: appError.message,
           code: appError.code,
@@ -124,7 +124,7 @@ export async function handleSubscribe(
       'Failed to subscribe',
     );
     return {
-      status: 500,
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       body: { message: 'Failed to subscribe' },
     };
   }
@@ -147,7 +147,7 @@ export async function handleUnsubscribe(
 ): Promise<HandlerResult<UnsubscribeResponse>> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
@@ -157,13 +157,13 @@ export async function handleUnsubscribe(
 
     if (!removed) {
       return {
-        status: 404,
+        status: HTTP_STATUS.NOT_FOUND,
         body: { message: 'Subscription not found', code: 'SUBSCRIPTION_NOT_FOUND' },
       };
     }
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         success: true,
         message: 'Successfully unsubscribed from push notifications',
@@ -175,7 +175,7 @@ export async function handleUnsubscribe(
       'Failed to unsubscribe',
     );
     return {
-      status: 500,
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       body: { message: 'Failed to unsubscribe' },
     };
   }
@@ -198,7 +198,7 @@ export async function handleGetPreferences(
 ): Promise<HandlerResult<PreferencesResponse>> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
@@ -207,7 +207,7 @@ export async function handleGetPreferences(
     const preferences = await getPreferences(ctx.db, req.user.userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { preferences },
     };
   } catch (error) {
@@ -216,7 +216,7 @@ export async function handleGetPreferences(
       'Failed to get preferences',
     );
     return {
-      status: 500,
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       body: { message: 'Failed to get preferences' },
     };
   }
@@ -239,7 +239,7 @@ export async function handleUpdatePreferences(
 ): Promise<HandlerResult<PreferencesResponse>> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
@@ -248,14 +248,14 @@ export async function handleUpdatePreferences(
     const preferences = await updatePreferences(ctx.db, req.user.userId, body);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { preferences },
     };
   } catch (error) {
     if (isAppError(error)) {
       const appError = error as Error & { code: string; statusCode: number };
       return {
-        status: 400,
+        status: HTTP_STATUS.BAD_REQUEST,
         body: {
           message: appError.message,
           code: appError.code,
@@ -268,7 +268,7 @@ export async function handleUpdatePreferences(
       'Failed to update preferences',
     );
     return {
-      status: 500,
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       body: { message: 'Failed to update preferences' },
     };
   }
@@ -294,13 +294,13 @@ export function handleTestNotification(
 ): HandlerResult<{ message: string }> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
 
   return {
-    status: 500,
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     body: {
       message: 'Push notification sending is not available. Provider not configured.',
       code: 'PROVIDER_NOT_CONFIGURED',
@@ -328,13 +328,13 @@ export function handleSendNotification(
 ): HandlerResult<{ message: string }> {
   if (req.user === undefined) {
     return {
-      status: 401,
+      status: HTTP_STATUS.UNAUTHORIZED,
       body: { message: 'Unauthorized' },
     };
   }
 
   return {
-    status: 500,
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     body: {
       message: 'Push notification sending is not available. Provider not configured.',
       code: 'PROVIDER_NOT_CONFIGURED',
@@ -370,7 +370,7 @@ export async function handleListNotifications(
   req: NotificationRequest,
 ): Promise<HandlerResult<NotificationsListBody>> {
   if (req.user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -402,7 +402,7 @@ export async function handleListNotifications(
     }));
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { notifications: formatted, unreadCount },
     };
   } catch (error) {
@@ -410,7 +410,7 @@ export async function handleListNotifications(
       { err: error as Error, handler: 'handleListNotifications', userId: req.user.userId },
       'Failed to list notifications',
     );
-    return { status: 500, body: { message: 'Failed to list notifications' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to list notifications' } };
   }
 }
 
@@ -430,7 +430,7 @@ export async function handleMarkAsRead(
   req: NotificationRequest,
 ): Promise<HandlerResult<{ message: string; count: number }>> {
   if (req.user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
@@ -441,7 +441,7 @@ export async function handleMarkAsRead(
     }
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: `Marked ${String(count)} notifications as read`, count },
     };
   } catch (error) {
@@ -449,7 +449,7 @@ export async function handleMarkAsRead(
       { err: error as Error, handler: 'handleMarkAsRead', userId: req.user.userId },
       'Failed to mark notifications as read',
     );
-    return { status: 500, body: { message: 'Failed to mark notifications as read' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to mark notifications as read' } };
   }
 }
 
@@ -469,14 +469,14 @@ export async function handleMarkAllAsRead(
   req: NotificationRequest,
 ): Promise<HandlerResult<{ message: string; count: number }>> {
   if (req.user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const count = await ctx.repos.notifications.markAllAsRead(req.user.userId);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: `Marked ${String(count)} notifications as read`, count },
     };
   } catch (error) {
@@ -484,7 +484,7 @@ export async function handleMarkAllAsRead(
       { err: error as Error, handler: 'handleMarkAllAsRead', userId: req.user.userId },
       'Failed to mark all notifications as read',
     );
-    return { status: 500, body: { message: 'Failed to mark all notifications as read' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to mark all notifications as read' } };
   }
 }
 
@@ -504,18 +504,18 @@ export async function handleDeleteNotification(
   req: NotificationRequest,
 ): Promise<HandlerResult<{ message: string }>> {
   if (req.user === undefined) {
-    return { status: 401, body: { message: 'Unauthorized' } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: 'Unauthorized' } };
   }
 
   try {
     const deleted = await ctx.repos.notifications.delete(body.id);
 
     if (!deleted) {
-      return { status: 404, body: { message: 'Notification not found' } };
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: 'Notification not found' } };
     }
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: 'Notification deleted' },
     };
   } catch (error) {
@@ -523,6 +523,6 @@ export async function handleDeleteNotification(
       { err: error as Error, handler: 'handleDeleteNotification', userId: req.user.userId },
       'Failed to delete notification',
     );
-    return { status: 500, body: { message: 'Failed to delete notification' } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: 'Failed to delete notification' } };
   }
 }

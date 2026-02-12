@@ -8,6 +8,8 @@
  * @module
  */
 
+import { DAYS_PER_WEEK, MS_PER_DAY, RETENTION_PERIODS } from '@abe-stack/shared';
+
 import { expireStaleInvitations } from '../tenants/invitation-cleanup';
 import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 
@@ -21,22 +23,11 @@ import type { DbClient, Repositories } from '@abe-stack/db';
 // ============================================================================
 
 /** One day in milliseconds */
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = MS_PER_DAY;
 
 /** One week in milliseconds */
-const ONE_WEEK_MS = 7 * ONE_DAY_MS;
+const ONE_WEEK_MS = DAYS_PER_WEEK * MS_PER_DAY;
 
-/** Default audit log retention period in days */
-const DEFAULT_AUDIT_RETENTION_DAYS = 90;
-
-/** Default grace period for PII anonymization in days */
-const DEFAULT_PII_GRACE_PERIOD_DAYS = 30;
-
-/** Default login attempt retention period in days */
-const DEFAULT_LOGIN_ATTEMPT_RETENTION_DAYS = 90;
-
-/** Default session retention period in days after revocation */
-const DEFAULT_SESSION_RETENTION_DAYS = 30;
 
 // ============================================================================
 // Task Registry
@@ -51,8 +42,6 @@ const activeTaskTrackers: TaskTracker[] = [];
 // Task Registration
 // ============================================================================
 
-/** Default retention period for hard-delete after anonymization in days */
-const DEFAULT_HARD_DELETE_RETENTION_DAYS = 30;
 
 /**
  * Register and start all scheduled cleanup tasks
@@ -72,7 +61,7 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       description: 'Delete login attempts older than 90 days',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        const cutoff = new Date(Date.now() - DEFAULT_LOGIN_ATTEMPT_RETENTION_DAYS * ONE_DAY_MS);
+        const cutoff = new Date(Date.now() - RETENTION_PERIODS.LOGIN_ATTEMPTS_DAYS * ONE_DAY_MS);
         const count = await repos.loginAttempts.deleteOlderThan(cutoff.toISOString());
         log.info({ task: 'login-cleanup', deleted: count }, 'Login attempts cleanup completed');
         return count;
@@ -109,7 +98,7 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       description: 'Delete revoked sessions older than 30 days',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        const cutoff = new Date(Date.now() - DEFAULT_SESSION_RETENTION_DAYS * ONE_DAY_MS);
+        const cutoff = new Date(Date.now() - RETENTION_PERIODS.SESSIONS_DAYS * ONE_DAY_MS);
         const count = await repos.userSessions.deleteRevokedBefore(cutoff.toISOString());
         log.info({ task: 'session-cleanup', deleted: count }, 'Sessions cleanup completed');
         return count;
@@ -122,9 +111,9 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       description: 'Delete audit events older than 90 days',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        const cutoff = new Date(Date.now() - DEFAULT_AUDIT_RETENTION_DAYS * ONE_DAY_MS);
+        const cutoff = new Date(Date.now() - RETENTION_PERIODS.AUDIT_DAYS * ONE_DAY_MS);
         const count = await repos.auditEvents.deleteOlderThan(cutoff.toISOString());
-        log.info({ task: 'audit-cleanup', deleted: count, retentionDays: DEFAULT_AUDIT_RETENTION_DAYS }, 'Audit events cleanup completed');
+        log.info({ task: 'audit-cleanup', deleted: count, retentionDays: RETENTION_PERIODS.AUDIT_DAYS }, 'Audit events cleanup completed');
         return count;
       },
     },
@@ -146,7 +135,7 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
       description: 'Anonymize PII for users deleted longer than grace period',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        return anonymizeDeletedUsers(repos, DEFAULT_PII_GRACE_PERIOD_DAYS, log);
+        return anonymizeDeletedUsers(repos, RETENTION_PERIODS.PII_GRACE_DAYS, log);
       },
     },
 
@@ -158,7 +147,7 @@ export function registerScheduledTasks(repos: Repositories, log: ScheduledTaskLo
             description: 'Permanently delete anonymized user records past retention period',
             schedule: 'daily' as const,
             execute: async (): Promise<number> => {
-              const result = await hardDeleteAnonymizedUsers(db, log, DEFAULT_HARD_DELETE_RETENTION_DAYS);
+              const result = await hardDeleteAnonymizedUsers(db, log, RETENTION_PERIODS.HARD_DELETE_DAYS);
               return result.deletedCount;
             },
           },

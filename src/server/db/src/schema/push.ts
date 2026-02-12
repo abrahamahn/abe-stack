@@ -5,6 +5,10 @@
  * Explicit TypeScript interfaces for push notifications.
  */
 
+import type { NotificationChannel, NotificationType } from '@abe-stack/shared';
+
+export type { NotificationChannel, NotificationType };
+
 // ============================================================================
 // Table Names
 // ============================================================================
@@ -71,16 +75,6 @@ export const PUSH_SUBSCRIPTION_COLUMNS = {
 // ============================================================================
 // Notification Preference Types
 // ============================================================================
-
-/**
- * Notification channel type
- */
-export type NotificationChannel = 'push' | 'email' | 'sms' | 'in_app';
-
-/**
- * Notification type categories
- */
-export type NotificationType = 'system' | 'security' | 'marketing' | 'social' | 'transactional';
 
 /**
  * Type preference structure stored as JSONB

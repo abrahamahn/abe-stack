@@ -22,6 +22,9 @@
     },
     {
       "path": "../engine"
+    },
+    {
+      "path": "../media"
     }
   ]
 }

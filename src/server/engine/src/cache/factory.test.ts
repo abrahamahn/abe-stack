@@ -2,8 +2,29 @@
 
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
+vi.mock('ioredis', () => {
+  class MockRedis {
+    on = vi.fn();
+    connect = vi.fn().mockResolvedValue(undefined);
+    quit = vi.fn().mockResolvedValue('OK');
+    get = vi.fn().mockResolvedValue(null);
+    set = vi.fn().mockResolvedValue('OK');
+    del = vi.fn().mockResolvedValue(0);
+    ping = vi.fn().mockResolvedValue('PONG');
+    pipeline = vi.fn().mockReturnValue({
+      psetex: vi.fn().mockReturnThis(),
+      set: vi.fn().mockReturnThis(),
+      sadd: vi.fn().mockReturnThis(),
+      del: vi.fn().mockReturnThis(),
+      exec: vi.fn().mockResolvedValue([]),
+    });
+  }
+  return { default: MockRedis };
+});
+
 import { createCache, createCacheFromEnv, createMemoryCache } from './factory';
 import { MemoryCacheProvider } from './providers/memory';
+import { RedisCacheProvider } from './providers/redis';
 
 // ============================================================================
 // Cache Factory Tests
@@ -19,6 +40,34 @@ describe('cache factory', () => {
 
       expect(cache).toBeInstanceOf(MemoryCacheProvider);
       expect(cache.name).toBe('memory');
+    });
+
+    test('should create memory provider by default (no args)', () => {
+      const cache = createCache();
+
+      expect(cache).toBeInstanceOf(MemoryCacheProvider);
+      expect(cache.name).toBe('memory');
+    });
+
+    test('should create redis provider with provider config', async () => {
+      const cache = createCache({ provider: 'redis', host: 'localhost', port: 6379 });
+
+      expect(cache).toBeInstanceOf(RedisCacheProvider);
+      expect(cache.name).toBe('redis');
+
+      await cache.close();
+    });
+
+    test('should create redis provider with useExternalProvider config', async () => {
+      const cache = createCache({
+        useExternalProvider: true,
+        externalConfig: { host: 'localhost', port: 6379 },
+      });
+
+      expect(cache).toBeInstanceOf(RedisCacheProvider);
+      expect(cache.name).toBe('redis');
+
+      await cache.close();
     });
 
     test('should pass options to provider', () => {

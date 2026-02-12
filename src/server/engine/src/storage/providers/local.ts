@@ -1,7 +1,7 @@
 // src/server/engine/src/storage/providers/local.ts
 import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, open, readFile, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { normalizeStorageKey } from '../signing';
@@ -25,7 +25,13 @@ export class LocalStorageProvider implements StorageProvider {
     const finalKey = key !== '' ? key : randomUUID();
     const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, data, { mode: 0o600 });
+    // Use open with write+create+truncate flags to set permissions atomically
+    const fd = await open(filePath, 'w', 0o600);
+    try {
+      await fd.writeFile(data);
+    } finally {
+      await fd.close();
+    }
     return finalKey;
   }
 

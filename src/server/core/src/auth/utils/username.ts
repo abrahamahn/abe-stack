@@ -11,10 +11,12 @@
 
 import { randomBytes } from 'node:crypto';
 
+import { QUOTAS } from '@abe-stack/shared';
+
 import type { Repositories } from '@abe-stack/db';
 
-/** Maximum username length (must match USERNAME_REGEX in contracts/common.ts) */
-const MAX_USERNAME_LENGTH = 15;
+/** Maximum username length (from shared QUOTAS) */
+const MAX_USERNAME_LENGTH = QUOTAS.MAX_USERNAME_LENGTH;
 
 /** Characters allowed in auto-generated usernames */
 const SANITIZE_REGEX = /[^a-z0-9_]/g;

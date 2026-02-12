@@ -8,7 +8,9 @@
  * @module security/sudo
  */
 
-import { verifySudoToken, SUDO_TOKEN_HEADER } from '../handlers/sudo';
+import { HTTP_STATUS, SUDO_TOKEN_HEADER } from '@abe-stack/shared';
+
+import { verifySudoToken } from '../handlers/sudo';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -22,7 +24,7 @@ export function createRequireSudo(jwtSecret: string) {
   return function requireSudo(request: FastifyRequest, reply: FastifyReply): void {
     const token = request.headers[SUDO_TOKEN_HEADER];
     if (typeof token !== 'string' || token === '') {
-      void reply.status(403).send({
+      void reply.status(HTTP_STATUS.FORBIDDEN).send({
         message: 'Sudo authentication required. Please re-verify your identity.',
         code: 'SUDO_REQUIRED',
       });
@@ -31,7 +33,7 @@ export function createRequireSudo(jwtSecret: string) {
 
     const result = verifySudoToken(token, jwtSecret);
     if (result === null) {
-      void reply.status(403).send({
+      void reply.status(HTTP_STATUS.FORBIDDEN).send({
         message: 'Sudo token is invalid or expired. Please re-verify your identity.',
         code: 'SUDO_EXPIRED',
       });
@@ -41,7 +43,7 @@ export function createRequireSudo(jwtSecret: string) {
     // Verify the sudo token belongs to the authenticated user
     const userId = (request as unknown as { user?: { userId: string } }).user?.userId;
     if (userId !== undefined && result.userId !== userId) {
-      void reply.status(403).send({
+      void reply.status(HTTP_STATUS.FORBIDDEN).send({
         message: 'Sudo token does not match authenticated user.',
         code: 'SUDO_MISMATCH',
       });

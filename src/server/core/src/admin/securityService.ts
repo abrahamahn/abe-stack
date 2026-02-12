@@ -22,6 +22,7 @@ import {
   type SecurityEvent as DbSecurityEvent,
   type SqlFragment,
 } from '@abe-stack/db';
+import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, toISODateOnly } from '@abe-stack/shared';
 
 import type {
   PaginationOptions,
@@ -120,16 +121,16 @@ function getPeriodBoundaries(period: 'hour' | 'day' | 'week' | 'month'): {
 
   switch (period) {
     case 'hour':
-      start = new Date(now.getTime() - 60 * 60 * 1000);
+      start = new Date(now.getTime() - MS_PER_HOUR);
       break;
     case 'day':
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      start = new Date(now.getTime() - MS_PER_DAY);
       break;
     case 'week':
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      start = new Date(now.getTime() - DAYS_PER_WEEK * MS_PER_DAY);
       break;
     case 'month':
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      start = new Date(now.getTime() - 30 * MS_PER_DAY);
       break;
   }
 
@@ -302,7 +303,7 @@ export async function exportSecurityEvents(
   const events = toCamelCaseArray<DbSecurityEvent>(rows, SECURITY_EVENT_COLUMNS);
   const apiEvents = events.map(toApiEvent);
 
-  const timestamp = new Date().toISOString().slice(0, 10);
+  const timestamp = toISODateOnly(new Date()) as string;
 
   if (format === 'json') {
     return {

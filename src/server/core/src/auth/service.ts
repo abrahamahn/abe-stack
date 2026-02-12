@@ -8,8 +8,6 @@
  * @module service
  */
 
-import { createHash, randomBytes } from 'node:crypto';
-
 import {
   and,
   EMAIL_VERIFICATION_TOKENS_TABLE,
@@ -29,11 +27,15 @@ import {
 import { sign as jwtSign } from '@abe-stack/server-engine';
 import {
   AccountLockedError,
+  AUTH_EXPIRY,
   canonicalizeEmail,
   EmailNotVerifiedError,
   EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
+  isAccountActive,
+  isWithinDeletionGracePeriod,
+  MS_PER_HOUR,
   normalizeEmail,
   validatePassword,
   WeakPasswordError,
@@ -53,7 +55,9 @@ import {
   createAccessToken,
   createAuthResponse,
   createRefreshTokenFamily,
+  generateSecureToken,
   hashPassword,
+  hashToken,
   needsRehash,
   revokeAllUserTokens,
   rotateRefreshToken as rotateRefreshTokenUtil,
@@ -420,6 +424,39 @@ export async function authenticateUser(
     throw new InvalidCredentialsError();
   }
 
+  // Check admin-imposed account lock (lockedUntil field on user record)
+  if (user.lockedUntil !== null) {
+    if (user.lockedUntil > new Date()) {
+      await logLoginAttempt(
+        db,
+        lockoutKey,
+        false,
+        ipAddress,
+        userAgent,
+        LOGIN_FAILURE_REASON.ACCOUNT_LOCKED,
+      );
+      throw new AccountLockedError();
+    }
+    // Lock expired — auto-unlock (fire-and-forget)
+    repos.users.unlockAccount(user.id).catch(() => {});
+  }
+
+  // Check if account is deactivated or deleted (past grace period)
+  if (!isAccountActive(user)) {
+    // Deleted accounts within grace period can still log in to reactivate
+    if (user.deletedAt !== null && isWithinDeletionGracePeriod(user)) {
+      // Allow login — user can reactivate during grace period
+    } else {
+      const reason =
+        user.deactivatedAt !== null
+          ? LOGIN_FAILURE_REASON.ACCOUNT_DEACTIVATED
+          : LOGIN_FAILURE_REASON.ACCOUNT_DELETED;
+      await logLoginAttempt(db, lockoutKey, false, ipAddress, userAgent, reason);
+      // Return generic error to prevent account status enumeration
+      throw new InvalidCredentialsError();
+    }
+  }
+
   // Check if email is verified
   if (!user.emailVerified) {
     await logLoginAttempt(
@@ -688,31 +725,8 @@ function rehashPassword(
 // Password Reset & Email Verification
 // ============================================================================
 
-/**
- * Hash a token using SHA-256 for deterministic lookup.
- * Tokens are high-entropy, so fast hashing is acceptable for storage.
- *
- * @param token - The token to hash
- * @returns SHA-256 hash in hex
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
-}
-
-/**
- * Generate a random token and return both plain and hashed versions.
- *
- * @returns Object with plain text and hashed token
- * @complexity O(1) - one hash operation
- */
-function generateSecureToken(): { plain: string; hash: string } {
-  const plain = randomBytes(32).toString('hex');
-  const hash = hashToken(plain);
-  return { plain, hash };
-}
-
 /** Token expiry in hours */
-const TOKEN_EXPIRY_HOURS = 24;
+const TOKEN_EXPIRY_HOURS = AUTH_EXPIRY.VERIFICATION_TOKEN_HOURS;
 
 /**
  * Request a password reset email.
@@ -745,7 +759,7 @@ export async function requestPasswordReset(
   }
 
   const { plain, hash } = generateSecureToken();
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * MS_PER_HOUR);
 
   await withTransaction(db, async (tx) => {
     // Invalidate all existing password reset tokens for this user
@@ -934,7 +948,7 @@ export async function createEmailVerificationToken(
   userId: string,
 ): Promise<string> {
   const { plain, hash } = generateSecureToken();
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * MS_PER_HOUR);
 
   // Check if this is a Repositories object (has emailVerificationTokens property)
   if ('emailVerificationTokens' in dbOrRepos) {

@@ -28,10 +28,10 @@ describe('sanitizeString', () => {
     expect(sanitizeString('\0test\0')).toBe('test');
   });
 
-  test('should remove script tags', () => {
-    expect(sanitizeString('<script>alert("xss")</script>')).toBe('');
-    expect(sanitizeString('hello<script>evil()</script>world')).toBe('helloworld');
-    expect(sanitizeString('<SCRIPT>ALERT(1)</SCRIPT>')).toBe('');
+  test('should neutralize script tags', () => {
+    expect(sanitizeString('<script>alert("xss")</script>')).toBe('&lt;script>alert("xss")&lt;/script>');
+    expect(sanitizeString('hello<script>evil()</script>world')).toBe('hello&lt;script>evil()&lt;/script>world');
+    expect(sanitizeString('<SCRIPT>ALERT(1)</SCRIPT>')).toBe('&lt;SCRIPT>ALERT(1)&lt;/SCRIPT>');
   });
 
   test('should remove event handlers', () => {
@@ -85,7 +85,7 @@ describe('sanitizeObject', () => {
 
     expect(result.valid).toBe(true);
     expect(result.data).toEqual({
-      name: '',
+      name: '&lt;script>alert(1)&lt;/script>',
       nested: {
         value: 'evil()',
       },
@@ -98,7 +98,7 @@ describe('sanitizeObject', () => {
     const result = sanitizeObject(input);
 
     expect(result.valid).toBe(true);
-    expect(result.data).toEqual(['', 'normal', '2']);
+    expect(result.data).toEqual(['&lt;script>1&lt;/script>', 'normal', '2']);
   });
 
   test('should handle null and undefined values', () => {
@@ -429,7 +429,7 @@ describe('registerInputValidation middleware', () => {
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.body) as { body: { name: string; email: string } };
-      expect(result.body.name).toBe('John');
+      expect(result.body.name).toBe('&lt;script>alert(1)&lt;/script>John');
       expect(result.body.email).toBe('test@example.com');
     });
 
@@ -474,7 +474,7 @@ describe('registerInputValidation middleware', () => {
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.body) as { query: { search: string } };
-      expect(result.query.search).toBe('test');
+      expect(result.query.search).toBe('&lt;script>alert(1)&lt;/script>test');
     });
 
     test('should reject SQL injection in query', async () => {
@@ -522,7 +522,7 @@ describe('registerInputValidation middleware', () => {
       const result = JSON.parse(response.body) as {
         body: { level1: { level2: { level3: { value: string } } } };
       };
-      expect(result.body.level1.level2.level3.value).toBe('safe');
+      expect(result.body.level1.level2.level3.value).toBe('&lt;script>xss&lt;/script>safe');
     });
 
     test('should handle arrays in payload', async () => {
@@ -536,7 +536,7 @@ describe('registerInputValidation middleware', () => {
 
       expect(response.statusCode).toBe(200);
       const result = JSON.parse(response.body) as { body: { items: string[] } };
-      expect(result.body.items).toEqual(['item1', 'item2', 'item3']);
+      expect(result.body.items).toEqual(['&lt;script>1&lt;/script>item1', 'item2', '&lt;script>2&lt;/script>item3']);
     });
 
     test('should preserve valid data structures', async () => {

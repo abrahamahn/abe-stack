@@ -50,11 +50,13 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@abe-stack/db": "workspace:*",
+    "@abe-stack/shared": "workspace:*",
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/credential-providers": "^3.600.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",
+    "@simplewebauthn/server": "^13.2.2",
     "fastify": "^5.7.4",
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/shared": "workspace:*"
+    "ioredis": "^5.9.2"
   }
 }

@@ -8,6 +8,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+const DEFAULT_OVERSCAN = 5;
+const DEFAULT_FALLBACK_ITEM_HEIGHT = 50;
+
 export interface VirtualScrollOptions {
   itemHeight: number | ((index: number) => number);
   containerHeight: number;
@@ -35,7 +38,7 @@ export function useVirtualScroll(
   itemCount: number,
   options: VirtualScrollOptions,
 ): VirtualScrollResult {
-  const { itemHeight, containerHeight, overscan = 5 } = options;
+  const { itemHeight, containerHeight, overscan = DEFAULT_OVERSCAN } = options;
 
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,12 +47,12 @@ export function useVirtualScroll(
   const getVisibleRange = useCallback((): { startIndex: number; endIndex: number } => {
     const startIndex = Math.max(
       0,
-      Math.floor(scrollTop / (typeof itemHeight === 'number' ? itemHeight : 50)) - overscan,
+      Math.floor(scrollTop / (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT)) - overscan,
     );
     const endIndex = Math.min(
       itemCount - 1,
       Math.ceil(
-        (scrollTop + containerHeight) / (typeof itemHeight === 'number' ? itemHeight : 50),
+        (scrollTop + containerHeight) / (typeof itemHeight === 'number' ? itemHeight : DEFAULT_FALLBACK_ITEM_HEIGHT),
       ) + overscan,
     );
 
@@ -143,7 +146,7 @@ export const VirtualScrollList = <T,>({
   containerHeight,
   renderItem,
   className = '',
-  overscan = 5,
+  overscan = DEFAULT_OVERSCAN,
 }: VirtualScrollListProps<T>): React.ReactElement => {
   const itemHeightFn =
     typeof itemHeight === 'function'

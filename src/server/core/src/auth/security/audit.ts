@@ -11,6 +11,8 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Extended Fastify types for audit tracking
@@ -183,8 +185,8 @@ export class SecurityAuditLogger {
   private intrusionCleanupTimer?: NodeJS.Timeout | undefined;
   private readonly intrusionState = new Map<string, { lastTriggered: number; count: number }>();
   private static readonly maxBufferSize = 10000;
-  private static readonly intrusionStateMaxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
-  private static readonly intrusionCleanupIntervalMs = 60 * 60 * 1000; // 1 hour
+  private static readonly intrusionStateMaxAgeMs = MS_PER_DAY; // 24 hours
+  private static readonly intrusionCleanupIntervalMs = MS_PER_HOUR; // 1 hour
 
   /**
    * @param config - Partial audit configuration (defaults applied)
@@ -320,7 +322,7 @@ export class SecurityAuditLogger {
       const logDir = path.dirname(logPath);
       const files = await fs.readdir(logDir);
 
-      const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
+      const retentionMs = retentionDays * MS_PER_DAY;
       const cutoffTime = Date.now() - retentionMs;
 
       for (const file of files) {
@@ -424,7 +426,7 @@ export class SecurityAuditLogger {
         const now = Date.now();
 
         // Check cooldown
-        if (now - state.lastTriggered < (rule.cooldownMs ?? 60000)) {
+        if (now - state.lastTriggered < (rule.cooldownMs ?? MS_PER_MINUTE)) {
           continue;
         }
 
@@ -452,28 +454,28 @@ export class SecurityAuditLogger {
           event.eventType === 'auth_failure' && (event.details.failedAttempts ?? 0) > 5,
         severity: 'high',
         action: 'alert',
-        cooldownMs: 300000, // 5 minutes
+        cooldownMs: 5 * MS_PER_MINUTE,
       },
       {
         name: 'csrf_attacks',
         condition: (event) => event.eventType === 'csrf_violation',
         severity: 'high',
         action: 'alert',
-        cooldownMs: 60000, // 1 minute
+        cooldownMs: MS_PER_MINUTE,
       },
       {
         name: 'sql_injection',
         condition: (event) => event.eventType === 'sql_injection_attempt',
         severity: 'critical',
         action: 'alert',
-        cooldownMs: 30000, // 30 seconds
+        cooldownMs: 30 * MS_PER_SECOND,
       },
       {
         name: 'suspicious_ips',
         condition: (event) => event.riskScore > 70 && event.details.geographicAnomaly === true,
         severity: 'high',
         action: 'log',
-        cooldownMs: 3600000, // 1 hour
+        cooldownMs: MS_PER_HOUR,
       },
     ];
   }
@@ -524,7 +526,7 @@ export class SecurityAuditLogger {
   private startPeriodicFlush(): void {
     this.flushTimer = setInterval(() => {
       void this.flush();
-    }, 30000); // Flush every 30 seconds
+    }, 30 * MS_PER_SECOND);
   }
 
   private startIntrusionStateCleanup(): void {

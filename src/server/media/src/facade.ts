@@ -13,6 +13,14 @@
  */
 
 import {
+  ALL_MEDIA_EXTENSIONS,
+  DEFAULT_CONCURRENCY,
+  DEFAULT_MAX_MEDIA_FILE_SIZE,
+  DEFAULT_PROCESSING_TIMEOUT_MS,
+  DEFAULT_RETRY_DELAY_MS,
+  DEFAULT_MAX_RETRIES,
+} from './constants';
+import {
   ImageProcessor,
   AudioProcessor,
   VideoProcessor,
@@ -72,9 +80,9 @@ export class ServerMediaQueue extends CustomJobQueue {
    */
   constructor(logger: Logger, limits?: Partial<ProcessingLimits>) {
     super({
-      concurrency: 3,
-      retryDelayMs: 1000,
-      maxRetries: 3,
+      concurrency: DEFAULT_CONCURRENCY,
+      retryDelayMs: DEFAULT_RETRY_DELAY_MS,
+      maxRetries: DEFAULT_MAX_RETRIES,
       logger,
     });
     this.logger = logger;
@@ -85,10 +93,10 @@ export class ServerMediaQueue extends CustomJobQueue {
       new AudioProcessor(),
       new VideoProcessor(),
       {
-        maxDuration: 5 * 60 * 1000, // 5 minutes
-        maxFileSize: 100 * 1024 * 1024, // 100MB
-        maxConcurrentJobs: 3,
-        allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'mp4', 'mov'],
+        maxDuration: DEFAULT_PROCESSING_TIMEOUT_MS,
+        maxFileSize: DEFAULT_MAX_MEDIA_FILE_SIZE,
+        maxConcurrentJobs: DEFAULT_CONCURRENCY,
+        allowedFormats: [...ALL_MEDIA_EXTENSIONS],
         ...limits,
       },
     );

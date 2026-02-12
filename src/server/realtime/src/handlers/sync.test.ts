@@ -119,7 +119,7 @@ describe('Realtime Sync Handler', () => {
         const result = await handleWrite(ctx, body, req);
 
         expect(result.status).toBe(403);
-        expect(result.body).toEqual({ message: 'Authentication required' });
+        expect(result.body).toEqual({ code: 'FORBIDDEN', message: 'Authentication required' });
       });
 
       test('should reject mismatched authorId', async () => {
@@ -130,7 +130,7 @@ describe('Realtime Sync Handler', () => {
         const result = await handleWrite(ctx, body, req);
 
         expect(result.status).toBe(403);
-        expect(result.body).toEqual({ message: 'Author ID must match authenticated user' });
+        expect(result.body).toEqual({ code: 'FORBIDDEN', message: 'Author ID must match authenticated user' });
         expect(ctx.log.warn).toHaveBeenCalled();
       });
     });
@@ -147,6 +147,7 @@ describe('Realtime Sync Handler', () => {
 
         expect(result.status).toBe(400);
         expect(result.body).toEqual({
+          code: 'BAD_REQUEST',
           message: "Table 'secret_table' is not allowed for realtime operations",
         });
       });
@@ -303,7 +304,7 @@ describe('Realtime Sync Handler', () => {
         const result = await handleWrite(ctx, body, req);
 
         expect(result.status).toBe(500);
-        expect(result.body).toEqual({ message: 'Internal server error' });
+        expect(result.body).toEqual({ code: 'INTERNAL_ERROR', message: 'Internal server error' });
         expect(ctx.log.error).toHaveBeenCalled();
       });
     });

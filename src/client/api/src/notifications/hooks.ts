@@ -28,6 +28,9 @@ import type {
   UpdatePreferencesRequest,
 } from '@abe-stack/shared';
 
+/** Polling interval for checking push permission changes (ms) */
+const PERMISSION_POLL_INTERVAL_MS = 1000;
+
 // ============================================================================
 // usePushSubscription
 // ============================================================================
@@ -452,7 +455,7 @@ export function usePushPermission(): PushPermissionState {
       if (current !== permission) {
         setPermission(current);
       }
-    }, 1000);
+    }, PERMISSION_POLL_INTERVAL_MS);
 
     return (): void => {
       clearInterval(interval);

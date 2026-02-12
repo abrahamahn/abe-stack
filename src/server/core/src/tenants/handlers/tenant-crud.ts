@@ -10,6 +10,7 @@
 import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';
+import { record } from '../../audit/service';
 import {
   createTenant,
   deleteTenant,
@@ -60,9 +61,21 @@ export async function handleCreateTenant(
       slug: body.slug,
     });
 
-    // Fire-and-forget activity log
+    // Fire-and-forget audit logging
     const tenantResult = tenant as { id?: string };
     const tenantId = tenantResult.id ?? '';
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.created',
+        resource: 'tenant',
+        resourceId: tenantId,
+        metadata: { name: body.name },
+      },
+    ).catch(() => {});
+
+    // Fire-and-forget activity log
     logActivity(deps.repos.activities, {
       actorId: userId,
       actorType: 'user',
@@ -166,6 +179,19 @@ export async function handleUpdateTenant(
 
     const tenant = await updateTenant(deps.repos, tenantId, userId, body);
 
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.updated',
+        resource: 'tenant',
+        resourceId: tenantId,
+        tenantId,
+        metadata: { fields: Object.keys(body) },
+      },
+    ).catch(() => {});
+
     // Fire-and-forget activity log
     logActivity(deps.repos.activities, {
       actorId: userId,
@@ -210,6 +236,18 @@ export async function handleDeleteTenant(
     }
 
     await deleteTenant(deps.db, deps.repos, tenantId, userId);
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: userId,
+        action: 'workspace.deleted',
+        resource: 'tenant',
+        resourceId: tenantId,
+        tenantId,
+      },
+    ).catch(() => {});
 
     // Fire-and-forget activity log
     logActivity(deps.repos.activities, {

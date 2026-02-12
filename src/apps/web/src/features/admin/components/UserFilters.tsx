@@ -5,6 +5,7 @@
  * Filter controls for the admin user list.
  */
 
+import { APP_ROLES, USER_STATUSES } from '@abe-stack/shared';
 import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
@@ -19,18 +20,26 @@ export interface UserFiltersProps {
   isLoading?: boolean;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  moderator: 'Moderator',
+  user: 'User',
+};
+
 const ROLE_OPTIONS = [
   { value: '', label: 'All Roles' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'moderator', label: 'Moderator' },
-  { value: 'user', label: 'User' },
+  ...APP_ROLES.map((role) => ({ value: role, label: ROLE_LABELS[role] ?? role })),
 ];
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  locked: 'Locked',
+  unverified: 'Unverified',
+};
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All Statuses' },
-  { value: 'active', label: 'Active' },
-  { value: 'locked', label: 'Locked' },
-  { value: 'unverified', label: 'Unverified' },
+  ...USER_STATUSES.map((status) => ({ value: status, label: STATUS_LABELS[status] ?? status })),
 ];
 
 const SORT_OPTIONS = [

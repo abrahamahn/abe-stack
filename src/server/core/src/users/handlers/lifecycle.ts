@@ -22,6 +22,7 @@ import {
   type DeleteAccountRequest,
 } from '@abe-stack/shared';
 
+import { record } from '../../audit/service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { Repositories } from '@abe-stack/db';
@@ -130,6 +131,19 @@ export async function handleDeactivateAccount(
 
     deps.log.info({ userId: request.user.userId }, 'Account deactivated');
 
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: request.user.userId,
+        action: 'user.account_deactivated',
+        resource: 'user',
+        resourceId: request.user.userId,
+        severity: 'warn',
+        category: 'security',
+      },
+    ).catch(() => {});
+
     return {
       status: 200,
       body: buildResponse('deactivated', 'Account has been deactivated'),
@@ -206,6 +220,20 @@ export async function handleRequestDeletion(
       'Account deletion requested',
     );
 
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: request.user.userId,
+        action: 'user.deletion_requested',
+        resource: 'user',
+        resourceId: request.user.userId,
+        severity: 'warn',
+        category: 'security',
+        metadata: { gracePeriodEnds: gracePeriodEnds.toISOString() },
+      },
+    ).catch(() => {});
+
     return {
       status: 200,
       body: buildResponse(
@@ -271,6 +299,18 @@ export async function handleReactivateAccount(
     }
 
     deps.log.info({ userId: request.user.userId }, 'Account reactivated');
+
+    // Fire-and-forget audit logging
+    record(
+      { auditEvents: deps.repos.auditEvents },
+      {
+        actorId: request.user.userId,
+        action: 'user.account_reactivated',
+        resource: 'user',
+        resourceId: request.user.userId,
+        category: 'security',
+      },
+    ).catch(() => {});
 
     return {
       status: 200,

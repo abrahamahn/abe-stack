@@ -8,6 +8,8 @@
  * @module types
  */
 
+import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
+
 import type { DbClient, Repositories } from '@abe-stack/db';
 import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
 
@@ -89,9 +91,9 @@ export interface TenantsModuleDeps extends BaseContext {
 // ============================================================================
 
 export const ERROR_MESSAGES = {
-  INTERNAL_ERROR: 'Internal server error',
+  INTERNAL_ERROR: SHARED_ERRORS.INTERNAL_ERROR,
   TENANT_NOT_FOUND: 'Workspace not found',
-  UNAUTHORIZED: 'Unauthorized',
+  UNAUTHORIZED: SHARED_ERRORS.UNAUTHORIZED,
   FORBIDDEN: 'You do not have permission to perform this action',
   SLUG_TAKEN: 'This workspace URL is already taken',
   NOT_MEMBER: 'You are not a member of this workspace',

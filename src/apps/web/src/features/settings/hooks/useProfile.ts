@@ -2,10 +2,12 @@
 /**
  * Profile Hook
  *
- * Hook for managing user profile updates.
+ * Hook for managing user profile updates with undo/redo support.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/client-engine';
+import { useQueryCache } from '@abe-stack/client-engine';
+import { useUndoableMutation } from '@abe-stack/react/hooks';
+import { useRef } from 'react';
 
 import { createSettingsApi, type UpdateProfileRequest, type User } from '../api';
 
@@ -32,6 +34,8 @@ function getSettingsApi(): ReturnType<typeof createSettingsApi> {
 export interface UseProfileUpdateOptions {
   onSuccess?: (user: User) => void;
   onError?: (error: Error) => void;
+  /** Current profile data for undo snapshots */
+  currentProfile?: Record<string, unknown>;
 }
 
 export interface UseProfileUpdateResult {
@@ -45,16 +49,30 @@ export interface UseProfileUpdateResult {
 
 export function useProfileUpdate(options?: UseProfileUpdateOptions): UseProfileUpdateResult {
   const queryCache = useQueryCache();
+  const profileRef = useRef<Record<string, unknown>>({});
 
-  const mutation = useMutation<User, Error, UpdateProfileRequest>({
+  // Keep snapshot ref in sync with provided profile data
+  if (options?.currentProfile !== undefined) {
+    profileRef.current = options.currentProfile;
+  }
+
+  const mutation = useUndoableMutation<User, Error, UpdateProfileRequest>({
     mutationFn: async (data): Promise<User> => {
       const api = getSettingsApi();
       return api.updateProfile(data);
+    },
+    getSnapshot: () => profileRef.current,
+    path: ['users', 'me'],
+    applyTransaction: async (data) => {
+      const api = getSettingsApi();
+      await api.updateProfile(data as UpdateProfileRequest);
     },
     onSuccess: (user) => {
       // Invalidate user queries to refresh the cached data
       queryCache.invalidateQuery(['user', 'me']);
       queryCache.invalidateQuery(['users']);
+      // Update ref with latest data for future snapshots
+      profileRef.current = user as unknown as Record<string, unknown>;
       options?.onSuccess?.(user);
     },
     onError: (error: Error): void => {

@@ -128,7 +128,11 @@ describe('WorkspaceFeatureOverrides', () => {
 
     // Find all "On" buttons (there are 2, one for each flag)
     const onButtons = screen.getAllByText('On');
-    await user.click(onButtons[0]);
+    const firstButton = onButtons[0];
+    if (firstButton === undefined) {
+      throw new Error('Expected to find at least one "On" button');
+    }
+    await user.click(firstButton);
 
     expect(mockSetOverride).toHaveBeenCalledWith('tenant-1', 'test.feature1', 'on');
   });
@@ -204,7 +208,11 @@ describe('WorkspaceFeatureOverrides', () => {
 
     const user = userEvent.setup();
     const onButtons = screen.getAllByText('On');
-    await user.click(onButtons[0]);
+    const firstButton = onButtons[0];
+    if (firstButton === undefined) {
+      throw new Error('Expected to find at least one "On" button');
+    }
+    await user.click(firstButton);
 
     await waitFor(() => {
       expect(screen.getByText('Feature override updated successfully')).toBeInTheDocument();

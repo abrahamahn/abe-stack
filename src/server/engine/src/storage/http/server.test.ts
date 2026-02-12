@@ -34,11 +34,34 @@ describe('File Server', () => {
 
     server = fastify({ forceCloseConnections: true });
 
-    // Register a pass-through content type parser for file uploads
-    // This allows the route handler to stream request.raw directly without consuming it
-    server.addContentTypeParser('application/octet-stream', (_req, _payload, done) => {
-      // Don't consume the body - let the route handler stream it directly
-      done(null);
+    // Register content type parser that buffers the body for file uploads
+    server.addContentTypeParser(
+      'application/octet-stream',
+      { parseAs: 'buffer' },
+      (_req, body, done) => {
+        done(null, body);
+      },
+    );
+
+    // Wrap sync preHandlers with done callback so Fastify can complete the lifecycle.
+    // The source code's rateLimitHandler is a sync 2-param function; Fastify 5 requires
+    // sync hooks to either be async or use the 3-param (req, reply, done) signature.
+    server.addHook('onRoute', (routeOptions) => {
+      if (routeOptions.preHandler != null) {
+        const handlers = Array.isArray(routeOptions.preHandler)
+          ? routeOptions.preHandler
+          : [routeOptions.preHandler];
+
+        routeOptions.preHandler = handlers.map((handler) => {
+          if (handler.length <= 2 && handler.constructor.name !== 'AsyncFunction') {
+            return (request: unknown, reply: unknown, done: () => void) => {
+              (handler as (req: unknown, rep: unknown) => void)(request, reply);
+              done();
+            };
+          }
+          return handler;
+        });
+      }
     });
 
     // Dynamically import to avoid hoisting issues with mocks

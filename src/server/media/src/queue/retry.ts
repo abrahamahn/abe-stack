@@ -8,6 +8,10 @@
  * @module queue/retry
  */
 
+import { delay, MS_PER_HOUR, MS_PER_MINUTE } from '@abe-stack/shared';
+
+import { CLEANUP_INTERVAL_MS, DEFAULT_PROCESSING_TIMEOUT_MS, JOB_RETENTION_MS } from '../constants';
+
 import type { Logger } from '@abe-stack/shared';
 
 /**
@@ -62,8 +66,8 @@ export class MediaProcessingRetryHandler {
   private readonly retryStates = new Map<string, RetryState>();
   private readonly defaultOptions: Required<RetryOptions>;
   private cleanupInterval: NodeJS.Timeout | null = null;
-  private static readonly cleanupIntervalMs = 5 * 60 * 1000; // 5 minutes
-  private static readonly defaultMaxAgeMs = 60 * 60 * 1000; // 1 hour
+  private static readonly cleanupIntervalMs = CLEANUP_INTERVAL_MS;
+  private static readonly defaultMaxAgeMs = JOB_RETENTION_MS;
 
   /**
    * Create a retry handler with optional custom options
@@ -78,11 +82,11 @@ export class MediaProcessingRetryHandler {
     this.defaultOptions = {
       maxRetries: 3,
       baseDelayMs: 1000,
-      maxDelayMs: 300000, // 5 minutes
+      maxDelayMs: DEFAULT_PROCESSING_TIMEOUT_MS,
       backoffMultiplier: 2,
       jitterFactor: 0.1,
       circuitBreakerThreshold: 5,
-      circuitBreakerTimeoutMs: 600000, // 10 minutes
+      circuitBreakerTimeoutMs: 10 * MS_PER_MINUTE,
       ...options,
     };
 
@@ -154,16 +158,16 @@ export class MediaProcessingRetryHandler {
 
         // If not the last attempt, wait before retrying
         if (attempt < this.defaultOptions.maxRetries) {
-          const delay = this.calculateDelay(attempt);
-          state.nextRetryAt = Date.now() + delay;
+          const retryDelay = this.calculateDelay(attempt);
+          state.nextRetryAt = Date.now() + retryDelay;
 
           this.logger.info('Scheduling retry', {
             operationId,
-            delay,
+            delay: retryDelay,
             nextRetryAt: new Date(state.nextRetryAt).toISOString(),
           });
 
-          await this.sleep(delay);
+          await delay(retryDelay);
         }
       }
     }
@@ -259,15 +263,6 @@ export class MediaProcessingRetryHandler {
   }
 
   /**
-   * Sleep for specified milliseconds
-   *
-   * @param ms - Duration to sleep
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
    * Get retry statistics across all tracked operations
    *
    * @returns Statistics including total operations, open circuits, and average retries
@@ -305,7 +300,7 @@ export class MediaProcessingRetryHandler {
    * @param maxAgeMs - Maximum age in milliseconds (default: 1 hour)
    * @complexity O(n) where n is tracked operations
    */
-  cleanup(maxAgeMs: number = 3600000): void {
+  cleanup(maxAgeMs: number = MS_PER_HOUR): void {
     const cutoff = Date.now() - maxAgeMs;
 
     for (const [operationId, state] of this.retryStates.entries()) {
@@ -336,11 +331,11 @@ export class MediaProcessingRetryHandler {
 export function createMediaRetryHandler(logger: Logger): MediaProcessingRetryHandler {
   return new MediaProcessingRetryHandler(logger, {
     maxRetries: 3,
-    baseDelayMs: 2000, // Start with 2 seconds
-    maxDelayMs: 300000, // Max 5 minutes
+    baseDelayMs: 2000,
+    maxDelayMs: DEFAULT_PROCESSING_TIMEOUT_MS,
     backoffMultiplier: 2,
     jitterFactor: 0.1,
     circuitBreakerThreshold: 5,
-    circuitBreakerTimeoutMs: 600000, // 10 minutes
+    circuitBreakerTimeoutMs: 10 * MS_PER_MINUTE,
   });
 }

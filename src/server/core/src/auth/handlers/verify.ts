@@ -9,6 +9,7 @@
 
 import {
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+  HTTP_STATUS,
   mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
@@ -56,7 +57,7 @@ export async function handleVerifyEmail(
     });
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: {
         verified: true,
         token: result.accessToken,
@@ -87,7 +88,7 @@ export async function handleResendVerification(
     await resendVerificationEmail(ctx.db, ctx.repos, ctx.email, ctx.emailTemplates, email, baseUrl);
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: { message: SUCCESS_MESSAGES.VERIFICATION_EMAIL_SENT },
     };
   } catch (error) {

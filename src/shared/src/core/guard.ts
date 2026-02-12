@@ -89,3 +89,27 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 export function isObjectLike(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
+/**
+ * Check whether a string is safe to use as an object key.
+ * Rejects `__proto__`, `constructor`, and `prototype` to prevent prototype pollution.
+ */
+export function isSafeObjectKey(key: string): boolean {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
+/**
+ * Type guard to check if a request context has an authenticated user.
+ *
+ * Validates that `req.user` is a non-null object with a non-empty `userId` string.
+ * Narrows the type so callers can access `req.user.userId`, `req.user.email`, etc.
+ */
+export function isAuthenticatedRequest<T extends { readonly user?: unknown }>(
+  req: T,
+): req is T & { readonly user: { readonly userId: string; readonly email: string; readonly role: string } } {
+  if (req.user === undefined || typeof req.user !== 'object') {
+    return false;
+  }
+  const user = req.user as unknown as Record<string, unknown>;
+  return 'userId' in user && typeof user['userId'] === 'string' && user['userId'] !== '';
+}

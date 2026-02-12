@@ -50,6 +50,9 @@ export function getFieldValue(obj: Record<string, unknown>, path: string): unkno
     if (typeof current !== 'object') {
       return undefined;
     }
+    if (!Object.hasOwn(current, part)) {
+      return undefined;
+    }
     current = (current as Record<string, unknown>)[part];
   }
 

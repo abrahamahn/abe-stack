@@ -9,6 +9,7 @@
  */
 
 import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '@abe-stack/db';
+import { MS_PER_DAY } from '@abe-stack/shared';
 
 import type { AuthEmailService, AuthEmailTemplates } from '../types';
 import type { DbClient } from '@abe-stack/db';
@@ -26,6 +27,9 @@ export type SecurityEventType =
   | 'account_locked'
   | 'account_unlocked'
   | 'suspicious_login'
+  | 'new_device_login'
+  | 'device_trusted'
+  | 'device_revoked'
   | 'password_changed'
   | 'email_changed'
   | 'magic_link_requested'
@@ -277,6 +281,67 @@ export async function logAccountUnlockedEvent(
 }
 
 /**
+ * Flag a suspicious login (e.g., new country/region, unusual time).
+ * Creates a high-severity security event for review.
+ *
+ * @param db - Database client
+ * @param userId - User ID
+ * @param email - User email
+ * @param reason - Description of why this login is suspicious
+ * @param ipAddress - Client IP address
+ * @param userAgent - Client user agent
+ * @complexity O(1)
+ */
+export async function flagSuspiciousLogin(
+  db: DbClient,
+  userId: string,
+  email: string,
+  reason: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'suspicious_login',
+    severity: 'high',
+    ipAddress,
+    userAgent,
+    metadata: { reason },
+  });
+}
+
+/**
+ * Log a new device login event.
+ *
+ * @param db - Database client
+ * @param userId - User ID
+ * @param email - User email
+ * @param ipAddress - Client IP address
+ * @param userAgent - Client user agent
+ * @complexity O(1)
+ */
+export async function logNewDeviceLogin(
+  db: DbClient,
+  userId: string,
+  email: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'new_device_login',
+    severity: 'medium',
+    ipAddress,
+    userAgent,
+    metadata: { reason: 'Login from unrecognized device' },
+  });
+}
+
+/**
  * Get recent security events for a user.
  * Useful for displaying security activity to users.
  *
@@ -325,7 +390,7 @@ export async function getUserSecurityEvents(
  */
 export async function getSecurityEventMetrics(
   db: DbClient,
-  since: Date = new Date(Date.now() - 24 * 60 * 60 * 1000),
+  since: Date = new Date(Date.now() - MS_PER_DAY),
 ): Promise<{
   tokenReuseCount: number;
   accountLockedCount: number;

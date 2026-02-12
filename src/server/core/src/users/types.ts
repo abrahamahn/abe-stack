@@ -11,7 +11,10 @@
  * @module types
  */
 
-import type { Repositories } from '@abe-stack/db';
+import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
+
+import type { DbClient, Repositories } from '@abe-stack/db';
+import type { CacheProvider } from '@abe-stack/shared';
 import type { Argon2Config } from '@abe-stack/shared/config';
 import type {
   BaseContext,
@@ -129,12 +132,16 @@ export type UsersRequest = RequestContext;
  * ```
  */
 export interface UsersModuleDeps extends Omit<BaseContext, 'db'> {
+  /** Database client for transaction support (password change, etc.) */
+  readonly db: DbClient;
   /** Repository layer for structured database access */
   readonly repos: Repositories;
   /** Logger instance for users module logging */
   readonly log: UsersLogger;
   /** Storage service for avatar uploads */
   readonly storage: StorageService;
+  /** Cache provider for performance optimization */
+  readonly cache?: CacheProvider | undefined;
   /** Application configuration subset needed by users */
   readonly config: {
     readonly auth: UsersAuthConfig;
@@ -152,9 +159,9 @@ export interface UsersModuleDeps extends Omit<BaseContext, 'db'> {
  */
 export const ERROR_MESSAGES = {
   /** Generic internal error message */
-  INTERNAL_ERROR: 'Internal server error',
+  INTERNAL_ERROR: SHARED_ERRORS.INTERNAL_ERROR,
   /** User not found error message */
   USER_NOT_FOUND: 'User not found',
   /** Unauthorized error message */
-  UNAUTHORIZED: 'Unauthorized',
+  UNAUTHORIZED: SHARED_ERRORS.UNAUTHORIZED,
 } as const;

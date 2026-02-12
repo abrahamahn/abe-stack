@@ -1,7 +1,8 @@
 // src/apps/web/src/features/dashboard/pages/DashboardPage.tsx
 import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
-import { SectionErrorBoundary } from '@app/components';
+import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
+import { GettingStartedChecklist } from '@dashboard/components';
 import { ActivityFeed } from '@features/activities';
 
 import type { NavigateFunction } from '@abe-stack/ui';
@@ -56,15 +57,13 @@ export const DashboardPage = (): JSX.Element => {
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
-        <Card>
-          <Heading as="h3" size="sm" className="mb-1">
-            Welcome to your dashboard!
-          </Heading>
-          <Text tone="muted">
-            This is a protected route that requires authentication. You can only access this page when
-            logged in with a valid JWT token.
-          </Text>
-        </Card>
+        <FeatureHint
+          featureKey="getting-started"
+          title="Getting Started"
+          description="Complete these steps to get the most out of your account"
+        >
+          <GettingStartedChecklist />
+        </FeatureHint>
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>

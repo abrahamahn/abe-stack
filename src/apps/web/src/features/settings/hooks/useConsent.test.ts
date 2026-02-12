@@ -110,14 +110,10 @@ describe('useUpdateConsent', () => {
 
     const { result } = renderHook(() => useUpdateConsent());
 
-    const updatePromise = result.current.updateConsent({
+    const response = await result.current.updateConsent({
       analytics: true,
       marketing_email: true,
     });
-
-    expect(result.current.isUpdating).toBe(true);
-
-    const response = await updatePromise;
 
     await waitFor(() => {
       expect(result.current.isUpdating).toBe(false);
@@ -155,10 +151,10 @@ describe('useUpdateConsent', () => {
     ).rejects.toThrow('Invalid input');
 
     await waitFor(() => {
-      expect(result.current.isUpdating).toBe(false);
+      expect(result.current.error).toBeInstanceOf(Error);
     });
 
-    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.isUpdating).toBe(false);
   });
 
   it('should handle network error', async () => {

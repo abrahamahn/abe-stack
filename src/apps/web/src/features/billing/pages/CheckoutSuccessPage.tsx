@@ -3,6 +3,7 @@
  * CheckoutSuccessPage - Displayed after successful checkout.
  */
 
+import { MS_PER_SECOND } from '@abe-stack/shared';
 import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
 
@@ -25,7 +26,7 @@ export const CheckoutSuccessPage = (): ReactElement => {
 
     const timer = setTimeout(() => {
       setCountdown((c) => c - 1);
-    }, 1000);
+    }, MS_PER_SECOND);
 
     return (): void => {
       clearTimeout(timer);

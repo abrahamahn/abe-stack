@@ -7,7 +7,7 @@
  * to track which events have already been processed.
  */
 
-import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/shared';
+import { MS_PER_DAY, WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/shared';
 
 import { PayPalProvider } from '../paypal-provider';
 
@@ -208,7 +208,7 @@ async function handleSubscriptionCreated(
   const nextBillingTime =
     typeof nextBillingTimeValue === 'string' && nextBillingTimeValue !== ''
       ? new Date(nextBillingTimeValue)
-      : new Date(startTime.getTime() + 30 * 24 * 60 * 60 * 1000);
+      : new Date(startTime.getTime() + 30 * MS_PER_DAY);
 
   // Create or update customer mapping
   if (typeof customerId === 'string' && customerId !== '') {

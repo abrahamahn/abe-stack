@@ -5,13 +5,14 @@
  * Data access layer for billing subscriptions table.
  */
 
+import { MS_PER_DAY } from '@abe-stack/shared';
+
 import {
   and,
   eq,
   gt,
   inArray,
   lt,
-  or,
   select,
   insert,
   update,
@@ -21,15 +22,17 @@ import {
 import {
   type NewSubscription,
   type Subscription,
+  SUBSCRIPTION_STATUSES,
   type SubscriptionStatus,
   type UpdateSubscription,
   SUBSCRIPTION_COLUMNS,
   SUBSCRIPTIONS_TABLE,
 } from '../../schema/index';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
+import { buildCursorCondition, buildCursorResult, combineConditions } from '../../utils/pagination';
 
 import type { RawDb } from '../../client';
-import type { PaginatedResult, PaginationOptions } from '../types';
+import type { CursorPaginatedResult, CursorPaginationOptions } from '../types';
 
 // ============================================================================
 // Types
@@ -69,8 +72,8 @@ export interface SubscriptionRepository {
   /** List subscriptions with filters */
   list(
     filters?: SubscriptionFilters,
-    options?: PaginationOptions,
-  ): Promise<PaginatedResult<Subscription>>;
+    options?: Partial<CursorPaginationOptions>,
+  ): Promise<CursorPaginatedResult<Subscription>>;
 
   /** Create a new subscription */
   create(subscription: NewSubscription): Promise<Subscription>;
@@ -116,10 +119,15 @@ function transformSubscription(row: Record<string, unknown>): Subscription {
   return subscription;
 }
 
+/** Frequently-referenced subscription statuses, sourced from shared constants */
+const STATUS_ACTIVE = SUBSCRIPTION_STATUSES[0]; // 'active'
+const STATUS_PAST_DUE = SUBSCRIPTION_STATUSES[4]; // 'past_due'
+const STATUS_TRIALING = SUBSCRIPTION_STATUSES[6]; // 'trialing'
+
 /**
  * Active subscription statuses
  */
-const ACTIVE_STATUSES: SubscriptionStatus[] = ['active', 'trialing'];
+const ACTIVE_STATUSES: SubscriptionStatus[] = [STATUS_ACTIVE, STATUS_TRIALING];
 
 /**
  * Create a subscription repository
@@ -168,9 +176,9 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
     async list(
       filters: SubscriptionFilters = {},
-      options: PaginationOptions = {},
-    ): Promise<PaginatedResult<Subscription>> {
-      const { limit = 20, cursor, direction = 'desc' } = options;
+      options: Partial<CursorPaginationOptions> = {},
+    ): Promise<CursorPaginatedResult<Subscription>> {
+      const { limit = 20, cursor, sortOrder = 'desc' } = options;
       const conditions = [];
 
       // Apply filters
@@ -194,69 +202,28 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         conditions.push(eq('cancel_at_period_end', filters.cancelAtPeriodEnd));
       }
 
-      // Build query
-      let query = select(SUBSCRIPTIONS_TABLE);
-
-      if (conditions.length > 0) {
-        const [firstCondition, ...restConditions] = conditions;
-        if (firstCondition === undefined) {
-          throw new Error('Failed to build subscription query conditions');
-        }
-        const whereCondition =
-          restConditions.length === 0 ? firstCondition : and(firstCondition, ...restConditions);
-        query = query.where(whereCondition);
+      // Cursor condition
+      const cursorCondition = buildCursorCondition(cursor, sortOrder);
+      if (cursorCondition !== null) {
+        conditions.push(cursorCondition);
       }
 
-      // Cursor pagination
-      if (cursor !== undefined && cursor !== '') {
-        const parts = cursor.split('_');
-        const cursorDateStr = parts[0];
-        const cursorId = parts[1];
-        if (
-          cursorDateStr !== undefined &&
-          cursorDateStr !== '' &&
-          cursorId !== undefined &&
-          cursorId !== ''
-        ) {
-          const cursorDate = new Date(cursorDateStr);
-          if (direction === 'desc') {
-            query = query.where(
-              or(
-                lt('created_at', cursorDate),
-                and(eq('created_at', cursorDate), lt('id', cursorId)),
-              ),
-            );
-          } else {
-            query = query.where(
-              or(
-                gt('created_at', cursorDate),
-                and(eq('created_at', cursorDate), gt('id', cursorId)),
-              ),
-            );
-          }
-        }
+      // Build query
+      let query = select(SUBSCRIPTIONS_TABLE);
+      const where = combineConditions(conditions);
+      if (where !== null) {
+        query = query.where(where);
       }
 
       query = query
-        .orderBy('created_at', direction)
-        .orderBy('id', direction)
+        .orderBy('created_at', sortOrder)
+        .orderBy('id', sortOrder)
         .limit(limit + 1);
 
       const results = await db.query(query.toSql());
-      const items = results.map(transformSubscription);
+      const data = results.map(transformSubscription);
 
-      const hasMore = items.length > limit;
-      if (hasMore) {
-        items.pop();
-      }
-
-      const lastItem = items[items.length - 1];
-      const nextCursor =
-        hasMore && lastItem !== undefined
-          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
-          : null;
-
-      return { items, nextCursor };
+      return buildCursorResult(data, limit, sortOrder);
     },
 
     async create(subscription: NewSubscription): Promise<Subscription> {
@@ -323,7 +290,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
     async findExpiringSoon(withinDays: number): Promise<Subscription[]> {
       const now = new Date();
-      const futureDate = new Date(now.getTime() + withinDays * 24 * 60 * 60 * 1000);
+      const futureDate = new Date(now.getTime() + withinDays * MS_PER_DAY);
 
       const results = await db.query(
         select(SUBSCRIPTIONS_TABLE)
@@ -344,7 +311,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
     async findPastDue(): Promise<Subscription[]> {
       const results = await db.query(
         select(SUBSCRIPTIONS_TABLE)
-          .where(eq('status', 'past_due'))
+          .where(eq('status', STATUS_PAST_DUE))
           .orderBy('updated_at', 'desc')
           .toSql(),
       );

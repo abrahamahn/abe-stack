@@ -91,6 +91,7 @@ import {
 } from './handlers';
 import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
+import { webauthnRouteEntries } from './webauthn';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -134,6 +135,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       registerRequestSchema,
+      { summary: 'Register new user', tags: ['Auth'] },
     ),
   ],
 
@@ -150,6 +152,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       loginRequestSchema,
+      { summary: 'Authenticate user', tags: ['Auth'] },
     ),
   ],
 
@@ -164,6 +167,8 @@ const coreAuthEntries: [string, RouteDefinition][] = [
           reply as unknown as ReplyWithCookies,
         );
       },
+      undefined,
+      { summary: 'Refresh access token', tags: ['Auth'] },
     ),
   ],
 
@@ -178,6 +183,8 @@ const coreAuthEntries: [string, RouteDefinition][] = [
           reply as unknown as ReplyWithCookies,
         );
       },
+      undefined,
+      { summary: 'Logout current session', tags: ['Auth'] },
     ),
   ],
 
@@ -192,6 +199,9 @@ const coreAuthEntries: [string, RouteDefinition][] = [
           reply as unknown as ReplyWithCookies,
         );
       },
+      [],
+      undefined,
+      { summary: 'Logout all sessions', tags: ['Auth'] },
     ),
   ],
 
@@ -207,6 +217,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       forgotPasswordRequestSchema,
+      { summary: 'Request password reset', tags: ['Auth'] },
     ),
   ],
 
@@ -222,6 +233,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       resetPasswordRequestSchema,
+      { summary: 'Reset password with token', tags: ['Auth'] },
     ),
   ],
 
@@ -238,6 +250,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       setPasswordRequestSchema,
+      { summary: 'Set password', tags: ['Auth'] },
     ),
   ],
 
@@ -253,6 +266,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       emailVerificationRequestSchema,
+      { summary: 'Verify email address', tags: ['Auth'] },
     ),
   ],
 
@@ -264,15 +278,22 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         return handleResendVerification(asAppContext(ctx), body as ResendVerificationRequest);
       },
       resendVerificationRequestSchema,
+      { summary: 'Resend verification email', tags: ['Auth'] },
     ),
   ],
 
   // TOTP (2FA) routes
   [
     'auth/totp/setup',
-    protectedRoute('POST', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      return handleTotpSetup(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        return handleTotpSetup(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'Setup TOTP 2FA', tags: ['Auth', 'TOTP'] },
+    ),
   ],
 
   [
@@ -288,6 +309,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       totpVerifyRequestSchema,
+      { summary: 'Enable TOTP 2FA', tags: ['Auth', 'TOTP'] },
     ),
   ],
 
@@ -304,14 +326,21 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       totpVerifyRequestSchema,
+      { summary: 'Disable TOTP 2FA', tags: ['Auth', 'TOTP'] },
     ),
   ],
 
   [
     'auth/totp/status',
-    protectedRoute('GET', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      return handleTotpStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        return handleTotpStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'Get TOTP status', tags: ['Auth', 'TOTP'] },
+    ),
   ],
 
   [
@@ -327,15 +356,22 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       totpLoginVerifyRequestSchema,
+      { summary: 'Verify TOTP login challenge', tags: ['Auth', 'TOTP'] },
     ),
   ],
 
   // Terms of Service routes
   [
     'auth/tos/status',
-    protectedRoute('GET', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      return handleTosStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        return handleTosStatus(asAppContext(ctx), undefined, req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'Get ToS acceptance status', tags: ['Auth', 'Terms of Service'] },
+    ),
   ],
 
   [
@@ -351,6 +387,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       acceptTosRequestSchema as RouteSchema,
+      { summary: 'Accept Terms of Service', tags: ['Auth', 'Terms of Service'] },
     ),
   ],
 
@@ -367,6 +404,8 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       'user',
+      undefined,
+      { summary: 'Elevate to sudo mode', tags: ['Auth'] },
     ),
   ],
 
@@ -384,6 +423,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       changeEmailRequestSchema,
+      { summary: 'Request email change', tags: ['Auth', 'Email'] },
     ),
   ],
 
@@ -399,6 +439,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       confirmEmailChangeRequestSchema,
+      { summary: 'Confirm email change', tags: ['Auth', 'Email'] },
     ),
   ],
 
@@ -410,31 +451,50 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         return handleRevertEmailChange(asAppContext(ctx), body as RevertEmailChangeRequest);
       },
       revertEmailChangeRequestSchema,
+      { summary: 'Revert email change', tags: ['Auth', 'Email'] },
     ),
   ],
 
   // Device management routes
   [
     'users/me/devices',
-    protectedRoute('GET', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      return handleListDevices(asAppContext(ctx), req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'GET',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        return handleListDevices(asAppContext(ctx), req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'List trusted devices', tags: ['Auth', 'Devices'] },
+    ),
   ],
 
   [
     'users/me/devices/:id/trust',
-    protectedRoute('POST', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      const params = (req as unknown as { params: { id: string } }).params;
-      return handleTrustDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'POST',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        const params = (req as unknown as { params: { id: string } }).params;
+        return handleTrustDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'Trust device', tags: ['Auth', 'Devices'] },
+    ),
   ],
 
   [
     'users/me/devices/:id',
-    protectedRoute('DELETE', async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
-      const params = (req as unknown as { params: { id: string } }).params;
-      return handleRevokeDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
-    }),
+    protectedRoute(
+      'DELETE',
+      async (ctx: HandlerContext, _body: unknown, req: FastifyRequest) => {
+        const params = (req as unknown as { params: { id: string } }).params;
+        return handleRevokeDevice(asAppContext(ctx), params, req as unknown as RequestWithCookies);
+      },
+      [],
+      undefined,
+      { summary: 'Revoke device', tags: ['Auth', 'Devices'] },
+    ),
   ],
 
   // Phone management routes
@@ -451,6 +511,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       setPhoneRequestSchema,
+      { summary: 'Set phone number', tags: ['Auth', 'Phone'] },
     ),
   ],
 
@@ -467,6 +528,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
       },
       'user',
       verifyPhoneRequestSchema,
+      { summary: 'Verify phone number', tags: ['Auth', 'Phone'] },
     ),
   ],
 
@@ -478,6 +540,8 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         return handleRemovePhone(asAppContext(ctx), req as unknown as RequestWithCookies);
       },
       'user',
+      undefined,
+      { summary: 'Remove phone number', tags: ['Auth', 'Phone'] },
     ),
   ],
 
@@ -493,6 +557,9 @@ const coreAuthEntries: [string, RouteDefinition][] = [
           reply as unknown as ReplyWithCookies,
         );
       },
+      [],
+      undefined,
+      { summary: 'Invalidate all sessions', tags: ['Auth', 'Sessions'] },
     ),
   ],
 
@@ -509,6 +576,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       smsChallengeRequestSchema,
+      { summary: 'Send SMS verification code', tags: ['Auth', 'SMS'] },
     ),
   ],
 
@@ -525,6 +593,7 @@ const coreAuthEntries: [string, RouteDefinition][] = [
         );
       },
       smsVerifyRequestSchema,
+      { summary: 'Verify SMS code', tags: ['Auth', 'SMS'] },
     ),
   ],
 ];
@@ -538,4 +607,5 @@ export const authRoutes = createRouteMap([
   ...coreAuthEntries,
   ...magicLinkRouteEntries,
   ...oauthRouteEntries,
+  ...webauthnRouteEntries,
 ]);

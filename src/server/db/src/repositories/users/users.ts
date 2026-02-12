@@ -8,7 +8,7 @@
  * @module
  */
 
-import { canonicalizeEmail } from '@abe-stack/shared';
+import { calculateOffsetPaginationMetadata, canonicalizeEmail } from '@abe-stack/shared';
 
 import {
   and,
@@ -37,6 +37,7 @@ import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { SqlFragment } from '../../builder/index';
 import type { RawDb } from '../../client';
+import type { PaginatedResult } from '@abe-stack/shared';
 
 // ============================================================================
 // Admin User List Types
@@ -76,27 +77,6 @@ export interface AdminUserListFilters {
   page?: number | undefined;
   /** Number of results per page (defaults to 20) */
   limit?: number | undefined;
-}
-
-/**
- * Paginated result set for user listing operations.
- * Contains the result items and pagination metadata.
- */
-export interface PaginatedUserResult {
-  /** Array of User records for the current page */
-  items: User[];
-  /** Total number of matching records across all pages */
-  total: number;
-  /** Current page number (1-indexed) */
-  page: number;
-  /** Number of results per page */
-  limit: number;
-  /** Total number of pages */
-  totalPages: number;
-  /** Whether there is a next page */
-  hasNext: boolean;
-  /** Whether there is a previous page */
-  hasPrev: boolean;
 }
 
 // ============================================================================
@@ -152,7 +132,7 @@ export interface UserRepository {
    * @returns Paginated result containing matching users and metadata
    * @complexity O(n) where n is the number of matching records (database-level)
    */
-  listWithFilters(filters: AdminUserListFilters): Promise<PaginatedUserResult>;
+  listWithFilters(filters: AdminUserListFilters): Promise<PaginatedResult<User>>;
 
   /**
    * Lock a user account until a specified date
@@ -308,7 +288,7 @@ export function createUserRepository(db: RawDb): UserRepository {
       return result !== null ? transformUser(result) : null;
     },
 
-    async listWithFilters(filters: AdminUserListFilters): Promise<PaginatedUserResult> {
+    async listWithFilters(filters: AdminUserListFilters): Promise<PaginatedResult<User>> {
       const page = filters.page ?? 1;
       const limit = filters.limit ?? 20;
       const sortBy = filters.sortBy ?? 'created_at';
@@ -336,16 +316,20 @@ export function createUserRepository(db: RawDb): UserRepository {
       const countRow = await db.queryOne(countQuery.toSql());
 
       const total = countRow !== null ? Number(countRow['count']) : 0;
-      const totalPages = Math.ceil(total / limit);
+      const { totalPages, hasNext, hasPrev } = calculateOffsetPaginationMetadata({
+        page,
+        limit,
+        total,
+      });
 
       return {
-        items: rows.map(transformUser),
+        data: rows.map(transformUser),
         total,
         page,
         limit,
         totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
+        hasNext,
+        hasPrev,
       };
     },
 

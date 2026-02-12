@@ -72,10 +72,13 @@ jobs:
 
       - name: Extract infrastructure information
         id: get-deployment-info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment || 'production' }}
+          INPUT_PROVIDER: ${{ inputs.provider || 'digitalocean' }}
+          MANUAL_INSTANCE_IP: ${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}
+          MANUAL_DOMAIN: ${{ inputs.domain || vars.DOMAIN || secrets.DOMAIN || '' }}
         run: |
-          DEPLOY_FILE=".deploy/${{ inputs.environment || 'production' }}-${{ inputs.provider || 'digitalocean' }}.json"
-          MANUAL_INSTANCE_IP="${{ inputs.instance_ip || vars.INSTANCE_IP || vars.DEPLOY_HOST || secrets.SERVER_HOST || '' }}"
-          MANUAL_DOMAIN="${{ inputs.domain || vars.DOMAIN || secrets.DOMAIN || '' }}"
+          DEPLOY_FILE=".deploy/${INPUT_ENVIRONMENT}-${INPUT_PROVIDER}.json"
 
           if [ -f "$DEPLOY_FILE" ]; then
             INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
@@ -113,14 +116,20 @@ jobs:
 
       - name: Resolve image variables
         id: image-vars
+        env:
+          INPUT_REGISTRY: ${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}
+          INPUT_IMAGE_NAME_RAW: ${{ vars.IMAGE_NAME || github.event.repository.name }}
+          INPUT_COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}
+          INPUT_REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
-          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
-          COMMIT_SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
-          IMAGE_TAG="${{ inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}"
+          REGISTRY="$INPUT_REGISTRY"
+          IMAGE_NAME_RAW="$INPUT_IMAGE_NAME_RAW"
+          COMMIT_SHA="$INPUT_COMMIT_SHA"
+          IMAGE_TAG="$INPUT_IMAGE_TAG"
 
           if [[ "$IMAGE_NAME_RAW" != */* ]]; then
-            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+            IMAGE_NAME="${INPUT_REPO_OWNER}/$IMAGE_NAME_RAW"
           else
             IMAGE_NAME="$IMAGE_NAME_RAW"
           fi
@@ -142,10 +151,14 @@ jobs:
 
       - name: Resolve deployment image references
         id: image-refs
+        env:
+          IMAGE_REGISTRY: ${{ steps.image-vars.outputs.registry }}
+          IMAGE_NAME: ${{ steps.image-vars.outputs.image_name }}
+          IMAGE_TAG: ${{ steps.image-vars.outputs.image_tag }}
         run: |
           ARTIFACT_FILE=".deploy-image/deployment-images.json"
-          DEFAULT_API_IMAGE="${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:${{ steps.image-vars.outputs.image_tag }}-api"
-          DEFAULT_WEB_IMAGE="${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}:${{ steps.image-vars.outputs.image_tag }}-web"
+          DEFAULT_API_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}-api"
+          DEFAULT_WEB_IMAGE="${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}-web"
 
           if [ -f "$ARTIFACT_FILE" ]; then
             API_IMAGE=$(jq -r '.api_image // empty' "$ARTIFACT_FILE")
@@ -167,11 +180,14 @@ jobs:
           echo "source=$SOURCE" >> "$GITHUB_OUTPUT"
 
       - name: Prepare SSH key for deployment
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          INSTANCE_IP: ${{ needs.get-infrastructure-info.outputs.instance_ip }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ needs.get-infrastructure-info.outputs.instance_ip }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
@@ -276,8 +292,10 @@ jobs:
             fi
 
       - name: Verify Deployment
+        env:
+          DEPLOY_DOMAIN: ${{ needs.get-infrastructure-info.outputs.domain }}
         run: |
-          TARGET="${{ needs.get-infrastructure-info.outputs.domain }}"
+          TARGET="$DEPLOY_DOMAIN"
           HTTPS_URL="https://$TARGET/health"
           HTTP_URL="http://$TARGET/health"
           sleep 10
@@ -287,12 +305,38 @@ jobs:
           curl -f -s "$HTTP_URL" >/dev/null
 
       - name: Deployment Summary
+        env:
+          DEPLOY_ENV: ${{ inputs.environment || 'production' }}
+          APP_NAME: ${{ inputs.app_name || 'abe-stack' }}
+          IMAGE_SOURCE: ${{ steps.image-refs.outputs.source }}
+          API_IMAGE: ${{ steps.image-refs.outputs.api_image }}
+          WEB_IMAGE: ${{ steps.image-refs.outputs.web_image }}
+          DEPLOY_DOMAIN: ${{ needs.get-infrastructure-info.outputs.domain }}
         run: |
           echo "## Deployment Completed Successfully" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Environment:** ${{ inputs.environment || 'production' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**App Name:** ${{ inputs.app_name || 'abe-stack' }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Image Source:** ${{ steps.image-refs.outputs.source }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**API Image:** \`${{ steps.image-refs.outputs.api_image }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Web Image:** \`${{ steps.image-refs.outputs.web_image }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Domain:** https://${{ needs.get-infrastructure-info.outputs.domain }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Environment:** $DEPLOY_ENV" >> "$GITHUB_STEP_SUMMARY"
+          echo "**App Name:** $APP_NAME" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Image Source:** $IMAGE_SOURCE" >> "$GITHUB_STEP_SUMMARY"
+          echo "**API Image:** \`$API_IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Web Image:** \`$WEB_IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Domain:** https://$DEPLOY_DOMAIN" >> "$GITHUB_STEP_SUMMARY"
+
+  smoke-test:
+    needs: [get-infrastructure-info, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment to stabilize
+        run: sleep 30
+
+      - name: Health check
+        env:
+          DEPLOY_DOMAIN: ${{ needs.get-infrastructure-info.outputs.domain }}
+        run: |
+          DOMAIN="$DEPLOY_DOMAIN"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://${DOMAIN}/api/health" || echo "000")
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check failed with status: $STATUS"
+            exit 1
+          fi
+          echo "Health check passed (200 OK)"

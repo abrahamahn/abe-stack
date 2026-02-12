@@ -11,7 +11,7 @@
  * @module middleware
  */
 
-import { ForbiddenError, UnauthorizedError } from '@abe-stack/shared';
+import { ForbiddenError, HTTP_STATUS, UnauthorizedError, extractBearerToken } from '@abe-stack/shared';
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
@@ -48,13 +48,10 @@ export function extractTokenPayload(
   secret: string,
   options?: { clockToleranceSeconds?: number },
 ): TokenPayload | null {
-  const authHeader = request.headers.authorization;
-  if (typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
+  const token = extractBearerToken(request.headers.authorization);
+  if (token == null) return null;
 
   try {
-    const token = authHeader.substring(7);
     return verifyToken(token, secret, options);
   } catch {
     return null;
@@ -77,7 +74,7 @@ export function createRequireAuth(secret: string) {
     const payload = extractTokenPayload(request, secret);
 
     if (payload == null) {
-      reply.status(401).send({ message: 'Unauthorized' });
+      reply.status(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Unauthorized' });
       return;
     }
 
@@ -98,12 +95,12 @@ export function createRequireRole(secret: string, ...allowedRoles: UserRole[]) {
     const payload = extractTokenPayload(request, secret);
 
     if (payload == null) {
-      void reply.status(401).send({ message: 'Unauthorized' });
+      void reply.status(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Unauthorized' });
       return;
     }
 
     if (!allowedRoles.includes(payload.role)) {
-      void reply.status(403).send({ message: 'Forbidden: insufficient permissions' });
+      void reply.status(HTTP_STATUS.FORBIDDEN).send({ message: 'Forbidden: insufficient permissions' });
       return;
     }
 

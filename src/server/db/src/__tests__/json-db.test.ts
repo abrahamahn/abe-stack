@@ -1,6 +1,6 @@
 // src/server/db/src/__tests__/json-db.test.ts
 
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, rmSync, writeSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -66,7 +66,9 @@ describe('JsonDatabase', () => {
       const existingData = {
         users: [{ id: '1', email: 'test@example.com' }],
       };
-      writeFileSync(filePath, JSON.stringify(existingData), { mode: 0o600 });
+      const fd1 = openSync(filePath, 'w', 0o600);
+      writeSync(fd1, JSON.stringify(existingData));
+      closeSync(fd1);
 
       const db = new JsonDatabase({ provider: 'json', filePath, persistOnWrite: false });
 
@@ -76,7 +78,9 @@ describe('JsonDatabase', () => {
     });
 
     test('should handle corrupted JSON file gracefully', () => {
-      writeFileSync(filePath, 'not valid json {{{', { mode: 0o600 });
+      const fd2 = openSync(filePath, 'w', 0o600);
+      writeSync(fd2, 'not valid json {{{');
+      closeSync(fd2);
 
       const db = new JsonDatabase({ provider: 'json', filePath, persistOnWrite: false });
 

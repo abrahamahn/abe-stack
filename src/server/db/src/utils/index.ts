@@ -21,3 +21,4 @@ export {
   OptimisticLockError,
   updateUserWithVersion,
 } from './optimistic-lock';
+export { buildCursorCondition, buildCursorResult, combineConditions } from './pagination';

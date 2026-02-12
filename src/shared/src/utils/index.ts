@@ -8,6 +8,10 @@ export * as Monitor from './monitor';
 export * as PubSub from './pubsub';
 export * as Search from './search';
 
+export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly, toISOStringOrNull } from './date';
+
+export { deepEqual } from './comparison';
+
 export {
   parseCookies,
   serializeCookie,
@@ -45,6 +49,18 @@ export {
   type PaginationOptions,
 } from './pagination';
 
+export {
+  formatKeyBinding,
+  isEditableElement,
+  isMac,
+  matchesAnyBinding,
+  matchesKeyBinding,
+  matchesModifiers,
+  parseKeyBinding,
+  type KeyModifiers,
+  type ParsedKeyBinding,
+} from './keyboard';
+
 export { createRateLimiter } from './rate-limit';
 
 export {
@@ -56,11 +72,14 @@ export {
   validateFileType,
 } from './storage';
 
+export { parseUserAgent, type ParsedUserAgent } from './user-agent';
+
 export {
   capitalize,
   countCharactersNoWhitespace,
   countWords,
   escapeHtml,
+  formatBytes,
   normalizeWhitespace,
   padLeft,
   slugify,

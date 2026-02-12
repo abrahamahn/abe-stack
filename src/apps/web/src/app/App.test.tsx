@@ -57,12 +57,9 @@ describe('App', () => {
       render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        // HomePage renders navigation links
+        // Left menu renders public navigation links when unauthenticated
         expect(document.querySelector('a[href="/"]')).toBeInTheDocument();
-        expect(document.querySelector('a[href="/settings"]')).toBeInTheDocument();
-        expect(document.querySelector('a[href="/dashboard"]')).toBeInTheDocument();
         expect(document.querySelector('a[href="/pricing"]')).toBeInTheDocument();
-        expect(document.querySelector('a[href="/admin"]')).toBeInTheDocument();
         expect(document.querySelector('a[href="/ui-library"]')).toBeInTheDocument();
       });
     });

@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@abe-stack/client-engine';
-import { tokenStore } from '@abe-stack/shared';
+import { MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
@@ -52,7 +52,7 @@ export function useRouteManifest(options: UseRouteManifestOptions = {}): UseRout
       return adminApi.getRouteManifest();
     },
     enabled: options.enabled !== false,
-    staleTime: 60000, // Route manifest rarely changes, 60s stale time
+    staleTime: MS_PER_MINUTE,
   });
 
   return {

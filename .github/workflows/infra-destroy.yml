@@ -51,8 +51,10 @@ jobs:
       # Configure cloud provider credentials
       - name: Configure DigitalOcean Credentials
         if: inputs.provider == 'digitalocean'
+        env:
+          DO_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
-          echo "DIGITALOCEAN_TOKEN=${{ secrets.DIGITALOCEAN_TOKEN }}" >> $GITHUB_ENV
+          echo "DIGITALOCEAN_TOKEN=$DO_TOKEN" >> $GITHUB_ENV
 
       - name: Authenticate to Google Cloud
         if: inputs.provider == 'gcp'
@@ -81,70 +83,99 @@ jobs:
         continue-on-error: true
 
       - name: Create Terraform Variables File
+        env:
+          ENVIRONMENT: ${{ inputs.environment || 'staging' }}
+          PROVIDER: ${{ inputs.provider }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          DO_REGION: ${{ vars.DO_REGION || 'nyc1' }}
+          DO_INSTANCE_SIZE: ${{ vars.DO_INSTANCE_SIZE || 's-1vcpu-1gb' }}
+          DO_ENABLE_MANAGED_DB: ${{ vars.DO_ENABLE_MANAGED_DB || 'false' }}
+          DO_DATABASE_SIZE: ${{ vars.DO_DATABASE_SIZE || 'db-s-1vcpu-1gb' }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION || 'us-central1' }}
+          GCP_ZONE: ${{ vars.GCP_ZONE || 'us-central1-a' }}
+          GCP_INSTANCE_SIZE: ${{ vars.GCP_INSTANCE_SIZE || 'e2-small' }}
+          GCP_ENABLE_MANAGED_DB: ${{ vars.GCP_ENABLE_MANAGED_DB || 'false' }}
+          GCP_DATABASE_SIZE: ${{ vars.GCP_DATABASE_SIZE || 'db-f1-micro' }}
+          GCP_DB_USERNAME: ${{ secrets.GCP_DB_USERNAME || 'abe_user' }}
+          GCP_DB_PASSWORD: ${{ secrets.GCP_DB_PASSWORD }}
         run: |
           cd infra/cloud
           cat > terraform.tfvars << EOF
           # Environment Configuration
-          environment = "${{ inputs.environment || 'staging' }}"
+          environment = "$ENVIRONMENT"
 
           # Domain Configuration
-          domain = "${{ secrets.DOMAIN }}"
+          domain = "$DOMAIN"
 
           # SSH Configuration
-          ssh_public_key = "${{ secrets.SSH_PUBLIC_KEY }}"
+          ssh_public_key = "$SSH_PUBLIC_KEY"
 
           # Provider-specific configuration
           EOF
 
-          if [ "${{ inputs.provider }}" = "digitalocean" ]; then
+          if [ "$PROVIDER" = "digitalocean" ]; then
             cat >> terraform.tfvars << EOF
-          region = "${{ vars.DO_REGION || 'nyc1' }}"
-          instance_size = "${{ vars.DO_INSTANCE_SIZE || 's-1vcpu-1gb' }}"
-          enable_managed_database = ${{ vars.DO_ENABLE_MANAGED_DB || 'false' }}
-          database_size = "${{ vars.DO_DATABASE_SIZE || 'db-s-1vcpu-1gb' }}"
+          region = "$DO_REGION"
+          instance_size = "$DO_INSTANCE_SIZE"
+          enable_managed_database = $DO_ENABLE_MANAGED_DB
+          database_size = "$DO_DATABASE_SIZE"
           EOF
-          elif [ "${{ inputs.provider }}" = "gcp" ]; then
+          elif [ "$PROVIDER" = "gcp" ]; then
             cat >> terraform.tfvars << EOF
-          project_id = "${{ vars.GCP_PROJECT_ID }}"
-          region = "${{ vars.GCP_REGION || 'us-central1' }}"
-          zone = "${{ vars.GCP_ZONE || 'us-central1-a' }}"
-          instance_size = "${{ vars.GCP_INSTANCE_SIZE || 'e2-small' }}"
-          enable_managed_database = ${{ vars.GCP_ENABLE_MANAGED_DB || 'false' }}
-          database_size = "${{ vars.GCP_DATABASE_SIZE || 'db-f1-micro' }}"
-          database_username = "${{ secrets.GCP_DB_USERNAME || 'abe_user' }}"
-          database_password = "${{ secrets.GCP_DB_PASSWORD }}"
+          project_id = "$GCP_PROJECT_ID"
+          region = "$GCP_REGION"
+          zone = "$GCP_ZONE"
+          instance_size = "$GCP_INSTANCE_SIZE"
+          enable_managed_database = $GCP_ENABLE_MANAGED_DB
+          database_size = "$GCP_DATABASE_SIZE"
+          database_username = "$GCP_DB_USERNAME"
+          database_password = "$GCP_DB_PASSWORD"
           EOF
           fi
 
       - name: Terraform Init
+        env:
+          PROVIDER: ${{ inputs.provider }}
         run: |
-          cd infra/cloud/${{ inputs.provider }}
+          cd "infra/cloud/$PROVIDER"
           terraform init
 
       - name: Terraform Plan Destroy
+        env:
+          PROVIDER: ${{ inputs.provider }}
         run: |
-          cd infra/cloud/${{ inputs.provider }}
+          cd "infra/cloud/$PROVIDER"
           terraform plan -destroy -var-file=../terraform.tfvars -out=tfplan-destroy
 
       - name: Terraform Destroy
+        env:
+          PROVIDER: ${{ inputs.provider }}
         run: |
-          cd infra/cloud/${{ inputs.provider }}
+          cd "infra/cloud/$PROVIDER"
           terraform apply -auto-approve tfplan-destroy
 
       - name: Clean up Deployment Artifacts
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          PROVIDER: ${{ inputs.provider }}
         run: |
           # Remove deployment info file if it exists
-          rm -f .deploy/${{ inputs.environment }}-${{ inputs.provider }}.json
+          rm -f ".deploy/${ENVIRONMENT}-${PROVIDER}.json"
 
           # Clean up terraform state artifacts
-          rm -rf infra/cloud/${{ inputs.provider }}/.terraform/
+          rm -rf "infra/cloud/${PROVIDER}/.terraform/"
 
       - name: Infrastructure Destruction Summary
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          PROVIDER: ${{ inputs.provider }}
         run: |
           echo "## 🗑️ Infrastructure Destroyed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** $ENVIRONMENT" >> $GITHUB_STEP_SUMMARY
+          echo "**Provider:** $PROVIDER" >> $GITHUB_STEP_SUMMARY
           echo "**Destroyed at:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "⚠️ **Important:** Make sure to:" >> $GITHUB_STEP_SUMMARY

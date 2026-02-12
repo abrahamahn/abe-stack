@@ -7,12 +7,7 @@
 
 import { promises as fs } from 'fs';
 
-/**
- * Maximum audio file size for full-file metadata parsing (200 MB).
- * Files larger than this threshold skip the full-buffer read to
- * prevent out-of-memory conditions; an empty metadata object is returned.
- */
-const MAX_AUDIO_FILE_SIZE = 200 * 1024 * 1024;
+import { MAX_AUDIO_FILE_SIZE } from './constants';
 
 export interface AudioMetadata {
   duration?: number;
@@ -31,12 +26,11 @@ export interface AudioMetadata {
  */
 export async function parseAudioMetadata(filePath: string): Promise<AudioMetadata> {
   try {
-    const fileStat = await fs.stat(filePath);
-    if (fileStat.size > MAX_AUDIO_FILE_SIZE) {
+    // Read file directly (avoids TOCTOU race from separate stat + readFile)
+    const buffer = await fs.readFile(filePath);
+    if (buffer.length > MAX_AUDIO_FILE_SIZE) {
       return {};
     }
-
-    const buffer = await fs.readFile(filePath);
     const metadata: AudioMetadata = {};
 
     // Detect format and parse accordingly

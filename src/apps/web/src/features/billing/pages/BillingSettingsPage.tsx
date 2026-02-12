@@ -32,7 +32,7 @@ import {
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { PaymentMethod } from '@abe-stack/shared';
+import type { PaymentMethod, SubscriptionStatus as SubscriptionStatusType } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================
@@ -124,7 +124,8 @@ export const BillingSettingsPage = (): ReactElement => {
   );
 
   // Determine if removal should be disabled
-  const hasActiveSubscription = subscription !== null && subscription.status !== 'canceled';
+  const CANCELED_STATUS: SubscriptionStatusType = 'canceled';
+  const hasActiveSubscription = subscription !== null && subscription.status !== CANCELED_STATUS;
 
   return (
     <PageContainer className="billing-settings-page">

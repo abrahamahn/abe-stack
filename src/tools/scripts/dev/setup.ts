@@ -19,7 +19,7 @@
 
 import { execSync, spawnSync } from 'child_process';
 import { randomFillSync } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { createInterface } from 'readline';
 
@@ -665,8 +665,14 @@ function writeFileAtomic(targetPath: string, content: string): void {
   const suffixBytes = new Uint8Array(4);
   randomFillSync(suffixBytes);
   const suffixHex = Buffer.from(suffixBytes).toString('hex');
-  const tempPath = resolve(directory, `.tmp-${process.pid}-${Date.now()}-${suffixHex}.env`);
-  writeFileSync(tempPath, content, { mode: 0o600 });
+  const tempPath = resolve(directory, `.tmp-${process.pid}-${suffixHex}.env`);
+  // Use openSync with mode to set permissions atomically (no brief window with default perms)
+  const fd = openSync(tempPath, 'w', 0o600);
+  try {
+    writeSync(fd, content);
+  } finally {
+    closeSync(fd);
+  }
   renameSync(tempPath, targetPath);
 }
 

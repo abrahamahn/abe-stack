@@ -45,7 +45,7 @@ function createWrapper(): (props: { children: ReactNode }) => ReactNode {
   const queryCache = new QueryCache();
 
   return (props: { children: ReactNode }) => {
-    return createElement(QueryCacheProvider, { cache: queryCache }, props.children);
+    return createElement(QueryCacheProvider, { cache: queryCache, children: props.children });
   };
 }
 
@@ -101,7 +101,9 @@ describe('useWorkspaceBilling', () => {
     });
 
     expect(result.current.subscription).toEqual(mockResponse.subscription);
-    expect(result.current.plan).toEqual(mockResponse.subscription.plan);
+    if (mockResponse.subscription !== null) {
+      expect(result.current.plan).toEqual(mockResponse.subscription.plan);
+    }
     expect(result.current.error).toBe(null);
   });
 
@@ -143,9 +145,13 @@ describe('useWorkspaceBilling', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+    // useQuery retries 3 times with exponential backoff (1s, 2s, 4s)
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 15000 },
+    );
 
     expect(result.current.subscription).toBe(null);
     expect(result.current.plan).toBe(null);

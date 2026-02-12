@@ -5,6 +5,7 @@
  * A timeline component that displays recent user activities.
  */
 
+import { formatTimeAgo, getActorTypeTone } from '@abe-stack/shared';
 import { Alert, Badge, EmptyState, Skeleton, Text } from '@abe-stack/ui';
 
 import { useActivities } from '../hooks';
@@ -25,33 +26,8 @@ export interface ActivityFeedProps {
 // Helpers
 // ============================================================================
 
-const ACTOR_TYPE_TONES: Record<string, 'info' | 'success' | 'warning'> = {
-  user: 'info',
-  system: 'warning',
-  api_key: 'success',
-};
-
-function formatTimeAgo(iso: string): string {
-  try {
-    const date = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffSecs = Math.floor(diffMs / 1000);
-    const diffMins = Math.floor(diffSecs / 60);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffDays > 0) return `${String(diffDays)}d ago`;
-    if (diffHours > 0) return `${String(diffHours)}h ago`;
-    if (diffMins > 0) return `${String(diffMins)}m ago`;
-    return 'just now';
-  } catch {
-    return iso;
-  }
-}
-
 function ActivityItem({ activity }: { activity: ActivityLocal }): ReactElement {
-  const actorTone = ACTOR_TYPE_TONES[activity.actorType] ?? 'info';
+  const actorTone = getActorTypeTone(activity.actorType);
 
   return (
     <div className="flex items-start gap-3 py-3 border-b border-border last:border-b-0">

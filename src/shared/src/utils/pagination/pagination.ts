@@ -37,6 +37,19 @@ export {
 export const sortOrderSchema = createEnumSchema(['asc', 'desc'] as const, 'sort order');
 
 // ============================================================================
+// Pagination Defaults
+// ============================================================================
+
+/** Default number of items per page */
+export const DEFAULT_PAGE_LIMIT = 50;
+
+/** Default sort order for pagination queries */
+export const DEFAULT_SORT_ORDER = 'desc' as const;
+
+/** Default sort field for pagination queries */
+export const DEFAULT_SORT_BY = 'createdAt';
+
+// ============================================================================
 // Errors
 // ============================================================================
 
@@ -104,14 +117,14 @@ export const paginationOptionsSchema: Schema<PaginationOptions> = createSchema((
     page = coerceNumber(obj['page'], 'page', { int: true, min: 1 });
   }
 
-  let limit = 50;
+  let limit = DEFAULT_PAGE_LIMIT;
   if (obj['limit'] !== undefined) {
     limit = coerceNumber(obj['limit'], 'limit', { int: true, min: 1, max: 1000 });
   }
 
   const sortBy = parseOptional(obj['sortBy'], (v) => parseString(v, 'sortBy'));
   const sortOrder =
-    obj['sortOrder'] !== undefined ? sortOrderSchema.parse(obj['sortOrder']) : ('desc' as const);
+    obj['sortOrder'] !== undefined ? sortOrderSchema.parse(obj['sortOrder']) : DEFAULT_SORT_ORDER;
 
   return { page, limit, sortBy, sortOrder };
 });
@@ -175,14 +188,14 @@ export const cursorPaginationOptionsSchema: Schema<CursorPaginationOptions> = cr
 
     const cursor = parseOptional(obj['cursor'], (v) => parseString(v, 'cursor'));
 
-    let limit = 50;
+    let limit = DEFAULT_PAGE_LIMIT;
     if (obj['limit'] !== undefined) {
       limit = coerceNumber(obj['limit'], 'limit', { int: true, min: 1, max: 1000 });
     }
 
     const sortBy = parseOptional(obj['sortBy'], (v) => parseString(v, 'sortBy'));
     const sortOrder =
-      obj['sortOrder'] !== undefined ? sortOrderSchema.parse(obj['sortOrder']) : ('desc' as const);
+      obj['sortOrder'] !== undefined ? sortOrderSchema.parse(obj['sortOrder']) : DEFAULT_SORT_ORDER;
 
     return { cursor, limit, sortBy, sortOrder };
   },

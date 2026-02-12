@@ -1,7 +1,10 @@
 // src/apps/web/src/features/settings/components/index.ts
 export { ApiKeysManagement, type ApiKeysManagementProps } from './ApiKeysManagement';
+export { ApiKeyScopeSelector, type ApiKeyScopeSelectorProps } from './ApiKeyScopeSelector';
 export { AvatarUpload, type AvatarUploadProps } from './AvatarUpload';
 export { ConsentPreferences } from './ConsentPreferences';
+export { CookieConsentBanner, type CookieConsentBannerProps } from './CookieConsentBanner';
+export { DataExportSection, type DataExportSectionProps } from './DataExportSection';
 export { EmailChangeForm, type EmailChangeFormProps } from './EmailChangeForm';
 export { ForgotPasswordShortcut, type ForgotPasswordShortcutProps } from './ForgotPasswordShortcut';
 export { OAuthConnectionsList, type OAuthConnectionsListProps } from './OAuthConnectionsList';
@@ -23,3 +26,4 @@ export { PreferencesSection, type PreferencesSectionProps } from './PreferencesS
 export { DataControlsSection, type DataControlsSectionProps } from './DataControlsSection';
 export { DevicesList } from './DevicesList';
 export { PhoneManagement } from './PhoneManagement';
+export { PasskeyManagement, type PasskeyManagementProps } from './PasskeyManagement';

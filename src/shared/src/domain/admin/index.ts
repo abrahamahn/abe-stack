@@ -6,6 +6,15 @@
  * @module Domain/Admin
  */
 
+export {
+  formatSecurityEventType,
+  getAppRoleLabel,
+  getAppRoleTone,
+  getSecuritySeverityTone,
+  getUserStatusLabel,
+  getUserStatusTone,
+} from './admin.display';
+
 export { adminContract } from './admin.contracts';
 
 export {

@@ -1,7 +1,19 @@
 // src/server/engine/src/mailer/smtp-client.test.ts
+import { delay } from '@abe-stack/shared';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SmtpClient } from './smtp-client';
+
+// Mock the shared delay function used for retry backoff
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...actual,
+    delay: vi.fn(() => Promise.resolve(undefined)),
+  };
+});
+
+const mockedDelay = vi.mocked(delay);
 
 describe('mailer/smtp-client', () => {
   it('returns success when connect/auth/send/quit succeed', async () => {
@@ -21,6 +33,7 @@ describe('mailer/smtp-client', () => {
   });
 
   it('retries transient errors and succeeds on a later attempt', async () => {
+    mockedDelay.mockClear();
     const client = new SmtpClient({ host: 'h', port: 587, secure: false });
     const anyClient = client as any;
     let attempt = 0;
@@ -33,25 +46,24 @@ describe('mailer/smtp-client', () => {
     anyClient.sendMessage = vi.fn(() => Promise.resolve('<msg@h>'));
     anyClient.quit = vi.fn(() => Promise.resolve(undefined));
     anyClient.cleanup = vi.fn(() => undefined);
-    anyClient.delay = vi.fn(() => Promise.resolve(undefined));
 
     const res = await client.send({ from: 'a@b.com', to: 'c@d.com', subject: 's', text: 't' });
     expect(res.success).toBe(true);
     expect(anyClient.connect).toHaveBeenCalledTimes(3);
-    expect(anyClient.delay).toHaveBeenCalledTimes(2);
+    expect(mockedDelay).toHaveBeenCalledTimes(2);
     expect(anyClient.cleanup).toHaveBeenCalledTimes(2);
   });
 
   it('does not retry non-transient errors', async () => {
+    mockedDelay.mockClear();
     const client = new SmtpClient({ host: 'h', port: 587, secure: false });
     const anyClient = client as any;
     anyClient.connect = vi.fn(() => Promise.reject(new Error('AUTH user failed: 535')));
     anyClient.cleanup = vi.fn(() => undefined);
-    anyClient.delay = vi.fn(() => Promise.resolve(undefined));
 
     const res = await client.send({ from: 'a@b.com', to: 'c@d.com', subject: 's', text: 't' });
     expect(res.success).toBe(false);
     expect(anyClient.connect).toHaveBeenCalledTimes(1);
-    expect(anyClient.delay).not.toHaveBeenCalled();
+    expect(mockedDelay).not.toHaveBeenCalled();
   });
 });

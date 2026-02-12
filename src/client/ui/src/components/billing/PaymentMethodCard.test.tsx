@@ -327,7 +327,7 @@ describe('PaymentMethodCard', () => {
 
       render(<PaymentMethodCard paymentMethod={paypalMethod} />);
 
-      expect(screen.getByText('Paypal')).toBeInTheDocument();
+      expect(screen.getByText('PayPal')).toBeInTheDocument();
       expect(screen.getByText('PP')).toBeInTheDocument();
     });
   });

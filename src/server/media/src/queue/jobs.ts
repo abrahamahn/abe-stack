@@ -9,6 +9,14 @@
  */
 
 import {
+  ALL_MEDIA_EXTENSIONS,
+  DEFAULT_CONCURRENCY,
+  DEFAULT_MAX_MEDIA_FILE_SIZE,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_PROCESSING_TIMEOUT_MS,
+  DEFAULT_RETRY_DELAY_MS,
+} from '../constants';
+import {
   ImageProcessor,
   AudioProcessor,
   VideoProcessor,
@@ -66,9 +74,9 @@ export class MediaProcessingQueue extends CustomJobQueue<MediaJobData> {
    */
   constructor(orchestrator: MediaProcessingOrchestrator, logger: Logger) {
     super({
-      concurrency: 3,
-      retryDelayMs: 1000,
-      maxRetries: 3,
+      concurrency: DEFAULT_CONCURRENCY,
+      retryDelayMs: DEFAULT_RETRY_DELAY_MS,
+      maxRetries: DEFAULT_MAX_RETRIES,
       logger,
     });
     this.orchestrator = orchestrator;
@@ -206,32 +214,10 @@ export function createMediaProcessingQueue(
     new AudioProcessor(),
     new VideoProcessor(),
     {
-      maxDuration: 5 * 60 * 1000, // 5 minutes
-      maxFileSize: 100 * 1024 * 1024, // 100MB
-      maxConcurrentJobs: 3,
-      allowedFormats: [
-        'jpg',
-        'jpeg',
-        'png',
-        'gif',
-        'webp',
-        'avif',
-        'tiff',
-        'bmp',
-        'mp3',
-        'wav',
-        'flac',
-        'aac',
-        'ogg',
-        'm4a',
-        'mp4',
-        'avi',
-        'mov',
-        'mkv',
-        'webm',
-        'flv',
-        'wmv',
-      ],
+      maxDuration: DEFAULT_PROCESSING_TIMEOUT_MS,
+      maxFileSize: DEFAULT_MAX_MEDIA_FILE_SIZE,
+      maxConcurrentJobs: DEFAULT_CONCURRENCY,
+      allowedFormats: [...ALL_MEDIA_EXTENSIONS],
       ...limits,
     },
     {

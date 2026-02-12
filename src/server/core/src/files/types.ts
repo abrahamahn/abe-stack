@@ -10,6 +10,8 @@
  * duplicate Logger and request interfaces across packages.
  */
 
+import { LIMITS } from '@abe-stack/shared';
+
 import type { FileRepository } from '@abe-stack/db';
 import type { BaseContext, HasStorage, RequestContext } from '@abe-stack/shared/core';
 
@@ -96,8 +98,8 @@ export type FileRequest = RequestContext;
 // Default Configuration
 // ============================================================================
 
-/** Default maximum file size: 10MB */
-export const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
+/** Default maximum file size: 10MB (from shared LIMITS) */
+export const DEFAULT_MAX_FILE_SIZE = LIMITS.MAX_FILE_SIZE;
 
 /** Default allowed MIME types for general file uploads */
 export const DEFAULT_ALLOWED_MIME_TYPES = [

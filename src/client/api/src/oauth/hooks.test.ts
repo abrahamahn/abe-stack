@@ -78,6 +78,13 @@ const createMockApiClient = (overrides?: Partial<ApiClient>): ApiClient => ({
   getOAuthLinkUrl: vi.fn(
     (provider: OAuthProvider) => `http://localhost/api/auth/oauth/${provider}/link`,
   ),
+  webauthnRegisterOptions: vi.fn(),
+  webauthnRegisterVerify: vi.fn(),
+  webauthnLoginOptions: vi.fn(),
+  webauthnLoginVerify: vi.fn(),
+  listPasskeys: vi.fn(),
+  renamePasskey: vi.fn(),
+  deletePasskey: vi.fn(),
   ...overrides,
 });
 

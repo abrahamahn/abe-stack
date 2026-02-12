@@ -6,6 +6,7 @@
  * Supports listing, creating, toggling, and deleting flags.
  */
 
+import { formatDate } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -32,18 +33,6 @@ import {
 } from '../hooks/useFeatureFlags';
 
 import type { ReactElement } from 'react';
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString();
-  } catch {
-    return iso;
-  }
-}
 
 // ============================================================================
 // Component

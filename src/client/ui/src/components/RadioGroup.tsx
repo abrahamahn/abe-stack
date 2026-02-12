@@ -107,42 +107,29 @@ export const RadioGroup = (props: RadioGroupProps): ReactElement => {
     // If focus is on a disabled item (which shouldn't happen easily with tab index), we might be in a weird state.
     // For now, let's proceed with finding the next/prev in the enabled list.
 
-    let nextIndex: number;
+    const computeNextIndex = (): number | undefined => {
+      switch (event.key) {
+        case 'ArrowDown':
+        case 'ArrowRight':
+          event.preventDefault();
+          return currentIndex === -1 ? 0 : (currentIndex + 1) % radios.length;
+        case 'ArrowUp':
+        case 'ArrowLeft':
+          event.preventDefault();
+          return currentIndex === -1 ? radios.length - 1 : (currentIndex - 1 + radios.length) % radios.length;
+        case 'Home':
+          event.preventDefault();
+          return 0;
+        case 'End':
+          event.preventDefault();
+          return radios.length - 1;
+        default:
+          return undefined;
+      }
+    };
 
-    switch (event.key) {
-      case 'ArrowDown':
-      case 'ArrowRight': {
-        event.preventDefault();
-        if (currentIndex === -1) {
-          nextIndex = 0;
-        } else {
-          nextIndex = (currentIndex + 1) % radios.length;
-        }
-        break;
-      }
-      case 'ArrowUp':
-      case 'ArrowLeft': {
-        event.preventDefault();
-        if (currentIndex === -1) {
-          nextIndex = radios.length - 1;
-        } else {
-          nextIndex = (currentIndex - 1 + radios.length) % radios.length;
-        }
-        break;
-      }
-      case 'Home': {
-        event.preventDefault();
-        nextIndex = 0;
-        break;
-      }
-      case 'End': {
-        event.preventDefault();
-        nextIndex = radios.length - 1;
-        break;
-      }
-      default:
-        return;
-    }
+    const nextIndex = computeNextIndex();
+    if (nextIndex === undefined) return;
 
     const nextRadio = radios[nextIndex];
     if (nextRadio != null) {

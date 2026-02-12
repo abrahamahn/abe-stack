@@ -261,29 +261,15 @@ export interface ConflictResult {
 }
 
 // ============================================================================
-// Error Messages
+// Realtime Domain Errors
 // ============================================================================
 
 /**
- * Build error message for disallowed table access.
- *
- * @param table - Table name that was not allowed
- * @returns Formatted error message
- * @complexity O(1)
+ * Domain-specific error messages for realtime operations.
+ * Generic errors (auth, internal) use `ERROR_CODES` from `@abe-stack/shared`.
  */
-function tableNotAllowedMessage(table: string): string {
-  return `Table '${table}' is not allowed for realtime operations`;
-}
-
-/**
- * Standardized error messages for realtime operations.
- *
- * @complexity O(1) constant access
- */
-export const ERROR_MESSAGES = {
-  AUTHENTICATION_REQUIRED: 'Authentication required',
+export const REALTIME_ERRORS = {
   AUTHOR_MISMATCH: 'Author ID must match authenticated user',
-  TABLE_NOT_ALLOWED: tableNotAllowedMessage,
-  INTERNAL_ERROR: 'Internal server error',
+  tableNotAllowed: (table: string) => `Table '${table}' is not allowed for realtime operations`,
   VERSION_CONFLICT: 'Version conflict: one or more records have been modified',
 } as const;

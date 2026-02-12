@@ -7,6 +7,19 @@
  * Maps to migration 0005_system.sql.
  */
 
+import {
+  AUDIT_CATEGORIES,
+  AUDIT_SEVERITIES,
+  WEBHOOK_DELIVERY_STATUSES,
+  type AuditCategory,
+  type AuditSeverity,
+  type WebhookDeliveryStatus,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES, WEBHOOK_DELIVERY_STATUSES };
+export type { AuditCategory, AuditSeverity, WebhookDeliveryStatus };
+
 // ============================================================================
 // Enums
 // ============================================================================
@@ -14,26 +27,8 @@
 /** Lifecycle states for a background job */
 export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'dead';
 
-/** All valid job statuses */
+/** All valid job statuses (DB-specific; differs from shared domain JOB_STATUSES) */
 export const JOB_STATUSES = ['pending', 'processing', 'completed', 'failed', 'dead'] as const;
-
-/** Categories for audit events */
-export type AuditCategory = 'security' | 'admin' | 'system' | 'billing';
-
-/** All valid audit categories */
-export const AUDIT_CATEGORIES = ['security', 'admin', 'system', 'billing'] as const;
-
-/** Severity levels for audit events */
-export type AuditSeverity = 'info' | 'warn' | 'error' | 'critical';
-
-/** All valid audit severities */
-export const AUDIT_SEVERITIES = ['info', 'warn', 'error', 'critical'] as const;
-
-/** Delivery states for webhook attempts */
-export type WebhookDeliveryStatus = 'pending' | 'delivered' | 'failed' | 'dead';
-
-/** All valid webhook delivery statuses */
-export const WEBHOOK_DELIVERY_STATUSES = ['pending', 'delivered', 'failed', 'dead'] as const;
 
 // ============================================================================
 // Table Names

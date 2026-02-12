@@ -9,6 +9,8 @@
 import { createConnection, type Socket } from 'node:net';
 import { connect as tlsConnect, type TLSSocket } from 'node:tls';
 
+import { delay, generateSecureId, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -50,15 +52,15 @@ export class SmtpClient {
 
   constructor(config: SmtpConfig) {
     this.config = {
-      connectionTimeout: 30000,
-      socketTimeout: 60000,
+      connectionTimeout: 30 * MS_PER_SECOND,
+      socketTimeout: MS_PER_MINUTE,
       ...config,
     };
   }
 
   async send(message: SmtpMessage): Promise<SmtpResult> {
     const maxRetries = 3;
-    const baseDelayMs = 1000;
+    const baseDelayMs = MS_PER_SECOND;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -93,7 +95,7 @@ export class SmtpClient {
 
         // Exponential backoff: 1s, 2s, 4s
         const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
-        await this.delay(delayMs);
+        await delay(delayMs);
       }
     }
 
@@ -104,9 +106,6 @@ export class SmtpClient {
     };
   }
 
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 
   private async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -223,7 +222,7 @@ export class SmtpClient {
   private async sendMessage(message: SmtpMessage): Promise<string> {
     const recipients = Array.isArray(message.to) ? message.to : [message.to];
     const timestamp = String(Date.now());
-    const randomPart = Math.random().toString(36).slice(2);
+    const randomPart = generateSecureId(12);
     const messageId = `<${timestamp}.${randomPart}@${this.config.host}>`;
 
     // MAIL FROM
@@ -261,7 +260,7 @@ export class SmtpClient {
   private buildMessage(message: SmtpMessage, messageId: string): string {
     const recipients = Array.isArray(message.to) ? message.to : [message.to];
     const boundaryTimestamp = String(Date.now());
-    const boundaryRandom = Math.random().toString(36).slice(2);
+    const boundaryRandom = generateSecureId(12);
     const boundary = `----=_Part_${boundaryTimestamp}_${boundaryRandom}`;
 
     let content = '';
@@ -319,7 +318,7 @@ export class SmtpClient {
   }
 
   private encodeQuotedPrintable(text: string): string {
-    return text
+    const encoded = text
       .split('')
       .map((char) => {
         const code = char.charCodeAt(0);
@@ -333,8 +332,15 @@ export class SmtpClient {
         }
         return `=${code.toString(16).toUpperCase().padStart(2, '0')}`;
       })
-      .join('')
-      .replace(/(.{75})/g, '$1=\r\n'); // Soft line breaks
+      .join('');
+
+    // Insert soft line breaks every 75 characters
+    let wrapped = '';
+    for (let i = 0; i < encoded.length; i += 75) {
+      if (i > 0) wrapped += '=\r\n';
+      wrapped += encoded.slice(i, i + 75);
+    }
+    return wrapped;
   }
 
   private extractEmail(address: string): string {

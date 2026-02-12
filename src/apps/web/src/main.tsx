@@ -8,6 +8,7 @@
  */
 
 import { QueryCache } from '@abe-stack/client-engine';
+import { MS_PER_DAY, MS_PER_MINUTE } from '@abe-stack/shared';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -27,8 +28,8 @@ import '@abe-stack/ui/styles/elements.css';
 // ============================================================================
 
 const queryCache = new QueryCache({
-  defaultStaleTime: 5 * 60 * 1000, // 5 minutes
-  defaultGcTime: 24 * 60 * 60 * 1000, // 24 hours - required for persistence
+  defaultStaleTime: 5 * MS_PER_MINUTE,
+  defaultGcTime: MS_PER_DAY,
   refetchOnWindowFocus: true,
   refetchOnReconnect: true,
 });

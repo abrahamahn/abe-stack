@@ -79,6 +79,31 @@ describe('Database Configuration', () => {
       if (config.provider !== 'postgresql') throw new Error('Expected postgresql');
       expect(config.connectionString).toBe('postgresql://remote-host:5432/remote-db');
     });
+
+    test('should set readReplicaConnectionString when DATABASE_READ_REPLICA_URL is provided', () => {
+      const config = loadDatabaseConfig({
+        DATABASE_READ_REPLICA_URL: 'postgresql://replica-host:5432/db',
+      } as unknown as FullEnv);
+
+      if (config.provider !== 'postgresql') throw new Error('Expected postgresql');
+      expect(config.readReplicaConnectionString).toBe('postgresql://replica-host:5432/db');
+    });
+
+    test('should not set readReplicaConnectionString when DATABASE_READ_REPLICA_URL is empty', () => {
+      const config = loadDatabaseConfig({
+        DATABASE_READ_REPLICA_URL: '',
+      } as unknown as FullEnv);
+
+      if (config.provider !== 'postgresql') throw new Error('Expected postgresql');
+      expect(config.readReplicaConnectionString).toBeUndefined();
+    });
+
+    test('should not set readReplicaConnectionString when DATABASE_READ_REPLICA_URL is undefined', () => {
+      const config = loadDatabaseConfig({} as unknown as FullEnv);
+
+      if (config.provider !== 'postgresql') throw new Error('Expected postgresql');
+      expect(config.readReplicaConnectionString).toBeUndefined();
+    });
   });
 
   describe('Connection String Utilities', () => {

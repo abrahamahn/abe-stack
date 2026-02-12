@@ -6,7 +6,7 @@
  * Displays toggle switches for different consent categories with descriptions.
  */
 
-import { Button, Card, Heading, Switch, Text } from '@abe-stack/ui';
+import { Alert, Button, Card, Heading, Switch, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useConsent, useUpdateConsent } from '../hooks/useConsent';
@@ -58,10 +58,8 @@ export const ConsentPreferences = (): ReactElement => {
   const { preferences, isLoading, error: fetchError, refetch } = useConsent();
   const { updateConsent, isUpdating, error: updateError } = useUpdateConsent();
 
-  // Local state for form values
   const [formValues, setFormValues] = useState<UpdateConsentInput>({});
 
-  // Compute current values (preferences from server or form state)
   const getCurrentValue = (key: ConsentCategory['key']): boolean => {
     if (formValues[key] !== undefined) {
       return formValues[key] ?? false;
@@ -79,9 +77,7 @@ export const ConsentPreferences = (): ReactElement => {
   const handleSave = async (): Promise<void> => {
     try {
       await updateConsent(formValues);
-      // Clear form state after successful save
       setFormValues({});
-      // Refetch to get the latest state
       await refetch();
     } catch {
       // Error is already stored in the hook
@@ -101,51 +97,31 @@ export const ConsentPreferences = (): ReactElement => {
 
   return (
     <Card className="p-4">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-lg)' }}>
+      <div className="flex flex-col gap-6">
         <div>
-          <Heading as="h3" size="md" style={{ marginBottom: 'var(--ui-gap-xs)' }}>
+          <Heading as="h4" size="sm" className="mb-1">
             Consent Preferences
           </Heading>
-          <Text tone="muted">Manage your data privacy and communication preferences.</Text>
+          <Text tone="muted" size="sm">
+            Manage your data privacy and communication preferences.
+          </Text>
         </div>
 
         {error !== null && (
-          <div
-            style={{
-              padding: 'var(--ui-gap-md)',
-              backgroundColor: 'var(--ui-alert-danger-bg)',
-              border: '1px solid var(--ui-alert-danger-border)',
-              borderRadius: 'var(--ui-radius-md)',
-            }}
-          >
-            <Text style={{ color: 'var(--ui-alert-danger-text)' }}>{error.message}</Text>
-          </div>
+          <Alert tone="danger" data-testid="consent-error">
+            {error.message}
+          </Alert>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--ui-gap-md)' }}>
+        <div className="flex flex-col gap-4">
           {CONSENT_CATEGORIES.map((category) => (
             <div
               key={category.key}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: 'var(--ui-gap-md)',
-                paddingBottom: 'var(--ui-gap-md)',
-                borderBottom: '1px solid var(--ui-color-border)',
-              }}
+              className="flex items-start justify-between gap-4 pb-4 border-b"
             >
-              <div style={{ flex: 1 }}>
+              <div className="flex-1">
                 <label htmlFor={`consent-${category.key}`}>
-                  <Text
-                    style={{
-                      display: 'block',
-                      fontWeight: 'var(--ui-font-weight-medium)',
-                      marginBottom: 'var(--ui-gap-xs)',
-                    }}
-                  >
-                    {category.label}
-                  </Text>
+                  <Text className="font-medium mb-1">{category.label}</Text>
                 </label>
                 <Text tone="muted" size="sm">
                   {category.description}
@@ -163,19 +139,13 @@ export const ConsentPreferences = (): ReactElement => {
           ))}
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            paddingTop: 'var(--ui-gap-md)',
-            borderTop: '1px solid var(--ui-color-border)',
-          }}
-        >
+        <div className="flex justify-end pt-4 border-t">
           <Button
             onClick={() => {
               void handleSave();
             }}
             disabled={!hasChanges || isUpdating}
+            data-testid="consent-save-button"
           >
             {isUpdating ? 'Saving...' : 'Save Preferences'}
           </Button>

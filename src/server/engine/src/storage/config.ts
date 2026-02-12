@@ -1,6 +1,9 @@
 // src/server/engine/src/storage/config.ts
 import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from './types';
 
+/** Default maximum file size for storage uploads (10MB) */
+export const DEFAULT_STORAGE_MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 /**
  * Load storage configuration from environment variables
  */
@@ -17,7 +20,7 @@ export function loadStorageConfig(): StorageConfig {
       secretAccessKey: process.env['S3_SECRET_ACCESS_KEY'] ?? '',
       forcePathStyle: process.env['S3_FORCE_PATH_STYLE'] === 'true',
       presignExpiresInSeconds: 3600,
-      maxFileSize: 10 * 1024 * 1024, // 10MB default
+      maxFileSize: DEFAULT_STORAGE_MAX_FILE_SIZE,
       allowedTypes: ['*'], // Allow all types by default
     };
     const endpoint = process.env['S3_ENDPOINT'];
@@ -30,7 +33,7 @@ export function loadStorageConfig(): StorageConfig {
   const localConfig: LocalStorageConfig = {
     provider: 'local',
     rootPath: process.env['STORAGE_ROOT_PATH'] ?? './storage',
-    maxFileSize: 10 * 1024 * 1024, // 10MB default
+    maxFileSize: DEFAULT_STORAGE_MAX_FILE_SIZE,
     allowedTypes: ['*'], // Allow all types by default
   };
   const publicBaseUrl = process.env['STORAGE_PUBLIC_BASE_URL'];

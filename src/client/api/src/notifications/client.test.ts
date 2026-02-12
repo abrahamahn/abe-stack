@@ -120,7 +120,9 @@ describe('Notification Client', () => {
       });
 
       const client = createClient('test-token');
-      const result = await client.unsubscribe({ subscriptionId: 'sub-123' });
+      const result = await client.unsubscribe({
+        subscriptionId: '550e8400-e29b-41d4-a716-446655440000',
+      });
 
       expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(

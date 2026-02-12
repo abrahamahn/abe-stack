@@ -8,7 +8,7 @@
  * @module billing/middleware
  */
 
-import { ForbiddenError } from '@abe-stack/shared';
+import { ERROR_MESSAGES, ForbiddenError } from '@abe-stack/shared';
 import { assertEntitled, resolveEntitlements } from '@abe-stack/shared/domain';
 
 import type { BillingRepositories } from './types';
@@ -62,7 +62,7 @@ export function requireEntitlement(
     const user = (request as FastifyRequest & { user?: { userId: string } }).user;
 
     if (user === undefined) {
-      throw new ForbiddenError('Authentication required', 'AUTH_REQUIRED');
+      throw new ForbiddenError(ERROR_MESSAGES.AUTHENTICATION_REQUIRED, 'AUTH_REQUIRED');
     }
 
     // Look up the user's active subscription

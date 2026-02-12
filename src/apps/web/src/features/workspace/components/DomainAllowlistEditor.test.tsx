@@ -22,10 +22,10 @@ afterEach(() => {
 // ============================================================================
 
 describe('DomainAllowlistEditor', () => {
-  let onChange: ReturnType<typeof vi.fn>;
+  let onChange: (domains: string[]) => void;
 
   beforeEach(() => {
-    onChange = vi.fn();
+    onChange = vi.fn<(domains: string[]) => void>();
   });
 
   it('should render with no domains', () => {

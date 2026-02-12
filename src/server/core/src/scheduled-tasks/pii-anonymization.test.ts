@@ -54,7 +54,7 @@ describe('anonymizeDeletedUsers', () => {
     const oldDeletedDate = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000); // 45 days ago
 
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [
+      data: [
         {
           id: 'user-1',
           email: 'user1@example.com',
@@ -64,7 +64,7 @@ describe('anonymizeDeletedUsers', () => {
           bio: 'Bio text',
           phone: '123-456-7890',
           avatarUrl: 'https://example.com/avatar.jpg',
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
       ],
       total: 1,
       page: 1,
@@ -91,12 +91,12 @@ describe('anonymizeDeletedUsers', () => {
     const recentDeletedDate = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); // 15 days ago
 
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [
+      data: [
         {
           id: 'user-1',
           email: 'user1@example.com',
           deletedAt: recentDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
       ],
       total: 1,
       page: 1,
@@ -116,12 +116,12 @@ describe('anonymizeDeletedUsers', () => {
     const oldDeletedDate = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000);
 
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [
+      data: [
         {
           id: 'user-1',
           email: 'deleted-abc123@anonymized.local',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
       ],
       total: 1,
       page: 1,
@@ -139,12 +139,12 @@ describe('anonymizeDeletedUsers', () => {
 
   it('should skip users without deletedAt', async () => {
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [
+      data: [
         {
           id: 'user-1',
           email: 'active@example.com',
           deletedAt: null,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
       ],
       total: 1,
       page: 1,
@@ -164,17 +164,17 @@ describe('anonymizeDeletedUsers', () => {
     const oldDeletedDate = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000);
 
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [
+      data: [
         {
           id: 'user-1',
           email: 'user1@example.com',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
         {
           id: 'user-2',
           email: 'user2@example.com',
           deletedAt: oldDeletedDate,
-        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { items: (infer T)[] } ? T : never : never,
+        } as unknown as Repositories['users'] extends { listWithFilters: (...args: unknown[]) => Promise<infer R> } ? R extends { data: (infer T)[] } ? T : never : never,
       ],
       total: 2,
       page: 1,
@@ -199,7 +199,7 @@ describe('anonymizeDeletedUsers', () => {
 
   it('should log when no users need anonymization', async () => {
     vi.mocked(repos.users.listWithFilters).mockResolvedValue({
-      items: [],
+      data: [],
       total: 0,
       page: 1,
       limit: 10000,

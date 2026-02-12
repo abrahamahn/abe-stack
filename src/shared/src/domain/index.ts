@@ -1,6 +1,8 @@
 // src/shared/src/domain/index.ts
 
 export {
+  getAuditActionTone,
+  getAuditSeverityTone,
   buildAuditEvent,
   sanitizeMetadata,
   AUDIT_ACTION_REGEX,
@@ -250,6 +252,8 @@ export {
 } from './feature-flags';
 
 export {
+  getJobStatusLabel,
+  getJobStatusTone,
   calculateBackoff,
   canRetry,
   isTerminalStatus,
@@ -268,6 +272,8 @@ export {
 } from './jobs';
 
 export {
+  getInvitationStatusTone,
+  getTenantRoleTone,
   canAcceptInvite,
   canAssignRole,
   canChangeRole,
@@ -296,6 +302,7 @@ export {
 } from './membership';
 
 export {
+  getNotificationLevelTone,
   shouldSendNotification,
   baseMarkAsReadRequestSchema,
   NOTIFICATION_TYPES,
@@ -489,6 +496,7 @@ export {
 } from './realtime';
 
 export {
+  getActorTypeTone,
   ACTOR_TYPES,
   activitySchema,
   actorTypeSchema,

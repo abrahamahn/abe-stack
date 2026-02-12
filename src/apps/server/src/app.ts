@@ -2,6 +2,7 @@
 
 import { verifyToken } from '@abe-stack/core/auth';
 import { requireValidSchema } from '@abe-stack/db';
+import { resolveTableName } from '@abe-stack/realtime';
 import { logStartupSummary } from '@abe-stack/server-engine';
 import { SubscriptionManager, createConsoleLogger } from '@abe-stack/shared';
 import { getWebSocketStats, registerWebSocket } from '@abe-stack/websocket';
@@ -110,7 +111,12 @@ export class App implements IServiceContainer {
     this.pubsub = new SubscriptionManager();
 
     // Initialize Infrastructure via Container
-    const infra = createInfrastructure(this.config, this.log);
+    // Wire pgPubSub → SubscriptionManager for cross-instance WebSocket notifications
+    const infra = createInfrastructure(this.config, this.log, {
+      onPubSubMessage: (key, version) => {
+        this.pubsub.publishLocal(key, version);
+      },
+    });
 
     // Assign Services (allow overrides from options for testing)
     this.db = options.db ?? infra.db;
@@ -127,6 +133,9 @@ export class App implements IServiceContainer {
     this.sms = infra.sms;
 
     this._pgPubSub = infra.pgPubSub;
+
+    // Enable cross-instance publishing via PostgresPubSub adapter
+    this.pubsub.setAdapter(this._pgPubSub);
   }
 
   async start(): Promise<void> {
@@ -149,7 +158,7 @@ export class App implements IServiceContainer {
       registerRoutes(this._server, this.context);
 
       // Register WebSocket support for realtime features
-      registerWebSocket(this._server, this.context, { verifyToken });
+      registerWebSocket(this._server, { ...this.context, resolveTableName }, { verifyToken });
 
       // Start background queue processing after routes are registered
       this.queue.start();

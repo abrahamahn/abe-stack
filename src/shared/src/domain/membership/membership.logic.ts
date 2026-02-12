@@ -56,7 +56,7 @@ export function hasAtLeastRole(
 // ============================================================================
 
 /** Numeric level for each role (ascending power). */
-const ROLE_LEVELS: Record<TenantRole, number> = {
+export const ROLE_LEVELS: Record<TenantRole, number> = {
   viewer: 1,
   member: 2,
   admin: 3,

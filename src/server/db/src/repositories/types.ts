@@ -3,33 +3,11 @@
  * Repository Types
  *
  * Common types used across all repositories.
+ * Pagination types are re-exported from @abe-stack/shared for DRY compliance.
  */
 
-/**
- * Pagination options for list queries
- */
-export interface PaginationOptions {
-  /** Maximum number of items to return */
-  limit?: number;
-  /** Cursor for pagination (typically the last item's ID or timestamp) */
-  cursor?: string;
-  /** Sort direction */
-  direction?: 'asc' | 'desc';
-  /** Column to sort by */
-  sortBy?: string;
-}
-
-/**
- * Paginated result
- */
-export interface PaginatedResult<T> {
-  /** Items in this page */
-  items: T[];
-  /** Cursor for the next page (null if no more pages) */
-  nextCursor: string | null;
-  /** Total count (optional, expensive to compute) */
-  totalCount?: number;
-}
+// Re-export pagination types from shared (replaces DB-local duplicates)
+export type { CursorPaginatedResult, CursorPaginationOptions } from '@abe-stack/shared';
 
 /**
  * Time range filter

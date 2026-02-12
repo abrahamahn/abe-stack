@@ -11,6 +11,8 @@
  * - Emits state change notifications
  */
 
+import { generateSecureId } from '@abe-stack/shared';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -426,7 +428,7 @@ export class UndoRedoStack<T = unknown> {
   }
 
   private generateId(): string {
-    return `${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`;
+    return `${String(Date.now())}-${generateSecureId(7)}`;
   }
 }
 

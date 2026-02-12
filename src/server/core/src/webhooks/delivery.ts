@@ -12,7 +12,9 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES } from './types';
+import { MS_PER_MINUTE } from '@abe-stack/shared';
+
+import { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, WEBHOOK_RESPONSE_MAX_LENGTH } from './types';
 
 import type { WebhookDispatchResult } from './types';
 import type { Repositories, WebhookDelivery } from '@abe-stack/db';
@@ -95,7 +97,7 @@ export function calculateRetryDelay(attemptNumber: number): number | null {
     return null;
   }
 
-  return delayMinutes * 60 * 1000;
+  return delayMinutes * MS_PER_MINUTE;
 }
 
 // ============================================================================
@@ -186,7 +188,7 @@ export async function recordDeliveryResult(
   if (isSuccess) {
     return repos.webhookDeliveries.update(deliveryId, {
       responseStatus,
-      responseBody: responseBody.slice(0, 4096),
+      responseBody: responseBody.slice(0, WEBHOOK_RESPONSE_MAX_LENGTH),
       status: 'delivered',
       attempts: newAttempts,
       deliveredAt: new Date(),
@@ -200,7 +202,7 @@ export async function recordDeliveryResult(
   if (retryDelay === null || newAttempts >= MAX_DELIVERY_ATTEMPTS) {
     return repos.webhookDeliveries.update(deliveryId, {
       responseStatus,
-      responseBody: responseBody.slice(0, 4096),
+      responseBody: responseBody.slice(0, WEBHOOK_RESPONSE_MAX_LENGTH),
       status: 'dead',
       attempts: newAttempts,
       nextRetryAt: null,
@@ -211,7 +213,7 @@ export async function recordDeliveryResult(
 
   return repos.webhookDeliveries.update(deliveryId, {
     responseStatus,
-    responseBody: responseBody.slice(0, 4096),
+    responseBody: responseBody.slice(0, WEBHOOK_RESPONSE_MAX_LENGTH),
     status: 'failed',
     attempts: newAttempts,
     nextRetryAt,

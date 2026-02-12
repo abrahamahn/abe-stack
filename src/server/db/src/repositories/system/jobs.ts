@@ -9,10 +9,13 @@
  */
 
 import { and, eq, rawCondition, select, insert, update, deleteFrom } from '../../builder/index';
-import { type Job, type NewJob, type UpdateJob, JOB_COLUMNS, JOBS_TABLE } from '../../schema/index';
+import { type Job, JOB_STATUSES, type NewJob, type UpdateJob, JOB_COLUMNS, JOBS_TABLE } from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { RawDb } from '../../client';
+
+/** Status value for pending jobs, sourced from schema constants */
+const PENDING_STATUS = JOB_STATUSES[0]; // 'pending'
 
 // ============================================================================
 // Job Repository Interface
@@ -139,7 +142,7 @@ export function createJobRepository(db: RawDb): JobRepository {
     async findPending(limit = 10): Promise<Job[]> {
       const results = await db.query(
         select(JOBS_TABLE)
-          .where(and(eq('status', 'pending'), rawCondition('"scheduled_at" <= NOW()')))
+          .where(and(eq('status', PENDING_STATUS), rawCondition('"scheduled_at" <= NOW()')))
           .orderBy('priority', 'desc')
           .limit(limit)
           .toSql(),

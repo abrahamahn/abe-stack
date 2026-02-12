@@ -52,6 +52,11 @@ export const Toast = ({ message, duration = 3500, onDismiss }: ToastProps): Reac
           <div className="toast-description">{message.description}</div>
         ) : null}
       </div>
+      {message.action != null ? (
+        <button type="button" className="toast-action" onClick={message.action.onClick}>
+          {message.action.label}
+        </button>
+      ) : null}
       {onDismiss !== undefined ? (
         <button
           type="button"

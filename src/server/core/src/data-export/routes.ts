@@ -30,8 +30,15 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): import('@abe-stack/server-engine').RouteDefinition {
-  return protectedRoute(method, handler as import('@abe-stack/server-engine').RouteHandler, 'user');
+  return protectedRoute(
+    method,
+    handler as import('@abe-stack/server-engine').RouteHandler,
+    'user',
+    undefined,
+    openapi,
+  );
 }
 
 // ============================================================================
@@ -47,8 +54,17 @@ function userRoute(
  */
 export const dataExportRoutes: RouteMap = createRouteMap([
   // Request a data export
-  ['users/me/export', userRoute('POST', handleRequestExport)],
+  [
+    'users/me/export',
+    userRoute('POST', handleRequestExport, { summary: 'Request data export', tags: ['Data Export'] }),
+  ],
 
   // Check export status
-  ['users/me/export/:id/status', userRoute('GET', handleGetExportStatus)],
+  [
+    'users/me/export/:id/status',
+    userRoute('GET', handleGetExportStatus, {
+      summary: 'Get export status',
+      tags: ['Data Export'],
+    }),
+  ],
 ]);

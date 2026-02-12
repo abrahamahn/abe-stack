@@ -31,13 +31,11 @@ describe('BasicSecurityScanner', () => {
     it('should return safe result for valid file', async () => {
       const fs = await import('fs');
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 1024 }),
         read: vi.fn().mockResolvedValue({ bytesRead: 100 }),
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: 1024,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -50,10 +48,13 @@ describe('BasicSecurityScanner', () => {
 
     it('should detect file size exceeding limit', async () => {
       const fs = await import('fs');
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 200 * 1024 * 1024 }),
+        read: vi.fn().mockResolvedValue({ bytesRead: 0 }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: 200 * 1024 * 1024, // 200MB
-      } as never);
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner({
         maxFileSize: 100 * 1024 * 1024,
@@ -67,10 +68,13 @@ describe('BasicSecurityScanner', () => {
 
     it('should detect empty file', async () => {
       const fs = await import('fs');
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 0 }),
+        read: vi.fn().mockResolvedValue({ bytesRead: 0 }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: 0,
-      } as never);
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
       const result = await scanner.scanFile('/empty-file.txt');
@@ -85,6 +89,7 @@ describe('BasicSecurityScanner', () => {
       const buffer = Buffer.from(maliciousContent);
 
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
         read: vi.fn().mockImplementation((buf: Buffer) => {
           buffer.copy(buf);
           return Promise.resolve({ bytesRead: buffer.length });
@@ -92,9 +97,6 @@ describe('BasicSecurityScanner', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: buffer.length,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -111,6 +113,7 @@ describe('BasicSecurityScanner', () => {
       const buffer = Buffer.from(phpContent);
 
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
         read: vi.fn().mockImplementation((buf: Buffer) => {
           buffer.copy(buf);
           return Promise.resolve({ bytesRead: buffer.length });
@@ -118,9 +121,6 @@ describe('BasicSecurityScanner', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: buffer.length,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -139,6 +139,7 @@ describe('BasicSecurityScanner', () => {
       }
 
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
         read: vi.fn().mockImplementation((buf: Buffer) => {
           buffer.copy(buf);
           return Promise.resolve({ bytesRead: buffer.length });
@@ -146,9 +147,6 @@ describe('BasicSecurityScanner', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: buffer.length,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -160,7 +158,7 @@ describe('BasicSecurityScanner', () => {
 
     it('should handle scan errors gracefully', async () => {
       const fs = await import('fs');
-      vi.mocked(fs.promises.stat).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fs.promises.open).mockRejectedValue(new Error('File not found'));
 
       const scanner = new BasicSecurityScanner();
       const result = await scanner.scanFile('/nonexistent.txt');
@@ -175,6 +173,7 @@ describe('BasicSecurityScanner', () => {
       const buffer = Buffer.from('Hello\x00World');
 
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
         read: vi.fn().mockImplementation((buf: Buffer) => {
           buffer.copy(buf);
           return Promise.resolve({ bytesRead: buffer.length });
@@ -182,9 +181,6 @@ describe('BasicSecurityScanner', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: buffer.length,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -203,6 +199,7 @@ describe('BasicSecurityScanner', () => {
       buffer[2] = 0xff;
 
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
         read: vi.fn().mockImplementation((buf: Buffer) => {
           buffer.copy(buf);
           return Promise.resolve({ bytesRead: buffer.length });
@@ -210,9 +207,6 @@ describe('BasicSecurityScanner', () => {
         close: vi.fn().mockResolvedValue(undefined),
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: buffer.length,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();
@@ -226,13 +220,11 @@ describe('BasicSecurityScanner', () => {
       const fs = await import('fs');
       const closeFn = vi.fn().mockResolvedValue(undefined);
       const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 1024 }),
         read: vi.fn().mockRejectedValue(new Error('Read error')),
         close: closeFn,
       };
 
-      vi.mocked(fs.promises.stat).mockResolvedValue({
-        size: 1024,
-      } as never);
       vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
 
       const scanner = new BasicSecurityScanner();

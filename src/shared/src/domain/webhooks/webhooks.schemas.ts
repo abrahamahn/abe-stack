@@ -30,6 +30,47 @@ import type { TenantId, WebhookDeliveryId, WebhookId } from '../../types/ids';
 /** All valid webhook delivery statuses */
 export const WEBHOOK_DELIVERY_STATUSES = ['pending', 'delivered', 'failed', 'dead'] as const;
 
+/**
+ * Event types that webhooks can subscribe to.
+ * Used to validate subscription requests and filter dispatches.
+ */
+export const WEBHOOK_EVENT_TYPES = {
+  USER_CREATED: 'user.created',
+  USER_UPDATED: 'user.updated',
+  USER_DELETED: 'user.deleted',
+  AUTH_LOGIN: 'auth.login',
+  AUTH_PASSWORD_CHANGED: 'auth.password_changed',
+  TENANT_CREATED: 'tenant.created',
+  TENANT_UPDATED: 'tenant.updated',
+  TENANT_DELETED: 'tenant.deleted',
+  MEMBER_ADDED: 'member.added',
+  MEMBER_REMOVED: 'member.removed',
+  MEMBER_ROLE_CHANGED: 'member.role_changed',
+  INVITATION_CREATED: 'invitation.created',
+  INVITATION_ACCEPTED: 'invitation.accepted',
+  INVITATION_REVOKED: 'invitation.revoked',
+  BILLING_SUBSCRIPTION_CREATED: 'billing.subscription.created',
+  BILLING_SUBSCRIPTION_UPDATED: 'billing.subscription.updated',
+  BILLING_SUBSCRIPTION_CANCELLED: 'billing.subscription.cancelled',
+  BILLING_PAYMENT_SUCCEEDED: 'billing.payment.succeeded',
+  BILLING_PAYMENT_FAILED: 'billing.payment.failed',
+} as const;
+
+/** All valid webhook event type values */
+export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[keyof typeof WEBHOOK_EVENT_TYPES];
+
+/** Array of all subscribable event types (for validation) */
+export const SUBSCRIBABLE_EVENT_TYPES: WebhookEventType[] = Object.values(WEBHOOK_EVENT_TYPES);
+
+/**
+ * Retry delay schedule in minutes.
+ * Exponential backoff: 1m, 5m, 30m, 2h (120m), 12h (720m).
+ */
+export const RETRY_DELAYS_MINUTES = [1, 5, 30, 120, 720] as const;
+
+/** Maximum number of delivery attempts before marking as dead */
+export const MAX_DELIVERY_ATTEMPTS = 5;
+
 /** Webhook delivery status union type */
 export type WebhookDeliveryStatus = (typeof WEBHOOK_DELIVERY_STATUSES)[number];
 

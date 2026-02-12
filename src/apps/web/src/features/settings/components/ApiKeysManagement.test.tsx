@@ -59,6 +59,22 @@ vi.mock('@abe-stack/ui', async () => {
         {children}
       </button>
     ),
+    Checkbox: ({
+      checked,
+      onChange,
+      label,
+      'data-testid': dataTestId,
+    }: {
+      checked?: boolean;
+      onChange?: () => void;
+      label?: ReactNode;
+      'data-testid'?: string;
+    }) => (
+      <label>
+        <input type="checkbox" checked={checked} onChange={onChange} data-testid={dataTestId} />
+        {label}
+      </label>
+    ),
     Heading: ({ children }: { children: ReactNode }) => <h3>{children}</h3>,
     Input: ({
       value,

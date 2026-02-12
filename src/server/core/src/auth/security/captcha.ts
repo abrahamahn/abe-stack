@@ -9,6 +9,8 @@
  * @module security/captcha
  */
 
+import { MS_PER_SECOND } from '@abe-stack/shared';
+
 import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
@@ -19,7 +21,7 @@ import type { AuthConfig } from '@abe-stack/shared/config';
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 /** Maximum time (ms) to wait for CAPTCHA verification response */
-const VERIFY_TIMEOUT_MS = 10_000;
+const VERIFY_TIMEOUT_MS = 10 * MS_PER_SECOND;
 
 // ============================================================================
 // Types

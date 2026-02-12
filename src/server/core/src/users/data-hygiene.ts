@@ -21,6 +21,7 @@ import {
   type DbClient,
   type User,
 } from '@abe-stack/db';
+import { RETENTION_PERIODS } from '@abe-stack/shared';
 
 import type { UsersLogger } from './types';
 
@@ -55,11 +56,9 @@ export function filterDeletedUsers<T extends Pick<User, 'deletedAt'>>(users: T[]
 // Hard-Delete Anonymized Users
 // ============================================================================
 
-/** Retention period in days after anonymization before hard-delete */
-const HARD_DELETE_RETENTION_DAYS = 30;
 
 /** Pattern matching anonymized email addresses (SHA-256 hex @ anonymized.local) */
-const ANONYMIZED_EMAIL_PATTERN = /^[a-f0-9]{64}@anonymized\.local$/;
+export const ANONYMIZED_EMAIL_PATTERN = /^[a-f0-9]{64}@anonymized\.local$/;
 
 /**
  * Result of hard-delete operation.
@@ -93,7 +92,7 @@ export interface HardDeleteResult {
 export async function hardDeleteAnonymizedUsers(
   db: DbClient,
   log: UsersLogger,
-  retentionDays: number = HARD_DELETE_RETENTION_DAYS,
+  retentionDays: number = RETENTION_PERIODS.HARD_DELETE_DAYS,
 ): Promise<HardDeleteResult> {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - retentionDays);

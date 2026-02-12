@@ -26,14 +26,19 @@ export {
   handleConfirmEmailChange,
   handleRevertEmailChange,
 } from './email-change';
-export {
-  handleSudoElevate,
-  verifySudoToken,
-  SUDO_TOKEN_HEADER,
-  SUDO_TOKEN_TTL_MINUTES,
-} from './sudo';
+export { handleSudoElevate, verifySudoToken, SUDO_TOKEN_TTL_MINUTES } from './sudo';
+export { SUDO_TOKEN_HEADER } from '@abe-stack/shared';
 export { handleAcceptTos, handleTosStatus } from './tos';
 export { handleListDevices, handleTrustDevice, handleRevokeDevice } from './devices';
 export { handleSetPhone, handleVerifyPhone, handleRemovePhone } from './phone';
 export { handleInvalidateSessions } from './invalidate-sessions';
 export { handleSendSmsCode, handleVerifySmsCode } from './sms-challenge';
+export {
+  handleDeletePasskey,
+  handleListPasskeys,
+  handleRenamePasskey,
+  handleWebauthnLoginOptions,
+  handleWebauthnLoginVerify,
+  handleWebauthnRegisterOptions,
+  handleWebauthnRegisterVerify,
+} from './webauthn';

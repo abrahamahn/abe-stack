@@ -1,5 +1,7 @@
 // src/shared/src/utils/http/http.ts
 
+import { isSafeObjectKey } from '../../core/guard';
+
 export interface CookieOptions {
   path?: string;
   domain?: string;
@@ -26,7 +28,6 @@ export interface CookieSerializeOptions extends CookieOptions {
  */
 export function parseCookies(cookieHeader: string | undefined | null): Record<string, string> {
   const cookies: Record<string, string> = Object.create(null) as Record<string, string>;
-  const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
 
   if (cookieHeader === undefined || cookieHeader === null || cookieHeader === '') {
     return cookies;
@@ -39,7 +40,7 @@ export function parseCookies(cookieHeader: string | undefined | null): Record<st
     if (eqIdx < 0) continue;
 
     const key = pair.slice(0, eqIdx).trim();
-    if (key === '' || blockedKeys.has(key.toLowerCase())) {
+    if (key === '' || !isSafeObjectKey(key.toLowerCase())) {
       continue;
     }
     let value = pair.slice(eqIdx + 1).trim();
@@ -49,15 +50,38 @@ export function parseCookies(cookieHeader: string | undefined | null): Record<st
       value = value.slice(1, -1);
     }
 
-    // Decode URI component
+    // Decode URI component, using defineProperty to prevent prototype pollution
+    let decoded: string;
     try {
-      cookies[key] = decodeURIComponent(value);
+      decoded = decodeURIComponent(value);
     } catch {
-      cookies[key] = value;
+      decoded = value;
     }
+    Object.defineProperty(cookies, key, {
+      value: decoded,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   return cookies;
+}
+
+/** Bearer auth scheme prefix */
+const BEARER_PREFIX = 'Bearer ';
+
+/**
+ * Extract a Bearer token from an Authorization header value.
+ * Returns undefined if the header is not a valid Bearer token.
+ *
+ * @param authHeader - The Authorization header value
+ * @returns The extracted token, or undefined if not a Bearer token
+ */
+export function extractBearerToken(authHeader: string | undefined): string | undefined {
+  if (authHeader?.startsWith(BEARER_PREFIX) !== true) return undefined;
+  const token = authHeader.slice(BEARER_PREFIX.length);
+  return token !== '' ? token : undefined;
 }
 
 /**

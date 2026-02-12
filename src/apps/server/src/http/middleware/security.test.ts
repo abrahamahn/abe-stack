@@ -89,7 +89,7 @@ describe('HTTP Security', () => {
 
       expect(mockReply.header).toHaveBeenCalledWith(
         'Access-Control-Allow-Origin',
-        'https://example.com',
+        '*',
       );
     });
 

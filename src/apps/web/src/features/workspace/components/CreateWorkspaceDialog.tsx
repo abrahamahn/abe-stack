@@ -5,6 +5,7 @@
  * Modal with name and slug form for creating a new workspace.
  */
 
+import { slugify } from '@abe-stack/shared';
 import { Alert, Button, FormField, Input, Modal, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
@@ -18,18 +19,6 @@ export interface CreateWorkspaceDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: (tenantId: string) => void;
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 63);
 }
 
 // ============================================================================
@@ -60,7 +49,7 @@ export const CreateWorkspaceDialog = ({
     const value = e.target.value;
     setName(value);
     if (!slugTouched) {
-      setSlug(generateSlug(value));
+      setSlug(slugify(value));
     }
   };
 

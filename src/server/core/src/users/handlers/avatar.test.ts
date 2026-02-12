@@ -161,6 +161,7 @@ function createMockRepos(): Repositories {
     consentLogs: {} as Repositories['consentLogs'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
+    webauthnCredentials: {} as Repositories['webauthnCredentials'],
     trustedDevices: {} as Repositories['trustedDevices'],
     files: {} as Repositories['files'],
   };

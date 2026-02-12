@@ -21,6 +21,7 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
+  RedisCacheConfig,
 } from '@abe-stack/shared';
 
 // Re-export eviction types from local LRU implementation

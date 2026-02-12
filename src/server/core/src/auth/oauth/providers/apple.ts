@@ -15,7 +15,7 @@
 
 import { createPrivateKey, createPublicKey, createVerify } from 'node:crypto';
 
-import { OAuthError } from '@abe-stack/shared';
+import { MS_PER_HOUR, OAuthError } from '@abe-stack/shared';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 
@@ -32,7 +32,7 @@ const APPLE_SCOPES = ['email', 'name'];
 
 // Cache for Apple's public keys (refreshed every hour)
 let appleKeysCache: { keys: AppleJWK[]; fetchedAt: number } | null = null;
-const KEYS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const KEYS_CACHE_TTL_MS = MS_PER_HOUR;
 
 // ============================================================================
 // Types

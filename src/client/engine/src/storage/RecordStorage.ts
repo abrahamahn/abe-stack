@@ -952,21 +952,13 @@ export function* iterateRecordMap<Tables extends string, R extends VersionedReco
 export function createRecordMap<Tables extends string, R extends VersionedRecord>(
   records: Array<RecordWithTable<Tables, R>>,
 ): RecordMap<Tables, R> {
-  const map: RecordMap<Tables, R> = {};
+  // Use null-prototype object to prevent prototype pollution
+  const map = Object.create(null) as RecordMap<Tables, R>;
 
   for (const { table, id, record } of records) {
-    if (
-      table === '__proto__' ||
-      table === 'constructor' ||
-      table === 'prototype' ||
-      id === '__proto__' ||
-      id === 'constructor' ||
-      id === 'prototype'
-    ) {
-      continue;
-    }
-    if (map[table] === undefined) {
-      (map as Record<Tables, Record<string, R>>)[table] = {};
+    if (!Object.hasOwn(map, table)) {
+      const tableMap = Object.create(null) as Record<string, R>;
+      (map as Record<Tables, Record<string, R>>)[table] = tableMap;
     }
     (map[table] as Record<string, R>)[id] = record;
   }

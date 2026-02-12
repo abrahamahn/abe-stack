@@ -6,6 +6,7 @@
  * mark-as-read and mark-all-read actions.
  */
 
+import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { Button, EmptyState, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import type { Notification } from '@abe-stack/shared';
@@ -22,6 +23,7 @@ export interface NotificationDropdownProps {
   onMarkAllAsRead: () => void;
   onDelete: (id: string) => void;
   onClose: () => void;
+  onNotificationClick?: (notification: Notification) => void;
   className?: string;
 }
 
@@ -40,7 +42,7 @@ function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
+  const diffMin = Math.floor(diffMs / MS_PER_MINUTE);
 
   if (diffMin < 1) return 'Just now';
   if (diffMin < 60) return `${String(diffMin)}m ago`;
@@ -65,6 +67,7 @@ export function NotificationDropdown({
   onMarkAllAsRead,
   onDelete,
   onClose,
+  onNotificationClick,
   className,
 }: NotificationDropdownProps): ReactElement {
   const hasUnread = notifications.some((n) => !n.isRead);
@@ -148,12 +151,20 @@ export function NotificationDropdown({
               if (!notification.isRead) {
                 onMarkAsRead([notification.id]);
               }
+              if (onNotificationClick !== undefined) {
+                onNotificationClick(notification);
+              }
             }}
             role="button"
             tabIndex={0}
             onKeyDown={(e): void => {
-              if (e.key === 'Enter' && !notification.isRead) {
-                onMarkAsRead([notification.id]);
+              if (e.key === 'Enter') {
+                if (!notification.isRead) {
+                  onMarkAsRead([notification.id]);
+                }
+                if (onNotificationClick !== undefined) {
+                  onNotificationClick(notification);
+                }
               }
             }}
           >

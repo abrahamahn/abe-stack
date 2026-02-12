@@ -10,6 +10,8 @@
 
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
+import { MS_PER_HOUR } from '@abe-stack/shared';
+
 import { getProviderClient } from './service';
 
 import type { OAuthProviderClient } from './types';
@@ -21,7 +23,7 @@ import type { AuthConfig } from '@abe-stack/shared/config';
 // ============================================================================
 
 /** Refresh tokens expiring within this window (in milliseconds) */
-const REFRESH_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const REFRESH_WINDOW_MS = MS_PER_HOUR;
 
 // ============================================================================
 // Token Encryption (mirrors service.ts)

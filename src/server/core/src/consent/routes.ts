@@ -30,8 +30,15 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): import('@abe-stack/server-engine').RouteDefinition {
-  return protectedRoute(method, handler as import('@abe-stack/server-engine').RouteHandler, 'user');
+  return protectedRoute(
+    method,
+    handler as import('@abe-stack/server-engine').RouteHandler,
+    'user',
+    undefined,
+    openapi,
+  );
 }
 
 // ============================================================================
@@ -47,8 +54,17 @@ function userRoute(
  */
 export const consentRoutes: RouteMap = createRouteMap([
   // Get current consent preferences
-  ['users/me/consent', userRoute('GET', handleGetConsent)],
+  [
+    'users/me/consent',
+    userRoute('GET', handleGetConsent, { summary: 'Get consent preferences', tags: ['Consent'] }),
+  ],
 
   // Update consent preferences
-  ['users/me/consent/update', userRoute('PATCH', handleUpdateConsent)],
+  [
+    'users/me/consent/update',
+    userRoute('PATCH', handleUpdateConsent, {
+      summary: 'Update consent preferences',
+      tags: ['Consent'],
+    }),
+  ],
 ]);

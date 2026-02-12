@@ -7,7 +7,7 @@
  */
 
 import { getApiClient, NetworkError } from '@abe-stack/api';
-import { tokenStore } from '@abe-stack/shared';
+import { MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
 import { createAuthRoute, type AuthRouteClient } from '@api/auth/route';
 
 import type { ClientConfig } from '@/config';
@@ -95,7 +95,7 @@ function isSmsChallengeResponse(response: LoginResponse): response is SmsLoginCh
 // ============================================================================
 
 // Maximum backoff delay for token refresh (5 minutes)
-const MAX_REFRESH_BACKOFF_MS = 5 * 60 * 1000;
+const MAX_REFRESH_BACKOFF_MS = 5 * MS_PER_MINUTE;
 const REQUEST_TIMEOUT_MS = 8000;
 
 // Type guard for User

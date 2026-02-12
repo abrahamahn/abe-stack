@@ -52,8 +52,9 @@ function adminProtectedRoute(
     reply: FastifyReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): RouteDefinition {
-  return protectedRoute(method, handler as unknown as RouteHandler, 'admin', schema);
+  return protectedRoute(method, handler as unknown as RouteHandler, 'admin', schema, openapi);
 }
 
 /**
@@ -68,8 +69,9 @@ function userProtectedRoute(
     reply: FastifyReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
+  openapi?: import('@abe-stack/server-engine').RouteOpenApiMeta,
 ): RouteDefinition {
-  return protectedRoute(method, handler as unknown as RouteHandler, 'user', schema);
+  return protectedRoute(method, handler as unknown as RouteHandler, 'user', schema, openapi);
 }
 
 // ============================================================================
@@ -97,16 +99,40 @@ export const featureFlagRoutes: RouteMap = createRouteMap([
   // ============================================================================
 
   // List all feature flags
-  ['admin/feature-flags', adminProtectedRoute('GET', handleListFlags)],
+  [
+    'admin/feature-flags',
+    adminProtectedRoute('GET', handleListFlags, undefined, {
+      summary: 'List feature flags',
+      tags: ['Feature Flags', 'Admin'],
+    }),
+  ],
 
   // Create a new feature flag
-  ['admin/feature-flags/create', adminProtectedRoute('POST', handleCreateFlag)],
+  [
+    'admin/feature-flags/create',
+    adminProtectedRoute('POST', handleCreateFlag, undefined, {
+      summary: 'Create feature flag',
+      tags: ['Feature Flags', 'Admin'],
+    }),
+  ],
 
   // Update a feature flag by key
-  ['admin/feature-flags/:key/update', adminProtectedRoute('POST', handleUpdateFlag)],
+  [
+    'admin/feature-flags/:key/update',
+    adminProtectedRoute('POST', handleUpdateFlag, undefined, {
+      summary: 'Update feature flag',
+      tags: ['Feature Flags', 'Admin'],
+    }),
+  ],
 
   // Delete a feature flag by key
-  ['admin/feature-flags/:key/delete', adminProtectedRoute('POST', handleDeleteFlag)],
+  [
+    'admin/feature-flags/:key/delete',
+    adminProtectedRoute('POST', handleDeleteFlag, undefined, {
+      summary: 'Delete feature flag',
+      tags: ['Feature Flags', 'Admin'],
+    }),
+  ],
 
   // ============================================================================
   // Admin Tenant Override CRUD
@@ -115,19 +141,28 @@ export const featureFlagRoutes: RouteMap = createRouteMap([
   // List overrides for a tenant
   [
     'admin/tenants/:tenantId/feature-overrides',
-    adminProtectedRoute('GET', handleListTenantOverrides),
+    adminProtectedRoute('GET', handleListTenantOverrides, undefined, {
+      summary: 'List tenant feature overrides',
+      tags: ['Feature Flags', 'Admin'],
+    }),
   ],
 
   // Set (upsert) a tenant override
   [
     'admin/tenants/:tenantId/feature-overrides/:key',
-    adminProtectedRoute('PUT', handleSetTenantOverride),
+    adminProtectedRoute('PUT', handleSetTenantOverride, undefined, {
+      summary: 'Set tenant feature override',
+      tags: ['Feature Flags', 'Admin'],
+    }),
   ],
 
   // Delete a tenant override
   [
     'admin/tenants/:tenantId/feature-overrides/:key/delete',
-    adminProtectedRoute('POST', handleDeleteTenantOverride),
+    adminProtectedRoute('POST', handleDeleteTenantOverride, undefined, {
+      summary: 'Delete tenant feature override',
+      tags: ['Feature Flags', 'Admin'],
+    }),
   ],
 
   // ============================================================================
@@ -135,5 +170,11 @@ export const featureFlagRoutes: RouteMap = createRouteMap([
   // ============================================================================
 
   // Evaluate all flags for the current user
-  ['feature-flags/evaluate', userProtectedRoute('GET', handleEvaluateFlags)],
+  [
+    'feature-flags/evaluate',
+    userProtectedRoute('GET', handleEvaluateFlags, undefined, {
+      summary: 'Evaluate feature flags',
+      tags: ['Feature Flags'],
+    }),
+  ],
 ]);

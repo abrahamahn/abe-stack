@@ -43,6 +43,13 @@ const emailTemplates = {
         text: `Email changed to ${newEmail} from IP ${ipAddress} using ${userAgent} at ${timestamp.toISOString()}.`,
       }),
     ),
+  securityNotification: vi
+    .fn()
+    .mockImplementation((type: string, details: string) => ({
+      subject: `Security Alert: ${type}`,
+      html: `<p>${details}</p>`,
+      text: details,
+    })),
 };
 
 import {

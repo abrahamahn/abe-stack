@@ -8,6 +8,8 @@
  * @module config/auth-helpers
  */
 
+import { MS_PER_DAY } from '../utils/constants/time';
+
 import type { AuthConfig, AuthStrategy } from './types/index';
 
 /**
@@ -29,7 +31,7 @@ export function getRefreshCookieOptions(config: AuthConfig): {
     secure: config.cookie.secure,
     sameSite: config.cookie.sameSite,
     path: config.cookie.path,
-    maxAge: config.refreshToken.expiryDays * 24 * 60 * 60 * 1000,
+    maxAge: config.refreshToken.expiryDays * MS_PER_DAY,
   };
 }
 

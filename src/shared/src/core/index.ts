@@ -19,7 +19,7 @@ export {
   type SuccessResponse,
 } from './api';
 
-export { ERROR_CODES, HTTP_STATUS, type ErrorCode, type HttpStatusCode } from './constants';
+export { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS, type ErrorCode, type HttpStatusCode } from './constants';
 
 export {
   type AuthenticatedUser,
@@ -84,10 +84,12 @@ export {
   assert,
   assertDefined,
   assertNever,
+  isAuthenticatedRequest,
   isNonEmptyString,
   isNumber,
   isObjectLike,
   isPlainObject,
+  isSafeObjectKey,
   isString,
 } from './guard';
 

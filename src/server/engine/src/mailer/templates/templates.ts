@@ -532,6 +532,50 @@ If you have any questions, reply to this email. We're happy to help.
    * Workspace invitation email
    * Sent when a user is invited to join a workspace.
    */
+  /**
+   * Generic security notification email
+   * Used for: password changed from new device, 2FA disabled, new device login, etc.
+   */
+  securityNotification(
+    type: string,
+    details: string,
+    actionUrl: string,
+  ): EmailOptions & { to: '' } {
+    return {
+      to: '',
+      subject: `Security Alert: ${type}`,
+      text: `
+Security Alert: ${type}
+
+${details}
+
+If this was you, no action is needed.
+
+If you did not perform this action, please secure your account immediately:
+${actionUrl}
+      `.trim(),
+      html: renderLayout(
+        'Security Alert',
+        `
+        <h2 style="${styles.heading}">Security Alert: ${type}</h2>
+        <p style="${styles.text}">${details}</p>
+
+        <div style="background-color: #fef3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <p style="color: #856404; margin: 0;">If this was you, no action is needed.</p>
+        </div>
+
+        <p style="${styles.alert}">If you did not perform this action, please secure your account immediately:</p>
+        <p>
+          <a href="${actionUrl}" style="${styles.button}">
+            Secure My Account
+          </a>
+        </p>
+        <p style="${styles.footer}">If you need help, please contact our support team.</p>
+        `,
+      ),
+    };
+  },
+
   workspaceInvitation(
     acceptUrl: string,
     workspaceName: string,

@@ -6,6 +6,7 @@
  * and specialized queries for expiring/past-due subscriptions.
  */
 
+import { encodeCursor, MS_PER_DAY } from '@abe-stack/shared';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createSubscriptionRepository } from './subscriptions';
@@ -256,7 +257,7 @@ describe('createSubscriptionRepository', () => {
       const repo = createSubscriptionRepository(mockDb);
       const result = await repo.list();
 
-      expect(result.items).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.nextCursor).toBeNull();
     });
 
@@ -358,9 +359,12 @@ describe('createSubscriptionRepository', () => {
       vi.mocked(mockDb.query).mockResolvedValue(subscriptions);
 
       const repo = createSubscriptionRepository(mockDb);
-      const cursorDate: string = mockSubscription.createdAt.toISOString();
-      const cursor = `${cursorDate}_sub-000`;
-      await repo.list({}, { cursor, direction: 'desc', limit: 20 });
+      const cursor = encodeCursor({
+        value: mockSubscription.createdAt,
+        tieBreaker: 'sub-000',
+        sortOrder: 'desc',
+      });
+      await repo.list({}, { cursor, sortOrder: 'desc', limit: 20 });
 
       expect(mockDb.query).toHaveBeenCalled();
     });
@@ -370,9 +374,12 @@ describe('createSubscriptionRepository', () => {
       vi.mocked(mockDb.query).mockResolvedValue(subscriptions);
 
       const repo = createSubscriptionRepository(mockDb);
-      const cursorDate: string = mockSubscription.createdAt.toISOString();
-      const cursor = `${cursorDate}_sub-000`;
-      await repo.list({}, { cursor, direction: 'asc', limit: 20 });
+      const cursor = encodeCursor({
+        value: mockSubscription.createdAt,
+        tieBreaker: 'sub-000',
+        sortOrder: 'asc',
+      });
+      await repo.list({}, { cursor, sortOrder: 'asc', limit: 20 });
 
       expect(mockDb.query).toHaveBeenCalled();
     });
@@ -405,8 +412,9 @@ describe('createSubscriptionRepository', () => {
       const repo = createSubscriptionRepository(mockDb);
       const result = await repo.list({}, { limit: 20 });
 
-      expect(result.items).toHaveLength(20);
+      expect(result.data).toHaveLength(20);
       expect(result.nextCursor).not.toBeNull();
+      expect(result.hasNext).toBe(true);
     });
 
     it('should return null cursor when no more items', async () => {
@@ -416,6 +424,7 @@ describe('createSubscriptionRepository', () => {
       const result = await repo.list({}, { limit: 20 });
 
       expect(result.nextCursor).toBeNull();
+      expect(result.hasNext).toBe(false);
     });
 
     it('should generate cursor from last item', async () => {
@@ -431,7 +440,9 @@ describe('createSubscriptionRepository', () => {
       const repo = createSubscriptionRepository(mockDb);
       const result = await repo.list({}, { limit: 20 });
 
-      expect(result.nextCursor).toBe('2024-01-15T12:00:00.000Z_sub-last');
+      // Cursor is now base64url-encoded via shared's encodeCursor
+      expect(result.nextCursor).toBeTruthy();
+      expect(result.hasNext).toBe(true);
     });
 
     it('should request limit + 1 items to detect hasMore', async () => {
@@ -727,7 +738,7 @@ describe('createSubscriptionRepository', () => {
     it('should return subscriptions expiring within specified days', async () => {
       const expiringSub = {
         ...mockDbRow,
-        current_period_end: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+        current_period_end: new Date(Date.now() + 5 * MS_PER_DAY),
         status: 'active',
       };
       vi.mocked(mockDb.query).mockResolvedValue([expiringSub]);
@@ -760,7 +771,7 @@ describe('createSubscriptionRepository', () => {
       const trialingSub = {
         ...mockDbRow,
         status: 'trialing',
-        current_period_end: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        current_period_end: new Date(Date.now() + 3 * MS_PER_DAY),
       };
       vi.mocked(mockDb.query).mockResolvedValue([trialingSub]);
 

@@ -7,7 +7,7 @@
  * @module handlers/email-change
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import {
   confirmEmailChange,
@@ -41,7 +41,7 @@ export async function handleChangeEmail(
   try {
     const userId = request.user?.userId;
     if (userId === undefined) {
-      return { status: 401, body: { message: 'Authentication required' } };
+      return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.AUTHENTICATION_REQUIRED } };
     }
 
     await assertUserActive((id) => ctx.repos.users.findById(id), userId);
@@ -59,7 +59,7 @@ export async function handleChangeEmail(
       ctx.log,
     );
 
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -106,7 +106,7 @@ export async function handleConfirmEmailChange(
       ctx.log.warn({ err, previousEmail }, 'Failed to send email changed alert');
     });
 
-    return { status: 200, body: response };
+    return { status: HTTP_STATUS.OK, body: response };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }
@@ -121,7 +121,7 @@ export async function handleRevertEmailChange(
 ): Promise<{ status: 200; body: RevertEmailChangeResponse } | HttpErrorResponse> {
   try {
     const result = await revertEmailChange(ctx.db, ctx.repos, body.token);
-    return { status: 200, body: result };
+    return { status: HTTP_STATUS.OK, body: result };
   } catch (error) {
     return mapErrorToHttpResponse(error, createErrorMapperLogger(ctx.log));
   }

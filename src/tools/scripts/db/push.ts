@@ -64,7 +64,7 @@ const STATEMENTS: string[] = [
     ALTER COLUMN canonical_email SET NOT NULL;
   `,
   `
-  -- Patch forward: Add specific profile columns if they are missing from an older dev DB.
+  -- Patch forward: Add columns from later migrations if missing from an older dev DB.
   ALTER TABLE users
     ADD COLUMN IF NOT EXISTS username text UNIQUE,
     ADD COLUMN IF NOT EXISTS first_name text,
@@ -78,7 +78,13 @@ const STATEMENTS: string[] = [
     ADD COLUMN IF NOT EXISTS country text,
     ADD COLUMN IF NOT EXISTS bio text,
     ADD COLUMN IF NOT EXISTS language text,
-    ADD COLUMN IF NOT EXISTS website text;
+    ADD COLUMN IF NOT EXISTS website text,
+    ADD COLUMN IF NOT EXISTS last_username_change timestamptz,
+    ADD COLUMN IF NOT EXISTS deactivated_at timestamptz,
+    ADD COLUMN IF NOT EXISTS deleted_at timestamptz,
+    ADD COLUMN IF NOT EXISTS deletion_grace_period_ends timestamptz,
+    ADD COLUMN IF NOT EXISTS lock_reason text,
+    ADD COLUMN IF NOT EXISTS token_version integer NOT NULL DEFAULT 0;
   `,
   `
   CREATE TABLE IF NOT EXISTS refresh_token_families (
@@ -583,6 +589,40 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_jobs_status_priority_created ON jobs (status, priority DESC, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_tenant_created ON audit_events (tenant_id, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_resource ON audit_events (resource, resource_id);`,
+  // Tenant domain restrictions (migration 0021)
+  `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS allowed_email_domains TEXT[] NOT NULL DEFAULT '{}';`,
+  // SMS verification codes (migration 0023)
+  `
+  CREATE TABLE IF NOT EXISTS sms_verification_codes (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    phone text NOT NULL,
+    code text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    verified boolean NOT NULL DEFAULT false,
+    attempts integer NOT NULL DEFAULT 0,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );
+  `,
+  `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_user_id ON sms_verification_codes(user_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_expires_at ON sms_verification_codes(expires_at);`,
+  // Trusted devices (migration 0025)
+  `
+  CREATE TABLE IF NOT EXISTS trusted_devices (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    device_fingerprint text NOT NULL,
+    label text,
+    ip_address text,
+    user_agent text,
+    first_seen_at timestamptz NOT NULL DEFAULT now(),
+    last_seen_at timestamptz NOT NULL DEFAULT now(),
+    trusted_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(user_id, device_fingerprint)
+  );
+  `,
+  `CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);`,
 ];
 
 /**

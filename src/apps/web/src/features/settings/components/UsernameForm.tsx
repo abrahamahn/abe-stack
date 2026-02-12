@@ -6,7 +6,7 @@
  * reserved word checking, and 30-day cooldown display.
  */
 
-import { RESERVED_USERNAMES, USERNAME_CHANGE_COOLDOWN_DAYS } from '@abe-stack/shared';
+import { MS_PER_DAY, RESERVED_USERNAMES, USERNAME_CHANGE_COOLDOWN_DAYS } from '@abe-stack/shared';
 import { Alert, Button, FormField, Input, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
@@ -54,7 +54,7 @@ function getCooldownInfo(lastChangeAt: string | null | undefined): {
   }
   const lastChange = new Date(lastChangeAt);
   const nextChange = new Date(
-    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000,
+    lastChange.getTime() + USERNAME_CHANGE_COOLDOWN_DAYS * MS_PER_DAY,
   );
   return {
     isActive: new Date() < nextChange,

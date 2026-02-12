@@ -13,8 +13,7 @@ export {
   UserNotFoundError,
   WeakPasswordError,
 } from './errors';
-export { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './http-mapper';
-export type { ErrorMapperLogger, ErrorMapperOptions, HttpErrorResponse } from './http-mapper';
+export { hashToken, generateSecureToken, generateBase64UrlToken } from './crypto';
 
 export { setRefreshTokenCookie, clearRefreshTokenCookie } from './cookies';
 export type { TokenPayload } from './jwt';

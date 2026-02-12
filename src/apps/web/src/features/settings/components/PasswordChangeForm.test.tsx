@@ -755,7 +755,8 @@ describe('PasswordChangeForm', () => {
       const user = userEvent.setup({ delay: null });
       render(<PasswordChangeForm {...defaultProps} />);
 
-      const longPassword = 'a'.repeat(100) + 'A1!';
+      // Max password length is 64 (from defaultPasswordConfig), so use a 60-char password
+      const longPassword = 'aB1!' + 'x'.repeat(56);
 
       await user.type(screen.getByTestId('password-input-currentPassword'), 'oldPassword123');
       await user.type(screen.getByTestId('password-input-newPassword'), longPassword);

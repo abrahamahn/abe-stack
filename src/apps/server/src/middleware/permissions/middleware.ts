@@ -325,7 +325,7 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
       }
 
       if (pointer == null) {
-        void reply.status(400).send({
+        void reply.status(HTTP_STATUS.BAD_REQUEST).send({
           message: 'Bad Request',
           error: 'Could not determine record to check permissions for',
         });
@@ -427,14 +427,14 @@ export function createStandalonePermissionGuard(
 
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     if (request.user == null || request.user.userId === '') {
-      void reply.status(401).send({ message: 'Unauthorized' });
+      void reply.status(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Unauthorized' });
       return;
     }
     const user = request.user;
 
     const recordId = getRecordId(request);
     if ((recordId == null || recordId === '') && operation !== 'create') {
-      void reply.status(400).send({
+      void reply.status(HTTP_STATUS.BAD_REQUEST).send({
         message: 'Bad Request',
         error: 'Record ID required',
       });

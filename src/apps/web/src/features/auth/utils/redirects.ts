@@ -9,10 +9,36 @@ interface UserLocal {
  * Only allows relative paths starting with a single slash.
  */
 function isSafeRedirectPath(path: string): boolean {
-  if (!path.startsWith('/')) return false;
-  if (path.startsWith('//')) return false;
-  const decoded = decodeURIComponent(path).toLowerCase();
-  if (decoded.startsWith('javascript:') || decoded.startsWith('data:')) return false;
+  // Decode first, then validate the decoded result
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(path);
+  } catch {
+    return false;
+  }
+
+  // Remove ASCII control chars that could bypass scheme checks
+  let cleaned = '';
+  for (let i = 0; i < decoded.length; i++) {
+    const code = decoded.charCodeAt(i);
+    if (code > 0x1f && code !== 0x7f) {
+      const char = decoded[i];
+      if (char !== undefined) {
+        cleaned += char;
+      }
+    }
+  }
+
+  // Must be a relative path starting with exactly one slash
+  if (!cleaned.startsWith('/')) return false;
+  if (cleaned.startsWith('//')) return false;
+
+  // Block dangerous URI schemes anywhere in the path
+  const lower = cleaned.toLowerCase();
+  if (lower.includes('javascript:') || lower.includes('data:') || lower.includes('vbscript:')) {
+    return false;
+  }
+
   return true;
 }
 

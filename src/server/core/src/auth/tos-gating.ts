@@ -11,6 +11,8 @@
  * @module tos-gating
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
 import type { Repositories } from '@abe-stack/db';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -22,7 +24,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 const TOS_DOCUMENT_TYPE = 'terms_of_service';
 
 /** HTTP status code for ToS acceptance required */
-const TOS_REQUIRED_STATUS = 403;
+const TOS_REQUIRED_STATUS = HTTP_STATUS.FORBIDDEN;
 
 /** Error code sent to clients when ToS acceptance is needed */
 const TOS_REQUIRED_CODE = 'TOS_ACCEPTANCE_REQUIRED';
@@ -147,7 +149,7 @@ export function createRequireTosAcceptance(repos: Repositories) {
     // If no user is attached, auth middleware should have already rejected.
     // This is a safety guard — should never happen in practice.
     if (user === undefined) {
-      void reply.status(401).send({ message: 'Unauthorized' });
+      void reply.status(HTTP_STATUS.UNAUTHORIZED).send({ message: 'Unauthorized' });
       return;
     }
 

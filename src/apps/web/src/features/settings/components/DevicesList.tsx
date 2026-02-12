@@ -3,36 +3,13 @@
  * DevicesList — Displays and manages trusted devices.
  */
 
+
+import { useDevices } from '@abe-stack/api';
+import { formatDateTime, parseUserAgent } from '@abe-stack/shared';
 import { Alert, Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 import { useCallback, useMemo, type ReactElement } from 'react';
 
-import { useDevices } from '@abe-stack/api';
-
 import type { DeviceItem } from '@abe-stack/api';
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function parseUserAgent(ua: string | null): string {
-  if (ua === null || ua === '') return 'Unknown device';
-  // Simple UA parsing — extract browser and OS
-  if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
-  if (ua.includes('Firefox')) return 'Firefox';
-  if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-  if (ua.includes('Edg')) return 'Edge';
-  return 'Browser';
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 // ============================================================================
 // Device Row
@@ -45,13 +22,13 @@ interface DeviceRowProps {
 }
 
 const DeviceRow = ({ device, onTrust, onRevoke }: DeviceRowProps): ReactElement => {
-  const browser = parseUserAgent(device.userAgent);
+  const { browser } = parseUserAgent(device.userAgent);
 
   return (
     <Card className="p-4 flex items-center justify-between gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <Text weight="medium">{device.label ?? browser}</Text>
+          <Text>{device.label ?? browser}</Text>
           {device.trusted && (
             <span
               className="text-xs px-2 py-0.5 rounded-full"
@@ -65,16 +42,30 @@ const DeviceRow = ({ device, onTrust, onRevoke }: DeviceRowProps): ReactElement 
           )}
         </div>
         <Text tone="muted" size="sm">
-          {device.ipAddress ?? 'Unknown IP'} &middot; Last seen {formatDate(device.lastSeenAt)}
+          {device.ipAddress ?? 'Unknown IP'} &middot; Last seen {formatDateTime(device.lastSeenAt)}
         </Text>
       </div>
       <div className="flex gap-2">
         {!device.trusted && (
-          <Button type="button" variant="outline" size="sm" onClick={() => onTrust(device.id)}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="small"
+            onClick={() => {
+              onTrust(device.id);
+            }}
+          >
             Trust
           </Button>
         )}
-        <Button type="button" variant="danger" size="sm" onClick={() => onRevoke(device.id)}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="small"
+          onClick={() => {
+            onRevoke(device.id);
+          }}
+        >
           Remove
         </Button>
       </div>
@@ -92,7 +83,13 @@ interface DevicesListProps {
 }
 
 export const DevicesList = ({ baseUrl, getToken }: DevicesListProps): ReactElement => {
-  const clientConfig = useMemo(() => ({ baseUrl, getToken }), [baseUrl, getToken]);
+  const clientConfig = useMemo(() => {
+    const config: { baseUrl: string; getToken?: () => string | null } = { baseUrl };
+    if (getToken !== undefined) {
+      config.getToken = getToken;
+    }
+    return config;
+  }, [baseUrl, getToken]);
   const { devices, isLoading, error, trustDevice, revokeDevice } = useDevices({
     clientConfig,
     autoFetch: true,
@@ -122,7 +119,7 @@ export const DevicesList = ({ baseUrl, getToken }: DevicesListProps): ReactEleme
   }
 
   if (error !== null) {
-    return <Alert variant="danger">{error.message}</Alert>;
+    return <Alert tone="danger">{error.message}</Alert>;
   }
 
   if (devices.length === 0) {

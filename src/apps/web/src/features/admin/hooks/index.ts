@@ -79,3 +79,10 @@ export type {
   UseSecurityMetricsOptions,
   UseSecurityMetricsResult,
 } from './useSecurityMetrics';
+
+// Tenant management (Stub - Backend not implemented yet)
+export { useTenant } from './useTenant';
+export type { UseTenantResult, UseTenantState } from './useTenant';
+
+export { useTenants } from './useTenants';
+export type { UseTenantsResult, UseTenantsState } from './useTenants';

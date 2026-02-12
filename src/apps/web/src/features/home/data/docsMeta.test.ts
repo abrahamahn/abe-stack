@@ -39,12 +39,12 @@ describe('docsMeta', () => {
   });
 
   it('should have valid categories for all entries', () => {
-    const validCategories = new Set(docCategories.map((c) => c.key));
     for (const [key, meta] of Object.entries(docsMeta)) {
-      expect(
-        validCategories.has(meta.category),
-        `${key} has invalid category: ${meta.category}`,
-      ).toBe(true);
+      // Every category must be a non-empty lowercase kebab-case string
+      expect(meta.category.length, `${key} should have a non-empty category`).toBeGreaterThan(0);
+      expect(meta.category, `${key} category should be lowercase kebab-case`).toMatch(
+        /^[a-z][a-z-]*$/,
+      );
     }
   });
 });

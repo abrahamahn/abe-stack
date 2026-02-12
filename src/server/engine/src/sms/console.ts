@@ -8,6 +8,8 @@
  * @module SMS
  */
 
+import { generateSecureId } from '@abe-stack/shared';
+
 import type { SmsOptions, SmsProvider, SmsResult } from './types';
 
 type LogFn = (message: string) => void;
@@ -24,7 +26,7 @@ export class ConsoleSmsProvider implements SmsProvider {
   }
 
   send(options: SmsOptions): Promise<SmsResult> {
-    const messageId = `sms-dev-${String(Date.now())}-${Math.random().toString(36).slice(2, 11)}`;
+    const messageId = `sms-dev-${String(Date.now())}-${generateSecureId(9)}`;
 
     this.log('\n--- SMS (Development Mode - Not Sent) ---');
     this.log(`  To:   ${options.to}`);

@@ -115,16 +115,20 @@ export type {
 
 export {
   createErrorMapperLogger,
-  ERROR_MESSAGES,
   LOGIN_FAILURE_REASON,
   MAX_PROGRESSIVE_DELAY_MS,
   MIN_JWT_SECRET_LENGTH,
   PROGRESSIVE_DELAY_WINDOW_MS,
   REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_BYTES,
-  SUCCESS_MESSAGES,
   type LoginFailureReason,
 } from './types';
+
+// Re-export auth messages from shared (admin module imports these via ../auth)
+export {
+  AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+} from '@abe-stack/shared';
 
 // Service (business logic)
 export {
@@ -175,6 +179,27 @@ export {
   type VerifyPhoneRequest,
 } from './sms-2fa';
 
+// WebAuthn
+export {
+  clearChallengeStore,
+  getAuthenticationOptions,
+  getRegistrationOptions,
+  verifyAuthentication,
+  verifyRegistration,
+  webauthnRouteEntries,
+} from './webauthn';
+
+// WebAuthn Handlers
+export {
+  handleDeletePasskey,
+  handleListPasskeys,
+  handleRenamePasskey,
+  handleWebauthnLoginOptions,
+  handleWebauthnLoginVerify,
+  handleWebauthnRegisterOptions,
+  handleWebauthnRegisterVerify,
+} from './handlers';
+
 // Email Change
 export {
   confirmEmailChange,
@@ -200,8 +225,11 @@ export {
   createRefreshToken,
   createRefreshTokenFamily,
   extractRequestInfo,
+  generateBase64UrlToken,
+  generateSecureToken,
   getRefreshTokenExpiry,
   hashPassword,
+  hashToken,
   initDummyHashPool,
   isDummyHashPoolInitialized,
   JwtError,

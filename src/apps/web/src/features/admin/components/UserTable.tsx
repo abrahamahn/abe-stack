@@ -5,6 +5,7 @@
  * Displays users in a table format with pagination for admin management.
  */
 
+import { formatDate } from '@abe-stack/shared';
 import {
   Button,
   Pagination,
@@ -33,10 +34,6 @@ export interface UserTableProps {
   isLoading: boolean;
   page: number;
   onPageChange: (page: number) => void;
-}
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString();
 }
 
 export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProps): JSX.Element => {

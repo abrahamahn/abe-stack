@@ -32,6 +32,12 @@ export {
   handleRetryJob,
 } from './jobsHandlers';
 export { handleGetMetrics } from './metricsHandler';
+export { handleGetAdminHealth } from './healthHandler';
+export {
+  handleListAdminWebhookDeliveries,
+  handleListAdminWebhooks,
+  handleReplayAdminWebhookDelivery,
+} from './webhookHandlers';
 export {
   handleExportSecurityEvents,
   handleGetSecurityEvent,

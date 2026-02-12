@@ -8,6 +8,9 @@
  * @module handlers/profile
  */
 
+import { HTTP_STATUS } from '@abe-stack/shared';
+
+import { CacheKeys, CacheTags, CacheTTL } from '../../cache';
 import { getUserById, listUsers } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
@@ -80,44 +83,60 @@ export async function handleMe(
 
   // User is already verified by middleware
   if (request.user === undefined) {
-    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    return { status: HTTP_STATUS.UNAUTHORIZED, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
-    const user = await getUserById(deps.repos.users, request.user.userId);
+    const userId = request.user.userId;
 
-    if (user === null) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+    // Cache-aside: check cache first, fall back to DB
+    const cacheKey = CacheKeys.user(userId);
+    const cached = deps.cache !== undefined ? await deps.cache.get<User>(cacheKey) : undefined;
+    if (cached !== undefined) {
+      return { status: HTTP_STATUS.OK, body: cached };
     }
 
-    return {
-      status: 200,
-      body: {
-        id: user.id as UserId,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatarUrl: user.avatarUrl ?? null,
-        role: user.role,
-        emailVerified: user.emailVerified,
-        phone: user.phone ?? null,
-        phoneVerified: user.phoneVerified,
-        dateOfBirth: user.dateOfBirth ?? null,
-        gender: user.gender ?? null,
-        bio: user.bio ?? null,
-        city: user.city ?? null,
-        state: user.state ?? null,
-        country: user.country ?? null,
-        language: user.language ?? null,
-        website: user.website ?? null,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-      },
+    const user = await getUserById(deps.repos.users, userId);
+
+    if (user === null) {
+      return { status: HTTP_STATUS.NOT_FOUND, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+    }
+
+    const body: User = {
+      id: user.id as UserId,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatarUrl: user.avatarUrl ?? null,
+      role: user.role,
+      emailVerified: user.emailVerified,
+      phone: user.phone ?? null,
+      phoneVerified: user.phoneVerified,
+      dateOfBirth: user.dateOfBirth ?? null,
+      gender: user.gender ?? null,
+      bio: user.bio ?? null,
+      city: user.city ?? null,
+      state: user.state ?? null,
+      country: user.country ?? null,
+      language: user.language ?? null,
+      website: user.website ?? null,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
+
+    // Populate cache for subsequent requests
+    if (deps.cache !== undefined) {
+      await deps.cache.set(cacheKey, body, {
+        ttl: CacheTTL.user,
+        tags: [CacheTags.user(userId)],
+      });
+    }
+
+    return { status: HTTP_STATUS.OK, body };
   } catch (error) {
     deps.log.error(toError(error), 'Users operation failed');
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -141,7 +160,7 @@ export async function handleListUsers(
 
   if (pagination.type !== 'cursor' || pagination.cursor === undefined) {
     return {
-      status: 400,
+      status: HTTP_STATUS.BAD_REQUEST,
       body: { message: 'This endpoint only supports cursor pagination' },
     };
   }
@@ -173,7 +192,7 @@ export async function handleListUsers(
     }));
 
     return {
-      status: 200,
+      status: HTTP_STATUS.OK,
       body: pagination.helpers.createCursorResult(
         userResponses,
         nextCursor,
@@ -183,6 +202,6 @@ export async function handleListUsers(
     };
   } catch (error) {
     deps.log.error(toError(error), 'Users operation failed');
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+    return { status: HTTP_STATUS.INTERNAL_SERVER_ERROR, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }

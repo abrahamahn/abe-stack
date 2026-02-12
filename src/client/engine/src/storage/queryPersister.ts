@@ -6,6 +6,8 @@
  * Queries are automatically restored when the app loads.
  */
 
+import { MS_PER_DAY, MS_PER_SECOND } from '@abe-stack/shared';
+
 import { idbStorage } from './storage';
 
 // ============================================================================
@@ -74,8 +76,8 @@ export interface QueryPersisterOptions {
 // ============================================================================
 
 const DEFAULT_KEY = 'abe-stack-query-cache';
-const DEFAULT_MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
-const DEFAULT_THROTTLE = 1000; // 1 second
+const DEFAULT_MAX_AGE = MS_PER_DAY;
+const DEFAULT_THROTTLE = MS_PER_SECOND;
 
 /**
  * Create an IndexedDB persister for QueryCache
