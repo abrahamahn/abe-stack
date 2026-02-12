@@ -13,9 +13,9 @@ import {
   parseBoolean,
   parseOptional,
   parseString,
-} from '../../core/schema.utils';
+} from '../../types/schema';
 
-import type { Schema } from '../../core/api';
+import type { Schema } from '../../types/schema';
 
 // Re-export cursor utilities
 export {

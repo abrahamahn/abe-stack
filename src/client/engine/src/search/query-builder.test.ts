@@ -17,11 +17,12 @@ import {
 
 describe('ClientSearchQueryBuilder', () => {
   describe('createClientSearchQuery', () => {
-    test('should create empty builder', () => {
+    test('should create empty builder with defaults', () => {
       const builder = createClientSearchQuery();
       const query = builder.build();
 
-      expect(query).toEqual({});
+      expect(query.page).toBe(1);
+      expect(query.limit).toBe(50);
     });
 
     test('should build query with filters', () => {
@@ -44,9 +45,7 @@ describe('ClientSearchQueryBuilder', () => {
     });
 
     test('should build query with search', () => {
-      const builder = createClientSearchQuery()
-        .search('test query')
-        .searchIn(['title', 'description']);
+      const builder = createClientSearchQuery().searchIn('test query', ['title', 'description']);
 
       const query = builder.build();
 
@@ -70,7 +69,7 @@ describe('ClientSearchQueryBuilder', () => {
         .search('test')
         .page(2)
         .limit(10)
-        .includeCount()
+        .withCount()
         .build();
 
       expect(query.filters).toBeDefined();
@@ -246,7 +245,7 @@ describe('ClientSearchQueryBuilder', () => {
       expect(params.get('includeCount')).toBe('1');
     });
 
-    test('should serialize Date values with $date marker', () => {
+    test('should serialize Date values with $d marker', () => {
       const date = new Date('2024-01-15T00:00:00.000Z');
       const params = queryToURLSearchParams({
         filters: { field: 'createdAt', operator: 'gte', value: date },
@@ -255,10 +254,10 @@ describe('ClientSearchQueryBuilder', () => {
       const filtersValue = params.get('filters');
       if (filtersValue === null) throw new Error('filters is null');
       const parsed = JSON.parse(filtersValue);
-      expect(parsed.v.$date).toBe('2024-01-15T00:00:00.000Z');
+      expect(parsed.v.$d).toBe('2024-01-15T00:00:00.000Z');
     });
 
-    test('should serialize range values with $range marker', () => {
+    test('should serialize range values with $r marker', () => {
       const params = queryToURLSearchParams({
         filters: { field: 'price', operator: 'between', value: { min: 10, max: 100 } },
       });
@@ -266,7 +265,7 @@ describe('ClientSearchQueryBuilder', () => {
       const filtersValue = params.get('filters');
       if (filtersValue === null) throw new Error('filters is null');
       const parsed = JSON.parse(filtersValue);
-      expect(parsed.v.$range).toEqual({ min: 10, max: 100 });
+      expect(parsed.v.$r).toEqual({ min: 10, max: 100 });
     });
   });
 
@@ -364,7 +363,7 @@ describe('ClientSearchQueryBuilder', () => {
       const params = new URLSearchParams();
       params.set(
         'filters',
-        JSON.stringify({ f: 'createdAt', o: 'gte', v: { $date: '2024-01-15T00:00:00.000Z' } }),
+        JSON.stringify({ f: 'createdAt', o: 'gte', v: { $d: '2024-01-15T00:00:00.000Z' } }),
       );
 
       const query = urlSearchParamsToQuery(params);
@@ -376,7 +375,7 @@ describe('ClientSearchQueryBuilder', () => {
       const params = new URLSearchParams();
       params.set(
         'filters',
-        JSON.stringify({ f: 'price', o: 'between', v: { $range: { min: 10, max: 100 } } }),
+        JSON.stringify({ f: 'price', o: 'between', v: { $r: { min: 10, max: 100 } } }),
       );
 
       const query = urlSearchParamsToQuery(params);

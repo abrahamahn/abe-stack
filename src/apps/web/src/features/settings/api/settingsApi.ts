@@ -6,6 +6,7 @@
  */
 
 import { createApiError, NetworkError } from '@abe-stack/client-engine';
+import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 import type {
   AccountLifecycleResponse,
@@ -113,16 +114,8 @@ export interface SettingsApi {
   deleteApiKey: (keyId: string) => Promise<{ message: string }>;
 }
 
-const API_PREFIX = '/api';
-
-function addAuthHeader(headers: Headers, token: string | null | undefined): void {
-  if (token !== null && token !== undefined && token !== '') {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-}
-
 export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
-  const baseUrl = config.baseUrl.replace(/\/+$/, '');
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {

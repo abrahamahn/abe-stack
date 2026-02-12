@@ -7,12 +7,16 @@
  * to track which events have already been processed.
  */
 
-import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/shared';
+import {
+  WebhookEventAlreadyProcessedError,
+  WebhookSignatureError,
+  type Logger as ServerLogger,
+  type NormalizedWebhookEvent,
+} from '@abe-stack/shared';
 
 import { StripeProvider } from '../stripe-provider';
 
-import type { BillingLogger, WebhookRepositories, WebhookResult } from '../types';
-import type { NormalizedWebhookEvent } from '@abe-stack/shared';
+import type { WebhookRepositories, WebhookResult } from '../types';
 import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
@@ -40,7 +44,7 @@ export async function handleStripeWebhook(
   signature: string,
   config: StripeConfig,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<WebhookResult> {
   const provider = new StripeProvider(config);
 
@@ -109,7 +113,7 @@ export async function handleStripeWebhook(
 async function processEvent(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   switch (event.type) {
     case 'subscription.created':
@@ -164,7 +168,7 @@ async function processEvent(
 async function handleSubscriptionCreated(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId, customerId, status, metadata } = event.data;
 
@@ -239,7 +243,7 @@ async function handleSubscriptionCreated(
 async function handleSubscriptionUpdated(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId, status } = event.data;
 
@@ -306,7 +310,7 @@ async function handleSubscriptionUpdated(
 async function handleSubscriptionCanceled(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
@@ -348,7 +352,7 @@ async function handleSubscriptionCanceled(
 async function handleInvoicePaid(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { invoiceId, customerId, subscriptionId } = event.data;
 
@@ -437,7 +441,7 @@ async function handleInvoicePaid(
 async function handleInvoicePaymentFailed(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
@@ -478,7 +482,7 @@ async function handleInvoicePaymentFailed(
 function handleRefundCreated(
   event: NormalizedWebhookEvent,
   _repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): void {
   // Log refund event for auditing
   log.info({ eventId: event.id, customerId: event.data.customerId }, 'Refund created');
@@ -498,7 +502,7 @@ function handleRefundCreated(
 function handleChargebackCreated(
   event: NormalizedWebhookEvent,
   _repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): void {
   // Log chargeback event for auditing - this is a serious event
   log.warn({ eventId: event.id, customerId: event.data.customerId }, 'Chargeback/dispute created');

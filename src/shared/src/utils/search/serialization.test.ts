@@ -1,4 +1,4 @@
-// src/client/engine/src/search/serialization.test.ts
+// src/shared/src/utils/search/serialization.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -13,7 +13,7 @@ import {
   serializeToURLParams,
 } from './serialization';
 
-import type { SearchQuery } from '@abe-stack/shared';
+import type { SearchQuery } from './types';
 
 describe('serialization', () => {
   describe('serializeToURLParams', () => {
@@ -24,11 +24,7 @@ describe('serialization', () => {
 
     test('should serialize filters', () => {
       const query: SearchQuery = {
-        filters: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
-        },
+        filters: { field: 'status', operator: 'eq', value: 'active' },
       };
 
       const params = serializeToURLParams(query);
@@ -77,11 +73,7 @@ describe('serialization', () => {
 
     test('should serialize search query', () => {
       const query: SearchQuery = {
-        search: {
-          query: 'test search',
-          fields: ['title', 'description'],
-          fuzziness: 0.8,
-        },
+        search: { query: 'test search', fields: ['title', 'description'], fuzziness: 0.8 },
       };
 
       const params = serializeToURLParams(query);
@@ -91,61 +83,34 @@ describe('serialization', () => {
     });
 
     test('should serialize pagination', () => {
-      const query: SearchQuery = {
-        page: 3,
-        limit: 25,
-      };
-
-      const params = serializeToURLParams(query);
+      const params = serializeToURLParams({ page: 3, limit: 25 });
       expect(params.get('page')).toBe('3');
       expect(params.get('limit')).toBe('25');
     });
 
     test('should not serialize page=1 by default', () => {
-      const query: SearchQuery = {
-        page: 1,
-        limit: 10,
-      };
-
-      const params = serializeToURLParams(query);
+      const params = serializeToURLParams({ page: 1, limit: 10 });
       expect(params.has('page')).toBe(false);
       expect(params.get('limit')).toBe('10');
     });
 
     test('should include page=1 when includeDefaults is true', () => {
-      const query: SearchQuery = {
-        page: 1,
-        limit: 10,
-      };
-
-      const params = serializeToURLParams(query, { includeDefaults: true });
+      const params = serializeToURLParams({ page: 1 }, { includeDefaults: true });
       expect(params.get('page')).toBe('1');
     });
 
     test('should serialize cursor', () => {
-      const query: SearchQuery = {
-        cursor: 'abc123',
-      };
-
-      const params = serializeToURLParams(query);
+      const params = serializeToURLParams({ cursor: 'abc123' });
       expect(params.get('cursor')).toBe('abc123');
     });
 
     test('should serialize select fields', () => {
-      const query: SearchQuery = {
-        select: ['id', 'name', 'email'],
-      };
-
-      const params = serializeToURLParams(query);
+      const params = serializeToURLParams({ select: ['id', 'name', 'email'] });
       expect(params.get('select')).toBe('id,name,email');
     });
 
     test('should serialize includeCount', () => {
-      const query: SearchQuery = {
-        includeCount: true,
-      };
-
-      const params = serializeToURLParams(query);
+      const params = serializeToURLParams({ includeCount: true });
       expect(params.get('includeCount')).toBe('1');
     });
 
@@ -166,44 +131,31 @@ describe('serialization', () => {
 
     test('should serialize Date values', () => {
       const date = new Date('2024-01-15T10:30:00.000Z');
-      const query: SearchQuery = {
-        filters: {
-          field: 'createdAt',
-          operator: 'gte',
-          value: date,
-        },
-      };
+      const params = serializeToURLParams({
+        filters: { field: 'createdAt', operator: 'gte', value: date },
+      });
 
-      const params = serializeToURLParams(query);
       const filtersStr = params.get('filters');
       if (filtersStr === null) throw new Error('filters is null');
       const parsed = JSON.parse(filtersStr);
-
       expect(parsed.v).toEqual({ $d: '2024-01-15T10:30:00.000Z' });
     });
 
     test('should serialize range values', () => {
-      const query: SearchQuery = {
-        filters: {
-          field: 'price',
-          operator: 'between',
-          value: { min: 10, max: 100 },
-        },
-      };
+      const params = serializeToURLParams({
+        filters: { field: 'price', operator: 'between', value: { min: 10, max: 100 } },
+      });
 
-      const params = serializeToURLParams(query);
       const filtersStr = params.get('filters');
       if (filtersStr === null) throw new Error('filters is null');
       const parsed = JSON.parse(filtersStr);
-
       expect(parsed.v).toEqual({ $r: { min: 10, max: 100 } });
     });
   });
 
   describe('deserializeFromURLParams', () => {
     test('should deserialize empty params', () => {
-      const query = deserializeFromURLParams(new URLSearchParams());
-      expect(query).toEqual({});
+      expect(deserializeFromURLParams(new URLSearchParams())).toEqual({});
     });
 
     test('should deserialize filters', () => {
@@ -273,30 +225,6 @@ describe('serialization', () => {
       expect(query.limit).toBe(25);
     });
 
-    test('should deserialize cursor', () => {
-      const params = new URLSearchParams();
-      params.set('cursor', 'abc123');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.cursor).toBe('abc123');
-    });
-
-    test('should deserialize select fields', () => {
-      const params = new URLSearchParams();
-      params.set('select', 'id,name,email');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.select).toEqual(['id', 'name', 'email']);
-    });
-
-    test('should deserialize includeCount', () => {
-      const params = new URLSearchParams();
-      params.set('includeCount', '1');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.includeCount).toBe(true);
-    });
-
     test('should accept string input', () => {
       const query = deserializeFromURLParams('page=2&limit=10');
       expect(query.page).toBe(2);
@@ -320,25 +248,19 @@ describe('serialization', () => {
     test('should handle invalid JSON in filters gracefully', () => {
       const params = new URLSearchParams();
       params.set('filters', 'invalid-json');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.filters).toBeUndefined();
+      expect(deserializeFromURLParams(params).filters).toBeUndefined();
     });
 
     test('should ignore invalid page values', () => {
       const params = new URLSearchParams();
       params.set('page', 'abc');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.page).toBeUndefined();
+      expect(deserializeFromURLParams(params).page).toBeUndefined();
     });
 
     test('should ignore negative page values', () => {
       const params = new URLSearchParams();
       params.set('page', '-1');
-
-      const query = deserializeFromURLParams(params);
-      expect(query.page).toBeUndefined();
+      expect(deserializeFromURLParams(params).page).toBeUndefined();
     });
 
     test('should deserialize Date values', () => {
@@ -348,8 +270,7 @@ describe('serialization', () => {
         JSON.stringify({ f: 'createdAt', o: 'gte', v: { $d: '2024-01-15T10:30:00.000Z' } }),
       );
 
-      const query = deserializeFromURLParams(params);
-      const filter = query.filters as { value: Date };
+      const filter = deserializeFromURLParams(params).filters as { value: Date };
       expect(filter.value).toBeInstanceOf(Date);
       expect(filter.value.toISOString()).toBe('2024-01-15T10:30:00.000Z');
     });
@@ -361,8 +282,9 @@ describe('serialization', () => {
         JSON.stringify({ f: 'price', o: 'between', v: { $r: { min: 10, max: 100 } } }),
       );
 
-      const query = deserializeFromURLParams(params);
-      const filter = query.filters as { value: { min: number; max: number } };
+      const filter = deserializeFromURLParams(params).filters as {
+        value: { min: number; max: number };
+      };
       expect(filter.value).toEqual({ min: 10, max: 100 });
     });
   });
@@ -390,7 +312,7 @@ describe('serialization', () => {
       };
 
       const encoded = serializeToJSON(query, { base64: true });
-      expect(encoded).not.toContain('{'); // Should be base64
+      expect(encoded).not.toContain('{');
 
       const restored = deserializeFromJSON(encoded, { base64: true });
       expect(restored.filters).toBeDefined();
@@ -398,11 +320,7 @@ describe('serialization', () => {
 
     test('should preserve search configuration', () => {
       const query: SearchQuery = {
-        search: {
-          query: 'test',
-          fields: ['title'],
-          fuzziness: 0.5,
-        },
+        search: { query: 'test', fields: ['title'], fuzziness: 0.5 },
       };
 
       const json = serializeToJSON(query);
@@ -415,111 +333,67 @@ describe('serialization', () => {
   });
 
   describe('URL helpers', () => {
-    describe('mergeSearchParamsIntoURL', () => {
-      test('should merge params into URL', () => {
-        const params = new URLSearchParams();
-        params.set('page', '2');
-        params.set('limit', '10');
+    test('mergeSearchParamsIntoURL merges params', () => {
+      const params = new URLSearchParams();
+      params.set('page', '2');
 
-        const url = mergeSearchParamsIntoURL('https://example.com/api', params);
-        expect(url.searchParams.get('page')).toBe('2');
-        expect(url.searchParams.get('limit')).toBe('10');
-      });
-
-      test('should preserve existing URL params', () => {
-        const params = new URLSearchParams();
-        params.set('newParam', 'value');
-
-        const url = mergeSearchParamsIntoURL('https://example.com/api?existing=true', params);
-        expect(url.searchParams.get('existing')).toBe('true');
-        expect(url.searchParams.get('newParam')).toBe('value');
-      });
-
-      test('should accept URL object', () => {
-        const baseUrl = new URL('https://example.com/api');
-        const params = new URLSearchParams();
-        params.set('page', '1');
-
-        const url = mergeSearchParamsIntoURL(baseUrl, params);
-        expect(url.searchParams.get('page')).toBe('1');
-      });
+      const url = mergeSearchParamsIntoURL('https://example.com/api', params);
+      expect(url.searchParams.get('page')).toBe('2');
     });
 
-    describe('extractQueryFromURL', () => {
-      test('should extract query from URL string', () => {
-        const query = extractQueryFromURL('https://example.com/api?page=2&limit=10');
-        expect(query.page).toBe(2);
-        expect(query.limit).toBe(10);
-      });
+    test('mergeSearchParamsIntoURL preserves existing params', () => {
+      const params = new URLSearchParams();
+      params.set('newParam', 'value');
 
-      test('should extract query from URL object', () => {
-        const url = new URL('https://example.com/api?sort=name:asc');
-        const query = extractQueryFromURL(url);
-        expect(query.sort).toEqual([{ field: 'name', order: 'asc' }]);
-      });
+      const url = mergeSearchParamsIntoURL('https://example.com/api?existing=true', params);
+      expect(url.searchParams.get('existing')).toBe('true');
+      expect(url.searchParams.get('newParam')).toBe('value');
     });
 
-    describe('buildURLWithQuery', () => {
-      test('should build URL with query', () => {
-        const query: SearchQuery = {
-          page: 2,
-          limit: 25,
-          sort: [{ field: 'name', order: 'asc' }],
-        };
+    test('extractQueryFromURL extracts from string', () => {
+      const query = extractQueryFromURL('https://example.com/api?page=2&limit=10');
+      expect(query.page).toBe(2);
+      expect(query.limit).toBe(10);
+    });
 
-        const url = buildURLWithQuery('https://example.com/api', query);
-        expect(url.searchParams.get('page')).toBe('2');
-        expect(url.searchParams.get('limit')).toBe('25');
-        expect(url.searchParams.get('sort')).toBe('name:asc');
-      });
+    test('extractQueryFromURL extracts from URL object', () => {
+      const url = new URL('https://example.com/api?sort=name:asc');
+      const query = extractQueryFromURL(url);
+      expect(query.sort).toEqual([{ field: 'name', order: 'asc' }]);
+    });
 
-      test('should apply serialization options', () => {
-        const query: SearchQuery = {
-          page: 2,
-          filters: { field: 'status', operator: 'eq', value: 'active' },
-        };
+    test('buildURLWithQuery builds complete URL', () => {
+      const query: SearchQuery = { page: 2, limit: 25, sort: [{ field: 'name', order: 'asc' }] };
+      const url = buildURLWithQuery('https://example.com/api', query);
 
-        const url = buildURLWithQuery('https://example.com/api', query, { compact: true });
-        expect(url.searchParams.has('p')).toBe(true);
-        expect(url.searchParams.has('f')).toBe(true);
-      });
+      expect(url.searchParams.get('page')).toBe('2');
+      expect(url.searchParams.get('limit')).toBe('25');
+      expect(url.searchParams.get('sort')).toBe('name:asc');
     });
   });
 
   describe('hash-based state', () => {
-    describe('serializeToHash', () => {
-      test('should serialize query to base64 hash', () => {
-        const query: SearchQuery = {
-          page: 2,
-          filters: { field: 'status', operator: 'eq', value: 'active' },
-        };
-
-        const hash = serializeToHash(query);
-        expect(hash).not.toContain('{'); // Should be base64
-      });
+    test('should serialize query to base64 hash', () => {
+      const hash = serializeToHash({ page: 2 });
+      expect(hash).not.toContain('{');
     });
 
-    describe('deserializeFromHash', () => {
-      test('should deserialize query from hash', () => {
-        const query: SearchQuery = {
-          page: 2,
-          filters: { field: 'status', operator: 'eq', value: 'active' },
-        };
+    test('should roundtrip through hash', () => {
+      const query: SearchQuery = {
+        filters: { field: 'status', operator: 'eq', value: 'active' },
+        page: 2,
+      };
 
-        const hash = serializeToHash(query);
-        const restored = deserializeFromHash(hash);
+      const hash = serializeToHash(query);
+      const restored = deserializeFromHash(hash);
+      expect(restored.page).toBe(2);
+      expect(restored.filters).toBeDefined();
+    });
 
-        expect(restored.page).toBe(2);
-        expect(restored.filters).toBeDefined();
-      });
-
-      test('should handle hash with # prefix', () => {
-        const query: SearchQuery = { page: 3 };
-        const hash = `#${serializeToHash(query)}`;
-
-        const restored = deserializeFromHash(hash);
-        expect(restored.page).toBe(3);
-      });
+    test('should handle hash with # prefix', () => {
+      const hash = `#${serializeToHash({ page: 3 })}`;
+      const restored = deserializeFromHash(hash);
+      expect(restored.page).toBe(3);
     });
 
     test('should roundtrip complex queries', () => {

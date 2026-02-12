@@ -7,6 +7,21 @@
  * Maps to migrations 0008_compliance.sql and 0011_data_exports.sql.
  */
 
+import {
+  CONSENT_TYPES,
+  DATA_EXPORT_STATUSES,
+  DATA_EXPORT_TYPES,
+  DOCUMENT_TYPES,
+  type ConsentType,
+  type DataExportStatus,
+  type DataExportType,
+  type DocumentType,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { CONSENT_TYPES, DATA_EXPORT_STATUSES, DATA_EXPORT_TYPES, DOCUMENT_TYPES };
+export type { ConsentType, DataExportStatus, DataExportType, DocumentType };
+
 // ============================================================================
 // Table Names
 // ============================================================================
@@ -15,38 +30,6 @@ export const LEGAL_DOCUMENTS_TABLE = 'legal_documents';
 export const USER_AGREEMENTS_TABLE = 'user_agreements';
 export const CONSENT_LOGS_TABLE = 'consent_logs';
 export const DATA_EXPORT_REQUESTS_TABLE = 'data_export_requests';
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/**
- * Standard legal document types (must match domain DOCUMENT_TYPES in compliance.schemas.ts).
- * DB column is TEXT, but application-level validation constrains to these values.
- */
-export type DocumentType = 'terms_of_service' | 'privacy_policy' | 'cookie_policy' | 'dpa';
-
-/** All valid document types */
-export const DOCUMENT_TYPES: readonly DocumentType[] = [
-  'terms_of_service',
-  'privacy_policy',
-  'cookie_policy',
-  'dpa',
-] as const;
-
-/**
- * Standard GDPR consent types (must match domain CONSENT_TYPES in compliance.schemas.ts).
- * DB column is TEXT, but application-level validation constrains to these values.
- */
-export type ConsentType = 'marketing_email' | 'analytics' | 'third_party_sharing' | 'profiling';
-
-/** All valid consent types */
-export const CONSENT_TYPES: readonly ConsentType[] = [
-  'marketing_email',
-  'analytics',
-  'third_party_sharing',
-  'profiling',
-] as const;
 
 // ============================================================================
 // Legal Document Types
@@ -190,27 +173,7 @@ export const CONSENT_LOG_COLUMNS = {
   createdAt: 'created_at',
 } as const;
 
-// ============================================================================
-// Data Export Enums
-// ============================================================================
-
-/** Type of data export request */
-export type DataExportType = 'export' | 'deletion';
-
-/** All valid data export types */
-export const DATA_EXPORT_TYPES = ['export', 'deletion'] as const;
-
-/** Lifecycle states for a data export request */
-export type DataExportStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'canceled';
-
-/** All valid data export statuses */
-export const DATA_EXPORT_STATUSES = [
-  'pending',
-  'processing',
-  'completed',
-  'failed',
-  'canceled',
-] as const;
+// DataExportType, DataExportStatus imported from @abe-stack/shared above
 
 // ============================================================================
 // Data Export Request Types

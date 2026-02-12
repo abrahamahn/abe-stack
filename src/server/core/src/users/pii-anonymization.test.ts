@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { anonymizeExpiredUsers } from './pii-anonymization';
 
-import type { UsersLogger } from './types';
 import type { DbClient } from '@abe-stack/db';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Mock Factories
@@ -30,14 +30,14 @@ function createMockDb(): DbClient {
   } as unknown as DbClient;
 }
 
-function createMockLogger(): UsersLogger {
+function createMockLogger(): ServerLogger {
   return {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
     child: vi.fn().mockReturnThis(),
-  } as unknown as UsersLogger;
+  } as unknown as ServerLogger;
 }
 
 // ============================================================================
@@ -99,7 +99,7 @@ function makeDbUserRow(overrides: {
 
 describe('anonymizeExpiredUsers', () => {
   let db: DbClient;
-  let log: UsersLogger;
+  let log: ServerLogger;
 
   beforeEach(() => {
     db = createMockDb();

@@ -27,7 +27,7 @@
  */
 
 // Module types
-export type { NotificationLogger, NotificationModuleDeps, NotificationRequest } from './types';
+export type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // Service - Subscription management
 export {
@@ -67,10 +67,11 @@ export {
 // Routes
 export { notificationRoutes } from './routes';
 
-// Errors
+// Errors (re-exported from @abe-stack/shared)
 export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
+  NOTIFICATION_PAYLOAD_MAX_SIZE,
   NotificationRateLimitError,
   NotificationSendError,
   NotificationsDisabledError,
@@ -78,13 +79,15 @@ export {
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
+  PushProviderNotConfiguredError,
   PushSubscriptionExistsError,
+  PushSubscriptionNotFoundError,
   QuietHoursActiveError,
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
   VapidNotConfiguredError,
-} from './errors';
+} from '@abe-stack/shared';
 
 // Provider types
 export type {

@@ -13,7 +13,7 @@
  * for Login/Register actions that trigger navigation modals.
  */
 
-import { Outlet, useNavigate } from '@abe-stack/ui';
+import { Outlet, useNavigate } from '@abe-stack/react/router';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';

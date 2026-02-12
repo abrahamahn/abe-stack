@@ -7,7 +7,7 @@
  */
 
 import { useQuery } from '@abe-stack/client-engine';
-import { addAuthHeader, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
+import { addAuthHeader, trimTrailingSlashes, WORKSPACE_ID_HEADER } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import type { UseQueryResult } from '@abe-stack/client-engine';
@@ -54,7 +54,7 @@ export function useFeatureFlag(
   options?: UseFeatureFlagOptions,
 ): UseFeatureFlagResult {
   const { config } = useClientEnvironment();
-  const baseUrl = config.apiUrl.replace(/\/+$/, '');
+  const baseUrl = trimTrailingSlashes(config.apiUrl);
 
   const tenantId = options?.tenantId;
   const queryEnabled = options?.enabled ?? true;
@@ -71,7 +71,7 @@ export function useFeatureFlag(
       headers.set('Content-Type', 'application/json');
 
       const token: string | null = localStorage.getItem('accessToken');
-      (addAuthHeader as (headers: Headers, token: string | null) => void)(headers, token);
+      addAuthHeader(headers, token);
 
       if (tenantId !== undefined) {
         headers.set(WORKSPACE_ID_HEADER, tenantId);

@@ -4,7 +4,37 @@
  *
  * Type definitions for the background job queue system.
  * Adopted from Chet-stack's QueueServer pattern.
+ *
+ * Monitoring types (JobStatus, JobDetails, QueueStats, etc.) are imported
+ * from @abe-stack/shared to enforce DRY.
  */
+
+import type {
+  JobDetails as SharedJobDetails,
+  JobError,
+  JobListQuery,
+  JobListResponse,
+  JobStatus,
+  QueueStats,
+} from '@abe-stack/shared';
+
+// Re-export shared types for consumers that import from queue-types
+export type { JobStatus, QueueStats };
+
+/** Alias: shared uses JobListQuery, queue uses JobListOptions */
+export type JobListOptions = JobListQuery;
+
+/** Alias: shared uses JobListResponse, queue uses JobListResult */
+export type JobListResult = JobListResponse;
+
+/** Alias: shared uses JobError, queue uses TaskError (same shape) */
+export type TaskError = JobError;
+
+/**
+ * JobDetails with TaskError alias for queue compatibility.
+ * Shared defines error as JobError; structurally identical to TaskError.
+ */
+export type JobDetails = SharedJobDetails;
 
 // ============================================================================
 // Task Types
@@ -46,14 +76,7 @@ export interface TaskResult {
   durationMs: number;
 }
 
-/**
- * Serialized error for storage
- */
-export interface TaskError {
-  name: string;
-  message: string;
-  stack?: string;
-}
+// TaskError is aliased from shared's JobError (see imports above)
 
 // ============================================================================
 // Handler Types
@@ -136,78 +159,5 @@ export interface QueueStore {
   moveToDeadLetter?(taskId: string, reason: string): Promise<boolean>;
 }
 
-// ============================================================================
-// Job Monitoring Types
-// ============================================================================
-
-/**
- * Job status values
- */
-export type JobStatus =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'dead_letter'
-  | 'cancelled';
-
-/**
- * Detailed job information for monitoring
- */
-export interface JobDetails {
-  id: string;
-  name: string;
-  args: unknown;
-  status: JobStatus;
-  attempts: number;
-  maxAttempts: number;
-  scheduledAt: string;
-  createdAt: string;
-  completedAt: string | null;
-  durationMs: number | null;
-  error: TaskError | null;
-  deadLetterReason?: string | null;
-}
-
-/**
- * Options for listing jobs
- */
-export interface JobListOptions {
-  status?: JobStatus;
-  name?: string;
-  page: number;
-  limit: number;
-  sortBy?: 'createdAt' | 'scheduledAt' | 'completedAt';
-  sortOrder?: 'asc' | 'desc';
-}
-
-/**
- * Paginated job list result
- */
-export interface JobListResult {
-  data: JobDetails[];
-  total: number;
-  page: number;
-  limit: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  totalPages: number;
-}
-
-/**
- * Queue statistics for monitoring dashboard
- */
-export interface QueueStats {
-  pending: number;
-  processing: number;
-  completed: number;
-  failed: number;
-  deadLetter: number;
-  total: number;
-  /** Failure rate as a percentage (0-100) */
-  failureRate: number;
-  /** Jobs processed in the last hour */
-  recentCompleted: number;
-  /** Jobs failed in the last hour */
-  recentFailed: number;
-}
+// Job monitoring types (JobStatus, JobDetails, JobListOptions, JobListResult,
+// QueueStats) are imported from @abe-stack/shared — see top of file.

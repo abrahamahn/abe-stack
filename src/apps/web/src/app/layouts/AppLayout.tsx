@@ -1,5 +1,12 @@
 // src/apps/web/src/app/layouts/AppLayout.tsx
-import { Outlet, ResizablePanelGroup, useContrast, useDensity, useSidePeek } from '@abe-stack/ui';
+import {
+  useContrast,
+  useDensity,
+  useSidePeek,
+  type AuthMode,
+} from '@abe-stack/react/hooks';
+import { Outlet } from '@abe-stack/react/router';
+import { ResizablePanelGroup } from '@abe-stack/ui';
 import { AuthModal, NewDeviceBanner } from '@auth/components';
 import { useAuth } from '@auth/hooks';
 import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
@@ -13,7 +20,6 @@ import { AppRightInfo } from './AppRightInfo';
 import { AppSidePeekLayout } from './AppSidePeekLayout';
 import { AppTopLayout } from './AppTopLayout';
 
-import type { AuthMode } from '@abe-stack/ui';
 import type { ReactElement, ReactNode } from 'react';
 
 export interface AppLayoutProps {

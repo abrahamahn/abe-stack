@@ -11,46 +11,7 @@
  */
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
-
-// ============================================================================
-// Logger Interface (Transition Alias)
-// ============================================================================
-
-/**
- * Logger interface for notification operations.
- *
- * Extends the shared `Logger` contract with a required `child` method.
- * The contracts `Logger` marks `child` as optional; the notification module
- * requires it for structured logging with notification context bindings.
- *
- * @complexity O(1) per log call
- */
-export interface NotificationLogger extends Logger {
-  /** Log an info-level message */
-  info(msg: string, data?: Record<string, unknown>): void;
-  /** Log an info-level message with structured data first (Pino convention) */
-  info(data: Record<string, unknown>, msg: string): void;
-  /** Log a warn-level message */
-  warn(msg: string, data?: Record<string, unknown>): void;
-  /** Log a warn-level message with structured data first (Pino convention) */
-  warn(data: Record<string, unknown>, msg: string): void;
-  /** Log an error-level message */
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  /** Log an error-level message with structured data first (Pino convention) */
-  error(data: unknown, msg?: string): void;
-  /** Log a debug-level message */
-  debug(msg: string, data?: Record<string, unknown>): void;
-  /** Log a debug-level message with structured data first (Pino convention) */
-  debug(data: Record<string, unknown>, msg: string): void;
-  /**
-   * Create a child logger with additional bindings.
-   *
-   * @param bindings - Key-value pairs to include in all child log entries
-   * @returns A new logger instance with the specified bindings
-   */
-  child(bindings: Record<string, unknown>): NotificationLogger;
-}
+import type { BaseContext, RequestContext, ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Context Interfaces
@@ -70,7 +31,7 @@ export interface NotificationModuleDeps extends BaseContext {
   /** Repository container for typed data access */
   readonly repos: Repositories;
   /** Logger instance for structured logging */
-  readonly log: NotificationLogger;
+  readonly log: ServerLogger;
 }
 
 // ============================================================================

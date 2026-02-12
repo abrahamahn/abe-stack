@@ -1,5 +1,6 @@
 // src/apps/web/src/pages/NotFoundPage.tsx
-import { EmptyState, PageContainer, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { EmptyState, PageContainer } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 

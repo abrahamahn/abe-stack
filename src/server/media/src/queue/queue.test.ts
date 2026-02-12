@@ -128,7 +128,9 @@ describe('CustomJobQueue', () => {
       // Only one start log
       const startCalls = vi
         .mocked(logger.info)
-        .mock.calls.filter((call: [string, unknown?]) => call[0] === 'Job queue started');
+        .mock.calls.filter(
+          (call) => typeof call[0] === 'string' && call[0] === 'Job queue started',
+        );
       expect(startCalls.length).toBe(1);
     });
   });

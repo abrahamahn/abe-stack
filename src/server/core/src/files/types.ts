@@ -13,7 +13,7 @@
 import { LIMITS } from '@abe-stack/shared';
 
 import type { FileRepository } from '@abe-stack/db';
-import type { BaseContext, HasStorage, RequestContext } from '@abe-stack/shared/core';
+import type { BaseContext, HasStorage } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Storage Interface
@@ -83,16 +83,6 @@ export interface FileAppContext extends BaseContext, HasStorage {
     readonly files: FileRepository;
   };
 }
-
-// ============================================================================
-// Request Context
-// ============================================================================
-
-/**
- * Request interface for file handlers.
- * Re-exports `RequestContext` from shared contracts for consistency.
- */
-export type FileRequest = RequestContext;
 
 // ============================================================================
 // Default Configuration

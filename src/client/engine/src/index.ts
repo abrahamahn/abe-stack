@@ -1,21 +1,4 @@
 // src/client/engine/src/index.ts
-// NOTE: This file is manually maintained after refactor
-
-// API Client
-export { createApiClient } from '@abe-stack/api';
-export type {
-  ApiClient,
-  ApiClientConfig,
-  ApiClientOptions,
-  AuthResponse,
-  LoginRequest,
-  OAuthConnectionsResponse,
-  OAuthEnabledProvidersResponse,
-  OAuthProvider,
-  OAuthUnlinkResponse,
-  RegisterRequest,
-  User,
-} from '@abe-stack/api';
 
 // In-Memory Cache
 export { Loader, LoaderCache, loadWithCache } from './cache/LoaderCache';
@@ -27,12 +10,13 @@ export type {
   RecordCacheOptions,
   RecordChange,
   RecordChangeListener,
-  RecordPointer,
   SetRecordOptions,
   TableMap,
 } from './cache/RecordCache';
 
-// Offline Support
+// Shared types (used alongside engine's realtime features)
+export type { RecordPointer, VersionedRecord } from '@abe-stack/shared';
+
 // Offline Support
 export { createTransactionQueue, TransactionQueue } from './offline/TransactionQueue';
 export type {
@@ -44,9 +28,7 @@ export type {
 } from './offline/TransactionQueue';
 
 // Real-Time
-// Real-Time
 export {
-  // WebSocket Client
   WebsocketPubsubClient,
   type ClientPubsubMessage,
   type ConnectionState,
@@ -58,7 +40,6 @@ export {
 export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime/SubscriptionCache';
 
 export {
-  // React Context
   RealtimeProvider,
   useRealtime,
   type RealtimeContextValue,
@@ -70,7 +51,6 @@ export {
 } from './realtime/RealtimeContext';
 
 export {
-  // React Hooks
   useConnectionState,
   useIsOnline,
   useIsPendingWrite,
@@ -87,7 +67,6 @@ export {
 } from './realtime/hooks';
 
 // Persistent Storage
-// Persistent Storage
 export {
   createRecordMap,
   createRecordStorage,
@@ -102,7 +81,6 @@ export type {
   RecordStorageListener,
   RecordStorageOptions,
   RecordWithTable,
-  VersionedRecord,
 } from './storage/RecordStorage';
 
 export { clear, createStore, del, get, keys, set, type IDBStore } from './storage/idb';
@@ -124,7 +102,6 @@ export {
 } from './storage/mutationQueue';
 
 // Undo/Redo
-// Undo/Redo
 export { createUndoRedoStack, UndoRedoStack } from './undo/UndoRedoStack';
 export type {
   OperationGroup,
@@ -133,7 +110,6 @@ export type {
   UndoRedoState,
 } from './undo/UndoRedoStack';
 
-// Query Cache
 // Query Cache
 export { hashQueryKey, QueryCache, queryKeysEqual } from './query/QueryCache';
 export type {
@@ -161,89 +137,14 @@ export type { UseQueryOptions, UseQueryResult } from './query/useQuery';
 export { queryKeys } from './queryKeys';
 export type { PostListFilters, QueryKeys, UserListFilters } from './queryKeys';
 
-// Errors
+// Search (client-specific)
 export {
-  ApiError,
-  createApiError,
-  getErrorMessage,
-  isApiError,
-  isNetworkError,
-  isTimeoutError,
-  isUnauthorizedError,
-  NetworkError,
-  TimeoutError,
-} from '@abe-stack/api';
-export type { ApiErrorBody } from '@abe-stack/api';
-
-// Notifications (Push)
-export {
-  // Client
-  createNotificationClient,
-  getDeviceId,
-  getExistingSubscription,
-  getPushPermission,
-  isPushSupported,
-  requestPushPermission,
-  subscribeToPush,
-  unsubscribeFromPush,
-  urlBase64ToUint8Array,
-  // Hooks
-  useNotificationPreferences,
-  usePushPermission,
-  usePushSubscription,
-  useTestNotification,
-} from '@abe-stack/api';
-export type {
-  NotificationClient,
-  NotificationClientConfig,
-  NotificationPreferencesState,
-  PushPermissionState,
-  PushSubscriptionState,
-  TestNotificationState,
-  UseNotificationPreferencesOptions,
-  UsePushSubscriptionOptions,
-} from '@abe-stack/api';
-
-// Search
-// Search
-export {
-  // Query Builder
   ClientSearchQueryBuilder,
-  contains,
   createClientSearchQuery,
-  createSearchQuery,
-  eq,
   fromClientSearchQuery,
-  fromSearchQuery,
-  gt,
-  inArray,
-  lt,
-  neq,
-  queryToURLSearchParams,
-  SearchQueryBuilder,
-  urlSearchParamsToQuery,
 } from './search/query-builder';
 
 export {
-  // URL Serialization
-  buildURLWithQuery,
-  deserializeFromHash,
-  deserializeFromJSON,
-  deserializeFromURLParams,
-  extractQueryFromURL,
-  mergeSearchParamsIntoURL,
-  serializeToHash,
-  serializeToJSON,
-  serializeToURLParams,
-} from './search/serialization';
-export type {
-  SerializationOptions,
-  SerializedFilter,
-  SerializedQuery,
-} from './search/serialization';
-
-export {
-  // Hooks
   useDebounceSearch,
   useInfiniteSearch,
   useSearch,
@@ -257,41 +158,3 @@ export type {
   UseSearchOptions,
   UseSearchResult,
 } from './search/hooks';
-
-// Billing
-export {
-  // Hooks
-  billingQueryKeys,
-  // Admin Client
-  createAdminBillingClient,
-  // Client
-  createBillingClient,
-  useAdminPlans,
-  useInvoices,
-  usePaymentMethods,
-  usePlans,
-  useSubscription,
-} from '@abe-stack/api';
-export type {
-  // Admin Types
-  AdminBillingClient,
-  AdminBillingClientConfig,
-  AdminPlansState,
-  // Client Types
-  BillingClient,
-  BillingClientConfig,
-  // Hook State Types
-  InvoicesState,
-  PaymentMethodsState,
-  PlansState,
-  SubscriptionState,
-} from '@abe-stack/api';
-
-// OAuth
-export {
-  getOAuthLoginUrl,
-  oauthQueryKeys,
-  useEnabledOAuthProviders,
-  useOAuthConnections,
-} from '@abe-stack/api';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from '@abe-stack/api';

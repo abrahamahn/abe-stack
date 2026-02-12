@@ -7,7 +7,8 @@
  */
 
 import { formatDate } from '@abe-stack/shared';
-import { Badge, Button, Card, Heading, Skeleton, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Badge, Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 
 import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
 

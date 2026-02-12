@@ -8,7 +8,12 @@
  * @module
  */
 
-import { calculateOffsetPaginationMetadata, canonicalizeEmail } from '@abe-stack/shared';
+import {
+  calculateOffsetPaginationMetadata,
+  canonicalizeEmail,
+  type PaginatedResult,
+  type UserStatus,
+} from '@abe-stack/shared';
 
 import {
   and,
@@ -37,19 +42,13 @@ import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { SqlFragment } from '../../builder/index';
 import type { RawDb } from '../../client';
-import type { PaginatedResult } from '@abe-stack/shared';
 
 // ============================================================================
 // Admin User List Types
 // ============================================================================
 
-/**
- * User status for filtering admin user lists.
- * - 'active': email verified and not locked
- * - 'locked': locked_until is in the future
- * - 'unverified': email_verified is false
- */
-export type UserStatus = 'active' | 'locked' | 'unverified';
+// UserStatus imported from @abe-stack/shared (re-exported for consumers)
+export type { UserStatus };
 
 /**
  * Database-level filter options for listing users with pagination.

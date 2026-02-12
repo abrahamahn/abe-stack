@@ -27,7 +27,21 @@ export {
   type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
+  type VersionedRecord,
   type SetNowOperation,
   type SetOperation,
   type WriteResponse,
 } from './realtime.schemas';
+
+export {
+  PROTECTED_FIELDS,
+  REALTIME_ERRORS,
+  applyOperation,
+  applyOperations,
+  checkVersionConflicts,
+  getOperationPointers,
+  isFieldMutable,
+  setPath,
+  type ApplyOperationsResult,
+  type VersionConflict,
+} from './realtime.operations';

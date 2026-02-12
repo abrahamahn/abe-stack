@@ -45,7 +45,6 @@ export type {
   DeliverySummary,
   UpdateWebhookData,
   WebhookDispatchResult,
-  WebhooksLogger,
   WebhooksModuleDeps,
   WebhooksRequest,
   WebhookWithStats,

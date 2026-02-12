@@ -16,11 +16,5 @@ export { handleUploadFile, handleGetFile, handleDeleteFile, handleDownloadFile }
 export { fileRoutes } from './routes';
 
 // Types
-export type {
-  FileAppContext,
-  FileMetadata,
-  FileRequest,
-  FileStorageProvider,
-  FileUploadOptions,
-} from './types';
+export type { FileAppContext, FileMetadata, FileStorageProvider, FileUploadOptions } from './types';
 export { DEFAULT_ALLOWED_MIME_TYPES, DEFAULT_MAX_FILE_SIZE } from './types';

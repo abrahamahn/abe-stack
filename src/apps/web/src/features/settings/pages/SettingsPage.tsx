@@ -5,7 +5,8 @@
  * Main settings page with tabs for Profile, Security, Sessions, Preferences, and more.
  */
 
-import { Button, Card, Heading, Link, Skeleton, Tabs, Text } from '@abe-stack/ui';
+import { Link } from '@abe-stack/react/router';
+import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useMemo, type ReactElement } from 'react';
 

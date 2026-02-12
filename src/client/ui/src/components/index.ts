@@ -11,8 +11,6 @@ export { Dropdown } from './Dropdown';
 export { ErrorBoundary } from './ErrorBoundary';
 export type { ErrorBoundaryProps } from './ErrorBoundary';
 export { FocusTrap } from './FocusTrap';
-export { LiveRegion, useAnnounce } from '@abe-stack/react';
-export type { AnnouncePoliteness, LiveRegionProps, UseAnnounceResult } from '@abe-stack/react';
 export { FormField } from './FormField';
 export { Image } from './Image';
 export { LoadingContainer } from './LoadingContainer';
@@ -44,18 +42,3 @@ export {
   type SubscriptionStatusProps,
 } from './billing';
 
-// Re-export providers for backwards compatibility
-// Prefer importing directly from '@abe-stack/react/providers'
-export {
-  createMemoizedContext,
-  createSelectiveContext,
-  createReducerContext,
-  createLazyContext,
-  createSubscriptionContext,
-  Memoized,
-  SelectiveMemo,
-  useRenderPerformance,
-  type ThemeContextValue,
-  type UserState,
-  type UserAction,
-} from '@abe-stack/react/providers';

@@ -10,21 +10,17 @@
  * Similar pattern to audit_events in system.ts but user-facing.
  */
 
+import { ACTOR_TYPES, type ActorType } from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { ACTOR_TYPES };
+export type { ActorType };
+
 // ============================================================================
 // Table Names
 // ============================================================================
 
 export const ACTIVITIES_TABLE = 'activities';
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/** Types of actors that can generate activity entries */
-export type ActorType = 'user' | 'system' | 'api_key';
-
-/** All valid actor types */
-export const ACTOR_TYPES = ['user', 'system', 'api_key'] as const;
 
 // ============================================================================
 // Activity Types

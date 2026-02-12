@@ -12,11 +12,13 @@
  */
 
 import {
+  BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
   INVOICE_STATUSES,
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
   SUBSCRIPTION_STATUSES,
+  type BillingEventType,
   type BillingProvider,
   type InvoiceStatus,
   type PaymentMethodType,
@@ -26,13 +28,21 @@ import {
 
 // Re-export shared constants for consumers that import from schema
 export {
+  BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
   INVOICE_STATUSES,
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
   SUBSCRIPTION_STATUSES,
 };
-export type { BillingProvider, InvoiceStatus, PaymentMethodType, PlanInterval, SubscriptionStatus };
+export type {
+  BillingEventType,
+  BillingProvider,
+  InvoiceStatus,
+  PaymentMethodType,
+  PlanInterval,
+  SubscriptionStatus,
+};
 
 // ============================================================================
 // Table Names
@@ -44,28 +54,6 @@ export const CUSTOMER_MAPPINGS_TABLE = 'customer_mappings';
 export const INVOICES_TABLE = 'invoices';
 export const PAYMENT_METHODS_TABLE = 'payment_methods';
 export const BILLING_EVENTS_TABLE = 'billing_events';
-
-/**
- * Billing event types (normalized from provider webhooks)
- */
-export type BillingEventType =
-  | 'subscription.created'
-  | 'subscription.updated'
-  | 'subscription.canceled'
-  | 'invoice.paid'
-  | 'invoice.payment_failed'
-  | 'refund.created'
-  | 'chargeback.created';
-
-export const BILLING_EVENT_TYPES = [
-  'subscription.created',
-  'subscription.updated',
-  'subscription.canceled',
-  'invoice.paid',
-  'invoice.payment_failed',
-  'refund.created',
-  'chargeback.created',
-] as const;
 
 // ============================================================================
 // Plan Types

@@ -10,9 +10,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleStripeWebhook } from './stripe-webhook';
 
-import type { BillingLogger, WebhookRepositories } from '../types';
+import type { WebhookRepositories } from '../types';
 import type { NormalizedWebhookEvent } from '@abe-stack/shared';
 import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Mock Dependencies
@@ -79,18 +80,18 @@ function createMockRepositories(): WebhookRepositories {
 }
 
 /**
- * Create mock BillingLogger.
+ * Create mock ServerLogger.
  *
  * @returns Mocked logger
  * @complexity O(1)
  */
-function createMockLogger(): BillingLogger {
+function createMockLogger(): ServerLogger {
   return {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
     child: vi.fn(),
-  } as unknown as BillingLogger;
+  } as unknown as ServerLogger;
 }
 
 /**
@@ -129,7 +130,7 @@ function createNormalizedEvent(
 describe('handleStripeWebhook', () => {
   let mockConfig: StripeConfig;
   let mockRepos: WebhookRepositories;
-  let mockLog: BillingLogger;
+  let mockLog: ServerLogger;
   let payload: Buffer;
   let signature: string;
 

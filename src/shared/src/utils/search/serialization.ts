@@ -1,28 +1,26 @@
-// src/client/engine/src/search/serialization.ts
+// src/shared/src/utils/search/serialization.ts
 /**
  * Search Query Serialization
  *
  * Utilities for serializing/deserializing search queries to/from
  * URL parameters, JSON, and other formats.
+ * Framework-agnostic — works in browser and Node.js.
  */
 
-import {
-  type CompoundFilter,
-  type FilterCondition,
-  type FilterOperator,
-  type FilterValue,
-  type SearchQuery,
-  type SortConfig,
-  SORT_ORDER,
-} from '@abe-stack/shared';
+import type {
+  CompoundFilter,
+  FilterCondition,
+  FilterOperator,
+  FilterValue,
+  SearchQuery,
+  SortConfig,
+} from './types';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-/**
- * Serialized filter format for URL transport.
- */
+/** Serialized filter format for URL transport. */
 export interface SerializedFilter {
   /** Field name (for simple filter) */
   f?: string;
@@ -38,9 +36,7 @@ export interface SerializedFilter {
   c?: SerializedFilter[];
 }
 
-/**
- * Serialized query format for URL transport.
- */
+/** Serialized query format for URL transport. */
 export interface SerializedQuery {
   /** Filters */
   f?: SerializedFilter;
@@ -64,9 +60,7 @@ export interface SerializedQuery {
   ic?: boolean;
 }
 
-/**
- * Options for serialization.
- */
+/** Options for serialization. */
 export interface SerializationOptions {
   /** Use compact keys (single-letter) */
   compact?: boolean;
@@ -80,9 +74,7 @@ export interface SerializationOptions {
 // URL Search Params Serialization
 // ============================================================================
 
-/**
- * Serialize a search query to URL search params.
- */
+/** Serialize a search query to URL search params. */
 export function serializeToURLParams<T = Record<string, unknown>>(
   query: SearchQuery<T>,
   options: SerializationOptions = {},
@@ -90,22 +82,18 @@ export function serializeToURLParams<T = Record<string, unknown>>(
   const params = new URLSearchParams();
   const { compact = false, includeDefaults = false } = options;
 
-  // Filters
   if (query.filters !== undefined) {
     const key = compact ? 'f' : 'filters';
-    params.set(key, JSON.stringify(serializeFilter(query.filters, compact)));
+    params.set(key, JSON.stringify(serializeFilter(query.filters)));
   }
 
-  // Sort
   if (query.sort !== undefined && query.sort.length > 0) {
     const key = compact ? 's' : 'sort';
     params.set(key, serializeSort(query.sort));
   }
 
-  // Search
   if (query.search !== undefined) {
-    const qKey = compact ? 'q' : 'q';
-    params.set(qKey, query.search.query);
+    params.set('q', query.search.query);
 
     if (query.search.fields !== undefined && query.search.fields.length > 0) {
       const sfKey = compact ? 'sf' : 'searchFields';
@@ -118,7 +106,6 @@ export function serializeToURLParams<T = Record<string, unknown>>(
     }
   }
 
-  // Pagination
   if (query.page !== undefined && (query.page !== 1 || includeDefaults)) {
     const key = compact ? 'p' : 'page';
     params.set(key, String(query.page));
@@ -134,13 +121,11 @@ export function serializeToURLParams<T = Record<string, unknown>>(
     params.set(key, query.cursor);
   }
 
-  // Select
   if (query.select !== undefined && query.select.length > 0) {
     const key = compact ? 'sl' : 'select';
     params.set(key, query.select.map(String).join(','));
   }
 
-  // Include count
   if (query.includeCount === true) {
     const key = compact ? 'ic' : 'includeCount';
     params.set(key, '1');
@@ -149,16 +134,13 @@ export function serializeToURLParams<T = Record<string, unknown>>(
   return params;
 }
 
-/**
- * Deserialize URL search params to a search query.
- */
+/** Deserialize URL search params to a search query. */
 export function deserializeFromURLParams<T = Record<string, unknown>>(
   params: URLSearchParams | string,
 ): SearchQuery<T> {
   const searchParams = typeof params === 'string' ? new URLSearchParams(params) : params;
   const query: SearchQuery<T> = {};
 
-  // Filters (try both compact and full keys)
   const filtersStr = searchParams.get('f') ?? searchParams.get('filters');
   if (filtersStr !== null && filtersStr !== '') {
     try {
@@ -168,13 +150,11 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
     }
   }
 
-  // Sort
   const sortStr = searchParams.get('s') ?? searchParams.get('sort');
   if (sortStr !== null && sortStr !== '') {
     query.sort = deserializeSort<T>(sortStr);
   }
 
-  // Search
   const searchQuery = searchParams.get('q');
   if (searchQuery !== null && searchQuery !== '') {
     query.search = { query: searchQuery };
@@ -193,7 +173,6 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
     }
   }
 
-  // Pagination
   const page = searchParams.get('p') ?? searchParams.get('page');
   if (page !== null && page !== '') {
     const parsed = parseInt(page, 10);
@@ -215,13 +194,11 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
     query.cursor = cursor;
   }
 
-  // Select
   const select = searchParams.get('sl') ?? searchParams.get('select');
   if (select !== null && select !== '') {
     query.select = select.split(',').filter(Boolean) as Array<keyof T | string>;
   }
 
-  // Include count
   const includeCount = searchParams.get('ic') ?? searchParams.get('includeCount');
   if (includeCount === '1' || includeCount === 'true') {
     query.includeCount = true;
@@ -234,9 +211,7 @@ export function deserializeFromURLParams<T = Record<string, unknown>>(
 // JSON Serialization
 // ============================================================================
 
-/**
- * Serialize a search query to JSON string.
- */
+/** Serialize a search query to JSON string. */
 export function serializeToJSON<T = Record<string, unknown>>(
   query: SearchQuery<T>,
   options: SerializationOptions = {},
@@ -251,9 +226,7 @@ export function serializeToJSON<T = Record<string, unknown>>(
   return json;
 }
 
-/**
- * Deserialize a search query from JSON string.
- */
+/** Deserialize a search query from JSON string. */
 export function deserializeFromJSON<T = Record<string, unknown>>(
   json: string,
   options: { base64?: boolean } = {},
@@ -269,14 +242,71 @@ export function deserializeFromJSON<T = Record<string, unknown>>(
 }
 
 // ============================================================================
+// URL Helpers
+// ============================================================================
+
+/** Merge search params into existing URL. */
+export function mergeSearchParamsIntoURL(url: string | URL, params: URLSearchParams): URL {
+  const urlObj = typeof url === 'string' ? new URL(url) : new URL(url.href);
+
+  params.forEach((value, key) => {
+    urlObj.searchParams.set(key, value);
+  });
+
+  return urlObj;
+}
+
+/** Extract search query from URL. */
+export function extractQueryFromURL<T = Record<string, unknown>>(
+  url: string | URL,
+): SearchQuery<T> {
+  const urlObj = typeof url === 'string' ? new URL(url) : url;
+  return deserializeFromURLParams<T>(urlObj.searchParams);
+}
+
+/** Build URL with search query. */
+export function buildURLWithQuery<T = Record<string, unknown>>(
+  baseUrl: string,
+  query: SearchQuery<T>,
+  options: SerializationOptions = {},
+): URL {
+  const url = new URL(baseUrl);
+  const params = serializeToURLParams(query, options);
+
+  params.forEach((value, key) => {
+    url.searchParams.set(key, value);
+  });
+
+  return url;
+}
+
+// ============================================================================
+// Hash-based State
+// ============================================================================
+
+/** Serialize query to URL hash (base64-encoded compact JSON). */
+export function serializeToHash<T = Record<string, unknown>>(query: SearchQuery<T>): string {
+  const serialized = serializeQuery(query, true);
+  return btoa(JSON.stringify(serialized));
+}
+
+/** Deserialize query from URL hash. */
+export function deserializeFromHash<T = Record<string, unknown>>(hash: string): SearchQuery<T> {
+  const cleaned = hash.startsWith('#') ? hash.slice(1) : hash;
+  const decoded = atob(cleaned);
+  const parsed = JSON.parse(decoded) as SerializedQuery;
+  return deserializeQuery<T>(parsed);
+}
+
+// ============================================================================
 // Internal Serialization Functions
 // ============================================================================
 
-function serializeQuery<T>(query: SearchQuery<T>, compact: boolean): SerializedQuery {
+function serializeQuery<T>(query: SearchQuery<T>, _compact: boolean): SerializedQuery {
   const result: SerializedQuery = {};
 
   if (query.filters !== undefined) {
-    result.f = serializeFilter(query.filters, compact);
+    result.f = serializeFilter(query.filters);
   }
 
   if (query.sort !== undefined && query.sort.length > 0) {
@@ -360,31 +390,22 @@ function deserializeQuery<T>(serialized: SerializedQuery): SearchQuery<T> {
   return query;
 }
 
-function serializeFilter<T>(
-  filter: FilterCondition<T> | CompoundFilter<T>,
-  compact: boolean,
-): SerializedFilter {
-  // Type guard for compound filter
+function serializeFilter<T>(filter: FilterCondition<T> | CompoundFilter<T>): SerializedFilter {
   if ('conditions' in filter) {
     return {
       op: filter.operator,
-      c: filter.conditions.map((c: FilterCondition<T> | CompoundFilter<T>) =>
-        serializeFilter(c, compact),
-      ),
+      c: filter.conditions.map((c: FilterCondition<T> | CompoundFilter<T>) => serializeFilter(c)),
     };
   }
 
-  // Filter is a condition
-  const condition = filter;
-
   const result: SerializedFilter = {
-    f: String(condition.field),
-    o: condition.operator,
-    v: serializeValue(condition.value),
+    f: String(filter.field),
+    o: filter.operator,
+    v: serializeValue(filter.value),
   };
 
-  if (condition.caseSensitive !== undefined) {
-    result.cs = condition.caseSensitive;
+  if (filter.caseSensitive !== undefined) {
+    result.cs = filter.caseSensitive;
   }
 
   return result;
@@ -411,26 +432,16 @@ function deserializeFilter<T>(
 }
 
 function serializeSort<T>(sort: SortConfig<T>[]): string {
-  return sort
-    .map((s) => {
-      const sortItem = s as { field: unknown; order: unknown };
-      return `${String(sortItem.field)}:${String(sortItem.order)}`;
-    })
-    .join(',');
+  return sort.map((s) => `${String(s.field)}:${s.order}`).join(',');
 }
 
 function deserializeSort<T>(sortStr: string): SortConfig<T>[] {
   return sortStr.split(',').map((s) => {
     const [field, order] = s.split(':');
-    const sortOrder = order === 'desc' ? SORT_ORDER : SORT_ORDER;
-    const result = {
+    return {
       field: field as keyof T,
-      order:
-        order === 'desc'
-          ? (sortOrder as { DESC: string }).DESC
-          : (sortOrder as { ASC: string }).ASC,
-    };
-    return result as unknown as SortConfig<T>;
+      order: order === 'desc' ? 'desc' : 'asc',
+    } as unknown as SortConfig<T>;
   });
 }
 
@@ -462,12 +473,10 @@ function deserializeValue(value: unknown): FilterValue {
   }
 
   if (typeof value === 'object') {
-    // Date
     if ('$d' in value && typeof (value as { $d: string }).$d === 'string') {
       return new Date((value as { $d: string }).$d);
     }
 
-    // Range
     if ('$r' in value) {
       const range = (value as { $r: { min: unknown; max: unknown } }).$r;
       return {
@@ -476,78 +485,10 @@ function deserializeValue(value: unknown): FilterValue {
       };
     }
 
-    // Array
     if (Array.isArray(value)) {
       return value.map(deserializeValue) as Array<string | number | boolean | Date | null>;
     }
   }
 
   return value as FilterValue;
-}
-
-// ============================================================================
-// URL Helpers
-// ============================================================================
-
-/**
- * Merge search params into existing URL.
- */
-export function mergeSearchParamsIntoURL(url: string | URL, params: URLSearchParams): URL {
-  const urlObj = typeof url === 'string' ? new URL(url) : new URL(url.href);
-
-  params.forEach((value, key) => {
-    urlObj.searchParams.set(key, value);
-  });
-
-  return urlObj;
-}
-
-/**
- * Extract search query from URL.
- */
-export function extractQueryFromURL<T = Record<string, unknown>>(
-  url: string | URL,
-): SearchQuery<T> {
-  const urlObj = typeof url === 'string' ? new URL(url) : url;
-  return deserializeFromURLParams<T>(urlObj.searchParams);
-}
-
-/**
- * Build URL with search query.
- */
-export function buildURLWithQuery<T = Record<string, unknown>>(
-  baseUrl: string,
-  query: SearchQuery<T>,
-  options: SerializationOptions = {},
-): URL {
-  const url = new URL(baseUrl);
-  const params = serializeToURLParams(query, options);
-
-  params.forEach((value, key) => {
-    url.searchParams.set(key, value);
-  });
-
-  return url;
-}
-
-// ============================================================================
-// Hash-based State
-// ============================================================================
-
-/**
- * Serialize query to URL hash.
- */
-export function serializeToHash<T = Record<string, unknown>>(query: SearchQuery<T>): string {
-  const serialized = serializeQuery(query, true);
-  return btoa(JSON.stringify(serialized));
-}
-
-/**
- * Deserialize query from URL hash.
- */
-export function deserializeFromHash<T = Record<string, unknown>>(hash: string): SearchQuery<T> {
-  const cleaned = hash.startsWith('#') ? hash.slice(1) : hash;
-  const decoded = atob(cleaned);
-  const parsed = JSON.parse(decoded) as SerializedQuery;
-  return deserializeQuery<T>(parsed);
 }

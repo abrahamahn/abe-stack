@@ -79,7 +79,6 @@ export {
 export type {
   TenantsEmailOptions,
   TenantsEmailTemplates,
-  TenantsLogger,
   TenantsModuleDeps,
   TenantsRequest,
 } from './types';

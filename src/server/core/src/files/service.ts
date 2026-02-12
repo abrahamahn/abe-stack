@@ -11,7 +11,10 @@
 import {
   BadRequestError,
   ForbiddenError,
+  generateFileId,
+  MIME_TO_EXT,
   NotFoundError,
+  sanitizeFilename,
   validateFileType,
 } from '@abe-stack/shared';
 
@@ -77,9 +80,9 @@ export async function uploadFile(
   }
 
   // Generate unique storage key
-  const extension = file.mimetype.split('/')[1] ?? 'bin';
-  const timestamp = Date.now();
-  const key = `${FILE_PATH_PREFIX}/${userId}/${String(timestamp)}.${extension}`;
+  const extension = MIME_TO_EXT[file.mimetype] ?? 'bin';
+  const fileId = generateFileId();
+  const key = `${FILE_PATH_PREFIX}/${userId}/${fileId}.${extension}`;
 
   // Upload to storage
   const storedKey = await storage.upload(key, file.buffer, file.mimetype);
@@ -91,8 +94,8 @@ export async function uploadFile(
   const newRecord: NewFileRecord = {
     userId,
     tenantId: tenantId ?? null,
-    filename: `${String(timestamp)}.${extension}`,
-    originalName: file.originalName,
+    filename: `${fileId}.${extension}`,
+    originalName: sanitizeFilename(file.originalName),
     mimeType: file.mimetype,
     sizeBytes: file.size,
     storageProvider: 'local',

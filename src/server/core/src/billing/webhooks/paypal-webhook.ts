@@ -11,12 +11,13 @@ import {
   MS_PER_DAY,
   WebhookEventAlreadyProcessedError,
   WebhookSignatureError,
+  type Logger as ServerLogger,
+  type NormalizedWebhookEvent,
 } from '@abe-stack/shared';
 
 import { PayPalProvider } from '../paypal-provider';
 
-import type { BillingLogger, WebhookRepositories, WebhookResult } from '../types';
-import type { NormalizedWebhookEvent } from '@abe-stack/shared';
+import type { WebhookRepositories, WebhookResult } from '../types';
 import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
@@ -44,7 +45,7 @@ export async function handlePayPalWebhook(
   signature: string,
   config: PayPalConfig,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<WebhookResult> {
   const provider = new PayPalProvider(config);
 
@@ -113,7 +114,7 @@ export async function handlePayPalWebhook(
 async function processEvent(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   switch (event.type) {
     case 'subscription.created':
@@ -168,7 +169,7 @@ async function processEvent(
 async function handleSubscriptionCreated(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId, customerId, status, metadata } = event.data;
 
@@ -261,7 +262,7 @@ async function handleSubscriptionCreated(
 async function handleSubscriptionUpdated(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId, status } = event.data;
 
@@ -338,7 +339,7 @@ async function handleSubscriptionUpdated(
 async function handleSubscriptionCanceled(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
@@ -380,7 +381,7 @@ async function handleSubscriptionCanceled(
 async function handleInvoicePaid(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { invoiceId, subscriptionId } = event.data;
 
@@ -481,7 +482,7 @@ async function handleInvoicePaid(
 async function handleInvoicePaymentFailed(
   event: NormalizedWebhookEvent,
   repos: WebhookRepositories,
-  log: BillingLogger,
+  log: ServerLogger,
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
@@ -531,7 +532,7 @@ async function handleInvoicePaymentFailed(
  * @param log - Logger for audit logging
  * @complexity O(1)
  */
-function handleRefundCreated(event: NormalizedWebhookEvent, log: BillingLogger): void {
+function handleRefundCreated(event: NormalizedWebhookEvent, log: ServerLogger): void {
   // Log refund event for auditing
   log.info({ eventId: event.id, customerId: event.data.customerId }, 'PayPal refund created');
 }
@@ -546,7 +547,7 @@ function handleRefundCreated(event: NormalizedWebhookEvent, log: BillingLogger):
  * @param log - Logger for audit logging
  * @complexity O(1)
  */
-function handleChargebackCreated(event: NormalizedWebhookEvent, log: BillingLogger): void {
+function handleChargebackCreated(event: NormalizedWebhookEvent, log: ServerLogger): void {
   // Log chargeback event for auditing - this is a serious event
   log.warn(
     { eventId: event.id, customerId: event.data.customerId },

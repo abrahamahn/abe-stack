@@ -7,30 +7,10 @@
  */
 
 import type { ErrorCode } from './constants';
+import type { Schema } from '../types/schema';
 
-// ============================================================================
-// Core Schema Interface
-// ============================================================================
-
-/**
- * Result type for safeParse operations.
- */
-export type SafeParseResult<T> = { success: true; data: T } | { success: false; error: Error };
-
-/**
- * Schema interface for validation.
- * Supports parse/safeParse for runtime validation.
- */
-export interface Schema<T> {
-  parse: (data: unknown) => T;
-  safeParse: (data: unknown) => SafeParseResult<T>;
-  _type: T; // Phantom type for inference
-}
-
-/**
- * Infer the type from a schema (similar to z.infer).
- */
-export type InferSchema<S> = S extends Schema<infer T> ? T : never;
+// Re-export schema types from L0
+export type { InferSchema, SafeParseResult, Schema } from '../types/schema';
 
 // ============================================================================
 // Endpoint Definitions
@@ -191,3 +171,6 @@ export interface Logger {
   fatal?(data: Record<string, unknown>, msg: string): void;
   child?(bindings: Record<string, unknown>): Logger;
 }
+
+/** Backward-compatible alias used by server packages. */
+export type ServerLogger = Logger;

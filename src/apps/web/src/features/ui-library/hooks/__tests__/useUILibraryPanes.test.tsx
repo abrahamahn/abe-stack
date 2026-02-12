@@ -16,8 +16,8 @@ const defaultPaneConfig: UILibraryPaneConfig = {
 // Create a mock function for useMediaQuery
 const mockUseMediaQuery = vi.fn();
 
-// Mock @abe-stack/ui
-vi.mock('@abe-stack/ui', () => ({
+// Mock @abe-stack/react/hooks
+vi.mock('@abe-stack/react/hooks', () => ({
   useLocalStorage: vi.fn((_key: string, defaultValue: unknown) => {
     const [value, setValue] = useState(defaultValue);
     return [value, setValue];

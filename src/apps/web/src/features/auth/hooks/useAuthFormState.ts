@@ -1,8 +1,6 @@
 // src/apps/web/src/features/auth/hooks/useAuthFormState.ts
-// Re-export from @abe-stack/ui for backwards compatibility
-import { useFormState } from '@abe-stack/ui';
-
-import type { FormState } from '@abe-stack/ui';
+// Re-export from @abe-stack/react/hooks for backwards compatibility
+import { useFormState, type FormState } from '@abe-stack/react/hooks';
 
 /**
  * Auth-specific alias for useFormState.

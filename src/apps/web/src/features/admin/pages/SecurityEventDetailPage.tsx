@@ -5,7 +5,8 @@
  * Admin page for viewing a single security event in detail.
  */
 
-import { Alert, Button, Heading, PageContainer, Text, useNavigate, useParams } from '@abe-stack/ui';
+import { useNavigate, useParams } from '@abe-stack/react/router';
+import { Alert, Button, Heading, PageContainer, Text } from '@abe-stack/ui';
 
 import { SecurityEventCard } from '../components';
 import { useSecurityEvent } from '../hooks';

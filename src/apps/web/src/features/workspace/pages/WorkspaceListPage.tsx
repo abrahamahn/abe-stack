@@ -6,7 +6,8 @@
  */
 
 import { toastStore } from '@abe-stack/react';
-import { Button, Heading, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Button, Heading, Text } from '@abe-stack/ui';
 import { useState, type ReactElement } from 'react';
 
 import { CreateWorkspaceDialog, WorkspaceList } from '../components';

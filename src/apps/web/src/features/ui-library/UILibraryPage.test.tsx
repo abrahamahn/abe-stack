@@ -1,5 +1,5 @@
 // src/apps/web/src/features/ui-library/UILibraryPage.test.tsx
-import { MemoryRouter } from '@abe-stack/ui';
+import { MemoryRouter } from '@abe-stack/react/router';
 import { AppLayoutContext } from '@app/layouts';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createElement, useCallback, useMemo, useState } from 'react';

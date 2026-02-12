@@ -8,16 +8,16 @@
  * @module @abe-stack/server-engine/search
  */
 
-import { createSqlSearchProvider } from './sql-provider';
-
-import type { SqlSearchProvider } from './sql-provider';
-import type {
-  SearchProviderType,
-  ServerSearchProvider,
-  SqlSearchProviderConfig,
-  SqlTableConfig,
-} from './types';
-import type { DbClient, Repositories } from '@abe-stack/db';
+import {
+  createSqlSearchProvider,
+  type DbClient,
+  type Repositories,
+  type SearchProviderType,
+  type ServerSearchProvider,
+  type SqlSearchProvider,
+  type SqlSearchProviderConfig,
+  type SqlTableConfig,
+} from '@abe-stack/db';
 
 // ============================================================================
 // Factory Types

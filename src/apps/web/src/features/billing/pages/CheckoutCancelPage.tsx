@@ -3,7 +3,8 @@
  * CheckoutCancelPage - Displayed after checkout is canceled.
  */
 
-import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 

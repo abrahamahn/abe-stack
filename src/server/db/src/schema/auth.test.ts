@@ -31,7 +31,7 @@ import {
   SECURITY_EVENT_COLUMNS,
   SECURITY_EVENTS_TABLE,
   type SecurityEvent,
-  type SecurityEventSeverity,
+  type SecuritySeverity,
   type SecurityEventType,
   TOTP_BACKUP_CODES_TABLE,
   TOTP_BACKUP_CODE_COLUMNS,
@@ -703,7 +703,7 @@ describe('Auth Schema - SecurityEvent Type', () => {
   });
 
   test('should accept all severity levels', () => {
-    const severities: SecurityEventSeverity[] = ['low', 'medium', 'high', 'critical'];
+    const severities: SecuritySeverity[] = ['low', 'medium', 'high', 'critical'];
 
     severities.forEach((severity, index) => {
       const event: SecurityEvent = {
@@ -844,7 +844,7 @@ describe('Auth Schema - NewSecurityEvent Type', () => {
 
 describe('Auth Schema - SecurityEventSeverity Type', () => {
   test('should only allow valid severity values', () => {
-    const validSeverities: SecurityEventSeverity[] = ['low', 'medium', 'high', 'critical'];
+    const validSeverities: SecuritySeverity[] = ['low', 'medium', 'high', 'critical'];
 
     validSeverities.forEach((severity) => {
       const event: Pick<SecurityEvent, 'severity'> = { severity };
@@ -853,7 +853,7 @@ describe('Auth Schema - SecurityEventSeverity Type', () => {
   });
 
   test('should have exactly 4 severity levels', () => {
-    const severities: SecurityEventSeverity[] = ['low', 'medium', 'high', 'critical'];
+    const severities: SecuritySeverity[] = ['low', 'medium', 'high', 'critical'];
     const uniqueSeverities = new Set(severities);
 
     expect(uniqueSeverities.size).toBe(4);

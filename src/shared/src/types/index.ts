@@ -1,6 +1,35 @@
 // src/shared/src/types/index.ts
 
 export {
+  UUID_REGEX,
+  URL_REGEX,
+  coerceDate,
+  coerceNumber,
+  createArraySchema,
+  createBrandedStringSchema,
+  createBrandedUuidSchema,
+  createEnumSchema,
+  createLiteralSchema,
+  createSchema,
+  createUnionSchema,
+  parseBoolean,
+  parseNullable,
+  parseNullableOptional,
+  parseNumber,
+  parseObject,
+  parseOptional,
+  parseRecord,
+  parseString,
+  parseTypedRecord,
+  withDefault,
+  type InferSchema,
+  type ParseNumberOptions,
+  type ParseStringOptions,
+  type SafeParseResult,
+  type Schema,
+} from './schema';
+
+export {
   auditEventIdSchema,
   consentLogIdSchema,
   inviteIdSchema,

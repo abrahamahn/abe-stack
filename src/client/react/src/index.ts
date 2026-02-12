@@ -184,18 +184,6 @@ export type {
 } from './components/LiveRegion';
 
 // ============================================================================
-// Theme
-// ============================================================================
-
-export {
-  DEFAULT_CONTRAST_MODE,
-  getContrastCssVariables,
-  highContrastDarkOverrides,
-  highContrastLightOverrides,
-} from './theme/contrast';
-export type { ContrastMode } from './theme/contrast';
-
-// ============================================================================
 // Utils
 // ============================================================================
 

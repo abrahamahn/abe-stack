@@ -10,7 +10,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { registerScheduledTasks, stopScheduledTasks } from './service';
 
-import type { ScheduledTaskLogger } from './types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 import type { Repositories } from '@abe-stack/db';
 
 // ============================================================================
@@ -53,8 +53,8 @@ function createMockRepos(): Repositories {
   } as unknown as Repositories;
 }
 
-function createMockLogger(): ScheduledTaskLogger {
-  const logger: ScheduledTaskLogger = {
+function createMockLogger(): ServerLogger {
+  const logger: ServerLogger = {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
@@ -70,7 +70,7 @@ function createMockLogger(): ScheduledTaskLogger {
 
 describe('registerScheduledTasks', () => {
   let repos: Repositories;
-  let log: ScheduledTaskLogger;
+  let log: ServerLogger;
 
   beforeEach(() => {
     repos = createMockRepos();
@@ -101,7 +101,7 @@ describe('registerScheduledTasks', () => {
 
 describe('stopScheduledTasks', () => {
   let repos: Repositories;
-  let log: ScheduledTaskLogger;
+  let log: ServerLogger;
 
   beforeEach(() => {
     repos = createMockRepos();

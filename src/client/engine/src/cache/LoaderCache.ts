@@ -1,9 +1,11 @@
 // src/client/engine/src/cache/LoaderCache.ts
 
+import { MS_PER_MINUTE } from '@abe-stack/shared';
+
 /**
  * Default TTL for cached entries (5 minutes).
  */
-const DEFAULT_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_TTL_MS = 5 * MS_PER_MINUTE;
 
 /**
  * Represents the state of a Loader.

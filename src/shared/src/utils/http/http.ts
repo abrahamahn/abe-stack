@@ -1,6 +1,6 @@
 // src/shared/src/utils/http/http.ts
 
-import { isSafeObjectKey } from '../../core/guard';
+import { isSafeObjectKey } from '../guard';
 
 export interface CookieOptions {
   path?: string;

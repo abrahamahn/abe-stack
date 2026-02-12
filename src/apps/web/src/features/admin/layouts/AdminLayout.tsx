@@ -6,16 +6,13 @@
  * and renders child routes in the main content area.
  */
 
+import { Navigate, Outlet, useLocation, useNavigate } from '@abe-stack/react/router';
 import {
   Button,
   Heading,
   LeftSidebarLayout,
-  Navigate,
-  Outlet,
   ScrollArea,
   Text,
-  useLocation,
-  useNavigate,
 } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 

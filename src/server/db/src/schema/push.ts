@@ -5,9 +5,15 @@
  * Explicit TypeScript interfaces for push notifications.
  */
 
-import type { NotificationChannel, NotificationType } from '@abe-stack/shared';
+import {
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  type NotificationChannel,
+  type NotificationType,
+  type NotificationTypePreference,
+} from '@abe-stack/shared';
 
-export type { NotificationChannel, NotificationType };
+export { DEFAULT_NOTIFICATION_PREFERENCES };
+export type { NotificationChannel, NotificationType, NotificationTypePreference };
 
 // ============================================================================
 // Table Names
@@ -77,14 +83,15 @@ export const PUSH_SUBSCRIPTION_COLUMNS = {
 // ============================================================================
 
 /**
- * Type preference structure stored as JSONB
+ * Type preference structure stored as JSONB.
+ * Uses shared NotificationTypePreference for each notification type.
  */
 export interface TypePreferences {
-  system: { enabled: boolean; channels: NotificationChannel[] };
-  security: { enabled: boolean; channels: NotificationChannel[] };
-  marketing: { enabled: boolean; channels: NotificationChannel[] };
-  social: { enabled: boolean; channels: NotificationChannel[] };
-  transactional: { enabled: boolean; channels: NotificationChannel[] };
+  system: NotificationTypePreference;
+  security: NotificationTypePreference;
+  marketing: NotificationTypePreference;
+  social: NotificationTypePreference;
+  transactional: NotificationTypePreference;
 }
 
 /**
@@ -97,26 +104,11 @@ export interface QuietHoursConfig {
   timezone: string; // IANA timezone
 }
 
-/**
- * Default quiet hours configuration
- */
-export const DEFAULT_QUIET_HOURS: QuietHoursConfig = {
-  enabled: false,
-  startHour: 22,
-  endHour: 8,
-  timezone: 'UTC',
-};
+/** Default quiet hours (derived from shared DEFAULT_NOTIFICATION_PREFERENCES) */
+export const DEFAULT_QUIET_HOURS: QuietHoursConfig = DEFAULT_NOTIFICATION_PREFERENCES.quietHours;
 
-/**
- * Default type preferences
- */
-export const DEFAULT_TYPE_PREFERENCES: TypePreferences = {
-  system: { enabled: true, channels: ['push', 'email', 'in_app'] },
-  security: { enabled: true, channels: ['push', 'email', 'in_app'] },
-  marketing: { enabled: false, channels: ['email'] },
-  social: { enabled: true, channels: ['push', 'in_app'] },
-  transactional: { enabled: true, channels: ['push', 'email', 'in_app'] },
-};
+/** Default type preferences (derived from shared DEFAULT_NOTIFICATION_PREFERENCES) */
+export const DEFAULT_TYPE_PREFERENCES: TypePreferences = DEFAULT_NOTIFICATION_PREFERENCES.types;
 
 /**
  * Notification preference record (SELECT result)

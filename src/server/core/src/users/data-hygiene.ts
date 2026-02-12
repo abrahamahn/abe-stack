@@ -23,7 +23,7 @@ import {
 } from '@abe-stack/db';
 import { RETENTION_PERIODS } from '@abe-stack/shared';
 
-import type { UsersLogger } from './types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Soft-Delete Checks
@@ -90,7 +90,7 @@ export interface HardDeleteResult {
  */
 export async function hardDeleteAnonymizedUsers(
   db: DbClient,
-  log: UsersLogger,
+  log: ServerLogger,
   retentionDays: number = RETENTION_PERIODS.HARD_DELETE_DAYS,
 ): Promise<HardDeleteResult> {
   const cutoff = new Date();

@@ -15,6 +15,7 @@ import {
   type BillingClientConfig,
 } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
+import { useNavigate } from '@abe-stack/react/router';
 import {
   Button,
   Card,
@@ -27,7 +28,6 @@ import {
   Skeleton,
   SubscriptionStatus,
   Text,
-  useNavigate,
 } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';

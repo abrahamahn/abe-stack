@@ -10,25 +10,17 @@
 import {
   AUDIT_CATEGORIES,
   AUDIT_SEVERITIES,
+  JOB_STATUSES,
   WEBHOOK_DELIVERY_STATUSES,
   type AuditCategory,
   type AuditSeverity,
+  type JobStatus,
   type WebhookDeliveryStatus,
 } from '@abe-stack/shared';
 
 // Re-export shared constants for consumers that import from schema
-export { AUDIT_CATEGORIES, AUDIT_SEVERITIES, WEBHOOK_DELIVERY_STATUSES };
-export type { AuditCategory, AuditSeverity, WebhookDeliveryStatus };
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/** Lifecycle states for a background job */
-export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'dead';
-
-/** All valid job statuses (DB-specific; differs from shared domain JOB_STATUSES) */
-export const JOB_STATUSES = ['pending', 'processing', 'completed', 'failed', 'dead'] as const;
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES, JOB_STATUSES, WEBHOOK_DELIVERY_STATUSES };
+export type { AuditCategory, AuditSeverity, JobStatus, WebhookDeliveryStatus };
 
 // ============================================================================
 // Table Names

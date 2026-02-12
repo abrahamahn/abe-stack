@@ -7,7 +7,7 @@
  * @complexity O(1) per test - all operations are single-entity lookups/updates
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   changePassword,
@@ -388,12 +388,6 @@ describe('uploadAvatar', () => {
     mockRepos = createMockRepos();
     mockStorage = createMockStorage();
     vi.clearAllMocks();
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('should upload JPEG avatar and update user', async () => {
@@ -404,14 +398,16 @@ describe('uploadAvatar', () => {
       size: 1024 * 500, // 500KB
     };
 
+    const avatarKeyPattern = /^avatars\/user-123\/[a-f0-9]{32}\.jpg$/;
+
     vi.mocked(mockRepos.users.findById).mockResolvedValue(mockUser);
-    vi.mocked(mockStorage.upload).mockResolvedValue('avatars/user-123/1705320000000.jpeg');
+    vi.mocked(mockStorage.upload).mockImplementation((key) => Promise.resolve(key));
     vi.mocked(mockStorage.getSignedUrl).mockResolvedValue(
-      'https://storage.example.com/avatars/user-123/1705320000000.jpeg?signature=abc123',
+      'https://storage.example.com/signed-avatar-url',
     );
     vi.mocked(mockRepos.users.update).mockResolvedValue(
       createMockUser({
-        avatarUrl: 'avatars/user-123/1705320000000.jpeg',
+        avatarUrl: 'avatars/user-123/test.jpg',
       }),
     );
 
@@ -419,13 +415,11 @@ describe('uploadAvatar', () => {
 
     expect(mockRepos.users.findById).toHaveBeenCalledWith(mockUser.id);
     expect(mockStorage.upload).toHaveBeenCalledWith(
-      'avatars/user-123/1705320000000.jpeg',
+      expect.stringMatching(avatarKeyPattern),
       fileBuffer,
       'image/jpeg',
     );
-    expect(result).toBe(
-      'https://storage.example.com/avatars/user-123/1705320000000.jpeg?signature=abc123',
-    );
+    expect(result).toBe('https://storage.example.com/signed-avatar-url');
   });
 
   it('should throw NotFoundError when user does not exist', async () => {

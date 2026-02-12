@@ -238,9 +238,15 @@ export const transactionSchema: Schema<RealtimeTransaction> = createSchema((data
 // ============================================================================
 
 /** Points to a specific record by table and ID */
-export interface RecordPointer {
-  table: string;
+export interface RecordPointer<T extends string = string> {
+  table: T;
   id: string;
+}
+
+/** Base interface for versioned records (id + version) */
+export interface VersionedRecord {
+  id: string;
+  version: number;
 }
 
 /** @complexity O(1) */
@@ -260,9 +266,7 @@ export const recordPointerSchema: Schema<RecordPointer> = createSchema((data: un
 // ============================================================================
 
 /** A record with required id and version fields */
-export interface RealtimeRecord {
-  id: string;
-  version: number;
+export interface RealtimeRecord extends VersionedRecord {
   [key: string]: unknown;
 }
 

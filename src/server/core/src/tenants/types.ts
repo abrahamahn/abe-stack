@@ -11,27 +11,7 @@
 import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
-
-// ============================================================================
-// Logger Interface
-// ============================================================================
-
-/**
- * Logger interface used by the tenants module.
- * Extends the shared Logger contract with required child method.
- */
-export interface TenantsLogger extends Logger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  info(data: Record<string, unknown>, msg: string): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  warn(data: Record<string, unknown>, msg: string): void;
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  error(data: unknown, msg?: string): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
-  debug(data: Record<string, unknown>, msg: string): void;
-  child(bindings: Record<string, unknown>): TenantsLogger;
-}
+import type { BaseContext, RequestContext, ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Request Types
@@ -77,7 +57,7 @@ export interface TenantsModuleDeps extends BaseContext {
   /** Repository layer for structured database access */
   readonly repos: Repositories;
   /** Logger instance for tenants module logging */
-  readonly log: TenantsLogger;
+  readonly log: ServerLogger;
   /** Email service for sending invitation emails (optional — gracefully skipped when absent) */
   readonly mailer?: { send(options: TenantsEmailOptions): Promise<unknown> };
   /** Email templates for workspace notifications (optional) */

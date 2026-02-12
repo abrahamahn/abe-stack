@@ -5,35 +5,10 @@
  * Centralized constants for the entire application, including HTTP status codes,
  * application-wide limits, and standard error codes.
  */
-export const HTTP_STATUS = {
-  // Success
-  OK: 200,
-  CREATED: 201,
-  ACCEPTED: 202,
-  NO_CONTENT: 204,
 
-  // Client Errors (4xx)
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  PAYLOAD_TOO_LARGE: 413,
-  UNPROCESSABLE_ENTITY: 422,
-  TOO_MANY_REQUESTS: 429,
-
-  // Server Errors (5xx)
-  INTERNAL_SERVER_ERROR: 500,
-  NOT_IMPLEMENTED: 501,
-  BAD_GATEWAY: 502,
-  SERVICE_UNAVAILABLE: 503,
-  GATEWAY_TIMEOUT: 504,
-} as const;
-
-/**
- * Union type of all HTTP status code values
- */
-export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
+// Re-export L0 constants
+export { HTTP_STATUS, type HttpStatusCode } from '../utils/constants/http-status';
+export { ERROR_CODES, ERROR_MESSAGES, type ErrorCode } from '../utils/constants/error-codes';
 
 /**
  * Application Limits
@@ -47,73 +22,6 @@ export const LIMITS = {
 
 /** Default HTTP request body size limit (1MB) */
 export const HTTP_BODY_LIMIT = 1024 * 1024;
-
-/**
- * Application Error Codes
- */
-export const ERROR_CODES = {
-  // Generic
-  INTERNAL_ERROR: 'INTERNAL_ERROR',
-  BAD_REQUEST: 'BAD_REQUEST',
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
-  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
-  CONFIGURATION_ERROR: 'CONFIGURATION_ERROR',
-  CONFLICT: 'CONFLICT',
-
-  // Auth
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  FORBIDDEN: 'FORBIDDEN',
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
-  TOKEN_REUSED: 'TOKEN_REUSED',
-  INVALID_TOKEN: 'INVALID_TOKEN',
-  EMAIL_ALREADY_EXISTS: 'EMAIL_ALREADY_EXISTS',
-  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
-  WEAK_PASSWORD: 'WEAK_PASSWORD',
-
-  // OAuth
-  OAUTH_ERROR: 'OAUTH_ERROR',
-  OAUTH_STATE_MISMATCH: 'OAUTH_STATE_MISMATCH',
-
-  // 2FA
-  TOTP_REQUIRED: 'TOTP_REQUIRED',
-  TOTP_INVALID: 'TOTP_INVALID',
-
-  // Billing
-  PAYMENT_FAILED: 'PAYMENT_FAILED',
-  SUBSCRIPTION_EXPIRED: 'SUBSCRIPTION_EXPIRED',
-  INSUFFICIENT_ENTITLEMENTS: 'INSUFFICIENT_ENTITLEMENTS',
-
-  // Rate Limit
-  RATE_LIMITED: 'RATE_LIMITED',
-
-  // Client/SDK
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
-
-  // Legal
-  TOS_ACCEPTANCE_REQUIRED: 'TOS_ACCEPTANCE_REQUIRED',
-} as const;
-
-/**
- * Union type for all application error codes
- */
-export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
-
-/**
- * Standard human-readable error messages.
- * Companion to `ERROR_CODES` — use these for user-facing `message` fields
- * so every handler returns the same wording for the same error class.
- */
-export const ERROR_MESSAGES = {
-  AUTHENTICATION_REQUIRED: 'Authentication required',
-  INTERNAL_ERROR: 'Internal server error',
-  NOT_FOUND: 'Resource not found',
-  UNAUTHORIZED: 'Unauthorized',
-  BAD_REQUEST: 'Bad request',
-  DEFAULT: 'An unexpected error occurred',
-} as const;
 
 /**
  * Default pagination settings
@@ -280,3 +188,10 @@ export const REFRESH_TOKEN_COOKIE_NAME = 'refreshToken';
 
 /** CSRF token header name (double-submit pattern) */
 export const CSRF_TOKEN_HEADER = 'x-csrf-token';
+
+// ============================================================================
+// API Constants
+// ============================================================================
+
+/** Common API route prefix */
+export const API_PREFIX = '/api';

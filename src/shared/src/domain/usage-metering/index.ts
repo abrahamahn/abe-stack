@@ -1,6 +1,11 @@
 // src/shared/src/domain/usage-metering/index.ts
 
-export { aggregateSnapshots, aggregateValues, isOverQuota } from './usage-metering.logic';
+export {
+  aggregateSnapshots,
+  aggregateValues,
+  isOverQuota,
+  type AggregationType,
+} from './usage-metering.logic';
 
 export {
   usageMetricSchema,

@@ -28,7 +28,7 @@ import {
   useMediaQuery,
   useResendCooldown,
   useWindowSize,
-} from '../../hooks';
+} from '@abe-stack/react/hooks';
 
 // =============================================================================
 // Test Components

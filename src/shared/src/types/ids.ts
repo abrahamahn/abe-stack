@@ -7,7 +7,7 @@
  * @module Shared/Types
  */
 
-import { createBrandedStringSchema, createBrandedUuidSchema } from '../core/schema.utils';
+import { createBrandedStringSchema, createBrandedUuidSchema } from './schema';
 
 // ============================================================================
 // Identity & Access Management

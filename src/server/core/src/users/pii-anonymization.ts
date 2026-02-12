@@ -26,7 +26,7 @@ import {
 } from '@abe-stack/db';
 import { RETENTION_PERIODS } from '@abe-stack/shared';
 
-import type { UsersLogger } from './types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Constants
@@ -88,7 +88,7 @@ function hashEmail(email: string): string {
  */
 export async function anonymizeExpiredUsers(
   db: DbClient,
-  log: UsersLogger,
+  log: ServerLogger,
   gracePeriodDays: number = RETENTION_PERIODS.PII_GRACE_DAYS,
 ): Promise<AnonymizeResult> {
   const cutoff = new Date();

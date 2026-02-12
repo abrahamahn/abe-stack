@@ -12,6 +12,20 @@
  * - email_change_tokens
  */
 
+import {
+  SECURITY_EVENT_TYPES,
+  SECURITY_SEVERITIES,
+  type SecurityEventType,
+  type SecuritySeverity,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { SECURITY_EVENT_TYPES, SECURITY_SEVERITIES };
+export type { SecurityEventType, SecuritySeverity };
+
+/** @deprecated Use `SecuritySeverity` from `@abe-stack/shared` instead */
+export type SecurityEventSeverity = SecuritySeverity;
+
 // ============================================================================
 // Table Names
 // ============================================================================
@@ -24,6 +38,7 @@ export const SECURITY_EVENTS_TABLE = 'security_events';
 export const TOTP_BACKUP_CODES_TABLE = 'totp_backup_codes';
 export const EMAIL_CHANGE_TOKENS_TABLE = 'email_change_tokens';
 export const EMAIL_CHANGE_REVERT_TOKENS_TABLE = 'email_change_revert_tokens';
+export const SMS_VERIFICATION_CODES_TABLE = 'sms_verification_codes';
 
 // ============================================================================
 // Refresh Token Families
@@ -186,61 +201,7 @@ export const EMAIL_VERIFICATION_TOKEN_COLUMNS = {
 // Security Events
 // ============================================================================
 
-/**
- * Security event severity levels
- */
-export type SecurityEventSeverity = 'low' | 'medium' | 'high' | 'critical';
-
-/**
- * Security event types.
- *
- * The DB column is TEXT (no CHECK constraint), so any string is accepted.
- * This union defines all known event types for type-safety.
- *
- * Legacy types (pre-0009): token_reuse, suspicious_activity, login_success,
- * login_failure, logout, password_reset_requested, password_reset_completed,
- * email_verification_sent, email_verified.
- *
- * Current types (post-0009): token_reuse_detected, suspicious_login, plus
- * magic_link_*, oauth_*, and email_changed events.
- *
- * @see src/server/core/src/auth/security/events.ts — Event emitters
- * @see src/shared/src/contracts/security.ts — API contract
- */
-export type SecurityEventType =
-  // Token events
-  | 'token_reuse'
-  | 'token_reuse_detected'
-  | 'token_family_revoked'
-  // Account lifecycle
-  | 'account_locked'
-  | 'account_unlocked'
-  // Password events
-  | 'password_changed'
-  | 'password_reset_requested'
-  | 'password_reset_completed'
-  // Email events
-  | 'email_verification_sent'
-  | 'email_verified'
-  | 'email_changed'
-  // Login/session events
-  | 'login_success'
-  | 'login_failure'
-  | 'logout'
-  | 'suspicious_activity'
-  | 'suspicious_login'
-  // Magic link events
-  | 'magic_link_requested'
-  | 'magic_link_verified'
-  | 'magic_link_failed'
-  // OAuth events
-  | 'oauth_login_success'
-  | 'oauth_login_failure'
-  | 'oauth_account_created'
-  | 'oauth_link_success'
-  | 'oauth_link_failure'
-  | 'oauth_unlink_success'
-  | 'oauth_unlink_failure';
+// SecurityEventType and SecuritySeverity imported from @abe-stack/shared above
 
 /**
  * Security event record (SELECT result)

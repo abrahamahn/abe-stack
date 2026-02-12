@@ -7,18 +7,11 @@
  * revert the email change and lock the account.
  */
 
-import { getApiClient } from '@abe-stack/api';
-import {
-  Alert,
-  AuthLayout,
-  Button,
-  Heading,
-  Spinner,
-  Text,
-  useNavigate,
-  useSearchParams,
-} from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
+
+import { getApiClient } from '@abe-stack/api';
+import { useNavigate, useSearchParams } from '@abe-stack/react/router';
+import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 

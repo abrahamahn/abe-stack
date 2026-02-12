@@ -6,6 +6,7 @@
  */
 
 import { createApiError, NetworkError } from '@abe-stack/client-engine';
+import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -54,16 +55,8 @@ export interface MediaApi {
 // API Client
 // ============================================================================
 
-const API_PREFIX = '/api';
-
-function addAuthHeader(headers: Headers, token: string | null | undefined): void {
-  if (token !== null && token !== undefined && token !== '') {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-}
-
 export function createMediaApi(config: MediaApiConfig): MediaApi {
-  const baseUrl = config.baseUrl.replace(/\/+$/, '');
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T = unknown>(

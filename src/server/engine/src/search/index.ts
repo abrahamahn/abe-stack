@@ -3,37 +3,44 @@
  * Search Module
  *
  * Server-side search providers for PostgreSQL.
- * Includes SQL-based search with parameterized queries,
- * query builder, and factory pattern for provider management.
+ * Canonical types and SQL provider live in @abe-stack/db;
+ * engine provides the factory, query builder, and re-exports.
  *
  * @module @abe-stack/server-engine/search
  */
 
 // ============================================================================
-// Types
+// Types (re-exported from @abe-stack/db)
 // ============================================================================
 
 export type {
   ElasticsearchProviderConfig,
+  IndexHint,
   SearchContext,
+  SearchMetrics,
   SearchProviderConfig,
   SearchProviderFactoryOptions,
   SearchProviderType,
+  SearchResultWithMetrics,
   ServerSearchProvider,
   SqlColumnMapping,
+  SqlCursorData,
+  SqlFilterResult,
+  SqlOperatorMap,
+  SqlOperatorTranslator,
   SqlQueryOptions,
   SqlSearchProviderConfig,
   SqlTableConfig,
-} from './types';
+} from '@abe-stack/db';
 
 // ============================================================================
-// SQL Provider
+// SQL Provider (re-exported from @abe-stack/db)
 // ============================================================================
 
-export { createSqlSearchProvider, SqlSearchProvider } from './sql-provider';
+export { createSqlSearchProvider, SqlSearchProvider } from '@abe-stack/db';
 
 // ============================================================================
-// Query Builder
+// Query Builder (re-exported from @abe-stack/shared)
 // ============================================================================
 
 export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from './query-builder';

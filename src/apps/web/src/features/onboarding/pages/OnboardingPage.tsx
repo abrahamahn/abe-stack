@@ -6,7 +6,8 @@
  * Centers the wizard vertically and horizontally.
  */
 
-import { PageContainer, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { PageContainer } from '@abe-stack/ui';
 
 import { OnboardingWizard } from '../components/OnboardingWizard';
 import { useOnboarding } from '../hooks/useOnboarding';

@@ -38,11 +38,14 @@ export {
   PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
+  ProviderNotConfiguredError,
   PushProviderNotConfiguredError,
   PushSubscriptionExistsError,
   PushSubscriptionNotFoundError,
   QuietHoursActiveError,
+  SubscriptionExistsError,
   SubscriptionExpiredError,
+  SubscriptionNotFoundError,
   VapidNotConfiguredError,
 } from './notifications.errors';
 

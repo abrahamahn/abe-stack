@@ -5,8 +5,8 @@
  * Custom error classes for search and filtering operations.
  */
 
-import { HTTP_STATUS } from '../../core/constants';
-import { AppError, BadRequestError } from '../../core/errors';
+import { HTTP_STATUS } from '../constants/http-status';
+import { AppError } from '../errors/base';
 
 // ============================================================================
 // Search Error Types
@@ -126,9 +126,9 @@ export class InvalidSortError extends SearchError {
 /**
  * Invalid pagination parameters.
  */
-export class InvalidPaginationError extends BadRequestError {
+export class InvalidPaginationError extends SearchError {
   constructor(message = 'Invalid pagination parameters', details?: Record<string, unknown>) {
-    super(message, SEARCH_ERROR_TYPES.InvalidPagination, details);
+    super(message, SEARCH_ERROR_TYPES.InvalidPagination, HTTP_STATUS.BAD_REQUEST, details);
     this.name = 'InvalidPaginationError';
   }
 }

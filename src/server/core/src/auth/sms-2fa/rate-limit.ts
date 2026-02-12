@@ -8,6 +8,7 @@
  * @module sms-2fa
  */
 
+import { SMS_VERIFICATION_CODES_TABLE } from '@abe-stack/db';
 import { MS_PER_DAY, MS_PER_HOUR } from '@abe-stack/shared';
 
 import { SMS_RATE_LIMIT_DAILY, SMS_RATE_LIMIT_HOURLY } from './types';
@@ -36,7 +37,7 @@ import type { DbClient } from '@abe-stack/db';
 export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<SmsRateLimitResult> {
   // Count codes sent in the last hour
   const hourlyResult = await db.raw<{ count: string }>(
-    `SELECT COUNT(*)::text AS count FROM sms_verification_codes
+    `SELECT COUNT(*)::text AS count FROM ${SMS_VERIFICATION_CODES_TABLE}
      WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
     [userId],
   );
@@ -45,7 +46,7 @@ export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<S
   if (hourlySent >= SMS_RATE_LIMIT_HOURLY) {
     // Find the oldest code in the hourly window to calculate retry time
     const oldestResult = await db.raw<{ created_at: Date }>(
-      `SELECT created_at FROM sms_verification_codes
+      `SELECT created_at FROM ${SMS_VERIFICATION_CODES_TABLE}
        WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour'
        ORDER BY created_at ASC LIMIT 1`,
       [userId],
@@ -61,7 +62,7 @@ export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<S
 
   // Count codes sent in the last 24 hours
   const dailyResult = await db.raw<{ count: string }>(
-    `SELECT COUNT(*)::text AS count FROM sms_verification_codes
+    `SELECT COUNT(*)::text AS count FROM ${SMS_VERIFICATION_CODES_TABLE}
      WHERE user_id = $1 AND created_at > NOW() - INTERVAL '24 hours'`,
     [userId],
   );
@@ -69,7 +70,7 @@ export async function checkSmsRateLimit(db: DbClient, userId: string): Promise<S
 
   if (dailySent >= SMS_RATE_LIMIT_DAILY) {
     const oldestDailyResult = await db.raw<{ created_at: Date }>(
-      `SELECT created_at FROM sms_verification_codes
+      `SELECT created_at FROM ${SMS_VERIFICATION_CODES_TABLE}
        WHERE user_id = $1 AND created_at > NOW() - INTERVAL '24 hours'
        ORDER BY created_at ASC LIMIT 1`,
       [userId],

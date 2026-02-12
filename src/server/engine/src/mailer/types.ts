@@ -2,43 +2,21 @@
 /**
  * Email Service Types
  *
- * Core type definitions for the email service.
+ * Re-exports shared email types and defines engine-specific EmailService
+ * (without healthCheck requirement from the shared port contract).
  */
 
-/**
- * Email sending options.
- */
-export interface EmailOptions {
-  /** Recipient email address */
-  to: string;
-  /** Email subject line */
-  subject: string;
-  /** Plain text content */
-  text?: string;
-  /** HTML content */
-  html?: string;
-}
+import type { EmailOptions, SendResult } from '@abe-stack/shared';
+
+export type { EmailOptions };
+
+/** Alias for shared SendResult — maintains engine-local naming */
+export type EmailResult = SendResult;
 
 /**
- * Result of an email sending operation.
- */
-export interface EmailResult {
-  /** Whether the email was sent successfully */
-  success: boolean;
-  /** Message ID from the email service (if available) */
-  messageId?: string;
-  /** Error message if sending failed */
-  error?: string;
-}
-
-/**
- * Email service interface.
+ * Engine-specific email service interface.
+ * Simpler than the shared port contract (no healthCheck requirement).
  */
 export interface EmailService {
-  /**
-   * Send an email.
-   * @param options - Email sending options
-   * @returns Promise resolving to email result
-   */
   send(options: EmailOptions): Promise<EmailResult>;
 }

@@ -1,6 +1,10 @@
 // src/server/core/src/auth/types.ts
 // Re-export LOGIN_FAILURE_REASON from shared (canonical source)
-export { LOGIN_FAILURE_REASON, type LoginFailureReason } from '@abe-stack/shared';
+export {
+  LOGIN_FAILURE_REASON,
+  REFRESH_TOKEN_COOKIE_NAME as REFRESH_COOKIE_NAME,
+  type LoginFailureReason,
+} from '@abe-stack/shared';
 
 /**
  * Auth Module Types
@@ -22,10 +26,10 @@ import type { EmailOptions, SendResult } from '@abe-stack/shared';
 import type {
   AuthenticatedUser,
   BaseContext,
-  Logger,
   ReplyContext,
   RequestContext,
   RequestInfo,
+  ServerLogger,
 } from '@abe-stack/shared/core';
 
 // ============================================================================
@@ -35,13 +39,13 @@ import type {
 /**
  * Logger interface used by the auth module.
  *
- * Extends the shared `Logger` contract with required `trace`, `fatal`,
- * and `child` methods. The contracts `Logger` marks these as optional;
- * auth requires them for security audit logging.
+ * Extends `ServerLogger` (which itself extends `Logger` with a required
+ * `child` method) with required `trace` and `fatal` methods.
+ * Auth requires these for security audit logging.
  *
  * @complexity O(1) per log call
  */
-export interface AuthLogger extends Logger {
+export interface AuthLogger extends ServerLogger {
   /** Log an info-level message */
   info(msg: string, data?: Record<string, unknown>): void;
   /** Log an info-level message with structured data first (Pino convention) */
@@ -338,9 +342,6 @@ export const MIN_JWT_SECRET_LENGTH = 32;
 
 /** Number of random bytes for refresh tokens (512 bits) */
 export const REFRESH_TOKEN_BYTES = 64;
-
-/** Name of the refresh token cookie */
-export const REFRESH_COOKIE_NAME = 'refreshToken';
 
 /** Progressive delay window in milliseconds (5 minutes) */
 export const PROGRESSIVE_DELAY_WINDOW_MS = 5 * MS_PER_MINUTE;

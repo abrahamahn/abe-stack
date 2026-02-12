@@ -10,7 +10,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { anonymizeDeletedUsers } from './pii-anonymization';
 
-import type { ScheduledTaskLogger } from './types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 import type { Repositories } from '@abe-stack/db';
 
 // ============================================================================
@@ -26,8 +26,8 @@ function createMockRepos(): Pick<Repositories, 'users'> {
   };
 }
 
-function createMockLogger(): ScheduledTaskLogger {
-  const logger: ScheduledTaskLogger = {
+function createMockLogger(): ServerLogger {
+  const logger: ServerLogger = {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
@@ -43,7 +43,7 @@ function createMockLogger(): ScheduledTaskLogger {
 
 describe('anonymizeDeletedUsers', () => {
   let repos: Pick<Repositories, 'users'>;
-  let log: ScheduledTaskLogger;
+  let log: ServerLogger;
 
   beforeEach(() => {
     repos = createMockRepos();

@@ -23,19 +23,27 @@ export {
   handleWrite,
 } from './handlers';
 
-// Service (business logic)
+// Service — server-specific (DB operations, table registry)
 export {
-  applyOperation,
-  applyOperations,
-  checkVersionConflicts,
-  getOperationPointers,
-  isFieldMutable,
   isTableAllowed,
   loadRecords,
   registerRealtimeTable,
   resolveTableName,
   saveRecords,
 } from './service';
+
+// Service — re-exported from @abe-stack/shared (pure operation logic)
+export {
+  PROTECTED_FIELDS,
+  REALTIME_ERRORS,
+  applyOperation,
+  applyOperations,
+  checkVersionConflicts,
+  getOperationPointers,
+  isFieldMutable,
+  type ApplyOperationsResult,
+  type VersionConflict,
+} from '@abe-stack/shared';
 
 // WebSocket
 export {
@@ -48,12 +56,9 @@ export {
   type WebSocketStats,
 } from '@abe-stack/websocket';
 
-// Types
-export { REALTIME_ERRORS } from './types';
-
+// Types — server-specific
 export type {
   AllowedTable,
-  ApplyOperationsResult,
   ConflictResult,
   GetRecordsResult,
   LoadRecordsOptions,
@@ -64,6 +69,5 @@ export type {
   RealtimeRecord,
   RealtimeRequest,
   TableConfig,
-  VersionConflict,
   WriteResult,
 } from './types';

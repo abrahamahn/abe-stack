@@ -6,6 +6,7 @@
  * then redirects to the workspace.
  */
 
+import { useNavigate, useSearchParams } from '@abe-stack/react/router';
 import {
   Alert,
   Button,
@@ -13,8 +14,6 @@ import {
   Heading,
   Spinner,
   Text,
-  useNavigate,
-  useSearchParams,
 } from '@abe-stack/ui';
 import { useEffect, useRef, type ReactElement } from 'react';
 

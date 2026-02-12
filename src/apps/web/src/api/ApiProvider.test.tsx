@@ -1,6 +1,6 @@
 // src/apps/web/src/api/ApiProvider.test.tsx
 import { QueryCache } from '@abe-stack/client-engine';
-import { MemoryRouter } from '@abe-stack/ui';
+import { MemoryRouter } from '@abe-stack/react/router';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

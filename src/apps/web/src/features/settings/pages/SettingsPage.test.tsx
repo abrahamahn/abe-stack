@@ -72,6 +72,16 @@ vi.mock('../components', () => {
   };
 });
 
+vi.mock('@abe-stack/react/router', () => {
+  const mockLink = ({ children, to }: { children: ReactNode; to?: string }) => (
+    <a href={to}>{children}</a>
+  );
+
+  return {
+    Link: mockLink,
+  };
+});
+
 vi.mock('@abe-stack/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/ui')>();
 
@@ -100,17 +110,12 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
     </div>
   );
 
-  const mockLink = ({ children, href }: { children: ReactNode; href?: string }) => (
-    <a href={href}>{children}</a>
-  );
-
   return {
     ...actual,
     Button: mockButton,
     Card: mockCard,
     Container: mockContainer,
     Heading: mockHeading,
-    Link: mockLink,
     Tabs: mockTabs,
   };
 });

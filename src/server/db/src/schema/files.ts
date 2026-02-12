@@ -9,27 +9,22 @@
  * @remarks Uses `FileRecord` (not `File`) to avoid collision with the DOM `File` global.
  */
 
+import {
+  FILE_PURPOSES,
+  STORAGE_PROVIDERS,
+  type FilePurpose,
+  type StorageProvider,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { FILE_PURPOSES, STORAGE_PROVIDERS };
+export type { FilePurpose, StorageProvider };
+
 // ============================================================================
 // Table Names
 // ============================================================================
 
 export const FILES_TABLE = 'files';
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/** Supported storage providers for file uploads */
-export type StorageProvider = 'local' | 's3' | 'gcs';
-
-/** All valid storage providers */
-export const STORAGE_PROVIDERS = ['local', 's3', 'gcs'] as const;
-
-/** Purpose classification for uploaded files */
-export type FilePurpose = 'avatar' | 'document' | 'export' | 'attachment' | 'other';
-
-/** All valid file purposes */
-export const FILE_PURPOSES = ['avatar', 'document', 'export', 'attachment', 'other'] as const;
 
 // ============================================================================
 // File Types

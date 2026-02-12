@@ -5,7 +5,8 @@
 
 import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
-import { Heading, PageContainer, PricingTable, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Heading, PageContainer, PricingTable, Text } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 

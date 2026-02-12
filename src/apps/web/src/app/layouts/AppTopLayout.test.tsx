@@ -7,13 +7,9 @@ import { AppTopLayout } from './AppTopLayout';
 const mockToggle = vi.fn();
 const mockSidePeekOpen = vi.hoisted(() => ({ current: false }));
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
-  return {
-    ...actual,
-    useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
-  };
-});
+vi.mock('@abe-stack/react/hooks', () => ({
+  useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
+}));
 
 vi.mock('@features/workspace/components', () => ({
   TenantSwitcher: ({ className }: { className?: string }) => (

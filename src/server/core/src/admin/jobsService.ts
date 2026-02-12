@@ -6,6 +6,8 @@
  * Includes payload redaction for sensitive fields.
  */
 
+import { AppError, NotFoundError } from '@abe-stack/shared';
+
 import type {
   JobDetails,
   JobListOptions,
@@ -95,17 +97,15 @@ function redactJobArgs(job: JobDetails): JobDetails {
 // Custom Errors
 // ============================================================================
 
-export class JobNotFoundError extends Error {
+export class JobNotFoundError extends NotFoundError {
   constructor(jobId: string) {
-    super(`Job not found: ${jobId}`);
-    this.name = 'JobNotFoundError';
+    super(`Job not found: ${jobId}`, 'JOB_NOT_FOUND');
   }
 }
 
-export class QueueStoreNotAvailableError extends Error {
+export class QueueStoreNotAvailableError extends AppError {
   constructor(method: string) {
-    super(`Queue store does not support method: ${method}`);
-    this.name = 'QueueStoreNotAvailableError';
+    super(`Queue store does not support method: ${method}`, 503, 'QUEUE_STORE_NOT_AVAILABLE');
   }
 }
 

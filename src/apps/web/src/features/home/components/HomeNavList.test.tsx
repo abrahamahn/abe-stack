@@ -6,6 +6,21 @@ import { HomeNavList } from './HomeNavList';
 
 import type { ReactElement, ReactNode } from 'react';
 
+vi.mock('@abe-stack/react/router', () => {
+  const mockLink = ({
+    children,
+    to,
+  }: {
+    children: ReactNode;
+    to: string;
+    className?: string;
+  }): ReactElement => <a href={to}>{children}</a>;
+
+  return {
+    Link: mockLink,
+  };
+});
+
 vi.mock('@abe-stack/ui', () => {
   const mockButton = ({
     children,
@@ -22,15 +37,6 @@ vi.mock('@abe-stack/ui', () => {
       {children}
     </button>
   );
-
-  const mockLink = ({
-    children,
-    to,
-  }: {
-    children: ReactNode;
-    to: string;
-    className?: string;
-  }): ReactElement => <a href={to}>{children}</a>;
 
   const mockMenuItem = ({
     children,
@@ -54,7 +60,6 @@ vi.mock('@abe-stack/ui', () => {
 
   return {
     Button: mockButton,
-    Link: mockLink,
     MenuItem: mockMenuItem,
     ScrollArea: mockScrollArea,
     Text: mockText,

@@ -5,6 +5,8 @@
  * Handlers for system-wide webhook monitoring and replay.
  */
 
+import { WEBHOOKS_TABLE } from '@abe-stack/db';
+
 import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';
@@ -92,7 +94,7 @@ export async function handleListAdminWebhooks(
     ? await ctx.db.raw(
         `
           SELECT id, tenant_id, url, events, is_active, created_at, updated_at
-          FROM webhooks
+          FROM ${WEBHOOKS_TABLE}
           WHERE tenant_id = $1
           ORDER BY created_at DESC
           LIMIT $2
@@ -102,7 +104,7 @@ export async function handleListAdminWebhooks(
     : await ctx.db.raw(
         `
           SELECT id, tenant_id, url, events, is_active, created_at, updated_at
-          FROM webhooks
+          FROM ${WEBHOOKS_TABLE}
           ORDER BY created_at DESC
           LIMIT $1
         `,

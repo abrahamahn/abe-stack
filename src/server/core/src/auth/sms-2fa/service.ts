@@ -10,6 +10,8 @@
 
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 
+import { SMS_VERIFICATION_CODES_TABLE } from '@abe-stack/db';
+
 import { SMS_CODE_EXPIRY_MS, SMS_MAX_ATTEMPTS } from './types';
 
 import type { DbClient } from '@abe-stack/db';
@@ -88,14 +90,14 @@ export async function sendSms2faCode(
 
   // Invalidate any existing pending codes for this user
   await db.raw(
-    `UPDATE sms_verification_codes SET verified = true
+    `UPDATE ${SMS_VERIFICATION_CODES_TABLE} SET verified = true
      WHERE user_id = $1 AND verified = false AND expires_at > NOW()`,
     [userId],
   );
 
   // Store the hashed code
   await db.raw(
-    `INSERT INTO sms_verification_codes (user_id, phone, code, expires_at)
+    `INSERT INTO ${SMS_VERIFICATION_CODES_TABLE} (user_id, phone, code, expires_at)
      VALUES ($1, $2, $3, $4)`,
     [userId, phone, codeHash, expiresAt],
   );
@@ -137,7 +139,7 @@ export async function verifySms2faCode(
     attempts: number;
     expires_at: Date;
   }>(
-    `SELECT id, code, attempts, expires_at FROM sms_verification_codes
+    `SELECT id, code, attempts, expires_at FROM ${SMS_VERIFICATION_CODES_TABLE}
      WHERE user_id = $1 AND verified = false AND expires_at > NOW()
      ORDER BY created_at DESC LIMIT 1`,
     [userId],
@@ -152,12 +154,14 @@ export async function verifySms2faCode(
   // Check attempt limit
   if (record.attempts >= SMS_MAX_ATTEMPTS) {
     // Mark as consumed to prevent further attempts
-    await db.raw(`UPDATE sms_verification_codes SET verified = true WHERE id = $1`, [record.id]);
+    await db.raw(`UPDATE ${SMS_VERIFICATION_CODES_TABLE} SET verified = true WHERE id = $1`, [
+      record.id,
+    ]);
     return { valid: false, message: 'Too many attempts. Please request a new code.' };
   }
 
   // Increment attempts
-  await db.raw(`UPDATE sms_verification_codes SET attempts = attempts + 1 WHERE id = $1`, [
+  await db.raw(`UPDATE ${SMS_VERIFICATION_CODES_TABLE} SET attempts = attempts + 1 WHERE id = $1`, [
     record.id,
   ]);
 
@@ -177,7 +181,9 @@ export async function verifySms2faCode(
   }
 
   // Mark as verified
-  await db.raw(`UPDATE sms_verification_codes SET verified = true WHERE id = $1`, [record.id]);
+  await db.raw(`UPDATE ${SMS_VERIFICATION_CODES_TABLE} SET verified = true WHERE id = $1`, [
+    record.id,
+  ]);
 
   return { valid: true, message: 'Code verified successfully.' };
 }
@@ -200,7 +206,7 @@ export async function getSmsVerificationCode(
     expires_at: Date;
     attempts: number;
   }>(
-    `SELECT id, phone, expires_at, attempts FROM sms_verification_codes
+    `SELECT id, phone, expires_at, attempts FROM ${SMS_VERIFICATION_CODES_TABLE}
      WHERE user_id = $1 AND verified = false AND expires_at > NOW()
      ORDER BY created_at DESC LIMIT 1`,
     [userId],

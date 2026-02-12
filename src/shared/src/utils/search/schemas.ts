@@ -6,7 +6,7 @@
  * Used for API validation and type inference.
  */
 
-import { createSchema } from '../../core/schema.utils';
+import { createSchema } from '../../types/schema';
 
 import { FILTER_OPERATORS, LOGICAL_OPERATORS, SORT_ORDER } from './types';
 
@@ -30,7 +30,7 @@ import type {
   SortConfig,
   SortOrder,
 } from './types';
-import type { Schema } from '../../core/api';
+import type { Schema } from '../../types/schema';
 
 // ============================================================================
 // Filter Operator Schemas

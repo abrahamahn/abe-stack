@@ -99,36 +99,90 @@ export function createLogger(baseLogger: BaseLogger, context?: LogData): Logger 
   });
 
   const logger: Logger = {
-    trace(msg: string, data?: LogData): void {
-      baseLogger.trace(withContext(data), msg);
-    },
-
-    debug(msg: string, data?: LogData): void {
-      baseLogger.debug(withContext(data), msg);
-    },
-
-    info(msg: string, data?: LogData): void {
-      baseLogger.info(withContext(data), msg);
-    },
-
-    warn(msg: string, data?: LogData): void {
-      baseLogger.warn(withContext(data), msg);
-    },
-
-    error(msg: string | Error, data?: LogData): void {
-      if (msg instanceof Error) {
-        baseLogger.error(withContext({ ...formatError(msg), ...data }), msg.message);
-      } else {
-        baseLogger.error(withContext(data), msg);
+    trace(msgOrData: string | LogData, dataOrMsg?: LogData | string): void {
+      if (typeof msgOrData === 'string') {
+        baseLogger.trace(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
       }
+      baseLogger.trace(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
     },
 
-    fatal(msg: string | Error, data?: LogData): void {
-      if (msg instanceof Error) {
-        baseLogger.fatal(withContext({ ...formatError(msg), ...data }), msg.message);
-      } else {
-        baseLogger.fatal(withContext(data), msg);
+    debug(msgOrData: string | LogData, dataOrMsg?: LogData | string): void {
+      if (typeof msgOrData === 'string') {
+        baseLogger.debug(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
       }
+      baseLogger.debug(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
+    },
+
+    info(msgOrData: string | LogData, dataOrMsg?: LogData | string): void {
+      if (typeof msgOrData === 'string') {
+        baseLogger.info(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
+      }
+      baseLogger.info(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
+    },
+
+    warn(msgOrData: string | LogData, dataOrMsg?: LogData | string): void {
+      if (typeof msgOrData === 'string') {
+        baseLogger.warn(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
+      }
+      baseLogger.warn(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
+    },
+
+    error(msgOrData: string | Error | LogData, dataOrMsg?: LogData | string): void {
+      if (msgOrData instanceof Error) {
+        baseLogger.error(
+          withContext({
+            ...formatError(msgOrData),
+            ...(typeof dataOrMsg === 'string' ? undefined : dataOrMsg),
+          }),
+          msgOrData.message,
+        );
+        return;
+      }
+      if (typeof msgOrData === 'string') {
+        baseLogger.error(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
+      }
+      baseLogger.error(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
+    },
+
+    fatal(msgOrData: string | Error | LogData, dataOrMsg?: LogData | string): void {
+      if (msgOrData instanceof Error) {
+        baseLogger.fatal(
+          withContext({
+            ...formatError(msgOrData),
+            ...(typeof dataOrMsg === 'string' ? undefined : dataOrMsg),
+          }),
+          msgOrData.message,
+        );
+        return;
+      }
+      if (typeof msgOrData === 'string') {
+        baseLogger.fatal(
+          withContext(typeof dataOrMsg === 'string' ? undefined : (dataOrMsg as LogData)),
+          msgOrData,
+        );
+        return;
+      }
+      baseLogger.fatal(withContext(msgOrData), (dataOrMsg as string | undefined) ?? '');
     },
 
     child(bindings: LogData): Logger {

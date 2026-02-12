@@ -11,6 +11,7 @@ export {
   type InferResponseData,
   type InferSchema,
   type Logger,
+  type ServerLogger,
   type QueryParams,
   type RequestBody,
   type SafeParseResult,
@@ -20,6 +21,7 @@ export {
 } from './api';
 
 export {
+  API_PREFIX,
   ERROR_CODES,
   ERROR_MESSAGES,
   HTTP_STATUS,

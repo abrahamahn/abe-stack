@@ -8,7 +8,7 @@ import {
   DEFAULT_CONTRAST_MODE,
   getContrastCssVariables,
   type ContrastMode,
-} from '../theme/contrast';
+} from '@abe-stack/shared';
 
 export type { ContrastMode };
 

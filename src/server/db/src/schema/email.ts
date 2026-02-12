@@ -9,28 +9,23 @@
  * @remarks email_log is append-only — no UpdateEmailLog type exists.
  */
 
+import {
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  type EmailProvider,
+  type EmailStatus,
+} from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { EMAIL_PROVIDERS, EMAIL_STATUSES };
+export type { EmailProvider, EmailStatus };
+
 // ============================================================================
 // Table Names
 // ============================================================================
 
 export const EMAIL_TEMPLATES_TABLE = 'email_templates';
 export const EMAIL_LOG_TABLE = 'email_log';
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/** Lifecycle states for email delivery */
-export type EmailStatus = 'queued' | 'sent' | 'delivered' | 'bounced' | 'failed';
-
-/** All valid email statuses */
-export const EMAIL_STATUSES = ['queued', 'sent', 'delivered', 'bounced', 'failed'] as const;
-
-/** Supported email delivery providers */
-export type EmailProvider = 'smtp' | 'ses' | 'sendgrid' | 'console';
-
-/** All valid email providers */
-export const EMAIL_PROVIDERS = ['smtp', 'ses', 'sendgrid', 'console'] as const;
 
 // ============================================================================
 // Email Template Types

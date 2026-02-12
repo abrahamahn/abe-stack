@@ -1,5 +1,6 @@
 // src/apps/web/src/features/dashboard/components/GettingStartedChecklist.tsx
-import { Button, Card, Heading, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Button, Card, Heading, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth';
 import { useWorkspaces } from '@features/workspace';
 import { useCallback, useState } from 'react';

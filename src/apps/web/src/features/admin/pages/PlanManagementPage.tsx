@@ -10,7 +10,7 @@
  * - Sync with Stripe
  */
 
-import { useAdminPlans, type AdminBillingClientConfig } from '@abe-stack/client-engine';
+import { useAdminPlans, type AdminBillingClientConfig } from '@abe-stack/api';
 import { tokenStore } from '@abe-stack/shared';
 import {
   Badge,

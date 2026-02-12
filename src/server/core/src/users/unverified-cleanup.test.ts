@@ -11,8 +11,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupUnverifiedUsers } from './unverified-cleanup';
 
-import type { UsersLogger } from './types';
 import type { DbClient, Repositories } from '@abe-stack/db';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Mock Factories
@@ -39,14 +39,14 @@ function createMockRepos(): Repositories {
   } as unknown as Repositories;
 }
 
-function createMockLogger(): UsersLogger {
+function createMockLogger(): ServerLogger {
   return {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
     child: vi.fn().mockReturnThis(),
-  } as unknown as UsersLogger;
+  } as unknown as ServerLogger;
 }
 
 // ============================================================================
@@ -101,7 +101,7 @@ function makeUnverifiedUserRow(overrides: { id: string; email: string }) {
 describe('cleanupUnverifiedUsers', () => {
   let db: DbClient;
   let repos: Repositories;
-  let log: UsersLogger;
+  let log: ServerLogger;
 
   beforeEach(() => {
     db = createMockDb();

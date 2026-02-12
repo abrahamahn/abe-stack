@@ -4,12 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PricingPage } from './PricingPage';
 
-// Mock useNavigate from @abe-stack/ui
+// Mock useNavigate from @abe-stack/react/router
 const { mockNavigate } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
 }));
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@abe-stack/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

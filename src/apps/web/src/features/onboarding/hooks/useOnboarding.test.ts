@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TOTAL_STEPS, useOnboarding } from './useOnboarding';
 
-// Mock useLocalStorage from @abe-stack/ui
+// Mock useLocalStorage from @abe-stack/react/hooks
 let storedValue = false;
 const mockSetValue = vi.fn((value: boolean | ((prev: boolean) => boolean)) => {
   if (typeof value === 'function') {
@@ -14,8 +14,8 @@ const mockSetValue = vi.fn((value: boolean | ((prev: boolean) => boolean)) => {
   }
 });
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@abe-stack/react/hooks', async () => {
+  const actual = await vi.importActual('@abe-stack/react/hooks');
   return {
     ...actual,
     useLocalStorage: () => [storedValue, mockSetValue],

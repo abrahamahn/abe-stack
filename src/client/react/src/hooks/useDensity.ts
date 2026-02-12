@@ -3,9 +3,7 @@
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback, useEffect } from 'react';
 
-import { DEFAULT_DENSITY, getDensityCssVariables } from '../theme/density';
-
-import type { Density } from '../theme/density';
+import { DEFAULT_DENSITY, getDensityCssVariables, type Density } from '@abe-stack/shared';
 
 export type UseDensityReturn = {
   /**

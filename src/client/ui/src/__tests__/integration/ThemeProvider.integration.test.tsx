@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Button } from '../../elements/Button';
-import { useThemeMode } from '../../hooks';
+import { useThemeMode } from '@abe-stack/react/hooks';
 import { ThemeProvider, useTheme } from '../../theme';
 
 // =============================================================================

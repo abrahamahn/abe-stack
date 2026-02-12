@@ -11,7 +11,7 @@
  */
 
 import type { ApiKeyRepository, AuditEventRepository } from '@abe-stack/db';
-import type { BaseContext, RequestContext } from '@abe-stack/shared/core';
+import type { BaseContext } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Handler Context
@@ -32,15 +32,3 @@ export interface ApiKeyAppContext extends BaseContext {
     readonly auditEvents?: AuditEventRepository;
   };
 }
-
-// ============================================================================
-// Request Context
-// ============================================================================
-
-/**
- * Request interface for API key handlers.
- *
- * Re-exports `RequestContext` from shared contracts for consistency
- * with other modules.
- */
-export type ApiKeyRequest = RequestContext;

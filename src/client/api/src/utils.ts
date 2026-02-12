@@ -3,28 +3,13 @@
  * Shared utilities for API client modules.
  */
 
-import { addAuthHeader } from '@abe-stack/shared';
+import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 import { createApiError, NetworkError } from './errors';
 
 import type { ApiErrorBody } from './errors';
 
-/** Common API path prefix */
-export const API_PREFIX = '/api';
-
-/** Character code for '/' — used for fast trailing-slash trimming */
-const CHAR_CODE_SLASH = 47;
-
-/**
- * Remove trailing slash characters from a URL string.
- */
-export function trimTrailingSlashes(value: string): string {
-  let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === CHAR_CODE_SLASH) {
-    end--;
-  }
-  return value.slice(0, end);
-}
+export { API_PREFIX, trimTrailingSlashes };
 
 // ============================================================================
 // Base Client Config

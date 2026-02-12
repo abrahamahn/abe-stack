@@ -6,6 +6,7 @@
  */
 
 import { formatDate } from '@abe-stack/shared';
+import { useNavigate } from '@abe-stack/react/router';
 import {
   Button,
   Pagination,
@@ -17,7 +18,6 @@ import {
   TableHeader,
   TableRow,
   Text,
-  useNavigate,
 } from '@abe-stack/ui';
 
 import { RoleBadge } from './RoleBadge';

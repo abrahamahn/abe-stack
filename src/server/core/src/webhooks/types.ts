@@ -20,27 +20,7 @@ export {
 } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
-
-// ============================================================================
-// Logger Interface
-// ============================================================================
-
-/**
- * Logger interface used by the webhooks module.
- * Extends the shared Logger contract with required child method.
- */
-export interface WebhooksLogger extends Logger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  info(data: Record<string, unknown>, msg: string): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  warn(data: Record<string, unknown>, msg: string): void;
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  error(data: unknown, msg?: string): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
-  debug(data: Record<string, unknown>, msg: string): void;
-  child(bindings: Record<string, unknown>): WebhooksLogger;
-}
+import type { BaseContext, RequestContext, ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Request Types
@@ -63,7 +43,7 @@ export interface WebhooksModuleDeps extends BaseContext {
   /** Repository layer for structured database access */
   readonly repos: Repositories;
   /** Logger instance for webhooks module logging */
-  readonly log: WebhooksLogger;
+  readonly log: ServerLogger;
 }
 
 // ============================================================================

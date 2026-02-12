@@ -22,12 +22,20 @@ const mockUseAuth = vi.fn(() => ({
 const mockNavigate = vi.fn();
 const mockNavigateToMode = vi.fn();
 
-// Mock @abe-stack/ui for useAuthModeNavigation and useNavigate
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+// Mock @abe-stack/react/router for useNavigate
+vi.mock('@abe-stack/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+  };
+});
+
+// Mock @abe-stack/react/hooks for useAuthModeNavigation
+vi.mock('@abe-stack/react/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/react/hooks')>();
+  return {
+    ...actual,
     useAuthModeNavigation: () => ({
       navigateToMode: mockNavigateToMode,
       navigateToLogin: (): void => mockNavigate('/login', { replace: false }),

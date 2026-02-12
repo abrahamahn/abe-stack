@@ -6,6 +6,7 @@
  */
 
 import { formatDateTime } from '@abe-stack/shared';
+import { useNavigate, useParams } from '@abe-stack/react/router';
 import {
   Alert,
   Badge,
@@ -16,8 +17,6 @@ import {
   PageContainer,
   Skeleton,
   Text,
-  useNavigate,
-  useParams,
 } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 

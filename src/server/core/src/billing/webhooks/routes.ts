@@ -16,7 +16,8 @@ import { HTTP_STATUS } from '@abe-stack/shared';
 import { handlePayPalWebhook } from './paypal-webhook';
 import { handleStripeWebhook } from './stripe-webhook';
 
-import type { BillingAppContext, BillingLogger } from '../types';
+import type { BillingAppContext } from '../types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Extend FastifyRequest to include rawBody (provided by fastify config)
@@ -49,7 +50,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: BillingAppConte
     return;
   }
 
-  const log: BillingLogger = ctx.log;
+  const log: ServerLogger = ctx.log;
 
   // Stripe webhook
   app.post(

@@ -1,11 +1,11 @@
 // src/apps/web/src/features/ui-library/hooks/useUILibraryTheme.test.ts
-import { useThemeMode } from '@abe-stack/ui';
+import { useThemeMode } from '@abe-stack/react/hooks';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useUILibraryTheme } from './useUILibraryTheme';
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@abe-stack/react/hooks', () => ({
   useThemeMode: vi.fn(() => ({
     mode: 'light',
     cycleMode: vi.fn(),

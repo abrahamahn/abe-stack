@@ -7,6 +7,7 @@
  * @module handlers/phone
  */
 
+import { SMS_VERIFICATION_CODES_TABLE, USERS_TABLE } from '@abe-stack/db';
 import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { assertUserActive } from '../middleware';
@@ -123,7 +124,7 @@ export async function handleVerifyPhone(
 
     // Get the phone number from the verified code record
     const pendingCode = await ctx.db.raw<{ phone: string }>(
-      `SELECT phone FROM sms_verification_codes
+      `SELECT phone FROM ${SMS_VERIFICATION_CODES_TABLE}
        WHERE user_id = $1 AND verified = true
        ORDER BY created_at DESC LIMIT 1`,
       [userId],
@@ -136,7 +137,7 @@ export async function handleVerifyPhone(
 
     // Update user record with verified phone
     await ctx.db.raw(
-      `UPDATE users SET phone = $1, phone_verified = true, updated_at = NOW() WHERE id = $2`,
+      `UPDATE ${USERS_TABLE} SET phone = $1, phone_verified = true, updated_at = NOW() WHERE id = $2`,
       [phone, userId],
     );
 
@@ -169,7 +170,7 @@ export async function handleRemovePhone(
 
     // Clear phone and phoneVerified
     await ctx.db.raw(
-      `UPDATE users SET phone = NULL, phone_verified = NULL, updated_at = NOW() WHERE id = $1`,
+      `UPDATE ${USERS_TABLE} SET phone = NULL, phone_verified = NULL, updated_at = NOW() WHERE id = $1`,
       [userId],
     );
 

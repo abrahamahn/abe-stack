@@ -4,7 +4,7 @@
  */
 
 import { QueryCache, QueryCacheProvider } from '@abe-stack/client-engine';
-import { MemoryRouter } from '@abe-stack/ui';
+import { MemoryRouter } from '@abe-stack/react/router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,8 +24,8 @@ import { WorkspaceBilling } from './WorkspaceBilling';
 import type { Plan, Subscription } from '../hooks/useWorkspaceBilling';
 
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/ui')>('@abe-stack/ui');
+vi.mock('@abe-stack/react/router', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/react/router')>('@abe-stack/react/router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,

@@ -21,6 +21,9 @@ import type {
   SubscriptionManager,
 } from '@abe-stack/shared';
 
+// Re-export shared types for backward compatibility
+export type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from '@abe-stack/shared';
+
 // ============================================================================
 // Logger Interface (Transition Alias)
 // ============================================================================
@@ -45,16 +48,6 @@ export type RealtimeLogger = Logger;
  * These are provided by the server composition root.
  *
  * Extends `BaseContext` with pub/sub and configuration.
- *
- * @example
- * ```typescript
- * const deps: RealtimeModuleDeps = {
- *   db: createDbClient(connectionString),
- *   pubsub: subscriptionManager,
- *   log: createLogger('realtime'),
- *   config: { env: 'production', auth: { cookie: { secret: '...' }, jwt: { secret: '...' } } },
- * };
- * ```
  */
 export interface RealtimeModuleDeps extends Omit<BaseContext, 'repos' | 'log'> {
   /** Database client for executing queries */
@@ -91,72 +84,15 @@ export interface RealtimeModuleDeps extends Omit<BaseContext, 'repos' | 'log'> {
 export type RealtimeRequest = RequestContext;
 
 // ============================================================================
-// Record Types
-// ============================================================================
-
-/**
- * A record with at minimum id and version fields.
- * All realtime records must include these for optimistic locking.
- *
- * @example
- * ```typescript
- * const record: RealtimeRecord = { id: 'user-1', version: 3, name: 'John' };
- * ```
- */
-export interface RealtimeRecord {
-  /** Unique record identifier */
-  id: string;
-  /** Version number for optimistic locking */
-  version: number;
-  /** Additional record fields */
-  [key: string]: unknown;
-}
-
-// ============================================================================
 // Service Types
 // ============================================================================
 
 /**
  * Options for loading records from the database.
- *
- * @param pointers - Array of table/id pairs identifying records to load
  */
 export interface LoadRecordsOptions {
   /** Record pointers to load */
   pointers: ReadonlyArray<{ table: string; id: string }>;
-}
-
-/**
- * Result of applying operations to a record map.
- *
- * @param recordMap - The updated record map after operations
- * @param modifiedRecords - List of records that were actually modified
- */
-export interface ApplyOperationsResult {
-  /** Updated record map */
-  recordMap: RecordMap;
-  /** Records that were modified (for publishing) */
-  modifiedRecords: ReadonlyArray<{ table: string; id: string }>;
-}
-
-/**
- * Version conflict error details.
- * Returned when optimistic locking detects a concurrent modification.
- *
- * @param table - Table name where conflict occurred
- * @param id - Record ID that conflicted
- * @param expectedVersion - The version the client expected
- * @param actualVersion - The actual version in the database
- */
-export interface VersionConflict {
-  /** Table name */
-  table: string;
-  /** Record ID */
-  id: string;
-  /** Version the client expected */
-  expectedVersion: number;
-  /** Actual version in the database */
-  actualVersion: number;
 }
 
 // ============================================================================
@@ -165,10 +101,6 @@ export interface VersionConflict {
 
 /**
  * Permission check context for authorizing realtime operations.
- *
- * @param userId - User performing the operation
- * @param operation - The operation to check
- * @param currentRecord - Current record state (if exists)
  */
 export interface PermissionContext {
   /** User ID performing the operation */
@@ -181,14 +113,11 @@ export interface PermissionContext {
     key: string;
   };
   /** Current record state (if exists) */
-  currentRecord?: RealtimeRecord | undefined;
+  currentRecord?: { id: string; version: number; [key: string]: unknown } | undefined;
 }
 
 /**
  * Permission check result.
- *
- * @param allowed - Whether the operation is allowed
- * @param reason - Explanation if denied
  */
 export interface PermissionResult {
   /** Whether the operation is allowed */
@@ -203,16 +132,11 @@ export interface PermissionResult {
 
 /**
  * Allowed tables for realtime operations.
- * For security, only explicitly registered tables can be accessed.
  */
 export type AllowedTable = string;
 
 /**
  * Table configuration for realtime operations.
- *
- * @param name - Table name in database
- * @param mutableFields - Fields that can be modified via realtime operations
- * @param readOnlyFields - Fields that are read-only
  */
 export interface TableConfig {
   /** Table name in database */
@@ -229,8 +153,6 @@ export interface TableConfig {
 
 /**
  * Write transaction result returned to the client.
- *
- * @param recordMap - The updated record map
  */
 export interface WriteResult {
   /** Updated record map after write operations */
@@ -239,8 +161,6 @@ export interface WriteResult {
 
 /**
  * Get records result returned to the client.
- *
- * @param recordMap - The loaded record map
  */
 export interface GetRecordsResult {
   /** Loaded record map */
@@ -249,9 +169,6 @@ export interface GetRecordsResult {
 
 /**
  * Version conflict result returned on HTTP 409.
- *
- * @param message - Human-readable conflict message
- * @param conflictingRecords - List of conflicting record pointers
  */
 export interface ConflictResult {
   /** Conflict description */
@@ -259,17 +176,3 @@ export interface ConflictResult {
   /** Records that conflicted */
   conflictingRecords?: ReadonlyArray<{ table: string; id: string }> | undefined;
 }
-
-// ============================================================================
-// Realtime Domain Errors
-// ============================================================================
-
-/**
- * Domain-specific error messages for realtime operations.
- * Generic errors (auth, internal) use `ERROR_CODES` from `@abe-stack/shared`.
- */
-export const REALTIME_ERRORS = {
-  AUTHOR_MISMATCH: 'Author ID must match authenticated user',
-  tableNotAllowed: (table: string) => `Table '${table}' is not allowed for realtime operations`,
-  VERSION_CONFLICT: 'Version conflict: one or more records have been modified',
-} as const;

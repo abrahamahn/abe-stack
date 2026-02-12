@@ -4,7 +4,8 @@
  */
 
 import { MS_PER_SECOND } from '@abe-stack/shared';
-import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';

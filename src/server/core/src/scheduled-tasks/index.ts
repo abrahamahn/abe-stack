@@ -9,4 +9,4 @@
 
 export { registerScheduledTasks, stopScheduledTasks } from './service';
 export { anonymizeDeletedUsers } from './pii-anonymization';
-export type { ScheduledTask, ScheduledTaskLogger, TaskSchedule } from './types';
+export type { ScheduledTask, TaskSchedule } from './types';

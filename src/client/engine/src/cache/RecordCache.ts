@@ -28,13 +28,9 @@
  * ```
  */
 
-/**
- * A record pointer identifies a specific record by table and ID.
- */
-export interface RecordPointer<T extends string = string> {
-  table: T;
-  id: string;
-}
+import type { RecordPointer } from '@abe-stack/shared';
+
+export type { RecordPointer };
 
 /**
  * Represents a change to a record, capturing before and after states.

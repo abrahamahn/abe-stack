@@ -6,15 +6,17 @@
  * Maps to migration 0007_metering.sql.
  */
 
-// ============================================================================
-// Enums
-// ============================================================================
+import type { AggregationType } from '@abe-stack/shared';
 
-/** How metric values are aggregated over compounding periods */
-export type AggregationType = 'sum' | 'max' | 'last';
+// Re-export shared type for consumers that import from schema
+export type { AggregationType };
 
 /** All valid aggregation types */
-export const AGGREGATION_TYPES = ['sum', 'max', 'last'] as const;
+export const AGGREGATION_TYPES = [
+  'sum',
+  'max',
+  'last',
+] as const satisfies readonly AggregationType[];
 
 // ============================================================================
 // Table Names

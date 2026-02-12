@@ -10,22 +10,18 @@
 
 import { withTransaction } from '@abe-stack/db';
 import {
+  applyOperations,
+  checkVersionConflicts,
   ERROR_CODES,
   ERROR_MESSAGES,
+  getOperationPointers,
   HTTP_STATUS,
   isAuthenticatedRequest,
+  REALTIME_ERRORS,
   SubKeys,
 } from '@abe-stack/shared';
 
-import {
-  applyOperations,
-  checkVersionConflicts,
-  getOperationPointers,
-  isTableAllowed,
-  loadRecords,
-  saveRecords,
-} from '../service';
-import { REALTIME_ERRORS } from '../types';
+import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
 import type { RecordPointer, RealtimeTransaction, RouteResult } from '@abe-stack/shared';

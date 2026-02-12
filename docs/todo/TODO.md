@@ -3089,3 +3089,4 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - Don't add new packages to implement a slice unless it removes duplication across apps.
 - If you touch auth/session/billing flows, add at least one test that asserts the failure mode you're most worried about.
 - For file placement rules during execution, follow `docs/todo/EXECUTION.md` (Hybrid Hexagonal standard).
+- For DRY cross-package audit plan (server/_ ↔ server/_), see `docs/todo/TODO-dag.md`.

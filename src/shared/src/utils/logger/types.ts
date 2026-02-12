@@ -52,7 +52,8 @@ export interface Logger {
    * @param msg - The log message
    * @param data - Optional structured data to attach
    */
-  trace(msg: string, data?: LogData): void;
+  trace?(msg: string, data?: LogData): void;
+  trace?(data: LogData, msg: string): void;
 
   /**
    * Log a debug-level message.
@@ -60,6 +61,7 @@ export interface Logger {
    * @param data - Optional structured data to attach
    */
   debug(msg: string, data?: LogData): void;
+  debug(data: LogData, msg: string): void;
 
   /**
    * Log an info-level message.
@@ -67,6 +69,7 @@ export interface Logger {
    * @param data - Optional structured data to attach
    */
   info(msg: string, data?: LogData): void;
+  info(data: LogData, msg: string): void;
 
   /**
    * Log a warn-level message.
@@ -74,6 +77,7 @@ export interface Logger {
    * @param data - Optional structured data to attach
    */
   warn(msg: string, data?: LogData): void;
+  warn(data: LogData, msg: string): void;
 
   /**
    * Log an error-level message.
@@ -81,13 +85,15 @@ export interface Logger {
    * @param data - Optional structured data to attach
    */
   error(msg: string | Error, data?: LogData): void;
+  error(data: LogData, msg?: string): void;
 
   /**
    * Log a fatal-level message (most severe).
    * @param msg - The log message or Error object
    * @param data - Optional structured data to attach
    */
-  fatal(msg: string | Error, data?: LogData): void;
+  fatal?(msg: string | Error, data?: LogData): void;
+  fatal?(data: LogData, msg: string): void;
 
   /**
    * Create a child logger with additional context bindings.
@@ -96,7 +102,7 @@ export interface Logger {
    * @param bindings - Key-value pairs to attach to all child log entries
    * @returns A new Logger instance with merged context
    */
-  child(bindings: LogData): Logger;
+  child?(bindings: LogData): Logger;
 }
 
 /**

@@ -67,11 +67,18 @@ describe('System Schema - Table Names', () => {
 
 describe('System Schema - Job Status Enum', () => {
   test('should have all valid job statuses', () => {
-    expect(JOB_STATUSES).toEqual(['pending', 'processing', 'completed', 'failed', 'dead']);
+    expect(JOB_STATUSES).toEqual([
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'dead_letter',
+      'cancelled',
+    ]);
   });
 
-  test('should have exactly 5 job statuses', () => {
-    expect(JOB_STATUSES).toHaveLength(5);
+  test('should have exactly 6 job statuses', () => {
+    expect(JOB_STATUSES).toHaveLength(6);
   });
 
   test('job statuses should be unique', () => {
@@ -451,7 +458,14 @@ describe('System Schema - Job Type', () => {
   });
 
   test('should handle all job statuses', () => {
-    const statuses: JobStatus[] = ['pending', 'processing', 'completed', 'failed', 'dead'];
+    const statuses: JobStatus[] = [
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'dead_letter',
+      'cancelled',
+    ];
 
     statuses.forEach((status, index) => {
       const job: Job = {
@@ -1740,7 +1754,7 @@ describe('System Schema - Integration Scenarios', () => {
 
     const deadJob: Job = {
       ...failedAttempt2,
-      status: 'dead',
+      status: 'dead_letter',
       attempts: 3,
       lastError: 'Max retries exceeded',
       scheduledAt: new Date(Date.now() - 300000),
@@ -1748,7 +1762,7 @@ describe('System Schema - Integration Scenarios', () => {
 
     expect(failedAttempt1.attempts).toBe(1);
     expect(failedAttempt2.attempts).toBe(2);
-    expect(deadJob.status).toBe('dead');
+    expect(deadJob.status).toBe('dead_letter');
     expect(deadJob.attempts).toBe(deadJob.maxAttempts);
   });
 

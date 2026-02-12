@@ -63,35 +63,6 @@ describe('Domain Structure', () => {
     });
   });
 
-  describe('Contracts', () => {
-    test('should export auth schemas from contracts', async () => {
-      const { authContract, loginRequestSchema, registerRequestSchema, authResponseSchema } =
-        await import('../contracts/index.js');
-
-      expect(typeof authContract).toBe('object');
-      expect(typeof loginRequestSchema).toBe('object');
-      expect(typeof registerRequestSchema).toBe('object');
-      expect(typeof authResponseSchema).toBe('object');
-    });
-
-    test('should export user types and schemas from contracts', async () => {
-      const { userSchema, userRoleSchema, usersContract } = await import('../contracts/index.js');
-
-      expect(typeof userSchema).toBe('object');
-      expect(typeof userRoleSchema).toBe('object');
-      expect(typeof usersContract).toBe('object');
-    });
-
-    test('should export admin schemas from contracts', async () => {
-      const { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } =
-        await import('../contracts/index.js');
-
-      expect(typeof adminContract).toBe('object');
-      expect(typeof unlockAccountRequestSchema).toBe('object');
-      expect(typeof unlockAccountResponseSchema).toBe('object');
-    });
-  });
-
   describe('Pagination Domain', () => {
     test('should export pagination utilities', async () => {
       const {
@@ -243,10 +214,6 @@ describe('Domain Structure', () => {
 
       // Auth domain (from export * from './domain')
       expect(typeof mainIndex.authContract).toBe('object');
-
-      // Contracts namespace (from export * as Contracts)
-      expect(typeof mainIndex.Contracts).toBe('object');
-      expect(typeof mainIndex.Contracts.userRoleSchema).toBe('object');
 
       // Types namespace (from export * as Types)
       expect(typeof mainIndex.Types).toBe('object');

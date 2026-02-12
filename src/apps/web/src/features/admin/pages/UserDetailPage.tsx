@@ -5,7 +5,8 @@
  * Admin page for viewing and managing a single user.
  */
 
-import { Alert, Button, Heading, PageContainer, useNavigate, useParams } from '@abe-stack/ui';
+import { useNavigate, useParams } from '@abe-stack/react/router';
+import { Alert, Button, Heading, PageContainer } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
 import { UserActionsMenu, UserDetailCard } from '../components';

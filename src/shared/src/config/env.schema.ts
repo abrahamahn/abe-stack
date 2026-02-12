@@ -16,9 +16,9 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../core/schema.utils';
+} from '../types/schema';
 
-import type { Schema } from '../core/api';
+import type { Schema } from '../types/schema';
 
 // ============================================================================
 // Sub-Schema Interfaces

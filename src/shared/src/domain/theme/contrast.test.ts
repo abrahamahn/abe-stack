@@ -1,13 +1,14 @@
-// src/client/ui/src/theme/contrast.test.ts
+// src/shared/src/domain/theme/contrast.test.ts
+import { describe, expect, it } from 'vitest';
+
 import {
   DEFAULT_CONTRAST_MODE,
   getContrastCssVariables,
   highContrastDarkOverrides,
   highContrastLightOverrides,
-} from '@abe-stack/react';
-import { describe, expect, it } from 'vitest';
+} from './contrast';
 
-import type { ContrastMode } from '@abe-stack/react';
+import type { ContrastMode } from './contrast';
 
 describe('contrast', () => {
   describe('DEFAULT_CONTRAST_MODE', () => {

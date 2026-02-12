@@ -5,25 +5,17 @@
  * Explicit TypeScript interfaces for OAuth provider connections.
  */
 
+import { OAUTH_PROVIDERS, type OAuthProvider } from '@abe-stack/shared';
+
+// Re-export shared constants for consumers that import from schema
+export { OAUTH_PROVIDERS };
+export type { OAuthProvider };
+
 // ============================================================================
 // Table Names
 // ============================================================================
 
 export const OAUTH_CONNECTIONS_TABLE = 'oauth_connections';
-
-// ============================================================================
-// OAuth Provider Types
-// ============================================================================
-
-/**
- * Supported OAuth providers
- */
-export type OAuthProvider = 'google' | 'github' | 'apple';
-
-/**
- * List of supported OAuth providers
- */
-export const OAUTH_PROVIDERS = ['google', 'github', 'apple'] as const;
 
 // ============================================================================
 // OAuth Connection Types

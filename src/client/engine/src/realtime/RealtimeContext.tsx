@@ -26,14 +26,14 @@ import {
 } from 'react';
 
 import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
-import { RecordStorage, type RecordMap, type VersionedRecord } from '../storage/RecordStorage';
+import { RecordStorage, type RecordMap } from '../storage/RecordStorage';
 import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
 
 import { SubscriptionCache } from './SubscriptionCache';
 import { WebsocketPubsubClient, type ConnectionState } from './WebsocketPubsubClient';
 
 import type { RecordCache, TableMap } from '../cache/RecordCache';
-import type { RealtimeOperation } from '@abe-stack/shared';
+import type { RealtimeOperation, VersionedRecord } from '@abe-stack/shared';
 
 // ============================================================================
 // Types
@@ -83,6 +83,8 @@ export interface RealtimeProviderConfig<TTables extends TableMap = TableMap> {
   fetchRecordsEndpoint?: string;
   /** API endpoint for submitting transactions */
   submitTransactionEndpoint?: string;
+  /** Token provider for authenticated API calls */
+  getToken?: () => Promise<string | null>;
 }
 
 /**
@@ -181,6 +183,7 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
     dbName = 'abe-realtime',
     fetchRecordsEndpoint = '/api/realtime/getRecords',
     submitTransactionEndpoint = '/api/realtime/write',
+    getToken,
   } = config;
 
   // Track connection state
@@ -329,9 +332,14 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
         tx: QueuedTransaction,
       ): Promise<{ status: number; message?: string }> => {
         try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          const token = await getToken?.();
+          if (token !== undefined && token !== null && token !== '') {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
           const response = await fetch(submitTransactionEndpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(tx),
           });
           return { status: response.status };
@@ -348,9 +356,16 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
           if (typeof table === 'string' && typeof id === 'string') {
             // Fetch fresh record from server
             try {
+              const rollbackHeaders: Record<string, string> = {
+                'Content-Type': 'application/json',
+              };
+              const rollbackToken = await getToken?.();
+              if (rollbackToken !== undefined && rollbackToken !== null && rollbackToken !== '') {
+                rollbackHeaders['Authorization'] = `Bearer ${rollbackToken}`;
+              }
               const response = await fetch(fetchRecordsEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: rollbackHeaders,
                 body: JSON.stringify({ pointers: [{ table, id }] }),
               });
               const data = (await response.json()) as { recordMap: RecordMap };
@@ -374,7 +389,7 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
         setIsOnline(online);
       },
     });
-  }, [fetchRecordsEndpoint, submitTransactionEndpoint, recordCache]);
+  }, [fetchRecordsEndpoint, submitTransactionEndpoint, recordCache, getToken]);
 
   // Wire up subscription cache to pubsub
   useEffect(() => {

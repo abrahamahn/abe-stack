@@ -1,6 +1,8 @@
 // src/client/engine/src/realtime/SubscriptionCache.ts
 
-const DEFAULT_CLEANUP_DELAY_MS = 10_000;
+import { MS_PER_SECOND } from '@abe-stack/shared';
+
+const DEFAULT_CLEANUP_DELAY_MS = 10 * MS_PER_SECOND;
 
 /**
  * Configuration options for SubscriptionCache.

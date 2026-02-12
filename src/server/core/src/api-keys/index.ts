@@ -33,7 +33,7 @@ export { createApiKeyAuthMiddleware, createScopeGuard, getApiKeyContext } from '
 export { apiKeyRoutes } from './routes';
 
 // Types
-export type { ApiKeyAppContext, ApiKeyRequest } from './types';
+export type { ApiKeyAppContext } from './types';
 export type {
   ApiKeyContext,
   ApiKeyAuthenticatedRequest,

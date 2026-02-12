@@ -18,50 +18,11 @@ import type { CacheProvider } from '@abe-stack/shared';
 import type { Argon2Config } from '@abe-stack/shared/config';
 import type {
   BaseContext,
-  Logger,
   RequestContext,
   RequestInfo,
+  ServerLogger,
   StorageService,
 } from '@abe-stack/shared/core';
-
-// ============================================================================
-// Logger Interface (Transition Alias)
-// ============================================================================
-
-/**
- * Logger interface used by the users module.
- *
- * Extends the shared `Logger` contract with a required `child` method.
- * The contracts `Logger` marks `child` as optional; the users module
- * requires it for structured logging with user context bindings.
- *
- * @complexity O(1) per log call
- */
-export interface UsersLogger extends Logger {
-  /** Log an info-level message */
-  info(msg: string, data?: Record<string, unknown>): void;
-  /** Log an info-level message with structured data first (Pino convention) */
-  info(data: Record<string, unknown>, msg: string): void;
-  /** Log a warn-level message */
-  warn(msg: string, data?: Record<string, unknown>): void;
-  /** Log a warn-level message with structured data first (Pino convention) */
-  warn(data: Record<string, unknown>, msg: string): void;
-  /** Log an error-level message */
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  /** Log an error-level message with structured data first (Pino convention) */
-  error(data: unknown, msg?: string): void;
-  /** Log a debug-level message */
-  debug(msg: string, data?: Record<string, unknown>): void;
-  /** Log a debug-level message with structured data first (Pino convention) */
-  debug(data: Record<string, unknown>, msg: string): void;
-  /**
-   * Create a child logger with additional bindings
-   *
-   * @param bindings - Key-value pairs to attach to all child log entries
-   * @returns A new logger instance with the bindings
-   */
-  child(bindings: Record<string, unknown>): UsersLogger;
-}
 
 // ============================================================================
 // Auth Config Subset
@@ -137,7 +98,7 @@ export interface UsersModuleDeps extends Omit<BaseContext, 'db'> {
   /** Repository layer for structured database access */
   readonly repos: Repositories;
   /** Logger instance for users module logging */
-  readonly log: UsersLogger;
+  readonly log: ServerLogger;
   /** Storage service for avatar uploads */
   readonly storage: StorageService;
   /** Cache provider for performance optimization */

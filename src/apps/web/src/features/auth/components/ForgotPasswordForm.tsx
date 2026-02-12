@@ -1,11 +1,13 @@
 // src/apps/web/src/features/auth/components/ForgotPasswordForm.tsx
-import { AuthFormLayout, Button, Input, Link } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
+
+import { Link } from '@abe-stack/react/router';
+import { AuthFormLayout, Button, Input } from '@abe-stack/ui';
 
 import { TurnstileWidget } from './TurnstileWidget';
 
 import type { ForgotPasswordRequest } from '@abe-stack/shared';
-import type { AuthMode } from '@abe-stack/ui';
+import type { AuthMode } from '@abe-stack/react/hooks';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface ForgotPasswordFormProps {

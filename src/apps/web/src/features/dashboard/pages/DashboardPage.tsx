@@ -1,11 +1,10 @@
 // src/apps/web/src/features/dashboard/pages/DashboardPage.tsx
-import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate, type NavigateFunction } from '@abe-stack/react/router';
+import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
 import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
-
-import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
 
 export const DashboardPage = (): JSX.Element => {

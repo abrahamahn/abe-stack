@@ -33,9 +33,12 @@ import {
   type QuietHoursConfig,
   type TypePreferences,
 } from '@abe-stack/db';
-import { DAYS_PER_WEEK, DEFAULT_NOTIFICATION_PREFERENCES, MS_PER_DAY } from '@abe-stack/shared';
-
-import { PushSubscriptionExistsError } from './errors';
+import {
+  DAYS_PER_WEEK,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  MS_PER_DAY,
+  PushSubscriptionExistsError,
+} from '@abe-stack/shared';
 
 import type {
   NotificationLevel,

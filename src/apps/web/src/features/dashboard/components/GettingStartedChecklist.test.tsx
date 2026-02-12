@@ -10,8 +10,8 @@ import type { User } from '@abe-stack/shared';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@abe-stack/react/router', async () => {
+  const actual = await vi.importActual('@abe-stack/react/router');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

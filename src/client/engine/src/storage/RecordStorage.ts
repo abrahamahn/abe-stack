@@ -11,26 +11,13 @@
  * Based on chet-stack's RecordStorage pattern.
  */
 
+import type { RecordPointer, VersionedRecord } from '@abe-stack/shared';
+
+export type { RecordPointer, VersionedRecord };
+
 // ============================================================================
 // Types
 // ============================================================================
-
-/**
- * Base interface for versioned records.
- * All records must have an id and version for optimistic concurrency.
- */
-export interface VersionedRecord {
-  id: string;
-  version: number;
-}
-
-/**
- * Pointer to a specific record in a table.
- */
-export interface RecordPointer<T extends string = string> {
-  table: T;
-  id: string;
-}
 
 /**
  * A record with its table context.

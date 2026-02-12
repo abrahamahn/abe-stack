@@ -18,6 +18,7 @@ export {
 
 export {
   ACCESS_TOKEN_COOKIE_NAME,
+  API_PREFIX,
   AUTH_EXPIRY,
   CSRF_COOKIE_NAME,
   CSRF_TOKEN_HEADER,
@@ -320,6 +321,7 @@ export {
 
 // Billing
 export {
+  BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
   BillingProviderError,
   BillingProviderNotConfiguredError,
@@ -393,6 +395,7 @@ export {
   type AdminPlanResponse,
   type AdminPlansListResponse,
   type BillingProvider,
+  type BillingEventType,
   type BillingStats,
   type CancelSubscriptionRequest,
   type CardDetails,
@@ -428,11 +431,15 @@ export {
 // Compliance
 export {
   CONSENT_TYPES,
+  DATA_EXPORT_STATUSES,
+  DATA_EXPORT_TYPES,
   DOCUMENT_TYPES,
   consentLogSchema,
   createConsentLogSchema,
+  createDataExportRequestSchema,
   createLegalDocumentSchema,
   createUserAgreementSchema,
+  dataExportRequestSchema,
   getEffectiveConsent,
   isConsentGranted,
   legalDocumentSchema,
@@ -442,13 +449,28 @@ export {
   type ConsentLog,
   type ConsentType,
   type CreateConsentLog,
+  type CreateDataExportRequest,
   type CreateLegalDocument,
   type CreateUserAgreement,
+  type DataExportRequest,
+  type DataExportStatus,
+  type DataExportType,
   type DocumentType,
   type LegalDocument,
   type UpdateLegalDocument,
   type UserAgreement,
 } from './domain/compliance';
+
+// Email
+export {
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  type EmailProvider,
+  type EmailStatus,
+} from './domain/email';
+
+// Files
+export { FILE_PURPOSES, STORAGE_PROVIDERS, type FilePurpose } from './domain/files';
 
 // Feature flags
 export {
@@ -519,6 +541,7 @@ export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_LEVELS,
+  NOTIFICATION_PAYLOAD_MAX_SIZE,
   NOTIFICATION_TYPES,
   NotificationRateLimitError,
   NotificationSendError,
@@ -526,11 +549,14 @@ export {
   PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
+  ProviderNotConfiguredError,
   PushProviderNotConfiguredError,
   PushSubscriptionExistsError,
   PushSubscriptionNotFoundError,
   QuietHoursActiveError,
+  SubscriptionExistsError,
   SubscriptionExpiredError,
+  SubscriptionNotFoundError,
   VapidNotConfiguredError,
   baseMarkAsReadRequestSchema,
   notificationPreferencesSchema,
@@ -614,6 +640,7 @@ export {
   isOverQuota,
   usageMetricSchema,
   usageSnapshotSchema,
+  type AggregationType,
   type UsageMetric,
   type UsageSnapshot,
 } from './domain/usage-metering';
@@ -777,6 +804,7 @@ export {
   queueStatsSchema,
   type JobActionResponse,
   type JobDetails,
+  type JobError,
   type JobListQuery,
   type JobListResponse,
   type QueueStats,
@@ -857,10 +885,54 @@ export {
   type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
+  type VersionedRecord,
   type SetNowOperation,
   type SetOperation as RealtimeSetOperation,
   type WriteResponse,
+  PROTECTED_FIELDS,
+  REALTIME_ERRORS,
+  applyOperation,
+  applyOperations,
+  checkVersionConflicts,
+  getOperationPointers,
+  isFieldMutable,
+  setPath,
+  type ApplyOperationsResult,
+  type VersionConflict,
 } from './domain/realtime';
+
+// Media (from domain/media)
+export {
+  ALL_MEDIA_EXTENSIONS,
+  ALLOWED_MEDIA_MIME_TYPES,
+  AUDIO_EXTENSIONS,
+  EXT_TO_MIME,
+  IMAGE_EXTENSIONS,
+  MAX_CHUNK_SIZE,
+  MAX_FILENAME_LENGTH,
+  MAX_UPLOAD_FILE_SIZE,
+  MAX_UPLOAD_TIMEOUT_MS,
+  MIME_TO_EXT,
+  VIDEO_EXTENSIONS,
+  detectFileType,
+  detectFileTypeFromPath,
+  generateFileId,
+  isAllowedFileType,
+  parseAudioMetadataFromBuffer,
+  sanitizeFilename,
+  validateUploadConfig,
+  type AudioMetadata,
+  type AudioProcessingOptions,
+  type ContentModerationResult,
+  type FileTypeResult,
+  type ImageProcessingOptions,
+  type MediaMetadata,
+  type MediaProcessingOptions,
+  type ProcessingResult,
+  type SecurityScanResult,
+  type UploadConfig,
+  type VideoProcessingOptions,
+} from './domain/media';
 
 // Activities (from domain/activities)
 export {
@@ -988,12 +1060,20 @@ export {
   SearchQueryBuilder,
   SearchTimeoutError,
   UnsupportedOperatorError,
+  // Serialization
+  buildURLWithQuery,
   compoundFilterSchema,
+  contains,
   createSearchQuery,
   cursorSearchResultSchema,
+  deserializeFromHash,
+  deserializeFromJSON,
+  deserializeFromURLParams,
+  eq,
   evaluateCompoundFilter,
   evaluateCondition,
   evaluateFilter,
+  extractQueryFromURL,
   facetBucketSchema,
   facetConfigSchema,
   facetResultSchema,
@@ -1008,7 +1088,9 @@ export {
   fromSearchQuery,
   fullTextSearchConfigSchema,
   getFieldValue,
+  gt,
   highlightedFieldSchema,
+  inArray,
   isCompoundFilter,
   isFilterCondition,
   isInvalidFilterError,
@@ -1017,11 +1099,17 @@ export {
   isSearchProviderError,
   isSearchTimeoutError,
   logicalOperatorSchema,
+  lt,
+  mergeSearchParamsIntoURL,
+  neq,
   paginateArray,
   rangeValueSchema,
   searchQuerySchema,
   searchResultItemSchema,
   searchResultSchema,
+  serializeToHash,
+  serializeToJSON,
+  serializeToURLParams,
   sortArray,
   sortConfigSchema,
   urlSearchParamsSchema,
@@ -1047,6 +1135,9 @@ export {
   type SearchQueryOutput,
   type SearchResult,
   type SearchResultItem,
+  type SerializationOptions,
+  type SerializedFilter,
+  type SerializedQuery,
   type SortConfig,
   type UrlSearchParamsInput,
 } from './utils/search';
@@ -1276,6 +1367,7 @@ export {
   toCamelCase,
   toKebabCase,
   toPascalCase,
+  trimTrailingSlashes,
   truncate,
 } from './utils/string/string';
 
@@ -1294,8 +1386,16 @@ export {
   waitForPort,
 } from './utils/port';
 
-// ============================================================================
-// CONTRACTS NAMESPACE (Backward Compatibility)
-// ============================================================================
-
-export * as Contracts from './contracts';
+// --- Theme tokens ---
+export {
+  DEFAULT_CONTRAST_MODE,
+  DEFAULT_DENSITY,
+  densityMultipliers,
+  getContrastCssVariables,
+  getDensityCssVariables,
+  getSpacingForDensity,
+  highContrastDarkOverrides,
+  highContrastLightOverrides,
+  type ContrastMode,
+  type Density,
+} from './domain/theme';

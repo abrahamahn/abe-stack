@@ -18,7 +18,7 @@ export {
   SECONDS_PER_MINUTE,
 } from './time';
 
-export { HTTP_STATUS, type HttpStatusCode } from '../../core/constants';
+export { HTTP_STATUS, type HttpStatusCode } from './http-status';
 
 export const SORT_ORDER = {
   ASC: 'asc',

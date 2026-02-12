@@ -41,7 +41,6 @@ export { getUserById, listUsers, type ListUsersResult, type User } from './servi
 export type {
   UsersArgon2Config,
   UsersAuthConfig,
-  UsersLogger,
   UsersModuleDeps,
   UsersRequest,
   UsersRequestInfo,

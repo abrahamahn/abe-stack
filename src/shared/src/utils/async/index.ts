@@ -1,6 +1,11 @@
 // src/shared/src/utils/async/index.ts
 
-export { BatchedQueue, type BatchedQueueOptions, type BatchProcessResult } from './batched-queue';
+export {
+  BatchedQueue,
+  QueueFullError,
+  type BatchedQueueOptions,
+  type BatchProcessResult,
+} from './batched-queue';
 
 export { DeferredPromise } from './deferred-promise';
 

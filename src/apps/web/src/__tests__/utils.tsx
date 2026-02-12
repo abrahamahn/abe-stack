@@ -12,7 +12,7 @@
  */
 
 import { QueryCache, QueryCacheProvider } from '@abe-stack/client-engine';
-import { MemoryRouter } from '@abe-stack/ui';
+import { MemoryRouter } from '@abe-stack/react/router';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';

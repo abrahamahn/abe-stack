@@ -42,7 +42,6 @@ export type {
   BillingHandlerConfig,
   BillingHandlerDeps,
   BillingHttpMethod,
-  BillingLogger,
   BillingModuleDeps,
   BillingRepositories,
   BillingRequest,

@@ -9,10 +9,10 @@ import { CookieConsentBanner } from './CookieConsentBanner';
 // Mocks
 // ============================================================================
 
-// Mock useNavigate from @abe-stack/ui
+// Mock useNavigate from @abe-stack/react/router
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@abe-stack/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,

@@ -12,8 +12,7 @@ vi.mock('@features/auth', () => ({
   useAuth: (...args: unknown[]) => mockUseAuth(...args),
 }));
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@abe-stack/react/router', () => {
   const link = ({
     children,
     to,
@@ -29,7 +28,6 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
   );
 
   return {
-    ...actual,
     Link: link,
   };
 });

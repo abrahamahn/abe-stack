@@ -7,9 +7,19 @@
  * when the queue exceeds the maximum size.
  */
 
-import { TooManyRequestsError } from '../../core/errors';
+import { HTTP_STATUS } from '../constants/http-status';
+import { AppError } from '../errors/base';
 
 import { DeferredPromise } from './deferred-promise';
+
+/**
+ * Error thrown when the queue exceeds its maximum size.
+ */
+export class QueueFullError extends AppError {
+  constructor(message: string) {
+    super(message, HTTP_STATUS.TOO_MANY_REQUESTS, 'QUEUE_FULL');
+  }
+}
 
 /**
  * Options for configuring the BatchedQueue
@@ -80,7 +90,7 @@ export class BatchedQueue<T, R = T> {
   enqueue(item: T): Promise<R> {
     // Check if we've exceeded the maximum queue size
     if (this.tasks.length >= this.options.maxQueueSize) {
-      throw new TooManyRequestsError(`Queue size exceeded maximum of ${this.options.maxQueueSize}`);
+      throw new QueueFullError(`Queue size exceeded maximum of ${this.options.maxQueueSize}`);
     }
 
     const deferred = new DeferredPromise<R>();

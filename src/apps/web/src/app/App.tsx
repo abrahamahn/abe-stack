@@ -14,21 +14,17 @@ import {
   type QueryKey,
   type QueryState,
 } from '@abe-stack/client-engine';
-import { toastStore } from '@abe-stack/react';
-import { ACCESS_TOKEN_COOKIE_NAME } from '@abe-stack/shared';
+import { LiveRegion, toastStore } from '@abe-stack/react';
+import { ACCESS_TOKEN_COOKIE_NAME, trimTrailingSlashes } from '@abe-stack/shared';
+import { HistoryProvider, useRouteFocusAnnounce } from '@abe-stack/react/hooks';
+import { BrowserRouter, Route, Routes } from '@abe-stack/react/router';
 import {
-  BrowserRouter,
   ErrorBoundary,
-  HistoryProvider,
-  LiveRegion,
   LoadingContainer,
   ProtectedRoute,
-  Route,
-  Routes,
   SkipLink,
   ThemeProvider,
   Toaster,
-  useRouteFocusAnnounce,
 } from '@abe-stack/ui';
 import { TosAcceptanceModal } from '@auth/components';
 import { useAuth } from '@features/auth';
@@ -293,7 +289,7 @@ function useTosAcceptance(environment: ClientEnvironment): {
   const handleAccept = useCallback(
     async (documentId: string) => {
       const { apiUrl } = environment.config;
-      const baseUrl = apiUrl.replace(/\/+$/, '');
+      const baseUrl = trimTrailingSlashes(apiUrl);
       const token = localStorage.getItem(ACCESS_TOKEN_COOKIE_NAME);
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
       if (token !== null) {

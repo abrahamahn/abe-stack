@@ -6,8 +6,8 @@
  * serialization errors, and capacity limits.
  */
 
-import { HTTP_STATUS } from '../../core/constants';
-import { AppError } from '../../core/errors';
+import { HTTP_STATUS } from '../constants/http-status';
+import { AppError } from '../errors/base';
 
 // ============================================================================
 // Base Cache Error

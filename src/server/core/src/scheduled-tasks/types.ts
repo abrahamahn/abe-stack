@@ -8,6 +8,8 @@
  * @module
  */
 
+import type { Logger } from '@abe-stack/shared';
+
 /**
  * Task schedule configuration
  */
@@ -35,18 +37,5 @@ export interface TaskTracker {
   intervalId: NodeJS.Timeout;
 }
 
-/**
- * Logger interface for scheduled tasks.
- * Must be compatible with UsersLogger (extends shared Logger contract).
- */
-export interface ScheduledTaskLogger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  info(data: Record<string, unknown>, msg: string): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  warn(data: Record<string, unknown>, msg: string): void;
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  error(data: unknown, msg?: string): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
-  debug(data: Record<string, unknown>, msg: string): void;
-  child(bindings: Record<string, unknown>): ScheduledTaskLogger;
-}
+/** Backward-compatible logger alias for scheduled-tasks internals/tests. */
+export type ScheduledTaskLogger = Logger;

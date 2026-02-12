@@ -25,7 +25,7 @@ import {
   type User,
 } from '@abe-stack/db';
 
-import type { UsersLogger } from './types';
+import type { ServerLogger } from '@abe-stack/shared/core';
 
 // ============================================================================
 // Constants
@@ -73,7 +73,7 @@ export interface CleanupResult {
 export async function cleanupUnverifiedUsers(
   db: DbClient,
   repos: Repositories,
-  log: UsersLogger,
+  log: ServerLogger,
   expiryDays: number = DEFAULT_EXPIRY_DAYS,
 ): Promise<CleanupResult> {
   const cutoff = new Date();

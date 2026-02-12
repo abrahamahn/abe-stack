@@ -6,7 +6,8 @@
  * Provides Accept All, Reject Non-Essential, and a link to manage preferences.
  */
 
-import { Button, Text, useNavigate } from '@abe-stack/ui';
+import { useNavigate } from '@abe-stack/react/router';
+import { Button, Text } from '@abe-stack/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 
 import { useUpdateConsent } from '../hooks/useConsent';

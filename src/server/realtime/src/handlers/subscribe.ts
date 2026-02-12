@@ -13,10 +13,10 @@ import {
   ERROR_MESSAGES,
   HTTP_STATUS,
   isAuthenticatedRequest,
+  REALTIME_ERRORS,
 } from '@abe-stack/shared';
 
 import { isTableAllowed, loadRecords } from '../service';
-import { REALTIME_ERRORS } from '../types';
 
 import type { GetRecordsResult, RealtimeModuleDeps, RealtimeRequest } from '../types';
 import type { RecordPointer, RouteResult } from '@abe-stack/shared';

@@ -1,9 +1,11 @@
 // src/apps/web/src/features/auth/components/MagicLinkForm.tsx
-import { Alert, AuthFormLayout, Button, Input, Link, Text } from '@abe-stack/ui';
 import { useState } from 'react';
 
+import { Link } from '@abe-stack/react/router';
+import { Alert, AuthFormLayout, Button, Input, Text } from '@abe-stack/ui';
+
 import type { MagicLinkRequest } from '@abe-stack/shared';
-import type { AuthMode } from '@abe-stack/ui';
+import type { AuthMode } from '@abe-stack/react/hooks';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface MagicLinkFormProps {

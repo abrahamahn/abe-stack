@@ -13,7 +13,9 @@ import { createHash } from 'node:crypto';
 import {
   ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
   BadRequestError,
+  generateFileId,
   MAX_IMAGE_SIZE as MAX_AVATAR_SIZE,
+  MIME_TO_EXT,
   NotFoundError,
   validatePassword,
   WeakPasswordError,
@@ -388,9 +390,9 @@ export async function uploadAvatar(
   }
 
   // Generate storage key
-  const extension = file.mimetype.split('/')[1];
-  const timestamp = Date.now();
-  const key = `${AVATAR_PATH_PREFIX}/${userId}/${String(timestamp)}.${extension ?? 'jpg'}`;
+  const extension = MIME_TO_EXT[file.mimetype] ?? 'jpg';
+  const fileId = generateFileId();
+  const key = `${AVATAR_PATH_PREFIX}/${userId}/${fileId}.${extension}`;
 
   // Upload to storage
   const storedKey = await storage.upload(key, file.buffer, file.mimetype);

@@ -11,30 +11,13 @@ import {
   or,
   select,
   selectCount,
+  TENANT_COLUMNS,
+  TENANTS_TABLE,
   toCamelCase,
   type DbClient,
   type Repositories,
 } from '@abe-stack/db';
 import { NotFoundError } from '@abe-stack/shared';
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const TENANTS_TABLE = 'tenants';
-
-const TENANT_COLUMNS = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  logoUrl: 'logo_url',
-  ownerId: 'owner_id',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  allowedEmailDomains: 'allowed_email_domains',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-} as const;
 
 // ============================================================================
 // Types

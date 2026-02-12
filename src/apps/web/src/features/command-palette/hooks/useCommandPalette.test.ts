@@ -4,15 +4,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCommandPalette } from './useCommandPalette';
 
-// Mock @abe-stack/ui hooks
+// Mock @abe-stack/react/router for useNavigate
 const mockNavigate = vi.fn();
 const mockCycleMode = vi.fn();
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@abe-stack/react/router', async () => {
+  const actual = await vi.importActual('@abe-stack/react/router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+  };
+});
+
+// Mock @abe-stack/react/hooks for useThemeMode and useKeyboardShortcuts
+vi.mock('@abe-stack/react/hooks', async () => {
+  const actual = await vi.importActual('@abe-stack/react/hooks');
+  return {
+    ...actual,
     useThemeMode: () => ({
       mode: 'system',
       setMode: vi.fn(),

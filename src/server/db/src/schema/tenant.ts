@@ -6,23 +6,19 @@
  * Maps to migration 0001_tenant.sql.
  */
 
-import { INVITATION_STATUSES, type InvitationStatus } from '@abe-stack/shared';
+import { INVITATION_STATUSES, type InvitationStatus, type TenantRole } from '@abe-stack/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { INVITATION_STATUSES };
-export type { InvitationStatus };
+export type { InvitationStatus, TenantRole };
 
-// ============================================================================
-// Enums
-// ============================================================================
-
-/** Roles within a tenant workspace */
-export type TenantRole = 'owner' | 'admin' | 'member' | 'viewer';
-
-/**
- * All valid tenant roles (DB-specific array; differs from shared TENANT_ROLES object structure)
- */
-export const TENANT_ROLES = ['owner', 'admin', 'member', 'viewer'] as const;
+// Flat array form for SQL value checks (shared TENANT_ROLES is a keyed object)
+export const TENANT_ROLES = [
+  'owner',
+  'admin',
+  'member',
+  'viewer',
+] as const satisfies readonly TenantRole[];
 
 // ============================================================================
 // Table Names

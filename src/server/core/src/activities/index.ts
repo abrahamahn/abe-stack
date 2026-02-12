@@ -16,4 +16,4 @@ export { handleListActivities, handleListTenantActivities } from './handlers';
 export { activityRoutes } from './routes';
 
 // Types
-export type { ActivityAppContext, ActivityRequest } from './types';
+export type { ActivityAppContext } from './types';

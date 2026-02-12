@@ -1,17 +1,10 @@
 // src/apps/web/src/features/auth/pages/MagicLinkVerifyPage.tsx
-import {
-  Alert,
-  AuthLayout,
-  Button,
-  Heading,
-  Spinner,
-  Text,
-  useNavigate,
-  useSearchParams,
-} from '@abe-stack/ui';
+import { useEffect, useRef, useState } from 'react';
+
+import { useNavigate, useSearchParams } from '@abe-stack/react/router';
+import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { getPostLoginRedirect } from '@auth/utils';
-import { useEffect, useRef, useState } from 'react';
 
 import type { ReactElement } from 'react';
 

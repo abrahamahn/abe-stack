@@ -6,7 +6,7 @@
  */
 
 import { createApiError, NetworkError } from '@abe-stack/client-engine';
-import { addAuthHeader } from '@abe-stack/shared';
+import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 import type { ApiErrorBody } from '@abe-stack/client-engine';
 import type {
@@ -302,17 +302,14 @@ export interface AdminApiClient {
 // API Client
 // ============================================================================
 
-const API_PREFIX = '/api';
-
 export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
-  const baseUrl = config.baseUrl.replace(/\/+$/, '');
+  const baseUrl = trimTrailingSlashes(config.baseUrl);
   const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
     headers.set('Content-Type', 'application/json');
-    const token: string | null | undefined = config.getToken?.();
-    (addAuthHeader as (headers: Headers, token: string | null | undefined) => void)(headers, token);
+    addAuthHeader(headers, config.getToken?.());
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
 

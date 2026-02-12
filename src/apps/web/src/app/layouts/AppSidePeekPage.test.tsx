@@ -14,13 +14,9 @@ vi.mock('@ui-library/components', () => {
   };
 });
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+vi.mock('@abe-stack/react/router', () => ({
+  useNavigate: () => mockNavigate,
+}));
 
 describe('AppSidePeekPage', () => {
   it('renders page and navigates back to ui-library', () => {

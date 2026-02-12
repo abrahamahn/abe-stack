@@ -52,24 +52,30 @@ vi.mock('@ui-library/hooks', () => ({
   }),
 }));
 
+vi.mock('@abe-stack/react/router', () => ({
+  Outlet: () => <div data-testid="outlet">Outlet Content</div>,
+}));
+
+vi.mock('@abe-stack/react/hooks', () => ({
+  useDensity: () => ({
+    density: 'normal',
+    cycleDensity: mockCycleDensity,
+  }),
+  useContrast: () => ({
+    contrastMode: 'system',
+    cycleContrastMode: mockCycleContrastMode,
+  }),
+  useSidePeek: () => ({
+    isOpen: true,
+    close: mockSidePeekClose,
+  }),
+}));
+
 vi.mock('@abe-stack/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/ui')>();
   return {
     ...actual,
-    Outlet: () => <div data-testid="outlet">Outlet Content</div>,
     ResizablePanelGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-    useDensity: () => ({
-      density: 'normal',
-      cycleDensity: mockCycleDensity,
-    }),
-    useContrast: () => ({
-      contrastMode: 'system',
-      cycleContrastMode: mockCycleContrastMode,
-    }),
-    useSidePeek: () => ({
-      isOpen: true,
-      close: mockSidePeekClose,
-    }),
   };
 });
 

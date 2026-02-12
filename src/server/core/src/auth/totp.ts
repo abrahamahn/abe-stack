@@ -11,6 +11,7 @@
 
 import { randomBytes } from 'node:crypto';
 
+import { TOTP_BACKUP_CODES_TABLE, USERS_TABLE } from '@abe-stack/db';
 import { Secret, TOTP } from 'otpauth';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
@@ -106,14 +107,14 @@ export async function setupTotp(
 
   // Store secret on user (but don't enable yet) and store backup codes
   await db.raw(
-    `UPDATE users SET totp_secret = $1, totp_enabled = false, updated_at = now() WHERE id = $2`,
+    `UPDATE ${USERS_TABLE} SET totp_secret = $1, totp_enabled = false, updated_at = now() WHERE id = $2`,
     [secret.base32, userId],
   );
 
   // Delete any existing backup codes and insert new ones
-  await db.raw(`DELETE FROM totp_backup_codes WHERE user_id = $1`, [userId]);
+  await db.raw(`DELETE FROM ${TOTP_BACKUP_CODES_TABLE} WHERE user_id = $1`, [userId]);
   for (const { codeHash } of codeHashes) {
-    await db.raw(`INSERT INTO totp_backup_codes (user_id, code_hash) VALUES ($1, $2)`, [
+    await db.raw(`INSERT INTO ${TOTP_BACKUP_CODES_TABLE} (user_id, code_hash) VALUES ($1, $2)`, [
       userId,
       codeHash,
     ]);
@@ -146,7 +147,7 @@ export async function enableTotp(
 ): Promise<TotpVerifyResult> {
   // Get the user's TOTP secret
   const result = await db.raw<{ totp_secret: string | null; totp_enabled: boolean }>(
-    `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
+    `SELECT totp_secret, totp_enabled FROM ${USERS_TABLE} WHERE id = $1`,
     [userId],
   );
   const user = result[0];
@@ -166,7 +167,9 @@ export async function enableTotp(
   }
 
   // Enable 2FA
-  await db.raw(`UPDATE users SET totp_enabled = true, updated_at = now() WHERE id = $1`, [userId]);
+  await db.raw(`UPDATE ${USERS_TABLE} SET totp_enabled = true, updated_at = now() WHERE id = $1`, [
+    userId,
+  ]);
 
   return { success: true, message: '2FA has been enabled successfully.' };
 }
@@ -187,7 +190,7 @@ export async function disableTotp(
   config: AuthConfig,
 ): Promise<TotpVerifyResult> {
   const result = await db.raw<{ totp_secret: string | null; totp_enabled: boolean }>(
-    `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
+    `SELECT totp_secret, totp_enabled FROM ${USERS_TABLE} WHERE id = $1`,
     [userId],
   );
   const user = result[0];
@@ -206,12 +209,12 @@ export async function disableTotp(
 
   // Disable 2FA and clear secret
   await db.raw(
-    `UPDATE users SET totp_enabled = false, totp_secret = NULL, updated_at = now() WHERE id = $1`,
+    `UPDATE ${USERS_TABLE} SET totp_enabled = false, totp_secret = NULL, updated_at = now() WHERE id = $1`,
     [userId],
   );
 
   // Delete backup codes
-  await db.raw(`DELETE FROM totp_backup_codes WHERE user_id = $1`, [userId]);
+  await db.raw(`DELETE FROM ${TOTP_BACKUP_CODES_TABLE} WHERE user_id = $1`, [userId]);
 
   return { success: true, message: '2FA has been disabled.' };
 }
@@ -221,7 +224,7 @@ export async function disableTotp(
  */
 export async function getTotpStatus(db: DbClient, userId: string): Promise<{ enabled: boolean }> {
   const result = await db.raw<{ totp_enabled: boolean }>(
-    `SELECT totp_enabled FROM users WHERE id = $1`,
+    `SELECT totp_enabled FROM ${USERS_TABLE} WHERE id = $1`,
     [userId],
   );
   const user = result[0];
@@ -246,7 +249,7 @@ export async function verifyTotpForLogin(
   config: AuthConfig,
 ): Promise<boolean> {
   const result = await db.raw<{ totp_secret: string | null; totp_enabled: boolean }>(
-    `SELECT totp_secret, totp_enabled FROM users WHERE id = $1`,
+    `SELECT totp_secret, totp_enabled FROM ${USERS_TABLE} WHERE id = $1`,
     [userId],
   );
   const user = result[0];
@@ -289,7 +292,7 @@ export function verifyTotpCode(secretBase32: string, code: string, window: numbe
  */
 async function verifyBackupCode(db: DbClient, userId: string, code: string): Promise<boolean> {
   const result = await db.raw<{ id: string; code_hash: string }>(
-    `SELECT id, code_hash FROM totp_backup_codes WHERE user_id = $1 AND used_at IS NULL`,
+    `SELECT id, code_hash FROM ${TOTP_BACKUP_CODES_TABLE} WHERE user_id = $1 AND used_at IS NULL`,
     [userId],
   );
 
@@ -297,7 +300,7 @@ async function verifyBackupCode(db: DbClient, userId: string, code: string): Pro
     const matches = await verifyPasswordSafe(code, row.code_hash);
     if (matches) {
       // Mark as used
-      await db.raw(`UPDATE totp_backup_codes SET used_at = now() WHERE id = $1`, [row.id]);
+      await db.raw(`UPDATE ${TOTP_BACKUP_CODES_TABLE} SET used_at = now() WHERE id = $1`, [row.id]);
       return true;
     }
   }

@@ -19,11 +19,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('../service', () => ({
   isTableAllowed: vi.fn((table: string) => table === 'users' || table === 'posts'),
   loadRecords: vi.fn(),
-  getOperationPointers: vi.fn((ops) =>
-    ops.map((op: { table: string; id: string }) => ({ table: op.table, id: op.id })),
-  ),
-  applyOperations: vi.fn(),
-  checkVersionConflicts: vi.fn(),
   saveRecords: vi.fn(),
 }));
 
@@ -35,6 +30,11 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/shared')>();
   return {
     ...actual,
+    getOperationPointers: vi.fn((ops: Array<{ table: string; id: string }>) =>
+      ops.map((op) => ({ table: op.table, id: op.id })),
+    ),
+    applyOperations: vi.fn(),
+    checkVersionConflicts: vi.fn(),
     SubKeys: {
       record: (table: string, id: string) => `record:${table}:${id}`,
     },
@@ -156,8 +156,8 @@ describe('Realtime Sync Handler', () => {
       });
 
       test('should accept operations on allowed tables', async () => {
-        const service = await import('../service');
-        const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } = service;
+        const { loadRecords, saveRecords } = await import('../service');
+        const { applyOperations, checkVersionConflicts } = await import('@abe-stack/shared');
 
         vi.mocked(loadRecords).mockResolvedValue({
           users: { 'user-1': { id: 'user-1', version: 1 } },
@@ -201,7 +201,8 @@ describe('Realtime Sync Handler', () => {
 
     describe('Version Conflicts', () => {
       test('should return 409 when version conflict detected', async () => {
-        const { loadRecords, applyOperations, checkVersionConflicts } = await import('../service');
+        const { loadRecords } = await import('../service');
+        const { applyOperations, checkVersionConflicts } = await import('@abe-stack/shared');
 
         vi.mocked(loadRecords).mockResolvedValue({
           users: { 'user-1': { id: 'user-1', version: 1 } },
@@ -232,8 +233,8 @@ describe('Realtime Sync Handler', () => {
 
     describe('Success Path', () => {
       test('should apply operations and return updated records', async () => {
-        const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } =
-          await import('../service');
+        const { loadRecords, saveRecords } = await import('../service');
+        const { applyOperations, checkVersionConflicts } = await import('@abe-stack/shared');
 
         const originalRecord = { id: 'user-1', version: 1, name: 'Original' };
         const updatedRecord = { id: 'user-1', version: 2, name: 'Updated' };
@@ -261,8 +262,8 @@ describe('Realtime Sync Handler', () => {
       });
 
       test('should log transaction details', async () => {
-        const { loadRecords, applyOperations, checkVersionConflicts, saveRecords } =
-          await import('../service');
+        const { loadRecords, saveRecords } = await import('../service');
+        const { applyOperations, checkVersionConflicts } = await import('@abe-stack/shared');
 
         vi.mocked(loadRecords).mockResolvedValue({
           users: { 'user-1': { id: 'user-1', version: 1 } },

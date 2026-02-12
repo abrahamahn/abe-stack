@@ -258,6 +258,21 @@ export function countCharactersNoWhitespace(str: string): number {
 }
 
 /**
+ * Removes trailing slash characters from a URL or path string.
+ *
+ * @param value - Input string to trim
+ * @returns String with trailing slashes removed
+ */
+export function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  // charCode 47 === '/'
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end--;
+  }
+  return value.slice(0, end);
+}
+
+/**
  * Formats a byte count to a human-readable string (e.g. "1.5 MB").
  */
 export function formatBytes(bytes: number): string {

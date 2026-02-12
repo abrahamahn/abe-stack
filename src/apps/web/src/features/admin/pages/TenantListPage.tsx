@@ -6,6 +6,7 @@
  */
 
 import { formatDate } from '@abe-stack/shared';
+import { useNavigate } from '@abe-stack/react/router';
 import {
   Alert,
   Badge,
@@ -20,7 +21,6 @@ import {
   TableHeader,
   TableRow,
   Text,
-  useNavigate,
 } from '@abe-stack/ui';
 
 import { useTenants } from '../hooks';

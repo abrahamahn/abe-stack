@@ -8,6 +8,8 @@
  * for testability and decoupled architecture.
  */
 
+import { ConflictError, NotFoundError } from '@abe-stack/shared';
+
 import type { DataExportRepositories, UserDataExport } from './types';
 import type {
   DataExportRequest as DbDataExportRequest,
@@ -260,19 +262,20 @@ async function aggregateConsentHistory(
 /**
  * Thrown when a user already has a pending or processing data export request.
  */
-export class DataExportAlreadyPendingError extends Error {
+export class DataExportAlreadyPendingError extends ConflictError {
   constructor(userId: string) {
-    super(`User ${userId} already has a pending data export request`);
-    this.name = 'DataExportAlreadyPendingError';
+    super(
+      `User ${userId} already has a pending data export request`,
+      'DATA_EXPORT_ALREADY_PENDING',
+    );
   }
 }
 
 /**
  * Thrown when a data export request is not found or does not belong to the user.
  */
-export class DataExportNotFoundError extends Error {
+export class DataExportNotFoundError extends NotFoundError {
   constructor(requestId: string) {
-    super(`Data export request not found: ${requestId}`);
-    this.name = 'DataExportNotFoundError';
+    super(`Data export request not found: ${requestId}`, 'DATA_EXPORT_NOT_FOUND');
   }
 }

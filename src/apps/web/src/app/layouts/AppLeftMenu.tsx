@@ -1,6 +1,7 @@
 // src/apps/web/src/app/layouts/AppLeftMenu.tsx
 import { isAdmin } from '@abe-stack/shared';
-import { Link, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
+import { Link } from '@abe-stack/react/router';
+import { MenuItem, ScrollArea, Text } from '@abe-stack/ui';
 import { FeatureHint } from '@app/components';
 import { useAuth } from '@features/auth';
 import { useMemo } from 'react';

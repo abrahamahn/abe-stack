@@ -22,7 +22,13 @@ import {
   type SecurityEvent as DbSecurityEvent,
   type SqlFragment,
 } from '@abe-stack/db';
-import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, toISODateOnly } from '@abe-stack/shared';
+import {
+  DAYS_PER_WEEK,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  NotFoundError,
+  toISODateOnly,
+} from '@abe-stack/shared';
 
 import type {
   PaginationOptions,
@@ -36,10 +42,9 @@ import type {
 // Types
 // ============================================================================
 
-export class SecurityEventNotFoundError extends Error {
+export class SecurityEventNotFoundError extends NotFoundError {
   constructor(id: string) {
-    super(`Security event not found: ${id}`);
-    this.name = 'SecurityEventNotFoundError';
+    super(`Security event not found: ${id}`, 'SECURITY_EVENT_NOT_FOUND');
   }
 }
 

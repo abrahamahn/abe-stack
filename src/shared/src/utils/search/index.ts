@@ -70,7 +70,31 @@ export {
 } from './operators';
 
 // Query Builder
-export { SearchQueryBuilder, createSearchQuery, fromSearchQuery } from './query-builder';
+export {
+  SearchQueryBuilder,
+  contains,
+  createSearchQuery,
+  eq,
+  fromSearchQuery,
+  gt,
+  inArray,
+  lt,
+  neq,
+} from './query-builder';
+
+// Serialization
+export {
+  buildURLWithQuery,
+  deserializeFromHash,
+  deserializeFromJSON,
+  deserializeFromURLParams,
+  extractQueryFromURL,
+  mergeSearchParamsIntoURL,
+  serializeToHash,
+  serializeToJSON,
+  serializeToURLParams,
+} from './serialization';
+export type { SerializationOptions, SerializedFilter, SerializedQuery } from './serialization';
 
 // Errors
 export {

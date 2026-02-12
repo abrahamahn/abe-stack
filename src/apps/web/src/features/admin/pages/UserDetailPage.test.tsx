@@ -6,6 +6,12 @@ import { UserDetailPage } from './UserDetailPage';
 
 import type { ReactNode } from 'react';
 
+// Mock router hooks
+vi.mock('@abe-stack/react/router', () => ({
+  useNavigate: () => vi.fn(),
+  useParams: () => ({ id: 'test-user-id' }),
+}));
+
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => {
   const mockAlert = ({ children, tone }: { children: ReactNode; tone?: string }) => (
@@ -53,16 +59,11 @@ vi.mock('@abe-stack/ui', () => {
     <div data-testid="page-container">{children}</div>
   );
 
-  const mockUseNavigate = () => vi.fn();
-  const mockUseParams = () => ({ id: 'test-user-id' });
-
   return {
     Alert: mockAlert,
     Button: mockButton,
     Heading: mockHeading,
     PageContainer: mockPageContainer,
-    useNavigate: mockUseNavigate,
-    useParams: mockUseParams,
   };
 });
 

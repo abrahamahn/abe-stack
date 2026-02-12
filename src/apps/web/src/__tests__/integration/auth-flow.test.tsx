@@ -9,7 +9,7 @@
  * - Mode switching between login/register/forgot-password
  */
 
-import { Route, Routes, useLocation } from '@abe-stack/ui';
+import { Route, Routes, useLocation } from '@abe-stack/react/router';
 import { act, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

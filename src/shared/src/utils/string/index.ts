@@ -25,6 +25,7 @@ export {
   titleCase,
   toKebabCase,
   toPascalCase,
+  trimTrailingSlashes,
   truncate,
 } from './string';
 

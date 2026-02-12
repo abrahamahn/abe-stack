@@ -1,5 +1,6 @@
 // src/apps/web/src/app/components/FeatureHint.tsx
-import { Button, Text, useLocalStorage } from '@abe-stack/ui';
+import { useLocalStorage } from '@abe-stack/react/hooks';
+import { Button, Text } from '@abe-stack/ui';
 import { useCallback, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 

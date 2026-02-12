@@ -13,9 +13,11 @@
  * 4. Available on the request object for use in handlers and error responses
  */
 
-import { randomUUID } from 'node:crypto';
+import { generateCorrelationId } from '@abe-stack/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
+export { generateCorrelationId };
 
 // ============================================================================
 // Types
@@ -91,7 +93,7 @@ export function registerCorrelationIdHook(
     }
 
     // Generate new ID if not provided or not trusted
-    correlationId ??= randomUUID();
+    correlationId ??= generateCorrelationId();
 
     // Attach to request for use in handlers
     req.correlationId = correlationId;
@@ -123,13 +125,4 @@ function isValidCorrelationId(id: string): boolean {
 
   // Allow UUIDs, ULIDs, and common ID formats
   return /^[a-zA-Z0-9_-]+$/.test(id);
-}
-
-/**
- * Generate a correlation ID (exported for use outside Fastify context)
- *
- * @returns A new UUID v4 string
- */
-export function generateCorrelationId(): string {
-  return randomUUID();
 }

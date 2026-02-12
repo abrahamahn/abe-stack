@@ -13,7 +13,7 @@
  */
 
 import { sign as jwtSign, verify as jwtVerify } from '@abe-stack/server-engine';
-import { AUTH_EXPIRY, QUOTAS } from '@abe-stack/shared';
+import { AUTH_EXPIRY, ForbiddenError, QUOTAS, TooManyRequestsError } from '@abe-stack/shared';
 
 import type { UserRepository } from '@abe-stack/db';
 import type { AdminUser, AppRole } from '@abe-stack/shared';
@@ -92,18 +92,16 @@ export interface ImpersonationAuditLogger {
 // ============================================================================
 
 /** Error thrown when the target user cannot be impersonated */
-export class ImpersonationForbiddenError extends Error {
+export class ImpersonationForbiddenError extends ForbiddenError {
   constructor(message: string) {
-    super(message);
-    this.name = 'ImpersonationForbiddenError';
+    super(message, 'IMPERSONATION_FORBIDDEN');
   }
 }
 
 /** Error thrown when the rate limit is exceeded */
-export class ImpersonationRateLimitError extends Error {
+export class ImpersonationRateLimitError extends TooManyRequestsError {
   constructor(message: string) {
-    super(message);
-    this.name = 'ImpersonationRateLimitError';
+    super(message, 'IMPERSONATION_RATE_LIMITED');
   }
 }
 

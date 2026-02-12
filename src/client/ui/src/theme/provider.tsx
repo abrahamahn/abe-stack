@@ -4,8 +4,7 @@ import { useDensity, type UseDensityReturn } from '@hooks/useDensity';
 import { useThemeMode, type ThemeMode, type UseThemeModeReturn } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
-import type { Density } from './density';
-import type { ContrastMode } from '@abe-stack/react';
+import type { ContrastMode, Density } from '@abe-stack/shared';
 import type { ReactElement, ReactNode } from 'react';
 
 /**

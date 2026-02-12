@@ -12,7 +12,11 @@ import {
   deleteFrom,
   eq,
   insert,
+  MEMBERSHIP_COLUMNS,
+  MEMBERSHIPS_TABLE,
   select,
+  TENANT_COLUMNS,
+  TENANTS_TABLE,
   toCamelCase,
   update,
   withTransaction,
@@ -26,34 +30,6 @@ import {
 } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '@abe-stack/db';
-
-// ============================================================================
-// Table & Column Constants (from db schema, not re-exported from @abe-stack/db)
-// ============================================================================
-
-const TENANTS_TABLE = 'tenants';
-const MEMBERSHIPS_TABLE = 'memberships';
-
-const TENANT_COLUMNS = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  logoUrl: 'logo_url',
-  ownerId: 'owner_id',
-  isActive: 'is_active',
-  metadata: 'metadata',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-} as const;
-
-const MEMBERSHIP_COLUMNS = {
-  id: 'id',
-  tenantId: 'tenant_id',
-  userId: 'user_id',
-  role: 'role',
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-} as const;
 
 // ============================================================================
 // Types

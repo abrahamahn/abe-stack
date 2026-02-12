@@ -24,50 +24,11 @@ import type { BillingConfig } from '@abe-stack/shared/config';
 import type {
   AuthenticatedUser,
   BaseContext,
-  Logger,
   RequestContext,
   RequestInfo,
+  ServerLogger,
 } from '@abe-stack/shared/core';
 import type { BillingService } from '@abe-stack/shared/domain';
-
-// ============================================================================
-// Logger Interface (Transition Alias)
-// ============================================================================
-
-/**
- * Logger interface for billing operations.
- *
- * Extends the shared `Logger` contract with a required `child` method.
- * The contracts `Logger` marks `child` as optional; billing requires it
- * for structured logging with billing context bindings.
- *
- * @complexity O(1) per log call
- */
-export interface BillingLogger extends Logger {
-  /** Log an info-level message */
-  info(msg: string, data?: Record<string, unknown>): void;
-  /** Log an info-level message with structured data first (Pino convention) */
-  info(data: Record<string, unknown>, msg: string): void;
-  /** Log a warn-level message */
-  warn(msg: string, data?: Record<string, unknown>): void;
-  /** Log a warn-level message with structured data first (Pino convention) */
-  warn(data: Record<string, unknown>, msg: string): void;
-  /** Log an error-level message */
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  /** Log an error-level message with structured data first (Pino convention) */
-  error(data: unknown, msg?: string): void;
-  /** Log a debug-level message */
-  debug(msg: string, data?: Record<string, unknown>): void;
-  /** Log a debug-level message with structured data first (Pino convention) */
-  debug(data: Record<string, unknown>, msg: string): void;
-  /**
-   * Create a child logger with additional bindings
-   *
-   * @param bindings - Key-value pairs to attach to all child log entries
-   * @returns A new logger instance with the bindings
-   */
-  child(bindings: Record<string, unknown>): BillingLogger;
-}
 
 // ============================================================================
 // Module Dependencies
@@ -82,7 +43,7 @@ export interface BillingLogger extends Logger {
  */
 export interface BillingModuleDeps {
   readonly db: unknown;
-  readonly logger: BillingLogger;
+  readonly logger: ServerLogger;
 }
 
 // ============================================================================
@@ -167,7 +128,7 @@ export interface BillingAppContext extends BaseContext {
     readonly auditEvents?: AuditEventRepository;
     readonly notifications?: NotificationRepository;
   };
-  readonly log: BillingLogger;
+  readonly log: ServerLogger;
 }
 
 /**

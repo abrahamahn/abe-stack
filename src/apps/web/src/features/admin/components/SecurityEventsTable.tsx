@@ -10,6 +10,7 @@ import {
   formatSecurityEventType,
   getSecuritySeverityTone,
 } from '@abe-stack/shared';
+import { useNavigate } from '@abe-stack/react/router';
 import {
   Badge,
   Button,
@@ -22,7 +23,6 @@ import {
   TableHeader,
   TableRow,
   Text,
-  useNavigate,
 } from '@abe-stack/ui';
 
 import type { JSX } from 'react';

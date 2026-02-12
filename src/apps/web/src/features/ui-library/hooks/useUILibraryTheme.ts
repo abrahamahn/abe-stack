@@ -1,5 +1,5 @@
 // src/apps/web/src/features/ui-library/hooks/useUILibraryTheme.ts
-import { useThemeMode } from '@abe-stack/ui';
+import { useThemeMode } from '@abe-stack/react/hooks';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 

@@ -7,6 +7,14 @@ import { HomeDocViewer } from './HomeDocViewer';
 import type { HomeDocViewerProps } from './HomeDocViewer';
 import type { ElementType, ReactElement, ReactNode } from 'react';
 
+vi.mock('@abe-stack/react/hooks', () => {
+  const mockUseDelayedFlag = (value: boolean): boolean => value;
+
+  return {
+    useDelayedFlag: mockUseDelayedFlag,
+  };
+});
+
 vi.mock('@abe-stack/ui', () => {
   const mockHeading = ({
     children,
@@ -40,14 +48,11 @@ vi.mock('@abe-stack/ui', () => {
     className?: string;
   }): ReactElement => <span>{children}</span>;
 
-  const mockUseDelayedFlag = (value: boolean): boolean => value;
-
   return {
     Heading: mockHeading,
     Markdown: mockMarkdown,
     Skeleton: mockSkeleton,
     Text: mockText,
-    useDelayedFlag: mockUseDelayedFlag,
   };
 });
 

@@ -6,13 +6,9 @@ import { AppRightInfo } from './AppRightInfo';
 
 const mockPathname = vi.hoisted(() => ({ current: '/dashboard' }));
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
-  return {
-    ...actual,
-    useLocation: () => ({ pathname: mockPathname.current }),
-  };
-});
+vi.mock('@abe-stack/react/router', () => ({
+  useLocation: () => ({ pathname: mockPathname.current }),
+}));
 
 describe('AppRightInfo', () => {
   it('renders route information for current pathname', () => {

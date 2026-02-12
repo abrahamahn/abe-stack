@@ -4,6 +4,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SecurityEventDetailPage } from './SecurityEventDetailPage';
 
+// Mock router hooks
+vi.mock('@abe-stack/react/router', () => ({
+  useNavigate: () => vi.fn(),
+  useParams: () => ({ id: 'test-event-id' }),
+}));
+
 // Mock @abe-stack/ui components
 vi.mock('@abe-stack/ui', () => {
   const button = ({
@@ -53,8 +59,6 @@ vi.mock('@abe-stack/ui', () => {
     Heading: heading,
     PageContainer: pageContainer,
     Text: text,
-    useNavigate: () => vi.fn(),
-    useParams: () => ({ id: 'test-event-id' }),
   };
 });
 

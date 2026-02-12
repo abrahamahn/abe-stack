@@ -92,6 +92,7 @@ export {
   REFRESH_TOKENS_TABLE,
   SECURITY_EVENT_COLUMNS,
   SECURITY_EVENTS_TABLE,
+  SMS_VERIFICATION_CODES_TABLE,
   SUBSCRIPTION_COLUMNS,
   SUBSCRIPTION_STATUSES,
   SUBSCRIPTIONS_TABLE,
@@ -116,6 +117,11 @@ export {
   FEATURE_FLAGS_TABLE,
   TENANT_FEATURE_OVERRIDE_COLUMNS,
   TENANT_FEATURE_OVERRIDES_TABLE,
+  // Tenant schema
+  TENANTS_TABLE,
+  TENANT_COLUMNS,
+  MEMBERSHIPS_TABLE,
+  MEMBERSHIP_COLUMNS,
   // Types
   type Activity,
   type NewActivity,
@@ -194,9 +200,11 @@ export {
   type QuietHoursConfig,
   type RefreshToken,
   type RefreshTokenFamily,
+  SECURITY_EVENT_TYPES,
+  SECURITY_SEVERITIES,
   type SecurityEvent,
-  type SecurityEventSeverity,
   type SecurityEventType,
+  type SecuritySeverity,
   type Subscription,
   type SubscriptionStatus,
   type TotpBackupCode,
@@ -443,3 +451,26 @@ export {
 
 // PubSub
 export { PostgresPubSub } from './pubsub/postgres-pubsub';
+
+// Search
+export { createSqlSearchProvider, SqlSearchProvider } from './search/sql-provider';
+
+export type {
+  ElasticsearchProviderConfig,
+  IndexHint,
+  SearchContext,
+  SearchMetrics,
+  SearchProviderConfig,
+  SearchProviderFactoryOptions,
+  SearchProviderType,
+  SearchResultWithMetrics,
+  ServerSearchProvider,
+  SqlColumnMapping,
+  SqlCursorData,
+  SqlFilterResult,
+  SqlOperatorMap,
+  SqlOperatorTranslator,
+  SqlQueryOptions,
+  SqlSearchProviderConfig,
+  SqlTableConfig,
+} from './search/types';

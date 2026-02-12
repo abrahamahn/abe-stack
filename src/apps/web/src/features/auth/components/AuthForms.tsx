@@ -12,7 +12,7 @@ import type {
   ResendVerificationRequest,
   ResetPasswordRequest,
 } from '@abe-stack/shared';
-import type { AuthMode } from '@abe-stack/ui';
+import type { AuthMode } from '@abe-stack/react/hooks';
 import type { ReactElement } from 'react';
 
 export interface AuthFormProps {

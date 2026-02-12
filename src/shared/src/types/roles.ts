@@ -7,7 +7,7 @@
  * @module Shared/Types
  */
 
-import { createEnumSchema } from '../core/schema.utils';
+import { createEnumSchema } from './schema';
 
 // ============================================================================
 // Role Definitions

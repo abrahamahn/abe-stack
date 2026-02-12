@@ -1,4 +1,4 @@
-// src/client/react/src/theme/contrast.ts
+// src/shared/src/domain/theme/contrast.ts
 
 /**
  * High-contrast mode support for accessibility.
