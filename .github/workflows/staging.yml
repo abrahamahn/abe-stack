@@ -68,11 +68,15 @@ jobs:
 
       - name: Resolve image variables
         id: image-vars
+        env:
+          INPUT_REGISTRY: ${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}
+          INPUT_IMAGE_NAME_RAW: ${{ vars.IMAGE_NAME || github.event.repository.name }}
+          INPUT_REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
-          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+          REGISTRY="$INPUT_REGISTRY"
+          IMAGE_NAME_RAW="$INPUT_IMAGE_NAME_RAW"
           if [[ "$IMAGE_NAME_RAW" != */* ]]; then
-            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+            IMAGE_NAME="${INPUT_REPO_OWNER}/$IMAGE_NAME_RAW"
           else
             IMAGE_NAME="$IMAGE_NAME_RAW"
           fi
@@ -99,10 +103,12 @@ jobs:
           # See deploy.yml for the full production deployment pattern
 
       - name: Deployment Summary
+        env:
+          DEPLOY_BRANCH: ${{ inputs.branch || github.ref_name }}
         run: |
           echo "## Staging Deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Environment:** staging" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Branch:** ${{ inputs.branch || github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Branch:** $DEPLOY_BRANCH" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Deployed at:** $(date -Iseconds)" >> "$GITHUB_STEP_SUMMARY"

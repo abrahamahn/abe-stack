@@ -48,8 +48,10 @@ jobs:
 
       - name: Generate preview URL
         id: preview
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          PREVIEW_URL="pr-${{ github.event.number }}.preview.abe-stack.dev"
+          PREVIEW_URL="pr-${PR_NUMBER}.preview.abe-stack.dev"
           echo "url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
           # Placeholder: actual preview deployment depends on infrastructure
           # For production use, this step would:
@@ -100,11 +102,14 @@ jobs:
             }
 
       - name: Preview Summary
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
         run: |
           echo "## PR Preview Deployment" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**PR:** #${{ github.event.number }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Preview URL:** https://${{ steps.preview.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**PR:** #${PR_NUMBER}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Preview URL:** https://${PREVIEW_URL}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
 
   cleanup:
@@ -112,9 +117,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cleanup preview environment
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          echo "Cleaning up preview environment for PR #${{ github.event.number }}"
-          echo "Preview URL: pr-${{ github.event.number }}.preview.abe-stack.dev"
+          echo "Cleaning up preview environment for PR #${PR_NUMBER}"
+          echo "Preview URL: pr-${PR_NUMBER}.preview.abe-stack.dev"
           # Placeholder: actual cleanup depends on infrastructure
           # For production use, this step would:
           # 1. Remove the preview Docker containers/services
@@ -122,9 +129,11 @@ jobs:
           # 3. Remove any preview-specific resources (databases, storage)
 
       - name: Cleanup Summary
+        env:
+          PR_NUMBER: ${{ github.event.number }}
         run: |
           echo "## Preview Cleanup" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**PR:** #${{ github.event.number }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**PR:** #${PR_NUMBER}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Action:** Preview environment removed" >> "$GITHUB_STEP_SUMMARY"
           echo "**Cleaned up at:** $(date -Iseconds)" >> "$GITHUB_STEP_SUMMARY"

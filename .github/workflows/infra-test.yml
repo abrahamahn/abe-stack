@@ -64,26 +64,30 @@ jobs:
           credentials_json: ${{ env.GCP_SA_KEY }}
 
       - name: Check Terraform Formatting
+        env:
+          PROVIDER: ${{ matrix.provider }}
         run: |
           cd infra/cloud
-          echo "🔍 Checking Terraform formatting for provider '${{ matrix.provider }}'..."
-          if terraform fmt -check -diff -recursive "${{ matrix.provider }}"; then
-            echo "✅ Terraform files are properly formatted for '${{ matrix.provider }}'"
+          echo "🔍 Checking Terraform formatting for provider '$PROVIDER'..."
+          if terraform fmt -check -diff -recursive "$PROVIDER"; then
+            echo "✅ Terraform files are properly formatted for '$PROVIDER'"
           else
-            echo "❌ Terraform files need formatting in infra/cloud/${{ matrix.provider }}."
-            echo "Run: cd infra/cloud && terraform fmt -recursive ${{ matrix.provider }}"
+            echo "❌ Terraform files need formatting in infra/cloud/$PROVIDER."
+            echo "Run: cd infra/cloud && terraform fmt -recursive $PROVIDER"
             exit 1
           fi
 
       - name: Validate Terraform Configuration
+        env:
+          PROVIDER: ${{ matrix.provider }}
         run: |
-          cd infra/cloud/${{ matrix.provider }}
-          echo "🔧 Validating ${{ matrix.provider }} Terraform configuration..."
+          cd infra/cloud/$PROVIDER
+          echo "🔧 Validating $PROVIDER Terraform configuration..."
           terraform init -backend=false
           if terraform validate; then
-            echo "✅ ${{ matrix.provider }} Terraform configuration is valid"
+            echo "✅ $PROVIDER Terraform configuration is valid"
           else
-            echo "❌ ${{ matrix.provider }} Terraform configuration validation failed"
+            echo "❌ $PROVIDER Terraform configuration validation failed"
             exit 1
           fi
 
@@ -100,17 +104,19 @@ jobs:
           fi
 
       - name: Test Provider-Specific Configuration
+        env:
+          PROVIDER: ${{ matrix.provider }}
         run: |
           set -euo pipefail
-          cd infra/cloud/${{ matrix.provider }}
-          echo "🔧 Testing ${{ matrix.provider }} configuration..."
+          cd infra/cloud/$PROVIDER
+          echo "🔧 Testing $PROVIDER configuration..."
 
-          if [ "${{ matrix.provider }}" = "digitalocean" ] && [ -z "${DIGITALOCEAN_TOKEN:-}" ]; then
+          if [ "$PROVIDER" = "digitalocean" ] && [ -z "${DIGITALOCEAN_TOKEN:-}" ]; then
             echo "⚠️ Skipping DigitalOcean plan test: DIGITALOCEAN_TOKEN is not available in this context."
             exit 0
           fi
 
-          if [ "${{ matrix.provider }}" = "gcp" ] && [ -z "${GCP_SA_KEY:-}" ]; then
+          if [ "$PROVIDER" = "gcp" ] && [ -z "${GCP_SA_KEY:-}" ]; then
             echo "⚠️ Skipping GCP plan test: GCP_SA_KEY is not available in this context."
             exit 0
           fi
@@ -137,14 +143,14 @@ jobs:
           EOF
 
           # Add provider-specific test variables
-          if [ "${{ matrix.provider }}" = "digitalocean" ]; then
+          if [ "$PROVIDER" = "digitalocean" ]; then
             cat >> test.tfvars << EOF
           region = "${DO_REGION:-nyc1}"
           instance_size = "${DO_INSTANCE_SIZE:-s-1vcpu-1gb}"
           enable_managed_database = ${DO_MANAGED_DB}
           database_size = "${DO_DATABASE_SIZE:-db-s-1vcpu-1gb}"
           EOF
-          elif [ "${{ matrix.provider }}" = "gcp" ]; then
+          elif [ "$PROVIDER" = "gcp" ]; then
             cat >> test.tfvars << EOF
           project_id = "test-project-123456"
           region = "us-central1"
@@ -156,11 +162,11 @@ jobs:
 
           # Test terraform plan with test variables
           if terraform plan -no-color -var-file=test.tfvars -out=tfplan-test > tfplan.log 2>&1; then
-            echo "✅ ${{ matrix.provider }} terraform plan succeeded"
+            echo "✅ $PROVIDER terraform plan succeeded"
             # Clean up test plan
             rm -f tfplan-test
           else
-            echo "❌ ${{ matrix.provider }} terraform plan failed"
+            echo "❌ $PROVIDER terraform plan failed"
             echo "------ terraform plan output ------"
             cat tfplan.log
             echo "-----------------------------------"

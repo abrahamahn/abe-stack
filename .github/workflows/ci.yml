@@ -157,11 +157,15 @@ jobs:
 
       - name: Resolve image variables
         id: image-vars
+        env:
+          INPUT_REGISTRY: ${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}
+          INPUT_IMAGE_NAME_RAW: ${{ vars.IMAGE_NAME || github.event.repository.name }}
+          INPUT_REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
-          IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
+          REGISTRY="$INPUT_REGISTRY"
+          IMAGE_NAME_RAW="$INPUT_IMAGE_NAME_RAW"
           if [[ "$IMAGE_NAME_RAW" != */* ]]; then
-            IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+            IMAGE_NAME="${INPUT_REPO_OWNER}/$IMAGE_NAME_RAW"
           else
             IMAGE_NAME="$IMAGE_NAME_RAW"
           fi
@@ -207,16 +211,23 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Write deployment image artifact
+        env:
+          IMAGE_REGISTRY: ${{ steps.image-vars.outputs.registry }}
+          IMAGE_NAME: ${{ steps.image-vars.outputs.image_name }}
+          API_DIGEST: ${{ steps.build-api.outputs.digest }}
+          WEB_DIGEST: ${{ steps.build-web.outputs.digest }}
+          API_TAG: ${{ steps.image-vars.outputs.api_tag }}
+          WEB_TAG: ${{ steps.image-vars.outputs.web_tag }}
         run: |
           cat > deployment-images.json << EOF
           {
             "commit_sha": "${GITHUB_SHA}",
-            "registry": "${{ steps.image-vars.outputs.registry }}",
-            "image_name": "${{ steps.image-vars.outputs.image_name }}",
-            "api_image": "${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}@${{ steps.build-api.outputs.digest }}",
-            "web_image": "${{ steps.image-vars.outputs.registry }}/${{ steps.image-vars.outputs.image_name }}@${{ steps.build-web.outputs.digest }}",
-            "api_tag": "${{ steps.image-vars.outputs.api_tag }}",
-            "web_tag": "${{ steps.image-vars.outputs.web_tag }}"
+            "registry": "${IMAGE_REGISTRY}",
+            "image_name": "${IMAGE_NAME}",
+            "api_image": "${IMAGE_REGISTRY}/${IMAGE_NAME}@${API_DIGEST}",
+            "web_image": "${IMAGE_REGISTRY}/${IMAGE_NAME}@${WEB_DIGEST}",
+            "api_tag": "${API_TAG}",
+            "web_tag": "${WEB_TAG}"
           }
           EOF
 

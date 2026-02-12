@@ -85,14 +85,16 @@ jobs:
           fi
 
       - name: Merge Claude branch into dev
+        env:
+          SOURCE_BRANCH: ${{ steps.branch.outputs.current }}
         run: |
           git fetch origin dev
           git checkout dev
           git pull origin dev
-          if git merge --no-ff "${{ steps.branch.outputs.current }}" -m "chore: auto-merge Claude session ${{ steps.branch.outputs.current }}"; then
+          if git merge --no-ff "$SOURCE_BRANCH" -m "chore: auto-merge Claude session $SOURCE_BRANCH"; then
             echo "Merge successful"
           else
-            echo "Merge conflict detected for ${{ steps.branch.outputs.current }} -> dev"
+            echo "Merge conflict detected for $SOURCE_BRANCH -> dev"
             git merge --abort
             exit 1
           fi

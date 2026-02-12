@@ -114,6 +114,13 @@ jobs:
 
       - name: Execute Rollback
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_ENV: ${{ inputs.environment }}
+          ROLLBACK_TAG: ${{ steps.get-rollback-tag.outputs.rollback_tag }}
+          REGISTRY: ${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}
+          IMAGE_NAME_RAW: ${{ vars.IMAGE_NAME || github.event.repository.name }}
+          APP_NAME_INPUT: ${{ inputs.app_name || 'abe-stack' }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
         with:
           host: ${{ steps.get-deployment-info.outputs.instance_ip }}
           username: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}
@@ -121,14 +128,8 @@ jobs:
           port: ${{ vars.SSH_PORT || secrets.SERVER_PORT || 22 }}
           script: |
             # Set rollback environment variables
-            export DEPLOY_ENV="${{ inputs.environment }}"
-            export ROLLBACK_TAG="${{ steps.get-rollback-tag.outputs.rollback_tag }}"
-            export REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
-            export IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
-            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
-
             if [[ "$IMAGE_NAME_RAW" != */* ]]; then
-              export IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
+              export IMAGE_NAME="${REPOSITORY_OWNER}/$IMAGE_NAME_RAW"
             else
               export IMAGE_NAME="$IMAGE_NAME_RAW"
             fi

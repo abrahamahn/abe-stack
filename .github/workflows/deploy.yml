@@ -191,18 +191,25 @@ jobs:
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_ENV: ${{ inputs.environment || 'production' }}
+          DEPLOY_DOMAIN: ${{ needs.get-infrastructure-info.outputs.domain }}
+          APP_NAME_INPUT: ${{ inputs.app_name || 'abe-stack' }}
+          DEPLOY_COMMIT_SHA: ${{ steps.image-vars.outputs.commit_sha }}
+          API_IMAGE: ${{ steps.image-refs.outputs.api_image }}
+          WEB_IMAGE: ${{ steps.image-refs.outputs.web_image }}
+          REPOSITORY: ${{ github.repository }}
+          ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD || secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         with:
           host: ${{ needs.get-infrastructure-info.outputs.instance_ip }}
           username: ${{ vars.SSH_USERNAME || secrets.SERVER_USER || 'root' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ vars.SSH_PORT || secrets.SERVER_PORT || 22 }}
           script: |
-            export DEPLOY_ENV="${{ inputs.environment || 'production' }}"
-            export DOMAIN="${{ needs.get-infrastructure-info.outputs.domain }}"
-            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
-            export DEPLOY_COMMIT_SHA="${{ steps.image-vars.outputs.commit_sha }}"
-            export API_IMAGE="${{ steps.image-refs.outputs.api_image }}"
-            export WEB_IMAGE="${{ steps.image-refs.outputs.web_image }}"
+            DOMAIN="$DEPLOY_DOMAIN"
 
             APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
             if [ -z "$APP_NAME" ]; then
@@ -215,19 +222,19 @@ jobs:
             mkdir -p "$DEPLOY_ROOT"
             cd "$DEPLOY_ROOT"
 
-            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/\${DEPLOY_COMMIT_SHA}/infra/docker/production/docker-compose.prod.yml" -o docker-compose.prod.yml
-            curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/\${DEPLOY_COMMIT_SHA}/infra/runtime/caddy/Caddyfile" -o Caddyfile
+            curl -sSL "https://raw.githubusercontent.com/${REPOSITORY}/${DEPLOY_COMMIT_SHA}/infra/docker/production/docker-compose.prod.yml" -o docker-compose.prod.yml
+            curl -sSL "https://raw.githubusercontent.com/${REPOSITORY}/${DEPLOY_COMMIT_SHA}/infra/runtime/caddy/Caddyfile" -o Caddyfile
 
             cat > ".env" << EOF
             APP_NAME=\${APP_NAME}
             COMPOSE_PROJECT_NAME=\${COMPOSE_PROJECT_NAME}
             DOMAIN=\${DOMAIN}
-            ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD || secrets.POSTGRES_PASSWORD }}
+            ACME_EMAIL=${ACME_EMAIL}
+            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             POSTGRES_DB=abe_stack
             POSTGRES_USER=postgres
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            JWT_SECRET=${JWT_SECRET}
+            SESSION_SECRET=${SESSION_SECRET}
             TRUST_PROXY=true
             TRUSTED_PROXIES=172.16.0.0/12,10.0.0.0/8
             MAX_PROXY_DEPTH=1
