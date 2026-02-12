@@ -33,6 +33,9 @@ vi.mock('@abe-stack/client-engine', () => ({
     restoreClient: vi.fn().mockResolvedValue(undefined),
     removeClient: vi.fn(),
   })),
+}));
+
+vi.mock('@abe-stack/react', () => ({
   QueryCacheProvider: vi.fn(({ children }: { children: unknown }) => children),
 }));
 
@@ -127,7 +130,8 @@ describe('main.tsx', () => {
       // Verify mocks are in place via dynamic import
       const sdk = await import('@abe-stack/client-engine');
       expect(sdk.QueryCache).toBeDefined();
-      expect(sdk.QueryCacheProvider).toBeDefined();
+      const react = await import('@abe-stack/react');
+      expect(react.QueryCacheProvider).toBeDefined();
     });
 
     it('should have QueryCache constructor mocked', async () => {

@@ -10,6 +10,7 @@
  */
 
 import { getApiClient } from '@abe-stack/api';
+import { tokenStore } from '@abe-stack/shared';
 import { Alert, Button, FormField, Input, PasswordInput, Text } from '@abe-stack/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
@@ -56,7 +57,7 @@ export const EmailChangeForm = ({ onSuccess }: EmailChangeFormProps): ReactEleme
             typeof import.meta.env['VITE_API_URL'] === 'string'
               ? import.meta.env['VITE_API_URL']
               : '',
-          getToken: () => localStorage.getItem('accessToken'),
+          getToken: () => tokenStore.get(),
         });
 
         const result = await api.changeEmail({

@@ -259,6 +259,113 @@ export type {
 } from './search/hooks';
 
 // ============================================================================
+// Billing
+// ============================================================================
+
+export {
+  adminBillingQueryKeys,
+  billingQueryKeys,
+  useAdminPlans,
+  useInvoices,
+  usePaymentMethods,
+  usePlans,
+  useSubscription,
+} from './billing';
+export type {
+  AdminPlansState,
+  InvoicesState,
+  PaymentMethodsState,
+  PlansState,
+  SubscriptionState,
+} from './billing';
+
+// ============================================================================
+// Devices
+// ============================================================================
+
+export { devicesQueryKeys, useDevices } from './devices/hooks';
+export type { DevicesState, UseDevicesOptions } from './devices/hooks';
+
+// ============================================================================
+// Phone
+// ============================================================================
+
+export { usePhone } from './phone/hooks';
+export type { PhoneState, UsePhoneOptions } from './phone/hooks';
+
+// ============================================================================
+// API Keys
+// ============================================================================
+
+export {
+  apiKeysQueryKeys,
+  useApiKeys,
+  useCreateApiKey,
+  useDeleteApiKey,
+  useRevokeApiKey,
+} from './api-keys/hooks';
+export type {
+  ApiKeysState,
+  UseApiKeysOptions,
+  UseCreateApiKeyState,
+  UseDeleteApiKeyState,
+  UseRevokeApiKeyState,
+} from './api-keys/hooks';
+
+// ============================================================================
+// Notifications
+// ============================================================================
+
+export {
+  useNotificationPreferences,
+  usePushPermission,
+  usePushSubscription,
+  useTestNotification,
+} from './notifications/hooks';
+export type {
+  NotificationPreferencesState,
+  PushPermissionState,
+  PushSubscriptionState,
+  TestNotificationState,
+  UseNotificationPreferencesOptions,
+  UsePushSubscriptionOptions,
+} from './notifications/hooks';
+
+// ============================================================================
+// OAuth
+// ============================================================================
+
+export {
+  getOAuthLoginUrl,
+  oauthQueryKeys,
+  useEnabledOAuthProviders,
+  useOAuthConnections,
+} from './oauth/hooks';
+export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth/hooks';
+
+// ============================================================================
+// Webhooks
+// ============================================================================
+
+export {
+  useCreateWebhook,
+  useDeleteWebhook,
+  useRotateWebhookSecret,
+  useUpdateWebhook,
+  useWebhook,
+  useWebhooks,
+  webhookQueryKeys,
+} from './webhooks/hooks';
+export type {
+  CreateWebhookState,
+  DeleteWebhookState,
+  RotateWebhookSecretState,
+  UpdateWebhookState,
+  WebhookDetailState,
+  WebhooksState,
+} from './webhooks/hooks';
+
+// ============================================================================
 // Version
 // ============================================================================
 

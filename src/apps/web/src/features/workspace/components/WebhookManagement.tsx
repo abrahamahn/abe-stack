@@ -6,7 +6,8 @@
  * Follows the same CRUD management pattern as ApiKeysManagement.
  */
 
-import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@abe-stack/api';
+import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import {
   Alert,
   Badge,
@@ -65,7 +66,7 @@ function getClientConfig(): WebhookClientConfig {
     typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
   return {
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   };
 }
 

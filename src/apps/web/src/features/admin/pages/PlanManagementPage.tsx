@@ -10,7 +10,7 @@
  * - Sync with Stripe
  */
 
-import { useAdminPlans, type AdminBillingClientConfig } from '@abe-stack/api';
+import { useAdminPlans } from '@abe-stack/react';
 import { tokenStore } from '@abe-stack/shared';
 import {
   Badge,
@@ -33,6 +33,7 @@ import {
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useState, useCallback } from 'react';
 
+import type { AdminBillingClientConfig } from '@abe-stack/api';
 import type {
   AdminPlan,
   CreatePlanRequest,

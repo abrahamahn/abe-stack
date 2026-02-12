@@ -5,20 +5,21 @@
  * Tests for device list display, trust, revoke interactions, and loading/error states.
  */
 
-import { useDevices } from '@abe-stack/api';
+import { useDevices } from '@abe-stack/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DevicesList } from './DevicesList';
 
-import type { DeviceItem, DevicesState } from '@abe-stack/api';
+import type { DeviceItem } from '@abe-stack/api';
+import type { DevicesState } from '@abe-stack/react';
 import type { ReactNode } from 'react';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/api', () => ({
+vi.mock('@abe-stack/react', () => ({
   useDevices: vi.fn(),
 }));
 
@@ -150,12 +151,20 @@ const defaultHookReturn: DevicesState = {
 // ============================================================================
 
 describe('DevicesList', () => {
-  let mockTrustDevice: ReturnType<typeof vi.fn<(deviceId: string) => Promise<void>>>;
-  let mockRevokeDevice: ReturnType<typeof vi.fn<(deviceId: string) => Promise<void>>>;
+  let mockTrustDevice: ReturnType<
+    typeof vi.fn<(deviceId: string) => Promise<{ device: DeviceItem }>>
+  >;
+  let mockRevokeDevice: ReturnType<
+    typeof vi.fn<(deviceId: string) => Promise<{ message: string }>>
+  >;
 
   beforeEach(() => {
-    mockTrustDevice = vi.fn<(deviceId: string) => Promise<void>>().mockResolvedValue(undefined);
-    mockRevokeDevice = vi.fn<(deviceId: string) => Promise<void>>().mockResolvedValue(undefined);
+    mockTrustDevice = vi
+      .fn<(deviceId: string) => Promise<{ device: DeviceItem }>>()
+      .mockResolvedValue({ device: {} as DeviceItem });
+    mockRevokeDevice = vi
+      .fn<(deviceId: string) => Promise<{ message: string }>>()
+      .mockResolvedValue({ message: 'ok' });
 
     vi.mocked(useDevices).mockReturnValue({
       ...defaultHookReturn,

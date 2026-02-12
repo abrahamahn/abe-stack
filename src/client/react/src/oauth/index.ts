@@ -1,8 +1,8 @@
-// src/client/api/src/oauth/index.ts
+// src/client/react/src/oauth/index.ts
 /**
- * OAuth Module
+ * OAuth React Hooks
  *
- * Provides hooks and utilities for OAuth authentication.
+ * React hooks and utilities for OAuth authentication.
  */
 
 export {

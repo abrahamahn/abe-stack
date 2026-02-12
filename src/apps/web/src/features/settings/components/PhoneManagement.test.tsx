@@ -9,14 +9,14 @@
  * - Error handling and loading states
  */
 
-import { usePhone } from '@abe-stack/api';
+import { usePhone } from '@abe-stack/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PhoneManagement } from './PhoneManagement';
 
-import type { PhoneState } from '@abe-stack/api';
+import type { PhoneState } from '@abe-stack/react';
 import type { User } from '@abe-stack/shared';
 import type { ReactNode } from 'react';
 
@@ -24,7 +24,7 @@ import type { ReactNode } from 'react';
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/api', () => ({
+vi.mock('@abe-stack/react', () => ({
   usePhone: vi.fn(),
 }));
 
@@ -168,14 +168,18 @@ const defaultHookReturn: PhoneState = {
 // ============================================================================
 
 describe('PhoneManagement', () => {
-  let mockSetPhone: ReturnType<typeof vi.fn<(phone: string) => Promise<void>>>;
-  let mockVerifyPhone: ReturnType<typeof vi.fn<(code: string) => Promise<void>>>;
+  let mockSetPhone: ReturnType<typeof vi.fn<(phone: string) => Promise<{ message: string }>>>;
+  let mockVerifyPhone: ReturnType<typeof vi.fn<(code: string) => Promise<{ verified: true }>>>;
   let mockRemovePhone: ReturnType<typeof vi.fn<() => Promise<void>>>;
   let mockOnStatusChange: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
-    mockSetPhone = vi.fn<(phone: string) => Promise<void>>().mockResolvedValue(undefined);
-    mockVerifyPhone = vi.fn<(code: string) => Promise<void>>().mockResolvedValue(undefined);
+    mockSetPhone = vi
+      .fn<(phone: string) => Promise<{ message: string }>>()
+      .mockResolvedValue({ message: 'ok' });
+    mockVerifyPhone = vi
+      .fn<(code: string) => Promise<{ verified: true }>>()
+      .mockResolvedValue({ verified: true });
     mockRemovePhone = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     mockOnStatusChange = vi.fn<() => void>();
 

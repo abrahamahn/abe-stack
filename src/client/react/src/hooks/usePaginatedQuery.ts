@@ -1,5 +1,4 @@
 // src/client/react/src/hooks/usePaginatedQuery.ts
-import { useInfiniteQuery, useQueryCache } from '@abe-stack/client-engine';
 import {
   DEFAULT_PAGE_LIMIT,
   DEFAULT_SORT_BY,
@@ -10,6 +9,9 @@ import {
   type PaginationOptions,
 } from '@abe-stack/shared';
 import { useCallback, useMemo, useRef } from 'react';
+
+import { useQueryCache } from '../query/QueryCacheProvider';
+import { useInfiniteQuery } from '../query/useInfiniteQuery';
 
 /**
  * Configuration for usePaginatedQuery hook

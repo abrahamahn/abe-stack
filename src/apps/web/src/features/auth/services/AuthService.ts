@@ -7,7 +7,7 @@
  */
 
 import { getApiClient, NetworkError } from '@abe-stack/api';
-import { MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
+import { ACCESS_TOKEN_COOKIE_NAME, MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
 import { createAuthRoute, type AuthRouteClient } from '@api/auth/route';
 
 import type { ClientConfig } from '@/config';
@@ -97,6 +97,41 @@ function isSmsChallengeResponse(response: LoginResponse): response is SmsLoginCh
 // Maximum backoff delay for token refresh (5 minutes)
 const MAX_REFRESH_BACKOFF_MS = 5 * MS_PER_MINUTE;
 const REQUEST_TIMEOUT_MS = 8000;
+const hasLocalStorage = (): boolean =>
+  typeof globalThis !== 'undefined' && 'localStorage' in globalThis;
+
+const readPersistedAccessToken = (): string | null => {
+  if (!hasLocalStorage()) {
+    return null;
+  }
+  try {
+    return globalThis.localStorage.getItem(ACCESS_TOKEN_COOKIE_NAME);
+  } catch {
+    return null;
+  }
+};
+
+const persistAccessToken = (token: string): void => {
+  if (!hasLocalStorage()) {
+    return;
+  }
+  try {
+    globalThis.localStorage.setItem(ACCESS_TOKEN_COOKIE_NAME, token);
+  } catch {
+    // Ignore localStorage write failures (private mode/quota/security settings)
+  }
+};
+
+const clearPersistedAccessToken = (): void => {
+  if (!hasLocalStorage()) {
+    return;
+  }
+  try {
+    globalThis.localStorage.removeItem(ACCESS_TOKEN_COOKIE_NAME);
+  } catch {
+    // Ignore localStorage delete failures
+  }
+};
 
 // Type guard for User
 const isUser = (value: unknown): value is User => {
@@ -127,6 +162,12 @@ const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> =>
       });
   });
 
+const normalizeUser = (user: User): User => ({
+  ...user,
+  firstName: typeof user.firstName === 'string' ? user.firstName : '',
+  lastName: typeof user.lastName === 'string' ? user.lastName : '',
+});
+
 export class AuthService {
   private readonly api: AuthRouteClient;
   private readonly config: ClientConfig;
@@ -153,7 +194,18 @@ export class AuthService {
   }) {
     this.config = args.config;
 
-    this.tokenStore = tokenStore as TokenStore;
+    const sharedTokenStore = tokenStore as TokenStore;
+    this.tokenStore = {
+      get: (): string | null => sharedTokenStore.get() ?? readPersistedAccessToken(),
+      set: (token: string): void => {
+        sharedTokenStore.set(token);
+        persistAccessToken(token);
+      },
+      clear: (): void => {
+        sharedTokenStore.clear();
+        clearPersistedAccessToken();
+      },
+    };
 
     const apiClient = getApiClient({
       baseUrl: this.config.apiUrl,
@@ -404,10 +456,11 @@ export class AuthService {
     try {
       const userResult = await withTimeout<User>(this.api.getCurrentUser(), 'Fetch current user');
       if (isUser(userResult)) {
-        this.user = userResult;
+        this.user = normalizeUser(userResult);
         this.isLoadingUser = false;
+        this.startRefreshInterval();
         this.notifyListeners();
-        return userResult;
+        return this.user;
       }
       throw new Error('Invalid user data received from API');
     } catch {
@@ -419,10 +472,11 @@ export class AuthService {
             this.api.getCurrentUser(),
             'Fetch current user',
           );
-          this.user = refreshedUser;
+          this.user = normalizeUser(refreshedUser);
           this.isLoadingUser = false;
+          this.startRefreshInterval();
           this.notifyListeners();
-          return refreshedUser;
+          return this.user;
         } catch {
           this.isLoadingUser = false;
           this.clearAuth();
@@ -475,7 +529,7 @@ export class AuthService {
 
   private handleAuthSuccess(response: AuthResponse): void {
     this.tokenStore.set(response.token);
-    this.user = response.user;
+    this.user = normalizeUser(response.user);
     this.isLoadingUser = false;
     this.startRefreshInterval();
     this.notifyListeners();

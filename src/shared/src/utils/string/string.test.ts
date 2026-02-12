@@ -16,6 +16,7 @@ import {
   toCamelCase,
   toKebabCase,
   toPascalCase,
+  trimTrailingSlashes,
   truncate,
 } from './string';
 
@@ -276,6 +277,24 @@ describe('string utilities', () => {
 
     it('handles tabs and newlines', () => {
       expect(countCharactersNoWhitespace('a\tb\nc')).toBe(3);
+    });
+  });
+
+  // ==========================================================================
+  // trimTrailingSlashes
+  // ==========================================================================
+  describe('trimTrailingSlashes', () => {
+    it('removes trailing slashes from url-like strings', () => {
+      expect(trimTrailingSlashes('http://localhost:3000///')).toBe('http://localhost:3000');
+    });
+
+    it('returns same string when no trailing slash exists', () => {
+      expect(trimTrailingSlashes('http://localhost:3000')).toBe('http://localhost:3000');
+    });
+
+    it('returns empty string for null/undefined inputs', () => {
+      expect(trimTrailingSlashes(undefined)).toBe('');
+      expect(trimTrailingSlashes(null)).toBe('');
     });
   });
 

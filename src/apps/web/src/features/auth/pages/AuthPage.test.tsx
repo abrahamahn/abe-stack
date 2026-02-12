@@ -2,9 +2,9 @@
 import { screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock SDK hooks
-vi.mock('@abe-stack/client-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client-engine')>();
+// Mock API hooks - useEnabledOAuthProviders and getOAuthLoginUrl are in @abe-stack/api
+vi.mock('@abe-stack/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/api')>();
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({

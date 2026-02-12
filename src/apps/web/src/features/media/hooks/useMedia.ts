@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { useEffect } from 'react';
 
 import { createMediaApi } from '../api';
@@ -23,7 +24,7 @@ const apiBaseUrl =
 function getMediaApi(): ReturnType<typeof createMediaApi> {
   mediaApi ??= createMediaApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return mediaApi;
 }

@@ -5,7 +5,7 @@
  * Route definitions for the activities module.
  * Uses the generic router pattern for DRY registration.
  *
- * All routes are protected and require the 'user' role.
+ * All routes are protected and require authentication.
  * Route map keys must be unique strings; each path maps to one method.
  *
  * @module activities/routes
@@ -34,7 +34,7 @@ const activityRouteEntries: [string, RouteDefinition][] = [
   // List activities for the authenticated user
   [
     'activities',
-    protectedRoute('GET', handleListActivities, 'user', undefined, {
+    protectedRoute('GET', handleListActivities, undefined, undefined, {
       summary: 'List user activities',
       tags: ['Activities'],
     }),
@@ -43,7 +43,7 @@ const activityRouteEntries: [string, RouteDefinition][] = [
   // List activities for a specific tenant
   [
     'tenants/:tenantId/activities',
-    protectedRoute('GET', handleListTenantActivities, 'user', undefined, {
+    protectedRoute('GET', handleListTenantActivities, undefined, undefined, {
       summary: 'List tenant activities',
       tags: ['Activities'],
     }),

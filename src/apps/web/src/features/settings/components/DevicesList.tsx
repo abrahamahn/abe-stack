@@ -3,7 +3,7 @@
  * DevicesList — Displays and manages trusted devices.
  */
 
-import { useDevices } from '@abe-stack/api';
+import { useDevices } from '@abe-stack/react';
 import { formatDateTime, parseUserAgent } from '@abe-stack/shared';
 import { Alert, Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
 import { useCallback, useMemo, type ReactElement } from 'react';

@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 
 import { createActivitiesApi } from '../api/activitiesApi';
 
@@ -22,7 +23,7 @@ const apiBaseUrl =
 function getActivitiesApi(): ReturnType<typeof createActivitiesApi> {
   activitiesApi ??= createActivitiesApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return activitiesApi;
 }

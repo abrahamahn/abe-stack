@@ -16,12 +16,12 @@ const { mockTokenGet } = vi.hoisted(() => ({
   mockTokenGet: vi.fn(() => 'test-token'),
 }));
 
-// Mock dependencies - use importOriginal for partial mocking
-vi.mock('@abe-stack/client-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/client-engine')>();
+// Mock dependencies - createApiClient is in @abe-stack/api
+vi.mock('@abe-stack/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/api')>();
   return {
     ...actual,
-    createApiClient: vi.fn(() => ({
+    getApiClient: vi.fn(() => ({
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),

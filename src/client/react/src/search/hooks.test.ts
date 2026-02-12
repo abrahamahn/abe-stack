@@ -1,4 +1,4 @@
-// src/client/engine/src/search/hooks.test.ts
+// src/client/react/src/search/hooks.test.ts
 /**
  * @vitest-environment jsdom
  */

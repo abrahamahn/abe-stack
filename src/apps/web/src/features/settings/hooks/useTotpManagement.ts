@@ -9,6 +9,7 @@
  */
 
 import { getApiClient } from '@abe-stack/api';
+import { tokenStore } from '@abe-stack/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { TotpSetupResponse } from '@abe-stack/shared';
@@ -63,7 +64,7 @@ export function useTotpManagement(): UseTotpManagementResult {
           typeof import.meta.env['VITE_API_URL'] === 'string'
             ? import.meta.env['VITE_API_URL']
             : '',
-        getToken: () => localStorage.getItem('accessToken'),
+        getToken: () => tokenStore.get(),
       }),
     [],
   );

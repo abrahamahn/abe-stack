@@ -6,6 +6,7 @@
  */
 
 import { useMutation } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 
 import { createSettingsApi } from '../api';
 
@@ -22,7 +23,7 @@ const apiBaseUrl =
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return settingsApi;
 }

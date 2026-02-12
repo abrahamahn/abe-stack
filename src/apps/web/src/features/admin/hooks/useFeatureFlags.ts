@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import { createAdminApiClient } from '../services/adminApi';
@@ -48,7 +49,7 @@ export function useFeatureFlags(options?: UseFeatureFlagsOptions): UseFeatureFla
     queryFn: async (): Promise<FeatureFlagListResponse> => {
       const client = createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: (): string | null => localStorage.getItem('accessToken'),
+        getToken: (): string | null => tokenStore.get(),
       });
       return client.listFeatureFlags();
     },
@@ -96,7 +97,7 @@ export function useCreateFeatureFlag(
     mutationFn: async (data): Promise<FeatureFlagResponse> => {
       const client = createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: (): string | null => localStorage.getItem('accessToken'),
+        getToken: (): string | null => tokenStore.get(),
       });
       return client.createFeatureFlag(data);
     },
@@ -145,7 +146,7 @@ export function useUpdateFeatureFlag(
     mutationFn: async ({ key, update }): Promise<FeatureFlagResponse> => {
       const client = createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: (): string | null => localStorage.getItem('accessToken'),
+        getToken: (): string | null => tokenStore.get(),
       });
       return client.updateFeatureFlag(key, update);
     },
@@ -190,7 +191,7 @@ export function useDeleteFeatureFlag(
     mutationFn: async (key): Promise<FeatureFlagDeleteResponse> => {
       const client = createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: (): string | null => localStorage.getItem('accessToken'),
+        getToken: (): string | null => tokenStore.get(),
       });
       return client.deleteFeatureFlag(key);
     },

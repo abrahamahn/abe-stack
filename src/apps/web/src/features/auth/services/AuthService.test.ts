@@ -260,6 +260,20 @@ describe('AuthService', () => {
       expect(authService.getState().user).toEqual(response.user);
     });
 
+    it('should normalize missing first/last names from login response', async () => {
+      const malformedUser = {
+        ...createMockUser(),
+        firstName: undefined as unknown as string,
+        lastName: undefined as unknown as string,
+      };
+      mocks.mockApiClient.login.mockResolvedValue(createMockAuthResponse(malformedUser));
+
+      await authService.login({ identifier: 'test@example.com', password: 'password' });
+
+      expect(authService.getState().user?.firstName).toBe('');
+      expect(authService.getState().user?.lastName).toBe('');
+    });
+
     it('should throw on login failure', async () => {
       mocks.mockApiClient.login.mockRejectedValue(new Error('Invalid credentials'));
 
@@ -384,6 +398,23 @@ describe('AuthService', () => {
 
       expect(user).toEqual(mockUser);
       expect(authService.getState().user).toEqual(mockUser);
+    });
+
+    it('should normalize missing first/last names from current user response', async () => {
+      mocks.mockTokenStore.get.mockReturnValue('valid-token');
+      const malformedUser = {
+        ...createMockUser(),
+        firstName: undefined as unknown as string,
+        lastName: undefined as unknown as string,
+      };
+      mocks.mockApiClient.getCurrentUser.mockResolvedValue(malformedUser);
+
+      const user = await authService.fetchCurrentUser();
+
+      expect(user?.firstName).toBe('');
+      expect(user?.lastName).toBe('');
+      expect(authService.getState().user?.firstName).toBe('');
+      expect(authService.getState().user?.lastName).toBe('');
     });
 
     it('should try refresh on initial fetch failure', async () => {

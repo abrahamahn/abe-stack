@@ -8,6 +8,28 @@ Last updated: 2026-02-12
 
 ---
 
+## Status Snapshot
+
+- This file tracks **open work only** (`- [ ]`).
+- Completed checklist entries were migrated to `docs/log/2026-W07.md`.
+- Focus order: Sprint 3 -> Sprint 4 -> Sprint 5 -> Sprint 6.
+
+---
+
+## Quick Navigation
+
+- [How To Use This File](#how-to-use-this-file)
+- [Definition of Done](#definition-of-done-per-slice)
+- [DB Artifact Checklist](#db-artifact-checklist-when-slice-touches-the-database)
+- [Work Queue](#work-queue-ordered-for-day-1-launch)
+- [Sprint 3 Remaining Work](#sprint-3-remaining-work-incomplete-todo-backlog)
+- [Sprint 4: Test Backfill + Quality Hardening](#sprint-4-test-backfill--quality-hardening)
+- [Sprint 5: Production Launch Readiness & Polish](#sprint-5-production-launch-readiness--polish)
+- [Sprint 6: Post-Launch Platform Maturity & Growth](#sprint-6-post-launch-platform-maturity--growth)
+- [Notes / Guardrails](#notes--guardrails)
+
+---
+
 ## How To Use This File
 
 1. Pick the next slice from **Work Queue** (below).
@@ -92,6 +114,11 @@ Each verification item is a **vertical slice**, but the output is confidence, no
 - prove client hooks/UI wiring works
 - prove tests cover the critical behaviors
 
+> Archived verification notes (kept for traceability):
+
+<details>
+<summary>Expand Verification Queue</summary>
+
 ### Auth Verification (CHECKLIST 1.1–1.11) — COMPLETE
 
 All 11 auth sub-systems verified: Registration, Email Verification, Login, Token Refresh, Logout, Password Reset, Magic Link, OAuth2, Email Change, TOTP, Canonicalization. All contracts, routes, clients, and tests pass.
@@ -114,35 +141,15 @@ All auth tables verified except one partial item:
 
 #### Verify Multi-Tenant Infra (4.1)
 
-- [x] DB artifacts: migrations + schema constants + repositories exist
-- [x] `pnpm db:audit` passes
-- [x] Tests: tenant/membership/invitation repo/schema tests pass
-
 #### Verify RBAC Definitions (5.1)
-
-- [x] Shared permissions/policy engine compiles
-- [x] Tests: permission matrix tests (or equivalent) pass
 
 #### Verify Realtime (Server) (6.9)
 
-- [x] Server boots with realtime routes registered
-- [x] Smoke: subscribe -> publish -> receive (manual or test harness)
-- [x] Tests: realtime handler/service tests pass
-
 #### Verify WebSocket Transport (6.10)
-
-- [x] Tests: websocket lifecycle/stats tests pass
-- [x] Smoke: connect/disconnect/reconnect under dev server
 
 #### Verify Media Processing (Server) (6.11)
 
-- [x] Tests: image/audio/video processor tests pass
-- [x] Verify no HTTP endpoints expected here (this is server-only module verification)
-
 #### Verify Desktop Scaffold (12)
-
-- [x] Desktop dev starts and loads renderer
-- [x] Basic IPC handlers do not crash on startup
 
 ### Account Management Verification (CHECKLIST 3) — COMPLETE
 
@@ -156,128 +163,33 @@ Sprint 2 additions: Tenant CRUD (4.2), membership management (4.3), invitation f
 
 #### Verify ProtectedRoute Component (5.3)
 
-- [x] `ProtectedRoute.tsx` renders children when authenticated
-- [x] `ProtectedRoute.tsx` redirects to login when unauthenticated
-- [x] Tests: ProtectedRoute tests pass (in `client/ui/layouts/layers/`)
-
 ### Module 3 Verification: Billing DB (Appendix A) — COMPLETE
 
-- [x] `plans` — migration 0003, schema constant, repo CRUD
-- [x] `subscriptions` — migration 0003, schema constant, repo CRUD
-- [x] `customer_mappings` — migration 0003, schema constant, repo CRUD
-- [x] `invoices` — migration 0003, schema constant, repo CRUD
-- [x] `payment_methods` — migration 0003, schema constant, repo CRUD
-- [x] `billing_events` — migration 0003, schema constant, repo CRUD
-- [x] `pnpm db:audit` passes for billing tables
-
 ### Module 4-9 Verification: Supporting DB (Appendix A) — COMPLETE
-
-- [x] `notifications` — migration 0004, schema, repo
-- [x] `push_subscriptions` — migration 0004, schema, repo
-- [x] `notification_preferences` — migration 0004, schema, repo
-- [x] `jobs` — migration 0005, schema, repo
-- [x] `audit_events` — migration 0005, schema, repo
-- [x] `webhooks` — migration 0005, schema, repo
-- [x] `webhook_deliveries` — migration 0005, schema, repo
-- [x] `feature_flags` — migration 0006, schema, repo
-- [x] `tenant_feature_overrides` — migration 0006, schema, repo
-- [x] `usage_metrics` — migration 0007, schema, repo
-- [x] `usage_snapshots` — migration 0007, schema, repo
-- [x] `legal_documents` — migration 0008, schema, repo
-- [x] `user_agreements` — migration 0008, schema, repo
-- [x] `consent_logs` — migration 0008, schema, repo
-- [x] `data_export_requests` — migration 0011, schema, repo
-- [x] `files` — migration 0013, schema, repo
-- [x] `email_templates` — migration 0014, schema, repo
-- [x] `email_log` — migration 0014, schema, repo
-- [x] `tenant_settings` — migration 0015, schema, repo
-- [x] `activities` — migration 0016, schema, repo
-- [x] `pnpm db:audit` passes for all supporting tables
 
 ### Supporting Modules Verification (CHECKLIST 6) — COMPLETE
 
 #### Verify API Keys DB Layer (6.1)
 
-- [x] `api_keys` table: key_hash, scopes, tenant_id, expires_at, revoked_at columns exist
-- [x] Repo: findByKeyHash, findByUserId, findByTenantId, create, revoke, updateLastUsedAt work
-- [x] Domain: `shared/domain/api-keys/**` types/schemas compile
-- [x] Tests: api-keys repo tests pass
-
 #### Verify Billing Infrastructure (6.2)
-
-- [x] Admin plan CRUD: list, create, get, update, deactivate, sync-to-stripe endpoints reachable
-- [x] Billing routes conditionally registered on `config.billing.enabled`
-- [x] Webhook routes: Stripe + PayPal endpoints accept POST
-- [x] Provider factory: `billing/factory.ts` returns correct provider for Stripe/PayPal
-- [x] Entitlements domain logic: `billing.entitlements.ts` compiles and exports resolvers
-- [x] Client UI: BillingSettingsPage, PricingPage, CheckoutSuccessPage, CheckoutCancelPage render
-- [x] Client API: `billing/client.ts`, `admin.ts`, `hooks.ts` compile
-- [x] Tests: billing handler/provider tests pass
 
 #### Verify Audit & Security Events (6.3)
 
-- [x] Security events table: 18+ event types with severity levels exist
-- [x] Event logging fires on: login, OAuth, lockout, TOTP (`core/auth/security/audit.ts`, `events.ts`)
-- [x] Admin API: `GET /api/admin/security/events`, `/events/:id`, `/metrics`, `/events/export` reachable
-- [x] General audit log: `audit_events` table + repo functional
-- [x] Admin UI: SecurityEventsPage, SecurityEventDetailPage, SecurityEventsTable, SecurityEventsFilters, SecurityMetricsCard, SecurityEventCard, ExportDialog render
-- [x] Hooks: useSecurityEvents, useSecurityMetrics, useSecurityEvent, useExportEvents compile
-- [x] Tests: security event tests pass
-
 #### Verify Notifications Infrastructure (6.4)
-
-- [x] `notifications` table + routes wired and reachable
-- [x] `email_templates` + `email_log` tables + repos functional
-- [x] Mailer module: client abstraction, SMTP transport, console provider (dev), template renderer all work
-- [x] Notification service: `core/notifications/service.ts` + `handlers.ts` compile
-- [x] Push provider: FCM provider + factory pattern compiles
-- [x] Client API: `notifications/client.ts`, `hooks.ts` compile
-- [x] Tests: notification service/handler tests pass
 
 #### Verify File Storage Infrastructure (6.5)
 
-- [x] `files` table + repository functional
-- [x] S3 storage provider (`server-engine/storage/providers/s3.ts`) compiles
-- [x] Local storage provider works for dev
-- [x] Presigned URL generation functional
-- [x] Tests: storage provider tests pass
-
 #### Verify Activity Tracking DB (6.6)
-
-- [x] `activities` table + repository functional
-- [x] Domain logic compiles (even if partial)
-- [x] Tests: activity repo tests pass
 
 #### Verify Feature Flags & Metering DB (6.7)
 
-- [x] `feature_flags` + `tenant_feature_overrides` tables + repos functional
-- [x] `usage_metrics` + `usage_snapshots` tables + repos functional
-- [x] Tests: feature flag / metering repo tests pass
-
 #### Verify Compliance DB Layer (6.8)
 
-- [x] `legal_documents`, `user_agreements`, `consent_logs` tables + repos functional
-- [x] `data_export_requests` table + repo functional
-- [x] Deletion domain logic: `deletion.logic.ts` + `deletion.schemas.ts` compile
-- [x] Tests: compliance domain logic tests pass
-
 #### Verify Realtime Client (6.9)
-
-- [x] Client: `RealtimeContext.tsx`, `SubscriptionCache.ts`, `WebsocketPubsubClient.ts` compile
-- [x] Realtime hooks compile and export correctly
-- [x] Tests: realtime client tests pass (if any exist)
 
 ### Admin & Support Verification (CHECKLIST 7)
 
 #### Verify User Settings — Existing Parts (7.1) — COMPLETE
-
-- [x] Profile: `ProfileForm.tsx`, `AvatarUpload.tsx`, `ProfileCompleteness.tsx` + hooks render and submit
-- [x] Username: `UsernameForm.tsx` + `useUsername.ts` render and submit
-- [x] Security: `PasswordChangeForm.tsx`, `TotpManagement.tsx`, `TotpQrCode.tsx`, `SudoModal.tsx` + hooks render and submit
-- [x] Sessions: `SessionsList.tsx`, `SessionCard.tsx`, `useSessions.ts` render with revoke
-- [x] Connected accounts: `OAuthConnectionsList.tsx` renders
-- [x] Danger zone: `DangerZone.tsx` + `useAccountLifecycle.ts` render with deactivate/delete
-- [x] Tests: settings component tests pass
 
 #### Verify System Admin (7.3) + Soft Ban (7.5) — COMPLETE
 
@@ -287,164 +199,50 @@ Admin UI (user list, detail, actions, security events, job monitor, billing, lay
 
 #### Verify Backend Core Infrastructure
 
-- [x] Shared Zod schemas compile: `*.contracts.ts` across auth, billing, users, jobs, audit-log, admin
-- [x] Shared config module: env.schema, env.parsers, auth-helpers + config types all tested and passing
-- [x] Request/response validation at boundary works (Zod parse on ingress)
-- [x] Route maps: auth, billing, users, admin, realtime, notifications all registered on server boot
-- [x] Postgres: connection + pooling, SQL builder (conditions, CTE, select, insert, update, delete, window) functional
-- [x] All 20 migrations apply cleanly in sequence
-- [x] Seed scripts + bootstrap admin run without errors
-- [x] DB utilities: optimistic locking, transaction management, factory pattern, PubSub functional
-- [x] Tests: config, SQL builder, DB utility tests pass
-
 #### Verify Server Engine Adapters
-
-- [x] Cache: config, factory, LRU, memory provider work; tests pass
-- [x] Mailer: client abstraction, SMTP transport, console provider, template renderer work
-- [x] Storage: S3 provider, local provider, presigned URLs, HTTP server work
-- [x] Queue + jobs: write service, client, memory store work; tests pass
-- [x] Search: SQL provider, factory, query builder work; tests pass
-- [x] Config loader: `env.loader.ts` works
-- [x] Logger: `logger.ts` outputs structured logs
-- [x] Routing: `routing.ts` registers Fastify routes with Zod + native validation
 
 #### Verify Security Modules
 
-- [x] Rate limiting: token-bucket with role-based presets works; tests pass
-- [x] JWT: native HS256, timing-safe, secret rotation works; tests pass
-- [x] CSRF: token generation, signing, encryption works
-- [x] Argon2id: password hashing with auto-rehash works
-- [x] Permissions: types, batch checker, Fastify preHandler middleware work; tests pass
-- [x] CORS, security headers, Pino logging, correlation IDs all active on server boot
-
 #### Verify Server App Middleware
-
-- [x] Cookie parsing, CSRF protection, correlation IDs, proxy validation, request info, security headers, static files, validation all registered
-- [x] Plugin registration (`http/plugins.ts`) runs without errors
-- [x] Server config factory produces valid config for all modules
 
 #### Verify Job Idempotency
 
 - [ ] Job idempotency keys prevent duplicate execution — **GAP**: no idempotency key field in Task interface
-- [x] Retries + backoff work as configured
-- [x] Dead-letter queue captures failed jobs
 - [ ] Tests: job idempotency tests pass — deferred until idempotency keys added
 
 ### Frontend Verification (CHECKLIST 8 Frontend) — COMPLETE
 
 #### Verify Core UI
 
-- [x] Shared component library renders: accessibility defaults (LiveRegion), theme system functional
-- [x] Sidebar + topbar layout renders without errors
-- [x] Error boundaries catch and display errors
-- [x] Global toasts appear and dismiss
-- [x] Custom router: BrowserRouter, MemoryRouter, Link, Route, Switch, hooks all work
-- [x] State management: createStore, toastStore, undoRedoStore functional
-- [x] Form utilities: useFormState, createFormHandler, Zod form resolver work
-- [x] UI hooks: useVirtualScroll, usePaginatedQuery, useSidePeek, useKeyboardShortcuts work
-- [x] Billing UI components: InvoiceRow, PaymentMethodCard, PlanCard, PricingTable, SubscriptionStatus render
-- [x] Tests: all client/ui and client/react tests pass
-
 #### Verify Client Engine
-
-- [x] Query system: useQuery, useMutation, useInfiniteQuery, QueryCache, QueryCacheProvider work
-- [x] Record cache + loader cache functional
-- [x] Offline-first: TransactionQueue, mutationQueue (IndexedDB) functional
-- [x] Storage layer: RecordStorage, idb, queryPersister functional
-- [x] Search: client-side query-builder, serialization, hooks compile
-- [x] Undo/redo: UndoRedoStack functional
-- [x] Tests: all client/engine tests pass
 
 #### Verify Client API
 
-- [x] Core API client: fetch wrapper, interceptors, auth headers work
-- [x] Billing API: client, admin, hooks compile and return typed responses
-- [x] Notifications API: client, hooks compile
-- [x] OAuth hooks compile
-- [x] Error handling: errors.ts maps API errors correctly
-- [x] Tests: client/api tests pass
-
 #### Verify PWA Support
-
-- [x] Service worker (`public/sw.js`) registers without errors
-- [x] Web manifest (`public/manifest.json`) is valid
-- [x] Service worker registration utility works
 
 #### Verify Web App Features
 
-- [x] `auth/` — Login, Register, ConfirmEmail, ForgotPassword, ResetPassword pages + TurnstileWidget + TosAcceptanceModal render and navigate
-- [x] `settings/` — SettingsPage, ProfileForm, UsernameForm, PasswordChangeForm, AvatarUpload, SessionsList, SessionCard, OAuthConnectionsList, TotpManagement, TotpQrCode, SudoModal, ProfileCompleteness, DangerZone render; tests pass
-- [x] `admin/` — UserListPage, UserDetailPage, PlanManagementPage, SecurityEventsPage, SecurityEventDetailPage, RouteManifestPage render; 15+ components + 12+ hooks compile; tests pass
-- [x] `billing/` — BillingSettingsPage, PricingPage, CheckoutSuccessPage, CheckoutCancelPage render
-- [x] `workspace/` — WorkspaceListPage, WorkspaceDetailPage, AcceptInvitationPage, MembersList, InviteMemberDialog, InvitationsList, CreateWorkspaceDialog, WorkspaceSettingsForm, TenantSwitcher, Can, RequireWorkspaceRole render; tests pass
-- [x] `dashboard/` — Dashboard page renders; test passes
-- [x] `home/` — HomePage, DocViewer, NavList, TopBar, BottomBar, MainLayout render; tests pass
-- [x] `ui-library/` — UILibraryPage, SidePeekUILibraryPage, ComponentList, PreviewArea, DocContent render; tests pass
-
 ### Operational Quality Verification (CHECKLIST 10) — COMPLETE
 
-- [x] Health endpoints: `server-engine/system/health.ts` + `shared/utils/monitor/health.ts` exist and tests pass
-- [x] Request correlation IDs: `correlationId.ts` middleware attaches IDs to requests
-- [x] Verify correlation ID appears in log output
-
 ### Login Attempt Logging Verification (CHECKLIST 11.4) — COMPLETE
-
-- [x] Login attempt logging (IP, user agent, success/fail) fires on every login
-- [x] Logged data is queryable from `login_attempts` table
-- [x] Tests: login attempt logging tests pass
 
 ### Infrastructure & CI/CD Verification (CHECKLIST 13) — COMPLETE
 
 #### Verify Containerization (13.1)
 
-- [x] `Dockerfile` builds production image successfully
-- [x] `Dockerfile.web` builds web production image successfully
-- [x] `docker-compose.dev.yml` starts all services (Postgres, Redis, etc.)
-- [x] `docker-compose.prod.yml` composition is valid
-- [x] `nginx.conf` and Caddy configs are syntactically valid
-
 #### Verify Cloud Deployment (13.2)
-
-- [x] DigitalOcean Terraform: `terraform validate` passes
-- [x] GCP Terraform: `terraform validate` passes
-- [x] Provider abstraction: `main.tf`, `providers.tf`, `variables.tf` valid
-- [x] Deployment docs: all 9 guides in `docs/deploy/` are current and accurate
 
 #### Verify CI Pipelines (13.3)
 
-- [x] `ci.yml` runs lint, type-check, test successfully
-- [x] `deploy.yml` workflow is valid
-- [x] `security.yml` scans run
-- [x] `audit.yml` dependency audit runs
-- [x] `rollback.yml` workflow is valid
-- [x] `infra-deploy.yml`, `infra-destroy.yml`, `infra-test.yml` workflows valid
-
 #### Verify Dev Tooling (13.4)
 
-- [x] Audit scripts: all 6 scripts run without errors
-- [x] DB tools: bootstrap-admin, db-push, migrate, seed run successfully; tests pass
-- [x] Dev automation: bootstrap, dev, run-tests, setup work
 - [ ] Git hooks: pre-commit, pre-push execute correctly — **GAP**: no `/infra/git-hooks/` directory found; hooks configured via `lint-staged` in package.json
-- [x] Sync tools: sync-css-theme, sync-file-headers, sync-ts-references run
-- [x] Path tools: barrel generation, alias management work
-- [x] Export tools: code export utilities work
 
 #### Verify Engine Queue/Job System (Appendix C)
 
-- [x] `types.ts` — merged queue + write types compile
-- [x] `client.ts` (QueueServer) — tested and functional
-- [x] `writer.ts` (WriteService) — tested and functional
-- [x] `memory-store.ts` — in-memory store works for dev/test
-- [x] `index.ts` barrel — explicit named exports correct
-- [x] Tests: queue/job system tests pass
-
 #### Verify Engine Search (Appendix C)
 
-- [x] `types.ts` — provider interfaces compile
-- [x] `query-builder.ts` — builds queries correctly
-- [x] `sql-provider.ts` — Postgres full-text search works; tests pass
-- [x] `factory.ts` — SearchProviderFactory singleton works; tests pass
-- [x] `index.ts` barrel — explicit named exports correct
+</details>
 
 ---
 
@@ -542,31 +340,11 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Contract + Service:**
 
-- [x] Contract: `shared/domain/api-keys/` — request/response schemas for create, list, revoke
-- [x] Service: `core/api-keys/service.ts` — create (hash key, store hash only), list (mask key), revoke
-- [x] Service: key generation — crypto-random, timing-safe comparison for auth
-- [x] Service: scope parsing + validation against allowed scope set
-
 **Routes + Middleware:**
-
-- [x] Route: `POST /api/users/me/api-keys` — create key (requires sudo), returns plaintext key ONCE
-- [x] Route: `GET /api/users/me/api-keys` — list keys (hash not exposed, shows name + scopes + last used)
-- [x] Route: `DELETE /api/users/me/api-keys/:id` — revoke key (requires sudo)
-- [x] Middleware: `Authorization: Bearer <key>` — authenticate API key requests, timing-safe hash compare
-- [x] Middleware: scope enforcement — reject requests outside key's allowed scopes
-- [x] Security event: log `api_key_created`, `api_key_revoked` events
 
 **Client + UI:**
 
-- [x] Client API: `client/api/src/api-keys/client.ts` + `hooks.ts` — CRUD hooks
-- [x] UI: API key management page in settings (create with name + scopes, copy-once, revoke)
-- [x] UI: scope selector component (checkbox list of available scopes)
-
 **Tests:**
-
-- [x] Unit tests: key generation, scope validation, timing-safe compare, service logic
-- [x] Integration tests: create → use → revoke lifecycle, expired key rejection, scope enforcement
-- [x] E2E test: settings → create key → copy → use in API call → revoke → verify rejected
 
 ---
 
@@ -630,21 +408,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Workspace Audit Viewer:**
 
-- [x] Route: `GET /api/tenants/:id/audit-events` — tenant-scoped events (paginated, filtered)
-- [x] Service: filter by actor, action, target, date range within tenant scope
-- [x] UI: workspace admin audit log viewer (table + filters + date range picker)
-- [x] UI: audit event detail modal
-
 **General Audit Integration:**
-
-- [x] Service: `audit.record({ actor, action, target, metadata })` — typed event helper
-- [x] Service: wire audit logging to: billing plan changes, role changes, project CRUD, settings changes
-- [x] Route: `GET /api/admin/audit-events` — system-wide audit log (admin only)
 
 **Retention + Cleanup:**
 
-- [x] Config: audit log retention period (configurable, default 90 days)
-- [x] Cron: daily cleanup of audit events older than retention period (audit-specific; token/session crons in 3.18, PII crons in 3.16)
 - [ ] Cron: archive to cold storage before deletion (optional, config-gated)
 
 **Tests:**
@@ -666,36 +433,15 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 - [ ] Docs: SMTP configuration guide (dev: console provider, staging/prod: SMTP/SES)
 - [ ] Service: verify SMTP config on server boot (optional health check)
-- [x] Templates: Welcome email — content + layout
 - [ ] Templates: Email Verification — content + layout
 - [ ] Templates: Password Reset — content + layout
 - [ ] Templates: Workspace Invitation — content + layout
-- [x] Templates: Security Notification (password changed, new device, 2FA disabled) — content + layout
 
 **In-App Notifications (BUSINESS 4.1):**
 
-- [x] Route: `GET /api/notifications` — list notifications (paginated, unread count)
-- [x] Route: `PATCH /api/notifications/:id/read` — mark as read
-- [x] Route: `POST /api/notifications/read-all` — mark all as read
-- [x] Route: `DELETE /api/notifications/:id` — delete notification
-- [x] Service: notification creation triggered by events (invite, payment, etc.)
-- [x] UI: notification bell icon in header with unread count badge
-- [x] UI: notification dropdown/panel with notification list
-- [x] UI: click notification → navigate to relevant page
-
 **Push Notifications (BUSINESS 4.2):**
 
-- [x] Route: `POST /api/push/subscribe` — register push subscription (browser/device)
-- [x] Route: `DELETE /api/push/subscribe` — unregister
-- [x] Service: FCM provider integration — send push on notification creation
-- [x] Service: web push (VAPID) for browser notifications
-
 **Notification Preferences (BUSINESS 4.4):**
-
-- [x] Route: `GET /api/users/me/notification-preferences` — get preferences
-- [x] Route: `PATCH /api/users/me/notification-preferences` — update preferences
-- [x] Service: per-notification-type channel toggles (email, push, in-app)
-- [x] UI: preference center in settings (toggle matrix: notification type x channel)
 
 **Bounce + Unsubscribe:**
 
@@ -720,11 +466,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Routes:**
 
-- [x] Route: `POST /api/files/upload` — multipart file upload (validate type + size → store → create `files` record)
-- [x] Route: `GET /api/files/:id` — file metadata + download URL (presigned if S3)
-- [x] Route: `DELETE /api/files/:id` — delete file (owner or admin only)
-- [x] Route: `GET /api/files/:id/download` — direct download (presigned redirect or stream)
-
 **Avatar Pipeline Verification:**
 
 - [ ] Verify: `PUT /api/users/me/avatar` → multipart → validate → resize → store to S3/local → update user record
@@ -745,12 +486,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > **Gap:** No handler integration, no feed endpoint, no UI.
 
 - [ ] Contract: `shared/domain/activities/` — activity event types, request/response schemas
-- [x] Service: `core/activities/service.ts` — log activity, query feed (filtered, paginated)
-- [x] Service: wire activity logging to key handlers (user CRUD, membership changes, billing events)
-- [x] Route: `GET /api/activities` — activity feed for current user (global)
-- [x] Route: `GET /api/tenants/:id/activities` — tenant-scoped activity feed
-- [x] UI: activity feed component (timeline view)
-- [x] UI: activity feed page or sidebar widget
 
 **Tests:**
 
@@ -768,14 +503,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Feature Flags (BUSINESS 5.4):**
 
-- [x] Service: `evaluateFlag(flagKey, tenantId?)` — check flag value with tenant override
-- [x] Middleware: Fastify preHandler — gate routes/features behind flags
-- [x] Route: `GET /api/admin/feature-flags` — list all flags
-- [x] Route: `POST /api/admin/feature-flags` — create flag
-- [x] Route: `PATCH /api/admin/feature-flags/:id` — update flag (enable/disable, rollout %)
-- [x] Route: `DELETE /api/admin/feature-flags/:id` — delete flag
-- [x] Route: `PUT /api/admin/tenants/:id/feature-overrides/:flagId` — set tenant override
-- [x] UI: admin feature flag management page (list, create, toggle, rollout slider)
 - [ ] UI: tenant-level override editor in workspace admin
 
 **Usage Metering (BUSINESS 5.5):**
@@ -806,37 +533,19 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > ToS gating middleware + acceptance wired in Sprint 1.6. Remaining: admin publish + agreements list.
 
 - [ ] Route: `GET /api/legal/current` — get current ToS + privacy policy versions
-- [x] Route: `POST /api/agreements/accept` — record user acceptance of current version (Sprint 1.6)
 - [ ] Route: `GET /api/users/me/agreements` — list user's accepted agreements
-- [x] UI: ToS acceptance modal — `TosAcceptanceModal.tsx` + `tosHandler.ts` (Sprint 1.6)
 - [ ] Admin route: `POST /api/admin/legal/publish` — publish new ToS version
 
 **Consent Management (BUSINESS 6.2):**
 
-- [x] Route: `GET /api/users/me/consent` — current consent preferences
-- [x] Route: `PATCH /api/users/me/consent` — update consent preferences (analytics, marketing)
-- [x] Service: consent versioning — track what was consented to and when
-- [x] UI: consent preferences in settings (toggles for analytics, marketing, functional cookies)
 - [ ] UI: cookie consent banner on first visit (if applicable)
 
 **Data Export — Right to Portability (BUSINESS 6.3):**
-
-- [x] Route: `POST /api/users/me/export` — request data export (requires sudo)
-- [x] Service: background job — aggregate user data from all tables (profile, activities, notifications, files, billing)
-- [x] Service: generate JSON/ZIP archive
-- [x] Service: email download link when ready (signed URL, 24h expiry)
-- [x] Route: `GET /api/users/me/export/:id/status` — check export status
-- [x] Route: `GET /api/users/me/export/:id/download` — download export (presigned)
-- [x] UI: data export request button in settings → status indicator → download link
 
 **Account Deletion — Right to be Forgotten (BUSINESS 6.4):**
 
 > Self-service deletion API built in Sprint 2.6. Remaining: hard-delete cron + PII anonymization.
 
-- [x] Service: deletion request handler — `core/users/handlers/lifecycle.ts` + test (Sprint 2.6)
-- [x] Service: reactivation handler — cancel pending deletion within grace period (Sprint 2.6)
-- [x] Route: `POST /api/users/me/delete` + `POST /api/users/me/deactivate` + `POST /api/users/me/reactivate` wired (Sprint 2.6)
-- [x] UI: `DangerZone.tsx` + `useAccountLifecycle.ts` in settings (Sprint 2.6)
 - [ ] UI: deletion request status indicator (countdown to permanent deletion)
 
 **Tests:**
@@ -855,7 +564,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Client: automatic reconnection with exponential backoff on disconnect
 - [ ] Client: offline queue — buffer outgoing messages during disconnect, flush on reconnect
 - [ ] Client: missed-message recovery — request delta sync after reconnect
-- [x] Client: connection status indicator component (connected/reconnecting/offline)
 
 **Tests:**
 
@@ -873,16 +581,8 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Routes:**
 
-- [x] Route: `POST /api/media/upload` — multipart upload → file type validation → queue processing job
-- [x] Route: `GET /api/media/:id` — media metadata + processed URLs (thumbnails, transcoded)
-- [x] Route: `DELETE /api/media/:id` — delete media + processed artifacts
-- [x] Route: `GET /api/media/:id/status` — processing job status (pending/processing/complete/failed)
-
 **Client Integration:**
 
-- [x] Client API: `client/api/src/media/client.ts` + `hooks.ts` — upload, status polling, delete
-- [x] UI: upload component with drag-and-drop + progress indicator
-- [x] UI: processing status indicator (spinner → thumbnail preview)
 - [ ] UI: media library/gallery component (grid of uploaded media)
 
 **Tests:**
@@ -902,16 +602,11 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Preferences Page:**
 
-- [x] Route: `GET /api/users/me/preferences` — get user preferences
-- [x] Route: `PATCH /api/users/me/preferences` — update preferences
-- [x] Service: preferences schema — theme (light/dark/system), locale, timezone, date format
 - [ ] UI: preferences settings page (theme selector, timezone picker, locale dropdown)
 - [ ] UI: notification preferences section (link to notification preference center from 3.4)
 
 **Data Controls Page:**
 
-- [x] UI: data export section — request export button, export history list (from 3.8)
-- [x] UI: account deletion section — `DangerZone.tsx` + `useAccountLifecycle.ts` (Sprint 2.6)
 - [ ] UI: confirmation dialogs with countdown for destructive actions
 
 **API Key Management:**
@@ -921,22 +616,13 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **TOTP Management:**
 
-- [x] UI: TOTP management wired to settings security tab — `TotpManagement.tsx`
-- [x] UI: QR code during TOTP setup — `TotpQrCode.tsx` (Sprint 1.8)
 - [ ] UI: backup codes display + regenerate flow
 
 **Magic Link Frontend (CHECKLIST 1.7 | BUSINESS 1.5):**
 
 > Backend complete. Frontend wired: `MagicLinkForm.tsx` + `MagicLinkVerifyPage.tsx` + full API stack.
 
-- [x] UI: magic link login option on login page — "Send me a login link" (config-gated via `isStrategyEnabled`)
-- [x] UI: magic link request form — email input → success message ("Check your email")
-- [x] UI: magic link verification page — handle token from URL, auto-login on success
-
 **Settings Navigation:**
-
-- [x] UI: settings page sidebar/tabs — routed in `SettingsPage.tsx`
-- [x] UI: add Preferences, Notifications, API Keys tabs (not yet routed)
 
 **Tests:**
 
@@ -953,21 +639,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Members + Invitations UI:**
 
-- [x] UI: members list page — `MembersList.tsx` (Sprint 2.8)
-- [x] UI: invite member dialog — `InviteMemberDialog.tsx` (Sprint 2.9)
-- [x] UI: pending invitations list — `InvitationsList.tsx` (Sprint 2.9)
-- [x] UI: member detail — change role dropdown, remove member button
-- [x] UI: confirmation dialogs for destructive membership actions
-
 **Role Management UI:**
-
-- [x] UI: role badges with color coding (owner/admin/member/viewer)
-- [x] UI: role change dropdown — only show assignable roles based on current user's role
-- [x] UI: permission gating — `Can.tsx`, `RequireWorkspaceRole.tsx`, `usePermissions.ts` (Sprint 2.15)
 
 **Workspace Settings:**
 
-- [x] UI: workspace settings page — `WorkspaceSettingsForm.tsx` (Sprint 2.7)
 - [ ] UI: workspace logo upload (reuse avatar upload pattern)
 - [ ] UI: danger zone — delete workspace (requires owner + sudo)
 
@@ -979,9 +654,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Workspace Audit Log:**
 
-- [x] UI: audit log viewer for workspace (from 3.3 — `GET /api/tenants/:id/audit-events`)
-- [x] UI: filterable table with actor, action, timestamp, detail link
-
 **Workspace Feature Overrides:**
 
 - [ ] UI: feature flag overrides list (from 3.7 — tenant override CRUD)
@@ -989,17 +661,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Domain Restrictions:**
 
-- [x] UI: allowed email domains editor (add/remove domains from allowlist) — `DomainAllowlistEditor.tsx`
-- [x] UI: domain validation feedback (reject invalid domain formats) — inline validation in `DomainAllowlistEditor`
-
 **Invitation Lifecycle Hardening (CHECKLIST 4.8):**
 
 > Sprint 2.9 built the core invitation flow. These items harden lifecycle management.
 
-- [x] Service: `expires_at` enforcement — reject acceptance of expired invitations (column exists, enforcement needed in handler)
-- [x] Cron (daily): auto-expire invitations past `expires_at` — update status to `expired`
-- [x] Route: `POST /api/tenants/:id/invitations/:id/regenerate` — new token + new expiry (reuse existing invite record)
-- [x] Service: max pending invitations per tenant (configurable limit, default 50) — reject create if over limit
 - [ ] Service: invitation reminder email — configurable N days before expiry (requires email template)
 
 **Tests:**
@@ -1018,39 +683,21 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **User Support (BUSINESS 7.1):**
 
-- [x] Route: `GET /api/admin/users/search` — search by email, name, UUID, stripe_customer_id (multi-field)
-- [x] UI: universal search bar in admin — searches across all user fields
-- [x] UI: search results with quick-action buttons (view detail, lock, impersonate)
-- [x] Service: fuzzy/partial matching for names, exact for UUID/email
-
 **Tenant Management (BUSINESS 7.2):**
 
-- [x] Route: `GET /api/admin/tenants` — list all tenants (paginated, filtered)
-- [x] Route: `GET /api/admin/tenants/:id` — tenant detail (members, plan, usage)
-- [x] Route: `PATCH /api/admin/tenants/:id` — update tenant (name, plan override)
-- [x] Route: `POST /api/admin/tenants/:id/suspend` — suspend tenant (blocks all member access)
-- [x] Route: `POST /api/admin/tenants/:id/unsuspend` — restore tenant access
-- [x] UI: tenant list page with search + filters (plan, status, member count)
-- [x] UI: tenant detail page — members, plan, usage, billing, audit trail
 - [ ] UI: plan override selector — assign specific plan to tenant
 
 **Webhook Monitor + Replay:**
 
-- [x] Route: `GET /api/admin/webhooks` — list registered webhooks
-- [x] Route: `GET /api/admin/webhooks/:id/deliveries` — delivery history (success/fail/retry)
-- [x] Route: `POST /api/admin/webhooks/:id/deliveries/:deliveryId/replay` — replay failed delivery
 - [ ] UI: webhook list with status indicators
 - [ ] UI: delivery log with retry/replay buttons
 
 **Feature Flag Admin:**
 
-- [x] UI: system-wide feature flag management page (from 3.7 admin routes)
-- [x] UI: create/edit flag dialog — name, description, enabled, rollout %
 - [ ] UI: per-tenant override table
 
 **System Health Dashboard (BUSINESS 7.3):**
 
-- [x] Route: `GET /api/admin/health` — aggregated system health (DB, cache, queue, storage)
 - [ ] UI: health dashboard page — component status cards (green/yellow/red)
 - [ ] UI: job queue stats widget (pending, processing, failed counts + charts)
 - [ ] UI: recent error log widget (last N errors with stack traces)
@@ -1072,35 +719,14 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Contract + Service:**
 
-- [x] Contract: `shared/domain/admin/impersonation.schemas.ts` — request/response types
-- [x] Service: `core/admin/impersonation.ts` — generate scoped token, validate target user
-- [x] Service: impersonation token includes `impersonator_id`, `target_user_id`, short TTL (30 min)
-- [x] Service: safety guard — cannot impersonate other admins or system accounts
-- [x] Service: rate limit — max N impersonations per admin per hour (configurable)
-
 **Routes:**
-
-- [x] Route: `POST /api/admin/impersonate/:userId` — start impersonation (admin only)
-- [x] Route: `POST /api/admin/impersonate/end` — end impersonation session
 
 **Audit Trail:**
 
-- [x] Security event: `admin_impersonation_start` — logged with impersonator + target
-- [x] Security event: `admin_impersonation_end`
-- [x] Service: all actions during impersonation tagged with `impersonated_by` in audit log
-- [x] Service: impersonated requests carry both admin identity and target user identity
-
 **Client + UI:**
-
-- [x] Client: impersonation state management (store impersonator context)
-- [x] UI: impersonation banner — "Viewing as user@example.com — End Session" (sticky, prominent)
-- [x] UI: end impersonation button → returns to admin view
-- [x] UI: visual indicator on all pages during impersonation (colored border or overlay)
-- [x] UI: admin user detail page — "Impersonate" button
 
 **Tests:**
 
-- [x] Unit: token generation, safety guards, rate limiting, audit tagging
 - [ ] Integration: start → perform actions → verify audit trail → end; admin-only enforcement
 - [ ] E2E: admin impersonates user → sees user's dashboard → sees banner → ends session → returns to admin
 
@@ -1113,10 +739,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Soft Ban Enhancements:**
 
-- [x] DB: `lock_reason` column on `users` (or separate `account_locks` table)
-- [x] DB: `locked_until` column — nullable, null = permanent lock
-- [x] Route: `POST /api/admin/users/:id/lock` — add `reason` + optional `duration` params
-- [x] Service: timed auto-unlock — check `locked_until` on login; cron to clear expired locks
 - [ ] Service: lock reason displayed to user on login attempt ("Your account has been suspended. Reason: ...")
 - [ ] Service: notification email on lock/unlock (to user)
 - [ ] UI: admin lock dialog — reason input + duration selector (permanent / 1h / 24h / 7d / 30d / custom)
@@ -1124,7 +746,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Hard Ban:**
 
-- [x] Route: `POST /api/admin/users/:id/hard-ban` — schedule permanent deletion
 - [ ] Service: admin confirmation required (re-enter password or 2FA via sudo)
 - [ ] Service: immediate actions — revoke all sessions + tokens
 - [ ] Service: cancel active subscriptions (via billing provider API)
@@ -1149,25 +770,16 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Soft Delete Enforcement:**
 
-- [x] Service: soft-deleted users — block login (`isDeleted()` check alongside `isLocked()`)
 - [ ] Service: hide soft-deleted users from search results and member lists
 - [ ] Service: preserve audit trail — soft-deleted user's events remain queryable by admin
 
 **PII Anonymization Cron (BUSINESS 6.4):**
 
-- [x] Cron (daily): find users where `deleted_at > 30 days` (configurable grace period)
-- [x] Service: anonymize PII — replace email with hash, clear first/last name, clear phone, clear bio
 - [ ] Service: preserve audit log structure — replace actor names with "Deleted User (hash)"
 - [ ] Service: foreign key safety — audit logs, invoices, activity history must not break
 - [ ] Service: delete stored files (avatars, uploads) associated with anonymized users
-- [x] Service: log cleanup counts to metrics/audit (N users anonymized per run)
 
 **Unverified User Cleanup (CHECKLIST 9.2):**
-
-- [x] Cron (daily): hard-delete users registered > 7 days ago with `email_verified_at = null`
-- [x] Service: exclude OAuth-only users (verified via provider, may have no email verification)
-- [x] Service: exclude users with active sessions (edge case: logged in but unverified)
-- [x] Service: log cleanup counts to metrics
 
 **Tests:**
 
@@ -1194,8 +806,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Error Reporting:**
 
-- [x] Service: Sentry integration — error capture with context (user, request, correlation ID)
-- [x] Service: config-gated: `config.observability.sentry.dsn`
 - [ ] Service: breadcrumbs for request lifecycle (auth, DB, external calls)
 - [ ] Client: Sentry browser SDK integration (error boundary → Sentry)
 
@@ -1204,7 +814,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 - [ ] Service: request count + latency metrics (per route, per status code)
 - [ ] Service: job queue metrics (pending, processing, completed, failed per queue)
 - [ ] Service: auth metrics (login attempts, success rate, lockouts per period)
-- [x] Route: `GET /api/admin/metrics` — metrics summary endpoint (admin only)
 - [ ] Service: metrics export format (Prometheus-compatible or JSON)
 
 **API Documentation:**
@@ -1235,19 +844,11 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Scheduled Cleanup Jobs (Appendix C):**
 
-- [x] Job: `login-cleanup` — purge expired login attempts (daily)
-- [x] Job: `magic-link-cleanup` — purge expired magic link tokens (daily)
 - [ ] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
-- [x] Job: `push-cleanup` — purge stale push subscriptions (weekly)
-- [x] Job: `session-cleanup` — purge stale/expired sessions (daily)
-- [x] Service: job registration on server boot (schedule via cron expressions)
 
 **Security:**
 
-- [x] Middleware: IP allowlisting for admin routes (configurable allowlist in config)
 - [ ] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
-- [x] Service: request signing for webhook delivery (HMAC-SHA256 signature in headers)
-- [x] Service: webhook signature verification on receiving end (example implementation)
 - [ ] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
 - [ ] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
 - [ ] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
@@ -1274,12 +875,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > **Existing:** Electron main process, preload script, IPC handlers, React entry point.
 > **Gap:** No auto-updater, no native menu, no deep link handling.
 
-- [x] Feature: auto-updater integration (electron-updater or similar)
-- [x] Feature: native menu bar (File, Edit, View, Window, Help)
-- [x] Feature: system tray icon + menu (minimize to tray, quick actions)
-- [x] Feature: deep link handling (`abe-stack://` protocol registration)
-- [x] Feature: deep link routing → navigate to specific page in renderer
-
 **Tests:**
 
 - [ ] Manual: auto-update flow (mock update server); deep link → correct page; tray actions work
@@ -1293,17 +888,10 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Staging Environment:**
 
-- [x] Workflow: `staging.yml` — deploy to staging on merge to `staging` branch (or manually triggered)
 - [ ] Infra: staging environment Terraform config (mirrors prod, smaller resources)
-- [x] Service: staging-specific env vars (separate DB, separate Stripe test keys)
 - [ ] Docs: staging environment setup guide
 
 **Preview Deployments:**
-
-- [x] Workflow: `preview.yml` — deploy PR branch to temporary preview environment
-- [x] Service: unique preview URL per PR (e.g., `pr-123.preview.abe-stack.dev`)
-- [x] Service: auto-cleanup preview environment on PR close/merge
-- [x] Workflow: comment preview URL on PR automatically
 
 ---
 
@@ -1312,21 +900,12 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 > **Existing:** `src/apps/storybook/` directory exists but empty.
 > **Gap:** No config, no stories.
 
-- [x] Config: Storybook setup — `main.ts`, `preview.ts`, Vite builder
-- [x] Config: theme integration — wrap stories in `ThemeProvider`
-- [x] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch
-- [x] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField
 - [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel
 - [ ] Stories: patterns — forms, navigation, data tables, loading states
-- [x] CI: Storybook build step in CI pipeline (validate stories compile)
 
 ---
 
 #### 3.22 Frontend UX Polish (CHECKLIST 8 Frontend Gaps)
-
-- [x] Slice: command palette (Ctrl+K) — search pages, actions, settings (defer if not blocking launch)
-- [x] Verify: tenant switcher component renders correctly (built in Sprint 2.13; polish UX if needed)
-- [x] Slice: onboarding flow — create workspace → invite teammate → pick plan → first success moment (BUSINESS Appendix E.8)
 
 ---
 
@@ -1339,51 +918,21 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Detection + Storage:**
 
-- [x] Service: geo-IP coarse lookup — resolve IP → country/region (use MaxMind GeoLite2 or IP-API fallback)
-- [x] Schema: `trusted_devices` table — `user_id`, `device_fingerprint` (IP + UA hash), `label`, `first_seen`, `last_seen`, `trusted_at`
-- [x] Repository: `trusted_devices` CRUD — create, findByUser, markTrusted, revoke
-- [x] Service: device fingerprint helper — deterministic hash of IP + UA (or subset)
-- [x] Service: `isNewDevice()` → check `trusted_devices`, not just active sessions
-- [x] Service: `recordDeviceAccess()` — upserts device fingerprint on login
-- [x] Service: `flagSuspiciousLogin()` — create security event when login from new country/region
-- [x] Security event types: `new_device_login`, `suspicious_location`, `device_trusted`, `device_revoked`
-
 **Backend — Token Version Invalidation:**
 
 > Note: This is distinct from Sprint 1.2's "max concurrent sessions" (limit N active sessions).
 > Token version invalidation forces ALL sessions to re-authenticate after security events.
 
-- [x] Schema: add `token_version` column to `users` table (integer, default 0)
-- [x] Service: increment `token_version` on force logout or admin action (`incrementTokenVersion`)
-- [x] Middleware: JWT validation checks `token_version` matches DB — reject stale tokens on refresh
-- [x] Route: `POST /api/auth/invalidate-sessions` — increment version, revoke all refresh families
-
 **Session Enforcement (CHECKLIST 2.4) — IMPLEMENTED:**
-
-- [x] Service: session idle timeout — reject refresh if token age exceeds idle window (`refresh.ts`)
-- [x] Middleware: check idle timeout on token refresh, revoke session if stale (`refresh.ts`)
-- [x] Service: max concurrent sessions — configurable limit per user (`login.ts`)
-- [x] Service: evict oldest session when limit exceeded on new login (`login.ts`)
-- [x] Config: `auth.sessions.idleTimeoutMinutes` + `auth.sessions.maxConcurrentSessions` settings
 
 **Backend — Alerts:**
 
 - [ ] Email template: "New login from {location}" alert (already partially wired in `sendNewLoginAlert`)
-- [x] Route: `GET /api/users/me/devices` — list trusted + recent devices
-- [x] Route: `POST /api/users/me/devices/:id/trust` — mark device as trusted
-- [x] Route: `DELETE /api/users/me/devices/:id` — revoke trusted device
 
 **Client + UI:**
 
-- [x] Client API: `devices/client.ts` + `hooks.ts` — list, trust, revoke, invalidate sessions hooks
-- [x] UI: Trusted Devices section in Settings → Sessions tab (`DevicesList.tsx`)
-- [x] UI: "New device login" banner — shown when `isNewDevice` flag is set on auth response
-- [x] UI: Device list with location, last seen, trust/revoke actions
-
 **Tests:**
 
-- [x] Unit tests: device fingerprint generation, geo-IP lookup mock, device handlers, client API
-- [x] Unit tests: `DevicesList.test.tsx` — loading/error/empty states, trust/revoke, UA parsing
 - [ ] Integration tests: new device detection → security event created, token invalidation flow
 - [ ] E2E test: login → see new device banner → trust device → banner gone on next login
 
@@ -1396,43 +945,14 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — SMS Provider:**
 
-- [x] Service: `sms/provider.ts` — interface `SmsProvider { send(to, body): Promise<void> }`
-- [x] Service: `sms/console-provider.ts` — dev provider that logs SMS to console
-- [x] Service: `sms/twilio-provider.ts` — Twilio integration (env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`)
-- [x] Config: `auth.sms` config section — `provider`, `codeLength` (6), `codeExpirySeconds` (300), `maxAttempts` (3)
-- [x] Factory: `createSmsProvider(config)` — returns console or Twilio based on config
-- [x] Wiring: SMS provider wired into AppContext as `sms?: SmsProvider`
-
 **Backend — Phone Number Management:**
-
-- [x] Schema: `phone` + `phone_verified` columns on `users` table
-- [x] Route: `POST /api/users/me/phone` — set phone number, send verification code
-- [x] Route: `POST /api/users/me/phone/verify` — verify phone with code
-- [x] Route: `DELETE /api/users/me/phone` — remove phone number
-- [x] Service: rate limit SMS sends per user (max 3/hour, 10/day)
 
 **Backend — SMS 2FA Challenge:**
 
-- [x] Service: `sendSms2faCode(userId)` — generate code, store hash, send SMS
-- [x] Service: `verifySms2faCode(userId, code)` — timing-safe compare, mark used
-- [x] Schema: `sms_verification_codes` table — `user_id`, `code_hash`, `expires_at`, `attempts`, `used_at`
-- [x] Route: `POST /api/auth/sms/send` — send SMS 2FA code during login challenge
-- [x] Route: `POST /api/auth/sms/verify` — verify SMS code, complete login
-- [x] Integration: login handler — if user has SMS 2FA enabled (no TOTP), return SMS challenge (202)
-
 **Client + UI:**
-
-- [x] Client API: `phone/client.ts` + `hooks.ts` — phone management + SMS 2FA hooks
-- [x] UI: Phone number management in Settings → Security tab (`PhoneManagement.tsx`)
-- [x] UI: SMS 2FA setup flow — enter number → verify → enable as 2FA method
-- [x] UI: SMS 2FA login challenge screen — `SmsChallenge.tsx` (code entry + resend + cancel)
-- [x] Wiring: `LoginForm.tsx` catches `SmsChallengeError` → renders `SmsChallenge` component
 
 **Tests:**
 
-- [x] Unit tests: SMS code generation, rate limiting, timing-safe verify, provider factory, sms-challenge handlers
-- [x] Unit tests: `PhoneManagement.test.tsx` — idle/verify/verified states, error handling
-- [x] Unit tests: `phone/client.test.ts` — all API methods, error handling
 - [ ] Integration tests: phone verification flow, SMS 2FA login challenge end-to-end
 - [ ] E2E test: settings → add phone → verify → enable SMS 2FA → login with SMS code
 
@@ -1447,21 +967,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Backend — Webhook Registration:**
 
-- [x] Route: `POST /api/webhooks` — register webhook endpoint (URL, secret, event types)
-- [x] Route: `GET /api/webhooks` — list registered webhooks for current tenant
-- [x] Route: `GET /api/webhooks/:id` — webhook detail with delivery stats
-- [x] Route: `PATCH /api/webhooks/:id` — update URL, events, enabled/disabled
-- [x] Route: `DELETE /api/webhooks/:id` — remove webhook registration
-- [x] Route: `POST /api/webhooks/:id/rotate-secret` — rotate shared secret (requires sudo)
-
 **Backend — Event Subscription + Delivery:**
-
-- [x] Service: event type registry — define subscribable events (user.created, invoice.paid, etc.)
-- [x] Service: webhook dispatcher — on event, find matching subscriptions, enqueue delivery jobs
-- [x] Service: delivery worker — POST payload to URL with HMAC-SHA256 signature header
-- [x] Service: retry with exponential backoff (1m, 5m, 30m, 2h, 12h) — max 5 retries
-- [x] Service: dead-letter after max retries — mark webhook as failing, alert admin
-- [x] Service: delivery log — store request/response/status/timing per delivery attempt
 
 **Client + UI:**
 
@@ -1471,7 +977,6 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Tests:**
 
-- [x] Unit: signature generation, retry backoff calculation, event matching, payload serialization
 - [ ] Integration: register webhook → trigger event → delivery queued → POST sent → logged
 - [ ] Integration: endpoint failure → retry scheduled → eventual dead-letter
 - [ ] E2E: admin → create webhook → trigger event → see delivery in log
@@ -1563,8 +1068,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] Harness: real test DB lifecycle — create/destroy test database per test suite (or per file)
 - [ ] Harness: migration runner — apply all migrations to test DB before suite
 - [ ] Harness: seed helpers — minimal seed data for each domain (users, tenants, subscriptions)
-- [x] Harness: Fastify inject factory — create configured app instance with test DB connection
-- [x] Harness: auth helpers — generate valid JWT tokens for test requests without full login flow
 - [ ] Harness: tenant context helpers — set `X-Workspace-Id` header for tenant-scoped tests
 
 **CI Pipeline:**
@@ -1584,35 +1087,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] `register.test.ts` — validates input, rejects weak passwords, rejects duplicate emails, email canonicalization
-- [x] `login.test.ts` — correct credentials succeed, wrong password fails, unverified email rejected, locked account rejected, CAPTCHA enforcement
-- [x] `refresh.test.ts` — rotation works, reuse detection triggers family revocation, grace period honored, idle timeout enforcement
-- [x] `password.test.ts` — token creation, token validation, token expiry, password strength enforcement, breach check
-- [x] `magic-link/service.test.ts` — token creation, rate limiting logic, auto-create user logic, expiry
-- [x] `oauth/service.test.ts` — state generation, callback code exchange, link/unlink logic, provider validation
-- [x] `handlers/email-change.test.ts` — token creation, confirmation logic, reversion logic, old-email notification
-- [x] `totp.test.ts` — setup secret generation, code validation (time window), backup code single-use enforcement
-- [x] `utils/password.test.ts` — email canonicalization (trim, lowercase, Gmail dots, `+` alias stripping)
-- [x] `security/lockout.test.ts` — progressive delays, threshold enforcement, reset after success, IP-based vs user-based
-
 **Integration Tests (`apps/server/src/__tests__/integration/auth.integration.test.ts`):**
 
-- [x] `POST /api/auth/register` → creates user in DB, sends verification email, returns expected shape
-- [x] `POST /api/auth/login` → returns tokens, sets HttpOnly cookie, creates session record
 - [ ] `POST /api/auth/refresh` → rotates token, old token rejected on reuse
-- [x] `POST /api/auth/logout` → clears cookie, revokes token in DB
 - [ ] `POST /api/auth/logout-all` → revokes all families except current
-- [x] `POST /api/auth/forgot-password` → creates token in DB, generic response (anti-enumeration)
-- [x] `POST /api/auth/reset-password` → updates password hash, invalidates old tokens
-- [x] `POST /api/auth/verify-email` → marks user verified, auto-login tokens returned
 - [ ] `POST /api/auth/magic-link/request` → creates token, rate limited
 - [ ] `POST /api/auth/magic-link/verify` → logs in user, creates new user if config allows
 - [ ] `GET /api/auth/oauth/:provider` → returns valid authorization URL
 - [ ] `GET /api/auth/oauth/:provider/callback` → exchanges code, creates/logs in user
 - [ ] `POST /api/auth/change-email` + `/confirm` → full atomic email update flow
 - [ ] `POST /api/auth/totp/setup` → `/enable` → `/disable` lifecycle against DB
-- [x] Protected routes reject unauthenticated requests with 401
-- [x] Anti-enumeration: all login failure types return identical 401 shape
 
 **E2E Tests (`apps/web/e2e/auth.spec.ts`):**
 
@@ -1637,21 +1121,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] `listUserSessions()` — returns sessions, marks current session correctly
-- [x] `revokeSession()` — validates ownership, prevents revoking current session
-- [x] `revokeAllSessions()` — keeps current, revokes rest
-- [x] `getSessionCount()` — returns correct count
-- [x] UA parsing — Chrome/Firefox/Safari/Edge/mobile variants produce human-readable labels
-- [x] Idle timeout — expired idle sessions rejected on refresh
-- [x] Max concurrent sessions — oldest session evicted when limit exceeded
-- [x] New device detection — IP + user agent comparison against existing sessions
-
 **Integration Tests (`apps/server/src/__tests__/integration/sessions.integration.test.ts`):**
 
-- [x] `GET /api/users/me/sessions` → returns session list with current marker
-- [x] `DELETE /api/users/me/sessions/:id` → revokes target session, rejects current session revocation
-- [x] `POST /api/users/me/sessions/revoke-all` → all sessions revoked except current
-- [x] `GET /api/users/me/sessions/count` → matches active session count
 - [ ] Login creates `user_sessions` record with parsed UA fields
 - [ ] Session record includes IP, user agent, device label
 
@@ -1672,27 +1143,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Username validation — uniqueness (case-insensitive), reserved names, cooldown enforcement
-- [x] Avatar processing — validate file type (JPEG, PNG, WebP), reject invalid, resize dimensions
-- [x] Profile update — field validation, completeness percentage calculation
-- [x] Account deactivation — state transition, `deactivated_at` timestamp set
-- [x] Account deletion request — grace period calculation, orphan prevention (sole workspace owner)
-- [x] Account reactivation — cancel deactivation within grace period, reject after grace period expiry
-- [x] Sudo mode — token scoping, TTL enforcement, elevation for sensitive ops
-
 **Integration Tests (`apps/server/src/__tests__/integration/account.integration.test.ts`):**
-
-- [x] `PATCH /api/users/me/username` → updates username, rejects duplicates, enforces cooldown
-- [x] `PUT /api/users/me/avatar` → processes and stores image, returns URL
-- [x] `DELETE /api/users/me/avatar` → removes avatar
-- [x] `PATCH /api/users/me` → updates profile fields (firstName, lastName, bio, etc.)
-- [x] `GET /api/users/me/profile/completeness` → returns percentage and missing fields
-- [x] `POST /api/users/me/deactivate` → sets `deactivated_at`, blocks subsequent API calls
-- [x] `POST /api/users/me/delete` → sets `deleted_at` + grace period end, blocks login after
-- [x] `POST /api/users/me/reactivate` → cancels pending deletion within grace period
-- [x] `POST /api/auth/sudo` → returns sudo token; subsequent sensitive ops require it
-- [x] Deactivated account → login attempt rejected
-- [x] Deleted account (past grace period) → login attempt rejected
 
 **E2E Tests (`apps/web/e2e/account.spec.ts`):**
 
@@ -1713,24 +1164,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] `canAssignRole()` — enforces role hierarchy (owner > admin > member > viewer)
-- [x] `canRemoveMember()` — prevents removing higher-ranked users
-- [x] Orphan prevention — block removal of last owner, require ownership transfer
-- [x] Invitation logic — domain restriction validation, expiry enforcement, token generation
-- [x] Tenant scoping — `assertWorkspaceScope()` throws when context missing
-- [x] Domain restriction — email domain matching, wildcard domains, invite-only enforcement
-- [x] Tenant settings — per-tenant config validation, defaults
-
 **Integration Tests (`apps/server/src/__tests__/integration/tenant.integration.test.ts`):**
 
-- [x] `POST /api/tenants` → creates tenant + owner membership in transaction
-- [x] `GET /api/tenants` → returns only user's workspaces
-- [x] `GET /api/tenants/:id` → returns tenant details (member only)
-- [x] `PATCH /api/tenants/:id` → updates tenant settings (admin/owner only)
-- [x] `POST /api/tenants/:id/invitations` → creates invite, sends email
-- [x] `POST /api/invitations/:token/accept` → creates membership, consumes token
-- [x] `PATCH /api/tenants/:id/members/:userId` → changes role, enforces hierarchy
-- [x] `DELETE /api/tenants/:id/members/:userId` → removes member, blocks last owner removal
 - [ ] Tenant-scoped queries only return data for the active workspace
 - [ ] Expired invitation rejection with clear error
 - [ ] Domain-restricted tenant rejects invites to non-matching email domains
@@ -1753,16 +1188,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] `canUser()` / `isOwner()` / `isAdmin()` — permission checks for all role combinations
-- [x] Policy engine — evaluation with multiple rules, deny overrides allow
-- [x] Route-level role check — correct roles pass, others rejected
-- [x] Permission batch checking — multiple permissions in one call
-- [x] Role hierarchy inheritance — admin inherits member permissions, owner inherits admin
-
 **Integration Tests (`apps/server/src/__tests__/integration/rbac.integration.test.ts`):**
 
-- [x] Protected routes reject unauthenticated requests (401)
-- [x] Admin routes reject non-admin users (403)
 - [ ] Per-tenant role enforcement — viewer cannot write, member cannot manage members
 - [ ] Resource ownership validation — user A cannot access user B's resources
 - [ ] System admin vs workspace admin distinction
@@ -1785,12 +1212,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Entitlements resolver — `resolveEntitlements(subscription, role)` returns correct flags/limits
-- [x] Plan validation — required fields, price constraints, interval validation
-- [x] Webhook signature verification — Stripe + PayPal signature validation logic
-- [x] Subscription state transitions — `trialing` → `active` → `past_due` → `canceled`
-- [x] Proration calculation — mid-cycle upgrade/downgrade amount
-- [x] Seat-based limit enforcement — max users per plan tier
 - [ ] Dunning logic — retry schedule, grace period, suspension threshold
 
 **Integration Tests (`apps/server/src/__tests__/integration/billing.integration.test.ts`):**
@@ -1824,12 +1245,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Notification service — create, mark read, mark all read, delete, count unread
-- [x] Push provider (FCM) — payload formatting, error handling, subscription validation
-- [x] Email template rendering — variable substitution, fallback values, HTML/text output
-- [x] Preference evaluation — channel enabled/disabled per notification type per user
-- [x] Notification routing — determine which channels to use based on event type + preferences
-
 **Integration Tests (`apps/server/src/__tests__/integration/notifications.integration.test.ts`):**
 
 - [ ] `POST /api/notifications` → creates notification in DB
@@ -1860,12 +1275,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Security event creation — all 18+ event types with correct severity classification
-- [x] Audit event creation — typed events with actor/action/target/metadata
-- [x] Event metrics aggregation — count by type, count by severity, time-series rollup
-- [x] Event filtering — by type, severity, user, date range, IP
-- [x] Export formatting — CSV and JSON output generation
-
 **Integration Tests (`apps/server/src/__tests__/integration/audit.integration.test.ts`):**
 
 - [ ] Security events written to DB on login/logout/lockout/OAuth/TOTP actions
@@ -1894,22 +1303,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Deletion logic — soft delete scheduling, grace period calculation, PII anonymization rules
-- [x] Data export — user data aggregation from all tables (users, sessions, activities, billing)
-- [x] Consent tracking — version comparison, acceptance recording, consent log creation
-- [x] ToS gating — version comparison logic, stale-version detection
-- [x] PII anonymization — field-level anonymization rules (email → hash, name → "Deleted User", etc.)
-
 **Integration Tests (`apps/server/src/__tests__/integration/compliance.integration.test.ts`):**
 
-- [x] `POST /api/users/me/export` → creates data export request, background job queued
-- [x] `GET /api/users/me/export/:id` → returns export status (pending/ready/expired)
 - [ ] `POST /api/users/me/delete` → sets `deleted_at`, blocks login after grace period
-- [x] ToS gating middleware — stale version → 403 with `TOS_ACCEPTANCE_REQUIRED`
-- [x] `POST /api/agreements/accept` → records acceptance, unblocks user
-- [x] `GET /api/agreements/current` → returns current ToS version
-- [x] Hard delete cron — anonymizes PII after grace period + hard-deletes after retention (`scheduled-tasks/service.ts` + `data-hygiene.ts`)
-- [x] Consent log — records consent changes with timestamp + IP
 
 **E2E Tests (`apps/web/e2e/compliance.spec.ts`):**
 
@@ -1928,10 +1324,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Subscription handler — subscribe/unsubscribe to channels, channel validation
-- [x] Sync handler — delta sync logic, conflict resolution
-- [x] PubSub — message routing, channel filtering, wildcard channels
-- [x] Connection lifecycle — connect, heartbeat, disconnect, reconnect, stale connection cleanup
 - [ ] Auth — WebSocket authentication handshake, token validation
 
 **Integration Tests (`apps/server/src/__tests__/integration/realtime.integration.test.ts`):**
@@ -1959,15 +1351,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Image processor — resize, crop, format conversion (JPEG/PNG/WebP)
-- [x] Audio metadata extraction — duration, sample rate, channels, format detection
-- [x] Video processor — thumbnail generation, format conversion
-- [x] File type detection — correct MIME types for common formats, magic byte validation
-- [x] File validation — size limits, type restrictions, security scanning (no embedded scripts)
-- [x] Queue — job creation, retry logic, dead-letter handling
-- [x] Local storage provider — write, read, delete, directory creation
-- [x] Presigned URL generation — valid signature, expiry, content-type restrictions
-
 **Integration Tests (`apps/server/src/__tests__/integration/media.integration.test.ts`):**
 
 - [ ] Upload image → processed and stored (local provider for tests)
@@ -1993,21 +1376,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests (colocated):**
 
-- [x] Key generation — crypto-random generation, hash storage (never store plaintext)
-- [x] Key authentication — timing-safe comparison, hash validation
-- [x] Scope parsing — valid scope strings, invalid scope rejection
-- [x] Scope enforcement — key with `read` scope cannot `write`
-- [x] Key revocation — immediate invalidation, revoked key check
-- [x] Key expiry — expired key rejected, expiry date validation
-
 **Integration Tests (`apps/server/src/__tests__/integration/api-keys.integration.test.ts`):**
 
-- [x] Create API key → use it to authenticate a request → success
 - [ ] Revoked key → 401 on subsequent requests
 - [ ] Expired key → 401 on subsequent requests
 - [ ] Scope enforcement — key with `read` scope cannot access `write` endpoints
-- [x] `GET /api/users/me/api-keys` → lists keys (hash not exposed, shows name + scopes + last used)
-- [x] `DELETE /api/users/me/api-keys/:id` → revokes key (requires sudo)
 - [ ] Key creation requires sudo mode
 
 **E2E Tests (`apps/web/e2e/api-keys.spec.ts`):**
@@ -2025,12 +1398,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Gap:** Zero impersonation tests, zero ban cascade tests, zero E2E admin flows.
 
 **Unit Tests (colocated):**
-
-- [x] Impersonation token — scoped TTL, target user validation, admin-only gate
-- [x] Impersonation guard — cannot impersonate another admin (safety)
-- [x] User search — multi-field matching (email, name, UUID, stripe customer ID)
-- [x] Ban logic — soft ban (lock account), hard ban cascade (revoke sessions, cancel subs, schedule PII deletion)
-- [x] Route manifest — returns all registered routes with metadata
 
 **Integration Tests (`apps/server/src/__tests__/integration/admin.integration.test.ts`):**
 
@@ -2061,24 +1428,16 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Health & Readiness:**
 
-- [x] Integration: `GET /health` → returns `200` with version + uptime
-- [x] Integration: `GET /health/live` → returns `200` (liveness probe)
-- [x] Integration: health check includes DB connectivity status
 - [ ] Integration: health check includes queue system status
 - [ ] E2E: health endpoint accessible from browser (no auth required)
 
 **Correlation IDs:**
 
-- [x] Integration: request with `X-Correlation-Id` header → same ID appears in response header + logs
-- [x] Integration: request without correlation ID → server generates one, returns in response header
 - [ ] Integration: correlation ID propagated to downstream service calls and queue jobs
 
 **Error Reporting:**
 
 - [ ] Service: Sentry integration provider (optional, config-gated)
-- [x] Service: unhandled error → captured with correlation ID + request context
-- [x] Service: breadcrumb trail — log key events leading to error
-- [x] Unit test: error formatting, PII scrubbing before send
 
 **Metrics:**
 
@@ -2089,9 +1448,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **OpenAPI / Swagger:**
 
-- [x] Integration: `/api/docs` serves Swagger UI
 - [ ] Integration: `/api/docs/json` returns valid OpenAPI 3.0 spec
-- [x] Security: `/api/docs` auth-protected in non-dev environments
 - [ ] Validation: all annotated routes appear in generated spec
 
 **Deployment Sanity (Appendix D):**
@@ -2109,47 +1466,23 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Anti-Abuse (11.1):**
 
-- [x] Integration: CAPTCHA-enabled config → public endpoints require valid token
-- [x] Integration: CAPTCHA-disabled config → public endpoints work without token
-- [x] Integration: invalid CAPTCHA token → 400 rejection
-- [x] Unit test: Turnstile server-side verification (success, failure, network error, timeout)
-
 **Rate Limiting & IP Policy (Appendix E.5):**
 
 - [ ] Integration: rate limit preset enforced on auth endpoints (burst rejected, normal allowed)
 - [ ] Integration: rate limit preset on general API endpoints (higher threshold than auth)
-- [x] Integration: IP allowlist on admin routes (allowed IP passes, blocked IP returns 403)
 - [ ] Integration: IP blocklist (blocked IP returns 403 on all routes)
-- [x] Unit test: rate limiter window calculation, token bucket / sliding window logic
 
 **Security Notifications (11.2):**
 
 - [ ] Integration: password change → "Was this you?" email sent to user
-- [x] Integration: 2FA disabled → security notification email sent
-- [x] Integration: new device login → new device alert email sent
-- [x] Integration: email change A→B → "Revert" link sent to old email (A)
-- [x] Integration: clicking revert link → email reverted, account locked, sessions killed
 - [ ] Integration: new API key generated → security notification email sent
-- [x] Unit test: email template rendering for each notification type
 
 **ToS Gating (11.3):**
 
-- [x] Integration: stale ToS version → all API calls return 403 except logout + accept
-- [x] Integration: accept ToS → unblocked
 - [ ] Integration: admin publishes new ToS version → users with old version blocked
 - [ ] E2E: new ToS → modal appears → accept → normal access
 
 **Login Failure Logging (11.4):**
-
-- [x] Integration: `USER_NOT_FOUND` failure → stored in `login_attempts` with reason
-- [x] Integration: `PASSWORD_MISMATCH` → stored with reason
-- [x] Integration: `UNVERIFIED_EMAIL` → stored with reason
-- [x] Integration: `ACCOUNT_LOCKED` → stored with reason
-- [x] Integration: `CAPTCHA_FAILED` → stored with reason
-- [x] Integration: `TOTP_REQUIRED` → stored with reason (successful password, awaiting 2FA)
-- [x] Integration: `TOTP_INVALID` → stored with reason (wrong 2FA code)
-- [x] Integration: admin can filter login attempts by failure reason
-- [x] Security: client receives identical 401 for all failure types (anti-enumeration)
 
 ---
 
@@ -2158,16 +1491,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** Queue system (QueueServer + WriteService), memory store for dev/test.
 > **Gap:** Scheduled job implementations are stubs, zero tests.
 
-- [x] `login-cleanup` — purge expired login attempts (`scheduled-tasks/service.ts`)
-- [x] `magic-link-cleanup` — purge expired magic link tokens (`scheduled-tasks/service.ts`)
-- [x] `oauth-refresh.ts` — refresh expiring OAuth tokens before expiry
-- [x] `push-cleanup` — purge stale push subscriptions (`scheduled-tasks/service.ts`)
-- [x] `hard-delete-anonymized` — hard-delete anonymized user records (`data-hygiene.ts`)
-- [x] `session-cleanup` — purge revoked sessions older than 30 days (`scheduled-tasks/service.ts`)
-- [x] `audit-cleanup` — purge audit events older than 90 days (`scheduled-tasks/service.ts`)
-- [x] `invitation-cleanup` — expire stale invitations (`scheduled-tasks/service.ts`)
-- [x] `pii-anonymization` — anonymize PII for deleted users (`scheduled-tasks/service.ts`)
-- [x] Unit tests: each job's selection criteria, batch processing, error handling
 - [ ] Integration tests: job enqueued → processed → DB state updated correctly
 - [ ] Integration: generic job lifecycle — enqueue → process → success callback; failure → retry with backoff → dead-letter after max retries
 - [ ] E2E: admin job monitor page → see scheduled jobs, status, last run, next run
@@ -2182,15 +1505,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Client Engine:**
 
-- [x] RecordStorage — CRUD operations, conflict resolution, sync delta calculation
-- [x] Offline queue — operations queued while offline, replayed on reconnect
-- [x] Sync protocol — optimistic updates, server reconciliation, rollback on conflict
-
 **Search:**
-
-- [x] `query-builder.ts` — query construction for all field types, pagination, sorting (NEW — Appendix C gap)
-- [x] SQL provider — full-text search, fuzzy matching, result ranking (verify existing tests adequate)
-- [x] Search factory — provider selection based on config (verify existing tests adequate)
 
 ---
 
@@ -2204,18 +1519,10 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Activity Tracking:**
 
-- [x] Unit: activity event creation — typed events with actor/action/target/metadata
-- [x] Unit: activity feed query — pagination, filtering by actor/target/type, date range
-- [x] Integration: `POST /api/activities` → creates activity record in DB
-- [x] Integration: `GET /api/activities` → returns paginated activity feed with filters
 - [ ] Integration: tenant-scoped activity isolation — tenant A cannot see tenant B's activities
 
 **Feature Flags:**
 
-- [x] Unit: flag evaluation logic — enabled/disabled, percentage rollout, user targeting
-- [x] Unit: flag defaults — missing flag returns default value, no crash
-- [x] Integration: `GET /api/flags/:key` → returns flag value for current user/tenant
-- [x] Integration: admin CRUD — create/update/delete flags, toggle enabled state
 - [ ] Integration: tenant-scoped flags — tenant-specific overrides vs global defaults
 
 **Usage Metering:**
@@ -2236,20 +1543,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Unit Tests:**
 
-- [x] Webhook signature generation — HMAC-SHA256 with shared secret, correct payload serialization
-- [x] Webhook signature verification — valid signature accepted, tampered payload rejected
-- [x] Retry logic — exponential backoff calculation, max retry count, dead-letter after exhaustion
-- [x] Event filtering — webhook subscription with event type filter, wildcard matching
-
 **Integration Tests:**
 
-- [x] Register webhook endpoint → stored in DB with secret
 - [ ] Event triggered → webhook queued → delivered to endpoint → delivery logged
 - [ ] Endpoint returns 500 → retry scheduled with exponential backoff
 - [ ] Endpoint returns 200 → delivery marked successful, no retry
 - [ ] Max retries exceeded → webhook marked failed, admin notified
-- [x] `GET /api/webhooks/:id/deliveries` → delivery log with status/response/timing
-- [x] Webhook secret rotation → old deliveries still verifiable, new deliveries use new secret
 - [ ] Tenant-scoped webhooks — tenant A's events don't trigger tenant B's webhooks
 
 ---
@@ -2348,19 +1647,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 - [ ] Flow: Create user → create tenant → invite teammate → teammate accepts → enforce RBAC within workspace
 - [ ] Flow: Run checkout → process webhooks idempotently → activate tenant plan → verify entitlements
-- [x] Flow: View audit logs → filter by type → export → verify data integrity
-- [x] Flow: Operate jobs via admin console → trigger job → monitor completion → verify dead-letter handling
-- [x] Flow: Debug issue via correlated logs → trace request through middleware → handler → DB → response
-- [x] Flow: Add new module using documented scaffold template → verify it integrates correctly
 
 **Ship Criteria Final Check (CHECKLIST):**
-
-- [x] Verify: Auth lifecycle complete end-to-end (register → verify → login → refresh → logout → reset)
-- [x] Verify: Session endpoints wired + UA labeling works in production build
-- [x] Verify: Turnstile active on public forms (register, login, forgot-password) in production config
-- [x] Verify: "Was this you?" email fires on password change + email change reversion works
-- [x] Verify: ToS gating middleware blocks stale versions in production
-- [x] Verify: Granular login failure reasons appear in internal logs (never in HTTP responses)
 
 ---
 
@@ -2400,7 +1688,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [ ] CI: `deploy.yml` workflow deploys to production on merge to `main` (or manual trigger)
 - [ ] CI: zero-downtime deployment verified (rolling restart, no dropped connections)
 - [ ] CI: rollback procedure tested — `rollback.yml` reverts to previous known-good deployment
-- [x] CI: deployment smoke test — after deploy, automated health check confirms app is live (`deploy.yml` smoke-test job)
 
 ---
 
@@ -2410,26 +1697,13 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Database Performance:**
 
-- [x] Audit: verify all foreign keys have corresponding indexes (migration 0026)
-- [x] Audit: query analysis on critical paths (login, refresh, session list, tenant member list)
-- [x] Audit: N+1 query detection — verify batch loading on list endpoints
-- [x] Optimize: add composite indexes for common query patterns (`0026_performance_indexes.sql`)
 - [ ] Benchmark: auth flow latency — login < 200ms p95, refresh < 50ms p95
 
 **API Performance:**
 
-- [x] Audit: response payload sizes — no unbounded arrays, all list endpoints paginated
-- [x] Optimize: HTTP response compression (gzip/brotli via @fastify/compress)
-- [x] Optimize: API response caching for read-heavy, rarely-changing data (plans, feature flags) — handled by CDN/reverse proxy in production
 - [ ] Benchmark: API latency — 95th percentile under 500ms for all endpoints under expected load
 
 **Frontend Performance:**
-
-- [x] Audit: production bundle size — main bundle < 250KB gzipped
-- [x] Audit: code splitting — route-based lazy loading for all feature pages
-- [x] Audit: image/asset optimization — asset size audit script created
-- [x] Audit: Lighthouse CI configured — Performance > 80, Accessibility > 90, Best Practices > 90
-- [x] Optimize: service worker caching strategy — static assets cached, API no-store respected
 
 **Load Testing:**
 
@@ -2479,32 +1753,9 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Production Security Verification:**
 
-- [x] Verify: all cookies set with `Secure`, `HttpOnly`, `SameSite=Strict` in production
-- [x] Verify: CORS origin restricted to production domain(s) only
-- [x] Verify: CSRF protection active on all state-changing endpoints
-- [x] Verify: rate limiting active on all public endpoints (stricter on auth routes)
-- [x] Verify: security headers — `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`
-- [x] Verify: no sensitive data in error responses (stack traces, internal paths, SQL)
-- [x] Verify: JWT secrets are production-grade (256-bit random, not default values)
-- [x] Verify: Argon2id parameters are OWASP-recommended for production (memory, iterations, parallelism)
-
 **Dependency Security:**
 
-- [x] Audit: `pnpm audit` passes with zero critical/high vulnerabilities (enforced in CI)
-- [x] Audit: no known-vulnerable dependencies in production build
-- [x] Setup: automated dependency audit in CI (weekly schedule — audit.yml daily + security.yml weekly)
-- [x] Docs: documented procedure for handling CVE alerts in dependencies (`docs/dev/security-ci.md`)
-
 **Penetration Testing Checklist:**
-
-- [x] Test: SQL injection — parameterized queries verified (Drizzle ORM enforces parameterized queries)
-- [x] Test: XSS — all user-generated content properly escaped in UI
-- [x] Test: CSRF — state-changing requests without valid CSRF token rejected
-- [x] Test: auth bypass — protected routes reject unauthenticated/insufficient-role requests (middleware enforced)
-- [x] Test: IDOR — users cannot access resources belonging to other users/tenants
-- [x] Test: rate limiting — brute-force attempts throttled and blocked (progressive delays configured)
-- [x] Test: file upload — malicious files (scripts, oversized) rejected
-- [x] Test: open redirect — `returnTo` parameter validated, absolute URLs rejected
 
 ---
 
@@ -2515,34 +1766,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **API Documentation:**
 
-- [x] Docs: all HTTP routes annotated with OpenAPI metadata (summary + tags on all engine routes)
-- [x] Docs: Swagger UI (`/api/docs`) renders complete API with all endpoints
-- [x] Docs: authentication documented in Swagger (Bearer token, cookie auth)
-- [x] Docs: error response schemas documented (standard error shape with code + message)
-- [x] Docs: rate limit headers documented (`X-RateLimit-Limit`, `X-RateLimit-Remaining`)
-
 **Deployment Documentation:**
-
-- [x] Docs: production deployment guide — step-by-step from fresh server to running app
-- [x] Docs: environment variables reference — every env var with description, type, default, required status
-- [x] Docs: database migration guide — how to apply migrations, rollback procedure
-- [x] Docs: backup/restore procedure — documented and tested
-- [x] Docs: scaling guide — horizontal scaling options, database read replicas, CDN setup
 
 **Developer Documentation:**
 
-- [x] Docs: architecture overview — updated diagram matching current module structure
-- [x] Docs: new developer onboarding — clone → install → `pnpm dev` → first feature in < 30 minutes
-- [x] Docs: module scaffold guide — how to add a new feature module (`docs/dev/module-creation.md`)
-- [x] Docs: testing guide — how to write unit, integration, E2E tests (`docs/dev/testing.md`)
-- [x] Docs: code review checklist — what to check before approving PRs
-
 **Operational Runbooks:**
-
-- [x] Runbook: incident response — detection → triage → mitigation → resolution → postmortem
-- [x] Runbook: database emergency — connection pool exhaustion, long-running queries, migration failures
-- [x] Runbook: authentication issues — locked accounts, token rotation, OAuth provider outage
-- [x] Runbook: deployment rollback — when to rollback, how to rollback, verification after rollback
 
 ---
 
@@ -2552,34 +1780,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Empty States:**
 
-- [x] UI: empty dashboard — welcome message + getting started checklist
-- [x] UI: empty workspace member list — "Invite your first teammate" CTA
-- [x] UI: empty notification list — "No notifications yet" message
-- [x] UI: empty activity feed — "No recent activity" message
-- [x] UI: empty session list — should never be empty (current session always exists) — verify
-- [x] UI: empty billing invoices — "No invoices yet" message
-- [x] UI: empty API keys — "Create your first API key" CTA
-
 **Loading States:**
-
-- [x] UI: Skeleton loaders on all data-dependent pages (dashboard, settings, admin)
-- [x] UI: verify no layout shift during data loading (skeletons match final layout dimensions)
-- [x] UI: page transition loading indicator (Suspense fallback with LoadingContainer)
 
 **Error States:**
 
-- [x] UI: global error boundary — friendly error page with "Try Again" + "Go Home" buttons
-- [x] UI: per-section error boundaries — individual widgets recover without full page crash
-- [x] UI: network error handling — "Connection lost" toast with retry option
-- [x] UI: 404 page — branded, with navigation links back to known pages
-- [x] UI: 403 page — "You don't have permission" with redirect to appropriate page
-
 **Onboarding Flow (BUSINESS E.8):**
-
-- [x] UI: first-login onboarding wizard — profile setup → create/join workspace → (optional) invite team → (optional) select plan
-- [x] UI: onboarding progress tracker — visible until all steps completed, dismissible (GettingStartedChecklist component)
-- [x] UI: contextual tooltips for key features on first use
-- [x] UI: "First success moment" — workspace created with sample content/welcome message
 
 ---
 
@@ -2589,37 +1794,13 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Module Boundary Verification:**
 
-- [x] Verify: no cross-app imports (apps import from packages only, never from each other)
-- [x] Verify: all barrel exports are explicit named exports (utility namespace re-exports are accepted exceptions)
-- [x] Verify: all path aliases resolve correctly in production build
-- [x] Verify: dependency flow never reversed (`apps` → `packages` → `shared`, never backwards)
-
 **Cross-Feature Integration Points:**
-
-- [x] Verify: registration → email verification → auto-create default workspace (`verify.ts` fire-and-forget)
-- [x] Verify: user deletion → cascade to sessions, tokens, memberships, subscriptions, files (ON DELETE CASCADE on all user FKs in schema)
-- [x] Verify: tenant suspension → all members blocked from workspace access (`getTenantById()` checks `isActive`, throws ForbiddenError)
-- [x] Verify: role change → immediate effect on permission-gated UI and API
-- [x] Verify: subscription change → entitlement update → feature gating works immediately
-- [x] Verify: email change → all email-dependent features use new email (all FKs use userId, email resolved from users table at query time)
 
 **Appendix D Essential Features Verification (CHECKLIST):**
 
-- [x] Verify: multi-tenant workspaces + membership roles + invites end-to-end
-- [x] Verify: entitlements service + assert helper works for all plan tiers
-- [x] Verify: subscription lifecycle states wired end-to-end (trialing/active/past_due/canceled)
-- [x] Verify: general audit log records all critical actions (separate from security events)
-- [x] Verify: data export + deletion workflows complete with cascading cleanup (export aggregates 8 data categories: profile, memberships, subscriptions, activities, files, notifications, sessions, consent; deletion via ON DELETE CASCADE)
-- [x] Verify: baseline observability — errors captured, metrics available, logs searchable (structured logging + correlationId middleware + request context)
-- [x] Verify: idempotent webhooks — duplicate events ignored, out-of-order handled (billing events dedup via UNIQUE constraint + wasProcessed(), state machine rejects invalid transitions)
-- [x] Verify: tenant scoping enforced on every tenant-scoped query
-- [x] Verify: baseline security defaults active (secure cookies, CSRF, CORS, rate limits, correlation IDs)
 - [ ] Verify: deployment sanity — migrations + seed + bootstrap on fresh DB works first try
 
 **DRY Shared Package Consolidation (per-package):**
-
-- [x] `@abe-stack/api` — hardcoded constants replaced with `@abe-stack/shared` (`HTTP_STATUS`, `ERROR_CODES`, `ERROR_MESSAGES`); duplicated request helpers consolidated into shared `apiRequest()` factory; duplicated config interfaces unified into `BaseClientConfig`; magic numbers named
-- [x] `@abe-stack/react` — shared package usage verified, no remaining hardcoded values
 
 ---
 
@@ -2774,54 +1955,22 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Partial progress:** WriteService (`apps/server/src/infra/write/`) already provides
 > transaction handling, version bumping, and auto-pubsub. Build on this foundation.
 
-- [x] Schema: add `version` (integer, default 0) column to all syncable tables (migration)
-- [x] Contract: `infra/realtime` transaction types — define write operation shapes, version metadata, delta sync types
-- [x] Route: `POST /api/realtime/write` — accept write operations, bump version, publish change via PubSub
-- [x] Route: `POST /api/realtime/getRecords` — fetch records by table + filters with version metadata
-- [x] Service: write handler — extend WriteService to validate, persist, increment version, broadcast via WebSocket PubSub
-- [x] Service: record query with version tracking — return records + their current versions for delta sync
-
 **Real-Time Sync (ROADMAP Phase 2):**
 
 > WebSocketServer, WebSocketPubSubClient, and SubscriptionCache already exist.
 > This phase wires them into the React app via context providers.
 
-- [x] Component: `RealtimeContext` — React context holding WebSocket connection state + subscription registry
-- [x] Component: `RealtimeProvider` — wraps app, manages WebSocket lifecycle, provides `RealtimeContext`
-- [x] Service: version-based update notifications — subscribe to record changes by key, push deltas to subscribers
-- [x] Service: missed-message recovery — delta sync from last known version on reconnect
-
 **React Hooks (ROADMAP Phase 6 — client/engine):**
 
-- [x] Hook: `useRecord<T>(table, id)` — single record subscription with real-time updates
-- [x] Hook: `useRecords<T>(table, filters)` — collection subscription with filtering + pagination
-- [x] Hook: `useWrite()` — optimistic write with offline queue (auto-sync on reconnect)
-- [x] Hook: `useUndoRedo()` — undo/redo controls bound to write operations
-
 **Optimistic Updates:**
-
-- [x] Service: optimistic write pipeline — apply locally → send to server → reconcile on response
-- [x] Service: conflict resolution — last-write-wins with version check, rollback on conflict
-- [x] Service: offline queue integration — queue writes during disconnect, replay on reconnect
 
 **Service Worker Asset Caching (ROADMAP Phase 3):**
 
 > RecordStorage, TransactionQueue, and LoaderCache already exist.
 > This covers the remaining service worker gap.
 
-- [x] Service: service worker asset caching strategy — static assets cached, API no-store respected
-- [x] Service: cache-first for JS/CSS bundles, network-first for API responses
-- [x] Service: cache versioning — invalidate stale caches on deploy
-
 **Tests:**
 
-- [x] Unit: hook behavior (subscribe → receive update → re-render), optimistic state management
-- [x] Unit: conflict resolution logic (version mismatch → rollback)
-- [x] Unit: write handler — version increment, PubSub broadcast
-- [x] Unit: transaction type validation, delta sync type serialization
-- [x] Integration: write record via `/api/realtime/write` → WebSocket notification → subscriber receives update
-- [x] Integration: `getRecords` returns correct records with version metadata
-- [x] Integration: RealtimeProvider connects, subscribes, receives live updates
 - [ ] E2E: two browser tabs → edit in tab A → see update in tab B; offline → online → sync
 
 ---
@@ -2842,44 +1991,21 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 > Correlation IDs and error serialization already exist. These items close the remaining gaps.
 
-- [x] Middleware: request context logging — attach IP, method, path, user agent to every log entry (structured via Pino)
-- [x] Service: conditional logging by severity — 5xx errors: full stack trace + request context; 4xx client errors: warn-level summary only (no stack trace noise)
-- [x] Config: `logging.clientErrorLevel` — configurable severity threshold for client errors (default `warn`)
-- [x] Config: `logging.requestContext` — toggle request context fields in log output (default `true` in production)
-
 **Generated API Client (ROADMAP Infrastructure > API Versioning & Typed Client):**
 
-- [x] Tool: route manifest exporter — `pnpm route:manifest` outputs JSON of all registered routes
-- [x] Tool: API client sync validator — `pnpm audit:api-sync` checks client coverage vs routes
 - [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output) _(deferred to ROADMAP)_
 - [ ] Tool: generate React Query hooks from client definitions _(deferred to ROADMAP)_
 - [ ] CI: regenerate client on route/schema changes (pre-commit or CI step) _(deferred to ROADMAP)_
 
 **Module Scaffold CLI:**
 
-- [x] Tool: `pnpm scaffold:module <name>` — generates: handler, service, routes, tests, types stubs
-- [x] Tool: scaffold creates barrel exports and registers in parent index.ts
-- [x] Tool: scaffold adds route registration to server routes
-- [x] Docs: module creation guide using scaffold tool
-
 **API Versioning (ROADMAP Infrastructure > API Versioning & Typed Client):**
-
-- [x] Service: route versioning strategy — `/api/v1/...` prefix with backward-compat redirect
-- [x] Service: version deprecation middleware — `Sunset` header, `Deprecation` header, `X-Deprecation-Notice`
-- [x] Docs: versioning policy — how to add new versions, sunset timeline
 
 **DB Reset Command:**
 
-- [x] Tool: `pnpm db:reset` — drop + recreate + migrate + seed dev DB in one command
-- [x] Tool: confirmation prompt to prevent accidental use (skippable with `--force`)
-
 **Tests:**
 
-- [x] Unit: scaffold template generation test (19 tests passing)
-- [x] Unit: request context logger — verify IP, method, path included in structured log output
-- [x] Unit: severity-based logging — 5xx produces error-level with stack, 4xx produces warn-level without stack
 - [ ] Integration: generated client successfully calls all routes _(deferred to ROADMAP)_
-- [x] Manual: `pnpm scaffold:module test-module` → produces correct files → type-checks
 
 ---
 
@@ -2890,25 +2016,13 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Caching Layer:**
 
-- [x] Service: distributed cache provider (Redis) — `RedisCacheProvider` with ioredis, tag-based invalidation
-- [x] Config: `CACHE_PROVIDER=local|redis` env var — factory selects provider at startup
-- [x] Service: cache-aside pattern for hot data (user profiles via `cacheAside()` helper)
-- [x] Service: cache invalidation strategy — TTL + tag-based invalidation on writes
 - [ ] Service: session store in Redis (optional, for horizontal scaling) — deferred (JWT-based, no server sessions)
 
 **Database Read Replicas:**
 
-- [x] Config: `DATABASE_READ_REPLICA_URL` env var + `readReplicaConnectionString` in PostgresConfig
-- [x] Service: `ReadReplicaClient` — writes to primary, reads to replica (falls back to primary when no replica)
-- [x] Service: replication lag awareness — critical reads (post-write) go to primary
-- [x] Service: connection pool management for primary + replica (maxConnections pass-through)
-
 **Horizontal Scaling:**
 
-- [x] Infra: stateless server design verification — JWT auth, DB-backed sessions, no in-process state
 - [ ] Infra: shared job queue — Redis-backed queue for multi-instance job processing — deferred (MemoryQueueStore sufficient)
-- [x] Infra: WebSocket scaling — PostgresPubSub wired to SubscriptionManager for cross-instance messaging
-- [x] Docs: horizontal scaling guide — `docs/dev/horizontal-scaling.md`
 
 **CDN & Asset Optimization:**
 
@@ -2919,10 +2033,6 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Tests:**
 
-- [x] Unit: Redis provider tests (57 tests) — get/set/has/delete, bulk ops, tags, stats, lifecycle
-- [x] Unit: factory tests (10 tests) — provider selection, env config, options passthrough
-- [x] Unit: cache-aside tests (5 tests) — miss/hit/TTL/tags/undefined handling
-- [x] Unit: read-replica tests (12 tests) — no replica/empty/with replica/URL verification + readClient routing + markWrite grace period
 - [ ] Integration: cache hit/miss/invalidation lifecycle
 - [ ] Integration: read replica routing — write → primary, read → replica
 - [ ] Load test: multi-instance deployment handles 500+ concurrent users
@@ -2935,24 +2045,8 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 > **Existing:** `UndoRedoStack.ts` (38 tests), `undoRedoStore`, `useUndoRedoShortcuts` hook.
 > **Gap:** Not wired to actual data operations or visible in the UI.
 
-- [x] Hook: `useUndoableMutation` — wraps `useMutation` to auto-push transactions to undo stack
-- [x] Hook: `useUndoRedoController` — integrates store + keyboard shortcuts + toast notifications
-- [x] UI: `UndoRedoToolbar` component — undo/redo buttons with keyboard shortcut hints
-- [x] UI: Toast action support — toasts can include action buttons (e.g., "Redo")
-- [x] UI: keyboard shortcuts (Ctrl+Z / Ctrl+Shift+Z) wired to undo/redo stack via controller
-- [x] UI: undo/redo buttons in app top bar (disabled when stack empty)
-- [x] UI: toast notification on undo — "Action undone" with "Redo" action button
-- [x] Service: bind undo/redo stack to write operations (record create/update/delete → push to stack)
-- [x] UI: undo history panel (optional) — list of recent operations with undo/redo actions
-
 **Tests:**
 
-- [x] Unit: `useUndoableMutation` — transaction push, set operations, snapshot capture (6 tests)
-- [x] Unit: `useUndoRedoController` — undo/redo with toasts, handler apply, counts (8 tests)
-- [x] Unit: `UndoRedoToolbar` — button states, click handlers, accessibility (7 tests)
-- [x] Unit: `UndoHistoryPanel` — empty state, entries, multi-field labels, undo-to-here, ordering (7 tests)
-- [x] Unit: `useUndoHandler` — handler stability, set operations, multi-ops, non-set ignored (5 tests)
-- [x] Unit: Toast action — render action button, click handler, absence when undefined (3 tests)
 - [ ] Integration: create record → undo → record removed → redo → record restored
 - [ ] E2E: perform action → Ctrl+Z → action reversed → Ctrl+Shift+Z → action restored
 
@@ -2966,14 +2060,11 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 **Configuration:**
 
 - [ ] Config: Storybook 8+ setup — `main.ts`, `preview.ts`, Vite builder
-- [x] Config: theme integration — wrap stories in `ThemeProvider`, support light/dark mode toggle
 - [ ] Config: viewport presets — mobile, tablet, desktop
 - [ ] Config: accessibility addon — a11y checks in every story
 
 **Stories:**
 
-- [x] Stories: elements — Button, Input, Text, Heading, Badge, Alert, Spinner, Checkbox, Switch, Table, Progress
-- [x] Stories: components — Card, Dialog, Dropdown, Select, Tabs, Toast, Popover, FormField, Accordion, Pagination
 - [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel, SidePeek
 - [ ] Stories: patterns — forms, navigation, data tables, loading states, error states, empty states
 - [ ] Stories: billing — PlanCard, PricingTable, InvoiceRow, SubscriptionStatus
@@ -3090,3 +2181,12 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - If you touch auth/session/billing flows, add at least one test that asserts the failure mode you're most worried about.
 - For file placement rules during execution, follow `docs/todo/EXECUTION.md` (Hybrid Hexagonal standard).
 - For DRY cross-package audit plan (server/_ ↔ server/_), see `docs/todo/TODO-dag.md`.
+
+### Library-Style Facade Refactor (Incremental, No Big-Bang)
+
+- [ ] Pattern: expose domain-level facades (for example `auth.signUp`) and keep route handlers thin.
+- [ ] Rule: migrate one flow at a time (`signUp` -> `signIn` -> `refresh` -> etc), preserving behavior first.
+- [ ] Rule: orchestration lives in service layer; crypto/token/db internals stay behind the facade boundary.
+- [ ] Guardrail: block deep imports to internals from app layers; consume package/domain entrypoints only.
+- [ ] Test policy: for each migrated flow, keep/add one success-path integration test and one critical failure-mode test.
+- [ ] Cleanup policy: after each migrated flow is stable, delete dead wrappers/duplicate tests in the same PR.

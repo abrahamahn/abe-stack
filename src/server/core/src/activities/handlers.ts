@@ -63,6 +63,15 @@ function asAppContext(ctx: HandlerContext): ActivityAppContext {
  * @complexity O(1)
  */
 function toActivityResponse(activity: DbActivity): ActivityResponse {
+  const rawCreatedAt = activity.createdAt as unknown;
+  const createdAt =
+    rawCreatedAt instanceof Date
+      ? rawCreatedAt
+      : typeof rawCreatedAt === 'string'
+        ? new Date(rawCreatedAt)
+        : new Date(0);
+  const safeCreatedAt = Number.isNaN(createdAt.getTime()) ? new Date(0) : createdAt;
+
   return {
     id: activity.id,
     tenantId: activity.tenantId,
@@ -74,7 +83,7 @@ function toActivityResponse(activity: DbActivity): ActivityResponse {
     description: activity.description,
     metadata: activity.metadata,
     ipAddress: activity.ipAddress,
-    createdAt: activity.createdAt.toISOString(),
+    createdAt: safeCreatedAt.toISOString(),
   };
 }
 

@@ -136,8 +136,8 @@ vi.mock('@abe-stack/shared', () => ({
   },
 }));
 
-// Mock @abe-stack/client-engine
-vi.mock('@abe-stack/client-engine', () => ({
+// Mock @abe-stack/api
+vi.mock('@abe-stack/api', () => ({
   useAdminPlans: () => ({
     plans: [],
     isLoading: false,

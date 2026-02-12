@@ -97,6 +97,18 @@ describe('GettingStartedChecklist', () => {
   });
 
   describe('Checklist Item Completion', () => {
+    it('should handle missing firstName/lastName without crashing', () => {
+      const malformedUser: User = {
+        ...mockUser,
+        firstName: undefined as unknown as string,
+        lastName: undefined as unknown as string,
+      };
+      const environment = createMockEnvironment({ user: malformedUser });
+
+      expect(() => renderWithProviders(<GettingStartedChecklist />, { environment })).not.toThrow();
+      expect(screen.getByText('Complete your profile')).toBeInTheDocument();
+    });
+
     it('should mark "Complete your profile" as done when user has first and last name', () => {
       const completeProfileUser: User = {
         ...mockUser,

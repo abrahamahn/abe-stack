@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import { createAdminApiClient } from '../../admin/services/adminApi';
@@ -71,7 +72,7 @@ export function useWorkspaceFeatureOverrides(
     queryFn: async (): Promise<FlagWithOverride[]> => {
       const client = createAdminApiClient({
         baseUrl: config.apiUrl,
-        getToken: (): string | null => localStorage.getItem('accessToken'),
+        getToken: (): string | null => tokenStore.get(),
       });
 
       // Fetch both flags and overrides in parallel
@@ -80,7 +81,7 @@ export function useWorkspaceFeatureOverrides(
         fetch(`${config.apiUrl}/api/admin/tenants/${tenantId}/feature-overrides`, {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('accessToken') ?? ''}`,
+            Authorization: `Bearer ${tokenStore.get() ?? ''}`,
           },
         }).then((res) => res.json() as Promise<TenantOverridesResponse>),
       ]);
@@ -162,7 +163,7 @@ export function useSetFeatureOverride(
       key: string;
       state: 'inherit' | 'on' | 'off';
     }): Promise<TenantOverride> => {
-      const token = localStorage.getItem('accessToken') ?? '';
+      const token = tokenStore.get() ?? '';
 
       // If state is 'inherit', delete the override
       if (state === 'inherit') {

@@ -1,6 +1,7 @@
 // src/apps/web/src/app/layouts/AppTopLayout.tsx
 import { toastStore } from '@abe-stack/react';
 import { useSidePeek, type AuthMode } from '@abe-stack/react/hooks';
+import { tokenStore } from '@abe-stack/shared';
 import { Button, Heading, ResizablePanel, Skeleton, Text } from '@abe-stack/ui';
 import { TenantSwitcher } from '@features/workspace/components';
 
@@ -20,8 +21,14 @@ export interface AppTopLayoutProps {
   isAuthLoading: boolean;
   /** Whether the user is authenticated */
   isAuthenticated: boolean;
-  /** Current user info (email for display) */
-  user: { email?: string } | null;
+  /** Current user info (identifier for display) */
+  user: {
+    email?: string;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    id?: string;
+  } | null;
   /** Logout handler */
   onLogout: () => Promise<void>;
   /** Open auth modal in login or register mode */
@@ -47,6 +54,47 @@ export const AppTopLayout = ({
   onOpenAuthModal,
 }: AppTopLayoutProps): ReactElement => {
   const { toggle, isOpen } = useSidePeek();
+
+  const getEmailFromToken = (): string | null => {
+    const token = tokenStore.get();
+    if (typeof token !== 'string' || token.length === 0) {
+      return null;
+    }
+
+    const parts = token.split('.');
+    const payloadPart = parts[1];
+    if (payloadPart === undefined || payloadPart.length === 0) {
+      return null;
+    }
+
+    try {
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      if (typeof atob !== 'function') {
+        return null;
+      }
+      const decoded = atob(base64);
+      const payload = JSON.parse(decoded) as { email?: unknown };
+      return typeof payload.email === 'string' && payload.email.trim().length > 0
+        ? payload.email
+        : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const tokenEmail = getEmailFromToken();
+  const userIdentifierCandidates = [
+    user?.email,
+    tokenEmail,
+    user?.username,
+    user?.firstName,
+    user?.id,
+  ];
+
+  const userIdentifier =
+    userIdentifierCandidates.find(
+      (value): value is string => typeof value === 'string' && value.trim().length > 0,
+    ) ?? 'Account';
 
   return (
     <ResizablePanel
@@ -96,7 +144,7 @@ export const AppTopLayout = ({
             <>
               <TenantSwitcher className="hide-mobile" />
               <Text size="sm" tone="muted" className="hide-mobile">
-                {user?.email}
+                {userIdentifier}
               </Text>
               <Button
                 variant="text"

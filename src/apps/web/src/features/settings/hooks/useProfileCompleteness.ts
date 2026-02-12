@@ -6,7 +6,7 @@
  */
 
 import { useQuery, useQueryCache } from '@abe-stack/react';
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { tokenStore, MS_PER_MINUTE } from '@abe-stack/shared';
 
 import { createSettingsApi } from '../api';
 
@@ -23,7 +23,7 @@ const apiBaseUrl =
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return settingsApi;
 }

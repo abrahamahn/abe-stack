@@ -1,4 +1,4 @@
-// src/client/engine/src/query/useQuery.test.tsx
+// src/client/react/src/query/useQuery.test.tsx
 /**
  * useQuery Hook Tests
  *
@@ -18,10 +18,11 @@
  * @vitest-environment jsdom
  */
 
+import { QueryCache } from '@abe-stack/client-engine';
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { QueryCache } from './QueryCache';
+
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useQuery } from './useQuery';
 

@@ -1,4 +1,4 @@
-// src/client/engine/src/query/useMutation.test.tsx
+// src/client/react/src/query/useMutation.test.tsx
 /**
  * Unit tests for useMutation hook.
  *
@@ -8,10 +8,11 @@
  * @vitest-environment jsdom
  */
 
+import { QueryCache } from '@abe-stack/client-engine';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { QueryCache } from './QueryCache';
+
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useMutation } from './useMutation';
 

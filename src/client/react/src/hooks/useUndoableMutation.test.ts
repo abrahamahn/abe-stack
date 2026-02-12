@@ -28,7 +28,7 @@ interface MockMutationOptions {
   onSuccess?: (d: unknown, v: unknown, c: unknown) => void;
 }
 
-vi.mock('@abe-stack/client-engine', async () => {
+vi.mock('../query/useMutation', async () => {
   const react = await import('react');
   return {
     useMutation: (options: MockMutationOptions) => {
@@ -70,9 +70,12 @@ vi.mock('@abe-stack/client-engine', async () => {
         variables: undefined,
       };
     },
-    useQueryCache: () => ({ invalidateQuery: vi.fn() }),
   };
 });
+
+vi.mock('../query/QueryCacheProvider', () => ({
+  useQueryCache: () => ({ invalidateQuery: vi.fn() }),
+}));
 
 vi.mock('../stores/undoRedoStore', () => ({
   useUndoRedoStore: () => mockStore.getState(),

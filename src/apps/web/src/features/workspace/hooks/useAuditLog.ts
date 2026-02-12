@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import type { UseQueryResult } from '@abe-stack/react';
@@ -44,7 +45,7 @@ export function useAuditLog(tenantId: string): UseAuditLogResult {
   const queryResult: UseQueryResult<AuditEventsResponse> = useQuery<AuditEventsResponse>({
     queryKey: ['workspaceAuditLog', tenantId],
     queryFn: async (): Promise<AuditEventsResponse> => {
-      const token = localStorage.getItem('accessToken') ?? '';
+      const token = tokenStore.get() ?? '';
 
       const response = await fetch(`${config.apiUrl}/api/tenants/${tenantId}/audit-events`, {
         headers: {

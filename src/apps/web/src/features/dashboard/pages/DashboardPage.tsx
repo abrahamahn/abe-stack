@@ -5,11 +5,16 @@ import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
 import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
+
 import type { JSX } from 'react';
 
 export const DashboardPage = (): JSX.Element => {
   const { user, logout } = useAuth();
   const navigate: NavigateFunction = useNavigate();
+  const firstName = user?.firstName ?? '';
+  const lastName = user?.lastName ?? '';
+  const hasName = firstName.length > 0 || lastName.length > 0;
+  const displayName = `${firstName} ${lastName}`.trim();
 
   const handleLogout = async (): Promise<void> => {
     await logout();
@@ -43,10 +48,7 @@ export const DashboardPage = (): JSX.Element => {
               <strong>Email:</strong> {user?.email}
             </Text>
             <Text>
-              <strong>Name:</strong>{' '}
-              {user !== null && (user.firstName.length > 0 || user.lastName.length > 0)
-                ? `${user.firstName} ${user.lastName}`.trim()
-                : 'Not provided'}
+              <strong>Name:</strong> {hasName ? displayName : 'Not provided'}
             </Text>
             <Text>
               <strong>User ID:</strong> {user?.id}

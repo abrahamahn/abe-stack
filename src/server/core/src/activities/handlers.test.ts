@@ -126,6 +126,42 @@ describe('handleListActivities', () => {
     expect(body.activities.at(0)?.createdAt).toBe('2026-02-10T12:00:00.000Z');
   });
 
+  it('should handle string createdAt values from repository rows', async () => {
+    const activity = createMockActivity({
+      createdAt: '2026-02-10T12:00:00.000Z' as unknown as Date,
+    });
+    vi.mocked(ctx.repos.activities.findByActorId).mockResolvedValue([activity]);
+
+    const request = createMockRequest({ user: { userId: 'user-1' } });
+    const result = await handleListActivities(
+      ctx as unknown as HandlerContext,
+      null,
+      request,
+      mockReply,
+    );
+
+    const body = result.body as { activities: Array<{ createdAt: string }> };
+    expect(body.activities.at(0)?.createdAt).toBe('2026-02-10T12:00:00.000Z');
+  });
+
+  it('should fall back when createdAt is invalid', async () => {
+    const activity = createMockActivity({
+      createdAt: 'not-a-date' as unknown as Date,
+    });
+    vi.mocked(ctx.repos.activities.findByActorId).mockResolvedValue([activity]);
+
+    const request = createMockRequest({ user: { userId: 'user-1' } });
+    const result = await handleListActivities(
+      ctx as unknown as HandlerContext,
+      null,
+      request,
+      mockReply,
+    );
+
+    const body = result.body as { activities: Array<{ createdAt: string }> };
+    expect(body.activities.at(0)?.createdAt).toBe('1970-01-01T00:00:00.000Z');
+  });
+
   it('should use default limit=50 when no query param', async () => {
     vi.mocked(ctx.repos.activities.findByActorId).mockResolvedValue([]);
 

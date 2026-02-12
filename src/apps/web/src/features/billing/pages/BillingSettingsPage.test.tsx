@@ -16,8 +16,8 @@ vi.mock('@abe-stack/react/router', async (importOriginal) => {
   };
 });
 
-// Mock @abe-stack/client-engine hooks
-vi.mock('@abe-stack/client-engine', () => ({
+// Mock @abe-stack/api hooks
+vi.mock('@abe-stack/api', () => ({
   useSubscription: vi.fn(() => ({
     subscription: null,
     isLoading: false,

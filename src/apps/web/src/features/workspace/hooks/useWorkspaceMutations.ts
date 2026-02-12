@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryCache } from '@abe-stack/react';
 import { useUndoableMutation } from '@abe-stack/react/hooks';
+import { tokenStore } from '@abe-stack/shared';
 import { useRef } from 'react';
 
 import { createWorkspaceApi } from '../api';
@@ -24,7 +25,7 @@ const apiBaseUrl =
 function getWorkspaceApi(): ReturnType<typeof createWorkspaceApi> {
   workspaceApi ??= createWorkspaceApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return workspaceApi;
 }

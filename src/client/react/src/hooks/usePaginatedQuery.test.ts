@@ -1,9 +1,11 @@
 // src/client/react/src/hooks/usePaginatedQuery.test.ts
 /** @vitest-environment jsdom */
-import { QueryCache, QueryCacheProvider } from '@abe-stack/client-engine';
+import { QueryCache } from '@abe-stack/client-engine';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import react from 'react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { QueryCacheProvider } from '../query/QueryCacheProvider';
 
 import { useOffsetPaginatedQuery, usePaginatedQuery } from './usePaginatedQuery';
 

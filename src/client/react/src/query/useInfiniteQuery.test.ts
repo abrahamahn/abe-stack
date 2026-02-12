@@ -1,11 +1,12 @@
-// src/client/engine/src/query/useInfiniteQuery.test.ts
+// src/client/react/src/query/useInfiniteQuery.test.ts
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { QueryCache } from '@abe-stack/client-engine';
 import { renderHook, waitFor, act, cleanup } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 
-import { QueryCache } from './QueryCache';
+
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useInfiniteQuery, type InfiniteData } from './useInfiniteQuery';
 

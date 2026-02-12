@@ -6,7 +6,7 @@
  * and copy-once secret display.
  */
 
-import { useRotateWebhookSecret, useWebhook } from '@abe-stack/api';
+import { useRotateWebhookSecret, useWebhook } from '@abe-stack/react';
 import {
   Alert,
   Badge,

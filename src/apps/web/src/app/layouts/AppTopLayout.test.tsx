@@ -6,10 +6,23 @@ import { AppTopLayout } from './AppTopLayout';
 
 const mockToggle = vi.fn();
 const mockSidePeekOpen = vi.hoisted(() => ({ current: false }));
+const mockTokenStoreGet = vi.hoisted(() => vi.fn<() => string | null>(() => null));
 
 vi.mock('@abe-stack/react/hooks', () => ({
   useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
 }));
+
+vi.mock('@abe-stack/shared', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
+  return {
+    ...actual,
+    tokenStore: {
+      get: mockTokenStoreGet,
+      set: vi.fn(),
+      clear: vi.fn(),
+    },
+  };
+});
 
 vi.mock('@features/workspace/components', () => ({
   TenantSwitcher: ({ className }: { className?: string }) => (
@@ -21,6 +34,7 @@ describe('AppTopLayout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSidePeekOpen.current = false;
+    mockTokenStoreGet.mockReturnValue(null);
   });
 
   it('renders static app title', () => {
@@ -104,5 +118,41 @@ describe('AppTopLayout', () => {
 
     expect(mockToggle).toHaveBeenCalledWith('/side-peek-ui-library');
     expect(onLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to username when email is missing', () => {
+    render(
+      <AppTopLayout
+        size={6}
+        visible
+        onResize={vi.fn()}
+        isAuthLoading={false}
+        isAuthenticated
+        user={{ username: 'admin-user' }}
+        onLogout={vi.fn()}
+        onOpenAuthModal={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('admin-user')).toBeInTheDocument();
+  });
+
+  it('does not crash when tokenStore returns undefined', () => {
+    mockTokenStoreGet.mockReturnValue(undefined as unknown as string | null);
+
+    expect(() =>
+      render(
+        <AppTopLayout
+          size={6}
+          visible
+          onResize={vi.fn()}
+          isAuthLoading={false}
+          isAuthenticated
+          user={{ username: 'admin-user' }}
+          onLogout={vi.fn()}
+          onOpenAuthModal={vi.fn()}
+        />,
+      ),
+    ).not.toThrow();
   });
 });

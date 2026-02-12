@@ -6,6 +6,7 @@
  * This is the handler that AppUndoRedo passes to useUndoRedoController.
  */
 
+import { tokenStore } from '@abe-stack/shared';
 import { useRef } from 'react';
 
 import { createSettingsApi } from '../api';
@@ -24,7 +25,7 @@ const apiBaseUrl =
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
     baseUrl: apiBaseUrl,
-    getToken: (): string | null => localStorage.getItem('accessToken'),
+    getToken: (): string | null => tokenStore.get(),
   });
   return settingsApi;
 }

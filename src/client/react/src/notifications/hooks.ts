@@ -1,4 +1,4 @@
-// src/client/api/src/notifications/hooks.ts
+// src/client/react/src/notifications/hooks.ts
 /**
  * Push Notification React Hooks
  *
@@ -6,9 +6,8 @@
  * - usePushSubscription: Manage push subscription state
  * - useNotificationPreferences: Manage notification preferences
  * - usePushPermission: Track push permission status
+ * - useTestNotification: Send test notifications
  */
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   createNotificationClient,
@@ -19,9 +18,14 @@ import {
   requestPushPermission,
   subscribeToPush,
   unsubscribeFromPush,
-} from './client';
+} from '@abe-stack/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { NotificationClientConfig } from './client';
+
+import { useMutation } from '../query/useMutation';
+import { useQuery } from '../query/useQuery';
+
+import type { NotificationClientConfig } from '@abe-stack/api';
 import type {
   NotificationPreferences,
   PushSubscription as PushSubscriptionType,
@@ -30,6 +34,14 @@ import type {
 
 /** Polling interval for checking push permission changes (ms) */
 const PERMISSION_POLL_INTERVAL_MS = 1000;
+
+// ============================================================================
+// Query Keys
+// ============================================================================
+
+const notificationQueryKeys = {
+  preferences: () => ['notifications', 'preferences'] as const,
+};
 
 // ============================================================================
 // usePushSubscription
@@ -72,65 +84,32 @@ export interface UsePushSubscriptionOptions {
 /**
  * Hook to manage push notification subscription
  *
- * @param options - Hook options
- * @returns Push subscription state and controls
- *
- * @example
- * ```tsx
- * function NotificationSettings() {
- *   const {
- *     isSupported,
- *     isSubscribed,
- *     isLoading,
- *     subscribe,
- *     unsubscribe,
- *     error,
- *   } = usePushSubscription({
- *     clientConfig: { baseUrl: '/api', getToken: () => token },
- *   });
- *
- *   if (!isSupported) {
- *     return <p>Push notifications not supported</p>;
- *   }
- *
- *   return (
- *     <div>
- *       <button
- *         onClick={isSubscribed ? unsubscribe : subscribe}
- *         disabled={isLoading}
- *       >
- *         {isSubscribed ? 'Disable' : 'Enable'} Push Notifications
- *       </button>
- *       {error && <p className="error">{error.message}</p>}
- *     </div>
- *   );
- * }
- * ```
+ * Browser subscription state is managed with useState since it's a local browser
+ * API, not an HTTP query. Subscribe/unsubscribe use useMutation for the HTTP calls.
  */
 export function usePushSubscription(options: UsePushSubscriptionOptions): PushSubscriptionState {
   const { clientConfig, autoCheck = true } = options;
 
-  const [isLoading, setIsLoading] = useState(true);
+  const client = useMemo(() => createNotificationClient(clientConfig), [clientConfig]);
+  const isSupported = useMemo(() => isPushSupported(), []);
+
+  // Browser subscription state (not cacheable via useQuery since it's a browser API)
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscriptionType | null>(null);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [checkLoading, setCheckLoading] = useState(true);
+  const [checkError, setCheckError] = useState<Error | null>(null);
 
-  const isSupported = useMemo(() => isPushSupported(), []);
-  const client = useMemo(() => createNotificationClient(clientConfig), [clientConfig]);
-
-  /**
-   * Check current subscription status
-   */
+  // Check subscription on mount (browser API, not HTTP)
   const checkSubscription = useCallback(async (): Promise<void> => {
     if (!isSupported) {
-      setIsLoading(false);
+      setCheckLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
-      setError(null);
+      setCheckLoading(true);
+      setCheckError(null);
 
       const existing = await getExistingSubscription();
       if (existing !== null) {
@@ -149,29 +128,28 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
         setIsSubscribed(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to check subscription'));
+      setCheckError(err instanceof Error ? err : new Error('Failed to check subscription'));
     } finally {
-      setIsLoading(false);
+      setCheckLoading(false);
     }
   }, [isSupported]);
 
-  /**
-   * Subscribe to push notifications
-   */
-  const subscribe = useCallback(async (): Promise<void> => {
-    if (!isSupported) {
-      setError(new Error('Push notifications not supported'));
-      return;
+  // Auto-check on mount
+  useEffect(() => {
+    if (autoCheck) {
+      void checkSubscription();
     }
+  }, [autoCheck, checkSubscription]);
 
-    try {
-      setIsLoading(true);
-      setError(null);
+  const subscribeMutation = useMutation<
+    { subscriptionData: PushSubscriptionType; subscriptionId: string }
+  >({
+    mutationFn: async () => {
+      if (!isSupported) {
+        throw new Error('Push notifications not supported');
+      }
 
-      // Get VAPID key from server
       const { publicKey } = await client.getVapidKey();
-
-      // Subscribe in browser
       const browserSub = await subscribeToPush(publicKey);
       const json = browserSub.toJSON();
 
@@ -184,69 +162,55 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
         },
       };
 
-      // Register with server
       const response = await client.subscribe({
         subscription: subscriptionData,
         deviceId: getDeviceId(),
         userAgent: navigator.userAgent,
       });
 
-      setSubscription(subscriptionData);
-      setSubscriptionId(response.subscriptionId);
+      return { subscriptionData, subscriptionId: response.subscriptionId };
+    },
+    onSuccess: (result) => {
+      setSubscription(result.subscriptionData);
+      setSubscriptionId(result.subscriptionId);
       setIsSubscribed(true);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to subscribe'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isSupported, client]);
+    },
+  });
 
-  /**
-   * Unsubscribe from push notifications
-   */
-  const unsubscribe = useCallback(async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Unsubscribe from browser
+  const unsubscribeMutation = useMutation<undefined>({
+    mutationFn: async () => {
       await unsubscribeFromPush();
 
-      // Unsubscribe from server
       if (subscriptionId !== null && subscriptionId !== '') {
         await client.unsubscribe({ subscriptionId });
       } else if (subscription !== null && subscription.endpoint !== '') {
         await client.unsubscribe({ endpoint: subscription.endpoint });
       }
-
+    },
+    onSuccess: () => {
       setSubscription(null);
       setSubscriptionId(null);
       setIsSubscribed(false);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to unsubscribe'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client, subscriptionId, subscription?.endpoint]);
+    },
+  });
 
-  // Auto-check on mount
-  useEffect(() => {
-    if (autoCheck) {
-      void checkSubscription();
-    }
-  }, [autoCheck, checkSubscription]);
+  const handleSubscribe = useCallback(async (): Promise<void> => {
+    await subscribeMutation.mutateAsync(undefined);
+  }, [subscribeMutation.mutateAsync]);
+
+  const handleUnsubscribe = useCallback(async (): Promise<void> => {
+    await unsubscribeMutation.mutateAsync(undefined);
+  }, [unsubscribeMutation.mutateAsync]);
 
   return {
     isSupported,
-    isLoading,
+    isLoading: checkLoading || subscribeMutation.isPending || unsubscribeMutation.isPending,
     isSubscribed,
     subscription,
     subscriptionId,
-    error,
-    subscribe,
-    unsubscribe,
+    error: checkError ?? subscribeMutation.error ?? unsubscribeMutation.error ?? null,
+    subscribe: handleSubscribe,
+    unsubscribe: handleUnsubscribe,
     refresh: checkSubscription,
   };
 }
@@ -285,108 +249,43 @@ export interface UseNotificationPreferencesOptions {
 
 /**
  * Hook to manage notification preferences
- *
- * @param options - Hook options
- * @returns Preferences state and controls
- *
- * @example
- * ```tsx
- * function PreferencesForm() {
- *   const {
- *     preferences,
- *     isLoading,
- *     isSaving,
- *     updatePreferences,
- *     error,
- *   } = useNotificationPreferences({
- *     clientConfig: { baseUrl: '/api', getToken: () => token },
- *   });
- *
- *   if (isLoading) return <Spinner />;
- *
- *   return (
- *     <form>
- *       <label>
- *         <input
- *           type="checkbox"
- *           checked={preferences?.globalEnabled ?? false}
- *           onChange={(e) => updatePreferences({
- *             globalEnabled: e.target.checked,
- *           })}
- *           disabled={isSaving}
- *         />
- *         Enable Notifications
- *       </label>
- *       {error && <p className="error">{error.message}</p>}
- *     </form>
- *   );
- * }
- * ```
  */
 export function useNotificationPreferences(
   options: UseNotificationPreferencesOptions,
 ): NotificationPreferencesState {
   const { clientConfig, autoFetch = true } = options;
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createNotificationClient(clientConfig), [clientConfig]);
 
-  /**
-   * Fetch preferences from server
-   */
-  const fetchPreferences = useCallback(async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: notificationQueryKeys.preferences(),
+    queryFn: () => client.getPreferences(),
+    enabled: autoFetch,
+  });
 
-      const response = await client.getPreferences();
-      setPreferences(response.preferences);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch preferences'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client]);
+  const updateMutation = useMutation({
+    mutationFn: (updates: UpdatePreferencesRequest) => client.updatePreferences(updates),
+    invalidateOnSuccess: [notificationQueryKeys.preferences()],
+  });
 
-  /**
-   * Update preferences
-   */
-  const updatePreferences = useCallback(
+  const handleUpdate = useCallback(
     async (updates: UpdatePreferencesRequest): Promise<void> => {
-      try {
-        setIsSaving(true);
-        setError(null);
-
-        const response = await client.updatePreferences(updates);
-        setPreferences(response.preferences);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to update preferences'));
-        throw err;
-      } finally {
-        setIsSaving(false);
-      }
+      await updateMutation.mutateAsync(updates);
     },
-    [client],
+    [updateMutation.mutateAsync],
   );
 
-  // Auto-fetch on mount
-  useEffect(() => {
-    if (autoFetch) {
-      void fetchPreferences();
-    }
-  }, [autoFetch, fetchPreferences]);
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query.refetch]);
 
   return {
-    isLoading,
-    isSaving,
-    preferences,
-    error,
-    updatePreferences,
-    refresh: fetchPreferences,
+    isLoading: query.isLoading,
+    isSaving: updateMutation.isPending,
+    preferences: query.data?.preferences ?? null,
+    error: query.error ?? updateMutation.error ?? null,
+    updatePreferences: handleUpdate,
+    refresh: handleRefresh,
   };
 }
 
@@ -413,26 +312,7 @@ export interface PushPermissionState {
 /**
  * Hook to track push notification permission status
  *
- * @returns Permission state and request function
- *
- * @example
- * ```tsx
- * function PermissionBanner() {
- *   const { isSupported, isGranted, isDenied, requestPermission } = usePushPermission();
- *
- *   if (!isSupported || isGranted) return null;
- *
- *   if (isDenied) {
- *     return <p>Notifications blocked. Enable in browser settings.</p>;
- *   }
- *
- *   return (
- *     <button onClick={requestPermission}>
- *       Enable notifications
- *     </button>
- *   );
- * }
- * ```
+ * Browser-only hook, no HTTP calls. Uses useState for browser permission state.
  */
 export function usePushPermission(): PushPermissionState {
   const [permission, setPermission] = useState<NotificationPermission>(() => getPushPermission());
@@ -491,59 +371,34 @@ export interface TestNotificationState {
 
 /**
  * Hook to send test notifications
- *
- * @param clientConfig - API client configuration
- * @returns Test notification state and send function
- *
- * @example
- * ```tsx
- * function TestButton() {
- *   const { isSending, lastResult, sendTest } = useTestNotification({
- *     baseUrl: '/api',
- *     getToken: () => token,
- *   });
- *
- *   return (
- *     <button onClick={sendTest} disabled={isSending}>
- *       {isSending ? 'Sending...' : 'Send Test'}
- *     </button>
- *   );
- * }
- * ```
  */
 export function useTestNotification(clientConfig: NotificationClientConfig): TestNotificationState {
-  const [isSending, setIsSending] = useState(false);
-  const [lastResult, setLastResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createNotificationClient(clientConfig), [clientConfig]);
 
-  const sendTest = useCallback(async (): Promise<void> => {
-    try {
-      setIsSending(true);
-      setError(null);
-      setLastResult(null);
+  const mutation = useMutation({
+    mutationFn: () => client.testNotification(),
+  });
 
-      const response = await client.testNotification();
-      setLastResult({
-        success: response.result.successful > 0,
+  const lastResult = mutation.isSuccess
+    ? {
+        success: (mutation.data?.result.successful ?? 0) > 0,
         message:
-          response.result.successful > 0
+          (mutation.data?.result.successful ?? 0) > 0
             ? 'Test notification sent!'
             : 'No active subscriptions found',
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to send test'));
-      setLastResult({ success: false, message: 'Failed to send test notification' });
-    } finally {
-      setIsSending(false);
-    }
-  }, [client]);
+      }
+    : mutation.isError
+      ? { success: false, message: 'Failed to send test notification' }
+      : null;
+
+  const handleSendTest = useCallback(async (): Promise<void> => {
+    await mutation.mutateAsync(undefined);
+  }, [mutation.mutateAsync]);
 
   return {
-    isSending,
+    isSending: mutation.isPending,
     lastResult,
-    error,
-    sendTest,
+    error: mutation.error ?? null,
+    sendTest: handleSendTest,
   };
 }

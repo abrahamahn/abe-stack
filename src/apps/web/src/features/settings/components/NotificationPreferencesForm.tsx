@@ -6,7 +6,8 @@
  * global enable/disable, per-type toggles, and quiet hours.
  */
 
-import { useNotificationPreferences } from '@abe-stack/api';
+import { useNotificationPreferences } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } from '@abe-stack/ui';
 import { useMemo, useState } from 'react';
 
@@ -56,7 +57,7 @@ export function NotificationPreferencesForm({
   const clientConfig: NotificationClientConfig = useMemo(
     () => ({
       baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
+      getToken: (): string | null => tokenStore.get(),
     }),
     [apiBaseUrl],
   );

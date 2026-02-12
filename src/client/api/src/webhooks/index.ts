@@ -15,21 +15,3 @@ export type {
   WebhookResponse,
   WebhookWithDeliveries,
 } from './client';
-
-export {
-  useCreateWebhook,
-  useDeleteWebhook,
-  useRotateWebhookSecret,
-  useUpdateWebhook,
-  useWebhook,
-  useWebhooks,
-  webhookQueryKeys,
-} from './hooks';
-export type {
-  CreateWebhookState,
-  DeleteWebhookState,
-  RotateWebhookSecretState,
-  UpdateWebhookState,
-  WebhookDetailState,
-  WebhooksState,
-} from './hooks';

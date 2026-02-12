@@ -5,7 +5,7 @@
  * API functions for user profile and settings operations.
  */
 
-import { createApiError, NetworkError } from '@abe-stack/client-engine';
+import { createApiError, NetworkError } from '@abe-stack/api';
 import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 import type {

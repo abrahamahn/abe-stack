@@ -112,6 +112,18 @@ describe('DashboardPage', () => {
 
       expect(screen.getByText(/Test User/)).toBeInTheDocument();
     });
+
+    it('should fall back to Not provided when user first/last names are missing', () => {
+      renderDashboardPage({
+        user: {
+          ...mockUser,
+          firstName: undefined as unknown as string,
+          lastName: undefined as unknown as string,
+        },
+      });
+
+      expect(screen.getByText(/Not provided/)).toBeInTheDocument();
+    });
   });
 
   describe('Logout Functionality', () => {

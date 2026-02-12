@@ -5,13 +5,12 @@
  * Displays linked OAuth providers and allows connecting/disconnecting.
  */
 
-import {
-  useEnabledOAuthProviders,
-  useOAuthConnections,
-  type ApiClientConfig,
-} from '@abe-stack/api';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/react';
+import { tokenStore } from '@abe-stack/shared';
 import { Alert, Button, Card, Skeleton, Text } from '@abe-stack/ui';
 import { useMemo, useState, type ReactElement } from 'react';
+
+import type { ApiClientConfig } from '@abe-stack/api';
 
 // ============================================================================
 // Local Types (for ESLint type resolution)
@@ -56,7 +55,7 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
   const clientConfig = useMemo<ApiClientConfig>(
     () => ({
       baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
+      getToken: (): string | null => tokenStore.get(),
     }),
     [apiBaseUrl],
   );

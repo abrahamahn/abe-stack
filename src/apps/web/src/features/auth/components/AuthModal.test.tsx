@@ -14,9 +14,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from './../../../__tests__/utils';
 import { AuthModal } from './AuthModal';
 
-// Mock SDK hooks - preserve actual exports (QueryCache, QueryCacheProvider) for renderWithProviders
-vi.mock('@abe-stack/client-engine', async () => {
-  const actual = await vi.importActual('@abe-stack/client-engine');
+// Mock API hooks - useEnabledOAuthProviders and getOAuthLoginUrl are in @abe-stack/api
+vi.mock('@abe-stack/api', async () => {
+  const actual = await vi.importActual('@abe-stack/api');
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({

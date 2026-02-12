@@ -157,14 +157,14 @@ Client and server have **zero compile-time imports** between them. They connect 
 
 **Key files:**
 
-| Role | File |
-| --- | --- |
-| Contract definitions | `shared/src/domain/*/` (22 modules) |
-| Constants (API_PREFIX, error codes) | `shared/src/core/constants.ts` |
-| Client HTTP factory | `client/api/src/api/client.ts` |
-| Server route handlers | `server/core/src/{module}/routes.ts` |
-| Client config (base URL) | `apps/web/src/config.ts` |
-| Server bootstrap | `apps/server/src/main.ts` |
+| Role                                | File                                 |
+| ----------------------------------- | ------------------------------------ |
+| Contract definitions                | `shared/src/domain/*/` (22 modules)  |
+| Constants (API_PREFIX, error codes) | `shared/src/core/constants.ts`       |
+| Client HTTP factory                 | `client/api/src/api/client.ts`       |
+| Server route handlers               | `server/core/src/{module}/routes.ts` |
+| Client config (base URL)            | `apps/web/src/config.ts`             |
+| Server bootstrap                    | `apps/server/src/main.ts`            |
 
 **Boundary enforcement verified:** Zero cross-boundary imports exist (no server packages in client apps, no client packages in server app).
 
@@ -172,13 +172,13 @@ Client and server have **zero compile-time imports** between them. They connect 
 
 ## Audit Scopes (5 total)
 
-| #   | Scope                      | Status                                       | Checks |
-| --- | -------------------------- | -------------------------------------------- | ------ |
-| 1   | shared/_ vs shared/_       | **DONE**                                     | —      |
-| 2   | shared/\* vs all consumers | **DONE**                                     | —      |
-| 3   | server/_ vs server/_       | **DONE**                                     | 13     |
+| #   | Scope                      | Status                                        | Checks |
+| --- | -------------------------- | --------------------------------------------- | ------ |
+| 1   | shared/_ vs shared/_       | **DONE**                                      | —      |
+| 2   | shared/\* vs all consumers | **DONE**                                      | —      |
+| 3   | server/_ vs server/_       | **DONE**                                      | 13     |
 | 4   | client/_ vs client/_       | **DONE** (5/7 refactors complete, 2 deferred) | 6      |
-| 5   | apps/_ vs deps + apps/_    | **TODO**                                     | 14     |
+| 5   | apps/_ vs deps + apps/_    | **TODO**                                      | 14     |
 | 6   | client-server boundary     | **DONE** (documented, zero violations)        | —      |
 
 > Cross-boundary (client ↔ server) verified clean — no imports exist.
@@ -370,15 +370,15 @@ No duplicated code between packages. Deep audit revealed **architectural misplac
 
 ### Refactoring Tasks
 
-| #   | Task                                                       | Priority | Status   | Impact                                                                 |
-| --- | ---------------------------------------------------------- | -------- | -------- | ---------------------------------------------------------------------- |
-| R1  | Remove all re-exports from ui                              | HIGH     | **DONE** | Cleaner API surface; consumers import hooks/router from react directly |
-| R2  | Move contrast.ts + density.ts to shared/domain/theme       | HIGH     | **DONE** | Theme tokens centralized in the shared package (avoids cycle)          |
-| F1  | Remove engine→api re-exports (~100 items)                  | HIGH     | **DONE** | Engine only exports its own code; consumers import api directly        |
-| F4  | Delete engine search re-export shims                       | MED      | **DONE** | serialization.ts (100% re-exports) deleted, query-builder cleaned      |
-| F5  | Fix RealtimeContext raw fetch() with auth                  | MED      | **DONE** | Added getToken config; fetch calls now include Authorization header    |
-| F3  | Split client-engine React hooks into react                 | LOW      | TODO     | Large refactor, deferred — document boundary for now                   |
-| F2  | Migrate api domain hooks to useQuery/useMutation           | LOW      | TODO     | Depends on F3; api hooks use raw useState, should use engine's useQuery|
+| #   | Task                                                 | Priority | Status   | Impact                                                                  |
+| --- | ---------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------- |
+| R1  | Remove all re-exports from ui                        | HIGH     | **DONE** | Cleaner API surface; consumers import hooks/router from react directly  |
+| R2  | Move contrast.ts + density.ts to shared/domain/theme | HIGH     | **DONE** | Theme tokens centralized in the shared package (avoids cycle)           |
+| F1  | Remove engine→api re-exports (~100 items)            | HIGH     | **DONE** | Engine only exports its own code; consumers import api directly         |
+| F4  | Delete engine search re-export shims                 | MED      | **DONE** | serialization.ts (100% re-exports) deleted, query-builder cleaned       |
+| F5  | Fix RealtimeContext raw fetch() with auth            | MED      | **DONE** | Added getToken config; fetch calls now include Authorization header     |
+| F3  | Split client-engine React hooks into react           | LOW      | TODO     | Large refactor, deferred — document boundary for now                    |
+| F2  | Migrate api domain hooks to useQuery/useMutation     | LOW      | TODO     | Depends on F3; api hooks use raw useState, should use engine's useQuery |
 
 #### R1: Remove ui re-exports (DONE)
 
@@ -462,17 +462,36 @@ Uses the apps DAG from above. Recap:
 
 Does each app contain logic that should be pushed down into a package?
 
-- [ ] `web` vs `shared` — app-level code that should use shared contracts/utilities?
-- [ ] `web` vs `api` — duplicated API client wrappers? raw fetch() bypassing api client?
-- [ ] `web` vs `client-engine` — duplicated cache/state logic?
-- [ ] `web` vs `react` — duplicated hooks/context?
-- [ ] `web` vs `ui` — duplicated components?
-- [ ] `server` vs `shared` — server-level code that should use shared contracts?
-- [ ] `server` vs `core` — duplicated business logic / route patterns?
-- [ ] `server` vs `server-engine` — duplicated infra adapters?
-- [ ] `desktop` vs `shared` — same concern as web vs shared
-- [ ] `desktop` vs `api` — duplicated API client wrappers?
-- [ ] `desktop` vs `ui` — duplicated components?
+- [x] `web` vs `shared` — **FIXED (2026-02-13)**  
+      Evidence: `0` non-test files now read `localStorage('accessToken')` directly.  
+      Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@abe-stack/shared` across web hooks/components.
+- [x] `web` vs `api` — **ACTION NEEDED**  
+      Evidence: `8` non-test files still use raw `fetch()` and bypass package clients.  
+      Files include ToS accept, consent, data export, impersonation, feature flag, workspace billing/audit/feature-overrides.
+- [x] `web` vs `client-engine` — **CLEAN**  
+      Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.
+- [x] `web` vs `react` — **CLEAN**  
+      Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.
+- [x] `web` vs `ui` — **CLEAN (for now)**  
+      Evidence: heavy reuse (`138` non-test imports from `@abe-stack/ui`); app components appear domain-specific rather than reusable design-system primitives.
+- [x] `server` vs `shared` — **CLEAN**  
+      Evidence: `30` non-test imports from `@abe-stack/shared`; server code consumes shared constants/utilities/contracts rather than duplicating them.
+- [x] `server` vs `core` — **CLEAN**  
+      Evidence: `22` non-test imports from `@abe-stack/core/*`; routes and business modules are wired from core package, not duplicated in app/server.
+- [x] `server` vs `server-engine` — **CLEAN**  
+      Evidence: `13` non-test imports from `@abe-stack/server-engine`; infra adapters/middleware helpers are reused through package boundaries.
+- [x] `desktop` vs `shared` — **CLEAN**  
+      Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`, `waitForPort`, `MS_PER_HOUR`), no duplicated shared utilities found.
+- [x] `desktop` vs `api` — **CLEAN (N/A usage)**  
+      Evidence: `0` non-test imports from `@abe-stack/api` in current desktop code. No duplicated API wrapper code found in app.
+- [x] `desktop` vs `ui` — **CLEAN (N/A usage)**  
+      Evidence: `0` non-test imports from `@abe-stack/ui` in current desktop code. No duplicated UI component implementations found in app.
+
+#### Phase 9 follow-up backlog (from audit)
+
+- [x] `web` token access consolidation: replace direct `localStorage('accessToken')` usage with unified token source (AuthService/tokenStore facade).
+- [ ] `web` raw fetch migration: move remaining 8 fetch-based call sites to `@abe-stack/api` clients/helpers.
+- [ ] `desktop` dependency hygiene: verify whether unused `@abe-stack/api` and `@abe-stack/ui` dependencies should remain declared.
 
 ### Phase 10: apps laterals
 
@@ -513,15 +532,15 @@ Do multiple apps share logic that should be in a package?
 
 ## Grand Summary
 
-| Scope | Description             | Checks | Status                                        |
-| ----- | ----------------------- | ------ | --------------------------------------------- |
-| 1     | shared internal         | —      | **DONE**                                      |
-| 2     | shared vs consumers     | —      | **DONE**                                      |
-| 3     | server/_ vs server/_    | 13     | **DONE**                                      |
-| 4     | client/_ vs client/_    | 6      | **DONE** (5/7 refactors done, 2 deferred)     |
-| 5     | apps/_ vs deps + apps/_ | 14     | TODO                                          |
-| 6     | client-server boundary  | —      | **DONE** (documented, zero violations)         |
-| **∑** |                         | **33** |                                               |
+| Scope | Description             | Checks | Status                                    |
+| ----- | ----------------------- | ------ | ----------------------------------------- |
+| 1     | shared internal         | —      | **DONE**                                  |
+| 2     | shared vs consumers     | —      | **DONE**                                  |
+| 3     | server/_ vs server/_    | 13     | **DONE**                                  |
+| 4     | client/_ vs client/_    | 6      | **DONE** (5/7 refactors done, 2 deferred) |
+| 5     | apps/_ vs deps + apps/_ | 14     | TODO                                      |
+| 6     | client-server boundary  | —      | **DONE** (documented, zero violations)    |
+| **∑** |                         | **33** |                                           |
 
 **Next**: Scope 5 — audit apps against their package dependencies and each other.
 

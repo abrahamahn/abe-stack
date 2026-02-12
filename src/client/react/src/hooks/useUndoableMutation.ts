@@ -1,11 +1,11 @@
 // src/client/react/src/hooks/useUndoableMutation.ts
-import { useMutation } from '@abe-stack/client-engine';
 import { createSetOperation, createTransaction } from '@abe-stack/shared';
 import { useRef } from 'react';
 
+import { useMutation } from '../query/useMutation';
 import { useUndoRedoStore } from '../stores/undoRedoStore';
 
-import type { UseMutationOptions, UseMutationResult } from '@abe-stack/client-engine';
+import type { UseMutationOptions, UseMutationResult } from '../query/useMutation';
 
 /**
  * Options for useUndoableMutation.

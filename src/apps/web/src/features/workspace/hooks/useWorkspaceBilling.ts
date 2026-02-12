@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@abe-stack/react';
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { tokenStore, MS_PER_MINUTE } from '@abe-stack/shared';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import type { UseQueryResult } from '@abe-stack/react';
@@ -74,7 +74,7 @@ export function useWorkspaceBilling(
   } = {
     queryKey: ['workspaceBilling', tenantId],
     queryFn: async (): Promise<SubscriptionResponse> => {
-      const token = localStorage.getItem('accessToken') ?? '';
+      const token = tokenStore.get() ?? '';
 
       const response = await fetch(`${config.apiUrl}/api/billing/subscription`, {
         headers: {

@@ -9,11 +9,10 @@
  */
 
 import { createQueryPersister, type QueryKey, type QueryState } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
-import { LiveRegion, toastStore } from '@abe-stack/react';
-import { ACCESS_TOKEN_COOKIE_NAME, trimTrailingSlashes } from '@abe-stack/shared';
+import { LiveRegion, QueryCacheProvider, toastStore } from '@abe-stack/react';
 import { HistoryProvider, useRouteFocusAnnounce } from '@abe-stack/react/hooks';
 import { BrowserRouter, Route, Routes } from '@abe-stack/react/router';
+import { ACCESS_TOKEN_COOKIE_NAME, trimTrailingSlashes } from '@abe-stack/shared';
 import {
   ErrorBoundary,
   LoadingContainer,
@@ -322,22 +321,6 @@ function useTosAcceptance(environment: ClientEnvironment): {
 }
 
 /**
- * useAuthInitialization - Restores authentication session on app mount
- *
- * Calls auth.initialize() which:
- * - Attempts to restore session from HTTP-only refresh token cookie
- * - Updates auth state if session is valid
- * - Handles session expiration gracefully
- */
-function useAuthInitialization(environment: ClientEnvironment): void {
-  const { auth } = environment;
-
-  useEffect(() => {
-    void auth.initialize();
-  }, [auth]);
-}
-
-/**
  * Root component that sets up all application infrastructure.
  *
  * Provider stack (outer to inner):
@@ -354,9 +337,6 @@ function useAuthInitialization(environment: ClientEnvironment): void {
 export const App = ({ environment }: AppProps): ReactElement => {
   // Start background cache restoration (non-blocking)
   useQueryPersistence(environment);
-
-  // Restore authentication session from cookies
-  useAuthInitialization(environment);
 
   // ToS acceptance modal state
   const {

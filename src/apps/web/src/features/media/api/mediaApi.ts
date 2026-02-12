@@ -5,7 +5,7 @@
  * API client for media upload, retrieval, and management operations.
  */
 
-import { createApiError, NetworkError } from '@abe-stack/client-engine';
+import { createApiError, NetworkError } from '@abe-stack/api';
 import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 
 // ============================================================================

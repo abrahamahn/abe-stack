@@ -45,25 +45,8 @@ export type {
 // Billing
 export { createBillingClient } from './billing/client';
 export type { BillingClient, BillingClientConfig } from './billing/client';
-export {
-  billingQueryKeys,
-  useInvoices,
-  usePaymentMethods,
-  usePlans,
-  useSubscription,
-} from './billing/hooks';
-export type {
-  InvoicesState,
-  PaymentMethodsState,
-  PlansState,
-  SubscriptionState,
-} from './billing/hooks';
-export { createAdminBillingClient, useAdminPlans } from './billing/admin';
-export type {
-  AdminBillingClient,
-  AdminBillingClientConfig,
-  AdminPlansState,
-} from './billing/admin';
+export { createAdminBillingClient } from './billing/admin';
+export type { AdminBillingClient, AdminBillingClientConfig } from './billing/admin';
 
 // Errors
 export {
@@ -80,6 +63,7 @@ export {
 export type { ApiErrorBody } from './errors';
 
 // Utils
+export { API_PREFIX, trimTrailingSlashes } from './utils';
 export type { BaseClientConfig } from './utils';
 
 // Notifications
@@ -95,26 +79,10 @@ export {
   urlBase64ToUint8Array,
 } from './notifications/client';
 export type { NotificationClient, NotificationClientConfig } from './notifications/client';
-export {
-  useNotificationPreferences,
-  usePushPermission,
-  usePushSubscription,
-  useTestNotification,
-} from './notifications/hooks';
-export type {
-  NotificationPreferencesState,
-  PushPermissionState,
-  PushSubscriptionState,
-  TestNotificationState,
-  UseNotificationPreferencesOptions,
-  UsePushSubscriptionOptions,
-} from './notifications/hooks';
 
 // Devices
 export { createDeviceClient } from './devices/client';
 export type { DeviceClient, DeviceClientConfig, DeviceItem } from './devices/client';
-export { useDevices } from './devices/hooks';
-export type { DevicesState, UseDevicesOptions } from './devices/hooks';
 
 // API Keys
 export { createApiKeysClient } from './api-keys/client';
@@ -128,35 +96,10 @@ export type {
   ListApiKeysResponse,
   RevokeApiKeyResponse,
 } from './api-keys/client';
-export {
-  apiKeysQueryKeys,
-  useApiKeys,
-  useCreateApiKey,
-  useRevokeApiKey,
-  useDeleteApiKey,
-} from './api-keys/hooks';
-export type {
-  ApiKeysState,
-  UseApiKeysOptions,
-  UseCreateApiKeyState,
-  UseDeleteApiKeyState,
-  UseRevokeApiKeyState,
-} from './api-keys/hooks';
 
 // Phone/SMS
 export { createPhoneClient } from './phone/client';
 export type { PhoneClient, PhoneClientConfig } from './phone/client';
-export { usePhone } from './phone/hooks';
-export type { PhoneState, UsePhoneOptions } from './phone/hooks';
-
-// OAuth
-export {
-  getOAuthLoginUrl,
-  oauthQueryKeys,
-  useEnabledOAuthProviders,
-  useOAuthConnections,
-} from './oauth/hooks';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth/hooks';
 
 // Webhooks
 export { createWebhookClient } from './webhooks/client';
@@ -169,20 +112,3 @@ export type {
   WebhookItem,
   WebhookWithDeliveries,
 } from './webhooks/client';
-export {
-  useCreateWebhook,
-  useDeleteWebhook,
-  useRotateWebhookSecret,
-  useUpdateWebhook,
-  useWebhook,
-  useWebhooks,
-  webhookQueryKeys,
-} from './webhooks/hooks';
-export type {
-  CreateWebhookState,
-  DeleteWebhookState,
-  RotateWebhookSecretState,
-  UpdateWebhookState,
-  WebhookDetailState,
-  WebhooksState,
-} from './webhooks/hooks';

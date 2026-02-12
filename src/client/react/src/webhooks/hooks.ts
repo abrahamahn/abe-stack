@@ -1,14 +1,17 @@
-// src/client/api/src/webhooks/hooks.ts
+// src/client/react/src/webhooks/hooks.ts
 /**
  * Webhook React Hooks
  *
  * Hooks for managing webhooks: list, get, create, update, delete, rotate secret.
- * Follows the same vanilla state pattern as billing/hooks.ts.
+ * Uses useQuery for reads and useMutation for writes.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createWebhookClient } from '@abe-stack/api';
+import { useCallback, useMemo } from 'react';
 
-import { createWebhookClient } from './client';
+
+import { useMutation } from '../query/useMutation';
+import { useQuery } from '../query/useQuery';
 
 import type {
   CreateWebhookRequest,
@@ -16,7 +19,7 @@ import type {
   WebhookClientConfig,
   WebhookItem,
   WebhookWithDeliveries,
-} from './client';
+} from '@abe-stack/api';
 
 // ============================================================================
 // Query Keys
@@ -40,30 +43,23 @@ export interface WebhooksState {
 }
 
 export function useWebhooks(clientConfig: WebhookClientConfig): WebhooksState {
-  const [webhooks, setWebhooks] = useState<WebhookItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const fetchWebhooks = useCallback(async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await client.list();
-      setWebhooks(response.webhooks);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch webhooks'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client]);
+  const query = useQuery({
+    queryKey: webhookQueryKeys.list(),
+    queryFn: () => client.list(),
+  });
 
-  useEffect(() => {
-    void fetchWebhooks();
-  }, [fetchWebhooks]);
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query.refetch]);
 
-  return { webhooks, isLoading, error, refresh: fetchWebhooks };
+  return {
+    webhooks: query.data?.webhooks ?? [],
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refresh: handleRefresh,
+  };
 }
 
 // ============================================================================
@@ -81,31 +77,24 @@ export function useWebhook(
   clientConfig: WebhookClientConfig,
   id: string | null,
 ): WebhookDetailState {
-  const [webhook, setWebhook] = useState<WebhookWithDeliveries | null>(null);
-  const [isLoading, setIsLoading] = useState(id !== null);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const fetchWebhook = useCallback(async (): Promise<void> => {
-    if (id === null) return;
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await client.get(id);
-      setWebhook(response.webhook);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch webhook'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client, id]);
+  const query = useQuery({
+    queryKey: webhookQueryKeys.detail(id ?? ''),
+    queryFn: () => client.get(id as string),
+    enabled: id !== null,
+  });
 
-  useEffect(() => {
-    void fetchWebhook();
-  }, [fetchWebhook]);
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    await query.refetch();
+  }, [query.refetch]);
 
-  return { webhook, isLoading, error, refresh: fetchWebhook };
+  return {
+    webhook: query.data?.webhook ?? null,
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refresh: handleRefresh,
+  };
 }
 
 // ============================================================================
@@ -122,28 +111,24 @@ export function useCreateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): CreateWebhookState {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const create = useCallback(
-    async (data: CreateWebhookRequest): Promise<void> => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        await client.create(data);
-        options?.onSuccess?.();
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to create webhook'));
-      } finally {
-        setIsLoading(false);
-      }
+  const mutation = useMutation({
+    mutationFn: (data: CreateWebhookRequest) => client.create(data),
+    onSuccess: () => {
+      options?.onSuccess?.();
     },
-    [client, options?.onSuccess],
+    invalidateOnSuccess: [webhookQueryKeys.list()],
+  });
+
+  const handleCreate = useCallback(
+    async (data: CreateWebhookRequest): Promise<void> => {
+      await mutation.mutateAsync(data);
+    },
+    [mutation.mutateAsync],
   );
 
-  return { create, isLoading, error };
+  return { create: handleCreate, isLoading: mutation.isPending, error: mutation.error ?? null };
 }
 
 // ============================================================================
@@ -160,28 +145,25 @@ export function useUpdateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): UpdateWebhookState {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const update = useCallback(
-    async (id: string, data: UpdateWebhookRequest): Promise<void> => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        await client.update(id, data);
-        options?.onSuccess?.();
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to update webhook'));
-      } finally {
-        setIsLoading(false);
-      }
+  const mutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateWebhookRequest }) =>
+      client.update(id, data),
+    onSuccess: () => {
+      options?.onSuccess?.();
     },
-    [client, options?.onSuccess],
+    invalidateOnSuccess: [webhookQueryKeys.list()],
+  });
+
+  const handleUpdate = useCallback(
+    async (id: string, data: UpdateWebhookRequest): Promise<void> => {
+      await mutation.mutateAsync({ id, data });
+    },
+    [mutation.mutateAsync],
   );
 
-  return { update, isLoading, error };
+  return { update: handleUpdate, isLoading: mutation.isPending, error: mutation.error ?? null };
 }
 
 // ============================================================================
@@ -198,28 +180,24 @@ export function useDeleteWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): DeleteWebhookState {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const remove = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        await client.remove(id);
-        options?.onSuccess?.();
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to delete webhook'));
-      } finally {
-        setIsLoading(false);
-      }
+  const mutation = useMutation({
+    mutationFn: (id: string) => client.remove(id),
+    onSuccess: () => {
+      options?.onSuccess?.();
     },
-    [client, options?.onSuccess],
+    invalidateOnSuccess: [webhookQueryKeys.list()],
+  });
+
+  const handleRemove = useCallback(
+    async (id: string): Promise<void> => {
+      await mutation.mutateAsync(id);
+    },
+    [mutation.mutateAsync],
   );
 
-  return { remove, isLoading, error };
+  return { remove: handleRemove, isLoading: mutation.isPending, error: mutation.error ?? null };
 }
 
 // ============================================================================
@@ -237,28 +215,26 @@ export function useRotateWebhookSecret(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): RotateWebhookSecretState {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [newSecret, setNewSecret] = useState<string | null>(null);
-
   const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
 
-  const rotate = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await client.rotateSecret(id);
-        setNewSecret(response.webhook.secret);
-        options?.onSuccess?.();
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to rotate secret'));
-      } finally {
-        setIsLoading(false);
-      }
+  const mutation = useMutation({
+    mutationFn: (id: string) => client.rotateSecret(id),
+    onSuccess: () => {
+      options?.onSuccess?.();
     },
-    [client, options?.onSuccess],
+  });
+
+  const handleRotate = useCallback(
+    async (id: string): Promise<void> => {
+      await mutation.mutateAsync(id);
+    },
+    [mutation.mutateAsync],
   );
 
-  return { rotate, isLoading, error, newSecret };
+  return {
+    rotate: handleRotate,
+    isLoading: mutation.isPending,
+    error: mutation.error ?? null,
+    newSecret: mutation.data?.webhook.secret ?? null,
+  };
 }

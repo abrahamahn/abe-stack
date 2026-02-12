@@ -20,6 +20,9 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
   const { user } = useAuth();
   const { data: workspaces } = useWorkspaces();
   const navigate = useNavigate();
+  const firstName = user?.firstName ?? '';
+  const lastName = user?.lastName ?? '';
+  const safeWorkspaces = Array.isArray(workspaces) ? workspaces : [];
 
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === 'true');
 
@@ -31,7 +34,7 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
   const items: ChecklistItem[] = [
     {
       label: 'Complete your profile',
-      complete: user !== null && user.firstName.length > 0 && user.lastName.length > 0,
+      complete: user !== null && firstName.length > 0 && lastName.length > 0,
       action: 'Go to Settings',
       path: '/settings/profile',
     },
@@ -43,13 +46,13 @@ export const GettingStartedChecklist = (): JSX.Element | null => {
     },
     {
       label: 'Create a workspace',
-      complete: workspaces.length > 0,
+      complete: safeWorkspaces.length > 0,
       action: 'Create Workspace',
       path: '/workspaces',
     },
     {
       label: 'Invite a teammate',
-      complete: workspaces.length > 1,
+      complete: safeWorkspaces.length > 1,
       action: 'Invite Member',
       path: '/workspaces',
     },

@@ -263,7 +263,10 @@ export function countCharactersNoWhitespace(str: string): number {
  * @param value - Input string to trim
  * @returns String with trailing slashes removed
  */
-export function trimTrailingSlashes(value: string): string {
+export function trimTrailingSlashes(value: string | null | undefined): string {
+  if (typeof value !== 'string') {
+    return '';
+  }
   let end = value.length;
   // charCode 47 === '/'
   while (end > 0 && value.charCodeAt(end - 1) === 47) {
