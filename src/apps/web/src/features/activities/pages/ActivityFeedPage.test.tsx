@@ -11,7 +11,7 @@ import { ActivityFeedPage } from './ActivityFeedPage';
 import type { ReactNode } from 'react';
 
 // Mock the ActivityFeed component
-vi.mock('../components', () => ({
+vi.mock('../components/ActivityFeed', () => ({
   ActivityFeed: ({ limit }: { limit?: number }) => (
     <div data-testid="activity-feed" data-limit={limit}>
       Activity Feed Content

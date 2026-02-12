@@ -7,9 +7,9 @@
 
 import { useQuery } from '@abe-stack/client-engine';
 
-import { createActivitiesApi } from '../api';
+import { createActivitiesApi } from '../api/activitiesApi';
 
-import type { ActivityListResponse, ActivityLocal } from '../api';
+import type { ActivityListResponse, ActivityLocal } from '../api/activitiesApi';
 
 // ============================================================================
 // API Instance

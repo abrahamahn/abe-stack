@@ -8,9 +8,9 @@
 import { formatTimeAgo, getActorTypeTone } from '@abe-stack/shared';
 import { Alert, Badge, EmptyState, Skeleton, Text } from '@abe-stack/ui';
 
-import { useActivities } from '../hooks';
+import { useActivities } from '../hooks/useActivities';
 
-import type { ActivityLocal } from '../api';
+import type { ActivityLocal } from '../api/activitiesApi';
 import type { ReactElement } from 'react';
 
 // ============================================================================

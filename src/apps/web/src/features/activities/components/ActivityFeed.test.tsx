@@ -6,14 +6,14 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useActivities } from '../hooks';
+import { useActivities } from '../hooks/useActivities';
 
 import { ActivityFeed } from './ActivityFeed';
 
 import type { ReactNode } from 'react';
 
 // Mock hooks
-vi.mock('../hooks', () => ({
+vi.mock('../hooks/useActivities', () => ({
   useActivities: vi.fn(),
 }));
 

@@ -3,7 +3,7 @@ import { useQuery } from '@abe-stack/client-engine';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createActivitiesApi } from '../api';
+import { createActivitiesApi } from '../api/activitiesApi';
 
 import { useActivities, useTenantActivities } from './useActivities';
 
@@ -13,7 +13,7 @@ vi.mock('@abe-stack/client-engine', () => ({
   useQuery: vi.fn(),
 }));
 
-vi.mock('../api', () => ({
+vi.mock('../api/activitiesApi', () => ({
   createActivitiesApi: vi.fn(),
 }));
 

@@ -7,7 +7,7 @@
 
 import { Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 
-import { ActivityFeed } from '../components';
+import { ActivityFeed } from '../components/ActivityFeed';
 
 import type { ReactElement } from 'react';
 
