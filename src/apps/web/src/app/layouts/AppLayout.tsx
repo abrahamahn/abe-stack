@@ -1,7 +1,8 @@
 // src/apps/web/src/app/layouts/AppLayout.tsx
 import { Outlet, ResizablePanelGroup, useContrast, useDensity, useSidePeek } from '@abe-stack/ui';
-import { AuthModal, NewDeviceBanner, useAuth } from '@auth';
-import { useUILibraryPanes, useUILibraryTheme } from '@ui-library';
+import { AuthModal, NewDeviceBanner } from '@auth/components';
+import { useAuth } from '@auth/hooks';
+import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AppBottomLayout } from './AppBottomLayout';

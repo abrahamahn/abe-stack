@@ -2,7 +2,7 @@
 import { toastStore } from '@abe-stack/react';
 import { AuthLayout, useAuthModeNavigation, useFormState, useSearchParams } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
-import { useAuth } from '@auth/hooks/useAuth';
+import { useAuth } from '@auth/hooks';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';

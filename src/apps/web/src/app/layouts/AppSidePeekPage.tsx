@@ -1,6 +1,6 @@
 // src/apps/web/src/app/layouts/AppSidePeekPage.tsx
 import { Button, Heading, PageContainer, useNavigate } from '@abe-stack/ui';
-import { SidePeekUILibraryContent } from '@ui-library/components/SidePeekUILibraryContent';
+import { SidePeekUILibraryContent } from '@ui-library/components';
 
 import type { ReactElement } from 'react';
 

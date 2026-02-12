@@ -1,6 +1,6 @@
 // src/apps/web/src/app/layouts/AppRightInfo.tsx
 import { Text, useLocation } from '@abe-stack/ui';
-import { HomeRightSidebar } from '@features/home/components/HomeRightSidebar';
+import { HomeRightSidebar } from '@features/home/components';
 
 import type { ReactElement } from 'react';
 

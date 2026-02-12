@@ -30,9 +30,9 @@ import {
   Toaster,
   useRouteFocusAnnounce,
 } from '@abe-stack/ui';
-import { TosAcceptanceModal } from '@auth/components/TosAcceptanceModal';
+import { TosAcceptanceModal } from '@auth/components';
 import { useAuth } from '@features/auth';
-import { CookieConsentBanner } from '@settings/components/CookieConsentBanner';
+import { CookieConsentBanner } from '@settings/components';
 import {
   useCallback,
   useEffect,

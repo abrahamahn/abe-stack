@@ -1,6 +1,6 @@
 // src/apps/web/src/features/auth/components/NewDeviceBanner.tsx
 import { Alert, CloseButton, Text } from '@abe-stack/ui';
-import { useAuth } from '@auth/hooks/useAuth';
+import { useAuth } from '@auth/hooks';
 
 import type { ReactElement } from 'react';
 

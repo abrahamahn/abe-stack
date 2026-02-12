@@ -9,7 +9,7 @@ import {
   useNavigate,
   useSearchParams,
 } from '@abe-stack/ui';
-import { useAuth } from '@auth/hooks/useAuth';
+import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect, useRef, useState } from 'react';
 

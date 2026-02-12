@@ -1,7 +1,7 @@
 // src/apps/web/src/features/ui-library/UILibraryPage.tsx
 import { Button, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
 import { useAppRightSidebar } from '@app/layouts';
-import { getAllCategories, getComponentsByCategory } from '@catalog/catalog';
+import { getAllCategories, getComponentsByCategory } from '@catalog/index';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { UILibraryPreviewArea } from './components/UILibraryPreviewArea';
