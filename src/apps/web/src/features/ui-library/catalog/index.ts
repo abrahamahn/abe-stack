@@ -5,7 +5,7 @@ export {
   getComponentsByCategory,
   getTotalComponentCount,
 } from './catalog';
-export { componentCatalog } from './componentCatalog';
+export { componentCatalog as baseComponentCatalog } from './componentCatalog';
 export { elementCatalog } from './elementCatalog';
 export { layoutCatalog } from './layoutCatalog';
 export {

@@ -23,7 +23,7 @@ import type {
   ResetPasswordRequest,
   User,
 } from '@abe-stack/api';
-import type { AuthState } from '@auth/services';
+import type { AuthState } from '@auth/services/AuthService';
 
 // Import directly from services to avoid circular dependency through barrel
 
