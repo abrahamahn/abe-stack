@@ -151,7 +151,7 @@ export const AppMainLayout = ({
             {/* Center Panel - fills remaining space with flex */}
             <div className="flex-1 min-w-0" style={{ minHeight: 0 }}>
               <ScrollArea className="h-full w-full">
-                <div className="p-4">{children}</div>
+                <div className="app-main-content min-h-full p-4">{children}</div>
               </ScrollArea>
             </div>
           </ResizablePanelGroup>

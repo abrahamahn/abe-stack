@@ -351,9 +351,16 @@
    AuthLayout - Centered auth card
    ============================================ */
 .auth-layout {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
+  box-sizing: border-box;
+}
+
+/* When auth pages are rendered inside AppLayout's center panel,
+   fill the available panel height instead of forcing viewport height. */
+.app-main-content .auth-layout {
+  min-height: 100%;
 }
 
 .auth-layout-card {

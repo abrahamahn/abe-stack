@@ -6,26 +6,26 @@
  */
 
 // API
-export { createActivitiesApi } from './api';
+export { createActivitiesApi } from './api/activitiesApi';
 export type {
   ActivitiesApi,
   ActivitiesApiConfig,
   ActivityListResponse,
   ActivityLocal,
-} from './api';
+} from './api/activitiesApi';
 
 // Hooks
-export { useActivities, useTenantActivities } from './hooks';
+export { useActivities, useTenantActivities } from './hooks/useActivities';
 export type {
   UseActivitiesOptions,
   UseActivitiesResult,
   UseTenantActivitiesOptions,
   UseTenantActivitiesResult,
-} from './hooks';
+} from './hooks/useActivities';
 
 // Components
-export { ActivityFeed } from './components';
-export type { ActivityFeedProps } from './components';
+export { ActivityFeed } from './components/ActivityFeed';
+export type { ActivityFeedProps } from './components/ActivityFeed';
 
 // Pages
-export { ActivityFeedPage } from './pages';
+export { ActivityFeedPage } from './pages/ActivityFeedPage';
