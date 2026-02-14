@@ -1,5 +1,5 @@
 // main/tools/scripts/dev/maintain-local-caches.ts
-import { MS_PER_DAY } from '@abe-stack/shared';
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
