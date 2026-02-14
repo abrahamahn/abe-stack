@@ -1,0 +1,239 @@
+// main/server/media/src/security.test.ts
+import { describe, expect, it, vi } from 'vitest';
+
+import { BasicSecurityScanner } from './security';
+
+// Mock fs module
+vi.mock('fs', () => ({
+  promises: {
+    stat: vi.fn(),
+    open: vi.fn(),
+  },
+}));
+
+describe('BasicSecurityScanner', () => {
+  describe('constructor', () => {
+    it('should create with default options', () => {
+      const scanner = new BasicSecurityScanner();
+      expect(scanner).toBeInstanceOf(BasicSecurityScanner);
+    });
+
+    it('should accept custom options', () => {
+      const scanner = new BasicSecurityScanner({
+        maxFileSize: 50 * 1024 * 1024,
+        allowedMimeTypes: ['image/jpeg', 'image/png'],
+      });
+      expect(scanner).toBeInstanceOf(BasicSecurityScanner);
+    });
+  });
+
+  describe('scanFile', () => {
+    it('should return safe result for valid file', async () => {
+      const fs = await import('fs');
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 1024 }),
+        read: vi.fn().mockResolvedValue({ bytesRead: 100 }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/safe-file.jpg');
+
+      expect(result.safe).toBe(true);
+      expect(result.threats).toHaveLength(0);
+      expect(result.metadata.fileSize).toBe(1024);
+    });
+
+    it('should detect file size exceeding limit', async () => {
+      const fs = await import('fs');
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 200 * 1024 * 1024 }),
+        read: vi.fn().mockResolvedValue({ bytesRead: 0 }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner({
+        maxFileSize: 100 * 1024 * 1024,
+        allowedMimeTypes: [],
+      });
+      const result = await scanner.scanFile('/large-file.mp4');
+
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('exceeds limit'))).toBe(true);
+    });
+
+    it('should detect empty file', async () => {
+      const fs = await import('fs');
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 0 }),
+        read: vi.fn().mockResolvedValue({ bytesRead: 0 }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/empty-file.txt');
+
+      expect(result.safe).toBe(false);
+      expect(result.threats).toContain('File is empty');
+    });
+
+    it('should detect XSS content in text files', async () => {
+      const fs = await import('fs');
+      const maliciousContent = '<script>alert("xss")</script>';
+      const buffer = Buffer.from(maliciousContent);
+
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      // Use .txt extension so it's detected as text-based for XSS scanning
+      const result = await scanner.scanFile('/malicious.txt');
+
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('XSS'))).toBe(true);
+    });
+
+    it('should detect server-side code', async () => {
+      const fs = await import('fs');
+      const phpContent = '<?php echo "hello"; ?>';
+      const buffer = Buffer.from(phpContent);
+
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/malicious.txt');
+
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('Server-side code'))).toBe(true);
+    });
+
+    it('should warn about high entropy files', async () => {
+      const fs = await import('fs');
+      // Create high entropy buffer (random-like data)
+      const buffer = Buffer.alloc(1024);
+      for (let i = 0; i < buffer.length; i++) {
+        buffer[i] = Math.floor(Math.random() * 256);
+      }
+
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/encrypted.bin');
+
+      // High entropy files get warnings, not threats
+      expect(result.warnings.some((w: string) => w.includes('entropy'))).toBe(true);
+    });
+
+    it('should handle scan errors gracefully', async () => {
+      const fs = await import('fs');
+      vi.mocked(fs.promises.open).mockRejectedValue(new Error('File not found'));
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/nonexistent.txt');
+
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('Scan failed'))).toBe(true);
+    });
+
+    it('should warn about null bytes only in text-based files', async () => {
+      const fs = await import('fs');
+      // Buffer containing null bytes
+      const buffer = Buffer.from('Hello\x00World');
+
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+
+      // Text file with null bytes → should warn
+      const textResult = await scanner.scanFile('/suspect.txt');
+      expect(textResult.warnings.some((w: string) => w.includes('null bytes'))).toBe(true);
+    });
+
+    it('should NOT warn about null bytes in binary media files', async () => {
+      const fs = await import('fs');
+      // JPEG-like buffer with null bytes (normal for binary)
+      const buffer = Buffer.alloc(1024, 0);
+      buffer[0] = 0xff;
+      buffer[1] = 0xd8;
+      buffer[2] = 0xff;
+
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: buffer.length }),
+        read: vi.fn().mockImplementation((buf: Buffer) => {
+          buffer.copy(buf);
+          return Promise.resolve({ bytesRead: buffer.length });
+        }),
+        close: vi.fn().mockResolvedValue(undefined),
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+
+      // Binary file with null bytes → should NOT warn about null bytes
+      const binaryResult = await scanner.scanFile('/image.jpg');
+      expect(binaryResult.warnings.every((w: string) => !w.includes('null bytes'))).toBe(true);
+    });
+
+    it('should close file descriptor even when fd.read() throws', async () => {
+      const fs = await import('fs');
+      const closeFn = vi.fn().mockResolvedValue(undefined);
+      const mockFd = {
+        stat: vi.fn().mockResolvedValue({ size: 1024 }),
+        read: vi.fn().mockRejectedValue(new Error('Read error')),
+        close: closeFn,
+      };
+
+      vi.mocked(fs.promises.open).mockResolvedValue(mockFd as never);
+
+      const scanner = new BasicSecurityScanner();
+      const result = await scanner.scanFile('/failing-read.bin');
+
+      // fd.close() must still be called despite fd.read() throwing
+      expect(closeFn).toHaveBeenCalledTimes(1);
+      expect(result.safe).toBe(false);
+      expect(result.threats.some((t: string) => t.includes('Scan failed'))).toBe(true);
+    });
+  });
+});

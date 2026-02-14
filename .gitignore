@@ -18,12 +18,12 @@ vitest.config.d.ts
 vitest.config.d.ts.map
 
 # TypeScript build artifacts in source directories (stray tsc emit)
-src/**/*.js.map
-src/**/*.d.ts.map
+main/**/*.js.map
+main/**/*.d.ts.map
 
 # Keep postbuild helper script tracked (path includes "/build/")
-!src/tools/scripts/build/
-!src/tools/scripts/build/ensure-js-extensions.ts
+!main/tools/scripts/build/
+!main/tools/scripts/build/ensure-js-extensions.ts
 
 # Allow Vite config for web build
 !config/build/
@@ -96,7 +96,7 @@ Thumbs.db
 
 # Uploads
 .data/
-src/apps/server/uploads/
+main/apps/server/uploads/
 
 # Temporary export files
 .tmp/

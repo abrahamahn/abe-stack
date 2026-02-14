@@ -6,7 +6,7 @@ ABE Stack uses **Argon2id** (OWASP recommended) for password hashing.
 
 ### Configuration
 
-Default parameters match OWASP guidelines (`src/server/core/src/auth/utils/password.ts`):
+Default parameters match OWASP guidelines (`main/server/core/src/auth/utils/password.ts`):
 
 | Parameter   | Value               | Purpose                                                                |
 | ----------- | ------------------- | ---------------------------------------------------------------------- |
@@ -24,7 +24,7 @@ Default parameters match OWASP guidelines (`src/server/core/src/auth/utils/passw
 
 ### Password Strength
 
-Passwords are validated using custom entropy-based estimation (`src/server/core/src/auth/security/password-strength.ts`):
+Passwords are validated using custom entropy-based estimation (`main/server/core/src/auth/security/password-strength.ts`):
 
 - Minimum length: 8 characters
 - Maximum length: 64 characters
@@ -43,11 +43,11 @@ Short-lived access tokens carry user identity and role.
 | Payload        | `userId`, `email`, `role`, optional `tokenVersion` |
 | Secret minimum | 32 characters                                      |
 
-Tokens are created via `createAccessToken()` and verified via `verifyToken()` in `src/server/core/src/auth/utils/jwt.ts`.
+Tokens are created via `createAccessToken()` and verified via `verifyToken()` in `main/server/core/src/auth/utils/jwt.ts`.
 
 ## Refresh Token Families
 
-Refresh tokens use **family-based rotation** with reuse detection (`src/server/core/src/auth/utils/refresh-token.ts`).
+Refresh tokens use **family-based rotation** with reuse detection (`main/server/core/src/auth/utils/refresh-token.ts`).
 
 ### How It Works
 
@@ -71,7 +71,7 @@ Configurable per deployment (default: 10). When the limit is reached, the oldest
 
 ## Cookie Security
 
-Refresh tokens are stored in HTTP-only cookies (`src/server/core/src/auth/utils/cookies.ts`).
+Refresh tokens are stored in HTTP-only cookies (`main/server/core/src/auth/utils/cookies.ts`).
 
 | Setting    | Development | Production |
 | ---------- | ----------- | ---------- |
@@ -87,11 +87,11 @@ Cookie secret is injected via environment configuration and used for both signin
 
 ### Global Rate Limiter
 
-Applied to all requests via the HTTP plugin stack (`src/apps/server/src/http/plugins.ts`). Returns standard rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
+Applied to all requests via the HTTP plugin stack (`main/apps/server/src/http/plugins.ts`). Returns standard rate limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
 
 ### Auth Endpoint Presets
 
-Stricter per-endpoint limits defined in `src/server/core/src/auth/security/rateLimitPresets.ts`:
+Stricter per-endpoint limits defined in `main/server/core/src/auth/security/rateLimitPresets.ts`:
 
 | Endpoint            | Max Requests | Window   |
 | ------------------- | ------------ | -------- |
@@ -110,7 +110,7 @@ All auth rate limiters use progressive delay with exponential backoff (1s base, 
 
 ## CSRF Protection
 
-Uses the double-submit cookie pattern with signed tokens (`src/apps/server/src/http/middleware/csrf.ts`):
+Uses the double-submit cookie pattern with signed tokens (`main/apps/server/src/http/middleware/csrf.ts`):
 
 - **Development**: HMAC-signed tokens in signed cookies (`sameSite: lax`)
 - **Production**: AES-256-GCM encrypted tokens in signed cookies (`sameSite: strict`)
@@ -119,7 +119,7 @@ Uses the double-submit cookie pattern with signed tokens (`src/apps/server/src/h
 
 ## CORS
 
-Explicit CORS handling replaces `@fastify/cors` (`src/apps/server/src/http/middleware/security.ts`):
+Explicit CORS handling replaces `@fastify/cors` (`main/apps/server/src/http/middleware/security.ts`):
 
 - Origin validated against configured allow list (supports comma-separated origins)
 - Credentials require exact origin match (no wildcard)
@@ -144,7 +144,7 @@ Production enables CSP with `getProductionSecurityDefaults()`. API routes also g
 
 ## Account Lockout
 
-Progressive lockout with exponential backoff (`src/server/core/src/auth/security/lockout.ts`):
+Progressive lockout with exponential backoff (`main/server/core/src/auth/security/lockout.ts`):
 
 1. Failed attempts are tracked per email within a configurable window
 2. After exceeding `maxAttempts`, the account is locked for `lockoutDurationMs`
@@ -158,7 +158,7 @@ All incoming JSON request bodies are sanitized by `registerPrototypePollutionPro
 
 ## Input Validation & Sanitization
 
-The validation middleware (`src/apps/server/src/http/middleware/validation.ts`) provides:
+The validation middleware (`main/apps/server/src/http/middleware/validation.ts`) provides:
 
 - XSS prevention: strips `<script>` blocks, event handlers, `javascript:` schemes
 - SQL injection detection (pattern-based, context-aware)

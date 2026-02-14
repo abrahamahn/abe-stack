@@ -1,11 +1,11 @@
 packages:
   # Applications
-  - 'src/apps/*'
+  - 'main/apps/*'
   # Infrastructure packages
-  - 'src/server/*'
+  - 'main/server/*'
   # Core
-  - 'src/shared'
+  - 'main/shared'
   # Client
-  - 'src/client/*'
+  - 'main/client/*'
   # Tools
-  - 'src/tools'
+  - 'main/tools'

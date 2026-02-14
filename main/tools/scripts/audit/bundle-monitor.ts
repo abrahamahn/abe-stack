@@ -1,0 +1,336 @@
+#!/usr/bin/env tsx
+// main/tools/scripts/audit/bundle-monitor.ts
+/**
+ * Bundle Size Monitor
+ *
+ * Monitors bundle sizes and provides regression detection
+ * Tracks changes over time and alerts on significant increases
+ */
+
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
+interface BundleInfo {
+  name: string;
+  size: number;
+  gzipSize: number;
+  timestamp: string;
+  commit?: string;
+}
+
+interface BundleReport {
+  timestamp: string;
+  commit?: string;
+  packages: Record<string, BundleInfo[]>;
+  totals: Record<string, { size: number; gzipSize: number }>;
+}
+
+// ============================================================================
+// Bundle Size Estimation
+// ============================================================================
+
+function estimatePackageBundleSize(packageName: string, packagePath: string): BundleInfo[] {
+  const bundles: BundleInfo[] = [];
+  const packageJsonPath = join(packagePath, 'package.json');
+
+  if (!existsSync(packageJsonPath)) return bundles;
+
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+  const dependencies: Record<string, string> = {
+    ...packageJson.dependencies,
+    ...packageJson.devDependencies,
+  };
+
+  // Estimate sizes for each dependency
+  const sizeEstimates: Record<string, { size: number; gzipSize: number }> = {
+    // Framework
+    react: { size: 150, gzipSize: 45 },
+    'react-dom': { size: 1200, gzipSize: 320 },
+
+    // Build Tools (not included in bundle)
+    typescript: { size: 0, gzipSize: 0 },
+    vite: { size: 0, gzipSize: 0 },
+    webpack: { size: 0, gzipSize: 0 },
+    esbuild: { size: 0, gzipSize: 0 },
+
+    // Dev Tools (not included in bundle)
+    eslint: { size: 0, gzipSize: 0 },
+    prettier: { size: 0, gzipSize: 0 },
+    '@types/node': { size: 0, gzipSize: 0 },
+    '@types/react': { size: 0, gzipSize: 0 },
+    vitest: { size: 0, gzipSize: 0 },
+
+    // UI Libraries
+    '@abe-stack/ui': { size: 200, gzipSize: 60 }, // Our custom UI
+    '@abe-stack/shared': { size: 150, gzipSize: 40 }, // Our core utilities
+
+    // Database (runtime only, not in client bundle)
+    '@abe-stack/db': { size: 0, gzipSize: 0 },
+    postgres: { size: 0, gzipSize: 0 },
+
+    // Security (runtime only)
+    argon2: { size: 0, gzipSize: 0 },
+
+    // Development dependencies
+    '@playwright/test': { size: 0, gzipSize: 0 },
+    '@testing-library/react': { size: 0, gzipSize: 0 },
+    msw: { size: 0, gzipSize: 0 },
+    jsdom: { size: 0, gzipSize: 0 },
+  };
+
+  let totalSize = 0;
+  let totalGzipSize = 0;
+
+  for (const [name] of Object.entries(dependencies)) {
+    const estimate = sizeEstimates[name] ?? { size: 30, gzipSize: 10 }; // Default estimate
+    totalSize += estimate.size;
+    totalGzipSize += estimate.gzipSize;
+
+    bundles.push({
+      name,
+      size: estimate.size,
+      gzipSize: estimate.gzipSize,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Add main bundle estimate
+  bundles.unshift({
+    name: `${packageName} (main)`,
+    size: Math.max(50, totalSize * 0.1), // Estimate 10% for app code
+    gzipSize: Math.max(15, totalGzipSize * 0.1),
+    timestamp: new Date().toISOString(),
+  });
+
+  return bundles;
+}
+
+// ============================================================================
+// Report Generation
+// ============================================================================
+
+function generateBundleReport(): BundleReport {
+  const packages: Record<string, BundleInfo[]> = {};
+  const totals: Record<string, { size: number; gzipSize: number }> = {};
+
+  const rootDir = resolve(__dirname, '..', '..', '..', '..');
+
+  // Analyze web app
+  const webPath = join(rootDir, 'src', 'apps', 'web');
+  if (existsSync(webPath)) {
+    const bundles = estimatePackageBundleSize('@abe-stack/web', webPath);
+    packages['@abe-stack/web'] = bundles;
+
+    const total = bundles.reduce(
+      (acc, bundle) => ({
+        size: acc.size + bundle.size,
+        gzipSize: acc.gzipSize + bundle.gzipSize,
+      }),
+      { size: 0, gzipSize: 0 },
+    );
+    totals['@abe-stack/web'] = total;
+  }
+
+  // Analyze packages across main/client/*, main/server/*, main/shared
+  const packageLayers = ['main/client', 'main/server'];
+  for (const layer of packageLayers) {
+    const layerDir = join(rootDir, layer);
+    if (!existsSync(layerDir)) continue;
+
+    const packageDirs = readdirSync(layerDir);
+    for (const pkgName of packageDirs) {
+      const pkgPath = join(layerDir, pkgName);
+      if (existsSync(join(pkgPath, 'package.json'))) {
+        const bundles = estimatePackageBundleSize(`@abe-stack/${pkgName}`, pkgPath);
+        packages[`@abe-stack/${pkgName}`] = bundles;
+
+        const total = bundles.reduce(
+          (acc, bundle) => ({
+            size: acc.size + bundle.size,
+            gzipSize: acc.gzipSize + bundle.gzipSize,
+          }),
+          { size: 0, gzipSize: 0 },
+        );
+        totals[`@abe-stack/${pkgName}`] = total;
+      }
+    }
+  }
+
+  // Analyze main/shared
+  const sharedPath = join(rootDir, 'src', 'shared');
+  if (existsSync(join(sharedPath, 'package.json'))) {
+    const bundles = estimatePackageBundleSize('@abe-stack/shared', sharedPath);
+    packages['@abe-stack/shared'] = bundles;
+
+    const total = bundles.reduce(
+      (acc, bundle) => ({
+        size: acc.size + bundle.size,
+        gzipSize: acc.gzipSize + bundle.gzipSize,
+      }),
+      { size: 0, gzipSize: 0 },
+    );
+    totals['@abe-stack/shared'] = total;
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    packages,
+    totals,
+  };
+}
+
+// ============================================================================
+// Historical Comparison
+// ============================================================================
+
+function getOutputDir(): string {
+  return join(__dirname, '..', '..', '..', '..', '.tmp');
+}
+
+function getReportPath(): string {
+  return join(getOutputDir(), '.bundle-sizes.json');
+}
+
+function loadPreviousReport(): BundleReport | null {
+  const reportPath = getReportPath();
+
+  if (!existsSync(reportPath)) return null;
+
+  try {
+    const data = readFileSync(reportPath, 'utf-8');
+    const reports = JSON.parse(data) as BundleReport[];
+    return reports[reports.length - 1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function saveReport(report: BundleReport): void {
+  const outputDir = getOutputDir();
+  const reportPath = getReportPath();
+
+  // Ensure .tmp directory exists
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+  }
+
+  let reports: BundleReport[] = [];
+  if (existsSync(reportPath)) {
+    try {
+      reports = JSON.parse(readFileSync(reportPath, 'utf-8')) as BundleReport[];
+    } catch {
+      reports = [];
+    }
+  }
+
+  reports.push(report);
+
+  // Keep only last 10 reports
+  if (reports.length > 10) {
+    reports = reports.slice(-10);
+  }
+
+  writeFileSync(reportPath, JSON.stringify(reports, null, 2));
+}
+
+// ============================================================================
+// Report Display
+// ============================================================================
+
+function displayReport(current: BundleReport, previous: BundleReport | null): void {
+  console.log('📏 Bundle Size Report\n');
+
+  for (const [pkgName, bundles] of Object.entries(current.packages)) {
+    console.log(`📦 ${pkgName}`);
+
+    const total = current.totals[pkgName];
+    const prevTotal = previous?.totals[pkgName];
+
+    console.log(`  Total: ${String(total.size)}KB (${String(total.gzipSize)}KB gzipped)`);
+
+    if (prevTotal) {
+      const sizeDiff = total.size - prevTotal.size;
+      const gzipDiff = total.gzipSize - prevTotal.gzipSize;
+
+      if (sizeDiff !== 0) {
+        const sign = sizeDiff > 0 ? '+' : '';
+        console.log(
+          `  Change: ${sign}${String(sizeDiff)}KB (${sign}${String(gzipDiff)}KB gzipped)`,
+        );
+      }
+    }
+
+    // Show top contributors
+    const mainBundle = bundles.find((b) => b.name.includes('(main)'));
+    if (mainBundle) {
+      console.log(
+        `  Main bundle: ${String(mainBundle.size)}KB (${String(mainBundle.gzipSize)}KB gzipped)`,
+      );
+    }
+
+    console.log('');
+  }
+
+  // Overall totals
+  const overallTotal = Object.values(current.totals).reduce(
+    (acc, total) => ({
+      size: acc.size + total.size,
+      gzipSize: acc.gzipSize + total.gzipSize,
+    }),
+    { size: 0, gzipSize: 0 },
+  );
+
+  console.log('📊 Overall Totals:');
+  console.log(`  Total size: ${String(overallTotal.size)}KB`);
+  console.log(`  Total gzipped: ${String(overallTotal.gzipSize)}KB`);
+
+  if (previous) {
+    const prevOverall = Object.values(previous.totals).reduce(
+      (acc, total) => ({
+        size: acc.size + total.size,
+        gzipSize: acc.gzipSize + total.gzipSize,
+      }),
+      { size: 0, gzipSize: 0 },
+    );
+
+    const sizeDiff = overallTotal.size - prevOverall.size;
+    const gzipDiff = overallTotal.gzipSize - prevOverall.gzipSize;
+
+    if (sizeDiff !== 0) {
+      const sign = sizeDiff > 0 ? '+' : '';
+      console.log(`  Change: ${sign}${String(sizeDiff)}KB (${sign}${String(gzipDiff)}KB gzipped)`);
+
+      if (sizeDiff > 50) {
+        console.log('⚠️  WARNING: Bundle size increased significantly!');
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Main Execution
+// ============================================================================
+
+function main(): void {
+  try {
+    const report = generateBundleReport();
+    const previous = loadPreviousReport();
+
+    displayReport(report, previous);
+    saveReport(report);
+
+    console.log('\n💾 Report saved to .tmp/.bundle-sizes.json');
+  } catch (error) {
+    console.error('❌ Bundle monitoring failed:', error);
+    process.exit(1);
+  }
+}
+
+const entryArg = process.argv[1];
+const isMainModule = entryArg !== undefined && import.meta.url === `file://${entryArg}`;
+if (isMainModule) {
+  main();
+}

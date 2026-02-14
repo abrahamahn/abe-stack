@@ -1,99 +1,38 @@
 {
+  "extends": "./config/tsconfig.base.json",
   "compilerOptions": {
-    /* 1. Monorepo & Build Performance */
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "incremental": true,
-    "noEmit": false,
-
-    /* 2. Language Fundamentals */
-    "target": "ES2023",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-
-    /* 3. Modern Strictness */
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "exactOptionalPropertyTypes": true,
-    "noPropertyAccessFromIndexSignature": true,
-
-    /* 4. Module Safety */
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-
-    /* 5. Build Cache */
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
+    "baseUrl": ".",
     "paths": {
-      "@abe-stack/shared": ["./src/shared/src/index.ts"],
-      "@abe-stack/shared/*": ["./src/shared/src/*"],
-      "@abe-stack/server-engine": ["./src/server/engine/src/index.ts"],
-      "@abe-stack/server-engine/*": ["./src/server/engine/src/*"],
-      "@abe-stack/db": ["./src/server/db/src/index.ts"],
-      "@abe-stack/db/*": ["./src/server/db/src/*"],
-      "@abe-stack/core": ["./src/server/core/src/index.ts"],
-      "@abe-stack/core/*": ["./src/server/core/src/*"],
-      "@abe-stack/api": ["./src/client/api/src/index.ts"],
-      "@abe-stack/api/*": ["./src/client/api/src/*"],
-      "@abe-stack/ui": ["./src/client/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["./src/client/ui/src/*"]
+      "@abe-stack/shared": ["./main/shared/src/index.ts"],
+      "@abe-stack/shared/*": ["./main/shared/src/*"],
+      "@abe-stack/server-engine": ["./main/server/engine/src/index.ts"],
+      "@abe-stack/server-engine/*": ["./main/server/engine/src/*"],
+      "@abe-stack/db": ["./main/server/db/src/index.ts"],
+      "@abe-stack/db/*": ["./main/server/db/src/*"],
+      "@abe-stack/core": ["./main/server/core/src/index.ts"],
+      "@abe-stack/core/*": ["./main/server/core/src/*"],
+      "@abe-stack/api": ["./main/client/api/src/index.ts"],
+      "@abe-stack/api/*": ["./main/client/api/src/*"],
+      "@abe-stack/ui": ["./main/client/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["./main/client/ui/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"],
   "files": [],
   "references": [
-    {
-      "path": "./src/apps/desktop"
-    },
-    {
-      "path": "./src/apps/server"
-    },
-    {
-      "path": "./src/apps/web"
-    },
-    {
-      "path": "./src/shared"
-    },
-    {
-      "path": "./src/server/engine"
-    },
-    {
-      "path": "./src/server/media"
-    },
-    {
-      "path": "./src/client/engine"
-    },
-    {
-      "path": "./src/client/api"
-    },
-    {
-      "path": "./src/client/react"
-    },
-    {
-      "path": "./src/client/ui"
-    },
-    {
-      "path": "./src/server/core"
-    },
-    {
-      "path": "./src/server/websocket"
-    },
-    {
-      "path": "./src/server/realtime"
-    },
-    {
-      "path": "./src/server/db"
-    }
+    { "path": "./main/apps/desktop" },
+    { "path": "./main/apps/server" },
+    { "path": "./main/apps/web" },
+    { "path": "./main/shared" },
+    { "path": "./main/server/engine" },
+    { "path": "./main/server/media" },
+    { "path": "./main/client/engine" },
+    { "path": "./main/client/api" },
+    { "path": "./main/client/react" },
+    { "path": "./main/client/ui" },
+    { "path": "./main/server/core" },
+    { "path": "./main/server/websocket" },
+    { "path": "./main/server/realtime" },
+    { "path": "./main/server/db" }
   ]
 }

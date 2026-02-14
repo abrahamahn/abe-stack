@@ -1,0 +1,29 @@
+{
+  "extends": "../../../config/tsconfig.node.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.realtime.tsbuildinfo",
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../db"
+    },
+    {
+      "path": "../engine"
+    },
+    {
+      "path": "../websocket"
+    }
+  ]
+}

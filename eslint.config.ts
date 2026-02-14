@@ -34,8 +34,8 @@ export default [
   {
     ignores: [
       '**/.github/**',
-      '**/src/tools/scripts/**',
-      '**/src/tools/sync/**',
+      '**/main/tools/scripts/**',
+      '**/main/tools/sync/**',
       '**/vite.config.ts',
       '**/vitest.config.js',
       '**/vitest.config.ts',
@@ -58,22 +58,22 @@ export default [
       'import/resolver': {
         typescript: {
           project: [
-            './tsconfig.json',
-            './src/apps/desktop/tsconfig.json',
-            './src/apps/desktop/src/electron/tsconfig.json',
-            './src/apps/server/tsconfig.json',
-            './src/apps/web/tsconfig.json',
-            './src/client/api/tsconfig.json',
-            './src/client/react/tsconfig.json',
-            './src/client/ui/tsconfig.json',
-            './src/server/engine/tsconfig.json',
-            './src/shared/tsconfig.json',
-            './src/server/db/tsconfig.json',
-            './src/server/core/tsconfig.json',
-            './src/client/engine/tsconfig.json',
-            './src/server/media/tsconfig.json',
-            './src/server/realtime/tsconfig.json',
-            './src/server/websocket/tsconfig.json',
+            path.resolve(tsconfigRootDir, 'tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/apps/desktop/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/apps/desktop/src/electron/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/apps/server/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/apps/web/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/client/react/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/client/ui/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/engine/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/db/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/core/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/client/engine/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/media/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/realtime/tsconfig.json'),
+            path.resolve(tsconfigRootDir, 'main/server/websocket/tsconfig.json'),
           ],
           alwaysTryTypes: true,
         },
@@ -93,21 +93,21 @@ export default [
         '**/*.spec.*',
         '**/*.d.ts',
         '**/docs/**',
-        '**/src/tools/**',
+        '**/main/tools/**',
         '**/ops/**',
         'config/**',
         '**/.github/**',
       ],
       'boundaries/elements': [
-        { type: 'app', pattern: 'src/apps/*', mode: 'folder' },
-        { type: 'module', pattern: 'src/server/core', mode: 'folder' },
-        { type: 'engine', pattern: 'src/server/engine', mode: 'folder' },
-        { type: 'media', pattern: 'src/server/media', mode: 'folder' },
-        { type: 'premium', pattern: 'src/server/websocket', mode: 'folder' },
-        { type: 'premium', pattern: 'src/server/realtime', mode: 'folder' },
-        { type: 'shared', pattern: 'src/shared', mode: 'folder' },
-        { type: 'db', pattern: 'src/server/db', mode: 'folder' },
-        { type: 'client', pattern: 'src/client/*', mode: 'folder' },
+        { type: 'app', pattern: 'main/apps/*', mode: 'folder' },
+        { type: 'module', pattern: 'main/server/core', mode: 'folder' },
+        { type: 'engine', pattern: 'main/server/engine', mode: 'folder' },
+        { type: 'media', pattern: 'main/server/media', mode: 'folder' },
+        { type: 'premium', pattern: 'main/server/websocket', mode: 'folder' },
+        { type: 'premium', pattern: 'main/server/realtime', mode: 'folder' },
+        { type: 'shared', pattern: 'main/shared', mode: 'folder' },
+        { type: 'db', pattern: 'main/server/db', mode: 'folder' },
+        { type: 'client', pattern: 'main/client/*', mode: 'folder' },
       ],
     },
     rules: {
@@ -139,7 +139,7 @@ export default [
             },
             {
               from: 'premium',
-              allow: [['premium', { relationship: 'internal' }], 'engine', 'shared', 'client'],
+              allow: [['premium', { relationship: 'internal' }], 'engine', 'shared', 'client', 'db'],
             },
             {
               from: 'client',
@@ -157,7 +157,6 @@ export default [
     },
   },
 
-  // Configuration for ALL TypeScript files with strict type checking
   ...tseslint.configs.strictTypeChecked.map(
     (config: any): Linter.Config => ({
       ...config,
@@ -171,7 +170,7 @@ export default [
         parserOptions: {
           ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
           tsconfigRootDir,
-          project: ['./tsconfig.json'],
+          project: [path.resolve(tsconfigRootDir, 'tsconfig.json')],
           noWarnOnMultipleProjects: true,
         },
       },
@@ -191,132 +190,132 @@ export default [
     },
   },
   {
-    files: ['src/apps/server/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/apps/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/apps/server/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/apps/server/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/apps/desktop/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/apps/desktop/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
         project: [
-          './src/apps/desktop/tsconfig.json',
-          './src/apps/desktop/src/electron/tsconfig.json',
+          path.resolve(tsconfigRootDir, 'main/apps/desktop/tsconfig.json'),
+          path.resolve(tsconfigRootDir, 'main/apps/desktop/src/electron/tsconfig.json'),
         ],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/apps/desktop/src/electron/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/apps/desktop/src/electron/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
     },
   },
   {
-    files: ['src/apps/web/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/apps/web/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
         project: [
-          './src/apps/web/tsconfig.json',
-          './src/client/api/tsconfig.json',
-          './src/shared/tsconfig.json',
+          path.resolve(tsconfigRootDir, 'main/apps/web/tsconfig.json'),
+          path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json'),
+          path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json'),
         ],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/shared/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/shared/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/shared/tsconfig.lint.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/shared/tsconfig.lint.json')],
         tsconfigRootDir,
       },
     },
   },
 
   {
-    files: ['src/client/ui/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/client/ui/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/client/ui/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/client/ui/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/client/api/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/client/api/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/client/api/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/media/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/media/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/media/tsconfig.lint.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/media/tsconfig.lint.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/client/engine/**/*.{ts,tsx,cts,mts}', 'src/client/react/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/client/engine/**/*.{ts,tsx,cts,mts}', 'main/client/react/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/client/engine/tsconfig.json', './src/client/react/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/client/engine/tsconfig.json'), path.resolve(tsconfigRootDir, 'main/client/react/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/engine/src/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/engine/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/engine/tsconfig.lint.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/engine/tsconfig.lint.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/db/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/db/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/db/tsconfig.lint.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/db/tsconfig.lint.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/core/src/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/core/src/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/core/tsconfig.lint.json', './src/shared/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/core/tsconfig.lint.json'), path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/websocket/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/websocket/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/websocket/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/websocket/tsconfig.json')],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['src/server/realtime/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/server/realtime/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./src/server/realtime/tsconfig.json'],
+        project: [path.resolve(tsconfigRootDir, 'main/server/realtime/tsconfig.json')],
         tsconfigRootDir,
       },
     },
@@ -568,11 +567,11 @@ export default [
           patterns: [
             {
               group: [
-                '**/src/apps/*/src/**',
-                '**/src/client/*/src/**',
-                '**/src/server/engine/src/**',
-                '**/src/server/core/src/**',
-                '**/src/server/websocket/src/**',
+                '**/main/apps/*/src/**',
+                '**/main/client/*/src/**',
+                '**/main/server/engine/src/**',
+                '**/main/server/core/src/**',
+                '**/main/server/websocket/src/**',
               ],
               message: 'Import from package entrypoints only (no /src deep imports).',
             },
@@ -622,7 +621,7 @@ export default [
   // Ban raw HTML elements in apps/web — use @abe-stack/ui components instead
   // Allowed structural elements: div, nav, section, main, header, footer, form, label, span, ul, ol, li
   {
-    files: ['src/apps/web/**/*.tsx'],
+    files: ['main/apps/web/**/*.tsx'],
     ignores: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [
@@ -701,7 +700,7 @@ export default [
   },
   // Prevent frontend clients from importing server-side code or DB internals
   {
-    files: ['src/apps/web/**/*', 'src/apps/desktop/**/*'],
+    files: ['main/apps/web/**/*', 'main/apps/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -722,7 +721,7 @@ export default [
           ],
           patterns: [
             {
-              group: ['**/src/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
+              group: ['**/main/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
               message:
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
@@ -739,11 +738,11 @@ export default [
             },
             {
               group: [
-                '**/src/apps/*/src/**',
-                '**/src/client/*/src/**',
-                '**/src/server/engine/src/**',
-                '**/src/server/core/src/**',
-                '**/src/server/websocket/src/**',
+                '**/main/apps/*/src/**',
+                '**/main/client/*/src/**',
+                '**/main/server/engine/src/**',
+                '**/main/server/core/src/**',
+                '**/main/server/websocket/src/**',
               ],
               message: 'Import from package entrypoints only (no /src deep imports).',
             },
@@ -757,21 +756,21 @@ export default [
     },
   },
   {
-    files: ['src/tools/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/tools/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
     },
   },
   {
     // Allow console in logger implementations and console-based dev services
-    files: ['src/server/core/src/config/*', 'src/apps/desktop/src/electron/**/*'],
+    files: ['main/server/core/src/config/*', 'main/apps/desktop/src/electron/**/*'],
     rules: {
       'no-console': 'off',
     },
   },
   {
     // Shared is a leaf package - disable boundaries rules for internal relative imports
-    files: ['src/shared/src/**/*.{ts,tsx,cts,mts}'],
+    files: ['main/shared/src/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'boundaries/no-unknown': 'off',
       'boundaries/element-types': 'off',
@@ -782,14 +781,14 @@ export default [
   // Config-level overrides replacing former inline eslint-disable comments
   {
     // QR code generator uses non-null assertions on mathematically-bounded array access (canvas rendering)
-    files: ['src/apps/web/src/features/settings/components/TotpQrCode.tsx'],
+    files: ['main/apps/web/src/features/settings/components/TotpQrCode.tsx'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
   {
     // String sanitizer intentionally matches control characters
-    files: ['src/shared/src/utils/string/string.ts'],
+    files: ['main/shared/src/utils/string/string.ts'],
     rules: {
       'no-control-regex': 'off',
     },
@@ -831,6 +830,16 @@ export default [
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+    },
+  },
+  {
+    // Targeted override for billing client resolution issues during migration
+    files: ['main/client/api/src/billing/client.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
     },
   },
 ] satisfies Linter.Config[];

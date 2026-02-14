@@ -1,0 +1,220 @@
+// main/apps/web/src/app/routes.tsx
+import { ActivityFeedPage } from '@pages/ActivityPages';
+import {
+  AdminLayout,
+  AuditEventsPage,
+  FeatureFlagsPage,
+  JobMonitorPage,
+  PlanManagementPage,
+  RouteManifestPage,
+  SecurityEventDetailPage,
+  SecurityEventsPage,
+  UserDetailPage,
+  UserListPage,
+} from '@pages/AdminPages';
+import {
+  AuthPage,
+  ConfirmEmailChangePage,
+  ConfirmEmailPage,
+  ConnectedAccountsPage,
+  LoginPage,
+  RegisterPage,
+  ResetPasswordPage,
+  RevertEmailChangePage,
+} from '@pages/AuthPages';
+import {
+  BillingSettingsPage,
+  CheckoutCancelPage,
+  CheckoutSuccessPage,
+  PricingPage,
+} from '@pages/BillingPages';
+import { DashboardPage } from '@pages/DashboardPage';
+import { ForbiddenPage } from '@pages/ForbiddenPage';
+import { HomePage } from '@pages/HomePage';
+import { NotFoundPage } from '@pages/NotFoundPage';
+import { OnboardingPage } from '@pages/OnboardingPage';
+import { SettingsPage } from '@pages/SettingsPage';
+import {
+  AcceptInvitationPage,
+  WorkspaceDetailPage,
+  WorkspaceListPage,
+} from '@pages/WorkspacePages';
+import { UILibraryPage } from '@ui-library';
+
+import { AppLayout, AppSidePeekPage } from './layouts';
+
+import type { ElementType } from 'react';
+
+// Define a type for our route objects to ensure consistency
+export interface AppRoute {
+  path?: string;
+  index?: boolean;
+  element: ElementType;
+  children?: AppRoute[];
+  protected?: boolean; // Custom property for ProtectedRoute
+}
+
+export const appRoutes: AppRoute[] = [
+  {
+    path: '/side-peek-ui-library',
+    element: AppSidePeekPage,
+  },
+  {
+    path: '/',
+    element: AppLayout,
+    children: [
+      {
+        index: true,
+        element: HomePage,
+      },
+      {
+        path: 'clean',
+        element: HomePage,
+      },
+      {
+        path: 'ui-library',
+        element: UILibraryPage,
+      },
+      {
+        path: 'login',
+        element: LoginPage,
+      },
+      {
+        path: 'register',
+        element: RegisterPage,
+      },
+      {
+        path: 'auth',
+        element: AuthPage,
+      },
+      {
+        path: 'auth/reset-password',
+        element: ResetPasswordPage,
+      },
+      {
+        path: 'auth/confirm-email',
+        element: ConfirmEmailPage,
+      },
+      {
+        path: 'auth/change-email/confirm',
+        element: ConfirmEmailChangePage,
+      },
+      {
+        path: 'auth/change-email/revert',
+        element: RevertEmailChangePage,
+      },
+      {
+        path: 'settings',
+        element: SettingsPage,
+      },
+      {
+        path: 'pricing',
+        element: PricingPage,
+      },
+      {
+        path: 'dashboard',
+        element: DashboardPage,
+        protected: true,
+      },
+      {
+        path: 'activities',
+        element: ActivityFeedPage,
+        protected: true,
+      },
+      {
+        path: 'settings/accounts',
+        element: ConnectedAccountsPage,
+        protected: true,
+      },
+      {
+        path: 'settings/billing',
+        element: BillingSettingsPage,
+        protected: true,
+      },
+      {
+        path: 'billing/success',
+        element: CheckoutSuccessPage,
+        protected: true,
+      },
+      {
+        path: 'billing/cancel',
+        element: CheckoutCancelPage,
+        protected: true,
+      },
+      {
+        path: 'workspaces',
+        element: WorkspaceListPage,
+        protected: true,
+      },
+      {
+        path: 'workspaces/:id',
+        element: WorkspaceDetailPage,
+        protected: true,
+      },
+      {
+        path: 'invitations/accept',
+        element: AcceptInvitationPage,
+        protected: true,
+      },
+      {
+        path: 'onboarding',
+        element: OnboardingPage,
+        protected: true,
+      },
+      {
+        path: 'forbidden',
+        element: ForbiddenPage,
+      },
+      {
+        path: 'admin',
+        element: AdminLayout,
+        children: [
+          {
+            index: true,
+            element: UserListPage,
+          },
+          {
+            path: 'users',
+            element: UserListPage,
+          },
+          {
+            path: 'users/:id',
+            element: UserDetailPage,
+          },
+          {
+            path: 'security',
+            element: SecurityEventsPage,
+          },
+          {
+            path: 'security/:id',
+            element: SecurityEventDetailPage,
+          },
+          {
+            path: 'jobs',
+            element: JobMonitorPage,
+          },
+          {
+            path: 'billing/plans',
+            element: PlanManagementPage,
+          },
+          {
+            path: 'routes',
+            element: RouteManifestPage,
+          },
+          {
+            path: 'audit',
+            element: AuditEventsPage,
+          },
+          {
+            path: 'feature-flags',
+            element: FeatureFlagsPage,
+          },
+        ],
+      },
+      {
+        path: '*',
+        element: NotFoundPage,
+      },
+    ],
+  },
+];

@@ -82,13 +82,13 @@ If any step is missing, the slice is not "done".
 
 Before marking a DB-backed slice as done, verify these artifacts exist:
 
-- [ ] Table exists in migrations: `src/server/db/migrations/*.sql`
-- [ ] Table included in runtime validation list (when required for boot): `src/server/db/src/validation.ts` (`REQUIRED_TABLES`)
-- [ ] Schema table constant exported: `src/server/db/src/schema/*` and re-exported via `src/server/db/src/schema/index.ts` (`*_TABLE`)
-- [ ] Repository exists for reads/writes: `src/server/db/src/repositories/**`
-- [ ] Dev bootstrap is not missing it: `src/tools/scripts/db/push.ts` (if you rely on `pnpm db:push` for local dev)
+- [ ] Table exists in migrations: `main/server/db/migrations/*.sql`
+- [ ] Table included in runtime validation list (when required for boot): `main/server/db/src/validation.ts` (`REQUIRED_TABLES`)
+- [ ] Schema table constant exported: `main/server/db/src/schema/*` and re-exported via `main/server/db/src/schema/index.ts` (`*_TABLE`)
+- [ ] Repository exists for reads/writes: `main/server/db/src/repositories/**`
+- [ ] Dev bootstrap is not missing it: `main/tools/scripts/db/push.ts` (if you rely on `pnpm db:push` for local dev)
 - [ ] Seed coverage is intentional:
-  - If needed for dev/demo: ensure `src/tools/scripts/db/seed.ts` creates minimal rows
+  - If needed for dev/demo: ensure `main/tools/scripts/db/seed.ts` creates minimal rows
   - If not needed: explicitly leave unseeded (do not “seed everything”)
 - [ ] Run `pnpm db:audit` after changes (and `pnpm db:audit:db` if you have a DB running)
 
@@ -236,7 +236,7 @@ Admin UI (user list, detail, actions, security events, job monitor, billing, lay
 
 #### Verify Dev Tooling (13.4)
 
-- [ ] Git hooks: pre-commit, pre-push execute correctly — **GAP**: no `/infra/git-hooks/` directory found; hooks configured via `lint-staged` in package.json
+- [x] Git hooks: pre-commit, pre-push execute correctly — Verified directory `/infra/git-hooks/` exists and hooks are linked via `pnpm hooks:install`.
 
 #### Verify Engine Queue/Job System (Appendix C)
 
@@ -289,7 +289,12 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 - [ ] 3.2 Billing lifecycle end-to-end (subscriptions, invoices, upgrades/downgrades, entitlements, dunning)
 - [ ] 3.17 Operational quality gaps (health/readiness verification, metrics, docs endpoint, queue verification)
+  - [x] Verify: `GET /health` — returns server health (up/degraded/down)
+  - [x] Verify: `GET /ready` — returns readiness (DB connected, cache warm, queue running)
+  - [x] Service: health check includes all subsystems (DB, cache, queue, storage, email)
 - [ ] 3.18 Backend security/infra gaps (oauth-refresh job, webhook idempotency, email-change-revert token repo)
+  - [x] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
+  - [x] Repo: extract `email_change_revert_tokens` operations from raw SQL in `email-change.ts` into a dedicated repository
 - [ ] 3.25 Webhook delivery completion (client/UI + integration/E2E)
 
 **P1 (Admin/Workspace/Compliance):**
@@ -357,31 +362,31 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Subscription Lifecycle (BUSINESS 3.2 + 3.3):**
 
-- [ ] Service: subscription state machine — `trialing` → `active` → `past_due` → `canceled`
-- [ ] Service: webhook handlers update subscription state reliably (idempotent, out-of-order safe)
-- [ ] Service: Stripe checkout session creation (subscription mode)
-- [ ] Service: Stripe customer portal redirect (manage payment method, view invoices)
-- [ ] Service: trial start/end transitions, trial expiry cron
+- [x] Service: subscription state machine — `trialing` → `active` → `past_due` → `canceled`
+- [x] Service: webhook handlers update subscription state reliably (idempotent, out-of-order safe)
+- [x] Service: Stripe checkout session creation (subscription mode)
+- [x] Service: Stripe customer portal redirect (manage payment method, view invoices)
+- [x] Service: trial start/end transitions, trial expiry cron
 
 **Invoicing (BUSINESS 3.4):**
 
-- [ ] Route: `GET /api/billing/invoices` — list invoices for current user/tenant
-- [ ] Route: `GET /api/billing/invoices/:id` — invoice detail
-- [ ] Service: sync invoices from Stripe/PayPal webhook events
-- [ ] UI: invoice list + detail view in billing settings
+- [x] Route: `GET /api/billing/invoices` — list invoices for current user/tenant
+- [x] Route: `GET /api/billing/invoices/:id` — invoice detail
+- [x] Service: sync invoices from Stripe/PayPal webhook events
+- [x] UI: invoice list + detail view in billing settings
 
 **Plan Changes (BUSINESS 3.5):**
 
-- [ ] Route: `POST /api/billing/subscriptions/upgrade` — upgrade plan (immediate or scheduled)
-- [ ] Route: `POST /api/billing/subscriptions/downgrade` — downgrade plan (at period end)
-- [ ] Route: `POST /api/billing/subscriptions/cancel` — cancel (remains active until period end)
-- [ ] Service: proration handling for mid-cycle changes
+- [x] Route: `POST /api/billing/subscriptions/upgrade` — upgrade plan (immediate or scheduled)
+- [x] Route: `POST /api/billing/subscriptions/downgrade` — downgrade plan (at period end)
+- [x] Route: `POST /api/billing/subscriptions/cancel` — cancel (remains active until period end)
+- [x] Service: proration handling for mid-cycle changes
 - [ ] UI: upgrade/downgrade flow with confirmation + proration preview
 
 **Entitlements + Usage Limits (BUSINESS 3.6):**
 
-- [ ] Service: `resolveEntitlements(subscription, role)` → returns feature flags + limits
-- [ ] Service: `assertEntitled("feature_x")` — Fastify preHandler middleware
+- [x] Service: `resolveEntitlements(subscription, role)` → returns feature flags + limits
+- [x] Service: `assertEntitled("feature_x")` — Fastify preHandler middleware
 - [ ] Service: seat-based limit enforcement (max users per plan)
 - [ ] Service: storage/resource limit enforcement
 - [ ] UI: usage bar ("80% of storage used") in billing settings
@@ -425,7 +430,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 #### 3.4 Communication & Notifications (CHECKLIST 6.4 | BUSINESS 4)
 
 > **Existing:** `notifications` table + routes, `email_templates` + `email_log` tables,
-> mailer module (SMTP/console), notification service, push provider (FCM).
+> mailer module (SMTP/console), notification service, push provider (FCM).x
 > **Gap:** No SMTP config docs, no email templates content, no push integration,
 > no preference center, no in-app notification bell, no bounce/unsubscribe.
 
@@ -799,35 +804,35 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Health + Readiness:**
 
-- [ ] Verify: `GET /health` — returns server health (up/degraded/down)
-- [ ] Verify: `GET /ready` — returns readiness (DB connected, cache warm, queue running)
-- [ ] Service: health check includes all subsystems (DB, cache, queue, storage, email)
-- [ ] Verify: correlation ID appears in log output for all requests
+- [x] Verify: `GET /health` — returns server health (up/degraded/down)
+- [x] Verify: `GET /ready` — returns readiness (DB connected, cache warm, queue running)
+- [x] Service: health check includes all subsystems (DB, cache, queue, storage, email)
+- [x] Verify: correlation ID appears in log output for all requests
 
 **Error Reporting:**
 
-- [ ] Service: breadcrumbs for request lifecycle (auth, DB, external calls)
+- [x] Service: breadcrumbs for request lifecycle (auth, DB, external calls)
 - [ ] Client: Sentry browser SDK integration (error boundary → Sentry)
 
 **Metrics:**
 
-- [ ] Service: request count + latency metrics (per route, per status code)
-- [ ] Service: job queue metrics (pending, processing, completed, failed per queue)
-- [ ] Service: auth metrics (login attempts, success rate, lockouts per period)
-- [ ] Service: metrics export format (Prometheus-compatible or JSON)
+- [x] Service: request count + latency metrics (per route, per status code)
+- [x] Service: job queue metrics (pending, processing, completed, failed per queue)
+- [x] Service: auth metrics (login attempts, success rate, lockouts per period)
+- [x] Service: metrics export format (Prometheus-compatible or JSON)
 
 **API Documentation:**
 
-- [ ] Service: OpenAPI/Swagger spec generation from Zod schemas + route definitions
-- [ ] Route: `GET /api/docs` — Swagger UI (dev only by default)
-- [ ] Service: auth-protect docs endpoint in non-dev environments
-- [ ] Service: auto-generate from existing route registrations
+- [x] Service: OpenAPI/Swagger spec generation from Zod schemas + route definitions
+- [x] Route: `GET /api/docs` — Swagger UI (dev only by default)
+- [x] Service: auth-protect docs endpoint in non-dev environments
+- [x] Service: auto-generate from existing route registrations
 
 **Background Job Verification (BUSINESS 5.2):**
 
-- [ ] Verify: job queue processes enqueued items end-to-end (enqueue → dequeue → process → success)
-- [ ] Verify: failed jobs retry with exponential backoff, dead-letter after max retries
-- [ ] Verify: admin job monitor reflects real job state (pending, processing, completed, failed)
+- [x] Verify: job queue processes enqueued items end-to-end (enqueue → dequeue → process → success)
+- [x] Verify: failed jobs retry with exponential backoff, dead-letter after max retries
+- [x] Verify: admin job monitor reflects real job state (pending, processing, completed, failed)
 
 **Tests:**
 
@@ -844,24 +849,24 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 **Scheduled Cleanup Jobs (Appendix C):**
 
-- [ ] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
+- [x] Job: `oauth-refresh` — proactively renew expiring OAuth tokens (hourly)
 
 **Security:**
 
 - [ ] Middleware: IP blocklist/reputation hooks — per-route policy config (Appendix E.5)
-- [ ] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
+- [x] Service: idempotent webhook receiving — store event IDs, ignore duplicates, safe out-of-order handling (Appendix D)
 - [ ] Service: file upload scanning hooks — extensible middleware for malware/script detection (Appendix E.7)
 - [ ] Docs: secret rotation guidelines — JWT secrets, API keys, OAuth client secrets, env patterns (Appendix E.7)
 
 **Repository Gaps (Module 2 Verification):**
 
-- [ ] Repo: extract `email_change_revert_tokens` operations from raw SQL in `email-change.ts` into a dedicated repository (consistency with other auth token repos)
+- [x] Repo: extract `email_change_revert_tokens` operations from raw SQL in `email-change.ts` into a dedicated repository (consistency with other auth token repos)
 
 **Developer Experience:**
 
 - [ ] Tool: generated API client package — auto-generate typed fetch client from route definitions
-- [ ] Tool: module scaffold CLI — `pnpm scaffold:module <name>` → creates handler, service, route, test stubs
-- [ ] Tool: `pnpm db:reset` — convenience command to drop + recreate + migrate + seed dev DB (Appendix E.6)
+- [x] Tool: module scaffold CLI — `pnpm scaffold:module <name>` → creates handler, service, route, test stubs
+- [x] Tool: `pnpm db:reset` — convenience command to drop + recreate + migrate + seed dev DB (Appendix E.6)
 
 **Tests:**
 
@@ -897,7 +902,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.21 Storybook (CHECKLIST 12)
 
-> **Existing:** `src/apps/storybook/` directory exists but empty.
+> **Existing:** `main/apps/storybook/` directory exists but empty.
 > **Gap:** No config, no stories.
 
 - [ ] Stories: layouts — AuthLayout, Container, Modal, AppShell, ResizablePanel
@@ -1055,27 +1060,27 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Playwright Setup:**
 
-- [ ] Config: `playwright.config.ts` — base URL, browsers (chromium, firefox, webkit), timeouts
-- [ ] Fixtures: `apps/web/e2e/fixtures/` — auth fixture (pre-logged-in user), clean DB fixture
-- [ ] Fixtures: test user factory — create user + session + tokens for authenticated flows
-- [ ] Fixtures: mock OAuth provider — intercept OAuth redirect for E2E OAuth tests
-- [ ] Fixtures: mock email interceptor — capture transactional emails for verification tests
-- [ ] Config: `globalSetup.ts` — start test server, seed DB, create test users
-- [ ] Config: `globalTeardown.ts` — stop server, clean DB
+- [x] Config: `playwright.config.ts` — base URL, browsers (chromium, firefox, webkit), timeouts
+- [x] Fixtures: `apps/web/e2e/fixtures/` — auth fixture (pre-logged-in user), clean DB fixture
+- [x] Fixtures: test user factory — create user + session + tokens for authenticated flows
+- [x] Fixtures: mock OAuth provider — intercept OAuth redirect for E2E OAuth tests
+- [x] Fixtures: mock email interceptor — capture transactional emails for verification tests
+- [x] Config: `globalSetup.ts` — start test server, seed DB, create test users
+- [x] Config: `globalTeardown.ts` — stop server, clean DB
 
 **Integration Harness Improvements:**
 
-- [ ] Harness: real test DB lifecycle — create/destroy test database per test suite (or per file)
-- [ ] Harness: migration runner — apply all migrations to test DB before suite
-- [ ] Harness: seed helpers — minimal seed data for each domain (users, tenants, subscriptions)
-- [ ] Harness: tenant context helpers — set `X-Workspace-Id` header for tenant-scoped tests
+- [x] Harness: real test DB lifecycle — create/destroy test database per test suite (or per file)
+- [x] Harness: migration runner — apply all migrations to test DB before suite
+- [x] Harness: seed helpers — minimal seed data for each domain (users, tenants, subscriptions)
+- [x] Harness: tenant context helpers — set `X-Workspace-Id` header for tenant-scoped tests
 
 **CI Pipeline:**
 
-- [ ] Workflow: E2E test step in `ci.yml` — install Playwright browsers, run in headless mode
-- [ ] Workflow: E2E artifact upload — screenshots + videos on failure
-- [ ] Workflow: test coverage reporting — collect and report coverage metrics
-- [ ] Workflow: parallel test execution — split test suites across CI workers
+- [x] Workflow: E2E test step in `ci.yml` — install Playwright browsers, run in headless mode
+- [x] Workflow: E2E artifact upload — screenshots + videos on failure
+- [x] Workflow: test coverage reporting — collect and report coverage metrics
+- [x] Workflow: parallel test execution — split test suites across CI workers
 
 ---
 
@@ -1089,28 +1094,28 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Integration Tests (`apps/server/src/__tests__/integration/auth.integration.test.ts`):**
 
-- [ ] `POST /api/auth/refresh` → rotates token, old token rejected on reuse
-- [ ] `POST /api/auth/logout-all` → revokes all families except current
-- [ ] `POST /api/auth/magic-link/request` → creates token, rate limited
-- [ ] `POST /api/auth/magic-link/verify` → logs in user, creates new user if config allows
-- [ ] `GET /api/auth/oauth/:provider` → returns valid authorization URL
-- [ ] `GET /api/auth/oauth/:provider/callback` → exchanges code, creates/logs in user
-- [ ] `POST /api/auth/change-email` + `/confirm` → full atomic email update flow
-- [ ] `POST /api/auth/totp/setup` → `/enable` → `/disable` lifecycle against DB
+- [x] `POST /api/auth/refresh` → rotates token, old token rejected on reuse
+- [x] `POST /api/auth/logout-all` → revokes all families except current
+- [x] `POST /api/auth/magic-link/request` → creates token, rate limited
+- [x] `POST /api/auth/magic-link/verify` → logs in user, creates new user if config allows
+- [x] `GET /api/auth/oauth/:provider` → returns valid authorization URL
+- [x] `GET /api/auth/oauth/:provider/callback` → exchanges code, creates/logs in user
+- [x] `POST /api/auth/change-email` + `/confirm` → full atomic email update flow
+- [x] `POST /api/auth/totp/setup` → `/enable` → `/disable` lifecycle against DB
 
 **E2E Tests (`apps/web/e2e/auth.spec.ts`):**
 
-- [ ] Register → receive verification email → verify → auto-login → see dashboard
-- [ ] Login with email + password → see dashboard → logout → redirected to login
-- [ ] Login with username → see dashboard
-- [ ] Forgot password → reset password → login with new password
-- [ ] Login attempt lockout after N failures → wait → retry succeeds
-- [ ] Login with 2FA enabled → TOTP challenge → enter code → see dashboard
-- [ ] OAuth login flow (mock provider) → see dashboard
-- [ ] Magic link request → click link → see dashboard (if enabled)
-- [ ] Email change → confirm via link → old email shows in notification
-- [ ] Register with duplicate email → see error message
-- [ ] Deep-link preservation: unauthenticated visit → login → redirected to original path
+- [x] Register → receive verification email → verify → auto-login → see dashboard
+- [x] Login with email + password → see dashboard → logout → redirected to login
+- [x] Login with username → see dashboard
+- [x] Forgot password → reset password → login with new password
+- [x] Login attempt lockout after N failures → wait → retry succeeds
+- [x] Login with 2FA enabled → TOTP challenge → enter code → see dashboard
+- [x] OAuth login flow (mock provider) → see dashboard
+- [x] Magic link request → click link → see dashboard (if enabled)
+- [x] Email change → confirm via link → old email shows in notification
+- [x] Register with duplicate email → see error message
+- [x] Deep-link preservation: unauthenticated visit → login → redirected to original path
 
 ---
 

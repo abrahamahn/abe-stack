@@ -120,7 +120,7 @@ Comprehensive guide to principles, coding standards, patterns, and anti-patterns
 
 Separate framework-agnostic client from React hooks:
 
-- `client/src/client.ts` - Pure TypeScript client
+- `client/main/client.ts` - Pure TypeScript client
 - `client/src/react-query.ts` - React Query hooks
 
 ### Form Validation

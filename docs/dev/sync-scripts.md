@@ -1,6 +1,6 @@
 # Sync Scripts
 
-DX automation scripts that keep the codebase consistent. All scripts live in `src/tools/sync/`.
+DX automation scripts that keep the codebase consistent. All scripts live in `main/tools/sync/`.
 
 ## Overview
 
@@ -44,11 +44,11 @@ Processed: `.ts`, `.tsx`, `.js`, `.jsx`, `.cts`, `.mts`, `.cjs`, `.mjs`
 
 ## sync-css-theme
 
-Generates `src/client/ui/src/styles/theme.css` from TypeScript theme source files.
+Generates `main/client/ui/src/styles/theme.css` from TypeScript theme source files.
 
 ### How It Works
 
-1. Reads theme source files from `src/client/ui/src/theme/`:
+1. Reads theme source files from `main/client/ui/src/theme/`:
    - `colors.ts` -- color palette (light/dark)
    - `spacing.ts` -- gap tokens
    - `radius.ts` -- border radius tokens
@@ -74,7 +74,7 @@ Updates the root `tsconfig.json` `references` array to include all packages that
 
 ### How It Works
 
-1. Scans directories under `src/apps/`, `src/client/`, `src/server/`, `src/shared/`
+1. Scans directories under `main/apps/`, `main/client/`, `main/server/`, `main/shared/`
 2. Finds subdirectories containing a `tsconfig.json`
 3. Updates the root `tsconfig.json` `references` array with relative paths
 4. Preserves existing non-scanned references
@@ -87,7 +87,7 @@ pnpm sync:ts         # Update tsconfig references
 
 ## sync-docs
 
-Previously auto-generated docs metadata from the `docs/` folder structure. Now a no-op -- docs are discovered at build time via Vite's `import.meta.glob` in `src/apps/web/src/features/home/data/docsMeta.ts`.
+Previously auto-generated docs metadata from the `docs/` folder structure. Now a no-op -- docs are discovered at build time via Vite's `import.meta.glob` in `main/apps/web/src/features/home/data/docsMeta.ts`.
 
 ```bash
 pnpm sync:docs       # No-op (prints skip message)
@@ -97,7 +97,7 @@ pnpm sync:docs       # No-op (prints skip message)
 
 ### During `pnpm dev`
 
-The dev script (`src/tools/scripts/dev/dev.ts`) starts sync watchers alongside the dev servers. File headers and theme CSS are kept in sync automatically during development.
+The dev script (`main/tools/scripts/dev/dev.ts`) starts sync watchers alongside the dev servers. File headers and theme CSS are kept in sync automatically during development.
 
 ### Pre-commit
 

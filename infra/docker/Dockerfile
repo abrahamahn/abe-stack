@@ -28,13 +28,13 @@ FROM base AS deps
 
 # Copy only package files for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY src/apps/server/package.json src/apps/server/
-COPY src/server/core/package.json src/server/core/
-COPY src/server/engine/package.json src/server/engine/
-COPY src/server/db/package.json src/server/db/
-COPY src/server/realtime/package.json src/server/realtime/
-COPY src/server/websocket/package.json src/server/websocket/
-COPY src/shared/package.json src/shared/
+COPY main/apps/server/package.json main/apps/server/
+COPY main/server/core/package.json main/server/core/
+COPY main/server/engine/package.json main/server/engine/
+COPY main/server/db/package.json main/server/db/
+COPY main/server/realtime/package.json main/server/realtime/
+COPY main/server/websocket/package.json main/server/websocket/
+COPY main/shared/package.json main/shared/
 
 # Fetch production dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
@@ -62,7 +62,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm --filter @abe-stack/core build && \
     pnpm --filter @abe-stack/server build && \
     pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy
-# node src/tools/dev/create-server-aliases.js /app/server-deploy src/apps/server/tsconfig.json
+# node main/tools/dev/create-server-aliases.js /app/server-deploy main/apps/server/tsconfig.json
 
 # =============================================================================
 # Production Stage - Minimal runtime image with security hardening

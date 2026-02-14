@@ -13,7 +13,7 @@ All foreign keys are indexed by default. Additional indexes follow these pattern
 
 ### Query Optimization
 
-The refresh token rotation (`src/server/core/src/auth/utils/refresh-token.ts`) demonstrates key optimization patterns:
+The refresh token rotation (`main/server/core/src/auth/utils/refresh-token.ts`) demonstrates key optimization patterns:
 
 1. **Parallel independent queries**: User, family, and session lookups run concurrently via `Promise.all`
 2. **Composite index usage**: Token lookup uses `(token, expires_at)` index for single-query validation
@@ -67,7 +67,7 @@ Use `lt('expires_at', now)` with an index on `expires_at` for efficient batch de
 
 ### Route-Based Code Splitting
 
-The app root (`src/apps/web/src/app/App.tsx`) wraps all routes in `<Suspense>` with a loading fallback:
+The app root (`main/apps/web/src/app/App.tsx`) wraps all routes in `<Suspense>` with a loading fallback:
 
 ```tsx
 const AppRoutes = (): ReactElement => {
@@ -83,7 +83,7 @@ Route components can be lazy-loaded to split the bundle per page, with `<Loading
 
 ### Bundle Splitting
 
-Vite build config (`src/apps/web/vite.config.ts`) defines manual chunk splitting:
+Vite build config (`main/apps/web/vite.config.ts`) defines manual chunk splitting:
 
 ```typescript
 build: {
@@ -109,7 +109,7 @@ Key decisions:
 
 ### Query Cache Persistence
 
-The app persists the React Query cache to IndexedDB for instant perceived load times on return visits (`src/apps/web/src/app/App.tsx`):
+The app persists the React Query cache to IndexedDB for instant perceived load times on return visits (`main/apps/web/src/app/App.tsx`):
 
 1. On mount, cached data is restored from IndexedDB in the background (non-blocking)
 2. The app renders immediately without waiting for cache restoration

@@ -11,7 +11,7 @@ Where `<name>` is a kebab-case module name (e.g., `my-feature`, `payments`, `ana
 ## What Gets Generated
 
 ```text
-src/server/core/src/<name>/
+main/server/core/src/<name>/
 ├── index.ts          # Barrel exports (explicit named exports)
 ├── types.ts          # Module context interface extending BaseContext
 ├── service.ts        # Business logic (no HTTP awareness)
@@ -21,7 +21,7 @@ src/server/core/src/<name>/
 └── routes.ts         # Route definitions using createRouteMap
 ```
 
-The scaffold also patches `src/apps/server/src/routes/routes.ts` to import and register the new module's routes.
+The scaffold also patches `main/apps/server/src/routes/routes.ts` to import and register the new module's routes.
 
 ## Generated File Structure
 

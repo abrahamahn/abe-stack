@@ -7,7 +7,7 @@ echo "Lines of Code by Package (excluding tests and node_modules):"
 echo "---------------------------------------------------------"
 
 # Find all package.json files to identify packages
-find src -name "package.json" -not -path "*/node_modules/*" | while read pkg_json; do
+find main -name "package.json" -not -path "*/node_modules/*" | while read pkg_json; do
   pkg_dir=$(dirname "$pkg_json")
   pkg_name=$(grep '"name":' "$pkg_json" | head -n 1 | sed 's/.*"name": "\(.*\)".*/\1/') or "Unknown"
 
@@ -26,5 +26,5 @@ done
 echo "---------------------------------------------------------"
 echo "Total Source Lines of Code (excluding tests):"
 # Total count across all src, applying same exclusions
-total_lines=$(eval "find src -type f \( -name '*.ts' -o -name '*.tsx' \) $EXCLUDES -print0" | xargs -0 wc -l | tail -n 1 | awk '{print $1}')
+total_lines=$(eval "find main -type f \( -name '*.ts' -o -name '*.tsx' \) $EXCLUDES -print0" | xargs -0 wc -l | tail -n 1 | awk '{print $1}')
 echo "$total_lines"

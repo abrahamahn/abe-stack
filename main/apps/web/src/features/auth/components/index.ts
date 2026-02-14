@@ -1,0 +1,24 @@
+// main/apps/web/src/features/auth/components/index.ts
+export { AuthForm } from './AuthForms';
+export type { AuthFormProps } from './AuthForms';
+export { AuthModal } from './AuthModal';
+export { ForgotPasswordForm } from './ForgotPasswordForm';
+export type { ForgotPasswordFormProps } from './ForgotPasswordForm';
+export { LoginForm } from './LoginForm';
+export type { LoginFormProps } from './LoginForm';
+export { MagicLinkForm } from './MagicLinkForm';
+export type { MagicLinkFormProps } from './MagicLinkForm';
+export { NewDeviceBanner } from './NewDeviceBanner';
+export { OAuthButtons } from './OAuthButtons';
+export type { OAuthButtonsProps } from './OAuthButtons';
+export { PasskeyLoginButton } from './PasskeyLoginButton';
+export type { PasskeyLoginButtonProps } from './PasskeyLoginButton';
+export { RegisterForm } from './RegisterForm';
+export type { RegisterFormProps } from './RegisterForm';
+export { ResetPasswordForm } from './ResetPasswordForm';
+export type { ResetPasswordFormProps } from './ResetPasswordForm';
+export { SmsChallenge } from './SmsChallenge';
+export { TosAcceptanceModal } from './TosAcceptanceModal';
+export type { TosAcceptanceModalProps } from './TosAcceptanceModal';
+export { TurnstileWidget } from './TurnstileWidget';
+export type { TurnstileWidgetProps } from './TurnstileWidget';

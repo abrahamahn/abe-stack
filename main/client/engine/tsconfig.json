@@ -1,0 +1,30 @@
+{
+  "extends": "../../../config/tsconfig.node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM"],
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": {
+      "@abe-stack/shared": ["../../shared/src/index.ts"],
+      "@abe-stack/shared/*": ["../../shared/src/*"],
+      "@abe-stack/api": ["../api/src/index.ts"],
+      "@abe-stack/api/*": ["../api/src/*"]
+    },
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.engine.tsbuildinfo"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "vitest.config.ts"],
+  "references": [
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../api"
+    }
+  ]
+}

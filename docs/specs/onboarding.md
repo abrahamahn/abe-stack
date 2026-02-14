@@ -91,14 +91,14 @@ This is the most common question for new developers. Here's the decision tree:
 
 | What you're building               | Where it goes                | Example                                       |
 | ---------------------------------- | ---------------------------- | --------------------------------------------- |
-| React component (reusable)         | `src/client/ui/`             | Button, Card, Dialog, Table                   |
-| React component (feature-specific) | `src/apps/web/src/features/` | LoginForm, UserListPage                       |
-| Business logic or validation       | `src/shared/`                | Zod schemas, domain rules, type contracts     |
-| API route handler                  | `src/server/core/`           | Auth handlers, user CRUD, admin endpoints     |
-| Infrastructure adapter             | `src/server/engine/`         | Email sending, file storage, JWT signing      |
-| Database schema or migration       | `src/server/db/`             | Drizzle table definitions, SQL migrations     |
-| API client hook                    | `src/client/api/`            | `useLogin()`, `useUsers()`, React Query hooks |
-| Dev tooling or scripts             | `src/tools/`                 | Linters, sync scripts, DB utilities           |
+| React component (reusable)         | `main/client/ui/`             | Button, Card, Dialog, Table                   |
+| React component (feature-specific) | `main/apps/web/src/features/` | LoginForm, UserListPage                       |
+| Business logic or validation       | `main/shared/`                | Zod schemas, domain rules, type contracts     |
+| API route handler                  | `main/server/core/`           | Auth handlers, user CRUD, admin endpoints     |
+| Infrastructure adapter             | `main/server/engine/`         | Email sending, file storage, JWT signing      |
+| Database schema or migration       | `main/server/db/`             | Drizzle table definitions, SQL migrations     |
+| API client hook                    | `main/client/api/`            | `useLogin()`, `useUsers()`, React Query hooks |
+| Dev tooling or scripts             | `main/tools/`                 | Linters, sync scripts, DB utilities           |
 
 **Before creating a new file,** search if something similar already exists. Prefer editing an existing file over creating a new one.
 
@@ -116,7 +116,7 @@ The project uses maximum TypeScript strictness. A few things that might surprise
 - **`exactOptionalPropertyTypes` is on.** You can't assign `undefined` to an optional property unless the type explicitly includes `| undefined`.
 - **`noUncheckedIndexedAccess` is on.** Array access returns `T | undefined`, so you must check bounds.
 
-Use Zod for all runtime validation. Define schemas in `src/shared/` and infer TypeScript types from them:
+Use Zod for all runtime validation. Define schemas in `main/shared/` and infer TypeScript types from them:
 
 ```typescript
 const userSchema = z.object({
@@ -203,7 +203,7 @@ The theme variables are all prefixed with `--ui-`. Here are the most common ones
 
 ### Prefer utility classes
 
-The design system includes utility classes similar to Tailwind (defined in `src/client/ui/src/styles/utilities.css`):
+The design system includes utility classes similar to Tailwind (defined in `main/client/ui/src/styles/utilities.css`):
 
 ```tsx
 <div className="flex gap-3 p-4 bg-surface border rounded-md">
@@ -221,27 +221,27 @@ Never use `px` for spacing, font sizes, or layout. Use `rem`, `em`, `%`, or the 
 
 ### Adding an API endpoint
 
-1. Define the Zod request/response schemas in `src/shared/src/domain/`
-2. Write the handler in `src/server/core/src/<module>/handlers/`
-3. Register the route in `src/server/core/src/<module>/routes.ts`
-4. Add the API client hook in `src/client/api/src/`
+1. Define the Zod request/response schemas in `main/shared/src/domain/`
+2. Write the handler in `main/server/core/src/<module>/handlers/`
+3. Register the route in `main/server/core/src/<module>/routes.ts`
+4. Add the API client hook in `main/client/api/src/`
 5. Write tests for the handler
 
 ### Adding a new page
 
-1. Create the page component in `src/apps/web/src/features/<feature>/pages/`
-2. Add the route in `src/apps/web/src/app/routes.tsx`
-3. If it needs lazy loading, add a lazy import in `src/apps/web/src/pages/`
+1. Create the page component in `main/apps/web/src/features/<feature>/pages/`
+2. Add the route in `main/apps/web/src/app/routes.tsx`
+3. If it needs lazy loading, add a lazy import in `main/apps/web/src/pages/`
 
 ### Form validation
 
-1. Define the Zod schema in `src/shared/` (so both client and server share it)
+1. Define the Zod schema in `main/shared/` (so both client and server share it)
 2. Use `safeParse()` before submitting
 3. Display field errors from `error.flatten().fieldErrors`
 
 ### Environment variables
 
-1. Define a Zod schema for the variable in `src/shared/`
+1. Define a Zod schema for the variable in `main/shared/`
 2. Parse at app startup: `envSchema.parse(process.env)`
 3. Use the validated object everywhere — never read `process.env` directly
 
@@ -253,8 +253,8 @@ These are the most common mistakes new developers make:
 
 | Mistake                            | Why it's a problem                      | What to do instead                      |
 | ---------------------------------- | --------------------------------------- | --------------------------------------- |
-| Business logic in React components | Can't test without rendering UI         | Move logic to `src/shared/`             |
-| Duplicating types across files     | They drift apart over time              | Single source of truth in `src/shared/` |
+| Business logic in React components | Can't test without rendering UI         | Move logic to `main/shared/`             |
+| Duplicating types across files     | They drift apart over time              | Single source of truth in `main/shared/` |
 | Importing from another app         | Breaks build boundaries                 | Use shared packages instead             |
 | Prop drilling through 5+ levels    | Fragile, hard to refactor               | Use React Context or hooks              |
 | Using `any` to "fix" type errors   | Defeats the purpose of TypeScript       | Write proper types + Zod schemas        |
@@ -283,19 +283,19 @@ During development, run targeted checks on just the files you changed:
 
 ```bash
 # Lint specific files
-npx eslint src/apps/web/src/features/auth/pages/LoginPage.tsx
+npx eslint main/apps/web/src/features/auth/pages/LoginPage.tsx
 
 # Type-check a specific package
 pnpm --filter @abe-stack/web type-check
 
 # Run a specific test file
-pnpm test -- --run src/server/core/src/auth/service.test.ts
+pnpm test -- --run main/server/core/src/auth/service.test.ts
 
 # Run all tests for a package
 pnpm --filter @abe-stack/shared test
 
 # Format specific files
-npx prettier --config config/.prettierrc --write src/apps/web/src/features/auth/pages/LoginPage.tsx
+npx prettier --config config/.prettierrc --write main/apps/web/src/features/auth/pages/LoginPage.tsx
 ```
 
 Before creating a PR or after large cross-package changes, run the full build:

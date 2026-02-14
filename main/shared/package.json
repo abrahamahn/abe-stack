@@ -1,0 +1,85 @@
+{
+  "name": "@abe-stack/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Shared environment-agnostic code for ABE Stack",
+  "keywords": [
+    "shared",
+    "types",
+    "schemas",
+    "errors",
+    "utils",
+    "constants",
+    "environment-agnostic"
+  ],
+  "author": "ABE Stack",
+  "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abe-stack/abe-stack.git",
+    "directory": "main/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/abe-stack/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abe-stack/abe-stack#readme",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    },
+    "./domain": {
+      "types": "./dist/domain/index.d.ts",
+      "default": "./dist/domain/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "default": "./dist/api/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "default": "./dist/logger/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "postbuild": "node --import tsx ../tools/scripts/build/ensure-js-extensions.ts dist",
+    "test": "vitest run",
+    "lint": "eslint . --max-warnings 0",
+    "type-check": "tsc --noEmit --types node --skipLibCheck",
+    "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
+    "verify-exports": "node scripts/verify-exports.mjs",
+    "prepack": "npm run build && npm run verify-exports && npm run test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^25.0.9",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

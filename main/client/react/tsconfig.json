@@ -1,0 +1,38 @@
+{
+  "extends": "../../../config/tsconfig.react.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "types": ["vite/client"],
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "composite": true,
+    "paths": {
+      "@abe-stack/shared": ["../../shared/src/index.ts"],
+      "@abe-stack/shared/*": ["../../shared/src/*"],
+      "@abe-stack/client-engine": ["../engine/src/index.ts"],
+      "@abe-stack/client-engine/*": ["../engine/src/*"],
+      "@abe-stack/api": ["../api/src/index.ts"],
+      "@abe-stack/api/*": ["../api/src/*"],
+      "@hooks": ["./src/hooks"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@providers": ["./src/providers"],
+      "@providers/*": ["./src/providers/*"],
+      "@router": ["./src/router"],
+      "@router/*": ["./src/router/*"]
+    },
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.react.tsbuildinfo",
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "../engine"
+    },
+    {
+      "path": "../api"
+    },
+    {
+      "path": "../../shared"
+    }
+  ]
+}

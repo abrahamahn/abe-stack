@@ -22,12 +22,12 @@ FROM base AS deps
 
 # Copy only package files for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY src/apps/web/package.json src/apps/web/
-COPY src/client/api/package.json src/client/api/
-COPY src/client/engine/package.json src/client/engine/
-COPY src/client/ui/package.json src/client/ui/
-COPY src/client/react/package.json src/client/react/
-COPY src/shared/package.json src/shared/
+COPY main/apps/web/package.json main/apps/web/
+COPY main/client/api/package.json main/client/api/
+COPY main/client/engine/package.json main/client/engine/
+COPY main/client/ui/package.json main/client/ui/
+COPY main/client/react/package.json main/client/react/
+COPY main/shared/package.json main/shared/
 
 # Fetch all dependencies (including dev deps for build)
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
@@ -76,7 +76,7 @@ RUN apk update && \
 COPY infra/docker/nginx.conf /etc/nginx/nginx.conf
 
 # Copy built static files from build stage
-COPY --from=build /app/src/apps/web/dist /usr/share/nginx/html
+COPY --from=build /app/main/apps/web/dist /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

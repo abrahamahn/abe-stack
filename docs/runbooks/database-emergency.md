@@ -1,5 +1,48 @@
 # Database Emergency Runbook
 
+## Seed Script Failures (Must Fail Hard)
+
+### Symptoms
+
+- `pnpm db:seed` logs per-user errors such as:
+  - `CONNECTION_ENDED localhost:5432`
+- Seed output appears partially successful but should terminate with non-zero exit code.
+- Local login fails because seeded users are missing or stale.
+
+### Expected behavior
+
+- Seed must fail hard if any seed row fails.
+- Process exit code must be non-zero on any seed failure.
+- No deployment or local bootstrap should continue after a failed seed run.
+
+### Diagnosis
+
+1. Run seed and check exit code:
+   ```bash
+   pnpm db:seed; echo "exit=$?"
+   ```
+2. If exit is `0` with row-level errors, treat as critical script regression.
+3. Validate DB availability:
+   ```bash
+   pg_isready -h localhost -p 5432
+   ```
+4. Confirm migration/schema state before seeding:
+   ```bash
+   pnpm db:migrate
+   ```
+
+### Recovery
+
+1. Restore DB connectivity.
+2. Re-run migrations.
+3. Re-run seed and verify `exit=0`.
+4. Validate seeded credentials by logging in with `admin@example.com / password123`.
+
+### Code reference
+
+- Seed fail-hard logic lives in `main/tools/scripts/db/seed.ts`.
+- Any per-user insert failure must be collected and re-thrown as a fatal error.
+
 ## Connection Pool Exhaustion
 
 ### Symptoms

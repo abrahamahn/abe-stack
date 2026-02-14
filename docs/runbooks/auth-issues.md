@@ -1,5 +1,49 @@
 # Authentication Issues Runbook
 
+## Invalid Login Response Shape
+
+### Symptoms
+
+- Frontend shows: `Invalid login response shape (keys=user)` or similar.
+- Login endpoint returns `200`, but auth state does not complete on the client.
+- Server logs show successful `/api/auth/login`, then repeated `/api/auth/refresh` or `/api/users/me`.
+
+### Canonical response contract (BFF mode)
+
+- `POST /api/auth/login` success payload must be:
+  - `{ "user": { ... }, "isNewDevice"?: boolean, "defaultTenantId"?: string }`
+- `POST /api/auth/login` must not return `token` or `accessToken`.
+- `POST /api/auth/refresh` success payload must be:
+  - `{ "token": "..." }`
+- `GET /api/users/me` success payload must be:
+  - `{ ...user fields... }`
+
+### Diagnosis
+
+1. Verify environment is BFF-only and restart dev services:
+   ```bash
+   pnpm dev
+   ```
+2. Check response body directly:
+   ```bash
+   curl -i -X POST http://localhost:8080/api/auth/login \
+     -H "Content-Type: application/json" \
+     --data '{"identifier":"admin@example.com","password":"password123"}'
+   ```
+3. If body shape differs from canonical contract, inspect:
+   - `main/server/core/src/auth/handlers/login.ts`
+   - `main/client/api/src/api/login-response.ts`
+4. Run governance audit (strict) to detect contract drift:
+   ```bash
+   pnpm audit:response-sync:strict
+   ```
+
+### Fix patterns
+
+- If backend returns nested envelopes or legacy token-bearing login payloads, normalize handler output to canonical BFF shape.
+- If frontend parser was relaxed temporarily, remove compatibility shims and parse only canonical shape.
+- If stale code persists after refactors, clear TypeScript caches and restart dev processes.
+
 ## Locked Accounts
 
 ### How accounts get locked

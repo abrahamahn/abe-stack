@@ -1,0 +1,750 @@
+// main/server/core/src/auth/handlers/login.test.ts
+/**
+ * Login Handler Tests
+ *
+ * Comprehensive tests for user authentication via email/password.
+ */
+
+import {
+  AccountLockedError,
+  EmailNotVerifiedError,
+  InvalidCredentialsError,
+} from '@abe-stack/shared';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { handleLogin } from './login';
+
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { LoginRequest } from '@abe-stack/shared';
+
+// ============================================================================
+// Mock Dependencies
+// ============================================================================
+
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const {
+  mockAuthenticateUser,
+  mockResendVerificationEmail,
+  mockSetRefreshTokenCookie,
+  mockMapErrorToHttpResponse,
+  mockSendNewLoginAlert,
+  mockIsCaptchaRequired,
+  mockVerifyCaptchaToken,
+  mockGenerateDeviceFingerprint,
+  mockIsKnownDevice,
+  mockRecordDeviceAccess,
+  mockLogNewDeviceLogin,
+} = vi.hoisted(() => ({
+  mockAuthenticateUser: vi.fn(),
+  mockResendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+  mockSetRefreshTokenCookie: vi.fn(),
+  mockSendNewLoginAlert: vi.fn().mockResolvedValue(undefined),
+  mockIsCaptchaRequired: vi.fn(() => false),
+  mockVerifyCaptchaToken: vi.fn().mockResolvedValue({ success: true, errorCodes: [] }),
+  mockGenerateDeviceFingerprint: vi.fn().mockReturnValue('mock-fingerprint'),
+  mockIsKnownDevice: vi.fn().mockResolvedValue(false),
+  mockRecordDeviceAccess: vi.fn().mockResolvedValue(undefined),
+  mockLogNewDeviceLogin: vi.fn().mockResolvedValue(undefined),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToHttpResponse: vi.fn((error: unknown, _ctx: unknown) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'AccountLockedError':
+          return {
+            status: 429,
+            body: { message: 'Account temporarily locked due to too many failed attempts' },
+          };
+        case 'EmailNotVerifiedError':
+          return {
+            status: 401,
+            body: {
+              message:
+                (error as Error & { email?: string }).message !== ''
+                  ? (error as Error & { email?: string }).message
+                  : 'Please verify your email',
+              code: 'EMAIL_NOT_VERIFIED',
+            },
+          };
+        case 'InvalidCredentialsError':
+          return { status: 401, body: { message: 'Invalid email or password' } };
+        default:
+          return { status: 500, body: { message: 'Internal server error' } };
+      }
+    }
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
+}));
+
+// Mock the service module
+vi.mock('../service', () => ({
+  authenticateUser: mockAuthenticateUser,
+  resendVerificationEmail: mockResendVerificationEmail,
+}));
+
+// Mock utils module
+vi.mock('../utils', () => ({
+  setRefreshTokenCookie: mockSetRefreshTokenCookie,
+}));
+
+vi.mock('../security', () => ({
+  sendNewLoginAlert: mockSendNewLoginAlert,
+  isCaptchaRequired: mockIsCaptchaRequired,
+  verifyCaptchaToken: mockVerifyCaptchaToken,
+  generateDeviceFingerprint: mockGenerateDeviceFingerprint,
+  isKnownDevice: mockIsKnownDevice,
+  recordDeviceAccess: mockRecordDeviceAccess,
+  logNewDeviceLogin: mockLogNewDeviceLogin,
+}));
+
+// Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
+vi.mock('@abe-stack/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+  return {
+    ...original,
+    mapErrorToHttpResponse: mockMapErrorToHttpResponse,
+  };
+});
+
+// ============================================================================
+// Test Helpers
+// ============================================================================
+
+function createMockContext(overrides?: Partial<AppContext>): AppContext {
+  return {
+    db: {} as AppContext['db'],
+    repos: {
+      refreshTokenFamilies: {
+        findActiveByUserId: vi.fn().mockResolvedValue([]),
+        revoke: vi.fn().mockResolvedValue(undefined),
+      },
+      memberships: {
+        findByUserId: vi.fn().mockResolvedValue([]),
+      },
+    } as unknown as AppContext['repos'],
+    email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
+    emailTemplates: {} as AppContext['emailTemplates'],
+    config: {
+      auth: {
+        jwt: {
+          secret: 'test-secret-32-characters-long!!',
+          accessTokenExpiry: '15m',
+        },
+        argon2: {},
+        refreshToken: {
+          expiryDays: 7,
+          gracePeriodSeconds: 30,
+        },
+        lockout: {
+          maxAttempts: 5,
+          windowMs: 900000,
+          lockoutDurationMs: 1800000,
+        },
+      },
+      server: {
+        port: 8080,
+        appBaseUrl: 'http://localhost:8080',
+      },
+    },
+    log: {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      fatal: vi.fn(),
+      child: vi.fn(),
+    },
+    storage: {} as AppContext['storage'],
+    pubsub: {} as AppContext['pubsub'],
+    ...overrides,
+  } as unknown as AppContext;
+}
+
+function createMockReply(): ReplyWithCookies {
+  return {
+    setCookie: vi.fn(),
+    clearCookie: vi.fn(),
+  };
+}
+
+function createMockRequest(
+  requestInfo?: Partial<RequestWithCookies['requestInfo']>,
+): RequestWithCookies {
+  return {
+    cookies: {},
+    headers: { 'user-agent': 'Test Browser' },
+    ip: '127.0.0.1',
+    requestInfo: {
+      ipAddress: '127.0.0.1',
+      userAgent: 'Test Browser',
+      ...requestInfo,
+    },
+  } as RequestWithCookies;
+}
+
+function createLoginBody(overrides?: Partial<LoginRequest>): LoginRequest {
+  return {
+    identifier: 'test@example.com',
+    password: 'SecureP@ssw0rd!',
+    ...overrides,
+  };
+}
+
+// ============================================================================
+// Tests: handleLogin
+// ============================================================================
+
+describe('handleLogin', () => {
+  const createdAt = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockIsCaptchaRequired.mockReturnValue(false);
+    mockVerifyCaptchaToken.mockResolvedValue({ success: true, errorCodes: [] });
+    mockSendNewLoginAlert.mockResolvedValue(undefined);
+  });
+
+  describe('successful login', () => {
+    test('should return 200 with user payload on successful login', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(200);
+      expect(result.body).toEqual({
+        user: mockAuthResult.user,
+        isNewDevice: true,
+      });
+      expect(result.body).not.toHaveProperty('ok');
+      expect(result.body).not.toHaveProperty('success');
+      expect(result.body).not.toHaveProperty('data');
+      expect(result.body).not.toHaveProperty('accessToken');
+
+      // Verify security event logged for new device
+      expect(mockLogNewDeviceLogin).toHaveBeenCalledWith(
+        ctx.db,
+        mockAuthResult.user.id,
+        mockAuthResult.user.email,
+        '127.0.0.1',
+        'Test Browser',
+      );
+    });
+
+    test('should return user-only payload', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          bio: null,
+          city: null,
+          state: null,
+          country: null,
+          language: null,
+          website: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(200);
+      expect(result.body).toEqual({
+        user: mockAuthResult.user,
+        isNewDevice: true,
+      });
+      expect(result.body).not.toHaveProperty('token');
+      expect(result.body).not.toHaveProperty('accessToken');
+    });
+
+    test('should call authenticateUser with correct parameters', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
+        ctx.db,
+        ctx.repos,
+        ctx.config.auth,
+        body.identifier,
+        body.password,
+        ctx.log,
+        '127.0.0.1',
+        'Test Browser',
+        expect.any(Function),
+      );
+    });
+
+    test('should set refresh token cookie on successful login', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
+        reply,
+        'refresh-token-456',
+        ctx.config.auth,
+      );
+    });
+
+    test('should handle user with null optional fields', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(200);
+      const user = (result.body as { user: { phone: string | null; avatarUrl: string | null } })
+        .user;
+      expect(user.phone).toBeNull();
+      expect(user.avatarUrl).toBeNull();
+    });
+
+    test('should handle admin role user', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'admin-123',
+          email: 'admin@example.com',
+          username: 'adminuser',
+          firstName: 'Admin',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'admin' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(200);
+      expect((result.body as { user: { role: string } }).user.role).toBe('admin');
+    });
+  });
+
+  describe('error handling', () => {
+    test('should return 401 for invalid credentials', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new InvalidCredentialsError());
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(401);
+      expect((result.body as { message: string }).message).toBe('Invalid email or password');
+    });
+
+    test('should return 429 for locked account', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new AccountLockedError());
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(429);
+      expect((result.body as { message: string }).message).toContain('Account temporarily locked');
+    });
+
+    test('should return 401 for unverified email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(401);
+      expect((result.body as { message: string }).message).toContain('verify your email');
+    });
+
+    test('should auto-resend verification email when login blocked by unverified email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockResendVerificationEmail).toHaveBeenCalledWith(
+        ctx.db,
+        ctx.repos,
+        ctx.email,
+        ctx.emailTemplates,
+        'test@example.com',
+        'http://localhost:8080',
+      );
+    });
+
+    test('should not crash if resend verification email fails on login', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new EmailNotVerifiedError('test@example.com'));
+      mockResendVerificationEmail.mockRejectedValue(new Error('SMTP error'));
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(401);
+      expect(mockResendVerificationEmail).toHaveBeenCalled();
+    });
+
+    test('should return 500 for unexpected errors', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new Error('Database connection failed'));
+
+      const result = await handleLogin(ctx, body, request, reply);
+
+      expect(result.status).toBe(500);
+      expect((result.body as { message: string }).message).toBe('Internal server error');
+    });
+
+    test('should not set cookie on authentication failure', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      mockAuthenticateUser.mockRejectedValue(new InvalidCredentialsError());
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockSetRefreshTokenCookie).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('password rehash callback', () => {
+    test('should log password hash upgrade on callback invocation', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest();
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      let capturedCallback: ((userId: string) => void) | undefined;
+      mockAuthenticateUser.mockImplementation(
+        (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
+          capturedCallback = callback;
+          return Promise.resolve(mockAuthResult);
+        },
+      );
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(capturedCallback).toBeDefined();
+      capturedCallback?.('user-123');
+
+      expect(ctx.log.info).toHaveBeenCalledWith({ userId: 'user-123' }, 'Password hash upgraded');
+    });
+  });
+
+  describe('request info extraction', () => {
+    test('should use IP address from requestInfo', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest({ ipAddress: '192.168.1.100' });
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        '192.168.1.100',
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    test('should use user agent from requestInfo', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest({ userAgent: 'Mozilla/5.0 Custom Browser' });
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        'Mozilla/5.0 Custom Browser',
+        expect.anything(),
+      );
+    });
+
+    test('should handle undefined user agent', async () => {
+      const ctx = createMockContext();
+      const request = {
+        cookies: {},
+        headers: {},
+        ip: '127.0.0.1',
+        requestInfo: { ipAddress: '127.0.0.1' },
+      } as RequestWithCookies;
+      const reply = createMockReply();
+      const body = createLoginBody();
+
+      const mockAuthResult = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        user: {
+          id: 'user-123',
+          email: 'test@example.com',
+          username: 'testuser',
+          firstName: 'Test',
+          lastName: 'User',
+          avatarUrl: null,
+          role: 'user' as const,
+          emailVerified: true,
+          phone: null,
+          phoneVerified: null,
+          dateOfBirth: null,
+          gender: null,
+          createdAt,
+          updatedAt: createdAt,
+        },
+      };
+
+      mockAuthenticateUser.mockResolvedValue(mockAuthResult);
+
+      await handleLogin(ctx, body, request, reply);
+
+      expect(mockAuthenticateUser).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        expect.anything(),
+      );
+    });
+  });
+});

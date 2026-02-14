@@ -13,7 +13,7 @@
 | ----------------- | ---------------------- | -------------------------------------------- |
 | Unit tests        | Colocated with source  | `service.ts` + `service.test.ts`             |
 | Handler tests     | Colocated with handler | `login.ts` + `login.test.ts`                 |
-| Integration tests | Central folder         | `src/apps/server/src/__tests__/integration/` |
+| Integration tests | Central folder         | `main/apps/server/src/__tests__/integration/` |
 | E2E tests         | Playwright config      | `config/playwright.config.ts`                |
 
 ## Running Tests
@@ -50,7 +50,7 @@ export const baseConfig = defineConfig({
 
 ### Web App Config
 
-`src/apps/web/vitest.config.ts` extends the base with:
+`main/apps/web/vitest.config.ts` extends the base with:
 
 - `environment: 'jsdom'` for browser API simulation
 - `setupFiles: ['./src/__tests__/setup.ts']` for global mocks
@@ -59,7 +59,7 @@ export const baseConfig = defineConfig({
 
 ## Test Setup (Golden Standard)
 
-The reference setup file is `src/apps/web/src/__tests__/setup.ts`. Every web test file inherits this setup.
+The reference setup file is `main/apps/web/src/__tests__/setup.ts`. Every web test file inherits this setup.
 
 ### Required Browser API Mocks
 
@@ -154,7 +154,7 @@ Tests must be run from the package directory (not root) for jsdom environment to
 pnpm --filter @abe-stack/web test
 
 # ALSO CORRECT
-cd src/apps/web && pnpm test
+cd main/apps/web && pnpm test
 ```
 
 ## Writing Tests

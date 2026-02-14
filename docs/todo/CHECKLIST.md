@@ -875,7 +875,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 ### Storybook — [ ] Empty Scaffold
 
-- [ ] `src/apps/storybook/` directory exists but contains no stories or config
+- [ ] `main/apps/storybook/` directory exists but contains no stories or config
 - [ ] Component stories for `client/ui` design system
 - [ ] Interactive documentation for reusable components
 
@@ -909,7 +909,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 - [ ] Staging environment workflow
 - [ ] Preview deployments for PRs
 
-### 13.4 Dev Tooling (`src/tools/`)
+### 13.4 Dev Tooling (`main/tools/`)
 
 - [x] Audit scripts: `build-optimizer.ts`, `bundle-monitor.ts`, `bundle-size.ts`, `dependency-audit.ts`, `health-check.ts`, `security-audit.ts`
 - [x] DB tools: `bootstrap-admin.ts`, `push.ts`, `migrate.ts`, `seed.ts` (all tested)

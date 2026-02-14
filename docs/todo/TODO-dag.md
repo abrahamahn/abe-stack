@@ -7,6 +7,38 @@ Last updated: 2026-02-13
 
 ---
 
+## Phase 1 API Standardization Progress (2026-02-13)
+
+### Completed
+
+- Shared contracts expanded and aligned with live server routes across auth, users, billing, admin, notifications, webhooks, and api-keys.
+- Runtime request validation wired at route boundaries for high-risk endpoints (auth flows, webauthn, oauth callback, notifications, api-keys, files, tenants, admin actions, consent, data export, legal publish, feature flags).
+- Client runtime response validation rollout applied across `main/client/api` domains (auth core, billing, notifications, phone/devices, api-keys, webhooks).
+- API governance audits implemented and standardized:
+  - `pnpm audit:contract-sync`
+  - `pnpm audit:api-sync`
+  - `pnpm audit:api-governance`
+  - strict variants with `--fail-on-drift`
+- Route manifest/audits made self-contained (in-memory route registration fallback when `route-manifest.json` is absent).
+- Contract drift resolved to zero on current snapshot:
+  - `contract-only = 0`
+  - `route-only = 0`
+
+### In progress / Remaining
+
+- Contract drift resolved:
+  - `contract-only = 0`
+  - `route-only = 0`
+- Client coverage drift resolved:
+  - `uncovered routes = 0`
+  - `method mismatches = 0`
+- Mutating route runtime schemas:
+  - `114 / 114` schema-backed
+  - Remaining exceptions: none
+- Strict governance is enabled in `ci:verify` (`pnpm audit:api-governance:strict`).
+
+---
+
 ## Full Monorepo Dependency DAG
 
 Every package depends on `shared` (omitted from diagrams for clarity).
@@ -458,6 +490,18 @@ Uses the apps DAG from above. Recap:
 | **apps/desktop** | api, client-engine, react, shared, server-engine, ui |
 | **apps/server**  | core, db, realtime, server-engine, shared, websocket |
 
+### Server DAG Baseline (2026-02-13)
+
+- [x] Generated canonical server dependency DAG from code:
+  - `docs/architecture/server-dependency-dag.md`
+  - command: `pnpm audit:server-dag:write`
+- [x] Confirmed package-layer direction:
+  - top composition layer: `apps/server`
+  - lower reusable domain layer: `server/core`
+  - infra/data leaves: `server-engine`, `db`, `media`, `websocket`, `realtime`, `shared`
+- [x] Decision: do **not** collapse `server/core` into `apps/server`.
+- [ ] Next refactor pass: move only app-runtime-specific code from `server/core` to `apps/server` where it cannot be reused outside app bootstrap/runtime wiring.
+
 ### Phase 9: apps vs their direct package deps (vertical)
 
 Does each app contain logic that should be pushed down into a package?
@@ -465,32 +509,37 @@ Does each app contain logic that should be pushed down into a package?
 - [x] `web` vs `shared` — **FIXED (2026-02-13)**  
       Evidence: `0` non-test files now read `localStorage('accessToken')` directly.  
       Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@abe-stack/shared` across web hooks/components.
-- [x] `web` vs `api` — **ACTION NEEDED**  
-      Evidence: `8` non-test files still use raw `fetch()` and bypass package clients.  
-      Files include ToS accept, consent, data export, impersonation, feature flag, workspace billing/audit/feature-overrides.
+- [x] `web` → `api` — **FIXED (2026-02-13)**  
+      Relationship: `apps/web` now routes HTTP concerns through `@abe-stack/api` clients/helpers.  
+      Evidence: `0` non-test files in `apps/web/src` use raw `fetch()`; hook/app callsites migrated to package API methods.
+      Follow-up completed: extracted shared CSRF/auth transport helper (`createCsrfRequestClient`) into `@abe-stack/api` and removed duplicated request boilerplate across web domain API modules (admin/settings/workspace/media/notifications/activities).
 - [x] `web` vs `client-engine` — **CLEAN**  
-      Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.
+      Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.  
+      Follow-up completed (2026-02-13): removed duplicated query-persister payload types from `apps/web/src/app/App.tsx` by exporting and consuming `PersistedQuery`/`PersistedClient`/`Persister` from `@abe-stack/client-engine`.
 - [x] `web` vs `react` — **CLEAN**  
-      Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.
+      Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.  
+      Follow-up completed (2026-02-13): extracted reusable pubsub connection-state subscription hook into `@abe-stack/react` (`usePubsubConnectionState`) and updated web realtime hook to consume it; migrated settings theme system-detection logic to shared `@abe-stack/react/hooks/useMediaQuery`; extracted raw localStorage subscription primitive (`useLocalStorageValue`) into `@abe-stack/react/hooks` and refactored web hooks/components (`useWorkspaceContext`, `CookieConsentBanner`, `GettingStartedChecklist`, `useDataExport`) to consume it.
 - [x] `web` vs `ui` — **CLEAN (for now)**  
       Evidence: heavy reuse (`138` non-test imports from `@abe-stack/ui`); app components appear domain-specific rather than reusable design-system primitives.
-- [x] `server` vs `shared` — **CLEAN**  
-      Evidence: `30` non-test imports from `@abe-stack/shared`; server code consumes shared constants/utilities/contracts rather than duplicating them.
-- [x] `server` vs `core` — **CLEAN**  
-      Evidence: `22` non-test imports from `@abe-stack/core/*`; routes and business modules are wired from core package, not duplicated in app/server.
-- [x] `server` vs `server-engine` — **CLEAN**  
-      Evidence: `13` non-test imports from `@abe-stack/server-engine`; infra adapters/middleware helpers are reused through package boundaries.
+      Follow-up completed (2026-02-13): extracted reusable presentation components from web into `@abe-stack/ui` and replaced app-local implementations with thin re-exports (`FeatureHint`, `SectionErrorBoundary`, `RoleBadge`, `JobStatusBadge`, `StatusBadge`, `getUserStatus`, `SessionCard`); moved profile completeness display rendering into shared UI component (`ProfileCompletenessCard`) while retaining web hook/data orchestration; introduced shared stat rendering primitive (`MetricValue`) for admin metric cards, extracted reusable settings device row renderer (`DeviceRowCard`), consolidated recurring card + heading shell markup via shared `TitledCardSection` (applied across admin metrics/queue/event detail panels), extracted shared labeled detail row rendering (`LabeledValueRow`) reused by admin event/job detail views, and standardized loading/error card handling via shared `CardAsyncState` (applied to queue stats, consent preferences, OAuth connections, and API keys sections).
+- [x] `server` vs `shared`
+- [x] `server` vs `core` — **REFACTORED (2026-02-13)**  
+      Evidence: extracted canonical core module registry from app wiring into `@abe-stack/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
+      Boundary hardening: moved Fastify/raw-body billing webhook registration into app runtime layer (`main/apps/server/src/routes/billingWebhooks.ts`) and removed framework-specific webhook route registration from core (`main/server/core/src/billing/webhooks/routes.ts` deleted; core now exports webhook business handlers only).
+- [ ] `server` vs `server-engine`
+- [x] Create `ServerManager` to wrap logic
+    - [x] Standardize startup/shutdown signals
+    - [x] Ensure correct configuration loading sequence
+- [x] Refactor `apps/server/main.ts` to use `ServerManager`
 - [x] `desktop` vs `shared` — **CLEAN**  
-      Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`, `waitForPort`, `MS_PER_HOUR`), no duplicated shared utilities found.
-- [x] `desktop` vs `api` — **CLEAN (N/A usage)**  
-      Evidence: `0` non-test imports from `@abe-stack/api` in current desktop code. No duplicated API wrapper code found in app.
+      Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`,  duplicated API wrapper code found in app.
 - [x] `desktop` vs `ui` — **CLEAN (N/A usage)**  
       Evidence: `0` non-test imports from `@abe-stack/ui` in current desktop code. No duplicated UI component implementations found in app.
 
 #### Phase 9 follow-up backlog (from audit)
 
 - [x] `web` token access consolidation: replace direct `localStorage('accessToken')` usage with unified token source (AuthService/tokenStore facade).
-- [ ] `web` raw fetch migration: move remaining 8 fetch-based call sites to `@abe-stack/api` clients/helpers.
+- [x] `web` raw fetch migration: moved web fetch-based call sites to `@abe-stack/api` clients/helpers.
 - [ ] `desktop` dependency hygiene: verify whether unused `@abe-stack/api` and `@abe-stack/ui` dependencies should remain declared.
 
 ### Phase 10: apps laterals
@@ -538,11 +587,11 @@ Do multiple apps share logic that should be in a package?
 | 2     | shared vs consumers     | —      | **DONE**                                  |
 | 3     | server/_ vs server/_    | 13     | **DONE**                                  |
 | 4     | client/_ vs client/_    | 6      | **DONE** (5/7 refactors done, 2 deferred) |
-| 5     | apps/_ vs deps + apps/_ | 14     | TODO                                      |
+| 5     | apps/_ vs deps + apps/_ | 14     | **DONE** (14/14 verticals audited; Phase 10 laterals TODO) |
 | 6     | client-server boundary  | —      | **DONE** (documented, zero violations)    |
 | **∑** |                         | **33** |                                           |
 
-**Next**: Scope 5 — audit apps against their package dependencies and each other.
+**Next**: Phase 10 — audit app laterals (web ↔ desktop, web ↔ server, desktop ↔ server).
 
 ---
 

@@ -42,7 +42,7 @@ jobs:
             echo "is_full_build=false" >> "$GITHUB_OUTPUT"
           fi
 
-  sanity-checks:
+  global-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,32 +64,96 @@ jobs:
       - name: Check file headers
         run: pnpm -w run sync:headers:check
 
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
       - name: Format Check
         run: pnpm format:check:ci
 
       - name: Lint
         run: pnpm lint
 
-      - name: Type Check
-        run: pnpm type-check
-
-      - name: Run Tests
-        run: pnpm test
-
       - name: Build Storybook
         run: pnpm --filter @abe-stack/storybook build-storybook --quiet 2>/dev/null || echo "Storybook build skipped (package not found)"
 
+  sanity-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ['@abe-stack/shared', '@abe-stack/db', '@abe-stack/server', '@abe-stack/web', '@abe-stack/api', '@abe-stack/client-engine', '@abe-stack/react', '@abe-stack/ui']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}-${{ matrix.package }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Type Check
+        run: pnpm --filter ${{ matrix.package }} type-check
+
+      - name: Run Tests
+        run: pnpm --filter ${{ matrix.package }} test -- --coverage
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-${{ matrix.package }}
+          path: coverage/
+          retention-days: 7
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [setup, global-checks, sanity-checks]
+    if: needs.setup.outputs.is_full_build == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run E2E Tests
+        run: pnpm test:e2e
+
+      - name: Upload E2E Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
   build-and-verify:
     runs-on: ubuntu-latest
-    needs: [setup, sanity-checks]
+    needs: [setup, global-checks, sanity-checks]
     if: needs.setup.outputs.is_full_build == 'true'
     steps:
       - uses: actions/checkout@v4

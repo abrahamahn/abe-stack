@@ -58,80 +58,80 @@
 
 | Utility                | Legacy Path                                                                    |
 | ---------------------- | ------------------------------------------------------------------------------ |
-| Rate limiting          | `src/server/infrastructure/middleware/rateLimitMiddleware.ts`                  |
-| Validation             | `src/server/infrastructure/middleware/validationMiddleware.ts`                 |
-| File utils             | `src/server/infrastructure/storage/FileUtils.ts`                               |
-| File helpers           | `src/server/infrastructure/files/fileHelpers.ts`                               |
-| Content types          | `src/server/infrastructure/storage/ContentTypes.ts`                            |
-| Storage service        | `src/server/infrastructure/storage/StorageService.ts`                          |
-| Cache service          | `src/server/infrastructure/cache/CacheService.ts`                              |
-| Image processor        | `src/server/infrastructure/processor/ImageProcessor.ts`                        |
-| Media processor        | `src/server/infrastructure/processor/MediaProcessor.ts`                        |
-| Stream processor       | `src/server/infrastructure/processor/StreamProcessor.ts`                       |
-| Search builder         | `src/server/infrastructure/search/SearchService.ts`                            |
-| Email service          | `src/server/modules/core/email/services/email.service.ts`                      |
-| Email templates        | `src/server/modules/core/email/services/email-template.service.ts`             |
-| Email job              | `src/server/modules/core/email/processors/email-notification.job.processor.ts` |
-| User prefs             | `src/server/modules/core/users/services/user-preference.service.ts`            |
-| Geolocation            | `src/server/modules/core/geo/middleware/geo.middleware.ts`                     |
-| Password utils         | `src/server/infrastructure/security/passwordUtils.ts`                          |
-| Encryption             | `src/server/infrastructure/security/encryptionUtils.ts`                        |
-| Token manager          | `src/server/infrastructure/security/TokenManager.ts`                           |
-| Token blacklist        | `src/server/infrastructure/security/InMemoryTokenBlacklist.ts`                 |
-| Token storage          | `src/server/infrastructure/security/InMemoryTokenStorage.ts`                   |
-| Auth helpers           | `src/server/infrastructure/security/authHelpers.ts`                            |
-| Cookie utils           | `src/server/infrastructure/security/cookieUtils.ts`                            |
-| CORS config            | `src/server/infrastructure/security/corsConfig.ts`                             |
-| CSRF utils             | `src/server/infrastructure/security/csrfUtils.ts`                              |
-| Signature helpers      | `src/server/infrastructure/security/signatureHelpers.ts`                       |
-| Security helpers       | `src/server/infrastructure/security/securityHelpers.ts`                        |
-| Token utils            | `src/server/infrastructure/security/tokenUtils.ts`                             |
-| Custom validators      | `src/server/shared/types/dataTypes.ts`                                         |
-| WebSocket auth         | `src/server/infrastructure/security/WebSocketAuthService.ts`                   |
-| Logging                | `src/server/infrastructure/logging/LoggerService.ts`                           |
-| Date helpers           | `src/server/infrastructure/utils/dateHelpers.ts`                               |
-| Random ID              | `src/server/infrastructure/utils/randomId.ts`                                  |
-| Shallow equal          | `src/server/infrastructure/utils/shallowEqual.ts`                              |
-| Fuzzy match            | `src/server/shared/utils/fuzzyMatch.ts`                                        |
-| Route helpers          | `src/server/shared/helpers/routeHelpers.ts`                                    |
-| Type helpers           | `src/server/shared/types/typeHelpers.ts`                                       |
-| Deferred promise       | `src/server/infrastructure/promises/DeferredPromise.ts`                        |
-| Batched queue          | `src/server/infrastructure/queue/BatchedQueue.ts`                              |
-| Transaction service    | `src/server/infrastructure/database/TransactionService.ts`                     |
-| Migration manager      | `src/server/infrastructure/database/migrationManager.ts`                       |
-| WebSocket service      | `src/server/infrastructure/pubsub/WebSocketService.ts`                         |
-| WebSocket types        | `src/server/infrastructure/pubsub/WebSocketTypes.ts`                           |
-| Job service            | `src/server/infrastructure/jobs/JobService.ts`                                 |
-| App lifecycle          | `src/server/infrastructure/lifecycle/ApplicationLifecycle.ts`                  |
-| Server manager         | `src/server/infrastructure/server/ServerManager.ts`                            |
-| Base model             | `src/server/modules/base/baseModel.ts`                                         |
-| Base service           | `src/server/modules/base/baseService.ts`                                       |
-| Base job processor     | `src/server/modules/base/baseJobProcessor.ts`                                  |
-| Shared types           | `src/server/shared/types/types.ts`                                             |
-| Format date            | `src/server/shared/date/formatDate.ts`                                         |
-| Error classes          | `src/server/infrastructure/errors/`                                            |
-| Error handler          | `src/server/infrastructure/errors/ErrorHandler.ts`                             |
-| Job queue              | `src/server/infrastructure/jobs/JobQueue.ts`                                   |
-| File job storage       | `src/server/infrastructure/jobs/FileJobStorage.ts`                             |
-| Console transport      | `src/server/infrastructure/logging/ConsoleTransport.ts`                        |
-| Server logger          | `src/server/infrastructure/logging/ServerLogger.ts`                            |
-| Token storage          | `src/server/infrastructure/security/TokenStorageService.ts`                    |
-| Token blacklist        | `src/server/infrastructure/security/TokenBlacklistService.ts`                  |
-| CORS config            | `src/server/infrastructure/security/CorsConfigService.ts`                      |
-| Secret providers       | `src/server/infrastructure/config/secrets/`                                    |
-| Session module         | `src/server/modules/core/sessions/`                                            |
-| Preferences middleware | `src/server/modules/core/preferences/PreferencesMiddleware.ts`                 |
-| Auth DTOs              | `src/server/modules/core/auth/features/*/models/`                              |
-| Reset service          | `src/server/modules/reset/ResetService.ts`                                     |
-| Verification service   | `src/server/modules/core/auth/services/verification.service.ts`                |
-| User profile service   | `src/server/modules/core/users/services/user-profile.service.ts`               |
-| User onboarding job    | `src/server/modules/core/users/processors/user-onboarding.job.processor.ts`    |
-| Auth helpers           | `src/server/modules/core/auth/helpers/auth.helpers.ts`                         |
-| Token utils            | `src/server/modules/core/auth/features/token/token.utils.ts`                   |
-| RBAC middleware        | `src/server/modules/core/auth/middleware/rbac.middleware.ts`                   |
-| MFA service            | `src/server/modules/core/auth/features/mfa/providers/mfa.service.ts`           |
-| Permission service     | `src/server/modules/core/permission/services/permission.service.ts`            |
-| Role service           | `src/server/modules/core/permission/services/role.service.ts`                  |
+| Rate limiting          | `main/server/infrastructure/middleware/rateLimitMiddleware.ts`                  |
+| Validation             | `main/server/infrastructure/middleware/validationMiddleware.ts`                 |
+| File utils             | `main/server/infrastructure/storage/FileUtils.ts`                               |
+| File helpers           | `main/server/infrastructure/files/fileHelpers.ts`                               |
+| Content types          | `main/server/infrastructure/storage/ContentTypes.ts`                            |
+| Storage service        | `main/server/infrastructure/storage/StorageService.ts`                          |
+| Cache service          | `main/server/infrastructure/cache/CacheService.ts`                              |
+| Image processor        | `main/server/infrastructure/processor/ImageProcessor.ts`                        |
+| Media processor        | `main/server/infrastructure/processor/MediaProcessor.ts`                        |
+| Stream processor       | `main/server/infrastructure/processor/StreamProcessor.ts`                       |
+| Search builder         | `main/server/infrastructure/search/SearchService.ts`                            |
+| Email service          | `main/server/modules/core/email/services/email.service.ts`                      |
+| Email templates        | `main/server/modules/core/email/services/email-template.service.ts`             |
+| Email job              | `main/server/modules/core/email/processors/email-notification.job.processor.ts` |
+| User prefs             | `main/server/modules/core/users/services/user-preference.service.ts`            |
+| Geolocation            | `main/server/modules/core/geo/middleware/geo.middleware.ts`                     |
+| Password utils         | `main/server/infrastructure/security/passwordUtils.ts`                          |
+| Encryption             | `main/server/infrastructure/security/encryptionUtils.ts`                        |
+| Token manager          | `main/server/infrastructure/security/TokenManager.ts`                           |
+| Token blacklist        | `main/server/infrastructure/security/InMemoryTokenBlacklist.ts`                 |
+| Token storage          | `main/server/infrastructure/security/InMemoryTokenStorage.ts`                   |
+| Auth helpers           | `main/server/infrastructure/security/authHelpers.ts`                            |
+| Cookie utils           | `main/server/infrastructure/security/cookieUtils.ts`                            |
+| CORS config            | `main/server/infrastructure/security/corsConfig.ts`                             |
+| CSRF utils             | `main/server/infrastructure/security/csrfUtils.ts`                              |
+| Signature helpers      | `main/server/infrastructure/security/signatureHelpers.ts`                       |
+| Security helpers       | `main/server/infrastructure/security/securityHelpers.ts`                        |
+| Token utils            | `main/server/infrastructure/security/tokenUtils.ts`                             |
+| Custom validators      | `main/server/shared/types/dataTypes.ts`                                         |
+| WebSocket auth         | `main/server/infrastructure/security/WebSocketAuthService.ts`                   |
+| Logging                | `main/server/infrastructure/logging/LoggerService.ts`                           |
+| Date helpers           | `main/server/infrastructure/utils/dateHelpers.ts`                               |
+| Random ID              | `main/server/infrastructure/utils/randomId.ts`                                  |
+| Shallow equal          | `main/server/infrastructure/utils/shallowEqual.ts`                              |
+| Fuzzy match            | `main/server/shared/utils/fuzzyMatch.ts`                                        |
+| Route helpers          | `main/server/shared/helpers/routeHelpers.ts`                                    |
+| Type helpers           | `main/server/shared/types/typeHelpers.ts`                                       |
+| Deferred promise       | `main/server/infrastructure/promises/DeferredPromise.ts`                        |
+| Batched queue          | `main/server/infrastructure/queue/BatchedQueue.ts`                              |
+| Transaction service    | `main/server/infrastructure/database/TransactionService.ts`                     |
+| Migration manager      | `main/server/infrastructure/database/migrationManager.ts`                       |
+| WebSocket service      | `main/server/infrastructure/pubsub/WebSocketService.ts`                         |
+| WebSocket types        | `main/server/infrastructure/pubsub/WebSocketTypes.ts`                           |
+| Job service            | `main/server/infrastructure/jobs/JobService.ts`                                 |
+| App lifecycle          | `main/server/infrastructure/lifecycle/ApplicationLifecycle.ts`                  |
+| Server manager         | `main/server/infrastructure/server/ServerManager.ts`                            |
+| Base model             | `main/server/modules/base/baseModel.ts`                                         |
+| Base service           | `main/server/modules/base/baseService.ts`                                       |
+| Base job processor     | `main/server/modules/base/baseJobProcessor.ts`                                  |
+| Shared types           | `main/server/shared/types/types.ts`                                             |
+| Format date            | `main/server/shared/date/formatDate.ts`                                         |
+| Error classes          | `main/server/infrastructure/errors/`                                            |
+| Error handler          | `main/server/infrastructure/errors/ErrorHandler.ts`                             |
+| Job queue              | `main/server/infrastructure/jobs/JobQueue.ts`                                   |
+| File job storage       | `main/server/infrastructure/jobs/FileJobStorage.ts`                             |
+| Console transport      | `main/server/infrastructure/logging/ConsoleTransport.ts`                        |
+| Server logger          | `main/server/infrastructure/logging/ServerLogger.ts`                            |
+| Token storage          | `main/server/infrastructure/security/TokenStorageService.ts`                    |
+| Token blacklist        | `main/server/infrastructure/security/TokenBlacklistService.ts`                  |
+| CORS config            | `main/server/infrastructure/security/CorsConfigService.ts`                      |
+| Secret providers       | `main/server/infrastructure/config/secrets/`                                    |
+| Session module         | `main/server/modules/core/sessions/`                                            |
+| Preferences middleware | `main/server/modules/core/preferences/PreferencesMiddleware.ts`                 |
+| Auth DTOs              | `main/server/modules/core/auth/features/*/models/`                              |
+| Reset service          | `main/server/modules/reset/ResetService.ts`                                     |
+| Verification service   | `main/server/modules/core/auth/services/verification.service.ts`                |
+| User profile service   | `main/server/modules/core/users/services/user-profile.service.ts`               |
+| User onboarding job    | `main/server/modules/core/users/processors/user-onboarding.job.processor.ts`    |
+| Auth helpers           | `main/server/modules/core/auth/helpers/auth.helpers.ts`                         |
+| Token utils            | `main/server/modules/core/auth/features/token/token.utils.ts`                   |
+| RBAC middleware        | `main/server/modules/core/auth/middleware/rbac.middleware.ts`                   |
+| MFA service            | `main/server/modules/core/auth/features/mfa/providers/mfa.service.ts`           |
+| Permission service     | `main/server/modules/core/permission/services/permission.service.ts`            |
+| Role service           | `main/server/modules/core/permission/services/role.service.ts`                  |
 
 ---
 
@@ -139,36 +139,36 @@
 
 | Utility               | Legacy Path                                    |
 | --------------------- | ---------------------------------------------- |
-| useAsync              | `src/client/hooks/useAsync.ts`                 |
-| useOnline             | `src/client/hooks/useOnline.ts`                |
-| useShortcut           | `src/client/hooks/useShortcut.ts`              |
-| usePopper             | `src/client/hooks/usePopper.ts`                |
-| useCounter            | `src/client/hooks/useCounter.ts`               |
-| useRefCurrent         | `src/client/hooks/useRefCurrent.ts`            |
-| useRefPrevious        | `src/client/hooks/useRefPrevious.ts`           |
-| useSocialInteractions | `src/client/hooks/useSocialInteractions.ts`    |
-| Formatters            | `src/client/helpers/formatters.ts`             |
-| Cookie helpers        | `src/client/helpers/cookieHelpers.ts`          |
-| Focus helpers         | `src/client/helpers/focusHelpers.ts`           |
-| Merge events          | `src/client/helpers/mergeEvents.ts`            |
-| Passthrough ref       | `src/client/helpers/passthroughRef.tsx`        |
-| Style utils           | `src/client/utils/styleUtils.ts`               |
-| Theme context         | `src/client/components/theme/ThemeContext.tsx` |
-| Auth context          | `src/client/contexts/AuthContext.tsx`          |
-| Social context        | `src/client/contexts/SocialContext.tsx`        |
-| Client env            | `src/client/services/ClientEnvironment.tsx`    |
-| Router service        | `src/client/services/Router.ts`                |
-| API client            | `src/client/services/api.ts`                   |
-| Social service        | `src/client/services/social.ts`                |
-| Auth client           | `src/client/services/AuthClient.ts`            |
-| WS PubSub client      | `src/client/services/WebsocketPubsubClient.ts` |
-| Client config         | `src/client/services/ClientConfig.ts`          |
-| Main layout           | `src/client/layouts/MainLayout.tsx`            |
-| Page content          | `src/client/layouts/PageContent.tsx`           |
-| Routes                | `src/client/routes.tsx`                        |
-| Global styles         | `src/client/styles.ts`                         |
-| Base test             | `src/client/test/base.test.ts`                 |
-| Base e2e              | `src/client/test/base.e2e.ts`                  |
+| useAsync              | `main/client/hooks/useAsync.ts`                 |
+| useOnline             | `main/client/hooks/useOnline.ts`                |
+| useShortcut           | `main/client/hooks/useShortcut.ts`              |
+| usePopper             | `main/client/hooks/usePopper.ts`                |
+| useCounter            | `main/client/hooks/useCounter.ts`               |
+| useRefCurrent         | `main/client/hooks/useRefCurrent.ts`            |
+| useRefPrevious        | `main/client/hooks/useRefPrevious.ts`           |
+| useSocialInteractions | `main/client/hooks/useSocialInteractions.ts`    |
+| Formatters            | `main/client/helpers/formatters.ts`             |
+| Cookie helpers        | `main/client/helpers/cookieHelpers.ts`          |
+| Focus helpers         | `main/client/helpers/focusHelpers.ts`           |
+| Merge events          | `main/client/helpers/mergeEvents.ts`            |
+| Passthrough ref       | `main/client/helpers/passthroughRef.tsx`        |
+| Style utils           | `main/client/utils/styleUtils.ts`               |
+| Theme context         | `main/client/components/theme/ThemeContext.tsx` |
+| Auth context          | `main/client/contexts/AuthContext.tsx`          |
+| Social context        | `main/client/contexts/SocialContext.tsx`        |
+| Client env            | `main/client/services/ClientEnvironment.tsx`    |
+| Router service        | `main/client/services/Router.ts`                |
+| API client            | `main/client/services/api.ts`                   |
+| Social service        | `main/client/services/social.ts`                |
+| Auth client           | `main/client/services/AuthClient.ts`            |
+| WS PubSub client      | `main/client/services/WebsocketPubsubClient.ts` |
+| Client config         | `main/client/services/ClientConfig.ts`          |
+| Main layout           | `main/client/layouts/MainLayout.tsx`            |
+| Page content          | `main/client/layouts/PageContent.tsx`           |
+| Routes                | `main/client/routes.tsx`                        |
+| Global styles         | `main/client/styles.ts`                         |
+| Base test             | `main/client/test/base.test.ts`                 |
+| Base e2e              | `main/client/test/base.e2e.ts`                  |
 
 ---
 
@@ -176,18 +176,18 @@
 
 | Component         | Legacy Path                                 |
 | ----------------- | ------------------------------------------- |
-| FileUpload        | `src/client/components/ui/FileUpload.tsx`   |
-| Throttle          | `src/client/components/ui/Throttle.tsx`     |
-| OfflineBadge      | `src/client/components/ui/OfflineBadge.tsx` |
-| ComboBox          | `src/client/components/ui/ComboBox.tsx`     |
-| FuzzyString       | `src/client/components/ui/FuzzyString.tsx`  |
-| ListBox           | `src/client/components/ui/ListBox.tsx`      |
-| Popup             | `src/client/components/ui/Popup.tsx`        |
-| DropdownMenu      | `src/client/components/ui/DropdownMenu.tsx` |
-| ProtectedRoute    | `src/client/components/ProtectedRoute.tsx`  |
-| Auth modals       | `src/client/components/auth/`               |
-| Social components | `src/client/components/social/`             |
-| Media components  | `src/client/components/media/`              |
+| FileUpload        | `main/client/components/ui/FileUpload.tsx`   |
+| Throttle          | `main/client/components/ui/Throttle.tsx`     |
+| OfflineBadge      | `main/client/components/ui/OfflineBadge.tsx` |
+| ComboBox          | `main/client/components/ui/ComboBox.tsx`     |
+| FuzzyString       | `main/client/components/ui/FuzzyString.tsx`  |
+| ListBox           | `main/client/components/ui/ListBox.tsx`      |
+| Popup             | `main/client/components/ui/Popup.tsx`        |
+| DropdownMenu      | `main/client/components/ui/DropdownMenu.tsx` |
+| ProtectedRoute    | `main/client/components/ProtectedRoute.tsx`  |
+| Auth modals       | `main/client/components/auth/`               |
+| Social components | `main/client/components/social/`             |
+| Media components  | `main/client/components/media/`              |
 
 ---
 

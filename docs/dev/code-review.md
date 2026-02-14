@@ -6,17 +6,17 @@
 - [ ] No escape hatches: no `@ts-ignore`, `@ts-expect-error`, `eslint-disable`
 - [ ] No wildcard exports (`export *`) -- use explicit named exports in barrel files
 - [ ] No namespace imports (`import * as foo`) -- use named imports (exception: test files needing `vi.spyOn`)
-- [ ] DRY -- shared logic lives in `src/shared/`, not duplicated across apps
+- [ ] DRY -- shared logic lives in `main/shared/`, not duplicated across apps
 - [ ] Code is minimal -- no unused variables, dead code, or speculative abstractions
 - [ ] Declarative style preferred (`.filter()`, `.map()`) over imperative loops
 
 ## Architecture
 
 - [ ] Code is in the correct layer:
-  - Pure UI components in `src/client/ui/`
-  - Business logic/validation in `src/shared/`
-  - API hooks in `src/client/api/`
-  - Route handlers in `src/server/core/`
+  - Pure UI components in `main/client/ui/`
+  - Business logic/validation in `main/shared/`
+  - API hooks in `main/client/api/`
+  - Route handlers in `main/server/core/`
 - [ ] No cross-app imports (apps import from packages, never from each other)
 - [ ] Barrel exports (`index.ts`) updated with explicit named exports for new public APIs
 - [ ] Path aliases used instead of deep relative imports (`@auth/...` not `../../features/auth/...`)

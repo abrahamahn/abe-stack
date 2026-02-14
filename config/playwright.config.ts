@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 // @ts-ignore - Resolving from monorepo source without build
-import { initEnv } from '../core/src/config/env.loader';
+import { initEnv } from '../main/server/core/src/config/env.loader';
 
 // Initialize environment variables using the custom monorepo loader
 initEnv();
@@ -10,8 +10,10 @@ const PORT = 5173;
 // const API_PORT = 8080; // Uncomment if your E2E tests require the live backend
 
 export default defineConfig({
-  testDir: '../apps/web/src/__tests__/e2e',
+  testDir: '../main/apps/web/e2e',
   testMatch: /.*\.e2e\.(ts|tsx)/,
+  globalSetup: require.resolve('../main/apps/web/e2e/globalSetup'),
+  globalTeardown: require.resolve('../main/apps/web/e2e/globalTeardown'),
   reporter: CI ? [['github'], ['blob']] : [['list'], ['html', { open: 'on-failure' }]],
   fullyParallel: !CI,
   forbidOnly: CI,

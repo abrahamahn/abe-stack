@@ -15,6 +15,18 @@ export const baseConfig = defineConfig({
     testTimeout: 10000,
     clearMocks: true,
     restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        'main/tools/**',
+        'config/**',
+      ],
+    },
   },
 });
 

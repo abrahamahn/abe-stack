@@ -6,8 +6,8 @@
   "tasks": {
     "build:theme": {
       "cache": true,
-      "inputs": ["src/tools/sync/sync-css-theme.ts", "src/client/ui/src/theme/**"],
-      "outputs": ["src/client/ui/src/generated/**"]
+      "inputs": ["main/tools/sync/sync-css-theme.ts", "main/client/ui/src/theme/**"],
+      "outputs": ["main/client/ui/src/generated/**"]
     },
     "build": {
       "dependsOn": ["^build", "build:theme"],
@@ -29,7 +29,7 @@
       "cache": true
     },
     "lint:css": {
-      "inputs": ["src/client/ui/src/styles/**/*.css", "src/tools/scripts/lint/lint-css-tokens.ts"],
+      "inputs": ["main/client/ui/src/styles/**/*.css", "main/tools/scripts/lint/lint-css-tokens.ts"],
       "cache": true
     },
     "type-check": {
