@@ -124,7 +124,13 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
 
   return {
     async getVapidKey(): Promise<VapidKeyResponse> {
-      return apiRequest(factory, '/notifications/vapid-key', undefined, false, vapidKeyResponseSchema);
+      return apiRequest(
+        factory,
+        '/notifications/vapid-key',
+        undefined,
+        false,
+        vapidKeyResponseSchema,
+      );
     },
 
     async subscribe(data: SubscribeRequest): Promise<SubscribeResponse> {
@@ -156,7 +162,13 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
     },
 
     async getPreferences(): Promise<PreferencesResponse> {
-      return apiRequest(factory, '/notifications/preferences', undefined, true, preferencesResponseSchema);
+      return apiRequest(
+        factory,
+        '/notifications/preferences',
+        undefined,
+        true,
+        preferencesResponseSchema,
+      );
     },
 
     async updatePreferences(data: UpdatePreferencesRequest): Promise<PreferencesResponse> {
@@ -184,7 +196,7 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
         true,
         sendNotificationResponseSchema,
       );
-      return parsed as unknown as SendNotificationResponse;
+      return parsed as SendNotificationResponse;
     },
 
     async sendNotification(data: SendNotificationRequest): Promise<SendNotificationResponse> {
@@ -199,7 +211,7 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
         true,
         sendNotificationResponseSchema,
       );
-      return parsed as unknown as SendNotificationResponse;
+      return parsed as SendNotificationResponse;
     },
 
     async listNotifications(limit = 20, offset = 0): Promise<NotificationsListResponse> {

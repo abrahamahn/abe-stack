@@ -2,13 +2,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    applyProgressiveDelay,
-    clearLoginAttempts,
-    getAccountLockoutStatus,
-    getProgressiveDelay,
-    isAccountLocked,
-    logLoginAttempt,
-    unlockAccount,
+  applyProgressiveDelay,
+  clearLoginAttempts,
+  getAccountLockoutStatus,
+  getProgressiveDelay,
+  isAccountLocked,
+  logLoginAttempt,
+  unlockAccount,
 } from './lockout';
 
 import type { LockoutConfig, LockoutStatus } from './types';

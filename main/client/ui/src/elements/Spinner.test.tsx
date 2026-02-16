@@ -2,7 +2,7 @@
 // client/ui/src/components/__tests__/Spinner.test.tsx
 /** @vitest-environment jsdom */
 import { render } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Spinner } from './Spinner';
 

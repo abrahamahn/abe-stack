@@ -1,6 +1,6 @@
 // main/apps/web/src/features/auth/pages/ConfirmEmailPage.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { mockUser, renderWithProviders } from './../../../__tests__/utils';
 import { ConfirmEmailPage } from './ConfirmEmailPage';

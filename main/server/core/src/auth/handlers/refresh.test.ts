@@ -6,9 +6,9 @@
  */
 
 import {
-    AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
-    InvalidTokenError,
-    TokenReuseError,
+  AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
+  InvalidTokenError,
+  TokenReuseError,
 } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

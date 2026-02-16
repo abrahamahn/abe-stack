@@ -1,6 +1,8 @@
 // main/client/ui/src/elements/OAuthButton.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
+import { Button } from './Button';
+
 import '../styles/elements.css';
 
 type OAuthButtonProps = ComponentPropsWithoutRef<'button'>;
@@ -18,7 +20,9 @@ type OAuthButtonProps = ComponentPropsWithoutRef<'button'>;
  */
 export const OAuthButton = forwardRef<HTMLButtonElement, OAuthButtonProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
-  return <button ref={ref} type={type} className={`oauth-button ${className}`.trim()} {...rest} />;
+  return (
+    <Button ref={ref as any} type={type} className={`oauth-button ${className}`.trim()} {...rest} />
+  );
 });
 
 OAuthButton.displayName = 'OAuthButton';

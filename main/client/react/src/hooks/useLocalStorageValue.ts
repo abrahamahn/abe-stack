@@ -86,7 +86,8 @@ export function useLocalStorageValue(
 
         const persisted = window.localStorage.getItem(key);
         const writeSucceeded =
-          (nextValue === null && persisted === null) || (nextValue !== null && persisted === nextValue);
+          (nextValue === null && persisted === null) ||
+          (nextValue !== null && persisted === nextValue);
 
         if (writeSucceeded) {
           localSnapshots.delete(key);

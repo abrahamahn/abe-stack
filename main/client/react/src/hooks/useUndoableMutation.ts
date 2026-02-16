@@ -13,11 +13,8 @@ import type { UseMutationOptions, UseMutationResult } from '../query/useMutation
  * Extends standard mutation options with snapshot/path/apply config
  * to automatically push undo transactions on success.
  */
-export interface UseUndoableMutationOptions<TData, TError, TVariables> extends UseMutationOptions<
-  TData,
-  TError,
-  TVariables
-> {
+export interface UseUndoableMutationOptions<TData, TError, TVariables>
+  extends UseMutationOptions<TData, TError, TVariables> {
   /** Capture current state before mutation (for computing undo operations) */
   getSnapshot: () => Record<string, unknown>;
   /** Path prefix for transaction operations (e.g., ['users', userId]) */

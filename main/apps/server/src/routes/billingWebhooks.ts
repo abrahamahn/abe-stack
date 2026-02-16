@@ -31,11 +31,15 @@ export function registerBillingWebhookRoutes(app: FastifyInstance, ctx: AppConte
     async (request: FastifyRequest, reply: FastifyReply) => {
       const signature = request.headers['stripe-signature'];
       if (typeof signature !== 'string') {
-        return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Missing stripe-signature header' });
+        return reply
+          .status(HTTP_STATUS.BAD_REQUEST)
+          .send({ error: 'Missing stripe-signature header' });
       }
 
       if (ctx.config.billing.stripe.secretKey === '') {
-        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Stripe not configured' });
+        return reply
+          .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Stripe not configured' });
       }
 
       if (request.rawBody === undefined) {
@@ -69,10 +73,14 @@ export function registerBillingWebhookRoutes(app: FastifyInstance, ctx: AppConte
           return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid webhook signature' });
         }
         if (err.name === 'WebhookEventAlreadyProcessedError') {
-          return reply.status(HTTP_STATUS.OK).send({ success: true, message: 'Event already processed' });
+          return reply
+            .status(HTTP_STATUS.OK)
+            .send({ success: true, message: 'Event already processed' });
         }
         ctx.log.error({ error: err }, 'Stripe webhook error');
-        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Webhook processing failed' });
+        return reply
+          .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Webhook processing failed' });
       }
     },
   );
@@ -98,7 +106,9 @@ export function registerBillingWebhookRoutes(app: FastifyInstance, ctx: AppConte
       });
 
       if (ctx.config.billing.paypal.clientId === '') {
-        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'PayPal not configured' });
+        return reply
+          .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'PayPal not configured' });
       }
 
       if (request.rawBody === undefined) {
@@ -133,10 +143,14 @@ export function registerBillingWebhookRoutes(app: FastifyInstance, ctx: AppConte
           return reply.status(HTTP_STATUS.BAD_REQUEST).send({ error: 'Invalid webhook signature' });
         }
         if (err.name === 'WebhookEventAlreadyProcessedError') {
-          return reply.status(HTTP_STATUS.OK).send({ success: true, message: 'Event already processed' });
+          return reply
+            .status(HTTP_STATUS.OK)
+            .send({ success: true, message: 'Event already processed' });
         }
         ctx.log.error({ error: err }, 'PayPal webhook error');
-        return reply.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({ error: 'Webhook processing failed' });
+        return reply
+          .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+          .send({ error: 'Webhook processing failed' });
       }
     },
   );

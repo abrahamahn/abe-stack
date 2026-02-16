@@ -1,6 +1,6 @@
 // main/apps/web/src/features/ui-library/catalog/layoutCatalog.test.tsx
 import { render } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { layoutCatalog } from './layoutCatalog';
 

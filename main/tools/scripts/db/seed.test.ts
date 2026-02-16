@@ -11,19 +11,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted() to ensure mock functions are available when vi.mock factory runs
-const {
-  mockBuildConnectionString,
-  mockCreateDbClient,
-  mockExecute,
-  mockClose,
-  mockHashPassword,
-} = vi.hoisted(() => ({
-  mockBuildConnectionString: vi.fn(),
-  mockCreateDbClient: vi.fn(),
-  mockExecute: vi.fn(),
-  mockClose: vi.fn(),
-  mockHashPassword: vi.fn(),
-}));
+const { mockBuildConnectionString, mockCreateDbClient, mockExecute, mockClose, mockHashPassword } =
+  vi.hoisted(() => ({
+    mockBuildConnectionString: vi.fn(),
+    mockCreateDbClient: vi.fn(),
+    mockExecute: vi.fn(),
+    mockClose: vi.fn(),
+    mockHashPassword: vi.fn(),
+  }));
 
 // Mock the database module using package path
 vi.mock('@abe-stack/db', () => ({

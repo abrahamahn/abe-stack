@@ -29,7 +29,7 @@ export interface UseResendCooldownReturn {
  *   return (
  *     <button disabled={isOnCooldown} onClick={handleResend}>
  *       {isOnCooldown ? `Resend in ${cooldown}s` : 'Resend'}
- *     </button>
+ *     </Button>
  *   );
  * }
  * ```

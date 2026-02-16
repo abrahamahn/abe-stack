@@ -12,13 +12,13 @@ import { PostgresQueueStore, type JobListOptions } from '../../../db/src';
 import { ERROR_MESSAGES } from '../auth';
 
 import {
-    cancelJob,
-    getJobDetails,
-    getQueueStats,
-    JobNotFoundError,
-    listJobs,
-    QueueStoreNotAvailableError,
-    retryJob,
+  cancelJob,
+  getJobDetails,
+  getQueueStats,
+  JobNotFoundError,
+  listJobs,
+  QueueStoreNotAvailableError,
+  retryJob,
 } from './jobsService';
 
 import type { AdminAppContext } from './types';

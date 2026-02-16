@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleAcceptInvitation,
-    handleCreateInvitation,
-    handleListInvitations,
-    handleResendInvitation,
-    handleRevokeInvitation,
+  handleAcceptInvitation,
+  handleCreateInvitation,
+  handleListInvitations,
+  handleResendInvitation,
+  handleRevokeInvitation,
 } from './invitations';
 
 import type { DbClient, Repositories } from '../../../../db/src';

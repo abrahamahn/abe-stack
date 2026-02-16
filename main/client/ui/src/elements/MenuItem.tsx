@@ -1,5 +1,8 @@
 // main/client/ui/src/elements/MenuItem.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+
+import { Button } from './Button';
+
 import '../styles/elements.css';
 
 type MenuItemProps = ComponentPropsWithoutRef<'button'>;
@@ -14,7 +17,9 @@ type MenuItemProps = ComponentPropsWithoutRef<'button'>;
  */
 export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
-  return <button ref={ref} type={type} className={`menu-item ${className}`.trim()} {...rest} />;
+  return (
+    <Button ref={ref as any} type={type} className={`menu-item ${className}`.trim()} {...rest} />
+  );
 });
 
 MenuItem.displayName = 'MenuItem';

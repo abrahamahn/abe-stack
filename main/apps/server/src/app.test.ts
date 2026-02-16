@@ -3,10 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp } from './app';
 
-import type {
-  CacheProvider,
-  QueueServer,
-} from '@abe-stack/server-engine';
+import type { CacheProvider, QueueServer } from '@abe-stack/server-engine';
 import type { AppConfig } from '@abe-stack/shared/config';
 import type { FastifyInstance } from 'fastify';
 
@@ -314,11 +311,13 @@ function createMockDbClient() {
     queryOne: vi.fn().mockResolvedValue(null),
     execute: vi.fn().mockResolvedValue(0),
     raw: vi.fn().mockResolvedValue([]),
-    transaction: vi.fn().mockImplementation(async (cb) => cb({
-      query: vi.fn().mockResolvedValue([]),
-      queryOne: vi.fn().mockResolvedValue(null),
-      execute: vi.fn().mockResolvedValue(0),
-    })),
+    transaction: vi.fn().mockImplementation(async (cb) =>
+      cb({
+        query: vi.fn().mockResolvedValue([]),
+        queryOne: vi.fn().mockResolvedValue(null),
+        execute: vi.fn().mockResolvedValue(0),
+      }),
+    ),
     healthCheck: vi.fn().mockResolvedValue(true),
     close: vi.fn().mockResolvedValue(undefined),
     getClient: vi.fn(),
@@ -327,7 +326,12 @@ function createMockDbClient() {
 
 function createMockRepos() {
   return {
-    users: { findById: vi.fn(), findByEmail: vi.fn(), findByUsername: vi.fn(), unlockAccount: vi.fn().mockResolvedValue(undefined) },
+    users: {
+      findById: vi.fn(),
+      findByEmail: vi.fn(),
+      findByUsername: vi.fn(),
+      unlockAccount: vi.fn().mockResolvedValue(undefined),
+    },
     refreshTokens: { deleteByToken: vi.fn() },
     refreshTokenFamilies: { findActiveByUserId: vi.fn().mockResolvedValue([]), revoke: vi.fn() },
     memberships: { findByUserId: vi.fn().mockResolvedValue([]) },
@@ -500,7 +504,12 @@ describe('App', () => {
         db: createMockDbClient(),
         repos: createMockRepos(),
         email: { send: vi.fn(), healthCheck: vi.fn().mockResolvedValue(true) },
-        storage: { put: vi.fn(), get: vi.fn(), delete: vi.fn(), healthCheck: vi.fn().mockResolvedValue(true) },
+        storage: {
+          put: vi.fn(),
+          get: vi.fn(),
+          delete: vi.fn(),
+          healthCheck: vi.fn().mockResolvedValue(true),
+        },
         notifications: { isConfigured: vi.fn().mockReturnValue(false), getFcmProvider: vi.fn() },
         billing: { provider: 'stripe' as const },
         search: { name: 'mock', healthCheck: vi.fn().mockResolvedValue(true) },
@@ -513,7 +522,7 @@ describe('App', () => {
         errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
         log: createMockLogger(),
       };
-      
+
       const app = new App(config, mockSystemContext as any);
 
       expect(app.config).toBe(config);
@@ -536,12 +545,22 @@ describe('App', () => {
       const mockRepos = createMockRepos();
       const mockEmail = { send: vi.fn(), healthCheck: vi.fn() };
       const mockStorage = { put: vi.fn(), get: vi.fn(), delete: vi.fn(), healthCheck: vi.fn() };
-      const mockNotifications = { isConfigured: vi.fn().mockReturnValue(false), getFcmProvider: vi.fn() };
+      const mockNotifications = {
+        isConfigured: vi.fn().mockReturnValue(false),
+        getFcmProvider: vi.fn(),
+      };
       const mockBilling = { provider: 'stripe' as const };
       const mockSearch = { name: 'mock', healthCheck: vi.fn() };
       const mockQueue = { start: vi.fn(), stop: vi.fn() };
-      const mockCache = { name: 'memory', getStats: vi.fn().mockResolvedValue({ hits: 0, misses: 0, size: 0 }) };
-      const mockErrorTracker = { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() };
+      const mockCache = {
+        name: 'memory',
+        getStats: vi.fn().mockResolvedValue({ hits: 0, misses: 0, size: 0 }),
+      };
+      const mockErrorTracker = {
+        addBreadcrumb: vi.fn(),
+        captureError: vi.fn(),
+        setUserContext: vi.fn(),
+      };
 
       const mockSystemContext = {
         config,
@@ -937,7 +956,7 @@ describe('App', () => {
         errorTracker: { addBreadcrumb: vi.fn(), captureError: vi.fn(), setUserContext: vi.fn() },
         log: createMockLogger(),
       };
-      
+
       const app = await createApp(config, mockSystemContext as any);
 
       expect(app).toBeInstanceOf(App);

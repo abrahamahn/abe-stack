@@ -9,11 +9,11 @@
 import { AppError, NotFoundError } from '@abe-stack/shared';
 
 import type {
-    JobDetails,
-    JobListOptions,
-    JobListResult,
-    PostgresQueueStore,
-    QueueStats,
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  PostgresQueueStore,
+  QueueStats,
 } from '../../../db/src';
 
 // ============================================================================

@@ -132,7 +132,13 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
 
     // Subscription
     async getSubscription(): Promise<SubscriptionResponse> {
-      return apiRequest(factory, '/billing/subscription', undefined, true, subscriptionResponseSchema);
+      return apiRequest(
+        factory,
+        '/billing/subscription',
+        undefined,
+        true,
+        subscriptionResponseSchema,
+      );
     },
 
     async createCheckout(data: CheckoutRequest): Promise<CheckoutResponse> {
@@ -211,12 +217,7 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
       return apiRequest(factory, '/billing/invoices', undefined, true, invoicesListResponseSchema);
     },
     async getInvoice(invoiceId: string): Promise<InvoiceResponse> {
-      return apiRequest(
-        factory,
-        `/billing/invoices/${invoiceId}`,
-        undefined,
-        true,
-      );
+      return apiRequest(factory, `/billing/invoices/${invoiceId}`, undefined, true);
     },
 
     // Payment Methods

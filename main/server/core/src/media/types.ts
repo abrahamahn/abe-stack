@@ -9,11 +9,11 @@
 
 import type { FileRepository } from '../../../db/src';
 import type {
-    AuthenticatedUser,
-    BaseContext,
-    Logger,
-    RequestContext,
-    RequestInfo,
+  AuthenticatedUser,
+  BaseContext,
+  Logger,
+  RequestContext,
+  RequestInfo,
 } from '@abe-stack/shared/core';
 
 // ============================================================================

@@ -58,4 +58,3 @@ export function createActivitiesClient(config: ActivitiesClientConfig): Activiti
     },
   };
 }
-

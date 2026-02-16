@@ -9,17 +9,17 @@
  */
 
 import {
-    AUTH_EXPIRY,
-    BadRequestError,
-    canAcceptInvite,
-    canAssignRole,
-    canRevokeInvite,
-    ForbiddenError,
-    isEmailDomainAllowed,
-    isInviteExpired,
-    MS_PER_DAY,
-    NotFoundError,
-    QUOTAS,
+  AUTH_EXPIRY,
+  BadRequestError,
+  canAcceptInvite,
+  canAssignRole,
+  canRevokeInvite,
+  ForbiddenError,
+  isEmailDomainAllowed,
+  isInviteExpired,
+  MS_PER_DAY,
+  NotFoundError,
+  QUOTAS,
 } from '@abe-stack/shared';
 
 import type { Repositories } from '../../../db/src';

@@ -10,7 +10,7 @@
  */
 
 import { screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { AuthModal } from '../../features/auth';
 import { renderWithProviders } from '../utils';

@@ -9,18 +9,18 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    createPlan,
-    deactivatePlan,
-    getAllPlans,
-    getPlanById,
-    syncPlanToStripe,
-    updatePlan,
+  createPlan,
+  deactivatePlan,
+  getAllPlans,
+  getPlanById,
+  syncPlanToStripe,
+  updatePlan,
 } from './billingService';
 
 import type {
-    AdminBillingRepositories,
-    CreatePlanParams,
-    UpdatePlanParams,
+  AdminBillingRepositories,
+  CreatePlanParams,
+  UpdatePlanParams,
 } from './billingService';
 import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '../../../db/src';
 import type { BillingService } from '@abe-stack/shared';

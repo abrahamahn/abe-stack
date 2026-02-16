@@ -9,12 +9,7 @@ export interface RetryDecision {
   reason: string;
 }
 
-type QueryDebugType =
-  | 'start'
-  | 'retry-check'
-  | 'retry-wait'
-  | 'success'
-  | 'failure';
+type QueryDebugType = 'start' | 'retry-check' | 'retry-wait' | 'success' | 'failure';
 
 export interface QueryDebugRecord {
   readonly type: QueryDebugType;
@@ -41,9 +36,8 @@ function isLocalDevHost(): boolean {
 function getExplicitDebugOverride(): boolean | null {
   if (!isBrowser()) return null;
 
-  const globalFlag = (
-    globalThis as unknown as { __ABE_QUERY_DEBUG__?: unknown }
-  ).__ABE_QUERY_DEBUG__;
+  const globalFlag = (globalThis as unknown as { __ABE_QUERY_DEBUG__?: unknown })
+    .__ABE_QUERY_DEBUG__;
   if (globalFlag === true) return true;
   if (globalFlag === false) return false;
 

@@ -3,13 +3,13 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    cancelJob,
-    getJobDetails,
-    getQueueStats,
-    JobNotFoundError,
-    listJobs,
-    redactSensitiveFields,
-    retryJob,
+  cancelJob,
+  getJobDetails,
+  getQueueStats,
+  JobNotFoundError,
+  listJobs,
+  redactSensitiveFields,
+  retryJob,
 } from './jobsService';
 
 import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '../../../db/src';

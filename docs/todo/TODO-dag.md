@@ -507,34 +507,34 @@ Uses the apps DAG from above. Recap:
 Does each app contain logic that should be pushed down into a package?
 
 - [x] `web` vs `shared` — **FIXED (2026-02-13)**  
-      Evidence: `0` non-test files now read `localStorage('accessToken')` directly.  
-      Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@abe-stack/shared` across web hooks/components.
+       Evidence: `0` non-test files now read `localStorage('accessToken')` directly.  
+       Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@abe-stack/shared` across web hooks/components.
 - [x] `web` → `api` — **FIXED (2026-02-13)**  
-      Relationship: `apps/web` now routes HTTP concerns through `@abe-stack/api` clients/helpers.  
-      Evidence: `0` non-test files in `apps/web/src` use raw `fetch()`; hook/app callsites migrated to package API methods.
+       Relationship: `apps/web` now routes HTTP concerns through `@abe-stack/api` clients/helpers.  
+       Evidence: `0` non-test files in `apps/web/src` use raw `fetch()`; hook/app callsites migrated to package API methods.
       Follow-up completed: extracted shared CSRF/auth transport helper (`createCsrfRequestClient`) into `@abe-stack/api` and removed duplicated request boilerplate across web domain API modules (admin/settings/workspace/media/notifications/activities).
 - [x] `web` vs `client-engine` — **CLEAN**  
-      Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.  
-      Follow-up completed (2026-02-13): removed duplicated query-persister payload types from `apps/web/src/app/App.tsx` by exporting and consuming `PersistedQuery`/`PersistedClient`/`Persister` from `@abe-stack/client-engine`.
+       Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.  
+       Follow-up completed (2026-02-13): removed duplicated query-persister payload types from `apps/web/src/app/App.tsx` by exporting and consuming `PersistedQuery`/`PersistedClient`/`Persister` from `@abe-stack/client-engine`.
 - [x] `web` vs `react` — **CLEAN**  
-      Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.  
-      Follow-up completed (2026-02-13): extracted reusable pubsub connection-state subscription hook into `@abe-stack/react` (`usePubsubConnectionState`) and updated web realtime hook to consume it; migrated settings theme system-detection logic to shared `@abe-stack/react/hooks/useMediaQuery`; extracted raw localStorage subscription primitive (`useLocalStorageValue`) into `@abe-stack/react/hooks` and refactored web hooks/components (`useWorkspaceContext`, `CookieConsentBanner`, `GettingStartedChecklist`, `useDataExport`) to consume it.
+       Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.  
+       Follow-up completed (2026-02-13): extracted reusable pubsub connection-state subscription hook into `@abe-stack/react` (`usePubsubConnectionState`) and updated web realtime hook to consume it; migrated settings theme system-detection logic to shared `@abe-stack/react/hooks/useMediaQuery`; extracted raw localStorage subscription primitive (`useLocalStorageValue`) into `@abe-stack/react/hooks` and refactored web hooks/components (`useWorkspaceContext`, `CookieConsentBanner`, `GettingStartedChecklist`, `useDataExport`) to consume it.
 - [x] `web` vs `ui` — **CLEAN (for now)**  
-      Evidence: heavy reuse (`138` non-test imports from `@abe-stack/ui`); app components appear domain-specific rather than reusable design-system primitives.
+       Evidence: heavy reuse (`138` non-test imports from `@abe-stack/ui`); app components appear domain-specific rather than reusable design-system primitives.
       Follow-up completed (2026-02-13): extracted reusable presentation components from web into `@abe-stack/ui` and replaced app-local implementations with thin re-exports (`FeatureHint`, `SectionErrorBoundary`, `RoleBadge`, `JobStatusBadge`, `StatusBadge`, `getUserStatus`, `SessionCard`); moved profile completeness display rendering into shared UI component (`ProfileCompletenessCard`) while retaining web hook/data orchestration; introduced shared stat rendering primitive (`MetricValue`) for admin metric cards, extracted reusable settings device row renderer (`DeviceRowCard`), consolidated recurring card + heading shell markup via shared `TitledCardSection` (applied across admin metrics/queue/event detail panels), extracted shared labeled detail row rendering (`LabeledValueRow`) reused by admin event/job detail views, and standardized loading/error card handling via shared `CardAsyncState` (applied to queue stats, consent preferences, OAuth connections, and API keys sections).
 - [x] `server` vs `shared`
 - [x] `server` vs `core` — **REFACTORED (2026-02-13)**  
-      Evidence: extracted canonical core module registry from app wiring into `@abe-stack/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
-      Boundary hardening: moved Fastify/raw-body billing webhook registration into app runtime layer (`main/apps/server/src/routes/billingWebhooks.ts`) and removed framework-specific webhook route registration from core (`main/server/core/src/billing/webhooks/routes.ts` deleted; core now exports webhook business handlers only).
+       Evidence: extracted canonical core module registry from app wiring into `@abe-stack/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
+       Boundary hardening: moved Fastify/raw-body billing webhook registration into app runtime layer (`main/apps/server/src/routes/billingWebhooks.ts`) and removed framework-specific webhook route registration from core (`main/server/core/src/billing/webhooks/routes.ts` deleted; core now exports webhook business handlers only).
 - [ ] `server` vs `server-engine`
 - [x] Create `ServerManager` to wrap logic
-    - [x] Standardize startup/shutdown signals
-    - [x] Ensure correct configuration loading sequence
+  - [x] Standardize startup/shutdown signals
+  - [x] Ensure correct configuration loading sequence
 - [x] Refactor `apps/server/main.ts` to use `ServerManager`
 - [x] `desktop` vs `shared` — **CLEAN**  
-      Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`,  duplicated API wrapper code found in app.
+       Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`, duplicated API wrapper code found in app.
 - [x] `desktop` vs `ui` — **CLEAN (N/A usage)**  
-      Evidence: `0` non-test imports from `@abe-stack/ui` in current desktop code. No duplicated UI component implementations found in app.
+       Evidence: `0` non-test imports from `@abe-stack/ui` in current desktop code. No duplicated UI component implementations found in app.
 
 #### Phase 9 follow-up backlog (from audit)
 
@@ -562,7 +562,7 @@ Do multiple apps share logic that should be in a package?
 
 | Priority | Check                   | Reason                                                    |
 | -------- | ----------------------- | --------------------------------------------------------- |
-| HIGH     | web ↔ desktop           | near-identical client stacks, highest duplication risk    |
+| HIGH     | web ↔ desktop          | near-identical client stacks, highest duplication risk    |
 | HIGH     | server vs core          | server is thin orchestrator; leaked logic = DRY violation |
 | HIGH     | web vs react            | web features may duplicate react hooks                    |
 | HIGH     | web vs shared           | app may hardcode constants/types available in shared      |
@@ -574,22 +574,22 @@ Do multiple apps share logic that should be in a package?
 | LOW      | web vs client-engine    | engine is low-level, less likely duplicated in app code   |
 | LOW      | desktop vs shared       | same concern as web vs shared                             |
 | LOW      | desktop vs ui           | same concern as web vs ui                                 |
-| LOW      | web ↔ server            | different stacks (HTTP boundary only)                     |
-| LOW      | desktop ↔ server        | check server-engine boundary only                         |
+| LOW      | web ↔ server           | different stacks (HTTP boundary only)                     |
+| LOW      | desktop ↔ server       | check server-engine boundary only                         |
 
 ---
 
 ## Grand Summary
 
-| Scope | Description             | Checks | Status                                    |
-| ----- | ----------------------- | ------ | ----------------------------------------- |
-| 1     | shared internal         | —      | **DONE**                                  |
-| 2     | shared vs consumers     | —      | **DONE**                                  |
-| 3     | server/_ vs server/_    | 13     | **DONE**                                  |
-| 4     | client/_ vs client/_    | 6      | **DONE** (5/7 refactors done, 2 deferred) |
+| Scope | Description             | Checks | Status                                                     |
+| ----- | ----------------------- | ------ | ---------------------------------------------------------- |
+| 1     | shared internal         | —      | **DONE**                                                   |
+| 2     | shared vs consumers     | —      | **DONE**                                                   |
+| 3     | server/_ vs server/_    | 13     | **DONE**                                                   |
+| 4     | client/_ vs client/_    | 6      | **DONE** (5/7 refactors done, 2 deferred)                  |
 | 5     | apps/_ vs deps + apps/_ | 14     | **DONE** (14/14 verticals audited; Phase 10 laterals TODO) |
-| 6     | client-server boundary  | —      | **DONE** (documented, zero violations)    |
-| **∑** |                         | **33** |                                           |
+| 6     | client-server boundary  | —      | **DONE** (documented, zero violations)                     |
+| **∑** |                         | **33** |                                                            |
 
 **Next**: Phase 10 — audit app laterals (web ↔ desktop, web ↔ server, desktop ↔ server).
 

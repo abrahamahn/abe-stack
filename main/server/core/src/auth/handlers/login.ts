@@ -7,21 +7,17 @@
  * @module handlers/login
  */
 
-import {
-    EmailNotVerifiedError,
-    HTTP_STATUS,
-    mapErrorToHttpResponse,
-} from '@abe-stack/shared';
+import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
 
 import { getMetricsCollector } from '../../../../engine/src';
 import {
-    generateDeviceFingerprint,
-    isCaptchaRequired,
-    isKnownDevice,
-    logNewDeviceLogin,
-    recordDeviceAccess,
-    sendNewLoginAlert,
-    verifyCaptchaToken,
+  generateDeviceFingerprint,
+  isCaptchaRequired,
+  isKnownDevice,
+  logNewDeviceLogin,
+  recordDeviceAccess,
+  sendNewLoginAlert,
+  verifyCaptchaToken,
 } from '../security';
 import { authenticateUser, resendVerificationEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
@@ -30,11 +26,11 @@ import { setRefreshTokenCookie } from '../utils';
 import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
-    AuthResponse,
-    HttpErrorResponse,
-    LoginRequest,
-    SmsChallengeResponse,
-    TotpLoginChallengeResponse,
+  AuthResponse,
+  HttpErrorResponse,
+  LoginRequest,
+  SmsChallengeResponse,
+  TotpLoginChallengeResponse,
 } from '@abe-stack/shared';
 
 type LoginResult = AuthResult | TotpChallengeResult | SmsChallengeResult;

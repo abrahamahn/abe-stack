@@ -61,7 +61,12 @@ export const SecurityMetricsCard = ({
   isLoading,
 }: SecurityMetricsCardProps): JSX.Element => {
   return (
-    <TitledCardSection title="Security Overview" headingAs="h3" headingSize="md" cardClassName="p-6">
+    <TitledCardSection
+      title="Security Overview"
+      headingAs="h3"
+      headingSize="md"
+      cardClassName="p-6"
+    >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <MetricValue
           label="Total Events"

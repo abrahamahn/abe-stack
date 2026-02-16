@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    getTenantDetail,
-    listAllTenants,
-    suspendTenant,
-    TenantNotFoundError,
-    unsuspendTenant,
+  getTenantDetail,
+  listAllTenants,
+  suspendTenant,
+  TenantNotFoundError,
+  unsuspendTenant,
 } from './tenantService';
 
 import type { DbClient, Repositories } from '../../../db/src';

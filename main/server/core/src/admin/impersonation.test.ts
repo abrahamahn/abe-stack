@@ -4,18 +4,18 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { sign as jwtSign } from '../../../engine/src';
 
 import {
-    endImpersonation,
-    ImpersonationForbiddenError,
-    ImpersonationRateLimitError,
-    resetRateLimitStore,
-    startImpersonation,
-    validateImpersonationToken,
+  endImpersonation,
+  ImpersonationForbiddenError,
+  ImpersonationRateLimitError,
+  resetRateLimitStore,
+  startImpersonation,
+  validateImpersonationToken,
 } from './impersonation';
 
 import type {
-    ImpersonationAuditLogger,
-    ImpersonationConfig,
-    ImpersonationRepositories,
+  ImpersonationAuditLogger,
+  ImpersonationConfig,
+  ImpersonationRepositories,
 } from './impersonation';
 import type { User as DbUser, UserRepository } from '../../../db/src';
 

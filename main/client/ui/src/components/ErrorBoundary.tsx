@@ -1,6 +1,8 @@
 // main/client/ui/src/components/ErrorBoundary.tsx
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
+import { Button } from '../elements/Button';
+
 import '../styles/components.css';
 
 /**
@@ -100,9 +102,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <h2 className="error-fallback-title">Something went wrong</h2>
           <p className="error-fallback-message">{error.message}</p>
-          <button type="button" className="error-fallback-retry" onClick={this.reset}>
+          <Button className="error-fallback-retry" onClick={this.reset}>
             Try again
-          </button>
+          </Button>
         </div>
       );
     }

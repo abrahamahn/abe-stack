@@ -6,7 +6,6 @@ import { Badge } from '../elements/Badge';
 import type { UserStatus } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
-
 interface AdminUserLocal {
   lockedUntil: string | null;
   emailVerified: boolean;

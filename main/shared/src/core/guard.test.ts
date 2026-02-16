@@ -10,7 +10,7 @@ import {
   isObjectLike,
   isPlainObject,
   isString,
-} from './guard';
+} from '../primitives/guards';
 
 describe('guard', () => {
   // ==========================================================================

@@ -51,17 +51,17 @@ const emailTemplates = {
 };
 
 import {
-    getSecurityEventMetrics,
-    getUserSecurityEvents,
-    logAccountLockedEvent,
-    logAccountUnlockedEvent,
-    logSecurityEvent,
-    logTokenFamilyRevokedEvent,
-    logTokenReuseEvent,
-    sendEmailChangedAlert,
-    sendNewLoginAlert,
-    sendPasswordChangedAlert,
-    sendTokenReuseAlert,
+  getSecurityEventMetrics,
+  getUserSecurityEvents,
+  logAccountLockedEvent,
+  logAccountUnlockedEvent,
+  logSecurityEvent,
+  logTokenFamilyRevokedEvent,
+  logTokenReuseEvent,
+  sendEmailChangedAlert,
+  sendNewLoginAlert,
+  sendPasswordChangedAlert,
+  sendTokenReuseAlert,
 } from './events';
 
 import type { DbClient } from '../../../../db/src';

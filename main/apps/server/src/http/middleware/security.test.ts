@@ -212,18 +212,21 @@ describe('HTTP Security', () => {
     test.skip('should not set headers when options are disabled', () => {
       const mockReply = { header: vi.fn() };
 
-      applySecurityHeaders(mockReply as never, {
-        enableHSTS: false,
-        enableFrameOptions: false,
-        enableContentTypeOptions: false,
-        enableXSSProtection: false,
-        enableReferrerPolicy: false,
-        enablePermissionsPolicy: false,
-        enableCSP: false,
-        enableCrossOriginEmbedderPolicy: false,
-        enableCrossOriginOpenerPolicy: false,
-        enableCrossOriginResourcePolicy: false,
-      } as any);
+      applySecurityHeaders(
+        mockReply as never,
+        {
+          enableHSTS: false,
+          enableFrameOptions: false,
+          enableContentTypeOptions: false,
+          enableXSSProtection: false,
+          enableReferrerPolicy: false,
+          enablePermissionsPolicy: false,
+          enableCSP: false,
+          enableCrossOriginEmbedderPolicy: false,
+          enableCrossOriginOpenerPolicy: false,
+          enableCrossOriginResourcePolicy: false,
+        } as any,
+      );
 
       // Should only be called twice for X-Powered-By and Server removal
       expect(mockReply.header).toHaveBeenCalledWith('X-Powered-By', undefined);

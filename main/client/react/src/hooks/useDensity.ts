@@ -4,7 +4,6 @@ import { DEFAULT_DENSITY, getDensityCssVariables, type Density } from '@abe-stac
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback, useEffect } from 'react';
 
-
 export type UseDensityReturn = {
   /**
    * Current density setting
@@ -43,7 +42,7 @@ export type UseDensityReturn = {
  * return (
  *   <button onClick={cycleDensity}>
  *     Density: {density}
- *   </button>
+ *   </Button>
  * );
  * ```
  */

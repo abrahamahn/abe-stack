@@ -20,7 +20,7 @@
       "@router": ["./src/router"],
       "@router/*": ["./src/router/*"]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.react.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.react.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

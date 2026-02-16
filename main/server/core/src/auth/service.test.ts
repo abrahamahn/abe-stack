@@ -7,35 +7,35 @@ import { toCamelCase, type DbClient, type Repositories, type User } from '../../
 import { createTenant } from '../tenants';
 
 import {
-    applyProgressiveDelay,
-    getAccountLockoutStatus,
-    isAccountLocked,
-    logAccountLockedEvent,
-    logLoginAttempt,
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  isAccountLocked,
+  logAccountLockedEvent,
+  logLoginAttempt,
 } from './security';
 import {
-    authenticateUser,
-    createEmailVerificationToken,
-    hasPassword,
-    logoutUser,
-    refreshUserTokens,
-    registerUser,
-    requestPasswordReset,
-    resendVerificationEmail,
-    resetPassword,
-    setPassword,
-    verifyEmail,
-    type AuthResult,
+  authenticateUser,
+  createEmailVerificationToken,
+  hasPassword,
+  logoutUser,
+  refreshUserTokens,
+  registerUser,
+  requestPasswordReset,
+  resendVerificationEmail,
+  resetPassword,
+  setPassword,
+  verifyEmail,
+  type AuthResult,
 } from './service';
 import { LOGIN_FAILURE_REASON } from './types';
 import {
-    createAccessToken,
-    createAuthResponse,
-    createRefreshTokenFamily,
-    hashPassword,
-    needsRehash,
-    rotateRefreshToken as rotateRefreshTokenUtil,
-    verifyPasswordSafe,
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  hashPassword,
+  needsRehash,
+  rotateRefreshToken as rotateRefreshTokenUtil,
+  verifyPasswordSafe,
 } from './utils';
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './index';
@@ -1317,7 +1317,9 @@ describe('verifyEmail', () => {
     // without waiting, but at least we check memberships was checked.
     // If we want to verify createTenant, we'd need to wait for pending promises.
     await new Promise(process.nextTick);
-    expect(createTenant).toHaveBeenCalledWith(db, repos, userId, { name: `${user.username}'s Workspace` });
+    expect(createTenant).toHaveBeenCalledWith(db, repos, userId, {
+      name: `${user.username}'s Workspace`,
+    });
   });
 
   it('should throw InvalidTokenError if token not found', async () => {

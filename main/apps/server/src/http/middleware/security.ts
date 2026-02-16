@@ -12,11 +12,16 @@
  */
 
 import {
-    generateSecurityHeaders,
-    getProductionSecurityDefaults,
-    type SecurityHeaderOptions,
+  generateSecurityHeaders,
+  getProductionSecurityDefaults,
+  type SecurityHeaderOptions,
 } from '@abe-stack/server-engine';
-import { HTTP_STATUS, SECONDS_PER_DAY, hasDangerousKeys, sanitizePrototype } from '@abe-stack/shared';
+import {
+  HTTP_STATUS,
+  SECONDS_PER_DAY,
+  hasDangerousKeys,
+  sanitizePrototype,
+} from '@abe-stack/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

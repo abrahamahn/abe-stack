@@ -51,9 +51,7 @@ function resolveConfig(next: ApiClientConfig): ApiClientConfig {
     ...next,
     ...(next.getToken !== undefined ? {} : { getToken: currentConfig.getToken }),
     ...(next.fetchImpl !== undefined ? {} : { fetchImpl: currentConfig.fetchImpl }),
-    ...(next.onTosRequired !== undefined
-      ? {}
-      : { onTosRequired: currentConfig.onTosRequired }),
+    ...(next.onTosRequired !== undefined ? {} : { onTosRequired: currentConfig.onTosRequired }),
   };
 }
 

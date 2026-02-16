@@ -1,6 +1,6 @@
 // main/apps/web/src/features/ui-library/components/SidePeekUILibraryContent.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const { mockMarkdown } = vi.hoisted(() => ({
   mockMarkdown: vi.fn(),

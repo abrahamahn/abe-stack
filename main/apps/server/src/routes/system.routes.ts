@@ -64,7 +64,12 @@ export const systemRoutes: RouteMap = createRouteMap([
     'metrics',
     publicRoute(
       'GET',
-      async (_ctx: HandlerContext, _body: undefined, _req: FastifyRequest, _reply: FastifyReply) => {
+      async (
+        _ctx: HandlerContext,
+        _body: undefined,
+        _req: FastifyRequest,
+        _reply: FastifyReply,
+      ) => {
         return getMetricsCollector().getMetricsSummary();
       },
       undefined,

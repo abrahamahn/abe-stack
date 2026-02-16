@@ -8,9 +8,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    enforceMaxConcurrentSessions,
-    getIdleTimeRemaining,
-    isSessionIdle,
+  enforceMaxConcurrentSessions,
+  getIdleTimeRemaining,
+  isSessionIdle,
 } from './session-enforcement';
 
 import type { RefreshTokenFamily, Repositories } from '../../../../db/src';

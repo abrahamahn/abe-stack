@@ -1,6 +1,8 @@
 // main/client/ui/src/components/Pagination.tsx
 import { useControllableState } from '@hooks/useControllableState';
 
+import { Button } from '../elements/Button';
+
 import type { ReactElement } from 'react';
 
 import '../styles/components.css';
@@ -50,16 +52,16 @@ export const Pagination = ({
 
   return (
     <nav className="pagination" role="navigation" aria-label={ariaLabel}>
-      <button
+      <Button
         className="pagination-button"
         onClick={prev}
         disabled={page <= 1}
         aria-label="Go to previous page"
       >
         ‹
-      </button>
+      </Button>
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-        <button
+        <Button
           key={p}
           className="pagination-button"
           data-active={p === page}
@@ -70,16 +72,16 @@ export const Pagination = ({
           }}
         >
           {p}
-        </button>
+        </Button>
       ))}
-      <button
+      <Button
         className="pagination-button"
         onClick={next}
         disabled={page >= totalPages}
         aria-label="Go to next page"
       >
         ›
-      </button>
+      </Button>
     </nav>
   );
 };

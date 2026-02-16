@@ -18,11 +18,9 @@ import {
   Skeleton,
   Text,
 } from '@abe-stack/ui';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ChangeEvent, JSX } from 'react';
 
 import { useTenant } from '../hooks';
-
-import type { JSX } from 'react';
 
 export const TenantDetailPage = (): JSX.Element => {
   const { id } = useParams();
@@ -175,7 +173,7 @@ export const TenantDetailPage = (): JSX.Element => {
                           label="Reason for suspension"
                           type="text"
                           value={suspendReason}
-                          onChange={(e) => {
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
                             setSuspendReason(e.target.value);
                           }}
                           placeholder="Enter suspension reason"

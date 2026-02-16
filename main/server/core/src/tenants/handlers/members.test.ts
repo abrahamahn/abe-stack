@@ -2,10 +2,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleAddMember,
-    handleListMembers,
-    handleRemoveMember,
-    handleUpdateMemberRole,
+  handleAddMember,
+  handleListMembers,
+  handleRemoveMember,
+  handleUpdateMemberRole,
 } from './members';
 
 import type { DbClient, Repositories } from '../../../../db/src';

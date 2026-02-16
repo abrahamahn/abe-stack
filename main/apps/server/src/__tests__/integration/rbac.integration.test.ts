@@ -19,7 +19,6 @@ import { createTestServer, type TestServer } from './test-utils';
 
 import type { AuthGuardFactory } from '@abe-stack/server-engine';
 
-
 // ============================================================================
 // Mock Repositories (minimal set for tenant routes)
 // ============================================================================

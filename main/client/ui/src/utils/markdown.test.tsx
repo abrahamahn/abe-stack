@@ -1,6 +1,6 @@
 // main/client/ui/src/utils/markdown.test.tsx
 import { render } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Markdown, parseMarkdown } from './markdown';
 

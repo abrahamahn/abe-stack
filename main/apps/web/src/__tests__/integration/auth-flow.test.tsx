@@ -11,7 +11,7 @@
 
 import { Route, Routes, useLocation } from '@abe-stack/react/router';
 import { act, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { LoginPage, RegisterPage } from '../../features/auth';
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';

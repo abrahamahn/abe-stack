@@ -4,7 +4,7 @@ import { Select } from '@components/Select';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 describe('Select', () => {
   describe('happy path', () => {

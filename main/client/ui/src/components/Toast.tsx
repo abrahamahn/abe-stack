@@ -1,6 +1,8 @@
 // main/client/ui/src/components/Toast.tsx
 import { useCallback, useEffect, type ReactElement } from 'react';
 
+import { Button } from '../elements/Button';
+
 import type { ToastMessage } from '@abe-stack/react';
 
 import '../styles/components.css';
@@ -53,19 +55,14 @@ export const Toast = ({ message, duration = 3500, onDismiss }: ToastProps): Reac
         ) : null}
       </div>
       {message.action != null ? (
-        <button type="button" className="toast-action" onClick={message.action.onClick}>
+        <Button className="toast-action" onClick={message.action.onClick}>
           {message.action.label}
-        </button>
+        </Button>
       ) : null}
       {onDismiss !== undefined ? (
-        <button
-          type="button"
-          className="toast-dismiss"
-          aria-label="Dismiss notification"
-          onClick={handleDismiss}
-        >
+        <Button className="toast-dismiss" aria-label="Dismiss notification" onClick={handleDismiss}>
           ✕
-        </button>
+        </Button>
       ) : null}
     </div>
   );

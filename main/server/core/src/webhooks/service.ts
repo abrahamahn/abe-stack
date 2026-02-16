@@ -15,10 +15,10 @@ import { randomBytes } from 'node:crypto';
 import { NotFoundError } from '@abe-stack/shared';
 
 import type {
-    CreateWebhookData,
-    DeliverySummary,
-    UpdateWebhookData,
-    WebhookWithStats,
+  CreateWebhookData,
+  DeliverySummary,
+  UpdateWebhookData,
+  WebhookWithStats,
 } from './types';
 import type { Repositories, Webhook } from '../../../db/src';
 

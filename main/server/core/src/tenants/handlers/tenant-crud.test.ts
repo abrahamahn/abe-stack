@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleCreateTenant,
-    handleDeleteTenant,
-    handleGetTenant,
-    handleListTenants,
-    handleUpdateTenant,
+  handleCreateTenant,
+  handleDeleteTenant,
+  handleGetTenant,
+  handleListTenants,
+  handleUpdateTenant,
 } from './tenant-crud';
 
 import type { DbClient, Repositories } from '../../../../db/src';

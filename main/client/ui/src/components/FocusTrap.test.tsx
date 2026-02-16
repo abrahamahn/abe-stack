@@ -2,7 +2,9 @@
 // client/ui/src/elements/__tests__/FocusTrap.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
+import { Button } from '../elements/Button';
 
 import { FocusTrap } from './FocusTrap';
 
@@ -10,8 +12,8 @@ describe('FocusTrap', () => {
   it('moves focus to the first focusable child', () => {
     render(
       <FocusTrap>
-        <button type="button">First</button>
-        <button type="button">Second</button>
+        <Button>First</Button>
+        <Button>Second</Button>
       </FocusTrap>,
     );
 
@@ -21,8 +23,8 @@ describe('FocusTrap', () => {
   it('cycles focus when tabbing past the last element', () => {
     const { container } = render(
       <FocusTrap>
-        <button type="button">First</button>
-        <button type="button">Second</button>
+        <Button>First</Button>
+        <Button>Second</Button>
       </FocusTrap>,
     );
 
@@ -40,13 +42,13 @@ describe('FocusTrap', () => {
   });
 
   it('restores focus to the previously focused element on unmount', () => {
-    render(<button type="button">Outside</button>);
+    render(<Button>Outside</Button>);
     const outside = screen.getByText('Outside');
     outside.focus();
 
     const { unmount } = render(
       <FocusTrap>
-        <button type="button">Inside</button>
+        <Button>Inside</Button>
       </FocusTrap>,
     );
     expect(screen.getByText('Inside')).toHaveFocus();
@@ -56,7 +58,7 @@ describe('FocusTrap', () => {
   });
 
   it('does nothing when no focusable children exist', () => {
-    render(<button type="button">Outside</button>);
+    render(<Button>Outside</Button>);
     const outside = screen.getByText('Outside');
     outside.focus();
 
@@ -73,7 +75,7 @@ describe('FocusTrap', () => {
   it('keeps focus on the only focusable element when tabbing', () => {
     const { container } = render(
       <FocusTrap>
-        <button type="button">Only</button>
+        <Button>Only</Button>
       </FocusTrap>,
     );
 

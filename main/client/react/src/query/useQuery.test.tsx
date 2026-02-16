@@ -23,7 +23,6 @@ import { UnauthorizedError } from '@abe-stack/shared';
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useQuery } from './useQuery';
 

@@ -6,10 +6,11 @@
  * Centralizes email, password, and other common field validations.
  */
 
-import { ERROR_CODES } from './constants';
+import { ERROR_CODES } from '../primitives/constants';
+
 import { createSchema, UUID_REGEX } from './schema.utils';
 
-import type { Schema } from './api';
+import type { Schema } from '../primitives/schema';
 
 // ============================================================================
 // Validation Helpers (Ported from contracts/common.ts)

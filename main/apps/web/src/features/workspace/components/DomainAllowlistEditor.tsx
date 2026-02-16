@@ -7,7 +7,7 @@
  */
 
 import { Alert, Badge, Button, CloseButton, FormField, Input } from '@abe-stack/ui';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ChangeEvent } from 'react';
 
 // ============================================================================
 // Types
@@ -88,7 +88,7 @@ export const DomainAllowlistEditor = ({
             id="domain-input"
             type="text"
             value={inputValue}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setInputValue(e.target.value);
               setError(null);
             }}

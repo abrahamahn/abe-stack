@@ -9,9 +9,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    determinePlanChangeDirection,
-    downgradeSubscription,
-    upgradeSubscription,
+  determinePlanChangeDirection,
+  downgradeSubscription,
+  upgradeSubscription,
 } from './plan-changes';
 
 import type { BillingRepositories } from './types';

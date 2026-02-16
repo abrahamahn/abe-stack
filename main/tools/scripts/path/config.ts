@@ -27,7 +27,13 @@ const EXCLUDED_DIRS = new Set([
 ]);
 
 /** Target directories for config files */
-const CONFIG_DIRECTORIES = ['main/tools', 'infra', 'config', '.github', 'main/client/ui/src/styles'];
+const CONFIG_DIRECTORIES = [
+  'main/tools',
+  'infra',
+  'config',
+  '.github',
+  'main/client/ui/src/styles',
+];
 
 /** Root-level file extensions to include */
 const ROOT_FILE_EXTENSIONS = new Set([

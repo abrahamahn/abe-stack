@@ -19,7 +19,7 @@ const FOCUSABLE = [
  * ```tsx
  * <FocusTrap>
  *   <dialog>
- *     <button>Focusable</button>
+ *     <Button>Focusable</Button>
  *   </dialog>
  * </FocusTrap>
  * ```

@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/hooks/useApiKeys.test.ts
 import { useMutation, useQuery } from '@abe-stack/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
 
 import { createSettingsApi } from '../api';
 

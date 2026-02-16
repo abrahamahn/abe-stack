@@ -143,9 +143,7 @@ export async function seed(): Promise<void> {
     }
 
     if (failures.length > 0) {
-      throw new Error(
-        `Seed failed for ${String(failures.length)} user(s): ${failures.join(', ')}`,
-      );
+      throw new Error(`Seed failed for ${String(failures.length)} user(s): ${failures.join(', ')}`);
     }
 
     console.log('\n✅ Database seeded successfully!\n');
@@ -155,7 +153,6 @@ export async function seed(): Promise<void> {
     console.log('');
 
     console.log('');
-
   } finally {
     if (process.argv[1]?.includes('seed')) {
       await db.close();

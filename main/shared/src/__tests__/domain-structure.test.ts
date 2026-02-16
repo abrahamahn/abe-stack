@@ -83,8 +83,9 @@ describe('Domain Structure', () => {
 
   describe('Infrastructure Layer', () => {
     test('should export async utilities', async () => {
-      const { BatchedQueue, DeferredPromise, ReactiveMap } =
-        await import('../utils/async/index.js');
+      const { BatchedQueue, DeferredPromise, ReactiveMap } = await import(
+        '../utils/async/index.js'
+      );
 
       expect(typeof BatchedQueue).toBe('function');
       expect(typeof DeferredPromise).toBe('function');
@@ -126,8 +127,9 @@ describe('Domain Structure', () => {
     });
 
     test('should export base errors and helpers', async () => {
-      const { AppError, ValidationError, isAppError, toAppError } =
-        await import('../core/errors.js');
+      const { AppError, ValidationError, isAppError, toAppError } = await import(
+        '../core/errors.js'
+      );
 
       expect(typeof AppError).toBe('function');
       expect(typeof ValidationError).toBe('function');

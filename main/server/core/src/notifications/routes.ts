@@ -11,43 +11,39 @@
  */
 
 import {
-    baseMarkAsReadRequestSchema,
-    emptyBodySchema,
-    notificationDeleteRequestSchema,
-    sendNotificationRequestSchema,
-    subscribeRequestSchema,
-    unsubscribeRequestSchema,
-    updatePreferencesRequestSchema,
+  baseMarkAsReadRequestSchema,
+  emptyBodySchema,
+  notificationDeleteRequestSchema,
+  sendNotificationRequestSchema,
+  subscribeRequestSchema,
+  unsubscribeRequestSchema,
+  updatePreferencesRequestSchema,
 } from '@abe-stack/shared';
 
-import {
-    createRouteMap,
-    type HandlerContext,
-    type RouteDefinition,
-} from '../../../engine/src';
+import { createRouteMap, type HandlerContext, type RouteDefinition } from '../../../engine/src';
 
 import {
-    handleDeleteNotification,
-    handleGetPreferences,
-    handleGetVapidKey,
-    handleListNotifications,
-    handleMarkAllAsRead,
-    handleMarkAsRead,
-    handleSendNotification,
-    handleSubscribe,
-    handleTestNotification,
-    handleUnsubscribe,
-    handleUpdatePreferences,
+  handleDeleteNotification,
+  handleGetPreferences,
+  handleGetVapidKey,
+  handleListNotifications,
+  handleMarkAllAsRead,
+  handleMarkAsRead,
+  handleSendNotification,
+  handleSubscribe,
+  handleTestNotification,
+  handleUnsubscribe,
+  handleUpdatePreferences,
 } from './handlers';
 
 import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
-    BaseMarkAsReadRequest,
-    EmptyBody,
-    SendNotificationRequest,
-    SubscribeRequest,
-    UnsubscribeRequest,
-    UpdatePreferencesRequest,
+  BaseMarkAsReadRequest,
+  EmptyBody,
+  SendNotificationRequest,
+  SubscribeRequest,
+  UnsubscribeRequest,
+  UpdatePreferencesRequest,
 } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

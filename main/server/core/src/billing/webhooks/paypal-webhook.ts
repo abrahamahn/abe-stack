@@ -8,21 +8,21 @@
  */
 
 import {
-    MS_PER_DAY,
-    WebhookEventAlreadyProcessedError,
-    WebhookSignatureError,
-    type LogData,
-    type NormalizedWebhookEvent,
-    type Logger as ServerLogger,
+  MS_PER_DAY,
+  WebhookEventAlreadyProcessedError,
+  WebhookSignatureError,
+  type LogData,
+  type NormalizedWebhookEvent,
+  type Logger as ServerLogger,
 } from '@abe-stack/shared';
 
 import {
-    createBillingEventRepository,
-    createCustomerMappingRepository,
-    createInvoiceRepository,
-    createPlanRepository,
-    createSubscriptionRepository,
-    type RawDb,
+  createBillingEventRepository,
+  createCustomerMappingRepository,
+  createInvoiceRepository,
+  createPlanRepository,
+  createSubscriptionRepository,
+  type RawDb,
 } from '../../../../db/src';
 import { PayPalProvider } from '../paypal-provider';
 
@@ -72,45 +72,45 @@ export async function handlePayPalWebhook(
       // Re-create repositories with the transaction client to ensure atomicity
       const txRepos: WebhookRepositories = {
         db: txDb,
-      billingEvents: createBillingEventRepository(txDb),
-      subscriptions: createSubscriptionRepository(txDb),
-      invoices: createInvoiceRepository(txDb),
-      plans: createPlanRepository(txDb),
-      customerMappings: createCustomerMappingRepository(txDb),
-    };
+        billingEvents: createBillingEventRepository(txDb),
+        subscriptions: createSubscriptionRepository(txDb),
+        invoices: createInvoiceRepository(txDb),
+        plans: createPlanRepository(txDb),
+        customerMappings: createCustomerMappingRepository(txDb),
+      };
 
-    // Check idempotency within the same transaction
-    const alreadyProcessed = await txRepos.billingEvents.wasProcessed('paypal', event.id);
-    if (alreadyProcessed) {
-      log.info({ eventId: event.id }, 'Webhook event already processed, skipping');
-      throw new WebhookEventAlreadyProcessedError(event.id);
-    }
+      // Check idempotency within the same transaction
+      const alreadyProcessed = await txRepos.billingEvents.wasProcessed('paypal', event.id);
+      if (alreadyProcessed) {
+        log.info({ eventId: event.id }, 'Webhook event already processed, skipping');
+        throw new WebhookEventAlreadyProcessedError(event.id);
+      }
 
-    // Process event using transaction-bound repositories
-    await processEvent(event, txRepos, log);
+      // Process event using transaction-bound repositories
+      await processEvent(event, txRepos, log);
 
-    // Record event as processed within the same transaction
-    await txRepos.billingEvents.recordEvent({
-      provider: 'paypal',
-      providerEventId: event.id,
-      eventType: event.type as
-        | 'subscription.created'
-        | 'subscription.updated'
-        | 'subscription.canceled'
-        | 'invoice.paid'
-        | 'invoice.payment_failed'
-        | 'refund.created'
-        | 'chargeback.created',
-      payload: event.data.raw as Record<string, unknown>,
-      processedAt: new Date(),
-    });
-
-        return {
-          success: true,
-          message: `Processed ${event.type} event`,
-          eventId: event.id,
-        };
+      // Record event as processed within the same transaction
+      await txRepos.billingEvents.recordEvent({
+        provider: 'paypal',
+        providerEventId: event.id,
+        eventType: event.type as
+          | 'subscription.created'
+          | 'subscription.updated'
+          | 'subscription.canceled'
+          | 'invoice.paid'
+          | 'invoice.payment_failed'
+          | 'refund.created'
+          | 'chargeback.created',
+        payload: event.data.raw as Record<string, unknown>,
+        processedAt: new Date(),
       });
+
+      return {
+        success: true,
+        message: `Processed ${event.type} event`,
+        eventId: event.id,
+      };
+    });
   } catch (error) {
     const normalizedError = error instanceof Error ? error : new Error(String(error));
     log.error(

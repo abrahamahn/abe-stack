@@ -7,7 +7,7 @@
  */
 
 import { Alert, Button, Card, FormField, Heading, Input, Text } from '@abe-stack/ui';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ChangeEvent } from 'react';
 
 import {
   useDeactivateAccount,
@@ -161,7 +161,7 @@ export const DangerZone = ({
                 id="deactivate-reason"
                 type="text"
                 value={reason}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setReason(e.target.value);
                 }}
                 placeholder="Why are you deactivating?"
@@ -195,7 +195,7 @@ export const DangerZone = ({
                   id="delete-reason"
                   type="text"
                   value={reason}
-                  onChange={(e) => {
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     setReason(e.target.value);
                   }}
                   placeholder="Why are you deleting your account?"

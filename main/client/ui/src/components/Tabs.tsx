@@ -1,5 +1,8 @@
 // main/client/ui/src/components/Tabs.tsx
 import { useState, type ReactElement, type ReactNode } from 'react';
+
+import { Button } from '../elements/Button';
+
 import '../styles/components.css';
 
 export type TabItem = {
@@ -68,12 +71,11 @@ export const Tabs = ({ items, value, defaultValue, onChange }: TabsProps): React
           const panelId = `tabpanel-${item.id}`;
 
           return (
-            <button
+            <Button
               key={item.id}
               id={tabId}
               className="tab"
               role="tab"
-              type="button"
               aria-selected={isActive}
               aria-controls={panelId}
               tabIndex={isActive ? 0 : -1}
@@ -99,7 +101,7 @@ export const Tabs = ({ items, value, defaultValue, onChange }: TabsProps): React
               }}
             >
               {item.label}
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -113,9 +113,9 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
  * });
  * ```
  */
-export class SqlSearchProvider<
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-> implements ServerSearchProvider<TRecord> {
+export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>
+  implements ServerSearchProvider<TRecord>
+{
   readonly name: string;
   private readonly config: Required<Omit<SqlSearchProviderConfig, 'name'>>;
   private readonly tableConfig: SqlTableConfig;

@@ -9,12 +9,12 @@
  */
 
 import {
-    BadRequestError,
-    canAssignRole,
-    canChangeRole,
-    canRemoveMember,
-    ForbiddenError,
-    NotFoundError,
+  BadRequestError,
+  canAssignRole,
+  canChangeRole,
+  canRemoveMember,
+  ForbiddenError,
+  NotFoundError,
 } from '@abe-stack/shared';
 
 import type { Repositories } from '../../../db/src';

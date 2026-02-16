@@ -1,6 +1,6 @@
 // main/client/ui/src/theme/buildThemeCss.test.ts
 import { generateThemeCss } from '@theme/buildThemeCss';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('generateThemeCss', () => {
   it('includes root tokens and dark mode overrides', () => {

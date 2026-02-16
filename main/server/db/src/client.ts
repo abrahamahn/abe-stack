@@ -14,10 +14,10 @@
  */
 
 import postgres, {
-    type Options,
-    type ParameterOrJSON,
-    type Sql,
-    type TransactionSql,
+  type Options,
+  type ParameterOrJSON,
+  type Sql,
+  type TransactionSql,
 } from 'postgres';
 
 export interface QueryResult {
@@ -185,15 +185,17 @@ function createDbFromSql(sql: PostgresClient, session?: SessionContext): RawDb {
   const unsafeQuery = async <T>(text: string, values: readonly unknown[]): Promise<T[]> => {
     // If a session is present, wrap the query in a transaction to set local RLS variables.
     // This ensures SET LOCAL variables are isolated to the connection and reset after.
-      if (session && (session.userId || session.tenantId)) {
-        return (sql as Sql).begin(async (tx: any) => {
-          if (session.userId) await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
-          if (session.tenantId) await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
-          if (session.role) await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
-          const r = await tx.unsafe(text, [...values] as ParameterOrJSON<never>[]);
-          return r as unknown as T[];
-        }) as unknown as Promise<T[]>;
-      }
+    if (session && (session.userId || session.tenantId)) {
+      return (sql as Sql).begin(async (tx: any) => {
+        if (session.userId)
+          await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
+        if (session.tenantId)
+          await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
+        if (session.role) await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
+        const r = await tx.unsafe(text, [...values] as ParameterOrJSON<never>[]);
+        return r as unknown as T[];
+      }) as unknown as Promise<T[]>;
+    }
 
     // The postgres driver's unsafe() accepts (query, args) where args is an array
     const result = await sql.unsafe(text, [...values] as ParameterOrJSON<never>[]);
@@ -226,9 +228,12 @@ function createDbFromSql(sql: PostgresClient, session?: SessionContext): RawDb {
       // Let's fix unsafeQuery to be more flexible or just handle it here.
       if (session && (session.userId || session.tenantId)) {
         return (sql as Sql).begin(async (tx: any) => {
-          if (session.userId) await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
-          if (session.tenantId) await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
-          if (session.role) await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
+          if (session.userId)
+            await tx.unsafe(`SET LOCAL app.user_id = ${tx.escapeLiteral(session.userId)}`);
+          if (session.tenantId)
+            await tx.unsafe(`SET LOCAL app.tenant_id = ${tx.escapeLiteral(session.tenantId)}`);
+          if (session.role)
+            await tx.unsafe(`SET LOCAL app.role = ${tx.escapeLiteral(session.role)}`);
           const r = await tx.unsafe(query.text, [...query.values] as ParameterOrJSON<never>[]);
           return r.count;
         });

@@ -95,10 +95,7 @@ export type CountResult =
  */
 export type OffsetPaginationQueryBuilder<T> = {
   clone?: () => OffsetPaginationQueryBuilder<T>;
-  orderBy: (
-    sortBy: string,
-    sortOrder?: SortDirection,
-  ) => OffsetPaginationQueryBuilder<T>;
+  orderBy: (sortBy: string, sortOrder?: SortDirection) => OffsetPaginationQueryBuilder<T>;
   count: () => PromiseLike<CountResult>;
   offset: (value: number) => OffsetPaginationQueryBuilder<T>;
   limit: (value: number) => OffsetPaginationQueryBuilder<T> | PromiseLike<T[]>;

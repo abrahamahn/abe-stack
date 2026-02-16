@@ -7,10 +7,10 @@
  */
 
 import {
-    createRequestContext,
-    createJobCorrelationId as createSharedJobCorrelationId,
-    createJobLogger as createSharedJobLogger,
-    getOrCreateCorrelationId,
+  createRequestContext,
+  createJobCorrelationId as createSharedJobCorrelationId,
+  createJobLogger as createSharedJobLogger,
+  getOrCreateCorrelationId,
 } from '@abe-stack/shared';
 
 import { getMetricsCollector } from '../system/metrics';
@@ -41,8 +41,14 @@ declare module 'fastify' {
  * Interface for the error tracker in the context.
  */
 interface ErrorTracker {
-  addBreadcrumb: (message: string, options: { category?: string; level?: string; data?: Record<string, unknown> }) => void;
-  captureError: (error: unknown, options: { tags?: Record<string, string>; extra?: Record<string, unknown> }) => void;
+  addBreadcrumb: (
+    message: string,
+    options: { category?: string; level?: string; data?: Record<string, unknown> },
+  ) => void;
+  captureError: (
+    error: unknown,
+    options: { tags?: Record<string, string>; extra?: Record<string, unknown> },
+  ) => void;
 }
 
 /**
@@ -122,14 +128,17 @@ export function registerLoggingMiddleware(
 
     // Add breadcrumb for request completion
     const req = request as RequestWithContext;
-    req.context?.errorTracker?.addBreadcrumb(`Request completed: ${request.method} ${request.url}`, {
-      category: 'http',
-      level: reply.statusCode >= 400 ? 'warn' : 'info',
-      data: {
-        statusCode: reply.statusCode,
-        duration,
+    req.context?.errorTracker?.addBreadcrumb(
+      `Request completed: ${request.method} ${request.url}`,
+      {
+        category: 'http',
+        level: reply.statusCode >= 400 ? 'warn' : 'info',
+        data: {
+          statusCode: reply.statusCode,
+          duration,
+        },
       },
-    });
+    );
 
     const logData: Record<string, unknown> = {
       method: request.method,

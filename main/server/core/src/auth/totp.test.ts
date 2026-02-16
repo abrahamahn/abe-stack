@@ -4,12 +4,12 @@ import { Secret, TOTP } from 'otpauth';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    disableTotp,
-    enableTotp,
-    getTotpStatus,
-    setupTotp,
-    verifyTotpCode,
-    verifyTotpForLogin,
+  disableTotp,
+  enableTotp,
+  getTotpStatus,
+  setupTotp,
+  verifyTotpCode,
+  verifyTotpForLogin,
 } from './totp';
 
 import type { DbClient } from '../../../db/src';

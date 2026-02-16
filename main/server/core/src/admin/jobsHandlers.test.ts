@@ -11,11 +11,11 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ERROR_MESSAGES } from '../auth';
 
 import {
-    handleCancelJob,
-    handleGetJobDetails,
-    handleGetQueueStats,
-    handleListJobs,
-    handleRetryJob,
+  handleCancelJob,
+  handleGetJobDetails,
+  handleGetQueueStats,
+  handleListJobs,
+  handleRetryJob,
 } from './jobsHandlers';
 
 import type { AdminAppContext } from './types';

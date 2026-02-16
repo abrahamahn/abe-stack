@@ -76,7 +76,10 @@ describe('createApiClient', () => {
     });
 
     const client = createApiClient({ baseUrl, fetchImpl: mockFetch });
-    const result = await client.login({ identifier: 'legacy@example.com', password: 'password123' });
+    const result = await client.login({
+      identifier: 'legacy@example.com',
+      password: 'password123',
+    });
 
     expect(result).toEqual(
       expect.objectContaining({

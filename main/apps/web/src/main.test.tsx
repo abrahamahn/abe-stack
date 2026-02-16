@@ -11,7 +11,7 @@
  * @complexity O(1) - All tests are unit tests with mocked dependencies
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // Vi.mock calls - these must come before any imports that use them

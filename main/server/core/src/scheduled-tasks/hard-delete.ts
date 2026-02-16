@@ -9,14 +9,14 @@
  */
 
 import {
-    deleteFrom,
-    eq,
-    isNotNull,
-    lt,
-    select,
-    toCamelCase,
-    USER_COLUMNS,
-    USERS_TABLE,
+  deleteFrom,
+  eq,
+  isNotNull,
+  lt,
+  select,
+  toCamelCase,
+  USER_COLUMNS,
+  USERS_TABLE,
 } from '../../../db/src';
 import { ANONYMIZED_EMAIL_PATTERN } from '../users';
 

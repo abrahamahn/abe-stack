@@ -77,7 +77,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: ['@abe-stack/shared', '@abe-stack/db', '@abe-stack/server', '@abe-stack/web', '@abe-stack/api', '@abe-stack/client-engine', '@abe-stack/react', '@abe-stack/ui']
+        package:
+          [
+            '@abe-stack/shared',
+            '@abe-stack/db',
+            '@abe-stack/server',
+            '@abe-stack/web',
+            '@abe-stack/api',
+            '@abe-stack/client-engine',
+            '@abe-stack/react',
+            '@abe-stack/ui',
+          ]
     steps:
       - uses: actions/checkout@v4
 

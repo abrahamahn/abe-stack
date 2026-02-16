@@ -1,6 +1,6 @@
 // main/apps/web/src/features/home/components/HomeDocViewer.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { HomeDocViewer } from './HomeDocViewer';
 

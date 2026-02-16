@@ -6,7 +6,7 @@
  */
 
 import { Alert, Button, FormField, Input, Modal, Select, Text } from '@abe-stack/ui';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ChangeEvent } from 'react';
 
 import { useCreateInvitation } from '../hooks';
 
@@ -83,7 +83,7 @@ export const InviteMemberDialog = ({
                 id="invite-email"
                 type="email"
                 value={email}
-                onChange={(e) => {
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setEmail(e.target.value);
                 }}
                 placeholder="colleague@example.com"

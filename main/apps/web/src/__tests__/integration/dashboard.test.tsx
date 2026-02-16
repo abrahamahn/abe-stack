@@ -10,7 +10,7 @@
 
 import { Route, Routes } from '@abe-stack/react/router';
 import { screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { DashboardPage } from '../../features/dashboard';
 import { createMockEnvironment, mockAdminUser, mockUser, renderWithProviders } from '../utils';

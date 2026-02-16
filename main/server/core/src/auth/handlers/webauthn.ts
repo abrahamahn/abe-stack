@@ -8,31 +8,31 @@
  */
 
 import {
-    mapErrorToHttpResponse,
-    type HttpErrorResponse,
-    type PasskeyListItem,
-    type RenamePasskeyRequest,
+  mapErrorToHttpResponse,
+  type HttpErrorResponse,
+  type PasskeyListItem,
+  type RenamePasskeyRequest,
 } from '@abe-stack/shared';
 
 import { withTransaction } from '../../../../db/src';
 import { assertUserActive } from '../middleware';
 import {
-    createErrorMapperLogger,
-    type AppContext,
-    type ReplyWithCookies,
-    type RequestWithCookies,
+  createErrorMapperLogger,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from '../types';
 import {
-    createAccessToken,
-    createAuthResponse,
-    createRefreshTokenFamily,
-    setRefreshTokenCookie,
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  setRefreshTokenCookie,
 } from '../utils';
 import {
-    getAuthenticationOptions,
-    getRegistrationOptions,
-    verifyAuthentication,
-    verifyRegistration,
+  getAuthenticationOptions,
+  getRegistrationOptions,
+  verifyAuthentication,
+  verifyRegistration,
 } from '../webauthn/service';
 
 // ============================================================================

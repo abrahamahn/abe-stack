@@ -1,6 +1,6 @@
 // main/apps/web/src/features/admin/hooks/useAdminUsers.test.ts
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 

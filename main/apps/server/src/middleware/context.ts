@@ -1,6 +1,6 @@
 // main/apps/server/src/middleware/context.ts
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { RequestWithCookies } from '../types/context';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Fastify preHandler hook to contextualize the application context for Row-Level Security.
@@ -8,7 +8,10 @@ import type { RequestWithCookies } from '../types/context';
  * If a user is authenticated (req.user is present), it creates a new scoped context
  * with the user's ID and tenant ID (if available).
  */
-export async function contextualizeRequest(req: FastifyRequest, _reply: FastifyReply): Promise<void> {
+export async function contextualizeRequest(
+  req: FastifyRequest,
+  _reply: FastifyReply,
+): Promise<void> {
   const request = req as unknown as RequestWithCookies;
 
   if (!request.context || !request.user) {

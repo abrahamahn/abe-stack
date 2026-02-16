@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
 import { PlanCard } from './PlanCard';
@@ -146,8 +147,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
       <div ref={ref} className={cn('pricing-table', className)} {...rest}>
         {showToggle && (
           <div className="pricing-table__toggle">
-            <button
-              type="button"
+            <Button
               className={cn(
                 'pricing-table__toggle-button',
                 selectedInterval === 'month' && 'pricing-table__toggle-button--active',
@@ -157,9 +157,8 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
               }}
             >
               Monthly
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               className={cn(
                 'pricing-table__toggle-button',
                 selectedInterval === 'year' && 'pricing-table__toggle-button--active',
@@ -172,7 +171,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
               {yearlySavings !== null && (
                 <span className="pricing-table__savings-badge">Save {yearlySavings}%</span>
               )}
-            </button>
+            </Button>
           </div>
         )}
 

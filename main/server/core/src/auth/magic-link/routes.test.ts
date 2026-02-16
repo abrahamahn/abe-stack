@@ -13,13 +13,13 @@
  */
 
 import {
-    magicLinkRequestSchema,
-    magicLinkVerifyRequestSchema,
-    type AuthResponse,
-    type MagicLinkRequest,
-    type MagicLinkRequestResponse,
-    type MagicLinkVerifyRequest,
-    type UserId,
+  magicLinkRequestSchema,
+  magicLinkVerifyRequestSchema,
+  type AuthResponse,
+  type MagicLinkRequest,
+  type MagicLinkRequestResponse,
+  type MagicLinkVerifyRequest,
+  type UserId,
 } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

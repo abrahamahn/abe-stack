@@ -8,7 +8,6 @@
  * - getOAuthLoginUrl: Pure function to build OAuth login URL
  */
 
-
 import { createApiClient } from '@abe-stack/api';
 import { API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
 import { useCallback, useMemo } from 'react';

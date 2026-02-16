@@ -8,15 +8,15 @@
  */
 
 import {
-    and,
-    eq,
-    gte,
-    insert,
-    LOGIN_ATTEMPTS_TABLE,
-    select,
-    selectCount,
-    USERS_TABLE,
-    type DbClient,
+  and,
+  eq,
+  gte,
+  insert,
+  LOGIN_ATTEMPTS_TABLE,
+  select,
+  selectCount,
+  USERS_TABLE,
+  type DbClient,
 } from '../../../../db/src';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '../types';
 

@@ -83,8 +83,7 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
     logging: {
       clientErrorLevel: env.LOG_CLIENT_ERROR_LEVEL ?? 'warn',
       requestContext: env.LOG_REQUEST_CONTEXT !== 'false',
-      prettyJson:
-        env.LOG_PRETTY_JSON !== undefined ? env.LOG_PRETTY_JSON === 'true' : !isProd,
+      prettyJson: env.LOG_PRETTY_JSON !== undefined ? env.LOG_PRETTY_JSON === 'true' : !isProd,
     },
   };
 }

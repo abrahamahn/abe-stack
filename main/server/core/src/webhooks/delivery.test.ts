@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    calculateRetryDelay,
-    dispatchWebhookEvent,
-    recordDeliveryResult,
-    signPayload,
-    verifySignature,
+  calculateRetryDelay,
+  dispatchWebhookEvent,
+  recordDeliveryResult,
+  signPayload,
+  verifySignature,
 } from './delivery';
 
 import type { Repositories } from '../../../db/src';

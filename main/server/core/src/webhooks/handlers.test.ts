@@ -2,12 +2,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleCreateWebhook,
-    handleDeleteWebhook,
-    handleGetWebhook,
-    handleListWebhooks,
-    handleRotateSecret,
-    handleUpdateWebhook,
+  handleCreateWebhook,
+  handleDeleteWebhook,
+  handleGetWebhook,
+  handleListWebhooks,
+  handleRotateSecret,
+  handleUpdateWebhook,
 } from './handlers';
 
 import type { WebhooksModuleDeps, WebhooksRequest } from './types';

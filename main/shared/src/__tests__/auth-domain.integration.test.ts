@@ -7,7 +7,6 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { AppError } from '../core/errors';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -21,20 +20,21 @@ import {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from '../domain/auth/auth.errors';
+} from '../core/auth/auth.errors';
 import {
   HTTP_ERROR_MESSAGES,
   isKnownAuthError,
   mapErrorToHttpResponse,
-} from '../domain/auth/auth.http-mapper';
+} from '../core/auth/auth.http-mapper';
 import {
   defaultPasswordConfig,
   getStrengthColor,
   getStrengthLabel,
   validatePassword,
   validatePasswordBasic,
-} from '../domain/auth/auth.password';
-import { HTTP_STATUS } from '../utils/constants/index';
+} from '../core/auth/auth.password';
+import { AppError } from '../core/errors';
+import { HTTP_STATUS } from '../primitives/constants';
 
 describe('Auth Domain Integration', () => {
   describe('Password validation with strength estimation', () => {

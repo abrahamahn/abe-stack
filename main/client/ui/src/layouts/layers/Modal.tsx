@@ -13,6 +13,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Button } from '../../elements/Button';
+
 import '../../styles/components.css';
 
 type ModalContextValue = {
@@ -191,9 +193,9 @@ const ModalFooter = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): Re
 const ModalClose = ({ children, ...rest }: ComponentPropsWithoutRef<'button'>): ReactElement => {
   const { onClose } = useModalCtx();
   return (
-    <button type="button" onClick={onClose} aria-label="Close" {...rest}>
+    <Button onClick={onClose} aria-label="Close" {...rest}>
       {children ?? 'Close'}
-    </button>
+    </Button>
   );
 };
 

@@ -6,7 +6,7 @@
  */
 
 import { Alert, Button, FormField, Input } from '@abe-stack/ui';
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactElement, type ChangeEvent } from 'react';
 
 import { useUpdateWorkspace } from '../hooks';
 
@@ -77,7 +77,7 @@ export const WorkspaceSettingsForm = ({
           id="ws-name"
           type="text"
           value={name}
-          onChange={(e) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setName(e.target.value);
           }}
           placeholder="Workspace name"

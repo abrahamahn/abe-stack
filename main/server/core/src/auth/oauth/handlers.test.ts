@@ -52,27 +52,27 @@ vi.mock('@abe-stack/db', async () => {
 
 // Import after mocking
 import {
-    authRateLimiters,
-    logOAuthLinkSuccessEvent,
-    logOAuthLoginFailureEvent,
-    logOAuthLoginSuccessEvent,
-    logOAuthUnlinkFailureEvent,
-    logOAuthUnlinkSuccessEvent,
+  authRateLimiters,
+  logOAuthLinkSuccessEvent,
+  logOAuthLoginFailureEvent,
+  logOAuthLoginSuccessEvent,
+  logOAuthUnlinkFailureEvent,
+  logOAuthUnlinkSuccessEvent,
 } from '../security';
 import { setRefreshTokenCookie } from '../utils';
 
 import {
-    handleGetConnections,
-    handleOAuthCallbackRequest,
-    handleOAuthInitiate,
-    handleOAuthLink,
-    handleOAuthUnlink,
+  handleGetConnections,
+  handleOAuthCallbackRequest,
+  handleOAuthInitiate,
+  handleOAuthLink,
+  handleOAuthUnlink,
 } from './handlers';
 import {
-    getAuthorizationUrl,
-    getConnectedProviders,
-    handleOAuthCallback,
-    unlinkOAuthAccount,
+  getAuthorizationUrl,
+  getConnectedProviders,
+  handleOAuthCallback,
+  unlinkOAuthAccount,
 } from './service';
 
 import type { AppContext } from '../index';

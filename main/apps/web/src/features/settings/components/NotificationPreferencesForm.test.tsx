@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/NotificationPreferencesForm.test.tsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { NotificationPreferencesForm } from './NotificationPreferencesForm';
 

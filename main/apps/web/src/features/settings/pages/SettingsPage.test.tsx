@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/pages/SettingsPage.test.tsx
 import { useAuth } from '@auth/hooks';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { SettingsPage } from './SettingsPage';
 

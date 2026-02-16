@@ -1,7 +1,7 @@
 // main/apps/web/src/features/admin/hooks/useJobsList.test.ts
 import { useQuery } from '@abe-stack/react';
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 

@@ -83,6 +83,8 @@ describe('parseLoginResponse', () => {
   });
 
   it('throws with key preview for unknown shapes', () => {
-    expect(() => parseLoginResponse({ foo: 'bar' })).toThrow('Invalid login response shape (keys=foo)');
+    expect(() => parseLoginResponse({ foo: 'bar' })).toThrow(
+      'Invalid login response shape (keys=foo)',
+    );
   });
 });

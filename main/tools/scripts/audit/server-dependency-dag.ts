@@ -83,7 +83,8 @@ function walkSourceFiles(dir: string): string[] {
 
 function collectImportCounts(): Map<string, number> {
   const counts = new Map<string, number>();
-  const importRegex = /from\s+['"](@abe-stack\/(?:server|core|server-engine|realtime|websocket|media|db|shared)(?:\/[^'"]*)?)['"]/g;
+  const importRegex =
+    /from\s+['"](@abe-stack\/(?:server|core|server-engine|realtime|websocket|media|db|shared)(?:\/[^'"]*)?)['"]/g;
 
   for (const pkg of SOURCE_AUDIT_PACKAGES) {
     const srcDir = resolve(ROOT, pkg.path, 'src');
@@ -111,10 +112,7 @@ function renderMermaid(workspaceDeps: Map<string, string[]>): string {
   lines.push('graph TD');
 
   const mermaidId = (pkgName: string): string =>
-    pkgName
-      .replace('@abe-stack/', '')
-      .replace(/-/g, '_')
-      .replace('/', '_');
+    pkgName.replace('@abe-stack/', '').replace(/-/g, '_').replace('/', '_');
 
   for (const pkg of TARGET_PACKAGES) {
     lines.push(`  ${mermaidId(pkg.name)}["${pkg.label}"]`);

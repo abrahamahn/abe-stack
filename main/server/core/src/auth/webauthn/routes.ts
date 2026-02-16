@@ -8,31 +8,31 @@
  */
 
 import {
-    emptyBodySchema,
-    renamePasskeyRequestSchema,
-    webauthnLoginOptionsRequestSchema,
-    webauthnLoginVerifyRequestSchema,
-    webauthnRegisterVerifyRequestSchema,
-    type RenamePasskeyRequest,
-    type WebauthnLoginOptionsRequest,
-    type WebauthnLoginVerifyRequest,
-    type WebauthnRegisterVerifyRequest,
+  emptyBodySchema,
+  renamePasskeyRequestSchema,
+  webauthnLoginOptionsRequestSchema,
+  webauthnLoginVerifyRequestSchema,
+  webauthnRegisterVerifyRequestSchema,
+  type RenamePasskeyRequest,
+  type WebauthnLoginOptionsRequest,
+  type WebauthnLoginVerifyRequest,
+  type WebauthnRegisterVerifyRequest,
 } from '@abe-stack/shared';
 
 import {
-    protectedRoute,
-    publicRoute,
-    type HandlerContext,
-    type RouteDefinition,
+  protectedRoute,
+  publicRoute,
+  type HandlerContext,
+  type RouteDefinition,
 } from '../../../../engine/src';
 import {
-    handleDeletePasskey,
-    handleListPasskeys,
-    handleRenamePasskey,
-    handleWebauthnLoginOptions,
-    handleWebauthnLoginVerify,
-    handleWebauthnRegisterOptions,
-    handleWebauthnRegisterVerify,
+  handleDeletePasskey,
+  handleListPasskeys,
+  handleRenamePasskey,
+  handleWebauthnLoginOptions,
+  handleWebauthnLoginVerify,
+  handleWebauthnRegisterOptions,
+  handleWebauthnRegisterVerify,
 } from '../handlers/webauthn';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';

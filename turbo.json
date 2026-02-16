@@ -29,7 +29,10 @@
       "cache": true
     },
     "lint:css": {
-      "inputs": ["main/client/ui/src/styles/**/*.css", "main/tools/scripts/lint/lint-css-tokens.ts"],
+      "inputs": [
+        "main/client/ui/src/styles/**/*.css",
+        "main/tools/scripts/lint/lint-css-tokens.ts"
+      ],
       "cache": true
     },
     "type-check": {

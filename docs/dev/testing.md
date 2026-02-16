@@ -9,12 +9,12 @@
 
 ## Test File Placement
 
-| Test type         | Location               | Example                                      |
-| ----------------- | ---------------------- | -------------------------------------------- |
-| Unit tests        | Colocated with source  | `service.ts` + `service.test.ts`             |
-| Handler tests     | Colocated with handler | `login.ts` + `login.test.ts`                 |
+| Test type         | Location               | Example                                       |
+| ----------------- | ---------------------- | --------------------------------------------- |
+| Unit tests        | Colocated with source  | `service.ts` + `service.test.ts`              |
+| Handler tests     | Colocated with handler | `login.ts` + `login.test.ts`                  |
 | Integration tests | Central folder         | `main/apps/server/src/__tests__/integration/` |
-| E2E tests         | Playwright config      | `config/playwright.config.ts`                |
+| E2E tests         | Playwright config      | `config/playwright.config.ts`                 |
 
 ## Running Tests
 

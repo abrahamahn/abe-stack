@@ -9,14 +9,14 @@
  */
 
 import {
-    BadRequestError,
-    ConflictError,
-    getNextUsernameChangeDate,
-    isUsernameChangeCooldownActive,
-    NotFoundError,
-    RESERVED_USERNAMES,
-    type UpdateUsernameRequest,
-    type UpdateUsernameResponse,
+  BadRequestError,
+  ConflictError,
+  getNextUsernameChangeDate,
+  isUsernameChangeCooldownActive,
+  NotFoundError,
+  RESERVED_USERNAMES,
+  type UpdateUsernameRequest,
+  type UpdateUsernameResponse,
 } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';

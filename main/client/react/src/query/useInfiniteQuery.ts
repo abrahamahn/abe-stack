@@ -170,7 +170,7 @@ const shouldRetryError = (error: unknown): boolean => {
  *       {hasNextPage && (
  *         <button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
  *           Load More
- *         </button>
+ *         </Button>
  *       )}
  *     </div>
  *   );

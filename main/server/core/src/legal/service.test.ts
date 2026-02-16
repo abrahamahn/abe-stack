@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } from './service';
 
 import type {
-    LegalDocument,
-    LegalDocumentRepository,
-    UserAgreement,
-    UserAgreementRepository,
+  LegalDocument,
+  LegalDocumentRepository,
+  UserAgreement,
+  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================

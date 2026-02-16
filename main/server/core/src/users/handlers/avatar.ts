@@ -11,14 +11,14 @@
 import { createHash } from 'node:crypto';
 
 import {
-    ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
-    BadRequestError,
-    generateFileId,
-    MAX_IMAGE_SIZE as MAX_AVATAR_SIZE,
-    MIME_TO_EXT,
-    NotFoundError,
-    validatePassword,
-    WeakPasswordError,
+  ALLOWED_IMAGE_TYPES as ALLOWED_AVATAR_TYPES,
+  BadRequestError,
+  generateFileId,
+  MAX_IMAGE_SIZE as MAX_AVATAR_SIZE,
+  MIME_TO_EXT,
+  NotFoundError,
+  validatePassword,
+  WeakPasswordError,
 } from '@abe-stack/shared';
 
 import { logActivity } from '../../activities';

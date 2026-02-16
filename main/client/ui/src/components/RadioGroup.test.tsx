@@ -5,7 +5,7 @@ import { RadioGroup } from '@components/RadioGroup';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const RadioGroupHarness = (): ReactElement => {
   const [value, setValue] = useState<'a' | 'b' | 'c'>('a');

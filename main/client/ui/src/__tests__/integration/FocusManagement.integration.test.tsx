@@ -15,7 +15,7 @@ import { useDisclosure } from '@abe-stack/react/hooks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect, useRef, useState } from 'react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { FocusTrap } from '../../components/FocusTrap';
 import { FormField } from '../../components/FormField';
@@ -213,7 +213,7 @@ const FocusableElementsList = (): React.ReactElement => {
       <a href="#" data-testid="link">
         Link
       </a>
-      <button data-testid="button">Button</button>
+      <Button data-testid="button">Button</Button>
       <input data-testid="input" />
       <textarea data-testid="textarea" />
       <select data-testid="select">
@@ -225,9 +225,9 @@ const FocusableElementsList = (): React.ReactElement => {
       <div tabIndex={-1} data-testid="tabindex-neg">
         Not tabbable but focusable
       </div>
-      <button disabled data-testid="disabled-button">
+      <Button disabled data-testid="disabled-button">
         Disabled
-      </button>
+      </Button>
     </div>
   );
 };

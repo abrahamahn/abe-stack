@@ -1,7 +1,8 @@
 // main/shared/src/core/errors.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { ERROR_CODES, HTTP_STATUS } from './constants';
+import { ERROR_CODES, HTTP_STATUS } from '../primitives/constants';
+
 import {
   AppError,
   BadRequestError,

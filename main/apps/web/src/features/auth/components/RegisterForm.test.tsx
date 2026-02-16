@@ -10,7 +10,7 @@
  * @complexity O(1) - All tests are unit tests with mocked dependencies
  */
 import { screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 import { RegisterForm } from './RegisterForm';

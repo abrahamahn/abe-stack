@@ -12,17 +12,17 @@ import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useEffect, useState } from 'react';
 
 import type {
-    EmailVerificationRequest,
-    EmailVerificationResponse,
-    ForgotPasswordRequest,
-    LoginRequest,
-    MagicLinkRequest,
-    MagicLinkRequestResponse,
-    RegisterRequest,
-    RegisterResponse,
-    ResendVerificationRequest,
-    ResetPasswordRequest,
-    User,
+  EmailVerificationRequest,
+  EmailVerificationResponse,
+  ForgotPasswordRequest,
+  LoginRequest,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+  ResetPasswordRequest,
+  User,
 } from '@abe-stack/api';
 import type { AuthState } from '@auth/services/AuthService';
 

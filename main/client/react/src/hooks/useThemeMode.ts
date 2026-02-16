@@ -44,7 +44,7 @@ export type UseThemeModeReturn = {
  * return (
  *   <button onClick={cycleMode}>
  *     {isDark ? 'Dark' : 'Light'} Mode
- *   </button>
+ *   </Button>
  * );
  * ```
  */

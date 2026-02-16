@@ -56,8 +56,8 @@
 
 ## Backend Utilities
 
-| Utility                | Legacy Path                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------ |
+| Utility                | Legacy Path                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------- |
 | Rate limiting          | `main/server/infrastructure/middleware/rateLimitMiddleware.ts`                  |
 | Validation             | `main/server/infrastructure/middleware/validationMiddleware.ts`                 |
 | File utils             | `main/server/infrastructure/storage/FileUtils.ts`                               |
@@ -137,8 +137,8 @@
 
 ## Frontend Utilities
 
-| Utility               | Legacy Path                                    |
-| --------------------- | ---------------------------------------------- |
+| Utility               | Legacy Path                                     |
+| --------------------- | ----------------------------------------------- |
 | useAsync              | `main/client/hooks/useAsync.ts`                 |
 | useOnline             | `main/client/hooks/useOnline.ts`                |
 | useShortcut           | `main/client/hooks/useShortcut.ts`              |
@@ -174,8 +174,8 @@
 
 ## Frontend Components
 
-| Component         | Legacy Path                                 |
-| ----------------- | ------------------------------------------- |
+| Component         | Legacy Path                                  |
+| ----------------- | -------------------------------------------- |
 | FileUpload        | `main/client/components/ui/FileUpload.tsx`   |
 | Throttle          | `main/client/components/ui/Throttle.tsx`     |
 | OfflineBadge      | `main/client/components/ui/OfflineBadge.tsx` |

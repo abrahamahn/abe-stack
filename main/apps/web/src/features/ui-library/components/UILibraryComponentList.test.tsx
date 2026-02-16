@@ -1,6 +1,6 @@
 // main/apps/web/src/features/ui-library/components/UILibraryComponentList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // Hoist mock fn references so they are available when vi.mock factories execute
 const { mockCloseButton, mockHeading, mockMenuItem, mockScrollArea, mockText } = vi.hoisted(() => ({

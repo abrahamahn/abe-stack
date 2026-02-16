@@ -6,34 +6,34 @@
  */
 import * as shared from '@abe-stack/shared';
 import {
-    AccountLockedError,
-    AUTH_ERROR_MESSAGES,
-    EmailAlreadyExistsError,
-    HTTP_ERROR_MESSAGES,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
-    WeakPasswordError,
+  AccountLockedError,
+  AUTH_ERROR_MESSAGES,
+  EmailAlreadyExistsError,
+  HTTP_ERROR_MESSAGES,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+  WeakPasswordError,
 } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 // Import actual modules to spy on their functions
 import {
-    handleForgotPassword,
-    handleLogin,
-    handleLogout,
-    handleRefresh,
-    handleRegister,
-    handleResetPassword,
-    handleVerifyEmail,
+  handleForgotPassword,
+  handleLogin,
+  handleLogout,
+  handleRefresh,
+  handleRegister,
+  handleResetPassword,
+  handleVerifyEmail,
 } from '../handlers/index';
 import * as security from '../security';
 import * as service from '../service';
 import {
-    REFRESH_COOKIE_NAME,
-    type AppContext,
-    type ReplyWithCookies,
-    type RequestWithCookies,
+  REFRESH_COOKIE_NAME,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from '../types';
 import * as utils from '../utils';
 

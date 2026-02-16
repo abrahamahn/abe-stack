@@ -11,7 +11,7 @@
  *
  *   return (
  *     <>
- *       <button onClick={() => open('/users/123')}>View User</button>
+ *       <button onClick={() => open('/users/123')}>View User</Button>
  *
  *       <SidePeek.Root open={isOpen} onClose={close}>
  *         <SidePeek.Content>

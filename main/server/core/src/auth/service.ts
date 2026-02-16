@@ -9,62 +9,62 @@
  */
 
 import {
-    AccountLockedError,
-    AUTH_EXPIRY,
-    canonicalizeEmail,
-    EmailNotVerifiedError,
-    EmailSendError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    isAccountActive,
-    isWithinDeletionGracePeriod,
-    MS_PER_HOUR,
-    normalizeEmail,
-    validatePassword,
-    WeakPasswordError,
-    type UserId,
-    type UserRole,
+  AccountLockedError,
+  AUTH_EXPIRY,
+  canonicalizeEmail,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  isAccountActive,
+  isWithinDeletionGracePeriod,
+  MS_PER_HOUR,
+  normalizeEmail,
+  validatePassword,
+  WeakPasswordError,
+  type UserId,
+  type UserRole,
 } from '@abe-stack/shared';
 
 import {
-    and,
-    EMAIL_VERIFICATION_TOKENS_TABLE,
-    eq,
-    insert,
-    isNull,
-    PASSWORD_RESET_TOKENS_TABLE,
-    toCamelCase,
-    update,
-    USER_AGREEMENTS_TABLE,
-    USER_COLUMNS,
-    USERS_TABLE,
-    withTransaction,
-    type DbClient,
-    type Repositories,
-    type User,
+  and,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
+  eq,
+  insert,
+  isNull,
+  PASSWORD_RESET_TOKENS_TABLE,
+  toCamelCase,
+  update,
+  USER_AGREEMENTS_TABLE,
+  USER_COLUMNS,
+  USERS_TABLE,
+  withTransaction,
+  type DbClient,
+  type Repositories,
+  type User,
 } from '../../../db/src';
 import { getMetricsCollector, sign as jwtSign } from '../../../engine/src';
 import { createTenant } from '../tenants';
 
 import {
-    applyProgressiveDelay,
-    getAccountLockoutStatus,
-    isAccountLocked,
-    logAccountLockedEvent,
-    logLoginAttempt,
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  isAccountLocked,
+  logAccountLockedEvent,
+  logLoginAttempt,
 } from './security';
 import { LOGIN_FAILURE_REASON } from './types';
 import {
-    createAccessToken,
-    createAuthResponse,
-    createRefreshTokenFamily,
-    generateSecureToken,
-    hashPassword,
-    hashToken,
-    needsRehash,
-    revokeAllUserTokens,
-    rotateRefreshToken as rotateRefreshTokenUtil,
-    verifyPasswordSafe,
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  generateSecureToken,
+  hashPassword,
+  hashToken,
+  needsRehash,
+  revokeAllUserTokens,
+  rotateRefreshToken as rotateRefreshTokenUtil,
+  verifyPasswordSafe,
 } from './utils';
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
@@ -468,7 +468,10 @@ export async function authenticateUser(
   // Check admin-imposed account lock (lockedUntil field on user record)
   if (user.lockedUntil !== null) {
     if (user.lockedUntil > new Date()) {
-      errorTracker?.addBreadcrumb('Account suspended by admin', { category: 'auth', level: 'warn' });
+      errorTracker?.addBreadcrumb('Account suspended by admin', {
+        category: 'auth',
+        level: 'warn',
+      });
       await logLoginAttempt(
         db,
         lockoutKey,

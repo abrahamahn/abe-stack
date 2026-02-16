@@ -7,7 +7,6 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { createElement, useEffect, useState } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-
 import { RealtimeProvider, useRealtime, type RealtimeProviderConfig } from './RealtimeContext';
 
 import type { ReactElement } from 'react';

@@ -1,6 +1,6 @@
 // main/apps/web/src/features/admin/components/JobActionsMenu.test.tsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, beforeEach } from 'vitest';
 
 import { JobActionsMenu } from './JobActionsMenu';
 

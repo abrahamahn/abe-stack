@@ -60,7 +60,7 @@ const PasskeyRow = ({ passkey, onRename, onDelete }: PasskeyRowProps): ReactElem
           <div className="flex items-center gap-2">
             <Input
               value={editName}
-              onChange={(e) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setEditName(e.target.value);
               }}
               className="flex-1"

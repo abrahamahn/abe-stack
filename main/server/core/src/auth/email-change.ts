@@ -12,12 +12,12 @@
  */
 
 import {
-    AUTH_EXPIRY,
-    canonicalizeEmail,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    MS_PER_HOUR,
-    normalizeEmail,
+  AUTH_EXPIRY,
+  canonicalizeEmail,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  MS_PER_HOUR,
+  normalizeEmail,
 } from '@abe-stack/shared';
 
 import { generateSecureToken, hashToken, revokeAllUserTokens, verifyPasswordSafe } from './utils';

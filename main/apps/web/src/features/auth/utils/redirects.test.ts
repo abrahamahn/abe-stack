@@ -5,7 +5,7 @@
  * Tests for the redirect logic after successful authentication based on user roles.
  */
 
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { getPostLoginRedirect } from './redirects';
 

@@ -6,17 +6,9 @@
  * This composes domain contracts without changing runtime behavior.
  */
 
-import { adminContract } from '../domain/admin';
-import { apiKeysContract } from '../domain/api-keys';
-import { auditLogContract } from '../domain/audit-log/audit-log.contracts';
-import { authContract } from '../domain/auth';
-import { billingContract } from '../domain/billing';
-import { jobsContract } from '../domain/jobs/jobs.contracts';
-import { notificationsContract } from '../domain/notifications';
-import { usersContract } from '../domain/users';
-import { webhooksContract } from '../domain/webhooks';
+import { adminContract, apiKeysContract, auditLogContract, authContract, billingContract, jobsContract, notificationsContract, usersContract, webhooksContract } from '../contracts';
 
-import type { ContractRouter } from '../core/api';
+import type { ContractRouter } from '../primitives/api';
 
 export const apiRouter = {
   admin: adminContract,
@@ -31,4 +23,3 @@ export const apiRouter = {
 } as const satisfies ContractRouter;
 
 export type ApiRouter = typeof apiRouter;
-export type ApiDomain = keyof ApiRouter;

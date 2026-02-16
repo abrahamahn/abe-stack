@@ -8,17 +8,17 @@
  * @module Core/Env
  */
 
+import { NODE_ENV_VALUES } from '../primitives/constants';
+
 import { ConfigurationError } from './errors';
 import { createEnumSchema, createSchema, parseOptional, parseString } from './schema.utils';
 
-import type { Schema } from './api';
+import type { Schema } from '../primitives/api';
 
 // ============================================================================
 // Base Environment Schema
 // ============================================================================
 
-/** Supported NODE_ENV values */
-const NODE_ENV_VALUES = ['development', 'production', 'test'] as const;
 
 /** Node environment enum schema */
 const nodeEnvSchema = createEnumSchema(NODE_ENV_VALUES, 'NODE_ENV');

@@ -43,6 +43,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Button } from '../../elements/Button';
+
 import '../../styles/components.css';
 
 // ============================================================================
@@ -331,15 +333,14 @@ const SidePeekClose = ({ children, className = '', ...rest }: SidePeekCloseProps
   const { onClose } = useSidePeekContext();
 
   return (
-    <button
-      type="button"
+    <Button
       onClick={onClose}
       aria-label="Close"
       className={`side-peek-close ${className}`.trim()}
       {...rest}
     >
       {children ?? '×'}
-    </button>
+    </Button>
   );
 };
 

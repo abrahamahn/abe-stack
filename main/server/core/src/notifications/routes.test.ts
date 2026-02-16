@@ -14,11 +14,11 @@
  */
 
 import {
-    emptyBodySchema,
-    sendNotificationRequestSchema,
-    subscribeRequestSchema,
-    unsubscribeRequestSchema,
-    updatePreferencesRequestSchema,
+  emptyBodySchema,
+  sendNotificationRequestSchema,
+  subscribeRequestSchema,
+  unsubscribeRequestSchema,
+  updatePreferencesRequestSchema,
 } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

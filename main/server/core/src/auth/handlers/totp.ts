@@ -8,17 +8,17 @@
  */
 
 import {
-    ERROR_MESSAGES,
-    HTTP_STATUS,
-    InvalidTokenError,
-    mapErrorToHttpResponse,
-    type AuthResponse,
-    type HttpErrorResponse,
-    type TotpLoginVerifyRequest,
-    type TotpSetupResponse,
-    type TotpStatusResponse,
-    type TotpVerifyRequest,
-    type TotpVerifyResponse,
+  ERROR_MESSAGES,
+  HTTP_STATUS,
+  InvalidTokenError,
+  mapErrorToHttpResponse,
+  type AuthResponse,
+  type HttpErrorResponse,
+  type TotpLoginVerifyRequest,
+  type TotpSetupResponse,
+  type TotpStatusResponse,
+  type TotpVerifyRequest,
+  type TotpVerifyResponse,
 } from '@abe-stack/shared';
 
 import { withTransaction } from '../../../../db/src';
@@ -26,16 +26,16 @@ import { JwtError, verify as jwtVerify } from '../../../../engine/src';
 import { assertUserActive } from '../middleware';
 import { disableTotp, enableTotp, getTotpStatus, setupTotp, verifyTotpForLogin } from '../totp';
 import {
-    createErrorMapperLogger,
-    type AppContext,
-    type ReplyWithCookies,
-    type RequestWithCookies,
+  createErrorMapperLogger,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from '../types';
 import {
-    createAccessToken,
-    createAuthResponse,
-    createRefreshTokenFamily,
-    setRefreshTokenCookie,
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  setRefreshTokenCookie,
 } from '../utils';
 
 /**

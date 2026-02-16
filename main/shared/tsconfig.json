@@ -13,5 +13,5 @@
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.shared.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist"]
 }

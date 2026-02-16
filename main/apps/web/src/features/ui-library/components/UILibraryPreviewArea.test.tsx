@@ -1,7 +1,7 @@
 // main/apps/web/src/features/ui-library/components/UILibraryPreviewArea.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Mock clipboard API
 const mockClipboard = { writeText: vi.fn().mockResolvedValue(undefined) };

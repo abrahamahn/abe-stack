@@ -8,10 +8,10 @@
  */
 
 import type {
-    AuditEventRepository,
-    DataExportRequestRepository,
-    Repositories,
-    UserRepository,
+  AuditEventRepository,
+  DataExportRequestRepository,
+  Repositories,
+  UserRepository,
 } from '../../../db/src';
 import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
 

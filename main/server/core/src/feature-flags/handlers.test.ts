@@ -2,14 +2,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleCreateFlag,
-    handleDeleteFlag,
-    handleDeleteTenantOverride,
-    handleEvaluateFlags,
-    handleListFlags,
-    handleListTenantOverrides,
-    handleSetTenantOverride,
-    handleUpdateFlag,
+  handleCreateFlag,
+  handleDeleteFlag,
+  handleDeleteTenantOverride,
+  handleEvaluateFlags,
+  handleListFlags,
+  handleListTenantOverrides,
+  handleSetTenantOverride,
+  handleUpdateFlag,
 } from './handlers';
 
 import type { FeatureFlagAppContext } from './types';

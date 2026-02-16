@@ -9,12 +9,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    createBillingEventRepository,
-    createCustomerMappingRepository,
-    createInvoiceRepository,
-    createPlanRepository,
-    createSubscriptionRepository,
-    type RawDb,
+  createBillingEventRepository,
+  createCustomerMappingRepository,
+  createInvoiceRepository,
+  createPlanRepository,
+  createSubscriptionRepository,
+  type RawDb,
 } from '../../../../db/src';
 
 import { handlePayPalWebhook } from './paypal-webhook';

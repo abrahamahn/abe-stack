@@ -62,7 +62,7 @@ type StateCreator<T> = (
  * // Use as hook
  * function Counter() {
  *   const { count, increment } = useCounterStore();
- *   return <button onClick={increment}>{count}</button>;
+ *   return <button onClick={increment}>{count}</Button>;
  * }
  *
  * // Direct access outside React

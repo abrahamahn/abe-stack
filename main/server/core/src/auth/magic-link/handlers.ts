@@ -9,16 +9,16 @@
  */
 
 import {
-    AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
-    mapErrorToHttpResponse,
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+  mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 import { isStrategyEnabled } from '@abe-stack/shared/config';
 
 import { getMetricsCollector } from '../../../../engine/src';
 import {
-    logMagicLinkFailedEvent,
-    logMagicLinkRequestEvent,
-    logMagicLinkVerifiedEvent,
+  logMagicLinkFailedEvent,
+  logMagicLinkRequestEvent,
+  logMagicLinkVerifiedEvent,
 } from '../security';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
@@ -27,11 +27,11 @@ import { requestMagicLink, verifyMagicLink } from './service';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
-    AuthResponse,
-    EmailSendError,
-    HttpErrorResponse,
-    MagicLinkRequest,
-    MagicLinkRequestResponse,
+  AuthResponse,
+  EmailSendError,
+  HttpErrorResponse,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
 } from '@abe-stack/shared';
 
 /**

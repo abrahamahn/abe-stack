@@ -1,27 +1,27 @@
 // main/apps/server/src/types/context.ts
 
 import type {
-    DbClient,
-    QueueServer,
-    QueueStore,
-    Repositories,
-    ServerSearchProvider,
-    SessionContext,
-    SmsProvider,
-    WriteService
+  DbClient,
+  QueueServer,
+  QueueStore,
+  Repositories,
+  ServerSearchProvider,
+  SessionContext,
+  SmsProvider,
+  WriteService,
 } from '@abe-stack/core';
 import type { AuthEmailTemplates } from '@abe-stack/server-engine';
 import type {
-    BaseContext,
-    BillingService,
-    CacheProvider,
-    EmailService,
-    ErrorTracker,
-    NotificationService,
-    ReplyContext,
-    RequestInfo,
-    StorageClient,
-    SubscriptionManager,
+  BaseContext,
+  BillingService,
+  CacheProvider,
+  EmailService,
+  ErrorTracker,
+  NotificationService,
+  ReplyContext,
+  RequestInfo,
+  StorageClient,
+  SubscriptionManager,
 } from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
 import type { FastifyBaseLogger } from 'fastify';
@@ -107,7 +107,6 @@ export interface IServiceContainer {
 
   /** Queue store (for task cleanup) */
   readonly queueStore: QueueStore;
-
 
   /** Unified write service (Chet-stack pattern) */
   readonly write: WriteService;

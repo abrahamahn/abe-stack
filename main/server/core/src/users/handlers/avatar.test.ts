@@ -10,14 +10,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    changePassword,
-    deleteAvatar,
-    getAvatarUrl,
-    updateProfile,
-    uploadAvatar,
-    type ProfileUser,
-    type StorageProvider,
-    type UpdateProfileData,
+  changePassword,
+  deleteAvatar,
+  getAvatarUrl,
+  updateProfile,
+  uploadAvatar,
+  type ProfileUser,
+  type StorageProvider,
+  type UpdateProfileData,
 } from './avatar';
 
 import type { DbClient, Repositories, User } from '../../../../db/src';

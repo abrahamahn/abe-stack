@@ -2,12 +2,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    createTenant,
-    deleteTenant,
-    getTenantById,
-    getUserTenants,
-    transferOwnership,
-    updateTenant,
+  createTenant,
+  deleteTenant,
+  getTenantById,
+  getUserTenants,
+  transferOwnership,
+  updateTenant,
 } from './service';
 
 import type { DbClient, Repositories } from '../../../db/src';

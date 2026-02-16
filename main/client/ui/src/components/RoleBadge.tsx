@@ -5,7 +5,6 @@ import { Badge } from '../elements/Badge';
 
 import type { ReactElement } from 'react';
 
-
 export interface RoleBadgeProps {
   role: string;
 }

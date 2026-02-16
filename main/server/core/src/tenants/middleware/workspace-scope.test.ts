@@ -2,12 +2,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    buildAuthContext,
-    createPermissionGuard,
-    createWorkspaceRoleGuard,
-    createWorkspaceScopeMiddleware,
-    getRequestWorkspaceContext,
-    requireRequestWorkspaceContext,
+  buildAuthContext,
+  createPermissionGuard,
+  createWorkspaceRoleGuard,
+  createWorkspaceScopeMiddleware,
+  getRequestWorkspaceContext,
+  requireRequestWorkspaceContext,
 } from './workspace-scope';
 
 import type { WorkspaceScopedRequest } from './workspace-scope';

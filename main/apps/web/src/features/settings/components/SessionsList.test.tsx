@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/SessionsList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Hoist mock fn references so they are available when vi.mock factories execute
 const { mockSessionCardFn, mockAlertFn, mockButtonFn, mockSkeletonFn } = vi.hoisted(() => ({

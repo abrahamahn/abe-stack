@@ -1,6 +1,6 @@
 // main/apps/web/src/features/admin/pages/UserDetailPage.test.tsx
 import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi, afterEach } from 'vitest';
 
 import { UserDetailPage } from './UserDetailPage';
 

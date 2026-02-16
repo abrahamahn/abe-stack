@@ -1,5 +1,6 @@
 // main/server/db/src/__tests__/rls.unit.test.ts
 import { describe, expect, it, vi } from 'vitest';
+
 import { createDbFromSql } from '../client';
 
 describe('RLS Session Client', () => {
@@ -21,7 +22,7 @@ describe('RLS Session Client', () => {
     const sessionClient = createDbFromSql(mockSql as any, {
       userId: 'user-123',
       tenantId: 'tenant-456',
-      role: 'user'
+      role: 'user',
     });
 
     await sessionClient.query('SELECT * FROM users', []);

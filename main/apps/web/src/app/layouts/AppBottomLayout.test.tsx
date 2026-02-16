@@ -1,6 +1,6 @@
 // main/apps/web/src/app/layouts/AppBottomLayout.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AppBottomLayout } from './AppBottomLayout';
 

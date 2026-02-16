@@ -6,7 +6,6 @@ import { Badge } from '../elements/Badge';
 import type { JobStatus } from '@abe-stack/shared';
 import type { ReactElement } from 'react';
 
-
 export interface JobStatusBadgeProps {
   status: JobStatus;
 }

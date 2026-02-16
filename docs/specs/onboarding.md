@@ -89,8 +89,8 @@ The server follows **hexagonal architecture**:
 
 This is the most common question for new developers. Here's the decision tree:
 
-| What you're building               | Where it goes                | Example                                       |
-| ---------------------------------- | ---------------------------- | --------------------------------------------- |
+| What you're building               | Where it goes                 | Example                                       |
+| ---------------------------------- | ----------------------------- | --------------------------------------------- |
 | React component (reusable)         | `main/client/ui/`             | Button, Card, Dialog, Table                   |
 | React component (feature-specific) | `main/apps/web/src/features/` | LoginForm, UserListPage                       |
 | Business logic or validation       | `main/shared/`                | Zod schemas, domain rules, type contracts     |
@@ -169,7 +169,7 @@ When you need a button, input, table, card, or other standard UI element, import
 import { Button, Input, Card, Text, Heading } from '@abe-stack/ui';
 ```
 
-Don't use raw `<button>`, `<input>`, `<select>`, `<table>`, or `<a>` elements. The design system components handle theming, accessibility, and consistent styling automatically.
+Don't use raw `<Button>`, `<input>`, `<select>`, `<table>`, or `<a>` elements. The design system components handle theming, accessibility, and consistent styling automatically.
 
 Raw HTML is fine for structural elements: `<div>`, `<nav>`, `<section>`, `<main>`, `<header>`, `<footer>`, `<form>`, `<label>`.
 
@@ -251,18 +251,18 @@ Never use `px` for spacing, font sizes, or layout. Use `rem`, `em`, `%`, or the 
 
 These are the most common mistakes new developers make:
 
-| Mistake                            | Why it's a problem                      | What to do instead                      |
-| ---------------------------------- | --------------------------------------- | --------------------------------------- |
+| Mistake                            | Why it's a problem                      | What to do instead                       |
+| ---------------------------------- | --------------------------------------- | ---------------------------------------- |
 | Business logic in React components | Can't test without rendering UI         | Move logic to `main/shared/`             |
 | Duplicating types across files     | They drift apart over time              | Single source of truth in `main/shared/` |
-| Importing from another app         | Breaks build boundaries                 | Use shared packages instead             |
-| Prop drilling through 5+ levels    | Fragile, hard to refactor               | Use React Context or hooks              |
-| Using `any` to "fix" type errors   | Defeats the purpose of TypeScript       | Write proper types + Zod schemas        |
-| `export *` in barrel files         | Hides dependencies, breaks tree-shaking | Explicit named exports                  |
-| `import * as X` namespace imports  | Hides what's actually used              | Explicit named imports (`import { X }`) |
-| Deep relative imports (`../../..`) | Breaks when files move                  | Use path aliases (`@auth`, etc.)        |
-| Adding npm packages without asking | Security + bundle size concerns         | Discuss first, prefer manual if <50 LOC |
-| Premature abstraction              | Adds complexity for no benefit          | Don't abstract until used in 2+ places  |
+| Importing from another app         | Breaks build boundaries                 | Use shared packages instead              |
+| Prop drilling through 5+ levels    | Fragile, hard to refactor               | Use React Context or hooks               |
+| Using `any` to "fix" type errors   | Defeats the purpose of TypeScript       | Write proper types + Zod schemas         |
+| `export *` in barrel files         | Hides dependencies, breaks tree-shaking | Explicit named exports                   |
+| `import * as X` namespace imports  | Hides what's actually used              | Explicit named imports (`import { X }`)  |
+| Deep relative imports (`../../..`) | Breaks when files move                  | Use path aliases (`@auth`, etc.)         |
+| Adding npm packages without asking | Security + bundle size concerns         | Discuss first, prefer manual if <50 LOC  |
+| Premature abstraction              | Adds complexity for no benefit          | Don't abstract until used in 2+ places   |
 
 ---
 

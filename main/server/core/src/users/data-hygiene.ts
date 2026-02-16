@@ -11,17 +11,17 @@
 import { RETENTION_PERIODS } from '@abe-stack/shared';
 
 import {
-    and,
-    deleteFrom,
-    eq,
-    isNotNull,
-    lt,
-    select,
-    toCamelCase,
-    USER_COLUMNS,
-    USERS_TABLE,
-    type DbClient,
-    type User,
+  and,
+  deleteFrom,
+  eq,
+  isNotNull,
+  lt,
+  select,
+  toCamelCase,
+  USER_COLUMNS,
+  USERS_TABLE,
+  type DbClient,
+  type User,
 } from '../../../db/src';
 
 import type { ServerLogger } from '@abe-stack/shared/core';

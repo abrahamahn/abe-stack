@@ -8,8 +8,8 @@
  */
 
 import {
-    createLogger as createKernelLogger,
-    createRequestLogger as createKernelRequestLogger,
+  createLogger as createKernelLogger,
+  createRequestLogger as createKernelRequestLogger,
 } from '@abe-stack/shared';
 
 import type { RequestContext, Logger } from '@abe-stack/shared';

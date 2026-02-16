@@ -7,7 +7,7 @@
 
 import { useQuery } from '@abe-stack/react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { useSecurityMetrics } from './useSecurityMetrics';
 

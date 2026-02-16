@@ -1,6 +1,6 @@
 // main/apps/web/src/features/home/hooks/useHomeKeyboard.test.ts
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { HOME_KEYBOARD_SHORTCUTS, useHomeKeyboard } from './useHomeKeyboard';
 

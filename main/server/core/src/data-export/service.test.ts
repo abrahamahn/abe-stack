@@ -2,18 +2,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    DataExportAlreadyPendingError,
-    DataExportNotFoundError,
-    getExportStatus,
-    processDataExport,
-    requestDataExport,
+  DataExportAlreadyPendingError,
+  DataExportNotFoundError,
+  getExportStatus,
+  processDataExport,
+  requestDataExport,
 } from './service';
 
 import type {
-    DataExportRequest,
-    DataExportRequestRepository,
-    User,
-    UserRepository,
+  DataExportRequest,
+  DataExportRequestRepository,
+  User,
+  UserRepository,
 } from '../../../db/src';
 
 // ============================================================================

@@ -17,8 +17,8 @@ import {
 } from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
-import type { RawDb } from '../../client';
 import type { SqlFragment } from '../../builder/types/types';
+import type { RawDb } from '../../client';
 
 // ============================================================================
 // Audit Event Repository Interface
@@ -159,10 +159,14 @@ export function createAuditEventRepository(db: RawDb): AuditEventRepository {
       const conditions: SqlFragment[] = [];
 
       if (filter.tenantId !== undefined) {
-        conditions.push(filter.tenantId === null ? isNull('tenant_id') : eq('tenant_id', filter.tenantId));
+        conditions.push(
+          filter.tenantId === null ? isNull('tenant_id') : eq('tenant_id', filter.tenantId),
+        );
       }
       if (filter.actorId !== undefined) {
-        conditions.push(filter.actorId === null ? isNull('actor_id') : eq('actor_id', filter.actorId));
+        conditions.push(
+          filter.actorId === null ? isNull('actor_id') : eq('actor_id', filter.actorId),
+        );
       }
       if (filter.action !== undefined) {
         conditions.push(eq('action', filter.action));

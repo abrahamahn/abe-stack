@@ -186,8 +186,9 @@ describe('handleSendSmsCode', () => {
     const request = createRequest();
     const body: SmsChallengeRequest = { challengeToken: 'invalid-token' };
 
-    const JwtError = vi.mocked(await import('../../../../engine/src'))
-      .JwtError as unknown as new (message: string) => Error;
+    const JwtError = vi.mocked(await import('../../../../engine/src')).JwtError as unknown as new (
+      message: string,
+    ) => Error;
     mockJwtVerify.mockImplementation(() => {
       throw new JwtError('Invalid JWT');
     });
@@ -324,8 +325,9 @@ describe('handleVerifySmsCode', () => {
     const reply = createMockReply();
     const body: SmsVerifyRequest = { challengeToken: 'invalid-token', code: '123456' };
 
-    const JwtError = vi.mocked(await import('../../../../engine/src'))
-      .JwtError as unknown as new (message: string) => Error;
+    const JwtError = vi.mocked(await import('../../../../engine/src')).JwtError as unknown as new (
+      message: string,
+    ) => Error;
     mockJwtVerify.mockImplementation(() => {
       throw new JwtError('Invalid JWT');
     });

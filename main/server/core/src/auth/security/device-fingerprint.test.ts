@@ -11,10 +11,10 @@ import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    generateDeviceFingerprint,
-    isKnownDevice,
-    isTrustedDevice,
-    recordDeviceAccess,
+  generateDeviceFingerprint,
+  isKnownDevice,
+  isTrustedDevice,
+  recordDeviceAccess,
 } from './device-fingerprint';
 
 import type { Repositories } from '../../../../db/src';

@@ -9,7 +9,9 @@ export interface ProfileCompletenessProps {
   className?: string;
 }
 
-export const ProfileCompleteness = ({ className }: ProfileCompletenessProps): ReactElement | null => {
+export const ProfileCompleteness = ({
+  className,
+}: ProfileCompletenessProps): ReactElement | null => {
   const { data, isLoading, isError } = useProfileCompleteness();
 
   if (isLoading || isError || data === null) return null;

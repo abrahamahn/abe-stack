@@ -5,7 +5,11 @@ import { parseMultipartFile, registerMultipartFormParser } from './multipart';
 
 import type { FastifyInstance } from 'fastify';
 
-function buildMultipartBody(boundary: string, filename = 'avatar.jpg', mime = 'image/jpeg'): Buffer {
+function buildMultipartBody(
+  boundary: string,
+  filename = 'avatar.jpg',
+  mime = 'image/jpeg',
+): Buffer {
   const payload =
     `--${boundary}\r\n` +
     `Content-Disposition: form-data; name="avatar"; filename="${filename}"\r\n` +
@@ -41,9 +45,7 @@ describe('multipart middleware', () => {
       done: (err: Error | null, body?: unknown) => void,
     ) => void;
 
-    let parser:
-      | MultipartParser
-      | null = null;
+    let parser: MultipartParser | null = null;
 
     const server = {
       addContentTypeParser: vi.fn((_, __, handler) => {

@@ -100,9 +100,7 @@ function normalizeClientPath(rawPath: string): string {
   // Normalize template interpolation segments:
   // - path params: `/users/${id}` -> `/users/:param`
   // - query suffix vars: `/flags${query}` -> `/flags`
-  pathValue = pathValue
-    .replace(/\/\$\{[^}]+\}/g, '/:param')
-    .replace(/\$\{[^}]+\}/g, '');
+  pathValue = pathValue.replace(/\/\$\{[^}]+\}/g, '/:param').replace(/\$\{[^}]+\}/g, '');
 
   return pathValue.replace(/\/+/g, '/');
 }
@@ -294,9 +292,7 @@ if (isMainModule) {
   if (result.uncoveredRoutes.length > 0) {
     console.log('\nUncovered routes:\n');
     for (const item of result.uncoveredRoutes) {
-      console.log(
-        `  ${item.route.method.padEnd(6)} ${item.route.path} (${item.route.module})`,
-      );
+      console.log(`  ${item.route.method.padEnd(6)} ${item.route.path} (${item.route.module})`);
     }
   }
 

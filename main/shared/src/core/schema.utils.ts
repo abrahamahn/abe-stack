@@ -9,8 +9,8 @@
  */
 
 export {
-  UUID_REGEX,
   URL_REGEX,
+  UUID_REGEX,
   coerceDate,
   coerceNumber,
   createArraySchema,
@@ -35,4 +35,4 @@ export {
   type ParseStringOptions,
   type SafeParseResult,
   type Schema,
-} from '../types/schema';
+} from '../primitives/schema';

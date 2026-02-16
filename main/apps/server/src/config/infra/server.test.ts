@@ -96,8 +96,12 @@ describe('Server Configuration', () => {
     });
 
     test('should honor LOG_PRETTY_JSON override', () => {
-      const forcedOff = loadServerConfig(createBaseEnv({ NODE_ENV: 'development', LOG_PRETTY_JSON: 'false' }));
-      const forcedOn = loadServerConfig(createBaseEnv({ NODE_ENV: 'production', LOG_PRETTY_JSON: 'true' }));
+      const forcedOff = loadServerConfig(
+        createBaseEnv({ NODE_ENV: 'development', LOG_PRETTY_JSON: 'false' }),
+      );
+      const forcedOn = loadServerConfig(
+        createBaseEnv({ NODE_ENV: 'production', LOG_PRETTY_JSON: 'true' }),
+      );
 
       expect(forcedOff.logging.prettyJson).toBe(false);
       expect(forcedOn.logging.prettyJson).toBe(true);

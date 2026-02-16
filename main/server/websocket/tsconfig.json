@@ -8,7 +8,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.websocket.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.websocket.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

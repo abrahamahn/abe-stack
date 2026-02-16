@@ -8,12 +8,18 @@
  */
 
 import { Dialog, Input, Kbd, Text } from '@abe-stack/ui';
-import { useCallback, useEffect, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type ChangeEvent,
+  KeyboardEvent as ReactKeyboardEvent,
+  ReactElement,
+} from 'react';
 
 import { useCommandPalette } from '../hooks';
 
 import type { Command } from '../data';
-import type { KeyboardEvent as ReactKeyboardEvent, ReactElement } from 'react';
 
 // ============================================================================
 // Sub-components
@@ -180,7 +186,7 @@ export function CommandPalette(): ReactElement {
             type="text"
             placeholder="Type a command..."
             value={query}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setQuery(e.target.value);
             }}
             onKeyDown={handleKeyDown}

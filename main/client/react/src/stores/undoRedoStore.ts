@@ -98,8 +98,8 @@ export interface UndoRedoState {
  *
  *   return (
  *     <>
- *       <button onClick={undo} disabled={!canUndo()}>Undo</button>
- *       <button onClick={redo} disabled={!canRedo()}>Redo</button>
+ *       <button onClick={undo} disabled={!canUndo()}>Undo</Button>
+ *       <button onClick={redo} disabled={!canRedo()}>Redo</Button>
  *     </>
  *   );
  * }
@@ -239,8 +239,8 @@ export function createUndoRedoStore(
  *
  *   return (
  *     <div>
- *       <button onClick={handleUndo} disabled={!canUndo()}>Undo</button>
- *       <button onClick={handleRedo} disabled={!canRedo()}>Redo</button>
+ *       <button onClick={handleUndo} disabled={!canUndo()}>Undo</Button>
+ *       <button onClick={handleRedo} disabled={!canRedo()}>Redo</Button>
  *     </div>
  *   );
  * }

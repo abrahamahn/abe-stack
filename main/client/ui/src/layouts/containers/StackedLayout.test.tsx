@@ -2,7 +2,7 @@
 // client/ui/src/layouts/__tests__/StackedLayout.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { StackedLayout } from './StackedLayout';
 

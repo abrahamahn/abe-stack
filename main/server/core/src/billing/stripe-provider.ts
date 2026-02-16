@@ -9,21 +9,20 @@ import stripeDefault from 'stripe';
 
 import type { SubscriptionStatus } from '../../../db/src';
 import type {
-    BillingService,
-    CheckoutParams,
-    CheckoutResult,
-    CreateProductParams,
-    CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
-    PortalSessionParams,
-    PortalSessionResult,
-    ProviderInvoice,
-    ProviderPaymentMethod,
-    ProviderSubscription,
-    SetupIntentResult,
+  BillingService,
+  CheckoutParams,
+  CheckoutResult,
+  CreateProductParams,
+  CreateProductResult,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  PortalSessionParams,
+  PortalSessionResult,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResult,
 } from '@abe-stack/shared';
-
 import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
 import type stripeLib from 'stripe';
 

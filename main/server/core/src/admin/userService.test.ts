@@ -2,14 +2,14 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    getUserById,
-    getUserStatus,
-    hardBanUser,
-    listUsers,
-    lockUser,
-    searchUsers,
-    unlockUser,
-    updateUser,
+  getUserById,
+  getUserStatus,
+  hardBanUser,
+  listUsers,
+  lockUser,
+  searchUsers,
+  unlockUser,
+  updateUser,
 } from './userService';
 
 import type { DbClient, User as DbUser, UserRepository } from '../../../db/src';

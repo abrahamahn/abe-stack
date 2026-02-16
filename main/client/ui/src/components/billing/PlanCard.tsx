@@ -7,8 +7,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
-
 
 import type { Plan, PlanFeature } from '@abe-stack/shared';
 
@@ -145,8 +145,7 @@ export const PlanCard = forwardRef<HTMLDivElement, PlanCardProps>(
         </ul>
 
         <div className="plan-card__action">
-          <button
-            type="button"
+          <Button
             className={cn(
               'plan-card__button',
               isHighlighted && 'plan-card__button--primary',
@@ -156,7 +155,7 @@ export const PlanCard = forwardRef<HTMLDivElement, PlanCardProps>(
             disabled={buttonDisabled}
           >
             {isLoading ? 'Loading...' : buttonLabel}
-          </button>
+          </Button>
         </div>
       </div>
     );

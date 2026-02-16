@@ -2,6 +2,7 @@
 import { getCardBrandLabel, getPaymentMethodIcon, getPaymentMethodLabel } from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
+import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
 import type { PaymentMethod } from '@abe-stack/shared';
@@ -110,19 +111,17 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
 
         <div className="payment-method-card__actions">
           {!isDefault && onSetDefault != null && (
-            <button
-              type="button"
+            <Button
               className="payment-method-card__action payment-method-card__action--default"
               onClick={handleSetDefault}
               disabled={isActing}
             >
               Set Default
-            </button>
+            </Button>
           )}
 
           {onRemove != null && (
-            <button
-              type="button"
+            <Button
               className="payment-method-card__action payment-method-card__action--remove"
               onClick={handleRemove}
               disabled={isActing || removeDisabled}
@@ -133,7 +132,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
               }
             >
               Remove
-            </button>
+            </Button>
           )}
         </div>
       </div>

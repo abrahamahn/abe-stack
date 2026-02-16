@@ -14,7 +14,7 @@
 import { QueryCacheProvider } from '@abe-stack/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { MediaMetadata, MediaStatusResponse, MediaUploadResponse } from '../api';
 

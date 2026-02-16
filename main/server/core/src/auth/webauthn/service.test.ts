@@ -6,11 +6,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    clearChallengeStore,
-    getAuthenticationOptions,
-    getRegistrationOptions,
-    verifyAuthentication,
-    verifyRegistration,
+  clearChallengeStore,
+  getAuthenticationOptions,
+  getRegistrationOptions,
+  verifyAuthentication,
+  verifyRegistration,
 } from './service';
 
 import type { Repositories } from '../../../../db/src';

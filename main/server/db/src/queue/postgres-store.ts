@@ -7,15 +7,15 @@
  */
 
 import type {
-    JobDetails,
-    JobListOptions,
-    JobListResult,
-    JobStatus,
-    QueueStats,
-    QueueStore,
-    Task,
-    TaskError,
-    TaskResult,
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  JobStatus,
+  QueueStats,
+  QueueStore,
+  Task,
+  TaskError,
+  TaskResult,
 } from './types/queue-types';
 import type { DbClient } from '@abe-stack/db';
 

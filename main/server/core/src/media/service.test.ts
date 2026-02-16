@@ -12,10 +12,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { deleteMedia, getMediaMetadata, getProcessingStatus, uploadMedia } from './service';
 
 import type {
-    MediaProcessingQueuePort,
-    MediaRepositories,
-    MediaStorageProvider,
-    MediaUploadInput,
+  MediaProcessingQueuePort,
+  MediaRepositories,
+  MediaStorageProvider,
+  MediaUploadInput,
 } from './types';
 import type { FileRecord } from '../../../db/src';
 

@@ -1,7 +1,7 @@
 // main/client/ui/src/elements/Progress.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Progress } from './Progress';
 

@@ -10,10 +10,10 @@
 
 import { MS_PER_MINUTE } from '@abe-stack/shared';
 import {
-    generateAuthenticationOptions,
-    generateRegistrationOptions,
-    verifyAuthenticationResponse,
-    verifyRegistrationResponse,
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 
 import type { Repositories } from '../../../../db/src';

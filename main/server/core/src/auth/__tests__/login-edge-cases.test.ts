@@ -15,11 +15,11 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { withTransaction } from '../../../../db/src';
 import {
-    applyProgressiveDelay,
-    getAccountLockoutStatus,
-    getProgressiveDelay,
-    isAccountLocked,
-    logLoginAttempt,
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  getProgressiveDelay,
+  isAccountLocked,
+  logLoginAttempt,
 } from '../security/index';
 import { authenticateUser, refreshUserTokens, verifyEmail } from '../service';
 import { LOGIN_FAILURE_REASON, type AuthLogger } from '../types';

@@ -3,7 +3,7 @@
 import { SidePeek } from '@layers/SidePeek';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('SidePeek', () => {
   // Clean up body overflow between tests

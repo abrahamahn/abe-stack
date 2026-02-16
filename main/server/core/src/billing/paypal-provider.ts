@@ -7,21 +7,20 @@
  */
 
 import type {
-    BillingService,
-    CheckoutParams,
-    CheckoutResult,
-    CreateProductParams,
-    CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
-    PortalSessionParams,
-    PortalSessionResult,
-    ProviderInvoice,
-    ProviderPaymentMethod,
-    ProviderSubscription,
-    SetupIntentResult,
+  BillingService,
+  CheckoutParams,
+  CheckoutResult,
+  CreateProductParams,
+  CreateProductResult,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  PortalSessionParams,
+  PortalSessionResult,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResult,
 } from '@abe-stack/shared';
-
 import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
 
 // ============================================================================

@@ -9,9 +9,9 @@
  */
 
 import {
-    mapErrorToHttpResponse,
-    type ErrorMapperLogger,
-    type HttpErrorResponse,
+  mapErrorToHttpResponse,
+  type ErrorMapperLogger,
+  type HttpErrorResponse,
 } from '@abe-stack/shared';
 
 import { ERROR_MESSAGES, type TenantsModuleDeps, type TenantsRequest } from '../types';
@@ -94,9 +94,14 @@ export async function handleListTenantAuditEvents(
       category: query.category !== '' && query.category !== undefined ? query.category : undefined,
       severity: query.severity !== '' && query.severity !== undefined ? query.severity : undefined,
       resource: query.resource !== '' && query.resource !== undefined ? query.resource : undefined,
-      resourceId: query.resourceId !== '' && query.resourceId !== undefined ? query.resourceId : undefined,
-      startDate: query.startDate !== undefined && query.startDate !== '' ? new Date(query.startDate) : undefined,
-      endDate: query.endDate !== undefined && query.endDate !== '' ? new Date(query.endDate) : undefined,
+      resourceId:
+        query.resourceId !== '' && query.resourceId !== undefined ? query.resourceId : undefined,
+      startDate:
+        query.startDate !== undefined && query.startDate !== ''
+          ? new Date(query.startDate)
+          : undefined,
+      endDate:
+        query.endDate !== undefined && query.endDate !== '' ? new Date(query.endDate) : undefined,
       limit,
       offset,
     });

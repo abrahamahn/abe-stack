@@ -5,7 +5,7 @@
  * @module Core/Policy
  */
 
-import { assertNever } from './guard';
+import { assertNever } from '../primitives/guards';
 
 import type { AppRole, Permission, TenantRole } from '../types/roles';
 

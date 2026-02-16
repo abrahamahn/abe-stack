@@ -9,25 +9,25 @@
  */
 
 import {
-    BadRequestError,
-    ForbiddenError,
-    generateSecureId,
-    NotFoundError,
-    slugify,
+  BadRequestError,
+  ForbiddenError,
+  generateSecureId,
+  NotFoundError,
+  slugify,
 } from '@abe-stack/shared';
 
 import {
-    deleteFrom,
-    eq,
-    insert,
-    MEMBERSHIP_COLUMNS,
-    MEMBERSHIPS_TABLE,
-    select,
-    TENANT_COLUMNS,
-    TENANTS_TABLE,
-    toCamelCase,
-    update,
-    withTransaction,
+  deleteFrom,
+  eq,
+  insert,
+  MEMBERSHIP_COLUMNS,
+  MEMBERSHIPS_TABLE,
+  select,
+  TENANT_COLUMNS,
+  TENANTS_TABLE,
+  toCamelCase,
+  update,
+  withTransaction,
 } from '../../../db/src';
 
 import type { DbClient, Repositories } from '../../../db/src';

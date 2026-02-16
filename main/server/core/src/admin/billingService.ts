@@ -6,15 +6,15 @@
  */
 
 import {
-    CannotDeactivatePlanWithActiveSubscriptionsError,
-    PlanNotFoundError,
+  CannotDeactivatePlanWithActiveSubscriptionsError,
+  PlanNotFoundError,
 } from '@abe-stack/shared';
 
 import type {
-    Plan as DbPlan,
-    PlanFeature,
-    PlanRepository,
-    SubscriptionRepository,
+  Plan as DbPlan,
+  PlanFeature,
+  PlanRepository,
+  SubscriptionRepository,
 } from '../../../db/src';
 import type { BillingService, CreateProductParams } from '@abe-stack/shared';
 

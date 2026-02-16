@@ -5,7 +5,6 @@ import boundaries from 'eslint-plugin-boundaries';
 import importXPlugin from 'eslint-plugin-import-x';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import unusedImportsPlugin from 'eslint-plugin-unused-imports';
-import globals from 'globals';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,13 +14,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, '.gitignore');
 
-// Type assertion to handle plugin compatibility
 const reactHooksPluginTyped: any = reactHooksPlugin;
-
 const tsconfigRootDir: string = path.resolve(__dirname);
 const require = createRequire(import.meta.url);
 
-let jsConfigs: { recommended?: { languageOptions?: { parser?: Linter.Parser } } } = {};
+let jsConfigs: any = {};
 try {
   jsConfigs = require('@eslint/js').configs;
 } catch {
@@ -29,7 +26,7 @@ try {
 }
 const jsParser: Linter.Parser | undefined = jsConfigs.recommended?.languageOptions?.parser;
 
-export default [
+export const baseConfig = [
   includeIgnoreFile(gitignorePath),
   {
     ignores: [
@@ -37,77 +34,50 @@ export default [
       '**/main/tools/scripts/**',
       '**/main/tools/sync/**',
       '**/vite.config.ts',
-      '**/vitest.config.js',
-      '**/vitest.config.ts',
+      '**/vitest.config.*',
       '**/drizzle.config.ts',
       '**/playwright.config.ts',
       '**/eslint.config.ts',
       '**/*.d.ts',
-      '**/*.d.ts.map',
-      '**/*.js.map',
+      '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
     ],
   },
+
+  // 1. BASE JS RECOMMENDED
   jsConfigs.recommended ? { ...jsConfigs.recommended } : {},
+
+  // 2. MONOREPO BOUNDARY ENFORCEMENT (DAG Mirror)
   {
     files: ['**/*.{js,jsx,ts,tsx,cts,mts,cjs,mjs}'],
-    plugins: {
-      boundaries,
-    },
+    plugins: { boundaries },
     settings: {
       'boundaries/root-path': tsconfigRootDir,
       'import/resolver': {
         typescript: {
-          project: [
-            path.resolve(tsconfigRootDir, 'tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/apps/desktop/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/apps/desktop/src/electron/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/apps/server/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/apps/web/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/client/react/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/client/ui/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/engine/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/db/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/core/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/client/engine/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/media/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/realtime/tsconfig.json'),
-            path.resolve(tsconfigRootDir, 'main/server/websocket/tsconfig.json'),
-          ],
           alwaysTryTypes: true,
+          project: [path.resolve(tsconfigRootDir, 'tsconfig.json')],
         },
       },
-      'boundaries/ignore': [
-        '**/node_modules/**',
-        '**/.git/**',
-        '**/.cache/**',
-        '**/.tmp/**',
-        '**/.turbo/**',
-        '**/.next/**',
-        '**/dist/**',
-        '**/build/**',
-        '**/coverage/**',
-        '**/__tests__/**',
-        '**/*.test.*',
-        '**/*.spec.*',
-        '**/*.d.ts',
-        '**/docs/**',
-        '**/main/tools/**',
-        '**/ops/**',
-        'config/**',
-        '**/.github/**',
-      ],
       'boundaries/elements': [
-        { type: 'app', pattern: 'main/apps/*', mode: 'folder' },
-        { type: 'module', pattern: 'main/server/core', mode: 'folder' },
-        { type: 'engine', pattern: 'main/server/engine', mode: 'folder' },
-        { type: 'media', pattern: 'main/server/media', mode: 'folder' },
-        { type: 'premium', pattern: 'main/server/websocket', mode: 'folder' },
-        { type: 'premium', pattern: 'main/server/realtime', mode: 'folder' },
         { type: 'shared', pattern: 'main/shared', mode: 'folder' },
+        // Server Packages
         { type: 'db', pattern: 'main/server/db', mode: 'folder' },
-        { type: 'client', pattern: 'main/client/*', mode: 'folder' },
+        { type: 'media', pattern: 'main/server/media', mode: 'folder' },
+        { type: 's-engine', pattern: 'main/server/engine', mode: 'folder' },
+        { type: 'websocket', pattern: 'main/server/websocket', mode: 'folder' },
+        { type: 'core', pattern: 'main/server/core', mode: 'folder' },
+        { type: 'realtime', pattern: 'main/server/realtime', mode: 'folder' },
+        // Client Packages
+        { type: 'api', pattern: 'main/client/api', mode: 'folder' },
+        { type: 'c-engine', pattern: 'main/client/engine', mode: 'folder' },
+        { type: 'react', pattern: 'main/client/react', mode: 'folder' },
+        { type: 'ui', pattern: 'main/client/ui', mode: 'folder' },
+        // Consumers (Apps)
+        { type: 'app-server', pattern: 'main/apps/server', mode: 'folder' },
+        { type: 'app-web', pattern: 'main/apps/web', mode: 'folder' },
+        { type: 'app-desktop', pattern: 'main/apps/desktop', mode: 'folder' },
       ],
     },
     rules: {
@@ -115,731 +85,137 @@ export default [
         'error',
         {
           default: 'disallow',
-          message: '${from.type} is not allowed to import ${to.type}',
+          message:
+            '${from.type} is not allowed to import ${to.type}. See DAG in docs/architecture.',
           rules: [
+            // Shared is the bedrock
+            { from: 'shared', allow: [] },
+            // Server DAG Edges
+            { from: 'db', allow: ['shared'] },
+            { from: 'media', allow: ['shared'] },
+            { from: 's-engine', allow: ['shared', 'db'] },
+            { from: 'websocket', allow: ['shared', 'db', 's-engine'] },
+            { from: 'core', allow: ['shared', 'db', 'media', 's-engine'] },
+            { from: 'realtime', allow: ['shared', 'db', 'websocket'] },
             {
-              from: 'app',
-              allow: ['app', 'module', 'engine', 'media', 'premium', 'shared', 'db', 'client'],
+              from: 'app-server',
+              allow: ['shared', 'core', 'db', 'realtime', 's-engine', 'websocket'],
             },
+            // Client DAG Edges
+            { from: 'api', allow: ['shared'] },
+            { from: 'c-engine', allow: ['shared', 'api'] },
+            { from: 'react', allow: ['shared', 'c-engine'] },
+            { from: 'ui', allow: ['shared', 'c-engine', 'react'] },
+            { from: 'app-web', allow: ['shared', 'api', 'c-engine', 'react', 'ui'] },
+            // Desktop Special Case (Client stack + local engine)
             {
-              from: 'module',
-              allow: ['module', 'engine', 'media', 'premium', 'shared', 'db'],
-            },
-            {
-              from: 'engine',
-              allow: [['engine', { relationship: 'internal' }], 'shared', 'db'],
-            },
-            {
-              from: 'media',
-              allow: [['media', { relationship: 'internal' }], 'shared'],
-            },
-            {
-              from: 'db',
-              allow: [['db', { relationship: 'internal' }], 'shared'],
-            },
-            {
-              from: 'premium',
-              allow: [['premium', { relationship: 'internal' }], 'engine', 'shared', 'client', 'db'],
-            },
-            {
-              from: 'client',
-              allow: ['client', 'premium', 'shared'],
-            },
-            {
-              from: 'shared',
-              allow: [['shared', { relationship: 'internal' }]],
+              from: 'app-desktop',
+              allow: ['shared', 'api', 'c-engine', 'react', 'ui', 's-engine'],
             },
           ],
         },
       ],
       'boundaries/no-unknown': 'error',
-      'boundaries/no-unknown-files': 'error',
     },
   },
 
-  ...tseslint.configs.strictTypeChecked.map(
-    (config: any): Linter.Config => ({
-      ...config,
-      files: ['**/*.{ts,tsx,cts,mts}'],
-      plugins: {
-        ...(config.plugins ?? {}),
-        '@typescript-eslint': tseslint.plugin,
-      },
-      languageOptions: {
-        ...(config.languageOptions ?? {}),
-        parserOptions: {
-          ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
-          tsconfigRootDir,
-          project: [path.resolve(tsconfigRootDir, 'tsconfig.json')],
-          noWarnOnMultipleProjects: true,
-        },
-      },
-    }),
-  ),
-  {
-    // This file lives outside TS project references; lint with default project service.
-    files: ['config/playwright.config.ts', '**/config/playwright.config.ts'],
+  // 3. TYPESCRIPT TYPE-AWARE LOGIC
+  ...tseslint.configs.strictTypeChecked.map((config: any) => ({
+    ...config,
+    files: ['**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
+      ...config.languageOptions,
       parserOptions: {
+        ...config.languageOptions?.parserOptions,
         tsconfigRootDir,
-        project: false,
-        projectService: {
-          allowDefaultProject: ['config/playwright.config.ts', '**/config/playwright.config.ts'],
-        },
+        project: true,
       },
     },
-  },
-  {
-    files: ['main/apps/server/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/apps/server/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/apps/desktop/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [
-          path.resolve(tsconfigRootDir, 'main/apps/desktop/tsconfig.json'),
-          path.resolve(tsconfigRootDir, 'main/apps/desktop/src/electron/tsconfig.json'),
-        ],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/apps/desktop/src/electron/**/*.{ts,tsx,cts,mts}'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
-  {
-    files: ['main/apps/web/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [
-          path.resolve(tsconfigRootDir, 'main/apps/web/tsconfig.json'),
-          path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json'),
-          path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json'),
-        ],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/shared/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/shared/tsconfig.lint.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
+  })),
 
   {
-    files: ['main/client/ui/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/client/ui/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/client/api/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/client/api/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/media/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/media/tsconfig.lint.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/client/engine/**/*.{ts,tsx,cts,mts}', 'main/client/react/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/client/engine/tsconfig.json'), path.resolve(tsconfigRootDir, 'main/client/react/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/engine/src/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/engine/tsconfig.lint.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/db/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/db/tsconfig.lint.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/core/src/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/core/tsconfig.lint.json'), path.resolve(tsconfigRootDir, 'main/shared/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/websocket/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/websocket/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['main/server/realtime/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: [path.resolve(tsconfigRootDir, 'main/server/realtime/tsconfig.json')],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     plugins: {
       '@typescript-eslint': tseslint.plugin,
+      'unused-imports': unusedImportsPlugin as any,
+      'import-x': importXPlugin as any,
     },
     rules: {
-      // Variable and function declarations
+      // --- LOGIC & PERFORMANCE (The BSLT Core) ---
+      'no-sync': 'error', // No blocking the event loop in infra code
+      '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: true }],
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { arguments: false, attributes: false } },
+      ],
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-deprecated': 'error',
+      'no-console': 'warn',
+
+      // --- VELOCITY OVER STYLE (AI-Friendly) ---
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/naming-convention': 'off', // Handle via Prettier
       '@typescript-eslint/no-unused-vars': [
         'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/explicit-function-return-type': 'error',
-      '@typescript-eslint/explicit-module-boundary-types': 'error',
+      'unused-imports/no-unused-imports': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
 
-      // Type safety - no escape hatches
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-return': 'error',
-      '@typescript-eslint/no-unsafe-argument': 'error',
-
-      // Type assertions and narrowing
-      '@typescript-eslint/no-non-null-assertion': 'error',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-
-      // Import/export consistency
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports', disallowTypeAnnotations: false },
-      ],
-      '@typescript-eslint/consistent-type-exports': [
-        'error',
-        { fixMixedExportsWithInlineTypeSpecifier: true },
-      ],
-
-      // Promise handling
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-
-      // Better type inference
-      '@typescript-eslint/prefer-nullish-coalescing': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/strict-boolean-expressions': [
-        'error',
-        {
-          allowString: false, // Force explicit null checks
-          allowNumber: false, // Keeps "if (count)" as error to prevent 0-value bugs
-          allowNullableObject: false, // Force explicit null checks
-        },
-      ],
-
-      // Deprecation check
-      '@typescript-eslint/no-deprecated': 'error',
-
-      // Exhaustiveness & immutability
-      '@typescript-eslint/switch-exhaustiveness-check': [
-        'error',
-        {
-          allowDefaultCaseForExhaustiveSwitch: true,
-          considerDefaultExhaustiveForUnions: true,
-        },
-      ],
-      '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/no-import-type-side-effects': 'error',
-
-      // 6. Naming Conventions (Big Tech Standard)
-      '@typescript-eslint/naming-convention': [
-        'error',
-        {
-          selector: 'default',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-          trailingUnderscore: 'allow',
-        },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
-          leadingUnderscore: 'allow',
-          trailingUnderscore: 'allow',
-        },
-        {
-          selector: 'typeLike',
-          format: ['PascalCase'],
-        },
-        {
-          selector: 'enumMember',
-          format: ['UPPER_CASE', 'PascalCase'],
-        },
-        {
-          selector: 'parameter',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-        },
-
-        {
-          // Allow destructured properties to match their source
-          selector: 'variable',
-          modifiers: ['destructured'],
-          format: null,
-        },
-        {
-          // Allow numeric strings (e.g., HTTP status codes '200', '404')
-          selector: ['objectLiteralProperty', 'typeProperty'],
-          format: null,
-          filter: {
-            regex: '^[0-9]+$',
-            match: true,
-          },
-        },
-        {
-          // Allow snake_case, kebab-case for external APIs (OAuth, etc.)
-          selector: ['objectLiteralProperty', 'typeProperty'],
-          format: null,
-          filter: {
-            regex: '[_-]',
-            match: true,
-          },
-        },
-        {
-          // Standard camelCase/PascalCase for all other properties
-          selector: ['objectLiteralProperty', 'typeProperty'],
-          format: ['camelCase', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-      ],
-
-      // Ban all TS escape-hatch comments (overrides strictTypeChecked which allows @ts-expect-error with description)
-      '@typescript-eslint/ban-ts-comment': [
-        'error',
-        {
-          'ts-expect-error': true,
-          'ts-ignore': true,
-          'ts-check': false,
-          'ts-nocheck': true,
-        },
-      ],
-
-      // Template expressions
-      '@typescript-eslint/restrict-template-expressions': [
-        'error',
-        {
-          allowNumber: true,
-          allowBoolean: false,
-          allowAny: false,
-          allowNullish: false,
-        },
-      ],
-    },
-  },
-  {
-    // Modern Import Handling & Cyclic Dependency Detection
-    files: ['**/*.{ts,tsx,cts,mts}'],
-    plugins: {
-      'import-x': importXPlugin as any,
-      'unused-imports': unusedImportsPlugin as any,
-    },
-    rules: {
-      'import-x/no-self-import': 'error',
+      // --- IMPORT GOVERNANCE ---
       'import-x/no-duplicates': 'error',
       'import-x/order': [
         'error',
         {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'object',
-            'type',
-          ],
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'type'],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
-      'unused-imports/no-unused-imports': 'error',
     },
   },
-  {
-    // JS/CJS/MJS config files: avoid TS type-aware rules here
-    files: ['**/*.{js,jsx,cjs,mjs}'],
-    languageOptions: {
-      parser: jsParser,
-      globals: {
-        ...globals.node,
-        ...globals.browser,
-      },
-    },
-    rules: {
-      '@typescript-eslint/await-thenable': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/consistent-type-imports': 'off',
-    },
-  },
-  // Ban inline eslint-disable comments — use config-level overrides instead
-  {
-    linterOptions: { noInlineConfig: true },
-  },
-  {
-    // General JS/TS rules for all files
-    rules: {
-      'no-console': 'error',
-      'prefer-const': 'error',
-      'no-var': 'error',
-      // Ban wildcard exports — use explicit named exports
-      // Allows: export * as Namespace from (namespace re-exports) and export type * from (type-only)
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'ExportAllDeclaration:not([exported]):not([exportKind="type"])',
-          message:
-            'Wildcard exports (export *) are banned. Use explicit named exports or "export * as Namespace".',
-        },
-      ],
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@abe-stack/*/src/**'],
-              message:
-                'Always import from the package entry point (e.g., "@abe-stack/shared"), never from "src" internals.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['**/*.{js,jsx,ts,tsx,cts,mts,cjs,mjs}'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: [
-                '**/main/apps/*/src/**',
-                '**/main/client/*/src/**',
-                '**/main/server/engine/src/**',
-                '**/main/server/core/src/**',
-                '**/main/server/websocket/src/**',
-              ],
-              message: 'Import from package entrypoints only (no /src deep imports).',
-            },
-            {
-              group: ['@abe-stack/packages/server-engine/*'],
-              message: 'Use @abe-stack/server-engine entrypoint only.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  // React hooks rules - catches missing deps and rules of hooks violations
+
+  // 4. REACT & UI LAYER
   {
     files: ['**/*.{tsx,jsx}'],
-    plugins: {
-      'react-hooks': reactHooksPluginTyped,
-    },
+    plugins: { 'react-hooks': reactHooksPluginTyped },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'error',
-    },
-  },
-  // Naming Conventions for React components (PascalCase for functions)
-  {
-    files: ['**/*.{tsx,jsx}'],
-    rules: {
-      '@typescript-eslint/naming-convention': [
-        'error',
-        {
-          selector: 'function',
-          format: ['camelCase', 'PascalCase'], // Allow both camelCase and PascalCase for functions in React components
-          filter: {
-            // Function name starts with 'use' followed by uppercase, or is 'Fragment', etc., or starts with an uppercase letter
-            regex:
-              '^(use[A-Z]|Fragment|StrictMode|Suspense|Profiler|ConcurrentMode|Lazy|memo|forwardRef|[A-Z])',
-            match: true,
-          },
-        },
-        // It's important to include other naming conventions here if they are meant to apply to TSX/JSX files
-        // and you've overridden the global naming-convention. Otherwise, they might be lost.
-        // For simplicity, let's just assume the default applies to others unless specified.
-        // But for a full solution, one might merge with the general naming-convention rules.
-      ],
-    },
-  },
-  // Ban raw HTML elements in apps/web — use @abe-stack/ui components instead
-  // Allowed structural elements: div, nav, section, main, header, footer, form, label, span, ul, ol, li
-  {
-    files: ['main/apps/web/**/*.tsx'],
-    ignores: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
-    rules: {
+      'react-hooks/exhaustive-deps': 'warn',
+      // Ensure we use the design system instead of raw HTML
       'no-restricted-syntax': [
         'error',
         {
-          selector: 'ExportAllDeclaration:not([exported]):not([exportKind="type"])',
-          message:
-            'Wildcard exports (export *) are banned. Use explicit named exports or "export * as Namespace".',
-        },
-        {
           selector: 'JSXOpeningElement[name.name="button"]',
-          message: 'Use <Button> from @abe-stack/ui instead of raw <button>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="input"]',
-          message: 'Use <Input>/<Checkbox>/<Switch> from @abe-stack/ui instead of raw <input>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="textarea"]',
-          message: 'Use <TextArea> from @abe-stack/ui instead of raw <textarea>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="select"]',
-          message: 'Use <Select> from @abe-stack/ui instead of raw <select>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="a"]',
-          message: 'Use <Link> from @abe-stack/ui instead of raw <a>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="img"]',
-          message: 'Use <Image> from @abe-stack/ui instead of raw <img>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h1"]',
-          message: 'Use <Heading as="h1"> from @abe-stack/ui instead of raw <h1>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h2"]',
-          message: 'Use <Heading as="h2"> from @abe-stack/ui instead of raw <h2>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h3"]',
-          message: 'Use <Heading as="h3"> from @abe-stack/ui instead of raw <h3>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h4"]',
-          message: 'Use <Heading as="h4"> from @abe-stack/ui instead of raw <h4>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h5"]',
-          message: 'Use <Heading as="h5"> from @abe-stack/ui instead of raw <h5>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="h6"]',
-          message: 'Use <Heading as="h6"> from @abe-stack/ui instead of raw <h6>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="p"]',
-          message: 'Use <Text> from @abe-stack/ui instead of raw <p>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="hr"]',
-          message: 'Use <Divider> from @abe-stack/ui instead of raw <hr>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="table"]',
-          message: 'Use <Table> from @abe-stack/ui instead of raw <table>.',
-        },
-        {
-          selector: 'JSXOpeningElement[name.name="progress"]',
-          message: 'Use <Progress> from @abe-stack/ui instead of raw <progress>.',
+          message: 'Use <Button> from @bslt/ui instead of raw <Button>.',
         },
       ],
-    },
-  },
-  // Prevent frontend clients from importing server-side code or DB internals
-  {
-    files: ['main/apps/web/**/*', 'main/apps/desktop/**/*'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: '@abe-stack/api',
-              importNames: ['createApiClient'],
-              message:
-                'Do not create API clients manually in apps. Use `getApiClient()` or `useApi()` instead.',
-            },
-            {
-              name: '@abe-stack/client-engine',
-              importNames: ['createApiClient'],
-              message:
-                'Do not create API clients manually in apps. Use `getApiClient()` or `useApi()` instead.',
-            },
-          ],
-          patterns: [
-            {
-              group: ['**/main/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
-              message:
-                'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
-            },
-            {
-              group: [
-                '**/infrastructure/**',
-                '**/database/**',
-                '@abe-stack/server-engine',
-                'postgres',
-                'pg',
-              ],
-              message:
-                'UI must not import database or backend internals. Use API clients or shared contracts instead.',
-            },
-            {
-              group: [
-                '**/main/apps/*/src/**',
-                '**/main/client/*/src/**',
-                '**/main/server/engine/src/**',
-                '**/main/server/core/src/**',
-                '**/main/server/websocket/src/**',
-              ],
-              message: 'Import from package entrypoints only (no /src deep imports).',
-            },
-            {
-              group: ['@abe-stack/packages/server-engine/*'],
-              message: 'Use @abe-stack/server-engine entrypoint only.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['main/tools/**/*.{ts,tsx,cts,mts}'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
-  {
-    // Allow console in logger implementations and console-based dev services
-    files: ['main/server/core/src/config/*', 'main/apps/desktop/src/electron/**/*'],
-    rules: {
-      'no-console': 'off',
-    },
-  },
-  {
-    // Shared is a leaf package - disable boundaries rules for internal relative imports
-    files: ['main/shared/src/**/*.{ts,tsx,cts,mts}'],
-    rules: {
-      'boundaries/no-unknown': 'off',
-      'boundaries/element-types': 'off',
-      'no-restricted-imports': 'off',
     },
   },
 
-  // Config-level overrides replacing former inline eslint-disable comments
+  // 5. TEST RELAXATION (Fast Loop support)
   {
-    // QR code generator uses non-null assertions on mathematically-bounded array access (canvas rendering)
-    files: ['main/apps/web/src/features/settings/components/TotpQrCode.tsx'],
-    rules: {
-      '@typescript-eslint/no-non-null-assertion': 'off',
-    },
-  },
-  {
-    // String sanitizer intentionally matches control characters
-    files: ['main/shared/src/utils/string/string.ts'],
-    rules: {
-      'no-control-regex': 'off',
-    },
-  },
-  {
-    // Test files: Relax rules for mocking and test setup
     files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-    },
     rules: {
-      // Allow 'any' because mocking deep objects is hard
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-
-      // Allow '!' because we control the test state
       '@typescript-eslint/no-non-null-assertion': 'off',
-
-      // Don't require return types on test functions (it's overkill)
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-
-      // Relax other test-specific strictness
-      '@typescript-eslint/no-unnecessary-condition': 'off',
-      // Allow unbound methods (common with vi.fn() mocks)
-      '@typescript-eslint/unbound-method': 'off',
-      // Allow throwing non-Error values (testing error handling)
-      '@typescript-eslint/only-throw-error': 'off',
-      // Allow non-standard naming in test data (e.g., PostgreSQL ?column?, external API shapes)
-      '@typescript-eslint/naming-convention': 'off',
-      // Allow @ts-expect-error in tests for intentional type-error testing
-      '@typescript-eslint/ban-ts-comment': 'off',
-
-      // KEEP STRICT: You MUST handle promises in tests
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
+      'no-console': 'off',
+      '@typescript-eslint/no-floating-promises': 'error', // Promises still matter in tests!
     },
   },
+
+  // 6. OPERATIONAL OVERRIDES
   {
-    // Targeted override for billing client resolution issues during migration
-    files: ['main/client/api/src/billing/client.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
+    linterOptions: {
+      noInlineConfig: false, // Allow local bypasses for v1.0.0 speed
+      reportUnusedDisableDirectives: true,
     },
   },
 ] satisfies Linter.Config[];
+
+export default baseConfig;

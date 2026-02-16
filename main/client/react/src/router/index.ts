@@ -28,7 +28,7 @@
  *   return (
  *     <>
  *       <Link to="/home">Home</Link>
- *       <button onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
+ *       <button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
  *     </>
  *   );
  * }

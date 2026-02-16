@@ -1,9 +1,9 @@
 // main/server/core/src/auth/types.ts
 // Re-export LOGIN_FAILURE_REASON from shared (canonical source)
 export {
-    LOGIN_FAILURE_REASON,
-    REFRESH_TOKEN_COOKIE_NAME as REFRESH_COOKIE_NAME,
-    type LoginFailureReason
+  LOGIN_FAILURE_REASON,
+  REFRESH_TOKEN_COOKIE_NAME as REFRESH_COOKIE_NAME,
+  type LoginFailureReason,
 } from '@abe-stack/shared';
 
 /**
@@ -24,12 +24,12 @@ import type { DbClient, Repositories } from '../../../db/src';
 import type { SmsProvider } from '../../../engine/src';
 import type { EmailOptions, SendResult } from '@abe-stack/shared';
 import type {
-    AuthenticatedUser,
-    BaseContext,
-    ReplyContext,
-    RequestContext,
-    RequestInfo,
-    ServerLogger,
+  AuthenticatedUser,
+  BaseContext,
+  ReplyContext,
+  RequestContext,
+  RequestInfo,
+  ServerLogger,
 } from '@abe-stack/shared/core';
 
 // ============================================================================

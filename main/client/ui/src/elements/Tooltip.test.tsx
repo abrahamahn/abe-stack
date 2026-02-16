@@ -3,6 +3,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { Button } from './Button';
 import { Tooltip } from './Tooltip';
 
 describe('Tooltip', () => {
@@ -17,7 +18,7 @@ describe('Tooltip', () => {
   it('renders children without tooltip content initially', () => {
     render(
       <Tooltip content="Tooltip text">
-        <button>Hover me</button>
+        <Button>Hover me</Button>
       </Tooltip>,
     );
 
@@ -28,7 +29,7 @@ describe('Tooltip', () => {
   it('shows tooltip on mouse enter and hides after delay on mouse leave', () => {
     render(
       <Tooltip content="Tooltip text">
-        <button>Hover me</button>
+        <Button>Hover me</Button>
       </Tooltip>,
     );
 

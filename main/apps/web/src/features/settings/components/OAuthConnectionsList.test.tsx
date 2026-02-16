@@ -12,7 +12,7 @@
 
 import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { OAuthConnectionsList, type OAuthConnectionsListProps } from './OAuthConnectionsList';
 

@@ -7,9 +7,9 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { BatchedQueue } from '../utils/async/batched-queue';
-import { DeferredPromise } from '../utils/async/deferred-promise';
-import { ReactiveMap } from '../utils/async/reactive-map';
+import { BatchedQueue } from '../primitives/utils/async/batched-queue';
+import { DeferredPromise } from '../primitives/utils/async/deferred-promise';
+import { ReactiveMap } from '../primitives/utils/async/reactive-map';
 
 describe('Async Utilities Integration', () => {
   describe('BatchedQueue under load', () => {
@@ -23,7 +23,7 @@ describe('Async Utilities Integration', () => {
           return ids.map((id) => ({ id, data: `Item ${String(id)}` }));
         });
 
-        const queue = new BatchedQueue(processBatch, {
+        const queue = new BatchedQueue<number, { id: number; data: string }>(processBatch, {
           maxBatchSize: 100,
           maxWaitMs: 1,
         });
@@ -56,7 +56,7 @@ describe('Async Utilities Integration', () => {
           return batch.map((n) => n * 2);
         });
 
-        const queue = new BatchedQueue(processBatch, {
+        const queue = new BatchedQueue<number, number>(processBatch, {
           maxBatchSize: 5,
           maxWaitMs: 0,
         });
@@ -84,7 +84,7 @@ describe('Async Utilities Integration', () => {
           return batch.map((n) => n * 2);
         });
 
-        const queue = new BatchedQueue(processBatch, {
+        const queue = new BatchedQueue<number, number>(processBatch, {
           maxBatchSize: 2,
           maxWaitMs: 0,
           errorHandling: 'continue',
@@ -130,7 +130,7 @@ describe('Async Utilities Integration', () => {
           return batch.map((n) => n);
         });
 
-        const queue = new BatchedQueue(processBatch, {
+        const queue = new BatchedQueue<number, number>(processBatch, {
           maxBatchSize: 100,
           maxWaitMs: 5000,
           maxQueueSize: 5,

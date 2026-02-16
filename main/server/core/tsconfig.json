@@ -10,7 +10,7 @@
     "declarationMap": true,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.tsbuildinfo",
     "typeRoots": ["../../../node_modules/@types"],
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

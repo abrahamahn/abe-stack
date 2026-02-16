@@ -7,24 +7,24 @@
  */
 
 import type {
-    AuditEventRepository,
-    DbClient,
-    PlanRepository,
-    Repositories,
-    SubscriptionRepository,
-    UserRepository,
+  AuditEventRepository,
+  DbClient,
+  PlanRepository,
+  Repositories,
+  SubscriptionRepository,
+  UserRepository,
 } from '../../../db/src';
 import type { BillingConfig } from '@abe-stack/shared/config';
 import type {
-    BaseContext,
-    HasBilling,
-    HasCache,
-    HasEmail,
-    HasNotifications,
-    HasPubSub,
-    HasStorage,
-    Logger,
-    RequestContext,
+  BaseContext,
+  HasBilling,
+  HasCache,
+  HasEmail,
+  HasNotifications,
+  HasPubSub,
+  HasStorage,
+  Logger,
+  RequestContext,
 } from '@abe-stack/shared/core';
 
 /**
@@ -34,7 +34,13 @@ import type {
  * The server's full `AppContext` structurally satisfies this interface.
  */
 export interface AdminAppContext
-  extends BaseContext, HasEmail, HasStorage, HasBilling, HasNotifications, HasPubSub, HasCache {
+  extends BaseContext,
+    HasEmail,
+    HasStorage,
+    HasBilling,
+    HasNotifications,
+    HasPubSub,
+    HasCache {
   readonly db: DbClient;
   readonly repos: {
     readonly users: UserRepository;

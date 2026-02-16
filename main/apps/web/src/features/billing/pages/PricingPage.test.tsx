@@ -1,6 +1,6 @@
 // main/apps/web/src/features/billing/pages/PricingPage.test.tsx
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { PricingPage } from './PricingPage';
 

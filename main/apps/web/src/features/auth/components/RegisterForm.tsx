@@ -10,9 +10,9 @@ import { TurnstileWidget } from './TurnstileWidget';
 
 import type { AuthMode } from '@abe-stack/react/hooks';
 import type {
-    RegisterRequest,
-    RegisterResponse,
-    ResendVerificationRequest,
+  RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
 } from '@abe-stack/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 

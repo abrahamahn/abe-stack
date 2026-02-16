@@ -8,9 +8,9 @@
  */
 
 import {
-    AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
-    HTTP_STATUS,
-    mapErrorToHttpResponse,
+  AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
+  HTTP_STATUS,
+  mapErrorToHttpResponse,
 } from '@abe-stack/shared';
 
 import { sendTokenReuseAlert } from '../security';

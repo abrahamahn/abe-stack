@@ -1,6 +1,6 @@
 // main/apps/web/src/features/workspace/hooks/useWorkspaceContext.test.ts
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, beforeEach } from 'vitest';
 
 import { useWorkspaceContext } from './useWorkspaceContext';
 

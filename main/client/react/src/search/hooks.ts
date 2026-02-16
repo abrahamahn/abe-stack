@@ -13,7 +13,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useInfiniteQuery as useInfiniteQueryBase } from '../query/useInfiniteQuery';
 import { useQuery as useQueryBase } from '../query/useQuery';
 
-
 import type {
   CursorSearchResult,
   SearchQuery,
@@ -346,7 +345,7 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
  *       {hasNextPage && (
  *         <button onClick={fetchNextPage} disabled={isFetchingNextPage}>
  *           {isFetchingNextPage ? 'Loading...' : 'Load More'}
- *         </button>
+ *         </Button>
  *       )}
  *     </div>
  *   );

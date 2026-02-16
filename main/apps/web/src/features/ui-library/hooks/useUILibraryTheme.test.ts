@@ -1,7 +1,7 @@
 // main/apps/web/src/features/ui-library/hooks/useUILibraryTheme.test.ts
 import { useThemeMode } from '@abe-stack/react/hooks';
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useUILibraryTheme } from './useUILibraryTheme';
 

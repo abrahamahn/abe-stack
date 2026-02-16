@@ -7,14 +7,7 @@
  */
 
 import { useNavigate, useSearchParams } from '@abe-stack/react/router';
-import {
-  Alert,
-  Button,
-  Card,
-  Heading,
-  Spinner,
-  Text,
-} from '@abe-stack/ui';
+import { Alert, Button, Card, Heading, Spinner, Text } from '@abe-stack/ui';
 import { useEffect, useRef, type ReactElement } from 'react';
 
 import { useAcceptInvitation } from '../hooks';

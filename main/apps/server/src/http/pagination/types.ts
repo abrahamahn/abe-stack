@@ -3,19 +3,15 @@
  * Pagination type definitions for HTTP middleware and helpers.
  */
 
+import type { CursorPaginationQueryBuilder, OffsetPaginationQueryBuilder } from '@abe-stack/db';
 import type {
-    CursorPaginationQueryBuilder,
-    OffsetPaginationQueryBuilder,
-} from '@abe-stack/db';
-import type {
-    CursorPaginatedResult,
-    CursorPaginationOptions,
-    PaginatedResult,
-    PaginationOptions,
-    SortOrder,
+  CursorPaginatedResult,
+  CursorPaginationOptions,
+  PaginatedResult,
+  PaginationOptions,
+  SortOrder,
 } from '@abe-stack/shared';
 import type { FastifyRequest } from 'fastify';
-
 
 /**
  * Pagination middleware configuration options
@@ -117,8 +113,6 @@ export interface PaginationHelpers {
     tieBreakerField?: string,
   ) => Promise<{ data: T[]; hasNext: boolean; nextCursor: string | null }>;
 }
-
-
 
 /**
  * Extended Fastify request with pagination context

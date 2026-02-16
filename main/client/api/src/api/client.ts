@@ -120,9 +120,9 @@ export interface ApiClient {
     tenantId: string,
     data: { newOwnerId: string },
   ) => Promise<Record<string, unknown>>;
-  listTenantFeatureOverrides: (
-    tenantId: string,
-  ) => Promise<{ overrides: Array<{ tenantId: string; key: string; value: unknown; isEnabled: boolean }> }>;
+  listTenantFeatureOverrides: (tenantId: string) => Promise<{
+    overrides: Array<{ tenantId: string; key: string; value: unknown; isEnabled: boolean }>;
+  }>;
   setTenantFeatureOverride: (
     tenantId: string,
     key: string,
@@ -227,7 +227,10 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       credentials: 'include',
     });
 
-    const data = (await response.json().catch(() => ({}))) as { token?: unknown; message?: unknown };
+    const data = (await response.json().catch(() => ({}))) as {
+      token?: unknown;
+      message?: unknown;
+    };
     if (!response.ok || typeof data.token !== 'string' || data.token.length === 0) {
       throw createApiError(response.status, {
         message: typeof data.message === 'string' ? data.message : 'Failed to fetch CSRF token',
@@ -406,10 +409,14 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
 
   return {
     async acceptTos(documentId: string): Promise<{ agreedAt: string }> {
-      return request<{ agreedAt: string }>('/auth/tos/accept', {
-        method: 'POST',
-        body: JSON.stringify({ documentId }),
-      }, acceptTosResponseSchema);
+      return request<{ agreedAt: string }>(
+        '/auth/tos/accept',
+        {
+          method: 'POST',
+          body: JSON.stringify({ documentId }),
+        },
+        acceptTosResponseSchema,
+      );
     },
     async getConsent(): Promise<{ preferences: Record<string, boolean | null> }> {
       return request<{ preferences: Record<string, boolean | null> }>('/users/me/consent');
@@ -460,9 +467,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     async listTenantActivities(
       tenantId: string,
     ): Promise<{ activities: Record<string, unknown>[] }> {
-      return request<{ activities: Record<string, unknown>[] }>(
-        `/tenants/${tenantId}/activities`,
-      );
+      return request<{ activities: Record<string, unknown>[] }>(`/tenants/${tenantId}/activities`);
     },
     async regenerateTenantInvitation(
       tenantId: string,
@@ -484,9 +489,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         body: JSON.stringify(data),
       });
     },
-    async listTenantFeatureOverrides(
-      tenantId: string,
-    ): Promise<{
+    async listTenantFeatureOverrides(tenantId: string): Promise<{
       overrides: Array<{ tenantId: string; key: string; value: unknown; isEnabled: boolean }>;
     }> {
       return request<{
@@ -497,14 +500,15 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       tenantId: string,
       key: string,
       data: { value?: unknown; isEnabled?: boolean },
-    ): Promise<{ override: { tenantId: string; key: string; value: unknown; isEnabled: boolean } }> {
-      return request<{ override: { tenantId: string; key: string; value: unknown; isEnabled: boolean } }>(
-        `/admin/tenants/${tenantId}/feature-overrides/${key}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify(data),
-        },
-      );
+    ): Promise<{
+      override: { tenantId: string; key: string; value: unknown; isEnabled: boolean };
+    }> {
+      return request<{
+        override: { tenantId: string; key: string; value: unknown; isEnabled: boolean };
+      }>(`/admin/tenants/${tenantId}/feature-overrides/${key}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
     },
     async deleteTenantFeatureOverride(
       tenantId: string,
@@ -520,12 +524,14 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     async startImpersonation(
       userId: string,
     ): Promise<{ token: string; targetUserId: string; targetEmail: string; expiresAt: string }> {
-      return request<{ token: string; targetUserId: string; targetEmail: string; expiresAt: string }>(
-        `/admin/impersonate/${userId}`,
-        {
-          method: 'POST',
-        },
-      );
+      return request<{
+        token: string;
+        targetUserId: string;
+        targetEmail: string;
+        expiresAt: string;
+      }>(`/admin/impersonate/${userId}`, {
+        method: 'POST',
+      });
     },
     async endImpersonation(targetUserId: string): Promise<{ success: boolean; message: string }> {
       return request<{ success: boolean; message: string }>('/admin/impersonate/end', {
@@ -598,70 +604,110 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     async login(
       data: LoginRequest,
     ): Promise<LoginSuccessResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse> {
-      return request('/auth/login', { method: 'POST', body: JSON.stringify(data) }, {
-        parse(
-          value: unknown,
-        ): LoginSuccessResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse {
-          return parseLoginResponse(value);
+      return request(
+        '/auth/login',
+        { method: 'POST', body: JSON.stringify(data) },
+        {
+          parse(
+            value: unknown,
+          ): LoginSuccessResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse {
+            return parseLoginResponse(value);
+          },
         },
-      });
+      );
     },
     async register(data: RegisterRequest): Promise<RegisterResponse> {
-      return request<RegisterResponse>('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, registerResponseSchema);
+      return request<RegisterResponse>(
+        '/auth/register',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        registerResponseSchema,
+      );
     },
     async refresh(): Promise<RefreshResponse> {
-      return request<RefreshResponse>('/auth/refresh', {
-        method: 'POST',
-        body: JSON.stringify({}),
-      }, refreshResponseSchema);
+      return request<RefreshResponse>(
+        '/auth/refresh',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+        refreshResponseSchema,
+      );
     },
     async logout(): Promise<LogoutResponse> {
-      return request<LogoutResponse>('/auth/logout', {
-        method: 'POST',
-        body: JSON.stringify({}),
-      }, logoutResponseSchema);
+      return request<LogoutResponse>(
+        '/auth/logout',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+        logoutResponseSchema,
+      );
     },
     async logoutAll(): Promise<LogoutResponse> {
-      return request<LogoutResponse>('/auth/logout-all', {
-        method: 'POST',
-        body: JSON.stringify({}),
-      }, logoutResponseSchema);
+      return request<LogoutResponse>(
+        '/auth/logout-all',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+        logoutResponseSchema,
+      );
     },
     async getCurrentUser(): Promise<User> {
       return request<User>('/users/me', undefined, userSchema);
     },
     async forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
-      return request<ForgotPasswordResponse>('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, forgotPasswordResponseSchema);
+      return request<ForgotPasswordResponse>(
+        '/auth/forgot-password',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        forgotPasswordResponseSchema,
+      );
     },
     async resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
-      return request<ResetPasswordResponse>('/auth/reset-password', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, resetPasswordResponseSchema);
+      return request<ResetPasswordResponse>(
+        '/auth/reset-password',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        resetPasswordResponseSchema,
+      );
     },
     async setPassword(data: SetPasswordRequest): Promise<SetPasswordResponse> {
-      return request<SetPasswordResponse>('/auth/set-password', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, setPasswordResponseSchema);
+      return request<SetPasswordResponse>(
+        '/auth/set-password',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        setPasswordResponseSchema,
+      );
     },
     async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
-      return request<EmailVerificationResponse>('/auth/verify-email', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, emailVerificationResponseSchema);
+      return request<EmailVerificationResponse>(
+        '/auth/verify-email',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        emailVerificationResponseSchema,
+      );
     },
     async resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
-      return request<ResendVerificationResponse>('/auth/resend-verification', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, resendVerificationResponseSchema);
+      return request<ResendVerificationResponse>(
+        '/auth/resend-verification',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        resendVerificationResponseSchema,
+      );
     },
     async getTosStatus(): Promise<{
       accepted: boolean;
@@ -678,76 +724,120 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     // TOTP methods
     async totpSetup(): Promise<TotpSetupResponse> {
-      return request<TotpSetupResponse>('/auth/totp/setup', {
-        method: 'POST',
-        body: JSON.stringify({}),
-      }, totpSetupResponseSchema);
+      return request<TotpSetupResponse>(
+        '/auth/totp/setup',
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+        },
+        totpSetupResponseSchema,
+      );
     },
     async totpEnable(data: TotpVerifyRequest): Promise<TotpVerifyResponse> {
-      return request<TotpVerifyResponse>('/auth/totp/enable', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, totpVerifyResponseSchema);
+      return request<TotpVerifyResponse>(
+        '/auth/totp/enable',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        totpVerifyResponseSchema,
+      );
     },
     async totpDisable(data: TotpVerifyRequest): Promise<TotpVerifyResponse> {
-      return request<TotpVerifyResponse>('/auth/totp/disable', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, totpVerifyResponseSchema);
+      return request<TotpVerifyResponse>(
+        '/auth/totp/disable',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        totpVerifyResponseSchema,
+      );
     },
     async totpStatus(): Promise<TotpStatusResponse> {
       return request<TotpStatusResponse>('/auth/totp/status', undefined, totpStatusResponseSchema);
     },
     async totpVerifyLogin(data: TotpLoginVerifyRequest): Promise<AuthResponse> {
-      return request<AuthResponse>('/auth/totp/verify-login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, authResponseSchema);
+      return request<AuthResponse>(
+        '/auth/totp/verify-login',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        authResponseSchema,
+      );
     },
     // SMS 2FA methods
     async smsSendCode(data: { challengeToken: string }): Promise<{ message: string }> {
-      return request<{ message: string }>('/auth/sms/send', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, totpVerifyResponseSchema);
+      return request<{ message: string }>(
+        '/auth/sms/send',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        totpVerifyResponseSchema,
+      );
     },
     async smsVerifyLogin(data: { challengeToken: string; code: string }): Promise<AuthResponse> {
-      return request<AuthResponse>('/auth/sms/verify', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, authResponseSchema);
+      return request<AuthResponse>(
+        '/auth/sms/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        authResponseSchema,
+      );
     },
     // Magic link methods
     async magicLinkRequest(data: MagicLinkRequest): Promise<MagicLinkRequestResponse> {
-      return request<MagicLinkRequestResponse>('/auth/magic-link/request', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, magicLinkRequestResponseSchema);
+      return request<MagicLinkRequestResponse>(
+        '/auth/magic-link/request',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        magicLinkRequestResponseSchema,
+      );
     },
     async magicLinkVerify(data: MagicLinkVerifyRequest): Promise<MagicLinkVerifyResponse> {
-      return request<MagicLinkVerifyResponse>('/auth/magic-link/verify', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, magicLinkVerifyResponseSchema);
+      return request<MagicLinkVerifyResponse>(
+        '/auth/magic-link/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        magicLinkVerifyResponseSchema,
+      );
     },
     // Email change methods
     async changeEmail(data: ChangeEmailRequest): Promise<ChangeEmailResponse> {
-      return request<ChangeEmailResponse>('/auth/change-email', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, changeEmailResponseSchema);
+      return request<ChangeEmailResponse>(
+        '/auth/change-email',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        changeEmailResponseSchema,
+      );
     },
     async confirmEmailChange(data: ConfirmEmailChangeRequest): Promise<ConfirmEmailChangeResponse> {
-      return request<ConfirmEmailChangeResponse>('/auth/change-email/confirm', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, confirmEmailChangeResponseSchema);
+      return request<ConfirmEmailChangeResponse>(
+        '/auth/change-email/confirm',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        confirmEmailChangeResponseSchema,
+      );
     },
     async revertEmailChange(data: RevertEmailChangeRequest): Promise<RevertEmailChangeResponse> {
-      return request<RevertEmailChangeResponse>('/auth/change-email/revert', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, revertEmailChangeResponseSchema);
+      return request<RevertEmailChangeResponse>(
+        '/auth/change-email/revert',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        revertEmailChangeResponseSchema,
+      );
     },
     // OAuth methods
     async getEnabledOAuthProviders(): Promise<OAuthEnabledProvidersResponse> {
@@ -759,9 +849,13 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     async unlinkOAuthProvider(provider: OAuthProvider): Promise<OAuthUnlinkResponse> {
       // OAuthProvider is already a string literal union type
       const providerStr = provider as string;
-      return request<OAuthUnlinkResponse>(`/auth/oauth/${providerStr}/unlink`, {
-        method: 'DELETE',
-      }, oauthUnlinkResponseSchema);
+      return request<OAuthUnlinkResponse>(
+        `/auth/oauth/${providerStr}/unlink`,
+        {
+          method: 'DELETE',
+        },
+        oauthUnlinkResponseSchema,
+      );
     },
     getOAuthLoginUrl(provider: OAuthProvider): string {
       // This returns a URL the browser should navigate to (redirect)
@@ -844,10 +938,14 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       credential: Record<string, unknown>;
       sessionKey: string;
     }): Promise<AuthResponse> {
-      return request<AuthResponse>('/auth/webauthn/login/verify', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, authResponseSchema);
+      return request<AuthResponse>(
+        '/auth/webauthn/login/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        authResponseSchema,
+      );
     },
     async listPasskeys(): Promise<PasskeyListItem[]> {
       return request<PasskeyListItem[]>('/users/me/passkeys', undefined, {
@@ -883,15 +981,23 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       });
     },
     async renamePasskey(id: string, name: string): Promise<{ message: string }> {
-      return request<{ message: string }>(`/users/me/passkeys/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ name }),
-      }, totpVerifyResponseSchema);
+      return request<{ message: string }>(
+        `/users/me/passkeys/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ name }),
+        },
+        totpVerifyResponseSchema,
+      );
     },
     async deletePasskey(id: string): Promise<{ message: string }> {
-      return request<{ message: string }>(`/users/me/passkeys/${id}/delete`, {
-        method: 'DELETE',
-      }, totpVerifyResponseSchema);
+      return request<{ message: string }>(
+        `/users/me/passkeys/${id}/delete`,
+        {
+          method: 'DELETE',
+        },
+        totpVerifyResponseSchema,
+      );
     },
   };
 }

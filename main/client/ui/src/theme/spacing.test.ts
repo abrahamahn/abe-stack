@@ -1,5 +1,5 @@
 // main/client/ui/src/theme/spacing.test.ts
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { spacing } from './spacing';
 

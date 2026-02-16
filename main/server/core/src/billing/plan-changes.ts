@@ -10,11 +10,11 @@
  */
 
 import {
-    BillingSubscriptionNotFoundError,
-    CannotDowngradeInTrialError,
-    PlanNotActiveError,
-    PlanNotFoundError,
-    SubscriptionNotActiveError,
+  BillingSubscriptionNotFoundError,
+  CannotDowngradeInTrialError,
+  PlanNotActiveError,
+  PlanNotFoundError,
+  SubscriptionNotActiveError,
 } from '@abe-stack/shared';
 
 import type { BillingRepositories } from './types';

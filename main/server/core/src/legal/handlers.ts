@@ -15,8 +15,8 @@ import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } fro
 
 import type { LegalAppContext, LegalRequest } from './types';
 import type {
-    LegalDocument as DbLegalDocument,
-    UserAgreement as DbUserAgreement,
+  LegalDocument as DbLegalDocument,
+  UserAgreement as DbUserAgreement,
 } from '../../../db/src';
 import type { AuditRecordParams } from '../audit/types';
 

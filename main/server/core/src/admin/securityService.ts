@@ -7,36 +7,36 @@
  */
 
 import {
-    DAYS_PER_WEEK,
-    MS_PER_DAY,
-    MS_PER_HOUR,
-    NotFoundError,
-    toISODateOnly,
+  DAYS_PER_WEEK,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  NotFoundError,
+  toISODateOnly,
 } from '@abe-stack/shared';
 
 import {
-    SECURITY_EVENTS_TABLE,
-    SECURITY_EVENT_COLUMNS,
-    and,
-    eq,
-    gte,
-    ilike,
-    lte,
-    select,
-    selectCount,
-    toCamelCase,
-    toCamelCaseArray,
-    type DbClient,
-    type SecurityEvent as DbSecurityEvent,
-    type SqlFragment,
+  SECURITY_EVENTS_TABLE,
+  SECURITY_EVENT_COLUMNS,
+  and,
+  eq,
+  gte,
+  ilike,
+  lte,
+  select,
+  selectCount,
+  toCamelCase,
+  toCamelCaseArray,
+  type DbClient,
+  type SecurityEvent as DbSecurityEvent,
+  type SqlFragment,
 } from '../../../db/src';
 
 import type {
-    PaginationOptions,
-    SecurityEvent,
-    SecurityEventsFilter,
-    SecurityEventsListResponse,
-    SecurityMetrics,
+  PaginationOptions,
+  SecurityEvent,
+  SecurityEventsFilter,
+  SecurityEventsListResponse,
+  SecurityMetrics,
 } from '@abe-stack/shared';
 
 // ============================================================================

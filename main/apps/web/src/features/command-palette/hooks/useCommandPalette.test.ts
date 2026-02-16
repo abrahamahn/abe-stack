@@ -1,6 +1,6 @@
 // main/apps/web/src/features/command-palette/hooks/useCommandPalette.test.ts
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { useCommandPalette } from './useCommandPalette';
 

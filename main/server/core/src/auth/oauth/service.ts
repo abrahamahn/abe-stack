@@ -11,52 +11,52 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
 import {
-    AUTH_EXPIRY,
-    canonicalizeEmail,
-    ConflictError,
-    EmailAlreadyExistsError,
-    MS_PER_MINUTE,
-    normalizeEmail,
-    NotFoundError,
-    OAuthError,
-    OAuthStateMismatchError,
-    toISODateOnly,
-    type UserId,
+  AUTH_EXPIRY,
+  canonicalizeEmail,
+  ConflictError,
+  EmailAlreadyExistsError,
+  MS_PER_MINUTE,
+  normalizeEmail,
+  NotFoundError,
+  OAuthError,
+  OAuthStateMismatchError,
+  toISODateOnly,
+  type UserId,
 } from '@abe-stack/shared';
 
 import {
-    insert,
-    OAUTH_CONNECTIONS_TABLE,
-    toCamelCase,
-    USER_COLUMNS,
-    USERS_TABLE,
-    withTransaction,
-    type DbClient,
-    type OAuthProvider,
-    type Repositories,
-    type User,
-    type UserRole,
+  insert,
+  OAUTH_CONNECTIONS_TABLE,
+  toCamelCase,
+  USER_COLUMNS,
+  USERS_TABLE,
+  withTransaction,
+  type DbClient,
+  type OAuthProvider,
+  type Repositories,
+  type User,
+  type UserRole,
 } from '../../../../db/src';
 import {
-    createAccessToken,
-    createRefreshTokenFamily,
-    generateUniqueUsername,
-    splitFullName,
+  createAccessToken,
+  createRefreshTokenFamily,
+  generateUniqueUsername,
+  splitFullName,
 } from '../utils';
 
 import {
-    createAppleProvider,
-    createGitHubProvider,
-    createGoogleProvider,
-    extractAppleUserFromIdToken,
+  createAppleProvider,
+  createGitHubProvider,
+  createGoogleProvider,
+  extractAppleUserFromIdToken,
 } from './providers';
 
 import type {
-    OAuthConnectionInfo,
-    OAuthProviderClient,
-    OAuthState,
-    OAuthTokenResponse,
-    OAuthUserInfo,
+  OAuthConnectionInfo,
+  OAuthProviderClient,
+  OAuthState,
+  OAuthTokenResponse,
+  OAuthUserInfo,
 } from './types';
 import type { AuthConfig, OAuthProviderConfig } from '@abe-stack/shared/config';
 

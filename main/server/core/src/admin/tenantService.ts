@@ -9,15 +9,15 @@
 import { NotFoundError } from '@abe-stack/shared';
 
 import {
-    ilike,
-    or,
-    select,
-    selectCount,
-    TENANT_COLUMNS,
-    TENANTS_TABLE,
-    toCamelCase,
-    type DbClient,
-    type Repositories,
+  ilike,
+  or,
+  select,
+  selectCount,
+  TENANT_COLUMNS,
+  TENANTS_TABLE,
+  toCamelCase,
+  type DbClient,
+  type Repositories,
 } from '../../../db/src';
 
 // ============================================================================

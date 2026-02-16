@@ -3,7 +3,7 @@
 /** @vitest-environment jsdom */
 import { Image } from '@components/Image';
 import { act, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 // Helper to trigger image load event
 function triggerLoad(img: HTMLElement): void {

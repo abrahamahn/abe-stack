@@ -43,7 +43,7 @@ vi.mock('@abe-stack/ui', async () => {
 
   const mockHeading = ({ children }: { children: ReactNode }) => <h4>{children}</h4>;
 
-const mockText = ({
+  const mockText = ({
     children,
     className,
     'data-testid': testId,

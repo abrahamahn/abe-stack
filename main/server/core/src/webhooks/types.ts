@@ -12,11 +12,11 @@ import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
 
 // Re-export webhook constants from shared (canonical source)
 export {
-    MAX_DELIVERY_ATTEMPTS,
-    RETRY_DELAYS_MINUTES,
-    SUBSCRIBABLE_EVENT_TYPES,
-    WEBHOOK_EVENT_TYPES,
-    type WebhookEventType
+  MAX_DELIVERY_ATTEMPTS,
+  RETRY_DELAYS_MINUTES,
+  SUBSCRIBABLE_EVENT_TYPES,
+  WEBHOOK_EVENT_TYPES,
+  type WebhookEventType,
 } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '../../../db/src';

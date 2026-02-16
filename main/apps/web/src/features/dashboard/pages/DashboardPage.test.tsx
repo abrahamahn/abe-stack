@@ -1,7 +1,7 @@
 // main/apps/web/src/features/dashboard/pages/DashboardPage.test.tsx
 import { DashboardPage } from '@dashboard/pages/DashboardPage';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../../../__tests__/utils';
 

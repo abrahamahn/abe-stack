@@ -27,7 +27,6 @@ import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
-
 import type { BillingClientConfig } from '@abe-stack/api';
 import type {
   PaymentMethod,

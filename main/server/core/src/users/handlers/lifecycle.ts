@@ -9,17 +9,17 @@
  */
 
 import {
-    BadRequestError,
-    calculateDeletionGracePeriodEnd,
-    canDeactivate,
-    canReactivate,
-    canRequestDeletion,
-    getAccountStatus,
-    type AccountLifecycleFields,
-    type AccountLifecycleResponse,
-    type AccountStatus,
-    type DeactivateAccountRequest,
-    type DeleteAccountRequest,
+  BadRequestError,
+  calculateDeletionGracePeriodEnd,
+  canDeactivate,
+  canReactivate,
+  canRequestDeletion,
+  getAccountStatus,
+  type AccountLifecycleFields,
+  type AccountLifecycleResponse,
+  type AccountStatus,
+  type DeactivateAccountRequest,
+  type DeleteAccountRequest,
 } from '@abe-stack/shared';
 
 import { record } from '../../audit/service';

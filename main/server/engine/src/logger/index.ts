@@ -34,4 +34,3 @@ export { createLogger, createRequestLogger, type Logger } from './logger';
 
 // Middleware (Fastify-specific)
 export { createJobLogger, registerLoggingMiddleware } from './middleware';
-

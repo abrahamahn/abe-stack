@@ -3,12 +3,12 @@ import { ForbiddenError, UnauthorizedError } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    assertUserActive,
-    createAuthGuard,
-    createRequireAuth,
-    createRequireRole,
-    extractTokenPayload,
-    isAdmin,
+  assertUserActive,
+  createAuthGuard,
+  createRequireAuth,
+  createRequireRole,
+  extractTokenPayload,
+  isAdmin,
 } from './middleware';
 import { verifyToken } from './utils/jwt';
 
@@ -189,7 +189,10 @@ describe('createRequireAuth', () => {
   test('should return 403 when user is locked', async () => {
     const mockPayload = { userId: 'user-123', email: 'test@example.com', role: 'user' as const };
     vi.mocked(verifyToken).mockReturnValue(mockPayload);
-    mockFindById.mockResolvedValue({ lockedUntil: new Date(Date.now() + 10000), lockReason: 'Banned' });
+    mockFindById.mockResolvedValue({
+      lockedUntil: new Date(Date.now() + 10000),
+      lockReason: 'Banned',
+    });
 
     const request = createMockRequest('Bearer valid-token');
     const reply = createMockReply();

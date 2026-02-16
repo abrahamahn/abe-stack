@@ -39,7 +39,6 @@ export {
 
 export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime/SubscriptionCache';
 
-
 // Persistent Storage
 export {
   createRecordMap,

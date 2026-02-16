@@ -11,28 +11,28 @@ import { HTTP_STATUS, UserNotFoundError } from '@abe-stack/shared';
 import { ERROR_MESSAGES } from '../auth';
 
 import {
-    getUserById,
-    hardBanUser,
-    listUsers,
-    lockUser,
-    searchUsers,
-    unlockUser,
-    updateUser,
+  getUserById,
+  hardBanUser,
+  listUsers,
+  lockUser,
+  searchUsers,
+  unlockUser,
+  updateUser,
 } from './userService';
 
 import type { AdminAppContext } from './types';
 import type { HardBanResult, SearchUsersResponse } from './userService';
 import type { UserRole } from '../../../db/src';
 import type {
-    AdminHardBanRequest,
-    AdminLockUserRequest,
-    AdminLockUserResponse,
-    AdminUpdateUserRequest,
-    AdminUpdateUserResponse,
-    AdminUser,
-    AdminUserListFilters,
-    AdminUserListResponse,
-    UnlockAccountRequest,
+  AdminHardBanRequest,
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UnlockAccountRequest,
 } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

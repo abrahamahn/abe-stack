@@ -1,6 +1,6 @@
 // main/apps/web/src/features/onboarding/hooks/useOnboarding.test.ts
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { TOTAL_STEPS, useOnboarding } from './useOnboarding';
 

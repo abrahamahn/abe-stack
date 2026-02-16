@@ -2,7 +2,7 @@
 // client/ui/src/layouts/__tests__/PageContainer.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { PageContainer } from './PageContainer';
 

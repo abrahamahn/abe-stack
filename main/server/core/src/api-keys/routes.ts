@@ -17,10 +17,10 @@ import { createApiKeyRequestSchema } from '@abe-stack/shared/domain';
 import { createRouteMap, protectedRoute } from '../../../engine/src';
 
 import {
-    handleCreateApiKey,
-    handleDeleteApiKey,
-    handleListApiKeys,
-    handleRevokeApiKey,
+  handleCreateApiKey,
+  handleDeleteApiKey,
+  handleListApiKeys,
+  handleRevokeApiKey,
 } from './handlers';
 
 import type { RouteDefinition } from '../../../engine/src';

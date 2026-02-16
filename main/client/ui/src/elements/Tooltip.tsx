@@ -19,7 +19,7 @@ type TooltipProps = {
  * @example
  * ```tsx
  * <Tooltip content="Helpful info">
- *   <button>Hover me</button>
+ *   <Button>Hover me</Button>
  * </Tooltip>
  * ```
  */

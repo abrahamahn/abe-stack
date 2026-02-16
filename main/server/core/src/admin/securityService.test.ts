@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    exportSecurityEvents,
-    getSecurityEvent,
-    getSecurityMetrics,
-    listSecurityEvents,
-    SecurityEventNotFoundError,
+  exportSecurityEvents,
+  getSecurityEvent,
+  getSecurityMetrics,
+  listSecurityEvents,
+  SecurityEventNotFoundError,
 } from './securityService';
 
 import type { DbClient } from '../../../db/src';

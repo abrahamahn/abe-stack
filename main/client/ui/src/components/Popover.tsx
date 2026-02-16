@@ -29,7 +29,7 @@ type PopoverProps = {
  *
  * @example
  * ```tsx
- * <Popover trigger={<button>Info</button>}>
+ * <Popover trigger={<Button>Info</Button>}>
  *   <p>Popover content here</p>
  * </Popover>
  * ```

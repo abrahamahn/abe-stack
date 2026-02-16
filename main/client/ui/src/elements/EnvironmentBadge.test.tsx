@@ -3,7 +3,7 @@
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { EnvironmentBadge } from './EnvironmentBadge';
 

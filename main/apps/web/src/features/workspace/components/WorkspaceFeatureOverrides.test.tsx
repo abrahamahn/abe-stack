@@ -7,7 +7,7 @@ import { QueryCache } from '@abe-stack/client-engine';
 import { QueryCacheProvider } from '@abe-stack/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 // ============================================================================
 // Mocks

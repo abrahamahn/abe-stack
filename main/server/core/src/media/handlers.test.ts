@@ -30,8 +30,9 @@ vi.mock('./service', () => ({
 }));
 
 // Import mocked service after vi.mock setup
-const { uploadMedia, getMediaMetadata, deleteMedia, getProcessingStatus } =
-  await import('./service');
+const { uploadMedia, getMediaMetadata, deleteMedia, getProcessingStatus } = await import(
+  './service'
+);
 
 // ============================================================================
 // Test Helpers

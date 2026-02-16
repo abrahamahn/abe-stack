@@ -2,6 +2,8 @@
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
+import { Button } from './Button';
+
 import '../styles/elements.css';
 
 type SwitchProps = Omit<ComponentPropsWithoutRef<'button'>, 'onChange' | 'defaultChecked'> & {
@@ -33,8 +35,8 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) =>
   const isChecked = currentChecked ?? false;
 
   return (
-    <button
-      ref={ref}
+    <Button
+      ref={ref as any}
       type={type}
       role="switch"
       aria-checked={isChecked}
@@ -46,7 +48,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) =>
       {...rest}
     >
       <span className="switch-thumb" />
-    </button>
+    </Button>
   );
 });
 

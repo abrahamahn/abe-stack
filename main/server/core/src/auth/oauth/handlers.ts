@@ -8,31 +8,31 @@
  */
 
 import {
-    ERROR_MESSAGES,
-    mapErrorToHttpResponse,
-    OAuthError,
-    TooManyRequestsError,
+  ERROR_MESSAGES,
+  mapErrorToHttpResponse,
+  OAuthError,
+  TooManyRequestsError,
 } from '@abe-stack/shared';
 
 import { OAUTH_PROVIDERS, type OAuthProvider } from '../../../../db/src';
 import { getMetricsCollector } from '../../../../engine/src';
 import {
-    authRateLimiters,
-    logOAuthLinkSuccessEvent,
-    logOAuthLoginFailureEvent,
-    logOAuthLoginSuccessEvent,
-    logOAuthUnlinkFailureEvent,
-    logOAuthUnlinkSuccessEvent,
-    type AuthEndpoint,
+  authRateLimiters,
+  logOAuthLinkSuccessEvent,
+  logOAuthLoginFailureEvent,
+  logOAuthLoginSuccessEvent,
+  logOAuthUnlinkFailureEvent,
+  logOAuthUnlinkSuccessEvent,
+  type AuthEndpoint,
 } from '../security';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
 import {
-    getAuthorizationUrl,
-    getConnectedProviders,
-    handleOAuthCallback,
-    unlinkOAuthAccount,
+  getAuthorizationUrl,
+  getConnectedProviders,
+  handleOAuthCallback,
+  unlinkOAuthAccount,
 } from './service';
 
 import type { AppContext, ReplyWithCookies } from '../types';
@@ -519,9 +519,10 @@ export async function handleGetConnections(
  * @returns Enabled provider names
  * @complexity O(n) where n is number of supported providers
  */
-export function handleGetEnabledProviders(
-  ctx: AppContext,
-): { status: 200; body: { providers: OAuthProvider[] } } {
+export function handleGetEnabledProviders(ctx: AppContext): {
+  status: 200;
+  body: { providers: OAuthProvider[] };
+} {
   const enabledProviders = OAUTH_PROVIDERS.filter((provider) => {
     return ctx.config.auth.oauth[provider] !== undefined;
   });

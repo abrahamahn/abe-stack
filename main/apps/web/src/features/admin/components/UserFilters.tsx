@@ -7,10 +7,9 @@
 
 import { APP_ROLES, USER_STATUSES } from '@abe-stack/shared';
 import { Button, Input, Select } from '@abe-stack/ui';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type ChangeEvent, JSX } from 'react';
 
 import type { AdminUserListFilters } from '@abe-stack/shared';
-import type { JSX } from 'react';
 
 type AdminUserListFiltersLocal = AdminUserListFilters;
 
@@ -131,7 +130,7 @@ export const UserFilters = ({
           type="text"
           placeholder="Search by email or name..."
           value={searchValue}
-          onChange={(e) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setSearchValue(e.target.value);
           }}
           className="flex-1"

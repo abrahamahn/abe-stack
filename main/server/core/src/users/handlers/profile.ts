@@ -16,10 +16,10 @@ import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../type
 
 import type { HandlerContext } from '../../../../engine/src';
 import type {
-    CursorPaginatedResult,
-    CursorPaginationOptions,
-    User,
-    UserId,
+  CursorPaginatedResult,
+  CursorPaginationOptions,
+  User,
+  UserId,
 } from '@abe-stack/shared';
 
 const toError = (error: unknown): Error =>

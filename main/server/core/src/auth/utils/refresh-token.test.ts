@@ -14,11 +14,11 @@ import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../security/even
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 import {
-    cleanupExpiredTokens,
-    createRefreshTokenFamily,
-    revokeAllUserTokens,
-    revokeTokenFamily,
-    rotateRefreshToken,
+  cleanupExpiredTokens,
+  createRefreshTokenFamily,
+  revokeAllUserTokens,
+  revokeTokenFamily,
+  rotateRefreshToken,
 } from './refresh-token';
 
 import type { DbClient, RefreshToken, RefreshTokenFamily, User } from '../../../../db/src';

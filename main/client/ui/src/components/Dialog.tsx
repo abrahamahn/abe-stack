@@ -18,6 +18,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Button } from '../elements/Button';
 import { cn } from '../utils/cn';
 
 import '../styles/components.css';
@@ -170,8 +171,8 @@ export const DialogTrigger = (props: DialogTriggerProps): ReactElement => {
   const { setOpen, triggerRef } = useDialogContext('Dialog.Trigger');
   const { className = '', type = 'button', ...rest } = props;
   return (
-    <button
-      ref={triggerRef}
+    <Button
+      ref={triggerRef as any}
       type={type}
       className={className}
       onClick={(e) => {
@@ -250,8 +251,7 @@ export const DialogContent = (props: DialogContentProps): ReactElement | null =>
           ) : null}
           {children}
           {/* Allow consumers to close by providing a button that calls setOpen(false) */}
-          <button
-            type="button"
+          <Button
             aria-label="Close dialog"
             className="dialog-close"
             onClick={() => {
@@ -259,7 +259,7 @@ export const DialogContent = (props: DialogContentProps): ReactElement | null =>
             }}
           >
             ×
-          </button>
+          </Button>
         </div>
       </FocusTrap>
     </div>

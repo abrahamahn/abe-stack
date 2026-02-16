@@ -72,4 +72,3 @@ export function createMediaClient(config: MediaClientConfig): MediaClient {
     },
   };
 }
-

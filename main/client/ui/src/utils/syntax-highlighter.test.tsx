@@ -1,7 +1,7 @@
 // main/client/ui/src/utils/syntax-highlighter.test.tsx
 import { render } from '@testing-library/react';
 import { isValidElement } from 'react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { SyntaxHighlighter, darkTheme, highlightCode, lightTheme } from './syntax-highlighter';
 

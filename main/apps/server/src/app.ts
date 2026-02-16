@@ -5,12 +5,19 @@ import { registerRoutes } from '@routes';
 import type { SystemContext } from '@abe-stack/core';
 import type { DbClient, QueueStore, Repositories, SessionContext } from '@abe-stack/db';
 import type {
-    QueueServer,
-    ServerSearchProvider,
-    SmsProvider,
-    WriteService,
+  QueueServer,
+  ServerSearchProvider,
+  SmsProvider,
+  WriteService,
 } from '@abe-stack/server-engine';
-import type { BillingService, CacheProvider, EmailService, ErrorTracker, NotificationService, StorageClient } from '@abe-stack/shared';
+import type {
+  BillingService,
+  CacheProvider,
+  EmailService,
+  ErrorTracker,
+  NotificationService,
+  StorageClient,
+} from '@abe-stack/shared';
 import type { AppConfig } from '@abe-stack/shared/config';
 import type { AppContext, IServiceContainer } from '@shared';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
@@ -54,7 +61,10 @@ export class App implements IServiceContainer {
 
   private _server: FastifyInstance | null = null;
 
-  constructor(config: AppConfig, private readonly systemContext: SystemContext) {
+  constructor(
+    config: AppConfig,
+    private readonly systemContext: SystemContext,
+  ) {
     this.config = config;
 
     // Assign Services from SystemContext
@@ -148,12 +158,12 @@ export class App implements IServiceContainer {
   }
 
   get log(): FastifyBaseLogger {
-      if (this._server) return this._server.log;
-      return this.systemContext.log as unknown as FastifyBaseLogger;
+    if (this._server) return this._server.log;
+    return this.systemContext.log as unknown as FastifyBaseLogger;
   }
 
   countRegisteredRoutes(): number {
-     if (this._server === null) return 0;
+    if (this._server === null) return 0;
     const maybePrintRoutes = (this._server as { printRoutes?: () => unknown }).printRoutes;
     if (typeof maybePrintRoutes !== 'function') return 0;
 

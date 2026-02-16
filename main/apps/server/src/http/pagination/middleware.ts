@@ -75,7 +75,10 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
 
       const limit = parseLimitParam(getQueryParam(query, paramNames.limit || 'limit'), config);
       const sortBy = parseSortByParam(getQueryParam(query, paramNames.sortBy || 'sortBy'), config);
-      const sortOrder = parseSortOrderParam(getQueryParam(query, paramNames.sortOrder || 'sortOrder'), config);
+      const sortOrder = parseSortOrderParam(
+        getQueryParam(query, paramNames.sortOrder || 'sortOrder'),
+        config,
+      );
 
       const cursorOptions: CursorPaginationOptions = {
         limit,
@@ -90,7 +93,10 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
       const page = parsePageParam(pageParam);
       const limit = parseLimitParam(getQueryParam(query, paramNames.limit || 'limit'), config);
       const sortBy = parseSortByParam(getQueryParam(query, paramNames.sortBy || 'sortBy'), config);
-      const sortOrder = parseSortOrderParam(getQueryParam(query, paramNames.sortOrder || 'sortOrder'), config);
+      const sortOrder = parseSortOrderParam(
+        getQueryParam(query, paramNames.sortOrder || 'sortOrder'),
+        config,
+      );
 
       paginationContext.offset = {
         page,

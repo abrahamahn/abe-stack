@@ -3,8 +3,9 @@
 /** @vitest-environment jsdom */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import { Button } from '../elements/Button';
 import { MenuItem } from '../elements/MenuItem';
 
 import { Dropdown } from './Dropdown';
@@ -495,11 +496,11 @@ describe('Dropdown', () => {
 
       render(
         <div>
-          <button>Before</button>
+          <Button>Before</Button>
           <Dropdown trigger={<span>Menu</span>}>
             <MenuItem>Item</MenuItem>
           </Dropdown>
-          <button>After</button>
+          <Button>After</Button>
         </div>,
       );
 

@@ -1,10 +1,13 @@
 // main/client/ui/src/components/Accordion.test.tsx
 // client/ui/src/elements/__tests__/Accordion.test.tsx
 /** @vitest-environment jsdom */
-import { Accordion } from '@components/Accordion';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Button } from '../elements/Button';
+
+import { Accordion } from './Accordion';
 
 const items = [
   { id: 'one', title: 'Section One', content: 'Content One' },
@@ -287,9 +290,9 @@ describe('Accordion', () => {
 
       render(
         <div>
-          <button>Before</button>
+          <Button>Before</Button>
           <Accordion items={items} />
-          <button>After</button>
+          <Button>After</Button>
         </div>,
       );
 

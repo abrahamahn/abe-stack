@@ -10,21 +10,21 @@
  */
 
 import {
-    can,
-    ERROR_MESSAGES,
-    ForbiddenError,
-    HTTP_STATUS,
-    ROLE_LEVELS,
-    WORKSPACE_ID_HEADER,
+  can,
+  ERROR_MESSAGES,
+  ForbiddenError,
+  HTTP_STATUS,
+  ROLE_LEVELS,
+  WORKSPACE_ID_HEADER,
 } from '@abe-stack/shared';
 
 import type { Repositories } from '../../../../db/src';
 import type {
-    AuthContext,
-    PolicyAction,
-    PolicyResource,
-    TenantRole,
-    WorkspaceContext,
+  AuthContext,
+  PolicyAction,
+  PolicyResource,
+  TenantRole,
+  WorkspaceContext,
 } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -209,7 +209,7 @@ export function buildAuthContext(
     .user;
   const workspaceCtx = getRequestWorkspaceContext(request);
 
-  const appRole = (user?.role ?? 'user');
+  const appRole = user?.role ?? 'user';
   const tenantRole: TenantRole | undefined =
     workspaceCtx?.role !== undefined ? (workspaceCtx.role as TenantRole) : undefined;
   const ownerFlag = isOwner !== undefined ? isOwner(request) : undefined;

@@ -1,5 +1,5 @@
 // main/apps/web/src/features/home/data/docsMeta.test.ts
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { docCategories, docsMeta, loadDocContent } from './docsMeta';
 

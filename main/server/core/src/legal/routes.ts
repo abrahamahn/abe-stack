@@ -12,12 +12,7 @@
 
 import { createLegalDocumentSchema } from '@abe-stack/shared';
 
-import {
-    createRouteMap,
-    protectedRoute,
-    publicRoute,
-    type RouteMap,
-} from '../../../engine/src';
+import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../../../engine/src';
 
 import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } from './handlers';
 

@@ -12,10 +12,10 @@
  */
 
 import {
-    ForbiddenError,
-    HTTP_STATUS,
-    UnauthorizedError,
-    extractBearerToken,
+  ForbiddenError,
+  HTTP_STATUS,
+  UnauthorizedError,
+  extractBearerToken,
 } from '@abe-stack/shared';
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
@@ -204,9 +204,9 @@ export function createAuthGuard(
   const repos = hasRepos ? reposOrFirstRole : undefined;
   const allowedRoles = hasRepos
     ? allowedRolesOrRest
-    : (reposOrFirstRole === undefined
-        ? allowedRolesOrRest
-        : [reposOrFirstRole, ...allowedRolesOrRest]);
+    : reposOrFirstRole === undefined
+      ? allowedRolesOrRest
+      : [reposOrFirstRole, ...allowedRolesOrRest];
 
   if (allowedRoles.length === 0) {
     return createRequireAuth(secret, repos);

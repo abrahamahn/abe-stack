@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider, useTheme } from '@theme/provider';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
+import { Button } from '../elements/Button';
+
 import type { ReactElement } from 'react';
 
 // Helper component to access theme context
@@ -16,33 +18,33 @@ const ThemeConsumer = (): ReactElement => {
       <span data-testid="resolved">{resolvedTheme}</span>
       <span data-testid="isDark">{isDark.toString()}</span>
       <span data-testid="isLight">{isLight.toString()}</span>
-      <button data-testid="cycle" onClick={cycleMode}>
+      <Button data-testid="cycle" onClick={cycleMode}>
         Cycle
-      </button>
-      <button
+      </Button>
+      <Button
         data-testid="set-dark"
         onClick={() => {
           setMode('dark');
         }}
       >
         Dark
-      </button>
-      <button
+      </Button>
+      <Button
         data-testid="set-light"
         onClick={() => {
           setMode('light');
         }}
       >
         Light
-      </button>
-      <button
+      </Button>
+      <Button
         data-testid="set-system"
         onClick={() => {
           setMode('system');
         }}
       >
         System
-      </button>
+      </Button>
     </div>
   );
 };

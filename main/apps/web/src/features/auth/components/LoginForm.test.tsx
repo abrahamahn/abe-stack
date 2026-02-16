@@ -1,7 +1,7 @@
 // main/apps/web/src/features/auth/components/LoginForm.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Mock API hooks before imports
 vi.mock('@abe-stack/api', async () => {

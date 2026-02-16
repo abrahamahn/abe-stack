@@ -2,13 +2,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    createWebhook,
-    deleteWebhook,
-    generateWebhookSecret,
-    getWebhook,
-    listWebhooks,
-    rotateWebhookSecret,
-    updateWebhook,
+  createWebhook,
+  deleteWebhook,
+  generateWebhookSecret,
+  getWebhook,
+  listWebhooks,
+  rotateWebhookSecret,
+  updateWebhook,
 } from './service';
 
 import type { Repositories } from '../../../db/src';

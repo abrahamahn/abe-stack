@@ -1,6 +1,8 @@
 // main/client/ui/src/components/Accordion.tsx
 import { useControllableState } from '@hooks/useControllableState';
 
+import { Button } from '../elements/Button';
+
 import type { ReactElement, ReactNode } from 'react';
 
 import '../styles/components.css';
@@ -59,8 +61,7 @@ export const Accordion = ({
         return (
           <div className="accordion-item" key={domId}>
             <h3 className="accordion-heading">
-              <button
-                type="button"
+              <Button
                 id={headerId}
                 className="accordion-header"
                 aria-expanded={isOpen}
@@ -71,7 +72,7 @@ export const Accordion = ({
               >
                 <span>{item.title}</span>
                 <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
-              </button>
+              </Button>
             </h3>
             {isOpen ? (
               <div

@@ -10,14 +10,14 @@
  */
 
 import {
-    emailVerificationRequestSchema,
-    emptyBodySchema,
-    forgotPasswordRequestSchema,
-    loginRequestSchema,
-    registerRequestSchema,
-    resendVerificationRequestSchema,
-    resetPasswordRequestSchema,
-    type UserId,
+  emailVerificationRequestSchema,
+  emptyBodySchema,
+  forgotPasswordRequestSchema,
+  loginRequestSchema,
+  registerRequestSchema,
+  resendVerificationRequestSchema,
+  resetPasswordRequestSchema,
+  type UserId,
 } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

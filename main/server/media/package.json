@@ -33,12 +33,11 @@
   ],
   "author": "",
   "license": "ISC",
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/abrahamahn/abe-stack.git",
-      "directory": "main/server/media"
-    }
-  ,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "main/server/media"
+  },
   "bugs": {
     "url": "https://github.com/abrahamahn/abe-stack/issues"
   },

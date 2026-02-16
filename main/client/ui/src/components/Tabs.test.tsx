@@ -2,7 +2,9 @@
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Button } from '../elements/Button';
 
 import { Tabs } from './Tabs';
 
@@ -129,13 +131,13 @@ describe('Tabs', () => {
         const [value, setValue] = useState('a');
         return (
           <>
-            <button
+            <Button
               onClick={() => {
                 setValue('b');
               }}
             >
               Set B
-            </button>
+            </Button>
             <Tabs items={items} value={value} onChange={setValue} />
           </>
         );

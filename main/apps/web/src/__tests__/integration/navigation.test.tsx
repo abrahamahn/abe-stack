@@ -17,7 +17,7 @@ import { Outlet, useNavigate } from '@abe-stack/react/router';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { App } from '../../app/App';
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';

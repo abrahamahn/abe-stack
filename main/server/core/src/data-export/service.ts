@@ -12,8 +12,8 @@ import { ConflictError, NotFoundError } from '@abe-stack/shared';
 
 import type { DataExportRepositories, UserDataExport } from './types';
 import type {
-    DataExportRequestRepository,
-    DataExportRequest as DbDataExportRequest,
+  DataExportRequestRepository,
+  DataExportRequest as DbDataExportRequest,
 } from '../../../db/src';
 
 // ============================================================================

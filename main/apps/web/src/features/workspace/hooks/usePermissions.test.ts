@@ -1,6 +1,6 @@
 // main/apps/web/src/features/workspace/hooks/usePermissions.test.ts
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { usePermissions } from './usePermissions';
 

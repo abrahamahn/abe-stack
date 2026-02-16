@@ -6,8 +6,9 @@
  */
 
 import { QueryCacheProvider } from '@abe-stack/react';
+import { Button } from '@abe-stack/ui';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { MediaGallery } from './MediaGallery';
 
@@ -32,14 +33,13 @@ vi.mock('../hooks/useMedia', () => ({
 vi.mock('./MediaUpload', () => ({
   MediaUpload: ({ onUploadComplete }: { onUploadComplete?: (id: string) => void }) => (
     <div data-testid="media-upload">
-      <button
-        type="button"
+      <Button
         onClick={() => {
           onUploadComplete?.('uploaded-file-id');
         }}
       >
         Upload File
-      </button>
+      </Button>
     </div>
   ),
 }));

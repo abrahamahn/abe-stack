@@ -2,11 +2,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    acceptInvitation,
-    createInvitation,
-    listInvitations,
-    resendInvitation,
-    revokeInvitation,
+  acceptInvitation,
+  createInvitation,
+  listInvitations,
+  resendInvitation,
+  revokeInvitation,
 } from './invitation-service';
 
 import type { Repositories } from '../../../db/src';

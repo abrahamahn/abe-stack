@@ -14,7 +14,7 @@ import { canonicalizeEmail } from '@abe-stack/shared';
  */
 export async function seedTestUser(
   connectionString: string,
-  overrides: { email: string; password?: string; role?: string }
+  overrides: { email: string; password?: string; role?: string },
 ): Promise<void> {
   const db = createDbClient(connectionString);
   const { email, password = 'TestPassword123!', role = 'user' } = overrides;

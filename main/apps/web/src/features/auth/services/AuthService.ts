@@ -182,7 +182,6 @@ export class AuthService {
     if (currentToken !== null) {
       this.startRefreshInterval();
     }
-
   }
 
   /**

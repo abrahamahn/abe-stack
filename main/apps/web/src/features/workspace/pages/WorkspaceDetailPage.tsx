@@ -6,14 +6,7 @@
  */
 
 import { useNavigate, useParams, useSearchParams } from '@abe-stack/react/router';
-import {
-  Button,
-  Card,
-  Heading,
-  Skeleton,
-  Tabs,
-  Text,
-} from '@abe-stack/ui';
+import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 import { useMemo, useState, type ReactElement } from 'react';
 

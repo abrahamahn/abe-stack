@@ -1,45 +1,18 @@
 // main/shared/src/index.ts
 
-export type * from './core/api';
-
 // ============================================================================
 // CORE EXPORTS (Errors, constants, guards, result, policy, etc.)
 // ============================================================================
 
-export {
-  type ApiResponse,
-  type ApiResult,
-  type Contract,
-  type EndpointContract,
-  type ErrorResponse,
-  type InferResponseData,
-  type StatusCode,
-} from './core/api';
-
-export {
-  ACCESS_TOKEN_COOKIE_NAME,
-  API_PREFIX,
-  AUTH_EXPIRY,
-  CSRF_COOKIE_NAME,
-  CSRF_TOKEN_HEADER,
-  DEFAULT_PAGINATION,
-  ERROR_CODES,
-  ERROR_MESSAGES,
-  HTTP_BODY_LIMIT,
-  HTTP_STATUS,
-  LIMITS,
-  LOGIN_FAILURE_REASON,
-  QUOTAS,
-  REFRESH_TOKEN_COOKIE_NAME,
-  RETENTION_PERIODS,
-  SMS_LIMITS,
-  SUDO_TOKEN_HEADER,
-  WEBSOCKET_PATH,
-  WS_CLOSE_POLICY_VIOLATION,
-  type ErrorCode,
-  type HttpStatusCode,
-  type LoginFailureReason,
-} from './core/constants';
+export type {
+  ApiResponse,
+  ApiResult,
+  Contract,
+  EndpointContract,
+  ErrorResponse,
+  InferResponseData,
+  StatusCode,
+} from './api/api';
 
 export {
   AppError,
@@ -50,14 +23,19 @@ export {
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
   ForbiddenError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
   InternalError,
   InternalServerError,
   InvalidCredentialsError,
   InvalidTokenError,
+  isAppError,
   NotFoundError,
   OAuthError,
   OAuthStateMismatchError,
   ResourceNotFoundError,
+  toAppError,
   TokenReuseError,
   TooManyRequestsError,
   TotpInvalidError,
@@ -67,36 +45,23 @@ export {
   UserNotFoundError,
   ValidationError,
   WeakPasswordError,
-  formatValidationErrors,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  isAppError,
-  toAppError,
   type AppErrorInfo,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
-  type ValidationIssue,
+  type ValidationIssue
 } from './core/errors';
+export * from './primitives/constants';
 
 export {
   isErrorResponse,
   isSuccessResponse,
   type ApiErrorResponse,
-  type ApiSuccessResponse,
+  type ApiSuccessResponse
 } from './core/response';
 
-export {
-  assert,
-  assertDefined,
-  assertNever,
-  isAuthenticatedRequest,
-  isNonEmptyString,
-  isNumber,
-  isObjectLike,
-  isPlainObject,
-  isSafeObjectKey,
-  isString,
-} from './core/guard';
+export * from './core/ids';
+export * from './primitives/guards';
+export * from './primitives/schema';
 
 export { err, isErr, isOk, ok, type Result } from './core/result';
 
@@ -105,7 +70,7 @@ export {
   hasPermission,
   type AuthContext,
   type PolicyAction,
-  type PolicyResource,
+  type PolicyResource
 } from './core/policy';
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './core/env';
@@ -131,14 +96,10 @@ export {
   type SendResult,
   type StorageClient,
   type StorageConfig,
-  type StorageProvider,
+  type StorageProvider
 } from './core/ports';
 
-export {
-  type BreadcrumbData,
-  type ErrorTracker,
-  type HasErrorTracker,
-} from './core/observability';
+export { type BreadcrumbData, type ErrorTracker, type HasErrorTracker } from './core/observability';
 
 export {
   apiResultSchema,
@@ -149,7 +110,7 @@ export {
   isoDateTimeSchema,
   passwordSchema,
   successResponseSchema,
-  type EmptyBody,
+  type EmptyBody
 } from './core/schemas';
 
 export type { ModuleDeps, ModuleRegistrationOptions } from './core/module-registration';
@@ -169,14 +130,14 @@ export {
   type ListRemoveOperation,
   type Operation,
   type SetOperation,
-  type Transaction,
+  type Transaction
 } from './core/transactions';
 
 // ============================================================================
 // API ROUTER EXPORTS
 // ============================================================================
 
-export { apiRouter, type ApiDomain, type ApiRouter } from './api';
+export { apiRouter, type ApiRouter } from './api';
 
 // ============================================================================
 // DOMAIN EXPORTS
@@ -184,16 +145,13 @@ export { apiRouter, type ApiDomain, type ApiRouter } from './api';
 
 // Audit log
 export {
-  getAuditActionTone,
-  getAuditSeverityTone,
-  AUDIT_ACTION_REGEX,
-  AUDIT_CATEGORIES,
-  AUDIT_SEVERITIES,
   auditEventSchema,
   auditLogFilterSchema,
   auditLogListResponseSchema,
   buildAuditEvent,
   createAuditEventSchema,
+  getAuditActionTone,
+  getAuditSeverityTone,
   sanitizeMetadata,
   type AuditBuilderParams,
   type AuditCategory,
@@ -201,33 +159,31 @@ export {
   type AuditLogFilter,
   type AuditLogListResponse,
   type AuditSeverity,
-  type CreateAuditEvent,
-} from './domain/audit-log';
+  type CreateAuditEvent
+} from './engine/audit-log';
 
 // Auth
 export {
+  acceptTosRequestSchema,
+  acceptTosResponseSchema,
+  AccountLockedError,
   AUTH_ERROR_MESSAGES,
   AUTH_SUCCESS_MESSAGES,
-  AccountLockedError,
-  COMMON_PASSWORDS,
-  EmailSendError,
-  HTTP_ERROR_MESSAGES,
-  KEYBOARD_PATTERNS,
   authContract,
   authResponseSchema,
   bffLoginResponseSchema,
   calculateEntropy,
   calculateScore,
-  containsUserInput,
   changeEmailRequestSchema,
   changeEmailResponseSchema,
+  COMMON_PASSWORDS,
   confirmEmailChangeRequestSchema,
   confirmEmailChangeResponseSchema,
-  acceptTosRequestSchema,
-  acceptTosResponseSchema,
-  revertEmailChangeRequestSchema,
-  revertEmailChangeResponseSchema,
+  containsUserInput,
   defaultPasswordConfig,
+  deviceItemSchema,
+  deviceListResponseSchema,
+  EmailSendError,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
   estimateCrackTime,
@@ -241,8 +197,11 @@ export {
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
+  HTTP_ERROR_MESSAGES,
+  invalidateSessionsResponseSchema,
   isCommonPassword,
   isKnownAuthError,
+  KEYBOARD_PATTERNS,
   loginRequestSchema,
   logoutResponseSchema,
   magicLinkRequestResponseSchema,
@@ -253,39 +212,39 @@ export {
   refreshResponseSchema,
   registerRequestSchema,
   registerResponseSchema,
+  removePhoneResponseSchema,
+  renamePasskeyRequestSchema,
   resendVerificationRequestSchema,
   resendVerificationResponseSchema,
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
+  revertEmailChangeRequestSchema,
+  revertEmailChangeResponseSchema,
   setPasswordRequestSchema,
   setPasswordResponseSchema,
+  setPhoneRequestSchema,
+  setPhoneResponseSchema,
+  smsChallengeRequestSchema,
+  smsVerifyRequestSchema,
   sudoRequestSchema,
   sudoResponseSchema,
+  tosStatusResponseSchema,
   totpLoginChallengeResponseSchema,
   totpLoginVerifyRequestSchema,
   totpSetupResponseSchema,
   totpStatusResponseSchema,
   totpVerifyRequestSchema,
-  tosStatusResponseSchema,
   totpVerifyResponseSchema,
-  deviceItemSchema,
-  deviceListResponseSchema,
   trustDeviceResponseSchema,
-  invalidateSessionsResponseSchema,
-  webauthnOptionsResponseSchema,
-  webauthnRegisterVerifyResponseSchema,
-  setPhoneRequestSchema,
-  setPhoneResponseSchema,
-  verifyPhoneRequestSchema,
-  verifyPhoneResponseSchema,
-  removePhoneResponseSchema,
-  smsChallengeRequestSchema,
-  smsVerifyRequestSchema,
-  webauthnRegisterVerifyRequestSchema,
-  webauthnLoginOptionsRequestSchema,
-  webauthnLoginVerifyRequestSchema,
   validatePassword,
   validatePasswordBasic,
+  verifyPhoneRequestSchema,
+  verifyPhoneResponseSchema,
+  webauthnLoginOptionsRequestSchema,
+  webauthnLoginVerifyRequestSchema,
+  webauthnOptionsResponseSchema,
+  webauthnRegisterVerifyRequestSchema,
+  webauthnRegisterVerifyResponseSchema,
   type AcceptTosRequest,
   type AcceptTosResponse,
   type AuthResponse,
@@ -294,8 +253,8 @@ export {
   type ChangeEmailResponse,
   type ConfirmEmailChangeRequest,
   type ConfirmEmailChangeResponse,
-  type RevertEmailChangeRequest,
-  type RevertEmailChangeResponse,
+  type DeviceItem,
+  type DeviceListResponse,
   type EmailVerificationRequest,
   type EmailVerificationResponse,
   type ErrorMapperLogger,
@@ -304,6 +263,7 @@ export {
   type ForgotPasswordRequest,
   type ForgotPasswordResponse,
   type HttpErrorResponse,
+  type InvalidateSessionsResponse,
   type LoginRequest,
   type LoginSuccessResponse,
   type LogoutResponse,
@@ -311,89 +271,72 @@ export {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
   type MagicLinkVerifyResponse,
+  type PasskeyListItem,
   type PasswordConfig,
   type PasswordPenalties,
   type PasswordValidationResult,
   type RefreshResponse,
   type RegisterRequest,
   type RegisterResponse,
+  type RemovePhoneResponse,
+  type RenamePasskeyRequest,
   type ResendVerificationRequest,
   type ResendVerificationResponse,
   type ResetPasswordRequest,
   type ResetPasswordResponse,
+  type RevertEmailChangeRequest,
+  type RevertEmailChangeResponse,
   type SetPasswordRequest,
   type SetPasswordResponse,
+  type SetPhoneRequest,
+  type SetPhoneResponse,
+  type SmsChallengeRequest,
+  type SmsChallengeResponse,
+  type SmsLoginChallengeResponse,
+  type SmsVerifyRequest,
   type StrengthResult,
   type SudoRequest,
   type SudoResponse,
-  type SmsLoginChallengeResponse,
+  type TosStatusResponse,
   type TotpLoginChallengeResponse,
   type TotpLoginVerifyRequest,
   type TotpSetupResponse,
   type TotpStatusResponse,
   type TotpVerifyRequest,
-  type TosStatusResponse,
   type TotpVerifyResponse,
-  type DeviceItem,
-  type DeviceListResponse,
   type TrustDeviceResponse,
-  type InvalidateSessionsResponse,
-  type WebauthnOptionsResponse,
-  type WebauthnRegisterVerifyResponse,
-  type SetPhoneRequest,
-  type SetPhoneResponse,
   type VerifyPhoneRequest,
   type VerifyPhoneResponse,
-  type RemovePhoneResponse,
-  type SmsChallengeRequest,
-  type SmsChallengeResponse,
-  type PasskeyListItem,
-  type RenamePasskeyRequest,
-  type WebauthnRegisterVerifyRequest,
   type WebauthnLoginOptionsRequest,
   type WebauthnLoginVerifyRequest,
-  renamePasskeyRequestSchema,
-  type SmsVerifyRequest,
-} from './domain/auth';
+  type WebauthnOptionsResponse,
+  type WebauthnRegisterVerifyRequest,
+  type WebauthnRegisterVerifyResponse
+} from './engine/auth';
 
 // Billing
 export {
-  BILLING_EVENT_TYPES,
-  BILLING_PROVIDERS,
-  BillingProviderError,
-  BillingProviderNotConfiguredError,
-  BillingSubscriptionExistsError,
-  BillingSubscriptionNotFoundError,
-  CannotDeactivatePlanWithActiveSubscriptionsError,
-  CannotDowngradeInTrialError,
-  CannotRemoveDefaultPaymentMethodError,
-  CheckoutSessionError,
-  CustomerNotFoundError,
-  FEATURE_KEYS,
-  INVOICE_STATUSES,
-  InvoiceNotFoundError,
-  PAYMENT_METHOD_TYPES,
-  PLAN_FEES,
-  PLAN_INTERVALS,
-  PaymentMethodNotFoundError,
-  PaymentMethodValidationError,
-  PlanHasActiveSubscriptionsError,
-  PlanNotActiveError,
-  PlanNotFoundError,
-  SUBSCRIPTION_STATUSES,
-  SubscriptionAlreadyCanceledError,
-  SubscriptionNotActiveError,
-  SubscriptionNotCancelingError,
-  WebhookEventAlreadyProcessedError,
-  WebhookSignatureError,
   addPaymentMethodRequestSchema,
   adminBillingStatsSchema,
   adminPlanResponseSchema,
   adminPlanSchema,
   adminPlansListResponseSchema,
   billingContract,
+  BillingProviderError,
+  BillingProviderNotConfiguredError,
+  BillingSubscriptionExistsError,
+  BillingSubscriptionNotFoundError,
   calculateProration,
   cancelSubscriptionRequestSchema,
+  CannotDeactivatePlanWithActiveSubscriptionsError,
+  CannotDowngradeInTrialError,
+  CannotRemoveDefaultPaymentMethodError,
+  cardDetailsSchema,
+  checkoutRequestSchema,
+  checkoutResponseSchema,
+  CheckoutSessionError,
+  createPlanRequestSchema,
+  CustomerNotFoundError,
   formatPlanInterval,
   formatPrice,
   formatPriceWithInterval,
@@ -404,35 +347,42 @@ export {
   getPaymentMethodLabel,
   getSubscriptionStatusLabel,
   getSubscriptionStatusVariant,
-  cardDetailsSchema,
-  checkoutRequestSchema,
-  checkoutResponseSchema,
-  createPlanRequestSchema,
+  InvoiceNotFoundError,
   invoiceSchema,
   invoicesListResponseSchema,
   isBillingProviderError,
   isPlanError,
   isSubscriptionError,
+  PaymentMethodNotFoundError,
   paymentMethodResponseSchema,
   paymentMethodSchema,
   paymentMethodsListResponseSchema,
+  PaymentMethodValidationError,
   planFeatureSchema,
+  PlanHasActiveSubscriptionsError,
+  PlanNotActiveError,
+  PlanNotFoundError,
   planSchema,
   plansListResponseSchema,
   setupIntentResponseSchema,
   subscriptionActionResponseSchema,
+  SubscriptionAlreadyCanceledError,
+  SubscriptionNotActiveError,
+  SubscriptionNotCancelingError,
   subscriptionResponseSchema,
   subscriptionSchema,
   syncStripeResponseSchema,
   updatePlanRequestSchema,
   updateSubscriptionRequestSchema,
+  WebhookEventAlreadyProcessedError,
+  WebhookSignatureError,
   type AddPaymentMethodRequest,
   type AdminBillingStats,
   type AdminPlan,
   type AdminPlanResponse,
   type AdminPlansListResponse,
-  type BillingProvider,
   type BillingEventType,
+  type BillingProvider,
   type BillingStats,
   type CancelSubscriptionRequest,
   type CardDetails,
@@ -442,35 +392,32 @@ export {
   type FeatureKey,
   type Invoice,
   type InvoiceResponse,
-  type InvoiceStatus,
   type InvoicesListResponse,
+  type InvoiceStatus,
   type PaymentMethod,
   type PaymentMethodResponse,
-  type PaymentMethodType,
   type PaymentMethodsListResponse,
+  type PaymentMethodType,
   type Plan,
   type PlanFeature,
-  type PlanInterval,
   type PlanId,
+  type PlanInterval,
   type PlansListResponse,
   type SetupIntentResponse,
-  type Subscription,
   type StatusVariant,
+  type Subscription,
   type SubscriptionActionResponse,
   type SubscriptionId,
   type SubscriptionResponse,
   type SubscriptionStatus,
   type SyncStripeResponse,
   type UpdatePlanRequest,
-  type UpdateSubscriptionRequest,
-} from './domain/billing';
+  type UpdateSubscriptionRequest
+} from './engine/billing';
 
 // Compliance
 export {
-  CONSENT_TYPES,
-  DATA_EXPORT_STATUSES,
-  DATA_EXPORT_TYPES,
-  DOCUMENT_TYPES,
+  // Compliance
   consentLogSchema,
   createConsentLogSchema,
   createDataExportRequestSchema,
@@ -497,30 +444,25 @@ export {
   type LegalDocument,
   type UpdateConsentPreferencesRequest,
   type UpdateLegalDocument,
-  type UserAgreement,
-} from './domain/compliance';
+  type UserAgreement
+} from './core/compliance';
 
 // Email
 export {
-  EMAIL_PROVIDERS,
-  EMAIL_STATUSES,
   type EmailProvider,
-  type EmailStatus,
-} from './domain/email';
+  type EmailStatus
+} from './engine/email';
 
 // Files
 export {
-  FILE_PURPOSES,
-  STORAGE_PROVIDERS,
-  fileUploadRequestSchema,
   type FilePurpose,
-  type FileUploadRequest,
-} from './domain/files';
+  type FileUploadRequest
+} from './engine/files';
 
 // Feature flags
 export {
-  evaluateFlag,
   createFeatureFlagRequestSchema,
+  evaluateFlag,
   featureFlagSchema,
   setTenantFeatureOverrideRequestSchema,
   tenantFeatureOverrideSchema,
@@ -529,19 +471,16 @@ export {
   type FeatureFlag,
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
-  type UpdateFeatureFlagRequest,
-} from './domain/feature-flags';
+  type UpdateFeatureFlagRequest
+} from './engine/feature-flags';
 
 // Jobs
 export {
-  getJobStatusLabel,
-  getJobStatusTone,
-  JOB_PRIORITIES,
-  JOB_PRIORITY_VALUES,
-  JOB_STATUSES,
   calculateBackoff,
   canRetry,
   createJobSchema,
+  getJobStatusLabel,
+  getJobStatusTone,
   isTerminalStatus,
   jobSchema,
   shouldProcess,
@@ -550,15 +489,11 @@ export {
   type DomainJob,
   type JobPriority,
   type JobStatus,
-  type UpdateJob,
-} from './domain/jobs';
+  type UpdateJob
+} from './engine/jobs';
 
 // Membership
 export {
-  getInvitationStatusTone,
-  getTenantRoleTone,
-  INVITATION_STATUSES,
-  ROLE_LEVELS,
   acceptInvitationSchema,
   addMemberSchema,
   canAcceptInvite,
@@ -568,13 +503,16 @@ export {
   canRemoveMember,
   canRevokeInvite,
   createInvitationSchema,
+  getInvitationStatusTone,
   getNextOwnerCandidate,
   getRoleLevel,
+  getTenantRoleTone,
   hasAtLeastRole,
   invitationSchema,
   isInviteExpired,
   isSoleOwner,
   membershipSchema,
+  ROLE_LEVELS,
   updateMembershipRoleSchema,
   type AcceptInvitation,
   type AddMember,
@@ -582,70 +520,70 @@ export {
   type Invitation,
   type InvitationStatus,
   type Membership,
-  type UpdateMembershipRole,
-} from './domain/membership';
+  type UpdateMembershipRole
+} from './core/membership';
 
 // Notifications
 export {
-  notificationsContract,
-  getNotificationLevelTone,
+  baseMarkAsReadRequestSchema,
   DEFAULT_NOTIFICATION_PREFERENCES,
+  deleteNotificationResponseSchema,
+  getNotificationLevelTone,
   InvalidPreferencesError,
   InvalidSubscriptionError,
+  markReadResponseSchema,
   NOTIFICATION_LEVELS,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
   NOTIFICATION_TYPES,
+  notificationDeleteRequestSchema,
+  notificationPreferencesSchema,
   NotificationRateLimitError,
-  NotificationSendError,
+  notificationSchema,
+  notificationsContract,
   NotificationsDisabledError,
+  NotificationSendError,
+  notificationsListRequestSchema,
+  notificationsListResponseSchema,
   PayloadTooLargeError,
   PreferencesNotFoundError,
+  preferencesResponseSchema,
   ProviderError,
   ProviderNotConfiguredError,
   PushProviderNotConfiguredError,
   PushSubscriptionExistsError,
   PushSubscriptionNotFoundError,
   QuietHoursActiveError,
-  SubscriptionExistsError,
-  SubscriptionExpiredError,
-  SubscriptionNotFoundError,
-  VapidNotConfiguredError,
-  baseMarkAsReadRequestSchema,
-  deleteNotificationResponseSchema,
-  markReadResponseSchema,
-  notificationDeleteRequestSchema,
-  notificationPreferencesSchema,
-  notificationSchema,
-  notificationsListRequestSchema,
-  notificationsListResponseSchema,
   sendNotificationRequestSchema,
   sendNotificationResponseSchema,
-  preferencesResponseSchema,
   shouldSendNotification,
   subscribeRequestSchema,
   subscribeResponseSchema,
+  SubscriptionExistsError,
+  SubscriptionExpiredError,
+  SubscriptionNotFoundError,
   unsubscribeRequestSchema,
   unsubscribeResponseSchema,
   updatePreferencesRequestSchema,
   vapidKeyResponseSchema,
+  VapidNotConfiguredError,
   type BaseMarkAsReadRequest,
+  type BatchSendResult,
   type DeleteNotificationResponse,
   type MarkReadResponse,
-  type NotificationDeleteRequest,
-  type BatchSendResult,
   type Notification,
   type NotificationAction,
-  type NotificationLevel,
   type NotificationChannel,
+  type NotificationDeleteRequest,
+  type NotificationLevel,
   type NotificationMessage,
   type NotificationPayload,
   type NotificationPreferences,
   type NotificationPreferencesConfig,
   type NotificationPriority,
-  type NotificationType,
-  type NotificationTypePreference,
   type NotificationsListRequest,
   type NotificationsListResponse,
+  type NotificationType,
+  type NotificationTypePreference,
   type PreferencesResponse,
   type PushSendResult,
   type PushSubscription,
@@ -658,8 +596,8 @@ export {
   type UnsubscribeRequest,
   type UnsubscribeResponse,
   type UpdatePreferencesRequest,
-  type VapidKeyResponse,
-} from './domain/notifications';
+  type VapidKeyResponse
+} from './core/notifications';
 
 // Sessions
 export {
@@ -671,8 +609,8 @@ export {
   userSessionSchema,
   type CreateUserSession,
   type UpdateUserSession,
-  type UserSession,
-} from './domain/sessions';
+  type UserSession
+} from './core/sessions';
 
 // Tenant
 export {
@@ -694,8 +632,8 @@ export {
   type Tenant,
   type TransferOwnershipInput,
   type UpdateTenantInput,
-  type WorkspaceContext,
-} from './domain/tenant';
+  type WorkspaceContext
+} from './core/tenant';
 
 // Usage metering
 export {
@@ -706,29 +644,41 @@ export {
   usageSnapshotSchema,
   type AggregationType,
   type UsageMetric,
-  type UsageSnapshot,
-} from './domain/usage-metering';
+  type UsageSnapshot
+} from './engine/usage-metering';
 
 // Users
 export {
+  ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
   APP_ROLES,
   appRoleSchema,
   avatarDeleteResponseSchema,
   avatarUploadRequestSchema,
   avatarUploadResponseSchema,
+  calculateDeletionGracePeriodEnd,
+  canDeactivate,
+  canReactivate,
+  canRequestDeletion,
   canUser,
   changePasswordRequestSchema,
   changePasswordResponseSchema,
+  deactivateAccountRequestSchema,
+  deleteAccountRequestSchema,
+  getAccountStatus,
   getAllRoles,
   getNextUsernameChangeDate,
   getRoleDisplayName,
   hasRole,
+  isAccountActive,
+  isAccountDeactivated,
+  isAccountPendingDeletion,
   isAdmin,
   isModerator,
   isOwner,
   isRegularUser,
   isUser,
   isUsernameChangeCooldownActive,
+  isWithinDeletionGracePeriod,
   profileCompletenessResponseSchema,
   RESERVED_USERNAMES,
   revokeAllSessionsResponseSchema,
@@ -737,33 +687,21 @@ export {
   sessionsListResponseSchema,
   updateProfileRequestSchema,
   updateUsernameRequestSchema,
-  USERNAME_CHANGE_COOLDOWN_DAYS,
   userIdSchema,
+  USERNAME_CHANGE_COOLDOWN_DAYS,
   userSchema,
   usersContract,
-  ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
-  calculateDeletionGracePeriodEnd,
-  canDeactivate,
-  canReactivate,
-  canRequestDeletion,
-  deactivateAccountRequestSchema,
-  deleteAccountRequestSchema,
-  getAccountStatus,
-  isAccountActive,
-  isAccountDeactivated,
-  isAccountPendingDeletion,
-  isWithinDeletionGracePeriod,
   type AccountLifecycleFields,
   type AccountLifecycleResponse,
   type AccountStatus,
-  type DeactivateAccountRequest,
-  type DeleteAccountRequest,
   type AppRole,
   type AvatarDeleteResponse,
   type AvatarUploadRequest,
   type AvatarUploadResponse,
   type ChangePasswordRequest,
   type ChangePasswordResponse,
+  type DeactivateAccountRequest,
+  type DeleteAccountRequest,
   type ProfileCompletenessResponse,
   type RevokeAllSessionsResponse,
   type RevokeSessionResponse,
@@ -773,14 +711,14 @@ export {
   type UpdateUsernameRequest,
   type UpdateUsernameResponse,
   type User,
-  type UserId,
-} from './domain/users';
+  type UserId
+} from './engine/users';
 
 // Webhooks
 export {
-  apiKeysContract,
   apiKeyItemSchema,
   apiKeySchema,
+  apiKeysContract,
   createApiKeyRequestSchema,
   createApiKeyResponseSchema,
   createApiKeySchema,
@@ -796,24 +734,21 @@ export {
   type DeleteApiKeyResponse,
   type ListApiKeysResponse,
   type RevokeApiKeyResponse,
-  type UpdateApiKey,
-} from './domain/api-keys';
+  type UpdateApiKey
+} from './engine/api-keys';
 
 // Webhooks
 export {
-  webhooksContract,
-  MAX_DELIVERY_ATTEMPTS,
-  RETRY_DELAYS_MINUTES,
-  SUBSCRIBABLE_EVENT_TYPES,
-  WEBHOOK_DELIVERY_STATUSES,
-  WEBHOOK_EVENT_TYPES,
   calculateRetryDelay,
   createWebhookDeliverySchema,
   createWebhookSchema,
   isDeliveryTerminal,
   matchesEventFilter,
-  shouldRetryDelivery,
+  MAX_DELIVERY_ATTEMPTS,
+  RETRY_DELAYS_MINUTES,
   rotateSecretResponseSchema,
+  shouldRetryDelivery,
+  SUBSCRIBABLE_EVENT_TYPES,
   updateWebhookDeliverySchema,
   updateWebhookSchema,
   webhookDeleteResponseSchema,
@@ -824,6 +759,7 @@ export {
   webhookMutationResponseSchema,
   webhookResponseSchema,
   webhookSchema,
+  webhooksContract,
   webhookWithDeliveriesSchema,
   type CreateWebhook,
   type CreateWebhookDelivery,
@@ -832,16 +768,16 @@ export {
   type UpdateWebhookDelivery,
   type Webhook,
   type WebhookDeleteResponse,
-  type WebhookDeliveryItem,
   type WebhookDelivery,
+  type WebhookDeliveryItem,
   type WebhookDeliveryStatus,
   type WebhookEventType,
   type WebhookItem,
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
-  type WebhookWithDeliveries,
-} from './domain/webhooks';
+  type WebhookWithDeliveries
+} from './engine/webhooks';
 
 // ============================================================================
 // ADDITIONAL DOMAIN EXPORTS (formerly in contracts/)
@@ -849,13 +785,6 @@ export {
 
 // Admin (additional exports)
 export {
-  formatSecurityEventType,
-  getAppRoleLabel,
-  getAppRoleTone,
-  getSecuritySeverityTone,
-  getUserStatusLabel,
-  getUserStatusTone,
-  USER_STATUSES,
   adminActionResponseSchema,
   adminHardBanRequestSchema,
   adminHardBanResponseSchema,
@@ -867,8 +796,15 @@ export {
   adminUserListFiltersSchema,
   adminUserListResponseSchema,
   adminUserSchema,
+  formatSecurityEventType,
+  getAppRoleLabel,
+  getAppRoleTone,
+  getSecuritySeverityTone,
+  getUserStatusLabel,
+  getUserStatusTone,
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
+  USER_STATUSES,
   userStatusSchema,
   type AdminActionResponse,
   type AdminHardBanRequest,
@@ -883,8 +819,8 @@ export {
   type AdminUserListResponse,
   type UnlockAccountRequest,
   type UnlockAccountResponse,
-  type UserStatus,
-} from './domain/admin';
+  type UserStatus
+} from './engine/admin';
 
 // Context (from core)
 export {
@@ -898,7 +834,7 @@ export {
   type HasNotifications,
   type HasPubSub,
   type HasStorage,
-  type ReplyContext,
+  type ReplyContext
 } from './core/context';
 
 // Jobs (additional contract exports)
@@ -913,8 +849,8 @@ export {
   type JobError,
   type JobListQuery,
   type JobListResponse,
-  type QueueStats,
-} from './domain/jobs';
+  type QueueStats
+} from './engine/jobs';
 
 // Billing Service types (from domain)
 export {
@@ -928,8 +864,8 @@ export {
   type ProviderInvoice,
   type ProviderPaymentMethod,
   type ProviderSubscription,
-  type SetupIntentResult,
-} from './domain/billing';
+  type SetupIntentResult
+} from './engine/billing';
 
 // OAuth (from domain/auth)
 export {
@@ -954,79 +890,79 @@ export {
   type OAuthLinkCallbackResponse,
   type OAuthLinkResponse,
   type OAuthProvider,
-  type OAuthUnlinkResponse,
-} from './domain/auth';
+  type OAuthUnlinkResponse
+} from './engine/auth';
 
 // Native bridge (from core)
 export { type NativeBridge } from './core/native';
 
 // Users contract (legacy aliases)
-export { USER_ROLES, userRoleSchema, type UserRole } from './domain/users';
+export { USER_ROLES, userRoleSchema, type UserRole } from './engine/users';
 
 // Realtime (from domain)
 export {
+  applyOperation,
+  applyOperations,
+  checkVersionConflicts,
   conflictResponseSchema,
+  getOperationPointers,
   getRecordsRequestSchema,
   getRecordsResponseSchema,
+  isFieldMutable,
   listInsertOperationSchema,
   listPositionSchema,
   listRemoveOperationSchema,
   operationSchema,
+  PROTECTED_FIELDS,
+  REALTIME_ERRORS,
   realtimeContract,
   recordMapSchema,
   recordPointerSchema,
   recordSchema,
   setNowOperationSchema,
   setOperationSchema,
+  setPath,
   transactionSchema,
   writeResponseSchema,
+  type ApplyOperationsResult,
   type ConflictResponse,
   type GetRecordsRequest,
   type GetRecordsResponse,
-  type ListInsertOperation as RealtimeListInsertOperation,
   type ListPosition,
+  type ListInsertOperation as RealtimeListInsertOperation,
   type ListRemoveOperation as RealtimeListRemoveOperation,
   type RealtimeOperation,
   type RealtimeRecord,
+  type SetOperation as RealtimeSetOperation,
   type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
-  type VersionedRecord,
   type SetNowOperation,
-  type SetOperation as RealtimeSetOperation,
-  type WriteResponse,
-  PROTECTED_FIELDS,
-  REALTIME_ERRORS,
-  applyOperation,
-  applyOperations,
-  checkVersionConflicts,
-  getOperationPointers,
-  isFieldMutable,
-  setPath,
-  type ApplyOperationsResult,
   type VersionConflict,
-} from './domain/realtime';
+  type VersionedRecord,
+  type WriteResponse
+} from './engine/realtime';
 
 // Media (from domain/media)
 export {
   ALL_MEDIA_EXTENSIONS,
   ALLOWED_MEDIA_MIME_TYPES,
   AUDIO_EXTENSIONS,
+  detectFileType,
+  detectFileTypeFromPath,
   EXT_TO_MIME,
+  generateFileId,
   IMAGE_EXTENSIONS,
+  isAllowedFileType,
   MAX_CHUNK_SIZE,
   MAX_FILENAME_LENGTH,
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
   MIME_TO_EXT,
-  VIDEO_EXTENSIONS,
-  detectFileType,
-  detectFileTypeFromPath,
-  generateFileId,
-  isAllowedFileType,
   parseAudioMetadataFromBuffer,
   sanitizeFilename,
   validateUploadConfig,
+  VIDEO_EXTENSIONS,
   type AudioMetadata,
   type AudioProcessingOptions,
   type ContentModerationResult,
@@ -1037,20 +973,18 @@ export {
   type ProcessingResult,
   type SecurityScanResult,
   type UploadConfig,
-  type VideoProcessingOptions,
-} from './domain/media';
+  type VideoProcessingOptions
+} from './engine/media';
 
 // Activities (from domain/activities)
 export {
-  ACTOR_TYPES,
   activitySchema,
-  actorTypeSchema,
   createActivitySchema,
   getActorTypeTone,
   type Activity,
   type ActorType,
-  type CreateActivity,
-} from './domain/activities';
+  type CreateActivity
+} from './core/activities';
 
 // Security (from domain/admin)
 export {
@@ -1071,17 +1005,17 @@ export {
   type SecurityEvent,
   type SecurityEventDetailRequest,
   type SecurityEventDetailResponse,
-  type SecurityEventType,
   type SecurityEventsExportRequest,
   type SecurityEventsExportResponse,
   type SecurityEventsFilter,
   type SecurityEventsListRequest,
   type SecurityEventsListResponse,
+  type SecurityEventType,
   type SecurityMetrics,
   type SecurityMetricsRequest,
   type SecurityMetricsResponse,
-  type SecuritySeverity,
-} from './domain/admin';
+  type SecuritySeverity
+} from './engine/admin';
 
 // ============================================================================
 // TYPE DEFINITIONS (Namespace)
@@ -1097,19 +1031,19 @@ export type { Permission, TenantRole } from './types/roles';
 // ============================================================================
 
 // --- Async ---
-export * as Async from './utils/async';
+export * as Async from './primitives/utils/async';
 
 export {
   BatchedQueue,
   DeferredPromise,
-  ReactiveMap,
   delay,
-  type BatchProcessResult,
+  ReactiveMap,
   type BatchedQueueOptions,
-} from './utils/async';
+  type BatchProcessResult
+} from './primitives/utils/async';
 
 // --- Cache ---
-export * as Cache from './utils/cache';
+export * as Cache from './primitives/utils/cache';
 
 export {
   CacheCapacityError,
@@ -1122,10 +1056,10 @@ export {
   CacheProviderNotFoundError,
   CacheSerializationError,
   CacheTimeoutError,
-  LRUCache,
   isCacheConnectionError,
   isCacheError,
   isCacheTimeoutError,
+  LRUCache,
   memoize,
   toCacheError,
   type BaseCacheConfig,
@@ -1141,31 +1075,13 @@ export {
   type MemoizeFunction,
   type MemoizeOptions,
   type MemoryCacheConfig,
-  type RedisCacheConfig,
-} from './utils/cache';
+  type RedisCacheConfig
+} from './primitives/utils/cache';
 
 // --- Search ---
-export * as Search from './utils/search';
+export * as Search from './primitives/utils/search';
 
 export {
-  FILTER_OPERATORS,
-  InvalidCursorError,
-  InvalidFieldError,
-  InvalidFilterError,
-  InvalidOperatorError,
-  InvalidPaginationError,
-  InvalidQueryError,
-  InvalidSortError,
-  LOGICAL_OPERATORS,
-  QueryTooComplexError,
-  SEARCH_DEFAULTS,
-  SEARCH_ERROR_TYPES,
-  SearchError,
-  SearchProviderError,
-  SearchProviderUnavailableError,
-  SearchQueryBuilder,
-  SearchTimeoutError,
-  UnsupportedOperatorError,
   // Serialization
   buildURLWithQuery,
   compoundFilterSchema,
@@ -1182,9 +1098,10 @@ export {
   extractQueryFromURL,
   facetBucketSchema,
   facetConfigSchema,
-  facetResultSchema,
   facetedSearchQuerySchema,
   facetedSearchResultSchema,
+  facetResultSchema,
+  FILTER_OPERATORS,
   filterArray,
   filterConditionSchema,
   filterOperatorSchema,
@@ -1197,6 +1114,13 @@ export {
   gt,
   highlightedFieldSchema,
   inArray,
+  InvalidCursorError,
+  InvalidFieldError,
+  InvalidFilterError,
+  InvalidOperatorError,
+  InvalidPaginationError,
+  InvalidQueryError,
+  InvalidSortError,
   isCompoundFilter,
   isFilterCondition,
   isInvalidFilterError,
@@ -1204,28 +1128,38 @@ export {
   isSearchError,
   isSearchProviderError,
   isSearchTimeoutError,
+  LOGICAL_OPERATORS,
   logicalOperatorSchema,
   lt,
   mergeSearchParamsIntoURL,
   neq,
   paginateArray,
+  QueryTooComplexError,
   rangeValueSchema,
+  SEARCH_DEFAULTS,
+  SEARCH_ERROR_TYPES,
+  SearchError,
+  SearchProviderError,
+  SearchProviderUnavailableError,
+  SearchQueryBuilder,
   searchQuerySchema,
   searchResultItemSchema,
   searchResultSchema,
+  SearchTimeoutError,
   serializeToHash,
   serializeToJSON,
   serializeToURLParams,
   sortArray,
   sortConfigSchema,
+  UnsupportedOperatorError,
   urlSearchParamsSchema,
   type CompoundFilter,
   type CursorSearchResult,
   type FacetBucket,
   type FacetConfig,
-  type FacetResult,
   type FacetedSearchQuery,
   type FacetedSearchResult,
+  type FacetResult,
   type FilterCondition,
   type FilterOperator,
   type FilterPrimitive,
@@ -1245,8 +1179,8 @@ export {
   type SerializedFilter,
   type SerializedQuery,
   type SortConfig,
-  type UrlSearchParamsInput,
-} from './utils/search';
+  type UrlSearchParamsInput
+} from './primitives/utils/search';
 
 // --- Logger ---
 // NOTE: The Logger type is available via the LoggerNs namespace below,
@@ -1255,7 +1189,6 @@ export * as LoggerNs from './logger';
 
 export {
   CONSOLE_LOG_LEVELS,
-  LOG_LEVELS,
   createConsoleLogger,
   createJobCorrelationId,
   createJobLogger,
@@ -1265,19 +1198,20 @@ export {
   generateCorrelationId,
   getOrCreateCorrelationId,
   isValidCorrelationId,
+  LOG_LEVELS,
   shouldLog,
   type BaseLogger,
-  type ConsoleLogLevel,
   type ConsoleLoggerConfig,
+  type ConsoleLogLevel,
   type LogData,
-  type LogLevel,
   type Logger,
   type LoggerConfig,
-  type RequestContext,
+  type LogLevel,
+  type RequestContext
 } from './logger';
 
 // --- Monitor ---
-export * as Monitor from './utils/monitor';
+export * as Monitor from './primitives/utils/monitor';
 
 export {
   buildDetailedHealthResponse,
@@ -1308,17 +1242,17 @@ export {
   type ServiceStatus,
   type StartupSummaryOptions,
   type StorageHealthConfig,
-  type WebSocketStats,
-} from './utils/monitor';
+  type WebSocketStats
+} from './primitives/utils/monitor';
 
 // --- PubSub ---
-export * as PubSub from './utils/pubsub';
+export * as PubSub from './engine/pubsub';
 
 export {
-  SubKeys,
-  SubscriptionManager,
   parseRecordKey,
   publishAfterWrite,
+  SubKeys,
+  SubscriptionManager,
   type ClientMessage,
   type ListKey,
   type ParsedRecordKey,
@@ -1329,19 +1263,19 @@ export {
   type ServerMessage,
   type SubscriptionKey,
   type SubscriptionManagerOptions,
-  type WebSocket,
-} from './utils/pubsub';
+  type WebSocket
+} from './engine/pubsub';
 
 // --- Casing ---
 export {
-  camelToSnake,
   camelizeKeys,
-  snakeToCamel,
+  camelToSnake,
   snakeifyKeys,
+  snakeToCamel,
   toCamelCaseArray,
   toSnakeCase,
-  type KeyMapping,
-} from './utils/string/casing';
+  type KeyMapping
+} from './primitives/utils/string/casing';
 // NOTE: toCamelCase is exported from ./utils/string/string (string conversion).
 // For record-key conversion, import { toCamelCase } from './utils/string/casing' directly.
 
@@ -1355,35 +1289,22 @@ export {
   matchesModifiers,
   parseKeyBinding,
   type KeyModifiers,
-  type ParsedKeyBinding,
-} from './utils/keyboard';
+  type ParsedKeyBinding
+} from './primitives/utils/keyboard';
 
 // --- Constants ---
-export {
-  DAYS_PER_WEEK,
-  HOURS_PER_DAY,
-  MINUTES_PER_HOUR,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-  MS_PER_SECOND,
-  SECONDS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_MINUTE,
-  SORT_ORDER,
-  type SortOrder,
-} from './utils/constants';
+// Constants exported from primitives/constants
 
 // --- Comparison ---
-export { deepEqual } from './utils/comparison';
+export { deepEqual } from './primitives/utils/comparison';
 
 // --- Crypto ---
 export {
   constantTimeCompare,
   generateSecureId,
   generateToken,
-  generateUUID,
-} from './utils/crypto/crypto';
+  generateUUID
+} from './engine/crypto/crypto';
 
 // --- Date ---
 export {
@@ -1391,8 +1312,8 @@ export {
   formatDateTime,
   formatTimeAgo,
   toISODateOnly,
-  toISOStringOrNull,
-} from './utils/date';
+  toISOStringOrNull
+} from './primitives/utils/date';
 
 // --- HTTP ---
 export {
@@ -1400,8 +1321,8 @@ export {
   parseCookies,
   serializeCookie,
   type CookieOptions,
-  type CookieSerializeOptions,
-} from './utils/http/http';
+  type CookieSerializeOptions
+} from './primitives/utils/http/http';
 
 export {
   type BaseRouteDefinition,
@@ -1411,9 +1332,12 @@ export {
   type RouteHandler,
   type RouteMap,
   type RouteResult,
-  type ValidationSchema,
-} from './utils/http/http-types';
+  type ValidationSchema
+} from './primitives/utils/http/http-types';
 
+export { extractCsrfToken } from './primitives/utils/http/csrf';
+export { getMimeType } from './primitives/utils/http/mime';
+export { parseMultipartFile, type ParsedMultipartFile } from './primitives/utils/http/multipart';
 export {
   getValidatedClientIp,
   ipMatchesCidr,
@@ -1425,38 +1349,34 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig,
-} from './utils/http/proxy';
-export { parseMultipartFile, type ParsedMultipartFile } from './utils/http/multipart';
-export { EXTRA_EXT_TO_MIME, getMimeType } from './utils/http/mime';
-export { extractIpAddress, extractUserAgent, getRequesterId } from './utils/http/request';
-export { SAFE_METHODS, CSRF_EXEMPT_PATHS, extractCsrfToken } from './utils/http/csrf';
+  type ProxyValidationConfig
+} from './primitives/utils/http/proxy';
+export {
+  extractIpAddress,
+  extractUserAgent,
+  getRequesterId
+} from './primitives/utils/http/request';
 
-export { hasDangerousKeys, sanitizePrototype } from './utils/security/prototype';
 export {
   detectNoSQLInjection,
   detectSQLInjection,
   isValidInputKeyName,
   sanitizeString,
-  type SQLInjectionDetectionOptions,
-} from './utils/security/input';
+  type SQLInjectionDetectionOptions
+} from './engine/security/input';
+export { hasDangerousKeys, sanitizePrototype } from './engine/security/prototype';
 export {
   getInjectionErrors,
   sanitizeObject,
   type SanitizationResult,
-  type ValidationOptions,
-} from './utils/security/sanitization';
+  type ValidationOptions
+} from './engine/security/sanitization';
 
 // --- Routes ---
-export { createRouteMap, protectedRoute, publicRoute } from './utils/http/routes';
+export { createRouteMap, protectedRoute, publicRoute } from './primitives/utils/http/routes';
 
 // --- Pagination ---
 export {
-  DEFAULT_PAGE_LIMIT,
-  DEFAULT_SORT_BY,
-  DEFAULT_SORT_ORDER,
-  PAGINATION_ERROR_TYPES,
-  PaginationError,
   buildCursorPaginationQuery,
   calculateCursorPaginationMetadata,
   calculateOffsetPaginationMetadata,
@@ -1466,11 +1386,16 @@ export {
   cursorPaginatedResultSchema,
   cursorPaginationOptionsSchema,
   decodeCursor,
+  DEFAULT_PAGE_LIMIT,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
   encodeCursor,
   getQueryParam,
   getSortableValue,
   isCursorValue,
   paginatedResultSchema,
+  PAGINATION_ERROR_TYPES,
+  PaginationError,
   paginationOptionsSchema,
   parseLimitParam,
   parsePageParam,
@@ -1484,27 +1409,27 @@ export {
   type PaginationErrorType,
   type PaginationOptions,
   type PaginationParamNames,
-  type PaginationParseConfig,
-} from './utils/pagination';
+  type PaginationParseConfig
+} from './engine/pagination';
 
 // --- Rate Limit ---
-export { createRateLimiter, type RateLimitInfo } from './utils/rate-limit';
+export { createRateLimiter, type RateLimitInfo } from './engine/security/rate-limit';
 
 // --- Storage ---
 export {
   ALLOWED_IMAGE_TYPES,
-  MAX_IMAGE_SIZE,
-  MAX_LOGO_SIZE,
   generateUniqueFilename,
   joinStoragePath,
+  MAX_IMAGE_SIZE,
+  MAX_LOGO_SIZE,
   normalizeStoragePath,
-  validateFileType,
-} from './utils/storage';
+  validateFileType
+} from './primitives/utils/storage';
 
 // --- String ---
 export {
-  capitalize,
   canonicalizeEmail,
+  capitalize,
   countCharactersNoWhitespace,
   countWords,
   escapeHtml,
@@ -1519,14 +1444,19 @@ export {
   toKebabCase,
   toPascalCase,
   trimTrailingSlashes,
-  truncate,
-} from './utils/string/string';
+  truncate
+} from './primitives/utils/string/string';
 
 // --- User Agent ---
-export { parseUserAgent, type ParsedUserAgent } from './utils/user-agent';
+export { parseUserAgent, type ParsedUserAgent } from './primitives/utils/user-agent';
 
 // --- Token ---
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './utils/crypto/token';
+export {
+  addAuthHeader,
+  createTokenStore,
+  tokenStore,
+  type TokenStore
+} from './engine/crypto/token';
 
 // --- Theme tokens ---
 export {
@@ -1539,5 +1469,6 @@ export {
   highContrastDarkOverrides,
   highContrastLightOverrides,
   type ContrastMode,
-  type Density,
-} from './domain/theme';
+  type Density
+} from './engine/theme';
+

@@ -4,25 +4,25 @@ import { asMockDb, createMockDb } from '@abe-stack/db/testing';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    createOAuthState,
-    decodeOAuthState,
-    encodeOAuthState,
-    findUserByOAuthProvider,
-    getAuthorizationUrl,
-    getConnectedProviders,
-    getProviderClient,
-    handleOAuthCallback,
-    linkOAuthAccount,
-    unlinkOAuthAccount,
+  createOAuthState,
+  decodeOAuthState,
+  encodeOAuthState,
+  findUserByOAuthProvider,
+  getAuthorizationUrl,
+  getConnectedProviders,
+  getProviderClient,
+  handleOAuthCallback,
+  linkOAuthAccount,
+  unlinkOAuthAccount,
 } from './service';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
 import type {
-    DbClient,
-    OAuthConnectionRepository,
-    RefreshTokenRepository,
-    Repositories,
-    UserRepository,
+  DbClient,
+  OAuthConnectionRepository,
+  RefreshTokenRepository,
+  Repositories,
+  UserRepository,
 } from '../../../../db/src';
 import type { AuthConfig } from '@abe-stack/shared/config';
 

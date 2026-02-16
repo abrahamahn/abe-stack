@@ -238,7 +238,7 @@ function Nav() {
   return (
     <>
       <Link to="/home">Home</Link>
-      <button onClick={() => navigate('/dashboard')}>Dashboard</button>
+      <button onClick={() => navigate('/dashboard')}>Dashboard</Button>
     </>
   );
 }

@@ -1,7 +1,7 @@
 // main/client/ui/src/elements/Heading.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Heading } from './Heading';
 

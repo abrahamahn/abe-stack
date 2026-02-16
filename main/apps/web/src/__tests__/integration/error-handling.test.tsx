@@ -10,7 +10,7 @@
  */
 
 import { screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { LoginPage, RegisterPage } from '../../features/auth';
 import { DashboardPage } from '../../features/dashboard';

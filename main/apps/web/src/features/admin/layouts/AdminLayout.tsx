@@ -7,13 +7,7 @@
  */
 
 import { Navigate, Outlet, useLocation, useNavigate } from '@abe-stack/react/router';
-import {
-  Button,
-  Heading,
-  LeftSidebarLayout,
-  ScrollArea,
-  Text,
-} from '@abe-stack/ui';
+import { Button, Heading, LeftSidebarLayout, ScrollArea, Text } from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 
 import type { ReactElement, ReactNode } from 'react';

@@ -2,6 +2,8 @@
 import { useDisclosure } from '@hooks/useDisclosure';
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
+import { Button } from '../elements/Button';
+
 import '../styles/components.css';
 
 /** Menu placement relative to the trigger element. */
@@ -27,7 +29,7 @@ type DropdownProps = {
  *
  * @example
  * ```tsx
- * <Dropdown trigger={<button>Menu</button>}>
+ * <Dropdown trigger={<Button>Menu</Button>}>
  *   <MenuItem>Edit</MenuItem>
  *   <MenuItem>Delete</MenuItem>
  * </Dropdown>
@@ -81,9 +83,8 @@ export const Dropdown = ({
 
   return (
     <div className="dropdown" data-placement={placement}>
-      <button
-        ref={triggerRef}
-        type="button"
+      <Button
+        ref={triggerRef as any}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         className="trigger-reset"
@@ -104,7 +105,7 @@ export const Dropdown = ({
         }}
       >
         {trigger}
-      </button>
+      </Button>
       {isOpen ? (
         <div ref={menuRef} className="dropdown-menu" role="menu" data-placement={placement}>
           {typeof children === 'function'

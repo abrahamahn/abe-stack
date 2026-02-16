@@ -22,9 +22,29 @@ export interface EmailService {
 }
 
 export interface AuthEmailTemplates {
-  verifyEmail: (data: { link: string; email: string }) => { subject: string; html: string; text: string };
-  resetPassword: (data: { link: string; email: string }) => { subject: string; html: string; text: string };
-  magicLink: (data: { link: string; email: string }) => { subject: string; html: string; text: string };
-  emailChange: (data: { link: string; email: string }) => { subject: string; html: string; text: string };
-  invitation: (data: { link: string; email: string; inviterName: string; tenantName: string }) => { subject: string; html: string; text: string };
+  verifyEmail: (data: { link: string; email: string }) => {
+    subject: string;
+    html: string;
+    text: string;
+  };
+  resetPassword: (data: { link: string; email: string }) => {
+    subject: string;
+    html: string;
+    text: string;
+  };
+  magicLink: (data: { link: string; email: string }) => {
+    subject: string;
+    html: string;
+    text: string;
+  };
+  emailChange: (data: { link: string; email: string }) => {
+    subject: string;
+    html: string;
+    text: string;
+  };
+  invitation: (data: { link: string; email: string; inviterName: string; tenantName: string }) => {
+    subject: string;
+    html: string;
+    text: string;
+  };
 }

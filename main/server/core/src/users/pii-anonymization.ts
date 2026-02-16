@@ -14,17 +14,17 @@ import { createHash } from 'node:crypto';
 import { RETENTION_PERIODS } from '@abe-stack/shared';
 
 import {
-    and,
-    eq,
-    isNotNull,
-    lt,
-    select,
-    toCamelCase,
-    update,
-    USER_COLUMNS,
-    USERS_TABLE,
-    type DbClient,
-    type User,
+  and,
+  eq,
+  isNotNull,
+  lt,
+  select,
+  toCamelCase,
+  update,
+  USER_COLUMNS,
+  USERS_TABLE,
+  type DbClient,
+  type User,
 } from '../../../db/src';
 
 import type { ServerLogger } from '@abe-stack/shared/core';

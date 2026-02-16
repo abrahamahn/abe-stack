@@ -21,7 +21,6 @@ import {
 } from '@abe-stack/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
@@ -141,9 +140,10 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
     }
   }, [autoCheck, checkSubscription]);
 
-  const subscribeMutation = useMutation<
-    { subscriptionData: PushSubscriptionType; subscriptionId: string }
-  >({
+  const subscribeMutation = useMutation<{
+    subscriptionData: PushSubscriptionType;
+    subscriptionId: string;
+  }>({
     mutationFn: async () => {
       if (!isSupported) {
         throw new Error('Push notifications not supported');

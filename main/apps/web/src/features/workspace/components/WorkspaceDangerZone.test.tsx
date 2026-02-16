@@ -3,9 +3,11 @@
  * Tests for WorkspaceDangerZone component.
  */
 
+import { Button } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 
 // ============================================================================
 // Mocks
@@ -26,17 +28,17 @@ vi.mock('../../settings/components/SudoModal', () => ({
     if (!open) return null;
     return (
       <div data-testid="sudo-modal">
-        <button
+        <Button
           data-testid="sudo-success"
           onClick={() => {
             onSuccess('mock-sudo-token');
           }}
         >
           Sudo Success
-        </button>
-        <button data-testid="sudo-dismiss" onClick={onDismiss}>
+        </Button>
+        <Button data-testid="sudo-dismiss" onClick={onDismiss}>
           Sudo Dismiss
-        </button>
+        </Button>
       </div>
     );
   }),

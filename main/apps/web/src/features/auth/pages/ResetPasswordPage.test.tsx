@@ -1,6 +1,6 @@
 // main/apps/web/src/features/auth/pages/ResetPasswordPage.test.tsx
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 import { ResetPasswordPage } from './ResetPasswordPage';

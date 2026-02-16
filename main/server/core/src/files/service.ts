@@ -9,13 +9,13 @@
  */
 
 import {
-    BadRequestError,
-    ForbiddenError,
-    generateFileId,
-    MIME_TO_EXT,
-    NotFoundError,
-    sanitizeFilename,
-    validateFileType,
+  BadRequestError,
+  ForbiddenError,
+  generateFileId,
+  MIME_TO_EXT,
+  NotFoundError,
+  sanitizeFilename,
+  validateFileType,
 } from '@abe-stack/shared';
 
 import { DEFAULT_ALLOWED_MIME_TYPES, DEFAULT_MAX_FILE_SIZE } from './types';

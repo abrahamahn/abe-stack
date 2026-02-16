@@ -121,9 +121,7 @@ export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): 
       <CardAsyncState
         errorMessage={errorMessage}
         cardClassName="p-4"
-        errorContent={
-          <Alert tone="danger">Failed to load OAuth connections: {errorMessage}</Alert>
-        }
+        errorContent={<Alert tone="danger">Failed to load OAuth connections: {errorMessage}</Alert>}
       />
     );
   }

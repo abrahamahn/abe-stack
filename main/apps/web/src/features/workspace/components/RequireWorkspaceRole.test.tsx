@@ -1,6 +1,6 @@
 // main/apps/web/src/features/workspace/components/RequireWorkspaceRole.test.tsx
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { meetsRoleRequirement, RequireWorkspaceRole } from './RequireWorkspaceRole';
 

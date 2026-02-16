@@ -1,8 +1,7 @@
 // main/apps/web/src/features/auth/hooks/useAuthFormState.test.ts
 import { useFormState, type FormState } from '@abe-stack/react/hooks';
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-
+import { describe, expect, it } from 'vitest';
 
 describe('useAuthFormState', () => {
   it('has the expected function signature', () => {

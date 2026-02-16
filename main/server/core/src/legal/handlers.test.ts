@@ -5,10 +5,10 @@ import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } fr
 
 import type { LegalAppContext } from './types';
 import type {
-    LegalDocument,
-    LegalDocumentRepository,
-    UserAgreement,
-    UserAgreementRepository,
+  LegalDocument,
+  LegalDocumentRepository,
+  UserAgreement,
+  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================

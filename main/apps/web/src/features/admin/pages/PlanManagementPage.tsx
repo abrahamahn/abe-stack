@@ -31,7 +31,7 @@ import {
 } from '@abe-stack/ui';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ChangeEvent, ReactElement } from 'react';
 
 import type { AdminBillingClientConfig } from '@abe-stack/api';
 import type {
@@ -41,7 +41,6 @@ import type {
   PlanFeature,
   UpdatePlanRequest,
 } from '@abe-stack/shared';
-import type { ReactElement } from 'react';
 
 // ============================================================================
 // Local Types (for form state)
@@ -190,7 +189,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
         <Input
           id="name"
           value={data.name}
-          onChange={(e) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             handleChange('name', e.target.value);
           }}
           placeholder="e.g., Pro Plan"
@@ -203,7 +202,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
         <Input
           id="description"
           value={data.description}
-          onChange={(e) => {
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
             handleChange('description', e.target.value);
           }}
           placeholder="Brief description of the plan"
@@ -232,7 +231,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="price"
             type="number"
             value={data.priceInCents.toString()}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const parsedValue = parseInt(e.target.value, 10);
               handleChange('priceInCents', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
@@ -246,7 +245,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
           <Input
             id="currency"
             value={data.currency}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               handleChange('currency', e.target.value.toLowerCase());
             }}
             placeholder="usd"
@@ -262,7 +261,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="trialDays"
             type="number"
             value={data.trialDays.toString()}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const parsedValue = parseInt(e.target.value, 10);
               handleChange('trialDays', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
@@ -277,7 +276,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="sortOrder"
             type="number"
             value={data.sortOrder.toString()}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const parsedValue = parseInt(e.target.value, 10);
               handleChange('sortOrder', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
@@ -329,7 +328,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             </Select>
             <Input
               value={feature.name}
-              onChange={(e) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 handleFeatureChange(index, 'name', e.target.value);
               }}
               placeholder="Feature name"

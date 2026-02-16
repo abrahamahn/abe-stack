@@ -24,10 +24,10 @@ import { registerPlugins, type AppErrorInfo } from './http/plugins';
 import { swaggerThemeCss } from './http/swagger-theme';
 import { contextualizeRequest } from './middleware/context';
 
+import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 import type { DbClient } from '@abe-stack/db';
 import type { AppConfig } from '@abe-stack/shared/config';
 import type { FastifyInstance } from 'fastify';
-import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 
 // ============================================================================
 // Types

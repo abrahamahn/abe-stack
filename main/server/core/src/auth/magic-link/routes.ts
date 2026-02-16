@@ -11,10 +11,10 @@
 import { magicLinkRequestSchema, magicLinkVerifyRequestSchema } from '@abe-stack/shared';
 
 import {
-    createRouteMap,
-    publicRoute,
-    type HandlerContext,
-    type RouteDefinition,
+  createRouteMap,
+  publicRoute,
+  type HandlerContext,
+  type RouteDefinition,
 } from '../../../../engine/src';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';

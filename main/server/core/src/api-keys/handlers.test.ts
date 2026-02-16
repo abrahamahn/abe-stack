@@ -2,10 +2,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    handleCreateApiKey,
-    handleDeleteApiKey,
-    handleListApiKeys,
-    handleRevokeApiKey,
+  handleCreateApiKey,
+  handleDeleteApiKey,
+  handleListApiKeys,
+  handleRevokeApiKey,
 } from './handlers';
 
 import type { ApiKeyAppContext } from './types';

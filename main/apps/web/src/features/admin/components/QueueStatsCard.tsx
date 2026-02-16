@@ -55,7 +55,11 @@ export const QueueStatsCard = ({
     return (
       <CardAsyncState
         isLoading={isLoading}
-        errorMessage={isError || stats === undefined ? (error?.message ?? 'Failed to load queue statistics') : null}
+        errorMessage={
+          isError || stats === undefined
+            ? (error?.message ?? 'Failed to load queue statistics')
+            : null
+        }
         loadingContent={
           <>
             <Skeleton width="10rem" height="1.25rem" className="mb-4" />

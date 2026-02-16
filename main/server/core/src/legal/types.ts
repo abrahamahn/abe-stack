@@ -8,9 +8,9 @@
  */
 
 import type {
-    AuditEventRepository,
-    LegalDocumentRepository,
-    UserAgreementRepository,
+  AuditEventRepository,
+  LegalDocumentRepository,
+  UserAgreementRepository,
 } from '../../../db/src';
 import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
 

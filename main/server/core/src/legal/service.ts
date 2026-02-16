@@ -9,11 +9,11 @@
  */
 
 import type {
-    LegalDocument as DbLegalDocument,
-    UserAgreement as DbUserAgreement,
-    LegalDocumentRepository,
-    NewLegalDocument,
-    UserAgreementRepository,
+  LegalDocument as DbLegalDocument,
+  UserAgreement as DbUserAgreement,
+  LegalDocumentRepository,
+  NewLegalDocument,
+  UserAgreementRepository,
 } from '../../../db/src';
 
 // ============================================================================

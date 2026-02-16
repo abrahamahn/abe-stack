@@ -4,7 +4,7 @@
 import { Dialog } from '@components/Dialog';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 describe('Dialog', () => {
   describe('happy path', () => {
@@ -451,8 +451,8 @@ describe('Dialog', () => {
         <Dialog.Root>
           <Dialog.Trigger>Open</Dialog.Trigger>
           <Dialog.Content title="Test">
-            <button type="button">First</button>
-            <button type="button">Second</button>
+            <Button>First</Button>
+            <Button>Second</Button>
           </Dialog.Content>
         </Dialog.Root>,
       );
@@ -470,7 +470,7 @@ describe('Dialog', () => {
         <Dialog.Root>
           <Dialog.Trigger>Open</Dialog.Trigger>
           <Dialog.Content title="Test">
-            <button type="button">Action</button>
+            <Button>Action</Button>
           </Dialog.Content>
         </Dialog.Root>,
       );
@@ -495,8 +495,8 @@ describe('Dialog', () => {
       render(
         <Dialog.Root defaultOpen>
           <Dialog.Content title="Test">
-            <button type="button">First</button>
-            <button type="button">Second</button>
+            <Button>First</Button>
+            <Button>Second</Button>
           </Dialog.Content>
         </Dialog.Root>,
       );

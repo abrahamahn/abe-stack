@@ -2,9 +2,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-    handleDeactivateAccount,
-    handleReactivateAccount,
-    handleRequestDeletion,
+  handleDeactivateAccount,
+  handleReactivateAccount,
+  handleRequestDeletion,
 } from './lifecycle';
 
 import type { User } from '../../../../db/src';

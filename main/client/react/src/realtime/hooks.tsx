@@ -10,11 +10,15 @@
  * - useIsPendingWrite: Check if a record has pending writes
  */
 
-import { useState, useEffect, useCallback, useSyncExternalStore, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 import { useRealtime, type WriteOperation, type WriteOptions } from './RealtimeContext';
 
-import type { ConnectionState, RecordChangeListener, WebsocketPubsubClient } from '@abe-stack/client-engine';
+import type {
+  ConnectionState,
+  RecordChangeListener,
+  WebsocketPubsubClient,
+} from '@abe-stack/client-engine';
 import type { VersionedRecord } from '@abe-stack/shared';
 
 // ============================================================================

@@ -57,7 +57,9 @@ describe.skip('Auth API Integration (Real DB)', () => {
       emailTemplates: {
         emailVerification: vi.fn().mockReturnValue({ subject: 'test', html: 'test', to: 'test' }),
         passwordReset: vi.fn().mockReturnValue({ subject: 'test', html: 'test', to: 'test' }),
-        passwordChangedAlert: vi.fn().mockReturnValue({ subject: 'test', html: 'test', to: 'test' }),
+        passwordChangedAlert: vi
+          .fn()
+          .mockReturnValue({ subject: 'test', html: 'test', to: 'test' }),
       },
       config: testServer.config,
     };
@@ -97,8 +99,11 @@ describe.skip('Auth API Integration (Real DB)', () => {
 
       expect(loginResponse.statusCode).toBe(200);
       const loginCookies = loginResponse.headers['set-cookie'];
-      const refreshToken = Array.isArray(loginCookies) 
-        ? loginCookies.find(c => c.startsWith('refreshToken='))?.split(';')[0]?.split('=')[1]
+      const refreshToken = Array.isArray(loginCookies)
+        ? loginCookies
+            .find((c) => c.startsWith('refreshToken='))
+            ?.split(';')[0]
+            ?.split('=')[1]
         : loginCookies?.split(';')[0]?.split('=')[1];
 
       expect(refreshToken).toBeDefined();
@@ -115,7 +120,10 @@ describe.skip('Auth API Integration (Real DB)', () => {
       expect(refresh1.statusCode).toBe(200);
       const refresh1Cookies = refresh1.headers['set-cookie'];
       const nextToken = Array.isArray(refresh1Cookies)
-        ? refresh1Cookies.find(c => c.startsWith('refreshToken='))?.split(';')[0]?.split('=')[1]
+        ? refresh1Cookies
+            .find((c) => c.startsWith('refreshToken='))
+            ?.split(';')[0]
+            ?.split('=')[1]
         : refresh1Cookies?.split(';')[0]?.split('=')[1];
 
       expect(nextToken).toBeDefined();
@@ -158,7 +166,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         url: '/api/auth/login',
         payload: { identifier: email, password },
       });
-      
+
       const session2 = await testServer.inject({
         method: 'POST',
         url: '/api/auth/login',
@@ -166,9 +174,13 @@ describe.skip('Auth API Integration (Real DB)', () => {
       });
 
       const token1 = (session1.headers['set-cookie'] as string[])
-        .find(c => c.startsWith('refreshToken='))?.split(';')[0]?.split('=')[1];
+        .find((c) => c.startsWith('refreshToken='))
+        ?.split(';')[0]
+        ?.split('=')[1];
       const token2 = (session2.headers['set-cookie'] as string[])
-        .find(c => c.startsWith('refreshToken='))?.split(';')[0]?.split('=')[1];
+        .find((c) => c.startsWith('refreshToken='))
+        ?.split(';')[0]
+        ?.split('=')[1];
       const accessToken2 = (parseJsonResponse(session2) as any).token;
 
       // 2. Call logout-all from session 2

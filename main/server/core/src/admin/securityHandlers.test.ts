@@ -13,19 +13,19 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ERROR_MESSAGES } from '../auth';
 
 import {
-    handleExportSecurityEvents,
-    handleGetSecurityEvent,
-    handleGetSecurityMetrics,
-    handleListSecurityEvents,
+  handleExportSecurityEvents,
+  handleGetSecurityEvent,
+  handleGetSecurityMetrics,
+  handleListSecurityEvents,
 } from './securityHandlers';
 
 import type { AdminAppContext } from './types';
 import type {
-    SecurityEvent,
-    SecurityEventsExportRequest,
-    SecurityEventsFilter,
-    SecurityEventsListRequest,
-    SecurityMetrics,
+  SecurityEvent,
+  SecurityEventsExportRequest,
+  SecurityEventsFilter,
+  SecurityEventsListRequest,
+  SecurityMetrics,
 } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

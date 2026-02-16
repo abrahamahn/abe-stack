@@ -3,10 +3,7 @@
  * Login response normalization and parsing for the web BFF flow.
  */
 
-import {
-  totpLoginChallengeResponseSchema,
-  userSchema,
-} from '@abe-stack/shared';
+import { totpLoginChallengeResponseSchema, userSchema } from '@abe-stack/shared';
 
 import type {
   LoginSuccessResponse,
@@ -20,7 +17,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object';
 }
 
-function parseSmsChallenge(candidate: Record<string, unknown> | null): SmsLoginChallengeResponse | null {
+function parseSmsChallenge(
+  candidate: Record<string, unknown> | null,
+): SmsLoginChallengeResponse | null {
   if (
     isRecord(candidate) &&
     candidate['requiresSms'] === true &&

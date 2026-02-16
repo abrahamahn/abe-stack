@@ -40,11 +40,7 @@ import {
   registerStaticServe,
 } from './middleware';
 
-import type {
-  AppErrorInfo,
-  ApiErrorResponse,
-  RateLimitInfo,
-} from '@abe-stack/shared';
+import type { AppErrorInfo, ApiErrorResponse, RateLimitInfo } from '@abe-stack/shared';
 export type { AppErrorInfo, ApiErrorResponse, RateLimitInfo };
 import type { FastifyInstance } from 'fastify';
 

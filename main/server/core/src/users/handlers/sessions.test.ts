@@ -11,11 +11,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    getSessionCount,
-    listUserSessions,
-    revokeAllSessions,
-    revokeSession,
-    type UserSession,
+  getSessionCount,
+  listUserSessions,
+  revokeAllSessions,
+  revokeSession,
+  type UserSession,
 } from './sessions';
 
 import type { RefreshTokenFamily, Repositories } from '../../../../db/src';

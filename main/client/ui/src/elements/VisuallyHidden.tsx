@@ -9,10 +9,10 @@ type VisuallyHiddenProps = ComponentPropsWithoutRef<'span'>;
  *
  * @example
  * ```tsx
- * <button>
+ * <Button>
  *   <IconClose />
  *   <VisuallyHidden>Close dialog</VisuallyHidden>
- * </button>
+ * </Button>
  * ```
  */
 export const VisuallyHidden = forwardRef<HTMLSpanElement, VisuallyHiddenProps>((props, ref) => {

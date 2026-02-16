@@ -8,34 +8,30 @@
  * @module routes
  */
 
-import {
-    createWebhookSchema,
-    emptyBodySchema,
-    updateWebhookSchema,
-} from '@abe-stack/shared';
+import { createWebhookSchema, emptyBodySchema, updateWebhookSchema } from '@abe-stack/shared';
 
 import {
-    createRouteMap,
-    protectedRoute,
-    type HandlerContext,
-    type RouteMap,
-    type RouteResult,
+  createRouteMap,
+  protectedRoute,
+  type HandlerContext,
+  type RouteMap,
+  type RouteResult,
 } from '../../../engine/src';
 
 import {
-    handleCreateWebhook,
-    handleDeleteWebhook,
-    handleGetWebhook,
-    handleListWebhooks,
-    handleRotateSecret,
-    handleUpdateWebhook,
+  handleCreateWebhook,
+  handleDeleteWebhook,
+  handleGetWebhook,
+  handleListWebhooks,
+  handleRotateSecret,
+  handleUpdateWebhook,
 } from './handlers';
 
 import type {
-    CreateWebhookData,
-    UpdateWebhookData,
-    WebhooksModuleDeps,
-    WebhooksRequest,
+  CreateWebhookData,
+  UpdateWebhookData,
+  WebhooksModuleDeps,
+  WebhooksRequest,
 } from './types';
 import type { FastifyRequest } from 'fastify';
 

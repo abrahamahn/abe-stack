@@ -1,6 +1,6 @@
 // main/apps/web/src/features/auth/pages/ConnectedAccountsPage.test.tsx
 import { screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 

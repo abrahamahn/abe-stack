@@ -9,7 +9,6 @@ import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useMediaQuery } from '@hooks/useMediaQuery';
 import { useCallback, useEffect } from 'react';
 
-
 export type { ContrastMode };
 
 export type UseContrastReturn = {
@@ -49,7 +48,7 @@ export type UseContrastReturn = {
  * return (
  *   <button onClick={cycleContrastMode}>
  *     Contrast: {isHighContrast ? 'High' : 'Normal'}
- *   </button>
+ *   </Button>
  * );
  * ```
  */

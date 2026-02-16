@@ -1,6 +1,6 @@
 // main/apps/web/src/features/auth/pages/AuthPage.test.tsx
 import { screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Mock API hooks - useEnabledOAuthProviders and getOAuthLoginUrl are in @abe-stack/api
 vi.mock('@abe-stack/api', async (importOriginal) => {

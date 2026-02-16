@@ -56,10 +56,7 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   const routerOptions = {
     prefix: '/api',
     jwtSecret: ctx.config.auth.jwt.secret,
-    authGuardFactory: (
-      secret: string,
-      ...roles: string[]
-    ): ReturnType<typeof createAuthGuard> =>
+    authGuardFactory: (secret: string, ...roles: string[]): ReturnType<typeof createAuthGuard> =>
       createAuthGuard(secret, ctx.repos, ...(roles as Array<'admin' | 'moderator' | 'user'>)),
   };
 

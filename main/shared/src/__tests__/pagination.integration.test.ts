@@ -383,7 +383,7 @@ describe('Pagination Integration', () => {
 
       const result = calculateCursorPaginationMetadata(items, 2, 'value', 'desc');
 
-      const decoded = decodeCursor(result.nextCursor!);
+      const decoded = decodeCursor(result.nextCursor);
       expect(decoded?.value).toBe(90); // Value of last item in page (id: 2)
       expect(decoded?.tieBreaker).toBe('2');
     });

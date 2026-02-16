@@ -3,7 +3,7 @@ import { QueryCache } from '@abe-stack/client-engine';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { renderHook } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useAuth } from './useAuth';
 

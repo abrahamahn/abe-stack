@@ -10,12 +10,12 @@
  */
 import { execSync } from 'node:child_process';
 import {
-    existsSync,
-    watch as fsWatch,
-    readFileSync,
-    readdirSync,
-    statSync,
-    writeFileSync,
+  existsSync,
+  watch as fsWatch,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
 } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'url';

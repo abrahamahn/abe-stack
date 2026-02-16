@@ -1,5 +1,8 @@
 // main/client/ui/src/elements/CloseButton.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+
+import { Button } from './Button';
+
 import '../styles/elements.css';
 
 type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
@@ -22,15 +25,14 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
 const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>((props, ref) => {
   const { children, className = '', 'aria-label': ariaLabel = 'Close', ...rest } = props;
   return (
-    <button
-      ref={ref}
-      type="button"
+    <Button
+      ref={ref as any}
       aria-label={ariaLabel}
       className={`close-btn ${className}`.trim()}
       {...rest}
     >
       {children ?? '✕'}
-    </button>
+    </Button>
   );
 });
 

@@ -19,7 +19,7 @@ describe('FeatureHint', () => {
   it('renders children and callout when not dismissed', () => {
     render(
       <FeatureHint featureKey={TEST_KEY} title="Tip" description="Helpful info">
-        <button>Target</button>
+        <Button>Target</Button>
       </FeatureHint>,
     );
     expect(screen.getByText('Target')).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe('FeatureHint', () => {
     localStorage.setItem(`abe:hint:${TEST_KEY}`, 'true');
     render(
       <FeatureHint featureKey={TEST_KEY} title="Tip" description="Helpful info">
-        <button>Target</button>
+        <Button>Target</Button>
       </FeatureHint>,
     );
     expect(screen.getByText('Target')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('FeatureHint', () => {
   it('dismisses on "Got it" click and persists to localStorage', async () => {
     render(
       <FeatureHint featureKey={TEST_KEY} title="Tip" description="Helpful info">
-        <button>Target</button>
+        <Button>Target</Button>
       </FeatureHint>,
     );
     await userEvent.click(screen.getByText('Got it'));
@@ -57,7 +57,7 @@ describe('FeatureHint', () => {
   it('dismisses on Escape key', async () => {
     render(
       <FeatureHint featureKey={TEST_KEY} title="Tip" description="Helpful info">
-        <button>Target</button>
+        <Button>Target</Button>
       </FeatureHint>,
     );
     expect(screen.getByText('Tip')).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('FeatureHint', () => {
   it('applies data-placement attribute', () => {
     const { container } = render(
       <FeatureHint featureKey={TEST_KEY} title="Tip" description="Info" placement="right">
-        <button>Target</button>
+        <Button>Target</Button>
       </FeatureHint>,
     );
     const wrapper = container.querySelector('.feature-hint');

@@ -1,7 +1,7 @@
 // main/client/ui/src/elements/Toaster.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Toaster } from './Toaster';
 

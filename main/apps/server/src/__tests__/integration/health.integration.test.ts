@@ -112,10 +112,7 @@ describe('health integration', () => {
     // System routes registered with empty prefix (no /api)
     // System routes are public, so we provide a dummy jwtSecret and authGuardFactory
     // (they won't be used since systemRoutes are all public)
-    const dummyAuthGuard = (
-      _secret: string,
-      ..._allowedRoles: string[]
-    ): preHandlerHookHandler => {
+    const dummyAuthGuard = (_secret: string, ..._allowedRoles: string[]): preHandlerHookHandler => {
       const handler: preHandlerHookHandler = (_req, _reply, done) => {
         // No-op guard for public routes
         done();

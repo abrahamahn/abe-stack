@@ -3,12 +3,12 @@ import { TokenReuseError } from '@abe-stack/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    withTransaction,
-    type DbClient,
-    type RefreshToken,
-    type RefreshTokenFamily,
-    type User,
-    type UserSession,
+  withTransaction,
+  type DbClient,
+  type RefreshToken,
+  type RefreshTokenFamily,
+  type User,
+  type UserSession,
 } from '../../../../db/src';
 import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../security/events';
 import { createRefreshToken, getRefreshTokenExpiry } from '../utils/jwt';

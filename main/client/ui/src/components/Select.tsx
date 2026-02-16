@@ -13,6 +13,8 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react';
+
+import { Button } from '../elements/Button';
 import '../styles/components.css';
 
 type SelectProps = Omit<
@@ -132,9 +134,8 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
 
   return (
     <div className={`select-custom ${className}`.trim()} ref={ref}>
-      <button
-        ref={triggerRef}
-        type="button"
+      <Button
+        ref={triggerRef as any}
         id={id}
         className="select select-trigger"
         aria-haspopup="listbox"
@@ -218,7 +219,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
         {...rest}
       >
         <span className="select-label">{currentLabel}</span>
-      </button>
+      </Button>
       {isOpen ? (
         <div id={listboxId} className="select-menu" role="listbox" aria-labelledby={id}>
           {options.map((opt, index) => (

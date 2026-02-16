@@ -11,14 +11,13 @@ import { Buffer } from 'node:buffer';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    createBillingEventRepository,
-    createCustomerMappingRepository,
-    createInvoiceRepository,
-    createPlanRepository,
-    createSubscriptionRepository,
-    type RawDb,
+  createBillingEventRepository,
+  createCustomerMappingRepository,
+  createInvoiceRepository,
+  createPlanRepository,
+  createSubscriptionRepository,
+  type RawDb,
 } from '../../../../db/src';
-
 
 import { handleStripeWebhook } from './stripe-webhook';
 
@@ -641,7 +640,9 @@ describe('handleStripeWebhook', () => {
   describe('error handling', () => {
     it('should execute processing logic within a database transaction', async () => {
       vi.mocked(mockRepos.billingEvents.wasProcessed).mockResolvedValue(false);
-      vi.mocked(mockRepos.customerMappings.findByProviderCustomerId).mockResolvedValue({ userId: 'user_1' } as any);
+      vi.mocked(mockRepos.customerMappings.findByProviderCustomerId).mockResolvedValue({
+        userId: 'user_1',
+      } as any);
       vi.mocked(mockRepos.plans.findById).mockResolvedValue({ id: 'plan_1' } as any);
 
       await handleStripeWebhook(payload, signature, mockConfig, mockRepos, mockLog);

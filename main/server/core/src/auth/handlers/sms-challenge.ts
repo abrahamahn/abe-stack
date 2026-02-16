@@ -9,11 +9,11 @@
  */
 
 import {
-    HTTP_STATUS,
-    InvalidTokenError,
-    mapErrorToHttpResponse,
-    type AuthResponse,
-    type HttpErrorResponse,
+  HTTP_STATUS,
+  InvalidTokenError,
+  mapErrorToHttpResponse,
+  type AuthResponse,
+  type HttpErrorResponse,
 } from '@abe-stack/shared';
 
 import { withTransaction } from '../../../../db/src';
@@ -21,16 +21,16 @@ import { JwtError, verify as jwtVerify } from '../../../../engine/src';
 import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
 import { sendSms2faCode, verifySms2faCode } from '../sms-2fa/service';
 import {
-    createErrorMapperLogger,
-    type AppContext,
-    type ReplyWithCookies,
-    type RequestWithCookies,
+  createErrorMapperLogger,
+  type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from '../types';
 import {
-    createAccessToken,
-    createAuthResponse,
-    createRefreshTokenFamily,
-    setRefreshTokenCookie,
+  createAccessToken,
+  createAuthResponse,
+  createRefreshTokenFamily,
+  setRefreshTokenCookie,
 } from '../utils';
 
 import type { SmsChallengeRequest, SmsVerifyRequest } from '../sms-2fa/types';

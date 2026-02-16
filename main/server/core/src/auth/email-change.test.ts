@@ -3,10 +3,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-    confirmEmailChange,
-    createEmailChangeRevertToken,
-    initiateEmailChange,
-    revertEmailChange,
+  confirmEmailChange,
+  createEmailChangeRevertToken,
+  initiateEmailChange,
+  revertEmailChange,
 } from './email-change';
 
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';

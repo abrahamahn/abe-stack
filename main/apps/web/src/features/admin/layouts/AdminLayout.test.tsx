@@ -1,6 +1,6 @@
 // main/apps/web/src/features/admin/layouts/AdminLayout.test.tsx
 import { screen } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   createMockEnvironment,

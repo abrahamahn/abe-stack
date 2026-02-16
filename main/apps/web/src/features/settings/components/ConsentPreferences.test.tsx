@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/ConsentPreferences.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ConsentPreferences } from './ConsentPreferences';
 

@@ -124,7 +124,7 @@ const DEFAULT_RETRY_DELAY = 1000;
  *     <form onSubmit={handleSubmit}>
  *       <button disabled={mutation.isLoading}>
  *         {mutation.isLoading ? 'Saving...' : 'Save'}
- *       </button>
+ *       </Button>
  *     </form>
  *   );
  * }

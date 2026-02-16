@@ -2,6 +2,7 @@
 import { formatPrice, getInvoiceStatusLabel, getInvoiceStatusVariant } from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
+import { Button } from '../../elements/Button';
 import { Skeleton } from '../../elements/Skeleton';
 import { cn } from '../../utils/cn';
 import { EmptyState } from '../EmptyState';
@@ -254,14 +255,13 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
 
         {hasMore && onLoadMore != null && (
           <div className="invoice-list__load-more">
-            <button
-              type="button"
+            <Button
               className="invoice-list__load-more-button"
               onClick={onLoadMore}
               disabled={isLoading}
             >
               {isLoading ? 'Loading...' : 'Load More'}
-            </button>
+            </Button>
           </div>
         )}
 

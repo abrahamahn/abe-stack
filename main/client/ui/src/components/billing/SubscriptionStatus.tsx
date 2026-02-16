@@ -7,6 +7,7 @@ import {
 } from '@abe-stack/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
+import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
 import type { Subscription } from '@abe-stack/shared';
@@ -167,47 +168,43 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
 
         <div className="subscription-status__actions">
           {canChangePlan && onChangePlan != null && (
-            <button
-              type="button"
+            <Button
               className="subscription-status__action subscription-status__action--secondary"
               onClick={onChangePlan}
               disabled={isActing}
             >
               Change Plan
-            </button>
+            </Button>
           )}
 
           {onManagePaymentMethods != null && (
-            <button
-              type="button"
+            <Button
               className="subscription-status__action subscription-status__action--secondary"
               onClick={onManagePaymentMethods}
               disabled={isActing}
             >
               Payment Methods
-            </button>
+            </Button>
           )}
 
           {canResume && onResume != null && (
-            <button
-              type="button"
+            <Button
               className="subscription-status__action subscription-status__action--primary"
               onClick={onResume}
               disabled={isActing}
             >
               {isActing ? 'Resuming...' : 'Resume Subscription'}
-            </button>
+            </Button>
           )}
 
           {canCancel && onCancel != null && (
-            <button
-              type="button"
+            <Button
               className="subscription-status__action subscription-status__action--danger"
               onClick={onCancel}
               disabled={isActing}
             >
               {isActing ? 'Canceling...' : 'Cancel Subscription'}
-            </button>
+            </Button>
           )}
         </div>
       </div>
