@@ -1,6 +1,6 @@
 // main/shared/src/engine/http/cookies.ts
 
-import { isSafeObjectKey } from '../../primitives';
+import { isSafeObjectKey } from '../../primitives/helpers/object';
 
 export interface CookieOptions {
   path?: string;

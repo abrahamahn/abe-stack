@@ -44,7 +44,7 @@ import {
   DEFAULT_PAGINATION,
   DEFAULT_SORT_ORDER,
   PAGINATION_ERROR_TYPES,
-} from '../../primitives/constants';
+} from '../constants/limits';
 
 const DEFAULT_PAGE_LIMIT = DEFAULT_PAGINATION.LIMIT;
 

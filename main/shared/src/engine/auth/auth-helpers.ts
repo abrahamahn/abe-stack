@@ -10,7 +10,7 @@
 
 import { MS_PER_DAY } from '../../primitives/constants';
 
-import type { AuthConfig, AuthStrategy } from '../../config/types/auth';
+import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/auth';
 
 /**
  * Gets refresh token cookie options based on auth config.

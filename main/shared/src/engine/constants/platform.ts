@@ -25,6 +25,7 @@ export const AUTH_CONSTANTS = {
   WORKSPACE_ROLE_HEADER: 'x-workspace-role',
 } as const;
 
+export const ACCESS_TOKEN_COOKIE_NAME = AUTH_CONSTANTS.ACCESS_TOKEN_COOKIE_NAME;
 export const API_PREFIX = AUTH_CONSTANTS.API_PREFIX;
 
 export const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -120,10 +121,35 @@ export const JOB_STATUS_CONFIG: Record<
 };
 
 /**
+ * Email
+ */
+export const EMAIL_STATUSES = ['queued', 'sent', 'delivered', 'bounced', 'failed'] as const;
+export const EMAIL_PROVIDERS = ['smtp', 'ses', 'sendgrid', 'console'] as const;
+
+/**
  * Webhook delivery statuses
  */
 export const WEBHOOK_DELIVERY_STATUSES = ['pending', 'delivered', 'failed', 'dead'] as const;
 export const TERMINAL_DELIVERY_STATUSES: ReadonlySet<string> = new Set(['delivered', 'dead']);
+
+/**
+ * Webhook event types
+ */
+export const WEBHOOK_EVENT_TYPES = {
+  USER_CREATED: 'user.created',
+  USER_UPDATED: 'user.updated',
+  USER_DELETED: 'user.deleted',
+  TENANT_CREATED: 'tenant.created',
+  TENANT_UPDATED: 'tenant.updated',
+  TENANT_DELETED: 'tenant.deleted',
+  SUBSCRIPTION_CREATED: 'subscription.created',
+  SUBSCRIPTION_UPDATED: 'subscription.updated',
+  SUBSCRIPTION_CANCELLED: 'subscription.cancelled',
+  INVOICE_PAID: 'invoice.paid',
+  INVOICE_FAILED: 'invoice.failed',
+} as const;
+
+export const SUBSCRIBABLE_EVENT_TYPES = Object.values(WEBHOOK_EVENT_TYPES);
 
 /**
  * HTTP / Errors

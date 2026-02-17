@@ -1,7 +1,7 @@
 // main/shared/src/utils/crypto/token.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { ACCESS_TOKEN_COOKIE_NAME } from '../../core/constants';
+import { ACCESS_TOKEN_COOKIE_NAME } from '../constants/platform';
 
 import { addAuthHeader, createTokenStore, tokenStore } from './token';
 

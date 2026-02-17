@@ -1,4 +1,4 @@
-// main/shared/src/config/auth-helpers.test.ts
+// main/shared/src/engine/auth/auth-helpers.test.ts
 /**
  * Auth Configuration Helpers Unit Tests
  *
@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getRefreshCookieOptions, isStrategyEnabled } from './auth-helpers';
 
-import type { AuthConfig, AuthStrategy } from '../../config/types/index';
+import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/index';
 
 // ============================================================================
 // Test Helpers

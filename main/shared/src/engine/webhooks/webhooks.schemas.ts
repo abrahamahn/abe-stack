@@ -20,7 +20,7 @@ import {
   parseString,
 } from '../../core/schema.utils';
 import { isoDateTimeSchema } from '../../core/schemas';
-import { WEBHOOK_DELIVERY_STATUSES, WEBHOOK_EVENT_TYPES } from '../../primitives/constants';
+import { WEBHOOK_DELIVERY_STATUSES, WEBHOOK_EVENT_TYPES } from '../constants/platform';
 
 import type { TenantId, WebhookDeliveryId, WebhookId } from '../../core/ids';
 import type { Schema } from '../../primitives/schema';

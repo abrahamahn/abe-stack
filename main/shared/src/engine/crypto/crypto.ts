@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/crypto.ts
+// main/shared/src/engine/crypto/crypto.ts
 /**
  * Cryptographically Secure Random Utilities
  *

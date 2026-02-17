@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/jwt.ts
+// main/shared/src/engine/crypto/jwt.ts
 /**
  * Native JWT Implementation
  *

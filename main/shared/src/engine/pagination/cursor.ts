@@ -1,5 +1,5 @@
 // main/shared/src/utils/pagination/cursor.ts
-import type { SortOrder } from '../../primitives/utils/constants';
+import type { SortOrder } from '../search/types';
 
 /**
  * Cursor data structure for encoding pagination state

@@ -20,7 +20,7 @@ import {
   withDefault,
 } from '../../core/schema.utils';
 import { isoDateTimeSchema } from '../../core/schemas';
-import { JOB_PRIORITIES, JOB_STATUSES } from '../../primitives/constants';
+import { JOB_PRIORITIES, JOB_STATUSES } from '../constants/platform';
 
 import type { JobId } from '../../core/ids';
 import type { Schema } from '../../primitives/schema';

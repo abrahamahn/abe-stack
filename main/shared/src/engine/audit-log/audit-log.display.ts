@@ -1,4 +1,4 @@
-// main/shared/src/domain/audit-log/audit-log.display.ts
+// main/shared/src/engine/audit-log/audit-log.display.ts
 
 // ============================================================================
 // Audit Action Tones

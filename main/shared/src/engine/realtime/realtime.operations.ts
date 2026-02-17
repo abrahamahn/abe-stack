@@ -8,9 +8,7 @@
  * @module Domain/Realtime/Operations
  */
 
-import { isSafeObjectKey } from '../../core/guard';
-import { deepEqual } from '../../primitives/utils/comparison';
-import { getFieldValue } from '../../primitives/utils/search/operators';
+import { deepEqual, getFieldValue, isSafeObjectKey } from '../../primitives/helpers/object';
 
 import type {
   ListInsertOperation,

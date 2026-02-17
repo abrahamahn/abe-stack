@@ -1,4 +1,4 @@
-// main/shared/src/domain/audit-log/audit-log.schemas.ts
+// main/shared/src/engine/audit-log/audit-log.schemas.ts
 
 /**
  * @file Audit Log Contracts
@@ -16,11 +16,8 @@ import {
   withDefault,
 } from '../../core/schema.utils';
 import { isoDateTimeSchema } from '../../core/schemas';
-import {
-  AUDIT_ACTION_REGEX,
-  AUDIT_CATEGORIES,
-  AUDIT_SEVERITIES,
-} from '../../primitives/constants';
+import { AUDIT_ACTION_REGEX } from '../../primitives/constants';
+import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../core/constants/notifications';
 import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../pagination';
 

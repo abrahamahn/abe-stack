@@ -95,7 +95,7 @@ export {
 export {
   EMAIL_PROVIDERS,
   EMAIL_STATUSES,
-} from '../../engine/email/email.schemas';
+} from '../../engine/constants/platform';
 
 // ============================================================================
 // Webhooks (from engine)
@@ -104,7 +104,7 @@ export {
 export {
   SUBSCRIBABLE_EVENT_TYPES,
   WEBHOOK_EVENT_TYPES,
-} from '../../engine/webhooks/webhooks.schemas';
+} from '../../engine/constants/platform';
 
 // ============================================================================
 // Time

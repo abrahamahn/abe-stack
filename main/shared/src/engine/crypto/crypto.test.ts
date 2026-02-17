@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/crypto.test.ts
+// main/shared/src/engine/crypto/crypto.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';

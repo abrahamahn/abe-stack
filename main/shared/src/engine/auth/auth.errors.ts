@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.errors.ts
+// main/shared/src/engine/auth/auth.errors.ts
 /**
  * Authentication & Authorization Errors
  *

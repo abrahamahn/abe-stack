@@ -1,4 +1,4 @@
-// main/shared/src/domain/audit-log/index.ts
+// main/shared/src/engine/audit-log/index.ts
 
 export { getAuditActionTone, getAuditSeverityTone } from './audit-log.display';
 

@@ -13,7 +13,7 @@ import {
   MAX_FILENAME_LENGTH,
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
-} from '../../primitives/constants';
+} from '../constants/limits';
 import { generateUUID } from '../crypto/crypto';
 
 

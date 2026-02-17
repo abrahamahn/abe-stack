@@ -5,7 +5,7 @@ import { PaginationError } from '.';
 
 import type { CursorData } from './cursor';
 import type { CursorPaginationOptions } from './pagination';
-import type { SortOrder } from '../../primitives/utils/constants';
+import type { SortOrder } from '../search/types';
 
 // ============================================================================
 // SQL Identifier Safety

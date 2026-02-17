@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/index.ts
+// main/shared/src/engine/crypto/index.ts
 /**
  * Cryptographic & Token Utilities
  *
