@@ -11,7 +11,8 @@ import { open } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { isSafePath } from '@abe-stack/server-engine';
-import { createRateLimiter, HTTP_STATUS, getMimeType, getRequesterId } from '@abe-stack/shared';
+import { createRateLimiter, HTTP_STATUS, getRequesterId } from '@abe-stack/shared';
+import { getMimeType } from '@abe-stack/shared/engine/media';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

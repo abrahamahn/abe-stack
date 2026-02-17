@@ -8,16 +8,12 @@
  * @module types
  */
 
-import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
+import { ERROR_MESSAGES as SHARED_ERRORS, MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES } from '@abe-stack/shared/engine/constants';
+import { SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType } from '@abe-stack/shared/engine/webhooks';
 
 // Re-export webhook constants from shared (canonical source)
-export {
-  MAX_DELIVERY_ATTEMPTS,
-  RETRY_DELAYS_MINUTES,
-  SUBSCRIBABLE_EVENT_TYPES,
-  WEBHOOK_EVENT_TYPES,
-  type WebhookEventType,
-} from '@abe-stack/shared';
+export { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES };
+export { SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType };
 
 import type { DbClient, Repositories } from '../../../db/src';
 import type { BaseContext, RequestContext, ServerLogger } from '@abe-stack/shared/core';

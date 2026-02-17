@@ -14,7 +14,6 @@
 
 import {
   BadRequestError,
-  DeferredPromise,
   delay,
   ForbiddenError,
   generateSecureId,
@@ -25,6 +24,7 @@ import {
   type RealtimeOperation,
   type RealtimeTransaction,
 } from '@abe-stack/shared';
+import { DeferredPromise } from '@abe-stack/shared/primitives';
 
 // ============================================================================
 // Types
