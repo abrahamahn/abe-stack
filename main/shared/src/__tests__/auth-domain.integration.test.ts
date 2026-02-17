@@ -20,21 +20,20 @@ import {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from '../core/auth/auth.errors';
+} from '../engine/errors';
 import {
-  HTTP_ERROR_MESSAGES,
   isKnownAuthError,
   mapErrorToHttpResponse,
-} from '../core/auth/auth.http-mapper';
+} from '../engine/errors';
+import { HTTP_ERROR_MESSAGES, HTTP_STATUS } from '../engine/constants';
 import {
   defaultPasswordConfig,
   getStrengthColor,
   getStrengthLabel,
   validatePassword,
   validatePasswordBasic,
-} from '../core/auth/auth.password';
+} from '../core/auth/passwords/auth.password';
 import { AppError } from '../engine/errors';
-import { HTTP_STATUS } from '../primitives/constants';
 
 describe('Auth Domain Integration', () => {
   describe('Password validation with strength estimation', () => {

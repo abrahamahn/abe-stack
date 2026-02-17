@@ -166,6 +166,7 @@ export { apiRouter, type ApiRouter } from './api';
 // Contracts
 export {
   apiKeysContract,
+  authContract,
   usersContract,
   webhooksContract,
 } from './contracts';
@@ -193,20 +194,35 @@ export {
   type CreateAuditEvent
 } from './engine/audit-log';
 
-// Auth
+// Auth error mapper
+export {
+  isKnownAuthError,
+  mapErrorToHttpResponse,
+  type ErrorMapperLogger,
+  type ErrorMapperOptions,
+  type ErrorStatusCode,
+  type HttpErrorResponse,
+} from './engine/errors';
+
+// Auth constants
+export {
+  AUTH_ERROR_MESSAGES,
+  AUTH_SUCCESS_MESSAGES,
+  HTTP_ERROR_MESSAGES,
+} from './engine/constants';
+
+export { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from './core/constants';
+
+// Auth schemas & utilities
 export {
   acceptTosRequestSchema,
   acceptTosResponseSchema,
-  AUTH_ERROR_MESSAGES,
-  AUTH_SUCCESS_MESSAGES,
-  authContract,
   authResponseSchema,
   bffLoginResponseSchema,
   calculateEntropy,
   calculateScore,
   changeEmailRequestSchema,
   changeEmailResponseSchema,
-  COMMON_PASSWORDS,
   confirmEmailChangeRequestSchema,
   confirmEmailChangeResponseSchema,
   containsUserInput,
@@ -226,18 +242,14 @@ export {
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
-  HTTP_ERROR_MESSAGES,
   invalidateSessionsResponseSchema,
   isCommonPassword,
-  isKnownAuthError,
-  KEYBOARD_PATTERNS,
   loginRequestSchema,
   logoutResponseSchema,
   magicLinkRequestResponseSchema,
   magicLinkRequestSchema,
   magicLinkVerifyRequestSchema,
   magicLinkVerifyResponseSchema,
-  mapErrorToHttpResponse,
   refreshResponseSchema,
   registerRequestSchema,
   registerResponseSchema,
@@ -274,6 +286,16 @@ export {
   webauthnOptionsResponseSchema,
   webauthnRegisterVerifyRequestSchema,
   webauthnRegisterVerifyResponseSchema,
+  oauthCallbackQuerySchema,
+  oauthCallbackResponseSchema,
+  oauthConnectionSchema,
+  oauthConnectionsResponseSchema,
+  oauthEnabledProvidersResponseSchema,
+  oauthInitiateResponseSchema,
+  oauthLinkCallbackResponseSchema,
+  oauthLinkResponseSchema,
+  oauthProviderSchema,
+  oauthUnlinkResponseSchema,
   type AcceptTosRequest,
   type AcceptTosResponse,
   type AuthResponse,
@@ -286,12 +308,8 @@ export {
   type DeviceListResponse,
   type EmailVerificationRequest,
   type EmailVerificationResponse,
-  type ErrorMapperLogger,
-  type ErrorMapperOptions,
-  type ErrorStatusCode,
   type ForgotPasswordRequest,
   type ForgotPasswordResponse,
-  type HttpErrorResponse,
   type InvalidateSessionsResponse,
   type LoginRequest,
   type LoginSuccessResponse,
@@ -340,7 +358,17 @@ export {
   type WebauthnLoginVerifyRequest,
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
-  type WebauthnRegisterVerifyResponse
+  type WebauthnRegisterVerifyResponse,
+  type OAuthCallbackQuery,
+  type OAuthCallbackResponse,
+  type OAuthConnection,
+  type OAuthConnectionsResponse,
+  type OAuthEnabledProvidersResponse,
+  type OAuthInitiateResponse,
+  type OAuthLinkCallbackResponse,
+  type OAuthLinkResponse,
+  type OAuthProvider,
+  type OAuthUnlinkResponse,
 } from './core/auth';
 
 // Billing
@@ -890,31 +918,9 @@ export {
   type SetupIntentResult
 } from './core/billing';
 
-// OAuth (from domain/auth)
-export {
-  OAUTH_PROVIDERS,
-  oauthCallbackQuerySchema,
-  oauthCallbackResponseSchema,
-  oauthConnectionSchema,
-  oauthConnectionsResponseSchema,
-  oauthContract,
-  oauthEnabledProvidersResponseSchema,
-  oauthInitiateResponseSchema,
-  oauthLinkCallbackResponseSchema,
-  oauthLinkResponseSchema,
-  oauthProviderSchema,
-  oauthUnlinkResponseSchema,
-  type OAuthCallbackQuery,
-  type OAuthCallbackResponse,
-  type OAuthConnection,
-  type OAuthConnectionsResponse,
-  type OAuthEnabledProvidersResponse,
-  type OAuthInitiateResponse,
-  type OAuthLinkCallbackResponse,
-  type OAuthLinkResponse,
-  type OAuthProvider,
-  type OAuthUnlinkResponse
-} from './core/auth';
+// OAuth contract & constants (schemas already exported from core/auth above)
+export { oauthContract } from './contracts';
+export { OAUTH_PROVIDERS } from './core/constants';
 
 // Native bridge (from engine)
 export { type NativeBridge } from './engine/native';

@@ -9,7 +9,10 @@ import { createSchema, parseString } from '../../primitives/schema';
 
 import { emailSchema } from './auth-scalars.schemas';
 
+import type { User } from '../users/users.schemas';
 import type { Schema } from '../../primitives/schema';
+
+import { userSchema } from '../users/users.schemas';
 
 // ============================================================================
 // Types
@@ -21,6 +24,15 @@ export interface MagicLinkRequest {
 
 export interface MagicLinkVerifyRequest {
   token: string;
+}
+
+export interface MagicLinkRequestResponse {
+  message: string;
+}
+
+export interface MagicLinkVerifyResponse {
+  token: string;
+  user: User;
 }
 
 // ============================================================================
@@ -36,5 +48,22 @@ export const magicLinkVerifyRequestSchema: Schema<MagicLinkVerifyRequest> = crea
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     return { token: parseString(obj['token'], 'token', { min: 1 }) };
+  },
+);
+
+export const magicLinkRequestResponseSchema: Schema<MagicLinkRequestResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return { message: parseString(obj['message'], 'message') };
+  },
+);
+
+export const magicLinkVerifyResponseSchema: Schema<MagicLinkVerifyResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    return {
+      token: parseString(obj['token'], 'token'),
+      user: userSchema.parse(obj['user']),
+    };
   },
 );

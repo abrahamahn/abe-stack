@@ -43,3 +43,14 @@ export {
   UserNotFoundError,
   WeakPasswordError,
 } from './errors';
+
+// HTTP error mapper
+export {
+  isKnownAuthError,
+  mapErrorToHttpResponse,
+  type EmailSendErrorShape,
+  type ErrorMapperLogger,
+  type ErrorMapperOptions,
+  type ErrorStatusCode,
+  type HttpErrorResponse,
+} from './error-mapper';

@@ -2,14 +2,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  COMMON_PASSWORDS,
   containsUserInput,
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
-  KEYBOARD_PATTERNS,
 } from './auth.password-patterns';
+import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants/auth';
 
 describe('Password Patterns', () => {
   describe('COMMON_PASSWORDS', () => {

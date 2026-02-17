@@ -9,15 +9,6 @@
 
 
 import {
-  oauthCallbackQuerySchema,
-  oauthCallbackResponseSchema,
-  oauthConnectionsResponseSchema,
-  oauthEnabledProvidersResponseSchema,
-  oauthInitiateResponseSchema,
-  oauthLinkResponseSchema,
-  oauthUnlinkResponseSchema,
-} from '../core/auth/auth.oauth';
-import {
   acceptTosRequestSchema,
   acceptTosResponseSchema,
   authResponseSchema,
@@ -38,6 +29,13 @@ import {
   magicLinkRequestSchema,
   magicLinkVerifyRequestSchema,
   magicLinkVerifyResponseSchema,
+  oauthCallbackQuerySchema,
+  oauthCallbackResponseSchema,
+  oauthConnectionsResponseSchema,
+  oauthEnabledProvidersResponseSchema,
+  oauthInitiateResponseSchema,
+  oauthLinkResponseSchema,
+  oauthUnlinkResponseSchema,
   passkeyListResponseSchema,
   refreshResponseSchema,
   registerRequestSchema,
@@ -73,7 +71,7 @@ import {
   webauthnOptionsResponseSchema,
   webauthnRegisterVerifyRequestSchema,
   webauthnRegisterVerifyResponseSchema,
-} from '../core/auth/auth.schemas';
+} from '../core/auth';
 import { errorResponseSchema, successResponseSchema } from '../engine/http';
 import { emptyBodySchema } from '../engine/http/response';
 

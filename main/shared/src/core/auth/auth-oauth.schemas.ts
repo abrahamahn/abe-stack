@@ -7,8 +7,6 @@
  * @module Core/Auth
  */
 
-import { HTTP_STATUS } from '../../engine/constants/platform';
-import { AppError } from '../../engine/errors/errors';
 import { createSchema, type Schema } from '../../primitives/schema';
 import { OAUTH_PROVIDERS } from '../constants/auth';
 import { userSchema } from '../users/users.schemas';
@@ -275,28 +273,3 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-// ============================================================================
-// OAuth Errors
-// ============================================================================
-
-/**
- * Base OAuth error
- */
-export class OAuthError extends AppError {
-  constructor(
-    message: string,
-    public readonly provider: string,
-    code?: string,
-  ) {
-    super(message, HTTP_STATUS.BAD_REQUEST, code);
-  }
-}
-
-/**
- * OAuth state mismatch - possible CSRF attack
- */
-export class OAuthStateMismatchError extends OAuthError {
-  constructor(provider: string) {
-    super('OAuth state mismatch - possible CSRF attack', provider, 'OAUTH_STATE_MISMATCH');
-  }
-}
