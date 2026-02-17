@@ -106,8 +106,8 @@ describe('audit-log.logic', () => {
       const event = buildAuditEvent({
         action: 'billing.charge',
         resource: 'subscription',
-        actorId: 'user-1' as ReturnType<typeof import('../../types/ids').parseUserId>,
-        tenantId: 'tenant-1' as ReturnType<typeof import('../../types/ids').parseTenantId>,
+        actorId: 'user-1' as ReturnType<typeof import('../../primitives/schema/ids').parseUserId>,
+        tenantId: 'tenant-1' as ReturnType<typeof import('../../primitives/schema/ids').parseTenantId>,
         category: 'billing',
         severity: 'warn',
         resourceId: 'sub-123',

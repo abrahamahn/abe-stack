@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getRefreshCookieOptions, isStrategyEnabled } from './auth-helpers';
 
-import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/index';
+import type { AuthConfig, AuthStrategy } from '../../config/types/index';
 
 // ============================================================================
 // Test Helpers

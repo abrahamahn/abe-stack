@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.contracts.ts
+// main/shared/src/contracts/contract.notifications.ts
 /**
  * Notification Contracts
  *
@@ -21,7 +21,7 @@ import {
   notificationDeleteRequestSchema,
   notificationsListResponseSchema,
 } from '../core/notifications/notifications.schemas';
-import { createSchema, parseString } from '../core/schema.utils';
+import { createSchema, parseString } from '../primitives/schema';
 import { errorResponseSchema, successResponseSchema } from '../core/schemas';
 
 

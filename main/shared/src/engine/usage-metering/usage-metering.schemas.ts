@@ -7,11 +7,11 @@
  */
 
 import { createEnumSchema, createSchema, parseNumber, parseString } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../core/schemas';
-import { tenantIdSchema } from '../../core/types/ids';
+import { isoDateTimeSchema } from '../../primitives/schema';
+import { tenantIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { TenantId } from '../../core/types/ids';
+import type { TenantId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

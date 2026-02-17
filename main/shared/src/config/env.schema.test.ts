@@ -1,7 +1,7 @@
 // main/shared/src/config/env.schema.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { EnvSchema } from './env.schema';
+import { EnvSchema } from './env';
 
 describe('EnvSchema', () => {
   const baseValidEnv = {

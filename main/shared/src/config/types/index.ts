@@ -13,6 +13,7 @@
 export type {
   Argon2Config,
   AuthConfig,
+  AuthEnv,
   AuthStrategy,
   JwtRotationConfig,
   OAuthProviderConfig,
@@ -78,6 +79,7 @@ export type {
   KnockConfig,
   NotificationConfig,
   NotificationProvider,
+  NotificationProviderConfig,
   OneSignalConfig,
   PayPalProviderConfig,
   SmtpConfig,

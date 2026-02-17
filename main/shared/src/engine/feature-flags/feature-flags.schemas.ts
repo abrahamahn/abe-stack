@@ -14,7 +14,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { tenantIdSchema } from '../../core/types/ids';
+import { tenantIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
 

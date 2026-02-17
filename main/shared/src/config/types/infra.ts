@@ -6,8 +6,6 @@
  * They are consumed by the server's config loaders and validated at startup.
  */
 
-import type { LogLevel } from '../../logger/index';
-
 // ============================================================================
 // Primitive Types
 // ============================================================================
@@ -16,7 +14,7 @@ export type DatabaseProvider = 'postgresql' | 'sqlite' | 'mongodb' | 'json';
 export type StorageProviderName = 'local' | 's3';
 export type QueueProvider = 'local' | 'redis';
 export type PackageManagerProvider = 'npm' | 'pnpm' | 'yarn';
-export { type LogLevel };
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 // ============================================================================
 // Database Configuration

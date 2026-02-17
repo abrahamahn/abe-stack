@@ -1,7 +1,7 @@
-// main/shared/src/primitives/config/env.test.ts
+// main/shared/src/config/env.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { createSchema, parseString } from '../schema';
+import { createSchema, parseString } from '../primitives/schema';
 
 import { BaseEnvSchema, getRawEnv, validateEnv } from './env';
 

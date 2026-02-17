@@ -10,13 +10,8 @@ import { randomUUID } from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  emailSchema,
-  nameSchema,
-  passwordSchema,
-  simpleErrorResponseSchema,
-  uuidSchema,
-} from '../core/schemas';
+import { emailSchema, passwordSchema, uuidSchema } from '../primitives/schema';
+import { nameSchema, simpleErrorResponseSchema } from '../core/schemas';
 import {
   authResponseSchema,
   emailVerificationRequestSchema,

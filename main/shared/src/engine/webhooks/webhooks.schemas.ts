@@ -19,7 +19,7 @@ import {
   parseRecord,
   parseString,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../core/schemas';
+import { isoDateTimeSchema } from '../../primitives/schema';
 import { WEBHOOK_DELIVERY_STATUSES, WEBHOOK_EVENT_TYPES } from '../constants/platform';
 
 import type { TenantId, WebhookDeliveryId, WebhookId } from '../../core/ids';

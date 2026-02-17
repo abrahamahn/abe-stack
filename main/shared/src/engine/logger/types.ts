@@ -7,7 +7,9 @@
  * reuse across packages without coupling to Fastify or pino.
  */
 
-export type { LogLevel } from '../../primitives/config/types/infra';
+import type { LogLevel } from '../../config/types/infra';
+
+export type { LogLevel };
 
 /**
  * Structured log data attached to log entries.

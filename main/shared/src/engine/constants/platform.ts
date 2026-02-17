@@ -275,12 +275,6 @@ export const AUTH_SUCCESS_MESSAGES = {
   MAGIC_LINK_SENT: 'Magic link sent to your email',
 } as const;
 
-export const REALTIME_ERRORS = {
-  AUTHOR_MISMATCH: 'Author ID must match authenticated user',
-  tableNotAllowed: (table: string) => `Table '${table}' is not allowed for realtime operations`,
-  VERSION_CONFLICT: 'Version conflict: one or more records have been modified',
-} as const;
-
 /**
  * Logging / ANSI
  */

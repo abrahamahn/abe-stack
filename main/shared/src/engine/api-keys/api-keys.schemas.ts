@@ -15,11 +15,11 @@ import {
   parseOptional,
   parseString,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../core/schemas';
-import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
+import { isoDateTimeSchema } from '../../primitives/schema';
+import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { ApiKeyId, TenantId, UserId } from '../../core/types/ids';
+import type { ApiKeyId, TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Helpers

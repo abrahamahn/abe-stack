@@ -3,7 +3,6 @@
  * Configuration Module
  *
  * Provides type-safe configuration types, env schemas, and parsing utilities.
- * Portable (no Node.js fs/path deps). Server-side env loading stays in engine.
  */
 
 // ============================================================================
@@ -15,6 +14,7 @@ export type {
   // Auth configuration
   Argon2Config,
   AuthConfig,
+  AuthEnv,
   AuthStrategy,
   // Service configuration
   BillingConfig,
@@ -42,6 +42,7 @@ export type {
   MySqlConfig,
   NotificationConfig,
   NotificationProvider,
+  NotificationProviderConfig,
   NpmConfig,
   OAuthProviderConfig,
   OneSignalConfig,
@@ -58,20 +59,24 @@ export type {
   ServerConfig,
   SmtpConfig,
   SnsConfig,
-  SqlColumnMapping, SqliteConfig, SqlSearchConfig,
+  SqlColumnMapping,
+  SqliteConfig,
+  SqlSearchConfig,
   SqlSearchProviderConfig,
-  SqlTableConfig, StorageConfig,
+  SqlTableConfig,
+  StorageConfig,
   StorageConfigBase,
   StorageProviderName,
   StripeProviderConfig,
-  YarnConfig
+  YarnConfig,
 } from './types/index';
 
 // ============================================================================
-// Environment Schema (from ./env.schema.ts)
+// Environment Schema (from ./env.ts)
 // ============================================================================
 export {
   AuthEnvSchema,
+  baseEnvSchema,
   BaseEnvSchema,
   BillingEnvSchema,
   CacheEnvSchema,
@@ -79,22 +84,22 @@ export {
   EmailEnvSchema,
   EnvSchema,
   FrontendEnvSchema,
+  getRawEnv,
+  NODE_ENV_VALUES,
   NotificationEnvSchema,
   PackageManagerEnvSchema,
   QueueEnvSchema,
   SearchEnvSchema,
   ServerEnvSchema,
-  StorageEnvSchema
-} from './env.schema';
+  StorageEnvSchema,
+  validateEnv,
+} from './env';
 
-export type { FullEnv } from './env.schema';
-
-// ============================================================================
-// Parsers (from ./env.parsers.ts)
-// ============================================================================
-export { getBool, getInt, getList, getRequired } from './env.parsers';
+export type { BaseEnv, FullEnv, NodeEnv } from './env';
 
 // ============================================================================
-// Auth Helpers (from ./auth-helpers.ts)
+// Parsers (canonical source: primitives/helpers/parse.ts)
 // ============================================================================
-export { getRefreshCookieOptions, isStrategyEnabled } from '../engine/auth/auth-helpers';
+import { getBool, getInt, getList, getRequired } from '../primitives/helpers';
+
+export { getBool, getInt, getList, getRequired };

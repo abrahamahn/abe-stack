@@ -1,4 +1,4 @@
-// main/shared/src/domain/admin/admin.contracts.ts
+// main/shared/src/contracts/contract.admin.ts
 /**
  * Admin Contracts
  *
@@ -34,7 +34,7 @@ import {
   updatePlanRequestSchema,
 } from '../core/billing/billing.admin.schemas';
 import { subscriptionActionResponseSchema } from '../core/billing/billing.schemas';
-import { createSchema } from '../core/schema.utils';
+import { createSchema } from '../primitives/schema';
 import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../core/schemas';
 
 

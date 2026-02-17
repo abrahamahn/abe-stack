@@ -19,7 +19,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../core/schemas';
+import { isoDateTimeSchema } from '../../primitives/schema';
 import { JOB_PRIORITIES, JOB_STATUSES } from '../constants/platform';
 
 import type { JobId } from '../../core/ids';

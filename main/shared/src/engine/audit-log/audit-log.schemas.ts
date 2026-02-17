@@ -15,14 +15,14 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../core/schemas';
+import { isoDateTimeSchema } from '../../primitives/schema';
 import { AUDIT_ACTION_REGEX } from '../../primitives/constants';
 import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../core/constants/notifications';
-import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
+import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../pagination';
 
 import type { Schema } from '../../primitives/api';
-import type { AuditEventId, TenantId, UserId } from '../../core/types/ids';
+import type { AuditEventId, TenantId, UserId } from '../../primitives/schema/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../pagination';
 
 // ============================================================================

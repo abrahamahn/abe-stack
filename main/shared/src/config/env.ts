@@ -1,11 +1,11 @@
-// main/shared/src/primitives/config/env.ts
+// main/shared/src/config/env.ts
 /**
  * Environment Configuration & Validation Schemas
  *
- * Consolidated from config/env.ts and config/env.schema.ts.
- * Defines environment variable schemas, parsing, and validation.
+ * Consolidated env variable interfaces, validation schemas, and startup helpers.
+ * Each domain's interface is colocated with its schema for maintainability.
  *
- * @module primitives/config/env
+ * @module config/env
  */
 
 import {
@@ -16,9 +16,10 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../schema';
+} from '../primitives/schema';
 
-import type { Schema } from '../schema';
+import type { Schema } from '../primitives/schema';
+import type { AuthEnv } from './types/auth';
 
 // ============================================================================
 // Constants
@@ -27,15 +28,37 @@ import type { Schema } from '../schema';
 export const NODE_ENV_VALUES = ['development', 'test', 'production'] as const;
 export type NodeEnv = (typeof NODE_ENV_VALUES)[number];
 
+const nodeEnvSchema = createEnumSchema(['development', 'production', 'test'] as const, 'NODE_ENV');
+const trueFalseSchema = createEnumSchema(['true', 'false'] as const, 'boolean flag');
+
 // ============================================================================
-// Sub-Schema Interfaces
+// Base
 // ============================================================================
 
 /** Base environment variables */
 export interface BaseEnv {
   NODE_ENV: 'development' | 'production' | 'test';
   PORT: number;
+  NEXT_PUBLIC_APP_URL?: string | undefined;
 }
+
+export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unknown) => {
+  const obj = parseObject(data, 'BaseEnv');
+  return {
+    NODE_ENV: nodeEnvSchema.parse(withDefault(obj['NODE_ENV'], 'development')),
+    PORT: coerceNumber(withDefault(obj['PORT'], 8080), 'PORT'),
+    NEXT_PUBLIC_APP_URL: parseOptional(obj['NEXT_PUBLIC_APP_URL'], (v: unknown) =>
+      parseString(v, 'NEXT_PUBLIC_APP_URL', { url: true }),
+    ),
+  };
+});
+
+/** @deprecated Use BaseEnvSchema */
+export const baseEnvSchema = BaseEnvSchema;
+
+// ============================================================================
+// JWT
+// ============================================================================
 
 /** JWT environment variables */
 export interface JwtEnv {
@@ -44,6 +67,10 @@ export interface JwtEnv {
   JWT_ISSUER: string;
   JWT_AUDIENCE: string;
 }
+
+// ============================================================================
+// Database
+// ============================================================================
 
 /** Database environment variables */
 export interface DatabaseEnv {
@@ -72,253 +99,6 @@ export interface DatabaseEnv {
   JSON_DB_PERSIST_ON_WRITE?: 'true' | 'false' | undefined;
   DATABASE_READ_REPLICA_URL?: string | undefined;
 }
-
-/** Authentication environment variables */
-export interface AuthEnv {
-  AUTH_STRATEGIES?: string | undefined;
-  ACCESS_TOKEN_EXPIRY: string;
-  JWT_ISSUER: string;
-  JWT_AUDIENCE: string;
-  REFRESH_TOKEN_EXPIRY_DAYS: number;
-  REFRESH_TOKEN_GRACE_PERIOD: number;
-  PASSWORD_MIN_LENGTH: number;
-  PASSWORD_MAX_LENGTH: number;
-  PASSWORD_MIN_SCORE: number;
-  LOCKOUT_MAX_ATTEMPTS: number;
-  LOCKOUT_DURATION_MS: number;
-  RATE_LIMIT_LOGIN_MAX?: number | undefined;
-  RATE_LIMIT_REGISTER_MAX?: number | undefined;
-  RATE_LIMIT_FORGOT_PASSWORD_MAX?: number | undefined;
-  RATE_LIMIT_VERIFY_EMAIL_MAX?: number | undefined;
-  COOKIE_SECRET?: string | undefined;
-  TRUST_PROXY?: 'true' | 'false' | undefined;
-  TRUSTED_PROXIES?: string | undefined;
-  MAX_PROXY_DEPTH?: number | undefined;
-  GOOGLE_CLIENT_ID?: string | undefined;
-  GOOGLE_CLIENT_SECRET?: string | undefined;
-  GOOGLE_CALLBACK_URL?: string | undefined;
-  GITHUB_CLIENT_ID?: string | undefined;
-  GITHUB_CLIENT_SECRET?: string | undefined;
-  GITHUB_CALLBACK_URL?: string | undefined;
-  FACEBOOK_CLIENT_ID?: string | undefined;
-  FACEBOOK_CLIENT_SECRET?: string | undefined;
-  FACEBOOK_CALLBACK_URL?: string | undefined;
-  MICROSOFT_CLIENT_ID?: string | undefined;
-  MICROSOFT_CLIENT_SECRET?: string | undefined;
-  MICROSOFT_CALLBACK_URL?: string | undefined;
-  MICROSOFT_TENANT_ID?: string | undefined;
-  APPLE_CLIENT_ID?: string | undefined;
-  APPLE_CLIENT_SECRET?: string | undefined;
-  APPLE_CALLBACK_URL?: string | undefined;
-  APPLE_TEAM_ID?: string | undefined;
-  APPLE_KEY_ID?: string | undefined;
-  APPLE_PRIVATE_KEY?: string | undefined;
-  APPLE_PRIVATE_KEY_BASE64?: string | undefined;
-  MAGIC_LINK_EXPIRY_MINUTES: number;
-  MAGIC_LINK_MAX_ATTEMPTS: number;
-  TOTP_ISSUER: string;
-  TOTP_WINDOW: number;
-  CAPTCHA_ENABLED?: 'true' | 'false' | undefined;
-  CAPTCHA_PROVIDER?: 'turnstile' | undefined;
-  CAPTCHA_SITE_KEY?: string | undefined;
-  CAPTCHA_SECRET_KEY?: string | undefined;
-}
-
-/** Email environment variables */
-export interface EmailEnv {
-  EMAIL_PROVIDER: 'console' | 'smtp';
-  SMTP_HOST?: string | undefined;
-  SMTP_PORT?: number | undefined;
-  SMTP_SECURE?: 'true' | 'false' | undefined;
-  SMTP_USER?: string | undefined;
-  SMTP_PASS?: string | undefined;
-  EMAIL_API_KEY?: string | undefined;
-  EMAIL_FROM_NAME?: string | undefined;
-  EMAIL_FROM_ADDRESS?: string | undefined;
-  EMAIL_REPLY_TO?: string | undefined;
-  SMTP_CONNECTION_TIMEOUT?: number | undefined;
-  SMTP_SOCKET_TIMEOUT?: number | undefined;
-}
-
-/** Storage environment variables */
-export interface StorageEnv {
-  STORAGE_PROVIDER: 'local' | 's3';
-  STORAGE_ROOT_PATH?: string | undefined;
-  STORAGE_PUBLIC_BASE_URL?: string | undefined;
-  S3_ACCESS_KEY_ID?: string | undefined;
-  S3_SECRET_ACCESS_KEY?: string | undefined;
-  S3_BUCKET?: string | undefined;
-  S3_REGION?: string | undefined;
-  S3_ENDPOINT?: string | undefined;
-  S3_FORCE_PATH_STYLE?: 'true' | 'false' | undefined;
-  S3_PRESIGN_EXPIRES_IN_SECONDS?: number | undefined;
-}
-
-/** Billing environment variables */
-export interface BillingEnv {
-  BILLING_PROVIDER?: 'stripe' | 'paypal' | undefined;
-  STRIPE_SECRET_KEY?: string | undefined;
-  STRIPE_PUBLISHABLE_KEY?: string | undefined;
-  STRIPE_WEBHOOK_SECRET?: string | undefined;
-  PAYPAL_CLIENT_ID?: string | undefined;
-  PAYPAL_CLIENT_SECRET?: string | undefined;
-  PAYPAL_WEBHOOK_ID?: string | undefined;
-  PAYPAL_MODE?: 'sandbox' | 'production' | undefined;
-  BILLING_CURRENCY: string;
-  PLAN_FREE_ID?: string | undefined;
-  PLAN_PRO_ID?: string | undefined;
-  PLAN_ENTERPRISE_ID?: string | undefined;
-  BILLING_PORTAL_RETURN_URL?: string | undefined;
-  BILLING_CHECKOUT_SUCCESS_URL?: string | undefined;
-  BILLING_CHECKOUT_CANCEL_URL?: string | undefined;
-}
-
-/** Cache environment variables */
-export interface CacheEnv {
-  CACHE_PROVIDER?: 'local' | 'redis' | undefined;
-  CACHE_TTL_MS: number;
-  CACHE_MAX_SIZE: number;
-  CACHE_USE_REDIS?: 'true' | 'false' | undefined;
-  REDIS_HOST: string;
-  REDIS_PORT: number;
-  REDIS_PASSWORD?: string | undefined;
-  REDIS_DB?: number | undefined;
-}
-
-/** Queue environment variables */
-export interface QueueEnv {
-  QUEUE_PROVIDER: 'local' | 'redis';
-  QUEUE_POLL_INTERVAL_MS: number;
-  QUEUE_CONCURRENCY: number;
-  QUEUE_MAX_ATTEMPTS: number;
-  QUEUE_BACKOFF_BASE_MS: number;
-  QUEUE_MAX_BACKOFF_MS: number;
-}
-
-/** Server environment variables */
-export interface ServerEnv {
-  HOST: string;
-  PORT: number;
-  API_PORT?: number | undefined;
-  APP_PORT?: number | undefined;
-  HEALTH_PORT: number;
-  MAINTENANCE_MODE?: 'true' | 'false' | undefined;
-  RATE_LIMIT_WINDOW_MS?: number | undefined;
-  RATE_LIMIT_MAX?: number | undefined;
-  PUBLIC_API_URL?: string | undefined;
-  PUBLIC_APP_URL?: string | undefined;
-  APP_URL?: string | undefined;
-  API_BASE_URL?: string | undefined;
-  APP_BASE_URL?: string | undefined;
-  CORS_ORIGIN?: string | undefined;
-  CORS_ORIGINS?: string | undefined;
-  LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
-  AUDIT_RETENTION_DAYS?: number | undefined;
-  LOG_CLIENT_ERROR_LEVEL?: 'debug' | 'info' | 'warn' | 'error' | undefined;
-  LOG_REQUEST_CONTEXT?: 'true' | 'false' | undefined;
-  LOG_PRETTY_JSON?: 'true' | 'false' | undefined;
-}
-
-/** Search environment variables */
-export interface SearchEnv {
-  SEARCH_PROVIDER: 'sql' | 'elasticsearch';
-  ELASTICSEARCH_NODE?: string | undefined;
-  ELASTICSEARCH_INDEX?: string | undefined;
-  ELASTICSEARCH_USERNAME?: string | undefined;
-  ELASTICSEARCH_PASSWORD?: string | undefined;
-  ELASTICSEARCH_API_KEY?: string | undefined;
-  ELASTICSEARCH_TLS?: 'true' | 'false' | undefined;
-  ELASTICSEARCH_REQUEST_TIMEOUT_MS?: number | undefined;
-  SQL_SEARCH_DEFAULT_PAGE_SIZE?: number | undefined;
-  SQL_SEARCH_MAX_PAGE_SIZE?: number | undefined;
-  SQL_SEARCH_MAX_QUERY_DEPTH?: number | undefined;
-  SQL_SEARCH_MAX_CONDITIONS?: number | undefined;
-  SQL_SEARCH_LOGGING?: 'true' | 'false' | undefined;
-  SQL_SEARCH_TIMEOUT_MS?: number | undefined;
-}
-
-/** Package manager environment variables */
-export interface PackageManagerEnv {
-  PACKAGE_MANAGER_PROVIDER: 'npm' | 'pnpm' | 'yarn';
-  NPM_AUDIT: 'true' | 'false';
-  NPM_LEGACY_PEER_DEPS: 'true' | 'false';
-  NPM_REGISTRY?: string | undefined;
-  PNPM_STRICT_PEER_DEPS: 'true' | 'false';
-  PNPM_FROZEN_LOCKFILE: 'true' | 'false';
-  PNPM_REGISTRY?: string | undefined;
-  YARN_AUDIT: 'true' | 'false';
-  YARN_FROZEN_LOCKFILE: 'true' | 'false';
-  YARN_REGISTRY?: string | undefined;
-}
-
-/** Frontend environment variables */
-export interface FrontendEnv {
-  VITE_API_URL?: string | undefined;
-  VITE_APP_NAME?: string | undefined;
-}
-
-/** Notification environment variables (from notification.ts) */
-export interface NotificationSchemaEnv {
-  NOTIFICATIONS_PROVIDER?:
-    | 'onesignal'
-    | 'fcm'
-    | 'courier'
-    | 'knock'
-    | 'sns'
-    | 'braze'
-    | 'generic'
-    | undefined;
-  ONESIGNAL_REST_API_KEY?: string | undefined;
-  ONESIGNAL_USER_AUTH_KEY?: string | undefined;
-  ONESIGNAL_APP_ID?: string | undefined;
-  ONESIGNAL_ENABLE_LOGGING?: 'true' | 'false' | undefined;
-  FCM_PROJECT_ID?: string | undefined;
-  FCM_CREDENTIALS?: string | undefined;
-  COURIER_API_KEY?: string | undefined;
-  COURIER_API_URL?: string | undefined;
-  COURIER_ENABLE_LOGGING?: 'true' | 'false' | undefined;
-}
-
-// ============================================================================
-// Combined FullEnv Type
-// ============================================================================
-
-/**
- * Combined environment type containing all validated environment variables.
- */
-export type FullEnv = BaseEnv &
-  JwtEnv &
-  DatabaseEnv &
-  AuthEnv &
-  EmailEnv &
-  StorageEnv &
-  BillingEnv &
-  CacheEnv &
-  QueueEnv &
-  ServerEnv &
-  SearchEnv &
-  PackageManagerEnv &
-  FrontendEnv &
-  NotificationSchemaEnv;
-
-// ============================================================================
-// Helper Enums
-// ============================================================================
-
-const nodeEnvSchema = createEnumSchema(['development', 'production', 'test'] as const, 'NODE_ENV');
-const trueFalseSchema = createEnumSchema(['true', 'false'] as const, 'boolean flag');
-
-// ============================================================================
-// Individual Sub-Schemas
-// ============================================================================
-
-export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unknown) => {
-  const obj = parseObject(data, 'BaseEnv');
-  return {
-    NODE_ENV: nodeEnvSchema.parse(withDefault(obj['NODE_ENV'], 'development')),
-    PORT: coerceNumber(withDefault(obj['PORT'], 8080), 'PORT'),
-  };
-});
 
 export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>((data: unknown) => {
   const obj = parseObject(data, 'DatabaseEnv');
@@ -378,6 +158,10 @@ export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>(
     ),
   };
 });
+
+// ============================================================================
+// Auth
+// ============================================================================
 
 export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unknown) => {
   const obj = parseObject(data, 'AuthEnv');
@@ -518,6 +302,26 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
   };
 });
 
+// ============================================================================
+// Email
+// ============================================================================
+
+/** Email environment variables */
+export interface EmailEnv {
+  EMAIL_PROVIDER: 'console' | 'smtp';
+  SMTP_HOST?: string | undefined;
+  SMTP_PORT?: number | undefined;
+  SMTP_SECURE?: 'true' | 'false' | undefined;
+  SMTP_USER?: string | undefined;
+  SMTP_PASS?: string | undefined;
+  EMAIL_API_KEY?: string | undefined;
+  EMAIL_FROM_NAME?: string | undefined;
+  EMAIL_FROM_ADDRESS?: string | undefined;
+  EMAIL_REPLY_TO?: string | undefined;
+  SMTP_CONNECTION_TIMEOUT?: number | undefined;
+  SMTP_SOCKET_TIMEOUT?: number | undefined;
+}
+
 export const EmailEnvSchema: Schema<EmailEnv> = createSchema<EmailEnv>((data: unknown) => {
   const obj = parseObject(data, 'EmailEnv');
   return {
@@ -545,6 +349,32 @@ export const EmailEnvSchema: Schema<EmailEnv> = createSchema<EmailEnv>((data: un
     ),
   };
 });
+
+// ============================================================================
+// Notifications
+// ============================================================================
+
+/** Notification environment variables */
+export interface NotificationSchemaEnv {
+  NOTIFICATIONS_PROVIDER?:
+    | 'onesignal'
+    | 'fcm'
+    | 'courier'
+    | 'knock'
+    | 'sns'
+    | 'braze'
+    | 'generic'
+    | undefined;
+  ONESIGNAL_REST_API_KEY?: string | undefined;
+  ONESIGNAL_USER_AUTH_KEY?: string | undefined;
+  ONESIGNAL_APP_ID?: string | undefined;
+  ONESIGNAL_ENABLE_LOGGING?: 'true' | 'false' | undefined;
+  FCM_PROJECT_ID?: string | undefined;
+  FCM_CREDENTIALS?: string | undefined;
+  COURIER_API_KEY?: string | undefined;
+  COURIER_API_URL?: string | undefined;
+  COURIER_ENABLE_LOGGING?: 'true' | 'false' | undefined;
+}
 
 export const NotificationEnvSchema: Schema<NotificationSchemaEnv> =
   createSchema<NotificationSchemaEnv>((data: unknown) => {
@@ -584,6 +414,24 @@ export const NotificationEnvSchema: Schema<NotificationSchemaEnv> =
     };
   });
 
+// ============================================================================
+// Storage
+// ============================================================================
+
+/** Storage environment variables */
+export interface StorageEnv {
+  STORAGE_PROVIDER: 'local' | 's3';
+  STORAGE_ROOT_PATH?: string | undefined;
+  STORAGE_PUBLIC_BASE_URL?: string | undefined;
+  S3_ACCESS_KEY_ID?: string | undefined;
+  S3_SECRET_ACCESS_KEY?: string | undefined;
+  S3_BUCKET?: string | undefined;
+  S3_REGION?: string | undefined;
+  S3_ENDPOINT?: string | undefined;
+  S3_FORCE_PATH_STYLE?: 'true' | 'false' | undefined;
+  S3_PRESIGN_EXPIRES_IN_SECONDS?: number | undefined;
+}
+
 export const StorageEnvSchema: Schema<StorageEnv> = createSchema<StorageEnv>((data: unknown) => {
   const obj = parseObject(data, 'StorageEnv');
   return {
@@ -613,6 +461,29 @@ export const StorageEnvSchema: Schema<StorageEnv> = createSchema<StorageEnv>((da
     ),
   };
 });
+
+// ============================================================================
+// Billing
+// ============================================================================
+
+/** Billing environment variables */
+export interface BillingEnv {
+  BILLING_PROVIDER?: 'stripe' | 'paypal' | undefined;
+  STRIPE_SECRET_KEY?: string | undefined;
+  STRIPE_PUBLISHABLE_KEY?: string | undefined;
+  STRIPE_WEBHOOK_SECRET?: string | undefined;
+  PAYPAL_CLIENT_ID?: string | undefined;
+  PAYPAL_CLIENT_SECRET?: string | undefined;
+  PAYPAL_WEBHOOK_ID?: string | undefined;
+  PAYPAL_MODE?: 'sandbox' | 'production' | undefined;
+  BILLING_CURRENCY: string;
+  PLAN_FREE_ID?: string | undefined;
+  PLAN_PRO_ID?: string | undefined;
+  PLAN_ENTERPRISE_ID?: string | undefined;
+  BILLING_PORTAL_RETURN_URL?: string | undefined;
+  BILLING_CHECKOUT_SUCCESS_URL?: string | undefined;
+  BILLING_CHECKOUT_CANCEL_URL?: string | undefined;
+}
 
 export const BillingEnvSchema: Schema<BillingEnv> = createSchema<BillingEnv>((data: unknown) => {
   const obj = parseObject(data, 'BillingEnv');
@@ -659,6 +530,22 @@ export const BillingEnvSchema: Schema<BillingEnv> = createSchema<BillingEnv>((da
   };
 });
 
+// ============================================================================
+// Cache
+// ============================================================================
+
+/** Cache environment variables */
+export interface CacheEnv {
+  CACHE_PROVIDER?: 'local' | 'redis' | undefined;
+  CACHE_TTL_MS: number;
+  CACHE_MAX_SIZE: number;
+  CACHE_USE_REDIS?: 'true' | 'false' | undefined;
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_PASSWORD?: string | undefined;
+  REDIS_DB?: number | undefined;
+}
+
 export const CacheEnvSchema: Schema<CacheEnv> = createSchema<CacheEnv>((data: unknown) => {
   const obj = parseObject(data, 'CacheEnv');
   return {
@@ -674,6 +561,20 @@ export const CacheEnvSchema: Schema<CacheEnv> = createSchema<CacheEnv>((data: un
     REDIS_DB: parseOptional(obj['REDIS_DB'], (v: unknown) => coerceNumber(v, 'REDIS_DB')),
   };
 });
+
+// ============================================================================
+// Queue
+// ============================================================================
+
+/** Queue environment variables */
+export interface QueueEnv {
+  QUEUE_PROVIDER: 'local' | 'redis';
+  QUEUE_POLL_INTERVAL_MS: number;
+  QUEUE_CONCURRENCY: number;
+  QUEUE_MAX_ATTEMPTS: number;
+  QUEUE_BACKOFF_BASE_MS: number;
+  QUEUE_MAX_BACKOFF_MS: number;
+}
 
 export const QueueEnvSchema: Schema<QueueEnv> = createSchema<QueueEnv>((data: unknown) => {
   const obj = parseObject(data, 'QueueEnv');
@@ -700,6 +601,34 @@ export const QueueEnvSchema: Schema<QueueEnv> = createSchema<QueueEnv>((data: un
     ),
   };
 });
+
+// ============================================================================
+// Server
+// ============================================================================
+
+/** Server environment variables */
+export interface ServerEnv {
+  HOST: string;
+  PORT: number;
+  API_PORT?: number | undefined;
+  APP_PORT?: number | undefined;
+  HEALTH_PORT: number;
+  MAINTENANCE_MODE?: 'true' | 'false' | undefined;
+  RATE_LIMIT_WINDOW_MS?: number | undefined;
+  RATE_LIMIT_MAX?: number | undefined;
+  PUBLIC_API_URL?: string | undefined;
+  PUBLIC_APP_URL?: string | undefined;
+  APP_URL?: string | undefined;
+  API_BASE_URL?: string | undefined;
+  APP_BASE_URL?: string | undefined;
+  CORS_ORIGIN?: string | undefined;
+  CORS_ORIGINS?: string | undefined;
+  LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
+  AUDIT_RETENTION_DAYS?: number | undefined;
+  LOG_CLIENT_ERROR_LEVEL?: 'debug' | 'info' | 'warn' | 'error' | undefined;
+  LOG_REQUEST_CONTEXT?: 'true' | 'false' | undefined;
+  LOG_PRETTY_JSON?: 'true' | 'false' | undefined;
+}
 
 export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data: unknown) => {
   const obj = parseObject(data, 'ServerEnv');
@@ -745,6 +674,28 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
   };
 });
 
+// ============================================================================
+// Search
+// ============================================================================
+
+/** Search environment variables */
+export interface SearchEnv {
+  SEARCH_PROVIDER: 'sql' | 'elasticsearch';
+  ELASTICSEARCH_NODE?: string | undefined;
+  ELASTICSEARCH_INDEX?: string | undefined;
+  ELASTICSEARCH_USERNAME?: string | undefined;
+  ELASTICSEARCH_PASSWORD?: string | undefined;
+  ELASTICSEARCH_API_KEY?: string | undefined;
+  ELASTICSEARCH_TLS?: 'true' | 'false' | undefined;
+  ELASTICSEARCH_REQUEST_TIMEOUT_MS?: number | undefined;
+  SQL_SEARCH_DEFAULT_PAGE_SIZE?: number | undefined;
+  SQL_SEARCH_MAX_PAGE_SIZE?: number | undefined;
+  SQL_SEARCH_MAX_QUERY_DEPTH?: number | undefined;
+  SQL_SEARCH_MAX_CONDITIONS?: number | undefined;
+  SQL_SEARCH_LOGGING?: 'true' | 'false' | undefined;
+  SQL_SEARCH_TIMEOUT_MS?: number | undefined;
+}
+
 export const SearchEnvSchema: Schema<SearchEnv> = createSchema<SearchEnv>((data: unknown) => {
   const obj = parseObject(data, 'SearchEnv');
   return {
@@ -789,6 +740,24 @@ export const SearchEnvSchema: Schema<SearchEnv> = createSchema<SearchEnv>((data:
   };
 });
 
+// ============================================================================
+// Package Manager
+// ============================================================================
+
+/** Package manager environment variables */
+export interface PackageManagerEnv {
+  PACKAGE_MANAGER_PROVIDER: 'npm' | 'pnpm' | 'yarn';
+  NPM_AUDIT: 'true' | 'false';
+  NPM_LEGACY_PEER_DEPS: 'true' | 'false';
+  NPM_REGISTRY?: string | undefined;
+  PNPM_STRICT_PEER_DEPS: 'true' | 'false';
+  PNPM_FROZEN_LOCKFILE: 'true' | 'false';
+  PNPM_REGISTRY?: string | undefined;
+  YARN_AUDIT: 'true' | 'false';
+  YARN_FROZEN_LOCKFILE: 'true' | 'false';
+  YARN_REGISTRY?: string | undefined;
+}
+
 export const PackageManagerEnvSchema: Schema<PackageManagerEnv> = createSchema<PackageManagerEnv>(
   (data: unknown) => {
     const obj = parseObject(data, 'PackageManagerEnv');
@@ -814,6 +783,16 @@ export const PackageManagerEnvSchema: Schema<PackageManagerEnv> = createSchema<P
   },
 );
 
+// ============================================================================
+// Frontend
+// ============================================================================
+
+/** Frontend environment variables */
+export interface FrontendEnv {
+  VITE_API_URL?: string | undefined;
+  VITE_APP_NAME?: string | undefined;
+}
+
 export const FrontendEnvSchema: Schema<FrontendEnv> = createSchema<FrontendEnv>((data: unknown) => {
   const obj = parseObject(data, 'FrontendEnv');
   return {
@@ -825,8 +804,24 @@ export const FrontendEnvSchema: Schema<FrontendEnv> = createSchema<FrontendEnv>(
 });
 
 // ============================================================================
-// Production Validation Guards
+// Combined Environment
 // ============================================================================
+
+/** Combined environment type containing all validated environment variables. */
+export type FullEnv = BaseEnv &
+  JwtEnv &
+  DatabaseEnv &
+  AuthEnv &
+  EmailEnv &
+  StorageEnv &
+  BillingEnv &
+  CacheEnv &
+  QueueEnv &
+  ServerEnv &
+  SearchEnv &
+  PackageManagerEnv &
+  FrontendEnv &
+  NotificationSchemaEnv;
 
 function validateProductionGuards(env: FullEnv): void {
   const isProd = env.NODE_ENV === 'production';
@@ -868,10 +863,6 @@ function validateProductionGuards(env: FullEnv): void {
     );
   }
 }
-
-// ============================================================================
-// Combined Environment Schema
-// ============================================================================
 
 function parseAllEnvFields(obj: Record<string, unknown>): FullEnv {
   const base = BaseEnvSchema.parse(obj);
@@ -922,24 +913,15 @@ export const EnvSchema: Schema<FullEnv> = createSchema<FullEnv>((data: unknown) 
 });
 
 // ============================================================================
-// Env Helpers (from env.ts - ConfigurationError replaced with plain Error)
+// Utilities
 // ============================================================================
 
-/**
- * Helper to get raw environment variables.
- * Can be overridden if the runtime doesn't use process.env (e.g. Cloudflare Workers).
- */
+/** Get raw environment variables (overridable for non-Node runtimes). */
 export function getRawEnv(): Record<string, string | undefined> {
   return typeof process !== 'undefined' ? process.env : {};
 }
 
-/**
- * Validates environment variables against a schema.
- *
- * @param schema - Schema to validate against
- * @returns Validated environment object
- * @throws Error if validation fails
- */
+/** Validates environment variables against a schema. Throws on failure. */
 export function validateEnv<T>(schema: Schema<T>): T {
   const result = schema.safeParse(getRawEnv());
 

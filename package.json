@@ -54,7 +54,9 @@
     "hooks:install": "git config --local core.hooksPath infra/git-hooks && chmod +x infra/git-hooks/pre-commit infra/git-hooks/pre-push",
     "hooks:cache:maintain": "node --import tsx main/tools/scripts/dev/maintain-local-caches.ts",
     "pre-commit": "pnpm sync:headers:staged && lint-staged",
-    "pre-push": "node --import tsx main/tools/scripts/dev/pre-push.ts"
+    "pre-push": "node --import tsx main/tools/scripts/dev/pre-push.ts",
+    "graph:shared": "node --import tsx main/tools/scripts/audit/graph-shared.ts",
+    "line-count": "node --import tsx main/tools/scripts/audit/line-count.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

@@ -235,6 +235,24 @@ export const baseConfig = [
     },
   },
 
+  // 5b. BARREL FILES: SIBLINGS ONLY (no reaching into parent directories)
+  {
+    files: ['main/shared/src/**/index.ts'],
+    ignores: [
+      'main/shared/src/index.ts',       // Root barrel re-exports from all layers
+      'main/shared/src/config/index.ts', // Public entry point — re-exports parsers from ../primitives/helpers
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportNamedDeclaration[source.value=/^\\.\\.\\//]',
+          message: 'Barrel exports must only re-export from sibling files (./), not parent directories (../). This prevents cross-module coupling.',
+        },
+      ],
+    },
+  },
+
   // 6. TEST RELAXATION (Fast Loop support)
   {
     files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],

@@ -9,7 +9,8 @@
  */
 
 import { createSchema } from '../../primitives/schema';
-import { errorResponseSchema, uuidSchema } from '../../core/schemas';
+import { uuidSchema } from '../../primitives/schema';
+import { errorResponseSchema } from '../../core/schemas';
 
 import type { Contract, Schema } from '../../primitives/api';
 

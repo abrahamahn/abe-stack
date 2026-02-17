@@ -264,3 +264,58 @@ export interface RateLimitConfig {
  * @see AuthConfig.argon2 for the nested form in the auth config
  */
 export type Argon2Config = AuthConfig['argon2'];
+
+// ============================================================================
+// Auth Environment Variables
+// ============================================================================
+
+/** Authentication environment variables */
+export interface AuthEnv {
+  AUTH_STRATEGIES?: string | undefined;
+  ACCESS_TOKEN_EXPIRY: string;
+  JWT_ISSUER: string;
+  JWT_AUDIENCE: string;
+  REFRESH_TOKEN_EXPIRY_DAYS: number;
+  REFRESH_TOKEN_GRACE_PERIOD: number;
+  PASSWORD_MIN_LENGTH: number;
+  PASSWORD_MAX_LENGTH: number;
+  PASSWORD_MIN_SCORE: number;
+  LOCKOUT_MAX_ATTEMPTS: number;
+  LOCKOUT_DURATION_MS: number;
+  RATE_LIMIT_LOGIN_MAX?: number | undefined;
+  RATE_LIMIT_REGISTER_MAX?: number | undefined;
+  RATE_LIMIT_FORGOT_PASSWORD_MAX?: number | undefined;
+  RATE_LIMIT_VERIFY_EMAIL_MAX?: number | undefined;
+  COOKIE_SECRET?: string | undefined;
+  TRUST_PROXY?: 'true' | 'false' | undefined;
+  TRUSTED_PROXIES?: string | undefined;
+  MAX_PROXY_DEPTH?: number | undefined;
+  GOOGLE_CLIENT_ID?: string | undefined;
+  GOOGLE_CLIENT_SECRET?: string | undefined;
+  GOOGLE_CALLBACK_URL?: string | undefined;
+  GITHUB_CLIENT_ID?: string | undefined;
+  GITHUB_CLIENT_SECRET?: string | undefined;
+  GITHUB_CALLBACK_URL?: string | undefined;
+  FACEBOOK_CLIENT_ID?: string | undefined;
+  FACEBOOK_CLIENT_SECRET?: string | undefined;
+  FACEBOOK_CALLBACK_URL?: string | undefined;
+  MICROSOFT_CLIENT_ID?: string | undefined;
+  MICROSOFT_CLIENT_SECRET?: string | undefined;
+  MICROSOFT_CALLBACK_URL?: string | undefined;
+  MICROSOFT_TENANT_ID?: string | undefined;
+  APPLE_CLIENT_ID?: string | undefined;
+  APPLE_CLIENT_SECRET?: string | undefined;
+  APPLE_CALLBACK_URL?: string | undefined;
+  APPLE_TEAM_ID?: string | undefined;
+  APPLE_KEY_ID?: string | undefined;
+  APPLE_PRIVATE_KEY?: string | undefined;
+  APPLE_PRIVATE_KEY_BASE64?: string | undefined;
+  MAGIC_LINK_EXPIRY_MINUTES: number;
+  MAGIC_LINK_MAX_ATTEMPTS: number;
+  TOTP_ISSUER: string;
+  TOTP_WINDOW: number;
+  CAPTCHA_ENABLED?: 'true' | 'false' | undefined;
+  CAPTCHA_PROVIDER?: 'turnstile' | undefined;
+  CAPTCHA_SITE_KEY?: string | undefined;
+  CAPTCHA_SECRET_KEY?: string | undefined;
+}

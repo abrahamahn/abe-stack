@@ -8,10 +8,10 @@
 
 import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from '../constants/platform';
 
-import { AppError, type ValidationIssue } from './base';
+import { AppError, BaseError, type ValidationIssue } from './base';
 
 // Re-export base error classes from L1
-export { AppError, BaseError, type ValidationIssue } from './base';
+export { AppError, BaseError, type ValidationIssue };
 
 // ============================================================================
 // HTTP Error Classes (4xx and 5xx)
