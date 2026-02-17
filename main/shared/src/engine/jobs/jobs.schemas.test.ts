@@ -16,7 +16,7 @@ import {
   updateJobSchema,
 } from './jobs.schemas';
 
-import type { JobId } from '../../types/ids';
+import type { JobId } from '../../core/types/ids';
 
 // ============================================================================
 // Helpers

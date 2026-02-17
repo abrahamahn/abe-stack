@@ -16,10 +16,10 @@ import {
   parseString,
 } from '../../core/schema.utils';
 import { isoDateTimeSchema } from '../../core/schemas';
-import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
+import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { ApiKeyId, TenantId, UserId } from '../../types/ids';
+import type { ApiKeyId, TenantId, UserId } from '../../core/types/ids';
 
 // ============================================================================
 // Helpers

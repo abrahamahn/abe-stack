@@ -28,7 +28,6 @@ import {
   deviceListResponseSchema,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
-  emptyBodySchema,
   forgotPasswordRequestSchema,
   forgotPasswordResponseSchema,
   invalidateSessionsResponseSchema,
@@ -76,6 +75,7 @@ import {
   webauthnRegisterVerifyResponseSchema,
 } from '../core/auth/auth.schemas';
 import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { emptyBodySchema } from '../engine/http/response';
 
 import type { Contract } from '../primitives/api';
 

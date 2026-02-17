@@ -21,11 +21,11 @@ import {
   AUDIT_CATEGORIES,
   AUDIT_SEVERITIES,
 } from '../../primitives/constants';
-import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
+import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../pagination';
 
 import type { Schema } from '../../primitives/api';
-import type { AuditEventId, TenantId, UserId } from '../../types/ids';
+import type { AuditEventId, TenantId, UserId } from '../../core/types/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../pagination';
 
 // ============================================================================

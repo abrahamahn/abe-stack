@@ -8,10 +8,10 @@
 
 import { createEnumSchema, createSchema, parseNumber, parseString } from '../../core/schema.utils';
 import { isoDateTimeSchema } from '../../core/schemas';
-import { tenantIdSchema } from '../../types/ids';
+import { tenantIdSchema } from '../../core/types/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { TenantId } from '../../types/ids';
+import type { TenantId } from '../../core/types/ids';
 
 // ============================================================================
 // Types

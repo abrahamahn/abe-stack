@@ -6,7 +6,7 @@
  * Domain-specific errors (BadRequestError, etc.) remain in core/errors.ts (L2).
  */
 
-import { ERROR_CODES, HTTP_STATUS } from '../../primitives/constants';
+import { ERROR_CODES, HTTP_STATUS } from '../constants/platform';
 
 /**
  * Minimal validation issue shape for error formatting.

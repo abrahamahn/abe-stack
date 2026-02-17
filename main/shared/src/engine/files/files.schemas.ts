@@ -17,10 +17,10 @@ import {
   parseRecord,
   parseString,
 } from '../../core/schema.utils';
-import { fileIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
+import { fileIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { FileId, TenantId, UserId } from '../../types/ids';
+import type { FileId, TenantId, UserId } from '../../core/types/ids';
 
 // ============================================================================
 // Enums
