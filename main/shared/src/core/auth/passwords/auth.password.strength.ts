@@ -14,13 +14,13 @@ import {
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
-} from './auth.password-patterns';
+} from './auth.password.patterns';
 import {
   calculateEntropy,
   calculateScore,
   estimateCrackTime,
   generateFeedback,
-} from './auth.password-scoring';
+} from './auth.password.scoring';
 
 /**
  * Strength result returned by estimatePasswordStrength

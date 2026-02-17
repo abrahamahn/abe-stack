@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { getSessionAge, isSessionActive, isSessionRevoked } from './auth-sessions.logic';
+import { getSessionAge, isSessionActive, isSessionRevoked } from './auth.sessions.logic';
 
 // ============================================================================
 // isSessionActive

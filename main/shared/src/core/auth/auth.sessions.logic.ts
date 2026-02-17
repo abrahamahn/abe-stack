@@ -5,7 +5,7 @@
  * @module Core/Auth
  */
 
-import type { UserSession } from './auth-sessions.schemas';
+import type { UserSession } from './auth.sessions.schemas';
 
 // ============================================================================
 // Session State Queries

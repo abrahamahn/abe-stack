@@ -9,7 +9,7 @@
 import { createLiteralSchema, createSchema, parseBoolean, parseString } from '../../primitives/schema';
 import { userSchema } from '../users/users.schemas';
 
-import { emailSchema, passwordSchema } from './auth-scalars.schemas';
+import { emailSchema, passwordSchema } from './auth.scalars.schemas';
 
 import type { Schema } from '../../primitives/schema';
 import type { User } from '../users/users.schemas';

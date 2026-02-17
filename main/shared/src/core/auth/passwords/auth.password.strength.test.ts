@@ -1,7 +1,7 @@
 // main/shared/src/domain/auth/auth.password-strength.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { estimatePasswordStrength } from './auth.password-strength';
+import { estimatePasswordStrength } from './auth.password.strength';
 
 describe('estimatePasswordStrength', () => {
   describe('score calculation', () => {

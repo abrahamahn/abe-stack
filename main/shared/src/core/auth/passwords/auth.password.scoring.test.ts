@@ -8,7 +8,7 @@ import {
   generateFeedback,
   getCharsetSize,
   type PasswordPenalties,
-} from './auth.password-scoring';
+} from './auth.password.scoring';
 
 describe('Password Scoring', () => {
   describe('getCharsetSize', () => {

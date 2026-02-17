@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { getRefreshCookieOptions, isStrategyEnabled } from './auth-helpers.schemas';
+import { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.schemas';
 
 import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/auth';
 

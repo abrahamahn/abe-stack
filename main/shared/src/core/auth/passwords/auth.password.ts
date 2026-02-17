@@ -1,5 +1,5 @@
 // main/shared/src/domain/auth/auth.password.ts
-import { estimatePasswordStrength } from './auth.password-strength';
+import { estimatePasswordStrength } from './auth.password.strength';
 
 /**
  * Password validation configuration

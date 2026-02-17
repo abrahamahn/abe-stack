@@ -7,7 +7,7 @@ import {
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
-} from './auth.password-patterns';
+} from './auth.password.patterns';
 import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants/auth';
 
 describe('Password Patterns', () => {

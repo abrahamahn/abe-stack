@@ -48,4 +48,4 @@ export {
   type CreateTenantSetting,
   type TenantSetting,
   type UpdateTenantSetting,
-} from './tenant-settings.schemas';
+} from './tenant.settings.schemas';

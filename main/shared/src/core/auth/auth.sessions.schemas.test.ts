@@ -14,7 +14,7 @@ import {
   type CreateUserSession,
   type UpdateUserSession,
   type UserSession,
-} from './auth-sessions.schemas';
+} from './auth.sessions.schemas';
 
 // ============================================================================
 // Test Constants

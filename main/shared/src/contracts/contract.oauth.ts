@@ -7,7 +7,7 @@ import {
     oauthInitiateResponseSchema,
     oauthLinkResponseSchema,
     oauthUnlinkResponseSchema,
-} from '../core/auth/auth-oauth.schemas';
+} from '../core/auth/auth.oauth.schemas';
 
 import type { Contract } from '../primitives/api';
 

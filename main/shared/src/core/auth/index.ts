@@ -41,7 +41,7 @@ export {
   type SetPasswordResponse,
   type SudoRequest,
   type SudoResponse,
-} from './auth-core.schemas';
+} from './auth.core.schemas';
 
 // --- Device schemas ---
 export {
@@ -51,7 +51,7 @@ export {
   type DeviceItem,
   type DeviceListResponse,
   type TrustDeviceResponse,
-} from './auth-devices.schemas';
+} from './auth.devices.schemas';
 
 // --- Email schemas ---
 export {
@@ -75,10 +75,10 @@ export {
   type ResendVerificationResponse,
   type RevertEmailChangeRequest,
   type RevertEmailChangeResponse,
-} from './auth-email.schemas';
+} from './auth.email.schemas';
 
 // --- Auth helpers ---
-export { getRefreshCookieOptions, isStrategyEnabled } from './auth-helpers.schemas';
+export { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.schemas';
 
 // --- Magic link schemas ---
 export {
@@ -90,7 +90,7 @@ export {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
   type MagicLinkVerifyResponse,
-} from './auth-magic-link.schemas';
+} from './auth.magic-link.schemas';
 
 // --- MFA schemas ---
 export {
@@ -124,7 +124,7 @@ export {
   type TotpVerifyResponse,
   type VerifyPhoneRequest,
   type VerifyPhoneResponse,
-} from './auth-mfa.schemas';
+} from './auth.mfa.schemas';
 
 // --- OAuth schemas ---
 export {
@@ -148,7 +148,7 @@ export {
   type OAuthLinkResponse,
   type OAuthProvider,
   type OAuthUnlinkResponse,
-} from './auth-oauth.schemas';
+} from './auth.oauth.schemas';
 
 // --- Passkey schemas ---
 export {
@@ -156,7 +156,7 @@ export {
   renamePasskeyRequestSchema,
   type PasskeyListItem,
   type RenamePasskeyRequest,
-} from './auth-passkey.schemas';
+} from './auth.passkey.schemas';
 
 // --- ToS schemas ---
 export {
@@ -166,7 +166,7 @@ export {
   type AcceptTosRequest,
   type AcceptTosResponse,
   type TosStatusResponse,
-} from './auth-tos.schemas';
+} from './auth.tos.schemas';
 
 // --- WebAuthn schemas ---
 export {
@@ -180,7 +180,7 @@ export {
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
   type WebauthnRegisterVerifyResponse,
-} from './auth-webauth.schemas';
+} from './auth.webauth.schemas';
 
 // --- Password validation ---
 export {
@@ -193,7 +193,7 @@ export {
   type PasswordValidationResult,
 } from './passwords/auth.password';
 
-export { estimatePasswordStrength, type StrengthResult } from './passwords/auth.password-strength';
+export { estimatePasswordStrength, type StrengthResult } from './passwords/auth.password.strength';
 
 export {
   calculateEntropy,
@@ -202,7 +202,7 @@ export {
   generateFeedback,
   getCharsetSize,
   type PasswordPenalties,
-} from './passwords/auth.password-scoring';
+} from './passwords/auth.password.scoring';
 
 export {
   containsUserInput,
@@ -210,7 +210,7 @@ export {
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
-} from './passwords/auth.password-patterns';
+} from './passwords/auth.password.patterns';
 
 // --- Auth errors (canonical in engine/errors) ---
 import {
@@ -250,7 +250,7 @@ export {
   getSessionAge,
   isSessionActive,
   isSessionRevoked,
-} from './auth-sessions.logic';
+} from './auth.sessions.logic';
 
 export {
   createUserSessionSchema,
@@ -259,7 +259,7 @@ export {
   type CreateUserSession,
   type UpdateUserSession,
   type UserSession,
-} from './auth-sessions.schemas';
+} from './auth.sessions.schemas';
 
 // --- Roles ---
 export {
