@@ -1,4 +1,4 @@
-// main/shared/src/engine/module-registration/module-registration.ts
+// main/shared/src/engine/di/di.ts
 /**
  * Module Registration Contract
  *

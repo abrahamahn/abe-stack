@@ -137,7 +137,7 @@ export {
   passwordSchema,
 } from './core/schemas';
 
-export type { ModuleDeps, ModuleRegistrationOptions } from './engine/module-registration';
+export type { ModuleDeps, ModuleRegistrationOptions } from './engine/di';
 
 export {
   createListInsertOperation,

@@ -240,7 +240,7 @@ export type {
   RequestInfo,
 } from './context';
 
-export type { ModuleDeps, ModuleRegistrationOptions } from './module-registration';
+export type { ModuleDeps, ModuleRegistrationOptions } from './di';
 
 export type { NativeBridge } from './native';
 
