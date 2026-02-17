@@ -19,17 +19,17 @@ import {
 import { emailSchema, isoDateTimeSchema, passwordSchema } from '../auth/auth-scalars.schemas';
 import { appRoleSchema } from '../auth/roles';
 import { APP_ROLES } from '../constants/auth';
-import { userIdSchema } from '../types/ids';
+import { userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/schema';
 import type { AppRole } from '../auth/roles';
-import type { UserId } from '../types/ids';
+import type { UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Shared Types & Re-exports
 // ============================================================================
 
-export type { UserId } from '../types/ids';
+export type { UserId } from '../../primitives/schema/ids';
 export { userIdSchema };
 
 // Re-export AppRole from core types (plus legacy aliases)

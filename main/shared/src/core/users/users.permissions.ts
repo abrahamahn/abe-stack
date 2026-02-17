@@ -12,7 +12,7 @@ import {
 
 import type { AuthContext, PolicyAction, PolicyResource } from '../policy';
 import type { AppRole, User } from './users.schemas';
-import type { UserId } from '../types/ids';
+import type { UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Access Control Logic

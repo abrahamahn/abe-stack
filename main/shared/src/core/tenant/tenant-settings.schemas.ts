@@ -7,8 +7,8 @@
  */
 
 import { coerceDate, createSchema, parseString, type Schema } from '../../primitives/schema';
-import { tenantIdSchema } from '../types/ids';
-import type { TenantId } from '../types/ids';
+import { tenantIdSchema } from '../../primitives/schema/ids';
+import type { TenantId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

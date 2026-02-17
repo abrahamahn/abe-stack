@@ -14,8 +14,8 @@ import {
   parseString,
   type Schema,
 } from '../../primitives/schema';
-import { sessionIdSchema, userIdSchema } from '../types/ids';
-import type { SessionId, UserId } from '../types/ids';
+import { sessionIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import type { SessionId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

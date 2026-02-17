@@ -23,7 +23,7 @@ import {
   type UpdatePlanRequest,
 } from './billing.admin.schemas';
 
-import type { PlanId } from '../types/ids';
+import type { PlanId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Test Fixtures

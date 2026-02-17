@@ -7,7 +7,7 @@
  */
 
 import { ACTOR_TYPES } from '../constants/iam';
-import { activityIdSchema, tenantIdSchema, userIdSchema } from '../types/ids';
+import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   coerceDate,
   createEnumSchema,
@@ -20,7 +20,7 @@ import {
 } from '../schema.utils';
 
 import type { Schema } from '../../primitives/api';
-import type { ActivityId, TenantId, UserId } from '../types/ids';
+import type { ActivityId, TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants

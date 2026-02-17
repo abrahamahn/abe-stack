@@ -18,7 +18,7 @@ import {
 } from './users.permissions';
 
 import type { User } from './users.schemas';
-import type { UserId } from '../types/ids';
+import type { UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Test Data

@@ -19,11 +19,11 @@ import {
   withDefault,
 } from '../../primitives/schema';
 import { isoDateTimeSchema } from '../auth/auth-scalars.schemas';
-import { notificationIdSchema, userIdSchema } from '../types/ids';
+import { notificationIdSchema, userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/schema';
 import type { CursorPaginationOptions } from '../../engine/pagination';
-import type { NotificationId, UserId } from '../types/ids';
+import type { NotificationId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants

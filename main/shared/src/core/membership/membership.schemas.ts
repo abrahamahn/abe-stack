@@ -16,9 +16,9 @@ import {
 import { emailSchema, isoDateTimeSchema } from '../auth/auth-scalars.schemas';
 import { tenantRoleSchema } from '../auth/roles';
 import { INVITATION_STATUSES } from '../constants/iam';
-import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../types/ids';
+import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import type { TenantRole } from '../auth/roles';
-import type { InviteId, MembershipId, TenantId, UserId } from '../types/ids';
+import type { InviteId, MembershipId, TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants
