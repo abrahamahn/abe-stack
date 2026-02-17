@@ -2,10 +2,9 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/audit';
+import { AUDIT_ACTION_REGEX } from '../../primitives/constants';
 import {
-  AUDIT_ACTION_REGEX,
-  AUDIT_CATEGORIES,
-  AUDIT_SEVERITIES,
   auditEventSchema,
   auditLogFilterSchema,
   auditLogListResponseSchema,

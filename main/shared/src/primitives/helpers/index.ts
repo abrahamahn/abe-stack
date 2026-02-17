@@ -85,3 +85,10 @@ export {
   type Ok,
   type Result,
 } from './result';
+
+export {
+  constantTimeCompare,
+  generateSecureId,
+  generateToken,
+  generateUUID,
+} from './crypto';

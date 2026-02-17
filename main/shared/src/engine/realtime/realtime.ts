@@ -11,7 +11,7 @@
 import { createSchema } from '../../primitives/schema';
 import { uuidSchema } from '../../primitives/schema';
 import { deepEqual, getFieldValue, isSafeObjectKey } from '../../primitives/helpers/object';
-import { errorResponseSchema } from '../../core/schemas';
+import { errorResponseSchema } from '../http/response';
 
 import type { Contract, Schema } from '../../primitives/api';
 

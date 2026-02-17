@@ -1,9 +1,9 @@
 // main/shared/src/engine/audit-log/index.ts
 
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/audit';
+export { AUDIT_ACTION_REGEX } from '../../primitives/constants';
+
 export {
-  AUDIT_ACTION_REGEX,
-  AUDIT_CATEGORIES,
-  AUDIT_SEVERITIES,
   auditEventSchema,
   auditLogFilterSchema,
   auditLogListResponseSchema,

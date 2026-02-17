@@ -6,7 +6,7 @@
  * and client-side token storage.
  */
 
-export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';
+export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from '../../primitives/helpers/crypto';
 
 export {
   checkTokenSecret,

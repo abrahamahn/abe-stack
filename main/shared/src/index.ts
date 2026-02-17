@@ -1264,7 +1264,7 @@ export {
   generateSecureId,
   generateToken,
   generateUUID
-} from './engine/crypto/crypto';
+} from './primitives/helpers/crypto';
 
 // --- HTTP ---
 export {

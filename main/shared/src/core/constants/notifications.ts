@@ -31,8 +31,7 @@ export const NOTIFICATION_LEVELS = ['info', 'success', 'warning', 'error'] as co
 export const NOTIFICATION_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
 
 // ============================================================================
-// Audit
+// Audit (canonical source: engine/constants/audit.ts)
 // ============================================================================
 
-export const AUDIT_CATEGORIES = ['security', 'admin', 'system', 'billing'] as const;
-export const AUDIT_SEVERITIES = ['info', 'warn', 'error', 'critical'] as const;
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../engine/constants/audit';

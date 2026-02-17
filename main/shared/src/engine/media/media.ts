@@ -15,7 +15,7 @@ import {
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
 } from '../constants/limits';
-import { generateUUID } from '../crypto/crypto';
+import { generateUUID } from '../../primitives/helpers/crypto';
 
 import type { FileTypeResult } from './media.types';
 

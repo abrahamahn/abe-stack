@@ -1,4 +1,4 @@
-// main/shared/src/engine/crypto/crypto.ts
+// main/shared/src/primitives/helpers/crypto.ts
 /**
  * Cryptographically Secure Random Utilities
  *
@@ -33,6 +33,9 @@ function getCrypto(): CryptoLike {
 /**
  * Generates a cryptographically secure random string.
  * Uses Web Crypto API for cross-platform compatibility.
+ *
+ * @param length - Desired hex string length (default: 32)
+ * @returns Random hex string of the specified length
  */
 export function generateToken(length: number = 32): string {
   const crypto = getCrypto();
@@ -45,6 +48,8 @@ export function generateToken(length: number = 32): string {
 
 /**
  * Generates a cryptographically secure UUID v4.
+ *
+ * @returns UUID v4 string
  */
 export function generateUUID(): string {
   const crypto = getCrypto();
@@ -70,7 +75,6 @@ export function generateUUID(): string {
  *
  * @param length - Desired ID length (default: 16)
  * @returns Uniformly random alphanumeric string
- * @complexity O(length) expected, with negligible rejection probability
  */
 export function generateSecureId(length: number = 16): string {
   const crypto = getCrypto();
@@ -108,7 +112,6 @@ export function generateSecureId(length: number = 16): string {
  * @param a - First string to compare
  * @param b - Second string to compare
  * @returns True if strings are equal, false otherwise
- * @complexity O(max(a.length, b.length))
  */
 export function constantTimeCompare(a: string, b: string): boolean {
   const maxLen = Math.max(a.length, b.length);

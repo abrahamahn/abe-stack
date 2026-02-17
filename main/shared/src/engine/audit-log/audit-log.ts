@@ -19,14 +19,11 @@ import { isoDateTimeSchema } from '../../primitives/schema';
 import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../pagination';
 import { AUDIT_ACTION_REGEX } from '../../primitives/constants';
-import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../core/constants/notifications';
+import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/audit';
 
 import type { Schema } from '../../primitives/api';
 import type { AuditEventId, TenantId, UserId } from '../../primitives/schema/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../pagination';
-
-// Re-export constants so barrel exports and tests can access them from this module
-export { AUDIT_ACTION_REGEX, AUDIT_CATEGORIES, AUDIT_SEVERITIES };
 
 // ============================================================================
 // Types

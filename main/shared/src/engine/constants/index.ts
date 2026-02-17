@@ -67,3 +67,5 @@ export {
 } from './platform';
 
 export { SENSITIVE_KEYS } from './security';
+
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from './audit';
