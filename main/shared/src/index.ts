@@ -94,7 +94,7 @@ export {
   type PolicyResource
 } from './core/auth/auth.policy';
 
-export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './core/env';
+export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './engine/env';
 
 export {
   type Attachment,

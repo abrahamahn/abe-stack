@@ -94,7 +94,9 @@ export {
   type PolicyResource,
 } from './auth/auth.policy';
 
-export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './env';
+import { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from '../engine/env';
+
+export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv };
 
 // Engine layer: response envelope schemas
 import {
