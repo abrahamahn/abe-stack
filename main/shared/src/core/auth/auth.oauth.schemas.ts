@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-oauth.schemas.ts
+// main/shared/src/core/auth/auth.oauth.schemas.ts
 /**
  * @file Auth OAuth Schemas
  * @description OAuth authentication schemas and API contract definitions.

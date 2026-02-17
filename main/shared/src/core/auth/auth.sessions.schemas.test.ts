@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-sessions.schemas.test.ts
+// main/shared/src/core/auth/auth.sessions.schemas.test.ts
 /**
  * @file Auth Session Schemas Tests
  * @description Tests for user session validation schemas.

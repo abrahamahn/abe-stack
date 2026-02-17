@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-mfa.schemas.ts
+// main/shared/src/core/auth/auth.mfa.schemas.ts
 /**
  * @file Auth MFA Schemas
  * @description Schemas for multi-factor authentication (TOTP, SMS 2FA, session invalidation).

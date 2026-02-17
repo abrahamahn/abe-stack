@@ -1,4 +1,4 @@
-// main/shared/src/core/tenant/tenant-settings.schemas.test.ts
+// main/shared/src/core/tenant/tenant.settings.schemas.test.ts
 
 /**
  * @file Unit Tests for Tenant Settings Schemas

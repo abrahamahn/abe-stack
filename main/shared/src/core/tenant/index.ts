@@ -40,7 +40,7 @@ export {
   isWorkspaceScoped,
 } from './tenant.workspace';
 
-// --- tenant-settings.schemas ---
+// --- tenant.settings.schemas ---
 export {
   createTenantSettingSchema,
   tenantSettingSchema,

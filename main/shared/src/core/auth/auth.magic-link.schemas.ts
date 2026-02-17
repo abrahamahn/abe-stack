@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-magic-link.schemas.ts
+// main/shared/src/core/auth/auth.magic-link.schemas.ts
 /**
  * @file Auth Magic Link Schemas
  * @description Schemas for magic link authentication flows.

@@ -13,7 +13,7 @@ import {
   withDefault,
   type Schema,
 } from '../../primitives/schema';
-import { emailSchema, isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { emailSchema, isoDateTimeSchema } from '../auth/auth.scalars.schemas';
 import { tenantRoleSchema } from '../auth/roles';
 import { INVITATION_STATUSES } from '../constants/iam';
 import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';

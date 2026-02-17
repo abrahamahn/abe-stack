@@ -18,7 +18,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { isoDateTimeSchema } from '../auth/auth.scalars.schemas';
 import { notificationIdSchema, userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/schema';

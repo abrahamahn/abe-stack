@@ -1,4 +1,4 @@
-// main/shared/src/core/tenant/tenant-settings.schemas.ts
+// main/shared/src/core/tenant/tenant.settings.schemas.ts
 
 /**
  * @file Tenant Settings Schemas

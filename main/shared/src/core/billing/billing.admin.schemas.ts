@@ -16,7 +16,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { isoDateTimeSchema } from '../auth/auth.scalars.schemas';
 import { PLAN_INTERVALS } from '../constants/billing';
 import { planFeatureSchema, planSchema } from './billing.schemas';
 

@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-devices.schemas.ts
+// main/shared/src/core/auth/auth.devices.schemas.ts
 /**
  * @file Auth Device Schemas
  * @description Schemas for device management (fingerprints, trust, listing).

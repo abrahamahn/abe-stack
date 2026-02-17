@@ -16,7 +16,7 @@ import {
   parseOptional,
   parseString,
 } from '../../primitives/schema';
-import { emailSchema, isoDateTimeSchema, passwordSchema } from '../auth/auth-scalars.schemas';
+import { emailSchema, isoDateTimeSchema, passwordSchema } from '../auth/auth.scalars.schemas';
 import { appRoleSchema } from '../auth/roles';
 import { APP_ROLES } from '../constants/auth';
 import { userIdSchema } from '../../primitives/schema/ids';

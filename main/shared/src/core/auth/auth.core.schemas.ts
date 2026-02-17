@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-core.schemas.ts
+// main/shared/src/core/auth/auth.core.schemas.ts
 /**
  * @file Auth Core Schemas
  * @description Core authentication request/response schemas for login, register,

@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-helpers.schemas.test.ts
+// main/shared/src/core/auth/auth.helpers.schemas.test.ts
 /**
  * @file Auth Configuration Helpers Tests
  * @description Tests for pure utility functions that operate on AuthConfig.

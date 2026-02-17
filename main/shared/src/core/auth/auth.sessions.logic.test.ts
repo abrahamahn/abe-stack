@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-sessions.logic.test.ts
+// main/shared/src/core/auth/auth.sessions.logic.test.ts
 /**
  * @file Auth Session Logic Tests
  * @description Tests for session state evaluation functions.

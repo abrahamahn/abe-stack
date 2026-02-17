@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-sessions.logic.ts
+// main/shared/src/core/auth/auth.sessions.logic.ts
 /**
  * @file Auth Session Logic
  * @description Pure functions for user session state evaluation.

@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-tos.schemas.ts
+// main/shared/src/core/auth/auth.tos.schemas.ts
 /**
  * @file Auth ToS Schemas
  * @description Schemas for Terms of Service acceptance and status.

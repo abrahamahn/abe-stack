@@ -18,7 +18,7 @@ import {
   withDefault,
   type Schema,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { isoDateTimeSchema } from '../auth/auth.scalars.schemas';
 import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/notifications';
 import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../../engine/pagination';

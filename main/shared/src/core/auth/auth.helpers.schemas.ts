@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-helpers.schemas.ts
+// main/shared/src/core/auth/auth.helpers.schemas.ts
 /**
  * @file Auth Configuration Helpers
  * @description Pure utility functions that operate on AuthConfig.

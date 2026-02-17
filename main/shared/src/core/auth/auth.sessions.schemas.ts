@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-sessions.schemas.ts
+// main/shared/src/core/auth/auth.sessions.schemas.ts
 /**
  * @file Auth Session Schemas
  * @description Schemas for user session validation and type inference.

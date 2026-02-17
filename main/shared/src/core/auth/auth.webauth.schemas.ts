@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-webauth.schemas.ts
+// main/shared/src/core/auth/auth.webauth.schemas.ts
 /**
  * @file Auth WebAuthn Schemas
  * @description Schemas for WebAuthn registration and login flows.

@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-email.schemas.ts
+// main/shared/src/core/auth/auth.email.schemas.ts
 /**
  * @file Auth Email Schemas
  * @description Schemas for email verification, change, and revert flows.

@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.password-patterns.ts
+// main/shared/src/core/auth/passwords/auth.password.patterns.ts
 
 import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants';
 

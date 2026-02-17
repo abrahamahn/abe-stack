@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.password-patterns.test.ts
+// main/shared/src/core/auth/passwords/auth.password.patterns.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

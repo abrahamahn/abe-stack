@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.password-strength.ts
+// main/shared/src/core/auth/passwords/auth.password.strength.ts
 /**
  * Password Strength Estimation
  *

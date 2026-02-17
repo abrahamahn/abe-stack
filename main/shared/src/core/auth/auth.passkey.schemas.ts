@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth-passkey.schemas.ts
+// main/shared/src/core/auth/auth.passkey.schemas.ts
 /**
  * @file Auth Passkey Schemas
  * @description Schemas for passkey (WebAuthn credential) management.
