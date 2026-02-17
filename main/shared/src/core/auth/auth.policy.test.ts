@@ -1,9 +1,9 @@
-// main/shared/src/core/policy.test.ts
+// main/shared/src/core/auth/auth.policy.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { can, hasPermission } from './policy';
+import { can, hasPermission } from './auth.policy';
 
-import type { AuthContext, PolicyAction, PolicyResource } from './policy';
+import type { AuthContext, PolicyAction, PolicyResource } from './auth.policy';
 
 describe('policy', () => {
   // ==========================================================================

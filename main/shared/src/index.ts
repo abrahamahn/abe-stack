@@ -92,7 +92,7 @@ export {
   type AuthContext,
   type PolicyAction,
   type PolicyResource
-} from './core/policy';
+} from './core/auth/auth.policy';
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './core/env';
 

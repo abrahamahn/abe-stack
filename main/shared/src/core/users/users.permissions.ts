@@ -8,9 +8,9 @@
 
 import {
   can as baseCan,
-} from '../policy';
+} from '../auth/auth.policy';
 
-import type { AuthContext, PolicyAction, PolicyResource } from '../policy';
+import type { AuthContext, PolicyAction, PolicyResource } from '../auth/auth.policy';
 import type { AppRole, User } from './users.schemas';
 import type { UserId } from '../../primitives/schema/ids';
 

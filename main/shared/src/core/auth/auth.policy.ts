@@ -1,13 +1,13 @@
-// main/shared/src/core/policy.ts
+// main/shared/src/core/auth/auth.policy.ts
 /**
  * @file Authorization Policy
  * @description Centralized, pure authorization rules for the entire platform.
  * @module Core/Policy
  */
 
-import { assertNever } from '../primitives/helpers';
+import { assertNever } from '../../primitives/helpers';
 
-import type { AppRole, Permission, TenantRole } from './auth/roles';
+import type { AppRole, Permission, TenantRole } from './roles';
 
 /**
  * Context required to make an authorization decision.

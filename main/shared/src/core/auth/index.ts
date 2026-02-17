@@ -94,3 +94,12 @@ export {
   type Permission,
   type TenantRole,
 } from './roles';
+
+// --- Policy ---
+export {
+  can,
+  hasPermission,
+  type AuthContext,
+  type PolicyAction,
+  type PolicyResource,
+} from './auth.policy';
