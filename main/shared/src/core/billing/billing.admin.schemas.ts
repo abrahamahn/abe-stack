@@ -1,9 +1,9 @@
-// main/shared/src/domain/billing/billing.admin.schemas.ts
+// main/shared/src/core/billing/billing.admin.schemas.ts
 
 /**
  * @file Billing Admin Schemas
  * @description Admin-specific schemas for plan management and billing stats.
- * @module Domain/Billing/Admin
+ * @module Core/Billing
  */
 
 import {
@@ -15,19 +15,13 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../schema.utils';
-import { isoDateTimeSchema } from '../schemas';
+} from '../../primitives/schema';
+import { isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { PLAN_INTERVALS } from '../constants/billing';
+import { planFeatureSchema, planSchema } from './billing.schemas';
 
-import {
-  PLAN_INTERVALS,
-  planFeatureSchema,
-  planSchema,
-  type Plan,
-  type PlanFeature,
-  type PlanInterval,
-} from './billing.schemas';
-
-import type { Schema } from '../../primitives/api';
+import type { Schema } from '../../primitives/schema';
+import type { Plan, PlanFeature, PlanInterval } from './billing.schemas';
 
 // ============================================================================
 // Types

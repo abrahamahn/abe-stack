@@ -1,8 +1,15 @@
-// main/shared/src/domain/billing/billing.logic.test.ts
+// main/shared/src/core/billing/billing.logic.test.ts
+
+/**
+ * @file Billing Logic Tests
+ * @description Unit tests for billing pure functions: entitlements, subscription status, proration.
+ * @module Core/Billing/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
-import { parsePlanId, parseUserId } from '../../types/ids';
-
+import { FEATURE_KEYS } from '../constants/billing';
+import { parsePlanId, parseUserId } from '../types/ids';
 import {
   calculateProration,
   canCancelSubscription,
@@ -20,7 +27,8 @@ import {
   isSubscriptionPastDue,
   PLAN_FEES,
 } from './billing.logic';
-import { FEATURE_KEYS, type Plan, type Subscription } from './billing.schemas';
+
+import type { Plan, Subscription } from './billing.schemas';
 
 describe('billing.logic', () => {
   // ==========================================================================

@@ -1,4 +1,10 @@
-// main/shared/src/domain/membership/membership.schemas.test.ts
+// main/shared/src/core/membership/membership.schemas.test.ts
+/**
+ * @file Membership Schemas Tests
+ * @description Tests for membership and invitation schema validation.
+ * @module Core/Membership/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import {

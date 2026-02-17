@@ -3,7 +3,7 @@
 /**
  * @file Compliance Schemas Unit Tests
  * @description Comprehensive tests for legal documents, user agreements, and consent log schemas.
- * @module Domain/Compliance/Tests
+ * @module Core/Compliance/Tests
  */
 
 import { describe, expect, it } from 'vitest';

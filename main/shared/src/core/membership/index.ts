@@ -1,9 +1,15 @@
-// main/shared/src/domain/membership/index.ts
+// main/shared/src/core/membership/index.ts
+/**
+ * @file Membership Barrel
+ * @description Public API for membership domain: schemas, logic, and display.
+ * @module Core/Membership
+ */
 
+// --- membership.display ---
 export { getInvitationStatusTone, getTenantRoleTone } from './membership.display';
 
+// --- membership.logic ---
 export {
-  ROLE_LEVELS,
   canAcceptInvite,
   canAssignRole,
   canChangeRole,
@@ -15,13 +21,15 @@ export {
   hasAtLeastRole,
   isInviteExpired,
   isSoleOwner,
+  ROLE_LEVELS,
 } from './membership.logic';
 
+// --- membership.schemas ---
 export {
-  INVITATION_STATUSES,
   acceptInvitationSchema,
   addMemberSchema,
   createInvitationSchema,
+  INVITATION_STATUSES,
   invitationSchema,
   membershipSchema,
   updateMembershipRoleSchema,

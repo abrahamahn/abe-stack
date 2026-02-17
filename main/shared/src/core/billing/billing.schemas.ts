@@ -3,7 +3,7 @@
 /**
  * @file Billing Schemas
  * @description Schemas and types for plans, subscriptions, invoices, and payments.
- * @module Domain/Billing
+ * @module Core/Billing
  */
 
 import {
@@ -13,8 +13,8 @@ import {
   INVOICE_STATUSES,
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES
-} from '../../primitives/constants';
+  SUBSCRIPTION_STATUSES,
+} from '../constants/billing';
 import { planIdSchema, subscriptionIdSchema, userIdSchema } from '../ids';
 import {
   createEnumSchema,
@@ -32,13 +32,8 @@ import { isoDateTimeSchema } from '../schemas';
 import type { Schema } from '../../api';
 import type { PlanId, SubscriptionId, UserId } from '../ids';
 
-// Re-export types
-export type { ErrorResponse } from '../../api';
-export type { PlanId, SubscriptionId, UserId } from '../ids';
-export { errorResponseSchema } from '../schemas';
-
 // ============================================================================
-// Constants & Enums
+// Types
 // ============================================================================
 
 export type BillingProvider = (typeof BILLING_PROVIDERS)[number];

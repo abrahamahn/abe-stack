@@ -17,7 +17,7 @@ import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_PRIORITIES,
   NOTIFICATION_TYPES,
-} from '../../primitives/constants';
+} from '../constants/notifications';
 
 /**
  * Types of notifications that can be sent

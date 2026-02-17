@@ -1,9 +1,9 @@
-// main/shared/src/domain/users/username.schemas.test.ts
+// main/shared/src/core/users/username.schemas.test.ts
 
 /**
  * @file Unit Tests for Username Schemas
  * @description Tests for username validation, cooldown logic, and reserved username checks.
- * @module Domain/Users
+ * @module Core/Users/Tests
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,20 +1,18 @@
-// main/shared/src/domain/users/users.permissions.ts
+// main/shared/src/core/users/users.permissions.ts
 
 /**
  * @file User Permissions
  * @description Domain-specific permission helpers for Users.
- * @module Domain/Users
+ * @module Core/Users
  */
 
 import {
   can as baseCan,
-  type AuthContext,
-  type PolicyAction,
-  type PolicyResource,
 } from '../policy';
 
+import type { AuthContext, PolicyAction, PolicyResource } from '../policy';
 import type { AppRole, User } from './users.schemas';
-import type { UserId } from '../../types/ids';
+import type { UserId } from '../types/ids';
 
 // ============================================================================
 // Access Control Logic

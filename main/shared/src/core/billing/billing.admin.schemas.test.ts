@@ -1,9 +1,9 @@
-// main/shared/src/domain/billing/billing.admin.schemas.test.ts
+// main/shared/src/core/billing/billing.admin.schemas.test.ts
 
 /**
  * @file Billing Admin Schemas Tests
  * @description Comprehensive unit tests for admin-specific billing schemas.
- * @module Domain/Billing/Admin
+ * @module Core/Billing/Tests
  */
 
 import { describe, expect, it } from 'vitest';
@@ -23,7 +23,7 @@ import {
   type UpdatePlanRequest,
 } from './billing.admin.schemas';
 
-import type { PlanId } from './billing.schemas';
+import type { PlanId } from '../types/ids';
 
 // ============================================================================
 // Test Fixtures

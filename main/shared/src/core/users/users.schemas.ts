@@ -1,14 +1,12 @@
-// main/shared/src/domain/users/users.schemas.ts
+// main/shared/src/core/users/users.schemas.ts
 
 /**
  * @file User Schemas
  * @description Schemas and types for user profiles, sessions, and settings.
- * @module Domain/Users
+ * @module Core/Users
  */
 
-import { userIdSchema } from '../../types/ids';
-import { appRoleSchema } from '../../types/roles';
-import { cursorPaginatedResultSchema } from '../../utils/pagination';
+import { cursorPaginatedResultSchema } from '../../engine/pagination/pagination';
 import {
   createSchema,
   parseBoolean,
@@ -17,33 +15,28 @@ import {
   parseNumber,
   parseOptional,
   parseString,
-} from '../schema.utils';
-import { emailSchema, isoDateTimeSchema, passwordSchema } from '../schemas';
+} from '../../primitives/schema';
+import { emailSchema, isoDateTimeSchema, passwordSchema } from '../auth/auth-scalars.schemas';
+import { appRoleSchema } from '../auth/roles';
+import { APP_ROLES } from '../constants/auth';
+import { userIdSchema } from '../types/ids';
 
-import type { Schema } from '../../primitives/api';
-import type { UserId } from '../../types/ids';
-import type { AppRole } from '../../types/roles';
+import type { Schema } from '../../primitives/schema';
+import type { AppRole } from '../auth/roles';
+import type { UserId } from '../types/ids';
 
 // ============================================================================
 // Shared Types & Re-exports
 // ============================================================================
 
-export type { UserId } from '../../types/ids';
+export type { UserId } from '../types/ids';
 export { userIdSchema };
 
 // Re-export AppRole from core types (plus legacy aliases)
-  export {
-    APP_ROLES,
-    appRoleSchema,
-    USER_ROLES,
-    userRoleSchema,
-    type AppRole,
-    type UserRole
-  } from '../../types/roles';
-
-// Re-export error response
-export type { ErrorResponse } from '../../primitives/api';
-export { errorResponseSchema } from '../schemas';
+export { APP_ROLES, appRoleSchema, type AppRole };
+export const USER_ROLES = APP_ROLES;
+export const userRoleSchema = appRoleSchema;
+export type UserRole = AppRole;
 
 // ============================================================================
 // Types

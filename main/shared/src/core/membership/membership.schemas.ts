@@ -1,30 +1,30 @@
-// main/shared/src/domain/membership/membership.schemas.ts
+// main/shared/src/core/membership/membership.schemas.ts
 /**
- * @file Membership Contracts
+ * @file Membership Schemas
  * @description Types and schemas for workspace/tenant memberships and invitations.
- * @module Domain/Membership
+ * @module Core/Membership
  */
 
-import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
-import { tenantRoleSchema } from '../../types/roles';
 import {
   createEnumSchema,
   createSchema,
   parseOptional,
   parseString,
   withDefault,
-} from '../schema.utils';
-import { emailSchema, isoDateTimeSchema } from '../schemas';
-
-import type { Schema } from '../../primitives/api';
-import type { InviteId, MembershipId, TenantId, UserId } from '../../types/ids';
-import type { TenantRole } from '../../types/roles';
+  type Schema,
+} from '../../primitives/schema';
+import { emailSchema, isoDateTimeSchema } from '../auth/auth-scalars.schemas';
+import { tenantRoleSchema } from '../auth/roles';
+import { INVITATION_STATUSES } from '../constants/iam';
+import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../types/ids';
+import type { TenantRole } from '../auth/roles';
+import type { InviteId, MembershipId, TenantId, UserId } from '../types/ids';
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-export const INVITATION_STATUSES = ['pending', 'accepted', 'revoked', 'expired'] as const;
+export { INVITATION_STATUSES };
 export type InvitationStatus = (typeof INVITATION_STATUSES)[number];
 
 /** Invitation status enum schema */
@@ -80,7 +80,7 @@ export interface AcceptInvitation {
 }
 
 // ============================================================================
-// Membership Schemas
+// Schemas
 // ============================================================================
 
 export const membershipSchema: Schema<Membership> = createSchema((data: unknown) => {

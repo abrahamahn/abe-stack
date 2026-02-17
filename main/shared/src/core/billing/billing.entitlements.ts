@@ -1,11 +1,9 @@
-// main/shared/src/domain/billing/billing.entitlements.ts
+// main/shared/src/core/billing/billing.entitlements.ts
+
 /**
- * Entitlements System
- *
- * Feature flags and limits based on subscription and role.
- * Provides a single access gate for permission checks.
- *
- * @module Domain/Billing/Entitlements
+ * @file Billing Entitlements
+ * @description Feature flags and limits based on subscription and role. Single access gate for permission checks.
+ * @module Core/Billing
  */
 
 import { ForbiddenError } from '../errors';

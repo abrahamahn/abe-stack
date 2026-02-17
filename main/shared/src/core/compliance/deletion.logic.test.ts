@@ -1,4 +1,11 @@
 // main/shared/src/domain/compliance/deletion.logic.test.ts
+
+/**
+ * @file Deletion Logic Unit Tests
+ * @description Tests for data retention and deletion workflow helpers.
+ * @module Core/Compliance/Tests
+ */
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

@@ -1,4 +1,10 @@
-// main/shared/src/domain/billing/billing.display.ts
+// main/shared/src/core/billing/billing.display.ts
+
+/**
+ * @file Billing Display
+ * @description Formatting and display helpers for billing entities: prices, statuses, labels.
+ * @module Core/Billing
+ */
 
 import type {
   InvoiceStatus,

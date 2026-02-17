@@ -1,4 +1,11 @@
-// main/shared/src/domain/billing/billing.entitlements.test.ts
+// main/shared/src/core/billing/billing.entitlements.test.ts
+
+/**
+ * @file Billing Entitlements Tests
+ * @description Unit tests for entitlements resolution, access guards, and subscription checks.
+ * @module Core/Billing/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import { ForbiddenError } from '../../core/errors';

@@ -1,9 +1,9 @@
-// main/shared/src/domain/billing/billing.errors.ts
+// main/shared/src/core/billing/billing.errors.ts
+
 /**
- * Billing Domain Errors
- *
- * Specific error types for billing operations including subscriptions,
- * payment methods, plans, and provider interactions.
+ * @file Billing Errors
+ * @description Domain error types for billing operations: subscriptions, payments, plans, providers.
+ * @module Core/Billing
  */
 
 import { HTTP_STATUS } from '../../primitives/constants';

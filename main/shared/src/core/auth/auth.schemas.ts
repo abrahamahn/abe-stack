@@ -18,10 +18,6 @@ import { userSchema as domainUserSchema, type User as DomainUser } from '../user
 
 import type { Schema } from '../../primitives/api';
 
-// Re-export utility schemas from contracts/common
-export type { ErrorResponse } from '../../primitives/api';
-export { emptyBodySchema, errorResponseSchema, type EmptyBody } from '../schemas';
-
 // ============================================================================
 // Types
 // ============================================================================

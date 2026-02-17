@@ -1,14 +1,14 @@
-// main/shared/src/domain/users/lifecycle.schemas.ts
+// main/shared/src/core/users/lifecycle.schemas.ts
+
 /**
- * Account Lifecycle Schemas
- *
- * Types and validation for account deactivation, deletion, and reactivation.
- * @module Domain/Users
+ * @file Account Lifecycle Schemas
+ * @description Types and validation for account deactivation, deletion, and reactivation.
+ * @module Core/Users
  */
 
-import { createSchema, parseOptional, parseString } from '../schema.utils';
+import { createSchema, parseOptional, parseString } from '../../primitives/schema';
 
-import type { Schema } from '../../primitives/api';
+import type { Schema } from '../../primitives/schema';
 
 // ============================================================================
 // Constants
@@ -30,10 +30,6 @@ export interface AccountLifecycleFields {
   deletedAt: Date | null;
   deletionGracePeriodEnds: Date | null;
 }
-
-// ============================================================================
-// Request/Response Types
-// ============================================================================
 
 /** Request to deactivate an account */
 export interface DeactivateAccountRequest {

@@ -1,11 +1,9 @@
-// main/shared/src/domain/billing/billing.service-types.ts
+// main/shared/src/core/billing/billing.service-types.ts
+
 /**
- * Billing Service Contract
- *
- * Provider-agnostic interface for payment operations.
- * Defines the port that billing provider adapters must implement.
- *
- * @module Domain/Billing/ServiceTypes
+ * @file Billing Service Types
+ * @description Provider-agnostic interface for payment operations. Port that billing provider adapters implement.
+ * @module Core/Billing
  */
 
 import type {

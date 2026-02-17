@@ -1,9 +1,9 @@
 // main/shared/src/domain/compliance/compliance.logic.ts
 
 /**
- * @file Compliance Domain Logic
+ * @file Compliance Logic
  * @description Pure functions for legal document acceptance and consent evaluation.
- * @module Domain/Compliance
+ * @module Core/Compliance
  */
 
 import type { ConsentLog, LegalDocument, UserAgreement } from './compliance.schemas';

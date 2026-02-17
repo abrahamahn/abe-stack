@@ -1,11 +1,9 @@
 // main/shared/src/domain/tenant/tenant.workspace.ts
+
 /**
- * Workspace/Tenant Scoping Types
- *
- * Types and helpers for multi-tenant workspace scoping.
- * All repository functions that need tenant isolation should use these.
- *
- * @module Domain/Tenant/Workspace
+ * @file Workspace/Tenant Scoping Types
+ * @description Types and helpers for multi-tenant workspace scoping.
+ * @module Core/Tenant
  */
 
 import { ForbiddenError } from '../errors';

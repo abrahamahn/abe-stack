@@ -1,9 +1,9 @@
 // main/shared/src/domain/compliance/deletion.schemas.ts
+
 /**
- * Deletion Schemas
- *
- * Types and validation schemas for GDPR-compliant data deletion workflows.
- * @module Domain/Compliance
+ * @file Deletion Schemas
+ * @description Types and validation schemas for GDPR-compliant data deletion workflows.
+ * @module Core/Compliance
  */
 
 import { createSchema, parseBoolean, parseOptional, parseString } from '../schema.utils';
@@ -65,7 +65,7 @@ export interface DeletionJob {
 }
 
 // ============================================================================
-// Schemas
+// Configuration
 // ============================================================================
 
 /** Configuration for deletion workflow */

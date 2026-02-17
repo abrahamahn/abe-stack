@@ -5,36 +5,22 @@
  * Validation schemas for notification-related requests and data.
  */
 
-import { createSchema } from '../schema.utils';
-
+import { UUID_REGEX } from '../../primitives/constants/regex';
+import { createSchema } from '../../primitives/schema';
+import {
+  NOTIFICATION_CHANNELS,
+  NOTIFICATION_PRIORITIES,
+  NOTIFICATION_TYPES,
+} from '../constants/notifications';
 import { NOTIFICATION_PAYLOAD_MAX_SIZE } from './notifications.errors';
 
-import type { Schema } from '../../primitives/api';
+import type { Schema } from '../../primitives/schema';
 
 // ============================================================================
-// Constants
+// Re-exports (constants defined in ../constants/notifications)
 // ============================================================================
 
-/**
- * Notification type enum values
- */
-export const NOTIFICATION_TYPES = [
-  'system',
-  'security',
-  'marketing',
-  'social',
-  'transactional',
-] as const;
-
-/**
- * Notification channel enum values
- */
-export const NOTIFICATION_CHANNELS = ['push', 'email', 'sms', 'in_app'] as const;
-
-/**
- * Notification priority enum values
- */
-export const NOTIFICATION_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
+export { NOTIFICATION_CHANNELS, NOTIFICATION_PRIORITIES, NOTIFICATION_TYPES };
 
 // ============================================================================
 // Types
@@ -48,7 +34,6 @@ export type NotificationPriority = (typeof NOTIFICATION_PRIORITIES)[number];
 // Validation Helpers
 // ============================================================================
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const BASE64URL_REGEX = /^[A-Za-z0-9_-]+$/;
 
 function isValidUuid(value: string): boolean {

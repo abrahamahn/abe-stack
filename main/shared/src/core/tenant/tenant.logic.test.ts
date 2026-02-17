@@ -3,7 +3,7 @@
 /**
  * @file Unit Tests for Tenant Logic
  * @description Tests for tenant domain logic including workspace context, guards, and role checks.
- * @module Domain/Tenant
+ * @module Core/Tenant/Tests
  */
 
 import { describe, expect, it } from 'vitest';

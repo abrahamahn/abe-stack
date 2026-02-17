@@ -64,11 +64,11 @@
     "dist"
   ],
   "scripts": {
-    "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
+    "build": "tsc --build",
     "postbuild": "node --import tsx ../tools/scripts/build/ensure-js-extensions.ts dist",
     "test": "vitest run",
     "lint": "eslint . --max-warnings 0",
-    "type-check": "tsc --noEmit --types node --skipLibCheck",
+    "type-check": "tsc -p tsconfig.lint.json",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "verify-exports": "node scripts/verify-exports.mjs",
     "prepack": "npm run build && npm run verify-exports && npm run test"

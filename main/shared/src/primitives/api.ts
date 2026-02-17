@@ -1,7 +1,44 @@
-// main/shared/src/api/api.ts
-import type { ErrorCode } from './constants';
+// main/shared/src/primitives/api.ts
+/**
+ * API Contract Vocabulary Types
+ *
+ * Fundamental types for defining API endpoint contracts.
+ * These are primitives used across all layers: engine, core, contracts, api.
+ */
+
 import type { Schema } from './schema';
+
 export type { Schema };
+
+/** Error codes for API error responses. Mirrors ERROR_CODES in engine/constants/platform. */
+export type ErrorCode =
+  | 'INTERNAL_ERROR'
+  | 'BAD_REQUEST'
+  | 'VALIDATION_ERROR'
+  | 'RESOURCE_NOT_FOUND'
+  | 'CONFIGURATION_ERROR'
+  | 'CONFLICT'
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'INVALID_CREDENTIALS'
+  | 'TOKEN_EXPIRED'
+  | 'TOKEN_REUSED'
+  | 'INVALID_TOKEN'
+  | 'EMAIL_ALREADY_EXISTS'
+  | 'EMAIL_NOT_VERIFIED'
+  | 'USER_NOT_FOUND'
+  | 'WEAK_PASSWORD'
+  | 'OAUTH_ERROR'
+  | 'OAUTH_STATE_MISMATCH'
+  | 'TOTP_REQUIRED'
+  | 'TOTP_INVALID'
+  | 'PAYMENT_FAILED'
+  | 'SUBSCRIPTION_EXPIRED'
+  | 'INSUFFICIENT_ENTITLEMENTS'
+  | 'RATE_LIMITED'
+  | 'NETWORK_ERROR'
+  | 'TIMEOUT_ERROR'
+  | 'TOS_ACCEPTANCE_REQUIRED';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -16,7 +53,7 @@ export interface EndpointDef<
 > {
   method: HttpMethod;
   path: string;
-  pathParams?: Record<string, Schema<any>> | Schema<TPath>;
+  pathParams?: Record<string, Schema<unknown>> | Schema<TPath>;
   body?: Schema<TBody>;
   query?: Schema<TQuery>;
   responses: Record<string, Schema<TResponse>>;
@@ -85,6 +122,7 @@ export interface ErrorResponse {
     details?: Record<string, unknown> | undefined;
   };
 }
+
 /**
  * Union type for API responses.
  */
@@ -141,29 +179,3 @@ export type InferResponseData<C extends { responses: Record<string, unknown> }> 
         : C['responses'] extends { 204: unknown }
           ? undefined
           : unknown;
-
-// ============================================================================
-// Service Interfaces (Ports - Hexagonal Architecture)
-// ============================================================================
-
-/**
- * Generic Logger interface.
- */
-export interface Logger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  info(data: Record<string, unknown>, msg: string): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  warn(data: Record<string, unknown>, msg: string): void;
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  error(data: unknown, msg?: string): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
-  debug(data: Record<string, unknown>, msg: string): void;
-  trace?(msg: string, data?: Record<string, unknown>): void;
-  trace?(data: Record<string, unknown>, msg: string): void;
-  fatal?(msg: string | Error, data?: Record<string, unknown>): void;
-  fatal?(data: Record<string, unknown>, msg: string): void;
-  child?(bindings: Record<string, unknown>): Logger;
-}
-
-/** Backward-compatible alias used by server packages. */
-export type ServerLogger = Logger;

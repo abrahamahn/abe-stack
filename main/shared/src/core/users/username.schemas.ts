@@ -1,11 +1,22 @@
-// main/shared/src/domain/users/username.schemas.ts
-import { MS_PER_DAY } from '../../utils/constants/time';
-import { createSchema, parseString } from '../schema.utils';
+// main/shared/src/core/users/username.schemas.ts
 
-import type { Schema } from '../../primitives/api';
+/**
+ * @file Username Schemas
+ * @description Schemas and logic for username validation, reserved names, and change cooldown.
+ * @module Core/Users
+ */
 
-/** Username cooldown period in days */
-export const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
+import { MS_PER_DAY } from '../../primitives/constants/time';
+import { createSchema, parseString } from '../../primitives/schema';
+import { USERNAME_CHANGE_COOLDOWN_DAYS } from '../constants/compliance';
+
+import type { Schema } from '../../primitives/schema';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+export { USERNAME_CHANGE_COOLDOWN_DAYS };
 
 /** Reserved usernames that cannot be used */
 export const RESERVED_USERNAMES = [
@@ -37,6 +48,10 @@ export const RESERVED_USERNAMES = [
 /** Username validation regex: 2-30 chars, lowercase alphanumeric + underscores, must start with letter */
 const USERNAME_REGEX = /^[a-z][a-z0-9_]{1,29}$/;
 
+// ============================================================================
+// Types
+// ============================================================================
+
 export interface UpdateUsernameRequest {
   username: string;
 }
@@ -45,6 +60,10 @@ export interface UpdateUsernameResponse {
   username: string;
   nextChangeAllowedAt: string;
 }
+
+// ============================================================================
+// Schemas
+// ============================================================================
 
 export const updateUsernameRequestSchema: Schema<UpdateUsernameRequest> = createSchema(
   (data: unknown) => {
@@ -71,6 +90,10 @@ export const updateUsernameResponseSchema: Schema<UpdateUsernameResponse> = crea
     };
   },
 );
+
+// ============================================================================
+// Functions
+// ============================================================================
 
 /**
  * Check if a username change is within the cooldown period.

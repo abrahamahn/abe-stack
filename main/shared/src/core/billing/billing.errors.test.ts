@@ -1,4 +1,11 @@
-// main/shared/src/domain/billing/billing.errors.test.ts
+// main/shared/src/core/billing/billing.errors.test.ts
+
+/**
+ * @file Billing Errors Tests
+ * @description Unit tests for billing domain error types, type guards, and aliases.
+ * @module Core/Billing/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import {

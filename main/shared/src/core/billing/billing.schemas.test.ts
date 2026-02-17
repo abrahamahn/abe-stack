@@ -1,10 +1,10 @@
-// main/shared/src/domain/billing/billing.schemas.test.ts
+// main/shared/src/core/billing/billing.schemas.test.ts
 
 /**
  * @file Billing Schemas Unit Tests
  * @description Comprehensive tests for billing schemas: plans, subscriptions, invoices, and payment methods.
  * Tests validate parsing logic, type constraints, enum validation, and edge cases.
- * @module Domain/Billing/Tests
+ * @module Core/Billing/Tests
  */
 
 import { describe, expect, it } from 'vitest';

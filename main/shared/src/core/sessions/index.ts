@@ -1,6 +1,11 @@
-// main/shared/src/domain/sessions/index.ts
+// main/shared/src/core/sessions/index.ts
+/**
+ * @file Sessions Barrel (backward compatibility)
+ * @description Re-exports from auth/auth-sessions for backward compatibility.
+ * @module Core/Sessions
+ */
 
-export { getSessionAge, isSessionActive, isSessionRevoked } from './sessions.logic';
+export { getSessionAge, isSessionActive, isSessionRevoked } from '../auth/auth-sessions.logic';
 
 export {
   createUserSessionSchema,
@@ -9,4 +14,4 @@ export {
   type CreateUserSession,
   type UpdateUserSession,
   type UserSession,
-} from './sessions.schemas';
+} from '../auth/auth-sessions.schemas';

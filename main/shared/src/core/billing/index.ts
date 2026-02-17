@@ -1,23 +1,12 @@
-// main/shared/src/domain/billing/index.ts
+// main/shared/src/core/billing/index.ts
 
-export { PLAN_FEES, calculateProration, type BillingStats } from './billing.logic';
+/**
+ * @file Billing Barrel
+ * @description Public API for the billing domain: schemas, types, display helpers, errors, entitlements.
+ * @module Core/Billing
+ */
 
-export {
-  formatPlanInterval,
-  formatPrice,
-  formatPriceWithInterval,
-  getCardBrandLabel,
-  getInvoiceStatusLabel,
-  getInvoiceStatusVariant,
-  getPaymentMethodIcon,
-  getPaymentMethodLabel,
-  getSubscriptionStatusLabel,
-  getSubscriptionStatusVariant,
-  type StatusVariant,
-} from './billing.display';
-
-export { billingContract } from '../../contracts';
-
+// --- constants (re-export for backward compatibility) ---
 export {
   BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
@@ -26,6 +15,16 @@ export {
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
   SUBSCRIPTION_STATUSES,
+} from '../constants/billing';
+
+// --- ids (re-export branded types) ---
+export { type PlanId, type SubscriptionId } from '../ids';
+
+// --- contracts ---
+export { billingContract } from '../../contracts';
+
+// --- billing.schemas ---
+export {
   addPaymentMethodRequestSchema,
   cancelSubscriptionRequestSchema,
   cardDetailsSchema,
@@ -40,6 +39,8 @@ export {
   planFeatureSchema,
   planSchema,
   plansListResponseSchema,
+  portalSessionRequestSchema,
+  portalSessionResultSchema,
   setupIntentResponseSchema,
   subscriptionActionResponseSchema,
   subscriptionResponseSchema,
@@ -63,18 +64,19 @@ export {
   type PaymentMethodsListResponse,
   type Plan,
   type PlanFeature,
-  type PlanId,
   type PlanInterval,
   type PlansListResponse,
+  type PortalSessionRequest,
+  type PortalSessionResult,
   type SetupIntentResponse,
   type Subscription,
   type SubscriptionActionResponse,
-  type SubscriptionId,
   type SubscriptionResponse,
   type SubscriptionStatus,
   type UpdateSubscriptionRequest,
 } from './billing.schemas';
 
+// --- billing.admin.schemas ---
 export {
   adminBillingStatsSchema,
   adminPlanResponseSchema,
@@ -92,6 +94,25 @@ export {
   type UpdatePlanRequest,
 } from './billing.admin.schemas';
 
+// --- billing.logic ---
+export { calculateProration, PLAN_FEES, type BillingStats } from './billing.logic';
+
+// --- billing.display ---
+export {
+  formatPlanInterval,
+  formatPrice,
+  formatPriceWithInterval,
+  getCardBrandLabel,
+  getInvoiceStatusLabel,
+  getInvoiceStatusVariant,
+  getPaymentMethodIcon,
+  getPaymentMethodLabel,
+  getSubscriptionStatusLabel,
+  getSubscriptionStatusVariant,
+  type StatusVariant,
+} from './billing.display';
+
+// --- billing.errors ---
 export {
   BillingProviderError,
   BillingProviderNotConfiguredError,
@@ -103,6 +124,9 @@ export {
   CheckoutSessionError,
   CustomerNotFoundError,
   InvoiceNotFoundError,
+  isBillingProviderError,
+  isPlanError,
+  isSubscriptionError,
   PaymentMethodNotFoundError,
   PaymentMethodValidationError,
   PlanHasActiveSubscriptionsError,
@@ -113,11 +137,9 @@ export {
   SubscriptionNotCancelingError,
   WebhookEventAlreadyProcessedError,
   WebhookSignatureError,
-  isBillingProviderError,
-  isPlanError,
-  isSubscriptionError,
 } from './billing.errors';
 
+// --- billing.entitlements ---
 export {
   assertEntitled,
   assertWithinLimit,
@@ -130,6 +152,7 @@ export {
   type SubscriptionState,
 } from './billing.entitlements';
 
+// --- billing.service-types ---
 export {
   type BillingService,
   type CheckoutParams,

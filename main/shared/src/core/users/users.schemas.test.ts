@@ -1,9 +1,9 @@
-// main/shared/src/domain/users/users.schemas.test.ts
+// main/shared/src/core/users/users.schemas.test.ts
 
 /**
  * @file Unit Tests for User Schemas
  * @description Tests for user profile, password, avatar, and session validation schemas.
- * @module Domain/Users
+ * @module Core/Users/Tests
  */
 
 import { describe, expect, it } from 'vitest';
@@ -20,16 +20,19 @@ import {
   sessionsListResponseSchema,
   updateProfileRequestSchema,
   userSchema,
-  type AvatarDeleteResponse,
-  type AvatarUploadResponse,
-  type ChangePasswordRequest,
-  type ChangePasswordResponse,
-  type RevokeAllSessionsResponse,
-  type RevokeSessionResponse,
-  type Session,
-  type SessionsListResponse,
-  type UpdateProfileRequest,
-  type User,
+} from './users.schemas';
+
+import type {
+  AvatarDeleteResponse,
+  AvatarUploadResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  RevokeAllSessionsResponse,
+  RevokeSessionResponse,
+  Session,
+  SessionsListResponse,
+  UpdateProfileRequest,
+  User,
 } from './users.schemas';
 
 // ============================================================================
@@ -432,7 +435,7 @@ describe('sessionsListResponseSchema', () => {
       sessions: [VALID_SESSION],
     });
     expect(result.sessions).toHaveLength(1);
-    expect(result.sessions[0].id).toBe(VALID_UUID);
+    expect(result.sessions[0]!.id).toBe(VALID_UUID);
   });
 
   it('should parse empty sessions array', () => {

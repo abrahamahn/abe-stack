@@ -1,7 +1,19 @@
-// main/shared/src/domain/billing/billing.display.test.ts
+// main/shared/src/core/billing/billing.display.test.ts
+
+/**
+ * @file Billing Display Tests
+ * @description Unit tests for billing formatting and display helpers.
+ * @module Core/Billing/Tests
+ */
 
 import { describe, expect, it } from 'vitest';
 
+import {
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+} from '../constants/billing';
 import {
   formatPlanInterval,
   formatPrice,
@@ -14,12 +26,6 @@ import {
   getSubscriptionStatusLabel,
   getSubscriptionStatusVariant,
 } from './billing.display';
-import {
-  INVOICE_STATUSES,
-  PAYMENT_METHOD_TYPES,
-  PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES,
-} from './billing.schemas';
 
 import type { StatusVariant } from './billing.display';
 import type {

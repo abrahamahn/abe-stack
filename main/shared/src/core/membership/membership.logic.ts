@@ -1,12 +1,24 @@
-// main/shared/src/domain/membership/membership.logic.ts
+// main/shared/src/core/membership/membership.logic.ts
 /**
  * @file Membership Logic
  * @description Business logic for invite status, transitions, and role validation.
- * @module Domain/Membership
+ * @module Core/Membership
  */
 
+import type { TenantRole } from '../auth/roles';
 import type { Invitation, Membership } from './membership.schemas';
-import type { TenantRole } from '../../types/roles';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Numeric level for each role (ascending power). */
+export const ROLE_LEVELS: Record<TenantRole, number> = {
+  viewer: 1,
+  member: 2,
+  admin: 3,
+  owner: 4,
+};
 
 // ============================================================================
 // Invite Lifecycle
@@ -51,24 +63,16 @@ export function hasAtLeastRole(
   return currentLevel >= requiredLevel;
 }
 
-// ============================================================================
-// Role Hierarchy Protection
-// ============================================================================
-
-/** Numeric level for each role (ascending power). */
-export const ROLE_LEVELS: Record<TenantRole, number> = {
-  viewer: 1,
-  member: 2,
-  admin: 3,
-  owner: 4,
-};
-
 /**
  * Returns the numeric level for a tenant role.
  */
 export function getRoleLevel(role: TenantRole): number {
   return ROLE_LEVELS[role];
 }
+
+// ============================================================================
+// Role Hierarchy Protection
+// ============================================================================
 
 /**
  * Determines if an actor with `actorRole` can assign `targetRole` to another member.

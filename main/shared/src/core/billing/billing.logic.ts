@@ -1,7 +1,15 @@
-// main/shared/src/domain/billing/billing.logic.ts
-import { FEATURE_KEYS } from './billing.schemas';
+// main/shared/src/core/billing/billing.logic.ts
+
+/**
+ * @file Billing Logic
+ * @description Pure functions for subscription status checks, entitlements, proration, and usage limits.
+ * @module Core/Billing
+ */
+
+import { FEATURE_KEYS } from '../constants/billing';
 
 import type { Plan, Subscription } from './billing.schemas';
+
 // ============================================================================
 // Constants
 // ============================================================================

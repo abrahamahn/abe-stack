@@ -18,6 +18,16 @@ const reactHooksPluginTyped: any = reactHooksPlugin;
 const tsconfigRootDir: string = path.resolve(__dirname);
 const require = createRequire(import.meta.url);
 
+// All shared sub-layer types for external boundary allow rules
+const allSharedLayers: string[] = [
+  'shared',
+  'shared-primitives',
+  'shared-engine',
+  'shared-core',
+  'shared-contracts',
+  'shared-api',
+];
+
 let jsConfigs: any = {};
 try {
   jsConfigs = require('@eslint/js').configs;
@@ -61,6 +71,13 @@ export const baseConfig = [
         },
       },
       'boundaries/elements': [
+        // Shared internal sub-layers (specific patterns first, catch-all last)
+        { type: 'shared-primitives', pattern: 'main/shared/src/primitives', mode: 'folder' },
+        { type: 'shared-engine', pattern: 'main/shared/src/engine', mode: 'folder' },
+        { type: 'shared-core', pattern: 'main/shared/src/core', mode: 'folder' },
+        { type: 'shared-contracts', pattern: 'main/shared/src/contracts', mode: 'folder' },
+        { type: 'shared-api', pattern: 'main/shared/src/api', mode: 'folder' },
+        // Shared catch-all (index.ts, __tests__, config/, etc.)
         { type: 'shared', pattern: 'main/shared', mode: 'folder' },
         // Server Packages
         { type: 'db', pattern: 'main/server/db', mode: 'folder' },
@@ -88,29 +105,37 @@ export const baseConfig = [
           message:
             '${from.type} is not allowed to import ${to.type}. See DAG in docs/architecture.',
           rules: [
-            // Shared is the bedrock
-            { from: 'shared', allow: [] },
-            // Server DAG Edges
-            { from: 'db', allow: ['shared'] },
-            { from: 'media', allow: ['shared'] },
-            { from: 's-engine', allow: ['shared', 'db'] },
-            { from: 'websocket', allow: ['shared', 'db', 's-engine'] },
-            { from: 'core', allow: ['shared', 'db', 'media', 's-engine'] },
-            { from: 'realtime', allow: ['shared', 'db', 'websocket'] },
+            // ── Shared Internal DAG (primitives → engine → core → contracts → api) ──
+            { from: 'shared-primitives', allow: [] },
+            { from: 'shared-engine', allow: ['shared-primitives'] },
+            { from: 'shared-core', allow: ['shared-primitives', 'shared-engine'] },
+            { from: 'shared-contracts', allow: ['shared-primitives', 'shared-engine', 'shared-core'] },
+            { from: 'shared-api', allow: ['shared-primitives', 'shared-engine', 'shared-core', 'shared-contracts'] },
+            // Shared catch-all (index.ts, config/, __tests__) can reach all internal layers
+            { from: 'shared', allow: ['shared-primitives', 'shared-engine', 'shared-core', 'shared-contracts', 'shared-api'] },
+
+            // ── Server DAG Edges ──
+            { from: 'db', allow: [...allSharedLayers] },
+            { from: 'media', allow: [...allSharedLayers] },
+            { from: 's-engine', allow: [...allSharedLayers, 'db'] },
+            { from: 'websocket', allow: [...allSharedLayers, 'db', 's-engine'] },
+            { from: 'core', allow: [...allSharedLayers, 'db', 'media', 's-engine'] },
+            { from: 'realtime', allow: [...allSharedLayers, 'db', 'websocket'] },
             {
               from: 'app-server',
-              allow: ['shared', 'core', 'db', 'realtime', 's-engine', 'websocket'],
+              allow: [...allSharedLayers, 'core', 'db', 'realtime', 's-engine', 'websocket'],
             },
-            // Client DAG Edges
-            { from: 'api', allow: ['shared'] },
-            { from: 'c-engine', allow: ['shared', 'api'] },
-            { from: 'react', allow: ['shared', 'c-engine'] },
-            { from: 'ui', allow: ['shared', 'c-engine', 'react'] },
-            { from: 'app-web', allow: ['shared', 'api', 'c-engine', 'react', 'ui'] },
+
+            // ── Client DAG Edges ──
+            { from: 'api', allow: [...allSharedLayers] },
+            { from: 'c-engine', allow: [...allSharedLayers, 'api'] },
+            { from: 'react', allow: [...allSharedLayers, 'c-engine'] },
+            { from: 'ui', allow: [...allSharedLayers, 'c-engine', 'react'] },
+            { from: 'app-web', allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui'] },
             // Desktop Special Case (Client stack + local engine)
             {
               from: 'app-desktop',
-              allow: ['shared', 'api', 'c-engine', 'react', 'ui', 's-engine'],
+              allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui', 's-engine'],
             },
           ],
         },
@@ -195,7 +220,22 @@ export const baseConfig = [
     },
   },
 
-  // 5. TEST RELAXATION (Fast Loop support)
+  // 5. NO RE-EXPORTS EXCEPT INDEX BARRELS
+  {
+    files: ['main/shared/src/**/*.ts'],
+    ignores: ['**/index.ts', '**/*.test.ts', '**/__tests__/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportNamedDeclaration[source]',
+          message: 'Re-exports (export { X } from "Y") are only allowed in index.ts barrel files. Import and use the value directly instead.',
+        },
+      ],
+    },
+  },
+
+  // 6. TEST RELAXATION (Fast Loop support)
   {
     files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
     rules: {
@@ -209,7 +249,7 @@ export const baseConfig = [
     },
   },
 
-  // 6. OPERATIONAL OVERRIDES
+  // 7. OPERATIONAL OVERRIDES
   {
     linterOptions: {
       noInlineConfig: false, // Allow local bypasses for v1.0.0 speed

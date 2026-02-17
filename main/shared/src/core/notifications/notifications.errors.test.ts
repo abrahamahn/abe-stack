@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { HTTP_STATUS } from '../../core/constants';
+import { HTTP_STATUS } from '../../primitives/constants';
 
 import {
   InvalidPreferencesError,

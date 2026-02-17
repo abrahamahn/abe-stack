@@ -1,4 +1,10 @@
-// main/shared/src/domain/auth/index.ts
+// main/shared/src/core/auth/index.ts
+/**
+ * @file Auth Module Barrel
+ * @description Central exports for authentication schemas, errors, helpers,
+ *   password validation, roles, and session management.
+ * @module Core/Auth
+ */
 
 export {
   defaultPasswordConfig,
@@ -191,3 +197,30 @@ export {
   type OAuthProvider,
   type OAuthUnlinkResponse,
 } from './auth.oauth';
+
+// --- auth-sessions.logic ---
+export {
+  getSessionAge,
+  isSessionActive,
+  isSessionRevoked,
+} from './auth-sessions.logic';
+
+// --- auth-sessions.schemas ---
+export {
+  createUserSessionSchema,
+  updateUserSessionSchema,
+  userSessionSchema,
+  type CreateUserSession,
+  type UpdateUserSession,
+  type UserSession,
+} from './auth-sessions.schemas';
+
+// --- roles ---
+export {
+  appRoleSchema,
+  permissionSchema,
+  tenantRoleSchema,
+  type AppRole,
+  type Permission,
+  type TenantRole,
+} from './roles';

@@ -6,7 +6,8 @@
  * @module Domain/Activities
  */
 
-import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../types/ids';
+import { ACTOR_TYPES } from '../constants/iam';
+import { activityIdSchema, tenantIdSchema, userIdSchema } from '../types/ids';
 import {
   coerceDate,
   createEnumSchema,
@@ -19,22 +20,19 @@ import {
 } from '../schema.utils';
 
 import type { Schema } from '../../primitives/api';
-import type { ActivityId, TenantId, UserId } from '../../types/ids';
+import type { ActivityId, TenantId, UserId } from '../types/ids';
 
 // ============================================================================
-// Enums
+// Constants
 // ============================================================================
 
-/** Types of actors that can generate activity entries */
-export const ACTOR_TYPES = ['user', 'system', 'api_key'] as const;
-export type ActorType = (typeof ACTOR_TYPES)[number];
-
-/** Schema for validating actor types */
-export const actorTypeSchema = createEnumSchema(ACTOR_TYPES, 'actorType');
+export { ACTOR_TYPES };
 
 // ============================================================================
 // Types
 // ============================================================================
+
+export type ActorType = (typeof ACTOR_TYPES)[number];
 
 /**
  * Full activity record (matches DB SELECT result).
@@ -85,9 +83,8 @@ export interface CreateActivity {
 // Schemas
 // ============================================================================
 
-/**
- * Full activity schema (matches DB SELECT result).
- */
+export const actorTypeSchema = createEnumSchema(ACTOR_TYPES, 'actorType');
+
 export const activitySchema: Schema<Activity> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 

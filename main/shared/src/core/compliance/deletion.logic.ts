@@ -1,9 +1,9 @@
 // main/shared/src/domain/compliance/deletion.logic.ts
+
 /**
- * Deletion Domain Logic
- *
- * Helpers for data retention and deletion workflows.
- * @module Domain/Compliance
+ * @file Deletion Logic
+ * @description Helpers for data retention and deletion workflows.
+ * @module Core/Compliance
  */
 
 import type { SoftDeletable } from './deletion.schemas';
@@ -15,7 +15,7 @@ import type { SoftDeletable } from './deletion.schemas';
 export const DEFAULT_GRACE_PERIOD_DAYS = 30;
 
 // ============================================================================
-// Helpers
+// Functions
 // ============================================================================
 
 /**

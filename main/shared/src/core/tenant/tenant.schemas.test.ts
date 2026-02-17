@@ -3,7 +3,7 @@
 /**
  * @file Unit Tests for Tenant Schemas
  * @description Tests for tenant validation schemas and types.
- * @module Domain/Tenant
+ * @module Core/Tenant/Tests
  */
 
 import { describe, expect, it } from 'vitest';

@@ -1,9 +1,9 @@
 // main/shared/src/domain/tenant/tenant.logic.ts
+
 /**
- * Tenant Domain Logic
- *
- * Multi-tenant scoping logic, context guards, and workspace utilities.
- * @module Domain/Tenant
+ * @file Tenant Domain Logic
+ * @description Multi-tenant scoping logic, context guards, and workspace utilities.
+ * @module Core/Tenant
  */
 
 import { ERROR_CODES } from '../constants';

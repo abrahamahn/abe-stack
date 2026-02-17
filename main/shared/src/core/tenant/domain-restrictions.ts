@@ -1,12 +1,14 @@
 // main/shared/src/domain/tenant/domain-restrictions.ts
+
 /**
- * Domain Restriction Logic
- *
- * Validates email addresses against a workspace's allowed domain list.
- * When the allowed domains list is empty, all domains are permitted.
- *
- * @module domain/tenant/domain-restrictions
+ * @file Domain Restriction Logic
+ * @description Validates email addresses against a workspace's allowed domain list.
+ * @module Core/Tenant
  */
+
+// ============================================================================
+// Functions
+// ============================================================================
 
 /**
  * Extract the domain from an email address.

@@ -1,9 +1,14 @@
-// main/shared/src/domain/membership/membership.display.ts
+// main/shared/src/core/membership/membership.display.ts
+/**
+ * @file Membership Display
+ * @description Badge tones for tenant roles and invitation statuses.
+ * @module Core/Membership
+ */
 
 import type { InvitationStatus } from './membership.schemas';
 
 // ============================================================================
-// Tenant Role Display
+// Constants
 // ============================================================================
 
 const TENANT_ROLE_TONES: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
@@ -13,17 +18,6 @@ const TENANT_ROLE_TONES: Record<string, 'info' | 'success' | 'warning' | 'danger
   viewer: 'success',
 };
 
-/**
- * Get the badge tone for a tenant role.
- */
-export function getTenantRoleTone(role: string): 'info' | 'success' | 'warning' | 'danger' {
-  return TENANT_ROLE_TONES[role] ?? 'info';
-}
-
-// ============================================================================
-// Invitation Status Display
-// ============================================================================
-
 const INVITATION_STATUS_TONES: Record<InvitationStatus, 'info' | 'success' | 'warning' | 'danger'> =
   {
     pending: 'info',
@@ -31,6 +25,17 @@ const INVITATION_STATUS_TONES: Record<InvitationStatus, 'info' | 'success' | 'wa
     revoked: 'danger',
     expired: 'warning',
   };
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+/**
+ * Get the badge tone for a tenant role.
+ */
+export function getTenantRoleTone(role: string): 'info' | 'success' | 'warning' | 'danger' {
+  return TENANT_ROLE_TONES[role] ?? 'info';
+}
 
 /**
  * Get the badge tone for an invitation status.

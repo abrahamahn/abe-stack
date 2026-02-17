@@ -3,7 +3,7 @@
 /**
  * @file Unit Tests for Tenant Workspace Context
  * @description Tests for workspace scoping types, guards, and helpers.
- * @module Domain/Tenant/Workspace
+ * @module Core/Tenant/Tests
  */
 
 import { describe, expect, it } from 'vitest';

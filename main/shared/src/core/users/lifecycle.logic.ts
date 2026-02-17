@@ -1,16 +1,14 @@
-// main/shared/src/domain/users/lifecycle.logic.ts
+// main/shared/src/core/users/lifecycle.logic.ts
+
 /**
- * Account Lifecycle Logic
- *
- * Pure business logic for account deactivation, deletion, and reactivation.
- * @module Domain/Users
+ * @file Account Lifecycle Logic
+ * @description Pure business logic for account deactivation, deletion, and reactivation.
+ * @module Core/Users
  */
 
-import {
-  ACCOUNT_DELETION_GRACE_PERIOD_DAYS,
-  type AccountLifecycleFields,
-  type AccountStatus,
-} from './lifecycle.schemas';
+import { ACCOUNT_DELETION_GRACE_PERIOD_DAYS } from './lifecycle.schemas';
+
+import type { AccountLifecycleFields, AccountStatus } from './lifecycle.schemas';
 
 // ============================================================================
 // Status Derivation

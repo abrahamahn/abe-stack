@@ -7,12 +7,12 @@ export {
   type EndpointContract,
   type EndpointDef,
   type HttpMethod,
-  type Logger,
   type QueryParams,
   type RequestBody,
-  type ServerLogger,
   type SuccessResponse
 } from '../primitives/api';
+
+export { type Logger, type ServerLogger } from '../primitives/logger';
 
 export { type InferSchema, type SafeParseResult, type Schema } from '../primitives/schema';
 

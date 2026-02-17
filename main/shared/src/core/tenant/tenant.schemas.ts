@@ -3,7 +3,7 @@
 /**
  * @file Tenant Contracts
  * @description Types and schemas for Workspace/Tenant management.
- * @module Domain/Tenant
+ * @module Core/Tenant
  */
 
 import { tenantIdSchema, userIdSchema } from '../../types/ids';

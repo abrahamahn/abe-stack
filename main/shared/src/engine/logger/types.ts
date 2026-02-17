@@ -7,11 +7,7 @@
  * reuse across packages without coupling to Fastify or pino.
  */
 
-/**
- * Log levels supported by the logger.
- * Ordered from least to most severe: trace < debug < info < warn < error < fatal.
- */
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+export type { LogLevel } from '../../primitives/config/types/infra';
 
 /**
  * Structured log data attached to log entries.

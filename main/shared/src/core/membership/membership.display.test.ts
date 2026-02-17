@@ -1,4 +1,9 @@
-// main/shared/src/domain/membership/membership.display.test.ts
+// main/shared/src/core/membership/membership.display.test.ts
+/**
+ * @file Membership Display Tests
+ * @description Tests for badge tone functions.
+ * @module Core/Membership/Tests
+ */
 
 import { describe, expect, it } from 'vitest';
 
@@ -8,6 +13,9 @@ import { INVITATION_STATUSES } from './membership.schemas';
 import type { InvitationStatus } from './membership.schemas';
 
 describe('membership.display', () => {
+  // ==========================================================================
+  // getTenantRoleTone
+  // ==========================================================================
   describe('getTenantRoleTone', () => {
     it('returns danger for owner', () => {
       expect(getTenantRoleTone('owner')).toBe('danger');
@@ -30,6 +38,9 @@ describe('membership.display', () => {
     });
   });
 
+  // ==========================================================================
+  // getInvitationStatusTone
+  // ==========================================================================
   describe('getInvitationStatusTone', () => {
     const expectedTones: Record<InvitationStatus, string> = {
       pending: 'info',

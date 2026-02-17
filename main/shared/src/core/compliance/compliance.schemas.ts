@@ -1,9 +1,9 @@
 // main/shared/src/domain/compliance/compliance.schemas.ts
 
 /**
- * @file Compliance Domain Schemas
+ * @file Compliance Schemas
  * @description Schemas for legal documents, user agreements, and consent logs.
- * @module Domain/Compliance
+ * @module Core/Compliance
  */
 
 import {

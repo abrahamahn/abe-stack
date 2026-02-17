@@ -1,4 +1,10 @@
-// main/shared/src/domain/membership/membership.logic.test.ts
+// main/shared/src/core/membership/membership.logic.test.ts
+/**
+ * @file Membership Logic Tests
+ * @description Tests for invite lifecycle, role validation, and orphan prevention.
+ * @module Core/Membership/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -15,8 +21,8 @@ import {
   isSoleOwner,
 } from './membership.logic';
 
+import type { TenantRole } from '../auth/roles';
 import type { Invitation, Membership } from './membership.schemas';
-import type { TenantRole } from '../../types/roles';
 
 describe('membership.logic', () => {
   // ==========================================================================

@@ -1,4 +1,11 @@
 // main/shared/src/domain/compliance/compliance.logic.test.ts
+
+/**
+ * @file Compliance Logic Unit Tests
+ * @description Tests for legal document acceptance and consent evaluation functions.
+ * @module Core/Compliance/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import { getEffectiveConsent, isConsentGranted, needsReacceptance } from './compliance.logic';

@@ -1,43 +1,65 @@
-// main/shared/src/domain/notifications/index.ts
+// main/shared/src/core/notifications/index.ts
 
+/**
+ * @file Notification Module Barrel
+ * @description Public API for notification types, schemas, errors, and logic.
+ * @module Core/Notifications
+ */
+
+// --- contracts ---
 export { notificationsContract } from '../../contracts';
 
+// --- notifications.display ---
 export { getNotificationLevelTone } from './notifications.display';
 
+// --- notifications.logic ---
 export { shouldSendNotification } from './notifications.logic';
 
+// --- notifications.schemas (in-app) ---
 export {
   baseMarkAsReadRequestSchema,
   deleteNotificationResponseSchema,
-  markReadResponseSchema, NOTIFICATION_LEVELS,
-  NOTIFICATION_TYPES, notificationDeleteRequestSchema,
+  markReadResponseSchema,
+  NOTIFICATION_LEVELS,
+  NOTIFICATION_TYPES,
+  notificationDeleteRequestSchema,
   notificationPreferencesSchema,
   notificationSchema,
   notificationsListRequestSchema,
   notificationsListResponseSchema,
   type BaseMarkAsReadRequest,
   type DeleteNotificationResponse,
-  type MarkReadResponse, type Notification, type NotificationDeleteRequest, type NotificationLevel,
+  type MarkReadResponse,
+  type Notification,
+  type NotificationDeleteRequest,
+  type NotificationLevel,
   type NotificationPreferencesConfig,
   type NotificationsListRequest,
-  type NotificationsListResponse
+  type NotificationsListResponse,
 } from './notifications.schemas';
 
+// --- notifications.push-schemas ---
 export {
-  preferencesResponseSchema, sendNotificationRequestSchema,
-  sendNotificationResponseSchema, subscribeRequestSchema,
+  preferencesResponseSchema,
+  sendNotificationRequestSchema,
+  sendNotificationResponseSchema,
+  subscribeRequestSchema,
   subscribeResponseSchema,
   unsubscribeRequestSchema,
   unsubscribeResponseSchema,
   updatePreferencesRequestSchema,
-  vapidKeyResponseSchema
+  vapidKeyResponseSchema,
 } from './notifications.push-schemas';
 
+// --- notifications.errors ---
 export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
-  NotificationRateLimitError, NotificationsDisabledError, NotificationSendError, PayloadTooLargeError,
+  NotificationRateLimitError,
+  NotificationsDisabledError,
+  NotificationSendError,
+  PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
@@ -48,9 +70,10 @@ export {
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
-  VapidNotConfiguredError
+  VapidNotConfiguredError,
 } from './notifications.errors';
 
+// --- notifications.types (push) ---
 export {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type BatchSendResult,
@@ -63,17 +86,16 @@ export {
   type NotificationType,
   type NotificationTypePreference,
   type PreferencesResponse,
-  type SendResult as PushSendResult,
   type PushSubscription,
   type PushSubscriptionKeys,
   type SendNotificationRequest,
   type SendNotificationResponse,
+  type SendResult as PushSendResult,
   type StoredPushSubscription,
   type SubscribeRequest,
   type SubscribeResponse,
   type UnsubscribeRequest,
   type UnsubscribeResponse,
   type UpdatePreferencesRequest,
-  type VapidKeyResponse
+  type VapidKeyResponse,
 } from './notifications.types';
-

@@ -15,7 +15,7 @@
  * @module context
  */
 
-import type { Logger } from '../primitives/api';
+import type { Logger } from '../primitives/logger';
 import type { HasErrorTracker } from './observability';
 import type { EmailService, NotificationService, StorageService } from './ports';
 

@@ -7,9 +7,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "composite": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.shared.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],

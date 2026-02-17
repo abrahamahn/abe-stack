@@ -1,4 +1,11 @@
-// main/shared/src/domain/users/users.permissions.test.ts
+// main/shared/src/core/users/users.permissions.test.ts
+
+/**
+ * @file Unit Tests for User Permissions
+ * @description Tests for permission checks, ownership, and role helpers.
+ * @module Core/Users/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,34 +18,36 @@ import {
 } from './users.permissions';
 
 import type { User } from './users.schemas';
-import type { UserId } from '../../types/ids';
+import type { UserId } from '../types/ids';
+
+// ============================================================================
+// Test Data
+// ============================================================================
+
+function createUser(role: 'user' | 'admin' | 'moderator' = 'user'): User {
+  return {
+    id: '550e8400-e29b-41d4-a716-446655440000' as User['id'],
+    email: 'test@example.com',
+    username: 'testuser',
+    firstName: 'Test',
+    lastName: 'User',
+    avatarUrl: null,
+    role,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: null,
+    dateOfBirth: null,
+    gender: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+// ============================================================================
+// canUser
+// ============================================================================
 
 describe('users.permissions', () => {
-  // ==========================================================================
-  // Test Data
-  // ==========================================================================
-  function createUser(role: 'user' | 'admin' | 'moderator' = 'user'): User {
-    return {
-      id: '550e8400-e29b-41d4-a716-446655440000' as User['id'],
-      email: 'test@example.com',
-      username: 'testuser',
-      firstName: 'Test',
-      lastName: 'User',
-      avatarUrl: null,
-      role,
-      emailVerified: true,
-      phone: null,
-      phoneVerified: null,
-      dateOfBirth: null,
-      gender: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-  }
-
-  // ==========================================================================
-  // canUser
-  // ==========================================================================
   describe('canUser', () => {
     it('admin user can perform any action', () => {
       const admin = createUser('admin');
@@ -63,9 +72,10 @@ describe('users.permissions', () => {
     });
   });
 
-  // ==========================================================================
+  // ============================================================================
   // isOwner
-  // ==========================================================================
+  // ============================================================================
+
   describe('isOwner', () => {
     it('returns true when user ID matches resource owner ID', () => {
       const userId = '550e8400-e29b-41d4-a716-446655440000' as UserId;
@@ -79,9 +89,10 @@ describe('users.permissions', () => {
     });
   });
 
-  // ==========================================================================
+  // ============================================================================
   // Role Checks
-  // ==========================================================================
+  // ============================================================================
+
   describe('hasRole', () => {
     it('returns true when user has matching role', () => {
       const admin = createUser('admin');

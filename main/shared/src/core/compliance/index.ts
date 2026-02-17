@@ -1,7 +1,15 @@
 // main/shared/src/domain/compliance/index.ts
 
+/**
+ * @file Compliance Module Index
+ * @description Barrel exports for compliance domain: legal documents, consent, deletion.
+ * @module Core/Compliance
+ */
+
+// --- compliance.logic ---
 export { getEffectiveConsent, isConsentGranted, needsReacceptance } from './compliance.logic';
 
+// --- compliance.schemas ---
 export {
   CONSENT_TYPES,
   consentLogSchema,
@@ -17,37 +25,45 @@ export {
   updateConsentPreferencesRequestSchema,
   updateLegalDocumentSchema,
   userAgreementSchema,
-  type ConsentLog,
-  type ConsentType,
-  type CreateConsentLog,
-  type CreateDataExportRequest,
-  type CreateLegalDocument,
-  type CreateUserAgreement,
-  type DataExportRequest,
-  type DataExportStatus,
-  type DataExportType,
-  type DocumentType,
-  type LegalDocument,
-  type UpdateConsentPreferencesRequest,
-  type UpdateLegalDocument,
-  type UserAgreement,
 } from './compliance.schemas';
 
+export type {
+  ConsentLog,
+  ConsentType,
+  CreateConsentLog,
+  CreateDataExportRequest,
+  CreateLegalDocument,
+  CreateUserAgreement,
+  DataExportRequest,
+  DataExportStatus,
+  DataExportType,
+  DocumentType,
+  LegalDocument,
+  UpdateConsentPreferencesRequest,
+  UpdateLegalDocument,
+  UserAgreement,
+} from './compliance.schemas';
+
+// --- deletion.logic ---
 export {
   calculateHardDeleteDate,
-  isWithinGracePeriod,
-  isSoftDeleted,
   DEFAULT_GRACE_PERIOD_DAYS,
+  isSoftDeleted,
+  isWithinGracePeriod,
 } from './deletion.logic';
 
+// --- deletion.schemas ---
 export {
   DEFAULT_DELETION_CONFIG,
   DELETION_STATES,
   deletionRequestSchema,
-  type DeletionConfig,
-  type DeletionJob,
-  type DeletionRequest,
-  type DeletionServiceContract,
-  type DeletionState,
-  type SoftDeletable,
+} from './deletion.schemas';
+
+export type {
+  DeletionConfig,
+  DeletionJob,
+  DeletionRequest,
+  DeletionServiceContract,
+  DeletionState,
+  SoftDeletable,
 } from './deletion.schemas';

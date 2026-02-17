@@ -5,7 +5,7 @@
  * Provides secure token storage with multiple backends.
  */
 
-import { ACCESS_TOKEN_COOKIE_NAME } from '../../../core/constants';
+import { ACCESS_TOKEN_COOKIE_NAME } from '../constants/platform';
 
 export type TokenStore = {
   get: () => string | null;

@@ -1,7 +1,18 @@
 // main/shared/src/domain/tenant/domain-restrictions.test.ts
+
+/**
+ * @file Unit Tests for Domain Restrictions
+ * @description Tests for email domain restriction validation.
+ * @module Core/Tenant/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import { extractEmailDomain, isEmailDomainAllowed } from './domain-restrictions';
+
+// ============================================================================
+// extractEmailDomain
+// ============================================================================
 
 describe('extractEmailDomain', () => {
   it('extracts domain from a valid email', () => {
@@ -24,6 +35,10 @@ describe('extractEmailDomain', () => {
     expect(extractEmailDomain('user@first@second.com')).toBe('second.com');
   });
 });
+
+// ============================================================================
+// isEmailDomainAllowed
+// ============================================================================
 
 describe('isEmailDomainAllowed', () => {
   it('allows all domains when allowlist is empty', () => {

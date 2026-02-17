@@ -1,4 +1,11 @@
-// main/shared/src/domain/users/lifecycle.logic.test.ts
+// main/shared/src/core/users/lifecycle.logic.test.ts
+
+/**
+ * @file Unit Tests for Account Lifecycle Logic
+ * @description Tests for account status derivation, grace period, and lifecycle validation.
+ * @module Core/Users/Tests
+ */
+
 import { describe, expect, it } from 'vitest';
 
 import {
