@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { SEARCH_ERROR_TYPES } from '../constants/limits';
-import { AppError } from '../errors/base';
+import { AppError } from '../errors';
 
 import {
   InvalidCursorError,

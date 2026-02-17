@@ -1,6 +1,6 @@
 // main/shared/src/domain/auth/auth.password-patterns.ts
 
-import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../primitives/constants';
+import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../constants';
 
 /**
  * Check for repeated characters (e.g., "aaa", "111")

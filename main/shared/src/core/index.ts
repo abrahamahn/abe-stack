@@ -1,47 +1,6 @@
 // main/shared/src/core/index.ts
 
 export {
-  type ApiResponse,
-  type ApiResult,
-  type Contract,
-  type EndpointContract,
-  type EndpointDef,
-  type HttpMethod,
-  type QueryParams,
-  type RequestBody,
-  type SuccessResponse
-} from '../primitives/api';
-
-export { type Logger, type ServerLogger } from '../primitives/logger';
-
-export { type InferSchema, type SafeParseResult, type Schema } from '../primitives/schema';
-
-export {
-  API_PREFIX,
-  ERROR_CODES,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-  type ErrorCode,
-  type HttpStatusCode
-} from '../primitives/constants';
-
-export {
-  type AuthenticatedUser,
-  type BaseContext,
-  type HasBilling,
-  type HasCache,
-  type HasEmail,
-  type HasNotifications,
-  type HasPubSub,
-  type HasStorage,
-  type ReplyContext,
-  type RequestContext,
-  type RequestInfo
-} from './context';
-
-export { type ServerEnvironment } from './environment';
-
-export {
   AppError,
   BadRequestError,
   BaseError,
@@ -49,15 +8,21 @@ export {
   ConflictError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
-  ForbiddenError, formatValidationErrors,
+  ForbiddenError,
+  formatValidationErrors,
   getErrorStatusCode,
-  getSafeErrorMessage, InternalError,
+  getSafeErrorMessage,
+  InternalError,
   InternalServerError,
   InvalidCredentialsError,
-  InvalidTokenError, isAppError, NotFoundError,
+  InvalidTokenError,
+  isAppError,
+  NotFoundError,
   OAuthError,
   OAuthStateMismatchError,
-  ResourceNotFoundError, toAppError, TokenReuseError,
+  ResourceNotFoundError,
+  toAppError,
+  TokenReuseError,
   TooManyRequestsError,
   TotpInvalidError,
   TotpRequiredError,
@@ -65,76 +30,22 @@ export {
   UnprocessableError,
   UserNotFoundError,
   ValidationError,
-  WeakPasswordError, type AppErrorInfo,
+  WeakPasswordError,
+  type AppErrorInfo,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
-  type ValidationIssue
+  type ValidationIssue,
 } from './errors';
-
-export {
-  isErrorResponse,
-  isSuccessResponse,
-  type ApiErrorResponse,
-  type ApiSuccessResponse
-} from './response';
-
-export {
-  assert,
-  assertDefined,
-  assertNever,
-  isAuthenticatedRequest,
-  isNonEmptyString,
-  isNumber,
-  isObjectLike,
-  isPlainObject,
-  isSafeObjectKey,
-  isString
-} from '../primitives/guards';
-
-export { type NativeBridge } from './native';
-
-export { err, isErr, isOk, ok, type Result } from './result';
 
 export {
   can,
   hasPermission,
   type AuthContext,
   type PolicyAction,
-  type PolicyResource
+  type PolicyResource,
 } from './policy';
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './env';
-
-export {
-  type Attachment,
-  type AuditEntry,
-  type AuditQuery,
-  type AuditResponse,
-  type AuditService,
-  type BaseStorageConfig,
-  type CacheService,
-  type ConfigService,
-  type DeletionService,
-  type EmailOptions,
-  type EmailService,
-  type HealthCheckResult,
-  type InfrastructureService,
-  type Job,
-  type JobHandler,
-  type JobOptions,
-  type JobQueueService,
-  type LocalStorageConfig,
-  type MetricsService,
-  type NotificationService,
-  type ReadableStreamLike,
-  type RecordAuditRequest,
-  type S3StorageConfig,
-  type SendResult,
-  type StorageClient,
-  type StorageConfig,
-  type StorageProvider,
-  type StorageService
-} from './ports';
 
 export {
   apiResultSchema,
@@ -163,10 +74,8 @@ export {
   type ApiResultEnvelope,
   type EmptyBody,
   type ErrorResponseEnvelope,
-  type SuccessResponseEnvelope
+  type SuccessResponseEnvelope,
 } from './schemas';
-
-export type { ModuleDeps, ModuleRegistrationOptions } from './module-registration';
 
 export {
   createListInsertOperation,
@@ -183,6 +92,5 @@ export {
   type ListRemoveOperation,
   type Operation,
   type SetOperation,
-  type Transaction
+  type Transaction,
 } from './transactions';
-

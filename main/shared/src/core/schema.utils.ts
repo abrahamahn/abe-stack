@@ -8,9 +8,9 @@
  * @module Core/SchemaUtils
  */
 
+export { URL_REGEX, UUID_REGEX } from '../primitives/constants';
+
 export {
-  URL_REGEX,
-  UUID_REGEX,
   coerceDate,
   coerceNumber,
   createArraySchema,

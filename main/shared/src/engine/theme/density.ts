@@ -10,6 +10,8 @@
 
 export type Density = 'compact' | 'normal' | 'comfortable';
 
+export const DEFAULT_DENSITY: Density = 'normal';
+
 /** Multipliers for each density level */
 export const densityMultipliers = {
   compact: 0.75,

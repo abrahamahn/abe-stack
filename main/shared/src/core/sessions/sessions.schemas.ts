@@ -6,7 +6,7 @@
  * @module Domain/Sessions
  */
 
-import { sessionIdSchema, userIdSchema } from '../../types/ids';
+import { sessionIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   coerceDate,
   createSchema,
@@ -17,7 +17,7 @@ import {
 } from '../schema.utils';
 
 import type { Schema } from '../../primitives/api';
-import type { SessionId, UserId } from '../../types/ids';
+import type { SessionId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

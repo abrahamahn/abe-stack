@@ -1,11 +1,15 @@
 // main/shared/src/engine/jobs/index.ts
 
-export { getJobStatusLabel, getJobStatusTone } from './jobs.display';
-
-export { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './jobs.logic';
-
 export {
+  calculateBackoff,
+  canRetry,
   createJobSchema,
+  getJobStatusLabel,
+  getJobStatusTone,
+  isTerminalStatus,
+  JOB_PRIORITIES,
+  JOB_PRIORITY_VALUES,
+  JOB_STATUSES,
   jobActionResponseSchema,
   jobDetailsSchema,
   jobErrorSchema,
@@ -15,6 +19,7 @@ export {
   jobSchema,
   jobStatusSchema,
   queueStatsSchema,
+  shouldProcess,
   updateJobSchema,
   type CreateJob,
   type DomainJob,
@@ -29,4 +34,4 @@ export {
   type JobStatus,
   type QueueStats,
   type UpdateJob,
-} from './jobs.schemas';
+} from './jobs';

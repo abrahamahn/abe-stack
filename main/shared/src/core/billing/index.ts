@@ -7,7 +7,7 @@
  */
 
 // --- constants (re-export for backward compatibility) ---
-export {
+import {
   BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
   FEATURE_KEYS,
@@ -17,11 +17,25 @@ export {
   SUBSCRIPTION_STATUSES,
 } from '../constants/billing';
 
+export {
+  BILLING_EVENT_TYPES,
+  BILLING_PROVIDERS,
+  FEATURE_KEYS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+};
+
 // --- ids (re-export branded types) ---
-export { type PlanId, type SubscriptionId } from '../ids';
+import type { PlanId, SubscriptionId } from '../../primitives/schema/ids';
+
+export type { PlanId, SubscriptionId };
 
 // --- contracts ---
-export { billingContract } from '../../contracts';
+import { billingContract } from '../../contracts';
+
+export { billingContract };
 
 // --- billing.schemas ---
 export {

@@ -14,7 +14,7 @@ import {
   webhookListResponseSchema,
   webhookMutationResponseSchema,
   webhookResponseSchema,
-} from '../engine/webhooks/webhooks.schemas';
+} from '../engine/webhooks/webhooks';
 
 import type { Contract } from '../primitives/api';
 

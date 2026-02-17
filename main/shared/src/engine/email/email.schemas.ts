@@ -6,7 +6,7 @@
  * @module Domain/Email
  */
 
-import { emailLogIdSchema, emailTemplateKeySchema, userIdSchema } from '../../core/ids';
+import { emailLogIdSchema, emailTemplateKeySchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   coerceDate,
   createEnumSchema,
@@ -20,7 +20,7 @@ import {
 } from '../../primitives/schema';
 import { EMAIL_PROVIDERS, EMAIL_STATUSES } from '../constants/platform';
 
-import type { EmailLogId, EmailTemplateKey, UserId } from '../../core/ids';
+import type { EmailLogId, EmailTemplateKey, UserId } from '../../primitives/schema/ids';
 import type { Schema } from '../../primitives/schema';
 
 // ============================================================================

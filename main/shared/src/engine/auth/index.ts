@@ -5,8 +5,10 @@ export {
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
   EmailSendError,
+  getRefreshCookieOptions,
   InvalidCredentialsError,
   InvalidTokenError,
+  isStrategyEnabled,
   OAuthError,
   OAuthStateMismatchError,
   TokenReuseError,
@@ -14,6 +16,4 @@ export {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from './auth.errors';
-
-export { getRefreshCookieOptions, isStrategyEnabled } from './auth-helpers';
+} from './auth';

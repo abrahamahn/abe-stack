@@ -6,7 +6,7 @@
  * @module Core/Tenant
  */
 
-import { tenantIdSchema, userIdSchema } from '../../types/ids';
+import { tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   createSchema,
   parseBoolean,
@@ -19,7 +19,7 @@ import {
 import { isoDateTimeSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';
-import type { TenantId, UserId } from '../../types/ids';
+import type { TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

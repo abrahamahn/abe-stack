@@ -8,7 +8,7 @@
 
 import { MS_PER_DAY } from '../../primitives/constants/time';
 
-import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/auth';
+import type { AuthConfig, AuthStrategy } from '../../config/types/auth';
 
 // ============================================================================
 // Functions

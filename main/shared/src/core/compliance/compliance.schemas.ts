@@ -11,7 +11,7 @@ import {
   legalDocumentIdSchema,
   userAgreementIdSchema,
   userIdSchema,
-} from '../../types/ids';
+} from '../../primitives/schema/ids';
 import {
   coerceDate,
   createSchema,
@@ -25,7 +25,7 @@ import {
 } from '../schema.utils';
 
 import type { Schema } from '../../primitives/api';
-import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../types/ids';
+import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants

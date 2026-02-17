@@ -5,9 +5,9 @@
  * @module Core/Policy
  */
 
-import { assertNever } from '../primitives/guards';
+import { assertNever } from '../primitives/helpers';
 
-import type { AppRole, Permission, TenantRole } from '../types/roles';
+import type { AppRole, Permission, TenantRole } from './auth/roles';
 
 /**
  * Context required to make an authorization decision.

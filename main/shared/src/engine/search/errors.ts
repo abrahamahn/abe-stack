@@ -1,5 +1,5 @@
 // main/shared/src/engine/search/errors.ts
-import { AppError } from '../errors/base';
+import { AppError } from '../errors';
 import { SEARCH_ERROR_TYPES } from '../constants/limits';
 import { HTTP_STATUS } from '../constants/platform';
 

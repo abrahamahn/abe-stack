@@ -9,7 +9,7 @@
 
 import { DeferredPromise } from '../../primitives/helpers/async';
 import { HTTP_STATUS } from '../constants/platform';
-import { AppError } from '../errors/base';
+import { AppError } from '../errors';
 
 /**
  * Error thrown when the queue exceeds its maximum size.

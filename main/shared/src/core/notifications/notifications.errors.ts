@@ -6,7 +6,7 @@
  * subscription management, sending, and preference handling.
  */
 
-import { HTTP_STATUS } from '../../primitives/constants';
+import { HTTP_STATUS } from '../../engine/constants';
 import {
   AppError,
   BadRequestError,

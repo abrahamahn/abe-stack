@@ -224,3 +224,54 @@ export {
   type WebhookResponse,
   type WebhookWithDeliveries,
 } from './webhooks';
+
+export type {
+  AuthenticatedUser,
+  BaseContext,
+  HasBilling,
+  HasCache,
+  HasEmail,
+  HasNotifications,
+  HasPubSub,
+  HasQueue,
+  HasStorage,
+  ReplyContext,
+  RequestContext,
+  RequestInfo,
+} from './context';
+
+export type { ModuleDeps, ModuleRegistrationOptions } from './module-registration';
+
+export type { NativeBridge } from './native';
+
+export type {
+  Attachment,
+  AuditEntry,
+  AuditQuery,
+  AuditResponse,
+  AuditService,
+  BaseStorageConfig,
+  CacheService,
+  ConfigService,
+  DeletionService,
+  EmailOptions,
+  EmailService,
+  HealthCheckResult,
+  InfrastructureService,
+  Job,
+  JobHandler,
+  JobOptions,
+  JobQueueService,
+  LocalStorageConfig,
+  MetricsService,
+  NotificationService,
+  ReadableStreamLike,
+  RecordAuditRequest,
+  S3StorageConfig,
+  SendResult,
+  StorageClient,
+  StorageConfig,
+  StorageService,
+} from './ports';
+// Note: StorageProvider from ports conflicts with StorageProvider from files.
+// Import directly from engine/ports when the ports variant is needed.

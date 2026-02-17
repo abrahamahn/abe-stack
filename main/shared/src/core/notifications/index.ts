@@ -7,7 +7,9 @@
  */
 
 // --- contracts ---
-export { notificationsContract } from '../../contracts';
+import { notificationsContract } from '../../contracts';
+
+export { notificationsContract };
 
 // --- notifications.display ---
 export { getNotificationLevelTone } from './notifications.display';

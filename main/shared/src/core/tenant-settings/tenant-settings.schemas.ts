@@ -6,11 +6,11 @@
  * @module Domain/TenantSettings
  */
 
-import { tenantIdSchema } from '../../types/ids';
+import { tenantIdSchema } from '../../primitives/schema/ids';
 import { coerceDate, createSchema, parseString } from '../schema.utils';
 
 import type { Schema } from '../../primitives/api';
-import type { TenantId } from '../../types/ids';
+import type { TenantId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

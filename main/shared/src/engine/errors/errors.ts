@@ -2,16 +2,71 @@
 /**
  * Core Error Classes and Utilities
  *
- * Consolidated error definitions for the BSLT.
  * All custom errors extend AppError for consistent error handling.
  */
 
 import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from '../constants/platform';
 
-import { AppError, BaseError, type ValidationIssue } from './base';
+// ============================================================================
+// Types
+// ============================================================================
 
-// Re-export base error classes from L1
-export { AppError, BaseError, type ValidationIssue };
+/**
+ * Minimal validation issue shape for error formatting.
+ * Structurally compatible with Zod's ZodIssue for backward compatibility.
+ */
+export interface ValidationIssue {
+  path: ReadonlyArray<string | number>;
+  message: string;
+  code: string;
+}
+
+// ============================================================================
+// Base Error Classes
+// ============================================================================
+
+export abstract class BaseError extends Error {
+  public abstract readonly code: string;
+
+  constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class AppError extends BaseError {
+  public readonly expose: boolean;
+
+  constructor(
+    message: string,
+    public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    public readonly code: string = ERROR_CODES.INTERNAL_ERROR,
+    public readonly details?: Record<string, unknown>,
+    expose?: boolean,
+  ) {
+    super(message);
+    this.expose = expose ?? statusCode < 500;
+  }
+
+  toJSON(): {
+    ok: false;
+    error: {
+      code: string;
+      message: string;
+      details?: Record<string, unknown> | undefined;
+    };
+  } {
+    return {
+      ok: false,
+      error: {
+        code: this.code,
+        message: this.message,
+        details: this.details,
+      },
+    };
+  }
+}
 
 // ============================================================================
 // HTTP Error Classes (4xx and 5xx)

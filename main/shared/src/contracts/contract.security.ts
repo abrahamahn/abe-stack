@@ -3,7 +3,6 @@
 import { errorResponseSchema } from '../engine/http/response';
 import {
   securityEventDetailResponseSchema,
-  securityEventDetailRequestSchema,
   securityEventsExportRequestSchema,
   securityEventsExportResponseSchema,
   securityEventsListRequestSchema,

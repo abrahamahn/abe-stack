@@ -6,8 +6,8 @@
  * @module Domain/Admin
  */
 
-import { appRoleSchema, type AppRole } from '../../types/roles';
-import { paginatedResultSchema } from '../../utils/pagination';
+import { appRoleSchema, type AppRole } from '../auth/roles';
+import { paginatedResultSchema } from '../../engine/pagination';
 import {
   createSchema,
   parseBoolean,

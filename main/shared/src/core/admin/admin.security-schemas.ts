@@ -13,7 +13,7 @@ import {
   paginationOptionsSchema,
   type PaginatedResult,
   type PaginationOptions,
-} from '../../utils/pagination';
+} from '../../engine/pagination';
 import { createSchema } from '../schema.utils';
 import { errorResponseSchema, uuidSchema } from '../schemas';
 

@@ -5,7 +5,7 @@
  * Specific error types for auth flows including login, tokens, OAuth, and 2FA.
  */
 
-import { HTTP_STATUS } from '../../primitives/constants';
+import { HTTP_STATUS } from '../../engine/constants';
 import {
   AppError,
   BadRequestError,

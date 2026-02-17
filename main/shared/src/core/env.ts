@@ -8,7 +8,7 @@
  * @module Core/Env
  */
 
-import { NODE_ENV_VALUES } from '../primitives/constants';
+import { NODE_ENV_VALUES } from '../config';
 
 import { ConfigurationError } from './errors';
 import { createEnumSchema, createSchema, parseOptional, parseString } from './schema.utils';

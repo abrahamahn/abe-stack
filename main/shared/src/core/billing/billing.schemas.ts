@@ -15,7 +15,7 @@ import {
   PLAN_INTERVALS,
   SUBSCRIPTION_STATUSES,
 } from '../constants/billing';
-import { planIdSchema, subscriptionIdSchema, userIdSchema } from '../ids';
+import { planIdSchema, subscriptionIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   createEnumSchema,
   createSchema,
@@ -29,8 +29,8 @@ import {
 } from '../schema.utils';
 import { isoDateTimeSchema } from '../schemas';
 
-import type { Schema } from '../../api';
-import type { PlanId, SubscriptionId, UserId } from '../ids';
+import type { Schema } from '../../primitives/api';
+import type { PlanId, SubscriptionId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

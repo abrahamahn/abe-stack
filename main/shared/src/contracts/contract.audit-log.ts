@@ -8,8 +8,8 @@
 
 import { errorResponseSchema, successResponseSchema } from '../core/schemas';
 
-import { tenantIdSchema } from '../core/ids';
-import { auditLogFilterSchema, auditLogListResponseSchema } from '../engine/audit-log/audit-log.schemas';
+import { tenantIdSchema } from '../primitives/schema/ids';
+import { auditLogFilterSchema, auditLogListResponseSchema } from '../engine/audit-log/audit-log';
 
 import type { Contract } from '../primitives/api';
 

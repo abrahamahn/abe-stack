@@ -27,3 +27,7 @@ export type {
 export type { Logger, ServerLogger } from './logger';
 
 export type { InferSchema, SafeParseResult, Schema } from './schema';
+
+export type { ServerEnvironment } from './environment';
+
+export type { BreadcrumbData, ErrorTracker, HasErrorTracker } from './observability';

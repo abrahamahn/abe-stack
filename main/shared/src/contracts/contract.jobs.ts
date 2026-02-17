@@ -14,7 +14,7 @@ import {
   jobListQuerySchema,
   jobListResponseSchema,
   queueStatsSchema,
-} from '../engine/jobs/jobs.schemas';
+} from '../engine/jobs';
 
 import type { Contract } from '../primitives/api';
 

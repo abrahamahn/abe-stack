@@ -7,7 +7,7 @@ import {
   getRecordsResponseSchema,
   transactionSchema,
   writeResponseSchema,
-} from '../engine/realtime/realtime.schemas';
+} from '../engine/realtime/realtime';
 
 import type { Contract } from '../primitives/api';
 

@@ -16,7 +16,7 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../../types/schema';
+} from '../../primitives/schema';
 
 import type {
   BrazeConfig,
@@ -26,7 +26,7 @@ import type {
   OneSignalConfig,
   SnsConfig,
 } from './services';
-import type { Schema } from '../../types/schema';
+import type { Schema } from '../../primitives/schema';
 
 // ============================================================================
 // Provider Config Schemas

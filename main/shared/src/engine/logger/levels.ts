@@ -7,7 +7,9 @@
  * a comparison function for log filtering.
  */
 
-import { LOG_LEVELS } from '../primitives/constants';
+import { LOG_LEVELS } from '../constants/platform';
+
+export { LOG_LEVELS };
 
 import type { LogLevel } from './types';
 

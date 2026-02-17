@@ -14,7 +14,7 @@ export type DatabaseProvider = 'postgresql' | 'sqlite' | 'mongodb' | 'json';
 export type StorageProviderName = 'local' | 's3';
 export type QueueProvider = 'local' | 'redis';
 export type PackageManagerProvider = 'npm' | 'pnpm' | 'yarn';
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 // ============================================================================
 // Database Configuration

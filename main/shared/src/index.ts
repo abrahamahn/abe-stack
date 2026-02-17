@@ -12,7 +12,7 @@ export type {
   ErrorResponse,
   InferResponseData,
   StatusCode,
-} from './api/api';
+} from './primitives/api';
 
 export {
   AppError,
@@ -51,19 +51,35 @@ export {
   type ValidationIssue
 } from './core/errors';
 export * from './primitives/constants';
+export {
+  MAX_CHUNK_SIZE,
+  MAX_FILENAME_LENGTH,
+  MAX_UPLOAD_FILE_SIZE,
+  MAX_UPLOAD_TIMEOUT_MS,
+} from './engine/constants';
 
 export {
   isErrorResponse,
   isSuccessResponse,
   type ApiErrorResponse,
   type ApiSuccessResponse
-} from './core/response';
+} from './primitives/helpers/response';
 
-export * from './core/ids';
-export * from './primitives/guards';
+export {
+  assert,
+  assertDefined,
+  assertNever,
+  getFieldValue,
+  isNonEmptyString,
+  isNumber,
+  isObjectLike,
+  isPlainObject,
+  isSafeObjectKey,
+  isString
+} from './primitives/helpers';
 export * from './primitives/schema';
 
-export { err, isErr, isOk, ok, type Result } from './core/result';
+export { err, isErr, isOk, ok, type Result } from './primitives/helpers/result';
 
 export {
   can,
@@ -97,9 +113,9 @@ export {
   type StorageClient,
   type StorageConfig,
   type StorageProvider
-} from './core/ports';
+} from './engine/ports';
 
-export { type BreadcrumbData, type ErrorTracker, type HasErrorTracker } from './core/observability';
+export { type BreadcrumbData, type ErrorTracker, type HasErrorTracker } from './primitives/observability';
 
 export {
   apiResultSchema,
@@ -113,7 +129,7 @@ export {
   type EmptyBody
 } from './core/schemas';
 
-export type { ModuleDeps, ModuleRegistrationOptions } from './core/module-registration';
+export type { ModuleDeps, ModuleRegistrationOptions } from './engine/module-registration';
 
 export {
   createListInsertOperation,
@@ -138,6 +154,13 @@ export {
 // ============================================================================
 
 export { apiRouter, type ApiRouter } from './api';
+
+// Contracts
+export {
+  apiKeysContract,
+  usersContract,
+  webhooksContract,
+} from './contracts';
 
 // ============================================================================
 // DOMAIN EXPORTS
@@ -312,7 +335,7 @@ export {
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
   type WebauthnRegisterVerifyResponse
-} from './engine/auth';
+} from './core/auth';
 
 // Billing
 export {
@@ -413,7 +436,7 @@ export {
   type SyncStripeResponse,
   type UpdatePlanRequest,
   type UpdateSubscriptionRequest
-} from './engine/billing';
+} from './core/billing';
 
 // Compliance
 export {
@@ -690,7 +713,6 @@ export {
   userIdSchema,
   USERNAME_CHANGE_COOLDOWN_DAYS,
   userSchema,
-  usersContract,
   type AccountLifecycleFields,
   type AccountLifecycleResponse,
   type AccountStatus,
@@ -712,13 +734,12 @@ export {
   type UpdateUsernameResponse,
   type User,
   type UserId
-} from './engine/users';
+} from './core/users';
 
-// Webhooks
+// API Keys
 export {
   apiKeyItemSchema,
   apiKeySchema,
-  apiKeysContract,
   createApiKeyRequestSchema,
   createApiKeyResponseSchema,
   createApiKeySchema,
@@ -744,11 +765,8 @@ export {
   createWebhookSchema,
   isDeliveryTerminal,
   matchesEventFilter,
-  MAX_DELIVERY_ATTEMPTS,
-  RETRY_DELAYS_MINUTES,
   rotateSecretResponseSchema,
   shouldRetryDelivery,
-  SUBSCRIBABLE_EVENT_TYPES,
   updateWebhookDeliverySchema,
   updateWebhookSchema,
   webhookDeleteResponseSchema,
@@ -759,7 +777,6 @@ export {
   webhookMutationResponseSchema,
   webhookResponseSchema,
   webhookSchema,
-  webhooksContract,
   webhookWithDeliveriesSchema,
   type CreateWebhook,
   type CreateWebhookDelivery,
@@ -820,9 +837,9 @@ export {
   type UnlockAccountRequest,
   type UnlockAccountResponse,
   type UserStatus
-} from './engine/admin';
+} from './core/admin';
 
-// Context (from core)
+// Context (from engine)
 export {
   type AuthenticatedUser,
   type BaseContext,
@@ -835,7 +852,7 @@ export {
   type HasPubSub,
   type HasStorage,
   type ReplyContext
-} from './core/context';
+} from './engine/context';
 
 // Jobs (additional contract exports)
 export {
@@ -865,7 +882,7 @@ export {
   type ProviderPaymentMethod,
   type ProviderSubscription,
   type SetupIntentResult
-} from './engine/billing';
+} from './core/billing';
 
 // OAuth (from domain/auth)
 export {
@@ -891,13 +908,13 @@ export {
   type OAuthLinkResponse,
   type OAuthProvider,
   type OAuthUnlinkResponse
-} from './engine/auth';
+} from './core/auth';
 
-// Native bridge (from core)
-export { type NativeBridge } from './core/native';
+// Native bridge (from engine)
+export { type NativeBridge } from './engine/native';
 
 // Users contract (legacy aliases)
-export { USER_ROLES, userRoleSchema, type UserRole } from './engine/users';
+export { USER_ROLES, userRoleSchema, type UserRole } from './core/users';
 
 // Realtime (from domain)
 export {
@@ -943,26 +960,16 @@ export {
   type WriteResponse
 } from './engine/realtime';
 
-// Media (from domain/media)
+// Media (from engine/media — functions and types only; constants via primitives/constants above)
 export {
-  ALL_MEDIA_EXTENSIONS,
-  ALLOWED_MEDIA_MIME_TYPES,
-  AUDIO_EXTENSIONS,
   detectFileType,
   detectFileTypeFromPath,
-  EXT_TO_MIME,
   generateFileId,
-  IMAGE_EXTENSIONS,
+  getMimeType,
   isAllowedFileType,
-  MAX_CHUNK_SIZE,
-  MAX_FILENAME_LENGTH,
-  MAX_UPLOAD_FILE_SIZE,
-  MAX_UPLOAD_TIMEOUT_MS,
-  MIME_TO_EXT,
   parseAudioMetadataFromBuffer,
   sanitizeFilename,
   validateUploadConfig,
-  VIDEO_EXTENSIONS,
   type AudioMetadata,
   type AudioProcessingOptions,
   type ContentModerationResult,
@@ -973,7 +980,7 @@ export {
   type ProcessingResult,
   type SecurityScanResult,
   type UploadConfig,
-  type VideoProcessingOptions
+  type VideoProcessingOptions,
 } from './engine/media';
 
 // Activities (from domain/activities)
@@ -1015,36 +1022,22 @@ export {
   type SecurityMetricsRequest,
   type SecurityMetricsResponse,
   type SecuritySeverity
-} from './engine/admin';
+} from './core/admin';
 
-// ============================================================================
-// TYPE DEFINITIONS (Namespace)
-// ============================================================================
-
-export * as Types from './types';
-
-// Commonly-used types from ./types that are needed by server modules
-export type { Permission, TenantRole } from './types/roles';
+// Commonly-used role types
+export type { Permission, TenantRole } from './core/auth/roles';
 
 // ============================================================================
 // BROWSER-SAFE UTILITIES
 // ============================================================================
 
 // --- Async ---
-export * as Async from './primitives/utils/async';
-
 export {
-  BatchedQueue,
   DeferredPromise,
   delay,
-  ReactiveMap,
-  type BatchedQueueOptions,
-  type BatchProcessResult
-} from './primitives/utils/async';
+} from './primitives/helpers';
 
 // --- Cache ---
-export * as Cache from './primitives/utils/cache';
-
 export {
   CacheCapacityError,
   CacheConnectionError,
@@ -1076,13 +1069,10 @@ export {
   type MemoizeOptions,
   type MemoryCacheConfig,
   type RedisCacheConfig
-} from './primitives/utils/cache';
+} from './engine/cache';
 
 // --- Search ---
-export * as Search from './primitives/utils/search';
-
 export {
-  // Serialization
   buildURLWithQuery,
   compoundFilterSchema,
   contains,
@@ -1101,7 +1091,6 @@ export {
   facetedSearchQuerySchema,
   facetedSearchResultSchema,
   facetResultSchema,
-  FILTER_OPERATORS,
   filterArray,
   filterConditionSchema,
   filterOperatorSchema,
@@ -1110,7 +1099,6 @@ export {
   filterValueSchema,
   fromSearchQuery,
   fullTextSearchConfigSchema,
-  getFieldValue,
   gt,
   highlightedFieldSchema,
   inArray,
@@ -1128,7 +1116,6 @@ export {
   isSearchError,
   isSearchProviderError,
   isSearchTimeoutError,
-  LOGICAL_OPERATORS,
   logicalOperatorSchema,
   lt,
   mergeSearchParamsIntoURL,
@@ -1136,8 +1123,6 @@ export {
   paginateArray,
   QueryTooComplexError,
   rangeValueSchema,
-  SEARCH_DEFAULTS,
-  SEARCH_ERROR_TYPES,
   SearchError,
   SearchProviderError,
   SearchProviderUnavailableError,
@@ -1180,13 +1165,9 @@ export {
   type SerializedQuery,
   type SortConfig,
   type UrlSearchParamsInput
-} from './primitives/utils/search';
+} from './engine/search';
 
 // --- Logger ---
-// NOTE: The Logger type is available via the LoggerNs namespace below,
-// or import directly from './logger'.
-export * as LoggerNs from './logger';
-
 export {
   CONSOLE_LOG_LEVELS,
   createConsoleLogger,
@@ -1198,7 +1179,6 @@ export {
   generateCorrelationId,
   getOrCreateCorrelationId,
   isValidCorrelationId,
-  LOG_LEVELS,
   shouldLog,
   type BaseLogger,
   type ConsoleLoggerConfig,
@@ -1208,11 +1188,9 @@ export {
   type LoggerConfig,
   type LogLevel,
   type RequestContext
-} from './logger';
+} from './engine/logger';
 
 // --- Monitor ---
-export * as Monitor from './primitives/utils/monitor';
-
 export {
   buildDetailedHealthResponse,
   checkCache,
@@ -1243,7 +1221,7 @@ export {
   type StartupSummaryOptions,
   type StorageHealthConfig,
   type WebSocketStats
-} from './primitives/utils/monitor';
+} from './engine/health';
 
 // --- PubSub ---
 export * as PubSub from './engine/pubsub';
@@ -1275,28 +1253,10 @@ export {
   toCamelCaseArray,
   toSnakeCase,
   type KeyMapping
-} from './primitives/utils/string/casing';
-// NOTE: toCamelCase is exported from ./utils/string/string (string conversion).
-// For record-key conversion, import { toCamelCase } from './utils/string/casing' directly.
-
-// --- Keyboard ---
-export {
-  formatKeyBinding,
-  isEditableElement,
-  isMac,
-  matchesAnyBinding,
-  matchesKeyBinding,
-  matchesModifiers,
-  parseKeyBinding,
-  type KeyModifiers,
-  type ParsedKeyBinding
-} from './primitives/utils/keyboard';
-
-// --- Constants ---
-// Constants exported from primitives/constants
+} from './primitives/helpers';
 
 // --- Comparison ---
-export { deepEqual } from './primitives/utils/comparison';
+export { deepEqual } from './primitives/helpers';
 
 // --- Crypto ---
 export {
@@ -1306,25 +1266,13 @@ export {
   generateUUID
 } from './engine/crypto/crypto';
 
-// --- Date ---
-export {
-  formatDate,
-  formatDateTime,
-  formatTimeAgo,
-  toISODateOnly,
-  toISOStringOrNull
-} from './primitives/utils/date';
-
 // --- HTTP ---
 export {
   extractBearerToken,
   parseCookies,
   serializeCookie,
   type CookieOptions,
-  type CookieSerializeOptions
-} from './primitives/utils/http/http';
-
-export {
+  type CookieSerializeOptions,
   type BaseRouteDefinition,
   type HandlerContext,
   type HttpMethod,
@@ -1333,11 +1281,10 @@ export {
   type RouteMap,
   type RouteResult,
   type ValidationSchema
-} from './primitives/utils/http/http-types';
+} from './engine/http';
 
-export { extractCsrfToken } from './primitives/utils/http/csrf';
-export { getMimeType } from './primitives/utils/http/mime';
-export { parseMultipartFile, type ParsedMultipartFile } from './primitives/utils/http/multipart';
+export { extractCsrfToken } from './engine/http/csrf';
+export { parseMultipartFile, type ParsedMultipartFile } from './engine/http/multipart';
 export {
   getValidatedClientIp,
   ipMatchesCidr,
@@ -1350,12 +1297,12 @@ export {
   validateCidrList,
   type ForwardedInfo,
   type ProxyValidationConfig
-} from './primitives/utils/http/proxy';
+} from './engine/http/proxy';
 export {
   extractIpAddress,
   extractUserAgent,
   getRequesterId
-} from './primitives/utils/http/request';
+} from './engine/http/request';
 
 export {
   detectNoSQLInjection,
@@ -1373,7 +1320,7 @@ export {
 } from './engine/security/sanitization';
 
 // --- Routes ---
-export { createRouteMap, protectedRoute, publicRoute } from './primitives/utils/http/routes';
+export { createRouteMap, protectedRoute, publicRoute } from './engine/http/routes';
 
 // --- Pagination ---
 export {
@@ -1424,7 +1371,7 @@ export {
   MAX_LOGO_SIZE,
   normalizeStoragePath,
   validateFileType
-} from './primitives/utils/storage';
+} from './engine/files';
 
 // --- String ---
 export {
@@ -1445,10 +1392,10 @@ export {
   toPascalCase,
   trimTrailingSlashes,
   truncate
-} from './primitives/utils/string/string';
+} from './primitives/helpers';
 
 // --- User Agent ---
-export { parseUserAgent, type ParsedUserAgent } from './primitives/utils/user-agent';
+export { parseUserAgent, type ParsedUserAgent } from './engine/http/user-agent';
 
 // --- Token ---
 export {

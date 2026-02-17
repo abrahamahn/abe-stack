@@ -6,7 +6,7 @@
  * @module Core/Billing
  */
 
-import { HTTP_STATUS } from '../../primitives/constants';
+import { HTTP_STATUS } from '../../engine/constants';
 import { AppError, BadRequestError, ConflictError, NotFoundError } from '../errors';
 
 // ============================================================================

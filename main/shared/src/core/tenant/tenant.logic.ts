@@ -6,7 +6,7 @@
  * @module Core/Tenant
  */
 
-import { ERROR_CODES } from '../constants';
+import { ERROR_CODES } from '../../engine/constants';
 
 // ============================================================================
 // Constants

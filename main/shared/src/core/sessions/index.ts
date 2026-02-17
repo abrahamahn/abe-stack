@@ -5,7 +5,7 @@
  * @module Core/Sessions
  */
 
-export { getSessionAge, isSessionActive, isSessionRevoked } from '../auth/auth-sessions.logic';
+export { getSessionAge, isSessionActive, isSessionRevoked } from './sessions.logic';
 
 export {
   createUserSessionSchema,
@@ -14,4 +14,4 @@ export {
   type CreateUserSession,
   type UpdateUserSession,
   type UserSession,
-} from '../auth/auth-sessions.schemas';
+} from './sessions.schemas';

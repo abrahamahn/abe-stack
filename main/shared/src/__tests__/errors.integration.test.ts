@@ -24,9 +24,9 @@ import {
   UnprocessableError,
   ValidationError,
 } from '../core/errors';
-import { isErrorResponse } from '../core/response';
+import { isErrorResponse } from '../primitives/helpers/response';
 
-import type { ApiErrorResponse, ApiResponse } from '../core/response';
+import type { ApiErrorResponse, ApiResponse } from '../primitives/helpers/response';
 
 describe('Error Infrastructure Integration', () => {
   describe('Error class hierarchy', () => {

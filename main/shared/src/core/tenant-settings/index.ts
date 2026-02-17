@@ -13,4 +13,4 @@ export {
   type CreateTenantSetting,
   type TenantSetting,
   type UpdateTenantSetting,
-} from '../tenant/tenant-settings.schemas';
+} from './tenant-settings.schemas';

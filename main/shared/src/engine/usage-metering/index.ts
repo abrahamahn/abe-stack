@@ -4,12 +4,9 @@ export {
   aggregateSnapshots,
   aggregateValues,
   isOverQuota,
-  type AggregationType,
-} from './usage-metering.logic';
-
-export {
   usageMetricSchema,
   usageSnapshotSchema,
+  type AggregationType,
   type UsageMetric,
   type UsageSnapshot,
-} from './usage-metering.schemas';
+} from './usage-metering';

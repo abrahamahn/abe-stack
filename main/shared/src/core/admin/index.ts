@@ -15,7 +15,9 @@ export {
   getUserStatusTone,
 } from './admin.display';
 
-export { adminContract } from '../../contracts';
+import { adminContract } from '../../contracts';
+
+export { adminContract };
 
 export {
   USER_STATUSES,

@@ -6,11 +6,11 @@
  * All custom errors extend AppError for consistent error handling.
  */
 
-import { AppError, type ValidationIssue } from '../engine/errors/base';
-import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from '../primitives/constants';
+import { AppError, type ValidationIssue } from '../engine/errors';
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS } from '../engine/constants';
 
 // Re-export base error classes from L1
-export { AppError, BaseError, type ValidationIssue } from '../engine/errors/base';
+export { AppError, BaseError, type ValidationIssue } from '../engine/errors';
 
 // ============================================================================
 // HTTP Error Classes (4xx and 5xx)

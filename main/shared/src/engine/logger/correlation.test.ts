@@ -1,7 +1,7 @@
 // main/shared/src/engine/logger/correlation.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { STANDARD_HEADERS } from '../primitives/constants';
+import { STANDARD_HEADERS } from '../constants/platform';
 
 import {
   createRequestContext,

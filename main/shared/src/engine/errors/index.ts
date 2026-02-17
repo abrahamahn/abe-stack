@@ -1,3 +1,27 @@
 // main/shared/src/engine/errors/index.ts
 
-export { AppError, BaseError, type ValidationIssue } from './base';
+export {
+  AppError,
+  BaseError,
+  BadRequestError,
+  ConfigurationError,
+  ConflictError,
+  ForbiddenError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  InternalError,
+  InternalServerError,
+  isAppError,
+  NotFoundError,
+  ResourceNotFoundError,
+  toAppError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  UnprocessableError,
+  ValidationError,
+  type AppErrorInfo,
+  type ValidationErrorDetail,
+  type ValidationErrorResponse,
+  type ValidationIssue,
+} from './errors';

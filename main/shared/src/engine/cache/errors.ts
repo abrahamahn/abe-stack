@@ -7,7 +7,7 @@
  */
 
 import { HTTP_STATUS } from '../constants/platform';
-import { AppError } from '../errors/base';
+import { AppError } from '../errors';
 
 // ============================================================================
 // Base Cache Error

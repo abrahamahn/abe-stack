@@ -9,7 +9,7 @@
  * @module Domain/Auth/OAuth
  */
 
-import { OAUTH_PROVIDERS } from '../../primitives/constants';
+import { OAUTH_PROVIDERS } from '../constants';
 import { createSchema } from '../schema.utils';
 import { emptyBodySchema, errorResponseSchema, uuidSchema } from '../schemas';
 import { userSchema, type User } from '../users/users.schemas';

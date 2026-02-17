@@ -28,8 +28,6 @@ export {
 } from './auth.password-scoring';
 
 export {
-  COMMON_PASSWORDS,
-  KEYBOARD_PATTERNS,
   containsUserInput,
   hasKeyboardPattern,
   hasRepeatedChars,
@@ -37,7 +35,9 @@ export {
   isCommonPassword,
 } from './auth.password-patterns';
 
-export { authContract } from '../../contracts';
+import { authContract } from '../../contracts';
+
+export { authContract };
 
 export { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from './auth.messages';
 
@@ -174,7 +174,6 @@ export {
 } from './auth.schemas';
 
 export {
-  OAUTH_PROVIDERS,
   oauthCallbackQuerySchema,
   oauthCallbackResponseSchema,
   oauthConnectionSchema,

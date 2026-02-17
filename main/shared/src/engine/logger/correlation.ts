@@ -7,7 +7,7 @@
  * dependency on Fastify, pino, or any HTTP framework.
  */
 
-import { STANDARD_HEADERS } from '../primitives/constants';
+import { STANDARD_HEADERS } from '../constants/platform';
 
 import type { RequestContext } from './types';
 
