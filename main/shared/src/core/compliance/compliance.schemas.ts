@@ -22,7 +22,7 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../schema.utils';
+} from '../../primitives/schema';
 
 import type { Schema } from '../../primitives/api';
 import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../primitives/schema/ids';

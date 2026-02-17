@@ -1,7 +1,7 @@
 // main/shared/src/core/schemas.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { createSchema, parseString } from '../core/schema.utils';
+import { createSchema, parseString } from '../primitives/schema';
 
 import {
   apiResultSchema,

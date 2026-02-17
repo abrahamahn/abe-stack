@@ -14,7 +14,7 @@ import {
   parseNullableOptional,
   parseOptional,
   parseString,
-} from '../schema.utils';
+} from '../../primitives/schema';
 
 import type { Schema } from '../../primitives/api';
 import type { SessionId, UserId } from '../../primitives/schema/ids';

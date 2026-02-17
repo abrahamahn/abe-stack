@@ -15,7 +15,7 @@ import {
   parseNumber,
   parseOptional,
   parseString,
-} from '../schema.utils';
+} from '../../primitives/schema';
 import { emailSchema, isoDateTimeSchema, usernameSchema, uuidSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';

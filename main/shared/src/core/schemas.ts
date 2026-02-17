@@ -8,7 +8,8 @@
 
 import { ERROR_CODES } from '../engine/constants';
 
-import { createSchema, UUID_REGEX } from './schema.utils';
+import { UUID_REGEX } from '../primitives/constants';
+import { createSchema } from '../primitives/schema';
 
 import type { Schema } from '../primitives/schema';
 

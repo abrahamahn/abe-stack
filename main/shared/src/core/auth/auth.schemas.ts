@@ -12,7 +12,7 @@ import {
   parseBoolean,
   parseNumber,
   parseString,
-} from '../schema.utils';
+} from '../../primitives/schema';
 import { emailSchema, passwordSchema } from '../schemas';
 import { userSchema as domainUserSchema, type User as DomainUser } from '../users/users.schemas';
 

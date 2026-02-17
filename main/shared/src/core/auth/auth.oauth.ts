@@ -10,7 +10,7 @@
  */
 
 import { OAUTH_PROVIDERS } from '../constants';
-import { createSchema } from '../schema.utils';
+import { createSchema } from '../../primitives/schema';
 import { emptyBodySchema, errorResponseSchema, uuidSchema } from '../schemas';
 import { userSchema, type User } from '../users/users.schemas';
 

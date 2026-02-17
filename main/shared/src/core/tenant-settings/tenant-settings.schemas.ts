@@ -7,7 +7,7 @@
  */
 
 import { tenantIdSchema } from '../../primitives/schema/ids';
-import { coerceDate, createSchema, parseString } from '../schema.utils';
+import { coerceDate, createSchema, parseString } from '../../primitives/schema';
 
 import type { Schema } from '../../primitives/api';
 import type { TenantId } from '../../primitives/schema/ids';

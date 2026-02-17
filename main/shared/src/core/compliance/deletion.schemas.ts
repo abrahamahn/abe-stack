@@ -6,7 +6,7 @@
  * @module Core/Compliance
  */
 
-import { createSchema, parseBoolean, parseOptional, parseString } from '../schema.utils';
+import { createSchema, parseBoolean, parseOptional, parseString } from '../../primitives/schema';
 
 import type { Schema } from '../../primitives/api';
 

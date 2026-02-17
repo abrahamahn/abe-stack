@@ -15,7 +15,7 @@ import {
   parseRecord,
   parseString,
   withDefault,
-} from '../schema.utils';
+} from '../../primitives/schema';
 import { isoDateTimeSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';
