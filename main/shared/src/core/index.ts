@@ -1,41 +1,72 @@
 // main/shared/src/core/index.ts
 
-export {
+// Engine layer: base classes, HTTP errors, utilities
+import {
   AppError,
   BadRequestError,
   BaseError,
   ConfigurationError,
   ConflictError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
   ForbiddenError,
   formatValidationErrors,
   getErrorStatusCode,
   getSafeErrorMessage,
   InternalError,
   InternalServerError,
-  InvalidCredentialsError,
-  InvalidTokenError,
   isAppError,
   NotFoundError,
-  OAuthError,
-  OAuthStateMismatchError,
   ResourceNotFoundError,
   toAppError,
-  TokenReuseError,
   TooManyRequestsError,
-  TotpInvalidError,
-  TotpRequiredError,
   UnauthorizedError,
   UnprocessableError,
-  UserNotFoundError,
   ValidationError,
-  WeakPasswordError,
   type AppErrorInfo,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
   type ValidationIssue,
-} from './errors';
+} from '../engine/errors';
+
+export {
+  AppError,
+  BadRequestError,
+  BaseError,
+  ConfigurationError,
+  ConflictError,
+  ForbiddenError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  InternalError,
+  InternalServerError,
+  isAppError,
+  NotFoundError,
+  ResourceNotFoundError,
+  toAppError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  UnprocessableError,
+  ValidationError,
+  type AppErrorInfo,
+  type ValidationErrorDetail,
+  type ValidationErrorResponse,
+  type ValidationIssue,
+};
+
+// Auth layer: domain-specific errors
+export {
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+} from './auth';
 
 export {
   can,

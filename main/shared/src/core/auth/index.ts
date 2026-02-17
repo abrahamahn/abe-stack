@@ -41,8 +41,21 @@ export { authContract };
 
 export { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from './auth.messages';
 
-// Only export auth-specific errors not already in core/errors.ts
-export { AccountLockedError, EmailSendError } from './auth.errors';
+export {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+} from './auth.errors';
 
 export {
   HTTP_ERROR_MESSAGES,

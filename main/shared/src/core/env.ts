@@ -10,7 +10,7 @@
 
 import { NODE_ENV_VALUES } from '../config';
 
-import { ConfigurationError } from './errors';
+import { ConfigurationError } from '../engine/errors';
 import { createEnumSchema, createSchema, parseOptional, parseString } from '../primitives/schema';
 
 import type { Schema } from '../primitives/api';

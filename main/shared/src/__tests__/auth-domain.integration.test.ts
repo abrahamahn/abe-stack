@@ -33,7 +33,7 @@ import {
   validatePassword,
   validatePasswordBasic,
 } from '../core/auth/auth.password';
-import { AppError } from '../core/errors';
+import { AppError } from '../engine/errors';
 import { HTTP_STATUS } from '../primitives/constants';
 
 describe('Auth Domain Integration', () => {

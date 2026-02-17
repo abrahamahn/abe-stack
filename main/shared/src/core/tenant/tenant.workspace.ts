@@ -6,7 +6,7 @@
  * @module Core/Tenant
  */
 
-import { ForbiddenError } from '../errors';
+import { ForbiddenError } from '../../engine/errors';
 
 // ============================================================================
 // Types

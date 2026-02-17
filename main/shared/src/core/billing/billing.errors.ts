@@ -7,7 +7,7 @@
  */
 
 import { HTTP_STATUS } from '../../engine/constants';
-import { AppError, BadRequestError, ConflictError, NotFoundError } from '../errors';
+import { AppError, BadRequestError, ConflictError, NotFoundError } from '../../engine/errors';
 
 // ============================================================================
 // Plan Errors

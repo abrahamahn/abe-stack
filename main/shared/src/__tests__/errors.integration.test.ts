@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { HTTP_STATUS } from '../core/constants';
+import { HTTP_STATUS } from '../engine/constants';
 import {
   AppError,
   getErrorStatusCode,
@@ -23,7 +23,7 @@ import {
   UnauthorizedError,
   UnprocessableError,
   ValidationError,
-} from '../core/errors';
+} from '../engine/errors';
 import { isErrorResponse } from '../primitives/helpers/response';
 
 import type { ApiErrorResponse, ApiResponse } from '../primitives/helpers/response';
