@@ -8,3 +8,6 @@ export { notificationsContract } from './contract.notifications';
 export { usersContract } from './contract.users';
 export { webhooksContract } from './contract.webhooks';
 
+export { oauthContract } from './contract.oauth';
+export { realtimeContract } from './contract.realtime';
+export { securityContract } from './contract.security';
