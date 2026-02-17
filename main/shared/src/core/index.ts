@@ -1,91 +1,12 @@
 // main/shared/src/core/index.ts
+/**
+ * Core Module Barrel
+ *
+ * Business logic: field schemas, transactions, and auth policy.
+ * Infrastructure (errors, envelopes, env) lives in engine/.
+ */
 
-// Engine layer: base classes, HTTP errors, utilities
-import {
-  AppError,
-  BadRequestError,
-  BaseError,
-  ConfigurationError,
-  ConflictError,
-  ForbiddenError,
-  formatValidationErrors,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  InternalError,
-  InternalServerError,
-  isAppError,
-  NotFoundError,
-  ResourceNotFoundError,
-  toAppError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableError,
-  ValidationError,
-  type AppErrorInfo,
-  type ValidationErrorDetail,
-  type ValidationErrorResponse,
-  type ValidationIssue,
-} from '../engine/errors';
-
-export {
-  AppError,
-  BadRequestError,
-  BaseError,
-  ConfigurationError,
-  ConflictError,
-  ForbiddenError,
-  formatValidationErrors,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  InternalError,
-  InternalServerError,
-  isAppError,
-  NotFoundError,
-  ResourceNotFoundError,
-  toAppError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableError,
-  ValidationError,
-  type AppErrorInfo,
-  type ValidationErrorDetail,
-  type ValidationErrorResponse,
-  type ValidationIssue,
-};
-
-// Auth & account errors (canonical in engine/errors)
-import {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  OAuthError,
-  OAuthStateMismatchError,
-  TokenReuseError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UserNotFoundError,
-  WeakPasswordError,
-} from '../engine/errors';
-
-export {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  OAuthError,
-  OAuthStateMismatchError,
-  TokenReuseError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UserNotFoundError,
-  WeakPasswordError,
-};
-
+// --- Auth policy ---
 export {
   can,
   hasPermission,
@@ -94,40 +15,7 @@ export {
   type PolicyResource,
 } from './auth/auth.policy';
 
-import { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from '../engine/env';
-
-export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv };
-
-// Engine layer: response envelope schemas
-import {
-  apiResultSchema,
-  createErrorCodeSchema,
-  emptyBodySchema,
-  envelopeErrorResponseSchema,
-  errorCodeSchema,
-  errorResponseSchema,
-  successResponseSchema,
-  type ApiResultEnvelope,
-  type EmptyBody,
-  type ErrorResponseEnvelope,
-  type SuccessResponseEnvelope,
-} from '../engine/http';
-
-export {
-  apiResultSchema,
-  createErrorCodeSchema,
-  emptyBodySchema,
-  envelopeErrorResponseSchema,
-  errorCodeSchema,
-  errorResponseSchema,
-  successResponseSchema,
-  type ApiResultEnvelope,
-  type EmptyBody,
-  type ErrorResponseEnvelope,
-  type SuccessResponseEnvelope,
-};
-
-// Field validation schemas
+// --- Field validation schemas ---
 export {
   bioSchema,
   dateOfBirthSchema,
@@ -147,6 +35,7 @@ export {
   websiteSchema,
 } from './schemas';
 
+// --- Transactions (undo/redo) ---
 export {
   createListInsertOperation,
   createListRemoveOperation,
