@@ -1,4 +1,4 @@
-// main/shared/src/logger/index.ts
+// main/shared/src/engine/logger/index.ts
 /**
  * Logger Module
  *
@@ -28,7 +28,7 @@ export {
 } from './correlation';
 
 // Log level utilities
-export { LOG_LEVELS, shouldLog } from './levels';
+export { shouldLog } from './levels';
 
 // Console logger
 export type { ConsoleLogLevel, ConsoleLoggerConfig } from './console';

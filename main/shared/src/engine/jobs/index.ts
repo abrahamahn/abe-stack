@@ -1,4 +1,4 @@
-// main/shared/src/domain/jobs/index.ts
+// main/shared/src/engine/jobs/index.ts
 
 export { getJobStatusLabel, getJobStatusTone } from './jobs.display';
 
@@ -6,9 +6,6 @@ export { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './j
 
 export {
   createJobSchema,
-  JOB_PRIORITIES,
-  JOB_PRIORITY_VALUES,
-  JOB_STATUSES,
   jobActionResponseSchema,
   jobDetailsSchema,
   jobErrorSchema,

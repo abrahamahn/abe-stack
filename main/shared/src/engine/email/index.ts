@@ -1,10 +1,8 @@
-// main/shared/src/domain/email/index.ts
+// main/shared/src/engine/email/index.ts
 
 export {
   createEmailLogEntrySchema,
   createEmailTemplateSchema,
-  EMAIL_PROVIDERS,
-  EMAIL_STATUSES,
   emailLogEntrySchema,
   emailProviderSchema,
   emailStatusSchema,

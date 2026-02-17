@@ -1,6 +1,4 @@
-// main/shared/src/domain/webhooks/index.ts
-
-export { webhooksContract } from '../../contracts';
+// main/shared/src/engine/webhooks/index.ts
 
 export {
   calculateRetryDelay,
@@ -8,14 +6,6 @@ export {
   matchesEventFilter,
   shouldRetryDelivery
 } from './webhooks.logic';
-
-export {
-  MAX_DELIVERY_ATTEMPTS,
-  RETRY_DELAYS_MINUTES,
-  SUBSCRIBABLE_EVENT_TYPES,
-  WEBHOOK_DELIVERY_STATUSES,
-  WEBHOOK_EVENT_TYPES,
-} from '../../primitives/constants';
 
 export {
   createWebhookDeliverySchema,

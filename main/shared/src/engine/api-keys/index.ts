@@ -1,6 +1,4 @@
-// main/shared/src/domain/api-keys/index.ts
-
-export { apiKeysContract } from '../../contract/api-keys.contracts';
+// main/shared/src/engine/api-keys/index.ts
 
 export {
   apiKeyItemSchema,
