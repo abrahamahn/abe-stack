@@ -206,36 +206,35 @@ export class ConfigurationError extends AppError {
 // Auth & Account Errors
 // ============================================================================
 
-/**
- * Invalid email or password during login
- */
+/** Invalid email or password during login */
 export class InvalidCredentialsError extends UnauthorizedError {
   constructor() {
     super('Invalid email or password', ERROR_CODES.INVALID_CREDENTIALS);
   }
 }
 
-/**
- * Password does not meet strength requirements
- */
+/** Password does not meet strength requirements */
 export class WeakPasswordError extends BadRequestError {
   constructor(details?: Record<string, unknown>) {
     super('Password is too weak', ERROR_CODES.WEAK_PASSWORD, details);
   }
 }
 
-/**
- * Email address already registered
- */
+/** Account temporarily locked due to failed attempts */
+export class AccountLockedError extends TooManyRequestsError {
+  constructor(public readonly retryAfter?: number) {
+    super('Account temporarily locked due to too many failed attempts', ERROR_CODES.ACCOUNT_LOCKED);
+  }
+}
+
+/** Email address already registered */
 export class EmailAlreadyExistsError extends ConflictError {
   constructor(message = 'Email already registered') {
     super(message, ERROR_CODES.EMAIL_ALREADY_EXISTS);
   }
 }
 
-/**
- * Email address not verified
- */
+/** Email address not verified */
 export class EmailNotVerifiedError extends UnauthorizedError {
   constructor(
     public readonly email: string,
@@ -245,18 +244,14 @@ export class EmailNotVerifiedError extends UnauthorizedError {
   }
 }
 
-/**
- * User not found
- */
+/** User not found */
 export class UserNotFoundError extends NotFoundError {
   constructor(message = 'User not found') {
     super(message, ERROR_CODES.USER_NOT_FOUND);
   }
 }
 
-/**
- * Invalid or expired token
- */
+/** Invalid or expired token */
 export class InvalidTokenError extends UnauthorizedError {
   constructor(message = 'Invalid or expired token') {
     super(message, ERROR_CODES.INVALID_TOKEN);
@@ -264,13 +259,8 @@ export class InvalidTokenError extends UnauthorizedError {
 }
 
 /**
- * Token has already been used (replay attack detection)
- *
- * @param userId - ID of the user whose token was reused
- * @param email - Email of the user for sending security alerts
- * @param familyId - Refresh token family ID
- * @param ipAddress - IP address of the reuse attempt
- * @param userAgent - User agent string of the reuse attempt
+ * Token has already been used (replay attack detection).
+ * Captures user details for security alerting.
  */
 export class TokenReuseError extends UnauthorizedError {
   constructor(
@@ -288,9 +278,7 @@ export class TokenReuseError extends UnauthorizedError {
 // OAuth Errors
 // ============================================================================
 
-/**
- * Base OAuth error
- */
+/** Base OAuth error */
 export class OAuthError extends AppError {
   constructor(
     message: string,
@@ -301,16 +289,10 @@ export class OAuthError extends AppError {
   }
 }
 
-/**
- * OAuth state mismatch - possible CSRF attack
- */
+/** OAuth state mismatch - possible CSRF attack */
 export class OAuthStateMismatchError extends OAuthError {
   constructor(provider: string) {
-    super(
-      'OAuth state mismatch - possible CSRF attack',
-      provider,
-      ERROR_CODES.OAUTH_STATE_MISMATCH,
-    );
+    super('OAuth state mismatch - possible CSRF attack', provider, ERROR_CODES.OAUTH_STATE_MISMATCH);
   }
 }
 
@@ -318,25 +300,31 @@ export class OAuthStateMismatchError extends OAuthError {
 // 2FA Errors
 // ============================================================================
 
-/**
- * Two-factor authentication required to complete login
- */
+/** Two-factor authentication required to complete login */
 export class TotpRequiredError extends AppError {
   constructor() {
-    super(
-      'Two-factor authentication required',
-      HTTP_STATUS.UNAUTHORIZED,
-      ERROR_CODES.TOTP_REQUIRED,
-    );
+    super('Two-factor authentication required', HTTP_STATUS.UNAUTHORIZED, ERROR_CODES.TOTP_REQUIRED);
   }
 }
 
-/**
- * Invalid TOTP verification code
- */
+/** Invalid TOTP verification code */
 export class TotpInvalidError extends BadRequestError {
   constructor() {
     super('Invalid verification code', ERROR_CODES.TOTP_INVALID);
+  }
+}
+
+// ============================================================================
+// Email Errors
+// ============================================================================
+
+/** Failed to send email */
+export class EmailSendError extends AppError {
+  constructor(
+    message = 'Failed to send email',
+    public readonly originalError?: Error,
+  ) {
+    super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, ERROR_CODES.EMAIL_SEND_FAILED);
   }
 }
 

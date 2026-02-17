@@ -1,5 +1,6 @@
 // main/shared/src/engine/errors/index.ts
 
+// Base classes, HTTP errors, utilities
 export {
   AppError,
   BaseError,
@@ -24,4 +25,21 @@ export {
   type ValidationErrorDetail,
   type ValidationErrorResponse,
   type ValidationIssue,
+} from './errors';
+
+// Auth & account errors
+export {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
 } from './errors';
