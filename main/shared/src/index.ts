@@ -633,7 +633,7 @@ export {
   type CreateUserSession,
   type UpdateUserSession,
   type UserSession
-} from './core/sessions';
+} from './core/auth';
 
 // Tenant
 export {
