@@ -53,4 +53,4 @@ export {
   type ErrorMapperOptions,
   type ErrorStatusCode,
   type HttpErrorResponse,
-} from './error-mapper';
+} from './error.mapper';

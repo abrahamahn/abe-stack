@@ -9,4 +9,4 @@ export {
   type AggregationType,
   type UsageMetric,
   type UsageSnapshot,
-} from './usage-metering';
+} from './usage.metering';

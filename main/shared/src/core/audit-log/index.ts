@@ -7,11 +7,11 @@
  */
 
 // --- audit-log.display ---
-export { getAuditActionTone, getAuditSeverityTone } from './audit-log.display';
+export { getAuditActionTone, getAuditSeverityTone } from './audit.log.display';
 
 // --- audit-log.logic ---
-export { buildAuditEvent, sanitizeMetadata } from './audit-log.logic';
-export type { AuditBuilderParams } from './audit-log.logic';
+export { buildAuditEvent, sanitizeMetadata } from './audit.log.logic';
+export type { AuditBuilderParams } from './audit.log.logic';
 
 // --- audit-log.schemas ---
 export {
@@ -22,7 +22,7 @@ export {
   auditLogFilterSchema,
   auditLogListResponseSchema,
   createAuditEventSchema,
-} from './audit-log.schemas';
+} from './audit.log.schemas';
 export type {
   AuditCategory,
   AuditEvent,
@@ -30,4 +30,4 @@ export type {
   AuditLogListResponse,
   AuditSeverity,
   CreateAuditEvent,
-} from './audit-log.schemas';
+} from './audit.log.schemas';

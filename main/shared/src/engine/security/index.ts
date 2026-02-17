@@ -9,4 +9,4 @@ export {
 } from './input';
 
 export { hasDangerousKeys, sanitizePrototype } from './prototype';
-export { createRateLimiter, type RateLimitInfo } from './rate-limit';
+export { createRateLimiter, type RateLimitInfo } from './rate.limit';

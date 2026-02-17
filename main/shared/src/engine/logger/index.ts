@@ -11,13 +11,13 @@
 export type { LogData, Logger, LoggerConfig, LogLevel, RequestContext } from './types';
 
 // Base logger adapter (framework-agnostic wrappers)
-export type { BaseLogger } from './base-logger';
+export type { BaseLogger } from './base.logger';
 export {
   createJobCorrelationId,
   createJobLogger,
   createLogger,
   createRequestLogger,
-} from './base-logger';
+} from './base.logger';
 
 // Correlation ID utilities
 export {

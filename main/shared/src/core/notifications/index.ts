@@ -51,7 +51,7 @@ export {
   unsubscribeResponseSchema,
   updatePreferencesRequestSchema,
   vapidKeyResponseSchema,
-} from './notifications.push-schemas';
+} from './notifications.push.schemas';
 
 // --- notifications.errors ---
 export {

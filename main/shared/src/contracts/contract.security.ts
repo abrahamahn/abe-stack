@@ -8,7 +8,7 @@ import {
   securityEventsListRequestSchema,
   securityEventsListResponseSchema,
   securityMetricsResponseSchema,
-} from '../core/admin/admin.security-schemas';
+} from '../core/admin/admin.security.schemas';
 
 import type { Contract } from '../primitives/api';
 

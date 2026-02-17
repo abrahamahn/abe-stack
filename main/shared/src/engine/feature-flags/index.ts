@@ -13,4 +13,4 @@ export {
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
   type UpdateFeatureFlagRequest,
-} from './feature-flags';
+} from './feature.flags';

@@ -112,4 +112,4 @@ export {
   lt,
   neq,
   SearchQueryBuilder,
-} from './query-builder';
+} from './query.builder';

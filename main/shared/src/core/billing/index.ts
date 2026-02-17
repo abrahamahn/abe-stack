@@ -179,4 +179,4 @@ export {
   type ProviderPaymentMethod,
   type ProviderSubscription,
   type SetupIntentResult,
-} from './billing.service-types';
+} from './billing.service.types';

@@ -7,7 +7,7 @@
  */
 
 // --- domain-restrictions ---
-export { extractEmailDomain, isEmailDomainAllowed } from './domain-restrictions';
+export { extractEmailDomain, isEmailDomainAllowed } from './domain.restrictions';
 
 // --- tenant.logic ---
 export {

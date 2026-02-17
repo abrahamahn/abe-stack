@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { publishAfterWrite } from './helpers';
 
-import type { SubscriptionManager } from './subscription-manager';
+import type { SubscriptionManager } from './subscription.manager';
 
 describe('pubsub helpers', () => {
   let mockPubsub: SubscriptionManager;

@@ -101,4 +101,4 @@ export {
   DEFAULT_CONTRAST_MODE,
   DEFAULT_DENSITY,
   DEFAULT_THEME,
-} from './ui-defaults';
+} from './ui.defaults';

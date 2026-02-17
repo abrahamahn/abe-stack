@@ -90,7 +90,7 @@ export {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
   type MagicLinkVerifyResponse,
-} from './auth.magic-link.schemas';
+} from './auth.magic.link.schemas';
 
 // --- MFA schemas ---
 export {

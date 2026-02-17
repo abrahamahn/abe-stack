@@ -15,7 +15,7 @@ import {
   unsubscribeResponseSchema,
   updatePreferencesRequestSchema,
   vapidKeyResponseSchema,
-} from '../core/notifications/notifications.push-schemas';
+} from '../core/notifications/notifications.push.schemas';
 import {
   baseMarkAsReadRequestSchema,
   notificationDeleteRequestSchema,

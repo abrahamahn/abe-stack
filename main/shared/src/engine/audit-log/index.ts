@@ -19,4 +19,4 @@ export {
   type AuditLogListResponse,
   type AuditSeverity,
   type CreateAuditEvent,
-} from './audit-log';
+} from './audit.log';

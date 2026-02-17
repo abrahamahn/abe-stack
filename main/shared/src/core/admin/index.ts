@@ -82,4 +82,4 @@ export {
   type SecurityMetricsRequest,
   type SecurityMetricsResponse,
   type SecuritySeverity,
-} from './admin.security-schemas';
+} from './admin.security.schemas';

@@ -1372,7 +1372,7 @@ export {
 } from './engine/pagination';
 
 // --- Rate Limit ---
-export { createRateLimiter, type RateLimitInfo } from './engine/security/rate-limit';
+export { createRateLimiter, type RateLimitInfo } from './engine/security/rate.limit';
 
 // --- Storage ---
 export {
@@ -1407,7 +1407,7 @@ export {
 } from './primitives/helpers';
 
 // --- User Agent ---
-export { parseUserAgent, type ParsedUserAgent } from './engine/http/user-agent';
+export { parseUserAgent, type ParsedUserAgent } from './engine/http/user.agent';
 
 // --- Token ---
 export {
