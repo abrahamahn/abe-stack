@@ -286,7 +286,7 @@ describe('Auth Domain Integration', () => {
 
         expect(error.message).toBe('Email already registered');
         expect(error.statusCode).toBe(HTTP_STATUS.CONFLICT);
-        expect(error.code).toBe('EMAIL_EXISTS');
+        expect(error.code).toBe('EMAIL_ALREADY_EXISTS');
       });
 
       it('should map to 409 response', () => {
