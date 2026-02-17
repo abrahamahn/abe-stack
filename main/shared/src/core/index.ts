@@ -53,10 +53,12 @@ export {
   type ValidationIssue,
 };
 
-// Auth layer: domain-specific errors
-export {
+// Auth & account errors (canonical in engine/errors)
+import {
+  AccountLockedError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
+  EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
   OAuthError,
@@ -66,7 +68,23 @@ export {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from './auth';
+} from '../engine/errors';
+
+export {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+};
 
 export {
   can,
@@ -78,16 +96,40 @@ export {
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './env';
 
-export {
+// Engine layer: response envelope schemas
+import {
   apiResultSchema,
-  bioSchema,
   createErrorCodeSchema,
-  dateOfBirthSchema,
-  emailSchema,
   emptyBodySchema,
   envelopeErrorResponseSchema,
   errorCodeSchema,
   errorResponseSchema,
+  successResponseSchema,
+  type ApiResultEnvelope,
+  type EmptyBody,
+  type ErrorResponseEnvelope,
+  type SuccessResponseEnvelope,
+} from '../engine/http';
+
+export {
+  apiResultSchema,
+  createErrorCodeSchema,
+  emptyBodySchema,
+  envelopeErrorResponseSchema,
+  errorCodeSchema,
+  errorResponseSchema,
+  successResponseSchema,
+  type ApiResultEnvelope,
+  type EmptyBody,
+  type ErrorResponseEnvelope,
+  type SuccessResponseEnvelope,
+};
+
+// Field validation schemas
+export {
+  bioSchema,
+  dateOfBirthSchema,
+  emailSchema,
   firstNameSchema,
   genderSchema,
   identifierSchema,
@@ -98,14 +140,9 @@ export {
   passwordSchema,
   phoneSchema,
   requiredNameSchema,
-  successResponseSchema,
   usernameSchema,
   uuidSchema,
   websiteSchema,
-  type ApiResultEnvelope,
-  type EmptyBody,
-  type ErrorResponseEnvelope,
-  type SuccessResponseEnvelope,
 } from './schemas';
 
 export {

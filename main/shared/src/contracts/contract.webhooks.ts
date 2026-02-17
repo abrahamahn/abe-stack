@@ -5,7 +5,7 @@
  * API contract definitions for webhook CRUD operations.
  */
 
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   createWebhookSchema,
   rotateSecretResponseSchema,

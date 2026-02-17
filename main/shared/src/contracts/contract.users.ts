@@ -6,7 +6,7 @@
  * @module Domain/Users
  */
 
-import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   accountLifecycleResponseSchema,
   deactivateAccountRequestSchema,

@@ -35,7 +35,7 @@ import {
 } from '../core/billing/billing.admin.schemas';
 import { subscriptionActionResponseSchema } from '../core/billing/billing.schemas';
 import { createSchema } from '../primitives/schema';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
 
 
 import type { Contract } from '../primitives/api';

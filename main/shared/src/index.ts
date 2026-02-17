@@ -41,8 +41,10 @@ export {
 } from './engine/errors';
 
 export {
+  AccountLockedError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
+  EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
   OAuthError,
@@ -52,7 +54,7 @@ export {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from './core/auth/auth.errors';
+} from './engine/errors';
 export * from './primitives/constants';
 export {
   MAX_CHUNK_SIZE,
@@ -122,14 +124,17 @@ export { type BreadcrumbData, type ErrorTracker, type HasErrorTracker } from './
 
 export {
   apiResultSchema,
-  emailSchema,
   emptyBodySchema,
   errorCodeSchema,
   errorResponseSchema,
+  successResponseSchema,
+  type EmptyBody,
+} from './engine/http';
+
+export {
+  emailSchema,
   isoDateTimeSchema,
   passwordSchema,
-  successResponseSchema,
-  type EmptyBody
 } from './core/schemas';
 
 export type { ModuleDeps, ModuleRegistrationOptions } from './engine/module-registration';
@@ -192,7 +197,6 @@ export {
 export {
   acceptTosRequestSchema,
   acceptTosResponseSchema,
-  AccountLockedError,
   AUTH_ERROR_MESSAGES,
   AUTH_SUCCESS_MESSAGES,
   authContract,
@@ -209,7 +213,6 @@ export {
   defaultPasswordConfig,
   deviceItemSchema,
   deviceListResponseSchema,
-  EmailSendError,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
   estimateCrackTime,

@@ -7,7 +7,7 @@
  * @module Domain/Jobs
  */
 
-import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   jobActionResponseSchema,
   jobDetailsSchema,

@@ -74,7 +74,7 @@ import {
   webauthnRegisterVerifyRequestSchema,
   webauthnRegisterVerifyResponseSchema,
 } from '../core/auth/auth.schemas';
-import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 import { emptyBodySchema } from '../engine/http/response';
 
 import type { Contract } from '../primitives/api';

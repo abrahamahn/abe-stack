@@ -6,7 +6,7 @@
  * @module Domain/AuditLog
  */
 
-import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 
 import { tenantIdSchema } from '../primitives/schema/ids';
 import { auditLogFilterSchema, auditLogListResponseSchema } from '../engine/audit-log/audit-log';

@@ -5,7 +5,7 @@
  * API contract definitions for user API key management.
  */
 
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   createApiKeyRequestSchema,
   createApiKeyResponseSchema,

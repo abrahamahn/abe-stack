@@ -22,7 +22,7 @@ import {
   notificationsListResponseSchema,
 } from '../core/notifications/notifications.schemas';
 import { createSchema, parseString } from '../primitives/schema';
-import { errorResponseSchema, successResponseSchema } from '../core/schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 
 
 import type { Contract, Schema } from '../primitives/api';

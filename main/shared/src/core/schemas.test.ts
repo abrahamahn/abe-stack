@@ -1,18 +1,16 @@
 // main/shared/src/core/schemas.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { createSchema, parseString } from '../primitives/schema';
-
 import {
   apiResultSchema,
-  emailSchema,
   emptyBodySchema,
   errorCodeSchema,
   errorResponseSchema,
-  isoDateTimeSchema,
-  passwordSchema,
   successResponseSchema,
-} from './schemas';
+} from '../engine/http';
+import { createSchema, parseString } from '../primitives/schema';
+
+import { emailSchema, isoDateTimeSchema, passwordSchema } from './schemas';
 
 describe('schemas', () => {
   // ==========================================================================

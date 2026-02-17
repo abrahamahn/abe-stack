@@ -15,7 +15,8 @@ import {
   type PaginationOptions,
 } from '../../engine/pagination';
 import { createSchema } from '../../primitives/schema';
-import { errorResponseSchema, uuidSchema } from '../schemas';
+import { errorResponseSchema } from '../../engine/http';
+import { uuidSchema } from '../schemas';
 
 import type { Contract, Schema } from '../../primitives/api';
 
