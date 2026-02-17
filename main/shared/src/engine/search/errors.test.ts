@@ -1,4 +1,4 @@
-// main/shared/src/utils/search/errors.test.ts
+// main/shared/src/engine/search/errors.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { SEARCH_ERROR_TYPES } from '../constants/limits';

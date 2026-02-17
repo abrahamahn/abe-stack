@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.types.ts
+// main/shared/src/engine/media/media.types.ts
 /**
  * Core Media Processing Types
  *

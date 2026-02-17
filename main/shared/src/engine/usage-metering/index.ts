@@ -1,4 +1,4 @@
-// main/shared/src/domain/usage-metering/index.ts
+// main/shared/src/engine/usage-metering/index.ts
 
 export {
   aggregateSnapshots,

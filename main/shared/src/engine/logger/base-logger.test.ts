@@ -1,4 +1,4 @@
-// main/shared/src/logger/base-logger.test.ts
+// main/shared/src/engine/logger/base-logger.test.ts
 /**
  * Base Logger Adapter Tests
  *

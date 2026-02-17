@@ -1,4 +1,4 @@
-// main/shared/src/domain/feature-flags/feature-flags.logic.ts
+// main/shared/src/engine/feature-flags/feature-flags.logic.ts
 
 /**
  * @file Feature Flags Logic

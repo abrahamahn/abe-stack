@@ -1,4 +1,4 @@
-// main/shared/src/domain/theme/index.ts
+// main/shared/src/engine/theme/index.ts
 
 export {
   DEFAULT_CONTRAST_MODE,

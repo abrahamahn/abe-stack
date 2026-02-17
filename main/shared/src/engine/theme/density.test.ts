@@ -1,4 +1,4 @@
-// main/shared/src/domain/theme/density.test.ts
+// main/shared/src/engine/theme/density.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

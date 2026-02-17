@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/jwt.test.ts
+// main/shared/src/engine/crypto/jwt.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

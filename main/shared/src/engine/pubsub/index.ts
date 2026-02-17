@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/index.ts
+// main/shared/src/engine/pubsub/index.ts
 /**
  * Real-time Pub/Sub System
  *

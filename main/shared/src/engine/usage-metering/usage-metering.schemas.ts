@@ -1,4 +1,4 @@
-// main/shared/src/domain/usage-metering/usage-metering.schemas.ts
+// main/shared/src/engine/usage-metering/usage-metering.schemas.ts
 
 /**
  * @file Usage Metering Contracts
@@ -6,7 +6,7 @@
  * @module Domain/UsageMetering
  */
 
-import { createEnumSchema, createSchema, parseNumber, parseString } from '../../core/schema.utils';
+import { createEnumSchema, createSchema, parseNumber, parseString } from '../../primitives/schema';
 import { isoDateTimeSchema } from '../../core/schemas';
 import { tenantIdSchema } from '../../core/types/ids';
 

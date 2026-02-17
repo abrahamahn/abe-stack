@@ -1,4 +1,4 @@
-// main/shared/src/utils/errors/base.ts
+// main/shared/src/engine/errors/base.ts
 /**
  * Base Error Classes (L1)
  *

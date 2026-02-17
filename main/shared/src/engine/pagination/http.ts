@@ -1,4 +1,4 @@
-// main/shared/src/utils/pagination/http.ts
+// main/shared/src/engine/pagination/http.ts
 /**
  * Shared HTTP-agnostic pagination query parsing utilities.
  */

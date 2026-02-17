@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/helpers.test.ts
+// main/shared/src/engine/pubsub/helpers.test.ts
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

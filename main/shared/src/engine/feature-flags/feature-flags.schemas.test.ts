@@ -1,4 +1,4 @@
-// main/shared/src/domain/feature-flags/feature-flags.schemas.test.ts
+// main/shared/src/engine/feature-flags/feature-flags.schemas.test.ts
 
 /**
  * @file Feature Flags Schemas Test Suite

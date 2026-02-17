@@ -1,4 +1,4 @@
-// main/shared/src/utils/security/prototype.test.ts
+// main/shared/src/engine/security/prototype.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { hasDangerousKeys, sanitizePrototype } from './prototype';

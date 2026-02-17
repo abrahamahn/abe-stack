@@ -14,7 +14,7 @@ import {
   parseRecord,
   parseString,
   withDefault,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { isoDateTimeSchema } from '../../core/schemas';
 import { AUDIT_ACTION_REGEX } from '../../primitives/constants';
 import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../core/constants/notifications';

@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.audio-metadata.ts
+// main/shared/src/engine/media/media.audio-metadata.ts
 /**
  * Audio Metadata Parser
  *

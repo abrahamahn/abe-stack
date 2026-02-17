@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/subscription-manager.test.ts
+// main/shared/src/engine/pubsub/subscription-manager.test.ts
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

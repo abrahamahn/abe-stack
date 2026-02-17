@@ -1,4 +1,4 @@
-// main/shared/src/domain/jobs/jobs.logic.test.ts
+// main/shared/src/engine/jobs/jobs.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { calculateBackoff, canRetry, isTerminalStatus, shouldProcess } from './jobs.logic';

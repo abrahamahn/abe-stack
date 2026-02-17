@@ -1,4 +1,4 @@
-// main/shared/src/core/errors.test.ts
+// main/shared/src/engine/errors/errors.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { ERROR_CODES, HTTP_STATUS } from '../constants/platform';

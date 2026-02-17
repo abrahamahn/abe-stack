@@ -1,4 +1,4 @@
-// main/shared/src/domain/realtime/index.ts
+// main/shared/src/engine/realtime/index.ts
 
 export {
   realtimeContract,

@@ -1,4 +1,4 @@
-// main/shared/src/utils/security/sanitization.ts
+// main/shared/src/engine/security/sanitization.ts
 /**
  * Shared sanitization and injection detection utilities.
  *

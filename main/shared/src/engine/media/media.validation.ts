@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.validation.ts
+// main/shared/src/engine/media/media.validation.ts
 /**
  * Media Validation Utilities
  *

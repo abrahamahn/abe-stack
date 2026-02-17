@@ -1,4 +1,4 @@
-// main/shared/src/domain/files/files.schemas.ts
+// main/shared/src/engine/files/files.schemas.ts
 
 /**
  * @file Files Domain Schemas
@@ -16,7 +16,7 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { fileIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 
 import type { Schema } from '../../primitives/api';

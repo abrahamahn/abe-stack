@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/token.test.ts
+// main/shared/src/engine/crypto/token.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { ACCESS_TOKEN_COOKIE_NAME } from '../constants/platform';

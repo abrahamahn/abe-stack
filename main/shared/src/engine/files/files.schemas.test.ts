@@ -1,4 +1,4 @@
-// main/shared/src/domain/files/files.schemas.test.ts
+// main/shared/src/engine/files/files.schemas.test.ts
 
 /**
  * @file Unit Tests for File Domain Schemas

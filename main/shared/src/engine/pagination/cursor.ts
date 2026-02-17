@@ -1,4 +1,4 @@
-// main/shared/src/utils/pagination/cursor.ts
+// main/shared/src/engine/pagination/cursor.ts
 import type { SortOrder } from '../search/types';
 
 /**

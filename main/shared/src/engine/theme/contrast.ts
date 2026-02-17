@@ -1,4 +1,4 @@
-// main/shared/src/domain/theme/contrast.ts
+// main/shared/src/engine/theme/contrast.ts
 
 /**
  * High-contrast mode support for accessibility.

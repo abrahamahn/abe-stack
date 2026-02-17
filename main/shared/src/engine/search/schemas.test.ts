@@ -1,4 +1,4 @@
-// main/shared/src/utils/search/schemas.test.ts
+// main/shared/src/engine/search/schemas.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { SEARCH_DEFAULTS } from '../constants/limits';

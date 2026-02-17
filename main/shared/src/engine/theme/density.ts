@@ -1,4 +1,4 @@
-// main/shared/src/domain/theme/density.ts
+// main/shared/src/engine/theme/density.ts
 
 /**
  * Theme density variants for adjusting spacing across the UI.

@@ -1,4 +1,4 @@
-// main/shared/src/utils/search/operators.test.ts
+// main/shared/src/engine/search/operators.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { getFieldValue } from '../../primitives/helpers/object';

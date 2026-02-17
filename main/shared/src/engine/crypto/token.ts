@@ -1,4 +1,4 @@
-// main/shared/src/utils/crypto/token.ts
+// main/shared/src/engine/crypto/token.ts
 /**
  * Token storage utilities for authentication.
  *

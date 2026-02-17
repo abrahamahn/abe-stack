@@ -1,4 +1,4 @@
-// main/shared/src/domain/realtime/realtime.schemas.ts
+// main/shared/src/engine/realtime/realtime.schemas.ts
 /**
  * Realtime Schemas & Contract
  *
@@ -8,7 +8,7 @@
  * @module Domain/Realtime
  */
 
-import { createSchema } from '../../core/schema.utils';
+import { createSchema } from '../../primitives/schema';
 import { errorResponseSchema, uuidSchema } from '../../core/schemas';
 
 import type { Contract, Schema } from '../../primitives/api';

@@ -1,4 +1,4 @@
-// main/shared/src/domain/webhooks/webhooks.schemas.ts
+// main/shared/src/engine/webhooks/webhooks.schemas.ts
 
 /**
  * @file Webhook Domain Schemas
@@ -18,7 +18,7 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { isoDateTimeSchema } from '../../core/schemas';
 import { WEBHOOK_DELIVERY_STATUSES, WEBHOOK_EVENT_TYPES } from '../constants/platform';
 

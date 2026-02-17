@@ -14,7 +14,7 @@ import {
   parseNullableOptional,
   parseOptional,
   parseString,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { isoDateTimeSchema } from '../../core/schemas';
 import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../core/types/ids';
 

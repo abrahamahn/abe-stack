@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/types.test.ts
+// main/shared/src/engine/pubsub/types.test.ts
 import { describe, it, expect } from 'vitest';
 
 import { parseRecordKey, SubKeys } from './types';

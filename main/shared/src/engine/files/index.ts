@@ -1,4 +1,4 @@
-// main/shared/src/domain/files/index.ts
+// main/shared/src/engine/files/index.ts
 
 export {
   createFileRecordSchema,

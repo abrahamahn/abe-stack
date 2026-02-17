@@ -1,4 +1,4 @@
-// main/shared/src/domain/usage-metering/usage-metering.schemas.test.ts
+// main/shared/src/engine/usage-metering/usage-metering.schemas.test.ts
 
 /**
  * @file Usage Metering Schema Tests

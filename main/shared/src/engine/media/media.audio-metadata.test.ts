@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.audio-metadata.test.ts
+// main/shared/src/engine/media/media.audio-metadata.test.ts
 /**
  * Tests for pure buffer-based audio metadata parsing.
  */

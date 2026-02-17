@@ -1,4 +1,4 @@
-// main/shared/src/domain/realtime/realtime.schemas.test.ts
+// main/shared/src/engine/realtime/realtime.schemas.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

@@ -1,4 +1,4 @@
-// main/shared/src/logger/types.ts
+// main/shared/src/engine/logger/types.ts
 /**
  * Logger Types
  *

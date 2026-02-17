@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/postgres-pubsub.ts
+// main/shared/src/engine/pubsub/postgres-pubsub.ts
 /**
  * PostgresPubSub Type Definitions
  *

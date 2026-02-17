@@ -1,4 +1,4 @@
-// main/shared/src/logger/levels.ts
+// main/shared/src/engine/logger/levels.ts
 /**
  * Log Level Utilities
  *

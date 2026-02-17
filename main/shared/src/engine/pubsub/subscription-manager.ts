@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/subscription-manager.ts
+// main/shared/src/engine/pubsub/subscription-manager.ts
 /**
  * Subscription Manager
  *

@@ -1,4 +1,4 @@
-// main/shared/src/utils/pagination/helpers.ts
+// main/shared/src/engine/pagination/helpers.ts
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
 
 import { PaginationError } from '.';

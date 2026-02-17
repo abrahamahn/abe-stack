@@ -1,4 +1,4 @@
-// main/shared/src/domain/jobs/jobs.schemas.ts
+// main/shared/src/engine/jobs/jobs.schemas.ts
 /**
  * Job Domain Schemas
  *
@@ -18,7 +18,7 @@ import {
   parseOptional,
   parseString,
   withDefault,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { isoDateTimeSchema } from '../../core/schemas';
 import { JOB_PRIORITIES, JOB_STATUSES } from '../constants/platform';
 

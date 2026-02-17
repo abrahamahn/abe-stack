@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.file-type.test.ts
+// main/shared/src/engine/media/media.file-type.test.ts
 /**
  * Tests for pure file type detection logic (buffer-based and path-based).
  */

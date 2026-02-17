@@ -1,4 +1,4 @@
-// main/shared/src/utils/security/prototype.ts
+// main/shared/src/engine/security/prototype.ts
 /**
  * Prototype Pollution Helpers
  *

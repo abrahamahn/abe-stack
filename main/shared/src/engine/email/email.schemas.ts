@@ -1,4 +1,4 @@
-// main/shared/src/domain/email/email.schemas.ts
+// main/shared/src/engine/email/email.schemas.ts
 
 /**
  * @file Email Domain Schemas
@@ -17,7 +17,7 @@ import {
   parseOptional,
   parseRecord,
   parseString,
-} from '../../core/schema.utils';
+} from '../../primitives/schema';
 import { EMAIL_PROVIDERS, EMAIL_STATUSES } from '../constants/platform';
 
 import type { EmailLogId, EmailTemplateKey, UserId } from '../../core/ids';

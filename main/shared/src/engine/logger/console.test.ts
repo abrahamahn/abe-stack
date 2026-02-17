@@ -1,4 +1,4 @@
-// main/shared/src/logger/console.test.ts
+// main/shared/src/engine/logger/console.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CONSOLE_LOG_LEVELS, createConsoleLogger, type ConsoleLogLevel } from './console';

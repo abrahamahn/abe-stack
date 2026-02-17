@@ -1,4 +1,4 @@
-// main/shared/src/utils/pubsub/helpers.ts
+// main/shared/src/engine/pubsub/helpers.ts
 /**
  * Pub/Sub Helpers
  */

@@ -1,4 +1,4 @@
-// main/shared/src/utils/pagination/pagination.ts
+// main/shared/src/engine/pagination/pagination.ts
 /**
  * @file Pagination Utilities
  * @description Validation schemas and offset/cursor logic for pagination.

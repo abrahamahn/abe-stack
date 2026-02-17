@@ -1,4 +1,4 @@
-// main/shared/src/domain/feature-flags/index.ts
+// main/shared/src/engine/feature-flags/index.ts
 
 export { evaluateFlag } from './feature-flags.logic';
 

@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.validation.test.ts
+// main/shared/src/engine/media/media.validation.test.ts
 /**
  * Tests for pure media validation utilities
  * (sanitizeFilename, generateFileId, validateUploadConfig).

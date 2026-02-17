@@ -1,4 +1,4 @@
-// main/shared/src/domain/media/media.file-type.ts
+// main/shared/src/engine/media/media.file-type.ts
 /**
  * File Type Detection
  *

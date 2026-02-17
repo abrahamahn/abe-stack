@@ -1,4 +1,4 @@
-// main/shared/src/domain/usage-metering/usage-metering.logic.test.ts
+// main/shared/src/engine/usage-metering/usage-metering.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { aggregateSnapshots, aggregateValues, isOverQuota } from './usage-metering.logic';

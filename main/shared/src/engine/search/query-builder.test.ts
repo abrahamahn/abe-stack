@@ -1,4 +1,4 @@
-// main/shared/src/utils/search/query-builder.test.ts
+// main/shared/src/engine/search/query-builder.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { FILTER_OPERATORS, LOGICAL_OPERATORS } from '../constants/limits';

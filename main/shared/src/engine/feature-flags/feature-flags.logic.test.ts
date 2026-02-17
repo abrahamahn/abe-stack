@@ -1,4 +1,4 @@
-// main/shared/src/domain/feature-flags/feature-flags.logic.test.ts
+// main/shared/src/engine/feature-flags/feature-flags.logic.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { evaluateFlag } from './feature-flags.logic';

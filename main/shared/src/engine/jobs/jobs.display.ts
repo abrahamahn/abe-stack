@@ -1,4 +1,4 @@
-// main/shared/src/domain/jobs/jobs.display.ts
+// main/shared/src/engine/jobs/jobs.display.ts
 
 import type { JobStatus } from './jobs.schemas';
 

@@ -1,4 +1,4 @@
-// main/shared/src/logger/levels.test.ts
+// main/shared/src/engine/logger/levels.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { LOG_LEVELS, shouldLog } from './levels';
