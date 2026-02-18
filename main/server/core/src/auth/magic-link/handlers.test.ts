@@ -43,8 +43,8 @@ vi.mock('@bslt/db', async () => {
   };
 });
 
-vi.mock('@bslt/shared/config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@bslt/shared/config')>();
+vi.mock('@bslt/shared/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared/core')>();
   return {
     ...actual,
     isStrategyEnabled: vi.fn(),
@@ -242,7 +242,7 @@ function createMagicLinkRequestBody(overrides?: Partial<MagicLinkRequest>): Magi
 describe('handleMagicLinkRequest', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/core'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -375,7 +375,7 @@ describe('handleMagicLinkRequest', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/core'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();
@@ -551,7 +551,7 @@ describe('handleMagicLinkRequest', () => {
 describe('handleMagicLinkVerify', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/core'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -802,7 +802,7 @@ describe('handleMagicLinkVerify', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/core'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();

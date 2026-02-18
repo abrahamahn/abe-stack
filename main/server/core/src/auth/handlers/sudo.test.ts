@@ -1,7 +1,5 @@
 // main/server/core/src/auth/handlers/sudo.test.ts
-import { AUTH_CONSTANTS } from '@bslt/shared';
-
-const { SUDO_TOKEN_HEADER } = AUTH_CONSTANTS;
+import { SUDO_TOKEN_HEADER } from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import { sign } from '../../../../system/src';

@@ -7,9 +7,7 @@
  * @module handlers
  */
 
-import { AUTH_CONSTANTS } from '@bslt/shared';
-
-export const SUDO_TOKEN_HEADER = AUTH_CONSTANTS.SUDO_TOKEN_HEADER;
+export { SUDO_TOKEN_HEADER } from '@bslt/shared';
 export { handleListDevices, handleRevokeDevice, handleTrustDevice } from './devices';
 export {
   handleChangeEmail,
