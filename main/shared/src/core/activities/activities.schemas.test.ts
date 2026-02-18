@@ -494,10 +494,15 @@ describe('activitiesListFiltersSchema', () => {
       expect(() => activitiesListFiltersSchema.parse({ limit: 10.5 })).toThrow();
     });
 
-    it('should throw when limit is a string', () => {
+    it('should throw when limit is a non-numeric string', () => {
       expect(() => activitiesListFiltersSchema.parse({ limit: 'ten' })).toThrow(
-        'limit must be a number',
+        'limit must be a valid number',
       );
+    });
+
+    it('should coerce numeric string limit from query params', () => {
+      const result = activitiesListFiltersSchema.parse({ limit: '50' });
+      expect(result.limit).toBe(50);
     });
 
     it('should throw when resourceType is a number', () => {

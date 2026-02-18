@@ -28,6 +28,7 @@ import {
   updateTenantSettingSchema,
 } from '../core/tenant/tenant.settings.schemas';
 import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
+import { inviteIdSchema, tenantIdSchema, userIdSchema } from '../primitives/schema/ids';
 
 import type { Contract } from '../primitives/api';
 
@@ -61,6 +62,7 @@ export const tenantContract = {
   get: {
     method: 'GET' as const,
     path: '/api/tenants/:id',
+    pathParams: { id: tenantIdSchema },
     responses: {
       200: successResponseSchema(tenantSchema),
       401: errorResponseSchema,
@@ -73,6 +75,7 @@ export const tenantContract = {
   update: {
     method: 'POST' as const,
     path: '/api/tenants/:id/update',
+    pathParams: { id: tenantIdSchema },
     body: updateTenantSchema,
     responses: {
       200: successResponseSchema(tenantActionResponseSchema),
@@ -87,6 +90,7 @@ export const tenantContract = {
   delete: {
     method: 'DELETE' as const,
     path: '/api/tenants/:id',
+    pathParams: { id: tenantIdSchema },
     responses: {
       200: successResponseSchema(tenantActionResponseSchema),
       401: errorResponseSchema,
@@ -99,6 +103,7 @@ export const tenantContract = {
   transferOwnership: {
     method: 'POST' as const,
     path: '/api/tenants/:id/transfer',
+    pathParams: { id: tenantIdSchema },
     body: transferOwnershipSchema,
     responses: {
       200: successResponseSchema(tenantActionResponseSchema),
@@ -113,6 +118,7 @@ export const tenantContract = {
   getSetting: {
     method: 'GET' as const,
     path: '/api/tenants/:id/settings/:key',
+    pathParams: { id: tenantIdSchema },
     responses: {
       200: successResponseSchema(tenantSettingSchema),
       401: errorResponseSchema,
@@ -125,6 +131,7 @@ export const tenantContract = {
   updateSetting: {
     method: 'POST' as const,
     path: '/api/tenants/:id/settings/:key',
+    pathParams: { id: tenantIdSchema },
     body: updateTenantSettingSchema,
     responses: {
       200: successResponseSchema(tenantSettingSchema),
@@ -143,6 +150,7 @@ export const tenantContract = {
   listMembers: {
     method: 'GET' as const,
     path: '/api/tenants/:tenantId/members',
+    pathParams: { tenantId: tenantIdSchema },
     responses: {
       200: successResponseSchema(membersListResponseSchema),
       401: errorResponseSchema,
@@ -155,6 +163,7 @@ export const tenantContract = {
   removeMember: {
     method: 'DELETE' as const,
     path: '/api/tenants/:tenantId/members/:userId',
+    pathParams: { tenantId: tenantIdSchema, userId: userIdSchema },
     responses: {
       200: successResponseSchema(membershipActionResponseSchema),
       401: errorResponseSchema,
@@ -167,6 +176,7 @@ export const tenantContract = {
   updateRole: {
     method: 'POST' as const,
     path: '/api/tenants/:tenantId/members/:userId/role',
+    pathParams: { tenantId: tenantIdSchema, userId: userIdSchema },
     body: updateMembershipRoleSchema,
     responses: {
       200: successResponseSchema(membershipActionResponseSchema),
@@ -181,6 +191,7 @@ export const tenantContract = {
   inviteMember: {
     method: 'POST' as const,
     path: '/api/tenants/:tenantId/invitations',
+    pathParams: { tenantId: tenantIdSchema },
     body: createInvitationSchema,
     responses: {
       201: successResponseSchema(membershipActionResponseSchema),
@@ -195,6 +206,7 @@ export const tenantContract = {
   listInvitations: {
     method: 'GET' as const,
     path: '/api/tenants/:tenantId/invitations',
+    pathParams: { tenantId: tenantIdSchema },
     responses: {
       200: successResponseSchema(invitationsListResponseSchema),
       401: errorResponseSchema,
@@ -221,6 +233,7 @@ export const tenantContract = {
   revokeInvitation: {
     method: 'DELETE' as const,
     path: '/api/tenants/:tenantId/invitations/:invitationId',
+    pathParams: { tenantId: tenantIdSchema, invitationId: inviteIdSchema },
     responses: {
       200: successResponseSchema(membershipActionResponseSchema),
       401: errorResponseSchema,
@@ -233,6 +246,7 @@ export const tenantContract = {
   resendInvitation: {
     method: 'POST' as const,
     path: '/api/tenants/:tenantId/invitations/:invitationId/resend',
+    pathParams: { tenantId: tenantIdSchema, invitationId: inviteIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(membershipActionResponseSchema),
@@ -246,6 +260,7 @@ export const tenantContract = {
   leave: {
     method: 'POST' as const,
     path: '/api/tenants/:tenantId/leave',
+    pathParams: { tenantId: tenantIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(membershipActionResponseSchema),

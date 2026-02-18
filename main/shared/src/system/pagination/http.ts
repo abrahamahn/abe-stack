@@ -51,9 +51,9 @@ export function parsePageParam(pageParam: string | string[] | undefined): number
   if (pageParam == null) return 1;
 
   const page = Array.isArray(pageParam) ? (pageParam[0] ?? '') : pageParam;
-  const parsed = parseInt(page, 10);
+  const parsed = Number(page);
 
-  if (isNaN(parsed) || parsed < 1) {
+  if (!Number.isInteger(parsed) || parsed < 1) {
     throw new PaginationError(
       PAGINATION_ERROR_TYPES.INVALID_PAGE,
       `Invalid page parameter: ${page}. Must be a positive integer.`,
@@ -80,9 +80,9 @@ export function parseLimitParam(
   if (limitParam == null) return defaultLimit;
 
   const limit = Array.isArray(limitParam) ? (limitParam[0] ?? '') : limitParam;
-  const parsed = parseInt(limit, 10);
+  const parsed = Number(limit);
 
-  if (isNaN(parsed) || parsed < 1) {
+  if (!Number.isInteger(parsed) || parsed < 1) {
     throw new PaginationError(
       PAGINATION_ERROR_TYPES.INVALID_LIMIT,
       `Invalid limit parameter: ${limit}. Must be a positive integer.`,

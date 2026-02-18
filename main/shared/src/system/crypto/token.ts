@@ -51,25 +51,22 @@ const clearPersistedToken = (): void => {
 /**
  * Creates a memory-based token store (recommended for security).
  *
- * Stores tokens in memory, with best-effort localStorage sync for app-level
- * interoperability across clients that read from the shared tokenStore.
+ * Tokens live only in the closure variable — never written to localStorage,
+ * sessionStorage, or any other browser-accessible store. This makes the token
+ * immune to XSS exfiltration via `localStorage.getItem()`.
+ *
+ * Trade-off: tokens are lost on page refresh. Use the refresh token
+ * (stored in an httpOnly cookie) to obtain a new access token on load.
  */
 const createMemoryTokenStore = (): TokenStore => {
   let token: string | null = null;
   return {
-    get: (): string | null => {
-      if (token !== null && token !== '') return token;
-      const persisted = readPersistedToken();
-      if (persisted !== null) token = persisted;
-      return token;
-    },
+    get: (): string | null => token,
     set: (value: string): void => {
       token = value;
-      persistToken(value);
     },
     clear: (): void => {
       token = null;
-      clearPersistedToken();
     },
   };
 };
@@ -98,25 +95,18 @@ const createLocalStorageTokenStore = (): TokenStore => ({
 });
 
 /**
- * Default token store - uses memory for security.
+ * Default token store — in-memory only, immune to XSS.
  *
- * Access tokens are short-lived and can be refreshed via the refresh token
- * (stored in an HTTP-only cookie). On page load, call refreshToken() to
- * get a new access token.
- *
- * To use localStorage instead (less secure), use:
- * ```typescript
- * import { createTokenStore } from '@bslt/shared';
- * const tokenStore = createTokenStore.localStorage();
- * ```
+ * Access tokens are short-lived and lost on page refresh. Use the refresh
+ * token (httpOnly cookie) + `refreshToken()` to rehydrate on load.
  */
 export const tokenStore: TokenStore = createMemoryTokenStore();
 
 /**
  * Factory for creating token stores with different storage backends.
  *
- * - `memory()`: Recommended. Tokens cleared on refresh, immune to XSS.
- * - `localStorage()`: Persistent but vulnerable to XSS attacks.
+ * - `memory()`: Recommended. Closure-only, immune to XSS. Lost on refresh.
+ * - `localStorage()`: Persistent across refreshes but vulnerable to XSS.
  */
 export const createTokenStore = {
   memory: createMemoryTokenStore,

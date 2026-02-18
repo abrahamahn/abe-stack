@@ -11,7 +11,7 @@ import type {
   AuthenticatedUser,
   BaseContext,
   Logger,
-  ContractRequestContext as RequestContext,
+  RequestContext,
   RequestInfo,
 } from '@bslt/shared';
 import type { FileRepository } from '../../../db/src';

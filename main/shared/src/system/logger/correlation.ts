@@ -9,7 +9,7 @@
 
 import { STANDARD_HEADERS } from '../constants/platform';
 
-import type { RequestContext } from './types';
+import type { LogRequestContext } from './types';
 
 /**
  * Validate that a correlation ID is safe to use in headers/logs.
@@ -91,10 +91,10 @@ export function getOrCreateCorrelationId(headers: Record<string, string | undefi
  * @param correlationId - The correlation ID for the request
  * @param request - Request metadata containing id, method, url, ip, and headers
  * @param userId - Optional user ID if the request is authenticated
- * @returns A fully populated RequestContext object
+ * @returns A fully populated LogRequestContext object
  * @complexity O(1)
  */
-export function createRequestContext(
+export function createLogRequestContext(
   correlationId: string,
   request: {
     id: string;
@@ -104,8 +104,8 @@ export function createRequestContext(
     headers: Record<string, string | undefined>;
   },
   userId?: string,
-): RequestContext {
-  const context: RequestContext = {
+): LogRequestContext {
+  const context: LogRequestContext = {
     correlationId,
     requestId: request.id,
     method: request.method,

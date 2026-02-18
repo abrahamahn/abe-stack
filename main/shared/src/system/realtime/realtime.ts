@@ -19,7 +19,7 @@ import type { Contract, Schema } from '../../primitives/api';
 // ============================================================================
 
 /** Set a field value on a record */
-export interface SetOperation {
+export interface RealtimeSetOperation {
   type: 'set';
   table: string;
   id: string;
@@ -28,7 +28,7 @@ export interface SetOperation {
 }
 
 /** Set a field to current timestamp (server-side) */
-export interface SetNowOperation {
+export interface RealtimeSetNowOperation {
   type: 'set-now';
   table: string;
   id: string;
@@ -39,7 +39,7 @@ export interface SetNowOperation {
 export type ListPosition = 'prepend' | 'append' | { before: unknown } | { after: unknown };
 
 /** Insert a value into a list field */
-export interface ListInsertOperation {
+export interface RealtimeListInsertOperation {
   type: 'listInsert';
   table: string;
   id: string;
@@ -49,7 +49,7 @@ export interface ListInsertOperation {
 }
 
 /** Remove a value from a list field */
-export interface ListRemoveOperation {
+export interface RealtimeListRemoveOperation {
   type: 'listRemove';
   table: string;
   id: string;
@@ -59,10 +59,10 @@ export interface ListRemoveOperation {
 
 /** Union of all operation types */
 export type RealtimeOperation =
-  | SetOperation
-  | SetNowOperation
-  | ListInsertOperation
-  | ListRemoveOperation;
+  | RealtimeSetOperation
+  | RealtimeSetNowOperation
+  | RealtimeListInsertOperation
+  | RealtimeListRemoveOperation;
 
 /** A transaction containing multiple operations to apply atomically */
 export interface RealtimeTransaction {
@@ -206,7 +206,7 @@ function validatePositiveInt(data: unknown, fieldName: string): number {
 }
 
 /** @complexity O(1) */
-export const setOperationSchema: Schema<SetOperation> = createSchema((data: unknown) => {
+export const setOperationSchema: Schema<RealtimeSetOperation> = createSchema((data: unknown) => {
   if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid set operation');
   }
@@ -222,7 +222,7 @@ export const setOperationSchema: Schema<SetOperation> = createSchema((data: unkn
 });
 
 /** @complexity O(1) */
-export const setNowOperationSchema: Schema<SetNowOperation> = createSchema((data: unknown) => {
+export const setNowOperationSchema: Schema<RealtimeSetNowOperation> = createSchema((data: unknown) => {
   if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid set-now operation');
   }
@@ -248,7 +248,7 @@ export const listPositionSchema: Schema<ListPosition> = createSchema((data: unkn
 });
 
 /** @complexity O(1) */
-export const listInsertOperationSchema: Schema<ListInsertOperation> = createSchema(
+export const listInsertOperationSchema: Schema<RealtimeListInsertOperation> = createSchema(
   (data: unknown) => {
     if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid listInsert operation');
@@ -267,7 +267,7 @@ export const listInsertOperationSchema: Schema<ListInsertOperation> = createSche
 );
 
 /** @complexity O(1) */
-export const listRemoveOperationSchema: Schema<ListRemoveOperation> = createSchema(
+export const listRemoveOperationSchema: Schema<RealtimeListRemoveOperation> = createSchema(
   (data: unknown) => {
     if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid listRemove operation');
@@ -514,14 +514,14 @@ export function setPath(obj: Record<string, unknown>, path: string, value: unkno
 /**
  * Apply a set operation to a record.
  */
-function applySetOp(record: RealtimeRecord, op: SetOperation): void {
+function applySetOp(record: RealtimeRecord, op: RealtimeSetOperation): void {
   setPath(record, op.key, op.value);
 }
 
 /**
  * Apply a set-now operation to a record (sets current ISO timestamp).
  */
-function applySetNowOp(record: RealtimeRecord, op: SetNowOperation): void {
+function applySetNowOp(record: RealtimeRecord, op: RealtimeSetNowOperation): void {
   setPath(record, op.key, new Date().toISOString());
 }
 
@@ -529,7 +529,7 @@ function applySetNowOp(record: RealtimeRecord, op: SetNowOperation): void {
  * Apply a list insert operation to a record.
  * Removes duplicates before inserting at the specified position.
  */
-function applyListInsertOp(record: RealtimeRecord, op: ListInsertOperation): void {
+function applyListInsertOp(record: RealtimeRecord, op: RealtimeListInsertOperation): void {
   const currentValue = getFieldValue(record, op.key);
   const list = Array.isArray(currentValue) ? [...(currentValue as unknown[])] : [];
 
@@ -556,7 +556,7 @@ function applyListInsertOp(record: RealtimeRecord, op: ListInsertOperation): voi
 /**
  * Apply a list remove operation to a record.
  */
-function applyListRemoveOp(record: RealtimeRecord, op: ListRemoveOperation): void {
+function applyListRemoveOp(record: RealtimeRecord, op: RealtimeListRemoveOperation): void {
   const currentValue = getFieldValue(record, op.key);
   if (!Array.isArray(currentValue)) {
     return;

@@ -9,7 +9,8 @@
 import {
   FILTER_OPERATORS,
   LOGICAL_OPERATORS,
-  SORT_ORDER
+  SEARCH_DEFAULTS,
+  SORT_ORDER,
 } from '../constants/limits';
 
 import {
@@ -25,6 +26,40 @@ import {
   type SortConfig,
   type SortOrder,
 } from './types';
+
+// ============================================================================
+// Filter-Only Builder (used in and/or/not callbacks)
+// ============================================================================
+
+/**
+ * Restricted builder interface for compound filter callbacks.
+ * Only exposes filter methods — prevents silent discard of pagination,
+ * sorting, and field selection inside and()/or()/not() groups.
+ */
+export interface FilterGroupBuilder<T = Record<string, unknown>> {
+  where(field: keyof T | string, operator: FilterOperator, value: FilterValue, options?: { caseSensitive?: boolean }): FilterGroupBuilder<T>;
+  whereEq(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereNeq(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereGt(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereGte(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereLt(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereLte(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereContains(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
+  whereStartsWith(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
+  whereEndsWith(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
+  whereLike(field: keyof T | string, pattern: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
+  whereIlike(field: keyof T | string, pattern: string): FilterGroupBuilder<T>;
+  whereIn(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
+  whereNotIn(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
+  whereNull(field: keyof T | string): FilterGroupBuilder<T>;
+  whereNotNull(field: keyof T | string): FilterGroupBuilder<T>;
+  whereBetween(field: keyof T | string, min: FilterPrimitive, max: FilterPrimitive): FilterGroupBuilder<T>;
+  whereArrayContains(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
+  whereArrayContainsAny(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
+  and(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): FilterGroupBuilder<T>;
+  or(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): FilterGroupBuilder<T>;
+  not(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): FilterGroupBuilder<T>;
+}
 
 // ============================================================================
 // Query Builder Class
@@ -48,11 +83,20 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   private _sort: SortConfig<T>[] = [];
   private _search?: FullTextSearchConfig | undefined;
   private _page = 1;
-  private _limit = 50;
+  private _limit = SEARCH_DEFAULTS.LIMIT;
+  private _maxPageSize: number;
+  private _skip?: number | undefined;
   private _cursor?: string | undefined;
   private _select?: Array<keyof T | string> | undefined;
   private _includeCount?: boolean | undefined;
   private _facets?: FacetConfig[] | undefined;
+
+  /**
+   * @param maxPageSize - Override the default max page size (server can pass env-configured value)
+   */
+  constructor(maxPageSize: number = SEARCH_DEFAULTS.MAX_LIMIT) {
+    this._maxPageSize = maxPageSize;
+  }
 
   // ============================================================================
   // Filter Methods
@@ -213,7 +257,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Combine current filters with AND logic.
    * This is the default behavior when multiple where() calls are made.
    */
-  and(callback: (builder: SearchQueryBuilder<T>) => SearchQueryBuilder<T>): this {
+  and(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): this {
     const subBuilder = new SearchQueryBuilder<T>();
     callback(subBuilder);
     const subFilters = subBuilder._filters;
@@ -231,7 +275,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   /**
    * Combine filters with OR logic.
    */
-  or(callback: (builder: SearchQueryBuilder<T>) => SearchQueryBuilder<T>): this {
+  or(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): this {
     const subBuilder = new SearchQueryBuilder<T>();
     callback(subBuilder);
     const subFilters = subBuilder._filters;
@@ -249,7 +293,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   /**
    * Negate a filter group.
    */
-  not(callback: (builder: SearchQueryBuilder<T>) => SearchQueryBuilder<T>): this {
+  not(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): this {
     const subBuilder = new SearchQueryBuilder<T>();
     callback(subBuilder);
     const subFilters = subBuilder._filters;
@@ -362,7 +406,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Set items per page.
    */
   limit(limit: number): this {
-    this._limit = Math.max(1, Math.min(limit, 1000));
+    this._limit = Math.max(1, Math.min(limit, this._maxPageSize));
     return this;
   }
 
@@ -375,10 +419,10 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   }
 
   /**
-   * Skip a number of items (converts to page).
+   * Skip a number of items (resolved to page at build time).
    */
   skip(count: number): this {
-    this._page = Math.floor(count / this._limit) + 1;
+    this._skip = Math.max(0, count);
     return this;
   }
 
@@ -458,8 +502,13 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Build the search query object.
    */
   build(): SearchQuery<T> {
+    // Resolve deferred skip → page calculation with final limit value
+    const page = this._skip !== undefined
+      ? Math.floor(this._skip / this._limit) + 1
+      : this._page;
+
     const query: SearchQuery<T> = {
-      page: this._page,
+      page,
       limit: this._limit,
     };
 
@@ -515,12 +564,13 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Clone the builder for modification.
    */
   clone(): SearchQueryBuilder<T> {
-    const cloned = new SearchQueryBuilder<T>();
+    const cloned = new SearchQueryBuilder<T>(this._maxPageSize);
     cloned._filters = [...this._filters];
     cloned._sort = [...this._sort];
     cloned._search = this._search !== undefined ? { ...this._search } : undefined;
     cloned._page = this._page;
     cloned._limit = this._limit;
+    cloned._skip = this._skip;
     cloned._cursor = this._cursor;
     cloned._select = this._select !== undefined ? [...this._select] : undefined;
     cloned._includeCount = this._includeCount;
@@ -536,7 +586,8 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
     this._sort = [];
     this._search = undefined;
     this._page = 1;
-    this._limit = 50;
+    this._limit = SEARCH_DEFAULTS.LIMIT;
+    this._skip = undefined;
     this._cursor = undefined;
     this._select = undefined;
     this._includeCount = undefined;
@@ -561,8 +612,10 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
  *   .build();
  * ```
  */
-export function createSearchQuery<T = Record<string, unknown>>(): SearchQueryBuilder<T> {
-  return new SearchQueryBuilder<T>();
+export function createSearchQuery<T = Record<string, unknown>>(
+  maxPageSize?: number,
+): SearchQueryBuilder<T> {
+  return new SearchQueryBuilder<T>(maxPageSize);
 }
 
 /**

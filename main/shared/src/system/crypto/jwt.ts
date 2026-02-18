@@ -333,16 +333,23 @@ export function signWithRotation(payload: object, config: JwtRotationConfig): st
  * Verify a token using either the current or previous secret
  */
 export function verifyWithRotation(token: string, config: JwtRotationConfig): JwtPayload {
-  const options: VerifyOptions = { clockToleranceSeconds: config.clockToleranceSeconds };
+  const options: VerifyOptions | undefined =
+    config.clockToleranceSeconds !== undefined
+      ? { clockToleranceSeconds: config.clockToleranceSeconds }
+      : undefined;
   try {
     // Try verifying with current secret first
     return jwtVerify(token, config.currentSecret, options);
   } catch (error) {
-    // If that fails and a previous secret is provided, try with that
+    // Expired tokens are expired regardless of which key signed them — rethrow immediately
+    // so callers (e.g. refresh flow) can distinguish expiry from a bad signature.
+    if (error instanceof JwtError && error.code === 'TOKEN_EXPIRED') {
+      throw error;
+    }
+    // Only fall back to previous secret for signature mismatches (key was rotated)
     if (config.previousSecret !== undefined && config.previousSecret !== '') {
       return jwtVerify(token, config.previousSecret, options);
     }
-    // If no previous secret or verification still fails, rethrow the error
     throw error;
   }
 }

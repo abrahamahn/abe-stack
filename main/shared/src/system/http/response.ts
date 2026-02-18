@@ -92,14 +92,14 @@ export function apiResultSchema<T>(dataSchema: Schema<T>): Schema<ApiResultEnvel
 // ============================================================================
 
 /** Simple error response (non-envelope) */
-export interface ErrorResponse {
+export interface SimpleErrorResponse {
   message: string;
   code?: string | undefined;
   details?: Record<string, unknown> | undefined;
 }
 
 /** Simple error response schema for non-envelope errors */
-export const simpleErrorResponseSchema: Schema<ErrorResponse> = createSchema((input: unknown) => {
+export const simpleErrorResponseSchema: Schema<SimpleErrorResponse> = createSchema((input: unknown) => {
   const obj = (input !== null && typeof input === 'object' ? input : {}) as Record<string, unknown>;
   if (typeof obj['message'] !== 'string') throw new Error('Error message must be a string');
   return {

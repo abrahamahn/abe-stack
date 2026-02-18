@@ -88,7 +88,7 @@ export interface SetTenantFeatureOverrideRequest {
  * @complexity O(n) where n is array length
  */
 function parseOptionalStringArray(data: unknown, label: string): string[] | undefined {
-  if (data === undefined) {
+  if (data === undefined || data === null) {
     return undefined;
   }
   if (!Array.isArray(data)) {

@@ -17,7 +17,7 @@ import type {
   BaseContext,
   Logger,
   RecordMap,
-  ContractRequestContext as RequestContext,
+  RequestContext,
   SubscriptionManager,
 } from '@bslt/shared';
 

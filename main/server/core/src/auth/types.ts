@@ -25,7 +25,7 @@ import type {
   BaseContext,
   EmailOptions,
   ReplyContext,
-  ContractRequestContext as RequestContext,
+  RequestContext,
   RequestInfo,
   SendResult,
   ServerLogger

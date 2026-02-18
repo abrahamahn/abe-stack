@@ -16,7 +16,7 @@ import { ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared';
 import type {
   BaseContext,
   CacheProvider,
-  ContractRequestContext as RequestContext,
+  RequestContext,
   RequestInfo,
   ServerLogger,
 } from '@bslt/shared';

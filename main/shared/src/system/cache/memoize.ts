@@ -66,6 +66,13 @@ export function memoize<T extends (...args: unknown[]) => unknown>(
     misses++;
     const result = fn(...args) as ReturnType<T>;
     cache.set(key, { value: result });
+
+    // If the result is a Promise that rejects, evict the poisoned entry
+    // so subsequent calls retry instead of returning the cached rejection.
+    if (result instanceof Promise) {
+      (result as Promise<unknown>).catch(() => cache.delete(key));
+    }
+
     return result;
   }) as MemoizeFunction<T>;
 

@@ -17,8 +17,8 @@ export type {
   HasErrorTracker,
   HealthCheckResult,
   InfrastructureService,
-  Job,
-  JobHandler,
+  QueueJob,
+  QueueJobHandler,
   JobOptions,
   JobQueueService,
   LocalStorageConfig,
@@ -32,6 +32,6 @@ export type {
   ServerLogger,
   StorageClient,
   StorageConfig,
-  StorageProvider,
+  StorageBackend,
   StorageService,
 } from './ports';

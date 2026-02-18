@@ -213,6 +213,45 @@ describe('memoize', () => {
   });
 
   // ==========================================================================
+  // Async: rejected promise eviction
+  // ==========================================================================
+  describe('async: rejected promise eviction', () => {
+    it('evicts rejected promises from cache so next call retries', async () => {
+      let callCount = 0;
+      const fn = vi.fn(async (_key: unknown): Promise<string> => {
+        callCount++;
+        if (callCount === 1) throw new Error('network timeout');
+        return 'success';
+      });
+      const memoized = memoize(fn as (...args: unknown[]) => unknown);
+
+      // First call: returns a rejected Promise, which gets cached then evicted
+      const first = memoized('key') as Promise<string>;
+      await expect(first).rejects.toThrow('network timeout');
+
+      // Allow microtask to process .catch() eviction
+      await new Promise((r) => setTimeout(r, 0));
+
+      // Second call: should retry (cache was evicted), not return cached rejection
+      const second = memoized('key') as Promise<string>;
+      await expect(second).resolves.toBe('success');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps resolved promises cached normally', async () => {
+      const fn = vi.fn(async (_key: unknown) => 'data');
+      const memoized = memoize(fn as (...args: unknown[]) => unknown);
+
+      const first = memoized('key') as Promise<string>;
+      await expect(first).resolves.toBe('data');
+
+      const second = memoized('key') as Promise<string>;
+      await expect(second).resolves.toBe('data');
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ==========================================================================
   // Adversarial: null and undefined return values
   // ==========================================================================
   describe('adversarial: null and undefined return values', () => {

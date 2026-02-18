@@ -309,10 +309,21 @@ describe('SearchQueryBuilder', () => {
       expect(query.cursor).toBe('abc123');
     });
 
-    test('skip should convert to page', () => {
+    test('skip should convert to page using final limit', () => {
       const query = new SearchQueryBuilder<TestUser>().limit(10).skip(25).build();
 
       expect(query.page).toBe(3); // Math.floor(25/10) + 1 = 3
+    });
+
+    test('skip().limit() and limit().skip() should produce same result', () => {
+      const a = new SearchQueryBuilder<TestUser>().skip(50).limit(10).build();
+      const b = new SearchQueryBuilder<TestUser>().limit(10).skip(50).build();
+
+      // Both should skip 50 items with limit 10 → page 6
+      expect(a.page).toBe(6);
+      expect(b.page).toBe(6);
+      expect(a.limit).toBe(10);
+      expect(b.limit).toBe(10);
     });
 
     test('take should be alias for limit', () => {

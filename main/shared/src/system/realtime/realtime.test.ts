@@ -31,13 +31,13 @@ import {
 } from './realtime';
 
 import type {
-  ListInsertOperation,
-  ListRemoveOperation,
+  RealtimeListInsertOperation,
+  RealtimeListRemoveOperation,
   RealtimeOperation,
   RealtimeRecord,
+  RealtimeSetNowOperation,
+  RealtimeSetOperation,
   RecordMap,
-  SetNowOperation,
-  SetOperation,
 } from './realtime';
 
 const VALID_UUID = '550e8400-e29b-41d4-a716-446655440000';
@@ -579,7 +579,7 @@ describe('applyOperation', () => {
   describe('SET operation', () => {
     test('should apply set operation to top-level field', () => {
       const record = createTestRecord();
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,
@@ -596,7 +596,7 @@ describe('applyOperation', () => {
 
     test('should apply set operation to nested field', () => {
       const record = createTestRecord({ metadata: { key: 'value', nested: { deep: true } } });
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,
@@ -611,7 +611,7 @@ describe('applyOperation', () => {
 
     test('should create nested path if it does not exist', () => {
       const record = createTestRecord();
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,
@@ -627,7 +627,7 @@ describe('applyOperation', () => {
 
     test('should throw for protected fields', () => {
       const record = createTestRecord();
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,
@@ -640,7 +640,7 @@ describe('applyOperation', () => {
 
     test('should throw for version field', () => {
       const record = createTestRecord();
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,
@@ -655,7 +655,7 @@ describe('applyOperation', () => {
   describe('SET_NOW operation', () => {
     test('should set field to current timestamp', () => {
       const record = createTestRecord();
-      const op: SetNowOperation = {
+      const op: RealtimeSetNowOperation = {
         type: 'set-now',
         table: 'users',
         id: record.id,
@@ -675,7 +675,7 @@ describe('applyOperation', () => {
   describe('listInsert operation', () => {
     test('should prepend item to list', () => {
       const record = createTestRecord({ tags: ['b', 'c'] });
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -691,7 +691,7 @@ describe('applyOperation', () => {
 
     test('should append item to list', () => {
       const record = createTestRecord({ tags: ['a', 'b'] });
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -707,7 +707,7 @@ describe('applyOperation', () => {
 
     test('should insert item before specified element', () => {
       const record = createTestRecord({ tags: ['a', 'c'] });
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -723,7 +723,7 @@ describe('applyOperation', () => {
 
     test('should insert item after specified element', () => {
       const record = createTestRecord({ tags: ['a', 'c'] });
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -739,7 +739,7 @@ describe('applyOperation', () => {
 
     test('should remove duplicates when inserting', () => {
       const record = createTestRecord({ tags: ['a', 'b', 'c'] });
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -757,7 +757,7 @@ describe('applyOperation', () => {
       const record = createTestRecord();
       delete (record as Record<string, unknown>)['tags'];
 
-      const op: ListInsertOperation = {
+      const op: RealtimeListInsertOperation = {
         type: 'listInsert',
         table: 'users',
         id: record.id,
@@ -775,7 +775,7 @@ describe('applyOperation', () => {
   describe('listRemove operation', () => {
     test('should remove item from list', () => {
       const record = createTestRecord({ tags: ['a', 'b', 'c'] });
-      const op: ListRemoveOperation = {
+      const op: RealtimeListRemoveOperation = {
         type: 'listRemove',
         table: 'users',
         id: record.id,
@@ -790,7 +790,7 @@ describe('applyOperation', () => {
 
     test('should handle removing non-existent item', () => {
       const record = createTestRecord({ tags: ['a', 'b'] });
-      const op: ListRemoveOperation = {
+      const op: RealtimeListRemoveOperation = {
         type: 'listRemove',
         table: 'users',
         id: record.id,
@@ -805,7 +805,7 @@ describe('applyOperation', () => {
 
     test('should handle removing from non-array field', () => {
       const record = createTestRecord({ tags: 'not-an-array' });
-      const op: ListRemoveOperation = {
+      const op: RealtimeListRemoveOperation = {
         type: 'listRemove',
         table: 'users',
         id: record.id,
@@ -1271,7 +1271,7 @@ describe('applyOperation — adversarial', () => {
     const record = createTestRecord({ id: 'r1', version: 1 });
     const protectedFields = [...PROTECTED_FIELDS];
     for (const field of protectedFields) {
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: 'r1',
@@ -1284,7 +1284,7 @@ describe('applyOperation — adversarial', () => {
 
   it('does not mutate the original record', () => {
     const record = createTestRecord({ name: 'original', version: 1 });
-    const op: SetOperation = {
+    const op: RealtimeSetOperation = {
       type: 'set',
       table: 'users',
       id: record.id,
@@ -1299,7 +1299,7 @@ describe('applyOperation — adversarial', () => {
 
   it('increments version by exactly 1 per operation', () => {
     const record = createTestRecord({ version: 42 });
-    const op: SetOperation = {
+    const op: RealtimeSetOperation = {
       type: 'set',
       table: 'users',
       id: record.id,
@@ -1312,7 +1312,7 @@ describe('applyOperation — adversarial', () => {
 
   it('listInsert with { before: nonexistent } prepends (index -1 → 0)', () => {
     const record = createTestRecord({ tags: ['a', 'b'] });
-    const op: ListInsertOperation = {
+    const op: RealtimeListInsertOperation = {
       type: 'listInsert',
       table: 'users',
       id: record.id,
@@ -1327,7 +1327,7 @@ describe('applyOperation — adversarial', () => {
 
   it('listInsert with { after: nonexistent } appends (index -1 → end)', () => {
     const record = createTestRecord({ tags: ['a', 'b'] });
-    const op: ListInsertOperation = {
+    const op: RealtimeListInsertOperation = {
       type: 'listInsert',
       table: 'users',
       id: record.id,
@@ -1343,7 +1343,7 @@ describe('applyOperation — adversarial', () => {
 
   it('set-now produces an ISO 8601 timestamp string', () => {
     const record = createTestRecord();
-    const op: SetNowOperation = {
+    const op: RealtimeSetNowOperation = {
       type: 'set-now',
       table: 'users',
       id: record.id,
@@ -1358,7 +1358,7 @@ describe('applyOperation — adversarial', () => {
   it('listRemove on null field (undefined key) does nothing', () => {
     const record = createTestRecord();
     // 'missingList' key does not exist on the record
-    const op: ListRemoveOperation = {
+    const op: RealtimeListRemoveOperation = {
       type: 'listRemove',
       table: 'users',
       id: record.id,
@@ -1372,7 +1372,7 @@ describe('applyOperation — adversarial', () => {
 
   it('set operation with key that is just a dot returns early (setPath no-op)', () => {
     const record = createTestRecord({ name: 'original' });
-    const op: SetOperation = {
+    const op: RealtimeSetOperation = {
       type: 'set',
       table: 'users',
       id: record.id,
@@ -1389,7 +1389,7 @@ describe('applyOperation — adversarial', () => {
   it('applying 100 sequential set ops increments version to 101', () => {
     let record = createTestRecord({ version: 1 });
     for (let i = 0; i < 100; i++) {
-      const op: SetOperation = {
+      const op: RealtimeSetOperation = {
         type: 'set',
         table: 'users',
         id: record.id,

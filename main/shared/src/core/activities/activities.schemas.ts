@@ -14,7 +14,7 @@ import {
   parseNullableOptional,
   parseOptional,
   parseRecord,
-  parseString, parseNumber 
+  parseString, coerceNumber
 } from '../../primitives/schema';
 import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { ACTOR_TYPES } from '../constants/iam';
@@ -148,7 +148,7 @@ export const activitiesListFiltersSchema: Schema<ActivitiesListFilters> = create
       action: parseOptional(obj['action'], (v) => parseString(v, 'action', { min: 1 })),
       cursor: parseOptional(obj['cursor'], (v) => parseString(v, 'cursor', { min: 1 })),
       limit: parseOptional(obj['limit'], (v) =>
-        parseNumber(v, 'limit', { int: true, min: 1, max: 100 }),
+        coerceNumber(v, 'limit', { int: true, min: 1, max: 100 }),
       ),
     };
   },

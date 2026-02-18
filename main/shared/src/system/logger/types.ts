@@ -37,7 +37,7 @@ export interface LogData {
  * Provides all metadata needed for request-scoped logging
  * and distributed tracing.
  */
-export interface RequestContext {
+export interface LogRequestContext {
   /** Correlation ID for distributed tracing across services */
   correlationId: string;
   /** Unique identifier for this specific request */

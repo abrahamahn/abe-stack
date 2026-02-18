@@ -15,6 +15,7 @@ import {
   parseObject,
   parseOptional,
   parseString,
+  withDefault,
 } from '../primitives/schema';
 
 import { trueFalseSchema } from './env.base';
@@ -101,7 +102,7 @@ export interface DatabaseEnv {
   POSTGRES_PASSWORD?: string | undefined;
   POSTGRES_CONNECTION_STRING?: string | undefined;
   DATABASE_URL?: string | undefined;
-  DB_MAX_CONNECTIONS?: number | undefined;
+  DB_MAX_CONNECTIONS: number;
   DB_SSL?: 'true' | 'false' | undefined;
   SQLITE_FILE_PATH?: string | undefined;
   SQLITE_WAL_MODE?: 'true' | 'false' | undefined;
@@ -143,9 +144,7 @@ export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>(
       parseString(v, 'POSTGRES_CONNECTION_STRING'),
     ),
     DATABASE_URL: parseOptional(obj['DATABASE_URL'], (v: unknown) => parseString(v, 'DATABASE_URL')),
-    DB_MAX_CONNECTIONS: parseOptional(obj['DB_MAX_CONNECTIONS'], (v: unknown) =>
-      coerceNumber(v, 'DB_MAX_CONNECTIONS'),
-    ),
+    DB_MAX_CONNECTIONS: coerceNumber(withDefault(obj['DB_MAX_CONNECTIONS'], 20), 'DB_MAX_CONNECTIONS'),
     DB_SSL: parseOptional(obj['DB_SSL'], (v: unknown) => trueFalseSchema.parse(v)),
     SQLITE_FILE_PATH: parseOptional(obj['SQLITE_FILE_PATH'], (v: unknown) =>
       parseString(v, 'SQLITE_FILE_PATH'),

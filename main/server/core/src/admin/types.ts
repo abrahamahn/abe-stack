@@ -15,7 +15,7 @@ import type {
   HasPubSub,
   HasStorage,
   Logger,
-  ContractRequestContext as RequestContext,
+  RequestContext,
 } from '@bslt/shared';
 import type { BillingConfig } from '@bslt/shared/config';
 import type {

@@ -166,11 +166,12 @@ export { StorageEnvSchema } from './env.storage';
 // ============================================================================
 export type { AppConfig, FullEnv } from './env.validation';
 
-export { EnvSchema, getRawEnv, validateEnv } from './env.validation';
+export { EnvSchema, validateEnv } from './env.validation';
 
 // ============================================================================
-// Parsers (canonical source: primitives/helpers/parse.ts)
+// Re-exports (canonical sources outside config/)
 // ============================================================================
 import { getBool, getInt, getList, getRequired } from '../primitives/helpers';
+import { getRawEnv } from '../system/env';
 
-export { getBool, getInt, getList, getRequired };
+export { getBool, getInt, getList, getRequired, getRawEnv };

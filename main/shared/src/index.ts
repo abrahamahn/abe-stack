@@ -307,8 +307,8 @@ export {
   type HasErrorTracker,
   type HealthCheckResult,
   type InfrastructureService,
-  type Job,
-  type JobHandler,
+  type QueueJob,
+  type QueueJobHandler,
   type JobOptions,
   type JobQueueService,
   type LocalStorageConfig,
@@ -320,7 +320,7 @@ export {
   type ServerLogger,
   type StorageClient,
   type StorageConfig,
-  type StorageProvider,
+  type StorageBackend,
 } from './system/ports';
 
 // HTTP (consolidated: response schemas, cookies, types, csrf, multipart, proxy, request, routes, user agent)
@@ -361,7 +361,6 @@ export {
   type ParsedMultipartFile,
   type ParsedUserAgent,
   type ProxyValidationConfig,
-  type RequestInfo,
   type RouteHandler,
   type RouteMap,
   type RouteResult,
@@ -379,8 +378,8 @@ export {
   type HasPubSub,
   type HasQueue,
   type HasStorage,
-  type RequestContext as ContractRequestContext,
-  type RequestInfo as ContractRequestInfo,
+  type RequestContext,
+  type RequestInfo,
   type ReplyContext,
 } from './system/context';
 
@@ -676,7 +675,7 @@ export {
   type Logger,
   type LoggerConfig,
   type LogLevel,
-  type RequestContext,
+  type LogRequestContext,
 } from './system/logger';
 
 // Health
@@ -763,15 +762,15 @@ export {
   type GetRecordsRequest,
   type GetRecordsResponse,
   type ListPosition,
-  type ListInsertOperation as RealtimeListInsertOperation,
-  type ListRemoveOperation as RealtimeListRemoveOperation,
+  type RealtimeListInsertOperation,
+  type RealtimeListRemoveOperation,
   type RealtimeOperation,
   type RealtimeRecord,
+  type RealtimeSetNowOperation,
+  type RealtimeSetOperation,
+  type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
-  type SetNowOperation,
-  type SetOperation as RealtimeSetOperation,
-  type RealtimeTransaction,
   type VersionConflict,
   type VersionedRecord,
   type WriteResponse,

@@ -32,7 +32,7 @@ import {
 } from '../core/users/users.schemas';
 import { errorResponseSchema, successResponseSchema } from '../system/http';
 
-import type { Contract, Schema } from '../primitives/api';
+import type { Contract } from '../primitives/api';
 
 // ============================================================================
 // Contract Definition
@@ -171,7 +171,7 @@ export const usersContract = {
     path: '/api/users/me/username',
     body: updateUsernameRequestSchema,
     responses: {
-      200: successResponseSchema(updateUsernameResponseSchema as Schema<unknown>),
+      200: successResponseSchema(updateUsernameResponseSchema),
       400: errorResponseSchema,
       401: errorResponseSchema,
       404: errorResponseSchema,

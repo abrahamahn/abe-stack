@@ -7,7 +7,7 @@
  * implementations, keeping the package framework-agnostic.
  */
 
-import type { BaseContext, Logger, ContractRequestContext as RequestContext } from '@bslt/shared';
+import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 import type { AuditEventRepository, ConsentLogRepository } from '../../../db/src';
 
 // ============================================================================

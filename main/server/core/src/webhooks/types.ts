@@ -14,7 +14,7 @@ import { SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType } 
 // Re-export webhook constants from shared (canonical source)
 export { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType };
 
-  import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@bslt/shared';
+  import type { BaseContext, RequestContext, ServerLogger } from '@bslt/shared';
   import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================

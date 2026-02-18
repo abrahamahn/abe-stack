@@ -47,19 +47,17 @@ describe('parsePageParam', () => {
     });
   });
 
-  describe('parseInt quirks — partial numeric strings', () => {
-    // parseInt('10abc', 10) === 10 — leading digits are accepted
-    it('accepts "10abc" as 10 because parseInt stops at the first non-digit', () => {
-      expect(parsePageParam('10abc')).toBe(10);
+  describe('strict numeric parsing — rejects non-integer inputs', () => {
+    it('throws for "10abc" (trailing garbage)', () => {
+      expect(() => parsePageParam('10abc')).toThrow(PaginationError);
     });
 
-    // parseInt('1.5', 10) === 1 — decimal truncated
-    it('truncates "1.5" to 1 (parseInt discards fractional part)', () => {
-      expect(parsePageParam('1.5')).toBe(1);
+    it('throws for "1.5" (decimal)', () => {
+      expect(() => parsePageParam('1.5')).toThrow(PaginationError);
     });
 
-    it('truncates "99.9" to 99', () => {
-      expect(parsePageParam('99.9')).toBe(99);
+    it('throws for "99.9" (decimal)', () => {
+      expect(() => parsePageParam('99.9')).toThrow(PaginationError);
     });
   });
 
@@ -177,14 +175,13 @@ describe('parseLimitParam', () => {
     });
   });
 
-  describe('parseInt quirks', () => {
-    // parseInt('25abc') === 25
-    it('accepts "25abc" as 25 due to parseInt behavior', () => {
-      expect(parseLimitParam('25abc')).toBe(25);
+  describe('strict numeric parsing — rejects non-integer inputs', () => {
+    it('throws for "25abc" (trailing garbage)', () => {
+      expect(() => parseLimitParam('25abc')).toThrow(PaginationError);
     });
 
-    it('truncates "10.9" to 10', () => {
-      expect(parseLimitParam('10.9')).toBe(10);
+    it('throws for "10.9" (decimal)', () => {
+      expect(() => parseLimitParam('10.9')).toThrow(PaginationError);
     });
   });
 

@@ -8,7 +8,7 @@
  * so Fastify loggers can be passed directly.
  */
 
-import type { LogData, Logger, RequestContext } from './types';
+import type { LogData, Logger, LogRequestContext } from './types';
 
 /**
  * Minimal interface for a structured logging backend.
@@ -217,7 +217,7 @@ export function createLogger(baseLogger: BaseLogger, context?: LogData): Logger 
  */
 export function createRequestLogger(
   baseLogger: BaseLogger,
-  requestContext: RequestContext,
+  requestContext: LogRequestContext,
 ): Logger {
   return createLogger(baseLogger, {
     correlationId: requestContext.correlationId,

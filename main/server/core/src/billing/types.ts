@@ -14,7 +14,7 @@ import type {
   AuthenticatedUser,
   BaseContext,
   BillingService,
-  ContractRequestContext as RequestContext,
+  RequestContext,
   RequestInfo,
   ServerLogger,
 } from '@bslt/shared';

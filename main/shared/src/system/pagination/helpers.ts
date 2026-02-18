@@ -110,18 +110,35 @@ export function buildCursorPaginationQuery(
 }
 
 /**
- * Calculates pagination metadata for cursor-based results
+ * Calculates pagination metadata for cursor-based results.
+ *
+ * @param tieBreakerField - Required when T lacks an `id` property; defaults to `'id'` otherwise.
  */
+export function calculateCursorPaginationMetadata<T extends { id: unknown }>(
+  items: T[],
+  requestedLimit: number,
+  sortBy: string,
+  sortOrder: SortOrder,
+  tieBreakerField?: keyof T,
+): { hasNext: boolean; nextCursor: string | null };
 export function calculateCursorPaginationMetadata<T>(
   items: T[],
   requestedLimit: number,
   sortBy: string,
   sortOrder: SortOrder,
-  tieBreakerField: keyof T = 'id' as keyof T,
+  tieBreakerField: keyof T,
+): { hasNext: boolean; nextCursor: string | null };
+export function calculateCursorPaginationMetadata<T>(
+  items: T[],
+  requestedLimit: number,
+  sortBy: string,
+  sortOrder: SortOrder,
+  tieBreakerField?: keyof T,
 ): {
   hasNext: boolean;
   nextCursor: string | null;
 } {
+  const field = tieBreakerField ?? ('id' as keyof T);
   const hasNext = items.length > requestedLimit;
 
   // Remove the extra item used for hasNext calculation
@@ -130,7 +147,7 @@ export function calculateCursorPaginationMetadata<T>(
   const lastItem = actualItems[actualItems.length - 1];
   const nextCursor =
     hasNext && lastItem !== undefined
-      ? createCursorForItem(lastItem, sortBy, sortOrder, tieBreakerField)
+      ? createCursorForItem(lastItem, sortBy, sortOrder, field)
       : null;
 
   return {
@@ -140,19 +157,34 @@ export function calculateCursorPaginationMetadata<T>(
 }
 
 /**
- * Applies cursor-based pagination to an array of items
- * Useful for in-memory pagination or testing
+ * Applies cursor-based pagination to an array of items.
+ * Useful for in-memory pagination or testing.
+ *
+ * @param tieBreakerField - Required when T lacks an `id` property; defaults to `'id'` otherwise.
  */
+export function paginateArrayWithCursor<T extends { id: unknown }>(
+  items: T[],
+  options: CursorPaginationOptions,
+  sortBy?: string,
+  tieBreakerField?: keyof T,
+): { data: T[]; nextCursor: string | null; hasNext: boolean };
+export function paginateArrayWithCursor<T>(
+  items: T[],
+  options: CursorPaginationOptions,
+  sortBy: string,
+  tieBreakerField: keyof T,
+): { data: T[]; nextCursor: string | null; hasNext: boolean };
 export function paginateArrayWithCursor<T>(
   items: T[],
   options: CursorPaginationOptions,
   sortBy: string = 'id',
-  tieBreakerField: keyof T = 'id' as keyof T,
+  tieBreakerField?: keyof T,
 ): {
   data: T[];
   nextCursor: string | null;
   hasNext: boolean;
 } {
+  const field = tieBreakerField ?? ('id' as keyof T);
   const { cursor, limit, sortOrder } = options;
   const effectiveSortBy = options.sortBy ?? sortBy;
 
@@ -167,8 +199,8 @@ export function paginateArrayWithCursor<T>(
 
     if (comparison === 0) {
       // Use tie-breaker
-      const aTieBreaker = String(getSortableValue(a, String(tieBreakerField)));
-      const bTieBreaker = String(getSortableValue(b, String(tieBreakerField)));
+      const aTieBreaker = String(getSortableValue(a, String(field)));
+      const bTieBreaker = String(getSortableValue(b, String(field)));
       comparison = aTieBreaker.localeCompare(bTieBreaker);
     }
 
@@ -182,7 +214,7 @@ export function paginateArrayWithCursor<T>(
     if (cursorData !== null) {
       const cursorIndex = sortedItems.findIndex((item) => {
         const itemValue = getSortableValue(item, effectiveSortBy);
-        const itemTieBreaker = String(getSortableValue(item, String(tieBreakerField)));
+        const itemTieBreaker = String(getSortableValue(item, String(field)));
 
         if (sortOrder === 'asc') {
           return (
@@ -209,7 +241,7 @@ export function paginateArrayWithCursor<T>(
     limit,
     effectiveSortBy,
     sortOrder,
-    tieBreakerField,
+    field,
   );
 
   return {
@@ -289,24 +321,39 @@ function findCursorIndexBinary<T>(
 }
 
 /**
- * Performance-optimized version for large arrays
- * Uses binary search for cursor positioning
+ * Performance-optimized version for large arrays.
+ * Uses binary search for cursor positioning.
+ *
+ * @param tieBreakerField - Required when T lacks an `id` property; defaults to `'id'` otherwise.
  */
+export function paginateLargeArrayWithCursor<T extends { id: unknown }>(
+  items: T[],
+  options: CursorPaginationOptions,
+  sortBy?: string,
+  tieBreakerField?: keyof T,
+): { data: T[]; nextCursor: string | null; hasNext: boolean };
+export function paginateLargeArrayWithCursor<T>(
+  items: T[],
+  options: CursorPaginationOptions,
+  sortBy: string,
+  tieBreakerField: keyof T,
+): { data: T[]; nextCursor: string | null; hasNext: boolean };
 export function paginateLargeArrayWithCursor<T>(
   items: T[],
   options: CursorPaginationOptions,
   sortBy: string = 'id',
-  tieBreakerField: keyof T = 'id' as keyof T,
+  tieBreakerField?: keyof T,
 ): {
   data: T[];
   nextCursor: string | null;
   hasNext: boolean;
 } {
+  const field = tieBreakerField ?? ('id' as keyof T);
   const { cursor, limit, sortOrder } = options;
   const effectiveSortBy = options.sortBy ?? sortBy;
 
   // Sort items efficiently
-  const sortedItems = sortItemsEfficiently(items, effectiveSortBy, sortOrder, tieBreakerField);
+  const sortedItems = sortItemsEfficiently(items, effectiveSortBy, sortOrder, field);
 
   // Find start index using binary search
   let startIndex = 0;
@@ -318,7 +365,7 @@ export function paginateLargeArrayWithCursor<T>(
         cursorData,
         effectiveSortBy,
         sortOrder,
-        tieBreakerField,
+        field,
       );
     }
   }
@@ -332,7 +379,7 @@ export function paginateLargeArrayWithCursor<T>(
     limit,
     effectiveSortBy,
     sortOrder,
-    tieBreakerField,
+    field,
   );
 
   return {

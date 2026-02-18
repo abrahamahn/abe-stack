@@ -1,27 +1,9 @@
 // main/shared/src/system/http/http.ts
 
+// RequestInfo is canonical in system/context/context.ts — re-exported via barrel
+import type { RequestInfo } from '../context/context';
 
-
-// ============================================================================
-// Request Context
-// ============================================================================
-
-/**
- * Request information extracted from HTTP request headers.
- * Framework-agnostic representation of client request metadata.
- *
- * @param ipAddress - The client's IP address (respecting proxy headers)
- * @param userAgent - The client's User-Agent header value
- * @param deviceId - Optional device identifier for tracking
- */
-export interface RequestInfo {
-  /** Client IP address (from X-Forwarded-For or direct connection) */
-  readonly ipAddress: string;
-  /** Client User-Agent header (capped at 500 chars) */
-  readonly userAgent: string | undefined;
-  /** Optional device identifier */
-  readonly deviceId?: string;
-}
+export type { RequestInfo };
 
 // ============================================================================
 // Route Result

@@ -112,4 +112,5 @@ export {
   lt,
   neq,
   SearchQueryBuilder,
+  type FilterGroupBuilder,
 } from './query.builder';

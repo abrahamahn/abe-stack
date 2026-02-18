@@ -10,7 +10,7 @@
  * duplicate Logger and request interfaces across packages.
  */
 
-import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@bslt/shared';
+import type { BaseContext, RequestContext, ServerLogger } from '@bslt/shared';
 import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================

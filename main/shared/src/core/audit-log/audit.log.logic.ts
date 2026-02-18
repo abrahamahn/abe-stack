@@ -40,6 +40,25 @@ const SENSITIVE_KEYS = [
 /** Maximum recursion depth for metadata sanitization to prevent stack overflow */
 const MAX_SANITIZE_DEPTH = 10;
 
+/**
+ * Patterns that indicate sensitive data regardless of key name.
+ * Matches JWT tokens, Bearer auth headers, and credit card number sequences.
+ */
+const SENSITIVE_VALUE_PATTERNS = [
+  /^eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/, // JWT (header.payload...)
+  /Bearer\s+[A-Za-z0-9\-._~+/]{10,}/, // Authorization Bearer token
+  /\b\d{13,19}\b/, // Credit card numbers (13–19 digits)
+];
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/** Returns true if a string value matches any known sensitive data pattern. */
+function containsSensitivePattern(value: string): boolean {
+  return SENSITIVE_VALUE_PATTERNS.some((pattern) => pattern.test(value));
+}
+
 // ============================================================================
 // Functions
 // ============================================================================
@@ -100,12 +119,17 @@ export function sanitizeMetadata(
       continue;
     }
 
-    if (Array.isArray(value)) {
-      sanitized[key] = (value as unknown[]).map((v: unknown) =>
-        v !== null && typeof v === 'object' && !Array.isArray(v)
-          ? sanitizeMetadata(v as Record<string, unknown>, depth + 1, seen)
-          : v,
-      );
+    // Scan string values for sensitive data patterns (JWTs, Bearer tokens, card numbers)
+    if (typeof value === 'string' && containsSensitivePattern(value)) {
+      sanitized[key] = '[REDACTED]';
+    } else if (Array.isArray(value)) {
+      sanitized[key] = (value as unknown[]).map((v: unknown) => {
+        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+          return sanitizeMetadata(v as Record<string, unknown>, depth + 1, seen);
+        }
+        if (typeof v === 'string' && containsSensitivePattern(v)) return '[REDACTED]';
+        return v;
+      });
     } else if (value !== null && typeof value === 'object') {
       sanitized[key] = sanitizeMetadata(value as Record<string, unknown>, depth + 1, seen);
     } else {

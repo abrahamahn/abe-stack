@@ -10,7 +10,7 @@
 
 import { ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared';
 
-import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@bslt/shared';
+import type { BaseContext, RequestContext, ServerLogger } from '@bslt/shared';
 import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================

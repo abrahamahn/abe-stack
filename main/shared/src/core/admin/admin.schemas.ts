@@ -11,6 +11,7 @@ import {
   createSchema,
   parseBoolean,
   parseNullable,
+  coerceNumber,
   parseNumber,
   parseOptional,
   parseString,
@@ -181,9 +182,9 @@ export const adminUserListFiltersSchema: Schema<AdminUserListFilters> = createSc
         if (v !== 'asc' && v !== 'desc') throw new Error('Invalid sortOrder');
         return v;
       }),
-      page: parseOptional(obj['page'], (v) => parseNumber(v, 'page', { int: true, min: 1 })),
+      page: parseOptional(obj['page'], (v) => coerceNumber(v, 'page', { int: true, min: 1 })),
       limit: parseOptional(obj['limit'], (v) =>
-        parseNumber(v, 'limit', { int: true, min: 1, max: 100 }),
+        coerceNumber(v, 'limit', { int: true, min: 1, max: 100 }),
       ),
     };
   },
@@ -195,10 +196,11 @@ export const adminUpdateUserRequestSchema: Schema<AdminUpdateUserRequest> = crea
   (data: unknown) => {
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     const result: AdminUpdateUserRequest = {};
-    if ('firstName' in obj)
+    if (obj['firstName'] !== undefined)
       result.firstName = parseString(obj['firstName'], 'firstName', { min: 1, max: 50 });
-    if ('lastName' in obj) result.lastName = parseString(obj['lastName'], 'lastName', { max: 50 });
-    if ('role' in obj) result.role = appRoleSchema.parse(obj['role']);
+    if (obj['lastName'] !== undefined)
+      result.lastName = parseString(obj['lastName'], 'lastName', { max: 50 });
+    if (obj['role'] !== undefined) result.role = appRoleSchema.parse(obj['role']);
     if (Object.keys(result).length === 0) throw new Error('At least one field must be provided');
     return result;
   },

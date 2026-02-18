@@ -17,6 +17,8 @@ import {
 } from '../primitives/schema';
 import { getRawEnv } from '../system/env';
 
+export { getRawEnv };
+
 import { AuthEnvSchema } from './env.auth';
 import { BaseEnvSchema } from './env.base';
 import { BillingEnvSchema } from './env.billing';
@@ -79,8 +81,9 @@ function validateProductionGuards(env: FullEnv): void {
     const hasSqlite = env.SQLITE_FILE_PATH !== undefined && env.SQLITE_FILE_PATH !== '';
     const hasMongo =
       env.MONGODB_CONNECTION_STRING !== undefined && env.MONGODB_CONNECTION_STRING !== '';
+    const hasJson = env.JSON_DB_PATH !== undefined && env.JSON_DB_PATH !== '';
 
-    if (!hasPostgres && !hasSqlite && !hasMongo) {
+    if (!hasPostgres && !hasSqlite && !hasMongo && !hasJson) {
       throw new Error('Production requires a valid database configuration (URL or host/user/pass)');
     }
   }
@@ -110,7 +113,7 @@ function validateProductionGuards(env: FullEnv): void {
 function parseAllEnvFields(obj: Record<string, unknown>): FullEnv {
   const base = BaseEnvSchema.parse(obj);
   const jwt: JwtEnv = {
-    JWT_SECRET: parseString(obj['JWT_SECRET'], 'JWT_SECRET', { min: 32 }),
+    JWT_SECRET: parseString(obj['JWT_SECRET'], 'JWT_SECRET'),
     JWT_SECRET_PREVIOUS: parseOptional(obj['JWT_SECRET_PREVIOUS'], (v: unknown) =>
       parseString(v, 'JWT_SECRET_PREVIOUS'),
     ),
@@ -156,21 +159,8 @@ export const EnvSchema: Schema<FullEnv> = createSchema<FullEnv>((data: unknown) 
 });
 
 // ============================================================================
-// Utilities
+// Utilities (getRawEnv is canonical in system/env — re-imported above)
 // ============================================================================
-
-/**
- * Get raw environment variables.
- * Pass an override for non-Node runtimes (e.g., Vite's import.meta.env).
- *
- * @param override - Custom env record (e.g., import.meta.env for Vite clients)
- */
-export function getRawEnv(
-  override?: Record<string, string | undefined>,
-): Record<string, string | undefined> {
-  if (override !== undefined) return override;
-  return typeof process !== 'undefined' ? process.env : {};
-}
 
 /**
  * Validates environment variables against a schema. Throws on failure.

@@ -7,28 +7,10 @@
  */
 
 function stripScriptBlocks(value: string): string {
-  // Instead of removing script blocks (which can create new tags via concatenation),
-  // neutralize every '<' that begins a script tag by replacing it with '&lt;'.
-  let output = value;
-  let lower = output.toLowerCase();
-  let idx = lower.indexOf('<script');
-
-  while (idx >= 0) {
-    output = output.slice(0, idx) + '&lt;' + output.slice(idx + 1);
-    lower = output.toLowerCase();
-    idx = lower.indexOf('<script', idx + 4);
-  }
-
-  // Also neutralize </script> closing tags
-  lower = output.toLowerCase();
-  idx = lower.indexOf('</script');
-  while (idx >= 0) {
-    output = output.slice(0, idx) + '&lt;' + output.slice(idx + 1);
-    lower = output.toLowerCase();
-    idx = lower.indexOf('</script', idx + 4);
-  }
-
-  return output;
+  // Neutralize every '<' that begins a script or closing-script tag.
+  // Uses regex to avoid manual pointer arithmetic and desynchronization bugs.
+  return value
+    .replace(/<(\/?script)/gi, '&lt;$1');
 }
 
 function isWordChar(code: number): boolean {

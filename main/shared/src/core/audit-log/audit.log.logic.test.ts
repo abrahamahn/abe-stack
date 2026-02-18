@@ -89,6 +89,50 @@ describe('sanitizeMetadata', () => {
     expect(sanitizeMetadata({})).toEqual({});
   });
 
+  // Value-pattern scanning (redacts regardless of key name)
+  it('redacts JWT tokens in string values regardless of key name', () => {
+    const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
+    const result = sanitizeMetadata({ data: jwt, message: 'login success' });
+    expect(result['data']).toBe('[REDACTED]');
+    expect(result['message']).toBe('login success');
+  });
+
+  it('redacts Bearer tokens in string values regardless of key name', () => {
+    const result = sanitizeMetadata({
+      header: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ.abc123',
+    });
+    expect(result['header']).toBe('[REDACTED]');
+  });
+
+  it('redacts credit card number patterns in string values', () => {
+    const result = sanitizeMetadata({ info: 'Card 4111111111111111 was charged' });
+    expect(result['info']).toBe('[REDACTED]');
+  });
+
+  it('does not false-positive on short numeric strings', () => {
+    const result = sanitizeMetadata({ orderId: '123456789012' }); // 12 digits, below 13
+    expect(result['orderId']).toBe('123456789012');
+  });
+
+  it('redacts sensitive patterns inside arrays of strings', () => {
+    const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ.signature';
+    const result = sanitizeMetadata({ entries: ['safe-string', jwt] });
+    const entries = result['entries'] as string[];
+    expect(entries[0]).toBe('safe-string');
+    expect(entries[1]).toBe('[REDACTED]');
+  });
+
+  it('preserves non-sensitive string values', () => {
+    const result = sanitizeMetadata({
+      name: 'John Doe',
+      email: 'john@example.com',
+      status: 'active',
+    });
+    expect(result['name']).toBe('John Doe');
+    expect(result['email']).toBe('john@example.com');
+    expect(result['status']).toBe('active');
+  });
+
   it('handles shared (non-circular) object references without false positives', () => {
     const address = { city: 'NYC', street: '123 Main' };
     const metadata = {

@@ -46,30 +46,9 @@ describe('token', () => {
     });
   });
 
-  describe('tokenStore', () => {
-    const localStorageMock = {
-      store: {} as Record<string, string>,
-      getItem: vi.fn((key: string): string | null => localStorageMock.store[key] ?? null),
-      setItem: vi.fn((key: string, value: string) => {
-        localStorageMock.store[key] = value;
-      }),
-      removeItem: vi.fn((key: string) => {
-        Reflect.deleteProperty(localStorageMock.store, key);
-      }),
-      clear: vi.fn(() => {
-        localStorageMock.store = {};
-      }),
-    };
-
-    beforeEach(() => {
-      localStorageMock.store = {};
-      vi.clearAllMocks();
-      vi.stubGlobal('localStorage', localStorageMock);
-    });
-
+  describe('tokenStore (default memory store)', () => {
     afterEach(() => {
       tokenStore.clear();
-      vi.unstubAllGlobals();
     });
 
     test('should return null when no token is set', () => {
@@ -91,11 +70,6 @@ describe('token', () => {
       tokenStore.set('first-token');
       tokenStore.set('second-token');
       expect(tokenStore.get()).toBe('second-token');
-    });
-
-    test('should hydrate from persisted access token key', () => {
-      localStorageMock.store[ACCESS_TOKEN_COOKIE_NAME] = 'persisted-token';
-      expect(tokenStore.get()).toBe('persisted-token');
     });
   });
 
@@ -232,7 +206,7 @@ describe('token', () => {
     });
   });
 
-  describe('adversarial: memory token store isolation and state', () => {
+  describe('adversarial: memory token store isolation and XSS immunity', () => {
     const localStorageMock = {
       store: {} as Record<string, string>,
       getItem: vi.fn((key: string): string | null => localStorageMock.store[key] ?? null),
@@ -297,44 +271,37 @@ describe('token', () => {
       expect(store.get()).toBeNull();
     });
 
-    test('after clear, both memory and localStorage are empty so get() returns null', () => {
+    test('set() never writes to localStorage (XSS immunity)', () => {
       const store = createTokenStore.memory();
-      store.set('token');
-      store.clear();
-      expect(store.get()).toBeNull();
+      store.set('secret-jwt');
+
+      expect(localStorageMock.setItem).not.toHaveBeenCalled();
+      expect(localStorageMock.store[ACCESS_TOKEN_COOKIE_NAME]).toBeUndefined();
     });
 
-    test('memory store falls back to localStorage on first get', () => {
+    test('get() never reads from localStorage', () => {
       localStorageMock.store[ACCESS_TOKEN_COOKIE_NAME] = 'persisted-value';
       const store = createTokenStore.memory();
-      expect(store.get()).toBe('persisted-value');
+
+      expect(store.get()).toBeNull();
+      expect(localStorageMock.getItem).not.toHaveBeenCalled();
     });
 
-    test('setting a token syncs it to localStorage', () => {
-      const store = createTokenStore.memory();
-      store.set('synced-token');
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        ACCESS_TOKEN_COOKIE_NAME,
-        'synced-token',
-      );
-    });
-
-    test('clearing removes primary key from localStorage', () => {
+    test('clear() never touches localStorage', () => {
       const store = createTokenStore.memory();
       store.set('token');
       store.clear();
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN_COOKIE_NAME);
+      expect(localStorageMock.removeItem).not.toHaveBeenCalled();
     });
 
-    test('clearing also removes legacy "token" key from localStorage', () => {
-      // The implementation calls localStorage.removeItem('token') as a cleanup
-      // for the previous auth storage strategy.
+    test('XSS attacker cannot steal token via localStorage.getItem()', () => {
       const store = createTokenStore.memory();
-      store.clear();
+      store.set('eyJhbGciOiJIUzI1NiJ9.sensitive-payload');
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('token');
+      // Simulate XSS: attacker reads localStorage
+      const stolen = globalThis.localStorage.getItem(ACCESS_TOKEN_COOKIE_NAME);
+      expect(stolen).toBeNull();
     });
   });
 
@@ -343,7 +310,8 @@ describe('token', () => {
     // vi.stubGlobal('localStorage', undefined) SETS the property to undefined —
     // the property still EXISTS in globalThis, so 'localStorage' in globalThis === true.
     // The guard passes but globalThis.localStorage.getItem() throws TypeError.
-    // These tests document this real implementation gap.
+    // These tests document the gap in the localStorage store only.
+    // The memory store is unaffected — it never touches localStorage.
 
     beforeEach(() => {
       vi.stubGlobal('localStorage', undefined);
@@ -353,21 +321,12 @@ describe('token', () => {
       vi.unstubAllGlobals();
     });
 
-    test('exposes guard gap: memory store get() throws when localStorage is set to undefined', () => {
-      // 'localStorage' in globalThis is true even with value=undefined,
-      // so hasLocalStorage() returns true and then crashes on .getItem()
+    test('memory store is unaffected by broken localStorage', () => {
       const store = createTokenStore.memory();
-      expect(() => store.get()).toThrow(TypeError);
-    });
-
-    test('exposes guard gap: memory store set() throws when localStorage is set to undefined', () => {
-      const store = createTokenStore.memory();
-      expect(() => store.set('token')).toThrow(TypeError);
-    });
-
-    test('exposes guard gap: memory store clear() throws when localStorage is set to undefined', () => {
-      const store = createTokenStore.memory();
-      expect(() => store.clear()).toThrow(TypeError);
+      store.set('token');
+      expect(store.get()).toBe('token');
+      store.clear();
+      expect(store.get()).toBeNull();
     });
 
     test('exposes guard gap: localStorage store get() throws when localStorage is set to undefined', () => {
@@ -408,19 +367,10 @@ describe('token', () => {
       vi.unstubAllGlobals();
     });
 
-    test('exposes bug: empty string in memory bypasses fast-path but falls back to returning ""', () => {
-      // memory get(): if (token !== null && token !== '') return token
-      // '' fails this fast-path check, falls through to readPersistedToken.
-      // readPersistedToken filters '' → returns null.
-      // Back in get(): persisted is null, so token is NOT updated.
-      // Final: `return token` returns the in-memory '' instead of null.
-      // This is a real implementation gap: empty-string tokens leak out of get().
+    test('memory store set("") stores empty string and get() returns it', () => {
       const store = createTokenStore.memory();
-      store.set(''); // sets in-memory token = ''
-
-      // localStorageMock also receives '' via persistToken
-      // (getItem returns '' → readPersistedToken returns null)
-      expect(store.get()).toBe(''); // documents the actual (buggy) behavior
+      store.set('');
+      expect(store.get()).toBe('');
     });
 
     test('localStorage store with empty-string value returns null', () => {
@@ -441,16 +391,12 @@ describe('token', () => {
       expect(store.get()).toBe('valid-token');
     });
 
-    test('memory store in-memory value takes priority over localStorage', () => {
-      // Set different values in memory vs localStorage
-      const store = createTokenStore.memory();
-      store.set('in-memory-token'); // memory = 'in-memory-token', localStorage = 'in-memory-token'
-
-      // Override localStorage to have a different value
+    test('memory store ignores localStorage entirely', () => {
       localStorageMock.store[ACCESS_TOKEN_COOKIE_NAME] = 'stale-persisted-token';
+      const store = createTokenStore.memory();
 
-      // In-memory value takes priority (checked first in get())
-      expect(store.get()).toBe('in-memory-token');
+      // Memory store returns null — it does not read from localStorage
+      expect(store.get()).toBeNull();
     });
 
     test('two isolated memory stores do not share the in-memory variable', () => {

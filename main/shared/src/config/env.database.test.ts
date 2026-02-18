@@ -20,7 +20,7 @@ describe('DatabaseEnvSchema', () => {
       expect(result.POSTGRES_PASSWORD).toBeUndefined();
       expect(result.POSTGRES_CONNECTION_STRING).toBeUndefined();
       expect(result.DATABASE_URL).toBeUndefined();
-      expect(result.DB_MAX_CONNECTIONS).toBeUndefined();
+      expect(result.DB_MAX_CONNECTIONS).toBe(20);
       expect(result.DB_SSL).toBeUndefined();
       expect(result.SQLITE_FILE_PATH).toBeUndefined();
       expect(result.SQLITE_WAL_MODE).toBeUndefined();

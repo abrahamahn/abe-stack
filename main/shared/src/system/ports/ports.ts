@@ -75,7 +75,7 @@ export interface HasErrorTracker {
 /**
  * Storage Provider Types
  */
-export type StorageProvider =
+export type StorageBackend =
   | 'local' // Local filesystem storage
   | 's3' // AWS S3 compatible (includes MinIO, R2, Spaces)
   | 'gcs' // Google Cloud Storage
@@ -131,7 +131,7 @@ export interface StorageClient {
  */
 export interface BaseStorageConfig {
   /** Storage provider type */
-  provider: StorageProvider;
+  provider: StorageBackend;
   /** Base URL for public access */
   baseUrl?: string;
   /** Maximum file size in bytes */
@@ -247,12 +247,12 @@ export interface JobQueueService {
   /**
    * Add a job to the queue
    */
-  add<T = unknown>(name: string, data: T, options?: JobOptions): Promise<Job<T>>;
+  add<T = unknown>(name: string, data: T, options?: JobOptions): Promise<QueueJob<T>>;
 
   /**
    * Process jobs of a specific type
    */
-  process<T = unknown>(name: string, handler: JobHandler<T>): void;
+  process<T = unknown>(name: string, handler: QueueJobHandler<T>): void;
 
   /**
    * Check queue health
@@ -261,9 +261,9 @@ export interface JobQueueService {
 }
 
 /**
- * Job handler function
+ * Queue job handler function
  */
-export type JobHandler<T = unknown> = (job: Job<T>) => Promise<void>;
+export type QueueJobHandler<T = unknown> = (job: QueueJob<T>) => Promise<void>;
 
 /**
  * Job options
@@ -275,9 +275,9 @@ export interface JobOptions {
 }
 
 /**
- * Job interface
+ * Queue job interface
  */
-export interface Job<T = unknown> {
+export interface QueueJob<T = unknown> {
   id: string;
   name: string;
   data: T;

@@ -56,7 +56,7 @@ export {
     successResponseSchema,
     type ApiResultEnvelope,
     type EmptyBody,
-    type ErrorResponse,
+    type SimpleErrorResponse,
     type ErrorResponseEnvelope,
     type SuccessResponseEnvelope,
 } from './response';

@@ -81,6 +81,16 @@ describe('input security helpers', () => {
       expect(result).not.toMatch(/<ScRiPt/i);
     });
 
+    it('blocks doubled angle bracket <<script bypass attempt', () => {
+      const result = sanitizeString('<<script>alert(1)<</script>');
+      expect(result).not.toMatch(/<script/i);
+    });
+
+    it('blocks nested <scr<script>ipt> insertion bypass', () => {
+      const result = sanitizeString('<scr<script>ipt>alert(1)</scr</script>ipt>');
+      expect(result).not.toMatch(/<script/i);
+    });
+
     it('blocks double-encoded script angle bracket (pre-decoded input)', () => {
       // sanitizeString operates on the already-decoded string representation
       const result = sanitizeString('<script>alert(1)</script>');

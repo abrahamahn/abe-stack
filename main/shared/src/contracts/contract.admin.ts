@@ -41,7 +41,16 @@ import {
 } from '../core/billing/billing.admin.schemas';
 import { subscriptionActionResponseSchema } from '../core/billing/billing.schemas';
 import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
+import { paginationOptionsSchema } from '../system/pagination';
 import { webhookListResponseSchema } from '../system/webhooks';
+import {
+  planIdSchema,
+  tenantIdSchema,
+  userIdSchema,
+  webhookDeliveryIdSchema,
+  webhookIdSchema,
+} from '../primitives/schema/ids';
+import { uuidSchema } from '../core/schemas';
 
 import type { Contract } from '../primitives/api';
 
@@ -67,6 +76,7 @@ export const adminContract = {
   getUser: {
     method: 'GET' as const,
     path: '/api/admin/users/:id',
+    pathParams: { id: userIdSchema },
     responses: {
       200: successResponseSchema(adminUserSchema),
       401: errorResponseSchema,
@@ -82,6 +92,7 @@ export const adminContract = {
   updateUser: {
     method: 'POST' as const,
     path: '/api/admin/users/:id/update',
+    pathParams: { id: userIdSchema },
     body: adminUpdateUserRequestSchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -99,6 +110,7 @@ export const adminContract = {
   lockUser: {
     method: 'POST' as const,
     path: '/api/admin/users/:id/lock',
+    pathParams: { id: userIdSchema },
     body: adminLockUserRequestSchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -116,6 +128,7 @@ export const adminContract = {
   unlockUser: {
     method: 'POST' as const,
     path: '/api/admin/users/:id/unlock',
+    pathParams: { id: userIdSchema },
     body: unlockAccountRequestSchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -157,6 +170,7 @@ export const adminContract = {
   hardBanUser: {
     method: 'POST' as const,
     path: '/api/admin/users/:id/hard-ban',
+    pathParams: { id: userIdSchema },
     body: adminHardBanRequestSchema,
     responses: {
       200: successResponseSchema(adminHardBanResponseSchema),
@@ -183,6 +197,7 @@ export const adminContract = {
   getSecurityEvent: {
     method: 'GET' as const,
     path: '/api/admin/security/events/:id',
+    pathParams: { id: uuidSchema },
     responses: {
       200: successResponseSchema(securityEventDetailResponseSchema),
       401: errorResponseSchema,
@@ -229,6 +244,7 @@ export const adminContract = {
   getAdminTenant: {
     method: 'GET' as const,
     path: '/api/admin/tenants/:id',
+    pathParams: { id: tenantIdSchema },
     responses: {
       200: successResponseSchema(adminTenantSchema),
       401: errorResponseSchema,
@@ -241,6 +257,7 @@ export const adminContract = {
   suspendTenant: {
     method: 'POST' as const,
     path: '/api/admin/tenants/:id/suspend',
+    pathParams: { id: tenantIdSchema },
     body: adminSuspendTenantRequestSchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -255,6 +272,7 @@ export const adminContract = {
   unsuspendTenant: {
     method: 'POST' as const,
     path: '/api/admin/tenants/:id/unsuspend',
+    pathParams: { id: tenantIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -268,6 +286,7 @@ export const adminContract = {
   startImpersonation: {
     method: 'POST' as const,
     path: '/api/admin/impersonate/:userId',
+    pathParams: { userId: userIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(impersonationResponseSchema),
@@ -294,6 +313,7 @@ export const adminContract = {
   listAdminWebhooks: {
     method: 'GET' as const,
     path: '/api/admin/webhooks',
+    query: paginationOptionsSchema,
     responses: {
       200: successResponseSchema(webhookListResponseSchema),
       401: errorResponseSchema,
@@ -305,6 +325,8 @@ export const adminContract = {
   listAdminWebhookDeliveries: {
     method: 'GET' as const,
     path: '/api/admin/webhooks/:id/deliveries',
+    pathParams: { id: webhookIdSchema },
+    query: paginationOptionsSchema,
     responses: {
       200: successResponseSchema(webhookListResponseSchema),
       401: errorResponseSchema,
@@ -317,6 +339,7 @@ export const adminContract = {
   replayAdminWebhookDelivery: {
     method: 'POST' as const,
     path: '/api/admin/webhooks/:id/deliveries/:deliveryId/replay',
+    pathParams: { id: webhookIdSchema, deliveryId: webhookDeliveryIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(adminActionResponseSchema),
@@ -341,6 +364,7 @@ export const adminContract = {
   getAdminPlan: {
     method: 'GET' as const,
     path: '/api/admin/billing/plans/:id',
+    pathParams: { id: planIdSchema },
     responses: {
       200: successResponseSchema(adminPlanResponseSchema),
       401: errorResponseSchema,
@@ -366,6 +390,7 @@ export const adminContract = {
   updateAdminPlan: {
     method: 'POST' as const,
     path: '/api/admin/billing/plans/:id/update',
+    pathParams: { id: planIdSchema },
     body: updatePlanRequestSchema,
     responses: {
       200: successResponseSchema(adminPlanResponseSchema),
@@ -380,6 +405,7 @@ export const adminContract = {
   syncAdminPlanToStripe: {
     method: 'POST' as const,
     path: '/api/admin/billing/plans/:id/sync-stripe',
+    pathParams: { id: planIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(syncStripeResponseSchema),
@@ -394,6 +420,7 @@ export const adminContract = {
   deactivateAdminPlan: {
     method: 'POST' as const,
     path: '/api/admin/billing/plans/:id/deactivate',
+    pathParams: { id: planIdSchema },
     body: emptyBodySchema,
     responses: {
       200: successResponseSchema(subscriptionActionResponseSchema),

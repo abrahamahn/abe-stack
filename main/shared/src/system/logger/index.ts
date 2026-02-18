@@ -8,7 +8,7 @@
  */
 
 // Types
-export type { LogData, Logger, LoggerConfig, LogLevel, RequestContext } from './types';
+export type { LogData, Logger, LoggerConfig, LogLevel, LogRequestContext } from './types';
 
 // Base logger adapter (framework-agnostic wrappers)
 export type { BaseLogger } from './base.logger';
@@ -21,7 +21,7 @@ export {
 
 // Correlation ID utilities
 export {
-  createRequestContext,
+  createLogRequestContext,
   generateCorrelationId,
   getOrCreateCorrelationId,
   isValidCorrelationId,
