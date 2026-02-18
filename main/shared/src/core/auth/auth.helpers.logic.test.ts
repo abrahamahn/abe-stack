@@ -24,60 +24,14 @@ import type { AuthConfig, AuthStrategy } from './auth.helpers.logic';
 function createTestAuthConfig(overrides?: Partial<AuthConfig>): AuthConfig {
   return {
     strategies: ['local', 'magic'] as AuthStrategy[],
-    jwt: {
-      secret: 'test-secret-that-is-at-least-32-characters-long',
-      accessTokenExpiry: '15m',
-      issuer: 'test-issuer',
-      audience: 'test-audience',
-    },
     refreshToken: {
       expiryDays: 7,
-      gracePeriodSeconds: 30,
-    },
-    argon2: {
-      type: 2,
-      memoryCost: 19456,
-      timeCost: 2,
-      parallelism: 1,
-    },
-    password: {
-      minLength: 8,
-      maxLength: 128,
-      minZxcvbnScore: 3,
-    },
-    lockout: {
-      maxAttempts: 5,
-      lockoutDurationMs: 900000,
-      progressiveDelay: true,
-      baseDelayMs: 1000,
-    },
-    proxy: {
-      trustProxy: false,
-      trustedProxies: [],
-      maxProxyDepth: 1,
-    },
-    rateLimit: {
-      login: { max: 10, windowMs: 900000 },
-      register: { max: 5, windowMs: 3600000 },
-      forgotPassword: { max: 5, windowMs: 3600000 },
-      verifyEmail: { max: 10, windowMs: 3600000 },
     },
     cookie: {
-      name: 'refresh_token',
-      secret: 'cookie-secret-that-is-at-least-32-characters-long',
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
       path: '/',
-    },
-    oauth: {},
-    magicLink: {
-      tokenExpiryMinutes: 15,
-      maxAttempts: 5,
-    },
-    totp: {
-      issuer: 'test-app',
-      window: 1,
     },
     ...overrides,
   };
@@ -104,7 +58,7 @@ describe('getRefreshCookieOptions', () => {
 
   it('should calculate maxAge from expiryDays in milliseconds', () => {
     const config = createTestAuthConfig({
-      refreshToken: { expiryDays: 30, gracePeriodSeconds: 30 },
+      refreshToken: { expiryDays: 30 },
     });
 
     const options = getRefreshCookieOptions(config);
@@ -114,7 +68,7 @@ describe('getRefreshCookieOptions', () => {
 
   it('should handle 1-day expiry', () => {
     const config = createTestAuthConfig({
-      refreshToken: { expiryDays: 1, gracePeriodSeconds: 30 },
+      refreshToken: { expiryDays: 1 },
     });
 
     const options = getRefreshCookieOptions(config);
@@ -125,8 +79,6 @@ describe('getRefreshCookieOptions', () => {
   it('should reflect secure=false for development', () => {
     const config = createTestAuthConfig({
       cookie: {
-        name: 'refresh_token',
-        secret: 'dev-secret-that-is-at-least-32-characters-long',
         httpOnly: true,
         secure: false,
         sameSite: 'lax',
@@ -143,8 +95,6 @@ describe('getRefreshCookieOptions', () => {
   it('should use the configured cookie path', () => {
     const config = createTestAuthConfig({
       cookie: {
-        name: 'refresh_token',
-        secret: 'test-secret-that-is-at-least-32-characters-long',
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
@@ -160,8 +110,6 @@ describe('getRefreshCookieOptions', () => {
   it('should handle sameSite=none', () => {
     const config = createTestAuthConfig({
       cookie: {
-        name: 'refresh_token',
-        secret: 'test-secret-that-is-at-least-32-characters-long',
         httpOnly: true,
         secure: true,
         sameSite: 'none',

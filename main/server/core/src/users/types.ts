@@ -21,7 +21,7 @@ import type {
   ServerLogger,
 } from '@bslt/shared';
 import type { Argon2Config } from '@bslt/shared/config';
-import type { StorageService } from '@bslt/shared/engine';
+import type { StorageService } from '@bslt/shared/system';
 import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================

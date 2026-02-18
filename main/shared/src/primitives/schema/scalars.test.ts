@@ -1,4 +1,4 @@
-// primitives/schema/scalars.test.ts
+// main/shared/src/primitives/schema/scalars.test.ts
 
 import { describe, expect, it } from 'vitest';
 

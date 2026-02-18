@@ -1,24 +1,23 @@
 // main/shared/src/core/admin/admin.security.schemas.ts
 /**
- * Security Audit Schemas & Contract
+ * Security Audit Schemas
  *
- * Admin-only endpoints for viewing and exporting security events.
+ * Admin-only schemas for viewing and exporting security events.
  * Used by the Security Audit Viewer feature.
  *
  * @module Domain/Admin/Security
  */
 
-import { errorResponseSchema } from '../../engine/http';
 import {
   paginatedResultSchema,
   paginationOptionsSchema,
   type PaginatedResult,
   type PaginationOptions,
-} from '../../engine/pagination';
+} from '../../system/pagination';
 import { createSchema } from '../../primitives/schema';
 import { uuidSchema } from '../schemas';
 
-import type { Contract, Schema } from '../../primitives/api';
+import type { Schema } from '../../primitives/api';
 
 // ============================================================================
 // Security Event Types
@@ -184,10 +183,12 @@ export const securityEventsFilterSchema: Schema<SecurityEventsFilter> = createSc
     }
     if (obj['startDate'] !== undefined) {
       if (typeof obj['startDate'] !== 'string') throw new Error('startDate must be a string');
+      if (isNaN(Date.parse(obj['startDate']))) throw new Error('startDate must be a valid ISO date');
       filter.startDate = obj['startDate'];
     }
     if (obj['endDate'] !== undefined) {
       if (typeof obj['endDate'] !== 'string') throw new Error('endDate must be a string');
+      if (isNaN(Date.parse(obj['endDate']))) throw new Error('endDate must be a valid ISO date');
       filter.endDate = obj['endDate'];
     }
 
@@ -406,53 +407,3 @@ export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResp
     };
   });
 
-// ============================================================================
-// Security Contract
-// ============================================================================
-
-/** Security audit API contract (admin-only) */
-export const securityContract = {
-  listEvents: {
-    method: 'POST' as const,
-    path: '/api/admin/security/events',
-    body: securityEventsListRequestSchema,
-    responses: {
-      200: securityEventsListResponseSchema,
-      401: errorResponseSchema,
-      403: errorResponseSchema,
-    },
-    summary: 'List security events with pagination and filtering (admin only)',
-  },
-  getEvent: {
-    method: 'GET' as const,
-    path: '/api/admin/security/events/:id',
-    responses: {
-      200: securityEventDetailResponseSchema,
-      401: errorResponseSchema,
-      403: errorResponseSchema,
-      404: errorResponseSchema,
-    },
-    summary: 'Get a single security event by ID (admin only)',
-  },
-  getMetrics: {
-    method: 'GET' as const,
-    path: '/api/admin/security/metrics',
-    responses: {
-      200: securityMetricsResponseSchema,
-      401: errorResponseSchema,
-      403: errorResponseSchema,
-    },
-    summary: 'Get security event metrics for dashboard (admin only)',
-  },
-  exportEvents: {
-    method: 'POST' as const,
-    path: '/api/admin/security/export',
-    body: securityEventsExportRequestSchema,
-    responses: {
-      200: securityEventsExportResponseSchema,
-      401: errorResponseSchema,
-      403: errorResponseSchema,
-    },
-    summary: 'Export security events as CSV or JSON (admin only)',
-  },
-} satisfies Contract;

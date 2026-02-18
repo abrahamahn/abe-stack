@@ -12,8 +12,8 @@ import {
   fileRecordSchema,
   filesListResponseSchema,
   fileUploadResponseSchema,
-} from '../engine/files';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
+} from '../system/files';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

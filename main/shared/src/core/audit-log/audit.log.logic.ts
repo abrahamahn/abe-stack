@@ -113,5 +113,9 @@ export function sanitizeMetadata(
     }
   }
 
+  // Remove from visited set so shared (non-circular) references are not
+  // falsely flagged when the same object appears in multiple branches.
+  seen.delete(metadata);
+
   return sanitized;
 }

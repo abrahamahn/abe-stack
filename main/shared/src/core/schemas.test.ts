@@ -7,7 +7,7 @@ import {
   errorCodeSchema,
   errorResponseSchema,
   successResponseSchema,
-} from '../engine/http';
+} from '../system/http';
 import { createSchema, parseString } from '../primitives/schema';
 
 import { emailSchema, isoDateTimeSchema, passwordSchema } from './schemas';

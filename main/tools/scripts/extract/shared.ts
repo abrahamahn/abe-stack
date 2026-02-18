@@ -1,3 +1,4 @@
+// main/tools/scripts/extract/shared.ts
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';

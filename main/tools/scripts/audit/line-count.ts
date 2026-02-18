@@ -6,7 +6,7 @@
  * excluding tests, node_modules, dist, build, and coverage.
  */
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
 
 const MAIN_DIR = resolve('main');
@@ -49,7 +49,11 @@ function walkFiles(dir: string): string[] {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
       results.push(...walkFiles(full));
-    } else if (EXTENSIONS.has(extname(entry.name)) && !TEST_PATTERN.test(entry.name)) {
+    } else if (
+      EXTENSIONS.has(extname(entry.name)) &&
+      !TEST_PATTERN.test(entry.name) &&
+      entry.name !== 'index.ts'
+    ) {
       results.push(full);
     }
   }
@@ -72,7 +76,8 @@ function findPackages(dir: string): PackageInfo[] {
     try {
       const raw = readFileSync(pkgJson, 'utf-8');
       const parsed = JSON.parse(raw) as { name?: string };
-      const files = walkFiles(full);
+      const srcDir = join(full, 'src');
+      const files = existsSync(srcDir) ? walkFiles(srcDir) : [];
       const lines = files.reduce((sum, f) => sum + countLines(f), 0);
       packages.push({ name: parsed.name ?? 'unknown', dir: full, lines });
     } catch {
@@ -96,4 +101,4 @@ for (const pkg of packages) {
 }
 
 console.log('-'.repeat(maxLabel + 12));
-console.log(`Total Source Lines of Code (excluding tests, comments, blank lines): ${total}`);
+console.log(`Total Source Lines of Code (excluding tests, index.ts, comments, blank lines): ${total}`);

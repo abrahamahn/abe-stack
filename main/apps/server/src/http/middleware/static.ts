@@ -12,7 +12,7 @@ import { join } from 'node:path';
 
 import { isSafePath } from '@bslt/server-engine';
 import { createRateLimiter, getRequesterId, HTTP_STATUS } from '@bslt/shared';
-import { getMimeType } from '@bslt/shared/engine/media';
+import { getMimeType } from '@bslt/shared/system/media';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

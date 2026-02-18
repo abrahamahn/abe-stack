@@ -1,4 +1,4 @@
-// main/server/db/main/client.test.ts
+// main/server/db/src/client.test.ts
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 import { createRawDb } from './client';

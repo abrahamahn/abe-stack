@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ERROR_CODES } from '../../engine/constants';
+import { ERROR_CODES } from '../../system/constants';
 
 import {
   WORKSPACE_ID_HEADER,

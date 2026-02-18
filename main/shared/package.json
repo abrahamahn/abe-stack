@@ -35,9 +35,9 @@
       "types": "./dist/primitives/index.d.ts",
       "default": "./dist/primitives/index.js"
     },
-    "./engine": {
-      "types": "./dist/engine/index.d.ts",
-      "default": "./dist/engine/index.js"
+    "./system": {
+      "types": "./dist/system/index.d.ts",
+      "default": "./dist/system/index.js"
     },
     "./core": {
       "types": "./dist/core/index.d.ts",

@@ -7,8 +7,8 @@
  */
 
 import { activitiesListFiltersSchema, activitySchema } from '../core/activities/activities.schemas';
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
-import { cursorPaginatedResultSchema } from '../engine/pagination';
+import { errorResponseSchema, successResponseSchema } from '../system/http';
+import { cursorPaginatedResultSchema } from '../system/pagination';
 
 import type { Contract } from '../primitives/api';
 

@@ -12,7 +12,7 @@ import {
   detailedHealthResponseSchema,
   liveResponseSchema,
   readyResponseSchema,
-} from '../engine/health';
+} from '../system/health';
 
 import type { Contract } from '../primitives/api';
 

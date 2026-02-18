@@ -20,7 +20,7 @@ import {
 
 import { trueFalseSchema } from './env.base';
 
-import type { LogLevel } from '../engine/logger/types';
+import type { LogLevel } from '../system/logger/types';
 import type { Schema } from '../primitives/schema';
 
 export type { LogLevel };

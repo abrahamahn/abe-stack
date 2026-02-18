@@ -8,8 +8,8 @@
  * @module types
  */
 
-import { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared/engine/constants';
-import { SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType } from '@bslt/shared/engine/webhooks';
+import { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared/system/constants';
+import { SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType } from '@bslt/shared/system/webhooks';
 
 // Re-export webhook constants from shared (canonical source)
 export { MAX_DELIVERY_ATTEMPTS, RETRY_DELAYS_MINUTES, SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES, type WebhookEventType };

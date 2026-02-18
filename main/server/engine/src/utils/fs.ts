@@ -1,4 +1,4 @@
-// main/shared/src/utils/fs.ts
+// main/server/engine/src/utils/fs.ts
 /**
  * Filesystem utilities.
  *

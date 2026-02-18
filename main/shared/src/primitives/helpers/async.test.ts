@@ -1,4 +1,4 @@
-// primitives/helpers/async.test.ts
+// main/shared/src/primitives/helpers/async.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { delay, DeferredPromise } from './async';

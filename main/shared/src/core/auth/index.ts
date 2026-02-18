@@ -227,7 +227,7 @@ import {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from '../../engine/errors';
+} from '../../system/errors';
 
 export {
   AccountLockedError,

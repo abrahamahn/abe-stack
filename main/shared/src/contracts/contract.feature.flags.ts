@@ -13,8 +13,8 @@ import {
   featureFlagsListResponseSchema,
   setTenantFeatureOverrideRequestSchema,
   updateFeatureFlagRequestSchema,
-} from '../engine/feature-flags';
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
+} from '../system/feature-flags';
+import { errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

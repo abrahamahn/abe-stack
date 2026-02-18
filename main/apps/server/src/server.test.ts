@@ -1,4 +1,4 @@
-// main/apps/server/main/server.test.ts
+// main/apps/server/src/server.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DbClient } from '@bslt/db';

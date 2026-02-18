@@ -27,7 +27,7 @@ import {
   tenantSettingSchema,
   updateTenantSettingSchema,
 } from '../core/tenant/tenant.settings.schemas';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

@@ -65,7 +65,6 @@ export type {
 export {
   SECURITY_EVENT_TYPES,
   SECURITY_SEVERITIES,
-  securityContract,
   securityEventDetailRequestSchema,
   securityEventDetailResponseSchema,
   securityEventSchema,

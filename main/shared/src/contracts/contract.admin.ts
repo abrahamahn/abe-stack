@@ -40,8 +40,8 @@ import {
   updatePlanRequestSchema,
 } from '../core/billing/billing.admin.schemas';
 import { subscriptionActionResponseSchema } from '../core/billing/billing.schemas';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
-import { webhookListResponseSchema } from '../engine/webhooks';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
+import { webhookListResponseSchema } from '../system/webhooks';
 
 import type { Contract } from '../primitives/api';
 

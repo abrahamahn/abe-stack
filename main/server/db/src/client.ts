@@ -1,4 +1,4 @@
-// main/server/db/main/client.ts
+// main/server/db/src/client.ts
 /**
  * Raw PostgreSQL Client Wrapper
  *

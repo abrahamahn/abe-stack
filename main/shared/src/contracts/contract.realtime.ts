@@ -1,13 +1,13 @@
 // main/shared/src/contracts/contract.realtime.ts
 
-import { errorResponseSchema } from '../engine/http/response';
+import { errorResponseSchema } from '../system/http/response';
 import {
   conflictResponseSchema,
   getRecordsRequestSchema,
   getRecordsResponseSchema,
   transactionSchema,
   writeResponseSchema,
-} from '../engine/realtime/realtime';
+} from '../system/realtime/realtime';
 
 import type { Contract } from '../primitives/api';
 

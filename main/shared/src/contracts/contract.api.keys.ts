@@ -11,8 +11,8 @@ import {
   deleteApiKeyResponseSchema,
   listApiKeysResponseSchema,
   revokeApiKeyResponseSchema,
-} from '../engine/api-keys/api-keys';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
+} from '../system/api-keys';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

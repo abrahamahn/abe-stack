@@ -6,7 +6,7 @@
  * @module Core/Users
  */
 
-import { cursorPaginatedResultSchema } from '../../engine/pagination/pagination';
+import { cursorPaginatedResultSchema } from '../../system/pagination/pagination';
 import {
   createSchema,
   parseBoolean,

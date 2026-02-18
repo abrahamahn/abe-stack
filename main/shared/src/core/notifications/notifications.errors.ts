@@ -6,21 +6,16 @@
  * subscription management, sending, and preference handling.
  */
 
-import { HTTP_STATUS } from '../../engine/constants';
+import { HTTP_STATUS, NOTIFICATION_PAYLOAD_MAX_SIZE } from '../../system/constants';
 import {
   AppError,
   BadRequestError,
   ConflictError,
   NotFoundError,
   UnprocessableError,
-} from '../../engine/errors';
+} from '../../system/errors';
 
-// ============================================================================
-// Constants
-// ============================================================================
-
-/** Maximum notification payload size in bytes (4KB) */
-export const NOTIFICATION_PAYLOAD_MAX_SIZE = 4096;
+export { NOTIFICATION_PAYLOAD_MAX_SIZE };
 
 // ============================================================================
 // Subscription Errors

@@ -6,7 +6,7 @@
  * @module Core/AuditLog
  */
 
-import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../../engine/pagination';
+import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../../system/pagination';
 import { AUDIT_ACTION_REGEX } from '../../primitives/constants/regex';
 import {
   createEnumSchema,
@@ -22,7 +22,7 @@ import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../primitiv
 import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/notifications';
 import { isoDateTimeSchema } from '../schemas';
 
-import type { CursorPaginatedResult, CursorPaginationOptions } from '../../engine/pagination';
+import type { CursorPaginatedResult, CursorPaginationOptions } from '../../system/pagination';
 import type { AuditEventId, TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================

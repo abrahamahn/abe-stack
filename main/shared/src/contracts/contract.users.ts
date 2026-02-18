@@ -30,7 +30,7 @@ import {
   userSchema,
   usersListResponseSchema,
 } from '../core/users/users.schemas';
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
+import { errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract, Schema } from '../primitives/api';
 

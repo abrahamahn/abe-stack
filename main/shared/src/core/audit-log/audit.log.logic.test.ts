@@ -88,6 +88,39 @@ describe('sanitizeMetadata', () => {
   it('handles empty metadata', () => {
     expect(sanitizeMetadata({})).toEqual({});
   });
+
+  it('handles shared (non-circular) object references without false positives', () => {
+    const address = { city: 'NYC', street: '123 Main' };
+    const metadata = {
+      billing: address,
+      shipping: address,
+    };
+
+    const result = sanitizeMetadata(metadata);
+    expect(result['billing']).toEqual({ city: 'NYC', street: '123 Main' });
+    expect(result['shipping']).toEqual({ city: 'NYC', street: '123 Main' });
+  });
+
+  it('detects actual circular references', () => {
+    const metadata: Record<string, unknown> = { name: 'root' };
+    metadata['self'] = metadata;
+
+    const result = sanitizeMetadata(metadata);
+    expect(result['name']).toBe('root');
+    expect(result['self']).toEqual({ _circular: '[CIRCULAR]' });
+  });
+
+  it('handles shared references in arrays without false positives', () => {
+    const shared = { id: '1', value: 'shared' };
+    const metadata = {
+      items: [shared, shared],
+    };
+
+    const result = sanitizeMetadata(metadata);
+    const items = result['items'] as Record<string, unknown>[];
+    expect(items[0]).toEqual({ id: '1', value: 'shared' });
+    expect(items[1]).toEqual({ id: '1', value: 'shared' });
+  });
 });
 
 // ============================================================================

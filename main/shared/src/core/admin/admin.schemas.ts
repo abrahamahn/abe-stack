@@ -6,7 +6,7 @@
  * @module Domain/Admin
  */
 
-import { paginatedResultSchema } from '../../engine/pagination';
+import { paginatedResultSchema } from '../../system/pagination';
 import {
   createSchema,
   parseBoolean,

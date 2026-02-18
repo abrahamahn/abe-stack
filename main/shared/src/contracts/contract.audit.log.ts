@@ -7,7 +7,7 @@
  */
 
 import { auditLogFilterSchema, auditLogListResponseSchema } from '../core/audit-log';
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
+import { errorResponseSchema, successResponseSchema } from '../system/http';
 import { tenantIdSchema } from '../primitives/schema/ids';
 
 import type { Contract } from '../primitives/api';

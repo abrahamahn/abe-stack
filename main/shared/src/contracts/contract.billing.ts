@@ -23,8 +23,8 @@ import {
   subscriptionResponseSchema,
   updateSubscriptionRequestSchema,
 } from '../core/billing/billing.schemas';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
-import { usageSummaryResponseSchema } from '../engine/usage-metering';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
+import { usageSummaryResponseSchema } from '../system/usage-metering';
 
 import type { Contract } from '../primitives/api';
 

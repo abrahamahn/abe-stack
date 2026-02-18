@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ForbiddenError } from '../../engine/errors';
+import { ForbiddenError } from '../../system/errors';
 
 import {
   assertWorkspaceScope,

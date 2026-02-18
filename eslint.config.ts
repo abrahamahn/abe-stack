@@ -22,7 +22,7 @@ const require = createRequire(import.meta.url);
 const allSharedLayers: string[] = [
   'shared',
   'shared-primitives',
-  'shared-engine',
+  'shared-system',
   'shared-core',
   'shared-contracts',
   'shared-api',
@@ -73,7 +73,7 @@ export const baseConfig = [
       'boundaries/elements': [
         // Shared internal sub-layers (specific patterns first, catch-all last)
         { type: 'shared-primitives', pattern: 'main/shared/src/primitives', mode: 'folder' },
-        { type: 'shared-engine', pattern: 'main/shared/src/engine', mode: 'folder' },
+        { type: 'shared-system', pattern: 'main/shared/src/system', mode: 'folder' },
         { type: 'shared-core', pattern: 'main/shared/src/core', mode: 'folder' },
         { type: 'shared-contracts', pattern: 'main/shared/src/contracts', mode: 'folder' },
         { type: 'shared-api', pattern: 'main/shared/src/api', mode: 'folder' },
@@ -107,12 +107,12 @@ export const baseConfig = [
           rules: [
             // ── Shared Internal DAG (primitives → engine → core → contracts → api) ──
             { from: 'shared-primitives', allow: [] },
-            { from: 'shared-engine', allow: ['shared-primitives'] },
-            { from: 'shared-core', allow: ['shared-primitives', 'shared-engine'] },
-            { from: 'shared-contracts', allow: ['shared-primitives', 'shared-engine', 'shared-core'] },
-            { from: 'shared-api', allow: ['shared-primitives', 'shared-engine', 'shared-core', 'shared-contracts'] },
+            { from: 'shared-system', allow: ['shared-primitives'] },
+            { from: 'shared-core', allow: ['shared-primitives', 'shared-system'] },
+            { from: 'shared-contracts', allow: ['shared-primitives', 'shared-system', 'shared-core'] },
+            { from: 'shared-api', allow: ['shared-primitives', 'shared-system', 'shared-core', 'shared-contracts'] },
             // Shared catch-all (index.ts, config/, __tests__) can reach all internal layers
-            { from: 'shared', allow: ['shared-primitives', 'shared-engine', 'shared-core', 'shared-contracts', 'shared-api'] },
+            { from: 'shared', allow: ['shared-primitives', 'shared-system', 'shared-core', 'shared-contracts', 'shared-api'] },
 
             // ── Server DAG Edges ──
             { from: 'db', allow: [...allSharedLayers] },

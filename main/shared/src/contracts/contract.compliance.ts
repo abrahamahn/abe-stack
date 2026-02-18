@@ -15,7 +15,7 @@ import {
   legalDocumentSchema,
   updateConsentPreferencesRequestSchema,
 } from '../core/compliance/compliance.schemas';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

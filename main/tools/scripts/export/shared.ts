@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..', '..', '..', '..');
-const sharedPath = path.join(root, 'src', 'shared');
+const sharedPath = path.join(root, 'main', 'shared', 'src');
 const outputDir = path.join(root, '.tmp');
 const outputPath = path.join(outputDir, 'shared.txt');
 
@@ -93,7 +93,7 @@ const run = (): void => {
 
   for (const relPath of allFiles) {
     const fullPath = path.join(sharedPath, relPath);
-    const displayPath = path.join('src', 'shared', relPath);
+    const displayPath = path.join('main', 'shared', 'src', relPath);
 
     try {
       const content = fs.readFileSync(fullPath, 'utf8');

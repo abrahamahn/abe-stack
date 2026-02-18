@@ -1,0 +1,651 @@
+// main/shared/src/system/jobs/jobs.test.ts
+
+import { describe, expect, it } from 'vitest';
+
+import {
+  calculateBackoff,
+  canRetry,
+  createJobSchema,
+  getJobStatusLabel,
+  getJobStatusTone,
+  isTerminalStatus,
+  JOB_PRIORITIES,
+  JOB_PRIORITY_VALUES,
+  JOB_STATUSES,
+  jobSchema,
+  shouldProcess,
+  updateJobSchema,
+} from './jobs';
+
+import type { JobId } from '../../primitives/schema/ids';
+import type { JobStatus } from './jobs';
+
+// ============================================================================
+// Display Functions
+// ============================================================================
+
+describe('getJobStatusLabel', () => {
+  const expectedLabels: Record<JobStatus, string> = {
+    pending: 'Pending',
+    processing: 'Processing',
+    completed: 'Completed',
+    failed: 'Failed',
+    dead_letter: 'Dead Letter',
+    cancelled: 'Cancelled',
+  };
+
+  it('returns a label for every job status', () => {
+    for (const status of JOB_STATUSES) {
+      expect(getJobStatusLabel(status)).toBe(expectedLabels[status]);
+    }
+  });
+});
+
+describe('getJobStatusTone', () => {
+  const expectedTones: Record<JobStatus, string> = {
+    pending: 'info',
+    processing: 'warning',
+    completed: 'success',
+    failed: 'danger',
+    dead_letter: 'danger',
+    cancelled: 'warning',
+  };
+
+  it('returns a tone for every job status', () => {
+    for (const status of JOB_STATUSES) {
+      expect(getJobStatusTone(status)).toBe(expectedTones[status]);
+    }
+  });
+});
+
+// ============================================================================
+// Logic Functions
+// ============================================================================
+
+describe('isTerminalStatus', () => {
+  it('returns true for "completed"', () => {
+    expect(isTerminalStatus('completed')).toBe(true);
+  });
+
+  it('returns true for "failed"', () => {
+    expect(isTerminalStatus('failed')).toBe(true);
+  });
+
+  it('returns true for "dead_letter"', () => {
+    expect(isTerminalStatus('dead_letter')).toBe(true);
+  });
+
+  it('returns true for "cancelled"', () => {
+    expect(isTerminalStatus('cancelled')).toBe(true);
+  });
+
+  it('returns false for "pending"', () => {
+    expect(isTerminalStatus('pending')).toBe(false);
+  });
+
+  it('returns false for "processing"', () => {
+    expect(isTerminalStatus('processing')).toBe(false);
+  });
+
+  it('identifies all terminal statuses correctly', () => {
+    const allStatuses: JobStatus[] = [
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'dead_letter',
+      'cancelled',
+    ];
+    const terminal = allStatuses.filter(isTerminalStatus);
+    expect(terminal).toEqual(['completed', 'failed', 'dead_letter', 'cancelled']);
+  });
+});
+
+describe('canRetry', () => {
+  it('returns true when attempts < maxAttempts and status is non-terminal', () => {
+    expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'pending' })).toBe(true);
+  });
+
+  it('returns true when attempts < maxAttempts and status is processing', () => {
+    expect(canRetry({ attempts: 0, maxAttempts: 3, status: 'processing' })).toBe(true);
+  });
+
+  it('returns false when attempts >= maxAttempts', () => {
+    expect(canRetry({ attempts: 3, maxAttempts: 3, status: 'pending' })).toBe(false);
+  });
+
+  it('returns false when attempts exceed maxAttempts', () => {
+    expect(canRetry({ attempts: 5, maxAttempts: 3, status: 'pending' })).toBe(false);
+  });
+
+  it('returns false when status is terminal even with retries remaining', () => {
+    expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'completed' })).toBe(false);
+    expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'failed' })).toBe(false);
+    expect(canRetry({ attempts: 1, maxAttempts: 3, status: 'dead_letter' })).toBe(false);
+  });
+
+  it('returns false when both conditions fail', () => {
+    expect(canRetry({ attempts: 3, maxAttempts: 3, status: 'dead_letter' })).toBe(false);
+  });
+});
+
+describe('shouldProcess', () => {
+  it('returns true for pending job with scheduledAt in the past', () => {
+    const past = new Date(Date.now() - 10_000);
+    expect(shouldProcess({ status: 'pending', scheduledAt: past })).toBe(true);
+  });
+
+  it('returns true for pending job with scheduledAt equal to now', () => {
+    const now = Date.now();
+    const scheduledAt = new Date(now);
+    expect(shouldProcess({ status: 'pending', scheduledAt }, now)).toBe(true);
+  });
+
+  it('returns false for pending job with scheduledAt in the future', () => {
+    const now = Date.now();
+    const future = new Date(now + 60_000);
+    expect(shouldProcess({ status: 'pending', scheduledAt: future }, now)).toBe(false);
+  });
+
+  it('returns false for non-pending status even if scheduledAt has passed', () => {
+    const past = new Date(Date.now() - 10_000);
+    expect(shouldProcess({ status: 'processing', scheduledAt: past })).toBe(false);
+    expect(shouldProcess({ status: 'completed', scheduledAt: past })).toBe(false);
+    expect(shouldProcess({ status: 'failed', scheduledAt: past })).toBe(false);
+    expect(shouldProcess({ status: 'dead_letter', scheduledAt: past })).toBe(false);
+  });
+});
+
+describe('calculateBackoff', () => {
+  it('returns baseDelayMs for first attempt', () => {
+    expect(calculateBackoff(1, 1000)).toBe(1000);
+  });
+
+  it('doubles delay for each subsequent attempt', () => {
+    expect(calculateBackoff(1, 1000)).toBe(1000);
+    expect(calculateBackoff(2, 1000)).toBe(2000);
+    expect(calculateBackoff(3, 1000)).toBe(4000);
+    expect(calculateBackoff(4, 1000)).toBe(8000);
+  });
+
+  it('uses default base delay of 1000ms', () => {
+    expect(calculateBackoff(1)).toBe(1000);
+    expect(calculateBackoff(2)).toBe(2000);
+    expect(calculateBackoff(3)).toBe(4000);
+  });
+
+  it('works with custom base delay', () => {
+    expect(calculateBackoff(1, 500)).toBe(500);
+    expect(calculateBackoff(2, 500)).toBe(1000);
+    expect(calculateBackoff(3, 500)).toBe(2000);
+  });
+
+  it('throws RangeError for attempts < 1', () => {
+    expect(() => calculateBackoff(0)).toThrow(RangeError);
+    expect(() => calculateBackoff(-1)).toThrow(RangeError);
+  });
+
+  it('handles large attempt counts', () => {
+    expect(calculateBackoff(10, 1000)).toBe(1000 * Math.pow(2, 9));
+  });
+});
+
+// ============================================================================
+// Schemas
+// ============================================================================
+
+/** Valid UUID for testing */
+const validJobId: JobId = '12345678-1234-4abc-8abc-123456789001' as JobId;
+
+/** Valid base job for testing */
+const validFullJob = {
+  id: validJobId,
+  type: 'email:send',
+  payload: { to: 'user@example.com' },
+  status: 'pending' as const,
+  priority: 0,
+  attempts: 0,
+  maxAttempts: 3,
+  lastError: null,
+  idempotencyKey: null,
+  scheduledAt: new Date('2026-01-01T00:00:00Z'),
+  startedAt: null,
+  completedAt: null,
+  createdAt: new Date('2026-01-01T00:00:00Z'),
+};
+
+describe('jobSchema', () => {
+  describe('when given valid full job', () => {
+    it('should parse successfully', () => {
+      const result = jobSchema.parse(validFullJob);
+
+      expect(result).toEqual(validFullJob);
+      expect(result.id).toBe(validJobId);
+      expect(result.type).toBe('email:send');
+      expect(result.status).toBe('pending');
+      expect(result.priority).toBe(0);
+      expect(result.attempts).toBe(0);
+      expect(result.maxAttempts).toBe(3);
+    });
+
+    it('should handle all valid statuses', () => {
+      for (const status of JOB_STATUSES) {
+        const job = { ...validFullJob, status };
+        const result = jobSchema.parse(job);
+        expect(result.status).toBe(status);
+      }
+    });
+
+    it('should handle nullable fields with null', () => {
+      const job = {
+        ...validFullJob,
+        lastError: null,
+        idempotencyKey: null,
+        startedAt: null,
+        completedAt: null,
+      };
+
+      const result = jobSchema.parse(job);
+
+      expect(result.lastError).toBeNull();
+      expect(result.idempotencyKey).toBeNull();
+      expect(result.startedAt).toBeNull();
+      expect(result.completedAt).toBeNull();
+    });
+
+    it('should handle nullable fields with values', () => {
+      const job = {
+        ...validFullJob,
+        lastError: 'Network timeout',
+        idempotencyKey: 'unique-key-123',
+        startedAt: new Date('2026-01-01T01:00:00Z'),
+        completedAt: new Date('2026-01-01T02:00:00Z'),
+      };
+
+      const result = jobSchema.parse(job);
+
+      expect(result.lastError).toBe('Network timeout');
+      expect(result.idempotencyKey).toBe('unique-key-123');
+      expect(result.startedAt).toEqual(new Date('2026-01-01T01:00:00Z'));
+      expect(result.completedAt).toEqual(new Date('2026-01-01T02:00:00Z'));
+    });
+  });
+
+  describe('priority validation', () => {
+    it('should accept priority within -100 to 100 range', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, priority: -100 })).not.toThrow();
+      expect(() => jobSchema.parse({ ...validFullJob, priority: 0 })).not.toThrow();
+      expect(() => jobSchema.parse({ ...validFullJob, priority: 100 })).not.toThrow();
+    });
+
+    it('should reject priority below -100', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, priority: -101 })).toThrow(
+        /priority.*must be at least -100/i,
+      );
+    });
+
+    it('should reject priority above 100', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, priority: 101 })).toThrow(
+        /priority.*must be at most 100/i,
+      );
+    });
+
+    it('should reject non-integer priority', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, priority: 5.5 })).toThrow(
+        /priority.*must be an integer/i,
+      );
+    });
+  });
+
+  describe('attempts validation', () => {
+    it('should accept attempts >= 0', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, attempts: 0 })).not.toThrow();
+      expect(() => jobSchema.parse({ ...validFullJob, attempts: 5 })).not.toThrow();
+    });
+
+    it('should reject attempts < 0', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, attempts: -1 })).toThrow(
+        /attempts.*must be at least 0/i,
+      );
+    });
+
+    it('should reject non-integer attempts', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, attempts: 2.5 })).toThrow(
+        /attempts.*must be an integer/i,
+      );
+    });
+  });
+
+  describe('maxAttempts validation', () => {
+    it('should accept maxAttempts >= 1', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, maxAttempts: 1 })).not.toThrow();
+      expect(() => jobSchema.parse({ ...validFullJob, maxAttempts: 10 })).not.toThrow();
+    });
+
+    it('should reject maxAttempts < 1', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, maxAttempts: 0 })).toThrow(
+        /maxAttempts.*must be at least 1/i,
+      );
+    });
+
+    it('should reject non-integer maxAttempts', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, maxAttempts: 3.5 })).toThrow(
+        /maxAttempts.*must be an integer/i,
+      );
+    });
+  });
+
+  describe('status validation', () => {
+    it('should reject invalid status enum', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, status: 'invalid' })).toThrow(/job status/i);
+    });
+
+    it('should reject empty string status', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, status: '' })).toThrow(/job status/i);
+    });
+  });
+
+  describe('type validation', () => {
+    it('should reject empty type', () => {
+      expect(() => jobSchema.parse({ ...validFullJob, type: '' })).toThrow(
+        /type.*must be at least 1 characters/i,
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should reject null input', () => {
+      expect(() => jobSchema.parse(null)).toThrow();
+    });
+
+    it('should reject undefined input', () => {
+      expect(() => jobSchema.parse(undefined)).toThrow();
+    });
+
+    it('should reject missing required fields', () => {
+      expect(() => jobSchema.parse({})).toThrow();
+    });
+  });
+});
+
+describe('createJobSchema', () => {
+  describe('when given valid minimal input', () => {
+    it('should parse with only type', () => {
+      const input = { type: 'email:send' };
+      const result = createJobSchema.parse(input);
+
+      expect(result.type).toBe('email:send');
+      expect(result.payload).toBeUndefined();
+      expect(result.priority).toBeUndefined();
+      expect(result.maxAttempts).toBeUndefined();
+      expect(result.idempotencyKey).toBeUndefined();
+      expect(result.scheduledAt).toBeUndefined();
+    });
+  });
+
+  describe('when given valid full input', () => {
+    it('should parse with all optional fields', () => {
+      const input = {
+        type: 'email:send',
+        payload: { to: 'user@example.com' },
+        priority: 10,
+        maxAttempts: 5,
+        idempotencyKey: 'unique-key',
+        scheduledAt: new Date('2026-01-01T00:00:00Z'),
+      };
+
+      const result = createJobSchema.parse(input);
+
+      expect(result.type).toBe('email:send');
+      expect(result.payload).toEqual({ to: 'user@example.com' });
+      expect(result.priority).toBe(10);
+      expect(result.maxAttempts).toBe(5);
+      expect(result.idempotencyKey).toBe('unique-key');
+      expect(result.scheduledAt).toEqual(new Date('2026-01-01T00:00:00Z'));
+    });
+
+    it('should accept null for idempotencyKey', () => {
+      const input = { type: 'email:send', idempotencyKey: null };
+      const result = createJobSchema.parse(input);
+
+      expect(result.idempotencyKey).toBeNull();
+    });
+  });
+
+  describe('type validation', () => {
+    it('should reject empty type', () => {
+      expect(() => createJobSchema.parse({ type: '' })).toThrow(
+        /type.*must be at least 1 characters/i,
+      );
+    });
+
+    it('should reject missing type', () => {
+      expect(() => createJobSchema.parse({})).toThrow();
+    });
+  });
+
+  describe('optional priority validation', () => {
+    it('should accept priority within -100 to 100 range', () => {
+      expect(() => createJobSchema.parse({ type: 'test', priority: -100 })).not.toThrow();
+      expect(() => createJobSchema.parse({ type: 'test', priority: 100 })).not.toThrow();
+    });
+
+    it('should reject priority outside range', () => {
+      expect(() => createJobSchema.parse({ type: 'test', priority: -101 })).toThrow(
+        /priority.*must be at least -100/i,
+      );
+      expect(() => createJobSchema.parse({ type: 'test', priority: 101 })).toThrow(
+        /priority.*must be at most 100/i,
+      );
+    });
+
+    it('should reject non-integer priority', () => {
+      expect(() => createJobSchema.parse({ type: 'test', priority: 5.5 })).toThrow(
+        /priority.*must be an integer/i,
+      );
+    });
+  });
+
+  describe('optional maxAttempts validation', () => {
+    it('should accept maxAttempts >= 1', () => {
+      expect(() => createJobSchema.parse({ type: 'test', maxAttempts: 1 })).not.toThrow();
+    });
+
+    it('should reject maxAttempts < 1', () => {
+      expect(() => createJobSchema.parse({ type: 'test', maxAttempts: 0 })).toThrow(
+        /maxAttempts.*must be at least 1/i,
+      );
+    });
+
+    it('should reject non-integer maxAttempts', () => {
+      expect(() => createJobSchema.parse({ type: 'test', maxAttempts: 3.5 })).toThrow(
+        /maxAttempts.*must be an integer/i,
+      );
+    });
+  });
+});
+
+describe('updateJobSchema', () => {
+  describe('when given empty update', () => {
+    it('should accept object with all undefined fields', () => {
+      const result = updateJobSchema.parse({});
+
+      expect(result.status).toBeUndefined();
+      expect(result.attempts).toBeUndefined();
+      expect(result.lastError).toBeUndefined();
+      expect(result.scheduledAt).toBeUndefined();
+      expect(result.startedAt).toBeUndefined();
+      expect(result.completedAt).toBeUndefined();
+    });
+  });
+
+  describe('when given partial updates', () => {
+    it('should accept only status update', () => {
+      const result = updateJobSchema.parse({ status: 'completed' });
+
+      expect(result.status).toBe('completed');
+      expect(result.attempts).toBeUndefined();
+    });
+
+    it('should accept only attempts update', () => {
+      const result = updateJobSchema.parse({ attempts: 3 });
+
+      expect(result.status).toBeUndefined();
+      expect(result.attempts).toBe(3);
+    });
+
+    it('should accept multiple fields', () => {
+      const result = updateJobSchema.parse({
+        status: 'failed',
+        attempts: 2,
+        lastError: 'Network error',
+      });
+
+      expect(result.status).toBe('failed');
+      expect(result.attempts).toBe(2);
+      expect(result.lastError).toBe('Network error');
+    });
+  });
+
+  describe('nullable-optional field behavior', () => {
+    it('should accept null for lastError', () => {
+      const result = updateJobSchema.parse({ lastError: null });
+      expect(result.lastError).toBeNull();
+    });
+
+    it('should accept undefined for lastError', () => {
+      const result = updateJobSchema.parse({ lastError: undefined });
+      expect(result.lastError).toBeUndefined();
+    });
+
+    it('should accept string value for lastError', () => {
+      const result = updateJobSchema.parse({ lastError: 'Error message' });
+      expect(result.lastError).toBe('Error message');
+    });
+
+    it('should accept null for startedAt', () => {
+      const result = updateJobSchema.parse({ startedAt: null });
+      expect(result.startedAt).toBeNull();
+    });
+
+    it('should accept undefined for startedAt', () => {
+      const result = updateJobSchema.parse({ startedAt: undefined });
+      expect(result.startedAt).toBeUndefined();
+    });
+
+    it('should accept Date value for startedAt', () => {
+      const date = new Date('2026-01-01T00:00:00Z');
+      const result = updateJobSchema.parse({ startedAt: date });
+      expect(result.startedAt).toEqual(date);
+    });
+
+    it('should accept null for completedAt', () => {
+      const result = updateJobSchema.parse({ completedAt: null });
+      expect(result.completedAt).toBeNull();
+    });
+
+    it('should accept undefined for completedAt', () => {
+      const result = updateJobSchema.parse({ completedAt: undefined });
+      expect(result.completedAt).toBeUndefined();
+    });
+
+    it('should accept Date value for completedAt', () => {
+      const date = new Date('2026-01-01T00:00:00Z');
+      const result = updateJobSchema.parse({ completedAt: date });
+      expect(result.completedAt).toEqual(date);
+    });
+  });
+
+  describe('status validation', () => {
+    it('should accept all valid statuses', () => {
+      for (const status of JOB_STATUSES) {
+        const result = updateJobSchema.parse({ status });
+        expect(result.status).toBe(status);
+      }
+    });
+
+    it('should reject invalid status', () => {
+      expect(() => updateJobSchema.parse({ status: 'invalid' })).toThrow(/job status/i);
+    });
+  });
+
+  describe('attempts validation', () => {
+    it('should accept attempts >= 0', () => {
+      expect(() => updateJobSchema.parse({ attempts: 0 })).not.toThrow();
+      expect(() => updateJobSchema.parse({ attempts: 5 })).not.toThrow();
+    });
+
+    it('should reject attempts < 0', () => {
+      expect(() => updateJobSchema.parse({ attempts: -1 })).toThrow(
+        /attempts.*must be at least 0/i,
+      );
+    });
+
+    it('should reject non-integer attempts', () => {
+      expect(() => updateJobSchema.parse({ attempts: 2.5 })).toThrow(
+        /attempts.*must be an integer/i,
+      );
+    });
+  });
+});
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+describe('JOB_STATUSES', () => {
+  it('should contain all expected statuses in lifecycle order', () => {
+    expect(JOB_STATUSES).toEqual([
+      'pending',
+      'processing',
+      'completed',
+      'failed',
+      'dead_letter',
+      'cancelled',
+    ]);
+  });
+
+  it('should be readonly (as const)', () => {
+    expect(Array.isArray(JOB_STATUSES)).toBe(true);
+    expect(JOB_STATUSES.length).toBe(6);
+  });
+});
+
+describe('JOB_PRIORITIES', () => {
+  it('should contain all expected priority levels', () => {
+    expect(JOB_PRIORITIES).toEqual(['low', 'normal', 'high', 'critical']);
+  });
+
+  it('should be readonly (as const)', () => {
+    expect(Array.isArray(JOB_PRIORITIES)).toBe(true);
+    expect(JOB_PRIORITIES.length).toBe(4);
+  });
+});
+
+describe('JOB_PRIORITY_VALUES', () => {
+  it('should map priority names to correct numeric values', () => {
+    expect(JOB_PRIORITY_VALUES.low).toBe(-10);
+    expect(JOB_PRIORITY_VALUES.normal).toBe(0);
+    expect(JOB_PRIORITY_VALUES.high).toBe(10);
+    expect(JOB_PRIORITY_VALUES.critical).toBe(100);
+  });
+
+  it('should have all priority keys', () => {
+    const keys = Object.keys(JOB_PRIORITY_VALUES);
+    expect(keys).toContain('low');
+    expect(keys).toContain('normal');
+    expect(keys).toContain('high');
+    expect(keys).toContain('critical');
+  });
+
+  it('should be readonly (as const)', () => {
+    expect(Object.keys(JOB_PRIORITY_VALUES).length).toBe(4);
+  });
+
+  it('should have values in ascending order', () => {
+    const values = Object.values(JOB_PRIORITY_VALUES);
+    expect(values[0]!).toBeLessThan(values[1]!); // low < normal
+    expect(values[1]!).toBeLessThan(values[2]!); // normal < high
+    expect(values[2]!).toBeLessThan(values[3]!); // high < critical
+  });
+});

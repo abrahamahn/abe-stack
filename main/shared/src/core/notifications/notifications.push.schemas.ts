@@ -13,7 +13,7 @@ import {
   NOTIFICATION_TYPES,
 } from '../constants/notifications';
 
-import { NOTIFICATION_PAYLOAD_MAX_SIZE } from './notifications.errors';
+import { NOTIFICATION_PAYLOAD_MAX_SIZE } from '../../system/constants';
 
 import type { Schema } from '../../primitives/schema';
 

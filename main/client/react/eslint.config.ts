@@ -1,3 +1,4 @@
+// main/client/react/eslint.config.ts
 import type { Linter } from 'eslint';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';

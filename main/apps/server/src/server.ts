@@ -1,4 +1,4 @@
-// main/apps/server/main/server.ts
+// main/apps/server/src/server.ts
 /**
  * Fastify Server Factory
  *

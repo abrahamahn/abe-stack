@@ -7,14 +7,14 @@
  * @module Domain/Jobs
  */
 
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
+import { errorResponseSchema, successResponseSchema } from '../system/http';
 import {
   jobActionResponseSchema,
   jobDetailsSchema,
   jobListQuerySchema,
   jobListResponseSchema,
   queueStatsSchema,
-} from '../engine/jobs';
+} from '../system/jobs';
 
 import type { Contract } from '../primitives/api';
 
