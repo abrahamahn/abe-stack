@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/index.ts
+// main/shared/src/core/compliance/index.ts
 
 /**
  * @file Compliance Module Index
@@ -11,14 +11,17 @@ export { getEffectiveConsent, isConsentGranted, needsReacceptance } from './comp
 
 // --- compliance.schemas ---
 export {
+  complianceActionResponseSchema,
   CONSENT_TYPES,
   consentLogSchema,
+  consentPreferencesResponseSchema,
   createConsentLogSchema,
   createDataExportRequestSchema,
   createLegalDocumentSchema,
   createUserAgreementSchema,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
+  dataExportRequestedResponseSchema,
   dataExportRequestSchema,
   DOCUMENT_TYPES,
   legalDocumentSchema,
@@ -28,13 +31,16 @@ export {
 } from './compliance.schemas';
 
 export type {
+  ComplianceActionResponse,
   ConsentLog,
+  ConsentPreferencesResponse,
   ConsentType,
   CreateConsentLog,
   CreateDataExportRequest,
   CreateLegalDocument,
   CreateUserAgreement,
   DataExportRequest,
+  DataExportRequestedResponse,
   DataExportStatus,
   DataExportType,
   DocumentType,

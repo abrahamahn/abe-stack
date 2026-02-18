@@ -5,8 +5,12 @@ export {
   aggregateValues,
   isOverQuota,
   usageMetricSchema,
+  usageMetricSummarySchema,
   usageSnapshotSchema,
+  usageSummaryResponseSchema,
   type AggregationType,
   type UsageMetric,
+  type UsageMetricSummary,
   type UsageSnapshot,
+  type UsageSummaryResponse,
 } from './usage.metering';

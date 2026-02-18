@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/compliance.schemas.ts
+// main/shared/src/core/compliance/compliance.schemas.ts
 
 /**
  * @file Compliance Schemas
@@ -6,12 +6,6 @@
  * @module Core/Compliance
  */
 
-import {
-  consentLogIdSchema,
-  legalDocumentIdSchema,
-  userAgreementIdSchema,
-  userIdSchema,
-} from '../../primitives/schema/ids';
 import {
   coerceDate,
   createSchema,
@@ -23,9 +17,20 @@ import {
   parseRecord,
   parseString,
 } from '../../primitives/schema';
+import {
+  consentLogIdSchema,
+  legalDocumentIdSchema,
+  userAgreementIdSchema,
+  userIdSchema,
+} from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
-import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../primitives/schema/ids';
+import type {
+  ConsentLogId,
+  LegalDocumentId,
+  UserAgreementId,
+  UserId,
+} from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants
@@ -400,6 +405,65 @@ export const createDataExportRequestSchema: Schema<CreateDataExportRequest> = cr
       type: parseDataExportType(obj['type'], 'type'),
       format: parseOptional(obj['format'], (v) => parseString(v, 'format', { min: 1 })),
       metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
+    };
+  },
+);
+
+// ============================================================================
+// Response Schemas (for API contracts)
+// ============================================================================
+
+/** Current consent preferences per category */
+export interface ConsentPreferencesResponse {
+  analytics: boolean;
+  marketing_email: boolean;
+  third_party_sharing: boolean;
+  profiling: boolean;
+}
+
+/** Response after requesting a data export */
+export interface DataExportRequestedResponse {
+  message: string;
+  requestId: string;
+  estimatedCompletionAt: string;
+}
+
+/** Generic compliance action response */
+export interface ComplianceActionResponse {
+  message: string;
+}
+
+export const consentPreferencesResponseSchema: Schema<ConsentPreferencesResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      analytics: parseBoolean(obj['analytics'], 'analytics'),
+      marketing_email: parseBoolean(obj['marketing_email'], 'marketing_email'),
+      third_party_sharing: parseBoolean(obj['third_party_sharing'], 'third_party_sharing'),
+      profiling: parseBoolean(obj['profiling'], 'profiling'),
+    };
+  },
+);
+
+export const dataExportRequestedResponseSchema: Schema<DataExportRequestedResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+      requestId: parseString(obj['requestId'], 'requestId'),
+      estimatedCompletionAt: parseString(obj['estimatedCompletionAt'], 'estimatedCompletionAt'),
+    };
+  },
+);
+
+export const complianceActionResponseSchema: Schema<ComplianceActionResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
     };
   },
 );

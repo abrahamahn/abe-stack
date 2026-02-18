@@ -1,4 +1,4 @@
-// main/shared/src/domain/billing/billing.contracts.ts
+// main/shared/src/contracts/contract.billing.ts
 /**
  * Billing Contracts
  *
@@ -24,7 +24,7 @@ import {
   updateSubscriptionRequestSchema,
 } from '../core/billing/billing.schemas';
 import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
-
+import { usageSummaryResponseSchema } from '../engine/usage-metering';
 
 import type { Contract } from '../primitives/api';
 
@@ -155,7 +155,7 @@ export const billingContract = {
     method: 'GET' as const,
     path: '/api/billing/usage',
     responses: {
-      200: successResponseSchema(Object as any), // TODO: Define usage schema
+      200: successResponseSchema(usageSummaryResponseSchema),
       401: errorResponseSchema,
     },
     summary: 'Get current subscription usage summary',

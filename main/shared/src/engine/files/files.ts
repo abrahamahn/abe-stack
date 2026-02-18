@@ -219,6 +219,61 @@ export const fileUploadRequestSchema: Schema<FileUploadRequest> = createSchema((
 });
 
 // ============================================================================
+// Response Schemas (for API contracts)
+// ============================================================================
+
+/** Response after uploading a file */
+export interface FileUploadResponse {
+  file: FileRecord;
+  url: string;
+}
+
+/** Paginated file list response */
+export interface FilesListResponse {
+  data: FileRecord[];
+  total: number;
+}
+
+/** File deletion response */
+export interface FileDeleteResponse {
+  message: string;
+  fileId: string;
+}
+
+export const fileUploadResponseSchema: Schema<FileUploadResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      file: fileRecordSchema.parse(obj['file']),
+      url: parseString(obj['url'], 'url'),
+    };
+  },
+);
+
+export const filesListResponseSchema: Schema<FilesListResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  if (!Array.isArray(obj['data'])) throw new Error('data must be an array');
+
+  return {
+    data: obj['data'].map((item) => fileRecordSchema.parse(item)),
+    total: parseNumber(obj['total'], 'total', { int: true, min: 0 }),
+  };
+});
+
+export const fileDeleteResponseSchema: Schema<FileDeleteResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+      fileId: parseString(obj['fileId'], 'fileId'),
+    };
+  },
+);
+
+// ============================================================================
 // Functions
 // ============================================================================
 

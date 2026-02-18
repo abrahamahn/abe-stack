@@ -1,4 +1,4 @@
-// main/shared/src/domain/activities/activities.schemas.ts
+// main/shared/src/core/activities/activities.schemas.ts
 
 /**
  * @file Activities Domain Schemas
@@ -6,8 +6,6 @@
  * @module Domain/Activities
  */
 
-import { ACTOR_TYPES } from '../constants/iam';
-import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   coerceDate,
   createEnumSchema,
@@ -16,8 +14,10 @@ import {
   parseNullableOptional,
   parseOptional,
   parseRecord,
-  parseString,
+  parseString, parseNumber 
 } from '../../primitives/schema';
+import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import { ACTOR_TYPES } from '../constants/iam';
 
 import type { Schema } from '../../primitives/api';
 import type { ActivityId, TenantId, UserId } from '../../primitives/schema/ids';
@@ -121,3 +121,35 @@ export const createActivitySchema: Schema<CreateActivity> = createSchema((data: 
     ipAddress: parseNullableOptional(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
   };
 });
+
+// ============================================================================
+// Response / Filter Schemas (for API contracts)
+// ============================================================================
+
+
+/** Cursor-paginated filters for activity list endpoints */
+export interface ActivitiesListFilters {
+  resourceType?: string | undefined;
+  actorId?: string | undefined;
+  action?: string | undefined;
+  cursor?: string | undefined;
+  limit?: number | undefined;
+}
+
+export const activitiesListFiltersSchema: Schema<ActivitiesListFilters> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      resourceType: parseOptional(obj['resourceType'], (v) =>
+        parseString(v, 'resourceType', { min: 1 }),
+      ),
+      actorId: parseOptional(obj['actorId'], (v) => parseString(v, 'actorId', { min: 1 })),
+      action: parseOptional(obj['action'], (v) => parseString(v, 'action', { min: 1 })),
+      cursor: parseOptional(obj['cursor'], (v) => parseString(v, 'cursor', { min: 1 })),
+      limit: parseOptional(obj['limit'], (v) =>
+        parseNumber(v, 'limit', { int: true, min: 1, max: 100 }),
+      ),
+    };
+  },
+);

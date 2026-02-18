@@ -1,14 +1,21 @@
-// src/engine/feature-flags/feature.flags.test.ts
+// main/shared/src/engine/feature-flags/feature.flags.test.ts
 
 import { describe, expect, it } from 'vitest';
 
 import {
   evaluateFlag,
+  featureFlagActionResponseSchema,
   featureFlagSchema,
+  featureFlagsListResponseSchema,
   tenantFeatureOverrideSchema,
 } from './feature.flags';
 
-import type { FeatureFlag, TenantFeatureOverride } from './feature.flags';
+import type {
+  FeatureFlag,
+  FeatureFlagActionResponse,
+  FeatureFlagsListResponse,
+  TenantFeatureOverride,
+} from './feature.flags';
 
 // ============================================================================
 // featureFlagSchema Tests
@@ -670,6 +677,178 @@ describe('evaluateFlag', () => {
         },
       };
       expect(evaluateFlag(flag, { userId: 'user-1' })).toBe(false);
+    });
+  });
+});
+
+// ============================================================================
+// featureFlagsListResponseSchema Tests
+// ============================================================================
+
+describe('featureFlagsListResponseSchema', () => {
+  const validFlag = { key: 'feature-x', isEnabled: true };
+
+  describe('valid inputs', () => {
+    it('should parse response with one feature flag', () => {
+      const result: FeatureFlagsListResponse = featureFlagsListResponseSchema.parse({
+        data: [validFlag],
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.key).toBe('feature-x');
+      expect(result.data[0]?.isEnabled).toBe(true);
+    });
+
+    it('should parse response with empty data array', () => {
+      const result: FeatureFlagsListResponse = featureFlagsListResponseSchema.parse({ data: [] });
+
+      expect(result.data).toHaveLength(0);
+    });
+
+    it('should parse response with multiple feature flags', () => {
+      const secondFlag = { key: 'feature-y', isEnabled: false, description: 'Feature Y' };
+      const result: FeatureFlagsListResponse = featureFlagsListResponseSchema.parse({
+        data: [validFlag, secondFlag],
+      });
+
+      expect(result.data).toHaveLength(2);
+      expect(result.data[1]?.key).toBe('feature-y');
+      expect(result.data[1]?.isEnabled).toBe(false);
+    });
+
+    it('should parse response where flags have metadata', () => {
+      const flagWithMeta = {
+        key: 'rollout-flag',
+        isEnabled: true,
+        metadata: { rolloutPercentage: 50 },
+      };
+      const result: FeatureFlagsListResponse = featureFlagsListResponseSchema.parse({
+        data: [flagWithMeta],
+      });
+
+      expect(result.data[0]?.metadata?.rolloutPercentage).toBe(50);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when data is not an array', () => {
+      expect(() => featureFlagsListResponseSchema.parse({ data: 'not-array' })).toThrow(
+        'data must be an array',
+      );
+    });
+
+    it('should throw when data is missing', () => {
+      expect(() => featureFlagsListResponseSchema.parse({})).toThrow('data must be an array');
+    });
+
+    it('should throw when a flag in data has missing key', () => {
+      expect(() => featureFlagsListResponseSchema.parse({ data: [{ isEnabled: true }] })).toThrow(
+        'key must be a string',
+      );
+    });
+
+    it('should throw when a flag has invalid isEnabled type', () => {
+      expect(() =>
+        featureFlagsListResponseSchema.parse({ data: [{ key: 'test', isEnabled: 'yes' }] }),
+      ).toThrow('isEnabled must be a boolean');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => featureFlagsListResponseSchema.parse(null)).toThrow('data must be an array');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => featureFlagsListResponseSchema.parse('flags')).toThrow('data must be an array');
+    });
+  });
+});
+
+// ============================================================================
+// featureFlagActionResponseSchema Tests
+// ============================================================================
+
+describe('featureFlagActionResponseSchema', () => {
+  const validFlag = { key: 'feature-x', isEnabled: true };
+
+  describe('valid inputs', () => {
+    it('should parse valid action response with flag', () => {
+      const result: FeatureFlagActionResponse = featureFlagActionResponseSchema.parse({
+        message: 'Feature flag updated',
+        flag: validFlag,
+      });
+
+      expect(result.message).toBe('Feature flag updated');
+      expect(result.flag.key).toBe('feature-x');
+      expect(result.flag.isEnabled).toBe(true);
+    });
+
+    it('should parse action response with flag that has description', () => {
+      const flagWithDesc = { key: 'new-ui', isEnabled: false, description: 'New UI feature' };
+      const result: FeatureFlagActionResponse = featureFlagActionResponseSchema.parse({
+        message: 'Created',
+        flag: flagWithDesc,
+      });
+
+      expect(result.flag.description).toBe('New UI feature');
+      expect(result.flag.isEnabled).toBe(false);
+    });
+
+    it('should parse action response with flag that has metadata', () => {
+      const flagWithMeta = {
+        key: 'beta-feature',
+        isEnabled: true,
+        metadata: { allowedUserIds: ['user-1'] },
+      };
+      const result: FeatureFlagActionResponse = featureFlagActionResponseSchema.parse({
+        message: 'Flag enabled for beta users',
+        flag: flagWithMeta,
+      });
+
+      expect(result.flag.metadata?.allowedUserIds).toEqual(['user-1']);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when message is missing', () => {
+      expect(() => featureFlagActionResponseSchema.parse({ flag: validFlag })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when flag is missing', () => {
+      expect(() => featureFlagActionResponseSchema.parse({ message: 'OK' })).toThrow(
+        'key must be a string',
+      );
+    });
+
+    it('should throw when flag has no key', () => {
+      expect(() =>
+        featureFlagActionResponseSchema.parse({ message: 'OK', flag: { isEnabled: true } }),
+      ).toThrow('key must be a string');
+    });
+
+    it('should throw when message is null', () => {
+      expect(() =>
+        featureFlagActionResponseSchema.parse({ message: null, flag: validFlag }),
+      ).toThrow('message must be a string');
+    });
+
+    it('should throw when flag is null', () => {
+      expect(() => featureFlagActionResponseSchema.parse({ message: 'OK', flag: null })).toThrow(
+        'key must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => featureFlagActionResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for empty object', () => {
+      expect(() => featureFlagActionResponseSchema.parse({})).toThrow('message must be a string');
     });
   });
 });

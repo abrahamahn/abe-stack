@@ -6,11 +6,6 @@
  * @module Core/Notifications
  */
 
-// --- contracts ---
-import { notificationsContract } from '../../contracts';
-
-export { notificationsContract };
-
 // --- notifications.display ---
 export { getNotificationLevelTone } from './notifications.display';
 

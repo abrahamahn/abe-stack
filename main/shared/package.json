@@ -31,29 +31,25 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "default": "./dist/primitives/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "default": "./dist/engine/index.js"
+    },
     "./core": {
       "types": "./dist/core/index.d.ts",
       "default": "./dist/core/index.js"
     },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "default": "./dist/types/index.js"
-    },
-    "./domain": {
-      "types": "./dist/domain/index.d.ts",
-      "default": "./dist/domain/index.js"
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "default": "./dist/contracts/index.js"
     },
     "./api": {
       "types": "./dist/api/index.d.ts",
       "default": "./dist/api/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "default": "./dist/utils/index.js"
-    },
-    "./logger": {
-      "types": "./dist/logger/index.d.ts",
-      "default": "./dist/logger/index.js"
     },
     "./config": {
       "types": "./dist/config/index.d.ts",

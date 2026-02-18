@@ -10,13 +10,22 @@ import { describe, expect, it } from 'vitest';
 import {
   acceptInvitationSchema,
   createInvitationSchema,
+  invitationsListResponseSchema,
   INVITATION_STATUSES,
   invitationSchema,
+  membershipActionResponseSchema,
+  membersListResponseSchema,
   membershipSchema,
   updateMembershipRoleSchema,
 } from './membership.schemas';
 
-import type { Invitation, Membership } from './membership.schemas';
+import type {
+  Invitation,
+  InvitationsListResponse,
+  Membership,
+  MembershipActionResponse,
+  MembersListResponse,
+} from './membership.schemas';
 
 describe('membership.schemas', () => {
   // ==========================================================================
@@ -697,6 +706,240 @@ describe('membership.schemas', () => {
         const result = acceptInvitationSchema.safeParse(['token']);
         expect(result.success).toBe(false);
       });
+    });
+  });
+});
+
+// ============================================================================
+// Response Schema Test Constants
+// ============================================================================
+
+const VALID_MEMBERSHIP = {
+  id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  tenantId: 'b1ffcd00-ad1c-4ef9-ab7e-7cc0ce491b22',
+  userId: 'c2aadd11-be2d-4ef0-ac8f-8dd1df602c33',
+  role: 'member',
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+};
+
+const VALID_INVITATION = {
+  id: 'd3bbee22-cf3e-4ef1-8d90-9ee2ef713d44',
+  tenantId: 'e4ccff33-d04f-4ef2-aeab-aff3f0824e55',
+  email: 'user@example.com',
+  role: 'member',
+  status: 'pending',
+  invitedById: 'f5dd0044-e150-4ef3-9fbc-b004f1935f66',
+  expiresAt: '2026-12-31T23:59:59.999Z',
+  createdAt: '2026-01-01T00:00:00.000Z',
+};
+
+// ============================================================================
+// membersListResponseSchema Tests
+// ============================================================================
+
+describe('membersListResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse response with one member', () => {
+      const result: MembersListResponse = membersListResponseSchema.parse({
+        data: [VALID_MEMBERSHIP],
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.id).toBe('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11');
+      expect(result.data[0]?.role).toBe('member');
+    });
+
+    it('should parse response with empty data array', () => {
+      const result: MembersListResponse = membersListResponseSchema.parse({ data: [] });
+
+      expect(result.data).toHaveLength(0);
+    });
+
+    it('should parse response with multiple members', () => {
+      const secondMember = {
+        ...VALID_MEMBERSHIP,
+        id: 'd3bbee22-cf3e-4ef1-8d90-9ee2ef713d55',
+        role: 'admin',
+      };
+      const result: MembersListResponse = membersListResponseSchema.parse({
+        data: [VALID_MEMBERSHIP, secondMember],
+      });
+
+      expect(result.data).toHaveLength(2);
+      expect(result.data[1]?.role).toBe('admin');
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when data is not an array', () => {
+      expect(() => membersListResponseSchema.parse({ data: 'not-array' })).toThrow(
+        'data must be an array',
+      );
+    });
+
+    it('should throw when data is missing', () => {
+      expect(() => membersListResponseSchema.parse({})).toThrow('data must be an array');
+    });
+
+    it('should throw when a member in data has invalid UUID', () => {
+      const badMember = { ...VALID_MEMBERSHIP, id: 'bad-uuid' };
+      expect(() => membersListResponseSchema.parse({ data: [badMember] })).toThrow();
+    });
+
+    it('should throw when a member has an invalid role', () => {
+      const badMember = { ...VALID_MEMBERSHIP, role: 'superuser' };
+      expect(() => membersListResponseSchema.parse({ data: [badMember] })).toThrow();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => membersListResponseSchema.parse(null)).toThrow('data must be an array');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => membersListResponseSchema.parse('list')).toThrow('data must be an array');
+    });
+  });
+});
+
+// ============================================================================
+// invitationsListResponseSchema Tests
+// ============================================================================
+
+describe('invitationsListResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse response with one invitation', () => {
+      const result: InvitationsListResponse = invitationsListResponseSchema.parse({
+        data: [VALID_INVITATION],
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.email).toBe('user@example.com');
+      expect(result.data[0]?.status).toBe('pending');
+    });
+
+    it('should parse response with empty data array', () => {
+      const result: InvitationsListResponse = invitationsListResponseSchema.parse({ data: [] });
+
+      expect(result.data).toHaveLength(0);
+    });
+
+    it('should parse response with multiple invitations of different statuses', () => {
+      const acceptedInvitation = {
+        ...VALID_INVITATION,
+        id: 'e4ccff33-d04f-4ef2-aeab-aff3f0824e66',
+        status: 'accepted',
+        acceptedAt: '2026-02-01T00:00:00.000Z',
+      };
+      const result: InvitationsListResponse = invitationsListResponseSchema.parse({
+        data: [VALID_INVITATION, acceptedInvitation],
+      });
+
+      expect(result.data).toHaveLength(2);
+      expect(result.data[1]?.status).toBe('accepted');
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when data is not an array', () => {
+      expect(() => invitationsListResponseSchema.parse({ data: {} })).toThrow(
+        'data must be an array',
+      );
+    });
+
+    it('should throw when data is missing', () => {
+      expect(() => invitationsListResponseSchema.parse({})).toThrow('data must be an array');
+    });
+
+    it('should throw when an invitation has an invalid email', () => {
+      const badInvitation = { ...VALID_INVITATION, email: 'not-an-email' };
+      expect(() => invitationsListResponseSchema.parse({ data: [badInvitation] })).toThrow();
+    });
+
+    it('should throw when an invitation has an invalid status', () => {
+      const badInvitation = { ...VALID_INVITATION, status: 'cancelled' };
+      expect(() => invitationsListResponseSchema.parse({ data: [badInvitation] })).toThrow();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => invitationsListResponseSchema.parse(null)).toThrow('data must be an array');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => invitationsListResponseSchema.parse(42)).toThrow('data must be an array');
+    });
+  });
+});
+
+// ============================================================================
+// membershipActionResponseSchema Tests
+// ============================================================================
+
+describe('membershipActionResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse valid action response with message', () => {
+      const result: MembershipActionResponse = membershipActionResponseSchema.parse({
+        message: 'Member removed successfully',
+      });
+
+      expect(result.message).toBe('Member removed successfully');
+    });
+
+    it('should parse action response with empty message', () => {
+      const result: MembershipActionResponse = membershipActionResponseSchema.parse({
+        message: '',
+      });
+
+      expect(result.message).toBe('');
+    });
+
+    it('should parse action response with long message', () => {
+      const longMessage = 'Invitation accepted and member added to workspace.';
+      const result: MembershipActionResponse = membershipActionResponseSchema.parse({
+        message: longMessage,
+      });
+
+      expect(result.message).toBe(longMessage);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when message is missing', () => {
+      expect(() => membershipActionResponseSchema.parse({})).toThrow('message must be a string');
+    });
+
+    it('should throw when message is null', () => {
+      expect(() => membershipActionResponseSchema.parse({ message: null })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when message is a number', () => {
+      expect(() => membershipActionResponseSchema.parse({ message: 42 })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when message is a boolean', () => {
+      expect(() => membershipActionResponseSchema.parse({ message: true })).toThrow(
+        'message must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => membershipActionResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => membershipActionResponseSchema.parse('success')).toThrow(
+        'message must be a string',
+      );
     });
   });
 });

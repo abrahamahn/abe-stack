@@ -48,6 +48,80 @@ export interface StartupSummaryOptions {
   routeCount: number;
 }
 
+// ============================================================================
+// Response Schemas (for API contracts)
+// ============================================================================
+
+import { createSchema, parseNumber, parseString, type Schema } from '../../primitives/schema';
+
+const serviceStatusValues = ['up', 'down', 'degraded'] as const;
+const overallStatusValues = ['healthy', 'degraded', 'down'] as const;
+
+export const detailedHealthResponseSchema: Schema<DetailedHealthResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    const statusStr = parseString(obj['status'], 'status');
+    if (!overallStatusValues.includes(statusStr as OverallStatus)) {
+      throw new Error(`status must be one of: ${overallStatusValues.join(', ')}`);
+    }
+
+    const services: Record<string, ServiceHealth> = {};
+    if (obj['services'] !== null && typeof obj['services'] === 'object') {
+      const svcObj = obj['services'] as Record<string, unknown>;
+      for (const key of Object.keys(svcObj)) {
+        const svc = (
+          svcObj[key] !== null && typeof svcObj[key] === 'object' ? svcObj[key] : {}
+        ) as Record<string, unknown>;
+        const svcStatus = parseString(svc['status'], `services.${key}.status`);
+        if (!serviceStatusValues.includes(svcStatus as ServiceStatus)) {
+          throw new Error(
+            `services.${key}.status must be one of: ${serviceStatusValues.join(', ')}`,
+          );
+        }
+        const svcEntry: ServiceHealth = { status: svcStatus as ServiceStatus };
+        if (typeof svc['message'] === 'string') svcEntry.message = svc['message'];
+        if (typeof svc['latencyMs'] === 'number') svcEntry.latencyMs = svc['latencyMs'];
+        services[key] = svcEntry;
+      }
+    }
+
+    return {
+      status: statusStr as OverallStatus,
+      timestamp: parseString(obj['timestamp'], 'timestamp'),
+      uptime: parseNumber(obj['uptime'], 'uptime'),
+      services,
+    };
+  },
+);
+
+export const readyResponseSchema: Schema<ReadyResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  const status = parseString(obj['status'], 'status');
+  if (status !== 'ready' && status !== 'not_ready') {
+    throw new Error('status must be "ready" or "not_ready"');
+  }
+
+  return {
+    status: status,
+    timestamp: parseString(obj['timestamp'], 'timestamp'),
+  };
+});
+
+export const liveResponseSchema: Schema<LiveResponse> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  const status = parseString(obj['status'], 'status');
+  if (status !== 'alive') {
+    throw new Error('status must be "alive"');
+  }
+
+  return {
+    status: 'alive' as const,
+    uptime: parseNumber(obj['uptime'], 'uptime'),
+  };
+});
 
 export interface HealthCheckDatabase {
   healthCheck(): Promise<boolean>;

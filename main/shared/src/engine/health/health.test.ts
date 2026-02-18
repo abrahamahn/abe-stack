@@ -5,19 +5,25 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import {
-    buildDetailedHealthResponse,
-    checkDatabase,
-    checkEmail,
-    checkPubSub,
-    checkRateLimit,
-    checkSchema,
-    checkStorage,
-    checkWebSocket,
-    determineOverallStatus,
-    type HealthCheckDatabase,
-    type HealthCheckPubSub,
-    type SchemaValidator,
-    type WebSocketStats,
+  buildDetailedHealthResponse,
+  checkDatabase,
+  checkEmail,
+  checkPubSub,
+  checkRateLimit,
+  checkSchema,
+  checkStorage,
+  checkWebSocket,
+  detailedHealthResponseSchema,
+  determineOverallStatus,
+  liveResponseSchema,
+  readyResponseSchema,
+  type DetailedHealthResponse,
+  type HealthCheckDatabase,
+  type HealthCheckPubSub,
+  type LiveResponse,
+  type ReadyResponse,
+  type SchemaValidator,
+  type WebSocketStats,
 } from './health';
 
 // ============================================================================
@@ -52,9 +58,7 @@ describe('checkDatabase', () => {
 
   test('should return down when database throws an error', async () => {
     const db: HealthCheckDatabase = {
-      healthCheck: vi
-        .fn<[], Promise<boolean>>()
-        .mockRejectedValue(new Error('Connection refused')),
+      healthCheck: vi.fn<[], Promise<boolean>>().mockRejectedValue(new Error('Connection refused')),
     };
 
     const result = await checkDatabase(db);
@@ -381,5 +385,266 @@ describe('buildDetailedHealthResponse', () => {
 
     expect(typeof response.uptime).toBe('number');
     expect(response.uptime).toBeGreaterThanOrEqual(0);
+  });
+});
+
+// ============================================================================
+// detailedHealthResponseSchema Tests
+// ============================================================================
+
+describe('detailedHealthResponseSchema', () => {
+  function createValidDetailedHealth(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
+    return {
+      status: 'healthy',
+      timestamp: '2026-02-18T10:00:00.000Z',
+      uptime: 3600,
+      services: {
+        database: { status: 'up', message: 'connected', latencyMs: 5 },
+        email: { status: 'up', message: 'smtp' },
+      },
+      ...overrides,
+    };
+  }
+
+  describe('valid inputs', () => {
+    test('should parse valid detailed health response', () => {
+      const result: DetailedHealthResponse = detailedHealthResponseSchema.parse(
+        createValidDetailedHealth(),
+      );
+
+      expect(result.status).toBe('healthy');
+      expect(result.timestamp).toBe('2026-02-18T10:00:00.000Z');
+      expect(result.uptime).toBe(3600);
+      expect(result.services['database']?.status).toBe('up');
+    });
+
+    test('should parse all valid overall statuses', () => {
+      const statuses = ['healthy', 'degraded', 'down'] as const;
+      statuses.forEach((status) => {
+        const result: DetailedHealthResponse = detailedHealthResponseSchema.parse(
+          createValidDetailedHealth({ status }),
+        );
+        expect(result.status).toBe(status);
+      });
+    });
+
+    test('should parse with empty services object', () => {
+      const result: DetailedHealthResponse = detailedHealthResponseSchema.parse(
+        createValidDetailedHealth({ services: {} }),
+      );
+
+      expect(result.services).toEqual({});
+    });
+
+    test('should parse service with only required status field', () => {
+      const result: DetailedHealthResponse = detailedHealthResponseSchema.parse(
+        createValidDetailedHealth({ services: { db: { status: 'down' } } }),
+      );
+
+      expect(result.services['db']?.status).toBe('down');
+      expect(result.services['db']?.message).toBeUndefined();
+    });
+
+    test('should parse service with all valid service statuses', () => {
+      const result: DetailedHealthResponse = detailedHealthResponseSchema.parse(
+        createValidDetailedHealth({
+          status: 'degraded',
+          services: {
+            db: { status: 'up' },
+            cache: { status: 'down' },
+            queue: { status: 'degraded' },
+          },
+        }),
+      );
+
+      expect(result.services['db']?.status).toBe('up');
+      expect(result.services['cache']?.status).toBe('down');
+      expect(result.services['queue']?.status).toBe('degraded');
+    });
+  });
+
+  describe('invalid inputs', () => {
+    test('should throw when status is an invalid value', () => {
+      expect(() =>
+        detailedHealthResponseSchema.parse(createValidDetailedHealth({ status: 'ok' })),
+      ).toThrow('status must be one of: healthy, degraded, down');
+    });
+
+    test('should throw when status is missing', () => {
+      const { status: _s, ...input } = createValidDetailedHealth();
+      expect(() => detailedHealthResponseSchema.parse(input)).toThrow('status must be a string');
+    });
+
+    test('should throw when timestamp is missing', () => {
+      const { timestamp: _t, ...input } = createValidDetailedHealth();
+      expect(() => detailedHealthResponseSchema.parse(input)).toThrow('timestamp must be a string');
+    });
+
+    test('should throw when uptime is not a number', () => {
+      expect(() =>
+        detailedHealthResponseSchema.parse(createValidDetailedHealth({ uptime: 'long' })),
+      ).toThrow('uptime must be a number');
+    });
+
+    test('should throw when a service has an invalid status', () => {
+      expect(() =>
+        detailedHealthResponseSchema.parse(
+          createValidDetailedHealth({
+            services: { db: { status: 'healthy' } },
+          }),
+        ),
+      ).toThrow('services.db.status must be one of: up, down, degraded');
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should throw for null input', () => {
+      expect(() => detailedHealthResponseSchema.parse(null)).toThrow('status must be a string');
+    });
+
+    test('should throw for empty object', () => {
+      expect(() => detailedHealthResponseSchema.parse({})).toThrow('status must be a string');
+    });
+  });
+});
+
+// ============================================================================
+// readyResponseSchema Tests
+// ============================================================================
+
+describe('readyResponseSchema', () => {
+  describe('valid inputs', () => {
+    test('should parse response with status "ready"', () => {
+      const result: ReadyResponse = readyResponseSchema.parse({
+        status: 'ready',
+        timestamp: '2026-02-18T10:00:00.000Z',
+      });
+
+      expect(result.status).toBe('ready');
+      expect(result.timestamp).toBe('2026-02-18T10:00:00.000Z');
+    });
+
+    test('should parse response with status "not_ready"', () => {
+      const result: ReadyResponse = readyResponseSchema.parse({
+        status: 'not_ready',
+        timestamp: '2026-02-18T10:00:00.000Z',
+      });
+
+      expect(result.status).toBe('not_ready');
+    });
+  });
+
+  describe('invalid inputs', () => {
+    test('should throw when status is not "ready" or "not_ready"', () => {
+      expect(() =>
+        readyResponseSchema.parse({ status: 'ok', timestamp: '2026-02-18T10:00:00.000Z' }),
+      ).toThrow('status must be "ready" or "not_ready"');
+    });
+
+    test('should throw when status is missing', () => {
+      expect(() => readyResponseSchema.parse({ timestamp: '2026-02-18T10:00:00.000Z' })).toThrow(
+        'status must be a string',
+      );
+    });
+
+    test('should throw when timestamp is missing', () => {
+      expect(() => readyResponseSchema.parse({ status: 'ready' })).toThrow(
+        'timestamp must be a string',
+      );
+    });
+
+    test('should throw when status is null', () => {
+      expect(() =>
+        readyResponseSchema.parse({ status: null, timestamp: '2026-02-18T10:00:00.000Z' }),
+      ).toThrow('status must be a string');
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should throw for null input', () => {
+      expect(() => readyResponseSchema.parse(null)).toThrow();
+    });
+
+    test('should throw for empty object', () => {
+      expect(() => readyResponseSchema.parse({})).toThrow('status must be a string');
+    });
+  });
+});
+
+// ============================================================================
+// liveResponseSchema Tests
+// ============================================================================
+
+describe('liveResponseSchema', () => {
+  describe('valid inputs', () => {
+    test('should parse valid live response', () => {
+      const result: LiveResponse = liveResponseSchema.parse({
+        status: 'alive',
+        uptime: 7200,
+      });
+
+      expect(result.status).toBe('alive');
+      expect(result.uptime).toBe(7200);
+    });
+
+    test('should parse live response with zero uptime', () => {
+      const result: LiveResponse = liveResponseSchema.parse({
+        status: 'alive',
+        uptime: 0,
+      });
+
+      expect(result.uptime).toBe(0);
+    });
+
+    test('should parse live response with large uptime', () => {
+      const result: LiveResponse = liveResponseSchema.parse({
+        status: 'alive',
+        uptime: 86400 * 365,
+      });
+
+      expect(result.uptime).toBe(86400 * 365);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    test('should throw when status is not "alive"', () => {
+      expect(() => liveResponseSchema.parse({ status: 'up', uptime: 100 })).toThrow(
+        'status must be "alive"',
+      );
+    });
+
+    test('should throw when status is missing', () => {
+      expect(() => liveResponseSchema.parse({ uptime: 100 })).toThrow('status must be a string');
+    });
+
+    test('should throw when uptime is not a number', () => {
+      expect(() => liveResponseSchema.parse({ status: 'alive', uptime: 'forever' })).toThrow(
+        'uptime must be a number',
+      );
+    });
+
+    test('should throw when uptime is missing', () => {
+      expect(() => liveResponseSchema.parse({ status: 'alive' })).toThrow(
+        'uptime must be a number',
+      );
+    });
+
+    test('should throw when status is null', () => {
+      expect(() => liveResponseSchema.parse({ status: null, uptime: 100 })).toThrow(
+        'status must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should throw for null input', () => {
+      expect(() => liveResponseSchema.parse(null)).toThrow();
+    });
+
+    test('should throw for empty object', () => {
+      expect(() => liveResponseSchema.parse({})).toThrow('status must be a string');
+    });
   });
 });

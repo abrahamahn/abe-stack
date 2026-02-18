@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/tenant.schemas.ts
+// main/shared/src/core/tenant/tenant.schemas.ts
 
 /**
  * @file Tenant Contracts
@@ -6,7 +6,6 @@
  * @module Core/Tenant
  */
 
-import { tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import {
   createSchema,
   parseBoolean,
@@ -16,6 +15,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
+import { tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { isoDateTimeSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';
@@ -151,6 +151,44 @@ export const transferOwnershipSchema: Schema<TransferOwnershipInput> = createSch
 
     return {
       newOwnerId: parseString(obj['newOwnerId'], 'newOwnerId', { min: 1 }),
+    };
+  },
+);
+
+// ============================================================================
+// Response Schemas
+// ============================================================================
+
+/** List of tenants */
+export interface TenantListResponse {
+  data: Tenant[];
+}
+
+/** Single-tenant action response */
+export interface TenantActionResponse {
+  message: string;
+  tenant: Tenant;
+}
+
+export const tenantListResponseSchema: Schema<TenantListResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['data'])) throw new Error('data must be an array');
+
+    return {
+      data: obj['data'].map((item) => tenantSchema.parse(item)),
+    };
+  },
+);
+
+export const tenantActionResponseSchema: Schema<TenantActionResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+      tenant: tenantSchema.parse(obj['tenant']),
     };
   },
 );

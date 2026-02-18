@@ -4,9 +4,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   createFileRecordSchema,
+  fileDeleteResponseSchema,
   filePurposeSchema,
   fileRecordSchema,
+  filesListResponseSchema,
   fileUploadRequestSchema,
+  fileUploadResponseSchema,
   generateUniqueFilename,
   joinStoragePath,
   normalizeStoragePath,
@@ -14,7 +17,10 @@ import {
   updateFileRecordSchema,
   validateFileType,
   type CreateFileRecord,
+  type FileDeleteResponse,
   type FileRecord,
+  type FilesListResponse,
+  type FileUploadResponse,
   type UpdateFileRecord,
 } from './files';
 
@@ -567,9 +573,7 @@ describe('joinStoragePath', () => {
   });
 
   it('normalizes the joined result', () => {
-    expect(joinStoragePath('/uploads/', '/images/', 'photo.jpg')).toBe(
-      'uploads/images/photo.jpg',
-    );
+    expect(joinStoragePath('/uploads/', '/images/', 'photo.jpg')).toBe('uploads/images/photo.jpg');
   });
 
   it('resolves .. in joined segments', () => {
@@ -688,6 +692,289 @@ describe('validateFileType', () => {
 
     it('returns false for filename with no extension and non-MIME types', () => {
       expect(validateFileType('README', ['jpg', 'png'])).toBe(false);
+    });
+  });
+});
+
+// ============================================================================
+// Test constant for response schema tests
+// ============================================================================
+
+const VALID_V4_UUID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+const VALID_V4_UUID_2 = 'b1ffcd00-ad1c-4ef9-ab7e-7cc0ce491b22';
+
+const VALID_FILE_RECORD_FOR_RESPONSE = {
+  id: VALID_V4_UUID,
+  tenantId: VALID_V4_UUID_2,
+  userId: VALID_V4_UUID,
+  filename: 'abc123.png',
+  originalName: 'photo.png',
+  mimeType: 'image/png',
+  sizeBytes: 1024,
+  storageProvider: 'local' as const,
+  storagePath: '/uploads/abc123.png',
+  url: 'https://example.com/files/abc123.png',
+  purpose: 'avatar' as const,
+  metadata: {},
+  createdAt: VALID_ISO,
+  updatedAt: VALID_ISO,
+};
+
+// ============================================================================
+// fileUploadResponseSchema Tests
+// ============================================================================
+
+describe('fileUploadResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse valid file upload response', () => {
+      const result: FileUploadResponse = fileUploadResponseSchema.parse({
+        file: VALID_FILE_RECORD_FOR_RESPONSE,
+        url: 'https://example.com/files/abc123.png',
+      });
+
+      expect(result.file.id).toBe(VALID_V4_UUID);
+      expect(result.file.filename).toBe('abc123.png');
+      expect(result.url).toBe('https://example.com/files/abc123.png');
+    });
+
+    it('should parse response with different URL', () => {
+      const result: FileUploadResponse = fileUploadResponseSchema.parse({
+        file: VALID_FILE_RECORD_FOR_RESPONSE,
+        url: 'https://cdn.example.com/uploads/abc123.png',
+      });
+
+      expect(result.url).toBe('https://cdn.example.com/uploads/abc123.png');
+    });
+
+    it('should parse response where file has null tenantId', () => {
+      const result: FileUploadResponse = fileUploadResponseSchema.parse({
+        file: { ...VALID_FILE_RECORD_FOR_RESPONSE, tenantId: null },
+        url: 'https://example.com/files/abc123.png',
+      });
+
+      expect(result.file.tenantId).toBeNull();
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when file is missing', () => {
+      expect(() =>
+        fileUploadResponseSchema.parse({ url: 'https://example.com/file.png' }),
+      ).toThrow();
+    });
+
+    it('should throw when url is missing', () => {
+      expect(() =>
+        fileUploadResponseSchema.parse({ file: VALID_FILE_RECORD_FOR_RESPONSE }),
+      ).toThrow('url must be a string');
+    });
+
+    it('should throw when url is null', () => {
+      expect(() =>
+        fileUploadResponseSchema.parse({
+          file: VALID_FILE_RECORD_FOR_RESPONSE,
+          url: null,
+        }),
+      ).toThrow('url must be a string');
+    });
+
+    it('should throw when file has invalid sizeBytes', () => {
+      expect(() =>
+        fileUploadResponseSchema.parse({
+          file: { ...VALID_FILE_RECORD_FOR_RESPONSE, sizeBytes: -1 },
+          url: 'https://example.com/file.png',
+        }),
+      ).toThrow();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => fileUploadResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for empty object', () => {
+      expect(() => fileUploadResponseSchema.parse({})).toThrow();
+    });
+  });
+});
+
+// ============================================================================
+// filesListResponseSchema Tests
+// ============================================================================
+
+describe('filesListResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse response with one file and total', () => {
+      const result: FilesListResponse = filesListResponseSchema.parse({
+        data: [VALID_FILE_RECORD_FOR_RESPONSE],
+        total: 1,
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.filename).toBe('abc123.png');
+      expect(result.total).toBe(1);
+    });
+
+    it('should parse response with empty data array and zero total', () => {
+      const result: FilesListResponse = filesListResponseSchema.parse({
+        data: [],
+        total: 0,
+      });
+
+      expect(result.data).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+
+    it('should parse response with multiple files', () => {
+      const secondFile = {
+        ...VALID_FILE_RECORD_FOR_RESPONSE,
+        id: VALID_V4_UUID_2,
+        filename: 'def456.jpg',
+        mimeType: 'image/jpeg',
+        purpose: 'document' as const,
+      };
+      const result: FilesListResponse = filesListResponseSchema.parse({
+        data: [VALID_FILE_RECORD_FOR_RESPONSE, secondFile],
+        total: 2,
+      });
+
+      expect(result.data).toHaveLength(2);
+      expect(result.data[1]?.filename).toBe('def456.jpg');
+      expect(result.total).toBe(2);
+    });
+
+    it('should parse response where total is greater than data length (paginated)', () => {
+      const result: FilesListResponse = filesListResponseSchema.parse({
+        data: [VALID_FILE_RECORD_FOR_RESPONSE],
+        total: 100,
+      });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(100);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when data is not an array', () => {
+      expect(() => filesListResponseSchema.parse({ data: 'not-array', total: 0 })).toThrow(
+        'data must be an array',
+      );
+    });
+
+    it('should throw when data is missing', () => {
+      expect(() => filesListResponseSchema.parse({ total: 0 })).toThrow('data must be an array');
+    });
+
+    it('should throw when total is missing', () => {
+      expect(() =>
+        filesListResponseSchema.parse({ data: [VALID_FILE_RECORD_FOR_RESPONSE] }),
+      ).toThrow('total must be a number');
+    });
+
+    it('should throw when total is negative', () => {
+      expect(() => filesListResponseSchema.parse({ data: [], total: -1 })).toThrow();
+    });
+
+    it('should throw when total is not an integer', () => {
+      expect(() => filesListResponseSchema.parse({ data: [], total: 1.5 })).toThrow();
+    });
+
+    it('should throw when a file in data has an invalid storageProvider', () => {
+      const badFile = { ...VALID_FILE_RECORD_FOR_RESPONSE, storageProvider: 'azure' };
+      expect(() => filesListResponseSchema.parse({ data: [badFile], total: 1 })).toThrow();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => filesListResponseSchema.parse(null)).toThrow('data must be an array');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => filesListResponseSchema.parse('list')).toThrow('data must be an array');
+    });
+  });
+});
+
+// ============================================================================
+// fileDeleteResponseSchema Tests
+// ============================================================================
+
+describe('fileDeleteResponseSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse valid file delete response', () => {
+      const result: FileDeleteResponse = fileDeleteResponseSchema.parse({
+        message: 'File deleted successfully',
+        fileId: VALID_UUID,
+      });
+
+      expect(result.message).toBe('File deleted successfully');
+      expect(result.fileId).toBe(VALID_UUID);
+    });
+
+    it('should parse response with any string fileId', () => {
+      const result: FileDeleteResponse = fileDeleteResponseSchema.parse({
+        message: 'Deleted',
+        fileId: 'file_custom_id_123',
+      });
+
+      expect(result.fileId).toBe('file_custom_id_123');
+    });
+
+    it('should parse response with empty message', () => {
+      const result: FileDeleteResponse = fileDeleteResponseSchema.parse({
+        message: '',
+        fileId: VALID_UUID,
+      });
+
+      expect(result.message).toBe('');
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when message is missing', () => {
+      expect(() => fileDeleteResponseSchema.parse({ fileId: VALID_UUID })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when fileId is missing', () => {
+      expect(() => fileDeleteResponseSchema.parse({ message: 'File deleted' })).toThrow(
+        'fileId must be a string',
+      );
+    });
+
+    it('should throw when message is null', () => {
+      expect(() => fileDeleteResponseSchema.parse({ message: null, fileId: VALID_UUID })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when fileId is a number', () => {
+      expect(() => fileDeleteResponseSchema.parse({ message: 'Deleted', fileId: 42 })).toThrow(
+        'fileId must be a string',
+      );
+    });
+
+    it('should throw when fileId is null', () => {
+      expect(() => fileDeleteResponseSchema.parse({ message: 'Deleted', fileId: null })).toThrow(
+        'fileId must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => fileDeleteResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for empty object', () => {
+      expect(() => fileDeleteResponseSchema.parse({})).toThrow('message must be a string');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => fileDeleteResponseSchema.parse('ok')).toThrow('message must be a string');
     });
   });
 });

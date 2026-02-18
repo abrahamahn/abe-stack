@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/index.ts
+// main/shared/src/core/tenant/index.ts
 
 /**
  * @file Tenant Module Barrel
@@ -22,12 +22,16 @@ export {
 // --- tenant.schemas ---
 export {
   createTenantSchema,
+  tenantActionResponseSchema,
+  tenantListResponseSchema,
   tenantSchema,
   transferOwnershipSchema,
   updateTenantSchema,
   type CreateTenantInput,
   type MaybeWorkspaceContext,
   type Tenant,
+  type TenantActionResponse,
+  type TenantListResponse,
   type TransferOwnershipInput,
   type UpdateTenantInput,
   type WorkspaceContext,

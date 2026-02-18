@@ -13,12 +13,18 @@ import {
   withDefault,
   type Schema,
 } from '../../primitives/schema';
+import {
+  inviteIdSchema,
+  membershipIdSchema,
+  tenantIdSchema,
+  userIdSchema,
+} from '../../primitives/schema/ids';
 import { emailSchema, isoDateTimeSchema } from '../auth/auth.scalars.schemas';
 import { tenantRoleSchema } from '../auth/roles';
 import { INVITATION_STATUSES } from '../constants/iam';
-import { inviteIdSchema, membershipIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
-import type { TenantRole } from '../auth/roles';
+
 import type { InviteId, MembershipId, TenantId, UserId } from '../../primitives/schema/ids';
+import type { TenantRole } from '../auth/roles';
 
 // ============================================================================
 // Constants
@@ -151,3 +157,56 @@ export const acceptInvitationSchema: Schema<AcceptInvitation> = createSchema((da
     token: parseString(obj['token'], 'token', { min: 1 }),
   };
 });
+
+// ============================================================================
+// Response Schemas
+// ============================================================================
+
+/** List of members */
+export interface MembersListResponse {
+  data: Membership[];
+}
+
+/** List of invitations */
+export interface InvitationsListResponse {
+  data: Invitation[];
+}
+
+/** Generic membership action response */
+export interface MembershipActionResponse {
+  message: string;
+}
+
+export const membersListResponseSchema: Schema<MembersListResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['data'])) throw new Error('data must be an array');
+
+    return {
+      data: obj['data'].map((item) => membershipSchema.parse(item)),
+    };
+  },
+);
+
+export const invitationsListResponseSchema: Schema<InvitationsListResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['data'])) throw new Error('data must be an array');
+
+    return {
+      data: obj['data'].map((item) => invitationSchema.parse(item)),
+    };
+  },
+);
+
+export const membershipActionResponseSchema: Schema<MembershipActionResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+    };
+  },
+);

@@ -22,24 +22,6 @@ export {
 } from './api-keys';
 
 export {
-  auditEventSchema,
-  auditLogFilterSchema,
-  auditLogListResponseSchema,
-  buildAuditEvent,
-  createAuditEventSchema,
-  getAuditActionTone,
-  getAuditSeverityTone,
-  sanitizeMetadata,
-  type AuditBuilderParams,
-  type AuditCategory,
-  type AuditEvent,
-  type AuditLogFilter,
-  type AuditLogListResponse,
-  type AuditSeverity,
-  type CreateAuditEvent,
-} from './audit-log';
-
-export {
   createEmailLogEntrySchema,
   createEmailTemplateSchema,
   emailLogEntrySchema,

@@ -1,4 +1,4 @@
-// src/engine/usage-metering/usage.metering.test.ts
+// main/shared/src/engine/usage-metering/usage.metering.test.ts
 
 import { describe, expect, it } from 'vitest';
 
@@ -7,7 +7,9 @@ import {
   aggregateValues,
   isOverQuota,
   usageMetricSchema,
+  usageMetricSummarySchema,
   usageSnapshotSchema,
+  usageSummaryResponseSchema,
 } from './usage.metering';
 
 import type { UsageMetric, UsageSnapshot } from './usage.metering';
@@ -631,5 +633,196 @@ describe('isOverQuota', () => {
 
   it('handles zero usage and limit', () => {
     expect(isOverQuota(0, 0)).toBe(true);
+  });
+});
+
+// ============================================================================
+// usageMetricSummarySchema Tests
+// ============================================================================
+
+describe('usageMetricSummarySchema', () => {
+  function createValidSummary(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      metricKey: 'api_requests',
+      name: 'API Requests',
+      unit: 'requests',
+      currentValue: 750,
+      limit: 1000,
+      percentUsed: 75,
+      ...overrides,
+    };
+  }
+
+  describe('when given valid input', () => {
+    it('should parse valid summary with all fields', () => {
+      const result = usageMetricSummarySchema.parse(createValidSummary());
+
+      expect(result.metricKey).toBe('api_requests');
+      expect(result.name).toBe('API Requests');
+      expect(result.unit).toBe('requests');
+      expect(result.currentValue).toBe(750);
+      expect(result.limit).toBe(1000);
+      expect(result.percentUsed).toBe(75);
+    });
+
+    it('should parse summary with zero currentValue and percentUsed', () => {
+      const result = usageMetricSummarySchema.parse(
+        createValidSummary({ currentValue: 0, percentUsed: 0 }),
+      );
+
+      expect(result.currentValue).toBe(0);
+      expect(result.percentUsed).toBe(0);
+    });
+
+    it('should parse summary with unlimited limit (negative)', () => {
+      const result = usageMetricSummarySchema.parse(createValidSummary({ limit: -1 }));
+
+      expect(result.limit).toBe(-1);
+    });
+
+    it('should parse summary with decimal percentUsed', () => {
+      const result = usageMetricSummarySchema.parse(
+        createValidSummary({ currentValue: 333, limit: 1000, percentUsed: 33.3 }),
+      );
+
+      expect(result.percentUsed).toBe(33.3);
+    });
+  });
+
+  describe('when given invalid input', () => {
+    it('should throw when metricKey is missing', () => {
+      const { metricKey: _mk, ...input } = createValidSummary();
+      expect(() => usageMetricSummarySchema.parse(input)).toThrow('metricKey must be a string');
+    });
+
+    it('should throw when currentValue is not a number', () => {
+      expect(() =>
+        usageMetricSummarySchema.parse(createValidSummary({ currentValue: 'a lot' })),
+      ).toThrow('currentValue must be a number');
+    });
+
+    it('should throw when limit is null', () => {
+      expect(() => usageMetricSummarySchema.parse(createValidSummary({ limit: null }))).toThrow(
+        'limit must be a number',
+      );
+    });
+
+    it('should throw when percentUsed is missing', () => {
+      const { percentUsed: _pu, ...input } = createValidSummary();
+      expect(() => usageMetricSummarySchema.parse(input)).toThrow('percentUsed must be a number');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => usageMetricSummarySchema.parse(null)).toThrow();
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => usageMetricSummarySchema.parse('summary')).toThrow();
+    });
+  });
+});
+
+// ============================================================================
+// usageSummaryResponseSchema Tests
+// ============================================================================
+
+describe('usageSummaryResponseSchema', () => {
+  const validMetric = {
+    metricKey: 'api_requests',
+    name: 'API Requests',
+    unit: 'requests',
+    currentValue: 500,
+    limit: 1000,
+    percentUsed: 50,
+  };
+
+  function createValidResponse(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      metrics: [validMetric],
+      periodStart: '2026-02-01T00:00:00.000Z',
+      periodEnd: '2026-02-28T23:59:59.999Z',
+      ...overrides,
+    };
+  }
+
+  describe('when given valid input', () => {
+    it('should parse response with one metric', () => {
+      const result = usageSummaryResponseSchema.parse(createValidResponse());
+
+      expect(result.metrics).toHaveLength(1);
+      expect(result.metrics[0]?.metricKey).toBe('api_requests');
+      expect(result.periodStart).toBe('2026-02-01T00:00:00.000Z');
+      expect(result.periodEnd).toBe('2026-02-28T23:59:59.999Z');
+    });
+
+    it('should parse response with empty metrics array', () => {
+      const result = usageSummaryResponseSchema.parse(createValidResponse({ metrics: [] }));
+
+      expect(result.metrics).toHaveLength(0);
+    });
+
+    it('should parse response with multiple metrics', () => {
+      const secondMetric = {
+        metricKey: 'storage_bytes',
+        name: 'Storage',
+        unit: 'bytes',
+        currentValue: 1024,
+        limit: 5120,
+        percentUsed: 20,
+      };
+      const result = usageSummaryResponseSchema.parse(
+        createValidResponse({ metrics: [validMetric, secondMetric] }),
+      );
+
+      expect(result.metrics).toHaveLength(2);
+      expect(result.metrics[1]?.metricKey).toBe('storage_bytes');
+    });
+  });
+
+  describe('when given invalid input', () => {
+    it('should throw when metrics is not an array', () => {
+      expect(() =>
+        usageSummaryResponseSchema.parse(createValidResponse({ metrics: 'not-array' })),
+      ).toThrow('metrics must be an array');
+    });
+
+    it('should throw when metrics is missing', () => {
+      const { metrics: _m, ...input } = createValidResponse();
+      expect(() => usageSummaryResponseSchema.parse(input)).toThrow('metrics must be an array');
+    });
+
+    it('should throw when periodStart is not a valid datetime', () => {
+      expect(() =>
+        usageSummaryResponseSchema.parse(createValidResponse({ periodStart: 'bad-date' })),
+      ).toThrow('Invalid ISO datetime format');
+    });
+
+    it('should throw when periodEnd is missing', () => {
+      const { periodEnd: _pe, ...input } = createValidResponse();
+      expect(() => usageSummaryResponseSchema.parse(input)).toThrow(
+        'ISO datetime must be a string',
+      );
+    });
+
+    it('should throw when a metric in the array is invalid', () => {
+      const badMetric = { ...validMetric, currentValue: 'not-a-number' };
+      expect(() =>
+        usageSummaryResponseSchema.parse(createValidResponse({ metrics: [badMetric] })),
+      ).toThrow('currentValue must be a number');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => usageSummaryResponseSchema.parse(null)).toThrow('metrics must be an array');
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => usageSummaryResponseSchema.parse('response')).toThrow(
+        'metrics must be an array',
+      );
+    });
   });
 });

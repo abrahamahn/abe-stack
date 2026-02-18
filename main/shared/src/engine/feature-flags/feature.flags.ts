@@ -1,4 +1,4 @@
-// src/engine/feature-flags/feature.flags.ts
+// main/shared/src/engine/feature-flags/feature.flags.ts
 
 /**
  * @file Feature Flags
@@ -206,6 +206,44 @@ export const setTenantFeatureOverrideRequestSchema: Schema<SetTenantFeatureOverr
 
     return { value, isEnabled };
   });
+
+// ============================================================================
+// Response Schemas (for API contracts)
+// ============================================================================
+
+/** List of feature flags */
+export interface FeatureFlagsListResponse {
+  data: FeatureFlag[];
+}
+
+/** Feature flag action response */
+export interface FeatureFlagActionResponse {
+  message: string;
+  flag: FeatureFlag;
+}
+
+export const featureFlagsListResponseSchema: Schema<FeatureFlagsListResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['data'])) throw new Error('data must be an array');
+
+    return {
+      data: obj['data'].map((item) => featureFlagSchema.parse(item)),
+    };
+  },
+);
+
+export const featureFlagActionResponseSchema: Schema<FeatureFlagActionResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+      flag: featureFlagSchema.parse(obj['flag']),
+    };
+  },
+);
 
 // ============================================================================
 // Functions

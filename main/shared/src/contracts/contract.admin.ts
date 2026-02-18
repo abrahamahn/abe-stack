@@ -12,10 +12,16 @@ import {
   adminHardBanResponseSchema,
   adminLockUserRequestSchema,
   adminSuspendTenantRequestSchema,
+  adminTenantSchema,
+  adminTenantsListResponseSchema,
   adminUpdateUserRequestSchema,
   adminUserListFiltersSchema,
   adminUserListResponseSchema,
   adminUserSchema,
+  endImpersonationResponseSchema,
+  impersonationResponseSchema,
+  routeManifestResponseSchema,
+  systemStatsResponseSchema,
   unlockAccountRequestSchema,
 } from '../core/admin/admin.schemas';
 import {
@@ -34,17 +40,10 @@ import {
   updatePlanRequestSchema,
 } from '../core/billing/billing.admin.schemas';
 import { subscriptionActionResponseSchema } from '../core/billing/billing.schemas';
-import { createSchema } from '../primitives/schema';
 import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
-
+import { webhookListResponseSchema } from '../engine/webhooks';
 
 import type { Contract } from '../primitives/api';
-
-// ============================================================================
-// Contract Definition
-// ============================================================================
-
-const unknownResponseSchema = createSchema((data: unknown) => data);
 
 export const adminContract = {
   /**
@@ -220,7 +219,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/tenants',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(adminTenantsListResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },
@@ -231,7 +230,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/tenants/:id',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(adminTenantSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
       404: errorResponseSchema,
@@ -244,7 +243,7 @@ export const adminContract = {
     path: '/api/admin/tenants/:id/suspend',
     body: adminSuspendTenantRequestSchema,
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(adminActionResponseSchema),
       400: errorResponseSchema,
       401: errorResponseSchema,
       403: errorResponseSchema,
@@ -258,7 +257,7 @@ export const adminContract = {
     path: '/api/admin/tenants/:id/unsuspend',
     body: emptyBodySchema,
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(adminActionResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
       404: errorResponseSchema,
@@ -271,7 +270,7 @@ export const adminContract = {
     path: '/api/admin/impersonate/:userId',
     body: emptyBodySchema,
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(impersonationResponseSchema),
       400: errorResponseSchema,
       401: errorResponseSchema,
       403: errorResponseSchema,
@@ -285,7 +284,7 @@ export const adminContract = {
     path: '/api/admin/impersonate/end',
     body: emptyBodySchema,
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(endImpersonationResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },
@@ -296,7 +295,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/webhooks',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(webhookListResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },
@@ -307,7 +306,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/webhooks/:id/deliveries',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(webhookListResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
       404: errorResponseSchema,
@@ -320,7 +319,7 @@ export const adminContract = {
     path: '/api/admin/webhooks/:id/deliveries/:deliveryId/replay',
     body: emptyBodySchema,
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(adminActionResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
       404: errorResponseSchema,
@@ -409,7 +408,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/metrics',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(systemStatsResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },
@@ -420,7 +419,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/health',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(systemStatsResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },
@@ -431,7 +430,7 @@ export const adminContract = {
     method: 'GET' as const,
     path: '/api/admin/routes',
     responses: {
-      200: successResponseSchema(unknownResponseSchema),
+      200: successResponseSchema(routeManifestResponseSchema),
       401: errorResponseSchema,
       403: errorResponseSchema,
     },

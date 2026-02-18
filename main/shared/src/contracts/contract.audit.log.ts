@@ -1,4 +1,4 @@
-// src/contracts/contract.audit.log.ts
+// main/shared/src/contracts/contract.audit.log.ts
 /**
  * Audit Log Contracts
  *
@@ -6,10 +6,9 @@
  * @module Domain/AuditLog
  */
 
+import { auditLogFilterSchema, auditLogListResponseSchema } from '../core/audit-log';
 import { errorResponseSchema, successResponseSchema } from '../engine/http';
-
 import { tenantIdSchema } from '../primitives/schema/ids';
-import { auditLogFilterSchema, auditLogListResponseSchema } from '../engine/audit-log/audit.log';
 
 import type { Contract } from '../primitives/api';
 

@@ -1,4 +1,4 @@
-// main/shared/src/domain/admin/index.ts
+// main/shared/src/core/admin/index.ts
 /**
  * Admin Domain
  *
@@ -15,10 +15,6 @@ export {
   getUserStatusTone,
 } from './admin.display';
 
-import { adminContract } from '../../contracts';
-
-export { adminContract };
-
 export {
   USER_STATUSES,
   adminActionResponseSchema,
@@ -27,11 +23,17 @@ export {
   adminLockUserRequestSchema,
   adminLockUserResponseSchema,
   adminSuspendTenantRequestSchema,
+  adminTenantSchema,
+  adminTenantsListResponseSchema,
   adminUpdateUserRequestSchema,
   adminUpdateUserResponseSchema,
   adminUserListFiltersSchema,
   adminUserListResponseSchema,
   adminUserSchema,
+  endImpersonationResponseSchema,
+  impersonationResponseSchema,
+  routeManifestResponseSchema,
+  systemStatsResponseSchema,
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
   userStatusSchema,
@@ -44,11 +46,17 @@ export type {
   AdminLockUserRequest,
   AdminLockUserResponse,
   AdminSuspendTenantRequest,
+  AdminTenant,
+  AdminTenantsListResponse,
   AdminUpdateUserRequest,
   AdminUpdateUserResponse,
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
+  EndImpersonationResponse,
+  ImpersonationResponse,
+  RouteManifestResponse,
+  SystemStatsResponse,
   UnlockAccountRequest,
   UnlockAccountResponse,
   UserStatus,

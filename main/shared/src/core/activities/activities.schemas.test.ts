@@ -1,4 +1,4 @@
-// main/shared/src/domain/activities/activities.schemas.test.ts
+// main/shared/src/core/activities/activities.schemas.test.ts
 
 /**
  * @file Unit Tests for Activities Domain Schemas
@@ -9,9 +9,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  activitiesListFiltersSchema,
   activitySchema,
   actorTypeSchema,
   createActivitySchema,
+  type ActivitiesListFilters,
   type Activity,
   type CreateActivity,
 } from './activities.schemas';
@@ -367,6 +369,163 @@ describe('createActivitySchema', () => {
           resourceId: 'test-1',
         }),
       ).toThrow();
+    });
+  });
+});
+
+// ============================================================================
+// activitiesListFiltersSchema Tests
+// ============================================================================
+
+describe('activitiesListFiltersSchema', () => {
+  describe('valid inputs', () => {
+    it('should parse empty filters (all optional)', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({});
+
+      expect(result.resourceType).toBeUndefined();
+      expect(result.actorId).toBeUndefined();
+      expect(result.action).toBeUndefined();
+      expect(result.cursor).toBeUndefined();
+      expect(result.limit).toBeUndefined();
+    });
+
+    it('should parse filters with resourceType only', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({
+        resourceType: 'project',
+      });
+
+      expect(result.resourceType).toBe('project');
+      expect(result.actorId).toBeUndefined();
+    });
+
+    it('should parse filters with actorId only', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({
+        actorId: VALID_UUID,
+      });
+
+      expect(result.actorId).toBe(VALID_UUID);
+    });
+
+    it('should parse filters with action only', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({
+        action: 'created',
+      });
+
+      expect(result.action).toBe('created');
+    });
+
+    it('should parse filters with cursor only', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({
+        cursor: 'cursor_abc123',
+      });
+
+      expect(result.cursor).toBe('cursor_abc123');
+    });
+
+    it('should parse filters with limit only', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({ limit: 50 });
+
+      expect(result.limit).toBe(50);
+    });
+
+    it('should parse filters with all fields', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({
+        resourceType: 'task',
+        actorId: VALID_UUID,
+        action: 'updated',
+        cursor: 'cursor_xyz',
+        limit: 25,
+      });
+
+      expect(result.resourceType).toBe('task');
+      expect(result.actorId).toBe(VALID_UUID);
+      expect(result.action).toBe('updated');
+      expect(result.cursor).toBe('cursor_xyz');
+      expect(result.limit).toBe(25);
+    });
+
+    it('should parse limit at minimum boundary (1)', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({ limit: 1 });
+
+      expect(result.limit).toBe(1);
+    });
+
+    it('should parse limit at maximum boundary (100)', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse({ limit: 100 });
+
+      expect(result.limit).toBe(100);
+    });
+  });
+
+  describe('invalid inputs', () => {
+    it('should throw when resourceType is empty string', () => {
+      expect(() => activitiesListFiltersSchema.parse({ resourceType: '' })).toThrow(
+        'resourceType must be at least 1 character',
+      );
+    });
+
+    it('should throw when actorId is empty string', () => {
+      expect(() => activitiesListFiltersSchema.parse({ actorId: '' })).toThrow(
+        'actorId must be at least 1 character',
+      );
+    });
+
+    it('should throw when action is empty string', () => {
+      expect(() => activitiesListFiltersSchema.parse({ action: '' })).toThrow(
+        'action must be at least 1 character',
+      );
+    });
+
+    it('should throw when cursor is empty string', () => {
+      expect(() => activitiesListFiltersSchema.parse({ cursor: '' })).toThrow(
+        'cursor must be at least 1 character',
+      );
+    });
+
+    it('should throw when limit is zero', () => {
+      expect(() => activitiesListFiltersSchema.parse({ limit: 0 })).toThrow();
+    });
+
+    it('should throw when limit exceeds 100', () => {
+      expect(() => activitiesListFiltersSchema.parse({ limit: 101 })).toThrow();
+    });
+
+    it('should throw when limit is not an integer', () => {
+      expect(() => activitiesListFiltersSchema.parse({ limit: 10.5 })).toThrow();
+    });
+
+    it('should throw when limit is a string', () => {
+      expect(() => activitiesListFiltersSchema.parse({ limit: 'ten' })).toThrow(
+        'limit must be a number',
+      );
+    });
+
+    it('should throw when resourceType is a number', () => {
+      expect(() => activitiesListFiltersSchema.parse({ resourceType: 123 })).toThrow(
+        'resourceType must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should parse null input as empty filters (all optional)', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse(null);
+
+      expect(result.resourceType).toBeUndefined();
+      expect(result.limit).toBeUndefined();
+    });
+
+    it('should parse undefined input as empty filters', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse(undefined);
+
+      expect(result.resourceType).toBeUndefined();
+    });
+
+    it('should parse non-object input as empty filters', () => {
+      const result: ActivitiesListFilters = activitiesListFiltersSchema.parse('filters');
+
+      expect(result.resourceType).toBeUndefined();
+      expect(result.limit).toBeUndefined();
     });
   });
 });

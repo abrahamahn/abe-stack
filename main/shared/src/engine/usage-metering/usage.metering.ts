@@ -1,4 +1,4 @@
-// src/engine/usage-metering/usage.metering.ts
+// main/shared/src/engine/usage-metering/usage.metering.ts
 
 /**
  * @file Usage Metering
@@ -7,8 +7,7 @@
  * @module Domain/UsageMetering
  */
 
-import { createEnumSchema, createSchema, parseNumber, parseString } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../primitives/schema';
+import { createEnumSchema, createSchema, parseNumber, parseString, isoDateTimeSchema  } from '../../primitives/schema';
 import { tenantIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
@@ -83,6 +82,56 @@ export const usageSnapshotSchema: Schema<UsageSnapshot> = createSchema((data: un
     updatedAt: isoDateTimeSchema.parse(obj['updatedAt']),
   };
 });
+
+// ============================================================================
+// Response Schemas
+// ============================================================================
+
+/** Summary of a single metric's usage against its quota */
+export interface UsageMetricSummary {
+  metricKey: string;
+  name: string;
+  unit: string;
+  currentValue: number;
+  limit: number;
+  percentUsed: number;
+}
+
+/** Response for the usage summary endpoint */
+export interface UsageSummaryResponse {
+  metrics: UsageMetricSummary[];
+  periodStart: string;
+  periodEnd: string;
+}
+
+export const usageMetricSummarySchema: Schema<UsageMetricSummary> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      metricKey: parseString(obj['metricKey'], 'metricKey'),
+      name: parseString(obj['name'], 'name'),
+      unit: parseString(obj['unit'], 'unit'),
+      currentValue: parseNumber(obj['currentValue'], 'currentValue'),
+      limit: parseNumber(obj['limit'], 'limit'),
+      percentUsed: parseNumber(obj['percentUsed'], 'percentUsed'),
+    };
+  },
+);
+
+export const usageSummaryResponseSchema: Schema<UsageSummaryResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['metrics'])) throw new Error('metrics must be an array');
+
+    return {
+      metrics: obj['metrics'].map((item) => usageMetricSummarySchema.parse(item)),
+      periodStart: isoDateTimeSchema.parse(obj['periodStart']),
+      periodEnd: isoDateTimeSchema.parse(obj['periodEnd']),
+    };
+  },
+);
 
 // ============================================================================
 // Functions

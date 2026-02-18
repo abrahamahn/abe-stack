@@ -1,4 +1,4 @@
-// main/shared/src/domain/admin/admin.schemas.ts
+// main/shared/src/core/admin/admin.schemas.ts
 /**
  * Admin Schemas
  *
@@ -6,7 +6,6 @@
  * @module Domain/Admin
  */
 
-import { appRoleSchema, type AppRole } from '../auth/roles';
 import { paginatedResultSchema } from '../../engine/pagination';
 import {
   createSchema,
@@ -16,9 +15,12 @@ import {
   parseOptional,
   parseString,
 } from '../../primitives/schema';
+import { tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import { appRoleSchema, type AppRole } from '../auth/roles';
 import { emailSchema, isoDateTimeSchema, usernameSchema, uuidSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';
+import type { TenantId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types
@@ -303,6 +305,121 @@ export const adminSuspendTenantRequestSchema: Schema<AdminSuspendTenantRequest> 
     const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
     return {
       reason: parseString(obj['reason'], 'reason', { min: 1, max: 500 }),
+    };
+  },
+);
+
+// ============================================================================
+// Admin Tenant Response Schemas
+// ============================================================================
+
+/** Admin view of a tenant */
+export interface AdminTenant {
+  id: TenantId;
+  name: string;
+  slug: string;
+  ownerId: UserId;
+  isActive: boolean;
+  isSuspended: boolean;
+  memberCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Paginated list of admin tenants */
+export type AdminTenantsListResponse = ReturnType<typeof adminTenantsListResponseSchema.parse>;
+
+/** Impersonation response */
+export interface ImpersonationResponse {
+  message: string;
+  targetUserId: string;
+  sessionToken: string;
+}
+
+/** End impersonation response */
+export interface EndImpersonationResponse {
+  message: string;
+}
+
+/** System stats response */
+export interface SystemStatsResponse {
+  totalUsers: number;
+  totalTenants: number;
+  activeSubscriptions: number;
+  monthlyRevenue: number;
+}
+
+/** Route manifest response */
+export interface RouteManifestResponse {
+  routes: string[];
+  timestamp: string;
+}
+
+export const adminTenantSchema: Schema<AdminTenant> = createSchema((data: unknown) => {
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  return {
+    id: tenantIdSchema.parse(obj['id']),
+    name: parseString(obj['name'], 'name'),
+    slug: parseString(obj['slug'], 'slug'),
+    ownerId: userIdSchema.parse(obj['ownerId']),
+    isActive: parseBoolean(obj['isActive'], 'isActive'),
+    isSuspended: parseBoolean(obj['isSuspended'], 'isSuspended'),
+    memberCount: parseNumber(obj['memberCount'], 'memberCount', { int: true, min: 0 }),
+    createdAt: isoDateTimeSchema.parse(obj['createdAt']),
+    updatedAt: isoDateTimeSchema.parse(obj['updatedAt']),
+  };
+});
+
+export const adminTenantsListResponseSchema = paginatedResultSchema(adminTenantSchema);
+
+export const impersonationResponseSchema: Schema<ImpersonationResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+      targetUserId: parseString(obj['targetUserId'], 'targetUserId'),
+      sessionToken: parseString(obj['sessionToken'], 'sessionToken'),
+    };
+  },
+);
+
+export const endImpersonationResponseSchema: Schema<EndImpersonationResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      message: parseString(obj['message'], 'message'),
+    };
+  },
+);
+
+export const systemStatsResponseSchema: Schema<SystemStatsResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      totalUsers: parseNumber(obj['totalUsers'], 'totalUsers', { int: true, min: 0 }),
+      totalTenants: parseNumber(obj['totalTenants'], 'totalTenants', { int: true, min: 0 }),
+      activeSubscriptions: parseNumber(obj['activeSubscriptions'], 'activeSubscriptions', {
+        int: true,
+        min: 0,
+      }),
+      monthlyRevenue: parseNumber(obj['monthlyRevenue'], 'monthlyRevenue', { min: 0 }),
+    };
+  },
+);
+
+export const routeManifestResponseSchema: Schema<RouteManifestResponse> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    if (!Array.isArray(obj['routes'])) throw new Error('routes must be an array');
+
+    return {
+      routes: obj['routes'].map((item) => parseString(item, 'routes[]')),
+      timestamp: isoDateTimeSchema.parse(obj['timestamp']),
     };
   },
 );

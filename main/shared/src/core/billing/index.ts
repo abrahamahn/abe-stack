@@ -32,11 +32,6 @@ import type { PlanId, SubscriptionId } from '../../primitives/schema/ids';
 
 export type { PlanId, SubscriptionId };
 
-// --- contracts ---
-import { billingContract } from '../../contracts';
-
-export { billingContract };
-
 // --- billing.schemas ---
 export {
   addPaymentMethodRequestSchema,
