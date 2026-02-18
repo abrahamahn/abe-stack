@@ -12,7 +12,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { cleanupUnverifiedUsers } from './unverified-cleanup';
 
 import type { DbClient, Repositories } from '../../../db/src';
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Factories

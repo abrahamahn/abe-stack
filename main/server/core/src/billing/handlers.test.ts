@@ -25,7 +25,7 @@ import {
 } from './handlers';
 
 import type { BillingAppContext, BillingRequest } from './types';
-import type { PlanId } from '@abe-stack/shared/domain';
+import type { PlanId } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies

@@ -24,7 +24,7 @@ import { handleStripeWebhook } from './stripe-webhook';
 import type { WebhookRepositories } from '../types';
 import type { NormalizedWebhookEvent } from '@abe-stack/shared';
 import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies

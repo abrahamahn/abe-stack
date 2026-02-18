@@ -15,7 +15,7 @@ import { handleDeleteFile, handleDownloadFile, handleGetFile, handleUploadFile }
 import type { FileStorageProvider } from './types';
 import type { FileRepository } from '../../../db/src';
 import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser, Logger } from '@abe-stack/shared/core';
+import type { AuthenticatedUser, Logger } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

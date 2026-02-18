@@ -22,7 +22,7 @@ import { handlePayPalWebhook } from './paypal-webhook';
 import type { WebhookRepositories } from '../types';
 import type { NormalizedWebhookEvent } from '@abe-stack/shared';
 import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies

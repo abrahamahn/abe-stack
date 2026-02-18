@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerScheduledTasks, stopScheduledTasks } from './service';
 
 import type { Repositories } from '../../../db/src';
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Helpers

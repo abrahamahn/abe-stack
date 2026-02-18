@@ -14,7 +14,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { anonymizeExpiredUsers } from './pii-anonymization';
 
 import type { DbClient } from '../../../db/src';
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Factories

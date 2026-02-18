@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/compliance.schemas.test.ts
+// main/shared/src/core/compliance/compliance.schemas.test.ts
 
 /**
  * @file Compliance Schemas Unit Tests
@@ -9,13 +9,22 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  complianceActionResponseSchema,
   consentLogSchema,
+  consentPreferencesResponseSchema,
   createConsentLogSchema,
   createLegalDocumentSchema,
   createUserAgreementSchema,
+  dataExportRequestedResponseSchema,
   legalDocumentSchema,
   updateLegalDocumentSchema,
   userAgreementSchema,
+} from './compliance.schemas';
+
+import type {
+  ComplianceActionResponse,
+  ConsentPreferencesResponse,
+  DataExportRequestedResponse,
 } from './compliance.schemas';
 
 import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../types/ids';
@@ -908,6 +917,241 @@ describe('createConsentLogSchema', () => {
           region: 'US',
         },
       });
+    });
+  });
+});
+
+// ============================================================================
+// consentPreferencesResponseSchema Tests
+// ============================================================================
+
+describe('consentPreferencesResponseSchema', () => {
+  function createValidPreferences(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
+    return {
+      analytics: true,
+      marketing_email: false,
+      third_party_sharing: false,
+      profiling: true,
+      ...overrides,
+    };
+  }
+
+  describe('when given valid input', () => {
+    it('should parse response with all fields true', () => {
+      const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
+        createValidPreferences({ analytics: true, marketing_email: true, third_party_sharing: true, profiling: true }),
+      );
+
+      expect(result.analytics).toBe(true);
+      expect(result.marketing_email).toBe(true);
+      expect(result.third_party_sharing).toBe(true);
+      expect(result.profiling).toBe(true);
+    });
+
+    it('should parse response with all fields false', () => {
+      const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
+        createValidPreferences({ analytics: false, marketing_email: false, third_party_sharing: false, profiling: false }),
+      );
+
+      expect(result.analytics).toBe(false);
+      expect(result.marketing_email).toBe(false);
+      expect(result.third_party_sharing).toBe(false);
+      expect(result.profiling).toBe(false);
+    });
+
+    it('should parse mixed preferences', () => {
+      const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
+        createValidPreferences(),
+      );
+
+      expect(result.analytics).toBe(true);
+      expect(result.marketing_email).toBe(false);
+      expect(result.profiling).toBe(true);
+    });
+  });
+
+  describe('when given invalid input', () => {
+    it('should throw when analytics is missing', () => {
+      const { analytics: _a, ...input } = createValidPreferences();
+      expect(() => consentPreferencesResponseSchema.parse(input)).toThrow(
+        'analytics must be a boolean',
+      );
+    });
+
+    it('should throw when marketing_email is not a boolean', () => {
+      expect(() =>
+        consentPreferencesResponseSchema.parse(createValidPreferences({ marketing_email: 'yes' })),
+      ).toThrow('marketing_email must be a boolean');
+    });
+
+    it('should throw when third_party_sharing is null', () => {
+      expect(() =>
+        consentPreferencesResponseSchema.parse(createValidPreferences({ third_party_sharing: null })),
+      ).toThrow('third_party_sharing must be a boolean');
+    });
+
+    it('should throw when profiling is a number', () => {
+      expect(() =>
+        consentPreferencesResponseSchema.parse(createValidPreferences({ profiling: 1 })),
+      ).toThrow('profiling must be a boolean');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => consentPreferencesResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for empty object', () => {
+      expect(() => consentPreferencesResponseSchema.parse({})).toThrow(
+        'analytics must be a boolean',
+      );
+    });
+  });
+});
+
+// ============================================================================
+// dataExportRequestedResponseSchema Tests
+// ============================================================================
+
+describe('dataExportRequestedResponseSchema', () => {
+  function createValidExportResponse(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
+    return {
+      message: 'Data export request submitted',
+      requestId: 'req_abc123',
+      estimatedCompletionAt: '2026-02-20T12:00:00.000Z',
+      ...overrides,
+    };
+  }
+
+  describe('when given valid input', () => {
+    it('should parse valid data export response', () => {
+      const result: DataExportRequestedResponse = dataExportRequestedResponseSchema.parse(
+        createValidExportResponse(),
+      );
+
+      expect(result.message).toBe('Data export request submitted');
+      expect(result.requestId).toBe('req_abc123');
+      expect(result.estimatedCompletionAt).toBe('2026-02-20T12:00:00.000Z');
+    });
+
+    it('should parse response with different requestId format', () => {
+      const result: DataExportRequestedResponse = dataExportRequestedResponseSchema.parse(
+        createValidExportResponse({ requestId: '00000000-0000-0000-0000-000000000001' }),
+      );
+
+      expect(result.requestId).toBe('00000000-0000-0000-0000-000000000001');
+    });
+  });
+
+  describe('when given invalid input', () => {
+    it('should throw when message is missing', () => {
+      const { message: _m, ...input } = createValidExportResponse();
+      expect(() => dataExportRequestedResponseSchema.parse(input)).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when requestId is missing', () => {
+      const { requestId: _r, ...input } = createValidExportResponse();
+      expect(() => dataExportRequestedResponseSchema.parse(input)).toThrow(
+        'requestId must be a string',
+      );
+    });
+
+    it('should throw when estimatedCompletionAt is missing', () => {
+      const { estimatedCompletionAt: _e, ...input } = createValidExportResponse();
+      expect(() => dataExportRequestedResponseSchema.parse(input)).toThrow(
+        'estimatedCompletionAt must be a string',
+      );
+    });
+
+    it('should throw when message is null', () => {
+      expect(() =>
+        dataExportRequestedResponseSchema.parse(createValidExportResponse({ message: null })),
+      ).toThrow('message must be a string');
+    });
+
+    it('should throw when requestId is a number', () => {
+      expect(() =>
+        dataExportRequestedResponseSchema.parse(createValidExportResponse({ requestId: 42 })),
+      ).toThrow('requestId must be a string');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => dataExportRequestedResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for empty object', () => {
+      expect(() => dataExportRequestedResponseSchema.parse({})).toThrow(
+        'message must be a string',
+      );
+    });
+  });
+});
+
+// ============================================================================
+// complianceActionResponseSchema Tests
+// ============================================================================
+
+describe('complianceActionResponseSchema', () => {
+  describe('when given valid input', () => {
+    it('should parse valid compliance action response', () => {
+      const result: ComplianceActionResponse = complianceActionResponseSchema.parse({
+        message: 'Consent preferences updated',
+      });
+
+      expect(result.message).toBe('Consent preferences updated');
+    });
+
+    it('should parse response with empty message', () => {
+      const result: ComplianceActionResponse = complianceActionResponseSchema.parse({
+        message: '',
+      });
+
+      expect(result.message).toBe('');
+    });
+
+    it('should parse response with deletion confirmation message', () => {
+      const result: ComplianceActionResponse = complianceActionResponseSchema.parse({
+        message: 'Account deletion request submitted. Your data will be deleted within 30 days.',
+      });
+
+      expect(result.message).toContain('deletion request submitted');
+    });
+  });
+
+  describe('when given invalid input', () => {
+    it('should throw when message is missing', () => {
+      expect(() => complianceActionResponseSchema.parse({})).toThrow('message must be a string');
+    });
+
+    it('should throw when message is null', () => {
+      expect(() => complianceActionResponseSchema.parse({ message: null })).toThrow(
+        'message must be a string',
+      );
+    });
+
+    it('should throw when message is a boolean', () => {
+      expect(() => complianceActionResponseSchema.parse({ message: false })).toThrow(
+        'message must be a string',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should throw for null input', () => {
+      expect(() => complianceActionResponseSchema.parse(null)).toThrow();
+    });
+
+    it('should throw for non-object input', () => {
+      expect(() => complianceActionResponseSchema.parse('ok')).toThrow('message must be a string');
     });
   });
 });
