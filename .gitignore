@@ -17,6 +17,7 @@ out/
 *.txt
 vitest.config.d.ts
 vitest.config.d.ts.map
+*.diff
 
 # TypeScript build artifacts in source directories (stray tsc emit)
 main/**/*.js.map

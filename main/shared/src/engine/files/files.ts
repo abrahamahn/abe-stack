@@ -7,6 +7,7 @@
  */
 
 import { ALLOWED_IMAGE_MIME_TYPES } from '../../primitives/constants/media';
+import { generateSecureId } from '../../primitives/helpers/crypto';
 import {
   coerceDate,
   createEnumSchema,
@@ -20,7 +21,6 @@ import {
 } from '../../primitives/schema';
 import { fileIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { LIMITS } from '../constants/limits';
-import { generateSecureId } from '../../primitives/helpers/crypto';
 
 import type { Schema } from '../../primitives/api';
 import type { FileId, TenantId, UserId } from '../../primitives/schema/ids';

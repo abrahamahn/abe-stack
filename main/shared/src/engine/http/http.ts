@@ -65,7 +65,9 @@ export interface ValidationSchema<T = unknown> {
  * HTTP methods supported by routes.
  * Canonical definition in primitives/api.ts — re-exported for engine consumers.
  */
-export type { HttpMethod } from '../../primitives/api';
+import type { HttpMethod } from '../../primitives/api';
+
+export type { HttpMethod };
 
 /**
  * Handler context type - placeholder for the actual context interface.

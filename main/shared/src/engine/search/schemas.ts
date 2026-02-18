@@ -7,7 +7,7 @@
  */
 
 import { createSchema } from '../../primitives/schema';
-import { FILTER_OPERATORS, LOGICAL_OPERATORS, SEARCH_DEFAULTS, SORT_ORDER } from '../constants/limits';
+import { FILTER_OPERATORS, LOGICAL_OPERATORS, SEARCH_DEFAULTS } from '../constants/limits';
 import { sortOrderSchema } from '../pagination/pagination';
 
 import type {
