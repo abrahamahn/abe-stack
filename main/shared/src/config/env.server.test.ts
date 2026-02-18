@@ -187,9 +187,9 @@ describe('ServerEnvSchema', () => {
     });
 
     it('accepts warn', () => {
-      expect(
-        ServerEnvSchema.parse({ LOG_CLIENT_ERROR_LEVEL: 'warn' }).LOG_CLIENT_ERROR_LEVEL,
-      ).toBe('warn');
+      expect(ServerEnvSchema.parse({ LOG_CLIENT_ERROR_LEVEL: 'warn' }).LOG_CLIENT_ERROR_LEVEL).toBe(
+        'warn',
+      );
     });
 
     it('rejects verbose', () => {
@@ -304,9 +304,9 @@ describe('ServerEnvSchema', () => {
 
   describe('LOG_REQUEST_CONTEXT and LOG_PRETTY_JSON', () => {
     it('accepts true for LOG_REQUEST_CONTEXT', () => {
-      expect(
-        ServerEnvSchema.parse({ LOG_REQUEST_CONTEXT: 'true' }).LOG_REQUEST_CONTEXT,
-      ).toBe('true');
+      expect(ServerEnvSchema.parse({ LOG_REQUEST_CONTEXT: 'true' }).LOG_REQUEST_CONTEXT).toBe(
+        'true',
+      );
     });
 
     it('accepts false for LOG_PRETTY_JSON', () => {

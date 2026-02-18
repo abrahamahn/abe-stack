@@ -222,19 +222,21 @@ export const setOperationSchema: Schema<RealtimeSetOperation> = createSchema((da
 });
 
 /** @complexity O(1) */
-export const setNowOperationSchema: Schema<RealtimeSetNowOperation> = createSchema((data: unknown) => {
-  if (data === null || data === undefined || typeof data !== 'object') {
-    throw new Error('Invalid set-now operation');
-  }
-  const obj = data as Record<string, unknown>;
-  if (obj['type'] !== 'set-now') throw new Error('Operation type must be "set-now"');
-  return {
-    type: 'set-now',
-    table: validateNonEmptyString(obj['table'], 'table'),
-    id: uuidSchema.parse(obj['id']),
-    key: validateNonEmptyString(obj['key'], 'key'),
-  };
-});
+export const setNowOperationSchema: Schema<RealtimeSetNowOperation> = createSchema(
+  (data: unknown) => {
+    if (data === null || data === undefined || typeof data !== 'object') {
+      throw new Error('Invalid set-now operation');
+    }
+    const obj = data as Record<string, unknown>;
+    if (obj['type'] !== 'set-now') throw new Error('Operation type must be "set-now"');
+    return {
+      type: 'set-now',
+      table: validateNonEmptyString(obj['table'], 'table'),
+      id: uuidSchema.parse(obj['id']),
+      key: validateNonEmptyString(obj['key'], 'key'),
+    };
+  },
+);
 
 /** @complexity O(1) */
 export const listPositionSchema: Schema<ListPosition> = createSchema((data: unknown) => {

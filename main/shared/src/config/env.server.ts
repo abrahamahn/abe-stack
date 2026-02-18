@@ -101,18 +101,24 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
     API_PORT: parseOptional(obj['API_PORT'], (v: unknown) => coerceNumber(v, 'API_PORT')),
     APP_PORT: parseOptional(obj['APP_PORT'], (v: unknown) => coerceNumber(v, 'APP_PORT')),
     HEALTH_PORT: coerceNumber(withDefault(obj['HEALTH_PORT'], 8081), 'HEALTH_PORT'),
-    MAINTENANCE_MODE: parseOptional(obj['MAINTENANCE_MODE'], (v: unknown) => trueFalseSchema.parse(v)),
+    MAINTENANCE_MODE: parseOptional(obj['MAINTENANCE_MODE'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
     RATE_LIMIT_WINDOW_MS: parseOptional(obj['RATE_LIMIT_WINDOW_MS'], (v: unknown) =>
       coerceNumber(v, 'RATE_LIMIT_WINDOW_MS'),
     ),
-    RATE_LIMIT_MAX: parseOptional(obj['RATE_LIMIT_MAX'], (v: unknown) => coerceNumber(v, 'RATE_LIMIT_MAX')),
+    RATE_LIMIT_MAX: parseOptional(obj['RATE_LIMIT_MAX'], (v: unknown) =>
+      coerceNumber(v, 'RATE_LIMIT_MAX'),
+    ),
     PUBLIC_API_URL: parseOptional(obj['PUBLIC_API_URL'], (v: unknown) =>
       parseString(v, 'PUBLIC_API_URL', { url: true }),
     ),
     PUBLIC_APP_URL: parseOptional(obj['PUBLIC_APP_URL'], (v: unknown) =>
       parseString(v, 'PUBLIC_APP_URL', { url: true }),
     ),
-    APP_URL: parseOptional(obj['APP_URL'], (v: unknown) => parseString(v, 'APP_URL', { url: true })),
+    APP_URL: parseOptional(obj['APP_URL'], (v: unknown) =>
+      parseString(v, 'APP_URL', { url: true }),
+    ),
     API_BASE_URL: parseOptional(obj['API_BASE_URL'], (v: unknown) =>
       parseString(v, 'API_BASE_URL', { url: true }),
     ),
@@ -120,7 +126,9 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
       parseString(v, 'APP_BASE_URL', { url: true }),
     ),
     CORS_ORIGIN: parseOptional(obj['CORS_ORIGIN'], (v: unknown) => parseString(v, 'CORS_ORIGIN')),
-    CORS_ORIGINS: parseOptional(obj['CORS_ORIGINS'], (v: unknown) => parseString(v, 'CORS_ORIGINS')),
+    CORS_ORIGINS: parseOptional(obj['CORS_ORIGINS'], (v: unknown) =>
+      parseString(v, 'CORS_ORIGINS'),
+    ),
     LOG_LEVEL: createEnumSchema(['debug', 'info', 'warn', 'error'] as const, 'LOG_LEVEL').parse(
       withDefault(obj['LOG_LEVEL'], 'info'),
     ),
@@ -132,7 +140,11 @@ export const ServerEnvSchema: Schema<ServerEnv> = createSchema<ServerEnv>((data:
         v,
       ),
     ),
-    LOG_REQUEST_CONTEXT: parseOptional(obj['LOG_REQUEST_CONTEXT'], (v: unknown) => trueFalseSchema.parse(v)),
-    LOG_PRETTY_JSON: parseOptional(obj['LOG_PRETTY_JSON'], (v: unknown) => trueFalseSchema.parse(v)),
+    LOG_REQUEST_CONTEXT: parseOptional(obj['LOG_REQUEST_CONTEXT'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
+    LOG_PRETTY_JSON: parseOptional(obj['LOG_PRETTY_JSON'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
   };
 });

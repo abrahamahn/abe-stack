@@ -160,11 +160,7 @@ function mapKeys(
     return obj;
   }
 
-  if (
-    obj instanceof Date ||
-    obj instanceof RegExp ||
-    ArrayBuffer.isView(obj)
-  ) {
+  if (obj instanceof Date || obj instanceof RegExp || ArrayBuffer.isView(obj)) {
     return obj;
   }
 
@@ -326,12 +322,16 @@ export function stripControlChars(input: string): string {
   // Matches C0 controls except HT/LF/CR, and DEL (U+007F).
   const controlCharsRe = new RegExp(
     '[' +
-      String.fromCharCode(0) + '-' + String.fromCharCode(8) +
+      String.fromCharCode(0) +
+      '-' +
+      String.fromCharCode(8) +
       String.fromCharCode(11) +
       String.fromCharCode(12) +
-      String.fromCharCode(14) + '-' + String.fromCharCode(31) +
+      String.fromCharCode(14) +
+      '-' +
+      String.fromCharCode(31) +
       String.fromCharCode(127) +
-    ']',
+      ']',
     'gu',
   );
   let sanitized = input.replace(nullByteRe, '');

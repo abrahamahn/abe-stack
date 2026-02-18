@@ -168,10 +168,7 @@ export const EnvSchema: Schema<FullEnv> = createSchema<FullEnv>((data: unknown) 
  * @param schema - The schema to validate against
  * @param rawEnv - Optional env source override (e.g., import.meta.env for Vite clients)
  */
-export function validateEnv<T>(
-  schema: Schema<T>,
-  rawEnv?: Record<string, string | undefined>,
-): T {
+export function validateEnv<T>(schema: Schema<T>, rawEnv?: Record<string, string | undefined>): T {
   const result = schema.safeParse(getRawEnv(rawEnv));
 
   if (!result.success) {

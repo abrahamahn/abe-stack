@@ -640,9 +640,7 @@ describe('operators', () => {
                 conditions: [
                   {
                     operator: 'or',
-                    conditions: [
-                      { field: 'score', operator: 'gte', value: 90 },
-                    ],
+                    conditions: [{ field: 'score', operator: 'gte', value: 90 }],
                   },
                 ],
               },
@@ -897,9 +895,7 @@ describe('operators', () => {
 
   describe('adversarial: evaluateFilter throws on invalid structure', () => {
     test('evaluateFilter throws on object without field or conditions', () => {
-      expect(() =>
-        evaluateFilter({ operator: 'and' } as unknown as CompoundFilter, {}),
-      ).toThrow();
+      expect(() => evaluateFilter({ operator: 'and' } as unknown as CompoundFilter, {})).toThrow();
     });
 
     test('evaluateCompoundFilter throws on unknown logical operator', () => {
@@ -907,7 +903,9 @@ describe('operators', () => {
         operator: 'xor',
         conditions: [{ field: 'x', operator: 'eq', value: 'y' }],
       } as unknown as CompoundFilter;
-      expect(() => evaluateCompoundFilter(badFilter, { x: 'y' })).toThrow('Unknown logical operator: xor');
+      expect(() => evaluateCompoundFilter(badFilter, { x: 'y' })).toThrow(
+        'Unknown logical operator: xor',
+      );
     });
   });
 });

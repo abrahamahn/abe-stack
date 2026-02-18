@@ -6,7 +6,11 @@
  * Schemas, types, and utilities for file records and storage operations.
  */
 
-import { ALLOWED_IMAGE_MIME_TYPES, FILE_PURPOSES, STORAGE_PROVIDERS } from '../../primitives/constants/media';
+import {
+  ALLOWED_IMAGE_MIME_TYPES,
+  FILE_PURPOSES,
+  STORAGE_PROVIDERS,
+} from '../../primitives/constants/media';
 import { generateSecureId } from '../../primitives/helpers/crypto';
 import {
   coerceDate,

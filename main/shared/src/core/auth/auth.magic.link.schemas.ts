@@ -12,7 +12,6 @@ import { userSchema } from '../users/users.schemas';
 import type { Schema } from '../../primitives/schema';
 import type { User } from '../users/users.schemas';
 
-
 // ============================================================================
 // Types
 // ============================================================================

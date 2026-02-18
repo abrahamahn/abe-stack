@@ -26,7 +26,13 @@ export const NOTIFICATION_ENV_PROVIDERS = [
 // ============================================================================
 
 export const NOTIFICATION_CHANNELS = ['push', 'email', 'sms', 'in_app'] as const;
-export const NOTIFICATION_TYPES = ['system', 'security', 'marketing', 'social', 'transactional'] as const;
+export const NOTIFICATION_TYPES = [
+  'system',
+  'security',
+  'marketing',
+  'social',
+  'transactional',
+] as const;
 export const NOTIFICATION_LEVELS = ['info', 'success', 'warning', 'error'] as const;
 export const NOTIFICATION_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
 

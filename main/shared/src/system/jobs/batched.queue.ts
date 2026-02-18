@@ -89,7 +89,9 @@ export class BatchedQueue<T, R = T> {
   enqueue(item: T): Promise<R> {
     // Check if we've exceeded the maximum queue size
     if (this.tasks.length >= this.options.maxQueueSize) {
-      throw new QueueFullError(`Queue size exceeded maximum of ${String(this.options.maxQueueSize)}`);
+      throw new QueueFullError(
+        `Queue size exceeded maximum of ${String(this.options.maxQueueSize)}`,
+      );
     }
 
     const deferred = new DeferredPromise<R>();

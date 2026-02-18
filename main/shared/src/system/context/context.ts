@@ -15,7 +15,13 @@
  * @module context
  */
 
-import type { EmailService, HasErrorTracker, Logger, NotificationService, StorageService } from '../ports';
+import type {
+  EmailService,
+  HasErrorTracker,
+  Logger,
+  NotificationService,
+  StorageService,
+} from '../ports';
 
 // ============================================================================
 // Base Context

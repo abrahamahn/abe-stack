@@ -531,7 +531,7 @@ describe('search errors', () => {
       const serialized = JSON.stringify(json);
       const parsed = JSON.parse(serialized) as typeof json;
 
-      expect(parsed.error.details?.['raw']).toBe("SELECT * FROM users WHERE name = '\";");
+      expect(parsed.error.details?.['raw']).toBe('SELECT * FROM users WHERE name = \'";');
       expect(parsed.error.details?.['unicode']).toBe('\u{1F525}');
     });
 
@@ -544,7 +544,10 @@ describe('search errors', () => {
     });
 
     test('SearchProviderUnavailableError with custom message round-trips', () => {
-      const err = new SearchProviderUnavailableError('solr', 'Solr cluster is down for maintenance');
+      const err = new SearchProviderUnavailableError(
+        'solr',
+        'Solr cluster is down for maintenance',
+      );
       const json = err.toJSON();
       const serialized = JSON.stringify(json);
       const parsed = JSON.parse(serialized) as typeof json;

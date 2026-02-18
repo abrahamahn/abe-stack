@@ -133,24 +133,39 @@ export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>(
         'DATABASE_PROVIDER',
       ).parse(v),
     ),
-    POSTGRES_HOST: parseOptional(obj['POSTGRES_HOST'], (v: unknown) => parseString(v, 'POSTGRES_HOST')),
-    POSTGRES_PORT: parseOptional(obj['POSTGRES_PORT'], (v: unknown) => coerceNumber(v, 'POSTGRES_PORT')),
+    POSTGRES_HOST: parseOptional(obj['POSTGRES_HOST'], (v: unknown) =>
+      parseString(v, 'POSTGRES_HOST'),
+    ),
+    POSTGRES_PORT: parseOptional(obj['POSTGRES_PORT'], (v: unknown) =>
+      coerceNumber(v, 'POSTGRES_PORT'),
+    ),
     POSTGRES_DB: parseOptional(obj['POSTGRES_DB'], (v: unknown) => parseString(v, 'POSTGRES_DB')),
-    POSTGRES_USER: parseOptional(obj['POSTGRES_USER'], (v: unknown) => parseString(v, 'POSTGRES_USER')),
+    POSTGRES_USER: parseOptional(obj['POSTGRES_USER'], (v: unknown) =>
+      parseString(v, 'POSTGRES_USER'),
+    ),
     POSTGRES_PASSWORD: parseOptional(obj['POSTGRES_PASSWORD'], (v: unknown) =>
       parseString(v, 'POSTGRES_PASSWORD'),
     ),
     POSTGRES_CONNECTION_STRING: parseOptional(obj['POSTGRES_CONNECTION_STRING'], (v: unknown) =>
       parseString(v, 'POSTGRES_CONNECTION_STRING'),
     ),
-    DATABASE_URL: parseOptional(obj['DATABASE_URL'], (v: unknown) => parseString(v, 'DATABASE_URL')),
-    DB_MAX_CONNECTIONS: coerceNumber(withDefault(obj['DB_MAX_CONNECTIONS'], 20), 'DB_MAX_CONNECTIONS'),
+    DATABASE_URL: parseOptional(obj['DATABASE_URL'], (v: unknown) =>
+      parseString(v, 'DATABASE_URL'),
+    ),
+    DB_MAX_CONNECTIONS: coerceNumber(
+      withDefault(obj['DB_MAX_CONNECTIONS'], 20),
+      'DB_MAX_CONNECTIONS',
+    ),
     DB_SSL: parseOptional(obj['DB_SSL'], (v: unknown) => trueFalseSchema.parse(v)),
     SQLITE_FILE_PATH: parseOptional(obj['SQLITE_FILE_PATH'], (v: unknown) =>
       parseString(v, 'SQLITE_FILE_PATH'),
     ),
-    SQLITE_WAL_MODE: parseOptional(obj['SQLITE_WAL_MODE'], (v: unknown) => trueFalseSchema.parse(v)),
-    SQLITE_FOREIGN_KEYS: parseOptional(obj['SQLITE_FOREIGN_KEYS'], (v: unknown) => trueFalseSchema.parse(v)),
+    SQLITE_WAL_MODE: parseOptional(obj['SQLITE_WAL_MODE'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
+    SQLITE_FOREIGN_KEYS: parseOptional(obj['SQLITE_FOREIGN_KEYS'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
     SQLITE_TIMEOUT_MS: parseOptional(obj['SQLITE_TIMEOUT_MS'], (v: unknown) =>
       coerceNumber(v, 'SQLITE_TIMEOUT_MS'),
     ),
@@ -171,7 +186,9 @@ export const DatabaseEnvSchema: Schema<DatabaseEnv> = createSchema<DatabaseEnv>(
     MONGODB_USE_UNIFIED_TOPOLOGY: parseOptional(obj['MONGODB_USE_UNIFIED_TOPOLOGY'], (v: unknown) =>
       trueFalseSchema.parse(v),
     ),
-    JSON_DB_PATH: parseOptional(obj['JSON_DB_PATH'], (v: unknown) => parseString(v, 'JSON_DB_PATH')),
+    JSON_DB_PATH: parseOptional(obj['JSON_DB_PATH'], (v: unknown) =>
+      parseString(v, 'JSON_DB_PATH'),
+    ),
     JSON_DB_PERSIST_ON_WRITE: parseOptional(obj['JSON_DB_PERSIST_ON_WRITE'], (v: unknown) =>
       trueFalseSchema.parse(v),
     ),

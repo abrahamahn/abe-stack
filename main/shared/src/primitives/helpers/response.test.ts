@@ -290,7 +290,12 @@ describe('API Response Types', () => {
     it('isErrorResponse correctly identifies response with retryAfter = 0', () => {
       const response: ApiResponse<string> = {
         ok: false,
-        error: { code: 'RATE_LIMIT', message: 'retry now', correlationId: undefined, retryAfter: 0 },
+        error: {
+          code: 'RATE_LIMIT',
+          message: 'retry now',
+          correlationId: undefined,
+          retryAfter: 0,
+        },
       };
       expect(isErrorResponse(response)).toBe(true);
     });

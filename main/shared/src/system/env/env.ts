@@ -8,7 +8,12 @@
  * @module Engine/Env
  */
 
-import { createEnumSchema, createSchema, parseOptional, parseString } from '../../primitives/schema';
+import {
+  createEnumSchema,
+  createSchema,
+  parseOptional,
+  parseString,
+} from '../../primitives/schema';
 import { ConfigurationError } from '../errors';
 
 import type { Schema } from '../../primitives/api';
@@ -72,10 +77,7 @@ export function getRawEnv(
  * @returns Validated environment object
  * @throws ConfigurationError if validation fails
  */
-export function validateEnv<T>(
-  schema: Schema<T>,
-  rawEnv?: Record<string, string | undefined>,
-): T {
+export function validateEnv<T>(schema: Schema<T>, rawEnv?: Record<string, string | undefined>): T {
   const result = schema.safeParse(getRawEnv(rawEnv));
 
   if (!result.success) {

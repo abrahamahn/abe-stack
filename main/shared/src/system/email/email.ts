@@ -17,7 +17,11 @@ import {
   parseRecord,
   parseString,
 } from '../../primitives/schema';
-import { emailLogIdSchema, emailTemplateKeySchema, userIdSchema } from '../../primitives/schema/ids';
+import {
+  emailLogIdSchema,
+  emailTemplateKeySchema,
+  userIdSchema,
+} from '../../primitives/schema/ids';
 import { EMAIL_PROVIDERS, EMAIL_STATUSES } from '../constants/platform';
 
 import type { Schema } from '../../primitives/schema';

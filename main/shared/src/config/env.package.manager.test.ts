@@ -70,27 +70,19 @@ describe('PackageManagerEnvSchema', () => {
     });
 
     it('rejects bun', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 'bun' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 'bun' })).toThrow();
     });
 
     it('rejects an empty string', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: '' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: '' })).toThrow();
     });
 
     it('rejects NPM in uppercase', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 'NPM' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 'NPM' })).toThrow();
     });
 
     it('rejects a numeric value', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 1 }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PACKAGE_MANAGER_PROVIDER: 1 })).toThrow();
     });
   });
 
@@ -122,15 +114,11 @@ describe('PackageManagerEnvSchema', () => {
     });
 
     it('rejects invalid PNPM_STRICT_PEER_DEPS value', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PNPM_STRICT_PEER_DEPS: 'on' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PNPM_STRICT_PEER_DEPS: 'on' })).toThrow();
     });
 
     it('rejects invalid PNPM_FROZEN_LOCKFILE value', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ PNPM_FROZEN_LOCKFILE: '0' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ PNPM_FROZEN_LOCKFILE: '0' })).toThrow();
     });
 
     it('rejects invalid YARN_AUDIT value', () => {
@@ -138,9 +126,7 @@ describe('PackageManagerEnvSchema', () => {
     });
 
     it('rejects invalid YARN_FROZEN_LOCKFILE value', () => {
-      expect(() =>
-        PackageManagerEnvSchema.parse({ YARN_FROZEN_LOCKFILE: 'enabled' }),
-      ).toThrow();
+      expect(() => PackageManagerEnvSchema.parse({ YARN_FROZEN_LOCKFILE: 'enabled' })).toThrow();
     });
   });
 

@@ -270,9 +270,7 @@ describe('parseNumber', () => {
 
   describe('failure — int constraint', () => {
     it('throws on float when int:true', () => {
-      expect(() => parseNumber(3.14, 'count', { int: true })).toThrow(
-        'count must be an integer',
-      );
+      expect(() => parseNumber(3.14, 'count', { int: true })).toThrow('count must be an integer');
     });
 
     it('accepts 0 as integer when int:true', () => {
@@ -478,9 +476,7 @@ describe('parseTypedRecord', () => {
 
   describe('failure — invalid structure', () => {
     it('throws when input is not an object', () => {
-      expect(() => parseTypedRecord(null, 'labels', parseStr)).toThrow(
-        'labels must be an object',
-      );
+      expect(() => parseTypedRecord(null, 'labels', parseStr)).toThrow('labels must be an object');
     });
 
     it('throws when a value fails the parser', () => {
@@ -682,9 +678,7 @@ describe('coerceDate', () => {
 
   describe('failure', () => {
     it('throws on an invalid Date object', () => {
-      expect(() => coerceDate(new Date('not-a-date'), 'date')).toThrow(
-        'date is an invalid date',
-      );
+      expect(() => coerceDate(new Date('not-a-date'), 'date')).toThrow('date is an invalid date');
     });
 
     it('throws on a non-date string', () => {

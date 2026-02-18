@@ -6,9 +6,7 @@
  * @module Core/Users
  */
 
-import {
-  can as baseCan,
-} from '../auth/auth.policy';
+import { can as baseCan } from '../auth/auth.policy';
 
 import type { AppRole, User } from './users.schemas';
 import type { UserId } from '../../primitives/schema/ids';

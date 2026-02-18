@@ -20,7 +20,11 @@ import {
   parseRecord,
   parseString,
 } from '../../primitives/schema';
-import { tenantIdSchema, webhookDeliveryIdSchema, webhookIdSchema } from '../../primitives/schema/ids';
+import {
+  tenantIdSchema,
+  webhookDeliveryIdSchema,
+  webhookIdSchema,
+} from '../../primitives/schema/ids';
 import { WEBHOOK_DELIVERY_STATUSES, WEBHOOK_EVENT_TYPES } from '../constants/platform';
 
 import type { Schema } from '../../primitives/schema';

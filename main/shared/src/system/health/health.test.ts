@@ -945,35 +945,27 @@ describe('detailedHealthResponseSchema — adversarial', () => {
   }
 
   test('throws when a service entry is a primitive instead of object', () => {
-    expect(() =>
-      detailedHealthResponseSchema.parse(
-        validBase({ services: { db: 'up' } }),
-      ),
-    ).toThrow('services.db.status must be a string');
+    expect(() => detailedHealthResponseSchema.parse(validBase({ services: { db: 'up' } }))).toThrow(
+      'services.db.status must be a string',
+    );
   });
 
   test('throws when a service entry is an array instead of object', () => {
     expect(() =>
-      detailedHealthResponseSchema.parse(
-        validBase({ services: { db: ['up'] } }),
-      ),
+      detailedHealthResponseSchema.parse(validBase({ services: { db: ['up'] } })),
     ).toThrow('services.db.status must be a string');
   });
 
   test('throws when a service status is a boolean', () => {
     expect(() =>
-      detailedHealthResponseSchema.parse(
-        validBase({ services: { db: { status: true } } }),
-      ),
+      detailedHealthResponseSchema.parse(validBase({ services: { db: { status: true } } })),
     ).toThrow('services.db.status must be a string');
   });
 
   test('throws when services field is a string instead of object', () => {
     // services is not null/object → treated as {} → no keys → parses fine
     // Actually the schema wraps non-objects as {} so it won't iterate
-    const result = detailedHealthResponseSchema.parse(
-      validBase({ services: 'not-an-object' }),
-    );
+    const result = detailedHealthResponseSchema.parse(validBase({ services: 'not-an-object' }));
     expect(result.services).toEqual({});
   });
 
@@ -1017,15 +1009,15 @@ describe('detailedHealthResponseSchema — adversarial', () => {
 
   test('throws when uptime is NaN', () => {
     // parseNumber: NaN typeof === 'number' but isNaN — check what parseNumber does
-    expect(() =>
-      detailedHealthResponseSchema.parse(validBase({ uptime: NaN })),
-    ).toThrow('uptime must be a number');
+    expect(() => detailedHealthResponseSchema.parse(validBase({ uptime: NaN }))).toThrow(
+      'uptime must be a number',
+    );
   });
 
   test('throws when status is an empty string', () => {
-    expect(() =>
-      detailedHealthResponseSchema.parse(validBase({ status: '' })),
-    ).toThrow('status must be one of: healthy, degraded, down');
+    expect(() => detailedHealthResponseSchema.parse(validBase({ status: '' }))).toThrow(
+      'status must be one of: healthy, degraded, down',
+    );
   });
 });
 

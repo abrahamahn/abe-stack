@@ -14,6 +14,5 @@ export {
   type EmailProvider,
   type EmailStatus,
   type EmailTemplate,
-  type UpdateEmailTemplate
+  type UpdateEmailTemplate,
 } from './email';
-

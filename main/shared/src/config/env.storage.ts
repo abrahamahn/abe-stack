@@ -99,9 +99,12 @@ export const StorageEnvSchema: Schema<StorageEnv> = createSchema<StorageEnv>((da
     S3_ENDPOINT: parseOptional(obj['S3_ENDPOINT'], (v: unknown) =>
       parseString(v, 'S3_ENDPOINT', { url: true }),
     ),
-    S3_FORCE_PATH_STYLE: parseOptional(obj['S3_FORCE_PATH_STYLE'], (v: unknown) => trueFalseSchema.parse(v)),
-    S3_PRESIGN_EXPIRES_IN_SECONDS: parseOptional(obj['S3_PRESIGN_EXPIRES_IN_SECONDS'], (v: unknown) =>
-      coerceNumber(v, 'S3_PRESIGN_EXPIRES_IN_SECONDS'),
+    S3_FORCE_PATH_STYLE: parseOptional(obj['S3_FORCE_PATH_STYLE'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
+    S3_PRESIGN_EXPIRES_IN_SECONDS: parseOptional(
+      obj['S3_PRESIGN_EXPIRES_IN_SECONDS'],
+      (v: unknown) => coerceNumber(v, 'S3_PRESIGN_EXPIRES_IN_SECONDS'),
     ),
   };
 });

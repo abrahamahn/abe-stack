@@ -7,7 +7,6 @@
  * @module Domain/Auth
  */
 
-
 import {
   acceptTosRequestSchema,
   acceptTosResponseSchema,

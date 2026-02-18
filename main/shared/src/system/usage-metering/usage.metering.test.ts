@@ -38,7 +38,9 @@ function createValidUsageMetric(overrides: Record<string, unknown> = {}): Record
  * @param overrides - Partial overrides for the default values
  * @returns A complete UsageSnapshot object
  */
-function createValidUsageSnapshot(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+function createValidUsageSnapshot(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
   return {
     id: 'snap_001',
     tenantId: '12345678-1234-4abc-8abc-123456789001',
@@ -971,7 +973,9 @@ describe('usageSnapshotSchema — adversarial', () => {
   });
 
   it('rejects snapshot where all fields are present but tenantId is an object', () => {
-    const input = createValidUsageSnapshot({ tenantId: { id: '12345678-1234-4abc-8abc-123456789001' } });
+    const input = createValidUsageSnapshot({
+      tenantId: { id: '12345678-1234-4abc-8abc-123456789001' },
+    });
     expect(() => usageSnapshotSchema.parse(input)).toThrow('TenantId must be a string');
   });
 

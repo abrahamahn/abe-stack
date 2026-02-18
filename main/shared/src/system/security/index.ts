@@ -5,7 +5,7 @@ export {
   detectSQLInjection,
   isValidInputKeyName,
   sanitizeString,
-  type SQLInjectionDetectionOptions
+  type SQLInjectionDetectionOptions,
 } from './input';
 
 export { hasDangerousKeys, sanitizePrototype } from './prototype';

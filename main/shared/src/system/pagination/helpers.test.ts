@@ -1,7 +1,6 @@
 // main/shared/src/system/pagination/helpers.test.ts
 import { describe, expect, it } from 'vitest';
 
-
 import { encodeCursor } from './cursor';
 import {
   buildCursorPaginationQuery,
@@ -357,52 +356,44 @@ describe('buildCursorPaginationQuery — adversarial', () => {
   });
 
   it('throws INVALID_SORT_FIELD for sortBy with single quote', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, "name'--", 'desc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, "name'--", 'desc')).toThrow(PaginationError);
   });
 
   it('throws INVALID_SORT_FIELD for sortBy starting with number', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, '1field', 'asc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, '1field', 'asc')).toThrow(PaginationError);
   });
 
   it('throws INVALID_SORT_FIELD for sortBy that is empty string', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, '', 'asc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, '', 'asc')).toThrow(PaginationError);
   });
 
   it('throws INVALID_SORT_FIELD for sortBy with spaces', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, 'created at', 'asc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, 'created at', 'asc')).toThrow(
+      PaginationError,
+    );
   });
 
   it('throws INVALID_SORT_FIELD for sortBy with parentheses (function call attempt)', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, 'LOWER(name)', 'asc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, 'LOWER(name)', 'asc')).toThrow(
+      PaginationError,
+    );
   });
 
   it('throws INVALID_SORT_FIELD for sortBy exceeding 63 chars (SQL identifier limit)', () => {
     const longField = 'a'.repeat(64);
-    expect(() =>
-      buildCursorPaginationQuery(undefined, longField, 'asc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, longField, 'asc')).toThrow(PaginationError);
   });
 
   it('throws INVALID_SORT_FIELD for tieBreakerField with hyphen', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, 'createdAt', 'asc', 'tie-breaker'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, 'createdAt', 'asc', 'tie-breaker')).toThrow(
+      PaginationError,
+    );
   });
 
   it('throws INVALID_SORT_FIELD for tieBreakerField with dot notation', () => {
-    expect(() =>
-      buildCursorPaginationQuery(undefined, 'createdAt', 'asc', 'table.id'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(undefined, 'createdAt', 'asc', 'table.id')).toThrow(
+      PaginationError,
+    );
   });
 
   it('throws INVALID_CURSOR for empty-string cursor (non-undefined)', () => {
@@ -414,9 +405,7 @@ describe('buildCursorPaginationQuery — adversarial', () => {
 
   it('throws INVALID_CURSOR for base64 that decodes to valid JSON but wrong shape', () => {
     const bad = Buffer.from('{"foo":"bar"}', 'utf8').toString('base64url');
-    expect(() =>
-      buildCursorPaginationQuery(bad, 'createdAt', 'desc'),
-    ).toThrow(PaginationError);
+    expect(() => buildCursorPaginationQuery(bad, 'createdAt', 'desc')).toThrow(PaginationError);
   });
 
   it('produces ASC direction in orderByClause for asc sortOrder', () => {
@@ -452,7 +441,10 @@ describe('calculateCursorPaginationMetadata — adversarial', () => {
   });
 
   it('handles limit=1 with 2 items (has next)', () => {
-    const items = [{ id: '1', name: 'a' }, { id: '2', name: 'b' }];
+    const items = [
+      { id: '1', name: 'a' },
+      { id: '2', name: 'b' },
+    ];
     const result = calculateCursorPaginationMetadata(items, 1, 'name', 'asc');
     expect(result.hasNext).toBe(true);
     expect(result.nextCursor).not.toBeNull();
@@ -468,15 +460,16 @@ describe('calculateCursorPaginationMetadata — adversarial', () => {
     const result = calculateCursorPaginationMetadata(items, 2, 'name', 'asc');
     expect(result.hasNext).toBe(true);
     // Cursor must not encode item '30'
-    const decoded = result.nextCursor !== null
-      ? (() => {
-          try {
-            return Buffer.from(result.nextCursor!, 'base64url').toString('utf8');
-          } catch {
-            return null;
-          }
-        })()
-      : null;
+    const decoded =
+      result.nextCursor !== null
+        ? (() => {
+            try {
+              return Buffer.from(result.nextCursor!, 'base64url').toString('utf8');
+            } catch {
+              return null;
+            }
+          })()
+        : null;
     expect(decoded).not.toContain('30');
   });
 
@@ -509,7 +502,10 @@ describe('paginateArrayWithCursor — adversarial', () => {
   });
 
   it('with limit larger than dataset returns all items', () => {
-    const items = [{ id: '1', score: 1 }, { id: '2', score: 2 }];
+    const items = [
+      { id: '1', score: 1 },
+      { id: '2', score: 2 },
+    ];
     const result = paginateArrayWithCursor(items, { limit: 100, sortOrder: 'asc' }, 'score');
     expect(result.data).toHaveLength(2);
     expect(result.hasNext).toBe(false);

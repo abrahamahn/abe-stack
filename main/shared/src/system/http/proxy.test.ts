@@ -583,7 +583,10 @@ describe('parseXForwardedFor', () => {
     });
 
     it('handles very long chain without crashing (DoS potential)', () => {
-      const longChain = Array.from({ length: 1000 }, (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`).join(', ');
+      const longChain = Array.from(
+        { length: 1000 },
+        (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`,
+      ).join(', ');
       const result = parseXForwardedFor(longChain);
       expect(result).toHaveLength(1000);
     });
@@ -644,8 +647,8 @@ describe('getValidatedClientIp', () => {
     it('ignores X-Forwarded-For completely when socket IP is untrusted', () => {
       // Attacker sets XFF to their own "clean" IP, but socket is untrusted
       const result = getValidatedClientIp(
-        '1.2.3.4',   // spoofed XFF — attacker claims this is client
-        '5.6.7.8',   // untrusted socket
+        '1.2.3.4', // spoofed XFF — attacker claims this is client
+        '5.6.7.8', // untrusted socket
         trustedConfig,
       );
       expect(result.clientIp).toBe('5.6.7.8');
@@ -693,11 +696,10 @@ describe('getValidatedClientIp', () => {
     it('does not walk further than maxProxyDepth hops into the chain', () => {
       // Chain: attacker(1.2.3.4) -> real-client(203.0.113.1) -> proxy1(10.0.0.5) -> proxy2(10.0.0.10)
       // With maxProxyDepth=1, we only trust 1 hop back from socket
-      const result = getValidatedClientIp(
-        '1.2.3.4, 203.0.113.1, 10.0.0.5',
-        '10.0.0.10',
-        { trustedProxies: ['10.0.0.0/8'], maxProxyDepth: 1 },
-      );
+      const result = getValidatedClientIp('1.2.3.4, 203.0.113.1, 10.0.0.5', '10.0.0.10', {
+        trustedProxies: ['10.0.0.0/8'],
+        maxProxyDepth: 1,
+      });
       // Depth=1: clientIndex starts at 3 (socket), walks back 1 -> index 2 (10.0.0.5, trusted)
       // After loop: clientIp = fullChain[max(0, 2-1)] = fullChain[1] = 203.0.113.1
       expect(result.clientIp).toBe('203.0.113.1');
@@ -706,11 +708,10 @@ describe('getValidatedClientIp', () => {
 
     it('with maxProxyDepth=0, uses socket IP minus 1 directly (clientIndex stays at end)', () => {
       // maxProxyDepth=0 means the loop body never executes
-      const result = getValidatedClientIp(
-        '203.0.113.50',
-        '10.0.0.10',
-        { trustedProxies: ['10.0.0.0/8'], maxProxyDepth: 0 },
-      );
+      const result = getValidatedClientIp('203.0.113.50', '10.0.0.10', {
+        trustedProxies: ['10.0.0.0/8'],
+        maxProxyDepth: 0,
+      });
       // Loop does not run. clientIndex = 1 (fullChain = ['203.0.113.50', '10.0.0.10'])
       // clientIp = fullChain[max(0, 1-1)] = fullChain[0] = '203.0.113.50'
       expect(result.clientIp).toBe('203.0.113.50');
@@ -722,11 +723,10 @@ describe('getValidatedClientIp', () => {
     it('prevents spoofing: all IPs in XFF are trusted proxies — walks to index 0', () => {
       // Attacker crafts XFF where every IP is in trusted range, hoping to claim any IP
       // Chain: 10.0.0.1(attacker-controlled XFF), 10.0.0.2(attacker), socket=10.0.0.3
-      const result = getValidatedClientIp(
-        '10.0.0.1, 10.0.0.2',
-        '10.0.0.3',
-        { trustedProxies: ['10.0.0.0/8'], maxProxyDepth: 10 },
-      );
+      const result = getValidatedClientIp('10.0.0.1, 10.0.0.2', '10.0.0.3', {
+        trustedProxies: ['10.0.0.0/8'],
+        maxProxyDepth: 10,
+      });
       // Full chain: ['10.0.0.1', '10.0.0.2', '10.0.0.3']
       // Walk: depth0 -> previousIp='10.0.0.2' trusted, clientIndex=2->1
       //        depth1 -> previousIp='10.0.0.1' trusted, clientIndex=1->0
@@ -738,11 +738,7 @@ describe('getValidatedClientIp', () => {
     });
 
     it('garbage in XFF falls back to socket IP minus 1 (trusted socket)', () => {
-      const result = getValidatedClientIp(
-        'not-an-ip, also-garbage',
-        '10.0.0.1',
-        trustedConfig,
-      );
+      const result = getValidatedClientIp('not-an-ip, also-garbage', '10.0.0.1', trustedConfig);
       // forwardedIps = [] after filtering garbage
       // Empty forwardedIps path: returns { clientIp: socketIp, trusted: true, proxyChain: [socketIp] }
       expect(result.clientIp).toBe('10.0.0.1');
@@ -751,7 +747,7 @@ describe('getValidatedClientIp', () => {
 
     it('XFF with injected newline is fully sanitized', () => {
       const result = getValidatedClientIp(
-        '10.0.0.1\n9.9.9.9',  // newline injection — invalid IP, filtered out
+        '10.0.0.1\n9.9.9.9', // newline injection — invalid IP, filtered out
         '10.0.0.2',
         trustedConfig,
       );
@@ -762,7 +758,7 @@ describe('getValidatedClientIp', () => {
 
     it('XFF with leading-zero spoofed IP is rejected', () => {
       const result = getValidatedClientIp(
-        '01.02.03.04',  // leading zeros — filtered by parseXForwardedFor
+        '01.02.03.04', // leading zeros — filtered by parseXForwardedFor
         '10.0.0.1',
         trustedConfig,
       );

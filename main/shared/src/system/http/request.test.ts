@@ -167,10 +167,7 @@ describe('getRequesterId', () => {
 
     it('returns req.ip when X-Forwarded-For is undefined', () => {
       const req = {
-        headers: { 'x-forwarded-for': undefined } as Record<
-          string,
-          string | string[] | undefined
-        >,
+        headers: { 'x-forwarded-for': undefined } as Record<string, string | string[] | undefined>,
         ip: '8.8.8.8',
       };
       expect(getRequesterId(req)).toBe('8.8.8.8');

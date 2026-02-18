@@ -6,7 +6,12 @@
  * @module Core/Constants/Product
  */
 
-import { EMAIL_PROVIDERS, EMAIL_STATUSES, SUBSCRIBABLE_EVENT_TYPES, WEBHOOK_EVENT_TYPES } from '../../system/constants/platform';
+import {
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  SUBSCRIBABLE_EVENT_TYPES,
+  WEBHOOK_EVENT_TYPES,
+} from '../../system/constants/platform';
 import {
   ALL_MEDIA_EXTENSIONS,
   ALLOWED_IMAGE_MIME_TYPES,
@@ -75,7 +80,6 @@ import {
   NOTIFICATION_SCHEMA_PROVIDERS,
   NOTIFICATION_TYPES,
 } from './notifications';
-
 
 // ============================================================================
 // Domain Re-exports

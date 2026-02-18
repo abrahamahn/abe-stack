@@ -7,11 +7,11 @@
  */
 
 import type {
-    BaseRouteDefinition,
-    HttpMethod,
-    RouteHandler,
-    RouteMap,
-    ValidationSchema,
+  BaseRouteDefinition,
+  HttpMethod,
+  RouteHandler,
+  RouteMap,
+  ValidationSchema,
 } from './http';
 
 // ============================================================================

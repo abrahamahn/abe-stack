@@ -292,7 +292,11 @@ export class OAuthError extends AppError {
 /** OAuth state mismatch - possible CSRF attack */
 export class OAuthStateMismatchError extends OAuthError {
   constructor(provider: string) {
-    super('OAuth state mismatch - possible CSRF attack', provider, ERROR_CODES.OAUTH_STATE_MISMATCH);
+    super(
+      'OAuth state mismatch - possible CSRF attack',
+      provider,
+      ERROR_CODES.OAUTH_STATE_MISMATCH,
+    );
   }
 }
 
@@ -303,7 +307,11 @@ export class OAuthStateMismatchError extends OAuthError {
 /** Two-factor authentication required to complete login */
 export class TotpRequiredError extends AppError {
   constructor() {
-    super('Two-factor authentication required', HTTP_STATUS.UNAUTHORIZED, ERROR_CODES.TOTP_REQUIRED);
+    super(
+      'Two-factor authentication required',
+      HTTP_STATUS.UNAUTHORIZED,
+      ERROR_CODES.TOTP_REQUIRED,
+    );
   }
 }
 

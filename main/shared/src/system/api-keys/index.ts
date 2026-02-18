@@ -18,6 +18,5 @@ export {
   type DeleteApiKeyResponse,
   type ListApiKeysResponse,
   type RevokeApiKeyResponse,
-  type UpdateApiKey
+  type UpdateApiKey,
 } from './api.keys';
-

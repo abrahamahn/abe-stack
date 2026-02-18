@@ -78,9 +78,7 @@ describe('StorageEnvSchema', () => {
     });
 
     it('rejects STORAGE_PUBLIC_BASE_URL that is a bare path', () => {
-      expect(() =>
-        StorageEnvSchema.parse({ STORAGE_PUBLIC_BASE_URL: '/public/files' }),
-      ).toThrow();
+      expect(() => StorageEnvSchema.parse({ STORAGE_PUBLIC_BASE_URL: '/public/files' })).toThrow();
     });
 
     it('rejects a non-string STORAGE_PUBLIC_BASE_URL', () => {

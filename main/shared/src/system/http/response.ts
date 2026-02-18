@@ -99,18 +99,23 @@ export interface SimpleErrorResponse {
 }
 
 /** Simple error response schema for non-envelope errors */
-export const simpleErrorResponseSchema: Schema<SimpleErrorResponse> = createSchema((input: unknown) => {
-  const obj = (input !== null && typeof input === 'object' ? input : {}) as Record<string, unknown>;
-  if (typeof obj['message'] !== 'string') throw new Error('Error message must be a string');
-  return {
-    message: obj['message'],
-    code: typeof obj['code'] === 'string' ? obj['code'] : undefined,
-    details:
-      obj['details'] !== null && typeof obj['details'] === 'object'
-        ? (obj['details'] as Record<string, unknown>)
-        : undefined,
-  };
-});
+export const simpleErrorResponseSchema: Schema<SimpleErrorResponse> = createSchema(
+  (input: unknown) => {
+    const obj = (input !== null && typeof input === 'object' ? input : {}) as Record<
+      string,
+      unknown
+    >;
+    if (typeof obj['message'] !== 'string') throw new Error('Error message must be a string');
+    return {
+      message: obj['message'],
+      code: typeof obj['code'] === 'string' ? obj['code'] : undefined,
+      details:
+        obj['details'] !== null && typeof obj['details'] === 'object'
+          ? (obj['details'] as Record<string, unknown>)
+          : undefined,
+    };
+  },
+);
 
 export type EmptyBody = Record<string, never>;
 

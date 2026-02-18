@@ -164,9 +164,7 @@ describe('BillingEnvSchema', () => {
     });
 
     it('rejects BILLING_CHECKOUT_CANCEL_URL without a protocol', () => {
-      expect(() =>
-        BillingEnvSchema.parse({ BILLING_CHECKOUT_CANCEL_URL: 'not-a-url' }),
-      ).toThrow();
+      expect(() => BillingEnvSchema.parse({ BILLING_CHECKOUT_CANCEL_URL: 'not-a-url' })).toThrow();
     });
 
     it('rejects a non-string URL field', () => {

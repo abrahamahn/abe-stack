@@ -4,37 +4,37 @@ import { describe, expect, it } from 'vitest';
 import { ERROR_CODES, HTTP_STATUS } from '../constants/platform';
 
 import {
-    AccountLockedError,
-    AppError,
-    BadRequestError,
-    BaseError,
-    ConfigurationError,
-    ConflictError,
-    EmailAlreadyExistsError,
-    EmailNotVerifiedError,
-    EmailSendError,
-    ForbiddenError,
-    formatValidationErrors,
-    getErrorStatusCode,
-    getSafeErrorMessage,
-    InternalServerError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    isAppError,
-    NotFoundError,
-    OAuthError,
-    OAuthStateMismatchError,
-    ResourceNotFoundError,
-    toAppError,
-    TokenReuseError,
-    TooManyRequestsError,
-    TotpInvalidError,
-    TotpRequiredError,
-    UnauthorizedError,
-    UnprocessableError,
-    UserNotFoundError,
-    ValidationError,
-    WeakPasswordError,
+  AccountLockedError,
+  AppError,
+  BadRequestError,
+  BaseError,
+  ConfigurationError,
+  ConflictError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  ForbiddenError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  InternalServerError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  isAppError,
+  NotFoundError,
+  OAuthError,
+  OAuthStateMismatchError,
+  ResourceNotFoundError,
+  toAppError,
+  TokenReuseError,
+  TooManyRequestsError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UnauthorizedError,
+  UnprocessableError,
+  UserNotFoundError,
+  ValidationError,
+  WeakPasswordError,
 } from './errors';
 
 describe('errors', () => {
@@ -663,7 +663,13 @@ describe('errors', () => {
     });
 
     it('TokenReuseError stores all optional security fields', () => {
-      const err = new TokenReuseError('user-1', 'user@example.com', 'family-x', '1.2.3.4', 'Chrome');
+      const err = new TokenReuseError(
+        'user-1',
+        'user@example.com',
+        'family-x',
+        '1.2.3.4',
+        'Chrome',
+      );
       expect(err.userId).toBe('user-1');
       expect(err.email).toBe('user@example.com');
       expect(err.familyId).toBe('family-x');
@@ -1004,7 +1010,9 @@ describe('errors', () => {
     });
 
     it('non-Error object returns default message in both modes', () => {
-      expect(getSafeErrorMessage({ message: 'hidden' }, false)).toBe('An unexpected error occurred');
+      expect(getSafeErrorMessage({ message: 'hidden' }, false)).toBe(
+        'An unexpected error occurred',
+      );
       expect(getSafeErrorMessage({ message: 'hidden' }, true)).toBe('An unexpected error occurred');
     });
 

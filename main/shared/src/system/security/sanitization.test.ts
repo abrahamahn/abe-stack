@@ -37,8 +37,7 @@ describe('sanitizeObject', () => {
     });
 
     it('preserves a user bio that legitimately contains "select" and "drop"', () => {
-      const bio =
-        'I select the best team members and never drop my responsibilities.';
+      const bio = 'I select the best team members and never drop my responsibilities.';
       const result = sanitizeObject({ bio });
       expect(result.valid).toBe(true);
       const data = result.data as Record<string, unknown>;
@@ -491,7 +490,7 @@ describe('getInjectionErrors', () => {
     });
 
     it('detects OR 1=1 classic payload', () => {
-      const errors = getInjectionErrors({ id: "1 OR 1=1" }, 'query');
+      const errors = getInjectionErrors({ id: '1 OR 1=1' }, 'query');
       expect(errors.some((e) => e.includes('SQL injection'))).toBe(true);
     });
 
@@ -526,17 +525,26 @@ describe('getInjectionErrors', () => {
     });
 
     it('detects semicolon-chained INSERT injection', () => {
-      const errors = getInjectionErrors({ val: "foo'; INSERT INTO admins VALUES ('x','y')" }, 'body');
+      const errors = getInjectionErrors(
+        { val: "foo'; INSERT INTO admins VALUES ('x','y')" },
+        'body',
+      );
       expect(errors.some((e) => e.includes('SQL injection'))).toBe(true);
     });
 
     it('detects INSERT INTO payload directly', () => {
-      const errors = getInjectionErrors({ raw: "INSERT INTO users (name) VALUES ('hacker')" }, 'body');
+      const errors = getInjectionErrors(
+        { raw: "INSERT INTO users (name) VALUES ('hacker')" },
+        'body',
+      );
       expect(errors.some((e) => e.includes('SQL injection'))).toBe(true);
     });
 
     it('detects UPDATE SET payload', () => {
-      const errors = getInjectionErrors({ raw: "UPDATE accounts SET password='x' WHERE 1=1" }, 'body');
+      const errors = getInjectionErrors(
+        { raw: "UPDATE accounts SET password='x' WHERE 1=1" },
+        'body',
+      );
       expect(errors.some((e) => e.includes('SQL injection'))).toBe(true);
     });
 
@@ -603,10 +611,7 @@ describe('getInjectionErrors', () => {
     });
 
     it('detects nested NoSQL operator object', () => {
-      const errors = getInjectionErrors(
-        { user: { profile: { age: { $gte: 0 } } } },
-        'body',
-      );
+      const errors = getInjectionErrors({ user: { profile: { age: { $gte: 0 } } } }, 'body');
       expect(errors.some((e) => e.includes('NoSQL injection'))).toBe(true);
     });
   });
@@ -651,13 +656,13 @@ describe('getInjectionErrors', () => {
     });
 
     it('handles a very large SQL injection string', () => {
-      const payload = ("' UNION SELECT null,null,null FROM users-- ").repeat(1000);
+      const payload = "' UNION SELECT null,null,null FROM users-- ".repeat(1000);
       const errors = getInjectionErrors({ q: payload }, 'body');
       expect(errors.some((e) => e.includes('SQL injection'))).toBe(true);
     });
 
     it('handles a very large NoSQL injection string', () => {
-      const payload = ('{"$gt":""}').repeat(1000);
+      const payload = '{"$gt":""}'.repeat(1000);
       const errors = getInjectionErrors({ q: payload }, 'body');
       expect(errors.some((e) => e.includes('NoSQL injection'))).toBe(true);
     });

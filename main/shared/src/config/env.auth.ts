@@ -372,13 +372,16 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     RATE_LIMIT_REGISTER_MAX: parseOptional(obj['RATE_LIMIT_REGISTER_MAX'], (v: unknown) =>
       coerceNumber(v, 'RATE_LIMIT_REGISTER_MAX'),
     ),
-    RATE_LIMIT_FORGOT_PASSWORD_MAX: parseOptional(obj['RATE_LIMIT_FORGOT_PASSWORD_MAX'], (v: unknown) =>
-      coerceNumber(v, 'RATE_LIMIT_FORGOT_PASSWORD_MAX'),
+    RATE_LIMIT_FORGOT_PASSWORD_MAX: parseOptional(
+      obj['RATE_LIMIT_FORGOT_PASSWORD_MAX'],
+      (v: unknown) => coerceNumber(v, 'RATE_LIMIT_FORGOT_PASSWORD_MAX'),
     ),
     RATE_LIMIT_VERIFY_EMAIL_MAX: parseOptional(obj['RATE_LIMIT_VERIFY_EMAIL_MAX'], (v: unknown) =>
       coerceNumber(v, 'RATE_LIMIT_VERIFY_EMAIL_MAX'),
     ),
-    COOKIE_SECRET: parseOptional(obj['COOKIE_SECRET'], (v: unknown) => parseString(v, 'COOKIE_SECRET')),
+    COOKIE_SECRET: parseOptional(obj['COOKIE_SECRET'], (v: unknown) =>
+      parseString(v, 'COOKIE_SECRET'),
+    ),
     TRUST_PROXY: parseOptional(obj['TRUST_PROXY'], (v: unknown) => trueFalseSchema.parse(v)),
     TRUSTED_PROXIES: parseOptional(obj['TRUSTED_PROXIES'], (v: unknown) =>
       parseString(v, 'TRUSTED_PROXIES'),
@@ -434,8 +437,12 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     APPLE_CALLBACK_URL: parseOptional(obj['APPLE_CALLBACK_URL'], (v: unknown) =>
       parseString(v, 'APPLE_CALLBACK_URL'),
     ),
-    APPLE_TEAM_ID: parseOptional(obj['APPLE_TEAM_ID'], (v: unknown) => parseString(v, 'APPLE_TEAM_ID')),
-    APPLE_KEY_ID: parseOptional(obj['APPLE_KEY_ID'], (v: unknown) => parseString(v, 'APPLE_KEY_ID')),
+    APPLE_TEAM_ID: parseOptional(obj['APPLE_TEAM_ID'], (v: unknown) =>
+      parseString(v, 'APPLE_TEAM_ID'),
+    ),
+    APPLE_KEY_ID: parseOptional(obj['APPLE_KEY_ID'], (v: unknown) =>
+      parseString(v, 'APPLE_KEY_ID'),
+    ),
     APPLE_PRIVATE_KEY: parseOptional(obj['APPLE_PRIVATE_KEY'], (v: unknown) =>
       parseString(v, 'APPLE_PRIVATE_KEY'),
     ),
@@ -452,7 +459,9 @@ export const AuthEnvSchema: Schema<AuthEnv> = createSchema<AuthEnv>((data: unkno
     ),
     TOTP_ISSUER: parseString(withDefault(obj['TOTP_ISSUER'], 'BSLT'), 'TOTP_ISSUER'),
     TOTP_WINDOW: coerceNumber(withDefault(obj['TOTP_WINDOW'], 1), 'TOTP_WINDOW'),
-    CAPTCHA_ENABLED: parseOptional(obj['CAPTCHA_ENABLED'], (v: unknown) => trueFalseSchema.parse(v)),
+    CAPTCHA_ENABLED: parseOptional(obj['CAPTCHA_ENABLED'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
     CAPTCHA_PROVIDER: parseOptional(obj['CAPTCHA_PROVIDER'], (v: unknown) =>
       createEnumSchema(['turnstile'] as const, 'CAPTCHA_PROVIDER').parse(v),
     ),

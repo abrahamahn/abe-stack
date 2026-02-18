@@ -373,7 +373,7 @@ describe('memoize', () => {
         resolver: (x: unknown) => (typeof x === 'number' ? 'num' : 'other'),
       });
 
-      memoized(1);   // miss — key: 'num'
+      memoized(1); // miss — key: 'num'
       memoized(999); // hit  — same key: 'num'
       expect(fn).toHaveBeenCalledTimes(1);
     });

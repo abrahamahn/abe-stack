@@ -4,17 +4,17 @@ import { describe, expect, test } from 'vitest';
 import { SEARCH_DEFAULTS } from '../constants/limits';
 
 import {
-    compoundFilterSchema,
-    facetConfigSchema,
-    filterConditionSchema,
-    filterOperatorSchema,
-    filterValueSchema,
-    fullTextSearchConfigSchema,
-    logicalOperatorSchema,
-    rangeValueSchema,
-    searchQuerySchema,
-    sortConfigSchema,
-    urlSearchParamsSchema,
+  compoundFilterSchema,
+  facetConfigSchema,
+  filterConditionSchema,
+  filterOperatorSchema,
+  filterValueSchema,
+  fullTextSearchConfigSchema,
+  logicalOperatorSchema,
+  rangeValueSchema,
+  searchQuerySchema,
+  sortConfigSchema,
+  urlSearchParamsSchema,
 } from './schemas';
 
 describe('search schemas', () => {
@@ -449,7 +449,8 @@ describe('search schemas', () => {
 
     test('between requires range value', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'age', operator: 'between', value: 'not-a-range' }).success,
+        filterConditionSchema.safeParse({ field: 'age', operator: 'between', value: 'not-a-range' })
+          .success,
       ).toBe(false);
     });
 
@@ -464,7 +465,8 @@ describe('search schemas', () => {
 
     test('in requires array value', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'status', operator: 'in', value: 'active' }).success,
+        filterConditionSchema.safeParse({ field: 'status', operator: 'in', value: 'active' })
+          .success,
       ).toBe(false);
     });
 
@@ -479,13 +481,15 @@ describe('search schemas', () => {
 
     test('notIn requires array value', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'status', operator: 'notIn', value: 'deleted' }).success,
+        filterConditionSchema.safeParse({ field: 'status', operator: 'notIn', value: 'deleted' })
+          .success,
       ).toBe(false);
     });
 
     test('contains requires string value', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'name', operator: 'contains', value: 123 }).success,
+        filterConditionSchema.safeParse({ field: 'name', operator: 'contains', value: 123 })
+          .success,
       ).toBe(false);
     });
 
@@ -500,7 +504,8 @@ describe('search schemas', () => {
 
     test('startsWith requires string value', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'name', operator: 'startsWith', value: 42 }).success,
+        filterConditionSchema.safeParse({ field: 'name', operator: 'startsWith', value: 42 })
+          .success,
       ).toBe(false);
     });
 
@@ -511,14 +516,24 @@ describe('search schemas', () => {
     });
 
     test('eq accepts any primitive value', () => {
-      expect(filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: 42 }).success).toBe(true);
-      expect(filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: 'str' }).success).toBe(true);
-      expect(filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: true }).success).toBe(true);
-      expect(filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: null }).success).toBe(true);
+      expect(
+        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: 42 }).success,
+      ).toBe(true);
+      expect(
+        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: 'str' }).success,
+      ).toBe(true);
+      expect(
+        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: true }).success,
+      ).toBe(true);
+      expect(
+        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: null }).success,
+      ).toBe(true);
     });
 
     test('gt accepts numeric value', () => {
-      expect(filterConditionSchema.safeParse({ field: 'age', operator: 'gt', value: 18 }).success).toBe(true);
+      expect(
+        filterConditionSchema.safeParse({ field: 'age', operator: 'gt', value: 18 }).success,
+      ).toBe(true);
     });
   });
 
@@ -532,11 +547,15 @@ describe('search schemas', () => {
     });
 
     test('rejects condition with number as field name', () => {
-      expect(filterConditionSchema.safeParse({ field: 123, operator: 'eq', value: 'x' }).success).toBe(false);
+      expect(
+        filterConditionSchema.safeParse({ field: 123, operator: 'eq', value: 'x' }).success,
+      ).toBe(false);
     });
 
     test('rejects condition with invalid operator value', () => {
-      expect(filterConditionSchema.safeParse({ field: 'x', operator: 'INVALID_OP', value: 'y' }).success).toBe(false);
+      expect(
+        filterConditionSchema.safeParse({ field: 'x', operator: 'INVALID_OP', value: 'y' }).success,
+      ).toBe(false);
     });
 
     test('extra unknown fields are ignored (schema extracts known fields)', () => {
@@ -552,7 +571,8 @@ describe('search schemas', () => {
 
     test('rejects object value that is not a valid FilterValue', () => {
       expect(
-        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: { arbitrary: true } }).success,
+        filterConditionSchema.safeParse({ field: 'x', operator: 'eq', value: { arbitrary: true } })
+          .success,
       ).toBe(false);
     });
 
@@ -565,9 +585,9 @@ describe('search schemas', () => {
 
   describe('adversarial: compoundFilterSchema — edge cases', () => {
     test('rejects null conditions array', () => {
-      expect(
-        compoundFilterSchema.safeParse({ operator: 'and', conditions: null }).success,
-      ).toBe(false);
+      expect(compoundFilterSchema.safeParse({ operator: 'and', conditions: null }).success).toBe(
+        false,
+      );
     });
 
     test('rejects conditions with object that has neither field nor conditions', () => {
@@ -633,7 +653,9 @@ describe('search schemas', () => {
     });
 
     test('rejects fuzziness of exactly -0.001', () => {
-      expect(fullTextSearchConfigSchema.safeParse({ query: 'x', fuzziness: -0.001 }).success).toBe(false);
+      expect(fullTextSearchConfigSchema.safeParse({ query: 'x', fuzziness: -0.001 }).success).toBe(
+        false,
+      );
     });
 
     test('accepts fuzziness of 0 (minimum)', () => {
@@ -645,7 +667,9 @@ describe('search schemas', () => {
     });
 
     test('rejects fuzziness of 1.001', () => {
-      expect(fullTextSearchConfigSchema.safeParse({ query: 'x', fuzziness: 1.001 }).success).toBe(false);
+      expect(fullTextSearchConfigSchema.safeParse({ query: 'x', fuzziness: 1.001 }).success).toBe(
+        false,
+      );
     });
 
     test('query with SQL injection characters is accepted as a string', () => {
@@ -694,7 +718,9 @@ describe('search schemas', () => {
     });
 
     test('rejects limit = MAX_LIMIT + 1', () => {
-      expect(searchQuerySchema.safeParse({ limit: SEARCH_DEFAULTS.MAX_LIMIT + 1 }).success).toBe(false);
+      expect(searchQuerySchema.safeParse({ limit: SEARCH_DEFAULTS.MAX_LIMIT + 1 }).success).toBe(
+        false,
+      );
     });
 
     test('accepts limit = MAX_LIMIT (boundary)', () => {

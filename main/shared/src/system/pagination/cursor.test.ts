@@ -206,27 +206,27 @@ describe('decodeCursor — adversarial', () => {
 
 describe('createCursorForItem — adversarial', () => {
   it('throws when sort field is missing from item', () => {
-    expect(() =>
-      createCursorForItem({ id: '1', name: 'Test' }, 'createdAt', 'asc'),
-    ).toThrow('Item missing or has invalid sort field: createdAt');
+    expect(() => createCursorForItem({ id: '1', name: 'Test' }, 'createdAt', 'asc')).toThrow(
+      'Item missing or has invalid sort field: createdAt',
+    );
   });
 
   it('throws when sort field value is null', () => {
-    expect(() =>
-      createCursorForItem({ id: '1', createdAt: null }, 'createdAt', 'desc'),
-    ).toThrow('Item missing or has invalid sort field: createdAt');
+    expect(() => createCursorForItem({ id: '1', createdAt: null }, 'createdAt', 'desc')).toThrow(
+      'Item missing or has invalid sort field: createdAt',
+    );
   });
 
   it('throws when sort field value is an object', () => {
-    expect(() =>
-      createCursorForItem({ id: '1', createdAt: {} }, 'createdAt', 'asc'),
-    ).toThrow('Item missing or has invalid sort field: createdAt');
+    expect(() => createCursorForItem({ id: '1', createdAt: {} }, 'createdAt', 'asc')).toThrow(
+      'Item missing or has invalid sort field: createdAt',
+    );
   });
 
   it('throws when sort field value is a boolean', () => {
-    expect(() =>
-      createCursorForItem({ id: '1', active: true }, 'active', 'asc'),
-    ).toThrow('Item missing or has invalid sort field: active');
+    expect(() => createCursorForItem({ id: '1', active: true }, 'active', 'asc')).toThrow(
+      'Item missing or has invalid sort field: active',
+    );
   });
 
   it('throws when tieBreaker field is null', () => {
@@ -236,9 +236,9 @@ describe('createCursorForItem — adversarial', () => {
   });
 
   it('throws when tieBreaker field is undefined', () => {
-    expect(() =>
-      createCursorForItem({ createdAt: '2024-01-01' }, 'createdAt', 'asc'),
-    ).toThrow('Invalid tie-breaker field: id. Must be string or number.');
+    expect(() => createCursorForItem({ createdAt: '2024-01-01' }, 'createdAt', 'asc')).toThrow(
+      'Invalid tie-breaker field: id. Must be string or number.',
+    );
   });
 
   it('throws when tieBreaker field is an object', () => {

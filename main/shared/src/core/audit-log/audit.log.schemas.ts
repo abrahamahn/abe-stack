@@ -6,7 +6,10 @@
  * @module Core/AuditLog
  */
 
-import { cursorPaginatedResultSchema, cursorPaginationOptionsSchema } from '../../system/pagination';
+import {
+  cursorPaginatedResultSchema,
+  cursorPaginationOptionsSchema,
+} from '../../system/pagination';
 import { AUDIT_ACTION_REGEX } from '../../primitives/constants/regex';
 import {
   createEnumSchema,

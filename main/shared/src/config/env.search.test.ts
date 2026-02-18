@@ -34,9 +34,9 @@ describe('SearchEnvSchema', () => {
     });
 
     it('accepts elasticsearch', () => {
-      expect(
-        SearchEnvSchema.parse({ SEARCH_PROVIDER: 'elasticsearch' }).SEARCH_PROVIDER,
-      ).toBe('elasticsearch');
+      expect(SearchEnvSchema.parse({ SEARCH_PROVIDER: 'elasticsearch' }).SEARCH_PROVIDER).toBe(
+        'elasticsearch',
+      );
     });
 
     it('rejects meilisearch', () => {
@@ -103,9 +103,7 @@ describe('SearchEnvSchema', () => {
     });
 
     it('rejects a non-numeric ELASTICSEARCH_REQUEST_TIMEOUT_MS', () => {
-      expect(() =>
-        SearchEnvSchema.parse({ ELASTICSEARCH_REQUEST_TIMEOUT_MS: 'slow' }),
-      ).toThrow();
+      expect(() => SearchEnvSchema.parse({ ELASTICSEARCH_REQUEST_TIMEOUT_MS: 'slow' })).toThrow();
     });
   });
 
@@ -133,15 +131,11 @@ describe('SearchEnvSchema', () => {
     });
 
     it('rejects a non-numeric SQL_SEARCH_DEFAULT_PAGE_SIZE', () => {
-      expect(() =>
-        SearchEnvSchema.parse({ SQL_SEARCH_DEFAULT_PAGE_SIZE: 'all' }),
-      ).toThrow();
+      expect(() => SearchEnvSchema.parse({ SQL_SEARCH_DEFAULT_PAGE_SIZE: 'all' })).toThrow();
     });
 
     it('rejects a non-numeric SQL_SEARCH_MAX_PAGE_SIZE', () => {
-      expect(() =>
-        SearchEnvSchema.parse({ SQL_SEARCH_MAX_PAGE_SIZE: 'unlimited' }),
-      ).toThrow();
+      expect(() => SearchEnvSchema.parse({ SQL_SEARCH_MAX_PAGE_SIZE: 'unlimited' })).toThrow();
     });
 
     it('accepts SQL_SEARCH_DEFAULT_PAGE_SIZE of 1 (minimal page)', () => {

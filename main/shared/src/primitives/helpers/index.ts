@@ -1,9 +1,6 @@
 // main/shared/src/primitives/helpers/index.ts
 
-export {
-  DeferredPromise,
-  delay
-} from './async';
+export { DeferredPromise, delay } from './async';
 
 export {
   assert,
@@ -18,7 +15,7 @@ export {
   isPlainObject,
   isSafeObjectKey,
   isString,
-  sanitizePrototype
+  sanitizePrototype,
 } from './object';
 
 export {
@@ -44,17 +41,12 @@ export {
   toPascalCase,
   toSnakeCase,
   trimTrailingSlashes,
-  truncate
+  truncate,
 } from './string';
 
 export type { KeyMapping } from './string';
 
-export {
-  getBool,
-  getInt,
-  getList,
-  getRequired
-} from './parse';
+export { getBool, getInt, getList, getRequired } from './parse';
 
 export {
   isErrorResponse,
@@ -86,9 +78,4 @@ export {
   type Result,
 } from './result';
 
-export {
-  constantTimeCompare,
-  generateSecureId,
-  generateToken,
-  generateUUID,
-} from './crypto';
+export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';

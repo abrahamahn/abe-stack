@@ -71,10 +71,14 @@ export const CacheEnvSchema: Schema<CacheEnv> = createSchema<CacheEnv>((data: un
     ),
     CACHE_TTL_MS: coerceNumber(withDefault(obj['CACHE_TTL_MS'], 300000), 'CACHE_TTL_MS'),
     CACHE_MAX_SIZE: coerceNumber(withDefault(obj['CACHE_MAX_SIZE'], 1000), 'CACHE_MAX_SIZE'),
-    CACHE_USE_REDIS: parseOptional(obj['CACHE_USE_REDIS'], (v: unknown) => trueFalseSchema.parse(v)),
+    CACHE_USE_REDIS: parseOptional(obj['CACHE_USE_REDIS'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
     REDIS_HOST: parseString(withDefault(obj['REDIS_HOST'], 'localhost'), 'REDIS_HOST'),
     REDIS_PORT: coerceNumber(withDefault(obj['REDIS_PORT'], 6379), 'REDIS_PORT'),
-    REDIS_PASSWORD: parseOptional(obj['REDIS_PASSWORD'], (v: unknown) => parseString(v, 'REDIS_PASSWORD')),
+    REDIS_PASSWORD: parseOptional(obj['REDIS_PASSWORD'], (v: unknown) =>
+      parseString(v, 'REDIS_PASSWORD'),
+    ),
     REDIS_DB: parseOptional(obj['REDIS_DB'], (v: unknown) => coerceNumber(v, 'REDIS_DB')),
   };
 });

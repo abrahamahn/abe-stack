@@ -7,12 +7,7 @@
  * @module config/env.frontend
  */
 
-import {
-  createSchema,
-  parseObject,
-  parseOptional,
-  parseString,
-} from '../primitives/schema';
+import { createSchema, parseObject, parseOptional, parseString } from '../primitives/schema';
 
 import type { Schema } from '../primitives/schema';
 
@@ -36,6 +31,8 @@ export const FrontendEnvSchema: Schema<FrontendEnv> = createSchema<FrontendEnv>(
     VITE_API_URL: parseOptional(obj['VITE_API_URL'], (v: unknown) =>
       parseString(v, 'VITE_API_URL', { url: true }),
     ),
-    VITE_APP_NAME: parseOptional(obj['VITE_APP_NAME'], (v: unknown) => parseString(v, 'VITE_APP_NAME')),
+    VITE_APP_NAME: parseOptional(obj['VITE_APP_NAME'], (v: unknown) =>
+      parseString(v, 'VITE_APP_NAME'),
+    ),
   };
 });

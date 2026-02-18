@@ -6,7 +6,17 @@
  * This composes domain contracts without changing runtime behavior.
  */
 
-import { adminContract, apiKeysContract, auditLogContract, authContract, billingContract, jobsContract, notificationsContract, usersContract, webhooksContract } from '../contracts';
+import {
+  adminContract,
+  apiKeysContract,
+  auditLogContract,
+  authContract,
+  billingContract,
+  jobsContract,
+  notificationsContract,
+  usersContract,
+  webhooksContract,
+} from '../contracts';
 
 import type { ContractRouter } from '../primitives/api';
 

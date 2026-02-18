@@ -46,12 +46,7 @@ export {
 } from './compliance';
 
 // --- i18n ---
-export {
-  CURRENCIES,
-  LOCALES,
-  type Currency,
-  type Locale,
-} from './i18n';
+export { CURRENCIES, LOCALES, type Currency, type Locale } from './i18n';
 
 // --- iam ---
 export {
@@ -97,8 +92,4 @@ export {
 } from './product';
 
 // --- ui-defaults ---
-export {
-  DEFAULT_CONTRAST_MODE,
-  DEFAULT_DENSITY,
-  DEFAULT_THEME,
-} from './ui.defaults';
+export { DEFAULT_CONTRAST_MODE, DEFAULT_DENSITY, DEFAULT_THEME } from './ui.defaults';

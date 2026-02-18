@@ -246,11 +246,7 @@ export {
 };
 
 // --- Sessions ---
-export {
-  getSessionAge,
-  isSessionActive,
-  isSessionRevoked,
-} from './auth.sessions.logic';
+export { getSessionAge, isSessionActive, isSessionRevoked } from './auth.sessions.logic';
 
 export {
   createUserSessionSchema,

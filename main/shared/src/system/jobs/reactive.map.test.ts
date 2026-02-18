@@ -331,8 +331,12 @@ describe('ReactiveMap — write error isolation', () => {
     const map = new ReactiveMap<string, number>();
     const survivor = vi.fn();
 
-    map.subscribe('a', () => { throw new Error('one'); });
-    map.subscribe('a', () => { throw new Error('two'); });
+    map.subscribe('a', () => {
+      throw new Error('one');
+    });
+    map.subscribe('a', () => {
+      throw new Error('two');
+    });
     map.subscribe('a', survivor);
 
     map.set('a', 7);
@@ -343,7 +347,9 @@ describe('ReactiveMap — write error isolation', () => {
     const map = new ReactiveMap<string, number>();
     const fnB = vi.fn();
 
-    map.subscribe('a', () => { throw new Error('key A exploded'); });
+    map.subscribe('a', () => {
+      throw new Error('key A exploded');
+    });
     map.subscribe('b', fnB);
 
     map.write([

@@ -87,15 +87,21 @@ export const PackageManagerEnvSchema: Schema<PackageManagerEnv> = createSchema<P
       NPM_LEGACY_PEER_DEPS: trueFalseSchema.parse(
         withDefault(obj['NPM_LEGACY_PEER_DEPS'], 'false'),
       ),
-      NPM_REGISTRY: parseOptional(obj['NPM_REGISTRY'], (v: unknown) => parseString(v, 'NPM_REGISTRY')),
+      NPM_REGISTRY: parseOptional(obj['NPM_REGISTRY'], (v: unknown) =>
+        parseString(v, 'NPM_REGISTRY'),
+      ),
       PNPM_STRICT_PEER_DEPS: trueFalseSchema.parse(
         withDefault(obj['PNPM_STRICT_PEER_DEPS'], 'true'),
       ),
       PNPM_FROZEN_LOCKFILE: trueFalseSchema.parse(withDefault(obj['PNPM_FROZEN_LOCKFILE'], 'true')),
-      PNPM_REGISTRY: parseOptional(obj['PNPM_REGISTRY'], (v: unknown) => parseString(v, 'PNPM_REGISTRY')),
+      PNPM_REGISTRY: parseOptional(obj['PNPM_REGISTRY'], (v: unknown) =>
+        parseString(v, 'PNPM_REGISTRY'),
+      ),
       YARN_AUDIT: trueFalseSchema.parse(withDefault(obj['YARN_AUDIT'], 'true')),
       YARN_FROZEN_LOCKFILE: trueFalseSchema.parse(withDefault(obj['YARN_FROZEN_LOCKFILE'], 'true')),
-      YARN_REGISTRY: parseOptional(obj['YARN_REGISTRY'], (v: unknown) => parseString(v, 'YARN_REGISTRY')),
+      YARN_REGISTRY: parseOptional(obj['YARN_REGISTRY'], (v: unknown) =>
+        parseString(v, 'YARN_REGISTRY'),
+      ),
     };
   },
 );

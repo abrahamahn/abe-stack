@@ -24,7 +24,6 @@ import {
 import { errorResponseSchema, successResponseSchema } from '../system/http';
 import { createSchema, parseString } from '../primitives/schema';
 
-
 import type { Contract, Schema } from '../primitives/api';
 
 const messageResponseSchema: Schema<{ message: string }> = createSchema((data: unknown) => {

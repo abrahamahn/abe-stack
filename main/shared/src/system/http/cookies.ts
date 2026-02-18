@@ -64,7 +64,6 @@ export function serializeCookie(
   return cookie;
 }
 
-
 /**
 
  * Parse a cookie header string into an object of key-value pairs.

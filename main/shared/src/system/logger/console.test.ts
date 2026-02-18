@@ -289,11 +289,12 @@ describe('Console Logger', () => {
 
     it('should process three lines delivered as one chunk', () => {
       const logger = createConsoleLogger('info');
-      const lines = [
-        JSON.stringify({ level: 30, msg: 'one' }),
-        JSON.stringify({ level: 30, msg: 'two' }),
-        JSON.stringify({ level: 30, msg: 'three' }),
-      ].join('\n') + '\n';
+      const lines =
+        [
+          JSON.stringify({ level: 30, msg: 'one' }),
+          JSON.stringify({ level: 30, msg: 'two' }),
+          JSON.stringify({ level: 30, msg: 'three' }),
+        ].join('\n') + '\n';
       logger.stream.write(lines);
       expect(vi.mocked(process.stdout.write).mock.calls.length).toBe(3);
     });
@@ -347,9 +348,7 @@ describe('Console Logger', () => {
 
     it('should detect CRUD when msg is exactly "Request completed"', () => {
       const logger = createConsoleLogger('info');
-      logger.stream.write(
-        JSON.stringify({ level: 30, msg: 'Request completed', durationMs: 42 }),
-      );
+      logger.stream.write(JSON.stringify({ level: 30, msg: 'Request completed', durationMs: 42 }));
       const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
       // CRUD path — durationMs appears in payload JSON
       expect(output).toContain('"durationMs": 42');

@@ -852,12 +852,7 @@ export {
 } from './system/security';
 
 // Crypto
-export {
-  addAuthHeader,
-  createTokenStore,
-  tokenStore,
-  type TokenStore,
-} from './system/crypto';
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system/crypto';
 
 // Usage metering
 export {

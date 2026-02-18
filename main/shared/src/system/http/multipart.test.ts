@@ -94,10 +94,7 @@ describe('parseMultipartFile', () => {
     test('handles quoted boundary value', () => {
       const boundary = 'quoted-bound';
       const body = buildMultipartBody(boundary);
-      const parsed = parseMultipartFile(
-        body,
-        `multipart/form-data; boundary="${boundary}"`,
-      );
+      const parsed = parseMultipartFile(body, `multipart/form-data; boundary="${boundary}"`);
       expect(parsed?.filename).toBe('avatar.jpg');
     });
   });
@@ -136,9 +133,7 @@ describe('parseMultipartFile', () => {
         { name: 'username', content: 'alice' },
         { name: 'email', content: 'alice@example.com' },
       ]);
-      expect(
-        parseMultipartFile(body, `multipart/form-data; boundary=${boundary}`),
-      ).toBeNull();
+      expect(parseMultipartFile(body, `multipart/form-data; boundary=${boundary}`)).toBeNull();
     });
   });
 
@@ -203,9 +198,7 @@ describe('parseMultipartFile', () => {
       // Null bytes are not filtered by the parser — we verify no exception
       const name = 'file\x00.jpg';
       const body = buildMultipartBody('b', name);
-      expect(() =>
-        parseMultipartFile(body, 'multipart/form-data; boundary=b'),
-      ).not.toThrow();
+      expect(() => parseMultipartFile(body, 'multipart/form-data; boundary=b')).not.toThrow();
     });
   });
 

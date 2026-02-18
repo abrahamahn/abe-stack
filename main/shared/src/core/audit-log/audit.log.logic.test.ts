@@ -91,7 +91,8 @@ describe('sanitizeMetadata', () => {
 
   // Value-pattern scanning (redacts regardless of key name)
   it('redacts JWT tokens in string values regardless of key name', () => {
-    const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
+    const jwt =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U';
     const result = sanitizeMetadata({ data: jwt, message: 'login success' });
     expect(result['data']).toBe('[REDACTED]');
     expect(result['message']).toBe('login success');
@@ -192,7 +193,9 @@ describe('buildAuditEvent', () => {
       action: 'billing.charge',
       resource: 'subscription',
       actorId: 'user-1' as ReturnType<typeof import('../../primitives/schema/ids').parseUserId>,
-      tenantId: 'tenant-1' as ReturnType<typeof import('../../primitives/schema/ids').parseTenantId>,
+      tenantId: 'tenant-1' as ReturnType<
+        typeof import('../../primitives/schema/ids').parseTenantId
+      >,
       category: 'billing',
       severity: 'warn',
       resourceId: 'sub-123',

@@ -14,7 +14,8 @@ import {
   parseNullableOptional,
   parseOptional,
   parseRecord,
-  parseString, coerceNumber
+  parseString,
+  coerceNumber,
 } from '../../primitives/schema';
 import { activityIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { ACTOR_TYPES } from '../constants/iam';
@@ -125,7 +126,6 @@ export const createActivitySchema: Schema<CreateActivity> = createSchema((data: 
 // ============================================================================
 // Response / Filter Schemas (for API contracts)
 // ============================================================================
-
 
 /** Cursor-paginated filters for activity list endpoints */
 export interface ActivitiesListFilters {

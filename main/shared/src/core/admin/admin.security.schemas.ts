@@ -183,7 +183,8 @@ export const securityEventsFilterSchema: Schema<SecurityEventsFilter> = createSc
     }
     if (obj['startDate'] !== undefined) {
       if (typeof obj['startDate'] !== 'string') throw new Error('startDate must be a string');
-      if (isNaN(Date.parse(obj['startDate']))) throw new Error('startDate must be a valid ISO date');
+      if (isNaN(Date.parse(obj['startDate'])))
+        throw new Error('startDate must be a valid ISO date');
       filter.startDate = obj['startDate'];
     }
     if (obj['endDate'] !== undefined) {
@@ -406,4 +407,3 @@ export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResp
       contentType: obj['contentType'],
     };
   });
-

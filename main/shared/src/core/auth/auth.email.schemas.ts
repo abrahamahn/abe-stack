@@ -9,7 +9,6 @@ import { createSchema, parseBoolean, parseString } from '../../primitives/schema
 import { emailSchema, passwordSchema } from '../schemas';
 import { userSchema } from '../users/users.schemas';
 
-
 import type { Schema } from '../../primitives/schema';
 import type { User } from '../users/users.schemas';
 

@@ -130,9 +130,12 @@ export const SearchEnvSchema: Schema<SearchEnv> = createSchema<SearchEnv>((data:
     ELASTICSEARCH_API_KEY: parseOptional(obj['ELASTICSEARCH_API_KEY'], (v: unknown) =>
       parseString(v, 'ELASTICSEARCH_API_KEY'),
     ),
-    ELASTICSEARCH_TLS: parseOptional(obj['ELASTICSEARCH_TLS'], (v: unknown) => trueFalseSchema.parse(v)),
-    ELASTICSEARCH_REQUEST_TIMEOUT_MS: parseOptional(obj['ELASTICSEARCH_REQUEST_TIMEOUT_MS'], (v: unknown) =>
-      coerceNumber(v, 'ELASTICSEARCH_REQUEST_TIMEOUT_MS'),
+    ELASTICSEARCH_TLS: parseOptional(obj['ELASTICSEARCH_TLS'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
+    ELASTICSEARCH_REQUEST_TIMEOUT_MS: parseOptional(
+      obj['ELASTICSEARCH_REQUEST_TIMEOUT_MS'],
+      (v: unknown) => coerceNumber(v, 'ELASTICSEARCH_REQUEST_TIMEOUT_MS'),
     ),
     SQL_SEARCH_DEFAULT_PAGE_SIZE: parseOptional(obj['SQL_SEARCH_DEFAULT_PAGE_SIZE'], (v: unknown) =>
       coerceNumber(v, 'SQL_SEARCH_DEFAULT_PAGE_SIZE'),
@@ -146,7 +149,9 @@ export const SearchEnvSchema: Schema<SearchEnv> = createSchema<SearchEnv>((data:
     SQL_SEARCH_MAX_CONDITIONS: parseOptional(obj['SQL_SEARCH_MAX_CONDITIONS'], (v: unknown) =>
       coerceNumber(v, 'SQL_SEARCH_MAX_CONDITIONS'),
     ),
-    SQL_SEARCH_LOGGING: parseOptional(obj['SQL_SEARCH_LOGGING'], (v: unknown) => trueFalseSchema.parse(v)),
+    SQL_SEARCH_LOGGING: parseOptional(obj['SQL_SEARCH_LOGGING'], (v: unknown) =>
+      trueFalseSchema.parse(v),
+    ),
     SQL_SEARCH_TIMEOUT_MS: parseOptional(obj['SQL_SEARCH_TIMEOUT_MS'], (v: unknown) =>
       coerceNumber(v, 'SQL_SEARCH_TIMEOUT_MS'),
     ),

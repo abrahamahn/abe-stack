@@ -48,7 +48,9 @@ describe('webauthnOptionsResponseSchema', () => {
 
     it('should coerce a non-object top-level to {} then reject missing options', () => {
       // primitive top-level → treated as {}, so options is undefined → should throw
-      expect(() => webauthnOptionsResponseSchema.parse('string')).toThrow('options must be an object');
+      expect(() => webauthnOptionsResponseSchema.parse('string')).toThrow(
+        'options must be an object',
+      );
     });
   });
 
@@ -140,7 +142,10 @@ describe('webauthnRegisterVerifyRequestSchema', () => {
     });
 
     it('should accept a nested credential object', () => {
-      const cred = { id: 'id', response: { clientDataJSON: 'base64', attestationObject: 'base64' } };
+      const cred = {
+        id: 'id',
+        response: { clientDataJSON: 'base64', attestationObject: 'base64' },
+      };
       const result = webauthnRegisterVerifyRequestSchema.parse({ credential: cred });
       expect(result.credential).toEqual(cred);
     });
@@ -148,9 +153,9 @@ describe('webauthnRegisterVerifyRequestSchema', () => {
 
   describe('invalid inputs — credential field', () => {
     it('should reject when credential is null', () => {
-      expect(() =>
-        webauthnRegisterVerifyRequestSchema.parse({ credential: null }),
-      ).toThrow('credential must be an object');
+      expect(() => webauthnRegisterVerifyRequestSchema.parse({ credential: null })).toThrow(
+        'credential must be an object',
+      );
     });
 
     it('should reject when credential is undefined (field missing)', () => {
@@ -160,21 +165,21 @@ describe('webauthnRegisterVerifyRequestSchema', () => {
     });
 
     it('should reject when credential is a string', () => {
-      expect(() =>
-        webauthnRegisterVerifyRequestSchema.parse({ credential: 'bad' }),
-      ).toThrow('credential must be an object');
+      expect(() => webauthnRegisterVerifyRequestSchema.parse({ credential: 'bad' })).toThrow(
+        'credential must be an object',
+      );
     });
 
     it('should reject when credential is a number', () => {
-      expect(() =>
-        webauthnRegisterVerifyRequestSchema.parse({ credential: 0 }),
-      ).toThrow('credential must be an object');
+      expect(() => webauthnRegisterVerifyRequestSchema.parse({ credential: 0 })).toThrow(
+        'credential must be an object',
+      );
     });
 
     it('should reject when credential is a boolean', () => {
-      expect(() =>
-        webauthnRegisterVerifyRequestSchema.parse({ credential: false }),
-      ).toThrow('credential must be an object');
+      expect(() => webauthnRegisterVerifyRequestSchema.parse({ credential: false })).toThrow(
+        'credential must be an object',
+      );
     });
 
     it('should reject entirely null input', () => {
@@ -260,9 +265,9 @@ describe('webauthnRegisterVerifyResponseSchema', () => {
 
   describe('invalid inputs — credentialId', () => {
     it('should reject when credentialId is missing', () => {
-      expect(() =>
-        webauthnRegisterVerifyResponseSchema.parse({ message: 'ok' }),
-      ).toThrow('credentialId must be a string');
+      expect(() => webauthnRegisterVerifyResponseSchema.parse({ message: 'ok' })).toThrow(
+        'credentialId must be a string',
+      );
     });
 
     it('should reject when credentialId is null', () => {
@@ -292,9 +297,9 @@ describe('webauthnRegisterVerifyResponseSchema', () => {
 
   describe('invalid inputs — message', () => {
     it('should reject when message is missing', () => {
-      expect(() =>
-        webauthnRegisterVerifyResponseSchema.parse({ credentialId: 'cred-1' }),
-      ).toThrow('message must be a string');
+      expect(() => webauthnRegisterVerifyResponseSchema.parse({ credentialId: 'cred-1' })).toThrow(
+        'message must be a string',
+      );
     });
 
     it('should reject when message is null', () => {
@@ -473,9 +478,9 @@ describe('webauthnLoginVerifyRequestSchema', () => {
     });
 
     it('should reject when credential is undefined (field missing)', () => {
-      expect(() =>
-        webauthnLoginVerifyRequestSchema.parse({ sessionKey: 'sk' }),
-      ).toThrow('credential must be an object');
+      expect(() => webauthnLoginVerifyRequestSchema.parse({ sessionKey: 'sk' })).toThrow(
+        'credential must be an object',
+      );
     });
 
     it('should reject when credential is a string', () => {
@@ -505,9 +510,9 @@ describe('webauthnLoginVerifyRequestSchema', () => {
 
   describe('invalid inputs — sessionKey field', () => {
     it('should reject when sessionKey is missing', () => {
-      expect(() =>
-        webauthnLoginVerifyRequestSchema.parse({ credential: {} }),
-      ).toThrow('sessionKey must be a string');
+      expect(() => webauthnLoginVerifyRequestSchema.parse({ credential: {} })).toThrow(
+        'sessionKey must be a string',
+      );
     });
 
     it('should reject when sessionKey is null', () => {

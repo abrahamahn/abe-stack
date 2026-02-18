@@ -7,7 +7,12 @@
  */
 
 import { createSchema } from '../primitives/schema';
-import { emailSchema, isoDateTimeSchema, passwordSchema, uuidSchema } from '../primitives/schema/scalars';
+import {
+  emailSchema,
+  isoDateTimeSchema,
+  passwordSchema,
+  uuidSchema,
+} from '../primitives/schema/scalars';
 
 import type { Schema } from '../primitives/schema';
 

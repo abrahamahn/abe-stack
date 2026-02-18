@@ -426,8 +426,14 @@ describe('adversarial — deepEqual', () => {
   });
 
   it('handles array of objects comparison', () => {
-    const a = [{ id: 1, name: 'alice' }, { id: 2, name: 'bob' }];
-    const b = [{ id: 1, name: 'alice' }, { id: 2, name: 'bob' }];
+    const a = [
+      { id: 1, name: 'alice' },
+      { id: 2, name: 'bob' },
+    ];
+    const b = [
+      { id: 1, name: 'alice' },
+      { id: 2, name: 'bob' },
+    ];
     expect(deepEqual(a, b)).toBe(true);
   });
 

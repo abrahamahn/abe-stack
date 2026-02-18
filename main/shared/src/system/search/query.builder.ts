@@ -37,23 +37,48 @@ import {
  * sorting, and field selection inside and()/or()/not() groups.
  */
 export interface FilterGroupBuilder<T = Record<string, unknown>> {
-  where(field: keyof T | string, operator: FilterOperator, value: FilterValue, options?: { caseSensitive?: boolean }): FilterGroupBuilder<T>;
+  where(
+    field: keyof T | string,
+    operator: FilterOperator,
+    value: FilterValue,
+    options?: { caseSensitive?: boolean },
+  ): FilterGroupBuilder<T>;
   whereEq(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereNeq(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereGt(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereGte(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereLt(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereLte(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
-  whereContains(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
-  whereStartsWith(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
-  whereEndsWith(field: keyof T | string, value: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
-  whereLike(field: keyof T | string, pattern: string, caseSensitive?: boolean): FilterGroupBuilder<T>;
+  whereContains(
+    field: keyof T | string,
+    value: string,
+    caseSensitive?: boolean,
+  ): FilterGroupBuilder<T>;
+  whereStartsWith(
+    field: keyof T | string,
+    value: string,
+    caseSensitive?: boolean,
+  ): FilterGroupBuilder<T>;
+  whereEndsWith(
+    field: keyof T | string,
+    value: string,
+    caseSensitive?: boolean,
+  ): FilterGroupBuilder<T>;
+  whereLike(
+    field: keyof T | string,
+    pattern: string,
+    caseSensitive?: boolean,
+  ): FilterGroupBuilder<T>;
   whereIlike(field: keyof T | string, pattern: string): FilterGroupBuilder<T>;
   whereIn(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
   whereNotIn(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
   whereNull(field: keyof T | string): FilterGroupBuilder<T>;
   whereNotNull(field: keyof T | string): FilterGroupBuilder<T>;
-  whereBetween(field: keyof T | string, min: FilterPrimitive, max: FilterPrimitive): FilterGroupBuilder<T>;
+  whereBetween(
+    field: keyof T | string,
+    min: FilterPrimitive,
+    max: FilterPrimitive,
+  ): FilterGroupBuilder<T>;
   whereArrayContains(field: keyof T | string, value: FilterPrimitive): FilterGroupBuilder<T>;
   whereArrayContainsAny(field: keyof T | string, values: FilterPrimitive[]): FilterGroupBuilder<T>;
   and(callback: (builder: FilterGroupBuilder<T>) => FilterGroupBuilder<T>): FilterGroupBuilder<T>;
@@ -503,9 +528,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    */
   build(): SearchQuery<T> {
     // Resolve deferred skip → page calculation with final limit value
-    const page = this._skip !== undefined
-      ? Math.floor(this._skip / this._limit) + 1
-      : this._page;
+    const page = this._skip !== undefined ? Math.floor(this._skip / this._limit) + 1 : this._page;
 
     const query: SearchQuery<T> = {
       page,

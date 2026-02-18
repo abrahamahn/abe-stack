@@ -27,7 +27,12 @@ import type {
   DataExportRequestedResponse,
 } from './compliance.schemas';
 
-import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../primitives/schema/ids';
+import type {
+  ConsentLogId,
+  LegalDocumentId,
+  UserAgreementId,
+  UserId,
+} from '../../primitives/schema/ids';
 
 // ============================================================================
 // Test Data Fixtures
@@ -941,7 +946,12 @@ describe('consentPreferencesResponseSchema', () => {
   describe('when given valid input', () => {
     it('should parse response with all fields true', () => {
       const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
-        createValidPreferences({ analytics: true, marketing_email: true, third_party_sharing: true, profiling: true }),
+        createValidPreferences({
+          analytics: true,
+          marketing_email: true,
+          third_party_sharing: true,
+          profiling: true,
+        }),
       );
 
       expect(result.analytics).toBe(true);
@@ -952,7 +962,12 @@ describe('consentPreferencesResponseSchema', () => {
 
     it('should parse response with all fields false', () => {
       const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
-        createValidPreferences({ analytics: false, marketing_email: false, third_party_sharing: false, profiling: false }),
+        createValidPreferences({
+          analytics: false,
+          marketing_email: false,
+          third_party_sharing: false,
+          profiling: false,
+        }),
       );
 
       expect(result.analytics).toBe(false);
@@ -962,9 +977,8 @@ describe('consentPreferencesResponseSchema', () => {
     });
 
     it('should parse mixed preferences', () => {
-      const result: ConsentPreferencesResponse = consentPreferencesResponseSchema.parse(
-        createValidPreferences(),
-      );
+      const result: ConsentPreferencesResponse =
+        consentPreferencesResponseSchema.parse(createValidPreferences());
 
       expect(result.analytics).toBe(true);
       expect(result.marketing_email).toBe(false);
@@ -988,7 +1002,9 @@ describe('consentPreferencesResponseSchema', () => {
 
     it('should throw when third_party_sharing is null', () => {
       expect(() =>
-        consentPreferencesResponseSchema.parse(createValidPreferences({ third_party_sharing: null })),
+        consentPreferencesResponseSchema.parse(
+          createValidPreferences({ third_party_sharing: null }),
+        ),
       ).toThrow('third_party_sharing must be a boolean');
     });
 
@@ -1089,9 +1105,7 @@ describe('dataExportRequestedResponseSchema', () => {
     });
 
     it('should throw for empty object', () => {
-      expect(() => dataExportRequestedResponseSchema.parse({})).toThrow(
-        'message must be a string',
-      );
+      expect(() => dataExportRequestedResponseSchema.parse({})).toThrow('message must be a string');
     });
   });
 });

@@ -9,8 +9,7 @@
 function stripScriptBlocks(value: string): string {
   // Neutralize every '<' that begins a script or closing-script tag.
   // Uses regex to avoid manual pointer arithmetic and desynchronization bugs.
-  return value
-    .replace(/<(\/?script)/gi, '&lt;$1');
+  return value.replace(/<(\/?script)/gi, '&lt;$1');
 }
 
 function isWordChar(code: number): boolean {

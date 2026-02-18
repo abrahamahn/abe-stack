@@ -205,7 +205,7 @@ describe('input security helpers', () => {
       expect(detectSQLInjection('DELETE FROM sessions WHERE 1=1')).toBe(true);
     });
 
-    it("detects UPDATE ... SET pattern", () => {
+    it('detects UPDATE ... SET pattern', () => {
       expect(detectSQLInjection("UPDATE users SET role='admin' WHERE 1=1")).toBe(true);
     });
 
@@ -229,7 +229,7 @@ describe('input security helpers', () => {
       expect(detectSQLInjection("' AND 1=1")).toBe(true);
     });
 
-    it("detects OR with string quoting bypass", () => {
+    it('detects OR with string quoting bypass', () => {
       expect(detectSQLInjection("' OR '1'='1")).toBe(true);
     });
 

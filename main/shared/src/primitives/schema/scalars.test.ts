@@ -378,9 +378,7 @@ describe('passwordSchema', () => {
 
   describe('failure states — too short', () => {
     it('throws on empty string', () => {
-      expect(() => passwordSchema.parse('')).toThrow(
-        'Password must be at least 8 characters',
-      );
+      expect(() => passwordSchema.parse('')).toThrow('Password must be at least 8 characters');
     });
 
     it('throws on 1-character password', () => {

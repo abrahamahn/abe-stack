@@ -90,9 +90,7 @@ describe('totpVerifyRequestSchema', () => {
     });
 
     it('should reject boolean code', () => {
-      expect(() => totpVerifyRequestSchema.parse({ code: true })).toThrow(
-        'code must be a string',
-      );
+      expect(() => totpVerifyRequestSchema.parse({ code: true })).toThrow('code must be a string');
     });
   });
 
@@ -150,9 +148,9 @@ describe('totpLoginVerifyRequestSchema', () => {
     });
 
     it('should reject missing code', () => {
-      expect(() =>
-        totpLoginVerifyRequestSchema.parse({ challengeToken: 'token-abc' }),
-      ).toThrow('code must be a string');
+      expect(() => totpLoginVerifyRequestSchema.parse({ challengeToken: 'token-abc' })).toThrow(
+        'code must be a string',
+      );
     });
 
     it('should reject both fields missing', () => {
@@ -223,9 +221,7 @@ describe('setPhoneRequestSchema', () => {
 
   describe('invalid inputs', () => {
     it('should reject null phone', () => {
-      expect(() => setPhoneRequestSchema.parse({ phone: null })).toThrow(
-        'phone must be a string',
-      );
+      expect(() => setPhoneRequestSchema.parse({ phone: null })).toThrow('phone must be a string');
     });
 
     it('should reject numeric phone', () => {
@@ -262,9 +258,7 @@ describe('verifyPhoneRequestSchema', () => {
 
   describe('invalid inputs', () => {
     it('should reject null', () => {
-      expect(() => verifyPhoneRequestSchema.parse({ code: null })).toThrow(
-        'code must be a string',
-      );
+      expect(() => verifyPhoneRequestSchema.parse({ code: null })).toThrow('code must be a string');
     });
 
     it('should reject missing code', () => {
@@ -304,9 +298,7 @@ describe('smsChallengeRequestSchema', () => {
     });
 
     it('should reject missing challengeToken', () => {
-      expect(() => smsChallengeRequestSchema.parse({})).toThrow(
-        'challengeToken must be a string',
-      );
+      expect(() => smsChallengeRequestSchema.parse({})).toThrow('challengeToken must be a string');
     });
 
     it('should reject numeric challengeToken', () => {
@@ -334,9 +326,9 @@ describe('smsVerifyRequestSchema', () => {
 
   describe('boundary: both fields are required', () => {
     it('should reject when only challengeToken is provided', () => {
-      expect(() =>
-        smsVerifyRequestSchema.parse({ challengeToken: 'tok' }),
-      ).toThrow('code must be a string');
+      expect(() => smsVerifyRequestSchema.parse({ challengeToken: 'tok' })).toThrow(
+        'code must be a string',
+      );
     });
 
     it('should reject when only code is provided', () => {
@@ -350,15 +342,15 @@ describe('smsVerifyRequestSchema', () => {
     });
 
     it('should reject 5-char code even with valid challengeToken', () => {
-      expect(() =>
-        smsVerifyRequestSchema.parse({ challengeToken: 'tok', code: '12345' }),
-      ).toThrow('code must be at least 6 characters');
+      expect(() => smsVerifyRequestSchema.parse({ challengeToken: 'tok', code: '12345' })).toThrow(
+        'code must be at least 6 characters',
+      );
     });
 
     it('should reject empty challengeToken', () => {
-      expect(() =>
-        smsVerifyRequestSchema.parse({ challengeToken: '', code: '123456' }),
-      ).toThrow('challengeToken must be at least 1 characters');
+      expect(() => smsVerifyRequestSchema.parse({ challengeToken: '', code: '123456' })).toThrow(
+        'challengeToken must be at least 1 characters',
+      );
     });
   });
 
@@ -368,15 +360,15 @@ describe('smsVerifyRequestSchema', () => {
     });
 
     it('should reject non-string challengeToken', () => {
-      expect(() =>
-        smsVerifyRequestSchema.parse({ challengeToken: true, code: '123456' }),
-      ).toThrow('challengeToken must be a string');
+      expect(() => smsVerifyRequestSchema.parse({ challengeToken: true, code: '123456' })).toThrow(
+        'challengeToken must be a string',
+      );
     });
 
     it('should reject non-string code', () => {
-      expect(() =>
-        smsVerifyRequestSchema.parse({ challengeToken: 'tok', code: 123456 }),
-      ).toThrow('code must be a string');
+      expect(() => smsVerifyRequestSchema.parse({ challengeToken: 'tok', code: 123456 })).toThrow(
+        'code must be a string',
+      );
     });
   });
 });
@@ -421,9 +413,9 @@ describe('totpSetupResponseSchema', () => {
 
   describe('invalid inputs: backupCodes must be an array', () => {
     it('should throw when backupCodes is absent', () => {
-      expect(() =>
-        totpSetupResponseSchema.parse({ secret: 'S', otpauthUrl: 'U' }),
-      ).toThrow('backupCodes must be an array');
+      expect(() => totpSetupResponseSchema.parse({ secret: 'S', otpauthUrl: 'U' })).toThrow(
+        'backupCodes must be an array',
+      );
     });
 
     it('should throw when backupCodes is null', () => {
@@ -479,15 +471,15 @@ describe('totpSetupResponseSchema', () => {
     });
 
     it('should reject missing secret', () => {
-      expect(() =>
-        totpSetupResponseSchema.parse({ otpauthUrl: 'U', backupCodes: [] }),
-      ).toThrow('secret must be a string');
+      expect(() => totpSetupResponseSchema.parse({ otpauthUrl: 'U', backupCodes: [] })).toThrow(
+        'secret must be a string',
+      );
     });
 
     it('should reject missing otpauthUrl', () => {
-      expect(() =>
-        totpSetupResponseSchema.parse({ secret: 'S', backupCodes: [] }),
-      ).toThrow('otpauthUrl must be a string');
+      expect(() => totpSetupResponseSchema.parse({ secret: 'S', backupCodes: [] })).toThrow(
+        'otpauthUrl must be a string',
+      );
     });
   });
 });

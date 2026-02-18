@@ -11,24 +11,24 @@ import { FILTER_OPERATORS, LOGICAL_OPERATORS, SEARCH_DEFAULTS } from '../constan
 import { sortOrderSchema } from '../pagination/pagination';
 
 import type {
-    CompoundFilter,
-    CursorSearchResult,
-    FacetBucket,
-    FacetConfig,
-    FacetedSearchQuery,
-    FacetResult,
-    FilterCondition,
-    FilterOperator,
-    FilterPrimitive,
-    FilterValue,
-    FullTextSearchConfig,
-    HighlightedField,
-    LogicalOperator,
-    SearchQuery,
-    SearchResult,
-    SearchResultItem,
-    SortConfig,
-    SortOrder,
+  CompoundFilter,
+  CursorSearchResult,
+  FacetBucket,
+  FacetConfig,
+  FacetedSearchQuery,
+  FacetResult,
+  FilterCondition,
+  FilterOperator,
+  FilterPrimitive,
+  FilterValue,
+  FullTextSearchConfig,
+  HighlightedField,
+  LogicalOperator,
+  SearchQuery,
+  SearchResult,
+  SearchResultItem,
+  SortConfig,
+  SortOrder,
 } from './types';
 import type { Schema } from '../../primitives/schema';
 
@@ -135,7 +135,14 @@ const RANGE_OPERATORS = new Set(['between']);
 const ARRAY_OPERATORS = new Set(['in', 'notIn', 'arrayContains', 'arrayContainsAny']);
 
 /** Operators that require a string value */
-const STRING_OPERATORS = new Set(['contains', 'startsWith', 'endsWith', 'like', 'ilike', 'fullText']);
+const STRING_OPERATORS = new Set([
+  'contains',
+  'startsWith',
+  'endsWith',
+  'like',
+  'ilike',
+  'fullText',
+]);
 
 /**
  * Schema for a single filter condition.

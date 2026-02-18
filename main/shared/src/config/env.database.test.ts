@@ -54,9 +54,7 @@ describe('DatabaseEnvSchema', () => {
     });
 
     it('accepts json', () => {
-      expect(DatabaseEnvSchema.parse({ DATABASE_PROVIDER: 'json' }).DATABASE_PROVIDER).toBe(
-        'json',
-      );
+      expect(DatabaseEnvSchema.parse({ DATABASE_PROVIDER: 'json' }).DATABASE_PROVIDER).toBe('json');
     });
 
     it('rejects mysql', () => {
@@ -192,9 +190,7 @@ describe('DatabaseEnvSchema', () => {
     });
 
     it('rejects invalid MONGODB_USE_UNIFIED_TOPOLOGY value', () => {
-      expect(() =>
-        DatabaseEnvSchema.parse({ MONGODB_USE_UNIFIED_TOPOLOGY: '1' }),
-      ).toThrow();
+      expect(() => DatabaseEnvSchema.parse({ MONGODB_USE_UNIFIED_TOPOLOGY: '1' })).toThrow();
     });
 
     it('coerces MONGODB_CONNECT_TIMEOUT_MS from string', () => {

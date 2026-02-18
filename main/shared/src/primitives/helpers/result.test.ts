@@ -376,8 +376,9 @@ describe('result', () => {
     });
 
     it('short-circuits before calling fn when result is Err', async () => {
-      const rejectingFn = vi.fn((_n: number): Promise<Result<number, string>> =>
-        Promise.reject(new Error('should not be called')),
+      const rejectingFn = vi.fn(
+        (_n: number): Promise<Result<number, string>> =>
+          Promise.reject(new Error('should not be called')),
       );
 
       const result = await andThenAsync(rejectingFn, err<string>('pre-existing error'));
@@ -386,15 +387,13 @@ describe('result', () => {
     });
 
     it('propagates async Ok result correctly', async () => {
-      const asyncFn = async (n: number): Promise<Result<string, never>> =>
-        ok(`processed: ${n}`);
+      const asyncFn = async (n: number): Promise<Result<string, never>> => ok(`processed: ${n}`);
       const result = await andThenAsync(asyncFn, ok(42));
       expect(result).toEqual({ ok: true, data: 'processed: 42' });
     });
 
     it('propagates async Err result correctly', async () => {
-      const asyncFn = async (_n: number): Promise<Result<string, string>> =>
-        err('async failure');
+      const asyncFn = async (_n: number): Promise<Result<string, string>> => err('async failure');
       const result = await andThenAsync(asyncFn, ok(42));
       expect(result).toEqual({ ok: false, error: 'async failure' });
     });
@@ -649,7 +648,10 @@ describe('result', () => {
     it('match passes the exact data value to the ok handler', () => {
       const captured: unknown[] = [];
       match(ok({ nested: { value: 42 } }), {
-        ok: (data) => { captured.push(data); return 'done'; },
+        ok: (data) => {
+          captured.push(data);
+          return 'done';
+        },
         err: () => 'never',
       });
       expect(captured[0]).toEqual({ nested: { value: 42 } });
@@ -660,7 +662,10 @@ describe('result', () => {
       let captured: unknown;
       match(err(originalError), {
         ok: () => 'never',
-        err: (e) => { captured = e; return 'done'; },
+        err: (e) => {
+          captured = e;
+          return 'done';
+        },
       });
       expect(captured).toBe(originalError);
     });

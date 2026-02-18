@@ -1,14 +1,8 @@
 // main/shared/src/primitives/schema/index.ts
 
-export type {
-  InferSchema,
-  SafeParseResult,
-  Schema
-} from './types';
+export type { InferSchema, SafeParseResult, Schema } from './types';
 
-export {
-  createSchema
-} from './factory';
+export { createSchema } from './factory';
 
 export {
   coerceDate,
@@ -24,7 +18,7 @@ export {
   parseTypedRecord,
   withDefault,
   type ParseNumberOptions,
-  type ParseStringOptions
+  type ParseStringOptions,
 } from './parsers';
 
 export {
@@ -33,15 +27,10 @@ export {
   createBrandedUuidSchema,
   createEnumSchema,
   createLiteralSchema,
-  createUnionSchema
+  createUnionSchema,
 } from './composite';
 
-export {
-  emailSchema,
-  isoDateTimeSchema,
-  passwordSchema,
-  uuidSchema
-} from './scalars';
+export { emailSchema, isoDateTimeSchema, passwordSchema, uuidSchema } from './scalars';
 
 export {
   activityIdSchema,
@@ -88,6 +77,5 @@ export {
   type UserId,
   type UserAgreementId,
   type WebhookDeliveryId,
-  type WebhookId
+  type WebhookId,
 } from './ids';
-

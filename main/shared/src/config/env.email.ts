@@ -92,14 +92,18 @@ export const EmailEnvSchema: Schema<EmailEnv> = createSchema<EmailEnv>((data: un
     SMTP_SECURE: parseOptional(obj['SMTP_SECURE'], (v: unknown) => trueFalseSchema.parse(v)),
     SMTP_USER: parseOptional(obj['SMTP_USER'], (v: unknown) => parseString(v, 'SMTP_USER')),
     SMTP_PASS: parseOptional(obj['SMTP_PASS'], (v: unknown) => parseString(v, 'SMTP_PASS')),
-    EMAIL_API_KEY: parseOptional(obj['EMAIL_API_KEY'], (v: unknown) => parseString(v, 'EMAIL_API_KEY')),
+    EMAIL_API_KEY: parseOptional(obj['EMAIL_API_KEY'], (v: unknown) =>
+      parseString(v, 'EMAIL_API_KEY'),
+    ),
     EMAIL_FROM_NAME: parseOptional(obj['EMAIL_FROM_NAME'], (v: unknown) =>
       parseString(v, 'EMAIL_FROM_NAME'),
     ),
     EMAIL_FROM_ADDRESS: parseOptional(obj['EMAIL_FROM_ADDRESS'], (v: unknown) =>
       parseString(v, 'EMAIL_FROM_ADDRESS'),
     ),
-    EMAIL_REPLY_TO: parseOptional(obj['EMAIL_REPLY_TO'], (v: unknown) => parseString(v, 'EMAIL_REPLY_TO')),
+    EMAIL_REPLY_TO: parseOptional(obj['EMAIL_REPLY_TO'], (v: unknown) =>
+      parseString(v, 'EMAIL_REPLY_TO'),
+    ),
     SMTP_CONNECTION_TIMEOUT: parseOptional(obj['SMTP_CONNECTION_TIMEOUT'], (v: unknown) =>
       coerceNumber(v, 'SMTP_CONNECTION_TIMEOUT'),
     ),

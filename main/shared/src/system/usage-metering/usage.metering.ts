@@ -7,7 +7,13 @@
  * @module Domain/UsageMetering
  */
 
-import { createEnumSchema, createSchema, parseNumber, parseString, isoDateTimeSchema  } from '../../primitives/schema';
+import {
+  createEnumSchema,
+  createSchema,
+  parseNumber,
+  parseString,
+  isoDateTimeSchema,
+} from '../../primitives/schema';
 import { tenantIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';

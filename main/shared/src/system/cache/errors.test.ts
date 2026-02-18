@@ -389,7 +389,10 @@ describe('cache errors', () => {
       const err = new CacheConnectionError('redis', 'Refused', new Error('root'));
       const json = err.toJSON();
       const serialized = JSON.stringify(json);
-      const parsed = JSON.parse(serialized) as { ok: boolean; error: { code: string; message: string } };
+      const parsed = JSON.parse(serialized) as {
+        ok: boolean;
+        error: { code: string; message: string };
+      };
 
       expect(parsed.ok).toBe(false);
       expect(parsed.error.code).toBe('CACHE_CONNECTION_ERROR');

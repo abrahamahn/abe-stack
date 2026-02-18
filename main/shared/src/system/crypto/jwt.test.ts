@@ -323,7 +323,9 @@ describe('JWT', () => {
     });
 
     it('rejects header with alg:RS256 (not HS256)', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
       const token = `${header}.${encodedPayload}.fakesig`;
 
@@ -463,7 +465,9 @@ describe('JWT', () => {
       // Advance 10 seconds past expiration
       vi.advanceTimersByTime(60 * 60 * 1000 + 10_000);
 
-      expect(() => verify(token, secret, { clockToleranceSeconds: 5 })).toThrow('Token has expired');
+      expect(() => verify(token, secret, { clockToleranceSeconds: 5 })).toThrow(
+        'Token has expired',
+      );
     });
 
     it('accepts token at exact tolerance boundary (exp + tolerance === now)', () => {
@@ -472,7 +476,9 @@ describe('JWT', () => {
       vi.advanceTimersByTime(13_000); // exp=10s, tolerance=3s → 13s is boundary
 
       // now >= exp + tolerance → expired
-      expect(() => verify(token, secret, { clockToleranceSeconds: 3 })).toThrow('Token has expired');
+      expect(() => verify(token, secret, { clockToleranceSeconds: 3 })).toThrow(
+        'Token has expired',
+      );
     });
 
     it('accepts token 1ms before tolerance boundary', () => {
@@ -497,9 +503,7 @@ describe('JWT', () => {
       vi.advanceTimersByTime(60 * 60 * 1000 + 2000);
 
       // Without tolerance: rejected
-      expect(() =>
-        verifyWithRotation(token, { currentSecret }),
-      ).toThrow('Token has expired');
+      expect(() => verifyWithRotation(token, { currentSecret })).toThrow('Token has expired');
 
       // With tolerance in config: accepted
       expect(() =>
@@ -512,13 +516,17 @@ describe('JWT', () => {
       vi.advanceTimersByTime(10_000);
 
       expect(() => verify(token, secret)).toThrow('Token has expired');
-      expect(() => verify(token, secret, { clockToleranceSeconds: 0 })).toThrow('Token has expired');
+      expect(() => verify(token, secret, { clockToleranceSeconds: 0 })).toThrow(
+        'Token has expired',
+      );
     });
   });
 
   describe('adversarial: malformed base64 and missing segments', () => {
     it('returns null from decode for completely invalid base64 payload', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       const malformed = '!!!not-base64!!!';
       const token = `${header}.${malformed}.fakesig`;
 
@@ -526,7 +534,9 @@ describe('JWT', () => {
     });
 
     it('rejects verify when payload decodes to a JSON array (not object)', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       const arrayPayload = Buffer.from(JSON.stringify([1, 2, 3])).toString('base64url');
       // Compute a valid signature so we get past the signature check
       const sig = createHmac('sha256', secret)
@@ -538,7 +548,9 @@ describe('JWT', () => {
     });
 
     it('rejects verify when payload decodes to a JSON string (not object)', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       const stringPayload = Buffer.from(JSON.stringify('just-a-string')).toString('base64url');
       const sig = createHmac('sha256', secret)
         .update(`${header}.${stringPayload}`)
@@ -549,7 +561,9 @@ describe('JWT', () => {
     });
 
     it('rejects verify when payload decodes to JSON null', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       const nullPayload = Buffer.from(JSON.stringify(null)).toString('base64url');
       const sig = createHmac('sha256', secret)
         .update(`${header}.${nullPayload}`)
@@ -576,7 +590,9 @@ describe('JWT', () => {
     });
 
     it('rejects token with empty payload segment', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
       expect(() => verify(`${header}..sig`, secret)).toThrow(JwtError);
     });
   });

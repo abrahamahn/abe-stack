@@ -43,27 +43,13 @@ export {
   updateUsernameResponseSchema,
   USERNAME_CHANGE_COOLDOWN_DAYS,
 } from './username.schemas';
-export type {
-  UpdateUsernameRequest,
-  UpdateUsernameResponse,
-} from './username.schemas';
+export type { UpdateUsernameRequest, UpdateUsernameResponse } from './username.schemas';
 
 // --- users.permissions ---
-export {
-  canUser,
-  hasRole,
-  isOwner,
-  isRegularUser,
-} from './users.permissions';
+export { canUser, hasRole, isOwner, isRegularUser } from './users.permissions';
 
 // --- users.roles ---
-export {
-  getAllRoles,
-  getRoleDisplayName,
-  isAdmin,
-  isModerator,
-  isUser,
-} from './users.roles';
+export { getAllRoles, getRoleDisplayName, isAdmin, isModerator, isUser } from './users.roles';
 
 // --- users.schemas ---
 export {

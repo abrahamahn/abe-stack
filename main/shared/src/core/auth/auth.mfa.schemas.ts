@@ -5,7 +5,12 @@
  * @module Core/Auth
  */
 
-import { createLiteralSchema, createSchema, parseBoolean, parseString } from '../../primitives/schema';
+import {
+  createLiteralSchema,
+  createSchema,
+  parseBoolean,
+  parseString,
+} from '../../primitives/schema';
 
 import type { Schema } from '../../primitives/schema';
 

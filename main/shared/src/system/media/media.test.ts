@@ -113,23 +113,17 @@ describe('detectFileType', () => {
     });
 
     it('detects PNG from 8-byte signature', () => {
-      const result = detectFileType(
-        makeBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-      );
+      const result = detectFileType(makeBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
       expect(result).toEqual({ ext: 'png', mime: 'image/png' });
     });
 
     it('detects GIF87a', () => {
-      const result = detectFileType(
-        makeBuffer([0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x01, 0x00]),
-      );
+      const result = detectFileType(makeBuffer([0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x01, 0x00]));
       expect(result).toEqual({ ext: 'gif', mime: 'image/gif' });
     });
 
     it('detects GIF89a', () => {
-      const result = detectFileType(
-        makeBuffer([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00]),
-      );
+      const result = detectFileType(makeBuffer([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00]));
       expect(result).toEqual({ ext: 'gif', mime: 'image/gif' });
     });
 
@@ -166,9 +160,7 @@ describe('detectFileType', () => {
     });
 
     it('detects M4A from ftyp M4A box', () => {
-      const result = detectFileType(
-        makeBuffer([0x66, 0x74, 0x79, 0x70, 0x4d, 0x34, 0x41, 0x20]),
-      );
+      const result = detectFileType(makeBuffer([0x66, 0x74, 0x79, 0x70, 0x4d, 0x34, 0x41, 0x20]));
       expect(result).toEqual({ ext: 'm4a', mime: 'audio/m4a' });
     });
   });
@@ -235,9 +227,7 @@ describe('detectFileType', () => {
     });
 
     it('returns null for buffer with almost-matching PNG (truncated at 7 bytes)', () => {
-      expect(
-        detectFileType(makeBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a])),
-      ).toBeNull();
+      expect(detectFileType(makeBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a]))).toBeNull();
     });
   });
 });
@@ -719,15 +709,13 @@ describe('sanitizeFilename', () => {
     });
 
     it('replaces full range of ASCII control chars (0x01-0x1f)', () => {
-      const controlChars = Array.from({ length: 31 }, (_, i) =>
-        String.fromCharCode(i + 1),
-      ).join('');
+      const controlChars = Array.from({ length: 31 }, (_, i) => String.fromCharCode(i + 1)).join(
+        '',
+      );
       const filename = `file${controlChars}name.txt`;
       const result = sanitizeFilename(filename);
       // No control chars should remain
-      expect(result).not.toMatch(
-        /[\x01-\x1f]/,
-      );
+      expect(result).not.toMatch(/[\x01-\x1f]/);
     });
   });
 
@@ -861,9 +849,7 @@ describe('validateUploadConfig', () => {
     });
 
     it('returns valid=true when all fields are omitted', () => {
-      expect(
-        validateUploadConfig({}),
-      ).toEqual({ valid: true, errors: [] });
+      expect(validateUploadConfig({})).toEqual({ valid: true, errors: [] });
     });
   });
 

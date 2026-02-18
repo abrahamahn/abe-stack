@@ -121,7 +121,9 @@ export const BillingEnvSchema: Schema<BillingEnv> = createSchema<BillingEnv>((da
       createEnumSchema(['sandbox', 'production'] as const, 'PAYPAL_MODE').parse(v),
     ),
     BILLING_CURRENCY: parseString(withDefault(obj['BILLING_CURRENCY'], 'usd'), 'BILLING_CURRENCY'),
-    PLAN_FREE_ID: parseOptional(obj['PLAN_FREE_ID'], (v: unknown) => parseString(v, 'PLAN_FREE_ID')),
+    PLAN_FREE_ID: parseOptional(obj['PLAN_FREE_ID'], (v: unknown) =>
+      parseString(v, 'PLAN_FREE_ID'),
+    ),
     PLAN_PRO_ID: parseOptional(obj['PLAN_PRO_ID'], (v: unknown) => parseString(v, 'PLAN_PRO_ID')),
     PLAN_ENTERPRISE_ID: parseOptional(obj['PLAN_ENTERPRISE_ID'], (v: unknown) =>
       parseString(v, 'PLAN_ENTERPRISE_ID'),

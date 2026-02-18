@@ -735,9 +735,7 @@ describe('cursorPaginatedResultSchema — adversarial', () => {
   const schema = cursorPaginatedResultSchema(idOnlySchema);
 
   it('rejects numeric nextCursor (not a string)', () => {
-    expect(() =>
-      schema.parse({ data: [], nextCursor: 12345, hasNext: true, limit: 10 }),
-    ).toThrow();
+    expect(() => schema.parse({ data: [], nextCursor: 12345, hasNext: true, limit: 10 })).toThrow();
   });
 
   it('rejects boolean nextCursor', () => {
@@ -757,8 +755,6 @@ describe('cursorPaginatedResultSchema — adversarial', () => {
   });
 
   it('rejects missing hasNext', () => {
-    expect(() =>
-      schema.parse({ data: [], nextCursor: null, limit: 10 }),
-    ).toThrow();
+    expect(() => schema.parse({ data: [], nextCursor: null, limit: 10 })).toThrow();
   });
 });

@@ -77,10 +77,7 @@ describe('publicRoute', () => {
     });
 
     it('stores an invalid HTTP method string without throwing — type safety is compile-time only', () => {
-      const route = publicRoute(
-        'CONNECT' as unknown as 'GET',
-        makeHandler(),
-      );
+      const route = publicRoute('CONNECT' as unknown as 'GET', makeHandler());
       // Runtime performs no validation — value is stored as-is.
       expect(route.method).toBe('CONNECT');
     });
@@ -148,10 +145,7 @@ describe('protectedRoute', () => {
     });
 
     it('stores an invalid method string at runtime without throwing', () => {
-      const route = protectedRoute(
-        'HEAD' as unknown as 'GET',
-        makeHandler(),
-      );
+      const route = protectedRoute('HEAD' as unknown as 'GET', makeHandler());
       expect(route.method).toBe('HEAD');
     });
 
@@ -242,9 +236,7 @@ describe('createRouteMap', () => {
 
     it('accepts null as a route definition without throwing', () => {
       expect(() =>
-        createRouteMap([
-          ['/bad', null as unknown as BaseRouteDefinition],
-        ]),
+        createRouteMap([['/bad', null as unknown as BaseRouteDefinition]]),
       ).not.toThrow();
     });
 

@@ -103,7 +103,9 @@ describe('oauthProviderSchema', () => {
     });
 
     it('should throw for array', () => {
-      expect(() => oauthProviderSchema.parse(['google'])).toThrow('OAuth provider must be a string');
+      expect(() => oauthProviderSchema.parse(['google'])).toThrow(
+        'OAuth provider must be a string',
+      );
     });
   });
 
@@ -162,17 +164,22 @@ describe('oauthProviderSchema', () => {
 describe('oauthInitiateResponseSchema', () => {
   describe('valid input', () => {
     it('should accept an https URL', () => {
-      const result = oauthInitiateResponseSchema.parse({ url: 'https://accounts.google.com/o/oauth2/auth' });
+      const result = oauthInitiateResponseSchema.parse({
+        url: 'https://accounts.google.com/o/oauth2/auth',
+      });
       expect(result).toEqual({ url: 'https://accounts.google.com/o/oauth2/auth' });
     });
 
     it('should accept an http URL', () => {
-      const result = oauthInitiateResponseSchema.parse({ url: 'http://localhost:4000/auth/callback' });
+      const result = oauthInitiateResponseSchema.parse({
+        url: 'http://localhost:4000/auth/callback',
+      });
       expect(result.url).toBe('http://localhost:4000/auth/callback');
     });
 
     it('should accept a URL with query params', () => {
-      const url = 'https://auth.example.com/oauth?client_id=abc&redirect_uri=https%3A%2F%2Fapp.example.com';
+      const url =
+        'https://auth.example.com/oauth?client_id=abc&redirect_uri=https%3A%2F%2Fapp.example.com';
       const result = oauthInitiateResponseSchema.parse({ url });
       expect(result.url).toBe(url);
     });
@@ -180,11 +187,15 @@ describe('oauthInitiateResponseSchema', () => {
 
   describe('null/undefined/non-object rejection', () => {
     it('should throw for null', () => {
-      expect(() => oauthInitiateResponseSchema.parse(null)).toThrow('Invalid OAuth initiate response');
+      expect(() => oauthInitiateResponseSchema.parse(null)).toThrow(
+        'Invalid OAuth initiate response',
+      );
     });
 
     it('should throw for undefined', () => {
-      expect(() => oauthInitiateResponseSchema.parse(undefined)).toThrow('Invalid OAuth initiate response');
+      expect(() => oauthInitiateResponseSchema.parse(undefined)).toThrow(
+        'Invalid OAuth initiate response',
+      );
     });
 
     it('should throw for a plain string', () => {
@@ -194,7 +205,9 @@ describe('oauthInitiateResponseSchema', () => {
     });
 
     it('should throw for a number', () => {
-      expect(() => oauthInitiateResponseSchema.parse(42)).toThrow('Invalid OAuth initiate response');
+      expect(() => oauthInitiateResponseSchema.parse(42)).toThrow(
+        'Invalid OAuth initiate response',
+      );
     });
   });
 
@@ -204,11 +217,15 @@ describe('oauthInitiateResponseSchema', () => {
     });
 
     it('should throw when url is not a string', () => {
-      expect(() => oauthInitiateResponseSchema.parse({ url: 123 })).toThrow('URL must be a valid URL');
+      expect(() => oauthInitiateResponseSchema.parse({ url: 123 })).toThrow(
+        'URL must be a valid URL',
+      );
     });
 
     it('should throw when url is null', () => {
-      expect(() => oauthInitiateResponseSchema.parse({ url: null })).toThrow('URL must be a valid URL');
+      expect(() => oauthInitiateResponseSchema.parse({ url: null })).toThrow(
+        'URL must be a valid URL',
+      );
     });
 
     it('should throw for a relative path (no protocol)', () => {
@@ -224,11 +241,15 @@ describe('oauthInitiateResponseSchema', () => {
     });
 
     it('should throw for an empty string url', () => {
-      expect(() => oauthInitiateResponseSchema.parse({ url: '' })).toThrow('URL must be a valid URL');
+      expect(() => oauthInitiateResponseSchema.parse({ url: '' })).toThrow(
+        'URL must be a valid URL',
+      );
     });
 
     it('should throw for whitespace-only url', () => {
-      expect(() => oauthInitiateResponseSchema.parse({ url: '   ' })).toThrow('URL must be a valid URL');
+      expect(() => oauthInitiateResponseSchema.parse({ url: '   ' })).toThrow(
+        'URL must be a valid URL',
+      );
     });
   });
 
@@ -367,7 +388,9 @@ describe('oauthCallbackResponseSchema', () => {
 
   describe('null/undefined/non-object rejection', () => {
     it('should throw for null', () => {
-      expect(() => oauthCallbackResponseSchema.parse(null)).toThrow('Invalid OAuth callback response');
+      expect(() => oauthCallbackResponseSchema.parse(null)).toThrow(
+        'Invalid OAuth callback response',
+      );
     });
 
     it('should throw for undefined', () => {
@@ -444,9 +467,7 @@ describe('oauthCallbackResponseSchema', () => {
 
   describe('user field delegation', () => {
     it('should throw when user is missing', () => {
-      expect(() =>
-        oauthCallbackResponseSchema.parse({ token: 'tok', isNewUser: false }),
-      ).toThrow();
+      expect(() => oauthCallbackResponseSchema.parse({ token: 'tok', isNewUser: false })).toThrow();
     });
 
     it('should throw when user has an invalid email', () => {
@@ -535,9 +556,9 @@ describe('oauthLinkCallbackResponseSchema', () => {
 
   describe('linked field validation', () => {
     it('should throw when linked is missing', () => {
-      expect(() =>
-        oauthLinkCallbackResponseSchema.parse({ provider: OAUTH_PROVIDERS[0] }),
-      ).toThrow('Linked must be a boolean');
+      expect(() => oauthLinkCallbackResponseSchema.parse({ provider: OAUTH_PROVIDERS[0] })).toThrow(
+        'Linked must be a boolean',
+      );
     });
 
     it('should throw when linked is a string "true"', () => {
@@ -595,7 +616,9 @@ describe('oauthUnlinkResponseSchema', () => {
     });
 
     it('should throw for undefined', () => {
-      expect(() => oauthUnlinkResponseSchema.parse(undefined)).toThrow('Invalid OAuth unlink response');
+      expect(() => oauthUnlinkResponseSchema.parse(undefined)).toThrow(
+        'Invalid OAuth unlink response',
+      );
     });
 
     it('should throw for a plain string', () => {
@@ -730,9 +753,9 @@ describe('oauthConnectionSchema', () => {
 
   describe('providerEmail type checking', () => {
     it('should throw when providerEmail is a number', () => {
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ providerEmail: 42 })),
-      ).toThrow('Provider email must be a string or null');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ providerEmail: 42 }))).toThrow(
+        'Provider email must be a string or null',
+      );
     });
 
     it('should throw when providerEmail is true', () => {
@@ -742,9 +765,9 @@ describe('oauthConnectionSchema', () => {
     });
 
     it('should throw when providerEmail is an object', () => {
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ providerEmail: {} })),
-      ).toThrow('Provider email must be a string or null');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ providerEmail: {} }))).toThrow(
+        'Provider email must be a string or null',
+      );
     });
   });
 
@@ -756,21 +779,21 @@ describe('oauthConnectionSchema', () => {
     });
 
     it('should throw for NaN numeric timestamp', () => {
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ connectedAt: NaN })),
-      ).toThrow('Invalid connectedAt date');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ connectedAt: NaN }))).toThrow(
+        'Invalid connectedAt date',
+      );
     });
 
     it('should throw for boolean connectedAt', () => {
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ connectedAt: true })),
-      ).toThrow('connectedAt must be a date');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ connectedAt: true }))).toThrow(
+        'connectedAt must be a date',
+      );
     });
 
     it('should throw for null connectedAt', () => {
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ connectedAt: null })),
-      ).toThrow('connectedAt must be a date');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ connectedAt: null }))).toThrow(
+        'connectedAt must be a date',
+      );
     });
 
     it('should throw for array connectedAt', () => {
@@ -781,9 +804,9 @@ describe('oauthConnectionSchema', () => {
 
     it('should throw for an empty string connectedAt', () => {
       // new Date('') is Invalid Date
-      expect(() =>
-        oauthConnectionSchema.parse(makeValidConnection({ connectedAt: '' })),
-      ).toThrow('Invalid connectedAt date');
+      expect(() => oauthConnectionSchema.parse(makeValidConnection({ connectedAt: '' }))).toThrow(
+        'Invalid connectedAt date',
+      );
     });
 
     it('should accept zero as Unix epoch (valid Date)', () => {
@@ -849,25 +872,27 @@ describe('oauthConnectionsResponseSchema', () => {
 
   describe('connections field validation', () => {
     it('should throw when connections field is missing', () => {
-      expect(() => oauthConnectionsResponseSchema.parse({})).toThrow('Connections must be an array');
+      expect(() => oauthConnectionsResponseSchema.parse({})).toThrow(
+        'Connections must be an array',
+      );
     });
 
     it('should throw when connections is an object (not array)', () => {
-      expect(() =>
-        oauthConnectionsResponseSchema.parse({ connections: {} }),
-      ).toThrow('Connections must be an array');
+      expect(() => oauthConnectionsResponseSchema.parse({ connections: {} })).toThrow(
+        'Connections must be an array',
+      );
     });
 
     it('should throw when connections is null', () => {
-      expect(() =>
-        oauthConnectionsResponseSchema.parse({ connections: null }),
-      ).toThrow('Connections must be an array');
+      expect(() => oauthConnectionsResponseSchema.parse({ connections: null })).toThrow(
+        'Connections must be an array',
+      );
     });
 
     it('should throw when connections is a number', () => {
-      expect(() =>
-        oauthConnectionsResponseSchema.parse({ connections: 5 }),
-      ).toThrow('Connections must be an array');
+      expect(() => oauthConnectionsResponseSchema.parse({ connections: 5 })).toThrow(
+        'Connections must be an array',
+      );
     });
   });
 
@@ -945,21 +970,21 @@ describe('oauthEnabledProvidersResponseSchema', () => {
     });
 
     it('should throw when providers is null', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: null }),
-      ).toThrow('Providers must be an array');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: null })).toThrow(
+        'Providers must be an array',
+      );
     });
 
     it('should throw when providers is an object', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: {} }),
-      ).toThrow('Providers must be an array');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: {} })).toThrow(
+        'Providers must be an array',
+      );
     });
 
     it('should throw when providers is a string', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: 'google' }),
-      ).toThrow('Providers must be an array');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: 'google' })).toThrow(
+        'Providers must be an array',
+      );
     });
   });
 
@@ -971,21 +996,21 @@ describe('oauthEnabledProvidersResponseSchema', () => {
     });
 
     it('should throw when providers array contains a number', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: [1] }),
-      ).toThrow('OAuth provider must be a string');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: [1] })).toThrow(
+        'OAuth provider must be a string',
+      );
     });
 
     it('should throw when providers array contains null', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: [null] }),
-      ).toThrow('OAuth provider must be a string');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: [null] })).toThrow(
+        'OAuth provider must be a string',
+      );
     });
 
     it('should throw when providers array contains an empty string', () => {
-      expect(() =>
-        oauthEnabledProvidersResponseSchema.parse({ providers: [''] }),
-      ).toThrow('Invalid OAuth provider');
+      expect(() => oauthEnabledProvidersResponseSchema.parse({ providers: [''] })).toThrow(
+        'Invalid OAuth provider',
+      );
     });
 
     it('should throw on first invalid provider (fail-fast per .map)', () => {

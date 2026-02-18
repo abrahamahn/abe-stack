@@ -1139,9 +1139,7 @@ describe('recordSchema — adversarial', () => {
 
 describe('recordMapSchema — adversarial', () => {
   it('rejects null table records value', () => {
-    expect(() => recordMapSchema.parse({ users: null })).toThrow(
-      'Invalid records for table users',
-    );
+    expect(() => recordMapSchema.parse({ users: null })).toThrow('Invalid records for table users');
   });
 
   it('rejects string as table records', () => {
@@ -1179,7 +1177,9 @@ describe('conflictResponseSchema — adversarial', () => {
   });
 
   it('rejects null message', () => {
-    expect(() => conflictResponseSchema.parse({ message: null })).toThrow('Message must be a string');
+    expect(() => conflictResponseSchema.parse({ message: null })).toThrow(
+      'Message must be a string',
+    );
   });
 
   it('accepts empty string message', () => {
@@ -1203,7 +1203,9 @@ describe('getRecordsRequestSchema — adversarial', () => {
       table: 'users',
       id: `550e8400-e29b-41d4-a716-${String(i).padStart(12, '0')}`,
     }));
-    expect(() => getRecordsRequestSchema.parse({ pointers })).toThrow('Maximum 100 pointers allowed');
+    expect(() => getRecordsRequestSchema.parse({ pointers })).toThrow(
+      'Maximum 100 pointers allowed',
+    );
   });
 
   it('accepts exactly 100 pointers (at limit)', () => {
@@ -1417,7 +1419,7 @@ describe('applyOperations — adversarial', () => {
 
   it('does not mutate the original recordMap', () => {
     const recordMap: RecordMap = {
-      users: { 'u1': createTestRecord({ id: 'u1', name: 'original', version: 1 }) },
+      users: { u1: createTestRecord({ id: 'u1', name: 'original', version: 1 }) },
     };
     const ops: RealtimeOperation[] = [
       { type: 'set', table: 'users', id: 'u1', key: 'name', value: 'mutated' },
@@ -1428,7 +1430,7 @@ describe('applyOperations — adversarial', () => {
 
   it('handles empty operations array', () => {
     const recordMap: RecordMap = {
-      users: { 'u1': createTestRecord({ id: 'u1', version: 1 }) },
+      users: { u1: createTestRecord({ id: 'u1', version: 1 }) },
     };
     const result = applyOperations(recordMap, []);
     expect(result.modifiedRecords).toHaveLength(0);
@@ -1438,7 +1440,7 @@ describe('applyOperations — adversarial', () => {
   it('throws mid-batch on protected field, leaving partial state', () => {
     const recordMap: RecordMap = {
       users: {
-        'u1': createTestRecord({ id: 'u1', name: 'original', version: 1 }),
+        u1: createTestRecord({ id: 'u1', name: 'original', version: 1 }),
       },
     };
     const ops: RealtimeOperation[] = [
@@ -1450,8 +1452,8 @@ describe('applyOperations — adversarial', () => {
 
   it('modifiedRecords contains cross-table records', () => {
     const recordMap: RecordMap = {
-      users: { 'u1': createTestRecord({ id: 'u1', version: 1 }) },
-      posts: { 'p1': createTestRecord({ id: 'p1', version: 1 }) },
+      users: { u1: createTestRecord({ id: 'u1', version: 1 }) },
+      posts: { p1: createTestRecord({ id: 'p1', version: 1 }) },
     };
     const ops: RealtimeOperation[] = [
       { type: 'set', table: 'users', id: 'u1', key: 'name', value: 'a' },
@@ -1478,7 +1480,7 @@ describe('checkVersionConflicts — adversarial', () => {
     // Record exists in current but not in original
     const original: RecordMap = {};
     const current: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 5 } },
+      users: { u1: { id: 'u1', version: 5 } },
     };
     const modified = [{ table: 'users', id: 'u1' }];
     const conflicts = checkVersionConflicts(original, current, modified);
@@ -1488,7 +1490,7 @@ describe('checkVersionConflicts — adversarial', () => {
 
   it('skips records not in currentRecordMap', () => {
     const original: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 5 } },
+      users: { u1: { id: 'u1', version: 5 } },
     };
     const current: RecordMap = {};
     const modified = [{ table: 'users', id: 'u1' }];
@@ -1499,12 +1501,12 @@ describe('checkVersionConflicts — adversarial', () => {
 
   it('detects multiple conflicts across tables', () => {
     const original: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 1 } },
-      posts: { 'p1': { id: 'p1', version: 3 } },
+      users: { u1: { id: 'u1', version: 1 } },
+      posts: { p1: { id: 'p1', version: 3 } },
     };
     const current: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 2 } },
-      posts: { 'p1': { id: 'p1', version: 4 } },
+      users: { u1: { id: 'u1', version: 2 } },
+      posts: { p1: { id: 'p1', version: 4 } },
     };
     const modified = [
       { table: 'users', id: 'u1' },
@@ -1516,10 +1518,10 @@ describe('checkVersionConflicts — adversarial', () => {
 
   it('does not report conflict when versions are identical (no concurrent write)', () => {
     const original: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 100 } },
+      users: { u1: { id: 'u1', version: 100 } },
     };
     const current: RecordMap = {
-      users: { 'u1': { id: 'u1', version: 100 } },
+      users: { u1: { id: 'u1', version: 100 } },
     };
     const conflicts = checkVersionConflicts(original, current, [{ table: 'users', id: 'u1' }]);
     expect(conflicts).toHaveLength(0);
@@ -1527,10 +1529,10 @@ describe('checkVersionConflicts — adversarial', () => {
 
   it('conflict includes correct expectedVersion and actualVersion', () => {
     const original: RecordMap = {
-      items: { 'i1': { id: 'i1', version: 7 } },
+      items: { i1: { id: 'i1', version: 7 } },
     };
     const current: RecordMap = {
-      items: { 'i1': { id: 'i1', version: 15 } },
+      items: { i1: { id: 'i1', version: 15 } },
     };
     const conflicts = checkVersionConflicts(original, current, [{ table: 'items', id: 'i1' }]);
     expect(conflicts[0]?.expectedVersion).toBe(7);

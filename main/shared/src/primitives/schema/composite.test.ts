@@ -184,9 +184,7 @@ describe('createBrandedUuidSchema', () => {
     });
 
     it('throws on UUID with wrong length (too long)', () => {
-      expect(() => schema.parse(`${VALID_UUID}-extra`)).toThrow(
-        'TestUUID must be a valid UUID',
-      );
+      expect(() => schema.parse(`${VALID_UUID}-extra`)).toThrow('TestUUID must be a valid UUID');
     });
 
     it('throws on UUID missing hyphens', () => {

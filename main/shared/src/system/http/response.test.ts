@@ -153,7 +153,10 @@ describe('errorResponseSchema (envelope)', () => {
   describe('happy path', () => {
     it('parses a minimal valid error envelope', () => {
       const result = errorResponseSchema.parse(validError);
-      expect(result).toEqual({ ok: false, error: { code: 'BAD_REQUEST', message: 'Something went wrong', details: undefined } });
+      expect(result).toEqual({
+        ok: false,
+        error: { code: 'BAD_REQUEST', message: 'Something went wrong', details: undefined },
+      });
     });
 
     it('preserves ok: false as a literal false', () => {
@@ -189,9 +192,9 @@ describe('errorResponseSchema (envelope)', () => {
     });
 
     it('throws when ok field is missing', () => {
-      expect(() =>
-        errorResponseSchema.parse({ error: { code: 'X', message: 'Y' } }),
-      ).toThrow('Expected ok to be false');
+      expect(() => errorResponseSchema.parse({ error: { code: 'X', message: 'Y' } })).toThrow(
+        'Expected ok to be false',
+      );
     });
 
     it('throws when error object is missing entirely', () => {
@@ -199,15 +202,15 @@ describe('errorResponseSchema (envelope)', () => {
     });
 
     it('throws when error.code is missing', () => {
-      expect(() =>
-        errorResponseSchema.parse({ ok: false, error: { message: 'oops' } }),
-      ).toThrow('Error code must be a string');
+      expect(() => errorResponseSchema.parse({ ok: false, error: { message: 'oops' } })).toThrow(
+        'Error code must be a string',
+      );
     });
 
     it('throws when error.message is missing', () => {
-      expect(() =>
-        errorResponseSchema.parse({ ok: false, error: { code: 'X' } }),
-      ).toThrow('Error message must be a string');
+      expect(() => errorResponseSchema.parse({ ok: false, error: { code: 'X' } })).toThrow(
+        'Error message must be a string',
+      );
     });
 
     it('throws when error.code is a number instead of string', () => {
@@ -223,15 +226,15 @@ describe('errorResponseSchema (envelope)', () => {
     });
 
     it('treats null error field as empty object — code check fails', () => {
-      expect(() =>
-        errorResponseSchema.parse({ ok: false, error: null }),
-      ).toThrow('Error code must be a string');
+      expect(() => errorResponseSchema.parse({ ok: false, error: null })).toThrow(
+        'Error code must be a string',
+      );
     });
 
     it('treats array as the error field — code check fails', () => {
-      expect(() =>
-        errorResponseSchema.parse({ ok: false, error: [] }),
-      ).toThrow('Error code must be a string');
+      expect(() => errorResponseSchema.parse({ ok: false, error: [] })).toThrow(
+        'Error code must be a string',
+      );
     });
 
     it('treats null top-level input as empty object — ok check fails', () => {
@@ -289,9 +292,7 @@ describe('simpleErrorResponseSchema', () => {
     });
 
     it('throws on null input', () => {
-      expect(() => simpleErrorResponseSchema.parse(null)).toThrow(
-        'Error message must be a string',
-      );
+      expect(() => simpleErrorResponseSchema.parse(null)).toThrow('Error message must be a string');
     });
 
     it('ignores code when it is a number — returns undefined for code', () => {

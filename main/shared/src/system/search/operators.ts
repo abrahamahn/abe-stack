@@ -7,10 +7,7 @@
  */
 
 import { getFieldValue } from '../../primitives/helpers/object';
-import {
-  FILTER_OPERATORS,
-  LOGICAL_OPERATORS
-} from '../constants/limits';
+import { FILTER_OPERATORS, LOGICAL_OPERATORS } from '../constants/limits';
 
 import {
   isCompoundFilter,

@@ -42,21 +42,15 @@ describe('FrontendEnvSchema', () => {
     });
 
     it('rejects a URL without a protocol', () => {
-      expect(() =>
-        FrontendEnvSchema.parse({ VITE_API_URL: 'api.example.com' }),
-      ).toThrow();
+      expect(() => FrontendEnvSchema.parse({ VITE_API_URL: 'api.example.com' })).toThrow();
     });
 
     it('rejects a relative path', () => {
-      expect(() =>
-        FrontendEnvSchema.parse({ VITE_API_URL: '/api/v1' }),
-      ).toThrow();
+      expect(() => FrontendEnvSchema.parse({ VITE_API_URL: '/api/v1' })).toThrow();
     });
 
     it('rejects a bare domain without protocol or slash', () => {
-      expect(() =>
-        FrontendEnvSchema.parse({ VITE_API_URL: 'localhost:3000' }),
-      ).toThrow();
+      expect(() => FrontendEnvSchema.parse({ VITE_API_URL: 'localhost:3000' })).toThrow();
     });
 
     it('rejects a non-string value', () => {

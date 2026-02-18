@@ -144,9 +144,7 @@ describe.each(UUID_SCHEMAS)('$name (UUID-based)', ({ schema, brand }) => {
     });
 
     it('throws on UUID that is too long', () => {
-      expect(() => schema.parse(`${VALID_UUID}-extra`)).toThrow(
-        `${brand} must be a valid UUID`,
-      );
+      expect(() => schema.parse(`${VALID_UUID}-extra`)).toThrow(`${brand} must be a valid UUID`);
     });
 
     it('throws on UUID with non-hex characters', () => {
@@ -274,9 +272,7 @@ describe('emailTemplateKeySchema (string-based)', () => {
   });
 
   it('throws on null', () => {
-    expect(() => emailTemplateKeySchema.parse(null)).toThrow(
-      'EmailTemplateKey must be a string',
-    );
+    expect(() => emailTemplateKeySchema.parse(null)).toThrow('EmailTemplateKey must be a string');
   });
 });
 

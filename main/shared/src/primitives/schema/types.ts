@@ -14,9 +14,7 @@
  * Result type for safeParse operations.
  * Discriminated union of success and failure states.
  */
-export type SafeParseResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: Error };
+export type SafeParseResult<T> = { success: true; data: T } | { success: false; error: Error };
 
 /**
  * Schema interface for validation.

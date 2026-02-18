@@ -278,17 +278,15 @@ describe('DeferredPromise', () => {
     it('all concurrent awaiters receive the resolved value', async () => {
       const d = new DeferredPromise<number>();
 
-      const results = await Promise.all([
-        d.promise,
-        d.promise,
-        d.promise.then((v) => v * 2),
-      ].map((p, i) => {
-        if (i === 0) {
-          // Resolve after all awaiters are registered
-          Promise.resolve().then(() => d.resolve(5));
-        }
-        return p;
-      }));
+      const results = await Promise.all(
+        [d.promise, d.promise, d.promise.then((v) => v * 2)].map((p, i) => {
+          if (i === 0) {
+            // Resolve after all awaiters are registered
+            Promise.resolve().then(() => d.resolve(5));
+          }
+          return p;
+        }),
+      );
 
       expect(results).toEqual([5, 5, 10]);
     });
@@ -297,16 +295,14 @@ describe('DeferredPromise', () => {
       const d = new DeferredPromise<number>();
       const err = new Error('shared failure');
 
-      const settled = await Promise.allSettled([
-        d.promise,
-        d.promise,
-        d.promise,
-      ].map((p, i) => {
-        if (i === 0) {
-          Promise.resolve().then(() => d.reject(err));
-        }
-        return p;
-      }));
+      const settled = await Promise.allSettled(
+        [d.promise, d.promise, d.promise].map((p, i) => {
+          if (i === 0) {
+            Promise.resolve().then(() => d.reject(err));
+          }
+          return p;
+        }),
+      );
 
       for (const outcome of settled) {
         expect(outcome.status).toBe('rejected');

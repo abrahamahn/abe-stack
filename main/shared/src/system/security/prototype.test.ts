@@ -261,7 +261,10 @@ describe('prototype pollution helpers', () => {
     });
 
     it('returns false for array of safe objects', () => {
-      const arr = [{ id: 1, name: 'alice' }, { id: 2, name: 'bob' }];
+      const arr = [
+        { id: 1, name: 'alice' },
+        { id: 2, name: 'bob' },
+      ];
       expect(hasDangerousKeys(arr)).toBe(false);
     });
 
