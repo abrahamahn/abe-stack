@@ -8,11 +8,10 @@
  * @module billing/middleware
  */
 
-import { ERROR_MESSAGES, ForbiddenError } from '@abe-stack/shared';
-import { assertEntitled, resolveEntitlements } from '@abe-stack/shared/domain';
+import { ERROR_MESSAGES, ForbiddenError, assertEntitled, resolveEntitlements  } from '@abe-stack/shared';
 
 import type { BillingRepositories } from './types';
-import type { SubscriptionState } from '@abe-stack/shared/domain';
+import type { SubscriptionState } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

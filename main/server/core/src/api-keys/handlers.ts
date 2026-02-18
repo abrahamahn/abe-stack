@@ -17,7 +17,7 @@ import type { ApiKeyAppContext } from './types';
 import type { ApiKey as DbApiKey } from '../../../db/src';
 import type { HandlerContext } from '../../../engine/src';
 import type { AuditRecordParams } from '../audit/types';
-import type { AuthenticatedUser } from '@abe-stack/shared/core';
+import type { AuthenticatedUser } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

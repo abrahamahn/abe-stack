@@ -19,7 +19,7 @@ import {
 
 import type { BillingRepositories } from './types';
 import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
-import type { BillingService } from '@abe-stack/shared/domain';
+import type { BillingService } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

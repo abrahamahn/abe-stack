@@ -11,10 +11,10 @@ import type { FileRepository } from '../../../db/src';
 import type {
   AuthenticatedUser,
   BaseContext,
+  ContractRequestContext as RequestContext,
   Logger,
-  RequestContext,
   RequestInfo,
-} from '@abe-stack/shared/core';
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Processing Status

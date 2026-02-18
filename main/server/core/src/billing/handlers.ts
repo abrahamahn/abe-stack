@@ -54,7 +54,7 @@ import type {
   SubscriptionResponse,
   UpdateSubscriptionRequest,
   UserId,
-} from '@abe-stack/shared/domain';
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Helper Functions

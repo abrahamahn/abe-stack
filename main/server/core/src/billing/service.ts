@@ -44,7 +44,7 @@ import type {
   CheckoutResult,
   PortalSessionResult,
   ProviderPaymentMethod,
-} from '@abe-stack/shared/domain';
+} from '@abe-stack/shared';
 
 // ============================================================================
 // Plan Operations

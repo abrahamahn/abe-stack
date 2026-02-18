@@ -9,11 +9,10 @@
  * @module billing/entitlements
  */
 
-import { ForbiddenError } from '@abe-stack/shared';
-import { resolveEntitlements } from '@abe-stack/shared/domain';
+import { ForbiddenError, resolveEntitlements  } from '@abe-stack/shared';
 
 import type { BillingRepositories } from './types';
-import type { ResolvedEntitlements, SubscriptionState } from '@abe-stack/shared/domain';
+import type { ResolvedEntitlements, SubscriptionState } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

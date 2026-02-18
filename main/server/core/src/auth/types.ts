@@ -22,15 +22,13 @@ import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '../../../db/src';
 import type { SmsProvider } from '../../../engine/src';
-import type { EmailOptions, SendResult } from '@abe-stack/shared';
-import type {
+import type { EmailOptions, SendResult,
   AuthenticatedUser,
   BaseContext,
+  ContractRequestContext as RequestContext,
   ReplyContext,
-  RequestContext,
   RequestInfo,
-  ServerLogger,
-} from '@abe-stack/shared/core';
+  ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Logger Interface

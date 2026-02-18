@@ -13,7 +13,7 @@ import { getActivityFeed, getTenantActivityFeed } from './service';
 import type { ActivityAppContext } from './types';
 import type { Activity as DbActivity } from '../../../db/src';
 import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser } from '@abe-stack/shared/core';
+import type { AuthenticatedUser } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

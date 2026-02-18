@@ -21,15 +21,15 @@ import type {
   RawDb,
   SubscriptionRepository,
 } from '../../../db/src';
-import type { BillingConfig } from '@abe-stack/shared/config';
 import type {
   AuthenticatedUser,
   BaseContext,
-  RequestContext,
+  BillingService,
+  ContractRequestContext as RequestContext,
   RequestInfo,
   ServerLogger,
-} from '@abe-stack/shared/core';
-import type { BillingService } from '@abe-stack/shared/domain';
+} from '@abe-stack/shared';
+import type { BillingConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Module Dependencies

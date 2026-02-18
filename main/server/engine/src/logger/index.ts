@@ -27,7 +27,7 @@ export {
   type Logger as BaseLoggerType,
   type LoggerConfig,
   type RequestContext,
-} from '@abe-stack/shared/logger';
+} from '@abe-stack/shared';
 
 // Fastify-specific logger wrappers
 export { createLogger, createRequestLogger, type Logger } from './logger';

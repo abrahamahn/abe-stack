@@ -89,7 +89,7 @@ export function generateTemplates(name: string): Map<string, string> {
  * Narrow dependency interfaces for the ${name} module.
  */
 
-import type { BaseContext } from '@abe-stack/shared/core';
+import type { BaseContext } from '@abe-stack/shared';
 
 /**
  * Application context for ${name} handlers.

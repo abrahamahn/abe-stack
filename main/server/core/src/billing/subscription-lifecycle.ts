@@ -11,7 +11,7 @@
 
 import { MS_PER_DAY } from '@abe-stack/shared';
 
-import type { SubscriptionStatus } from '@abe-stack/shared/domain';
+import type { SubscriptionStatus } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

@@ -15,7 +15,7 @@ import { HTTP_STATUS } from '@abe-stack/shared';
 
 import { registerRoute } from './route-registry';
 
-import type { BaseContext } from '@abe-stack/shared/core';
+import type { BaseContext } from '@abe-stack/shared';
 import type {
   FastifyInstance,
   FastifyReply,

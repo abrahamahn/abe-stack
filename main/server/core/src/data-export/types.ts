@@ -13,7 +13,7 @@ import type {
   Repositories,
   UserRepository,
 } from '../../../db/src';
-import type { BaseContext, Logger, RequestContext } from '@abe-stack/shared/core';
+import type { BaseContext, ContractRequestContext as RequestContext, Logger } from '@abe-stack/shared';
 
 // ============================================================================
 // Handler Context Types

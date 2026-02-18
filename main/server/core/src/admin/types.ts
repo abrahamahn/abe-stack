@@ -14,9 +14,9 @@ import type {
   SubscriptionRepository,
   UserRepository,
 } from '../../../db/src';
-import type { BillingConfig } from '@abe-stack/shared/config';
 import type {
   BaseContext,
+  ContractRequestContext as RequestContext,
   HasBilling,
   HasCache,
   HasEmail,
@@ -24,8 +24,8 @@ import type {
   HasPubSub,
   HasStorage,
   Logger,
-  RequestContext,
-} from '@abe-stack/shared/core';
+} from '@abe-stack/shared';
+import type { BillingConfig } from '@abe-stack/shared/config';
 
 /**
  * Application context narrowed for the admin module.

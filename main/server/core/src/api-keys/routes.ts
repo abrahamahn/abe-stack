@@ -11,8 +11,7 @@
  * @module api-keys/routes
  */
 
-import { emptyBodySchema } from '@abe-stack/shared';
-import { createApiKeyRequestSchema } from '@abe-stack/shared/domain';
+import { emptyBodySchema, createApiKeyRequestSchema  } from '@abe-stack/shared';
 
 import { createRouteMap, protectedRoute } from '../../../engine/src';
 

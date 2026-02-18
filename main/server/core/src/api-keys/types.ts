@@ -11,7 +11,7 @@
  */
 
 import type { ApiKeyRepository, AuditEventRepository } from '../../../db/src';
-import type { BaseContext } from '@abe-stack/shared/core';
+import type { BaseContext } from '@abe-stack/shared';
 
 // ============================================================================
 // Handler Context

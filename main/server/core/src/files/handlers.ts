@@ -12,7 +12,7 @@ import { deleteFile, getDownloadUrl, getFileMetadata, uploadFile } from './servi
 
 import type { FileAppContext, FileMetadata, FileStorageProvider } from './types';
 import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser } from '@abe-stack/shared/core';
+import type { AuthenticatedUser } from '@abe-stack/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

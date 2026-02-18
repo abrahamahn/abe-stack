@@ -11,7 +11,7 @@
  */
 
 import type { DbClient, Repositories } from '../../../db/src';
-import type { BaseContext, RequestContext, ServerLogger } from '@abe-stack/shared/core';
+import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Context Interfaces

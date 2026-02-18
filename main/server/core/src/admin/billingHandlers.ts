@@ -16,7 +16,7 @@ import {
   type PlanFeature,
   type SubscriptionActionResponse,
   type SyncStripeResponse,
-  type UpdatePlanRequest,
+  type UpdatePlanRequest, PlanId 
 } from '@abe-stack/shared';
 
 import { createBillingProvider } from '../billing';
@@ -33,7 +33,6 @@ import {
 
 import type { AdminAppContext, AdminRequest } from './types';
 import type { Plan as DbPlan } from '../../../db/src';
-import type { PlanId } from '@abe-stack/shared/types';
 
 // ============================================================================
 // Helper Functions
