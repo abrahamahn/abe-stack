@@ -102,3 +102,4 @@ main/apps/server/uploads/
 
 # Temporary export files
 .tmp/
+changes.diff
