@@ -9,10 +9,10 @@
 // Re-export all pure utilities and types from shared
 export {
   CONSOLE_LOG_LEVELS, createLogger as createBaseLogger, createRequestLogger as createBaseRequestLogger, createConsoleLogger,
-  createJobCorrelationId, createRequestContext, generateCorrelationId,
+  createJobCorrelationId, createLogRequestContext, generateCorrelationId,
   getOrCreateCorrelationId,
   isValidCorrelationId, LOG_LEVELS, shouldLog,
-  type BaseLogger, type Logger as BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type LoggerConfig, type LogLevel, type RequestContext
+  type BaseLogger, type Logger as BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type LoggerConfig, type LogLevel, type LogRequestContext
 } from '@bslt/shared';
 
 // Fastify-specific logger wrappers

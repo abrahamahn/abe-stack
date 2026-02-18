@@ -340,6 +340,8 @@ export interface NotificationEnv {
   BRAZE_API_KEY?: string | undefined;
   BRAZE_API_URL?: string | undefined;
   BRAZE_ENABLE_LOGGING?: 'true' | 'false' | undefined;
+  VAPID_PUBLIC_KEY?: string | undefined;
+  VAPID_PRIVATE_KEY?: string | undefined;
 }
 
 // ============================================================================
@@ -406,6 +408,12 @@ export const NotificationEnvSchema: Schema<NotificationEnv> = createSchema<Notif
       BRAZE_API_URL: parseOptional(obj['BRAZE_API_URL'], (v) => parseString(v, 'BRAZE_API_URL')),
       BRAZE_ENABLE_LOGGING: parseOptional(obj['BRAZE_ENABLE_LOGGING'], (v) =>
         trueFalseSchema.parse(v),
+      ),
+      VAPID_PUBLIC_KEY: parseOptional(obj['VAPID_PUBLIC_KEY'], (v) =>
+        parseString(v, 'VAPID_PUBLIC_KEY'),
+      ),
+      VAPID_PRIVATE_KEY: parseOptional(obj['VAPID_PRIVATE_KEY'], (v) =>
+        parseString(v, 'VAPID_PRIVATE_KEY'),
       ),
     };
   },

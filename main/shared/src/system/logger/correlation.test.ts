@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { STANDARD_HEADERS } from '../constants/platform';
 
 import {
-  createRequestContext,
+  createLogRequestContext,
   generateCorrelationId,
   getOrCreateCorrelationId,
   isValidCorrelationId,
@@ -149,9 +149,9 @@ describe('Correlation ID Utilities', () => {
     });
   });
 
-  describe('createRequestContext', () => {
+  describe('createLogRequestContext', () => {
     test('should create context with all fields', () => {
-      const context = createRequestContext(
+      const context = createLogRequestContext(
         'correlation-123',
         {
           id: 'req-456',
@@ -175,7 +175,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should handle missing user agent', () => {
-      const context = createRequestContext('correlation-123', {
+      const context = createLogRequestContext('correlation-123', {
         id: 'req-456',
         method: 'GET',
         url: '/health',
@@ -187,7 +187,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should handle missing userId', () => {
-      const context = createRequestContext('correlation-123', {
+      const context = createLogRequestContext('correlation-123', {
         id: 'req-456',
         method: 'GET',
         url: '/api/public',
@@ -200,7 +200,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should handle both optional fields missing', () => {
-      const context = createRequestContext('corr-1', {
+      const context = createLogRequestContext('corr-1', {
         id: 'req-1',
         method: 'DELETE',
         url: '/api/resource/42',
@@ -220,7 +220,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should preserve all request metadata', () => {
-      const context = createRequestContext(
+      const context = createLogRequestContext(
         'abc-def-ghi',
         {
           id: 'fastify-req-001',
@@ -407,9 +407,9 @@ describe('Correlation ID Utilities', () => {
   // -------------------------------------------------------------------------
   // Adversarial — createRequestContext edge cases
   // -------------------------------------------------------------------------
-  describe('adversarial — createRequestContext edge cases', () => {
+  describe('adversarial — createLogRequestContext edge cases', () => {
     test('should not include userAgent key when header value is undefined', () => {
-      const context = createRequestContext('c', {
+      const context = createLogRequestContext('c', {
         id: 'r',
         method: 'GET',
         url: '/',
@@ -420,7 +420,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should preserve empty string IP as-is', () => {
-      const context = createRequestContext('c', {
+      const context = createLogRequestContext('c', {
         id: 'r',
         method: 'GET',
         url: '/',
@@ -432,7 +432,7 @@ describe('Correlation ID Utilities', () => {
 
     test('should preserve URL with query string and fragment', () => {
       const url = '/search?q=hello+world&page=2#results';
-      const context = createRequestContext('c', {
+      const context = createLogRequestContext('c', {
         id: 'r',
         method: 'GET',
         url,
@@ -443,7 +443,7 @@ describe('Correlation ID Utilities', () => {
     });
 
     test('should not mutate the returned context after creation', () => {
-      const context = createRequestContext('c', {
+      const context = createLogRequestContext('c', {
         id: 'r',
         method: 'DELETE',
         url: '/items/1',
@@ -457,7 +457,7 @@ describe('Correlation ID Utilities', () => {
 
     test('should handle very long user-agent string without truncation', () => {
       const longUA = 'Mozilla/5.0 ' + 'X'.repeat(1000);
-      const context = createRequestContext('c', {
+      const context = createLogRequestContext('c', {
         id: 'r',
         method: 'GET',
         url: '/',

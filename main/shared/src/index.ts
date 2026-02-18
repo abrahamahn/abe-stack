@@ -662,7 +662,7 @@ export {
   createJobCorrelationId,
   createJobLogger,
   createLogger,
-  createRequestContext,
+  createLogRequestContext,
   createRequestLogger,
   generateCorrelationId,
   getOrCreateCorrelationId,

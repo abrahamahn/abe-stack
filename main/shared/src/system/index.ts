@@ -150,7 +150,6 @@ export {
   type BaseRouteDefinition,
   type HandlerContext,
   type HttpMethod,
-  type RequestInfo,
   type RouteHandler,
   type RouteMap,
   type RouteResult,
@@ -196,7 +195,7 @@ export {
   successResponseSchema,
   type ApiResultEnvelope,
   type EmptyBody,
-  type ErrorResponse,
+  type SimpleErrorResponse,
   type ErrorResponseEnvelope,
   type SuccessResponseEnvelope,
 } from './http';
@@ -356,7 +355,7 @@ export {
   createJobCorrelationId,
   createJobLogger,
   createLogger,
-  createRequestContext,
+  createLogRequestContext,
   createRequestLogger,
   generateCorrelationId,
   getOrCreateCorrelationId,
@@ -369,7 +368,7 @@ export {
   type Logger,
   type LoggerConfig,
   type LogLevel,
-  type RequestContext,
+  type LogRequestContext,
 } from './logger';
 
 // ============================================================================
@@ -730,16 +729,16 @@ export {
   type ConflictResponse,
   type GetRecordsRequest,
   type GetRecordsResponse,
-  type ListInsertOperation,
   type ListPosition,
-  type ListRemoveOperation,
+  type RealtimeListInsertOperation,
+  type RealtimeListRemoveOperation,
   type RealtimeOperation,
   type RealtimeRecord,
+  type RealtimeSetNowOperation,
+  type RealtimeSetOperation,
   type RealtimeTransaction,
   type RecordMap,
   type RecordPointer,
-  type SetNowOperation,
-  type SetOperation,
   type VersionConflict,
   type WriteResponse,
 } from './realtime';
@@ -818,8 +817,8 @@ export type {
   HasQueue,
   HasStorage,
   ReplyContext,
-  RequestContext as EngineRequestContext,
-  RequestInfo as EngineRequestInfo,
+  RequestContext,
+  RequestInfo,
 } from './context';
 
 // ============================================================================
@@ -855,8 +854,8 @@ export type {
   HasErrorTracker,
   HealthCheckResult,
   InfrastructureService,
-  Job as PortsJob,
-  JobHandler,
+  QueueJob,
+  QueueJobHandler,
   JobOptions,
   JobQueueService,
   LocalStorageConfig,
@@ -867,10 +866,9 @@ export type {
   S3StorageConfig,
   SendResult,
   ServerLogger,
+  StorageBackend,
   StorageClient,
   StorageConfig,
   StorageService,
 } from './ports';
-// Note: StorageProvider from ports conflicts with StorageProvider from files.
-// Import directly from engine/ports when the ports variant is needed.
 // Note: Logger from ports is re-exported via ./logger to avoid duplicate export.

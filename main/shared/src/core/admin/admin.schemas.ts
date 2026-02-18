@@ -6,7 +6,6 @@
  * @module Domain/Admin
  */
 
-import { paginatedResultSchema } from '../../system/pagination';
 import {
   createSchema,
   parseBoolean,
@@ -17,6 +16,7 @@ import {
   parseString,
 } from '../../primitives/schema';
 import { tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import { paginatedResultSchema } from '../../system/pagination';
 import { appRoleSchema, type AppRole } from '../auth/roles';
 import { emailSchema, isoDateTimeSchema, usernameSchema, uuidSchema } from '../schemas';
 

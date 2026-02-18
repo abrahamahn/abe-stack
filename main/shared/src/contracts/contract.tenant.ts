@@ -27,8 +27,8 @@ import {
   tenantSettingSchema,
   updateTenantSettingSchema,
 } from '../core/tenant/tenant.settings.schemas';
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 import { inviteIdSchema, tenantIdSchema, userIdSchema } from '../primitives/schema/ids';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../system/http';
 
 import type { Contract } from '../primitives/api';
 

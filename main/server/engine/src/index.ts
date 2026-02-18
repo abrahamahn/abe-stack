@@ -19,7 +19,7 @@ export {
   createJobCorrelationId,
   createJobLogger,
   createLogger,
-  createRequestContext,
+  createLogRequestContext,
   createRequestLogger,
   generateCorrelationId,
   getOrCreateCorrelationId,
@@ -27,7 +27,7 @@ export {
   shouldLog,
   type BaseLogger,
   type BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type Logger,
-  type LoggerConfig, type LogLevel, type RequestContext
+  type LoggerConfig, type LogLevel, type LogRequestContext
 } from './logger';
 
 // ============================================================================

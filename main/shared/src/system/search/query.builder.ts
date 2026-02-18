@@ -83,7 +83,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   private _sort: SortConfig<T>[] = [];
   private _search?: FullTextSearchConfig | undefined;
   private _page = 1;
-  private _limit = SEARCH_DEFAULTS.LIMIT;
+  private _limit: number = SEARCH_DEFAULTS.LIMIT;
   private _maxPageSize: number;
   private _skip?: number | undefined;
   private _cursor?: string | undefined;

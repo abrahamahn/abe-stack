@@ -7,7 +7,7 @@
  */
 
 import {
-  createRequestContext,
+  createLogRequestContext,
   createJobCorrelationId as createSharedJobCorrelationId,
   createJobLogger as createSharedJobLogger,
   getOrCreateCorrelationId,
@@ -18,7 +18,7 @@ import { getMetricsCollector } from '../system/metrics';
 import { createRequestLogger } from './logger';
 
 import type { UserRole } from '@bslt/db';
-import type { Logger, RequestContext } from '@bslt/shared';
+import type { Logger, LogRequestContext } from '@bslt/shared';
 import type { LoggingConfig } from '@bslt/shared/config';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
@@ -26,7 +26,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 declare module 'fastify' {
   interface FastifyRequest {
     correlationId: string;
-    requestContext: RequestContext;
+    requestContext: LogRequestContext;
     logger: Logger; // Our wrapped logger with correct signature
     user?: {
       userId: string;
@@ -86,7 +86,7 @@ export function registerLoggingMiddleware(
     reply.header('x-correlation-id', correlationId);
 
     // Create request context
-    const requestContext = createRequestContext(
+    const requestContext = createLogRequestContext(
       correlationId,
       {
         id: request.id,
