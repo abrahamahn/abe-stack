@@ -437,3 +437,57 @@ export const WEBAUTHN_CREDENTIAL_COLUMNS = {
   createdAt: 'created_at',
   lastUsedAt: 'last_used_at',
 } as const;
+
+// ============================================================================
+// SMS Verification Codes
+// ============================================================================
+
+/**
+ * SMS verification code record (SELECT result).
+ * Stores phone verification codes for 2FA.
+ *
+ * @see 0023_sms_verification.sql
+ */
+export interface SmsVerificationCode {
+  id: string;
+  userId: string;
+  phone: string;
+  code: string;
+  expiresAt: Date;
+  verified: boolean;
+  attempts: number;
+  createdAt: Date;
+}
+
+/**
+ * Fields for inserting a new SMS verification code (INSERT).
+ */
+export interface NewSmsVerificationCode {
+  id?: string;
+  userId: string;
+  phone: string;
+  code: string;
+  expiresAt: Date;
+  verified?: boolean;
+  attempts?: number;
+  createdAt?: Date;
+}
+
+/**
+ * Fields for updating an SMS verification code (UPDATE).
+ */
+export interface UpdateSmsVerificationCode {
+  verified?: boolean;
+  attempts?: number;
+}
+
+export const SMS_VERIFICATION_CODE_COLUMNS = {
+  id: 'id',
+  userId: 'user_id',
+  phone: 'phone',
+  code: 'code',
+  expiresAt: 'expires_at',
+  verified: 'verified',
+  attempts: 'attempts',
+  createdAt: 'created_at',
+} as const;

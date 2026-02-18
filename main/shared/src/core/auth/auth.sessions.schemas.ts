@@ -29,6 +29,8 @@ import type { SessionId, UserId } from '../../primitives/schema/ids';
  * @param userId - Owner of the session (UUID)
  * @param ipAddress - Client IP at session creation
  * @param userAgent - Client user-agent string
+ * @param deviceName - Human-readable device name (e.g. "Chrome on macOS")
+ * @param deviceType - Device category (e.g. "desktop", "mobile", "tablet")
  * @param deviceId - Optional device fingerprint
  * @param lastActiveAt - Last activity timestamp
  * @param revokedAt - Revocation timestamp (null if active)
@@ -39,6 +41,8 @@ export interface UserSession {
   userId: UserId;
   ipAddress: string | null;
   userAgent: string | null;
+  deviceName: string | null;
+  deviceType: string | null;
   deviceId: string | null;
   lastActiveAt: Date;
   revokedAt: Date | null;
@@ -52,6 +56,8 @@ export interface CreateUserSession {
   userId: UserId;
   ipAddress?: string | null | undefined;
   userAgent?: string | null | undefined;
+  deviceName?: string | null | undefined;
+  deviceType?: string | null | undefined;
   deviceId?: string | null | undefined;
 }
 
@@ -60,6 +66,8 @@ export interface CreateUserSession {
  */
 export interface UpdateUserSession {
   lastActiveAt?: Date | undefined;
+  deviceName?: string | null | undefined;
+  deviceType?: string | null | undefined;
   revokedAt?: Date | null | undefined;
 }
 
@@ -78,6 +86,8 @@ export const userSessionSchema: Schema<UserSession> = createSchema((data: unknow
     userId: userIdSchema.parse(obj['userId']),
     ipAddress: parseNullable(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
     userAgent: parseNullable(obj['userAgent'], (v) => parseString(v, 'userAgent')),
+    deviceName: parseNullable(obj['deviceName'], (v) => parseString(v, 'deviceName')),
+    deviceType: parseNullable(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     deviceId: parseNullable(obj['deviceId'], (v) => parseString(v, 'deviceId')),
     lastActiveAt: coerceDate(obj['lastActiveAt'], 'lastActiveAt'),
     revokedAt: parseNullable(obj['revokedAt'], (v) => coerceDate(v, 'revokedAt')),
@@ -95,6 +105,8 @@ export const createUserSessionSchema: Schema<CreateUserSession> = createSchema((
     userId: userIdSchema.parse(obj['userId']),
     ipAddress: parseNullableOptional(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
     userAgent: parseNullableOptional(obj['userAgent'], (v) => parseString(v, 'userAgent')),
+    deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
+    deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     deviceId: parseNullableOptional(obj['deviceId'], (v) => parseString(v, 'deviceId')),
   };
 });
@@ -107,6 +119,8 @@ export const updateUserSessionSchema: Schema<UpdateUserSession> = createSchema((
 
   return {
     lastActiveAt: parseOptional(obj['lastActiveAt'], (v) => coerceDate(v, 'lastActiveAt')),
+    deviceName: parseNullableOptional(obj['deviceName'], (v) => parseString(v, 'deviceName')),
+    deviceType: parseNullableOptional(obj['deviceType'], (v) => parseString(v, 'deviceType')),
     revokedAt: parseNullableOptional(obj['revokedAt'], (v) => coerceDate(v, 'revokedAt')),
   };
 });
