@@ -100,23 +100,23 @@ export {
 } from './validation';
 
 // Processors (audio, image, video)
-export { AudioProcessor } from './processors/audio';
-export { ImageProcessor } from './processors/image';
-export { VideoProcessor } from './processors/video';
+export { AudioProcessor } from './processors';
+export { ImageProcessor } from './processors';
+export { VideoProcessor } from './processors';
 
 // Queue (job queue, retry handling)
 export {
   createMediaProcessingQueue, MediaProcessingQueue, type MediaJobData,
   type MediaJobResult
-} from './queue/jobs';
-export { CustomJobQueue, type JobData, type QueueOptions } from './queue/queue';
+} from './queue';
+export { CustomJobQueue, type JobData, type QueueOptions } from './queue';
 export {
   createMediaRetryHandler, MediaProcessingRetryHandler, type RetryOptions,
   type RetryState
-} from './queue/retry';
+} from './queue';
 
 // Utils (streaming)
-export { StreamingMediaProcessor, type StreamingOptions } from './utils/streaming';
+export { StreamingMediaProcessor, type StreamingOptions } from './utils';
 
 // Orchestrator
 export {

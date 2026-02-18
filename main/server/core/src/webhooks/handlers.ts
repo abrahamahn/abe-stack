@@ -20,13 +20,13 @@ import {
 } from './service';
 import { ERROR_MESSAGES } from './types';
 
-import type { HttpErrorResponse } from '@bslt/shared';
 import type {
   CreateWebhookData,
   UpdateWebhookData,
   WebhooksModuleDeps,
   WebhooksRequest,
 } from './types';
+import type { HttpErrorResponse } from '@bslt/shared';
 
 // ============================================================================
 // Handlers

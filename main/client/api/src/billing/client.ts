@@ -24,6 +24,7 @@ import {
 
 import { apiRequest, createRequestFactory } from '../utils';
 
+import type { BaseClientConfig } from '../utils';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
@@ -41,7 +42,6 @@ import type {
   SubscriptionResponse,
   UpdateSubscriptionRequest,
 } from '@bslt/shared';
-import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types

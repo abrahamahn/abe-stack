@@ -16,14 +16,14 @@ import {
   unsuspendTenant,
 } from './tenantService';
 
-import type { AdminSuspendTenantRequest } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type {
   AdminTenantDetail,
   AdminTenantListResponse,
   TenantSuspendResult,
 } from './tenantService';
 import type { AdminAppContext } from './types';
+import type { AdminSuspendTenantRequest } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

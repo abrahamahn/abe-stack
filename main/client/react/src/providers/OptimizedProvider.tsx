@@ -11,9 +11,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
-  useRef,
   useState,
 } from 'react';
 
@@ -130,39 +130,49 @@ export function createSelectiveContext<
   }: {
     children: ReactNode;
   } & T): ReactElement => {
-    // Create refs for previous values to detect changes
-    const prevValueRef = useRef<T | undefined>(undefined);
-    const changedKeysRef = useRef<Set<keyof T>>(new Set());
-
-    // Detect which keys changed
-    const changedKeys = new Set<keyof T>();
     const contextValue = value as unknown as T;
-    const prevValue = prevValueRef.current;
-    if (prevValue !== undefined) {
+    // Track which keys changed using state (not refs) to avoid render-time ref access
+    const [changedKeys, setChangedKeys] = useState<Set<keyof T>>(() => {
+      const initial = new Set<keyof T>();
       for (const key in value) {
-        if (prevValue[key as keyof T] !== contextValue[key as keyof T]) {
-          changedKeys.add(key as keyof T);
+        initial.add(key as keyof T);
+      }
+      return initial;
+    });
+    const [prevValue, setPrevValue] = useState<T | undefined>(undefined);
+
+    // Update changed keys and prev value after render via layout effect.
+    // setTimeout defers the setState calls to avoid synchronous cascading re-renders.
+    useLayoutEffect(() => {
+      const id = setTimeout(() => {
+        const nextChangedKeys = new Set<keyof T>();
+        if (prevValue !== undefined) {
+          for (const key in value) {
+            if (prevValue[key as keyof T] !== contextValue[key as keyof T]) {
+              nextChangedKeys.add(key as keyof T);
+            }
+          }
+        } else {
+          for (const key in value) {
+            nextChangedKeys.add(key as keyof T);
+          }
         }
-      }
-    } else {
-      // First render, all keys are "changed"
-      for (const key in value) {
-        changedKeys.add(key as keyof T);
-      }
-    }
+        setChangedKeys(nextChangedKeys);
+        setPrevValue(contextValue);
+      }, 0);
+      return (): void => {
+        clearTimeout(id);
+      };
+    });
 
-    // Update refs
-    prevValueRef.current = contextValue;
-    changedKeysRef.current = changedKeys;
-
-    // Memoize the context value - use ref for changedKeys to avoid triggering on every render
+    // Memoize the context value with changed key tracking
     const memoizedValue = useMemo(
       () => ({
         ...contextValue,
         // Add a method to check if a specific key changed
-        hasChanged: (key: keyof T): boolean => changedKeysRef.current.has(key),
+        hasChanged: (key: keyof T): boolean => changedKeys.has(key),
       }),
-      [contextValue],
+      [contextValue, changedKeys],
     );
 
     return <Context.Provider value={memoizedValue as unknown as T}>{children}</Context.Provider>;
@@ -400,7 +410,9 @@ interface MemoizedProps {
  * Memoized component wrapper with shallow comparison
  */
 export const Memoized = memo(
-  ({ children }: MemoizedProps): ReactElement => <>{children}</>,
+  function MemoizedComponent({ children }: MemoizedProps): ReactElement {
+    return <>{children}</>;
+  },
   (prevProps: MemoizedProps, nextProps: MemoizedProps): boolean => {
     // Shallow comparison
     const prevKeys = Object.keys(prevProps) as (keyof MemoizedProps)[];
@@ -432,13 +444,11 @@ export const SelectiveMemo = <T extends Record<string, unknown>>({
   ...props
 }: SelectiveMemoProps<T> & T): ReactElement => {
   const typedProps = props as unknown as T;
-  const propsRef = useRef(typedProps);
-  propsRef.current = typedProps;
   const watchedValuesKey = JSON.stringify(watchKeys.map((key) => typedProps[key]));
-  const memoizedChildren = useMemo(() => {
-    void watchedValuesKey;
-    return children(propsRef.current);
-  }, [children, watchedValuesKey]);
+  const memoizedChildren = useMemo(
+    () => children(typedProps),
+    [children, typedProps, watchedValuesKey],
+  );
 
   return <>{memoizedChildren}</>;
 };
@@ -456,34 +466,22 @@ interface RenderPerformanceResult {
  * Hook to monitor component render performance (dev mode only)
  */
 export function useRenderPerformance(_componentName: string): RenderPerformanceResult {
-  const renderCountRef = useRef(0);
-  const lastRenderTimeRef = useRef(Date.now());
-
-  renderCountRef.current++;
+  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
-    const now = Date.now();
-    lastRenderTimeRef.current = now;
-
-    // Only log in development - use globalThis for safe access
-    const isDev =
-      typeof globalThis !== 'undefined' &&
-      'process' in globalThis &&
-      (globalThis as { process?: { env?: { ['NODE_ENV']?: string } } }).process?.env?.[
-        'NODE_ENV'
-      ] === 'development';
-
-    if (isDev) {
-      // Development-only logging for performance monitoring
-    }
+    const id = setTimeout(() => {
+      setRenderCount((prev) => prev + 1);
+    }, 0);
+    return (): void => {
+      clearTimeout(id);
+    };
   });
 
-  return {
-    renderCount: renderCountRef.current,
-    resetCounter: (): void => {
-      renderCountRef.current = 0;
-    },
-  };
+  const resetCounter = useCallback(() => {
+    setRenderCount(0);
+  }, []);
+
+  return { renderCount, resetCounter };
 }
 
 // ============================================================================

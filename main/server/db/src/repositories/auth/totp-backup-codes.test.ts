@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -122,10 +123,10 @@ describe('createTotpBackupCodeRepository', () => {
       const result = await repo.findUnusedByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[0].codeHash).toBe('sha256hash');
-      expect(result[0].usedAt).toBeNull();
-      expect(result[1].codeHash).toBe('sha256hash2');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[0]?.codeHash).toBe('sha256hash');
+      expect(result[0]?.usedAt).toBeNull();
+      expect(result[1]?.codeHash).toBe('sha256hash2');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),

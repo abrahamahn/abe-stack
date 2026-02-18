@@ -18,7 +18,7 @@ import {
   Skeleton,
   Text,
 } from '@bslt/ui';
-import { JSX, useCallback, useState, type ChangeEvent } from 'react';
+import { useCallback, useState, type ChangeEvent, type JSX } from 'react';
 
 import { useTenant } from '../hooks';
 

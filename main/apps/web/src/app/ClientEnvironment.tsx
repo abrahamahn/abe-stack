@@ -60,7 +60,7 @@ export const ClientEnvironmentProvider = ({
   children,
 }: {
   value: ClientEnvironment;
-  children: ReactNode;
+  children?: ReactNode;
 }): ReactElement => {
   return (
     <ClientEnvironmentContext.Provider value={value}>{children}</ClientEnvironmentContext.Provider>

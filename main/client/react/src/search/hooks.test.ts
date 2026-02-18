@@ -15,7 +15,7 @@ import type { CursorSearchResult, SearchResult } from '@bslt/shared';
 // Helper to create wrapper with QueryCacheProvider
 function createWrapper() {
   return function wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryCacheProvider, { options: { defaultGcTime: 0 }, children });
+    return createElement(QueryCacheProvider, { options: { defaultGcTime: 0 } }, children);
   };
 }
 

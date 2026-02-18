@@ -3,6 +3,7 @@ import {
   forwardRef,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ComponentPropsWithoutRef,
@@ -155,9 +156,14 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
     const [isDragging, setIsDragging] = useState(false);
     const startPosRef = useRef<number>(0);
     const onResizeRef = useRef(onResize);
-    onResizeRef.current = onResize;
     const onDragEndRef = useRef(onDragEnd);
-    onDragEndRef.current = onDragEnd;
+
+    // Keep refs in sync with the latest callbacks without causing re-renders.
+    // useLayoutEffect ensures the ref is updated before any effects that read it.
+    useLayoutEffect(() => {
+      onResizeRef.current = onResize;
+      onDragEndRef.current = onDragEnd;
+    });
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>): void => {
       e.preventDefault();

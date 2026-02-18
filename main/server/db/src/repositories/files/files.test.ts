@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -106,8 +107,8 @@ describe('createFileRepository', () => {
       const result = await repo.findByUserId('user-001');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('file-001');
-      expect(result[1].id).toBe('file-002');
+      expect(result[0]?.id).toBe('file-001');
+      expect(result[1]?.id).toBe('file-002');
     });
 
     it('should return empty array when no files found', async () => {
@@ -154,7 +155,7 @@ describe('createFileRepository', () => {
       const result = await repo.findByTenantId('tenant-001');
 
       expect(result).toHaveLength(1);
-      expect(result[0].tenantId).toBe('tenant-001');
+      expect(result[0]?.tenantId).toBe('tenant-001');
     });
 
     it('should filter by tenant_id in SQL', async () => {

@@ -8,7 +8,7 @@ import { loadDatabaseConfig } from './infra/database';
 import { loadPackageManagerConfig } from './infra/package';
 import { loadQueueConfig } from './infra/queue';
 import { loadServerConfig } from './infra/server';
-import { loadStorageConfig } from './infra/storage';
+import { loadStorageConfig, validateStorage } from './infra/storage';
 import { loadBillingConfig, validateBillingConfig } from './services/billing';
 import { loadEmailConfig } from './services/email';
 import { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
@@ -36,12 +36,7 @@ import type { AppConfig, FullEnv } from '@bslt/shared/config';
  * @returns Validated `AppConfig` or exits process on error.
  */
 export function load(rawEnv: Record<string, string | undefined> = process.env): AppConfig {
-  // 1. Initialize environment from files if we are loading from process.env
-  if (rawEnv === process.env) {
-    initEnv();
-  }
-
-  // 2. Validate raw strings against Zod Schema
+  // Validate raw strings against Zod Schema
   const envResult = EnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
@@ -86,6 +81,17 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   return config;
 }
 
+/**
+ * Async variant that initializes environment files before loading config.
+ * Use this at the process entry point. For tests, prefer `load(explicitEnv)`.
+ *
+ * @returns Validated `AppConfig` after reading `.env` files into `process.env`.
+ */
+export async function loadConfig(): Promise<AppConfig> {
+  await initEnv();
+  return load(process.env);
+}
+
 function validate(config: AppConfig): void {
   const errors: string[] = [];
   const isProd = config.env === 'production';
@@ -103,12 +109,12 @@ function validate(config: AppConfig): void {
 
   // Billing Domain
   if (config.billing.enabled) {
-    errors.push(...validateBillingConfig(config.billing));
+    errors.push(...validateBillingConfig(config.billing, isProd));
   }
 
   // Search Domain - Using clean Type Predicates
   if (config.search.provider === 'elasticsearch') {
-    errors.push(...validateElasticsearchConfig(config.search.config));
+    errors.push(...validateElasticsearchConfig(config.search.config, isProd));
   } else {
     errors.push(...validateSqlSearchConfig(config.search.config));
   }
@@ -117,15 +123,22 @@ function validate(config: AppConfig): void {
   errors.push(...validateNotificationsConfig(config.notifications));
 
   // Global Production Hard-Guards
+  errors.push(...validateStorage(config.storage, isProd));
+
   if (isProd) {
-    if (config.storage.provider === 's3' && config.storage.accessKeyId === '') {
-      errors.push('Storage: S3_ACCESS_KEY_ID is required in production');
-    }
     if (config.email.provider === 'console') {
       errors.push('Email: Provider cannot be "console" in production.');
     }
     if (config.database.provider === 'postgresql' && !config.database.ssl) {
       errors.push('Database: SSL must be enabled in production.');
+    }
+    if (config.database.provider === 'json') {
+      errors.push('Database: JSON provider is not allowed in production; use PostgreSQL or MongoDB');
+    }
+    if (!config.server.appBaseUrl.startsWith('https://')) {
+      errors.push(
+        `Server: APP_BASE_URL must be an HTTPS URL in production (got: ${config.server.appBaseUrl})`,
+      );
     }
   }
 

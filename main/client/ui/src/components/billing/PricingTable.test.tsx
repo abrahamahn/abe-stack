@@ -479,8 +479,8 @@ describe('PricingTable', () => {
 
     it('should handle many plans', () => {
       const manyPlans: Plan[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `plan-${i}` as unknown as PlanId,
-        name: `Plan ${i}`,
+        id: `plan-${String(i)}` as unknown as PlanId,
+        name: `Plan ${String(i)}`,
         description: null,
         priceInCents: 1000 * (i + 1),
         currency: 'usd',

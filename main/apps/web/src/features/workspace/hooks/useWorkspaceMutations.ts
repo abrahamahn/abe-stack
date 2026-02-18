@@ -8,7 +8,8 @@
 import { getAccessToken } from '@app/authToken';
 import { useMutation, useQueryCache } from '@bslt/react';
 import { useUndoableMutation } from '@bslt/react/hooks';
-import { useRef } from 'react';
+import { clientConfig } from '@config';
+import { useEffect, useRef } from 'react';
 
 import { createWorkspaceApi } from '../api';
 
@@ -19,12 +20,10 @@ import type { CreateTenantInput, Tenant, UpdateTenantInput } from '@bslt/shared'
 // ============================================================================
 
 let workspaceApi: ReturnType<typeof createWorkspaceApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getWorkspaceApi(): ReturnType<typeof createWorkspaceApi> {
   workspaceApi ??= createWorkspaceApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return workspaceApi;
@@ -105,10 +104,13 @@ export function useUpdateWorkspace(options?: UseUpdateWorkspaceOptions): UseUpda
   const queryCache = useQueryCache();
   const workspaceRef = useRef<Record<string, unknown>>({});
 
-  if (options?.currentWorkspace !== undefined) {
-    workspaceRef.current = options.currentWorkspace;
-  }
-  const currentWorkspaceId = workspaceRef.current['id'];
+  useEffect(() => {
+    if (options?.currentWorkspace !== undefined) {
+      workspaceRef.current = options.currentWorkspace;
+    }
+  });
+
+  const currentWorkspaceId = options?.currentWorkspace?.['id'];
   const undoPathWorkspaceId =
     typeof currentWorkspaceId === 'string' && currentWorkspaceId !== ''
       ? currentWorkspaceId

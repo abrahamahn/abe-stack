@@ -56,7 +56,7 @@ describe('parseMultipartFile', () => {
     expect(parsed?.filename).toBe('avatar.jpg');
     expect(parsed?.mimetype).toBe('image/jpeg');
     expect(parsed?.size).toBeGreaterThan(0);
-    expect(parsed?.buffer.toString('latin1')).toContain('abc123-binary-content');
+    expect(new TextDecoder('latin1').decode(parsed?.buffer)).toContain('abc123-binary-content');
   });
 
   test('returns null when boundary is missing', () => {

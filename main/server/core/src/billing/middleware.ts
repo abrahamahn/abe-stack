@@ -10,9 +10,9 @@
 
 import { ERROR_MESSAGES, ForbiddenError, assertEntitled, resolveEntitlements } from '@bslt/shared';
 
+import type { BillingRepositories } from './types';
 import type { SubscriptionState } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { BillingRepositories } from './types';
 
 // ============================================================================
 // Types

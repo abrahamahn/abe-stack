@@ -25,6 +25,7 @@ import { setRefreshTokenCookie } from '../utils';
 
 import { requestMagicLink, verifyMagicLink } from './service';
 
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   AuthResponse,
   EmailSendError,
@@ -32,7 +33,6 @@ import type {
   MagicLinkRequest,
   MagicLinkRequestResponse,
 } from '@bslt/shared';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 /**
  * Handle magic link request.

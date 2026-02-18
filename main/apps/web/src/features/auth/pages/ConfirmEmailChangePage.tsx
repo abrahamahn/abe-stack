@@ -12,16 +12,11 @@
 import { getApiClient } from '@bslt/api';
 import { useNavigate, useSearchParams } from '@bslt/react/router';
 import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@bslt/ui';
+import { clientConfig } from '@config';
 import { useEffect, useState } from 'react';
 
+
 import type { ReactElement } from 'react';
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-/** Default API base URL when env var is not set */
-const DEFAULT_API_URL = 'http://localhost:3000';
 
 // ============================================================================
 // Component
@@ -50,18 +45,17 @@ export const ConfirmEmailChangePage = (): ReactElement => {
 
   useEffect(() => {
     if (token === null) {
-      setStatus('error');
-      setMessage('Invalid email change link. No token was provided.');
+      queueMicrotask(() => {
+        setStatus('error');
+        setMessage('Invalid email change link. No token was provided.');
+      });
       return;
     }
 
     const confirm = async (): Promise<void> => {
       try {
         const api = getApiClient({
-          baseUrl:
-            typeof import.meta.env['VITE_API_URL'] === 'string'
-              ? import.meta.env['VITE_API_URL']
-              : DEFAULT_API_URL,
+          baseUrl: clientConfig.apiUrl,
         });
         const result = await api.confirmEmailChange({ token });
         setStatus('success');

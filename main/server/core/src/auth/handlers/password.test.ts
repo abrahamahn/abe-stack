@@ -15,8 +15,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 
-import type { AppConfig } from '@bslt/shared/config';
 import type { AppContext, RequestWithCookies } from '../types';
+import type { AppConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -145,6 +145,7 @@ const baseConfig: AppConfig = {
       sameSite: 'lax',
       path: '/',
     },
+    oauthTokenEncryptionKey: 'test-secret-32-characters-long!!',
     oauth: {},
     magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
     totp: { issuer: 'Test', window: 1 },

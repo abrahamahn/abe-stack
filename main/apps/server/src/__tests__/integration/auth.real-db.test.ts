@@ -113,7 +113,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         method: 'POST',
         url: '/api/auth/refresh',
         headers: {
-          cookie: `refreshToken=${refreshToken}`,
+          cookie: `refreshToken=${String(refreshToken)}`,
         },
       });
 
@@ -134,7 +134,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         method: 'POST',
         url: '/api/auth/refresh',
         headers: {
-          cookie: `refreshToken=${refreshToken}`,
+          cookie: `refreshToken=${String(refreshToken)}`,
         },
       });
 
@@ -146,7 +146,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         method: 'POST',
         url: '/api/auth/refresh',
         headers: {
-          cookie: `refreshToken=${nextToken}`,
+          cookie: `refreshToken=${String(nextToken)}`,
         },
       });
 
@@ -181,7 +181,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         .find((c) => c.startsWith('refreshToken='))
         ?.split(';')[0]
         ?.split('=')[1];
-      const accessToken2 = (parseJsonResponse(session2) as any).token;
+      const accessToken2 = String((parseJsonResponse(session2) as { token: unknown }).token);
 
       // 2. Call logout-all from session 2
       const logoutAllResponse = await testServer.inject({
@@ -189,7 +189,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         url: '/api/auth/logout-all',
         headers: {
           authorization: `Bearer ${accessToken2}`,
-          cookie: `refreshToken=${token2}`,
+          cookie: `refreshToken=${String(token2)}`,
         },
       });
 
@@ -200,7 +200,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         method: 'POST',
         url: '/api/auth/refresh',
         headers: {
-          cookie: `refreshToken=${token1}`,
+          cookie: `refreshToken=${String(token1)}`,
         },
       });
       expect(refresh1.statusCode).toBe(401);
@@ -210,7 +210,7 @@ describe.skip('Auth API Integration (Real DB)', () => {
         method: 'POST',
         url: '/api/auth/refresh',
         headers: {
-          cookie: `refreshToken=${token2}`,
+          cookie: `refreshToken=${String(token2)}`,
         },
       });
       expect(refresh2.statusCode).toBe(200);

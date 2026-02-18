@@ -110,7 +110,7 @@ describe('OAuthConnectionsList', () => {
     // Mock window methods
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     Object.defineProperty(window, 'location', {
-      value: { href: '' },
+      value: { href: '', assign: vi.fn() },
       writable: true,
     });
 
@@ -381,7 +381,7 @@ describe('OAuthConnectionsList', () => {
       fireEvent.click(connectButton);
 
       expect(mockGetLinkUrl).toHaveBeenCalledWith('apple');
-      expect(window.location.href).toBe('/auth/oauth/apple');
+      expect(window.location.assign).toHaveBeenCalledWith('/auth/oauth/apple');
     });
 
     it('should generate correct link URLs for different providers', () => {

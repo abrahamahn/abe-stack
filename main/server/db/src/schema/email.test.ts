@@ -509,7 +509,7 @@ describe('Email Schema - EmailLog Type', () => {
 
     statuses.forEach((status, index) => {
       const log: EmailLog = {
-        id: `log-${index}`,
+        id: `log-${String(index)}`,
         userId: null,
         templateKey: null,
         recipient: 'test@example.com',
@@ -534,7 +534,7 @@ describe('Email Schema - EmailLog Type', () => {
 
     providers.forEach((provider, index) => {
       const log: EmailLog = {
-        id: `log-${index}`,
+        id: `log-${String(index)}`,
         userId: null,
         templateKey: null,
         recipient: 'test@example.com',

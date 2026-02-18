@@ -1,6 +1,7 @@
 // main/client/react/src/hooks/useHistoryNav.test.tsx
 import { MemoryRouter, useLocation } from '@router';
 import { render, screen, act } from '@testing-library/react';
+import react from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { HistoryProvider, useHistoryNav } from './useHistoryNav';
@@ -100,8 +101,8 @@ describe('useHistoryNav', () => {
         const { goBack, goForward } = useHistoryNav();
         return (
           <div>
-            <button onClick={goBack}>Back</button>
-            <button onClick={goForward}>Forward</button>
+            {react.createElement('button', { onClick: goBack }, 'Back')}
+            {react.createElement('button', { onClick: goForward }, 'Forward')}
           </div>
         );
       };
@@ -121,7 +122,7 @@ describe('useHistoryNav', () => {
     it('should not crash when goBack is called with no history', () => {
       const TestComponent = (): React.ReactElement => {
         const { goBack } = useHistoryNav();
-        return <button onClick={goBack}>Back</button>;
+        return react.createElement('button', { onClick: goBack }, 'Back');
       };
 
       render(
@@ -142,7 +143,7 @@ describe('useHistoryNav', () => {
     it('should not crash when goForward is called with no forward history', () => {
       const TestComponent = (): React.ReactElement => {
         const { goForward } = useHistoryNav();
-        return <button onClick={goForward}>Forward</button>;
+        return react.createElement('button', { onClick: goForward }, 'Forward');
       };
 
       render(

@@ -12,6 +12,12 @@ import { pipeline } from 'node:stream/promises';
 
 import { HTTP_STATUS, MS_PER_MINUTE, SECONDS_PER_DAY } from '@bslt/shared';
 
+import { verifySignature } from './signatures';
+
+import type { FileSignatureData } from './helpers';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
+
 // ============================================================================
 // Path Traversal Protection
 // ============================================================================
@@ -64,11 +70,6 @@ function isRateLimited(request: FastifyRequest): boolean {
   current.count += 1;
   return current.count > RATE_LIMIT_MAX_REQUESTS;
 }
-
-import { verifySignature } from './signatures';
-
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import type { FileSignatureData } from './helpers';
 
 export interface FilesConfig {
   uploadDir: string;

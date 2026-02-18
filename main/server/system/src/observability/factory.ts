@@ -7,8 +7,8 @@
  * @module Observability
  */
 
-import { ConsoleErrorTrackingProvider } from './console-provider';
-import { NoopErrorTrackingProvider } from './noop-provider';
+import { ConsoleErrorTrackingProvider } from './console.provider';
+import { NoopErrorTrackingProvider } from './noop.provider';
 
 import type { ErrorTrackingConfig, ErrorTrackingProvider } from './types';
 

@@ -72,6 +72,7 @@ function createMockAuthConfig(overrides: Partial<AuthConfig> = {}): AuthConfig {
       sameSite: 'strict',
       path: '/',
     },
+    oauthTokenEncryptionKey: 'test-oauth-encryption-key-32chars!',
     oauth: {},
     magicLink: {
       tokenExpiryMinutes: 15,

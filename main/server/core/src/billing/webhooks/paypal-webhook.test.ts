@@ -19,9 +19,9 @@ import {
 
 import { handlePayPalWebhook } from './paypal-webhook';
 
+import type { WebhookRepositories } from '../types';
 import type { NormalizedWebhookEvent, ServerLogger } from '@bslt/shared';
 import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
-import type { WebhookRepositories } from '../types';
 
 // ============================================================================
 // Mock Dependencies

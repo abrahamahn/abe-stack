@@ -102,6 +102,7 @@ export {
   CACHE_TTL,
   CORS_CONFIG,
   CRYPTO,
+  CSRF_COOKIE_NAME,
   CSRF_EXEMPT_PATHS,
   DEVICE_TYPES,
   EMAIL_PROVIDERS,
@@ -115,13 +116,17 @@ export {
   LOG_LEVELS,
   PLATFORM_TYPES,
   RATE_LIMIT_WINDOWS,
+  REFRESH_TOKEN_COOKIE_NAME,
   SAFE_METHODS,
   STANDARD_HEADERS,
   SUBSCRIBABLE_EVENT_TYPES,
+  SUDO_TOKEN_HEADER,
   TERMINAL_DELIVERY_STATUSES,
   TERMINAL_STATUSES,
   WEBHOOK_DELIVERY_STATUSES,
   WEBHOOK_EVENT_TYPES,
+  WEBSOCKET_PATH,
+  WS_CLOSE_POLICY_VIOLATION,
   type HttpStatusCode,
   // security
   SENSITIVE_KEYS,
@@ -741,6 +746,7 @@ export {
   type RecordMap,
   type RecordPointer,
   type VersionConflict,
+  type VersionedRecord,
   type WriteResponse,
 } from './realtime';
 

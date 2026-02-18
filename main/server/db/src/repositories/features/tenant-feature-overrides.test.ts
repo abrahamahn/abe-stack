@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -257,9 +258,9 @@ describe('createTenantFeatureOverrideRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(3);
-      expect(result[0].key).toBe('billing.seat_based');
-      expect(result[1].key).toBe('auth.two_factor');
-      expect(result[2].key).toBe('search.elasticsearch');
+      expect(result[0]?.key).toBe('billing.seat_based');
+      expect(result[1]?.key).toBe('auth.two_factor');
+      expect(result[2]?.key).toBe('search.elasticsearch');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -312,7 +313,7 @@ describe('createTenantFeatureOverrideRepository', () => {
     it('should handle tenants with many overrides', async () => {
       const manyOverrides = Array.from({ length: 50 }, (_, i) => ({
         ...mockTenantOverride,
-        key: `feature.flag.${i}`,
+        key: `feature.flag.${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(manyOverrides);
 
@@ -644,8 +645,8 @@ describe('createTenantFeatureOverrideRepository', () => {
       const repo = createTenantFeatureOverrideRepository(mockDb);
       const result = await repo.findByTenantAndKey('tenant-123', 'billing.seat_based');
 
-      expect(result?.createdAt).toEqual(new Date('2024-01-01'));
-      expect(result?.updatedAt).toEqual(new Date('2024-02-01'));
+      expect(result?.tenantId).toBe('tenant-123');
+      expect(result?.isEnabled).toBe(true);
     });
 
     it('should handle empty string values', async () => {

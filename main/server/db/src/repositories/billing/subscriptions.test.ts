@@ -27,6 +27,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -222,8 +223,8 @@ describe('createSubscriptionRepository', () => {
       const result = await repo.findByUserId('user-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('sub-123');
-      expect(result[1].id).toBe('sub-456');
+      expect(result[0]?.id).toBe('sub-123');
+      expect(result[1]?.id).toBe('sub-456');
     });
 
     it('should return empty array when no subscriptions', async () => {
@@ -563,7 +564,7 @@ describe('createSubscriptionRepository', () => {
       const result = await repo.create(newSub);
 
       expect(result.provider).toBe('paypal');
-      expect(result?.status).toBe('trialing');
+      expect(result.status).toBe('trialing');
     });
   });
 
@@ -747,7 +748,7 @@ describe('createSubscriptionRepository', () => {
       const result = await repo.findExpiringSoon(7);
 
       expect(result).toHaveLength(1);
-      expect(result[0].status).toBe('active');
+      expect(result[0]?.status).toBe('active');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringMatching(/current_period_end/i),
@@ -778,7 +779,7 @@ describe('createSubscriptionRepository', () => {
       const repo = createSubscriptionRepository(mockDb);
       const result = await repo.findExpiringSoon(7);
 
-      expect(result[0].status).toBe('trialing');
+      expect(result[0]?.status).toBe('trialing');
     });
 
     it('should order by current_period_end ascending', async () => {
@@ -822,7 +823,7 @@ describe('createSubscriptionRepository', () => {
       const result = await repo.findPastDue();
 
       expect(result).toHaveLength(1);
-      expect(result[0].status).toBe('past_due');
+      expect(result[0]?.status).toBe('past_due');
       const call = vi.mocked(mockDb.query).mock.calls[0];
       expect(call).toBeDefined();
       expect(call?.[0].text).toContain('status');

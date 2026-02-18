@@ -8,9 +8,8 @@
  * account linking/unlinking, and security event logging.
  */
 
+import { OAUTH_PROVIDERS } from '@bslt/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-import { OAUTH_PROVIDERS } from '../../../../db/src';
 
 // ============================================================================
 // Mock Dependencies
@@ -75,10 +74,10 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { UserId } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext } from '../index';
 import type { OAuthConnectionInfo } from './types';
+import type { UserId } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers
@@ -115,6 +114,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
           sameSite: 'lax',
           path: '/',
         },
+        oauthTokenEncryptionKey: 'oauth-token-encryption-key-32-ch!',
         oauth: {
           google: {
             clientId: 'google-client-id',

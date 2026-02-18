@@ -16,8 +16,8 @@ import {
 } from '../components';
 import { useSecurityEvents, useSecurityMetrics } from '../hooks';
 
-import type { JSX } from 'react';
 import type { MetricsPeriod } from '../hooks';
+import type { JSX } from 'react';
 
 // ============================================================================
 // Component

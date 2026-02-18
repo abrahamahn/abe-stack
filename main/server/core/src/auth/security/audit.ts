@@ -13,6 +13,8 @@ import path from 'path';
 
 import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
+import type { FastifyInstance } from 'fastify';
+
 interface AuditRequest {
   headers: Record<string, string | string[] | undefined>;
   ip?: string;
@@ -21,8 +23,8 @@ interface AuditRequest {
   user?: {
     id?: string;
     userId: string;
-    role?: any;
-    [key: string]: any;
+    role?: string;
+    [key: string]: unknown;
   };
   sessionId?: string;
 }
@@ -596,7 +598,7 @@ export class SecurityAuditLogger {
  * @returns The security audit logger instance
  */
 export function registerSecurityAudit(
-  server: any,
+  server: FastifyInstance,
   config: Partial<AuditConfig> = {},
 ): SecurityAuditLogger {
   const logger = new SecurityAuditLogger(config);

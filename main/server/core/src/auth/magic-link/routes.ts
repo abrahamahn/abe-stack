@@ -19,9 +19,9 @@ import {
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type { MagicLinkRequest, MagicLinkVerifyRequest } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 /**
  * Narrow HandlerContext to AppContext.

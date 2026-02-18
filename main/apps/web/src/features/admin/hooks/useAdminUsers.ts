@@ -102,8 +102,8 @@ export function useAdminUsers(initialFilters: AdminUserListFiltersLocal = {}): U
 
   // Fetch users when filters change
   useEffect(() => {
-    fetchUsers(filters).catch(() => {
-      // Error is already handled in fetchUsers
+    queueMicrotask(() => {
+      void fetchUsers(filters);
     });
   }, [filters, fetchUsers]);
 

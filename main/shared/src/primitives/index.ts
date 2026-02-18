@@ -251,4 +251,4 @@ export {
 export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './helpers';
 
 // --- date ---
-export { toISODateOnly } from './helpers';
+export { formatDate, formatDateTime, formatTimeAgo, toISODateOnly } from './helpers';

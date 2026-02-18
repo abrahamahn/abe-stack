@@ -8,7 +8,7 @@
  * @module
  */
 
-import { and, eq, isNull, select, insert, update } from '../../builder/index';
+import { and, deleteFrom, eq, isNull, lt, select, insert, update } from '../../builder/index';
 import {
   type EmailChangeToken,
   type NewEmailChangeToken,
@@ -64,6 +64,14 @@ export interface EmailChangeTokenRepository {
    * @complexity O(n) where n is number of pending tokens (typically 0-1)
    */
   invalidateForUser(userId: string): Promise<number>;
+
+  /**
+   * Delete expired, unused tokens (for daily cleanup task).
+   *
+   * @returns Number of deleted tokens
+   * @complexity O(n) where n is number of expired unused tokens
+   */
+  deleteExpired(): Promise<number>;
 }
 
 // ============================================================================
@@ -127,6 +135,14 @@ export function createEmailChangeTokenRepository(db: RawDb): EmailChangeTokenRep
         .where(and(eq('user_id', userId), isNull('used_at')))
         .toSql();
       return db.execute({ text, values });
+    },
+
+    async deleteExpired(): Promise<number> {
+      return db.execute(
+        deleteFrom(EMAIL_CHANGE_TOKENS_TABLE)
+          .where(and(lt('expires_at', new Date()), isNull('used_at')))
+          .toSql(),
+      );
     },
   };
 }

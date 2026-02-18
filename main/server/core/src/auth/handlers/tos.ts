@@ -12,13 +12,13 @@ import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/share
 import { acceptTos, checkTosAcceptance } from '../tos-gating';
 import { createErrorMapperLogger } from '../types';
 
+import type { AppContext, RequestWithCookies } from '../types';
 import type {
   AcceptTosRequest,
   AcceptTosResponse,
   HttpErrorResponse,
   TosStatusResponse,
 } from '@bslt/shared';
-import type { AppContext, RequestWithCookies } from '../types';
 
 /**
  * Handle ToS acceptance.

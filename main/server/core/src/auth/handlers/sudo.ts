@@ -16,8 +16,8 @@ import { verifyTotpCode } from '../totp';
 import { createErrorMapperLogger } from '../types';
 import { verifyPasswordSafe } from '../utils/password';
 
-import type { HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
+import type { HttpErrorResponse } from '@bslt/shared';
 
 /** Sudo token TTL in minutes */
 export const SUDO_TOKEN_TTL_MINUTES = AUTH_EXPIRY.SUDO_MINUTES;

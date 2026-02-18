@@ -293,10 +293,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await act(async () => {
@@ -329,10 +326,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await act(async () => {
@@ -371,10 +365,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await waitFor(
@@ -410,8 +401,10 @@ describe('RealtimeContext', () => {
         useEffect(() => {
           if (written && !undone && undoRedoState.canUndo) {
             undo();
-            setUndone(true);
+            const id = setTimeout(() => { setUndone(true); }, 0);
+            return (): void => { clearTimeout(id); };
           }
+          return;
         }, [written, undone, undoRedoState.canUndo, undo]);
 
         const user = recordCache.get('user', 'u1');
@@ -424,10 +417,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await waitFor(
@@ -506,10 +496,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await waitFor(
@@ -601,10 +588,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await waitFor(
@@ -644,15 +628,19 @@ describe('RealtimeContext', () => {
         useEffect(() => {
           if (step === 1 && undoRedoState.canUndo) {
             undo();
-            setStep(2);
+            const id = setTimeout(() => { setStep(2); }, 0);
+            return (): void => { clearTimeout(id); };
           }
+          return;
         }, [step, undoRedoState.canUndo, undo]);
 
         useEffect(() => {
           if (step === 2 && undoRedoState.canRedo) {
             redo();
-            setStep(3);
+            const id = setTimeout(() => { setStep(3); }, 0);
+            return (): void => { clearTimeout(id); };
           }
+          return;
         }, [step, undoRedoState.canRedo, redo]);
 
         const user = recordCache.get('user', 'u1');
@@ -665,10 +653,7 @@ describe('RealtimeContext', () => {
       };
 
       render(
-        createElement(RealtimeProvider<TestTables>, {
-          config,
-          children: createElement(TestComponent),
-        }),
+        createElement(RealtimeProvider<TestTables>, { config }, createElement(TestComponent)),
       );
 
       await waitFor(

@@ -8,7 +8,7 @@
 
 import { vi, type Mock } from 'vitest';
 
-import type { RawDb } from '../client';
+import type { RawDb, SessionContext } from '../client';
 
 // MockDbClient represents a minimal mock of RawDb for testing
 export interface MockDbClient {
@@ -17,6 +17,7 @@ export interface MockDbClient {
   execute: Mock<(sql: { text: string; values: unknown[] }) => Promise<number>>;
   raw: Mock<(sql: string) => Promise<unknown[]>>;
   transaction: Mock<<T>(callback: (tx: RawDb) => Promise<T>, options?: unknown) => Promise<T>>;
+  withSession: Mock<(session: SessionContext) => RawDb>;
   healthCheck: Mock<() => Promise<boolean>>;
   close: Mock<() => Promise<void>>;
   getClient: Mock<() => unknown>;
@@ -42,6 +43,9 @@ export function createMockDb(): MockDbClient {
     return await callback(mock as unknown as RawDb);
   });
 
+  // withSession returns the same mock (session scoping is transparent in tests)
+  mock.withSession = vi.fn().mockReturnValue(mock as unknown as RawDb);
+
   return mock;
 }
 
@@ -66,6 +70,9 @@ export function createMockDbWithData(options: {
   mock.transaction = vi.fn().mockImplementation(async <T>(callback: (tx: RawDb) => Promise<T>) => {
     return await callback(mock as unknown as RawDb);
   });
+
+  // withSession returns the same mock (session scoping is transparent in tests)
+  mock.withSession = vi.fn().mockReturnValue(mock as unknown as RawDb);
 
   return mock;
 }

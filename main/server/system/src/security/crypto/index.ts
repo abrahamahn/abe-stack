@@ -11,8 +11,8 @@
 // Base JWT
 // ============================================================================
 
-export { decode, JwtError, sign, verify } from '../jwt';
-export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from '../jwt';
+export { decode, JwtError, sign, verify } from './jwt';
+export type { JwtErrorCode, JwtHeader, JwtPayload, SignOptions, VerifyOptions } from './jwt';
 
 // ============================================================================
 // JWT Rotation
@@ -23,6 +23,6 @@ export {
   createJwtRotationHandler,
   signWithRotation,
   verifyWithRotation
-} from './jwt-rotation';
-export type { JwtRotationConfig, JwtRotationHandler, RotatingJwtOptions } from './jwt-rotation';
+} from './jwt.rotation';
+export type { JwtRotationConfig, JwtRotationHandler, RotatingJwtOptions } from './jwt.rotation';
 

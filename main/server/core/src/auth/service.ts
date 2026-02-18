@@ -22,6 +22,7 @@ import {
   normalizeEmail,
   validatePassword,
   WeakPasswordError,
+  type BreadcrumbData,
   type UserId,
   type UserRole,
 } from '@bslt/shared';
@@ -67,9 +68,9 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { EmailOptions } from '../../../system/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { EmailOptions } from '../../../system/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Helper Functions
@@ -400,7 +401,7 @@ export async function authenticateUser(
   ipAddress?: string,
   userAgent?: string,
   onPasswordRehash?: (userId: string, error?: Error) => void,
-  errorTracker?: { addBreadcrumb: (m: string, d: any) => void },
+  errorTracker?: { addBreadcrumb: (m: string, d: BreadcrumbData) => void },
 ): Promise<AuthResult | TotpChallengeResult | SmsChallengeResult> {
   errorTracker?.addBreadcrumb('Authenticating user', {
     category: 'auth',

@@ -58,7 +58,7 @@
     },
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["vite/client"],
+
     "composite": true,
     "noEmit": false,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.web.tsbuildinfo"

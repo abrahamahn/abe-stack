@@ -26,9 +26,9 @@ import { useTotpManagement } from '../hooks/useTotpManagement';
 
 import { TotpManagement } from './TotpManagement';
 
+import type { UseTotpManagementResult } from '../hooks/useTotpManagement';
 import type { ReactNode } from 'react';
 import type { Mock } from 'vitest';
-import type { UseTotpManagementResult } from '../hooks/useTotpManagement';
 
 // ============================================================================
 // Mocks

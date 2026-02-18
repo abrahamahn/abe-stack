@@ -2,47 +2,54 @@
 // Auth feature - authentication and authorization
 
 // Components
-export { AuthForm, type AuthFormProps } from './components/AuthForms';
-export { AuthModal } from './components/AuthModal';
-export { ForgotPasswordForm, type ForgotPasswordFormProps } from './components/ForgotPasswordForm';
-export { LoginForm, type LoginFormProps } from './components/LoginForm';
-export { MagicLinkForm, type MagicLinkFormProps } from './components/MagicLinkForm';
-export { NewDeviceBanner } from './components/NewDeviceBanner';
-export { OAuthButtons, type OAuthButtonsProps } from './components/OAuthButtons';
-export { RegisterForm, type RegisterFormProps } from './components/RegisterForm';
-export { ResetPasswordForm, type ResetPasswordFormProps } from './components/ResetPasswordForm';
-export { SmsChallenge } from './components/SmsChallenge';
-export { TosAcceptanceModal, type TosAcceptanceModalProps } from './components/TosAcceptanceModal';
-export { TurnstileWidget, type TurnstileWidgetProps } from './components/TurnstileWidget';
+export {
+  AuthForm,
+  AuthModal,
+  ForgotPasswordForm,
+  LoginForm,
+  MagicLinkForm,
+  NewDeviceBanner,
+  OAuthButtons,
+  RegisterForm,
+  ResetPasswordForm,
+  SmsChallenge,
+  TosAcceptanceModal,
+  TurnstileWidget,
+} from './components';
+export type {
+  AuthFormProps,
+  ForgotPasswordFormProps,
+  LoginFormProps,
+  MagicLinkFormProps,
+  OAuthButtonsProps,
+  RegisterFormProps,
+  ResetPasswordFormProps,
+  TosAcceptanceModalProps,
+  TurnstileWidgetProps,
+} from './components';
 
 // Hooks
-export { useAuth, type AuthContextType } from './hooks/useAuth';
-export {
-  useLoginWithPasskey,
-  usePasskeys,
-  useRegisterPasskey,
-  type LoginWithPasskeyState,
-  type PasskeysState,
-  type RegisterPasskeyState
-} from './hooks/useWebauthn';
+export { useAuth, useLoginWithPasskey, usePasskeys, useRegisterPasskey } from './hooks';
+export type { AuthContextType, LoginWithPasskeyState, PasskeysState, RegisterPasskeyState } from './hooks';
 
 // Note: useAuthModeNavigation, AuthMode, createFormHandler should be imported directly from @bslt/ui
 
 // Pages
-export { AuthPage } from './pages/AuthPage';
-export { ConfirmEmailChangePage } from './pages/ConfirmEmailChangePage';
-export { ConfirmEmailPage } from './pages/ConfirmEmailPage';
-export { ConnectedAccountsPage } from './pages/ConnectedAccountsPage';
-export { LoginPage } from './pages/LoginPage';
-export { MagicLinkVerifyPage } from './pages/MagicLinkVerifyPage';
-export { RegisterPage } from './pages/RegisterPage';
-export { ResetPasswordPage } from './pages/ResetPasswordPage';
-export { RevertEmailChangePage } from './pages/RevertEmailChangePage';
+export {
+  AuthPage,
+  ConfirmEmailChangePage,
+  ConfirmEmailPage,
+  ConnectedAccountsPage,
+  LoginPage,
+  MagicLinkVerifyPage,
+  RegisterPage,
+  ResetPasswordPage,
+  RevertEmailChangePage,
+} from './pages';
 
 // Services
-export {
-  AuthService, createAuthService, TotpChallengeError, type AuthState
-} from './services/AuthService';
+export { AuthService, createAuthService, TotpChallengeError } from './services';
+export type { AuthState } from './services';
 
 // External Types
 export type { User } from '@bslt/api';

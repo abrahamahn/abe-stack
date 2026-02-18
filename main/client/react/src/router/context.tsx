@@ -268,7 +268,7 @@ const browserStore = typeof window !== 'undefined' ? createBrowserRouterStore() 
 // ============================================================================
 
 export interface RouterProps {
-  children: ReactNode;
+  children?: ReactNode;
   /** Enable automatic scroll restoration (default: true) */
   scrollRestoration?: boolean;
 }
@@ -350,7 +350,7 @@ export const Router = ({ children, scrollRestoration = true }: RouterProps): Rea
 // ============================================================================
 
 export interface MemoryRouterProps {
-  children: ReactNode;
+  children?: ReactNode;
   initialEntries?: (string | { pathname: string; state?: unknown })[];
   initialIndex?: number;
 }
@@ -366,32 +366,25 @@ export const MemoryRouter = ({
   initialEntries = ['/'],
   initialIndex,
 }: MemoryRouterProps): ReactElement => {
-  // Normalize entries to strings and extract state
-  // Memoize initial entries only once on mount to avoid infinite re-render loops.
-  // Default parameter `initialEntries = ['/']` creates a new array reference on every
-  // render, which would cause useMemo to recompute → useEffect to fire → setState →
-  // re-render → infinite loop. Using a ref ensures stable initialization.
-  const initialEntriesRef = useRef(initialEntries);
-  const initialIndexRef = useRef(initialIndex);
-
-  const normalizedEntries = useMemo((): MemoryEntry[] => {
-    return initialEntriesRef.current.map((entry): MemoryEntry => {
+  // Initialize state once on mount using lazy useState initializer.
+  // Props like `initialEntries = ['/']` create new array references on every render,
+  // so we capture them at mount time via the lazy initializer to prevent loops.
+  const [state, setState] = useState<{
+    entries: MemoryEntry[];
+    index: number;
+    navigationType: NavigationType;
+  }>(() => {
+    const normalizedEntries = initialEntries.map((entry): MemoryEntry => {
       if (typeof entry === 'string') {
         return { path: entry, state: null, key: createKey() };
       }
       return { path: entry.pathname, state: entry.state ?? null, key: createKey() };
     });
-  }, []);
-
-  const initialIndexValue = initialIndexRef.current ?? normalizedEntries.length - 1;
-  const [state, setState] = useState<{
-    entries: MemoryEntry[];
-    index: number;
-    navigationType: NavigationType;
-  }>({
-    entries: normalizedEntries,
-    index: initialIndexValue,
-    navigationType: 'POP',
+    return {
+      entries: normalizedEntries,
+      index: initialIndex ?? normalizedEntries.length - 1,
+      navigationType: 'POP',
+    };
   });
 
   const location = useMemo((): RouterLocation => {

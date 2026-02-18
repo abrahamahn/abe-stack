@@ -44,6 +44,11 @@ function createMockContext(): AdminAppContext {
     queue: {},
     write: {},
     search: {},
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
+    },
   } as AdminAppContext;
 }
 

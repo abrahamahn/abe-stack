@@ -6,12 +6,11 @@
  * Pure utilities and types are re-exported from @bslt/shared.
  */
 
-// Re-export all pure utilities and types from shared
+// Re-export shared logger constructors and types used by server infrastructure
 export {
-  CONSOLE_LOG_LEVELS, createLogger as createBaseLogger, createRequestLogger as createBaseRequestLogger, createConsoleLogger,
-  createJobCorrelationId, createLogRequestContext, generateCorrelationId,
+  createLogger as createBaseLogger, createRequestLogger as createBaseRequestLogger, createConsoleLogger,
+  createLogRequestContext,
   getOrCreateCorrelationId,
-  isValidCorrelationId, LOG_LEVELS, shouldLog,
   type BaseLogger, type Logger as BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type LoggerConfig, type LogLevel, type LogRequestContext
 } from '@bslt/shared';
 

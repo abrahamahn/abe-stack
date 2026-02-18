@@ -1,6 +1,6 @@
 // main/client/react/src/hooks/useUndoRedoShortcuts.ts
-import { isEditableElement, isMac, matchesAnyBinding } from '@bslt/shared';
-import { useCallback, useEffect, useRef } from 'react';
+import { isEditableElement, isMac, matchesAnyBinding } from '@bslt/client-engine';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 // ============================================================================
 // Types
@@ -160,14 +160,18 @@ export function useUndoRedoShortcuts(
   // Store callbacks in refs to avoid recreating listener
   const onUndoRef = useRef(onUndo);
   const onRedoRef = useRef(onRedo);
-  onUndoRef.current = onUndo;
-  onRedoRef.current = onRedo;
+  useLayoutEffect(() => {
+    onUndoRef.current = onUndo;
+    onRedoRef.current = onRedo;
+  });
 
   // Store state in refs for the event handler
   const canUndoRef = useRef(canUndo);
   const canRedoRef = useRef(canRedo);
-  canUndoRef.current = canUndo;
-  canRedoRef.current = canRedo;
+  useLayoutEffect(() => {
+    canUndoRef.current = canUndo;
+    canRedoRef.current = canRedo;
+  });
 
   // Manual trigger functions for toolbar buttons
   const triggerUndo = useCallback((): void => {

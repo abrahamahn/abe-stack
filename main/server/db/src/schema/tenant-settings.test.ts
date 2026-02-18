@@ -279,8 +279,10 @@ describe('Tenant Settings Schema - Type Consistency', () => {
     };
 
     const fullSetting: TenantSetting = {
+      tenantId: newSetting.tenantId,
+      key: newSetting.key,
+      value: newSetting.value,
       updatedAt: new Date(),
-      ...newSetting,
     };
 
     expect(fullSetting.tenantId).toBe(newSetting.tenantId);
@@ -489,7 +491,7 @@ describe('Tenant Settings Schema - Edge Cases', () => {
   });
 
   test('should handle large JSONB arrays', () => {
-    const largeArray = Array.from({ length: 100 }, (_, i) => `item-${i}`);
+    const largeArray = Array.from({ length: 100 }, (_, i) => `item-${String(i)}`);
     const setting: TenantSetting = {
       tenantId: 'tenant-123',
       key: 'allowlist.domains',

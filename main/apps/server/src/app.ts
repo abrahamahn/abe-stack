@@ -16,13 +16,14 @@ import type {
   EmailService,
   ErrorTracker,
   NotificationService,
+  PostgresPubSub,
   StorageClient,
 } from '@bslt/shared';
 import type { AppConfig } from '@bslt/shared/config';
 import type { AppContext, IServiceContainer } from '@shared';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
-import { createServer } from '@/server';
+import { createServer, listen } from '@/server';
 
 export interface AppOptions {
   config: AppConfig;
@@ -87,8 +88,15 @@ export class App implements IServiceContainer {
     this.pubsub = new SubscriptionManager();
 
     // Enable cross-instance publishing via PostgresPubSub adapter if available
-    if (systemContext.pubsub && 'publish' in systemContext.pubsub) {
-      this.pubsub.setAdapter(systemContext.pubsub as any);
+    // pubsub is typed as always present but may be undefined in test environments
+    const pubsub: unknown = systemContext.pubsub;
+    if (
+      pubsub !== null &&
+      pubsub !== undefined &&
+      typeof pubsub === 'object' &&
+      'publish' in pubsub
+    ) {
+      this.pubsub.setAdapter(pubsub as unknown as PostgresPubSub);
     }
   }
 
@@ -107,8 +115,9 @@ export class App implements IServiceContainer {
     if (!this._server) {
       await this.init();
     }
-    const { host, port } = this.config.server;
-    await this._server!.listen({ port, host });
+    const server = this._server;
+    if (!server) throw new Error('Failed to initialize server');
+    await listen(server, this.config);
   }
 
   async stop(): Promise<void> {
@@ -142,7 +151,7 @@ export class App implements IServiceContainer {
   }
 
   get server(): FastifyInstance {
-    if (this._server === null) throw new Error('App not initialized. Call init() first.');
+    if (this._server === null) throw new Error('App not started');
     return this._server;
   }
 

@@ -6,6 +6,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { Button } from '../elements/Button';
+
 describe('Dialog', () => {
   describe('happy path', () => {
     it('renders closed by default', () => {

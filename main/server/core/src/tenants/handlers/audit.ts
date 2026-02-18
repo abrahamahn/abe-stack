@@ -87,24 +87,20 @@ export async function handleListTenantAuditEvents(
     const offset = Number.isFinite(parsedOffset) ? Math.max(parsedOffset, 0) : 0;
 
     // Fetch events scoped to this tenant using the generic find method
-    const events = await deps.repos.auditEvents.find({
+    const filter = {
       tenantId,
-      actorId: query.actorId !== '' && query.actorId !== undefined ? query.actorId : undefined,
-      action: query.action !== '' && query.action !== undefined ? query.action : undefined,
-      category: query.category !== '' && query.category !== undefined ? query.category : undefined,
-      severity: query.severity !== '' && query.severity !== undefined ? query.severity : undefined,
-      resource: query.resource !== '' && query.resource !== undefined ? query.resource : undefined,
-      resourceId:
-        query.resourceId !== '' && query.resourceId !== undefined ? query.resourceId : undefined,
-      startDate:
-        query.startDate !== undefined && query.startDate !== ''
-          ? new Date(query.startDate)
-          : undefined,
-      endDate:
-        query.endDate !== undefined && query.endDate !== '' ? new Date(query.endDate) : undefined,
       limit,
       offset,
-    });
+      ...(query.actorId ? { actorId: query.actorId } : {}),
+      ...(query.action ? { action: query.action } : {}),
+      ...(query.category ? { category: query.category } : {}),
+      ...(query.severity ? { severity: query.severity } : {}),
+      ...(query.resource ? { resource: query.resource } : {}),
+      ...(query.resourceId ? { resourceId: query.resourceId } : {}),
+      ...(query.startDate ? { startDate: new Date(query.startDate) } : {}),
+      ...(query.endDate ? { endDate: new Date(query.endDate) } : {}),
+    };
+    const events = await deps.repos.auditEvents.find(filter);
 
     deps.log.info(
       { tenantId, userId, resultCount: events.length, filters: query },

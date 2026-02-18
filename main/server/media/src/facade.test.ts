@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ServerMediaQueue, createServerMediaQueue } from './facade';
 
-import type { Logger } from '@bslt/shared';
 import type { MediaEntitlements } from './facade';
+import type { Logger } from '@bslt/shared';
 
 // Mock processor module with proper class constructors
 vi.mock('./processor', () => {

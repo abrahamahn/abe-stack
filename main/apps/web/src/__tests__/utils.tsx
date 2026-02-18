@@ -20,12 +20,12 @@ import { vi } from 'vitest';
 
 import { ClientEnvironmentProvider } from '../app/ClientEnvironment';
 
-import type { User, UserId } from '@bslt/shared';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import type { ReactElement, ReactNode } from 'react';
 import type { ClientEnvironment } from '../app/ClientEnvironment';
 import type { ClientConfig } from '../config';
 import type { AuthService, AuthState } from '../features/auth';
+import type { User, UserId } from '@bslt/shared';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
 
 // ============================================================================
 // Mock User Data

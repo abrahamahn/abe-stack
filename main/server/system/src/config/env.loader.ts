@@ -1,5 +1,5 @@
 // main/server/system/src/config/env.loader.ts
-import fs from 'node:fs';
+import { access, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 import { EnvSchema } from '@bslt/shared/config';
@@ -11,11 +11,20 @@ import type { FullEnv } from '@bslt/shared/config';
  * Zero-dependency, monorepo-aware, priority-ordered.
  */
 
-function parseAndPopulate(filePath: string): void {
-  if (!fs.existsSync(filePath)) return;
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function parseAndPopulate(filePath: string): Promise<void> {
+  if (!(await fileExists(filePath))) return;
 
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = await readFile(filePath, 'utf-8');
     const lines = content.split(/\r?\n/);
 
     for (const line of lines) {
@@ -48,10 +57,19 @@ function parseAndPopulate(filePath: string): void {
   }
 }
 
+async function isDirectory(dirPath: string): Promise<boolean> {
+  try {
+    const s = await stat(dirPath);
+    return s.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Initializes the environment by loading .env files with correct priority.
  */
-export function initEnv(): void {
+export async function initEnv(): Promise<void> {
   const nodeEnv = process.env['NODE_ENV'] ?? 'development';
   let currentDir = process.cwd();
   let configDir: string | null = null;
@@ -59,7 +77,7 @@ export function initEnv(): void {
   // Locate config/env
   for (let i = 0; i < 5; i++) {
     const candidate = path.join(currentDir, 'config');
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+    if (await isDirectory(candidate)) {
       configDir = candidate;
       break;
     }
@@ -87,26 +105,26 @@ export function initEnv(): void {
     if (process.env['NODE_ENV'] !== 'test') {
       process.stdout.write(`[EnvLoader] Loading explicit file: ${customPath}\n`);
     }
-    parseAndPopulate(resolvedPath);
+    await parseAndPopulate(resolvedPath);
   }
 
   // Priority 1: .env.local (Config directory - Not committed)
-  parseAndPopulate(path.join(configDir, 'env', '.env.local'));
+  await parseAndPopulate(path.join(configDir, 'env', '.env.local'));
 
   // Priority 2: Stage-specific (.env.production, .env.development)
   const envFile = path.join(configDir, 'env', `.env.${nodeEnv}`);
   if (process.env['NODE_ENV'] !== 'test') {
     process.stdout.write(`[EnvLoader] Loading stage: ${nodeEnv}\n`);
   }
-  parseAndPopulate(envFile);
+  await parseAndPopulate(envFile);
 
   // Priority 3: Base .env (Config directory)
-  parseAndPopulate(path.join(configDir, 'env', '.env'));
+  await parseAndPopulate(path.join(configDir, 'env', '.env'));
 
   // Priority 4: Root fallbacks (for flexibility in deployment)
-  parseAndPopulate(path.join(repoRoot, '.env.local'));
-  parseAndPopulate(path.join(repoRoot, `.env.${nodeEnv}`));
-  parseAndPopulate(path.join(repoRoot, '.env'));
+  await parseAndPopulate(path.join(repoRoot, '.env.local'));
+  await parseAndPopulate(path.join(repoRoot, `.env.${nodeEnv}`));
+  await parseAndPopulate(path.join(repoRoot, '.env'));
 }
 
 /**
@@ -116,9 +134,9 @@ export function initEnv(): void {
  * @returns Validated environment object
  * @throws Exits process on validation failure
  */
-export function loadServerEnv(): FullEnv {
+export async function loadServerEnv(): Promise<FullEnv> {
   // 1. Load the files into process.env
-  initEnv();
+  await initEnv();
 
   // 2. Validate using the schema contract
   const sanitized: Record<string, unknown> = {};

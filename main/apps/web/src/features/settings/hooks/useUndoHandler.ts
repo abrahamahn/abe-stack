@@ -7,7 +7,8 @@
  */
 
 import { getAccessToken } from '@app/authToken';
-import { useRef } from 'react';
+import { clientConfig } from '@config';
+import { useMemo } from 'react';
 
 import { createSettingsApi } from '../api';
 
@@ -19,12 +20,10 @@ import type { SetOperation, Transaction } from '@bslt/shared';
 // ============================================================================
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
   settingsApi ??= createSettingsApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return settingsApi;
@@ -57,15 +56,16 @@ async function applySetOperation(op: SetOperation): Promise<void> {
  * Pass the returned handler to `useUndoRedoController`.
  */
 export function useUndoHandler(): UndoRedoHandler {
-  const handlerRef = useRef<UndoRedoHandler>({
-    apply: async (tx: Transaction): Promise<void> => {
-      for (const op of tx.operations) {
-        if (op.type === 'set') {
-          await applySetOperation(op);
+  return useMemo<UndoRedoHandler>(
+    () => ({
+      apply: async (tx: Transaction): Promise<void> => {
+        for (const op of tx.operations) {
+          if (op.type === 'set') {
+            await applySetOperation(op);
+          }
         }
-      }
-    },
-  });
-
-  return handlerRef.current;
+      },
+    }),
+    [],
+  );
 }

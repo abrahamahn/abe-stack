@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PasskeyLoginButton } from './PasskeyLoginButton';
 

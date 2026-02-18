@@ -10,7 +10,6 @@
  *   eq('email', 'user@example.com'),
  *   gt('created_at', new Date('2024-01-01'))
  * );
- * // { text: '"email" = $1 AND "created_at" > $2', values: ['user@example.com', Date] }
  */
 
 import { combine, EMPTY_FRAGMENT, escapeIdentifier, type SqlFragment } from './types/types';

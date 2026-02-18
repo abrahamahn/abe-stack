@@ -64,8 +64,8 @@ import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
 
 import { SessionsList } from './SessionsList';
 
-import type { ReactNode } from 'react';
 import type { Session } from '../api';
+import type { ReactNode } from 'react';
 
 describe('SessionsList', () => {
   let mockRefetch: any;

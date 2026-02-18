@@ -25,6 +25,7 @@ import {
   TableRow,
   Text,
 } from '@bslt/ui';
+import { clientConfig } from '@config';
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
 import { WebhookDetailView } from './WebhookDetailView';
@@ -62,10 +63,8 @@ const AVAILABLE_EVENTS = [
 // ============================================================================
 
 function getClientConfig(): WebhookClientConfig {
-  const apiBaseUrl =
-    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
   return {
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   };
 }
@@ -75,14 +74,14 @@ function getClientConfig(): WebhookClientConfig {
 // ============================================================================
 
 export const WebhookManagement = ({ className }: WebhookManagementProps): ReactElement => {
-  const clientConfig = useMemo(getClientConfig, []);
-  const { webhooks, isLoading, error, refresh } = useWebhooks(clientConfig);
+  const webhookConfig = useMemo(() => getClientConfig(), []);
+  const { webhooks, isLoading, error, refresh } = useWebhooks(webhookConfig);
   const [showCreate, setShowCreate] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [selectedWebhookId, setSelectedWebhookId] = useState<string | null>(null);
 
-  const createWebhook = useCreateWebhook(clientConfig, {
+  const createWebhook = useCreateWebhook(webhookConfig, {
     onSuccess: () => {
       setNewUrl('');
       setSelectedEvents([]);
@@ -91,7 +90,7 @@ export const WebhookManagement = ({ className }: WebhookManagementProps): ReactE
     },
   });
 
-  const deleteWebhook = useDeleteWebhook(clientConfig, {
+  const deleteWebhook = useDeleteWebhook(webhookConfig, {
     onSuccess: () => {
       void refresh();
     },
@@ -284,7 +283,7 @@ export const WebhookManagement = ({ className }: WebhookManagementProps): ReactE
       {selectedWebhookId !== null && (
         <WebhookDetailView
           webhookId={selectedWebhookId}
-          clientConfig={clientConfig}
+          clientConfig={webhookConfig}
           open
           onClose={() => {
             setSelectedWebhookId(null);

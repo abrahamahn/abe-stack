@@ -7,6 +7,7 @@
 
 import { getAccessToken } from '@app/authToken';
 import { useQuery } from '@bslt/react';
+import { clientConfig } from '@config';
 
 import { createActivitiesApi } from '../api/activitiesApi';
 
@@ -17,12 +18,10 @@ import type { ActivityListResponse, ActivityLocal } from '../api/activitiesApi';
 // ============================================================================
 
 let activitiesApi: ReturnType<typeof createActivitiesApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getActivitiesApi(): ReturnType<typeof createActivitiesApi> {
   activitiesApi ??= createActivitiesApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return activitiesApi;

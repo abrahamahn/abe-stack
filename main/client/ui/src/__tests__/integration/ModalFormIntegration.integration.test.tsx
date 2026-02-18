@@ -242,7 +242,7 @@ const ConfirmDeleteModal = ({
         </Modal.Header>
         <Modal.Body>
           <Modal.Description>
-            This action cannot be undone. Please type "{userName}" to confirm deletion.
+            This action cannot be undone. Please type &quot;{userName}&quot; to confirm deletion.
           </Modal.Description>
 
           {error !== null && (

@@ -1,6 +1,6 @@
 // main/server/core/src/bootstrap.ts
 import { loadServerEnv } from '@bslt/server-system/config';
-import { createLogger, type BaseLogger, type LogData } from '@bslt/shared';
+import { createLogger, type BaseLogger, type ErrorTracker, type LogData } from '@bslt/shared';
 
 import {
   createDbClient,
@@ -82,8 +82,8 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
   if (options?.config) {
     config = options.config;
   } else {
-    initEnv();
-    config = loadServerEnv() as any;
+    await initEnv();
+    config = loadServerEnv() as unknown as AppConfig;
   }
 
   // 2. Logger
@@ -94,7 +94,7 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
 
   // 2.5 Error Tracking
   initSentry({
-    dsn: (process.env['SENTRY_DSN'] as string) ?? null,
+    dsn: process.env['SENTRY_DSN'] ?? null,
     environment: config.env,
     release: process.env['RELEASE_VERSION'],
   });
@@ -118,11 +118,7 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
   const repos = createRepositories(db);
 
   // 6. Cache
-  const cache = createCache({
-    driver: (config.cache as any).driver,
-    redisUrl: (config.cache as any).redisUrl,
-    ttl: config.cache.ttl,
-  });
+  const cache = createCache(config.cache);
 
   // 7. PubSub (for real-time events)
   const pgPubSub = createPostgresPubSub({
@@ -156,8 +152,8 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
       supportedOperators: [],
       maxPageSize: 100,
     }),
-    search: async () => ({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
-    searchWithCursor: async () => ({
+    search: () => Promise.resolve({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
+    searchWithCursor: () => Promise.resolve({
       data: [],
       nextCursor: null,
       prevCursor: null,
@@ -165,10 +161,10 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
       hasPrev: false,
       limit: 10,
     }),
-    searchFaceted: async () => ({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
-    count: async () => 0,
-    healthCheck: async () => true,
-    close: async () => {},
+    searchFaceted: () => Promise.resolve({ data: [], page: 1, limit: 10, hasNext: false, hasPrev: false }),
+    count: () => Promise.resolve(0),
+    healthCheck: () => Promise.resolve(true),
+    close: () => Promise.resolve(),
   };
 
   // 10. Email Templates
@@ -180,14 +176,14 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
     log: logger,
     db,
     repos,
-    cache: cache as any,
+    cache: cache as unknown as SystemContext['cache'],
     pubsub: pgPubSub,
-    queue: queueStore as any,
+    queue: queueStore as unknown as SystemContext['queue'],
     queueStore,
     write: writeService,
     search,
     emailTemplates: templates,
-    errorTracker: errorTracker as any,
+    errorTracker: errorTracker as unknown as ErrorTracker,
 
     // Helper to check health - uses full context
     health: async () => getDetailedHealth(context),
@@ -197,7 +193,7 @@ export async function bootstrapSystem(options?: { config?: AppConfig }): Promise
       const scopedDb = db.withSession(session);
       return {
         ...context,
-        db: scopedDb as any,
+        db: scopedDb as unknown as SystemContext['db'],
         repos: createRepositories(scopedDb),
       };
     },

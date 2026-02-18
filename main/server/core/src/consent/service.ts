@@ -10,8 +10,8 @@
 
 import { CONSENT_TYPES } from '@bslt/shared';
 
-import type { ConsentLogRepository, ConsentLog as DbConsentLog } from '../../../db/src';
 import type { ConsentPreferences, UpdateConsentInput } from './types';
+import type { ConsentLogRepository, ConsentLog as DbConsentLog } from '../../../db/src';
 
 // ============================================================================
 // Consent Operations

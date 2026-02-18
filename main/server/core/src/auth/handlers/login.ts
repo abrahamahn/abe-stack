@@ -23,6 +23,8 @@ import { authenticateUser, resendVerificationEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
+import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   AuthResponse,
   HttpErrorResponse,
@@ -30,8 +32,6 @@ import type {
   SmsChallengeResponse,
   TotpLoginChallengeResponse,
 } from '@bslt/shared';
-import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 type LoginResult = AuthResult | TotpChallengeResult | SmsChallengeResult;
 type BffLoginResponse = Pick<AuthResponse, 'user' | 'isNewDevice' | 'defaultTenantId'>;

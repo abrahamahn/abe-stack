@@ -1,4 +1,9 @@
 // main/server/system/src/system/types.ts
+import type { AppConfig } from '../config';
+import type { AuthEmailTemplates } from '../email/types';
+import type { QueueStore, WriteService } from '../queue';
+import type { ServerSearchProvider } from '../search';
+import type { SmsProvider } from '../sms';
 import type { RawDb, Repositories, SessionContext } from '@bslt/db';
 import type {
   BillingService,
@@ -13,11 +18,6 @@ import type {
   NotificationService,
   StorageClient,
 } from '@bslt/shared';
-import type { AppConfig } from '../config';
-import type { AuthEmailTemplates } from '../mailer/types';
-import type { QueueStore, WriteService } from '../queue';
-import type { ServerSearchProvider } from '../search';
-import type { SmsProvider } from '../sms';
 
 /**
  * Context required by the system health-check functions.

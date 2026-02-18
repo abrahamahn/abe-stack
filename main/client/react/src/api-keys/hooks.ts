@@ -5,7 +5,7 @@
  * Uses useQuery/useMutation for API key CRUD operations.
  */
 
-import { createApiKeysClient } from '@bslt/api';
+import { createApiKeysClient } from '@bslt/client-engine';
 import { useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
@@ -18,7 +18,7 @@ import type {
   CreateApiKeyResponse,
   DeleteApiKeyResponse,
   RevokeApiKeyResponse,
-} from '@bslt/api';
+} from '@bslt/client-engine';
 
 // ============================================================================
 // Query Keys

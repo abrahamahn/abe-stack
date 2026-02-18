@@ -5,6 +5,16 @@
  * Storage providers (Local, S3) and HTTP file server.
  */
 
+// Errors
+export {
+  isStorageError,
+  isStorageNotFoundError,
+  StorageError,
+  StorageNotFoundError,
+  StorageUploadError,
+  toStorageError,
+} from './errors';
+
 // Configuration
 export { DEFAULT_STORAGE_MAX_FILE_SIZE, loadStorageConfig, validateStorage } from './config';
 
@@ -22,8 +32,7 @@ export type {
 export { createStorage } from './factory';
 
 // Providers (direct access if needed)
-export { LocalStorageProvider } from './providers/local';
-export { S3StorageProvider } from './providers/s3';
+export { LocalStorageProvider, S3StorageProvider } from './providers';
 
 // URL Signing (canonical implementations)
 export {
@@ -42,5 +51,5 @@ export {
   normalizeFilename,
   registerFileServer,
   verifySignature as verifyFileSignature, type FilesConfig, type FileSignatureData
-} from './http/index';
+} from './http';
 

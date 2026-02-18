@@ -1,11 +1,4 @@
 // main/server/core/src/auth/types.ts
-// Re-export LOGIN_FAILURE_REASON from shared (canonical source)
-import { LOGIN_FAILURE_REASON, REFRESH_TOKEN_COOKIE_NAME } from '@bslt/shared';
-
-export { LOGIN_FAILURE_REASON };
-export const REFRESH_COOKIE_NAME = REFRESH_TOKEN_COOKIE_NAME;
-export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGIN_FAILURE_REASON];
-
 /**
  * Auth Module Types
  *
@@ -18,8 +11,15 @@ export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGI
  * @module types
  */
 
-import { MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
+import {
+  LOGIN_FAILURE_REASON,
+  MS_PER_MINUTE,
+  MS_PER_SECOND,
+  REFRESH_TOKEN_COOKIE_NAME,
+} from '@bslt/shared';
 
+import type { DbClient, Repositories } from '../../../db/src';
+import type { SmsProvider } from '../../../system/src';
 import type {
   AuthenticatedUser,
   BaseContext,
@@ -28,10 +28,12 @@ import type {
   RequestContext,
   RequestInfo,
   SendResult,
-  ServerLogger
+  ServerLogger,
 } from '@bslt/shared';
-import type { DbClient, Repositories } from '../../../db/src';
-import type { SmsProvider } from '../../../system/src';
+
+export { LOGIN_FAILURE_REASON };
+export const REFRESH_COOKIE_NAME = REFRESH_TOKEN_COOKIE_NAME;
+export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGIN_FAILURE_REASON];
 
 // ============================================================================
 // Logger Interface

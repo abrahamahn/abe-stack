@@ -10,9 +10,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WriteService, createWriteService, type WriteServiceOptions } from './writer';
 
+import type { WriteBatch, WriteOperation } from './types';
 import type { DbClient } from '@bslt/db';
 import type { SubscriptionManager } from '@bslt/shared';
-import type { WriteBatch, WriteOperation } from './types';
 
 /**
  * Logger interface matching WriteService's internal Logger type
@@ -487,9 +487,7 @@ describe('WriteService', () => {
         db: mockDb,
         hooks: { afterWrite: [failingHook] },
       };
-      if (mockLogger !== undefined) {
-        options.log = mockLogger as unknown as Logger;
-      }
+      options.log = mockLogger as unknown as Logger;
 
       new WriteService(options);
 

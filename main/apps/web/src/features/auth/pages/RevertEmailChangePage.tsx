@@ -10,11 +10,11 @@
 import { getApiClient } from '@bslt/api';
 import { useNavigate, useSearchParams } from '@bslt/react/router';
 import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@bslt/ui';
+import { clientConfig } from '@config';
 import { useEffect, useState } from 'react';
 
-import type { ReactElement } from 'react';
 
-const DEFAULT_API_URL = 'http://localhost:3000';
+import type { ReactElement } from 'react';
 
 export const RevertEmailChangePage = (): ReactElement => {
   const searchParamsResult = useSearchParams();
@@ -29,18 +29,17 @@ export const RevertEmailChangePage = (): ReactElement => {
 
   useEffect(() => {
     if (token === null) {
-      setStatus('error');
-      setMessage('Invalid email reversion link. No token was provided.');
+      queueMicrotask(() => {
+        setStatus('error');
+        setMessage('Invalid email reversion link. No token was provided.');
+      });
       return;
     }
 
     const revert = async (): Promise<void> => {
       try {
         const api = getApiClient({
-          baseUrl:
-            typeof import.meta.env['VITE_API_URL'] === 'string'
-              ? import.meta.env['VITE_API_URL']
-              : DEFAULT_API_URL,
+          baseUrl: clientConfig.apiUrl,
         });
         const result = await api.revertEmailChange({ token });
         setStatus('success');

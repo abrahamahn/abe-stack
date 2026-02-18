@@ -7,7 +7,9 @@
 
 import { getApiClient } from '@bslt/api';
 import { Alert, Button, Text } from '@bslt/ui';
+import { clientConfig } from '@config';
 import { useCallback, useState, type ReactElement } from 'react';
+
 
 export interface ForgotPasswordShortcutProps {
   email: string;
@@ -31,10 +33,7 @@ export const ForgotPasswordShortcut = ({
 
     try {
       const api = getApiClient({
-        baseUrl:
-          typeof import.meta.env['VITE_API_URL'] === 'string'
-            ? import.meta.env['VITE_API_URL']
-            : '',
+        baseUrl: clientConfig.apiUrl,
       });
 
       const result = await api.forgotPassword({ email: email.trim() });

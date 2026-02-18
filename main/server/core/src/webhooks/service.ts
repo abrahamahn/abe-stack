@@ -14,13 +14,13 @@ import { randomBytes } from 'node:crypto';
 
 import { NotFoundError } from '@bslt/shared';
 
-import type { Repositories, Webhook } from '../../../db/src';
 import type {
   CreateWebhookData,
   DeliverySummary,
   UpdateWebhookData,
   WebhookWithStats,
 } from './types';
+import type { Repositories, Webhook } from '../../../db/src';
 
 // ============================================================================
 // Secret Generation

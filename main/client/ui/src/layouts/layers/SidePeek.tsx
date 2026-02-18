@@ -104,40 +104,38 @@ const SidePeekRoot = ({
   closeOnOverlayClick = true,
   closeOnEscape = true,
 }: SidePeekRootProps): ReactElement | null => {
-  const [mounted, setMounted] = useState(false);
   const [titleId, setTitleId] = useState<string | undefined>(undefined);
   const [descriptionId, setDescriptionId] = useState<string | undefined>(undefined);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
+  // Initialize to `open` so a panel opened on first render appears without flash.
+  const [shouldRender, setShouldRender] = useState(open);
 
-  // Handle mount
-  useEffect((): (() => void) => {
-    setMounted(true);
-    return (): void => {
-      setMounted(false);
-    };
-  }, []);
-
-  // Handle animation states
+  // Handle animation states — all setState calls are inside timer callbacks, not
+  // synchronous effect bodies, so they don't trigger cascading renders.
   useEffect((): (() => void) | undefined => {
     if (open) {
-      setShouldRender(true);
-      // Small delay to trigger CSS transition
-      const timer = setTimeout(() => {
+      // Mount first, then animate in after a frame to trigger CSS transition
+      const mountTimer = setTimeout(() => {
+        setShouldRender(true);
+      }, 0);
+      const animateTimer = setTimeout(() => {
         setIsAnimating(true);
       }, 10);
       return (): void => {
-        clearTimeout(timer);
+        clearTimeout(mountTimer);
+        clearTimeout(animateTimer);
       };
     }
-    // Start slide-out animation
-    setIsAnimating(false);
-    // Wait for CSS transition to complete before unmounting (matches 0.2s in CSS)
-    const timer = setTimeout(() => {
+    // Start slide-out animation, then unmount after transition completes (0.2s CSS)
+    const slideOutTimer = setTimeout(() => {
+      setIsAnimating(false);
+    }, 0);
+    const unmountTimer = setTimeout(() => {
       setShouldRender(false);
     }, 200);
     return (): void => {
-      clearTimeout(timer);
+      clearTimeout(slideOutTimer);
+      clearTimeout(unmountTimer);
     };
   }, [open]);
 
@@ -176,7 +174,8 @@ const SidePeekRoot = ({
     }
   }, [closeOnOverlayClick, onClose]);
 
-  if (!shouldRender || !mounted) return null;
+  // Guard: portals require the DOM (client-only component).
+  if (!shouldRender || typeof document === 'undefined') return null;
 
   return createPortal(
     <SidePeekContext.Provider

@@ -2,9 +2,9 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createQueueServer } from './client';
-import { createMemoryQueueStore } from './memory-store';
+import { createMemoryQueueStore } from './memory.store';
 
-import type { MemoryQueueStore } from './memory-store';
+import type { MemoryQueueStore } from './memory.store';
 import type { TaskHandlers } from './types';
 
 // ============================================================================

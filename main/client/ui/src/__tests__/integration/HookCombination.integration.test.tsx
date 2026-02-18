@@ -69,7 +69,7 @@ const EmailVerification = ({
       {emailSent && <div data-testid="success">Email sent!</div>}
 
       <Button onClick={handleSend} disabled={isLoading || isOnCooldown} data-testid="send-btn">
-        {isLoading ? 'Sending...' : isOnCooldown ? `Wait ${cooldown}s` : 'Send Email'}
+        {isLoading ? 'Sending...' : isOnCooldown ? `Wait ${String(cooldown)}s` : 'Send Email'}
       </Button>
 
       <Button onClick={handleReset} data-testid="reset-btn">
@@ -295,7 +295,7 @@ const MultiStateForm = ({
       )}
 
       <Button type="submit" disabled={isLoading || isOnCooldown} data-testid="submit-btn">
-        {isLoading ? 'Submitting...' : isOnCooldown ? `Wait ${cooldown}s` : 'Submit'}
+        {isLoading ? 'Submitting...' : isOnCooldown ? `Wait ${String(cooldown)}s` : 'Submit'}
       </Button>
     </form>
   );

@@ -31,6 +31,8 @@ const VALID_SESSION = {
   ipAddress: '192.168.1.1',
   userAgent: 'Mozilla/5.0',
   deviceId: 'device-abc',
+  deviceName: null,
+  deviceType: null,
   lastActiveAt: VALID_ISO,
   revokedAt: null,
   createdAt: VALID_ISO,
@@ -61,13 +63,28 @@ describe('userSessionSchema', () => {
         ipAddress: null,
         userAgent: null,
         deviceId: null,
+        deviceName: null,
+        deviceType: null,
         revokedAt: null,
       });
 
       expect(result.ipAddress).toBeNull();
       expect(result.userAgent).toBeNull();
       expect(result.deviceId).toBeNull();
+      expect(result.deviceName).toBeNull();
+      expect(result.deviceType).toBeNull();
       expect(result.revokedAt).toBeNull();
+    });
+
+    it('should parse deviceName and deviceType when provided', () => {
+      const result: UserSession = userSessionSchema.parse({
+        ...VALID_SESSION,
+        deviceName: 'iPhone 15 Pro',
+        deviceType: 'mobile',
+      });
+
+      expect(result.deviceName).toBe('iPhone 15 Pro');
+      expect(result.deviceType).toBe('mobile');
     });
 
     it('should coerce ISO string dates to Date objects', () => {
@@ -175,6 +192,17 @@ describe('createUserSessionSchema', () => {
       expect(result.userAgent).toBeNull();
       expect(result.deviceId).toBeNull();
     });
+
+    it('should parse deviceName and deviceType when provided', () => {
+      const result: CreateUserSession = createUserSessionSchema.parse({
+        userId: VALID_UUID,
+        deviceName: 'MacBook Pro',
+        deviceType: 'desktop',
+      });
+
+      expect(result.deviceName).toBe('MacBook Pro');
+      expect(result.deviceType).toBe('desktop');
+    });
   });
 
   describe('invalid inputs', () => {
@@ -245,6 +273,26 @@ describe('updateUserSessionSchema', () => {
 
       expect(result.lastActiveAt).toBeInstanceOf(Date);
       expect(result.revokedAt).toBeInstanceOf(Date);
+    });
+
+    it('should parse deviceName and deviceType updates', () => {
+      const result: UpdateUserSession = updateUserSessionSchema.parse({
+        deviceName: 'Safari on iPhone',
+        deviceType: 'mobile',
+      });
+
+      expect(result.deviceName).toBe('Safari on iPhone');
+      expect(result.deviceType).toBe('mobile');
+    });
+
+    it('should accept null for deviceName and deviceType (clearing device info)', () => {
+      const result: UpdateUserSession = updateUserSessionSchema.parse({
+        deviceName: null,
+        deviceType: null,
+      });
+
+      expect(result.deviceName).toBeNull();
+      expect(result.deviceType).toBeNull();
     });
   });
 

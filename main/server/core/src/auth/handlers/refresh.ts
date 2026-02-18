@@ -18,8 +18,8 @@ import { refreshUserTokens } from '../service';
 import { createErrorMapperLogger, REFRESH_COOKIE_NAME } from '../types';
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from '../utils';
 
-import type { HttpErrorResponse, RefreshResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { HttpErrorResponse, RefreshResponse } from '@bslt/shared';
 
 /**
  * Handle token refresh.

@@ -35,8 +35,8 @@ import {
   handleWebauthnRegisterVerify,
 } from '../handlers/webauthn';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function asAppContext(ctx: HandlerContext): AppContext {
   return ctx as unknown as AppContext;

@@ -8,8 +8,8 @@
 import { getAuditActionTone } from '@bslt/shared';
 import { Badge, Button, Modal, Text } from '@bslt/ui';
 
-import type { ReactElement } from 'react';
 import type { AuditEvent } from '../hooks/useAuditLog';
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Types

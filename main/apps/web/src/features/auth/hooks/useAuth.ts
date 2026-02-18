@@ -63,10 +63,7 @@ export function useAuth(): AuthContextType {
 
   // Subscribe to auth state changes
   useEffect(() => {
-    // Get initial state
-    setState(auth.getState());
-
-    // Subscribe to updates
+    // Subscribe to updates; initial state already set via useState initializer
     const unsubscribe = auth.subscribe(() => {
       setState(auth.getState());
     });

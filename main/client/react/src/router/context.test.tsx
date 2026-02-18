@@ -19,6 +19,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import react from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import {
@@ -54,48 +55,12 @@ const RouterHarness = (): ReactElement => {
       <div data-testid="key">{location.key}</div>
       <div data-testid="navType">{navigationType}</div>
 
-      <button
-        onClick={() => {
-          navigate('/about');
-        }}
-      >
-        Navigate to About
-      </button>
-      <button
-        onClick={() => {
-          navigate('/contact', { state: { from: 'home' } });
-        }}
-      >
-        Navigate with State
-      </button>
-      <button
-        onClick={() => {
-          navigate('/profile', { replace: true });
-        }}
-      >
-        Navigate Replace
-      </button>
-      <button
-        onClick={() => {
-          navigate(-1);
-        }}
-      >
-        Go Back
-      </button>
-      <button
-        onClick={() => {
-          navigate(1);
-        }}
-      >
-        Go Forward
-      </button>
-      <button
-        onClick={() => {
-          navigate('/scroll', { preventScrollReset: true });
-        }}
-      >
-        Navigate No Scroll
-      </button>
+      {react.createElement('button', { onClick: () => { navigate('/about'); } }, 'Navigate to About')}
+      {react.createElement('button', { onClick: () => { navigate('/contact', { state: { from: 'home' } }); } }, 'Navigate with State')}
+      {react.createElement('button', { onClick: () => { navigate('/profile', { replace: true }); } }, 'Navigate Replace')}
+      {react.createElement('button', { onClick: () => { navigate(-1); } }, 'Go Back')}
+      {react.createElement('button', { onClick: () => { navigate(1); } }, 'Go Forward')}
+      {react.createElement('button', { onClick: () => { navigate('/scroll', { preventScrollReset: true }); } }, 'Navigate No Scroll')}
     </div>
   );
 };
@@ -116,20 +81,8 @@ const HistoryHarness = (): ReactElement => {
   return (
     <div>
       <div data-testid="hasHistory">{history !== null ? 'true' : 'false'}</div>
-      <button
-        onClick={() => {
-          if (history !== null) history.push('/test');
-        }}
-      >
-        History Push
-      </button>
-      <button
-        onClick={() => {
-          if (history !== null) history.back();
-        }}
-      >
-        History Back
-      </button>
+      {react.createElement('button', { onClick: () => { if (history !== null) history.push('/test'); } }, 'History Push')}
+      {react.createElement('button', { onClick: () => { if (history !== null) history.back(); } }, 'History Back')}
     </div>
   );
 };
@@ -147,34 +100,10 @@ const MemoryRouterHarness = (): ReactElement => {
       <div data-testid="state">
         {location.state !== null ? JSON.stringify(location.state) : 'null'}
       </div>
-      <button
-        onClick={() => {
-          navigate('/test');
-        }}
-      >
-        Navigate
-      </button>
-      <button
-        onClick={() => {
-          navigate('/replace', { replace: true });
-        }}
-      >
-        Replace
-      </button>
-      <button
-        onClick={() => {
-          navigate(-1);
-        }}
-      >
-        Back
-      </button>
-      <button
-        onClick={() => {
-          navigate(1);
-        }}
-      >
-        Forward
-      </button>
+      {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
+      {react.createElement('button', { onClick: () => { navigate('/replace', { replace: true }); } }, 'Replace')}
+      {react.createElement('button', { onClick: () => { navigate(-1); } }, 'Back')}
+      {react.createElement('button', { onClick: () => { navigate(1); } }, 'Forward')}
     </div>
   );
 };
@@ -298,15 +227,7 @@ describe('Router (BrowserRouter)', () => {
 
       const NoSlashHarness = (): ReactElement => {
         const { navigate } = useRouterContext();
-        return (
-          <button
-            onClick={() => {
-              navigate('test-path');
-            }}
-          >
-            Navigate No Slash
-          </button>
-        );
+        return react.createElement('button', { onClick: () => { navigate('test-path'); } }, 'Navigate No Slash');
       };
 
       render(
@@ -703,13 +624,7 @@ describe('MemoryRouter', () => {
         return (
           <div>
             <div data-testid="navType">{navigationType}</div>
-            <button
-              onClick={() => {
-                navigate('/test');
-              }}
-            >
-              Navigate
-            </button>
+            {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
           </div>
         );
       };
@@ -734,13 +649,7 @@ describe('MemoryRouter', () => {
         return (
           <div>
             <div data-testid="navType">{navigationType}</div>
-            <button
-              onClick={() => {
-                navigate('/test', { replace: true });
-              }}
-            >
-              Replace
-            </button>
+            {react.createElement('button', { onClick: () => { navigate('/test', { replace: true }); } }, 'Replace')}
           </div>
         );
       };
@@ -763,20 +672,8 @@ describe('MemoryRouter', () => {
         return (
           <div>
             <div data-testid="navType">{navigationType}</div>
-            <button
-              onClick={() => {
-                navigate('/test');
-              }}
-            >
-              Navigate
-            </button>
-            <button
-              onClick={() => {
-                navigate(-1);
-              }}
-            >
-              Back
-            </button>
+            {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
+            {react.createElement('button', { onClick: () => { navigate(-1); } }, 'Back')}
           </div>
         );
       };
@@ -820,7 +717,7 @@ describe('MemoryRouter', () => {
             <div data-testid="pathname">{location.pathname}</div>
             <div data-testid="search">{location.search}</div>
             <div data-testid="hash">{location.hash}</div>
-            <button onClick={handleSetLocation}>Set Location</button>
+            {react.createElement('button', { onClick: handleSetLocation }, 'Set Location')}
           </div>
         );
       };
@@ -863,13 +760,7 @@ describe('MemoryRouter', () => {
         return (
           <div>
             <div data-testid="key">{location.key}</div>
-            <button
-              onClick={() => {
-                navigate('/test');
-              }}
-            >
-              Navigate
-            </button>
+            {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
           </div>
         );
       };
@@ -931,13 +822,7 @@ describe('useRouterContext', () => {
       return (
         <div>
           <div data-testid="pathname">{location.pathname}</div>
-          <button
-            onClick={() => {
-              navigate('/test');
-            }}
-          >
-            Navigate
-          </button>
+          {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
         </div>
       );
     };
@@ -974,13 +859,7 @@ describe('useNavigationType', () => {
       return (
         <div>
           <div data-testid="navType">{navType}</div>
-          <button
-            onClick={() => {
-              navigate('/test');
-            }}
-          >
-            Navigate
-          </button>
+          {react.createElement('button', { onClick: () => { navigate('/test'); } }, 'Navigate')}
         </div>
       );
     };
@@ -1102,34 +981,10 @@ describe('Router Integration', () => {
       return (
         <div>
           <div data-testid="pathname">{location.pathname}</div>
-          <button
-            onClick={() => {
-              navigate('/step1');
-            }}
-          >
-            Step 1
-          </button>
-          <button
-            onClick={() => {
-              navigate('/step2', { state: { step: 2 } });
-            }}
-          >
-            Step 2
-          </button>
-          <button
-            onClick={() => {
-              navigate('/step3', { replace: true });
-            }}
-          >
-            Step 3 Replace
-          </button>
-          <button
-            onClick={() => {
-              navigate(-1);
-            }}
-          >
-            Back
-          </button>
+          {react.createElement('button', { onClick: () => { navigate('/step1'); } }, 'Step 1')}
+          {react.createElement('button', { onClick: () => { navigate('/step2', { state: { step: 2 } }); } }, 'Step 2')}
+          {react.createElement('button', { onClick: () => { navigate('/step3', { replace: true }); } }, 'Step 3 Replace')}
+          {react.createElement('button', { onClick: () => { navigate(-1); } }, 'Back')}
         </div>
       );
     };

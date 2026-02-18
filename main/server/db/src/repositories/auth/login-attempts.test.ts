@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -114,9 +115,9 @@ describe('createLoginAttemptRepository', () => {
       const result = await repo.findRecentByEmail('test@example.com', since);
 
       expect(result).toHaveLength(2);
-      expect(result[0].email).toBe('test@example.com');
-      expect(result[0].ipAddress).toBe('192.168.1.1');
-      expect(result[0].failureReason).toBe('invalid_password');
+      expect(result[0]?.email).toBe('test@example.com');
+      expect(result[0]?.ipAddress).toBe('192.168.1.1');
+      expect(result[0]?.failureReason).toBe('invalid_password');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('SELECT'),

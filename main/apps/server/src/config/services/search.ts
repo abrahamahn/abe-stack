@@ -92,10 +92,16 @@ export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
  * @param config - Elasticsearch provider configuration
  * @returns Array of validation error messages (empty if valid)
  */
-export function validateElasticsearchConfig(config: ElasticsearchProviderConfig): string[] {
+export function validateElasticsearchConfig(
+  config: ElasticsearchProviderConfig,
+  isProd: boolean,
+): string[] {
   const errors: string[] = [];
   if (config.node === '') errors.push('ELASTICSEARCH_NODE is required');
   if (config.index === '') errors.push('ELASTICSEARCH_INDEX is required');
+  if (isProd && !config.node.startsWith('https://')) {
+    errors.push('Elasticsearch: ELASTICSEARCH_NODE must use HTTPS in production');
+  }
   return errors;
 }
 

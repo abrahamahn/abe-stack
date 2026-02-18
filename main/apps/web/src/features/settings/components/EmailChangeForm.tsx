@@ -12,7 +12,9 @@
 import { getAccessToken } from '@app/authToken';
 import { getApiClient } from '@bslt/api';
 import { Alert, Button, FormField, Input, PasswordInput, Text } from '@bslt/ui';
+import { clientConfig } from '@config';
 import { useCallback, useState, type ReactElement } from 'react';
+
 
 // ============================================================================
 // Types
@@ -53,10 +55,7 @@ export const EmailChangeForm = ({ onSuccess }: EmailChangeFormProps): ReactEleme
 
       try {
         const api = getApiClient({
-          baseUrl:
-            typeof import.meta.env['VITE_API_URL'] === 'string'
-              ? import.meta.env['VITE_API_URL']
-              : '',
+          baseUrl: clientConfig.apiUrl,
           getToken: getAccessToken,
         });
 

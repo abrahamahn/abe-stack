@@ -19,6 +19,7 @@ import { NetworkError } from '../errors';
 
 import { createAdminBillingClient } from './admin';
 
+import type { AdminBillingClientConfig } from './admin';
 import type {
   AdminPlan,
   AdminPlanResponse,
@@ -29,7 +30,6 @@ import type {
   SyncStripeResponse,
   UpdatePlanRequest,
 } from '@bslt/shared';
-import type { AdminBillingClientConfig } from './admin';
 
 // ============================================================================
 // Test Data

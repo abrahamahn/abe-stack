@@ -56,8 +56,8 @@ import {
 } from './handlers';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from './types';
 
-import type { FastifyRequest } from 'fastify';
 import type { Repositories } from '../../../db/src';
+import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge

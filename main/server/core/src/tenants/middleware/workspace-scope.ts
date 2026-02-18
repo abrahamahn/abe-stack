@@ -18,6 +18,7 @@ import {
   WORKSPACE_ID_HEADER,
 } from '@bslt/shared';
 
+import type { Repositories } from '../../../../db/src';
 import type {
   AuthContext,
   PolicyAction,
@@ -26,7 +27,6 @@ import type {
   WorkspaceContext,
 } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Types

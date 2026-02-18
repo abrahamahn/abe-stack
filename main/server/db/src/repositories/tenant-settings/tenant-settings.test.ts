@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -91,8 +92,8 @@ describe('createTenantSettingRepository', () => {
       const result = await repo.findByTenantId('tenant-001');
 
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe('branding.primary_color');
-      expect(result[1].key).toBe('branding.logo_url');
+      expect(result[0]?.key).toBe('branding.primary_color');
+      expect(result[1]?.key).toBe('branding.logo_url');
     });
 
     it('should return empty array when no settings found', async () => {

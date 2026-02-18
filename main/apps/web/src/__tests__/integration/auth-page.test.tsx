@@ -97,24 +97,30 @@ describe('AuthPage Integration', () => {
       expect(screen.getByText('Welcome back')).toBeInTheDocument();
     });
 
-    it('should render register form when mode=register', () => {
+    it('should render register form when mode=register', async () => {
       renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
-      expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     });
 
-    it('should render forgot password form when mode=forgot-password', () => {
+    it('should render forgot password form when mode=forgot-password', async () => {
       renderWithProviders(<AuthPage />, { route: '/auth?mode=forgot-password' });
 
-      expect(screen.getByText('Reset password')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Reset password')).toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /send reset link/i })).toBeInTheDocument();
     });
 
-    it('should render reset password form when mode=reset-password with token', () => {
+    it('should render reset password form when mode=reset-password with token', async () => {
       renderWithProviders(<AuthPage />, { route: '/auth?mode=reset-password&token=test-token' });
 
-      expect(screen.getByText('Set new password')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Set new password')).toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /update password/i })).toBeInTheDocument();
     });
 
@@ -146,7 +152,9 @@ describe('AuthPage Integration', () => {
     it('should switch from register to login mode', async () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
-      expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      });
 
       const signInButton = screen.getByRole('button', { name: /sign in/i });
       await user.click(signInButton);
@@ -180,6 +188,9 @@ describe('AuthPage Integration', () => {
     it('should call register with form data', async () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      });
       await user.type(screen.getByLabelText('Email'), 'new@example.com');
       await user.type(screen.getByLabelText('Username'), 'newuser');
       await user.type(screen.getByLabelText('First Name'), 'New');
@@ -202,6 +213,9 @@ describe('AuthPage Integration', () => {
     it('should call forgotPassword with email', async () => {
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=forgot-password' });
 
+      await waitFor(() => {
+        expect(screen.getByText('Reset password')).toBeInTheDocument();
+      });
       await user.type(screen.getByLabelText('Email'), 'forgot@example.com');
       await user.click(screen.getByRole('button', { name: /send reset link/i }));
 
@@ -218,16 +232,20 @@ describe('AuthPage Integration', () => {
   // ============================================================================
 
   describe('Reset Password Flow', () => {
-    it('should show invalid link message when token is missing', () => {
+    it('should show invalid link message when token is missing', async () => {
       renderWithProviders(<AuthPage />, { route: '/auth?mode=reset-password' });
 
-      expect(screen.getByText('Invalid reset link')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Invalid reset link')).toBeInTheDocument();
+      });
     });
 
-    it('should show reset form when token is present', () => {
+    it('should show reset form when token is present', async () => {
       renderWithProviders(<AuthPage />, { route: '/auth?mode=reset-password&token=valid-token' });
 
-      expect(screen.getByLabelText('New password')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByLabelText('New password')).toBeInTheDocument();
+      });
       expect(screen.getByRole('button', { name: /update password/i })).toBeInTheDocument();
     });
 
@@ -236,6 +254,9 @@ describe('AuthPage Integration', () => {
         route: '/auth?mode=reset-password&token=reset-token-123',
       });
 
+      await waitFor(() => {
+        expect(screen.getByLabelText('New password')).toBeInTheDocument();
+      });
       await user.type(screen.getByLabelText('New password'), 'newSecurePass123');
       await user.click(screen.getByRole('button', { name: /update password/i }));
 
@@ -321,6 +342,9 @@ describe('AuthPage Integration', () => {
 
       const { user } = renderWithProviders(<AuthPage />, { route: '/auth?mode=register' });
 
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
+      });
       await user.type(screen.getByLabelText('Email'), 'existing@example.com');
       await user.type(screen.getByLabelText('Username'), 'existinguser');
       await user.type(screen.getByLabelText('First Name'), 'Existing');

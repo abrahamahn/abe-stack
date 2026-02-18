@@ -5,18 +5,19 @@
  * In-app notification bell, dropdown, and data hooks.
  */
 
-export { NotificationBell } from './components/NotificationBell';
-export { NotificationDropdown } from './components/NotificationDropdown';
-export { useNotifications } from './hooks/useNotifications';
-export { createNotificationsApi } from './api/notificationsApi';
-export { getNotificationRoute } from './utils/getNotificationRoute';
-export type { NotificationBellProps } from './components/NotificationBell';
-export type { NotificationDropdownProps } from './components/NotificationDropdown';
-export type { UseNotificationsOptions, UseNotificationsResult } from './hooks/useNotifications';
+export { NotificationBell, NotificationDropdown } from './components';
+export type { NotificationBellProps, NotificationDropdownProps } from './components';
+
+export { useNotifications } from './hooks';
+export type { UseNotificationsOptions, UseNotificationsResult } from './hooks';
+
+export { createNotificationsApi } from './api';
 export type {
+  NotificationsApi,
   NotificationsApiConfig,
   NotificationsListResponse,
   MarkReadResponse,
   DeleteNotificationResponse,
-  NotificationsApi,
-} from './api/notificationsApi';
+} from './api';
+
+export { getNotificationRoute } from './utils';

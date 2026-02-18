@@ -36,6 +36,11 @@ import {
   TOTP_BACKUP_CODES_TABLE,
   TOTP_BACKUP_CODE_COLUMNS,
   type TotpBackupCode,
+  SMS_VERIFICATION_CODES_TABLE,
+  SMS_VERIFICATION_CODE_COLUMNS,
+  type SmsVerificationCode,
+  type NewSmsVerificationCode,
+  type UpdateSmsVerificationCode,
 } from './auth';
 
 describe('Auth Schema - Table Names', () => {
@@ -71,6 +76,10 @@ describe('Auth Schema - Table Names', () => {
     expect(EMAIL_CHANGE_REVERT_TOKENS_TABLE).toBe('email_change_revert_tokens');
   });
 
+  test('should have correct table name for sms_verification_codes', () => {
+    expect(SMS_VERIFICATION_CODES_TABLE).toBe('sms_verification_codes');
+  });
+
   test('table names should be unique', () => {
     const tableNames = [
       REFRESH_TOKEN_FAMILIES_TABLE,
@@ -81,6 +90,7 @@ describe('Auth Schema - Table Names', () => {
       TOTP_BACKUP_CODES_TABLE,
       EMAIL_CHANGE_TOKENS_TABLE,
       EMAIL_CHANGE_REVERT_TOKENS_TABLE,
+      SMS_VERIFICATION_CODES_TABLE,
     ];
 
     const uniqueNames = new Set(tableNames);
@@ -929,11 +939,12 @@ describe('Auth Schema - Type Consistency', () => {
     // Should be able to spread New* into full type with additional fields
     const fullFamily: RefreshTokenFamily = {
       id: 'family-123',
+      userId: newFamily.userId,
+      ipAddress: newFamily.ipAddress ?? null,
       createdAt: new Date(),
       revokedAt: null,
       revokeReason: null,
       userAgent: null,
-      ...newFamily,
     };
 
     expect(fullFamily.userId).toBe(newFamily.userId);
@@ -1000,7 +1011,7 @@ describe('Auth Schema - Edge Cases', () => {
       severity: '',
       ipAddress: '',
       userAgent: '',
-      metadata: '',
+      metadata: {},
       createdAt: new Date(),
     };
 
@@ -1018,7 +1029,7 @@ describe('Auth Schema - Edge Cases', () => {
       severity: 'low',
       ipAddress: '192.168.1.1',
       userAgent: longString,
-      metadata: longString,
+      metadata: { value: longString },
       createdAt: new Date(),
     };
 
@@ -1098,7 +1109,7 @@ describe('Auth Schema - Edge Cases', () => {
 
     userAgents.forEach((userAgent, index) => {
       const attempt: LoginAttempt = {
-        id: `attempt-${index}`,
+        id: `attempt-${String(index)}`,
         email: 'user@example.com',
         ipAddress: '192.168.1.1',
         userAgent: userAgent === '' ? null : userAgent,
@@ -1153,7 +1164,7 @@ describe('Auth Schema - Integration Scenarios', () => {
   test('should support login attempt rate limiting workflow', () => {
     // Create failed login attempts
     const attempts: LoginAttempt[] = Array.from({ length: 5 }, (_, index) => ({
-      id: `attempt-${index}`,
+      id: `attempt-${String(index)}`,
       email: 'user@example.com',
       ipAddress: '192.168.1.1',
       userAgent: 'Mozilla/5.0',
@@ -1344,9 +1355,9 @@ describe('Auth Schema - TotpBackupCode Type', () => {
 
   test('should support batch of 10 backup codes', () => {
     const codes: TotpBackupCode[] = Array.from({ length: 10 }, (_, index) => ({
-      id: `tbc-${index}`,
+      id: `tbc-${String(index)}`,
       userId: 'user-456',
-      codeHash: `hash-${index}`,
+      codeHash: `hash-${String(index)}`,
       usedAt: null,
       createdAt: new Date(),
     }));
@@ -1590,5 +1601,127 @@ describe('Auth Schema - NewEmailChangeRevertToken Type', () => {
 
     expect(newToken.oldEmail).toBe('old@example.com');
     expect(newToken.newEmail).toBe('new@example.com');
+  });
+});
+
+describe('Auth Schema - SMS Verification Code Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(SMS_VERIFICATION_CODE_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      phone: 'phone',
+      codeHash: 'code_hash',
+      expiresAt: 'expires_at',
+      verified: 'verified',
+      attempts: 'attempts',
+      createdAt: 'created_at',
+    });
+  });
+
+  test('should map userId to snake_case', () => {
+    expect(SMS_VERIFICATION_CODE_COLUMNS.userId).toBe('user_id');
+  });
+
+  test('should map expiresAt to snake_case', () => {
+    expect(SMS_VERIFICATION_CODE_COLUMNS.expiresAt).toBe('expires_at');
+  });
+
+  test('should map createdAt to snake_case', () => {
+    expect(SMS_VERIFICATION_CODE_COLUMNS.createdAt).toBe('created_at');
+  });
+});
+
+describe('Auth Schema - SmsVerificationCode Type', () => {
+  test('should accept valid SMS verification code', () => {
+    const code: SmsVerificationCode = {
+      id: 'sms-123',
+      userId: 'user-456',
+      phone: '+15551234567',
+      codeHash: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+      expiresAt: new Date(Date.now() + 300000),
+      verified: false,
+      attempts: 0,
+      createdAt: new Date(),
+    };
+
+    expect(code.phone).toBe('+15551234567');
+    expect(code.verified).toBe(false);
+    expect(code.attempts).toBe(0);
+  });
+
+  test('should accept verified code with attempts', () => {
+    const code: SmsVerificationCode = {
+      id: 'sms-789',
+      userId: 'user-456',
+      phone: '+15559876543',
+      codeHash: 'c6f057b86584942e415435ffb1fa93d4e5bf73c568ef54d5bfe74bc5f96b5e6a',
+      expiresAt: new Date(Date.now() + 300000),
+      verified: true,
+      attempts: 2,
+      createdAt: new Date(),
+    };
+
+    expect(code.verified).toBe(true);
+    expect(code.attempts).toBe(2);
+  });
+});
+
+describe('Auth Schema - NewSmsVerificationCode Type', () => {
+  test('should accept minimal new SMS code (defaults for optional fields)', () => {
+    const newCode: NewSmsVerificationCode = {
+      userId: 'user-456',
+      phone: '+15551234567',
+      codeHash: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+      expiresAt: new Date(Date.now() + 300000),
+    };
+
+    expect(newCode.userId).toBe('user-456');
+    expect(newCode.phone).toBe('+15551234567');
+    expect(newCode.verified).toBeUndefined();
+    expect(newCode.attempts).toBeUndefined();
+  });
+
+  test('should accept all fields including optional', () => {
+    const newCode: NewSmsVerificationCode = {
+      id: 'sms-001',
+      userId: 'user-456',
+      phone: '+15551234567',
+      codeHash: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+      expiresAt: new Date(Date.now() + 300000),
+      verified: false,
+      attempts: 0,
+      createdAt: new Date(),
+    };
+
+    expect(newCode.id).toBe('sms-001');
+    expect(newCode.verified).toBe(false);
+  });
+});
+
+describe('Auth Schema - UpdateSmsVerificationCode Type', () => {
+  test('should accept empty update', () => {
+    const update: UpdateSmsVerificationCode = {};
+
+    expect(update.verified).toBeUndefined();
+    expect(update.attempts).toBeUndefined();
+  });
+
+  test('should accept verified flag only', () => {
+    const update: UpdateSmsVerificationCode = { verified: true };
+
+    expect(update.verified).toBe(true);
+  });
+
+  test('should accept attempts increment', () => {
+    const update: UpdateSmsVerificationCode = { attempts: 3 };
+
+    expect(update.attempts).toBe(3);
+  });
+
+  test('should accept both verified and attempts', () => {
+    const update: UpdateSmsVerificationCode = { verified: true, attempts: 1 };
+
+    expect(update.verified).toBe(true);
+    expect(update.attempts).toBe(1);
   });
 });

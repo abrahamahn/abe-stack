@@ -10,8 +10,8 @@
 
 import { toISODateOnly } from '@bslt/shared';
 
-import type { CursorPaginationOptions, AppRole as UserRole } from '@bslt/shared';
 import type { UserRepository } from '../../../db/src';
+import type { CursorPaginationOptions, AppRole as UserRole } from '@bslt/shared';
 
 // ============================================================================
 // Types

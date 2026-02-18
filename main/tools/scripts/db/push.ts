@@ -28,7 +28,7 @@ export const STATEMENTS: string[] = [
     email_verified boolean NOT NULL DEFAULT false,
     email_verified_at timestamptz,
     locked_until timestamptz,
-    failed_login_attempts integer NOT NULL DEFAULT 0,
+    failed_login_attempts integer NOT NULL DEFAULT 0 CHECK (failed_login_attempts >= 0),
     totp_secret text,
     totp_enabled boolean NOT NULL DEFAULT false,
     phone text,
@@ -295,7 +295,7 @@ export const STATEMENTS: string[] = [
     name text NOT NULL,
     description text,
     interval text NOT NULL,
-    price_in_cents integer NOT NULL,
+    price_in_cents integer NOT NULL CHECK (price_in_cents >= 0),
     currency text NOT NULL DEFAULT 'usd',
     features jsonb NOT NULL DEFAULT '[]'::jsonb,
     trial_days integer NOT NULL DEFAULT 0,
@@ -318,7 +318,7 @@ export const STATEMENTS: string[] = [
     provider_customer_id text NOT NULL,
     status text NOT NULL,
     current_period_start timestamptz NOT NULL,
-    current_period_end timestamptz NOT NULL,
+    current_period_end timestamptz NOT NULL CHECK (current_period_end > current_period_start),
     cancel_at_period_end boolean NOT NULL DEFAULT false,
     canceled_at timestamptz,
     trial_end timestamptz,
@@ -345,8 +345,8 @@ export const STATEMENTS: string[] = [
     provider text NOT NULL,
     provider_invoice_id text NOT NULL,
     status text NOT NULL,
-    amount_due integer NOT NULL,
-    amount_paid integer NOT NULL DEFAULT 0,
+    amount_due integer NOT NULL CHECK (amount_due >= 0),
+    amount_paid integer NOT NULL DEFAULT 0 CHECK (amount_paid >= 0 AND amount_paid <= amount_due),
     currency text NOT NULL DEFAULT 'usd',
     period_start timestamptz NOT NULL,
     period_end timestamptz NOT NULL,
@@ -522,7 +522,9 @@ export const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_refresh_token_families_user ON refresh_token_families (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_login_attempts_email_created ON login_attempts (email, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens (token_hash);`,
+  `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_hash ON email_verification_tokens (token_hash);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user ON email_verification_tokens (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_security_events_user ON security_events (user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_magic_link_tokens_email ON magic_link_tokens (email);`,
   `CREATE INDEX IF NOT EXISTS idx_oauth_connections_user ON oauth_connections (user_id);`,
@@ -539,19 +541,20 @@ export const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_data_export_requests_user ON data_export_requests(user_id, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS idx_data_export_requests_status ON data_export_requests(status);`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_tenant_email ON invitations (tenant_id, email) WHERE status = 'pending';`,
+  `CREATE INDEX IF NOT EXISTS idx_invitations_invited_by ON invitations (invited_by_id);`,
   `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications (user_id, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_jobs_status_priority_created ON jobs (status, priority DESC, created_at);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_tenant_created ON audit_events (tenant_id, created_at DESC);`,
   `CREATE INDEX IF NOT EXISTS idx_audit_events_resource ON audit_events (resource, resource_id);`,
-  // Tenant domain restrictions (migration 0021)
+  // Tenant domain restrictions (0100_tenants.sql)
   `ALTER TABLE tenants ADD COLUMN IF NOT EXISTS allowed_email_domains TEXT[] NOT NULL DEFAULT '{}';`,
-  // SMS verification codes (migration 0023)
+  // SMS verification codes (0001_auth_extensions.sql)
   `
   CREATE TABLE IF NOT EXISTS sms_verification_codes (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     phone text NOT NULL,
-    code text NOT NULL,
+    code_hash text NOT NULL,
     expires_at timestamptz NOT NULL,
     verified boolean NOT NULL DEFAULT false,
     attempts integer NOT NULL DEFAULT 0,
@@ -560,7 +563,7 @@ export const STATEMENTS: string[] = [
   `,
   `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_user_id ON sms_verification_codes(user_id);`,
   `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_expires_at ON sms_verification_codes(expires_at);`,
-  // Trusted devices (migration 0025)
+  // Trusted devices (0001_auth_extensions.sql)
   `
   CREATE TABLE IF NOT EXISTS trusted_devices (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -577,6 +580,36 @@ export const STATEMENTS: string[] = [
   );
   `,
   `CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);`,
+  // Performance indexes (0000_users.sql)
+  `CREATE INDEX IF NOT EXISTS idx_users_active ON users(id) WHERE deleted_at IS NULL AND deactivated_at IS NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_expires ON refresh_tokens(user_id, expires_at DESC) WHERE expires_at > NOW();`,
+  // Active API keys (0101_api_keys.sql)
+  `CREATE INDEX IF NOT EXISTS idx_api_keys_active ON api_keys(user_id, created_at DESC) WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > NOW());`,
+  // New indexes: 0000_users.sql
+  `CREATE INDEX IF NOT EXISTS idx_users_locked_until ON users(locked_until) WHERE locked_until IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_users_deletion_grace ON users(deletion_grace_period_ends) WHERE deletion_grace_period_ends IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at);`,
+  `CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_expires ON email_verification_tokens(expires_at);`,
+  `CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type, created_at DESC);`,
+  // New indexes: 0001_auth_extensions.sql
+  `CREATE INDEX IF NOT EXISTS idx_email_change_tokens_expires ON email_change_tokens(expires_at) WHERE used_at IS NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_email_change_revert_tokens_expires ON email_change_revert_tokens(expires_at) WHERE used_at IS NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_sms_verification_codes_unverified ON sms_verification_codes(user_id, expires_at) WHERE verified = FALSE;`,
+  `CREATE INDEX IF NOT EXISTS idx_trusted_devices_last_seen ON trusted_devices(user_id, last_seen_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_webauthn_cred_last_used ON webauthn_credentials(user_id, last_used_at DESC) WHERE last_used_at IS NOT NULL;`,
+  // New indexes: 0002_sessions.sql
+  `CREATE INDEX IF NOT EXISTS idx_user_sessions_revoked_at ON user_sessions(revoked_at) WHERE revoked_at IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_oauth_connections_expires ON oauth_connections(expires_at) WHERE expires_at IS NOT NULL;`,
+  // New indexes: 0200_billing.sql
+  `CREATE INDEX IF NOT EXISTS idx_plans_active_sorted ON plans(sort_order) WHERE is_active = TRUE;`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_user_status_period ON subscriptions(user_id, status, current_period_end DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_trial_expiry ON subscriptions(trial_end) WHERE status = 'trialing' AND trial_end IS NOT NULL;`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_plan_status ON subscriptions(plan_id, status);`,
+  `CREATE INDEX IF NOT EXISTS idx_invoices_user_status ON invoices(user_id, status, created_at DESC);`,
+  `CREATE INDEX IF NOT EXISTS idx_payment_methods_user_default ON payment_methods(user_id) WHERE is_default = TRUE;`,
+  `CREATE INDEX IF NOT EXISTS idx_billing_events_type ON billing_events(event_type, created_at DESC);`,
+  // New indexes: 0500_compliance.sql
+  `CREATE INDEX IF NOT EXISTS idx_data_export_requests_expires ON data_export_requests(expires_at) WHERE expires_at IS NOT NULL AND status != 'completed';`,
 ];
 
 /**
@@ -587,7 +620,7 @@ export const STATEMENTS: string[] = [
  */
 export async function pushSchema(): Promise<void> {
   // Load + validate `config/env` files (prefers `.env.local` when present).
-  loadServerEnv();
+  await loadServerEnv();
 
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);

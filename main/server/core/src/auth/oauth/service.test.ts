@@ -16,15 +16,16 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { AuthConfig } from '@bslt/shared/config';
+import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
 import type {
   DbClient,
   OAuthConnectionRepository,
+  RawDb,
   RefreshTokenRepository,
   Repositories,
   UserRepository,
 } from '../../../../db/src';
-import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // Mock the crypto module for consistent state generation in tests
 vi.mock('node:crypto', async () => {
@@ -52,7 +53,7 @@ vi.mock('../utils', () => ({
     Promise.resolve(email.split('@')[0]),
   ),
   splitFullName: vi.fn((name: string | null) => {
-    if (name === null || name === undefined) return { firstName: 'User', lastName: '' };
+    if (name === null) return { firstName: 'User', lastName: '' };
     const parts = name.trim().split(/\s+/);
     return { firstName: parts[0] ?? 'User', lastName: parts.slice(1).join(' ') };
   }),
@@ -65,9 +66,7 @@ vi.mock('@bslt/db', async () => {
   const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
-    withTransaction: vi.fn((db, callback) => {
-      return Promise.resolve(callback(db));
-    }),
+    withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
         returningAll: vi.fn(() => ({
@@ -76,7 +75,7 @@ vi.mock('@bslt/db', async () => {
         toSql: vi.fn(() => 'INSERT SQL'),
       })),
     })),
-    toCamelCase: vi.fn((data) => data),
+    toCamelCase: vi.fn(<T>(data: T) => data),
   };
 });
 
@@ -176,6 +175,7 @@ describe('OAuth Service', () => {
         sameSite: 'lax',
         path: '/',
       },
+      oauthTokenEncryptionKey: 'oauth-token-encryption-key-32-ch!',
       oauth: {
         google: {
           clientId: 'google-client-id',

@@ -104,7 +104,9 @@ const createWindow = async (): Promise<void> => {
     const rendererPortPreference = Number(
       process.env['DESKTOP_RENDERER_PORT'] ?? process.env['VITE_PORT'] ?? 5174,
     );
-    console.log(`[Main] Waiting for renderer on ports starting with ${rendererPortPreference}...`);
+    console.log(
+      `[Main] Waiting for renderer on ports starting with ${String(rendererPortPreference)}...`,
+    );
     try {
       const rendererPort: number = await (
         waitForPort as (ports: Array<number | undefined>, host?: string) => Promise<number>

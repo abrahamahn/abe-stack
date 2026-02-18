@@ -53,7 +53,7 @@ export const Dropdown = ({
     defaultOpen: defaultOpen ?? false,
     ...(onChange !== undefined && { onChange }),
   });
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect((): (() => void) | undefined => {
@@ -84,7 +84,7 @@ export const Dropdown = ({
   return (
     <div className="dropdown" data-placement={placement}>
       <Button
-        ref={triggerRef as any}
+        ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         className="trigger-reset"

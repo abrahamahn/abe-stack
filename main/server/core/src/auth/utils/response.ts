@@ -128,7 +128,10 @@ export function createAuthResponse(
     typeof user.createdAt === 'string' ? user.createdAt : user.createdAt.toISOString();
   const updatedAt =
     typeof user.updatedAt === 'string' ? user.updatedAt : user.updatedAt.toISOString();
-  const dateOfBirth = toISODateOnly(user.dateOfBirth ?? null);
+  const dateOfBirthRaw = user.dateOfBirth ?? null;
+  const dateOfBirth = typeof dateOfBirthRaw === 'string'
+    ? dateOfBirthRaw
+    : toISODateOnly(dateOfBirthRaw);
 
   return {
     accessToken,

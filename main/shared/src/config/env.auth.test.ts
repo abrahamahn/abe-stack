@@ -156,6 +156,7 @@ describe('auth.ts type definitions', () => {
         sameSite: 'strict',
         path: '/',
       },
+      oauthTokenEncryptionKey: 'oauth-token-encryption-key-32-chars-min',
       oauth: {
         google: {
           clientId: 'google-client-id',
@@ -788,6 +789,7 @@ describe('auth.ts type definitions', () => {
           sameSite: 'lax',
           path: '/',
         },
+        oauthTokenEncryptionKey: 'oauth-encryption-key-for-test-32c',
         oauth: {},
         magicLink: {
           tokenExpiryMinutes: 15,

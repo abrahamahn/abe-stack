@@ -20,13 +20,15 @@ import {
   SUBSCRIPTION_STATUSES,
   type BillingEventType,
   type BillingProvider,
+  type CardDetails,
   type InvoiceStatus,
   type PaymentMethodType,
+  type PlanFeature,
   type PlanInterval,
   type SubscriptionStatus,
 } from '@bslt/shared';
 
-// Re-export shared constants for consumers that import from schema
+// Re-export shared constants and types for consumers that import from schema
 export {
   BILLING_EVENT_TYPES,
   BILLING_PROVIDERS,
@@ -38,8 +40,10 @@ export {
 export type {
   BillingEventType,
   BillingProvider,
+  CardDetails,
   InvoiceStatus,
   PaymentMethodType,
+  PlanFeature,
   PlanInterval,
   SubscriptionStatus
 };
@@ -59,25 +63,7 @@ export const BILLING_EVENTS_TABLE = 'billing_events';
 // Plan Types
 // ============================================================================
 
-/**
- * Plan feature item stored in JSONB
- * Supports both limit features (with numeric value) and toggle features (boolean)
- */
-export type PlanFeature =
-  | {
-      key: 'projects:limit' | 'storage:limit' | 'media:max_file_size';
-      name: string;
-      included: boolean;
-      value: number;
-      description?: string | undefined;
-    }
-  | {
-      key: 'team:invite' | 'api:access' | 'branding:custom' | 'media:processing';
-      name: string;
-      included: boolean;
-      value?: boolean | undefined;
-      description?: string | undefined;
-    };
+// PlanFeature imported from @bslt/shared (canonical definition)
 
 /**
  * Plan record from database (SELECT result)
@@ -289,15 +275,7 @@ export interface UpdateInvoice {
 // Payment Method Types
 // ============================================================================
 
-/**
- * Card details for payment method
- */
-export interface CardDetails {
-  brand: string;
-  last4: string;
-  expMonth: number;
-  expYear: number;
-}
+// CardDetails imported from @bslt/shared (canonical definition)
 
 /**
  * Payment method record from database (SELECT result)

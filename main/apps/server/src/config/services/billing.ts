@@ -30,9 +30,9 @@ import type {
  * PAYPAL_CLIENT_SECRET=...
  * ```
  */
-export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingConfig {
-  // Use passed URL or fall back to env/default
-  const appUrl = (appBaseUrl ?? env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '');
+export function loadBillingConfig(env: FullEnv, appBaseUrl: string): BillingConfig {
+  const appUrl = appBaseUrl.replace(/\/$/, '');
+  const isProd = env.NODE_ENV === 'production';
 
   // 1. Check which provider keys are present
   const availability = {
@@ -49,7 +49,7 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
   };
 
   // 2. Resolve active provider (Explicit Choice > Stripe > PayPal)
-  const provider = resolveActiveProvider(env.BILLING_PROVIDER, availability);
+  const provider = resolveActiveProvider(env.BILLING_PROVIDER, availability, isProd);
 
   const config: BillingConfig = {
     enabled: Boolean(provider),
@@ -97,7 +97,7 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
   };
 
   if (config.enabled) {
-    ensureValid(config);
+    ensureValid(config, isProd);
   }
 
   return config;
@@ -106,8 +106,8 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
 function resolveActiveProvider(
   explicit: BillingProvider | undefined,
   avail: { stripe: boolean; paypal: boolean },
+  isProd: boolean,
 ): BillingProvider | null {
-  const isProd = process.env['NODE_ENV'] === 'production';
 
   // In production: If explicit provider is set, use it (validation will fail if credentials missing)
   // In development: Only use explicit provider if credentials are available
@@ -129,9 +129,8 @@ function resolveActiveProvider(
   return null;
 }
 
-export function validateBillingConfig(config: BillingConfig): string[] {
+export function validateBillingConfig(config: BillingConfig, isProd: boolean): string[] {
   const errors: string[] = [];
-  const isProd = process.env['NODE_ENV'] === 'production';
 
   if (config.provider === 'stripe') {
     if (config.stripe.secretKey === '') errors.push('STRIPE_SECRET_KEY missing');
@@ -149,8 +148,8 @@ export function validateBillingConfig(config: BillingConfig): string[] {
   return errors;
 }
 
-function ensureValid(config: BillingConfig): void {
-  const errors = validateBillingConfig(config);
+function ensureValid(config: BillingConfig, isProd: boolean): void {
+  const errors = validateBillingConfig(config, isProd);
   if (errors.length > 0) {
     throw new Error(`Billing Configuration Failed:\n${errors.map((e) => ` - ${e}`).join('\n')}`);
   }

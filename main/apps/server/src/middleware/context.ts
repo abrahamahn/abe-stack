@@ -8,10 +8,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  * If a user is authenticated (req.user is present), it creates a new scoped context
  * with the user's ID and tenant ID (if available).
  */
-export async function contextualizeRequest(
-  req: FastifyRequest,
-  _reply: FastifyReply,
-): Promise<void> {
+export function contextualizeRequest(req: FastifyRequest, _reply: FastifyReply): void {
   const request = req as unknown as RequestWithCookies;
 
   if (!request.context || !request.user) {
@@ -27,7 +24,7 @@ export async function contextualizeRequest(
   // This will wrap all DB queries in a transaction that sets PG session variables.
   request.context = request.context.contextualize({
     userId: request.user.userId,
-    tenantId: tenantId,
     role: request.user.role,
+    ...(tenantId !== undefined ? { tenantId } : {}),
   });
 }

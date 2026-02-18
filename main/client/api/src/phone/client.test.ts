@@ -10,8 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createPhoneClient } from './client';
 
-import type { User, UserId } from '@bslt/shared';
 import type { PhoneClientConfig } from './client';
+import type { User, UserId } from '@bslt/shared';
 
 // Mock @bslt/shared
 vi.mock('@bslt/shared', async () => {

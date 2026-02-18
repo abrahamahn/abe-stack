@@ -9,7 +9,9 @@
 import { getAccessToken } from '@app/authToken';
 import { useNotificationPreferences } from '@bslt/react';
 import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } from '@bslt/ui';
+import { clientConfig as appClientConfig } from '@config';
 import { useMemo, useState } from 'react';
+
 
 import type { NotificationClientConfig } from '@bslt/api';
 import type { NotificationPreferences, NotificationType } from '@bslt/shared';
@@ -51,19 +53,16 @@ const CHANNEL_LABELS: Record<string, string> = {
 export function NotificationPreferencesForm({
   className,
 }: NotificationPreferencesFormProps): ReactElement {
-  const apiBaseUrl =
-    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
-
-  const clientConfig: NotificationClientConfig = useMemo(
+  const notificationConfig: NotificationClientConfig = useMemo(
     () => ({
-      baseUrl: apiBaseUrl,
+      baseUrl: appClientConfig.apiUrl,
       getToken: getAccessToken,
     }),
-    [apiBaseUrl],
+    [],
   );
 
   const { preferences, isLoading, isSaving, error, updatePreferences } = useNotificationPreferences(
-    { clientConfig },
+    { clientConfig: notificationConfig },
   );
 
   const [saveError, setSaveError] = useState<string | null>(null);

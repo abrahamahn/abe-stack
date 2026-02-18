@@ -13,8 +13,8 @@ export type {
   ErrorCode,
   ErrorResponse,
   InferResponseData,
-  StatusCode,
-} from './primitives/api';
+  StatusCode
+} from './primitives';
 
 // Constants
 export {
@@ -53,8 +53,8 @@ export {
   URL_REGEX,
   USERNAME_REGEX_LOCAL,
   UUID_REGEX,
-  VIDEO_EXTENSIONS,
-} from './primitives/constants';
+  VIDEO_EXTENSIONS
+} from './primitives';
 
 // Schema
 export {
@@ -123,8 +123,8 @@ export {
   type TenantId,
   type UserAgreementId,
   type WebhookDeliveryId,
-  type WebhookId,
-} from './primitives/schema';
+  type WebhookId
+} from './primitives';
 
 // Helpers (consolidated: object, string, async, response, result, crypto)
 export {
@@ -144,6 +144,9 @@ export {
   err,
   escapeHtml,
   formatBytes,
+  formatDate,
+  formatDateTime,
+  formatTimeAgo,
   generateSecureId,
   generateToken,
   generateUUID,
@@ -180,8 +183,8 @@ export {
   type ApiErrorResponse,
   type ApiSuccessResponse,
   type KeyMapping,
-  type Result,
-} from './primitives/helpers';
+  type Result
+} from './primitives';
 
 // ============================================================================
 // SYSTEM INFRASTRUCTURE
@@ -230,8 +233,8 @@ export {
   type HttpErrorResponse,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
-  type ValidationIssue,
-} from './system/errors';
+  type ValidationIssue
+} from './system';
 
 // Constants (consolidated)
 export {
@@ -294,11 +297,11 @@ export {
   WEBHOOK_EVENT_TYPES,
   WEBSOCKET_PATH,
   WS_CLOSE_POLICY_VIOLATION,
-  type HttpStatusCode,
-} from './system/constants';
+  type HttpStatusCode
+} from './system';
 
 // Environment
-export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './system/env';
+export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './system';
 
 // Ports
 export {
@@ -326,8 +329,8 @@ export {
   type ServerLogger,
   type StorageBackend,
   type StorageClient,
-  type StorageConfig,
-} from './system/ports';
+  type StorageConfig
+} from './system';
 
 // HTTP (consolidated: response schemas, cookies, types, csrf, multipart, proxy, request, routes, user agent)
 export {
@@ -370,8 +373,8 @@ export {
   type RouteHandler,
   type RouteMap,
   type RouteResult,
-  type ValidationSchema,
-} from './system/http';
+  type ValidationSchema
+} from './system';
 
 // Context
 export {
@@ -386,14 +389,14 @@ export {
   type HasStorage,
   type ReplyContext,
   type RequestContext,
-  type RequestInfo,
-} from './system/context';
+  type RequestInfo
+} from './system';
 
 // DI
-export type { ModuleDeps, ModuleRegistrationOptions } from './system/di';
+export type { ModuleDeps, ModuleRegistrationOptions } from './system';
 
 // Email types
-export { type EmailProvider, type EmailStatus } from './system/email';
+export { type EmailProvider, type EmailStatus } from './system';
 
 // Files (consolidated: schemas + storage utilities)
 export {
@@ -414,8 +417,8 @@ export {
   type FileRecord,
   type FilesListResponse,
   type FileUploadRequest,
-  type FileUploadResponse,
-} from './system/files';
+  type FileUploadResponse
+} from './system';
 
 // Feature flags
 export {
@@ -433,8 +436,8 @@ export {
   type FeatureFlagsListResponse,
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
-  type UpdateFeatureFlagRequest,
-} from './system/feature-flags';
+  type UpdateFeatureFlagRequest
+} from './system';
 
 // Jobs (consolidated)
 export {
@@ -463,8 +466,8 @@ export {
   type JobPriority,
   type JobStatus,
   type QueueStats,
-  type UpdateJob,
-} from './system/jobs';
+  type UpdateJob
+} from './system';
 
 // API keys
 export {
@@ -485,8 +488,8 @@ export {
   type DeleteApiKeyResponse,
   type ListApiKeysResponse,
   type RevokeApiKeyResponse,
-  type UpdateApiKey,
-} from './system/api-keys';
+  type UpdateApiKey
+} from './system';
 
 // Webhooks
 export {
@@ -518,16 +521,15 @@ export {
   type WebhookDelivery,
   type WebhookDeliveryItem,
   type WebhookDeliveryStatus,
-  type WebhookEventType,
   type WebhookItem,
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
-  type WebhookWithDeliveries,
-} from './system/webhooks';
+  type WebhookWithDeliveries
+} from './system';
 
 // Native bridge
-export { type NativeBridge } from './system/native';
+export { type NativeBridge } from './system';
 
 // ============================================================================
 // SYSTEM UTILITIES
@@ -564,8 +566,8 @@ export {
   type MemoizeFunction,
   type MemoizeOptions,
   type MemoryCacheConfig,
-  type RedisCacheConfig,
-} from './system/cache';
+  type RedisCacheConfig
+} from './system';
 
 // Search
 export {
@@ -660,8 +662,8 @@ export {
   type SerializedFilter,
   type SerializedQuery,
   type SortConfig,
-  type UrlSearchParamsInput,
-} from './system/search';
+  type UrlSearchParamsInput
+} from './system';
 
 // Logger
 export {
@@ -683,8 +685,8 @@ export {
   type Logger,
   type LoggerConfig,
   type LogLevel,
-  type LogRequestContext,
-} from './system/logger';
+  type LogRequestContext
+} from './system';
 
 // Health
 export {
@@ -719,8 +721,8 @@ export {
   type ServiceStatus,
   type StartupSummaryOptions,
   type StorageHealthConfig,
-  type WebSocketStats,
-} from './system/health';
+  type WebSocketStats
+} from './system';
 
 // PubSub
 export {
@@ -738,8 +740,8 @@ export {
   type ServerMessage,
   type SubscriptionKey,
   type SubscriptionManagerOptions,
-  type WebSocket,
-} from './system/pubsub';
+  type WebSocket
+} from './system';
 
 // Realtime
 export {
@@ -781,8 +783,8 @@ export {
   type RecordPointer,
   type VersionConflict,
   type VersionedRecord,
-  type WriteResponse,
-} from './system/realtime';
+  type WriteResponse
+} from './system';
 
 // Media
 export {
@@ -804,8 +806,8 @@ export {
   type ProcessingResult,
   type SecurityScanResult,
   type UploadConfig,
-  type VideoProcessingOptions,
-} from './system/media';
+  type VideoProcessingOptions
+} from './system';
 
 // Pagination
 export {
@@ -841,8 +843,8 @@ export {
   type PaginationErrorType,
   type PaginationOptions,
   type PaginationParamNames,
-  type PaginationParseConfig,
-} from './system/pagination';
+  type PaginationParseConfig
+} from './system';
 
 // Security (consolidated: input, sanitization, rate limit)
 export {
@@ -856,11 +858,11 @@ export {
   type RateLimitInfo,
   type SanitizationResult,
   type SQLInjectionDetectionOptions,
-  type ValidationOptions,
-} from './system/security';
+  type ValidationOptions
+} from './system';
 
-// Crypto
-export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system/crypto';
+// Crypto (browser-safe token storage only — jwt.ts is server-only, import from ./system/crypto directly)
+export { addAuthHeader, createTokenStore, tokenStore, type TokenStore } from './system';
 
 // Usage metering
 export {
@@ -875,8 +877,8 @@ export {
   type UsageMetric,
   type UsageMetricSummary,
   type UsageSnapshot,
-  type UsageSummaryResponse,
-} from './system/usage-metering';
+  type UsageSummaryResponse
+} from './system';
 
 // ============================================================================
 // CORE DOMAIN
@@ -1055,11 +1057,11 @@ export {
   type WebauthnLoginVerifyRequest,
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
-  type WebauthnRegisterVerifyResponse,
-} from './core/auth';
+  type WebauthnRegisterVerifyResponse
+} from './core';
 
 // Field schemas
-export { emailSchema, isoDateTimeSchema, passwordSchema } from './core/schemas';
+export { emailSchema, isoDateTimeSchema, passwordSchema } from './core';
 
 // Transactions
 export {
@@ -1077,8 +1079,8 @@ export {
   type ListRemoveOperation,
   type Operation,
   type SetOperation,
-  type Transaction,
-} from './core/transactions';
+  type Transaction
+} from './core';
 
 // Core constants (consolidated)
 export {
@@ -1088,7 +1090,7 @@ export {
   LOGIN_FAILURE_REASON,
   OAUTH_PROVIDERS,
   RETENTION_PERIODS,
-} from './core/constants';
+} from './core';
 
 // Audit log
 export {
@@ -1106,8 +1108,8 @@ export {
   type AuditLogFilter,
   type AuditLogListResponse,
   type AuditSeverity,
-  type CreateAuditEvent,
-} from './core/audit-log';
+  type CreateAuditEvent
+} from './core';
 
 // Billing (consolidated: schemas + service types)
 export {
@@ -1240,22 +1242,19 @@ export {
   type SubscriptionStatus,
   type SyncStripeResponse,
   type UpdatePlanRequest,
-  type UpdateSubscriptionRequest,
-} from './core/billing';
+  type UpdateSubscriptionRequest
+} from './core';
 
 // Compliance
 export {
-  complianceActionResponseSchema,
   CONSENT_TYPES,
   consentLogSchema,
-  consentPreferencesResponseSchema,
   createConsentLogSchema,
   createDataExportRequestSchema,
   createLegalDocumentSchema,
   createUserAgreementSchema,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
-  dataExportRequestedResponseSchema,
   dataExportRequestSchema,
   DOCUMENT_TYPES,
   getEffectiveConsent,
@@ -1265,24 +1264,21 @@ export {
   updateConsentPreferencesRequestSchema,
   updateLegalDocumentSchema,
   userAgreementSchema,
-  type ComplianceActionResponse,
   type ConsentLog,
-  type ConsentPreferencesResponse,
   type ConsentType,
   type CreateConsentLog,
   type CreateDataExportRequest,
   type CreateLegalDocument,
   type CreateUserAgreement,
   type DataExportRequest,
-  type DataExportRequestedResponse,
   type DataExportStatus,
   type DataExportType,
   type DocumentType,
   type LegalDocument,
   type UpdateConsentPreferencesRequest,
   type UpdateLegalDocument,
-  type UserAgreement,
-} from './core/compliance';
+  type UserAgreement
+} from './core';
 
 // Tenant (consolidated: includes membership)
 export {
@@ -1295,9 +1291,7 @@ export {
   canLeave,
   canRemoveMember,
   canRevokeInvite,
-  createInvitationSchema,
-  INVITATION_STATUSES,
-  createTenantSchema,
+  createInvitationSchema, createTenantSchema,
   createWorkspaceContext,
   extractEmailDomain,
   getInvitationStatusTone,
@@ -1306,19 +1300,13 @@ export {
   getTenantRoleTone,
   getWorkspaceContext,
   hasAtLeastRole,
-  hasRequiredWorkspaceRole,
-  invitationSchema,
-  invitationsListResponseSchema,
+  hasRequiredWorkspaceRole, INVITATION_STATUSES, invitationSchema,
   isEmailDomainAllowed,
   isInviteExpired,
   isSoleOwner,
   isWorkspaceScoped,
-  membershipActionResponseSchema,
   membershipSchema,
-  membersListResponseSchema,
   ROLE_LEVELS,
-  tenantActionResponseSchema,
-  tenantListResponseSchema,
   tenantSchema,
   transferOwnershipSchema,
   updateMembershipRoleSchema,
@@ -1330,20 +1318,15 @@ export {
   type CreateInvitation,
   type CreateTenantInput,
   type Invitation,
-  type InvitationsListResponse,
   type InvitationStatus,
   type MaybeWorkspaceContext,
   type Membership,
-  type MembershipActionResponse,
-  type MembersListResponse,
   type Tenant,
-  type TenantActionResponse,
-  type TenantListResponse,
   type TransferOwnershipInput,
   type UpdateMembershipRole,
   type UpdateTenantInput,
-  type WorkspaceContext,
-} from './core/tenant';
+  type WorkspaceContext
+} from './core';
 
 // Notifications
 export {
@@ -1417,8 +1400,8 @@ export {
   type UnsubscribeRequest,
   type UnsubscribeResponse,
   type UpdatePreferencesRequest,
-  type VapidKeyResponse,
-} from './core/notifications';
+  type VapidKeyResponse
+} from './core';
 
 // Users (consolidated)
 export {
@@ -1486,21 +1469,19 @@ export {
   type UpdateUsernameResponse,
   type User,
   type UserId,
-  type UserRole,
-} from './core/users';
+  type UserRole
+} from './core';
 
 // Activities
 export {
-  activitiesListFiltersSchema,
-  ACTOR_TYPES,
   activitySchema,
+  ACTOR_TYPES,
   createActivitySchema,
   getActorTypeTone,
-  type ActivitiesListFilters,
   type Activity,
   type ActorType,
-  type CreateActivity,
-} from './core/activities';
+  type CreateActivity
+} from './core';
 
 // Admin (consolidated: includes security schemas)
 export {
@@ -1576,14 +1557,17 @@ export {
   type SystemStatsResponse,
   type UnlockAccountRequest,
   type UnlockAccountResponse,
-  type UserStatus,
-} from './core/admin';
+  type UserStatus
+} from './core';
 
 // ============================================================================
 // API ROUTER & CONTRACTS
 // ============================================================================
 
-export { apiRouter, type ApiRouter } from './api';
+export {
+  apiRouter,
+  type ApiRouter
+} from './api';
 
 export {
   activitiesContract,
@@ -1601,5 +1585,6 @@ export {
   realtimeContract,
   tenantContract,
   usersContract,
-  webhooksContract,
+  webhooksContract
 } from './contracts';
+

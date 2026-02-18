@@ -10,8 +10,8 @@
 
 import { Button, Card, Heading, Input, Text } from '@bslt/ui';
 
-import type { ReactElement } from 'react';
 import type { UseOnboardingResult } from '../hooks/useOnboarding';
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Types

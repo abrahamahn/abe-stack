@@ -18,13 +18,13 @@ import {
   requestPushPermission,
   subscribeToPush,
   unsubscribeFromPush,
-} from '@bslt/api';
+} from '@bslt/client-engine';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { NotificationClientConfig } from '@bslt/api';
+import type { NotificationClientConfig } from '@bslt/client-engine';
 import type {
   NotificationPreferences,
   PushSubscription as PushSubscriptionType,
@@ -196,11 +196,11 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
 
   const handleSubscribe = useCallback(async (): Promise<void> => {
     await subscribeMutation.mutateAsync(undefined);
-  }, [subscribeMutation.mutateAsync]);
+  }, [subscribeMutation]);
 
   const handleUnsubscribe = useCallback(async (): Promise<void> => {
     await unsubscribeMutation.mutateAsync(undefined);
-  }, [unsubscribeMutation.mutateAsync]);
+  }, [unsubscribeMutation]);
 
   return {
     isSupported,
@@ -272,12 +272,12 @@ export function useNotificationPreferences(
     async (updates: UpdatePreferencesRequest): Promise<void> => {
       await updateMutation.mutateAsync(updates);
     },
-    [updateMutation.mutateAsync],
+    [updateMutation],
   );
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     isLoading: query.isLoading,
@@ -393,7 +393,7 @@ export function useTestNotification(clientConfig: NotificationClientConfig): Tes
 
   const handleSendTest = useCallback(async (): Promise<void> => {
     await mutation.mutateAsync(undefined);
-  }, [mutation.mutateAsync]);
+  }, [mutation]);
 
   return {
     isSending: mutation.isPending,

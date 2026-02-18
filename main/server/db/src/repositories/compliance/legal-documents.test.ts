@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -37,9 +38,8 @@ const mockLegalDocument = {
   version: 1,
   title: 'Terms of Service',
   content: 'These are the terms...',
-  effective_date: new Date('2024-01-01'),
+  effective_at: new Date('2024-01-01'),
   created_at: new Date('2024-01-01'),
-  updated_at: new Date('2024-01-01'),
 };
 
 // ============================================================================
@@ -64,7 +64,7 @@ describe('createLegalDocumentRepository', () => {
         version: 1,
         title: 'Terms of Service',
         content: 'These are the terms...',
-        effectiveDate: new Date('2024-01-01'),
+        effectiveAt: new Date('2024-01-01'),
       });
 
       expect(result.type).toBe('terms_of_service');
@@ -89,7 +89,7 @@ describe('createLegalDocumentRepository', () => {
           version: 1,
           title: 'Terms of Service',
           content: 'These are the terms...',
-          effectiveDate: new Date('2024-01-01'),
+          effectiveAt: new Date('2024-01-01'),
         }),
       ).rejects.toThrow('Failed to create legal document');
     });
@@ -109,7 +109,7 @@ describe('createLegalDocumentRepository', () => {
         version: 2,
         title: 'Terms of Service',
         content: 'Updated terms...',
-        effectiveDate: new Date('2024-02-01'),
+        effectiveAt: new Date('2024-02-01'),
       });
 
       expect(result.version).toBe(2);
@@ -132,7 +132,7 @@ describe('createLegalDocumentRepository', () => {
         version: 1,
         title: 'Privacy Policy',
         content: 'Privacy terms...',
-        effectiveDate: new Date('2024-01-01'),
+        effectiveAt: new Date('2024-01-01'),
       });
 
       expect(result.type).toBe('privacy_policy');
@@ -153,7 +153,7 @@ describe('createLegalDocumentRepository', () => {
         version: 1,
         title: 'Terms of Service',
         content: longContent,
-        effectiveDate: new Date('2024-01-01'),
+        effectiveAt: new Date('2024-01-01'),
       });
 
       expect(result.content).toBe(longContent);
@@ -209,7 +209,7 @@ describe('createLegalDocumentRepository', () => {
       expect(result?.version).toBe(1);
       expect(result?.title).toBe('Terms of Service');
       expect(result?.content).toBe('These are the terms...');
-      expect(result?.effectiveDate).toEqual(new Date('2024-01-01'));
+      expect(result?.effectiveAt).toEqual(new Date('2024-01-01'));
     });
   });
 
@@ -226,9 +226,9 @@ describe('createLegalDocumentRepository', () => {
       const result = await repo.findByType('terms_of_service');
 
       expect(result).toHaveLength(3);
-      expect(result[0].version).toBe(3);
-      expect(result[1].version).toBe(2);
-      expect(result[2].version).toBe(1);
+      expect(result[0]?.version).toBe(3);
+      expect(result[1]?.version).toBe(2);
+      expect(result[2]?.version).toBe(1);
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('ORDER BY'),
@@ -265,7 +265,7 @@ describe('createLegalDocumentRepository', () => {
       const result = await repo.findByType('terms_of_service');
 
       expect(result).toHaveLength(1);
-      expect(result[0].version).toBe(1);
+      expect(result[0]?.version).toBe(1);
     });
 
     it('should handle multiple versions with gaps', async () => {
@@ -280,8 +280,8 @@ describe('createLegalDocumentRepository', () => {
       const result = await repo.findByType('terms_of_service');
 
       expect(result).toHaveLength(3);
-      expect(result[0].version).toBe(5);
-      expect(result[2].version).toBe(1);
+      expect(result[0]?.version).toBe(5);
+      expect(result[2]?.version).toBe(1);
     });
   });
 
@@ -360,10 +360,10 @@ describe('createLegalDocumentRepository', () => {
       const result = await repo.findAllLatest();
 
       expect(result).toHaveLength(3);
-      expect(result[0].type).toBe('terms_of_service');
-      expect(result[0].version).toBe(3);
-      expect(result[1].type).toBe('privacy_policy');
-      expect(result[1].version).toBe(2);
+      expect(result[0]?.type).toBe('terms_of_service');
+      expect(result[0]?.version).toBe(3);
+      expect(result[1]?.type).toBe('privacy_policy');
+      expect(result[1]?.version).toBe(2);
       expect(mockDb.raw).toHaveBeenCalledWith(expect.stringContaining('DISTINCT ON'));
     });
 
@@ -393,7 +393,7 @@ describe('createLegalDocumentRepository', () => {
       const result = await repo.findAllLatest();
 
       expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('terms_of_service');
+      expect(result[0]?.type).toBe('terms_of_service');
     });
 
     it('should return only one version per type', async () => {
@@ -468,23 +468,22 @@ describe('createLegalDocumentRepository', () => {
       const newEffectiveDate = new Date('2024-06-01');
       const updatedDocument = {
         ...mockLegalDocument,
-        effective_date: newEffectiveDate,
+        effective_at: newEffectiveDate,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedDocument);
 
       const repo = createLegalDocumentRepository(mockDb);
       const result = await repo.update('doc-123', {
-        effectiveDate: newEffectiveDate,
+        effectiveAt: newEffectiveDate,
       });
 
-      expect(result?.effectiveDate).toEqual(newEffectiveDate);
+      expect(result?.effectiveAt).toEqual(newEffectiveDate);
     });
 
     it('should return all fields after update', async () => {
       const updatedDocument = {
         ...mockLegalDocument,
         title: 'Updated',
-        updated_at: new Date('2024-02-01'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedDocument);
 
@@ -494,7 +493,7 @@ describe('createLegalDocumentRepository', () => {
       expect(result?.id).toBe('doc-123');
       expect(result?.type).toBe('terms_of_service');
       expect(result?.version).toBe(1);
-      expect(result?.updatedAt).toEqual(new Date('2024-02-01'));
+      expect(result?.createdAt).toBeDefined();
     });
 
     it('should handle content updates', async () => {
@@ -526,7 +525,7 @@ describe('createLegalDocumentRepository', () => {
         version: 999,
         title: 'Terms of Service',
         content: 'Content...',
-        effectiveDate: new Date('2024-01-01'),
+        effectiveAt: new Date('2024-01-01'),
       });
 
       expect(result.version).toBe(999);
@@ -546,7 +545,7 @@ describe('createLegalDocumentRepository', () => {
         version: 1,
         title: 'Terms of Service',
         content: contentWithSpecialChars,
-        effectiveDate: new Date('2024-01-01'),
+        effectiveAt: new Date('2024-01-01'),
       });
 
       expect(result.content).toBe(contentWithSpecialChars);
@@ -578,7 +577,7 @@ describe('createLegalDocumentRepository', () => {
       const futureDate = new Date('2025-01-01');
       const futureDocument = {
         ...mockLegalDocument,
-        effective_date: futureDate,
+        effective_at: futureDate,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(futureDocument);
 
@@ -588,17 +587,17 @@ describe('createLegalDocumentRepository', () => {
         version: 2,
         title: 'Terms of Service',
         content: 'Future terms...',
-        effectiveDate: futureDate,
+        effectiveAt: futureDate,
       });
 
-      expect(result.effectiveDate).toEqual(futureDate);
+      expect(result.effectiveAt).toEqual(futureDate);
     });
 
     it('should handle past effective dates', async () => {
       const pastDate = new Date('2020-01-01');
       const pastDocument = {
         ...mockLegalDocument,
-        effective_date: pastDate,
+        effective_at: pastDate,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(pastDocument);
 
@@ -608,10 +607,10 @@ describe('createLegalDocumentRepository', () => {
         version: 1,
         title: 'Terms of Service',
         content: 'Historical terms...',
-        effectiveDate: pastDate,
+        effectiveAt: pastDate,
       });
 
-      expect(result.effectiveDate).toEqual(pastDate);
+      expect(result.effectiveAt).toEqual(pastDate);
     });
   });
 });

@@ -1,9 +1,11 @@
 // main/server/system/src/system/index.ts
 
 export {
+  checkCacheStatus,
   checkDbStatus,
   checkEmailStatus,
   checkPubSubStatus,
+  checkQueueStatus,
   checkRateLimitStatus,
   checkSchemaStatus,
   checkStorageStatus,

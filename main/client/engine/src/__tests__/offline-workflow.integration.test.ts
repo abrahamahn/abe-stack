@@ -97,7 +97,7 @@ const mockWindow = {
   eventListeners: new Map<string, Set<EventHandler>>(),
   addEventListener: (type: string, handler: EventHandler): void => {
     let handlers = mockWindow.eventListeners.get(type);
-    if (handlers === null || handlers === undefined) {
+    if (handlers === undefined) {
       handlers = new Set();
       mockWindow.eventListeners.set(type, handlers);
     }
@@ -105,13 +105,13 @@ const mockWindow = {
   },
   removeEventListener: (type: string, handler: EventHandler): void => {
     const handlers = mockWindow.eventListeners.get(type);
-    if (handlers !== null && handlers !== undefined) {
+    if (handlers !== undefined) {
       handlers.delete(handler);
     }
   },
   dispatchEvent: (event: Event): boolean => {
     const handlers = mockWindow.eventListeners.get(event.type);
-    if (handlers !== null && handlers !== undefined) {
+    if (handlers !== undefined) {
       for (const handler of handlers) {
         handler(event);
       }
@@ -181,7 +181,7 @@ function createOfflineSystem(): OfflineSystem {
 
     for (const op of operations) {
       const rollback = cache.optimisticUpdate(op.table, op.id, op.updates);
-      if (rollback !== null && rollback !== undefined) {
+      if (rollback !== undefined) {
         rollbacks.push(rollback);
       }
     }

@@ -11,9 +11,9 @@ import {
 } from './userHandlers';
 import * as userService from './userService';
 
+import type { AdminAppContext, AdminRequest } from './types';
 import type { AdminUser } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { AdminAppContext, AdminRequest } from './types';
 
 // ============================================================================
 // Mocks - use relative path to match vitest module resolution
@@ -123,6 +123,11 @@ function createMockContext(): AdminAppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   } as AdminAppContext;
 }

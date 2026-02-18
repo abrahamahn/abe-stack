@@ -21,7 +21,7 @@ import {
   rotateRefreshToken,
 } from './refresh-token';
 
-import type { DbClient, RefreshToken, RefreshTokenFamily, User } from '../../../../db/src';
+import type { DbClient, RawDb, RefreshToken, RefreshTokenFamily, User } from '../../../../db/src';
 
 // ============================================================================
 // Mock Dependencies
@@ -41,7 +41,7 @@ vi.mock('@bslt/db', async () => {
   const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
-    withTransaction: vi.fn((db, callback) => callback(db)),
+    withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
   };
 });
 
@@ -54,8 +54,8 @@ function createMockDbClient(): DbClient {
     query: vi.fn(),
     queryOne: vi.fn(),
     execute: vi.fn(),
-    transaction: vi.fn((callback) =>
-      callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() }),
+    transaction: vi.fn(<T>(callback: (tx: RawDb) => Promise<T>) =>
+      callback({ query: vi.fn(), queryOne: vi.fn(), execute: vi.fn() } as unknown as RawDb),
     ),
   } as unknown as DbClient;
 }

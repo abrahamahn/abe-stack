@@ -13,6 +13,17 @@ import { createApp, type App } from './app';
 
 import type { AppConfig } from '@bslt/shared/config';
 
+/** Narrowed type for pubsub objects that support start/stop lifecycle */
+interface LifecyclePubSub {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+}
+
+/** Narrowed type for cache objects that support close */
+interface ClosableCache {
+  close(): Promise<void>;
+}
+
 /**
  * Server Manager
  *
@@ -22,7 +33,6 @@ import type { AppConfig } from '@bslt/shared/config';
  * 3. Starts/Stops the HTTP server & Background Services
  */
 export class ServerManager {
-  private server?: http.Server;
   private app?: App;
   private context?: SystemContext;
   private port = 0;
@@ -38,7 +48,7 @@ export class ServerManager {
       // Note: We don't pass a logger here, allowing bootstrap to create the default console logger
       // tailored for the engine.
       this.context = await bootstrapSystem({ config: this.config });
-      const { log, db, pubsub, queue, repos, queueStore } = this.context;
+      const { log, db, pubsub, repos, queueStore } = this.context;
 
       log.info('System bootstrapped successfully');
 
@@ -46,21 +56,29 @@ export class ServerManager {
       await requireValidSchema(db);
 
       // 3. Start Internal Services
-      if (pubsub && 'start' in pubsub && typeof pubsub.start === 'function') {
-        await (pubsub as any).start();
+      if ('start' in pubsub && typeof (pubsub as Partial<LifecyclePubSub>).start === 'function') {
+        await (pubsub as unknown as LifecyclePubSub).start();
       }
-      // queue.start(); // QueueStore is passive, no start needed
 
       // 4. Create App (Fastify)
       this.app = await createApp(this.config, this.context);
 
       // 5. Register WebSocket Support
       // We use the raw Fastify instance from the App
-      registerWebSocket(this.app.server, { ...this.context, resolveTableName } as any, {
-        verifyToken,
-      });
+      registerWebSocket(
+        this.app.server,
+        {
+          db: this.app.db,
+          pubsub: this.app.pubsub,
+          log: this.context.log,
+          config: this.config,
+          resolveTableName,
+        },
+        { verifyToken },
+      );
 
       // 6. Register Scheduled Tasks
+
       // Adapted logger to match FastifyBaseLogger expectation if needed, or update registerScheduledTasks signature
       // registerScheduledTasks expects FastifyBaseLogger. SystemContext.logger is generic Logger.
       // We might need an adapter or use the app.log (which is Fastify logger)
@@ -70,11 +88,10 @@ export class ServerManager {
       this.port = await this.findAvailablePort(this.config.server.port);
 
       await this.app.server.ready();
-      this.server = this.app.server.server;
 
       await this.app.server.listen({ port: this.port, host: this.config.server.host });
 
-      log.info(`Server listening on ${this.config.server.host}:${this.port}`);
+      log.info(`Server listening on ${this.config.server.host}:${String(this.port)}`);
 
       // 8. Log Summary
       const routeCount = this.app.countRegisteredRoutes();
@@ -90,11 +107,11 @@ export class ServerManager {
 
       // Setup graceful shutdown
       this.setupSignalHandlers();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to start server:', error);
       // Ensure we try to cleanup if start failed midway
       if (this.context) {
-        await this.stop().catch((err) => {
+        await this.stop().catch((err: unknown) => {
           console.error('Failed to stop during startup error:', err);
         });
       }
@@ -106,19 +123,20 @@ export class ServerManager {
    * Stop the server
    */
   async stop(): Promise<void> {
-    const log = this.context?.log || console;
+    const log = this.context?.log ?? console;
     log.info('Stopping server...');
 
     // 1. Stop Background Tasks
     if (this.context) {
       const { pubsub, write, cache } = this.context;
-      if (pubsub && 'stop' in pubsub && typeof pubsub.stop === 'function') {
-        await (pubsub as any).stop();
+      if ('stop' in pubsub && typeof (pubsub as Partial<LifecyclePubSub>).stop === 'function') {
+        await (pubsub as unknown as LifecyclePubSub).stop();
       }
-      // await queue.stop(); // QueueStore is passive
       stopScheduledTasks();
       write.close();
-      await (cache as any).close();
+      if ('close' in cache && typeof (cache as Partial<ClosableCache>).close === 'function') {
+        await (cache as ClosableCache).close();
+      }
     }
 
     // 2. Stop HTTP Server
@@ -159,7 +177,7 @@ export class ServerManager {
     }
 
     if (!isAvailable) {
-      throw new Error(`Could not find an available port starting from ${preferredPort}`);
+      throw new Error(`Could not find an available port starting from ${String(preferredPort)}`);
     }
 
     return port;
@@ -174,12 +192,5 @@ export class ServerManager {
         process.exit(0);
       });
     });
-  }
-
-  private displayStatus(): void {
-    // Redundant with logStartupSummary, but kept for method completeness
-    if (!this.context || !this.app) return;
-    const { log } = this.context;
-    log.info(`Application active on port ${this.port}`);
   }
 }

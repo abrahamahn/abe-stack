@@ -9,14 +9,13 @@
  * - usePaymentMethods: Manage payment methods
  */
 
-import { createBillingClient } from '@bslt/api';
+import { createBillingClient } from '@bslt/client-engine';
 import { useMemo, useState } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { BillingClientConfig } from '@bslt/api';
-import type { QueryKey } from '@bslt/client-engine';
+import type { BillingClientConfig, QueryKey } from '@bslt/client-engine';
 import type {
   CheckoutRequest,
   Invoice,
@@ -63,7 +62,7 @@ export interface PlansState {
  * @returns Plans state
  */
 export function usePlans(clientConfig: BillingClientConfig): PlansState {
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: billingQueryKeys.plans(),
@@ -113,7 +112,7 @@ export interface SubscriptionState {
  * @returns Subscription state and actions
  */
 export function useSubscription(clientConfig: BillingClientConfig): SubscriptionState {
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: billingQueryKeys.subscription(),
@@ -198,7 +197,7 @@ export interface InvoicesState {
  * @returns Invoices state
  */
 export function useInvoices(clientConfig: BillingClientConfig): InvoicesState {
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: billingQueryKeys.invoices(),
@@ -251,7 +250,7 @@ export interface PaymentMethodsState {
  * @returns Payment methods state and actions
  */
 export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMethodsState {
-  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createBillingClient(clientConfig), [clientConfig]);
 
   // Local state for setup intent secret (not from a query)
   const [setupIntentSecret, setSetupIntentSecret] = useState<string | null>(null);

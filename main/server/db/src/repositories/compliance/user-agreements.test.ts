@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -36,7 +37,6 @@ const mockUserAgreement = {
   user_id: 'usr-123',
   document_id: 'doc-123',
   ip_address: '192.168.1.1',
-  user_agent: 'Mozilla/5.0',
   agreed_at: new Date('2024-01-01'),
 };
 
@@ -61,13 +61,11 @@ describe('createUserAgreementRepository', () => {
         userId: 'usr-123',
         documentId: 'doc-123',
         ipAddress: '192.168.1.1',
-        userAgent: 'Mozilla/5.0',
       });
 
       expect(result.userId).toBe('usr-123');
       expect(result.documentId).toBe('doc-123');
       expect(result.ipAddress).toBe('192.168.1.1');
-      expect(result.userAgent).toBe('Mozilla/5.0');
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('INSERT INTO'),
@@ -85,7 +83,6 @@ describe('createUserAgreementRepository', () => {
           userId: 'usr-123',
           documentId: 'doc-123',
           ipAddress: '192.168.1.1',
-          userAgent: 'Mozilla/5.0',
         }),
       ).rejects.toThrow('Failed to create user agreement');
     });
@@ -106,21 +103,20 @@ describe('createUserAgreementRepository', () => {
       expect(result.ipAddress).toBeNull();
     });
 
-    it('should handle optional user agent', async () => {
-      const agreementWithoutUserAgent = {
+    it('should handle agreement without IP address', async () => {
+      const agreementWithoutIpOrAgent = {
         ...mockUserAgreement,
-        user_agent: null,
+        ip_address: null,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(agreementWithoutUserAgent);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(agreementWithoutIpOrAgent);
 
       const repo = createUserAgreementRepository(mockDb);
       const result = await repo.create({
         userId: 'usr-123',
         documentId: 'doc-123',
-        ipAddress: '192.168.1.1',
       });
 
-      expect(result.userAgent).toBeNull();
+      expect(result.ipAddress).toBeNull();
     });
 
     it('should record timestamp automatically', async () => {
@@ -176,9 +172,9 @@ describe('createUserAgreementRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].agreedAt.getTime()).toBeGreaterThan(result[1].agreedAt.getTime());
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.agreedAt.getTime() ?? 0).toBeGreaterThan(result[1]?.agreedAt.getTime() ?? 0);
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -216,8 +212,7 @@ describe('createUserAgreementRepository', () => {
       const repo = createUserAgreementRepository(mockDb);
       const result = await repo.findByUserId('usr-123');
 
-      expect(result[0].ipAddress).toBe('192.168.1.1');
-      expect(result[0].userAgent).toBe('Mozilla/5.0');
+      expect(result[0]?.ipAddress).toBe('192.168.1.1');
     });
 
     it('should order by agreed_at descending', async () => {
@@ -300,7 +295,6 @@ describe('createUserAgreementRepository', () => {
 
       expect(result?.id).toBe('agreement-123');
       expect(result?.ipAddress).toBe('192.168.1.1');
-      expect(result?.userAgent).toBe('Mozilla/5.0');
       expect(result?.agreedAt).toEqual(new Date('2024-01-01'));
     });
   });
@@ -347,8 +341,8 @@ describe('createUserAgreementRepository', () => {
       const repo = createUserAgreementRepository(mockDb);
       const result = await repo.findByDocumentId('doc-123');
 
-      expect(result[0].agreedAt.getTime()).toBeGreaterThan(result[1].agreedAt.getTime());
-      expect(result[1].agreedAt.getTime()).toBeGreaterThan(result[2].agreedAt.getTime());
+      expect(result[0]?.agreedAt.getTime() ?? 0).toBeGreaterThan(result[1]?.agreedAt.getTime() ?? 0);
+      expect(result[1]?.agreedAt.getTime() ?? 0).toBeGreaterThan(result[2]?.agreedAt.getTime() ?? 0);
     });
 
     it('should handle single user agreement', async () => {
@@ -358,14 +352,14 @@ describe('createUserAgreementRepository', () => {
       const result = await repo.findByDocumentId('doc-123');
 
       expect(result).toHaveLength(1);
-      expect(result[0].userId).toBe('usr-123');
+      expect(result[0]?.userId).toBe('usr-123');
     });
 
     it('should handle many agreements efficiently', async () => {
       const manyAgreements = Array.from({ length: 1000 }, (_, i) => ({
         ...mockUserAgreement,
-        id: `agreement-${i}`,
-        user_id: `usr-${i}`,
+        id: `agreement-${String(i)}`,
+        user_id: `usr-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(manyAgreements);
 
@@ -378,11 +372,10 @@ describe('createUserAgreementRepository', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle null IP address and user agent', async () => {
+    it('should handle null IP address', async () => {
       const minimalAgreement = {
         ...mockUserAgreement,
         ip_address: null,
-        user_agent: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(minimalAgreement);
 
@@ -393,26 +386,6 @@ describe('createUserAgreementRepository', () => {
       });
 
       expect(result.ipAddress).toBeNull();
-      expect(result.userAgent).toBeNull();
-    });
-
-    it('should handle long user agent strings', async () => {
-      const longUserAgent =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59';
-      const agreementWithLongUA = {
-        ...mockUserAgreement,
-        user_agent: longUserAgent,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(agreementWithLongUA);
-
-      const repo = createUserAgreementRepository(mockDb);
-      const result = await repo.create({
-        userId: 'usr-123',
-        documentId: 'doc-123',
-        userAgent: longUserAgent,
-      });
-
-      expect(result.userAgent).toBe(longUserAgent);
     });
 
     it('should handle agreements from different time zones', async () => {
@@ -496,7 +469,7 @@ describe('createUserAgreementRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].agreedAt).toEqual(result[1].agreedAt);
+      expect(result[0]?.agreedAt).toEqual(result[1]?.agreedAt);
     });
 
     it('should verify append-only nature by checking no modification methods', () => {

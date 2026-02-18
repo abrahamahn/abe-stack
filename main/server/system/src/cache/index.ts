@@ -39,8 +39,25 @@ export { createRedisProvider, MemoryCacheProvider, RedisCacheProvider } from './
 export { createCache, createCacheFromEnv, createMemoryCache, createRedisCache } from './factory';
 
 // ============================================================================
-// Errors
+// Errors (canonical in @bslt/shared)
 // ============================================================================
+
+import {
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  toCacheError,
+} from '@bslt/shared';
 
 export {
   CacheCapacityError,
@@ -56,8 +73,8 @@ export {
   isCacheConnectionError,
   isCacheError,
   isCacheTimeoutError,
-  toCacheError
-} from './errors';
+  toCacheError,
+};
 
 // ============================================================================
 // Configuration

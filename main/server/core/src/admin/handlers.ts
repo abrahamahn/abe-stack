@@ -9,8 +9,8 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../auth';
 
 import { unlockUserAccount, UserNotFoundError } from './service';
 
-import type { UnlockAccountRequest, UnlockAccountResponse } from '@bslt/shared';
 import type { AdminAppContext, AdminRequest } from './types';
+import type { UnlockAccountRequest, UnlockAccountResponse } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

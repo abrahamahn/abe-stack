@@ -140,7 +140,7 @@ function createProvider(
   config: RealtimeProviderConfig<TestTables>,
   children: ReactElement,
 ): ReactElement {
-  return createElement(RealtimeProvider<TestTables>, { config, children });
+  return createElement(RealtimeProvider<TestTables>, { config }, children);
 }
 
 // ============================================================================

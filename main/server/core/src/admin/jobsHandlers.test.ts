@@ -18,8 +18,8 @@ import {
   handleRetryJob,
 } from './jobsHandlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AdminAppContext } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Mocks
@@ -115,6 +115,11 @@ function createMockContext(): AdminAppContext {
     queue: {},
     write: {},
     search: {},
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
+    },
   } as AdminAppContext;
 }
 

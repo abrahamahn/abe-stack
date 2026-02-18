@@ -148,9 +148,8 @@ function useQueryPersistence(environment: ClientEnvironment): void {
       try {
         const persistedClient = await persister.restoreClient();
         restorePersistedQueryCache(queryCache, persistedClient);
-      } catch (_error: unknown) {
+      } catch {
         // Restore failed silently, continue with empty cache
-        // Optionally log error for debugging: console.error(_error);
       }
 
       // Subscribe to cache changes for persistence

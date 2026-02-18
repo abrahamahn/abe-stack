@@ -4,10 +4,11 @@ import { createReadStream } from 'node:fs';
 import { mkdir, open, readFile, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import { StorageNotFoundError, toStorageError } from '../errors';
 import { normalizeStorageKey } from '../signing';
 
-import type { ReadableStreamLike } from '@bslt/shared';
 import type { LocalStorageConfig, StorageProvider } from '../types';
+import type { ReadableStreamLike } from '@bslt/shared';
 
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}
@@ -37,7 +38,18 @@ export class LocalStorageProvider implements StorageProvider {
 
   async download(key: string): Promise<Buffer> {
     const filePath = this.resolveKey(key);
-    return readFile(filePath);
+    try {
+      return await readFile(filePath);
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as NodeJS.ErrnoException).code === 'ENOENT'
+      ) {
+        throw new StorageNotFoundError(key, error);
+      }
+      throw toStorageError(error, `Failed to read storage object: ${key}`);
+    }
   }
 
   downloadStream(key: string): Promise<ReadableStreamLike<Uint8Array>> {
@@ -83,9 +95,9 @@ export class LocalStorageProvider implements StorageProvider {
         error != null &&
         typeof error === 'object' &&
         'code' in error &&
-        error.code !== 'ENOENT'
+        (error as NodeJS.ErrnoException).code !== 'ENOENT'
       ) {
-        throw error;
+        throw toStorageError(error, 'Failed to delete storage object');
       }
     }
   }

@@ -11,7 +11,6 @@ import { useMutation, useQuery } from '@bslt/react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { UseQueryResult } from '@bslt/react';
 import type {
   CreateFeatureFlagRequest,
   FeatureFlagDeleteResponse,
@@ -19,6 +18,7 @@ import type {
   FeatureFlagResponse,
   UpdateFeatureFlagRequest,
 } from '../services/adminApi';
+import type { UseQueryResult } from '@bslt/react';
 
 // ============================================================================
 // List Feature Flags

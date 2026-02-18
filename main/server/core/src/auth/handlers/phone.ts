@@ -15,8 +15,8 @@ import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
 import { sendSms2faCode, verifySms2faCode } from '../sms-2fa/service';
 import { createErrorMapperLogger, type AppContext, type RequestWithCookies } from '../types';
 
-import type { HttpErrorResponse } from '@bslt/shared';
 import type { SetPhoneRequest, VerifyPhoneRequest } from '../sms-2fa/types';
+import type { HttpErrorResponse } from '@bslt/shared';
 
 // ============================================================================
 // Phone Regex (E.164-compatible, loose)

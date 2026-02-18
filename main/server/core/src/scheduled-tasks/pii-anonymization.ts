@@ -13,8 +13,8 @@ import { createHash } from 'node:crypto';
 
 import { MS_PER_DAY } from '@bslt/shared';
 
-import type { Repositories } from '../../../db/src';
 import type { ScheduledTaskLogger } from './types';
+import type { Repositories } from '../../../db/src';
 
 /**
  * Anonymize PII for users deleted longer than the grace period

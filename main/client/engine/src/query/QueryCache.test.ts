@@ -1220,7 +1220,7 @@ describe('QueryCache', () => {
       cache.subscribe(key, subscriber);
 
       for (let i = 0; i < 100; i++) {
-        cache.setQueryData(key, { name: `User ${i}` });
+        cache.setQueryData(key, { name: `User ${i.toString()}` });
       }
 
       expect(subscriber).toHaveBeenCalledTimes(100);

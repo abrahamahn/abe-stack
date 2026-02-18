@@ -24,8 +24,8 @@ import {
   handleAdminUpdatePlan,
 } from './billingHandlers';
 
-import type { Plan as DbPlan } from '../../../db/src';
 import type { AdminAppContext, AdminRequest } from './types';
+import type { Plan as DbPlan } from '../../../db/src';
 
 // ============================================================================
 // Mocks
@@ -156,6 +156,11 @@ function createMockContext(
     queue: {},
     write: {},
     search: {},
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
+    },
   } as AdminAppContext;
 }
 

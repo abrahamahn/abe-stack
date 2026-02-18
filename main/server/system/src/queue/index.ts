@@ -24,7 +24,7 @@ export { createWriteService, WriteService, type WriteServiceOptions } from './wr
 // Memory Store
 // ============================================================================
 
-export { createMemoryQueueStore, MemoryQueueStore } from './memory-store';
+export { createMemoryQueueStore, MemoryQueueStore } from './memory.store';
 
 // ============================================================================
 // Queue Types

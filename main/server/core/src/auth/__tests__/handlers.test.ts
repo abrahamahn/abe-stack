@@ -55,13 +55,13 @@ function createMockDb(): RawDb {
     queryOne: vi.fn().mockResolvedValue(null),
     execute: vi.fn().mockResolvedValue(0),
     raw: vi.fn().mockResolvedValue([]),
-    transaction: vi.fn((cb) =>
+    transaction: vi.fn(<T>(cb: (tx: RawDb) => Promise<T>) =>
       cb({
         query: vi.fn().mockResolvedValue([]),
         queryOne: vi.fn().mockResolvedValue(null),
         execute: vi.fn().mockResolvedValue(0),
         raw: vi.fn().mockResolvedValue([]),
-      }),
+      } as unknown as RawDb),
     ),
   } as unknown as RawDb;
 }
@@ -964,7 +964,7 @@ describe('verifyToken (from utils/jwt)', () => {
       throw new Error('Invalid token');
     });
 
-    expect(() => verifyTokenSpy('invalid-token', 'secret-key-32-characters-long!!')).toThrow(
+    expect(() => { verifyTokenSpy('invalid-token', 'secret-key-32-characters-long!!'); }).toThrow(
       'Invalid token',
     );
   });

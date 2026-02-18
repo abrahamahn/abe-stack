@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadBillingConfig, validateBillingConfig } from './billing';
 
-import type { FullEnv } from '@bslt/shared/config';
+import type { BillingConfig, FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with billing-related defaults (as applied by Zod schema).
@@ -63,7 +63,7 @@ describe('Billing Configuration', () => {
       BILLING_CHECKOUT_CANCEL_URL: 'https://example.com/cancel',
     });
 
-    const config = loadBillingConfig(env);
+    const config = loadBillingConfig(env, 'http://localhost:5173');
 
     expect(config.enabled).toBe(true);
     expect(config.provider).toBe('stripe');
@@ -82,7 +82,7 @@ describe('Billing Configuration', () => {
       PAYPAL_MODE: 'production',
     });
 
-    const config = loadBillingConfig(env);
+    const config = loadBillingConfig(env, 'http://localhost:5173');
 
     expect(config.enabled).toBe(true);
     expect(config.provider).toBe('paypal');
@@ -94,6 +94,7 @@ describe('Billing Configuration', () => {
         PAYPAL_CLIENT_SECRET: 'paypal-secret',
         PAYPAL_MODE: 'sandbox',
       }),
+      'http://localhost:5173',
     );
     expect(devConfig.paypal.sandbox).toBe(true);
   });
@@ -107,7 +108,7 @@ describe('Billing Configuration', () => {
       BILLING_PROVIDER: 'paypal',
     });
 
-    const config = loadBillingConfig(env);
+    const config = loadBillingConfig(env, 'http://localhost:5173');
     expect(config.provider).toBe('paypal');
   });
 
@@ -115,10 +116,9 @@ describe('Billing Configuration', () => {
     const env = createBaseEnv({
       STRIPE_SECRET_KEY: 'sk_test_123',
       STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-      APP_URL: 'https://myapp.com/',
     });
 
-    const config = loadBillingConfig(env);
+    const config = loadBillingConfig(env, 'https://myapp.com/');
     expect(config.urls.portalReturnUrl).toBe('https://myapp.com/settings/billing');
   });
 
@@ -127,36 +127,34 @@ describe('Billing Configuration', () => {
       const config = {
         provider: 'stripe',
         stripe: { secretKey: '', publishableKey: '' },
-      } as any;
+      } as unknown as BillingConfig;
 
-      const errors = validateBillingConfig(config);
+      const errors = validateBillingConfig(config, false);
       expect(errors).toContain('STRIPE_SECRET_KEY missing');
       expect(errors).toContain('STRIPE_PUBLISHABLE_KEY missing');
     });
 
     it('requires webhook secrets in production for security', () => {
-      vi.stubEnv('NODE_ENV', 'production');
-
       const config = {
         provider: 'stripe',
         stripe: { secretKey: 'sk_prod', publishableKey: 'pk_prod', webhookSecret: '' },
-      } as any;
+      } as unknown as BillingConfig;
 
-      const errors = validateBillingConfig(config);
+      const errors = validateBillingConfig(config, true);
       expect(errors).toContain('STRIPE_WEBHOOK_SECRET is mandatory in production');
     });
 
     it('throws when loading configuration with missing mandatory credentials', () => {
       // In production mode, explicit provider with incomplete credentials should throw
-      vi.stubEnv('NODE_ENV', 'production');
-
       expect(() => {
         loadBillingConfig(
           createBaseEnv({
+            NODE_ENV: 'production',
             BILLING_PROVIDER: 'stripe',
             STRIPE_SECRET_KEY: 'sk_test_123',
             // Missing publishable key
           }),
+          'https://example.com',
         );
       }).toThrow(/STRIPE_PUBLISHABLE_KEY missing/);
     });

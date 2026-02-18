@@ -391,7 +391,7 @@ describe('pickAvailablePort', () => {
 
     try {
       await expect(pickAvailablePort([port1, port2])).rejects.toThrow(
-        `No available ports found in list: ${port1}, ${port2}`,
+        `No available ports found in list: ${String(port1)}, ${String(port2)}`,
       );
     } finally {
       await new Promise<void>((resolve) => {

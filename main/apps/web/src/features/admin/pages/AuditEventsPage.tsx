@@ -27,8 +27,8 @@ import { useCallback, useState } from 'react';
 
 import { useAuditEvents } from '../hooks/useAuditEvents';
 
-import type { ReactElement } from 'react';
 import type { AuditEventLocal, AuditEventsFilterLocal } from '../services/adminApi';
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Constants

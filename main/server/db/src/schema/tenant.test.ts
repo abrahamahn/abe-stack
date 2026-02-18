@@ -341,6 +341,7 @@ describe('Tenant Schema - Tenant Type', () => {
       ownerId: 'user-456',
       isActive: true,
       metadata: { industry: 'technology', size: 'large' },
+      allowedEmailDomains: [],
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-02'),
     };
@@ -360,6 +361,7 @@ describe('Tenant Schema - Tenant Type', () => {
       ownerId: 'user-456',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -376,6 +378,7 @@ describe('Tenant Schema - Tenant Type', () => {
       ownerId: 'user-456',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -401,6 +404,7 @@ describe('Tenant Schema - Tenant Type', () => {
       ownerId: 'user-456',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -422,6 +426,7 @@ describe('Tenant Schema - Tenant Type', () => {
         nestedObject: { key: 'value' },
         arrayField: [1, 2, 3],
       },
+      allowedEmailDomains: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -1007,6 +1012,7 @@ describe('Tenant Schema - Type Consistency', () => {
       id: 'tenant-123',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       logoUrl: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -1241,6 +1247,7 @@ describe('Tenant Schema - Edge Cases', () => {
         ownerId: 'user-456',
         isActive: false,
         metadata: {},
+        allowedEmailDomains: [],
         createdAt: pastDate,
         updatedAt: pastDate,
       };
@@ -1281,6 +1288,7 @@ describe('Tenant Schema - Edge Cases', () => {
         ownerId: 'user-456',
         isActive: true,
         metadata: {},
+        allowedEmailDomains: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -1305,6 +1313,7 @@ describe('Tenant Schema - Edge Cases', () => {
           },
           mixed: ['string', 123, true, null],
         },
+        allowedEmailDomains: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -1354,6 +1363,7 @@ describe('Tenant Schema - Integration Scenarios', () => {
       ownerId: newTenant.ownerId,
       isActive: newTenant.isActive ?? true,
       metadata: newTenant.metadata ?? {},
+      allowedEmailDomains: newTenant.allowedEmailDomains ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -1457,6 +1467,7 @@ describe('Tenant Schema - Integration Scenarios', () => {
       ownerId: 'user-456',
       isActive: true,
       metadata: {},
+      allowedEmailDomains: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };

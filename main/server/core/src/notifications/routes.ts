@@ -36,6 +36,7 @@ import {
   handleUpdatePreferences,
 } from './handlers';
 
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   BaseMarkAsReadRequest,
   EmptyBody,
@@ -45,7 +46,6 @@ import type {
   UpdatePreferencesRequest,
 } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Local Types

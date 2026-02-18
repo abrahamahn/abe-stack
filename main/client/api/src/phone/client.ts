@@ -19,6 +19,7 @@ import {
 
 import { apiRequest, createRequestFactory } from '../utils';
 
+import type { BaseClientConfig } from '../utils';
 import type {
   AuthResponse,
   RemovePhoneResponse,
@@ -26,7 +27,6 @@ import type {
   TotpVerifyResponse,
   VerifyPhoneResponse,
 } from '@bslt/shared';
-import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types

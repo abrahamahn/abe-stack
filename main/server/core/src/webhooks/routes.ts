@@ -27,13 +27,13 @@ import {
   handleUpdateWebhook,
 } from './handlers';
 
-import type { FastifyRequest } from 'fastify';
 import type {
   CreateWebhookData,
   UpdateWebhookData,
   WebhooksModuleDeps,
   WebhooksRequest,
 } from './types';
+import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge

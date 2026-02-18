@@ -20,7 +20,7 @@ vi.mock('@bslt/shared', async () => {
   return {
     ...actual,
     addAuthHeader: vi.fn((headers: Headers, token: string | null) => {
-      if (token !== null && token !== undefined && token !== '') {
+      if (token !== null && token !== '') {
         headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;

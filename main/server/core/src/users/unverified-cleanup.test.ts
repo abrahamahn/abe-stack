@@ -11,8 +11,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupUnverifiedUsers } from './unverified-cleanup';
 
-import type { ServerLogger } from '@bslt/shared';
 import type { DbClient, Repositories } from '../../../db/src';
+import type { ServerLogger } from '@bslt/shared';
 
 // ============================================================================
 // Mock Factories

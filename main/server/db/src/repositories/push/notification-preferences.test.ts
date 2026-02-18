@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createNotificationPreferenceRepository } from './notification-preferences';
 
 import type { RawDb } from '../../client';
+import type { TypePreferences } from '../../schema/push';
 
 // ============================================================================
 // Mock Database
@@ -25,6 +26,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -38,7 +40,7 @@ const mockQuietHours = {
   timezone: 'UTC',
 };
 
-const mockNotificationTypes = {
+const mockNotificationTypes: TypePreferences = {
   system: { enabled: true, channels: ['push', 'email', 'in_app'] },
   security: { enabled: true, channels: ['push', 'email', 'in_app'] },
   marketing: { enabled: false, channels: ['email'] },
@@ -291,7 +293,7 @@ describe('createNotificationPreferencesRepository', () => {
     });
 
     it('should handle upsert with only types change', async () => {
-      const newTypes = {
+      const newTypes: TypePreferences = {
         ...mockNotificationTypes,
         marketing: { enabled: true, channels: ['email', 'push'] },
       };
@@ -346,7 +348,7 @@ describe('createNotificationPreferencesRepository', () => {
       const repo = createNotificationPreferenceRepository(mockDb);
       const result = await repo.findByUserId('usr-123');
 
-      expect(result?.quietHours.startHour).toBeGreaterThan(result?.quietHours.endHour);
+      expect(result?.quietHours.startHour ?? 0).toBeGreaterThan(result?.quietHours.endHour ?? 0);
     });
 
     it('should handle 24-hour quiet hours', async () => {
@@ -387,8 +389,9 @@ describe('createNotificationPreferencesRepository', () => {
       const repo = createNotificationPreferenceRepository(mockDb);
       const result = await repo.findByUserId('usr-123');
 
-      const types = result !== null && result !== undefined ? result.types : {};
-      expect(Object.values(types ?? {}).every((t: { enabled: boolean }) => !t.enabled)).toBe(true);
+      expect(result).not.toBeNull();
+      const types = result?.types;
+      expect(types && Object.values(types).every((t) => !t.enabled)).toBe(true);
     });
 
     it('should handle single channel per type', async () => {

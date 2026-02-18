@@ -23,7 +23,9 @@ vi.mock('../service', () => ({
 }));
 
 vi.mock('@bslt/db', () => ({
-  withTransaction: vi.fn((_db, callback) => callback(_db)),
+  withTransaction: vi.fn(
+    (_db: unknown, callback: (_db: unknown) => Promise<unknown>) => callback(_db),
+  ),
 }));
 
 vi.mock('@bslt/shared', async (importOriginal) => {
@@ -43,8 +45,8 @@ vi.mock('@bslt/shared', async (importOriginal) => {
 
 import { handleWrite, RecordNotFoundError, VersionConflictError } from './sync';
 
-import type { RealtimeTransaction, RecordPointer } from '@bslt/shared';
 import type { RealtimeModuleDeps, RealtimeRequest } from '../types';
+import type { RealtimeTransaction, RecordPointer } from '@bslt/shared';
 
 // ============================================================================
 // Test Helpers
@@ -93,7 +95,7 @@ function createWriteTransaction(
   operations: RealtimeTransaction['operations'],
 ): RealtimeTransaction {
   return {
-    txId: `tx-${Date.now()}`,
+    txId: `tx-${String(Date.now())}`,
     authorId,
     clientTimestamp: Date.now(),
     operations,

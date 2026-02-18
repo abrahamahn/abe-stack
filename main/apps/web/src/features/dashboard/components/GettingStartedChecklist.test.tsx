@@ -530,8 +530,8 @@ describe('GettingStartedChecklist', () => {
 
     it('should handle many workspaces (100+)', () => {
       const manyWorkspaces = Array.from({ length: 100 }, (_, i) => ({
-        id: `ws-${i}`,
-        name: `Workspace ${i}`,
+        id: `ws-${String(i)}`,
+        name: `Workspace ${String(i)}`,
       }));
 
       mockUseWorkspaces.mockReturnValue({

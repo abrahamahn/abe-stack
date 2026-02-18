@@ -248,9 +248,9 @@ describe('FeatureFlag Type Structure', () => {
         updatedAt: new Date(),
       };
 
-      expect(flag.metadata.category).toBe('ui');
-      expect(flag.metadata.priority).toBe(5);
-      expect(Array.isArray(flag.metadata.tags)).toBe(true);
+      expect(flag.metadata['category']).toBe('ui');
+      expect(flag.metadata['priority']).toBe(5);
+      expect(Array.isArray(flag.metadata['tags'])).toBe(true);
     });
 
     test('should have Date types for timestamp fields', () => {
@@ -914,9 +914,9 @@ describe('Edge Cases', () => {
         updatedAt: new Date(),
       };
 
-      expect(flag.metadata.category).toBe('billing');
-      expect(Array.isArray(flag.metadata.tags)).toBe(true);
-      expect(typeof flag.metadata.rollout).toBe('object');
+      expect(flag.metadata['category']).toBe('billing');
+      expect(Array.isArray(flag.metadata['tags'])).toBe(true);
+      expect(typeof flag.metadata['rollout']).toBe('object');
     });
   });
 

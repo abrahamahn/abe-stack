@@ -41,9 +41,7 @@ export function applySecurityHeaders(res: FastifyReply, options: SecurityHeaderO
   const headers = generateSecurityHeaders(options);
 
   for (const [key, value] of Object.entries(headers)) {
-    if (value !== undefined) {
-      res.header(key, value);
-    }
+    res.header(key, value);
   }
 
   // Remove server information (don't advertise technology stack)

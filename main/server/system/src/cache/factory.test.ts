@@ -91,12 +91,10 @@ describe('cache factory', () => {
   });
 
   describe('createMemoryCache', () => {
-    let cache: MemoryCacheProvider;
+    let cache: MemoryCacheProvider | undefined;
 
     afterEach(async () => {
-      if (cache != null) {
-        await cache.close();
-      }
+      await cache?.close();
     });
 
     test('should create memory cache with defaults', () => {
@@ -111,7 +109,7 @@ describe('cache factory', () => {
 
       // Fill cache to verify maxSize
       for (let i = 0; i < 10; i++) {
-        await cache.set(`key${i}`, `value${i}`);
+        await cache.set(`key${String(i)}`, `value${String(i)}`);
       }
 
       const stats = cache.getStats();

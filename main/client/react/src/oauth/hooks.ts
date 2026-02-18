@@ -8,14 +8,14 @@
  * - getOAuthLoginUrl: Pure function to build OAuth login URL
  */
 
-import { createApiClient } from '@bslt/api';
+import { createApiClient } from '@bslt/client-engine';
 import { API_PREFIX, trimTrailingSlashes } from '@bslt/shared';
 import { useCallback, useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { ApiClientConfig } from '@bslt/api';
+import type { ApiClientConfig } from '@bslt/client-engine';
 import type { OAuthConnection, OAuthProvider } from '@bslt/shared';
 
 // ============================================================================
@@ -61,7 +61,7 @@ export function useEnabledOAuthProviders(
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     providers: query.data?.providers ?? [],
@@ -115,7 +115,7 @@ export function useOAuthConnections(clientConfig: ApiClientConfig): OAuthConnect
     async (provider: OAuthProvider): Promise<void> => {
       await unlinkMutation.mutateAsync(provider);
     },
-    [unlinkMutation.mutateAsync],
+    [unlinkMutation],
   );
 
   const getLinkUrl = useCallback(
@@ -127,7 +127,7 @@ export function useOAuthConnections(clientConfig: ApiClientConfig): OAuthConnect
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     connections: query.data?.connections ?? [],

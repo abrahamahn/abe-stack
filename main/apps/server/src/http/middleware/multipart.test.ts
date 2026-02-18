@@ -55,8 +55,7 @@ describe('multipart middleware', () => {
 
     registerMultipartFormParser(server);
     expect(parser).not.toBeNull();
-    if (parser === null) throw new Error('Parser was not registered');
-    const multipartParser: MultipartParser = parser;
+    const multipartParser = parser as unknown as MultipartParser;
 
     const body = buildMultipartBody('x-boundary');
     let parsedBody: unknown = null;

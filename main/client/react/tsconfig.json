@@ -2,7 +2,6 @@
   "extends": "../../../config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "types": ["vite/client"],
     "rootDir": "./src",
     "baseUrl": "./",
     "composite": true,
@@ -23,7 +22,16 @@
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.react.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "vitest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/__tests__/**"
+  ],
   "references": [
     {
       "path": "../engine"

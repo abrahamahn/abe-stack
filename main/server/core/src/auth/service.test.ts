@@ -3,7 +3,7 @@
 import { canonicalizeEmail, validatePassword } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { toCamelCase, type DbClient, type Repositories, type User } from '../../../db/src';
+import { toCamelCase, type DbClient, type LegalDocument, type RawDb, type Repositories, type User } from '../../../db/src';
 import { createTenant } from '../tenants';
 
 import {
@@ -38,8 +38,8 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './index';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -87,7 +87,7 @@ vi.mock('@bslt/db', () => ({
 }));
 
 vi.mock('@bslt/db', () => ({
-  withTransaction: vi.fn((db, callback) => callback(db)),
+  withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
   toCamelCase: vi.fn(),
   USERS_TABLE: 'users',
   USER_COLUMNS: [],
@@ -400,7 +400,7 @@ describe('registerUser', () => {
       vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email, username }]);
 
       const tosDoc = { id: 'tos-doc-id', type: 'terms-of-service', version: 1 };
-      vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc as any);
+      vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc as unknown as LegalDocument);
 
       await registerUser(
         db,

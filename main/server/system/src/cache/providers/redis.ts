@@ -12,7 +12,7 @@ import {
   CacheConnectionError,
   CacheDeserializationError,
   CacheSerializationError,
-} from '../errors';
+} from '@bslt/shared';
 
 import type {
   CacheDeleteOptions,

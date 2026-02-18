@@ -36,8 +36,8 @@ type DialogContextValue = {
   setLabelledBy: (id?: string) => void;
   /** Registers the aria-describedby ID */
   setDescribedBy: (id?: string) => void;
-  /** Ref to the trigger button for focus restoration */
-  triggerRef: RefObject<HTMLButtonElement | null>;
+  /** Ref to the trigger element for focus restoration */
+  triggerRef: RefObject<HTMLElement | null>;
 };
 
 const DialogContext = createContext<DialogContextValue | null>(null);
@@ -95,7 +95,7 @@ export const DialogRoot = ({
 
   const [labelledBy, setLabelledBy] = useState<string | undefined>(undefined);
   const [describedBy, setDescribedBy] = useState<string | undefined>(undefined);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   const setOpen = useCallback(
     (next: boolean): void => {
@@ -103,14 +103,9 @@ export const DialogRoot = ({
     },
     [setCurrentOpen],
   );
-  const [mounted, setMounted] = useState(false);
-
-  useEffect((): (() => void) => {
-    setMounted(true);
-    return (): void => {
-      setMounted(false);
-    };
-  }, []);
+  // Portals require the DOM to be available. This ref tracks client-side mounting
+  // by checking document existence synchronously, avoiding an extra render cycle.
+  const mounted = typeof document !== 'undefined';
 
   const handleOverlayClick = useCallback((): void => {
     setOpen(false);
@@ -172,7 +167,7 @@ export const DialogTrigger = (props: DialogTriggerProps): ReactElement => {
   const { className = '', type = 'button', ...rest } = props;
   return (
     <Button
-      ref={triggerRef as any}
+      ref={triggerRef}
       type={type}
       className={className}
       onClick={(e) => {

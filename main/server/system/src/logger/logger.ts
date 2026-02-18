@@ -12,10 +12,22 @@ import {
   createRequestLogger as createKernelRequestLogger,
 } from '@bslt/shared';
 
-import type { Logger, RequestContext } from '@bslt/shared';
+import type { BaseLogger, Logger, LogRequestContext } from '@bslt/shared';
 import type { FastifyBaseLogger } from 'fastify';
 
 export type { Logger };
+
+/**
+ * Adapts a Fastify/pino logger to the shared BaseLogger contract.
+ *
+ * FastifyBaseLogger is structurally identical to BaseLogger (both follow
+ * pino's data-first, message-second calling convention). This explicit
+ * adapter documents the compatibility contract and replaces the
+ * `as unknown as BaseLogger` double-cast anti-pattern.
+ */
+function adaptFastifyLogger(fl: FastifyBaseLogger): BaseLogger {
+  return fl as BaseLogger;
+}
 
 /**
  * Create a logger that wraps Fastify's pino logger.
@@ -29,12 +41,7 @@ export function createLogger(
   baseLogger: FastifyBaseLogger,
   context?: Record<string, unknown>,
 ): Logger {
-  // FastifyBaseLogger structurally satisfies BaseLogger interface
-  // The kernel logger returns utils/Logger which satisfies contracts/Logger
-  return createKernelLogger(
-    baseLogger as unknown as import('@bslt/shared').BaseLogger,
-    context,
-  );
+  return createKernelLogger(adaptFastifyLogger(baseLogger), context);
 }
 
 /**
@@ -46,12 +53,7 @@ export function createLogger(
  */
 export function createRequestLogger(
   baseLogger: FastifyBaseLogger,
-  requestContext: RequestContext,
+  requestContext: LogRequestContext,
 ): Logger {
-  // FastifyBaseLogger structurally satisfies BaseLogger interface
-  // The kernel logger returns utils/Logger which satisfies contracts/Logger
-  return createKernelRequestLogger(
-    baseLogger as unknown as import('@bslt/shared').BaseLogger,
-    requestContext,
-  );
+  return createKernelRequestLogger(adaptFastifyLogger(baseLogger), requestContext);
 }

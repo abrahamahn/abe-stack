@@ -91,9 +91,10 @@ describe('useAuth', () => {
   };
 
   const createWrapper = (env: ClientEnvironment): React.FC<{ children: React.ReactNode }> => {
-    return ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <ClientEnvironmentProvider value={env}>{children}</ClientEnvironmentProvider>
-    );
+    function Wrapper({ children }: { children: React.ReactNode }): React.ReactElement {
+      return <ClientEnvironmentProvider value={env}>{children}</ClientEnvironmentProvider>;
+    }
+    return Wrapper;
   };
 
   it('should return auth state when used within ClientEnvironmentProvider', () => {

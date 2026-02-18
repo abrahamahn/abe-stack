@@ -1,6 +1,6 @@
 // main/client/ui/src/elements/PasswordInput.tsx
 import { estimatePasswordStrength, getStrengthLabel } from '@bslt/shared';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useId, useState } from 'react';
 
 import { Button } from './Button';
 import { Text } from './Text';
@@ -50,7 +50,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
   const [isVisible, setIsVisible] = useState(false);
   const [internalValue, setInternalValue] = useState('');
 
-  const inputId = id ?? `password-${Math.random().toString(36).slice(2, 7)}`;
+  const generatedId = useId();
+  const inputId = id ?? `password-${generatedId}`;
   const descId = description != null && description !== '' ? `${inputId}-desc` : undefined;
   const errorId = error != null && error !== '' ? `${inputId}-err` : undefined;
 

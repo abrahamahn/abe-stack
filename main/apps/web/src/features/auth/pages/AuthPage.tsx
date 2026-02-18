@@ -56,7 +56,9 @@ export const AuthPage = (): ReactElement => {
       return validModes.includes(value);
     };
     if (isValidMode(modeParam)) {
-      setMode(modeParam);
+      queueMicrotask(() => {
+        setMode(modeParam);
+      });
     }
   }, [searchParams]);
 

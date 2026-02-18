@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -221,8 +222,8 @@ describe('createMembershipRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].tenantId).toBe('tenant-123');
-      expect(result[1].tenantId).toBe('tenant-123');
+      expect(result[0]?.tenantId).toBe('tenant-123');
+      expect(result[1]?.tenantId).toBe('tenant-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -279,7 +280,7 @@ describe('createMembershipRepository', () => {
       const result = await repo.findByTenantId('tenant-123');
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('mem-123');
+      expect(result[0]?.id).toBe('mem-123');
     });
   });
 
@@ -295,8 +296,8 @@ describe('createMembershipRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -333,8 +334,8 @@ describe('createMembershipRepository', () => {
     it('should handle user with memberships in multiple tenants', async () => {
       const multiTenantMemberships = Array.from({ length: 5 }, (_, i) => ({
         ...mockMembership,
-        id: `mem-${i}`,
-        tenant_id: `tenant-${i}`,
+        id: `mem-${String(i)}`,
+        tenant_id: `tenant-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(multiTenantMemberships);
 
@@ -543,8 +544,8 @@ describe('createMembershipRepository', () => {
     it('should handle concurrent memberships', async () => {
       const concurrentMemberships = Array.from({ length: 10 }, (_, i) => ({
         ...mockMembership,
-        id: `mem-${i}`,
-        user_id: `usr-${i}`,
+        id: `mem-${String(i)}`,
+        user_id: `usr-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(concurrentMemberships);
 
@@ -586,8 +587,8 @@ describe('createMembershipRepository', () => {
     it('should handle large result sets for popular tenants', async () => {
       const largeMembershipSet = Array.from({ length: 100 }, (_, i) => ({
         ...mockMembership,
-        id: `mem-${i}`,
-        user_id: `usr-${i}`,
+        id: `mem-${String(i)}`,
+        user_id: `usr-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(largeMembershipSet);
 
@@ -600,8 +601,8 @@ describe('createMembershipRepository', () => {
     it('should handle user belonging to many tenants', async () => {
       const manyTenantMemberships = Array.from({ length: 50 }, (_, i) => ({
         ...mockMembership,
-        id: `mem-${i}`,
-        tenant_id: `tenant-${i}`,
+        id: `mem-${String(i)}`,
+        tenant_id: `tenant-${String(i)}`,
         user_id: 'usr-power-user',
       }));
       vi.mocked(mockDb.query).mockResolvedValue(manyTenantMemberships);

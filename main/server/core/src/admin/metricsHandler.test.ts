@@ -8,8 +8,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleGetMetrics } from './metricsHandler';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AdminAppContext } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Mocks

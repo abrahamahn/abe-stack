@@ -27,6 +27,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -99,8 +100,8 @@ describe('createActivityRepository', () => {
       const result = await repo.findRecent(10);
 
       expect(result).toHaveLength(2);
-      expect(result[0].action).toBe('created');
-      expect(result[1].action).toBe('updated');
+      expect(result[0]?.action).toBe('created');
+      expect(result[1]?.action).toBe('updated');
     });
 
     it('should return empty array when no activities exist', async () => {
@@ -147,7 +148,7 @@ describe('createActivityRepository', () => {
       const result = await repo.findByActorId('user-001');
 
       expect(result).toHaveLength(1);
-      expect(result[0].actorId).toBe('user-001');
+      expect(result[0]?.actorId).toBe('user-001');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('actor_id'),
@@ -173,7 +174,7 @@ describe('createActivityRepository', () => {
       const result = await repo.findByTenantId('tenant-001');
 
       expect(result).toHaveLength(1);
-      expect(result[0].tenantId).toBe('tenant-001');
+      expect(result[0]?.tenantId).toBe('tenant-001');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('tenant_id'),
@@ -190,8 +191,8 @@ describe('createActivityRepository', () => {
       const result = await repo.findByResource('project', 'proj-001');
 
       expect(result).toHaveLength(1);
-      expect(result[0].resourceType).toBe('project');
-      expect(result[0].resourceId).toBe('proj-001');
+      expect(result[0]?.resourceType).toBe('project');
+      expect(result[0]?.resourceId).toBe('proj-001');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('resource_type'),

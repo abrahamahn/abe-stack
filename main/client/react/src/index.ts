@@ -5,54 +5,35 @@
 // Hooks
 // ============================================================================
 
-export { useMediaQuery } from './hooks/useMediaQuery';
-export { useDisclosure } from './hooks/useDisclosure';
-export { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 export {
+  useMediaQuery,
+  useDisclosure,
+  useKeyboardShortcuts,
   useKeyboardShortcut,
   useKeyBindings,
   parseKeyBinding,
   formatKeyBinding,
-} from './hooks/useKeyboardShortcut';
-export type {
-  KeyModifiers,
-  KeyboardShortcutOptions,
-  ParsedKeyBinding,
-} from './hooks/useKeyboardShortcut';
-export {
   useUndoRedoShortcuts,
   getUndoShortcutText,
   getRedoShortcutText,
   getUndoRedoShortcutTexts,
-} from './hooks/useUndoRedoShortcuts';
-export type {
-  UndoRedoKeyBindings,
-  UndoRedoCallbacks,
-  UseUndoRedoShortcutsOptions,
-  UseUndoRedoShortcutsResult,
-} from './hooks/useUndoRedoShortcuts';
-export { useClickOutside } from './hooks/useClickOutside';
-export { useControllableState } from './hooks/useControllableState';
-export { useDebounce } from './hooks/useDebounce';
-export { useFormState } from './hooks/useFormState';
-export type { FormState } from './hooks/useFormState';
-export { useLocalStorage } from './hooks/useLocalStorage';
-export { useLocalStorageValue } from './hooks/useLocalStorageValue';
-export { useResendCooldown } from './hooks/useResendCooldown';
-export type { UseResendCooldownReturn } from './hooks/useResendCooldown';
-export { useWindowSize } from './hooks/useWindowSize';
-export { useOnScreen } from './hooks/useOnScreen';
-export { usePanelConfig } from './hooks/usePanelConfig';
-export { useThemeMode } from './hooks/useThemeMode';
-export { useDensity } from './hooks/useDensity';
-export type { UseDensityReturn } from './hooks/useDensity';
-export { useContrast } from './hooks/useContrast';
-export type { UseContrastReturn } from './hooks/useContrast';
-export { useCopyToClipboard } from './hooks/useCopyToClipboard';
-export { useHistoryNav, HistoryProvider } from './hooks/useHistoryNav';
-export type { HistoryContextValue } from './hooks/useHistoryNav';
-export { useDelayedFlag } from './hooks/useDelayedFlag';
-export {
+  useClickOutside,
+  useControllableState,
+  useDebounce,
+  useFormState,
+  useLocalStorage,
+  useLocalStorageValue,
+  useResendCooldown,
+  useWindowSize,
+  useOnScreen,
+  usePanelConfig,
+  useThemeMode,
+  useDensity,
+  useContrast,
+  useCopyToClipboard,
+  useHistoryNav,
+  HistoryProvider,
+  useDelayedFlag,
   deepEqual,
   shallowEqual,
   useDeepMemo,
@@ -69,41 +50,50 @@ export {
   useDebouncedState,
   useThrottle,
   useDebounce as useOptimizedDebounce,
-} from './hooks/useOptimizedMemo';
-export { useVirtualScroll, VirtualScrollList } from './hooks/useVirtualScroll';
+  useVirtualScroll,
+  VirtualScrollList,
+  usePaginatedQuery,
+  useOffsetPaginatedQuery,
+  useAuthModeNavigation,
+  useSidePeek,
+  useFocusReturn,
+  useRouteFocusAnnounce,
+  useUndoableMutation,
+  useUndoRedoController,
+} from './hooks';
 export type {
+  KeyModifiers,
+  KeyboardShortcutOptions,
+  ParsedKeyBinding,
+  UndoRedoKeyBindings,
+  UndoRedoCallbacks,
+  UseUndoRedoShortcutsOptions,
+  UseUndoRedoShortcutsResult,
+  FormState,
+  UseResendCooldownReturn,
+  UseDensityReturn,
+  UseContrastReturn,
+  HistoryContextValue,
   VirtualScrollOptions,
   VirtualScrollItem,
   VirtualScrollResult,
   VirtualScrollListProps,
-} from './hooks/useVirtualScroll';
-export { usePaginatedQuery, useOffsetPaginatedQuery } from './hooks/usePaginatedQuery';
-export type {
   UsePaginatedQueryOptions,
   UsePaginatedQueryResult,
   UseOffsetPaginatedQueryOptions,
   UseOffsetPaginatedQueryResult,
-} from './hooks/usePaginatedQuery';
-export { useAuthModeNavigation } from './hooks/useAuthModeNavigation';
-export type {
   AuthMode,
   AuthModeNavigation,
   AuthModeNavigationOptions,
-} from './hooks/useAuthModeNavigation';
-export { useSidePeek } from './hooks/useSidePeek';
-export type { UseSidePeekResult } from './hooks/useSidePeek';
-export { useFocusReturn } from './hooks/useFocusReturn';
-export type { UseFocusReturnOptions, UseFocusReturnResult } from './hooks/useFocusReturn';
-export { useRouteFocusAnnounce } from './hooks/useRouteFocusAnnounce';
-export type { UseRouteFocusAnnounceOptions } from './hooks/useRouteFocusAnnounce';
-export { useUndoableMutation } from './hooks/useUndoableMutation';
-export type { UseUndoableMutationOptions } from './hooks/useUndoableMutation';
-export { useUndoRedoController } from './hooks/useUndoRedoController';
-export type {
+  UseSidePeekResult,
+  UseFocusReturnOptions,
+  UseFocusReturnResult,
+  UseRouteFocusAnnounceOptions,
+  UseUndoableMutationOptions,
   UndoRedoHandler,
   UseUndoRedoControllerOptions,
   UseUndoRedoControllerResult,
-} from './hooks/useUndoRedoController';
+} from './hooks';
 
 // ============================================================================
 // Providers
@@ -118,8 +108,8 @@ export {
   Memoized,
   SelectiveMemo,
   useRenderPerformance,
-} from './providers/OptimizedProvider';
-export type { ThemeContextValue, UserState, UserAction } from './providers/OptimizedProvider';
+} from './providers';
+export type { ThemeContextValue, UserState, UserAction } from './providers';
 
 // ============================================================================
 // Router
@@ -132,7 +122,17 @@ export {
   RouterContext,
   useHistory,
   useNavigationType,
-} from './router/context';
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  Link,
+  Navigate,
+  Outlet,
+  OutletProvider,
+  Route,
+  Routes,
+  useParams,
+} from './router';
 export type {
   History,
   MemoryRouterProps,
@@ -143,71 +143,51 @@ export type {
   RouterLocation,
   RouterProps,
   RouterState,
-} from './router/context';
-export { useLocation, useNavigate, useSearchParams } from './router/hooks';
-export {
-  Link,
-  Navigate,
-  Outlet,
-  OutletProvider,
-  Route,
-  Routes,
-  useParams,
-} from './router/components';
-export type {
   LinkProps,
   NavigateProps,
   OutletProviderProps,
   RouteProps,
   RoutesProps,
-} from './router/components';
+} from './router';
 
 // ============================================================================
 // Stores
 // ============================================================================
 
-export { createStore } from './stores/createStore';
-export type { StoreApi, UseBoundStore } from './stores/createStore';
-export { toastStore } from './stores/toastStore';
-export type { ToastMessage, ToastTone } from './stores/toastStore';
-export { createUndoRedoStore, useUndoRedoStore } from './stores/undoRedoStore';
-export type { UndoRedoState } from './stores/undoRedoStore';
+export { createStore, toastStore, createUndoRedoStore, useUndoRedoStore } from './stores';
+export type { StoreApi, UseBoundStore, ToastMessage, ToastTone, UndoRedoState } from './stores';
 
 // ============================================================================
 // Components
 // ============================================================================
 
-export { LiveRegion, useAnnounce } from './components/LiveRegion';
-export type {
-  AnnouncePoliteness,
-  LiveRegionProps,
-  UseAnnounceResult,
-} from './components/LiveRegion';
+export { LiveRegion, useAnnounce } from './components';
+export type { AnnouncePoliteness, LiveRegionProps, UseAnnounceResult } from './components';
 
 // ============================================================================
 // Utils
 // ============================================================================
 
-export { createFormHandler } from './utils/createFormHandler';
-export type { FormHandlerOptions } from './utils/createFormHandler';
+export { createFormHandler } from './utils';
+export type { FormHandlerOptions } from './utils';
 
 // ============================================================================
 // Query
 // ============================================================================
 
-export { QueryCacheProvider, useQueryCache } from './query/QueryCacheProvider';
-export type { QueryCacheProviderProps } from './query/QueryCacheProvider';
-export { useQuery } from './query/useQuery';
-export type { UseQueryOptions, UseQueryResult } from './query/useQuery';
-export { useMutation } from './query/useMutation';
-export type { MutationStatus, UseMutationOptions, UseMutationResult } from './query/useMutation';
-export { useInfiniteQuery } from './query/useInfiniteQuery';
+export { QueryCacheProvider, useQueryCache, useQuery, useMutation, useInfiniteQuery } from './query';
 export type {
+  QueryCacheProviderProps,
+  UseQueryOptions,
+  UseQueryResult,
+  MutationStatus,
+  UseMutationOptions,
+  UseMutationResult,
   InfiniteData,
   InfinitePageParam,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
-} from './query/useInfiniteQuery';
+} from './query';
 
 // ============================================================================
 // Realtime
@@ -216,15 +196,6 @@ export type {
 export {
   RealtimeProvider,
   useRealtime,
-  type RealtimeContextValue,
-  type RealtimeProviderConfig,
-  type RealtimeProviderProps,
-  type UndoableWrite,
-  type WriteOperation,
-  type WriteOptions,
-} from './realtime/RealtimeContext';
-
-export {
   usePubsubConnectionState,
   useConnectionState,
   useIsOnline,
@@ -233,13 +204,21 @@ export {
   useRecords,
   useUndoRedo,
   useWrite,
-  type UseRecordOptions,
-  type UseRecordResult,
-  type UseRecordsResult,
-  type UseUndoRedoResult,
-  type UseWriteResult,
-  type WriteFn,
-} from './realtime/hooks';
+} from './realtime';
+export type {
+  RealtimeContextValue,
+  RealtimeProviderConfig,
+  RealtimeProviderProps,
+  UndoableWrite,
+  WriteOperation,
+  WriteOptions,
+  UseRecordOptions,
+  UseRecordResult,
+  UseRecordsResult,
+  UseUndoRedoResult,
+  UseWriteResult,
+  WriteFn,
+} from './realtime';
 
 // ============================================================================
 // Search
@@ -250,7 +229,7 @@ export {
   useInfiniteSearch,
   useSearch,
   useSearchParams as useSearchQueryParams,
-} from './search/hooks';
+} from './search';
 export type {
   CursorSearchFn,
   SearchFn,
@@ -258,7 +237,7 @@ export type {
   UseInfiniteSearchResult,
   UseSearchOptions,
   UseSearchResult,
-} from './search/hooks';
+} from './search';
 
 // ============================================================================
 // Billing
@@ -285,15 +264,15 @@ export type {
 // Devices
 // ============================================================================
 
-export { devicesQueryKeys, useDevices } from './devices/hooks';
-export type { DevicesState, UseDevicesOptions } from './devices/hooks';
+export { devicesQueryKeys, useDevices } from './devices';
+export type { DevicesState, UseDevicesOptions } from './devices';
 
 // ============================================================================
 // Phone
 // ============================================================================
 
-export { usePhone } from './phone/hooks';
-export type { PhoneState, UsePhoneOptions } from './phone/hooks';
+export { usePhone } from './phone';
+export type { PhoneState, UsePhoneOptions } from './phone';
 
 // ============================================================================
 // API Keys
@@ -305,14 +284,14 @@ export {
   useCreateApiKey,
   useDeleteApiKey,
   useRevokeApiKey,
-} from './api-keys/hooks';
+} from './api-keys';
 export type {
   ApiKeysState,
   UseApiKeysOptions,
   UseCreateApiKeyState,
   UseDeleteApiKeyState,
   UseRevokeApiKeyState,
-} from './api-keys/hooks';
+} from './api-keys';
 
 // ============================================================================
 // Notifications
@@ -323,7 +302,7 @@ export {
   usePushPermission,
   usePushSubscription,
   useTestNotification,
-} from './notifications/hooks';
+} from './notifications';
 export type {
   NotificationPreferencesState,
   PushPermissionState,
@@ -331,7 +310,7 @@ export type {
   TestNotificationState,
   UseNotificationPreferencesOptions,
   UsePushSubscriptionOptions,
-} from './notifications/hooks';
+} from './notifications';
 
 // ============================================================================
 // OAuth
@@ -342,8 +321,8 @@ export {
   oauthQueryKeys,
   useEnabledOAuthProviders,
   useOAuthConnections,
-} from './oauth/hooks';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth/hooks';
+} from './oauth';
+export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth';
 
 // ============================================================================
 // Webhooks
@@ -357,7 +336,7 @@ export {
   useWebhook,
   useWebhooks,
   webhookQueryKeys,
-} from './webhooks/hooks';
+} from './webhooks';
 export type {
   CreateWebhookState,
   DeleteWebhookState,
@@ -365,7 +344,7 @@ export type {
   UpdateWebhookState,
   WebhookDetailState,
   WebhooksState,
-} from './webhooks/hooks';
+} from './webhooks';
 
 // ============================================================================
 // Version

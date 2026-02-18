@@ -46,8 +46,8 @@ import {
   handleUpdateTenant,
 } from './handlers';
 
-import type { FastifyRequest } from 'fastify';
 import type { TenantsModuleDeps, TenantsRequest } from './types';
+import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge

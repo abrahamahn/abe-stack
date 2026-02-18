@@ -20,6 +20,9 @@ import {
   updateUser,
 } from './userService';
 
+import type { AdminAppContext } from './types';
+import type { HardBanResult, SearchUsersResponse } from './userService';
+import type { UserRole } from '../../../db/src';
 import type {
   AdminHardBanRequest,
   AdminLockUserRequest,
@@ -32,9 +35,6 @@ import type {
   UnlockAccountRequest,
 } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { UserRole } from '../../../db/src';
-import type { AdminAppContext } from './types';
-import type { HardBanResult, SearchUsersResponse } from './userService';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

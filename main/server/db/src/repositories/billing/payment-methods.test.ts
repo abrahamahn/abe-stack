@@ -32,6 +32,7 @@ const createMockDb = (): RawDb =>
     healthCheck: vi.fn(),
     close: vi.fn(),
     getClient: vi.fn(),
+    withSession: vi.fn(),
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -198,8 +199,8 @@ describe('createPaymentMethodRepository', () => {
       const result = await repo.findByUserId('user-456');
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('pm-123');
-      expect(result[1].id).toBe('pm-456');
+      expect(result[0]?.id).toBe('pm-123');
+      expect(result[1]?.id).toBe('pm-456');
     });
 
     it('should order by isDefault descending, then createdAt descending', async () => {
@@ -213,8 +214,8 @@ describe('createPaymentMethodRepository', () => {
       const repo = createPaymentMethodRepository(mockDb);
       const result = await repo.findByUserId('user-456');
 
-      expect(result[0].id).toBe('pm-1'); // Default first
-      expect(result[0].isDefault).toBe(true);
+      expect(result[0]?.id).toBe('pm-1'); // Default first
+      expect(result[0]?.isDefault).toBe(true);
     });
 
     it('should return empty array when user has no payment methods', async () => {
@@ -253,8 +254,8 @@ describe('createPaymentMethodRepository', () => {
       const repo = createPaymentMethodRepository(mockDb);
       const result = await repo.findByUserId('user-456');
 
-      expect(result[0].cardDetails?.brand).toBe('visa');
-      expect(result[1].cardDetails?.brand).toBe('amex');
+      expect(result[0]?.cardDetails?.brand).toBe('visa');
+      expect(result[1]?.cardDetails?.brand).toBe('amex');
     });
   });
 
@@ -810,9 +811,9 @@ describe('createPaymentMethodRepository', () => {
       const repo = createPaymentMethodRepository(mockDb);
       const result = await repo.findByUserId('user-456');
 
-      expect(result[0].type).toBe('card');
-      expect(result[1].type).toBe('bank_account');
-      expect(result[2].type).toBe('paypal');
+      expect(result[0]?.type).toBe('card');
+      expect(result[1]?.type).toBe('bank_account');
+      expect(result[2]?.type).toBe('paypal');
     });
   });
 

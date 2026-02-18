@@ -29,8 +29,10 @@ export const AuthModal = ({
   // Sync mode when modal opens with a different initialMode
   useEffect(() => {
     if (open) {
-      setMode(initialMode);
-      setError(null);
+      queueMicrotask(() => {
+        setMode(initialMode);
+        setError(null);
+      });
     }
   }, [open, initialMode, setError]);
 

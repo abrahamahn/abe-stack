@@ -1,5 +1,5 @@
 // main/client/ui/src/elements/Input.tsx
-import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
+import { forwardRef, useId, type ComponentPropsWithoutRef, type ElementType } from 'react';
 
 import { Text } from './Text';
 
@@ -48,7 +48,8 @@ InputRoot.displayName = 'Input';
  */
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) => {
   const { as, label, hideLabel, description, error, className, id, ...rest } = props;
-  const inputId = id ?? `input-${Math.random().toString(36).slice(2, 7)}`;
+  const generatedId = useId();
+  const inputId = id ?? `input-${generatedId}`;
   const descId = description != null && description !== '' ? `${inputId}-desc` : undefined;
   const errorId = error != null && error !== '' ? `${inputId}-err` : undefined;
 

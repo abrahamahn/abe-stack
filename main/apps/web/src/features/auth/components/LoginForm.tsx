@@ -262,7 +262,7 @@ export const LoginForm = ({
         </div>
 
         <AuthFormLayout.Footer>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           {onModeChange !== undefined ? (
             <Button
               variant="text"

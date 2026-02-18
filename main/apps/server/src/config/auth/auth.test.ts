@@ -55,6 +55,35 @@ describe('Auth Configuration', () => {
     expect(config.proxy.trustProxy).toBe(true);
   });
 
+  test('should use dedicated oauth token encryption key when provided', () => {
+    const config = load(
+      createBaseEnv({
+        ['JWT_SECRET']: 'a-very-secure-secret-key-at-least-32-chars!',
+        ['OAUTH_TOKEN_ENCRYPTION_KEY']: 'dedicated-oauth-encryption-key-32-chars!',
+      }),
+    );
+    expect(config.oauthTokenEncryptionKey).toBe('dedicated-oauth-encryption-key-32-chars!');
+  });
+
+  test('should fall back to cookie secret for oauth encryption key', () => {
+    const config = load(
+      createBaseEnv({
+        ['JWT_SECRET']: 'a-very-secure-secret-key-at-least-32-chars!',
+        ['COOKIE_SECRET']: 'cookie-signing-secret-key-at-least-32-chars!',
+      }),
+    );
+    expect(config.oauthTokenEncryptionKey).toBe('cookie-signing-secret-key-at-least-32-chars!');
+  });
+
+  test('should fall back to jwt secret for oauth encryption key when no other keys set', () => {
+    const config = load(
+      createBaseEnv({
+        ['JWT_SECRET']: 'a-very-secure-secret-key-at-least-32-chars!',
+      }),
+    );
+    expect(config.oauthTokenEncryptionKey).toBe('a-very-secure-secret-key-at-least-32-chars!');
+  });
+
   test('should have stricter rate limits in production', () => {
     const dev = load(
       createBaseEnv({
@@ -142,6 +171,15 @@ describe('Security Validation', () => {
     expect(() => {
       validateAuthConfig(config);
     }).toThrow(/Lockout duration must be at least 60000ms/);
+  });
+
+  test('should throw if oauth token encryption key is too short', () => {
+    const config = baseValidConfig();
+    (config as any).oauthTokenEncryptionKey = 'too-short';
+
+    expect(() => {
+      validateAuthConfig(config);
+    }).toThrow(/OAuth token encryption key must be at least 32 characters/);
   });
 });
 

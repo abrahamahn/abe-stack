@@ -13,12 +13,12 @@ import { record } from '../audit/service';
 
 import { getCurrentLegalDocuments, getUserAgreements, publishLegalDocument } from './service';
 
+import type { LegalAppContext, LegalRequest } from './types';
 import type {
   LegalDocument as DbLegalDocument,
   UserAgreement as DbUserAgreement,
 } from '../../../db/src';
 import type { AuditRecordParams } from '../audit/types';
-import type { LegalAppContext, LegalRequest } from './types';
 
 // ============================================================================
 // Response Types

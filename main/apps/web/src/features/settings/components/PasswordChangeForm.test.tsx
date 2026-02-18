@@ -18,8 +18,8 @@ import { usePasswordChange } from '../hooks';
 
 import { PasswordChangeForm } from './PasswordChangeForm';
 
-import type { ChangeEvent, ReactNode } from 'react';
 import type { PasswordChangeFormProps } from './PasswordChangeForm';
+import type { ChangeEvent, ReactNode } from 'react';
 
 // Mock the hooks
 vi.mock('../hooks', () => ({

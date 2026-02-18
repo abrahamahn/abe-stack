@@ -38,9 +38,9 @@ vi.mock('./handlers', () => ({
 
 import { oauthRoutes } from './routes';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { RouteDefinition } from '../../../../system/src';
 import type { AppContext } from '../index';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers

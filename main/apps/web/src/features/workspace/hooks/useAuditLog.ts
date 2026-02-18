@@ -62,7 +62,7 @@ export function useAuditLog(tenantId: string, filters: AuditLogFilters = {}): Us
         baseUrl: config.apiUrl,
         getToken: getAccessToken,
       });
-      return (await api.listTenantAuditEvents(tenantId, filters)) as unknown as AuditEventsResponse;
+      return (await api.listTenantAuditEvents(tenantId)) as unknown as AuditEventsResponse;
     },
     staleTime: 30000,
   });

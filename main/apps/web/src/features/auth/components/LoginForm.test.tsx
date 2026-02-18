@@ -20,8 +20,8 @@ vi.mock('@bslt/api', async () => {
 import { renderWithProviders } from './../../../__tests__/utils';
 import { LoginForm } from './LoginForm';
 
-import type { ReactElement } from 'react';
 import type { LoginFormProps } from './LoginForm';
+import type { ReactElement } from 'react';
 
 // Helper function to render with providers
 function renderWithRouter(ui: ReactElement) {

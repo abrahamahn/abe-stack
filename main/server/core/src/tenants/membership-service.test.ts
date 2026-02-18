@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { addMember, listMembers, removeMember, updateMemberRole } from './membership-service';
 
-import type { TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Helpers

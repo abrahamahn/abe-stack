@@ -34,8 +34,9 @@ function createWrapper(
   const queryCache = cache ?? new QueryCache();
   activeCaches.push(queryCache);
 
-  return ({ children }: { children: ReactNode }) =>
-    createElement(QueryCacheProvider, { cache: queryCache, children });
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryCacheProvider, { cache: queryCache }, children);
+  };
 }
 
 function createMockQueryFn(
@@ -49,12 +50,12 @@ function createMockQueryFn(
 
     const pageIndex = pageParam ?? 0;
     if (pageIndex < 0 || pageIndex >= pages.length) {
-      throw new Error(`Page ${pageIndex} not found`);
+      throw new Error(`Page ${String(pageIndex)} not found`);
     }
 
     const page = pages[pageIndex];
     if (page == null) {
-      throw new Error(`Page ${pageIndex} not found`);
+      throw new Error(`Page ${String(pageIndex)} not found`);
     }
 
     return page;
@@ -342,7 +343,7 @@ describe('useInfiniteQuery', () => {
           }
           const page = pages[pageIndex];
           if (page == null) {
-            return Promise.reject(new Error(`Page ${pageIndex} not found`));
+            return Promise.reject(new Error(`Page ${String(pageIndex)} not found`));
           }
           return Promise.resolve(page);
         },
@@ -857,7 +858,7 @@ describe('useInfiniteQuery', () => {
 
   describe('stale time', () => {
     it('should not refetch if data is fresh', async () => {
-      const uniqueKey = `test-stale-${Date.now()}-${Math.random()}`;
+      const uniqueKey = `test-stale-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createMockQueryFn(mockPages);
       const cache = new QueryCache({ defaultStaleTime: 60000 });
 
@@ -1181,7 +1182,7 @@ describe('useInfiniteQuery', () => {
 
   describe('status and fetchStatus', () => {
     it('should transition through correct status states', async () => {
-      const uniqueKey = `test-status-${Date.now()}-${Math.random()}`;
+      const uniqueKey = `test-status-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createMockQueryFn(mockPages, 20);
 
       const { result } = renderHook(
@@ -1208,7 +1209,7 @@ describe('useInfiniteQuery', () => {
     });
 
     it('should set correct boolean flags for success state', async () => {
-      const uniqueKey = `test-success-flags-${Date.now()}-${Math.random()}`;
+      const uniqueKey = `test-success-flags-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createMockQueryFn(mockPages);
 
       const { result } = renderHook(
@@ -1233,7 +1234,7 @@ describe('useInfiniteQuery', () => {
     });
 
     it('should set correct boolean flags for error state', async () => {
-      const uniqueKey = `test-error-flags-${Date.now()}-${Math.random()}`;
+      const uniqueKey = `test-error-flags-${String(Date.now())}-${String(Math.random())}`;
       const queryFn = createFailingQueryFn();
 
       const { result } = renderHook(

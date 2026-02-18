@@ -72,13 +72,9 @@ describe('File Server', () => {
   }, 30000);
 
   afterEach(async () => {
-    if (server !== undefined) {
-      await server.close();
-    }
+    await server.close();
     // Clean up temp directory
-    if (uploadDir !== undefined) {
-      await rm(uploadDir, { recursive: true, force: true });
-    }
+    await rm(uploadDir, { recursive: true, force: true });
   });
 
   // ============================================================================

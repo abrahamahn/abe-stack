@@ -43,7 +43,7 @@ export { createSqlSearchProvider, SqlSearchProvider } from '@bslt/db';
 // Query Builder (re-exported from @bslt/shared)
 // ============================================================================
 
-export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from './query-builder';
+export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from './query.builder';
 
 // ============================================================================
 // Factory

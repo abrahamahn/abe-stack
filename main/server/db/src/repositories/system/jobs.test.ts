@@ -26,6 +26,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -40,13 +41,12 @@ const mockJob = {
   priority: 10,
   scheduled_at: new Date('2024-01-01T12:00:00Z'),
   idempotency_key: 'idem-123',
-  max_retries: 3,
-  retry_count: 0,
-  retry_backoff: 1000,
-  error_message: null,
+  max_attempts: 3,
+  attempts: 0,
+  last_error: null,
   created_at: new Date('2024-01-01T10:00:00Z'),
-  updated_at: new Date('2024-01-01T10:00:00Z'),
   completed_at: null,
+  started_at: null,
 };
 
 // ============================================================================
@@ -104,9 +104,8 @@ describe('createJobRepository', () => {
       const jobWithDefaults = {
         ...mockJob,
         priority: 0,
-        max_retries: 3,
-        retry_count: 0,
-        retry_backoff: 1000,
+        max_attempts: 3,
+        attempts: 0,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(jobWithDefaults);
 
@@ -118,8 +117,8 @@ describe('createJobRepository', () => {
       });
 
       expect(result.priority).toBe(0);
-      expect(result.maxRetries).toBe(3);
-      expect(result.retryCount).toBe(0);
+      expect(result.maxAttempts).toBe(3);
+      expect(result.attempts).toBe(0);
     });
 
     it('should handle high priority jobs', async () => {
@@ -199,8 +198,8 @@ describe('createJobRepository', () => {
       expect(result?.type).toBe('email.send');
       expect(result?.status).toBe('pending');
       expect(result?.priority).toBe(10);
-      expect(result?.retryCount).toBe(0);
-      expect(result?.maxRetries).toBe(3);
+      expect(result?.attempts).toBe(0);
+      expect(result?.maxAttempts).toBe(3);
     });
   });
 
@@ -289,7 +288,7 @@ describe('createJobRepository', () => {
     it('should respect custom limit', async () => {
       const jobs = Array.from({ length: 50 }, (_, i) => ({
         ...mockJob,
-        id: `job-${i}`,
+        id: `job-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(jobs);
 
@@ -308,7 +307,7 @@ describe('createJobRepository', () => {
         const repo = createJobRepository(mockDb);
         const result = await repo.findByStatus(status);
 
-        expect(result[0].status).toBe(status);
+        expect(result[0]?.status).toBe(status);
       }
     });
   });
@@ -355,7 +354,7 @@ describe('createJobRepository', () => {
     it('should respect custom limit', async () => {
       const jobs = Array.from({ length: 5 }, (_, i) => ({
         ...mockJob,
-        id: `job-${i}`,
+        id: `job-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(jobs);
 
@@ -397,7 +396,6 @@ describe('createJobRepository', () => {
       const updatedJob = {
         ...mockJob,
         status: 'processing',
-        updated_at: new Date('2024-01-01T12:30:00Z'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedJob);
 
@@ -425,21 +423,21 @@ describe('createJobRepository', () => {
       const updatedJob = {
         ...mockJob,
         status: 'failed',
-        retry_count: 1,
-        error_message: 'Network timeout',
+        attempts: 1,
+        last_error: 'Network timeout',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedJob);
 
       const repo = createJobRepository(mockDb);
       const result = await repo.update('job-123', {
         status: 'failed',
-        retryCount: 1,
-        errorMessage: 'Network timeout',
+        attempts: 1,
+        lastError: 'Network timeout',
       });
 
       expect(result?.status).toBe('failed');
-      expect(result?.retryCount).toBe(1);
-      expect(result?.errorMessage).toBe('Network timeout');
+      expect(result?.attempts).toBe(1);
+      expect(result?.lastError).toBe('Network timeout');
     });
 
     it('should handle completion timestamp', async () => {
@@ -460,21 +458,21 @@ describe('createJobRepository', () => {
       expect(result?.completedAt).toEqual(new Date('2024-01-01T13:00:00Z'));
     });
 
-    it('should handle retry count increment', async () => {
+    it('should handle attempt increment with error', async () => {
       const retriedJob = {
         ...mockJob,
-        retry_count: 2,
-        error_message: 'Temporary error',
+        attempts: 2,
+        last_error: 'Temporary error',
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(retriedJob);
 
       const repo = createJobRepository(mockDb);
       const result = await repo.update('job-123', {
-        retryCount: 2,
-        errorMessage: 'Temporary error',
+        attempts: 2,
+        lastError: 'Temporary error',
       });
 
-      expect(result?.retryCount).toBe(2);
+      expect(result?.attempts).toBe(2);
     });
   });
 
@@ -572,7 +570,7 @@ describe('createJobRepository', () => {
     it('should respect custom limit', async () => {
       const jobs = Array.from({ length: 25 }, (_, i) => ({
         ...mockJob,
-        id: `job-${i}`,
+        id: `job-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(jobs);
 
@@ -591,26 +589,26 @@ describe('createJobRepository', () => {
         const repo = createJobRepository(mockDb);
         const result = await repo.findByType(type);
 
-        expect(result[0].type).toBe(type);
+        expect(result[0]?.type).toBe(type);
       }
     });
   });
 
   describe('edge cases', () => {
-    it('should handle jobs with max retries reached', async () => {
-      const maxRetriesJob = {
+    it('should handle jobs with max attempts reached', async () => {
+      const maxAttemptsJob = {
         ...mockJob,
-        retry_count: 3,
-        max_retries: 3,
+        attempts: 3,
+        max_attempts: 3,
         status: 'failed',
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(maxRetriesJob);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(maxAttemptsJob);
 
       const repo = createJobRepository(mockDb);
       const result = await repo.findById('job-123');
 
-      expect(result?.retryCount).toBe(3);
-      expect(result?.maxRetries).toBe(3);
+      expect(result?.attempts).toBe(3);
+      expect(result?.maxAttempts).toBe(3);
     });
 
     it('should handle jobs scheduled in future', async () => {
@@ -628,7 +626,7 @@ describe('createJobRepository', () => {
 
     it('should handle very large payloads', async () => {
       const largePayload = {
-        data: Array.from({ length: 1000 }, (_, i) => ({ id: i, value: `item-${i}` })),
+        data: Array.from({ length: 1000 }, (_, i) => ({ id: i, value: `item-${String(i)}` })),
       };
       const jobWithLargePayload = {
         ...mockJob,
@@ -642,32 +640,18 @@ describe('createJobRepository', () => {
       expect(result?.payload).toEqual(largePayload);
     });
 
-    it('should handle exponential backoff values', async () => {
-      const backoffJob = {
-        ...mockJob,
-        retry_backoff: 8000,
-        retry_count: 3,
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(backoffJob);
-
-      const repo = createJobRepository(mockDb);
-      const result = await repo.findById('job-123');
-
-      expect(result?.retryBackoff).toBe(8000);
-    });
-
-    it('should handle null error messages', async () => {
+    it('should handle null last error for successful jobs', async () => {
       const successJob = {
         ...mockJob,
         status: 'completed',
-        error_message: null,
+        last_error: null,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(successJob);
 
       const repo = createJobRepository(mockDb);
       const result = await repo.findById('job-123');
 
-      expect(result?.errorMessage).toBeNull();
+      expect(result?.lastError).toBeNull();
     });
 
     it('should handle very long error messages', async () => {
@@ -675,14 +659,27 @@ describe('createJobRepository', () => {
       const failedJob = {
         ...mockJob,
         status: 'failed',
-        error_message: longError,
+        last_error: longError,
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(failedJob);
 
       const repo = createJobRepository(mockDb);
       const result = await repo.findById('job-123');
 
-      expect(result?.errorMessage).toBe(longError);
+      expect(result?.lastError).toBe(longError);
+    });
+
+    it('should handle negative priority jobs', async () => {
+      const lowPriorityJob = {
+        ...mockJob,
+        priority: -100,
+      };
+      vi.mocked(mockDb.queryOne).mockResolvedValue(lowPriorityJob);
+
+      const repo = createJobRepository(mockDb);
+      const result = await repo.findById('job-123');
+
+      expect(result?.priority).toBe(-100);
     });
   });
 });

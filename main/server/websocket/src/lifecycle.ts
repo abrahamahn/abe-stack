@@ -19,7 +19,6 @@ import {
   parseCookies,
   parseRecordKey,
 } from '@bslt/shared';
-
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';

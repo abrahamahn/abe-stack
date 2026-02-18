@@ -430,7 +430,7 @@ describe('undoRedoStore', () => {
       // Push 100 transactions
       for (let i = 0; i < 100; i++) {
         const tx = {
-          id: `tx-${i}`,
+          id: `tx-${String(i)}`,
           timestamp: i * 1000,
           operations: [createSetOperation(['value'], i + 1, i)],
         };
@@ -464,7 +464,7 @@ describe('undoRedoStore', () => {
       // Push 10 transactions
       for (let i = 0; i < 10; i++) {
         const tx = {
-          id: `tx-${i}`,
+          id: `tx-${String(i)}`,
           timestamp: i * 1000,
           operations: [createSetOperation(['value'], i + 1, i)],
         };

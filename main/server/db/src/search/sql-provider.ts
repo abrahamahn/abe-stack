@@ -452,8 +452,8 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
    * @returns Next sequential parameter number.
    * @complexity O(1)
    */
-  private nextParam(): number {
-    return ++this.paramIndex;
+  private nextParam(): string {
+    return String(++this.paramIndex);
   }
 
   // ============================================================================

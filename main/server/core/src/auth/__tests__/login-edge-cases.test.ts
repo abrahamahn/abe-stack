@@ -24,8 +24,8 @@ import {
 import { authenticateUser, refreshUserTokens, verifyEmail } from '../service';
 import { LOGIN_FAILURE_REASON, type AuthLogger } from '../types';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { RawDb, Repositories } from '../../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -53,7 +53,7 @@ vi.mock('@bslt/db', async () => {
   const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
-    withTransaction: vi.fn((db, callback) => callback(db)),
+    withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
   };
 });
 

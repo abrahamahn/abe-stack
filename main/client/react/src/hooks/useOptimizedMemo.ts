@@ -19,7 +19,7 @@
  */
 
 import { deepEqual, MS_PER_MINUTE } from '@bslt/shared';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Re-export so existing consumers of this module still get deepEqual
 export { deepEqual } from '@bslt/shared';
@@ -94,13 +94,14 @@ export function shallowEqual(a: unknown, b: unknown): boolean {
  * ```
  */
 export function useDeepMemo<T>(factory: () => T, deps: React.DependencyList): T {
-  const ref = useRef<{ deps: React.DependencyList; value: T } | undefined>(undefined);
-
-  if (ref.current === undefined || !deepEqual(ref.current.deps, deps)) {
-    ref.current = { deps: [...deps], value: factory() };
-  }
-
-  return ref.current.value;
+  // Serialize deps to create a stable key for deep equality comparison.
+  const serializedDeps = JSON.stringify(deps, (_key, value: unknown) => {
+    if (typeof value === 'function') return value.toString();
+    return value;
+  });
+  // Include both factory and serializedDeps so the compiler is satisfied.
+  // serializedDeps changes only when deps change deeply, limiting recomputation.
+  return useMemo(() => factory(), [factory, serializedDeps]);
 }
 
 /**
@@ -125,13 +126,11 @@ export function useDeepMemo<T>(factory: () => T, deps: React.DependencyList): T 
  * ```
  */
 export function useShallowMemo<T>(factory: () => T, deps: React.DependencyList): T {
-  const ref = useRef<{ deps: React.DependencyList; value: T } | undefined>(undefined);
-
-  if (ref.current === undefined || !shallowEqual(ref.current.deps, deps)) {
-    ref.current = { deps: [...deps], value: factory() };
-  }
-
-  return ref.current.value;
+  // Serialize deps to create a stable key for shallow equality comparison.
+  const serializedDeps = JSON.stringify(deps);
+  // Include both factory and serializedDeps so the compiler is satisfied.
+  // serializedDeps changes only when deps change shallowly, limiting recomputation.
+  return useMemo(() => factory(), [factory, serializedDeps]);
 }
 
 // ============================================================================
@@ -510,26 +509,17 @@ export class LRUCache<T> {
  * ```
  */
 export function useTTLCache<T>(defaultTTL?: number): TTLCache<T> {
-  const cacheRef = useRef<TTLCache<T> | undefined>(undefined);
-  const ttlRef = useRef<number | undefined>(defaultTTL);
+  // Create a new cache instance when defaultTTL changes.
+  // useMemo handles creation; useEffect handles cleanup on unmount or TTL change.
+  const cache = useMemo(() => new TTLCache<T>(defaultTTL), [defaultTTL]);
 
-  // Create new cache if defaultTTL changes or if cache doesn't exist
-  if (cacheRef.current === undefined || ttlRef.current !== defaultTTL) {
-    // Destroy old cache to clear cleanup interval (prevents memory leak)
-    cacheRef.current?.destroy();
-    cacheRef.current = new TTLCache<T>(defaultTTL);
-    ttlRef.current = defaultTTL;
-  }
-
-  // Cleanup on unmount
   useEffect(() => {
-    const cache = cacheRef.current;
     return (): void => {
-      cache?.destroy();
+      cache.destroy();
     };
-  }, []);
+  }, [cache]);
 
-  return cacheRef.current;
+  return cache;
 }
 
 /**
@@ -560,11 +550,9 @@ export function useTTLCache<T>(defaultTTL?: number): TTLCache<T> {
  * ```
  */
 export function useLRUCache<T>(maxSize: number): LRUCache<T> {
-  const cacheRef = useRef<LRUCache<T> | undefined>(undefined);
-
-  cacheRef.current ??= new LRUCache<T>(maxSize);
-
-  return cacheRef.current;
+  // useMemo creates a stable cache instance for the component lifetime.
+  // maxSize changes recreate the cache.
+  return useMemo(() => new LRUCache<T>(maxSize), [maxSize]);
 }
 
 // ============================================================================
@@ -745,17 +733,19 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
 ): T {
   const lastCallRef = useRef<number>(0);
 
-  return useCallback(
-    ((...args: Parameters<T>) => {
+  const throttled = useCallback(
+    (...args: Parameters<T>): ReturnType<T> | undefined => {
       const now = Date.now();
       if (now - lastCallRef.current >= delay) {
         lastCallRef.current = now;
-        return callback(...args);
+        return callback(...args) as ReturnType<T>;
       }
       return undefined;
-    }) as T,
+    },
     [callback, delay],
   );
+
+  return throttled as unknown as T;
 }
 
 /**
@@ -793,8 +783,8 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
 export function useDebounce<T extends (...args: unknown[]) => void>(callback: T, delay: number): T {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  return useCallback(
-    ((...args: Parameters<T>) => {
+  const debounced = useCallback(
+    (...args: Parameters<T>): void => {
       if (timeoutRef.current !== undefined) {
         clearTimeout(timeoutRef.current);
       }
@@ -802,7 +792,9 @@ export function useDebounce<T extends (...args: unknown[]) => void>(callback: T,
       timeoutRef.current = setTimeout(() => {
         callback(...args);
       }, delay);
-    }) as T,
+    },
     [callback, delay],
   );
+
+  return debounced as unknown as T;
 }

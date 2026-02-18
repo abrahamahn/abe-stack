@@ -33,8 +33,8 @@ import {
   handleOAuthUnlink,
 } from './handlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext } from '../types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Narrow HandlerContext to AppContext.

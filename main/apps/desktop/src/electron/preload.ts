@@ -3,8 +3,8 @@ import { contextBridge, ipcRenderer, shell } from 'electron';
 
 import { IPC_CHANNELS } from './types';
 
-import type { NativeBridge } from '@bslt/shared';
 import type { IPCChannel, IPCChannelMap, OpenDialogOptions, SaveDialogOptions } from './types';
+import type { NativeBridge } from '@bslt/shared';
 
 /**
  * Type-safe IPC invoke function.
@@ -45,5 +45,4 @@ const electronBridge: NativeBridge = {
 
 contextBridge.exposeInMainWorld('electronAPI', electronBridge);
 
-export { };
-
+export {};

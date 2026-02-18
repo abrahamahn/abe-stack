@@ -289,9 +289,9 @@ describe('Compliance Schema - LegalDocument Type', () => {
 
     versions.forEach((version, index) => {
       const doc: LegalDocument = {
-        id: `doc-${index}`,
+        id: `doc-${String(index)}`,
         type: 'terms_of_service',
-        title: `Terms v${version}`,
+        title: `Terms v${String(version)}`,
         content: 'Content',
         version,
         effectiveAt: new Date(),
@@ -428,7 +428,7 @@ describe('Compliance Schema - UserAgreement Type', () => {
 
     ipv4Addresses.forEach((ipAddress, index) => {
       const agreement: UserAgreement = {
-        id: `agreement-${index}`,
+        id: `agreement-${String(index)}`,
         userId: 'user-456',
         documentId: 'doc-789',
         agreedAt: new Date(),
@@ -569,7 +569,7 @@ describe('Compliance Schema - ConsentLog Type', () => {
 
     consentTypes.forEach((consentType, index) => {
       const log: ConsentLog = {
-        id: `log-${index}`,
+        id: `log-${String(index)}`,
         userId: 'user-456',
         consentType,
         granted: true,
@@ -917,7 +917,7 @@ describe('Compliance Schema - Edge Cases', () => {
 
     userAgents.forEach((userAgent, index) => {
       const log: ConsentLog = {
-        id: `log-${index}`,
+        id: `log-${String(index)}`,
         userId: 'user-456',
         consentType: 'analytics',
         granted: true,
@@ -1160,7 +1160,7 @@ describe('Compliance Schema - Integration Scenarios', () => {
 
     // User grants some consents and denies others
     const logs: ConsentLog[] = consentTypes.map((consentType, index) => ({
-      id: `log-${index}`,
+      id: `log-${String(index)}`,
       userId,
       consentType,
       granted: index % 2 === 0, // Grant even indices, deny odd
@@ -1359,7 +1359,7 @@ describe('Compliance Schema - DataExportRequest Type', () => {
 
     types.forEach((type, index) => {
       const request: DataExportRequest = {
-        id: `der-${index}`,
+        id: `der-${String(index)}`,
         userId: 'user-456',
         type,
         status: 'pending',
@@ -1387,7 +1387,7 @@ describe('Compliance Schema - DataExportRequest Type', () => {
 
     statuses.forEach((status, index) => {
       const request: DataExportRequest = {
-        id: `der-${index}`,
+        id: `der-${String(index)}`,
         userId: 'user-456',
         type: 'export',
         status,

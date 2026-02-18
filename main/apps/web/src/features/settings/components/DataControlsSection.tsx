@@ -8,7 +8,7 @@
 
 import { MS_PER_DAY } from '@bslt/shared';
 import { Alert, Badge, Button, Card, Heading, Text } from '@bslt/ui';
-import { useCallback, useState, type ReactElement } from 'react';
+import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
 import {
   useDeactivateAccount,
@@ -159,10 +159,11 @@ export const DataControlsSection = ({
 
   const currentError = deactivateError ?? deleteError ?? reactivateError;
   const isAnyLoading = isDeactivating || isDeleting || isReactivating;
-  const deletionDaysLeft =
-    deletionScheduledAt !== undefined
-      ? Math.max(0, Math.ceil((new Date(deletionScheduledAt).getTime() - Date.now()) / MS_PER_DAY))
-      : null;
+  const [now] = useState(() => Date.now());
+  const deletionDaysLeft = useMemo(() => {
+    if (deletionScheduledAt === undefined) return null;
+    return Math.max(0, Math.ceil((new Date(deletionScheduledAt).getTime() - now) / MS_PER_DAY));
+  }, [deletionScheduledAt, now]);
 
   return (
     <div className={className}>

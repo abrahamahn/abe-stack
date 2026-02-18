@@ -7,7 +7,7 @@
 
 import { APP_ROLES, USER_STATUSES } from '@bslt/shared';
 import { Button, Input, Select } from '@bslt/ui';
-import { JSX, useCallback, useState, type ChangeEvent } from 'react';
+import { useCallback, useState, type ChangeEvent, type JSX } from 'react';
 
 import type { AdminUserListFilters } from '@bslt/shared';
 

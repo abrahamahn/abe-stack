@@ -16,8 +16,8 @@ import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../.
 
 import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } from './handlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { LegalAppContext } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper

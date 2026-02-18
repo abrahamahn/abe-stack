@@ -17,6 +17,8 @@ import type {
   CreateProductParams,
   CreateProductResult,
   NormalizedWebhookEvent,
+  PortalSessionParams,
+  PortalSessionResult,
   ProviderInvoice,
   ProviderPaymentMethod,
   ProviderSubscription,
@@ -40,6 +42,10 @@ class DisabledBillingProvider implements BillingService {
   }
 
   createCheckoutSession(_params: CheckoutParams): Promise<CheckoutResult> {
+    this.throwDisabled();
+  }
+
+  createPortalSession(_params: PortalSessionParams): Promise<PortalSessionResult> {
     this.throwDisabled();
   }
 

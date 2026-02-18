@@ -16,9 +16,9 @@ import {
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 
+import type { Repositories } from '../../../../db/src';
 import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
-import type { Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Constants

@@ -9,8 +9,8 @@ import {
   revokeInvitation,
 } from './invitation-service';
 
-import type { InvitationStatus, TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
+import type { InvitationStatus, TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Helpers

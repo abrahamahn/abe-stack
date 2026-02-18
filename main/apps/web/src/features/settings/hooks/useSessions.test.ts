@@ -16,9 +16,9 @@ import { createSettingsApi } from '../api';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from './useSessions';
 
+import type { Session, SessionsListResponse } from '../api';
 import type { ReactElement, ReactNode } from 'react';
 import type { Mock } from 'vitest';
-import type { Session, SessionsListResponse } from '../api';
 
 // ============================================================================
 // Mocks
@@ -41,8 +41,8 @@ const mockRevokeSession = vi.fn();
 const mockRevokeAllSessions = vi.fn();
 
 function createWrapper(cache: QueryCache): (props: { children: ReactNode }) => ReactElement {
-  return function wrapper({ children }: { children: ReactNode }): ReactElement {
-    return createElement(QueryCacheProvider, { cache, children }, children);
+  return function Wrapper({ children }: { children: ReactNode }): ReactElement {
+    return createElement(QueryCacheProvider, { cache }, children);
   };
 }
 

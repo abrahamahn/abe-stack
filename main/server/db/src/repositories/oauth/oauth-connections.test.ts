@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -148,8 +149,8 @@ describe('createOAuthConnectionRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].provider).toBe('google');
-      expect(result[1].provider).toBe('github');
+      expect(result[0]?.provider).toBe('google');
+      expect(result[1]?.provider).toBe('github');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),

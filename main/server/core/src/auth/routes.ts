@@ -97,8 +97,8 @@ import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
 import { webauthnRouteEntries } from './webauthn';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Narrow HandlerContext to AppContext.

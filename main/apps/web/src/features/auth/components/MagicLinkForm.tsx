@@ -42,7 +42,7 @@ export const MagicLinkForm = ({
         <AuthFormLayout.Header>
           <AuthFormLayout.Title>Sign in with email</AuthFormLayout.Title>
           <AuthFormLayout.Subtitle>
-            We'll send you a magic link to sign in without a password
+            We&apos;ll send you a magic link to sign in without a password
           </AuthFormLayout.Subtitle>
         </AuthFormLayout.Header>
 
@@ -53,7 +53,7 @@ export const MagicLinkForm = ({
               in.
             </Alert>
             <Text size="sm" tone="muted" className="text-center">
-              Didn't receive the email? Check your spam folder or try again.
+              Didn&apos;t receive the email? Check your spam folder or try again.
             </Text>
             <Button
               variant="secondary"

@@ -12,8 +12,8 @@ import { getRefreshCookieOptions } from '@bslt/shared/core';
 
 import { REFRESH_COOKIE_NAME } from '../types';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { ReplyWithCookies } from '../types';
+import type { AuthConfig } from '@bslt/shared/config';
 
 /**
  * Set the refresh token as an HTTP-only cookie.

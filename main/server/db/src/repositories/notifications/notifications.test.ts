@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -129,7 +130,7 @@ describe('createNotificationRepository', () => {
     });
 
     it('should handle different notification types', async () => {
-      const types = ['info', 'warning', 'error', 'success'];
+      const types = ['info', 'warning', 'error', 'success'] as const;
 
       for (const type of types) {
         vi.mocked(mockDb.queryOne).mockResolvedValue({
@@ -204,8 +205,8 @@ describe('createNotificationRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),

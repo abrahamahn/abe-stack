@@ -7,6 +7,7 @@
  * the module framework-agnostic.
  */
 
+import type { FileRepository } from '../../../db/src';
 import type {
   AuthenticatedUser,
   BaseContext,
@@ -14,7 +15,6 @@ import type {
   RequestContext,
   RequestInfo,
 } from '@bslt/shared';
-import type { FileRepository } from '../../../db/src';
 
 // ============================================================================
 // Processing Status

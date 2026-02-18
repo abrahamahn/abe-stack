@@ -13,9 +13,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient, MagicLinkToken, RawDb, Repositories, User } from '../../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates } from '../index';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -62,8 +62,8 @@ vi.mock('@bslt/db', () => ({
   emailTemplates: {
     magicLink: vi.fn((url: string, expiryMinutes: number) => ({
       subject: 'Your Magic Link',
-      text: `Click here: ${url}. Expires in ${expiryMinutes} minutes.`,
-      html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
+      text: `Click here: ${url}. Expires in ${String(expiryMinutes)} minutes.`,
+      html: `<a href="${url}">Click here</a>. Expires in ${String(expiryMinutes)} minutes.`,
     })),
   },
 }));
@@ -140,8 +140,8 @@ function createMockEmailTemplates(): AuthEmailTemplates {
   return {
     magicLink: vi.fn((url: string, expiryMinutes: number) => ({
       subject: 'Your Magic Link',
-      text: `Click here: ${url}. Expires in ${expiryMinutes} minutes.`,
-      html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
+      text: `Click here: ${url}. Expires in ${String(expiryMinutes)} minutes.`,
+      html: `<a href="${url}">Click here</a>. Expires in ${String(expiryMinutes)} minutes.`,
     })),
     emailVerification: vi.fn(() => ({ subject: 'Verify', text: 'v', html: '<p>v</p>' })),
     existingAccountRegistrationAttempt: vi.fn(() => ({
@@ -243,6 +243,7 @@ function createMockAuthConfig(): AuthConfig {
       sameSite: 'lax',
       path: '/',
     },
+    oauthTokenEncryptionKey: 'test-secret-32-characters-long!!',
     oauth: {},
     magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
     totp: { issuer: 'Test', window: 1 },
@@ -754,9 +755,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -852,9 +853,9 @@ describe('verifyMagicLink', () => {
                 {
                   id: user.id,
                   email: user.email,
-                  username: user.username ?? 'testuser',
-                  first_name: user.firstName ?? 'Test',
-                  last_name: user.lastName ?? 'User',
+                  username: user.username,
+                  first_name: user.firstName,
+                  last_name: user.lastName,
                   password_hash: user.passwordHash,
                   role: user.role,
                   email_verified: true,
@@ -866,9 +867,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: false,
@@ -912,9 +913,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1068,9 +1069,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1115,9 +1116,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: user.role,
               email_verified: true,
@@ -1205,9 +1206,9 @@ describe('verifyMagicLink', () => {
             queryOne: vi.fn().mockResolvedValue({
               id: user.id,
               email: user.email,
-              username: user.username ?? 'testuser',
-              first_name: user.firstName ?? 'Test',
-              last_name: user.lastName ?? 'User',
+              username: user.username,
+              first_name: user.firstName,
+              last_name: user.lastName,
               password_hash: user.passwordHash,
               role: 'admin',
               email_verified: true,

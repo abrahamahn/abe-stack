@@ -32,8 +32,10 @@ export const ConfirmEmailPage = (): ReactElement => {
 
   useEffect(() => {
     if (token === null) {
-      setStatus('error');
-      setMessage('Invalid verification link');
+      queueMicrotask(() => {
+        setStatus('error');
+        setMessage('Invalid verification link');
+      });
       return;
     }
 

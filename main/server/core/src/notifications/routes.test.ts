@@ -47,9 +47,9 @@ vi.mock('./handlers', () => ({
 
 import { notificationRoutes } from './routes';
 
-import type { FastifyReply } from 'fastify';
-import type { RouteDefinition } from '../../../system/src';
 import type { NotificationModuleDeps, NotificationRequest } from './types';
+import type { RouteDefinition } from '../../../system/src';
+import type { FastifyReply } from 'fastify';
 
 // ============================================================================
 // Test Helpers
@@ -239,7 +239,6 @@ describe('Notification Routes', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(subscribeRoute.schema).toBeDefined();
       if (
-        subscribeRoute.schema !== null &&
         subscribeRoute.schema !== undefined &&
         typeof subscribeRoute.schema === 'object' &&
         'safeParse' in subscribeRoute.schema
@@ -347,7 +346,6 @@ describe('Notification Routes', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(unsubscribeRoute.schema).toBeDefined();
       if (
-        unsubscribeRoute.schema !== null &&
         unsubscribeRoute.schema !== undefined &&
         typeof unsubscribeRoute.schema === 'object' &&
         'safeParse' in unsubscribeRoute.schema
@@ -542,7 +540,6 @@ describe('Notification Routes', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(updatePreferencesRoute.schema).toBeDefined();
       if (
-        updatePreferencesRoute.schema !== null &&
         updatePreferencesRoute.schema !== undefined &&
         typeof updatePreferencesRoute.schema === 'object' &&
         'safeParse' in updatePreferencesRoute.schema
@@ -751,7 +748,6 @@ describe('Notification Routes', () => {
       // Check schema is defined and has expected shape (toBe fails due to ESM module instances)
       expect(sendRoute.schema).toBeDefined();
       if (
-        sendRoute.schema !== null &&
         sendRoute.schema !== undefined &&
         typeof sendRoute.schema === 'object' &&
         'safeParse' in sendRoute.schema

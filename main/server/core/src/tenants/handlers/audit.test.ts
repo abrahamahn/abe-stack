@@ -14,6 +14,7 @@ function createMockAuditEventsRepo(): AuditEventRepository {
   return {
     create: vi.fn(),
     findById: vi.fn(),
+    find: vi.fn(),
     findRecent: vi.fn(),
     findByActorId: vi.fn(),
     findByTenantId: vi.fn(),

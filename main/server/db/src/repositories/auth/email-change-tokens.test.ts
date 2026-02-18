@@ -26,6 +26,7 @@ const createMockDb = (): RawDb =>
     getClient: vi.fn() as RawDb['getClient'],
     queryOne: vi.fn(),
     execute: vi.fn(),
+    withSession: vi.fn() as RawDb['withSession'],
   }) as unknown as RawDb;
 
 // ============================================================================
@@ -295,6 +296,57 @@ describe('createEmailChangeTokenRepository', () => {
       const call = vi.mocked(mockDb.execute).mock.calls[0]?.[0];
       expect(call).toBeDefined();
       expect(call?.text).toMatch(/IS NULL/);
+    });
+  });
+
+  describe('deleteExpired', () => {
+    it('should delete expired unused tokens', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(3);
+
+      const repo = createEmailChangeTokenRepository(mockDb);
+      const result = await repo.deleteExpired();
+
+      expect(result).toBe(3);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('DELETE FROM'),
+        }),
+      );
+    });
+
+    it('should return zero when no expired tokens exist', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(0);
+
+      const repo = createEmailChangeTokenRepository(mockDb);
+      const result = await repo.deleteExpired();
+
+      expect(result).toBe(0);
+    });
+
+    it('should filter by expires_at < now', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(1);
+
+      const repo = createEmailChangeTokenRepository(mockDb);
+      await repo.deleteExpired();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('expires_at'),
+        }),
+      );
+    });
+
+    it('should only delete unused tokens (used_at IS NULL guard)', async () => {
+      vi.mocked(mockDb.execute).mockResolvedValue(1);
+
+      const repo = createEmailChangeTokenRepository(mockDb);
+      await repo.deleteExpired();
+
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringMatching(/IS NULL/),
+        }),
+      );
     });
   });
 });

@@ -65,6 +65,7 @@ export {
   REFRESH_TOKEN_FAMILY_COLUMNS, REFRESH_TOKENS_TABLE, SECURITY_EVENT_COLUMNS,
   SECURITY_EVENT_TYPES, SECURITY_EVENTS_TABLE, SECURITY_SEVERITIES,
   SMS_VERIFICATION_CODES_TABLE,
+  SMS_VERIFICATION_CODE_COLUMNS,
   STORAGE_PROVIDERS, SUBSCRIPTION_COLUMNS,
   SUBSCRIPTION_STATUSES, SUBSCRIPTIONS_TABLE, TENANT_COLUMNS, TENANT_FEATURE_OVERRIDE_COLUMNS, TENANT_FEATURE_OVERRIDES_TABLE,
   // Tenant schema
@@ -123,6 +124,7 @@ export {
   type NewRefreshToken,
   type NewRefreshTokenFamily,
   type NewSecurityEvent,
+  type NewSmsVerificationCode,
   type NewSubscription,
   type NewTenantFeatureOverride,
   type NewTotpBackupCode,
@@ -152,6 +154,7 @@ export {
   type SecurityEvent,
   type SecurityEventType,
   type SecuritySeverity,
+  type SmsVerificationCode,
   type Subscription,
   type SubscriptionStatus,
   type TenantFeatureOverride,
@@ -167,6 +170,7 @@ export {
   type UpdateOAuthConnection,
   type UpdatePaymentMethod,
   type UpdatePlan,
+  type UpdateSmsVerificationCode,
   type UpdateSubscription,
   type UpdateTenantFeatureOverride,
   type UpdateTrustedDevice,
@@ -347,15 +351,15 @@ export {
 } from './builder';
 
 // Transaction
-export { isInTransaction, withTransaction } from './utils/transaction';
+export { isInTransaction, withTransaction } from './utils';
 
 // Optimistic Locking
 export {
   isOptimisticLockError, OptimisticLockError, updateUserWithVersion
-} from './utils/optimistic-lock';
+} from './utils';
 
 // Queue
-export { createPostgresQueueStore, PostgresQueueStore } from './queue/postgres-store';
+export { createPostgresQueueStore, PostgresQueueStore } from './queue';
 
 export {
   type JobDetails,
@@ -370,7 +374,7 @@ export {
   type TaskHandler,
   type TaskHandlers,
   type TaskResult
-} from './queue/types/queue-types';
+} from './queue';
 
 // Read Replica
 export {
@@ -380,10 +384,10 @@ export {
 } from './read-replica';
 
 // PubSub
-export { createPostgresPubSub, PostgresPubSub } from './pubsub/postgres-pubsub';
+export { createPostgresPubSub, PostgresPubSub } from './pubsub';
 
 // Search
-export { createSqlSearchProvider, SqlSearchProvider } from './search/sql-provider';
+export { createSqlSearchProvider, SqlSearchProvider } from './search';
 
 export type {
   ElasticsearchProviderConfig,
@@ -403,5 +407,5 @@ export type {
   SqlQueryOptions,
   SqlSearchProviderConfig,
   SqlTableConfig
-} from './search/types';
+} from './search';
 

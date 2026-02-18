@@ -1,9 +1,9 @@
 // main/server/system/src/observability/factory.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { ConsoleErrorTrackingProvider } from './console-provider';
+import { ConsoleErrorTrackingProvider } from './console.provider';
 import { createErrorTracker } from './factory';
-import { NoopErrorTrackingProvider } from './noop-provider';
+import { NoopErrorTrackingProvider } from './noop.provider';
 
 import type { ErrorTrackingConfig } from './types';
 

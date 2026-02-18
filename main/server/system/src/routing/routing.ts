@@ -13,7 +13,7 @@
 
 import { HTTP_STATUS } from '@bslt/shared';
 
-import { registerRoute } from './route-registry';
+import { registerRoute } from './route.registry';
 
 import type { BaseContext } from '@bslt/shared';
 import type {

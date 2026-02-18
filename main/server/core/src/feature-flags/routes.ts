@@ -36,8 +36,8 @@ import {
   handleUpdateFlag,
 } from './handlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FeatureFlagAppContext } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper

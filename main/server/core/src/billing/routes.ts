@@ -34,13 +34,6 @@ import {
 } from './handlers';
 
 import type {
-  AddPaymentMethodRequest,
-  CancelSubscriptionRequest,
-  CheckoutRequest,
-  PortalSessionRequest,
-  UpdateSubscriptionRequest,
-} from '@bslt/shared';
-import type {
   BillingAppContext,
   BillingBaseRouteDefinition,
   BillingRequest,
@@ -48,6 +41,13 @@ import type {
   BillingRouteResult,
   BillingValidationSchema,
 } from './types';
+import type {
+  AddPaymentMethodRequest,
+  CancelSubscriptionRequest,
+  CheckoutRequest,
+  PortalSessionRequest,
+  UpdateSubscriptionRequest,
+} from '@bslt/shared';
 
 // ============================================================================
 // Route Helper Functions
@@ -267,18 +267,18 @@ export const billingRoutes: BillingRouteMap = createBillingRouteMap([
     'billing/usage',
     billingProtectedRoute(
       'GET',
-      async (
-        ctx: BillingAppContext,
+      (
+        _ctx: BillingAppContext,
         _body: unknown,
-        req: BillingRequest,
+        _req: BillingRequest,
       ): Promise<BillingRouteResult> => {
         // TODO: Implement handleGetUsage
-        return {
+        return Promise.resolve({
           status: 200,
           body: {
             metrics: [],
           },
-        };
+        });
       },
       'user',
     ),

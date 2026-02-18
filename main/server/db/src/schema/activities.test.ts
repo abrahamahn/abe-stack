@@ -242,7 +242,7 @@ describe('Activities Schema - Activity Type', () => {
 
     actions.forEach((action, index) => {
       const activity: Activity = {
-        id: `act-${index}`,
+        id: `act-${String(index)}`,
         tenantId: null,
         actorId: 'user-123',
         actorType: 'user',
@@ -264,7 +264,7 @@ describe('Activities Schema - Activity Type', () => {
 
     resourceTypes.forEach((resourceType, index) => {
       const activity: Activity = {
-        id: `act-${index}`,
+        id: `act-${String(index)}`,
         tenantId: null,
         actorId: 'user-123',
         actorType: 'user',
@@ -291,7 +291,7 @@ describe('Activities Schema - Activity Type', () => {
 
     nonUuidIds.forEach((resourceId, index) => {
       const activity: Activity = {
-        id: `act-${index}`,
+        id: `act-${String(index)}`,
         tenantId: null,
         actorId: null,
         actorType: 'system',
@@ -563,8 +563,8 @@ describe('Activities Schema - Integration Scenarios', () => {
 
     // Verify chronological order
     for (let i = 1; i < activities.length; i++) {
-      expect(activities[i].createdAt.getTime()).toBeGreaterThan(
-        activities[i - 1].createdAt.getTime(),
+      expect(activities[i]?.createdAt.getTime()).toBeGreaterThan(
+        activities[i - 1]?.createdAt.getTime() ?? 0,
       );
     }
   });

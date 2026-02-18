@@ -14,6 +14,7 @@ import {
   checkWebSocket,
 } from '@bslt/shared';
 
+import type { SystemContext } from './types';
 import type { RawDb } from '@bslt/db';
 import type {
   DetailedHealthResponse,
@@ -23,7 +24,6 @@ import type {
   StartupSummaryOptions,
   WebSocketStats,
 } from '@bslt/shared';
-import type { SystemContext } from './types';
 
 /** Callback shape expected by the shared `checkSchema` utility. */
 type SchemaValidator = (
@@ -206,7 +206,7 @@ export async function logStartupSummary(
     server: {
       host,
       port,
-      url: `http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`,
+      url: `http://${host === '0.0.0.0' ? 'localhost' : host}:${String(port)}`,
     },
     stats: {
       routes: routeCount,
@@ -231,7 +231,7 @@ function printDevConfigSummary(
 ): void {
   const { config } = ctx;
   const { host, port, routeCount } = options;
-  const url = `http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`;
+  const url = `http://${host === '0.0.0.0' ? 'localhost' : host}:${String(port)}`;
 
   const line = '─'.repeat(52);
   const status = (s: ServiceHealth | undefined): string =>

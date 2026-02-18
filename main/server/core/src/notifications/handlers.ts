@@ -13,6 +13,7 @@ import { HTTP_STATUS, isAppError } from '@bslt/shared';
 
 import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
 
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   BaseMarkAsReadRequest,
   Notification,
@@ -24,7 +25,6 @@ import type {
   UpdatePreferencesRequest,
   VapidKeyResponse,
 } from '@bslt/shared';
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Type Definitions

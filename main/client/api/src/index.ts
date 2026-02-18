@@ -1,7 +1,7 @@
 // main/client/api/src/index.ts
 // Lightweight API client wrappers for bslt
 
-// API Client
+// Shared types
 export type {
   AuthResponse,
   BffLoginResponse,
@@ -13,13 +13,18 @@ export type {
   EmailVerificationResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
-  LoginRequest, LoginSuccessResponse, MagicLinkRequest,
+  LoginRequest,
+  LoginSuccessResponse,
+  MagicLinkRequest,
   MagicLinkRequestResponse,
   MagicLinkVerifyRequest,
-  MagicLinkVerifyResponse, OAuthConnectionsResponse,
+  MagicLinkVerifyResponse,
+  OAuthConnectionsResponse,
   OAuthEnabledProvidersResponse,
   OAuthProvider,
-  OAuthUnlinkResponse, PasskeyListItem, RegisterRequest,
+  OAuthUnlinkResponse,
+  PasskeyListItem,
+  RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
@@ -31,41 +36,38 @@ export type {
   TotpSetupResponse,
   TotpStatusResponse,
   TotpVerifyRequest,
-  TotpVerifyResponse, User, VerifyPhoneResponse
+  TotpVerifyResponse,
+  User,
+  VerifyPhoneResponse,
 } from '@bslt/shared';
-export { createApiClient } from './api/client';
-export type { ApiClient, ApiClientConfig, TosRequiredPayload } from './api/client';
-export { clearApiClient, getApiClient } from './api/instance';
-export type { ApiClientOptions } from './api/types';
+
+// API Client
+export { createApiClient, clearApiClient, getApiClient } from './api';
+export type { ApiClient, ApiClientConfig, TosRequiredPayload, ApiClientOptions } from './api';
 
 // Billing
-export { createAdminBillingClient } from './billing/admin';
-export type { AdminBillingClient, AdminBillingClientConfig } from './billing/admin';
-export { createBillingClient } from './billing/client';
-export type { BillingClient, BillingClientConfig } from './billing/client';
+export { createAdminBillingClient, createBillingClient } from './billing';
+export type { AdminBillingClient, AdminBillingClientConfig, BillingClient, BillingClientConfig } from './billing';
 
 // Admin
-export { createAdminClient } from './admin/client';
-export type { AdminClient, AdminClientConfig } from './admin/client';
+export { createAdminClient } from './admin';
+export type { AdminClient, AdminClientConfig } from './admin';
 
 // Activities
-export { createActivitiesClient } from './activities/client';
-export type {
-  ActivitiesClient,
-  ActivitiesClientConfig,
-  ActivityListResponse,
-  ActivityLocal
-} from './activities/client';
+export { createActivitiesClient } from './activities';
+export type { ActivitiesClient, ActivitiesClientConfig, ActivityListResponse, ActivityLocal } from './activities';
 
 // Errors
 export {
-  ApiError, createApiError,
+  ApiError,
+  createApiError,
   getErrorMessage,
   isApiError,
   isNetworkError,
   isTimeoutError,
-  isUnauthorizedError, NetworkError,
-  TimeoutError
+  isUnauthorizedError,
+  NetworkError,
+  TimeoutError,
 } from './errors';
 export type { ApiErrorBody } from './errors';
 
@@ -83,22 +85,22 @@ export {
   requestPushPermission,
   subscribeToPush,
   unsubscribeFromPush,
-  urlBase64ToUint8Array
-} from './notifications/client';
+  urlBase64ToUint8Array,
+} from './notifications';
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
   NotificationClient,
   NotificationClientConfig,
-  NotificationsListResponse
-} from './notifications/client';
+  NotificationsListResponse,
+} from './notifications';
 
 // Devices
-export { createDeviceClient } from './devices/client';
-export type { DeviceClient, DeviceClientConfig, DeviceItem } from './devices/client';
+export { createDeviceClient } from './devices';
+export type { DeviceClient, DeviceClientConfig, DeviceItem } from './devices';
 
 // API Keys
-export { createApiKeysClient } from './api-keys/client';
+export { createApiKeysClient } from './api-keys';
 export type {
   ApiKeyItem,
   ApiKeysClient,
@@ -107,15 +109,15 @@ export type {
   CreateApiKeyResponse,
   DeleteApiKeyResponse,
   ListApiKeysResponse,
-  RevokeApiKeyResponse
-} from './api-keys/client';
+  RevokeApiKeyResponse,
+} from './api-keys';
 
 // Phone/SMS
-export { createPhoneClient } from './phone/client';
-export type { PhoneClient, PhoneClientConfig } from './phone/client';
+export { createPhoneClient } from './phone';
+export type { PhoneClient, PhoneClientConfig } from './phone';
 
 // Webhooks
-export { createWebhookClient } from './webhooks/client';
+export { createWebhookClient } from './webhooks';
 export type {
   CreateWebhookRequest,
   UpdateWebhookRequest,
@@ -123,28 +125,31 @@ export type {
   WebhookClientConfig,
   WebhookDeliveryItem,
   WebhookItem,
-  WebhookWithDeliveries
-} from './webhooks/client';
+  WebhookWithDeliveries,
+} from './webhooks';
 
 // Workspace
-export { createWorkspaceClient } from './workspace/client';
-export type { WorkspaceClient, WorkspaceClientConfig } from './workspace/client';
+export { createWorkspaceClient } from './workspace';
+export type { WorkspaceClient, WorkspaceClientConfig } from './workspace';
 
 // Media
-export { createMediaClient } from './media/client';
+export { createMediaClient } from './media';
 export type {
-  MediaMetadata as ApiMediaMetadata, MediaClient,
-  MediaClientConfig, MediaStatusResponse,
-  MediaUploadResponse
-} from './media/client';
+  MediaMetadata as ApiMediaMetadata,
+  MediaClient,
+  MediaClientConfig,
+  MediaStatusResponse,
+  MediaUploadResponse,
+} from './media';
 
 // Settings
-export { createSettingsClient } from './settings/client';
+export { createSettingsClient } from './settings';
 export type {
-  ApiKeyLocal, SettingsClient,
-  SettingsClientConfig, CreateApiKeyRequest as SettingsCreateApiKeyRequest,
+  ApiKeyLocal,
+  SettingsClient,
+  SettingsClientConfig,
+  CreateApiKeyRequest as SettingsCreateApiKeyRequest,
   CreateApiKeyResponse as SettingsCreateApiKeyResponse,
   ListApiKeysResponse as SettingsListApiKeysResponse,
-  RevokeApiKeyResponse as SettingsRevokeApiKeyResponse
-} from './settings/client';
-
+  RevokeApiKeyResponse as SettingsRevokeApiKeyResponse,
+} from './settings';

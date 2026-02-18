@@ -801,4 +801,11 @@ export {
 // Constants (unique to core/constants, not in domain modules above)
 // ============================================================================
 
-export { COMMON_PASSWORDS, KEYBOARD_PATTERNS, OAUTH_PROVIDERS } from './constants';
+export {
+  AUTH_EXPIRY,
+  COMMON_PASSWORDS,
+  KEYBOARD_PATTERNS,
+  LOGIN_FAILURE_REASON,
+  OAUTH_PROVIDERS,
+  RETENTION_PERIODS,
+} from './constants';

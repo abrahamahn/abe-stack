@@ -195,8 +195,10 @@ describe('Query Keys', () => {
     });
 
     test('should handle factory with options', () => {
-      const factory: QueryKeyFactory<'users'> = (id, options) =>
-        options !== undefined ? ['users', 'detail', id, options] : ['users', 'detail', id];
+      const factory: QueryKeyFactory<'users'> = (...args) => {
+        const [id, options] = args;
+        return options != null ? ['users', 'detail', id!, options] : ['users', 'detail', id!];
+      };
 
       const keyWithOptions = factory('user-123', { include: 'profile' });
       const keyWithoutOptions = factory('user-456', undefined as unknown as string);

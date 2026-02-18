@@ -10,8 +10,8 @@
 import { getUserById } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
-import type { ProfileCompletenessResponse } from '@bslt/shared';
 import type { HandlerContext } from '../../../../system/src';
+import type { ProfileCompletenessResponse } from '@bslt/shared';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

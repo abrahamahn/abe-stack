@@ -32,9 +32,10 @@ const mockUploadAvatar = vi.fn();
 const mockDeleteAvatar = vi.fn();
 
 const createWrapper = (cache: QueryCache): ((props: { children: ReactNode }) => ReactElement) => {
-  return ({ children }: { children: ReactNode }): ReactElement => {
-    return createElement(QueryCacheProvider, { cache: cache, children }, children);
-  };
+  function Wrapper({ children }: { children: ReactNode }): ReactElement {
+    return createElement(QueryCacheProvider, { cache }, children);
+  }
+  return Wrapper;
 };
 
 describe('useAvatarUpload', () => {

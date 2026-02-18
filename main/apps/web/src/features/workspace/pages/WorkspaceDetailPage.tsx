@@ -160,7 +160,7 @@ export const WorkspaceDetailPage = (): ReactElement => {
         content: workspaceId !== null ? <WebhookManagement tenantId={workspaceId} /> : null,
       },
     ],
-    [navigate, workspaceId, user?.id],
+    [navigate, workspaceId, user],
   );
 
   if (workspaceId === null) {

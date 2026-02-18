@@ -1,7 +1,6 @@
 // main/client/ui/src/components/Image.tsx
 import {
   forwardRef,
-  useEffect,
   useState,
   type ComponentPropsWithoutRef,
   type ReactNode,
@@ -65,14 +64,17 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>((props, ref) => {
     ...rest
   } = props;
 
+  // Track which src was last loaded to detect changes without effects or refs.
+  // React supports calling setState during render when derived from a previous render's state.
+  const [loadedSrc, setLoadedSrc] = useState(src);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // Reset loading state when src changes
-  useEffect(() => {
+  if (loadedSrc !== src) {
+    setLoadedSrc(src);
     setIsLoading(true);
     setHasError(false);
-  }, [src]);
+  }
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>): void => {
     setIsLoading(false);

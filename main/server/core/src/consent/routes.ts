@@ -14,8 +14,8 @@ import { createRouteMap, protectedRoute, type RouteMap } from '../../../system/s
 
 import { handleGetConsent, handleUpdateConsent } from './handlers';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { ConsentAppContext } from './types';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Helper

@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { anonymizeExpiredUsers } from './pii-anonymization';
 
-import type { ServerLogger } from '@bslt/shared';
 import type { DbClient } from '../../../db/src';
+import type { ServerLogger } from '@bslt/shared';
 
 // ============================================================================
 // Mock Factories

@@ -35,10 +35,10 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies } from '../types';
 import type { OAuthConnectionInfo } from './types';
+import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types

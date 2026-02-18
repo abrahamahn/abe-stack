@@ -101,10 +101,10 @@ describe('useAuth', () => {
   };
 
   const createWrapper = (env: ClientEnvironment) => {
-    const wrapper = ({ children }: { children: ReactNode }) => {
-      return createElement(ClientEnvironmentProvider, { value: env, children });
-    };
-    return wrapper;
+    function Wrapper({ children }: { children: ReactNode }) {
+      return createElement(ClientEnvironmentProvider, { value: env }, children);
+    }
+    return Wrapper;
   };
 
   it('should return user data when authenticated', () => {

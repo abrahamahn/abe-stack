@@ -1,5 +1,6 @@
 // main/client/ui/src/components/SessionCard.tsx
-import { formatDate, parseUserAgent } from '@bslt/shared';
+import { formatDate } from '@bslt/shared/primitives/helpers';
+import { parseUserAgent } from '@bslt/shared/system/http';
 
 import { Badge } from '../elements/Badge';
 import { Button } from '../elements/Button';

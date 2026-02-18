@@ -32,6 +32,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -148,7 +149,7 @@ const RealtimeContext = createContext<RealtimeContextValue | null>(null);
 // ============================================================================
 
 export interface RealtimeProviderProps<TTables extends TableMap = TableMap> {
-  children: ReactNode;
+  children?: ReactNode;
   config: RealtimeProviderConfig<TTables>;
 }
 
@@ -209,7 +210,9 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
 
   // Keep config values in refs for stable callbacks
   const configRef = useRef(config);
-  configRef.current = config;
+  useLayoutEffect(() => {
+    configRef.current = config;
+  });
   const pubsubRef = useRef<WebsocketPubsubClient | null>(null);
 
   // Initialize core components (only once)
@@ -259,10 +262,8 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
           }
         }
       },
-      onStateChange: (state: UndoRedoState): void => {
-        setUndoRedoState(state);
-        configRef.current.onUndoRedoStateChange?.(state);
-      },
+      // Only call setUndoRedoState here — config callback called via useEffect below
+      onStateChange: setUndoRedoState,
     });
 
     return { recordStorage, undoRedoStack };
@@ -270,67 +271,66 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
 
   const { recordStorage, undoRedoStack } = components;
 
-  // Create subscription cache
-  const subscriptionCache = useMemo(() => {
-    return new SubscriptionCache({
-      onSubscribe: (key: string): void => {
-        pubsubRef.current?.subscribe(key);
-      },
-      onUnsubscribe: (key: string): void => {
-        pubsubRef.current?.unsubscribe(key);
-      },
-    });
-  }, []);
+  // Forward undo/redo state changes to config callback (safe: runs in effect, not render)
+  useEffect(() => {
+    configRef.current.onUndoRedoStateChange?.(undoRedoState);
+  }, [undoRedoState]);
 
-  // Create pubsub client
-  const pubsub = useMemo(() => {
-    return new WebsocketPubsubClient({
+  const handlePubsubMessage = useCallback(
+    (key: string, value: unknown): void => {
+      const [table, id] = key.split(':');
+      if (table === undefined || table === '' || id === undefined || id === '') return;
+      if (typeof value !== 'object' || value === null) return;
+
+      const record = value as VersionedRecord & { [key: string]: unknown };
+      const existing = recordCache.get(table as keyof TTables & string, id) as
+        | VersionedRecord
+        | undefined;
+      const shouldUpdate = existing === undefined || record.version > existing.version;
+
+      if (shouldUpdate) {
+        recordCache.set(
+          table as keyof TTables & string,
+          id,
+          record as unknown as TTables[keyof TTables & string],
+        );
+        void recordStorage.setRecord(table, record);
+      }
+    },
+    [recordCache, recordStorage],
+  );
+
+  // Create pubsub + subscription cache together so callbacks close directly over pubsub.
+  // Recreated only when connection config or message handler changes.
+  // Note: configRef.current access is intentionally deferred to effects below.
+  const { subscriptionCache, pubsub } = useMemo(() => {
+    const client = new WebsocketPubsubClient({
       host: wsHost,
       secure: wsSecure,
       debug,
-      onMessage: (key: string, value: unknown): void => {
-        // Parse key: "table:id"
-        const [table, id] = key.split(':');
-        if (table === undefined || table === '' || id === undefined || id === '') return;
-
-        // Validate value is an object before using as record
-        if (typeof value !== 'object' || value === null) return;
-
-        // Update cache with new value
-        const record = value as VersionedRecord & { [key: string]: unknown };
-        const existing = recordCache.get(table as keyof TTables & string, id) as
-          | VersionedRecord
-          | undefined;
-
-        // Update if no existing record or if new version is higher
-        const shouldUpdate = existing === undefined || record.version > existing.version;
-
-        if (shouldUpdate) {
-          recordCache.set(
-            table as keyof TTables & string,
-            id,
-            record as unknown as TTables[keyof TTables & string],
-          );
-
-          // Also persist to storage
-          void recordStorage.setRecord(table, record);
-        }
-      },
+      onMessage: handlePubsubMessage,
       onConnect: (): void => {
         setConnectionState('connected');
-        configRef.current.onConnectionStateChange?.('connected');
-
-        // Resubscribe to all active subscriptions
-        for (const key of subscriptionCache.keys()) {
-          pubsub.subscribe(key);
+        for (const key of cache.keys()) {
+          client.subscribe(key);
         }
       },
       onDisconnect: (): void => {
         setConnectionState('disconnected');
-        configRef.current.onConnectionStateChange?.('disconnected');
       },
     });
-  }, [wsHost, wsSecure, debug, recordCache, recordStorage, subscriptionCache]);
+
+    const cache = new SubscriptionCache({
+      onSubscribe: (key: string): void => {
+        client.subscribe(key);
+      },
+      onUnsubscribe: (key: string): void => {
+        client.unsubscribe(key);
+      },
+    });
+
+    return { subscriptionCache: cache, pubsub: client };
+  }, [wsHost, wsSecure, debug, handlePubsubMessage]);
 
   useEffect(() => {
     pubsubRef.current = pubsub;
@@ -338,6 +338,11 @@ export const RealtimeProvider = <TTables extends TableMap = TableMap>({
       pubsubRef.current = null;
     };
   }, [pubsub]);
+
+  // Forward connection state changes to config callback (safe: runs in effect, not render)
+  useEffect(() => {
+    configRef.current.onConnectionStateChange?.(connectionState);
+  }, [connectionState]);
 
   // Create transaction queue
   const transactionQueue = useMemo(() => {

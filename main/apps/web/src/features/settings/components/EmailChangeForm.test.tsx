@@ -18,8 +18,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EmailChangeForm } from './EmailChangeForm';
 
-import type { ChangeEvent, ReactNode } from 'react';
 import type { EmailChangeFormProps } from './EmailChangeForm';
+import type { ChangeEvent, ReactNode } from 'react';
 
 // ============================================================================
 // Mocks

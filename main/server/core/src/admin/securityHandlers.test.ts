@@ -19,6 +19,7 @@ import {
   handleListSecurityEvents,
 } from './securityHandlers';
 
+import type { AdminAppContext } from './types';
 import type {
   SecurityEvent,
   SecurityEventsExportRequest,
@@ -27,7 +28,6 @@ import type {
   SecurityMetrics,
 } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { AdminAppContext } from './types';
 
 // ============================================================================
 // Mocks
@@ -151,6 +151,11 @@ function createMockContext(): AdminAppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   } as AdminAppContext;
 }

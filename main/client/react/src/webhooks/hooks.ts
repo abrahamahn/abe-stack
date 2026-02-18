@@ -6,7 +6,7 @@
  * Uses useQuery for reads and useMutation for writes.
  */
 
-import { createWebhookClient } from '@bslt/api';
+import { createWebhookClient } from '@bslt/client-engine';
 import { useCallback, useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
@@ -18,7 +18,7 @@ import type {
   WebhookClientConfig,
   WebhookItem,
   WebhookWithDeliveries,
-} from '@bslt/api';
+} from '@bslt/client-engine';
 
 // ============================================================================
 // Query Keys
@@ -42,7 +42,7 @@ export interface WebhooksState {
 }
 
 export function useWebhooks(clientConfig: WebhookClientConfig): WebhooksState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: webhookQueryKeys.list(),
@@ -51,7 +51,7 @@ export function useWebhooks(clientConfig: WebhookClientConfig): WebhooksState {
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     webhooks: query.data?.webhooks ?? [],
@@ -76,7 +76,7 @@ export function useWebhook(
   clientConfig: WebhookClientConfig,
   id: string | null,
 ): WebhookDetailState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const query = useQuery({
     queryKey: webhookQueryKeys.detail(id ?? ''),
@@ -86,7 +86,7 @@ export function useWebhook(
 
   const handleRefresh = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query.refetch]);
+  }, [query]);
 
   return {
     webhook: query.data?.webhook ?? null,
@@ -110,7 +110,7 @@ export function useCreateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): CreateWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (data: CreateWebhookRequest) => client.create(data),
@@ -124,7 +124,7 @@ export function useCreateWebhook(
     async (data: CreateWebhookRequest): Promise<void> => {
       await mutation.mutateAsync(data);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { create: handleCreate, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -144,7 +144,7 @@ export function useUpdateWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): UpdateWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateWebhookRequest }) =>
@@ -159,7 +159,7 @@ export function useUpdateWebhook(
     async (id: string, data: UpdateWebhookRequest): Promise<void> => {
       await mutation.mutateAsync({ id, data });
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { update: handleUpdate, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -179,7 +179,7 @@ export function useDeleteWebhook(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): DeleteWebhookState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (id: string) => client.remove(id),
@@ -193,7 +193,7 @@ export function useDeleteWebhook(
     async (id: string): Promise<void> => {
       await mutation.mutateAsync(id);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return { remove: handleRemove, isLoading: mutation.isPending, error: mutation.error ?? null };
@@ -214,7 +214,7 @@ export function useRotateWebhookSecret(
   clientConfig: WebhookClientConfig,
   options?: { onSuccess?: () => void },
 ): RotateWebhookSecretState {
-  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig.baseUrl]);
+  const client = useMemo(() => createWebhookClient(clientConfig), [clientConfig]);
 
   const mutation = useMutation({
     mutationFn: (id: string) => client.rotateSecret(id),
@@ -227,7 +227,7 @@ export function useRotateWebhookSecret(
     async (id: string): Promise<void> => {
       await mutation.mutateAsync(id);
     },
-    [mutation.mutateAsync],
+    [mutation],
   );
 
   return {

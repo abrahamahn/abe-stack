@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobsTable } from './JobsTable';
 
-import type { JobStatus } from '@bslt/shared';
 import type { JobsTableProps } from './JobsTable';
+import type { JobStatus } from '@bslt/shared';
 
 // ============================================================================
 // Test Types (matching component internal types)

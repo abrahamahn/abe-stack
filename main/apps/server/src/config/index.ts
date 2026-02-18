@@ -4,41 +4,62 @@
  * 1. THE BRAIN
  * This is the only way the app should initialize the config.
  */
-export { load, load as loadConfig } from './factory';
+export { load, loadConfig } from './factory';
 
 /**
  * 2. AUTHENTICATION & SECURITY
- * Only export the utilities and types the server-side logic needs.
  */
-export { AuthValidationError, loadAuthConfig, validateAuthConfig } from './auth/auth';
+export {
+  AuthValidationError,
+  DEFAULT_JWT_ROTATION_CONFIG,
+  DEFAULT_RATE_LIMIT_CONFIG,
+  loadAuthConfig,
+  loadJwtRotationConfig,
+  loadRateLimitConfig,
+  validateAuthConfig,
+} from './auth';
 
 export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/core';
 
-export { loadJwtRotationConfig } from './auth/jwt';
-export { loadRateLimitConfig } from './auth/rate-limit';
-
 /**
  * 3. INFRASTRUCTURE
- * Selective helpers for DB connections and Storage handling.
  */
-export { loadCacheConfig } from './infra/cache';
 export {
   buildConnectionString,
+  DEFAULT_CACHE_CONFIG,
+  DEFAULT_PACKAGE_MANAGER_CONFIG,
+  DEFAULT_QUEUE_CONFIG,
   getSafeConnectionString,
-  loadDatabaseConfig
-} from './infra/database';
-export { loadServerConfig } from './infra/server';
-export { loadStorageConfig } from './infra/storage';
+  isJsonDatabase,
+  isPostgres,
+  loadCacheConfig,
+  loadDatabaseConfig,
+  loadPackageManagerConfig,
+  loadQueueConfig,
+  loadServerConfig,
+  loadStorageConfig,
+  validateStorage,
+} from './infra';
 
 /**
  * 4. SERVICES
- * Domain-specific loaders.
  */
-export { loadPackageManagerConfig } from './infra/package';
-export { loadBillingConfig, validateBillingConfig } from './services/billing';
-export { loadEmailConfig } from './services/email';
-export { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
-export { loadElasticsearchConfig, loadSqlSearchConfig } from './services/search';
+export {
+  DEFAULT_ELASTICSEARCH_CONFIG,
+  DEFAULT_NOTIFICATION_CONFIG,
+  DEFAULT_SMTP_CONFIG,
+  DEFAULT_SQL_SEARCH_CONFIG,
+  loadBillingConfig,
+  loadEmailConfig,
+  loadElasticsearchConfig,
+  loadNotificationsConfig,
+  loadSmtpConfig,
+  loadSqlSearchConfig,
+  validateBillingConfig,
+  validateElasticsearchConfig,
+  validateNotificationsConfig,
+  validateSqlSearchConfig,
+} from './services';
 
 /**
  * 5. THE CONTRACTS (Type Aliases)
@@ -59,6 +80,5 @@ export type {
   QueueConfig,
   SearchConfig,
   ServerConfig,
-  StorageConfig
+  StorageConfig,
 } from '@bslt/shared/config';
-

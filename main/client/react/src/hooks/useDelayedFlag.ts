@@ -18,8 +18,13 @@ export function useDelayedFlag(active: boolean, delayMs = DEFAULT_DELAY_MS): boo
 
   useEffect(() => {
     if (!active) {
-      setDelayed(false);
-      return;
+      // Reset immediately when deactivated
+      const resetId = setTimeout(() => {
+        setDelayed(false);
+      }, 0);
+      return (): void => {
+        clearTimeout(resetId);
+      };
     }
 
     const timeout = setTimeout(() => {

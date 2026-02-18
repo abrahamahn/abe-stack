@@ -12,8 +12,8 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useUserActions } from './useUserActions';
 
-import type { AdminLockUserResponse, AdminUpdateUserResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
+import type { AdminLockUserResponse, AdminUpdateUserResponse } from '@bslt/shared';
 
 // ============================================================================
 // Mocks

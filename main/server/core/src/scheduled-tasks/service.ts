@@ -16,9 +16,9 @@ import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 
 import { anonymizeDeletedUsers } from './pii-anonymization';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { DbClient, QueueStore, Repositories } from '../../../db/src';
 import type { ScheduledTask, ScheduledTaskLogger, TaskTracker } from './types';
+import type { DbClient, QueueStore, Repositories } from '../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Constants
@@ -180,6 +180,22 @@ export function registerScheduledTasks(
       },
     },
 
+    // Daily cleanup: Billing events older than 90 days
+    {
+      name: 'billing-events-cleanup',
+      description: 'Delete billing events older than 90 days',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const cutoff = new Date(Date.now() - RETENTION_PERIODS.BILLING_EVENTS_DAYS * ONE_DAY_MS);
+        const count = await repos.billingEvents.deleteOlderThan(cutoff);
+        log.info(
+          { task: 'billing-events-cleanup', deleted: count },
+          'Billing events cleanup completed',
+        );
+        return count;
+      },
+    },
+
     // Daily cleanup: Expire stale invitations
     {
       name: 'invitation-cleanup',
@@ -226,6 +242,51 @@ export function registerScheduledTasks(
         log.info(
           { task: 'email-verification-cleanup', deleted: count },
           'Email verification tokens cleanup completed',
+        );
+        return count;
+      },
+    },
+
+    // Daily cleanup: Expired email change tokens
+    {
+      name: 'email-change-tokens-cleanup',
+      description: 'Delete expired email change tokens',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const count = await repos.emailChangeTokens.deleteExpired();
+        log.info(
+          { task: 'email-change-tokens-cleanup', deleted: count },
+          'Email change tokens cleanup completed',
+        );
+        return count;
+      },
+    },
+
+    // Daily cleanup: Expired email change revert tokens
+    {
+      name: 'email-change-revert-tokens-cleanup',
+      description: 'Delete expired email change revert tokens',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const count = await repos.emailChangeRevertTokens.deleteExpired();
+        log.info(
+          { task: 'email-change-revert-tokens-cleanup', deleted: count },
+          'Email change revert tokens cleanup completed',
+        );
+        return count;
+      },
+    },
+
+    // Daily cleanup: Expired data export requests
+    {
+      name: 'data-export-cleanup',
+      description: 'Delete expired data export requests',
+      schedule: 'daily',
+      execute: async (): Promise<number> => {
+        const count = await repos.dataExportRequests.deleteExpired();
+        log.info(
+          { task: 'data-export-cleanup', deleted: count },
+          'Data export requests cleanup completed',
         );
         return count;
       },

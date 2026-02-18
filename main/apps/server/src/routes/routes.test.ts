@@ -243,6 +243,7 @@ function createMockContext(billingEnabled = false): AppContext {
           sameSite: 'lax',
           path: '/',
         },
+        oauthTokenEncryptionKey: 'test-cookie-secret-min-32-chars',
         oauth: {
           google: {
             clientId: 'test-client-id',

@@ -2,12 +2,13 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 
+import { StorageError } from '../errors';
 import { normalizeStorageKey } from '../signing';
 
-import { S3ClientWrapper } from './s3-client-wrapper';
+import { S3ClientWrapper } from './s3.client.wrapper';
 
-import type { ReadableStreamLike } from '@bslt/shared';
 import type { S3StorageConfig, StorageProvider } from '../index';
+import type { ReadableStreamLike } from '@bslt/shared';
 
 type AwsCredentials = ReturnType<typeof fromEnv> | { accessKeyId: string; secretAccessKey: string };
 
@@ -63,7 +64,7 @@ export class S3StorageProvider implements StorageProvider {
 
     const body = result.Body;
     if (body === undefined) {
-      throw new Error(`Empty body returned for S3 key: ${key}`);
+      throw new StorageError(`Empty response body for S3 key: ${key}`);
     }
 
     const byteArray: Uint8Array = await body.transformToByteArray();
@@ -78,7 +79,7 @@ export class S3StorageProvider implements StorageProvider {
 
     const body = result.Body;
     if (body === undefined) {
-      throw new Error(`Empty body returned for S3 key: ${key}`);
+      throw new StorageError(`Empty response body for S3 key: ${key}`);
     }
 
     return {

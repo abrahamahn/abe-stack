@@ -13,8 +13,9 @@
 
 import { HTTP_STATUS } from '@bslt/shared';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Repositories } from '../../../db/src';
+import type { AppRole } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Constants
@@ -38,7 +39,7 @@ const TOS_REQUIRED_CODE = 'TOS_ACCEPTANCE_REQUIRED';
  * ToS gating runs AFTER auth, so `user` is guaranteed to exist.
  */
 interface AuthenticatedRequest extends FastifyRequest {
-  user?: { userId: string; email: string; role: any };
+  user?: { userId: string; email: string; role: AppRole };
 }
 
 /**

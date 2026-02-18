@@ -50,7 +50,6 @@
       "@ipc/*": ["./src/electron/ipc/*"]
     },
     "outDir": "./dist",
-    "types": ["vite/client"],
     "composite": true,
     "noEmit": false,
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.desktop.tsbuildinfo",
@@ -60,6 +59,9 @@
   "exclude": [
     "node_modules",
     "vitest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/__tests__/**/*",
     "../web/src/__tests__/**/*",
     "../web/src/**/*.test.ts",
     "../web/src/**/*.test.tsx"

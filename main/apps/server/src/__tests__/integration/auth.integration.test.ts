@@ -1815,7 +1815,7 @@ describe('Auth API Integration Tests', () => {
       expect(testServer.email.send).toHaveBeenCalled();
     });
 
-    it('POST /api/auth/refresh detects token reuse and revokes family', async () => {
+    it('POST /api/auth/refresh detects token reuse and revokes family', () => {
       // Setup: Valid user, but token is already reused (or mapped to a reused state in logic)
       // Ideally, the service logic checks if the token exists.
       // If we mock finding the token, but also say the family is revoked...
@@ -1844,12 +1844,9 @@ describe('Auth API Integration Tests', () => {
       //    - `repos.refreshTokenFamilies.findById(payload.familyId)`
       //    - If family exists: **REUSE DETECTED** -> revoke family, log event, throw TokenReuseError.
 
-      const payload = {
-        tokenId: 'used-token-id',
-        familyId: 'family-reuse',
-        userId: 'user-reuse',
-        version: 1,
-      };
+      // The payload below would be used to craft a valid signed cookie for reuse testing.
+      // Left as reference for when we add real crypto signing to tests.
+      // { tokenId: 'used-token-id', familyId: 'family-reuse', userId: 'user-reuse', version: 1 }
 
       // Mock cookie unsigning to return this payload
       // We can't easily mock `unsignCookie` internal logic without deeper mocking,

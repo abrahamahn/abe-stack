@@ -23,8 +23,8 @@ import { isAuthenticatedRequest } from '@bslt/shared/core';
 
 import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
-import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
+import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
 
 // ============================================================================
 // Error Classes

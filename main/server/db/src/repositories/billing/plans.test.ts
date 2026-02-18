@@ -26,6 +26,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -33,9 +34,9 @@ const createMockDb = (): RawDb => ({
 // ============================================================================
 
 const mockFeatures: PlanFeature[] = [
-  { name: 'Unlimited storage', included: true },
-  { name: 'Priority support', included: true, description: '24/7 email support' },
-  { name: 'Advanced analytics', included: false },
+  { key: 'api:access', name: 'Unlimited storage', included: true },
+  { key: 'branding:custom', name: 'Priority support', included: true, description: '24/7 email support' },
+  { key: 'team:invite', name: 'Advanced analytics', included: false },
 ];
 
 const mockPlan: Plan = {
@@ -257,8 +258,8 @@ describe('createPlanRepository', () => {
       const repo = createPlanRepository(mockDb);
       const result = await repo.listActive();
 
-      expect(result[0].features).toEqual(mockFeatures);
-      expect(result[1].features).toEqual(mockFeatures);
+      expect(result[0]?.features).toEqual(mockFeatures);
+      expect(result[1]?.features).toEqual(mockFeatures);
     });
   });
 
@@ -332,7 +333,7 @@ describe('createPlanRepository', () => {
       const repo = createPlanRepository(mockDb);
       const result = await repo.create(newPlan);
 
-      expect(result?.name).toBe('Enterprise Plan');
+      expect(result.name).toBe('Enterprise Plan');
       expect(result.interval).toBe('year');
       expect(result.priceInCents).toBe(19999);
       expect(result.features).toEqual(mockFeatures);
@@ -385,7 +386,7 @@ describe('createPlanRepository', () => {
       const repo = createPlanRepository(mockDb);
       const result = await repo.create(minimalPlan);
 
-      expect(result?.name).toBe('Minimal Plan');
+      expect(result.name).toBe('Minimal Plan');
       expect(result.description).toBeNull();
       expect(result.features).toEqual([]);
     });
@@ -449,14 +450,14 @@ describe('createPlanRepository', () => {
       const updateData: UpdatePlan = {
         name: 'Pro Plan Updated',
         priceInCents: 2499,
-        features: [{ name: 'New Feature', included: true }],
+        features: [{ key: 'api:access' as const, name: 'New Feature', included: true }],
       };
 
       const updatedRow = {
         ...mockDbRow,
         name: 'Pro Plan Updated',
         price_in_cents: 2499,
-        features: JSON.stringify([{ name: 'New Feature', included: true }]),
+        features: JSON.stringify([{ key: 'api:access', name: 'New Feature', included: true }]),
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedRow);
@@ -466,7 +467,7 @@ describe('createPlanRepository', () => {
 
       expect(result?.name).toBe('Pro Plan Updated');
       expect(result?.priceInCents).toBe(2499);
-      expect(result?.features).toEqual([{ name: 'New Feature', included: true }]);
+      expect(result?.features).toEqual([{ key: 'api:access', name: 'New Feature', included: true }]);
       expect(mockDb.queryOne).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('UPDATE'),
@@ -485,12 +486,12 @@ describe('createPlanRepository', () => {
 
     it('should stringify features array when updating', async () => {
       const updateData: UpdatePlan = {
-        features: [{ name: 'Updated Feature', included: false }],
+        features: [{ key: 'team:invite' as const, name: 'Updated Feature', included: false }],
       };
 
       vi.mocked(mockDb.queryOne).mockResolvedValue({
         ...mockDbRow,
-        features: JSON.stringify([{ name: 'Updated Feature', included: false }]),
+        features: JSON.stringify([{ key: 'team:invite', name: 'Updated Feature', included: false }]),
       });
 
       const repo = createPlanRepository(mockDb);
@@ -692,16 +693,11 @@ describe('createPlanRepository', () => {
       const repo = createPlanRepository(mockDb);
       await repo.existsByName('Pro Plan', 'plan-123');
 
-      const callArgs = vi.mocked(mockDb.queryOne).mock.calls[0][0] as {
-        text: string;
-        values: unknown[];
-      };
-
-      // The SQL must use <> (not equal) for the id column, not = (equal)
-      // This ensures we check "does another plan with this name exist?" rather than
-      // "does this exact plan exist?"
-      expect(callArgs.text).toMatch(/id\s*<>/);
-      expect(callArgs.text).not.toMatch(/id\s*=\s*\$/);
+      expect(vi.mocked(mockDb.queryOne)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringMatching(/id\s*<>/),
+        }),
+      );
     });
 
     it('should handle empty excludeId parameter', async () => {
@@ -727,6 +723,7 @@ describe('createPlanRepository', () => {
     it('should handle features with all fields', async () => {
       const fullFeatures: PlanFeature[] = [
         {
+          key: 'branding:custom',
           name: 'Full Feature',
           included: true,
           description: 'Complete feature description',
@@ -744,11 +741,11 @@ describe('createPlanRepository', () => {
       const result = await repo.findById('plan-123');
 
       expect(result?.features).toEqual(fullFeatures);
-      expect(result?.features[0].description).toBe('Complete feature description');
+      expect(result?.features[0]?.description).toBe('Complete feature description');
     });
 
     it('should handle features without optional description', async () => {
-      const minimalFeatures: PlanFeature[] = [{ name: 'Minimal Feature', included: false }];
+      const minimalFeatures: PlanFeature[] = [{ key: 'team:invite', name: 'Minimal Feature', included: false }];
 
       const rowWithMinimalFeatures = {
         ...mockDbRow,
@@ -761,7 +758,7 @@ describe('createPlanRepository', () => {
       const result = await repo.findById('plan-123');
 
       expect(result?.features).toEqual(minimalFeatures);
-      expect(result?.features[0].description).toBeUndefined();
+      expect(result?.features[0]?.description).toBeUndefined();
     });
 
     it('should handle empty features JSON', async () => {

@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { PostgresQueueStore, createPostgresQueueStore } from './postgres-store';
 
+import type { Task, TaskError, TaskResult } from './types/queue-types';
 import type { DbClient } from '@bslt/db';
-import type { Task, TaskError, TaskResult } from './types';
 
 // ============================================================================
 // Mock Database Client

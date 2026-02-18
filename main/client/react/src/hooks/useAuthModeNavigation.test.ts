@@ -16,7 +16,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 function createWrapper(initialPath = '/') {
   return function wrapper({ children }: { children: ReactNode }): ReactElement {
-    return createElement(MemoryRouter, { initialEntries: [initialPath], children });
+    return createElement(MemoryRouter, { initialEntries: [initialPath] }, children);
   };
 }
 describe('useAuthModeNavigation', () => {

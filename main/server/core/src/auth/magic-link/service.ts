@@ -48,8 +48,8 @@ import {
   hashToken,
 } from '../utils';
 
-import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthEmailService, AuthEmailTemplates } from '../types';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Constants

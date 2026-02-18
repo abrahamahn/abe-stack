@@ -22,9 +22,9 @@ import {
 
 import { generateSecureToken, hashToken, revokeAllUserTokens, verifyPasswordSafe } from './utils';
 
-import type { AuthConfig } from '@bslt/shared/config';
-import type { DbClient, Repositories } from '../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { DbClient, Repositories } from '../../../db/src';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Types

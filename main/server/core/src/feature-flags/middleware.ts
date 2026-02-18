@@ -13,8 +13,8 @@
 
 import { ERROR_MESSAGES, evaluateFlag, HTTP_STATUS, WORKSPACE_ID_HEADER } from '@bslt/shared';
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FeatureFlagRepository, TenantFeatureOverrideRepository } from '../../../db/src';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types

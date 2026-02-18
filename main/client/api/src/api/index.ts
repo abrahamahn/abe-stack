@@ -6,6 +6,6 @@
  */
 
 export { createApiClient } from './client';
-export type { ApiClient, ApiClientConfig } from './client';
+export type { ApiClient, ApiClientConfig, TosRequiredPayload } from './client';
 export { clearApiClient, getApiClient } from './instance';
 export type { ApiClientOptions } from './types';

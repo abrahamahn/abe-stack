@@ -25,8 +25,8 @@ import {
 
 import { CustomJobQueue } from './queue';
 
-import type { Logger } from '@bslt/shared';
 import type { MediaMetadata } from '../types';
+import type { Logger } from '@bslt/shared';
 
 /**
  * Data payload for a media processing job

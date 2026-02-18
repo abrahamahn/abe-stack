@@ -35,6 +35,7 @@ function createMockContext(): ApiKeyAppContext {
       auditEvents: {
         create: vi.fn(),
         findById: vi.fn(),
+        find: vi.fn(),
         findRecent: vi.fn(),
         findByActorId: vi.fn(),
         findByTenantId: vi.fn(),
@@ -48,6 +49,11 @@ function createMockContext(): ApiKeyAppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
+    },
+    errorTracker: {
+      captureError: vi.fn(),
+      addBreadcrumb: vi.fn(),
+      setUserContext: vi.fn(),
     },
   };
 }

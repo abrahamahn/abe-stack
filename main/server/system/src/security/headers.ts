@@ -43,7 +43,7 @@ export function generateSecurityHeaders(options: SecurityHeaderOptions = {}): Se
 
   // Strict-Transport-Security (HSTS)
   const hstsMaxAge = options.hstsMaxAge ?? 31536000; // 1 year
-  let hstsValue = `max-age=${hstsMaxAge}`;
+  let hstsValue = `max-age=${String(hstsMaxAge)}`;
   if (options.hstsIncludeSubDomains !== false) hstsValue += '; includeSubDomains';
   if (options.hstsPreload === true) hstsValue += '; preload';
   headers['Strict-Transport-Security'] = hstsValue;

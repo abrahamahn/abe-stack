@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -36,7 +37,10 @@ const mockTenant = {
   owner_id: 'usr-123',
   name: 'Acme Corp',
   slug: 'acme-corp',
-  settings: { theme: 'dark' },
+  logo_url: null,
+  is_active: true,
+  metadata: { theme: 'dark' },
+  allowed_email_domains: [],
   created_at: new Date('2024-01-01'),
   updated_at: new Date('2024-01-01'),
 };
@@ -89,22 +93,22 @@ describe('createTenantRepository', () => {
       ).rejects.toThrow('Failed to create tenant');
     });
 
-    it('should handle optional settings', async () => {
-      const tenantWithSettings = {
+    it('should handle optional metadata', async () => {
+      const tenantWithMetadata = {
         ...mockTenant,
-        settings: { theme: 'light', notifications: true },
+        metadata: { theme: 'light', notifications: true },
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithSettings);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithMetadata);
 
       const repo = createTenantRepository(mockDb);
       const result = await repo.create({
         ownerId: 'usr-123',
         name: 'Acme Corp',
         slug: 'acme-corp',
-        settings: { theme: 'light', notifications: true },
+        metadata: { theme: 'light', notifications: true },
       });
 
-      expect(result.settings).toEqual({ theme: 'light', notifications: true });
+      expect(result.metadata).toEqual({ theme: 'light', notifications: true });
     });
 
     it('should handle tenant creation with minimal data', async () => {
@@ -112,7 +116,7 @@ describe('createTenantRepository', () => {
         ...mockTenant,
         name: 'Minimal Corp',
         slug: 'minimal-corp',
-        settings: null,
+        metadata: {},
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(minimalTenant);
 
@@ -264,8 +268,8 @@ describe('createTenantRepository', () => {
       const result = await repo.findByOwnerId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].ownerId).toBe('usr-123');
-      expect(result[1].ownerId).toBe('usr-123');
+      expect(result[0]?.ownerId).toBe('usr-123');
+      expect(result[1]?.ownerId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('owner_id'),
@@ -306,15 +310,15 @@ describe('createTenantRepository', () => {
       const result = await repo.findByOwnerId('usr-123');
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('tenant-123');
+      expect(result[0]?.id).toBe('tenant-123');
     });
 
     it('should handle owner with multiple tenants', async () => {
       const multiTenants = Array.from({ length: 5 }, (_, i) => ({
         ...mockTenant,
-        id: `tenant-${i}`,
-        name: `Tenant ${i}`,
-        slug: `tenant-${i}`,
+        id: `tenant-${String(i)}`,
+        name: `Tenant ${String(i)}`,
+        slug: `tenant-${String(i)}`,
       }));
       vi.mocked(mockDb.query).mockResolvedValue(multiTenants);
 
@@ -356,18 +360,18 @@ describe('createTenantRepository', () => {
       expect(result).toBeNull();
     });
 
-    it('should update only specified fields', async () => {
+    it('should update metadata field', async () => {
       const updatedTenant = {
         ...mockTenant,
-        settings: { theme: 'light' },
+        metadata: { theme: 'light' },
         updated_at: new Date('2024-01-02'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedTenant);
 
       const repo = createTenantRepository(mockDb);
-      const result = await repo.update('tenant-123', { settings: { theme: 'light' } });
+      const result = await repo.update('tenant-123', { metadata: { theme: 'light' } });
 
-      expect(result?.settings).toEqual({ theme: 'light' });
+      expect(result?.metadata).toEqual({ theme: 'light' });
       expect(result?.name).toBe('Acme Corp');
     });
 
@@ -403,7 +407,7 @@ describe('createTenantRepository', () => {
       const updatedTenant = {
         ...mockTenant,
         name: 'New Name',
-        settings: { theme: 'light', locale: 'en-US' },
+        metadata: { theme: 'light', locale: 'en-US' },
         updated_at: new Date('2024-01-02'),
       };
       vi.mocked(mockDb.queryOne).mockResolvedValue(updatedTenant);
@@ -411,11 +415,11 @@ describe('createTenantRepository', () => {
       const repo = createTenantRepository(mockDb);
       const result = await repo.update('tenant-123', {
         name: 'New Name',
-        settings: { theme: 'light', locale: 'en-US' },
+        metadata: { theme: 'light', locale: 'en-US' },
       });
 
       expect(result?.name).toBe('New Name');
-      expect(result?.settings).toEqual({ theme: 'light', locale: 'en-US' });
+      expect(result?.metadata).toEqual({ theme: 'light', locale: 'en-US' });
     });
   });
 
@@ -484,34 +488,21 @@ describe('createTenantRepository', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle null settings', async () => {
-      const tenantWithoutSettings = {
+    it('should handle empty metadata object', async () => {
+      const tenantWithEmptyMetadata = {
         ...mockTenant,
-        settings: null,
+        metadata: {},
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithoutSettings);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithEmptyMetadata);
 
       const repo = createTenantRepository(mockDb);
       const result = await repo.findById('tenant-123');
 
-      expect(result?.settings).toBeNull();
+      expect(result?.metadata).toEqual({});
     });
 
-    it('should handle empty settings object', async () => {
-      const tenantWithEmptySettings = {
-        ...mockTenant,
-        settings: {},
-      };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithEmptySettings);
-
-      const repo = createTenantRepository(mockDb);
-      const result = await repo.findById('tenant-123');
-
-      expect(result?.settings).toEqual({});
-    });
-
-    it('should handle complex settings structure', async () => {
-      const complexSettings = {
+    it('should handle complex metadata structure', async () => {
+      const complexMetadata = {
         theme: 'dark',
         notifications: {
           email: true,
@@ -520,16 +511,29 @@ describe('createTenantRepository', () => {
         },
         features: ['feature1', 'feature2'],
       };
-      const tenantWithComplexSettings = {
+      const tenantWithComplexMetadata = {
         ...mockTenant,
-        settings: complexSettings,
+        metadata: complexMetadata,
       };
-      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithComplexSettings);
+      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithComplexMetadata);
 
       const repo = createTenantRepository(mockDb);
       const result = await repo.findById('tenant-123');
 
-      expect(result?.settings).toEqual(complexSettings);
+      expect(result?.metadata).toEqual(complexMetadata);
+    });
+
+    it('should handle allowed email domains', async () => {
+      const tenantWithDomains = {
+        ...mockTenant,
+        allowed_email_domains: ['example.com', 'acme.com'],
+      };
+      vi.mocked(mockDb.queryOne).mockResolvedValue(tenantWithDomains);
+
+      const repo = createTenantRepository(mockDb);
+      const result = await repo.findById('tenant-123');
+
+      expect(result?.allowedEmailDomains).toEqual(['example.com', 'acme.com']);
     });
 
     it('should handle very long tenant names', async () => {

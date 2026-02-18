@@ -85,7 +85,8 @@ function createMockDb(): DbClient {
     execute: vi.fn(),
     raw: vi.fn(),
     transaction: vi.fn(((callback: (tx: DbClient) => Promise<unknown>) =>
-      callback(mockDb as DbClient)) as DbClient['transaction']),
+      callback(mockDb as unknown as DbClient)) as DbClient['transaction']),
+    withSession: vi.fn(),
     healthCheck: vi.fn(),
     close: vi.fn(),
     getClient: vi.fn(),

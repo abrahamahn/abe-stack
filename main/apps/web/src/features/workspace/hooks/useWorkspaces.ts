@@ -7,6 +7,7 @@
 
 import { getAccessToken } from '@app/authToken';
 import { useQuery, useQueryCache } from '@bslt/react';
+import { clientConfig } from '@config';
 
 import { createWorkspaceApi } from '../api';
 
@@ -17,12 +18,10 @@ import type { Tenant } from '@bslt/shared';
 // ============================================================================
 
 let workspaceApi: ReturnType<typeof createWorkspaceApi> | null = null;
-const apiBaseUrl =
-  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getWorkspaceApi(): ReturnType<typeof createWorkspaceApi> {
   workspaceApi ??= createWorkspaceApi({
-    baseUrl: apiBaseUrl,
+    baseUrl: clientConfig.apiUrl,
     getToken: getAccessToken,
   });
   return workspaceApi;

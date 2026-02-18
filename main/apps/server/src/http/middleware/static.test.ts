@@ -92,7 +92,7 @@ describe('Static File Serving', () => {
           maxAge: 3600,
         });
         const calls = mockServer.get.mock.calls[0];
-        if (calls !== undefined && calls !== null && typeof calls[2] === 'function') {
+        if (typeof calls?.[2] === 'function') {
           routeHandler = calls[2] as (req: unknown, reply: unknown) => Promise<unknown>;
         }
       });

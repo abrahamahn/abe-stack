@@ -15,13 +15,13 @@ import {
   handleTotpStatus,
 } from './totp';
 
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   TotpLoginVerifyRequest,
   TotpSetupResponse,
   TotpStatusResponse,
   TotpVerifyRequest,
 } from '@bslt/shared';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 // ============================================================================
 // Mock Dependencies

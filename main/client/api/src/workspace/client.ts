@@ -7,6 +7,7 @@
 
 import { createCsrfRequestClient } from '../utils';
 
+import type { BaseClientConfig } from '../utils';
 import type {
   CreateInvitation,
   CreateTenantInput,
@@ -16,7 +17,6 @@ import type {
   UpdateMembershipRole,
   UpdateTenantInput,
 } from '@bslt/shared';
-import type { BaseClientConfig } from '../utils';
 
 export type WorkspaceClientConfig = BaseClientConfig;
 

@@ -22,11 +22,11 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
  * <CloseButton aria-label="Dismiss notification" onClick={handleDismiss} />
  * ```
  */
-const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>((props, ref) => {
+const CloseButton = forwardRef<HTMLElement, CloseButtonProps>((props, ref) => {
   const { children, className = '', 'aria-label': ariaLabel = 'Close', ...rest } = props;
   return (
     <Button
-      ref={ref as any}
+      ref={ref}
       aria-label={ariaLabel}
       className={`close-btn ${className}`.trim()}
       {...rest}

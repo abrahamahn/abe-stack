@@ -17,9 +17,9 @@ import {
 
 import { createPaginationHelpers } from './helpers';
 
+import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
 import type { CursorPaginationOptions } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
 
 /**
  * Default pagination middleware options

@@ -4,7 +4,7 @@ export {
   getRegisteredRoutes,
   registerRoute,
   type RouteRegistryEntry,
-} from './route-registry';
+} from './route.registry';
 export {
   createRouteMap,
   protectedRoute,

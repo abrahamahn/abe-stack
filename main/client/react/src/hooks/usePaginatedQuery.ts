@@ -8,7 +8,7 @@ import {
   type PaginatedResult,
   type PaginationOptions,
 } from '@bslt/shared';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useQueryCache } from '../query/QueryCacheProvider';
 import { useInfiniteQuery } from '../query/useInfiniteQuery';
@@ -142,14 +142,16 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
   const itemCount = data.length;
   const prevItemCountRef = useRef(itemCount);
 
-  if (itemCount !== prevItemCountRef.current) {
-    const isInitialLoadNotification = !hasCalledOnDataReceivedRef.current;
-    if (isInitialLoadNotification) {
-      hasCalledOnDataReceivedRef.current = true;
+  useEffect(() => {
+    if (itemCount !== prevItemCountRef.current) {
+      const isInitialLoadNotification = !hasCalledOnDataReceivedRef.current;
+      if (isInitialLoadNotification) {
+        hasCalledOnDataReceivedRef.current = true;
+      }
+      onDataReceived?.(data, isInitialLoadNotification);
+      prevItemCountRef.current = itemCount;
     }
-    onDataReceived?.(data, isInitialLoadNotification);
-    prevItemCountRef.current = itemCount;
-  }
+  });
 
   // Reset function
   const reset = useCallback(() => {

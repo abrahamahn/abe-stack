@@ -301,6 +301,7 @@ describe('Billing Schema - Plan Types', () => {
   describe('PlanFeature', () => {
     it('should have required properties', () => {
       const feature: PlanFeature = {
+        key: 'api:access',
         name: 'Unlimited projects',
         included: true,
       };
@@ -311,6 +312,7 @@ describe('Billing Schema - Plan Types', () => {
 
     it('should support optional description', () => {
       const featureWithDesc: PlanFeature = {
+        key: 'api:access',
         name: 'API Access',
         included: true,
         description: 'Full REST API access',
@@ -320,8 +322,8 @@ describe('Billing Schema - Plan Types', () => {
     });
 
     it('should allow boolean included flag', () => {
-      const includedFeature: PlanFeature = { name: 'Feature A', included: true };
-      const excludedFeature: PlanFeature = { name: 'Feature B', included: false };
+      const includedFeature: PlanFeature = { key: 'team:invite', name: 'Feature A', included: true };
+      const excludedFeature: PlanFeature = { key: 'branding:custom', name: 'Feature B', included: false };
 
       expect(includedFeature.included).toBe(true);
       expect(excludedFeature.included).toBe(false);
@@ -379,8 +381,8 @@ describe('Billing Schema - Plan Types', () => {
 
     it('should support features array', () => {
       const features: PlanFeature[] = [
-        { name: 'Feature 1', included: true },
-        { name: 'Feature 2', included: false },
+        { key: 'team:invite', name: 'Feature 1', included: true },
+        { key: 'branding:custom', name: 'Feature 2', included: false },
       ];
 
       const plan: Plan = {
@@ -451,7 +453,7 @@ describe('Billing Schema - Plan Types', () => {
         interval: 'year',
         priceInCents: 19900,
         currency: 'eur',
-        features: [{ name: 'Everything', included: true }],
+        features: [{ key: 'api:access', name: 'Everything', included: true }],
         trialDays: 30,
         stripePriceId: 'price_xyz',
         stripeProductId: 'prod_xyz',

@@ -80,10 +80,47 @@ vi.mock('sharp', () => {
 // Cast strictly to Mock for use in tests
 const sharpMock = sharp as unknown as Mock;
 
+/** Shape of the mock sharp instance used across tests */
+interface MockSharpInstance {
+  resize: ReturnType<typeof vi.fn>;
+  jpeg: ReturnType<typeof vi.fn>;
+  png: ReturnType<typeof vi.fn>;
+  webp: ReturnType<typeof vi.fn>;
+  toBuffer: ReturnType<typeof vi.fn>;
+  toFormat: ReturnType<typeof vi.fn>;
+  quality: ReturnType<typeof vi.fn>;
+  withMetadata: ReturnType<typeof vi.fn>;
+  removeAlpha: ReturnType<typeof vi.fn>;
+  flatten: ReturnType<typeof vi.fn>;
+  rotate: ReturnType<typeof vi.fn>;
+  blur: ReturnType<typeof vi.fn>;
+  sharpen: ReturnType<typeof vi.fn>;
+  median: ReturnType<typeof vi.fn>;
+  gamma: ReturnType<typeof vi.fn>;
+  negate: ReturnType<typeof vi.fn>;
+  normalise: ReturnType<typeof vi.fn>;
+  clahe: ReturnType<typeof vi.fn>;
+  convolve: ReturnType<typeof vi.fn>;
+  threshold: ReturnType<typeof vi.fn>;
+  linear: ReturnType<typeof vi.fn>;
+  modulate: ReturnType<typeof vi.fn>;
+  tint: ReturnType<typeof vi.fn>;
+  composite: ReturnType<typeof vi.fn>;
+  extend: ReturnType<typeof vi.fn>;
+  embed: ReturnType<typeof vi.fn>;
+  max: ReturnType<typeof vi.fn>;
+  min: ReturnType<typeof vi.fn>;
+  withoutEnlargement: ReturnType<typeof vi.fn>;
+  kernel: ReturnType<typeof vi.fn>;
+  failOnError: ReturnType<typeof vi.fn>;
+  metadata: ReturnType<typeof vi.fn>;
+  stats: ReturnType<typeof vi.fn>;
+}
+
 describe('Image Processing', () => {
   const mockImageBuffer = Buffer.from('test-image-data');
   // Store mock instance for test assertions
-  let mockInstance: ReturnType<typeof sharpMock>;
+  let mockInstance: MockSharpInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -150,8 +187,8 @@ describe('Image Processing', () => {
     };
 
     // Reset mock to return the stable methods object
-    mockInstance = mockMethods as ReturnType<typeof sharpMock>;
-    sharpMock.mockImplementation(() => mockInstance);
+    mockInstance = mockMethods as MockSharpInstance;
+    sharpMock.mockImplementation((): MockSharpInstance => mockInstance);
   });
 
   describe('resizeImage', () => {

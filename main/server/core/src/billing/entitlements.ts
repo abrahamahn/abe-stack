@@ -11,8 +11,8 @@
 
 import { ForbiddenError, resolveEntitlements } from '@bslt/shared';
 
-import type { ResolvedEntitlements, SubscriptionState } from '@bslt/shared';
 import type { BillingRepositories } from './types';
+import type { ResolvedEntitlements, SubscriptionState } from '@bslt/shared';
 
 // ============================================================================
 // Types

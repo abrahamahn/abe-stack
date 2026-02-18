@@ -108,7 +108,7 @@ export const OAuthButtons = ({
 
   const handleOAuthClick = (provider: OAuthProviderLocal): void => {
     const url = getOAuthLoginUrl(config.apiUrl, provider);
-    window.location.href = url;
+    window.location.assign(url);
   };
 
   return (

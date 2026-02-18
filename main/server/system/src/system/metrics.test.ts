@@ -162,6 +162,20 @@ describe('MetricsCollector', () => {
           p99: expect.any(Number),
           avg: expect.any(Number),
         },
+        jobs: {
+          enqueued: expect.any(Number),
+          processed: expect.any(Number),
+          completed: expect.any(Number),
+          failed: expect.any(Number),
+          byName: expect.any(Object),
+        },
+        auth: {
+          loginAttempts: expect.any(Number),
+          loginSuccess: expect.any(Number),
+          loginFailures: expect.any(Number),
+          lockouts: expect.any(Number),
+          byProvider: expect.any(Object),
+        },
         uptimeSeconds: expect.any(Number),
         collectedAt: expect.any(String),
       });

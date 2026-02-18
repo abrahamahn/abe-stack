@@ -14,8 +14,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleLogin } from './login';
 
-import type { LoginRequest } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
+import type { LoginRequest } from '@bslt/shared';
 
 // ============================================================================
 // Mock Dependencies

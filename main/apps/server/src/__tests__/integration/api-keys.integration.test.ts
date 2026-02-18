@@ -47,7 +47,7 @@ function createInMemoryApiKeyRepo() {
       counter += 1;
       const now = new Date();
       const record: ApiKeyRecord = {
-        id: `key-${counter}`,
+        id: `key-${String(counter)}`,
         tenantId: data.tenantId ?? null,
         userId: data.userId ?? 'unknown-user',
         name: data.name ?? 'API Key',

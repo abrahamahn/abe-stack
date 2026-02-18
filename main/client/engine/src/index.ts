@@ -1,5 +1,54 @@
 // main/client/engine/src/index.ts
 
+// API Client re-exports for react layer (DAG: react → c-engine → api)
+export { createApiClient } from '@bslt/api';
+export type { ApiClient, ApiClientConfig } from '@bslt/api';
+
+export { createAdminBillingClient } from '@bslt/api';
+export type { AdminBillingClient, AdminBillingClientConfig } from '@bslt/api';
+
+export { createBillingClient } from '@bslt/api';
+export type { BillingClient, BillingClientConfig } from '@bslt/api';
+
+export { createDeviceClient } from '@bslt/api';
+export type { DeviceClient, DeviceClientConfig, DeviceItem } from '@bslt/api';
+
+export { createApiKeysClient } from '@bslt/api';
+export type {
+  ApiKeyItem,
+  ApiKeysClient,
+  ApiKeysClientConfig,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  DeleteApiKeyResponse,
+  RevokeApiKeyResponse,
+} from '@bslt/api';
+
+export {
+  createNotificationClient,
+  getDeviceId,
+  getExistingSubscription,
+  getPushPermission,
+  isPushSupported,
+  requestPushPermission,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from '@bslt/api';
+export type { NotificationClient, NotificationClientConfig } from '@bslt/api';
+
+export { createPhoneClient } from '@bslt/api';
+export type { PhoneClient, PhoneClientConfig } from '@bslt/api';
+
+export { createWebhookClient } from '@bslt/api';
+export type {
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  WebhookClient,
+  WebhookClientConfig,
+  WebhookItem,
+  WebhookWithDeliveries,
+} from '@bslt/api';
+
 // In-Memory Cache
 export { Loader, LoaderCache, loadWithCache } from './cache/LoaderCache';
 export type { LoaderCacheOptions, LoaderOptions, LoaderState } from './cache/LoaderCache';
@@ -122,4 +171,17 @@ export {
   type ContrastMode,
   type Density
 } from './theme';
+
+// UI / Keyboard
+export {
+  formatKeyBinding,
+  isEditableElement,
+  isMac,
+  matchesAnyBinding,
+  matchesKeyBinding,
+  matchesModifiers,
+  parseKeyBinding,
+  type KeyModifiers,
+  type ParsedKeyBinding,
+} from './ui/keyboard';
 

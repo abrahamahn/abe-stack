@@ -9,25 +9,25 @@
  */
 
 // ============================================================================
+// Errors
+// ============================================================================
+
+export { registerErrorHandler, replyError, replyOk, sendResult } from './errors';
+
+// ============================================================================
 // Logger
 // ============================================================================
 
 export {
-  CONSOLE_LOG_LEVELS, createBaseLogger,
-  createBaseRequestLogger,
-  createConsoleLogger,
-  createJobCorrelationId,
-  createJobLogger,
-  createLogger,
-  createLogRequestContext,
-  createRequestLogger,
-  generateCorrelationId,
-  getOrCreateCorrelationId,
-  isValidCorrelationId, LOG_LEVELS, registerLoggingMiddleware,
-  shouldLog,
-  type BaseLogger,
-  type BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type Logger,
-  type LoggerConfig, type LogLevel, type LogRequestContext
+    createBaseLogger,
+    createBaseRequestLogger,
+    createConsoleLogger,
+    createJobLogger, createLogRequestContext, createLogger, createRequestLogger,
+    getOrCreateCorrelationId,
+    registerLoggingMiddleware,
+    type BaseLogger,
+    type BaseLoggerType, type ConsoleLogLevel, type ConsoleLoggerConfig, type LogData, type LogLevel, type LogRequestContext, type Logger,
+    type LoggerConfig
 } from './logger';
 
 // ============================================================================
@@ -35,66 +35,59 @@ export {
 // ============================================================================
 
 export {
-  emailTemplates,
-  type AuthEmailTemplates,
-  type EmailOptions,
-  type EmailResult,
-  type EmailService
-} from './mailer';
-export { MailerClient } from './mailer/client';
+    MailerClient, emailTemplates, type AuthEmailTemplates,
+    type EmailOptions,
+    type EmailResult,
+    type EmailService
+} from './email';
 
 // ============================================================================
 // Cache
 // ============================================================================
 
 export {
-  // Errors
-  CacheCapacityError,
-  CacheConnectionError,
-  CacheDeserializationError,
-  CacheError,
-  CacheInvalidKeyError,
-  CacheMemoryLimitError,
-  CacheNotInitializedError,
-  CacheProviderNotFoundError,
-  CacheSerializationError,
-  CacheTimeoutError,
-  // Factory
-  createCache,
-  createCacheFromEnv,
-  createMemoryCache,
-  // Configuration
-  DEFAULT_CACHE_CONFIG,
-  isCacheConnectionError,
-  isCacheError,
-  isCacheTimeoutError,
-  loadCacheConfig,
-  // Core LRU
-  LRUCache,
-  // Providers
-  MemoryCacheProvider,
-  toCacheError,
-  // Types
-  type BaseCacheConfig,
-  type CacheConfig,
-  type CacheDeleteOptions,
-  type CacheEntry,
-  type CacheEntryMetadata,
-  type CacheEvictionReason,
-  type CacheGetOptions,
-  type CacheLogger,
-  type CacheOperationResult,
-  type CacheProvider,
-  type CacheSetOptions,
-  type CacheStats,
-  type CreateCacheOptions,
-  type EvictionCallback,
-  type EvictionReason,
-  type LRUCacheOptions,
-  type MemoizedFunction,
-  type MemoizeOptions,
-  type MemoizeStats,
-  type MemoryCacheConfig
+    // Errors
+    CacheCapacityError,
+    CacheConnectionError,
+    CacheDeserializationError,
+    CacheError,
+    CacheInvalidKeyError,
+    CacheMemoryLimitError,
+    CacheNotInitializedError,
+    CacheProviderNotFoundError,
+    CacheSerializationError,
+    CacheTimeoutError,
+    // Configuration
+    DEFAULT_CACHE_CONFIG,
+    // Core LRU
+    LRUCache,
+    // Providers
+    MemoryCacheProvider,
+    // Factory
+    createCache,
+    createCacheFromEnv,
+    createMemoryCache, isCacheConnectionError,
+    isCacheError,
+    isCacheTimeoutError,
+    loadCacheConfig, toCacheError,
+    // Types
+    type BaseCacheConfig,
+    type CacheConfig,
+    type CacheDeleteOptions,
+    type CacheEntry,
+    type CacheEntryMetadata,
+    type CacheEvictionReason,
+    type CacheGetOptions,
+    type CacheLogger,
+    type CacheOperationResult,
+    type CacheProvider,
+    type CacheSetOptions,
+    type CacheStats,
+    type CreateCacheOptions,
+    type EvictionCallback,
+    type EvictionReason,
+    type LRUCacheOptions, type MemoizeOptions,
+    type MemoizeStats, type MemoizedFunction, type MemoryCacheConfig
 } from './cache';
 
 // ============================================================================
@@ -102,171 +95,117 @@ export {
 // ============================================================================
 
 export {
-  // Environment Schema
-  AuthEnvSchema,
-  BillingEnvSchema,
-  CacheEnvSchema,
-  DatabaseEnvSchema,
-  EmailEnvSchema,
-  EnvSchema,
-  // Parsers
-  getBool,
-  getInt,
-  getList,
-  getRequired,
-  // Environment Loading
-  initEnv,
-  loadServerEnv,
-  NotificationEnvSchema,
-  PackageManagerEnvSchema,
-  QueueEnvSchema,
-  SearchEnvSchema,
-  ServerEnvSchema,
-  StorageEnvSchema,
-  validateEnvironment,
-  type FullEnv
+    // Environment Schema
+    AuthEnvSchema,
+    BillingEnvSchema,
+    CacheEnvSchema,
+    DatabaseEnvSchema,
+    EmailEnvSchema,
+    EnvSchema, NotificationEnvSchema,
+    PackageManagerEnvSchema,
+    QueueEnvSchema,
+    SearchEnvSchema,
+    ServerEnvSchema,
+    StorageEnvSchema,
+    // Parsers
+    getBool,
+    getInt,
+    getList,
+    getRequired,
+    // Environment Loading
+    initEnv,
+    loadServerEnv, validateEnvironment,
+    type FullEnv
 } from './config';
 
 // ============================================================================
-// Security — Crypto (JWT)
+// Security
 // ============================================================================
 
 export {
-  checkTokenSecret,
-  createJwtRotationHandler,
-  decode,
-  JwtError,
-  sign,
-  signWithRotation,
-  verify,
-  verifyWithRotation,
-  type JwtErrorCode,
-  type JwtHeader,
-  type JwtPayload,
-  type JwtRotationConfig,
-  type JwtRotationHandler,
-  type RotatingJwtOptions,
-  type SignOptions,
-  type VerifyOptions
-} from './security/crypto';
-
-// ============================================================================
-// Security — Token (CSRF)
-// ============================================================================
-
-export {
-  decryptToken,
-  encryptToken,
-  generateToken,
-  signToken,
-  TOKEN_LENGTH,
-  validateCsrfToken,
-  verifyToken as verifyCsrfToken,
-  verifyToken,
-  type CsrfValidationOptions
-} from './security/token';
-
-export {
-  generateSecurityHeaders,
-  getProductionSecurityDefaults,
-  type SecurityHeaderOptions,
-  type SecurityHeaders
-} from './security/headers';
-
-// ============================================================================
-// Security — Permissions
-// ============================================================================
-
-export {
-  allowed,
-  createAdminRule,
-  createCustomRule,
-  createDefaultPermissionConfig,
-  createMemberRule,
-  createOwnerRule,
-  createPermissionChecker,
-  denied,
-  getRecordKey,
-  isAllowed,
-  isDenied,
-  parseRecordKey,
-  PERMISSION_TYPES,
-  PermissionChecker,
-  type BatchRecordLoader,
-  type CustomRule,
-  type MembershipRule,
-  type OwnershipRule,
-  type PermissionAllowed,
-  type PermissionCheck,
-  type PermissionCheckerOptions,
-  type PermissionConfig,
-  type PermissionContext,
-  type PermissionDenied,
-  type PermissionRecord,
-  type PermissionResult,
-  type PermissionRule,
-  type PermissionRuleBase,
-  type PermissionRuleType,
-  type PermissionType,
-  type RecordLoader,
-  type RecordPointer,
-  type RoleRule,
-  type TablePermissionConfig
-} from './security/permissions';
-
-// ============================================================================
-// Security — Rate Limiting
-// ============================================================================
-
-export {
-  createRateLimiter,
-  MemoryStore,
-  RateLimiter,
-  RateLimitPresets,
-  type MemoryStoreConfig,
-  type MemoryStoreStats,
-  type RateLimitConfig,
-  type RateLimiterStats,
-  type RateLimitInfo
-} from './security/rate-limit';
+    JwtError,
+    // Rate Limiting
+    MemoryStore,
+    // Permissions
+    PERMISSION_TYPES,
+    PermissionChecker, RateLimitPresets,
+    RateLimiter,
+    // Token (CSRF)
+    TOKEN_LENGTH, allowed,
+    // Crypto (JWT)
+    checkTokenSecret, createAdminRule,
+    createCustomRule,
+    createDefaultPermissionConfig, createJwtRotationHandler, createMemberRule,
+    createOwnerRule,
+    createPermissionChecker, createRateLimiter, decode, decryptToken, denied, encryptToken,
+    // Headers
+    generateSecurityHeaders, generateToken, getProductionSecurityDefaults, getRecordKey,
+    isAllowed,
+    isDenied,
+    parseRecordKey, sign, signToken, signWithRotation, validateCsrfToken, verify, verifyToken as verifyCsrfToken,
+    verifyToken, verifyWithRotation, type BatchRecordLoader, type CsrfValidationOptions, type CustomRule, type JwtErrorCode,
+    type JwtHeader,
+    type JwtPayload,
+    type JwtRotationConfig,
+    type JwtRotationHandler, type MembershipRule, type MemoryStoreConfig,
+    type MemoryStoreStats, type OwnershipRule,
+    type PermissionAllowed,
+    type PermissionCheck,
+    type PermissionCheckerOptions,
+    type PermissionConfig,
+    type PermissionContext,
+    type PermissionDenied,
+    type PermissionRecord,
+    type PermissionResult,
+    type PermissionRule,
+    type PermissionRuleBase,
+    type PermissionRuleType,
+    type PermissionType, type RateLimitConfig,
+    type RateLimitInfo,
+    type RateLimiterStats, type RecordLoader,
+    type RecordPointer,
+    type RoleRule, type RotatingJwtOptions, type SecurityHeaderOptions,
+    type SecurityHeaders, type SignOptions, type TablePermissionConfig, type VerifyOptions
+} from './security';
 
 // ============================================================================
 // Storage
 // ============================================================================
 
 export {
-  createFileSignature,
-  // URL Signing
-  createSignedUrl,
-  // Factory
-  createStorage,
-  createStorageSignature,
-  getDefaultExpiration,
-  isUrlExpired,
-  // Configuration
-  loadStorageConfig,
-  // Providers
-  LocalStorageProvider,
-  normalizeFilename,
-  normalizeStorageFilename,
-  normalizeStorageKey,
-  parseSignedUrl,
-  // HTTP Server
-  registerFileServer,
-  S3StorageProvider,
-  validateStorage,
-  verifyFileSignature,
-  verifyStorageSignature,
-  type FilesConfig,
-  type FileSignatureData,
-  // Types
-  type LocalStorageConfig,
-  type S3StorageConfig,
-  type SignedUrlData,
-  type StorageConfig,
-  type StorageProvider,
-  type StorageProviderName,
-  type UploadParams
+    // Providers
+    LocalStorageProvider, S3StorageProvider,
+    // Errors
+    StorageError,
+    StorageNotFoundError,
+    StorageUploadError, createFileSignature,
+    // URL Signing
+    createSignedUrl,
+    // Factory
+    createStorage,
+    createStorageSignature,
+    getDefaultExpiration,
+    isStorageError,
+    isStorageNotFoundError,
+    isUrlExpired,
+    // Configuration
+    loadStorageConfig, normalizeFilename,
+    normalizeStorageFilename,
+    normalizeStorageKey,
+    parseSignedUrl,
+    // HTTP Server
+    registerFileServer, toStorageError,
+    validateStorage,
+    verifyFileSignature,
+    verifyStorageSignature, type FileSignatureData, type FilesConfig,
+    // Types
+    type LocalStorageConfig,
+    type S3StorageConfig,
+    type SignedUrlData,
+    type StorageConfig,
+    type StorageProvider,
+    type StorageProviderName,
+    type UploadParams
 } from './storage';
 
 // ============================================================================
@@ -274,41 +213,41 @@ export {
 // ============================================================================
 
 export {
-  // Memory Store
-  createMemoryQueueStore,
-  // Queue Server
-  createQueueServer,
-  // Write Service
-  createWriteService,
-  MemoryQueueStore,
-  QueueServer,
-  WriteService,
-  // Write Types
-  type AfterWriteHook,
-  type BeforeValidateHook,
-  // Queue Types
-  type JobDetails,
-  type JobListOptions,
-  type JobListResult,
-  type JobStatus,
-  type OperationResult,
-  type OperationType,
-  type QueueConfig,
-  type QueueServerOptions,
-  type QueueStats,
-  type QueueStore,
-  type Task,
-  type TaskError,
-  type TaskHandler,
-  type TaskHandlers,
-  type TaskResult,
-  type WriteBatch,
-  type WriteContext,
-  type WriteError,
-  type WriteHooks,
-  type WriteOperation,
-  type WriteResult,
-  type WriteServiceOptions
+    MemoryQueueStore,
+    QueueServer,
+    WriteService,
+    // Memory Store
+    createMemoryQueueStore,
+    // Queue Server
+    createQueueServer,
+    // Write Service
+    createWriteService,
+    // Write Types
+    type AfterWriteHook,
+    type BeforeValidateHook,
+    // Queue Types
+    type JobDetails,
+    type JobListOptions,
+    type JobListResult,
+    type JobStatus,
+    type OperationResult,
+    type OperationType,
+    type QueueConfig,
+    type QueueServerOptions,
+    type QueueStats,
+    type QueueStore,
+    type Task,
+    type TaskError,
+    type TaskHandler,
+    type TaskHandlers,
+    type TaskResult,
+    type WriteBatch,
+    type WriteContext,
+    type WriteError,
+    type WriteHooks,
+    type WriteOperation,
+    type WriteResult,
+    type WriteServiceOptions
 } from './queue';
 
 // ============================================================================
@@ -316,30 +255,30 @@ export {
 // ============================================================================
 
 export {
-  // Query Builder
-  createSearchQuery,
-  // SQL Provider
-  createSqlSearchProvider,
-  fromSearchQuery,
-  // Factory
-  getSearchProviderFactory,
-  resetSearchProviderFactory,
-  SearchProviderFactory,
-  SearchQueryBuilder,
-  SqlSearchProvider,
-  // Types
-  type ElasticsearchProviderConfig,
-  type ProviderOptions,
-  type SearchContext,
-  type SearchProviderConfig,
-  type SearchProviderFactoryOptions,
-  type SearchProviderType,
-  type ServerSearchProvider,
-  type SqlColumnMapping,
-  type SqlQueryOptions,
-  type SqlSearchProviderConfig,
-  type SqlSearchProviderOptions,
-  type SqlTableConfig
+    SearchProviderFactory,
+    SearchQueryBuilder,
+    SqlSearchProvider,
+    // Query Builder
+    createSearchQuery,
+    // SQL Provider
+    createSqlSearchProvider,
+    fromSearchQuery,
+    // Factory
+    getSearchProviderFactory,
+    resetSearchProviderFactory,
+    // Types
+    type ElasticsearchProviderConfig,
+    type ProviderOptions,
+    type SearchContext,
+    type SearchProviderConfig,
+    type SearchProviderFactoryOptions,
+    type SearchProviderType,
+    type ServerSearchProvider,
+    type SqlColumnMapping,
+    type SqlQueryOptions,
+    type SqlSearchProviderConfig,
+    type SqlSearchProviderOptions,
+    type SqlTableConfig
 } from './search';
 
 // ============================================================================
@@ -347,20 +286,21 @@ export {
 // ============================================================================
 
 export {
-  checkDbStatus,
-  checkEmailStatus,
-  checkPubSubStatus,
-  checkRateLimitStatus,
-  checkSchemaStatus,
-  checkStorageStatus,
-  checkWebSocketStatus,
-  getDetailedHealth,
-  getMetricsCollector,
-  logStartupSummary,
-  MetricsCollector,
-  resetMetricsCollector,
-  type MetricsSummary,
-  type SystemContext
+    MetricsCollector,
+    checkCacheStatus,
+    checkDbStatus,
+    checkEmailStatus,
+    checkPubSubStatus,
+    checkQueueStatus,
+    checkRateLimitStatus,
+    checkSchemaStatus,
+    checkStorageStatus,
+    checkWebSocketStatus,
+    getDetailedHealth,
+    getMetricsCollector,
+    logStartupSummary, resetMetricsCollector,
+    type MetricsSummary,
+    type SystemContext
 } from './system';
 
 // ============================================================================
@@ -368,14 +308,11 @@ export {
 // ============================================================================
 
 export {
-  ConsoleSmsProvider,
-  createSmsProvider,
-  TwilioSmsProvider,
-  type SmsConfig,
-  type SmsOptions,
-  type SmsProvider,
-  type SmsResult,
-  type TwilioConfig
+    ConsoleSmsProvider, TwilioSmsProvider, createSmsProvider, type SmsConfig,
+    type SmsOptions,
+    type SmsProvider,
+    type SmsResult,
+    type TwilioConfig
 } from './sms';
 
 // ============================================================================
@@ -383,12 +320,10 @@ export {
 // ============================================================================
 
 export {
-  createGeoIpProvider,
-  IpApiGeoIpProvider,
-  NoopGeoIpProvider,
-  type GeoIpConfig,
-  type GeoIpProvider,
-  type GeoIpResult
+    IpApiGeoIpProvider,
+    NoopGeoIpProvider, createGeoIpProvider, type GeoIpConfig,
+    type GeoIpProvider,
+    type GeoIpResult
 } from './geo-ip';
 
 // ============================================================================
@@ -396,26 +331,23 @@ export {
 // ============================================================================
 
 export {
-  clearRegistry,
-  createRouteMap,
-  getRegisteredRoutes,
-  protectedRoute,
-  publicRoute,
-  registerRoute,
-  registerRouteMap,
-  type AuthGuardFactory,
-  type HandlerContext,
-  type HttpMethod,
-  type JsonSchemaObject,
-  type RouteDefinition,
-  type RouteHandler,
-  type RouteMap,
-  type RouteOpenApiMeta,
-  type RouteRegistryEntry,
-  type RouteResult,
-  type RouterOptions,
-  type RouteSchema,
-  type ValidationSchema
+    clearRegistry,
+    createRouteMap,
+    getRegisteredRoutes,
+    protectedRoute,
+    publicRoute,
+    registerRoute,
+    registerRouteMap,
+    type AuthGuardFactory,
+    type HandlerContext,
+    type HttpMethod,
+    type JsonSchemaObject,
+    type RouteDefinition,
+    type RouteHandler,
+    type RouteMap,
+    type RouteOpenApiMeta,
+    type RouteRegistryEntry,
+    type RouteResult, type RouteSchema, type RouterOptions, type ValidationSchema
 } from './routing';
 
 // ============================================================================
@@ -423,31 +355,19 @@ export {
 // ============================================================================
 
 export {
-  addBreadcrumb,
-  captureError,
-  ConsoleErrorTrackingProvider,
-  createErrorTracker,
-  initSentry,
-  NoopErrorTrackingProvider,
-  setUserContext,
-  type Breadcrumb,
-  type BreadcrumbLevel,
-  type ErrorContext,
-  type ErrorTrackingConfig,
-  type ErrorTrackingProvider
+    ConsoleErrorTrackingProvider, NoopErrorTrackingProvider, addBreadcrumb,
+    captureError, createErrorTracker,
+    initSentry, setUserContext,
+    type Breadcrumb,
+    type BreadcrumbLevel,
+    type ErrorContext,
+    type ErrorTrackingConfig,
+    type ErrorTrackingProvider
 } from './observability';
 
 // ============================================================================
 // Utils
 // ============================================================================
 
-export { isSafePath } from './utils/fs';
-export {
-  isPortFree,
-  isPortListening,
-  pickAvailablePort,
-  uniquePorts,
-  waitForPort
-} from './utils/port';
-export { swaggerThemeCss } from './utils/swagger';
+export { isPortFree, isPortListening, isSafePath, pickAvailablePort, uniquePorts, waitForPort } from './utils';
 

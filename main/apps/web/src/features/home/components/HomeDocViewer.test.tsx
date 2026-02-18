@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { HomeDocViewer } from './HomeDocViewer';
 
-import type { ElementType, ReactElement, ReactNode } from 'react';
 import type { HomeDocViewerProps } from './HomeDocViewer';
+import type { ElementType, ReactElement, ReactNode } from 'react';
 
 vi.mock('@bslt/react/hooks', () => {
   const mockUseDelayedFlag = (value: boolean): boolean => value;

@@ -18,6 +18,7 @@ import { registerRequestInfoHook } from '../../http/middleware/requestInfo';
 import {
   applyCors,
   applySecurityHeaders,
+  getProductionSecurityDefaults,
   registerPrototypePollutionProtection,
 } from '../../http/middleware/security';
 
@@ -366,6 +367,7 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
         sameSite: 'lax',
         path: '/',
       },
+      oauthTokenEncryptionKey: 'test-cookie-secret-32-chars-long!',
       oauth: {},
       magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
       totp: { issuer: 'Test', window: 1 },
@@ -442,19 +444,19 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
         ...overrides.auth?.rateLimit,
         login: {
           ...base.auth.rateLimit.login,
-          ...overrides.auth?.rateLimit?.login,
+          ...overrides.auth?.rateLimit.login,
         },
         register: {
           ...base.auth.rateLimit.register,
-          ...overrides.auth?.rateLimit?.register,
+          ...overrides.auth?.rateLimit.register,
         },
         forgotPassword: {
           ...base.auth.rateLimit.forgotPassword,
-          ...overrides.auth?.rateLimit?.forgotPassword,
+          ...overrides.auth?.rateLimit.forgotPassword,
         },
         verifyEmail: {
           ...base.auth.rateLimit.verifyEmail,
-          ...overrides.auth?.rateLimit?.verifyEmail,
+          ...overrides.auth?.rateLimit.verifyEmail,
         },
       },
       cookie: {
@@ -485,11 +487,11 @@ export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
         auth: {
           user:
             overrides.email?.smtp !== undefined && 'auth' in overrides.email.smtp
-              ? (overrides.email.smtp.auth?.user ?? '')
+              ? overrides.email.smtp.auth.user
               : '',
           pass:
             overrides.email?.smtp !== undefined && 'auth' in overrides.email.smtp
-              ? (overrides.email.smtp.auth?.pass ?? '')
+              ? overrides.email.smtp.auth.pass
               : '',
         },
       },
@@ -640,7 +642,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
   // Security headers, CORS, and rate limiting hook
   server.addHook('onRequest', async (req, res) => {
     if (enableSecurityHeaders) {
-      applySecurityHeaders(res, (production ? { enableCSP: true } : {}) as any);
+      applySecurityHeaders(res, production ? getProductionSecurityDefaults() : {});
     }
 
     if (enableCors) {

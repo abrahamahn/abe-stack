@@ -15,12 +15,12 @@ import {
 
 import { and, eq, gt, lt, or } from '../builder/index';
 
+import type { SortDirection, SqlFragment } from '../builder/index';
 import type {
   CursorPaginatedResult,
   CursorPaginationOptions,
   PaginationOptions,
 } from '@bslt/shared';
-import type { SortDirection, SqlFragment } from '../builder/index';
 
 /**
  * Build a SQL condition for cursor-based pagination on created_at + id.

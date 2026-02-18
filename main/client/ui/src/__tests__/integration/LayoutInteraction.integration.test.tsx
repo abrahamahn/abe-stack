@@ -392,7 +392,7 @@ describe('LayoutInteraction Integration Tests', () => {
       render(
         <ScrollArea style={{ height: '100px', overflow: 'auto' }} data-testid="scroll-area">
           {Array.from({ length: 20 }, (_, i) => (
-            <div key={i} data-testid={`item-${i}`}>
+            <div key={i} data-testid={`item-${String(i)}`}>
               Item {i}
             </div>
           ))}

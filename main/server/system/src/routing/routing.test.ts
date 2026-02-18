@@ -8,7 +8,7 @@
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { clearRegistry, getRegisteredRoutes } from './route-registry';
+import { clearRegistry, getRegisteredRoutes } from './route.registry';
 import { createRouteMap, protectedRoute, publicRoute, registerRouteMap } from './routing';
 
 import type {

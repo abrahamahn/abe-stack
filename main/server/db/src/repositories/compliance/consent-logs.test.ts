@@ -25,6 +25,7 @@ const createMockDb = (): RawDb => ({
   getClient: vi.fn() as RawDb['getClient'],
   queryOne: vi.fn(),
   execute: vi.fn(),
+  withSession: vi.fn() as RawDb['withSession'],
 });
 
 // ============================================================================
@@ -206,9 +207,9 @@ describe('createConsentLogRepository', () => {
       const result = await repo.findByUserId('usr-123');
 
       expect(result).toHaveLength(2);
-      expect(result[0].createdAt.getTime()).toBeGreaterThan(result[1].createdAt.getTime());
-      expect(result[0].userId).toBe('usr-123');
-      expect(result[1].userId).toBe('usr-123');
+      expect(result[0]?.createdAt.getTime() ?? 0).toBeGreaterThan(result[1]?.createdAt.getTime() ?? 0);
+      expect(result[0]?.userId).toBe('usr-123');
+      expect(result[1]?.userId).toBe('usr-123');
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -282,7 +283,7 @@ describe('createConsentLogRepository', () => {
 
       expect(result).toHaveLength(3);
       expect(result.every((log) => log.consentType === 'marketing')).toBe(true);
-      expect(result[0].createdAt.getTime()).toBeGreaterThan(result[1].createdAt.getTime());
+      expect(result[0]?.createdAt.getTime() ?? 0).toBeGreaterThan(result[1]?.createdAt.getTime() ?? 0);
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.objectContaining({
           text: expect.stringContaining('user_id'),
@@ -341,8 +342,8 @@ describe('createConsentLogRepository', () => {
       const result1 = await repo.findByUserAndType('usr-123', 'marketing');
       const result2 = await repo.findByUserAndType('usr-456', 'marketing');
 
-      expect(result1[0].userId).toBe('usr-123');
-      expect(result2[0].userId).toBe('usr-456');
+      expect(result1[0]?.userId).toBe('usr-123');
+      expect(result2[0]?.userId).toBe('usr-456');
     });
   });
 
@@ -491,7 +492,7 @@ describe('createConsentLogRepository', () => {
       const result = await repo.findByUserAndType('usr-123', 'marketing');
 
       expect(result).toHaveLength(5);
-      expect(result[0].granted).toBe(false);
+      expect(result[0]?.granted).toBe(false);
     });
 
     it('should handle IPv6 addresses', async () => {
@@ -564,7 +565,7 @@ describe('createConsentLogRepository', () => {
       const result = await repo.findByUserAndType('usr-123', 'marketing');
 
       expect(result).toHaveLength(2);
-      expect(result[0].createdAt).toEqual(result[1].createdAt);
+      expect(result[0]?.createdAt).toEqual(result[1]?.createdAt);
     });
 
     it('should handle all GDPR-relevant consent types', async () => {

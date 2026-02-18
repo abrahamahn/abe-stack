@@ -6,8 +6,8 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useAdminUsers } from './useAdminUsers';
 
-import type { AdminUserListFilters, AdminUserListResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
+import type { AdminUserListFilters, AdminUserListResponse } from '@bslt/shared';
 
 vi.mock('../services/adminApi', () => ({
   createAdminApiClient: vi.fn(),
