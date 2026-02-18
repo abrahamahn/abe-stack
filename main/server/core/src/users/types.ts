@@ -14,15 +14,15 @@
 import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
 
 import type { DbClient, Repositories } from '../../../db/src';
-import type { CacheProvider } from '@abe-stack/shared';
-import type { Argon2Config } from '@abe-stack/shared/config';
 import type {
   BaseContext,
-  RequestContext,
+  CacheProvider,
+  ContractRequestContext as RequestContext,
   RequestInfo,
   ServerLogger,
-  StorageService,
-} from '@abe-stack/shared/core';
+} from '@abe-stack/shared';
+import type { Argon2Config } from '@abe-stack/shared/config';
+import type { StorageService } from '@abe-stack/shared/engine';
 
 // ============================================================================
 // Auth Config Subset

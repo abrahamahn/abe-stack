@@ -25,7 +25,7 @@ import {
   type User,
 } from '../../../db/src';
 
-import type { ServerLogger } from '@abe-stack/shared/core';
+import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Constants
