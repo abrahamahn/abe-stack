@@ -249,3 +249,6 @@ export {
 
 // --- crypto ---
 export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './helpers';
+
+// --- date ---
+export { toISODateOnly } from './helpers';

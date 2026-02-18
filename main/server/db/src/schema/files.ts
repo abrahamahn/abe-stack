@@ -13,8 +13,8 @@ import {
   FILE_PURPOSES,
   STORAGE_PROVIDERS,
   type FilePurpose,
-  type StorageProvider,
 } from '@bslt/shared';
+import { type StorageProvider } from '@bslt/shared/system';
 
 // Re-export shared constants for consumers that import from schema
 export { FILE_PURPOSES, STORAGE_PROVIDERS };

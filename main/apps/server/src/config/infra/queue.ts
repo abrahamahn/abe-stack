@@ -1,5 +1,5 @@
 // main/apps/server/src/config/infra/queue.ts
-import { MS_PER_MINUTE } from '@bslt/shared';
+import { QUEUE_DEFAULTS } from '@bslt/shared/config';
 
 import type { FullEnv, QueueConfig } from '@bslt/shared/config';
 
@@ -34,9 +34,9 @@ export function loadQueueConfig(env: FullEnv): QueueConfig {
 
 export const DEFAULT_QUEUE_CONFIG: Required<QueueConfig> = {
   provider: 'local',
-  pollIntervalMs: 1000,
-  concurrency: 5,
-  defaultMaxAttempts: 3,
-  backoffBaseMs: 1000,
-  maxBackoffMs: 5 * MS_PER_MINUTE,
+  pollIntervalMs: QUEUE_DEFAULTS.POLL_INTERVAL_MS,
+  concurrency: QUEUE_DEFAULTS.CONCURRENCY,
+  defaultMaxAttempts: QUEUE_DEFAULTS.MAX_ATTEMPTS,
+  backoffBaseMs: QUEUE_DEFAULTS.BACKOFF_BASE_MS,
+  maxBackoffMs: QUEUE_DEFAULTS.MAX_BACKOFF_MS,
 };

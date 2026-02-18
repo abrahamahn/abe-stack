@@ -668,6 +668,7 @@ export {
   type JobListResponse,
   type JobPriority,
   type JobStatus,
+  ReactiveMap,
   type QueueStats,
   type UpdateJob,
 } from './jobs';

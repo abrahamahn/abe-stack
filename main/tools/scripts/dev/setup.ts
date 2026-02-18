@@ -114,7 +114,7 @@ const QUICK_START_ENV: EnvConfig = {
   postgresPort: '5432',
   postgresUser: 'postgres',
   postgresPassword: 'postgres',
-  postgresDb: 'abe_stack_dev',
+  postgresDb: 'bslt_dev',
   jsonDbPath: '.data/db.json',
   nodeEnv: 'development',
   appPort: '3000',

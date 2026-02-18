@@ -13,7 +13,7 @@ import {
   validateCsrfToken,
 } from '@bslt/server-system';
 import {
-  CSRF_COOKIE_NAME,
+  AUTH_CONSTANTS,
   CSRF_EXEMPT_PATHS,
   HTTP_STATUS,
   SAFE_METHODS,
@@ -21,6 +21,8 @@ import {
 } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
+const { CSRF_COOKIE_NAME } = AUTH_CONSTANTS;
 
 // ============================================================================
 // Types

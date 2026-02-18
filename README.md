@@ -102,7 +102,7 @@ pnpm db:seed
 **Local Postgres:**
 
 ```bash
-createdb abe_stack_dev
+createdb bslt_dev
 ENV_FILE=config/env/.env.local pnpm db:push
 ENV_FILE=config/env/.env.local pnpm db:seed
 ```

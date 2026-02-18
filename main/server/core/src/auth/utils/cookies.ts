@@ -8,7 +8,7 @@
  * @module utils/cookies
  */
 
-import { getRefreshCookieOptions } from '@bslt/shared/config';
+import { getRefreshCookieOptions } from '@bslt/shared/core';
 
 import { REFRESH_COOKIE_NAME } from '../types';
 

@@ -1,16 +1,16 @@
-// main/tools/scripts/audit/graph-shared.ts
+// main/tools/scripts/audit/graph-server.ts
 /**
- * Shared Package Dependency Graph
+ * Server App Dependency Graph
  *
- * Generates SVG dependency graphs for each layer of main/shared/src
- * using madge. Outputs to main/shared/_graphs/.
+ * Generates SVG dependency graphs for each layer of main/apps/server/src
+ * using madge. Outputs to main/apps/server/_graphs/.
  */
 
 import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const ROOT = resolve('main', 'shared');
+const ROOT = resolve('main', 'apps', 'server');
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, '_graphs');
 
@@ -19,13 +19,12 @@ if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true });
 const EXCLUDE = String.raw`(__tests__|\.test\.|\.spec\.)`;
 
 const targets = [
-  { name: 'shared-src', dir: SRC },
-  { name: 'shared-primitives', dir: join(SRC, 'primitives') },
-  { name: 'shared-system', dir: join(SRC, 'system') },
-  { name: 'shared-core', dir: join(SRC, 'core') },
-  { name: 'shared-contracts', dir: join(SRC, 'contracts') },
-  { name: 'shared-api', dir: join(SRC, 'api') },
-  { name: 'shared-config', dir: join(SRC, 'config') },
+  { name: 'server-src', dir: SRC },
+  { name: 'server-config', dir: join(SRC, 'config') },
+  { name: 'server-http', dir: join(SRC, 'http') },
+  { name: 'server-middleware', dir: join(SRC, 'middleware') },
+  { name: 'server-routes', dir: join(SRC, 'routes') },
+  { name: 'server-types', dir: join(SRC, 'types') },
 ];
 
 for (const t of targets) {

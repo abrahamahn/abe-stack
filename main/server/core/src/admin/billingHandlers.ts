@@ -8,7 +8,7 @@
 import {
   BillingProviderNotConfiguredError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
-  PlanId,
+  type PlanId,
   PlanNotFoundError,
   type AdminPlan,
   type AdminPlanResponse,

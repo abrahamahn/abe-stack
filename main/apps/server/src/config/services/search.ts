@@ -1,39 +1,18 @@
 // main/apps/server/src/config/services/search.ts
+import {
+  DEFAULT_SEARCH_SCHEMAS,
+  ELASTICSEARCH_DEFAULTS,
+  SEARCH_DEFAULTS,
+} from '@bslt/shared/config';
+
 import type {
   ElasticsearchProviderConfig,
   FullEnv,
   SqlSearchProviderConfig,
-  SqlTableConfig,
 } from '@bslt/shared/config';
 
-/**
- * Default Search Schemas
- *
- * Defines the searchable columns, filters, and sort options for domain entities.
- * Decoupled from the App / Composition Root to allow easier modification.
- */
-export const DEFAULT_SEARCH_SCHEMAS: Record<string, SqlTableConfig> = {
-  users: {
-    table: 'users',
-    primaryKey: 'id',
-    columns: [
-      {
-        field: 'name',
-        column: 'name',
-        type: 'string',
-        filterable: true,
-        sortable: true,
-      },
-      {
-        field: 'email',
-        column: 'email',
-        type: 'string',
-        filterable: true,
-        sortable: true,
-      },
-    ],
-  },
-};
+// Re-export for consumers that import from this file
+export { DEFAULT_SEARCH_SCHEMAS };
 
 /**
  * Load Elasticsearch Configuration.
@@ -47,8 +26,8 @@ export const DEFAULT_SEARCH_SCHEMAS: Record<string, SqlTableConfig> = {
  */
 export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConfig {
   const config: ElasticsearchProviderConfig = {
-    node: env.ELASTICSEARCH_NODE ?? 'http://localhost:9200',
-    index: env.ELASTICSEARCH_INDEX ?? 'default',
+    node: env.ELASTICSEARCH_NODE ?? ELASTICSEARCH_DEFAULTS.NODE,
+    index: env.ELASTICSEARCH_INDEX ?? ELASTICSEARCH_DEFAULTS.INDEX,
     tls: env.ELASTICSEARCH_TLS === 'true',
   };
 
@@ -87,8 +66,8 @@ export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConf
  */
 export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
   const config: SqlSearchProviderConfig = {
-    defaultPageSize: env.SQL_SEARCH_DEFAULT_PAGE_SIZE ?? 50,
-    maxPageSize: env.SQL_SEARCH_MAX_PAGE_SIZE ?? 1000,
+    defaultPageSize: env.SQL_SEARCH_DEFAULT_PAGE_SIZE ?? SEARCH_DEFAULTS.DEFAULT_PAGE_SIZE,
+    maxPageSize: env.SQL_SEARCH_MAX_PAGE_SIZE ?? SEARCH_DEFAULTS.MAX_PAGE_SIZE,
     logging: env.SQL_SEARCH_LOGGING === 'true',
   };
 
@@ -136,12 +115,12 @@ export function validateSqlSearchConfig(config: SqlSearchProviderConfig): string
 
 /** Default Elasticsearch configuration for development */
 export const DEFAULT_ELASTICSEARCH_CONFIG: ElasticsearchProviderConfig = {
-  node: 'http://localhost:9200',
-  index: 'default',
+  node: ELASTICSEARCH_DEFAULTS.NODE,
+  index: ELASTICSEARCH_DEFAULTS.INDEX,
 };
 
 /** Default SQL search configuration */
 export const DEFAULT_SQL_SEARCH_CONFIG: SqlSearchProviderConfig = {
-  defaultPageSize: 50,
-  maxPageSize: 1000,
+  defaultPageSize: SEARCH_DEFAULTS.DEFAULT_PAGE_SIZE,
+  maxPageSize: SEARCH_DEFAULTS.MAX_PAGE_SIZE,
 };

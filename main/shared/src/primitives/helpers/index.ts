@@ -79,3 +79,5 @@ export {
 } from './result';
 
 export { constantTimeCompare, generateSecureId, generateToken, generateUUID } from './crypto';
+
+export { toISODateOnly } from './date';

@@ -16,7 +16,7 @@ import {
   type DataExportStatus,
   type DataExportType,
   type DocumentType,
-} from '@bslt/shared';
+} from '@bslt/shared/core';
 
 // Re-export shared constants for consumers that import from schema
 export { CONSENT_TYPES, DATA_EXPORT_STATUSES, DATA_EXPORT_TYPES, DOCUMENT_TYPES };

@@ -344,7 +344,7 @@ export function buildConnectionString(
   const password = env['POSTGRES_PASSWORD'] ?? env['DB_PASSWORD'] ?? '';
   const host = env['POSTGRES_HOST'] ?? env['DB_HOST'] ?? 'localhost';
   const port = env['POSTGRES_PORT'] ?? env['DB_PORT'] ?? '5432';
-  const database = env['POSTGRES_DB'] ?? env['DB_NAME'] ?? 'abe_stack_dev';
+  const database = env['POSTGRES_DB'] ?? env['DB_NAME'] ?? 'bslt_dev';
 
   const auth = password !== '' ? `${user}:${password}` : user;
   return `postgres://${auth}@${host}:${port}/${database}`;

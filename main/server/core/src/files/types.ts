@@ -89,7 +89,7 @@ export interface FileAppContext extends BaseContext, HasStorage {
 // ============================================================================
 
 /** Default maximum file size: 10MB (from shared LIMITS) */
-export const DEFAULT_MAX_FILE_SIZE = LIMITS.MAX_FILE_SIZE;
+export const DEFAULT_MAX_FILE_SIZE = LIMITS.MAX_FILE_SIZE_BYTES;
 
 /** Default allowed MIME types for general file uploads */
 export const DEFAULT_ALLOWED_MIME_TYPES = [

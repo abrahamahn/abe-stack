@@ -13,14 +13,13 @@ import { eq, select } from '@bslt/db';
 import { validateCsrfToken } from '@bslt/server-system';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
-  CSRF_COOKIE_NAME,
+  AUTH_CONSTANTS,
   ERROR_MESSAGES,
   HTTP_STATUS,
-  WEBSOCKET_PATH,
-  WS_CLOSE_POLICY_VIOLATION,
   parseCookies,
   parseRecordKey,
 } from '@bslt/shared';
+
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
@@ -37,6 +36,8 @@ import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 import type { WebSocket } from 'ws';
+
+const { CSRF_COOKIE_NAME, WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } = AUTH_CONSTANTS;
 
 // ============================================================================
 // Local Constants

@@ -8,13 +8,8 @@
  * @module handlers/subscribe
  */
 
-import {
-  ERROR_CODES,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-  isAuthenticatedRequest,
-  REALTIME_ERRORS,
-} from '@bslt/shared';
+import { ERROR_CODES, ERROR_MESSAGES, HTTP_STATUS, REALTIME_ERRORS } from '@bslt/shared';
+import { isAuthenticatedRequest } from '@bslt/shared/core';
 
 import { isTableAllowed, loadRecords } from '../service';
 

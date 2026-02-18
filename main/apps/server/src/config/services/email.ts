@@ -1,5 +1,5 @@
 // main/apps/server/src/config/services/email.ts
-import { getInt } from '@bslt/shared/config';
+import { SMTP_DEFAULTS, getInt } from '@bslt/shared/config';
 
 import type { EmailConfig, FullEnv, SmtpConfig } from '@bslt/shared/config';
 
@@ -12,15 +12,15 @@ import type { EmailConfig, FullEnv, SmtpConfig } from '@bslt/shared/config';
 export function loadSmtpConfig(env: FullEnv): SmtpConfig {
   const config: SmtpConfig = {
     host: env.SMTP_HOST ?? 'localhost',
-    port: getInt(env.SMTP_PORT != null ? String(env.SMTP_PORT) : undefined, 587),
+    port: getInt(env.SMTP_PORT != null ? String(env.SMTP_PORT) : undefined, SMTP_DEFAULTS.PORT),
     secure: env.SMTP_SECURE === 'true',
     connectionTimeout: getInt(
       env.SMTP_CONNECTION_TIMEOUT != null ? String(env.SMTP_CONNECTION_TIMEOUT) : undefined,
-      5000,
+      SMTP_DEFAULTS.CONNECTION_TIMEOUT_MS,
     ),
     socketTimeout: getInt(
       env.SMTP_SOCKET_TIMEOUT != null ? String(env.SMTP_SOCKET_TIMEOUT) : undefined,
-      30000,
+      SMTP_DEFAULTS.SOCKET_TIMEOUT_MS,
     ),
   };
 
@@ -86,8 +86,8 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
 
 export const DEFAULT_SMTP_CONFIG: SmtpConfig = {
   host: 'localhost',
-  port: 587,
+  port: SMTP_DEFAULTS.PORT,
   secure: false,
-  connectionTimeout: 5000,
-  socketTimeout: 30000,
+  connectionTimeout: SMTP_DEFAULTS.CONNECTION_TIMEOUT_MS,
+  socketTimeout: SMTP_DEFAULTS.SOCKET_TIMEOUT_MS,
 };

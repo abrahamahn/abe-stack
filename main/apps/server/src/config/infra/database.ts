@@ -1,4 +1,6 @@
 // main/apps/server/src/config/infra/database.ts
+import { DB_DEFAULTS } from '@bslt/shared/config';
+
 import type {
   DatabaseConfig,
   DatabaseProvider,
@@ -36,7 +38,7 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
         filePath: env.SQLITE_FILE_PATH ?? '.data/sqlite.db',
         walMode: env.SQLITE_WAL_MODE !== 'false',
         foreignKeys: env.SQLITE_FOREIGN_KEYS !== 'false',
-        timeout: env.SQLITE_TIMEOUT_MS ?? 5000,
+        timeout: env.SQLITE_TIMEOUT_MS ?? DB_DEFAULTS.SQLITE_TIMEOUT_MS,
       };
 
     case 'mongodb': {
@@ -48,7 +50,7 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
       } else if (dbUrl?.includes('mongodb') === true) {
         connectionString = dbUrl;
       } else {
-        connectionString = 'mongodb://localhost:27017/abe_stack_dev';
+        connectionString = DB_DEFAULTS.MONGODB_DEFAULT_URL;
       }
 
       return {
@@ -57,11 +59,11 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
         database:
           env.MONGODB_DATABASE !== undefined && env.MONGODB_DATABASE !== ''
             ? env.MONGODB_DATABASE
-            : (env.MONGODB_DB ?? 'abe_stack_dev'),
+            : (env.MONGODB_DB ?? DB_DEFAULTS.DEFAULT_DATABASE_NAME),
         options: {
           ssl: env.MONGODB_SSL === 'true',
-          connectTimeoutMs: env.MONGODB_CONNECT_TIMEOUT_MS ?? 30000,
-          socketTimeoutMs: env.MONGODB_SOCKET_TIMEOUT_MS ?? 30000,
+          connectTimeoutMs: env.MONGODB_CONNECT_TIMEOUT_MS ?? DB_DEFAULTS.MONGODB_CONNECT_TIMEOUT_MS,
+          socketTimeoutMs: env.MONGODB_SOCKET_TIMEOUT_MS ?? DB_DEFAULTS.MONGODB_SOCKET_TIMEOUT_MS,
           useUnifiedTopology: env.MONGODB_USE_UNIFIED_TOPOLOGY !== 'false',
         },
       };
@@ -69,7 +71,6 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
 
     case 'postgresql':
     default: {
-      const pgDefaultPort = 5432;
       const isPgProd = env.NODE_ENV === 'production';
       const dbUrl = env.DATABASE_URL;
       const connectionString =
@@ -79,12 +80,13 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
       const config: PostgresConfig = {
         provider: 'postgresql',
         host: env.POSTGRES_HOST ?? 'localhost',
-        port: env.POSTGRES_PORT ?? pgDefaultPort,
-        database: env.POSTGRES_DB ?? 'abe_stack_dev',
+        port: env.POSTGRES_PORT ?? DB_DEFAULTS.POSTGRES_PORT,
+        database: env.POSTGRES_DB ?? DB_DEFAULTS.DEFAULT_DATABASE_NAME,
         user: env.POSTGRES_USER ?? 'postgres',
         password: env.POSTGRES_PASSWORD ?? '',
-        maxConnections: env.DB_MAX_CONNECTIONS ?? (isPgProd ? 20 : 10),
-        portFallbacks: [pgDefaultPort, pgDefaultPort + 1, pgDefaultPort + 2],
+        maxConnections: env.DB_MAX_CONNECTIONS ??
+          (isPgProd ? DB_DEFAULTS.POSTGRES_MAX_CONNECTIONS_PROD : DB_DEFAULTS.POSTGRES_MAX_CONNECTIONS_DEV),
+        portFallbacks: [...DB_DEFAULTS.POSTGRES_PORT_FALLBACKS],
         // ssl is usually required for cloud providers in production
         ssl: env.DB_SSL !== undefined ? env.DB_SSL === 'true' : isPgProd,
       };

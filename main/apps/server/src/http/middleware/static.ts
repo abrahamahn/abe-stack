@@ -11,8 +11,7 @@ import { open } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { isSafePath } from '@bslt/server-system';
-import { createRateLimiter, getRequesterId, HTTP_STATUS } from '@bslt/shared';
-import { getMimeType } from '@bslt/shared/systems/media';
+import { createRateLimiter, getMimeType, getRequesterId, HTTP_STATUS } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

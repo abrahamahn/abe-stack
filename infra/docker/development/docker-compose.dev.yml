@@ -22,7 +22,7 @@ services:
     image: postgres:16-alpine
     container_name: bslt-dev-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-abe_stack_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-bslt_dev}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-development}
     ports:
@@ -31,7 +31,7 @@ services:
       - postgres_dev_data:/var/lib/postgresql/data
     healthcheck:
       test:
-        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-abe_stack_dev}']
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-bslt_dev}']
       interval: 10s
       timeout: 5s
       retries: 5

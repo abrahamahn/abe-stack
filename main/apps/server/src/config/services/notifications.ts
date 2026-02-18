@@ -1,4 +1,6 @@
 // main/apps/server/src/config/services/notifications.ts
+import { COURIER_DEFAULT_API_URL } from '@bslt/shared/config';
+
 import type {
   CourierConfig,
   FcmConfig,
@@ -121,7 +123,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
     case 'courier':
       config.config = {
         apiKey: env.COURIER_API_KEY ?? '',
-        apiUrl: env.COURIER_API_URL ?? 'https://api.courier.com',
+        apiUrl: env.COURIER_API_URL ?? COURIER_DEFAULT_API_URL,
         settings: {
           enableLogging: env.COURIER_ENABLE_LOGGING === 'true',
         },

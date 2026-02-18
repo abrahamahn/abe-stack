@@ -21,7 +21,7 @@ export type { StorageClient as StorageProvider } from '@bslt/shared';
 /**
  * Storage provider name string union — alias for the shared StorageProvider type.
  */
-export type { StorageProvider as StorageProviderName } from '@bslt/shared';
+export type { StorageProvider as StorageProviderName } from '@bslt/shared/system';
 
 /**
  * Parameters for uploading a file to storage.

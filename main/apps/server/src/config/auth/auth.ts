@@ -1,6 +1,14 @@
 // main/apps/server/src/config/auth/auth.ts
 import { BaseError, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
-import { getList } from '@bslt/shared/config';
+import {
+  ARGON2_DEFAULTS,
+  AUTH_STRATEGIES,
+  AUTH_VALIDATION,
+  RATE_LIMIT_DEFAULTS,
+  REPEATING_SECRET_PATTERN,
+  WEAK_SECRETS,
+  getList,
+} from '@bslt/shared/config';
 
 import type {
   AuthConfig,
@@ -9,28 +17,7 @@ import type {
   OAuthProviderConfig,
 } from '@bslt/shared/config';
 
-const WEAK_SECRETS = new Set([
-  'secret',
-  'password',
-  'jwt_secret',
-  'changeme',
-  'test',
-  'dev',
-  'prod',
-]);
-
-const REPEATING_PATTERN = /^(.)\1{31,}$/;
-
-const VALID_STRATEGIES = new Set([
-  'local',
-  'magic',
-  'webauthn',
-  'google',
-  'github',
-  'facebook',
-  'microsoft',
-  'apple',
-]);
+const VALID_STRATEGIES = new Set<string>(AUTH_STRATEGIES);
 
 export class AuthValidationError extends BaseError {
   public readonly code = 'AUTH_VALIDATION_ERROR';
@@ -134,10 +121,10 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
     },
 
     argon2: {
-      type: 2, // argon2id
-      memoryCost: 19456,
-      timeCost: 2,
-      parallelism: 1,
+      type: ARGON2_DEFAULTS.TYPE,
+      memoryCost: ARGON2_DEFAULTS.MEMORY_COST,
+      timeCost: ARGON2_DEFAULTS.TIME_COST,
+      parallelism: ARGON2_DEFAULTS.PARALLELISM,
     },
 
     password: {
@@ -161,19 +148,23 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     rateLimit: {
       login: {
-        max: env.RATE_LIMIT_LOGIN_MAX ?? (isProduction ? 5 : 100),
+        max: env.RATE_LIMIT_LOGIN_MAX ??
+          (isProduction ? RATE_LIMIT_DEFAULTS.LOGIN_MAX_PROD : RATE_LIMIT_DEFAULTS.LOGIN_MAX_DEV),
         windowMs: 15 * MS_PER_MINUTE,
       },
       register: {
-        max: env.RATE_LIMIT_REGISTER_MAX ?? (isProduction ? 3 : 100),
+        max: env.RATE_LIMIT_REGISTER_MAX ??
+          (isProduction ? RATE_LIMIT_DEFAULTS.REGISTER_MAX_PROD : RATE_LIMIT_DEFAULTS.REGISTER_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
       forgotPassword: {
-        max: env.RATE_LIMIT_FORGOT_PASSWORD_MAX ?? (isProduction ? 3 : 100),
+        max: env.RATE_LIMIT_FORGOT_PASSWORD_MAX ??
+          (isProduction ? RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_PROD : RATE_LIMIT_DEFAULTS.FORGOT_PASSWORD_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
       verifyEmail: {
-        max: env.RATE_LIMIT_VERIFY_EMAIL_MAX ?? (isProduction ? 10 : 100),
+        max: env.RATE_LIMIT_VERIFY_EMAIL_MAX ??
+          (isProduction ? RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_PROD : RATE_LIMIT_DEFAULTS.VERIFY_EMAIL_MAX_DEV),
         windowMs: MS_PER_HOUR,
       },
     },
@@ -231,37 +222,43 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 export function validateAuthConfig(config: AuthConfig): void {
   const { jwt, cookie, lockout, refreshToken, password } = config;
 
-  if (jwt.secret.length < 32)
+  if (jwt.secret.length < AUTH_VALIDATION.MIN_SECRET_LENGTH)
     throw new AuthValidationError('JWT secret must be at least 32 characters', 'jwt.secret');
 
   if (WEAK_SECRETS.has(jwt.secret.toLowerCase().trim()))
     throw new AuthValidationError('JWT secret is a weak value', 'jwt.secret');
 
-  if (REPEATING_PATTERN.test(jwt.secret))
+  if (REPEATING_SECRET_PATTERN.test(jwt.secret))
     throw new AuthValidationError('JWT secret is a repeating pattern', 'jwt.secret');
 
-  if (cookie.secret.length < 32)
+  if (cookie.secret.length < AUTH_VALIDATION.MIN_SECRET_LENGTH)
     throw new AuthValidationError('Cookie secret must be >= 32 chars', 'cookie.secret');
 
-  if (lockout.maxAttempts < 3 || lockout.maxAttempts > 20)
+  if (
+    lockout.maxAttempts < AUTH_VALIDATION.LOCKOUT_MIN_ATTEMPTS ||
+    lockout.maxAttempts > AUTH_VALIDATION.LOCKOUT_MAX_ATTEMPTS
+  )
     throw new AuthValidationError(
       'Lockout attempts must be between 3 and 20',
       'lockout.maxAttempts',
     );
 
-  if (lockout.lockoutDurationMs < 60000)
+  if (lockout.lockoutDurationMs < AUTH_VALIDATION.LOCKOUT_MIN_DURATION_MS)
     throw new AuthValidationError(
       'Lockout duration must be at least 60000ms',
       'lockout.lockoutDurationMs',
     );
 
-  if (refreshToken.expiryDays < 1 || refreshToken.expiryDays > 30)
+  if (
+    refreshToken.expiryDays < AUTH_VALIDATION.REFRESH_TOKEN_MIN_DAYS ||
+    refreshToken.expiryDays > AUTH_VALIDATION.REFRESH_TOKEN_MAX_DAYS
+  )
     throw new AuthValidationError(
       'Refresh expiry must be between 1 and 30 days',
       'refreshToken.expiryDays',
     );
 
-  if (password.minLength < 8)
+  if (password.minLength < AUTH_VALIDATION.PASSWORD_MIN_LENGTH)
     throw new AuthValidationError(
       'Min password length must be at least 8 characters',
       'password.minLength',

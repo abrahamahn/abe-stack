@@ -214,4 +214,55 @@ export async function logStartupSummary(
     },
     version: process.env['npm_package_version'] ?? 'unknown',
   });
+
+  if (ctx.config.env === 'development') {
+    printDevConfigSummary(ctx, options, health);
+  }
+}
+
+/**
+ * Prints a human-readable config summary to stdout in development/test.
+ * Redacts secrets — only shows provider choices and operational settings.
+ */
+function printDevConfigSummary(
+  ctx: SystemContext,
+  options: StartupSummaryOptions,
+  health: DetailedHealthResponse,
+): void {
+  const { config } = ctx;
+  const { host, port, routeCount } = options;
+  const url = `http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`;
+
+  const line = '─'.repeat(52);
+  const status = (s: ServiceHealth | undefined): string =>
+    s === undefined ? '?' : s.status === 'up' ? 'ok' : s.status;
+
+  const rows: Array<[string, string]> = [
+    ['Environment', config.env],
+    ['URL', url],
+    ['Routes', String(routeCount)],
+    ['Database', `${config.database.provider} [${status(health.services['database'])}]`],
+    ['Cache', config.cache.useExternalProvider ? 'redis' : 'memory'],
+    ['Storage', config.storage.provider],
+    ['Email', config.email.provider],
+    ['Queue', config.queue.provider],
+    ['Search', config.search.provider],
+    ['Auth', config.auth.strategies.join(', ')],
+    ['Billing', config.billing.enabled ? config.billing.provider : 'disabled'],
+    ['Notifications', config.notifications.enabled ? config.notifications.provider : 'disabled'],
+  ];
+
+  const out: string[] = [
+    '',
+    `  BSLT Server`,
+    `  ${line}`,
+  ];
+
+  for (const [label, value] of rows) {
+    out.push(`  ${label.padEnd(16)} ${value}`);
+  }
+
+  out.push(`  ${line}`, '');
+
+  process.stdout.write(out.join('\n'));
 }

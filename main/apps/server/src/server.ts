@@ -15,7 +15,7 @@ import path from 'node:path';
 
 import { RateLimiter } from '@bslt/server-system';
 import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-system/logger';
-import { ERROR_CODES, HTTP_BODY_LIMIT, isAppError } from '@bslt/shared';
+import { ERROR_CODES, isAppError, LIMITS } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastify from 'fastify';
@@ -69,7 +69,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     // This helps prevent denial-of-service attacks via large payloads.
     // Note: File upload routes should configure their own higher limits
     // (e.g., 50MB for multipart uploads) on a per-route basis.
-    bodyLimit: HTTP_BODY_LIMIT,
+    bodyLimit: LIMITS.HTTP_BODY_LIMIT_BYTES,
   });
 
   // Hybrid Context Hook (2026 Pattern)

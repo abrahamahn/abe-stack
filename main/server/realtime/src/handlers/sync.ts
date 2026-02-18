@@ -16,10 +16,10 @@ import {
   ERROR_MESSAGES,
   getOperationPointers,
   HTTP_STATUS,
-  isAuthenticatedRequest,
   REALTIME_ERRORS,
   SubKeys,
 } from '@bslt/shared';
+import { isAuthenticatedRequest } from '@bslt/shared/core';
 
 import { isTableAllowed, loadRecords, saveRecords } from '../service';
 

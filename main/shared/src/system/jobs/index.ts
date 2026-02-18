@@ -35,3 +35,5 @@ export {
   type QueueStats,
   type UpdateJob,
 } from './jobs';
+
+export { ReactiveMap } from './reactive.map';

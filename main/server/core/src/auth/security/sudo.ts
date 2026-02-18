@@ -8,7 +8,9 @@
  * @module security/sudo
  */
 
-import { HTTP_STATUS, SUDO_TOKEN_HEADER } from '@bslt/shared';
+import { AUTH_CONSTANTS, HTTP_STATUS } from '@bslt/shared';
+
+const { SUDO_TOKEN_HEADER } = AUTH_CONSTANTS;
 
 import { verifySudoToken } from '../handlers/sudo';
 

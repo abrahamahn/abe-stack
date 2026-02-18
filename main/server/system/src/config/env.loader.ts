@@ -137,17 +137,8 @@ export function loadServerEnv(): FullEnv {
     process.exit(1);
   }
 
-  const env = result.data;
-
-  // 3. Production Sanity Checks
-  if (env.NODE_ENV === 'production') {
-    if (env.JWT_SECRET.length < 32) {
-      process.stderr.write('❌ SECURITY RISK: JWT_SECRET must be 32+ chars in production.\n');
-      process.exit(1);
-    }
-  }
-
-  return env;
+  // EnvSchema.safeParse already runs validateProductionGuards (JWT_SECRET, DB, etc.)
+  return result.data;
 }
 
 /**

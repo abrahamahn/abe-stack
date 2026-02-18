@@ -1,10 +1,10 @@
 // main/server/core/src/auth/types.ts
 // Re-export LOGIN_FAILURE_REASON from shared (canonical source)
-export {
-  LOGIN_FAILURE_REASON,
-  REFRESH_TOKEN_COOKIE_NAME as REFRESH_COOKIE_NAME,
-  type LoginFailureReason
-} from '@bslt/shared';
+import { AUTH_CONSTANTS, LOGIN_FAILURE_REASON } from '@bslt/shared';
+
+export { LOGIN_FAILURE_REASON };
+export type LoginFailureReason = (typeof LOGIN_FAILURE_REASON)[keyof typeof LOGIN_FAILURE_REASON];
+export const REFRESH_COOKIE_NAME = AUTH_CONSTANTS.REFRESH_TOKEN_COOKIE_NAME;
 
 /**
  * Auth Module Types

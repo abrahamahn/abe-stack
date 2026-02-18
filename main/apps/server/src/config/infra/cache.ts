@@ -1,5 +1,5 @@
 // main/apps/server/src/config/infra/cache.ts
-import { MS_PER_MINUTE } from '@bslt/shared';
+import { CACHE_DEFAULTS } from '@bslt/shared/config';
 
 import type { CacheConfig, FullEnv } from '@bslt/shared/config';
 
@@ -38,7 +38,7 @@ export function loadCacheConfig(env: FullEnv): CacheConfig {
 }
 
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {
-  ttl: 5 * MS_PER_MINUTE,
-  maxSize: 1000,
+  ttl: CACHE_DEFAULTS.TTL_MS,
+  maxSize: CACHE_DEFAULTS.MAX_SIZE,
   useExternalProvider: false,
 };

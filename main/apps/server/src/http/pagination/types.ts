@@ -9,8 +9,8 @@ import type {
   CursorPaginationOptions,
   PaginatedResult,
   PaginationOptions,
-  SortOrder,
 } from '@bslt/shared';
+import type { SortOrder } from '@bslt/shared/system';
 import type { FastifyRequest } from 'fastify';
 
 /**

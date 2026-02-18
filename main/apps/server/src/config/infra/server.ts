@@ -1,5 +1,6 @@
 // main/apps/server/src/config/infra/server.ts
-import { getList } from '@bslt/shared/config';
+import { CORS_CONFIG } from '@bslt/shared';
+import { RATE_LIMIT_DEFAULTS, SERVER_PORT_FALLBACKS, getList } from '@bslt/shared/config';
 
 import type { FullEnv, LogLevel, ServerConfig } from '@bslt/shared/config';
 
@@ -18,7 +19,6 @@ import type { FullEnv, LogLevel, ServerConfig } from '@bslt/shared/config';
  */
 export function loadServerConfig(env: FullEnv): ServerConfig {
   const isProd = env.NODE_ENV === 'production';
-  const defaultPort = 8080;
 
   // Port resolution
   const port = env.API_PORT ?? env.PORT;
@@ -47,7 +47,7 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
     host: env.HOST !== '' ? env.HOST : '0.0.0.0',
     port,
     // Used by the starter logic to find an open port if the default is taken
-    portFallbacks: [defaultPort, 3000, 5000, 8000],
+    portFallbacks: [...SERVER_PORT_FALLBACKS],
 
     cors: {
       // Support multiple origins (e.g., Web + Desktop + Admin)
@@ -58,7 +58,7 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
             ? getList(env.CORS_ORIGIN)
             : [appBaseUrl],
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      methods: [...CORS_CONFIG.ALLOWED_METHODS],
     },
 
     // Operational Settings
@@ -75,8 +75,9 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
 
     // Global Rate Limiting (Infrastructure layer)
     rateLimit: {
-      windowMs: env.RATE_LIMIT_WINDOW_MS ?? 60000,
-      max: env.RATE_LIMIT_MAX ?? (isProd ? 100 : 1000),
+      windowMs: env.RATE_LIMIT_WINDOW_MS ?? RATE_LIMIT_DEFAULTS.GLOBAL_WINDOW_MS,
+      max: env.RATE_LIMIT_MAX ??
+        (isProd ? RATE_LIMIT_DEFAULTS.GLOBAL_MAX_PROD : RATE_LIMIT_DEFAULTS.GLOBAL_MAX_DEV),
     },
 
     // Logging behavior

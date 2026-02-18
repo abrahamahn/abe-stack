@@ -414,6 +414,7 @@ export {
   type PlanId,
   type PlanInterval,
   type PlansListResponse,
+  type PortalSessionParams,
   type PortalSessionRequest,
   type PortalSessionResult,
   type ProviderInvoice,

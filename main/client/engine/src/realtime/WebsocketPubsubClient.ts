@@ -1,6 +1,8 @@
 // main/client/engine/src/realtime/WebsocketPubsubClient.ts
 
-import { delay, MS_PER_SECOND, WEBSOCKET_PATH } from '@bslt/shared';
+import { AUTH_CONSTANTS, delay, MS_PER_SECOND } from '@bslt/shared';
+
+const { WEBSOCKET_PATH } = AUTH_CONSTANTS;
 
 /**
  * Time constants for reconnection delays

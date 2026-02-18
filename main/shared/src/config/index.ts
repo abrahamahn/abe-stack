@@ -169,6 +169,40 @@ export type { AppConfig, FullEnv } from './env.validation';
 export { EnvSchema, validateEnv } from './env.validation';
 
 // ============================================================================
+// Constants
+// ============================================================================
+export {
+  ARGON2_DEFAULTS,
+  AUTH_STRATEGIES,
+  AUTH_VALIDATION,
+  BILLING_PROVIDERS,
+  CACHE_DEFAULTS,
+  CACHE_PROVIDERS,
+  COURIER_DEFAULT_API_URL,
+  DATABASE_PROVIDERS,
+  DB_DEFAULTS,
+  ELASTICSEARCH_DEFAULTS,
+  NOTIFICATION_PROVIDERS,
+  PACKAGE_MANAGER_PROVIDERS,
+  QUEUE_DEFAULTS,
+  QUEUE_PROVIDERS,
+  RATE_LIMIT_DEFAULTS,
+  REPEATING_SECRET_PATTERN,
+  S3_DEFAULTS,
+  SEARCH_DEFAULTS,
+  SEARCH_PROVIDERS,
+  SERVER_PORT_FALLBACKS,
+  SMTP_DEFAULTS,
+  STORAGE_PROVIDERS,
+  WEAK_SECRETS,
+} from './constants';
+
+// ============================================================================
+// Search Defaults
+// ============================================================================
+export { DEFAULT_SEARCH_SCHEMAS } from './search.defaults';
+
+// ============================================================================
 // Re-exports (canonical sources outside config/)
 // ============================================================================
 import { getBool, getInt, getList, getRequired } from '../primitives/helpers';

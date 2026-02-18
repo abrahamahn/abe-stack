@@ -170,6 +170,7 @@ export {
   type CreateProductResult,
   type NormalizedEventType,
   type NormalizedWebhookEvent,
+  type PortalSessionParams,
   type ProviderInvoice,
   type ProviderPaymentMethod,
   type ProviderSubscription,

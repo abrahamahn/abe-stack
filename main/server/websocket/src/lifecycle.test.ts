@@ -8,8 +8,10 @@
 
 import { EventEmitter } from 'node:events';
 
-import { WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } from '@bslt/shared';
+import { AUTH_CONSTANTS } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
+const { WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } = AUTH_CONSTANTS;
 
 // Use vi.hoisted() to define mocks that can be referenced in vi.mock() factories
 const { mockHandleUpgrade, mockVerifyToken, mockValidateCsrfToken, mockParseCookies } = vi.hoisted(

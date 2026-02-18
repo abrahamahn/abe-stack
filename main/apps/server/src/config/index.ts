@@ -12,7 +12,7 @@ export { load, load as loadConfig } from './factory';
  */
 export { AuthValidationError, loadAuthConfig, validateAuthConfig } from './auth/auth';
 
-export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/config';
+export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/core';
 
 export { loadJwtRotationConfig } from './auth/jwt';
 export { loadRateLimitConfig } from './auth/rate-limit';

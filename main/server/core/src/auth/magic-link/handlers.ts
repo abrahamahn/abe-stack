@@ -12,7 +12,7 @@ import {
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   mapErrorToHttpResponse,
 } from '@bslt/shared';
-import { isStrategyEnabled } from '@bslt/shared/config';
+import { isStrategyEnabled } from '@bslt/shared/core';
 
 import { getMetricsCollector } from '../../../../system/src';
 import {

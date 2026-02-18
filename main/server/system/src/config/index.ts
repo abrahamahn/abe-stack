@@ -76,16 +76,18 @@ export {
   DatabaseEnvSchema,
   EmailEnvSchema,
   EnvSchema,
-  FrontendEnvSchema, getBool,
+  FrontendEnvSchema,
+  getBool,
   getInt,
   getList,
-  getRefreshCookieOptions,
   getRequired,
-  isStrategyEnabled, NotificationEnvSchema,
+  NotificationEnvSchema,
   PackageManagerEnvSchema,
   QueueEnvSchema,
   SearchEnvSchema,
   ServerEnvSchema,
-  StorageEnvSchema
+  StorageEnvSchema,
 } from '@bslt/shared/config';
+
+export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/core';
 
