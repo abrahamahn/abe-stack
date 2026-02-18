@@ -21,6 +21,7 @@ function createMockExportRepo(): DataExportRequestRepository {
     findByUserId: vi.fn(),
     update: vi.fn(),
     updateStatus: vi.fn(),
+    deleteExpired: vi.fn(),
   };
 }
 
