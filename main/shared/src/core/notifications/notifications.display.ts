@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.display.ts
+// main/shared/src/core/notifications/notifications.display.ts
 
 import type { NotificationLevel } from './notifications.schemas';
 

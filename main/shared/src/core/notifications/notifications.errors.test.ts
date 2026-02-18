@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.errors.test.ts
+// main/shared/src/core/notifications/notifications.errors.test.ts
 /**
  * Notification Error Tests
  *
@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { HTTP_STATUS } from '../../primitives/constants';
+import { HTTP_STATUS } from '../../engine/constants';
 
 import {
   InvalidPreferencesError,

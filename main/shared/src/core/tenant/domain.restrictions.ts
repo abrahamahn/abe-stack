@@ -1,4 +1,4 @@
-// src/core/tenant/domain.restrictions.ts
+// main/shared/src/core/tenant/domain.restrictions.ts
 
 /**
  * @file Domain Restriction Logic

@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/compliance.logic.test.ts
+// main/shared/src/core/compliance/compliance.logic.test.ts
 
 /**
  * @file Compliance Logic Unit Tests

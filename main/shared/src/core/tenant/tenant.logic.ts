@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/tenant.logic.ts
+// main/shared/src/core/tenant/tenant.logic.ts
 
 /**
  * @file Tenant Domain Logic

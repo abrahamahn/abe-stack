@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/deletion.logic.ts
+// main/shared/src/core/compliance/deletion.logic.ts
 
 /**
  * @file Deletion Logic

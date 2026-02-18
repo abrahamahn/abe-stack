@@ -22,9 +22,9 @@ import type { WebhookDeliveryStatus } from './webhooks';
 // Test Data Helpers
 // ============================================================================
 
-const VALID_UUID = '00000000-0000-0000-0000-000000000001';
-const VALID_WEBHOOK_ID = '00000000-0000-0000-0000-000000000002';
-const VALID_DELIVERY_ID = '00000000-0000-0000-0000-000000000003';
+const VALID_UUID = '12345678-1234-4abc-8abc-123456789001';
+const VALID_WEBHOOK_ID = '12345678-1234-4abc-8abc-123456789002';
+const VALID_DELIVERY_ID = '12345678-1234-4abc-8abc-123456789003';
 const VALID_URL = 'https://example.com/webhook';
 
 // ============================================================================

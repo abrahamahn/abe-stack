@@ -53,3 +53,46 @@ export {
   type TenantSetting,
   type UpdateTenantSetting,
 } from './tenant.settings.schemas';
+
+// --- membership.display ---
+export { getInvitationStatusTone, getTenantRoleTone } from './membership.display';
+
+// --- membership.logic ---
+export {
+  canAcceptInvite,
+  canAssignRole,
+  canChangeRole,
+  canLeave,
+  canRemoveMember,
+  canRevokeInvite,
+  getNextOwnerCandidate,
+  getRoleLevel,
+  hasAtLeastRole,
+  isInviteExpired,
+  isSoleOwner,
+  ROLE_LEVELS,
+} from './membership.logic';
+
+// --- membership.schemas ---
+export {
+  acceptInvitationSchema,
+  addMemberSchema,
+  createInvitationSchema,
+  INVITATION_STATUSES,
+  invitationSchema,
+  invitationsListResponseSchema,
+  membershipActionResponseSchema,
+  membershipSchema,
+  membersListResponseSchema,
+  updateMembershipRoleSchema,
+  type AcceptInvitation,
+  type AddMember,
+  type CreateInvitation,
+  type Invitation,
+  type InvitationStatus,
+  type InvitationsListResponse,
+  type Membership,
+  type MembershipActionResponse,
+  type MembersListResponse,
+  type UpdateMembershipRole,
+} from './membership.schemas';

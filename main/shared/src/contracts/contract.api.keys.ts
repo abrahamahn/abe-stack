@@ -1,18 +1,18 @@
-// src/contracts/contract.api.keys.ts
+// main/shared/src/contracts/contract.api.keys.ts
 /**
  * API Keys Contracts
  *
  * API contract definitions for user API key management.
  */
 
-import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   createApiKeyRequestSchema,
   createApiKeyResponseSchema,
   deleteApiKeyResponseSchema,
   listApiKeysResponseSchema,
   revokeApiKeyResponseSchema,
-} from '../engine/api-keys/api.keys.schemas';
+} from '../engine/api-keys/api-keys';
+import { emptyBodySchema, errorResponseSchema, successResponseSchema } from '../engine/http';
 
 import type { Contract } from '../primitives/api';
 

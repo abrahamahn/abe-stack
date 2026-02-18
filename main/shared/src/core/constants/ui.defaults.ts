@@ -1,4 +1,4 @@
-// src/core/constants/ui.defaults.ts
+// main/shared/src/core/constants/ui.defaults.ts
 
 /**
  * @file UI Defaults

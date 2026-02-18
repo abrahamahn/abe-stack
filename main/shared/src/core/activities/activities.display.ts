@@ -1,4 +1,4 @@
-// main/shared/src/domain/activities/activities.display.ts
+// main/shared/src/core/activities/activities.display.ts
 
 // ============================================================================
 // Actor Type Display

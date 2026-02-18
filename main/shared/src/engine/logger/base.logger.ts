@@ -1,4 +1,4 @@
-// src/engine/logger/base.logger.ts
+// main/shared/src/engine/logger/base.logger.ts
 /**
  * Base Logger Adapter
  *

@@ -78,7 +78,7 @@ export {
 } from './auth.email.schemas';
 
 // --- Auth helpers ---
-export { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.schemas';
+export { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.logic';
 
 // --- Magic link schemas ---
 export {

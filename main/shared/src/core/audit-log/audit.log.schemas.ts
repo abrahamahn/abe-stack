@@ -1,4 +1,4 @@
-// src/core/audit-log/audit.log.schemas.ts
+// main/shared/src/core/audit-log/audit.log.schemas.ts
 
 /**
  * @file Audit Log Schemas
@@ -18,7 +18,7 @@ import {
   withDefault,
   type Schema,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../auth/auth.scalars.schemas';
+import { isoDateTimeSchema } from '../schemas';
 import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../constants/notifications';
 import { auditEventIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import type { CursorPaginatedResult, CursorPaginationOptions } from '../../engine/pagination';

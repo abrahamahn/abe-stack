@@ -1,4 +1,4 @@
-// src/core/audit-log/audit.log.display.ts
+// main/shared/src/core/audit-log/audit.log.display.ts
 
 /**
  * @file Audit Log Display

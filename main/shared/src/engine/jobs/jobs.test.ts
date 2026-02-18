@@ -195,7 +195,7 @@ describe('calculateBackoff', () => {
 // ============================================================================
 
 /** Valid UUID for testing */
-const validJobId: JobId = '00000000-0000-0000-0000-000000000001' as JobId;
+const validJobId: JobId = '12345678-1234-4abc-8abc-123456789001' as JobId;
 
 /** Valid base job for testing */
 const validFullJob = {

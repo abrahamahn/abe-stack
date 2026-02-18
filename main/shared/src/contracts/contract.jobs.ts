@@ -1,4 +1,4 @@
-// main/shared/src/domain/jobs/jobs.contracts.ts
+// main/shared/src/contracts/contract.jobs.ts
 /**
  * Jobs Contracts
  *

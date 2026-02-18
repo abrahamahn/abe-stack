@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.display.test.ts
+// main/shared/src/core/notifications/notifications.display.test.ts
 
 import { describe, expect, it } from 'vitest';
 

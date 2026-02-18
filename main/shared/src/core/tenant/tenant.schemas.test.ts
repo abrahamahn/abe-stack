@@ -29,11 +29,11 @@ describe('tenantSchema', () => {
   describe('valid inputs', () => {
     it('should parse valid full tenant entity with all fields', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme Corporation',
         slug: 'acme-corp',
         logoUrl: 'https://example.com/logo.png',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -47,31 +47,31 @@ describe('tenantSchema', () => {
 
     it('should parse with minimal required fields', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
 
       const result: Tenant = tenantSchema.parse(input);
 
-      expect(result.id).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.id).toBe('12345678-1234-4abc-8abc-123456789001');
       expect(result.name).toBe('Acme');
       expect(result.slug).toBe('acme');
-      expect(result.ownerId).toBe('00000000-0000-0000-0000-000000000002');
+      expect(result.ownerId).toBe('12345678-1234-4abc-8abc-123456789002');
       expect(result.isActive).toBe(true);
       expect(result.metadata).toEqual({});
     });
 
     it('should accept null logoUrl', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: null,
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -85,10 +85,10 @@ describe('tenantSchema', () => {
 
     it('should accept undefined logoUrl', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -102,11 +102,11 @@ describe('tenantSchema', () => {
 
     it('should accept valid URL for logoUrl', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: 'https://cdn.example.com/logos/acme.svg',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -122,10 +122,10 @@ describe('tenantSchema', () => {
   describe('defaults', () => {
     it('should default isActive to true when undefined', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
@@ -137,10 +137,10 @@ describe('tenantSchema', () => {
 
     it('should default metadata to empty object when undefined', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -153,10 +153,10 @@ describe('tenantSchema', () => {
 
     it('should respect explicitly set isActive to false', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: false,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -172,10 +172,10 @@ describe('tenantSchema', () => {
   describe('name validation', () => {
     it('should accept name with minimum length of 1', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'A',
         slug: 'a',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -190,10 +190,10 @@ describe('tenantSchema', () => {
     it('should accept name with maximum length of 100', () => {
       const name = 'A'.repeat(100);
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name,
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -207,10 +207,10 @@ describe('tenantSchema', () => {
 
     it('should reject name longer than 100 characters', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'A'.repeat(101),
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -222,10 +222,10 @@ describe('tenantSchema', () => {
 
     it('should reject empty name', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: '',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -237,9 +237,9 @@ describe('tenantSchema', () => {
 
     it('should reject missing name', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -256,10 +256,10 @@ describe('tenantSchema', () => {
 
       for (const slug of validSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -276,10 +276,10 @@ describe('tenantSchema', () => {
 
       for (const slug of validSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -296,10 +296,10 @@ describe('tenantSchema', () => {
 
       for (const slug of validSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -316,10 +316,10 @@ describe('tenantSchema', () => {
 
       for (const slug of invalidSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -337,10 +337,10 @@ describe('tenantSchema', () => {
 
       for (const slug of invalidSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -358,10 +358,10 @@ describe('tenantSchema', () => {
 
       for (const slug of invalidSlugs) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
+          id: '12345678-1234-4abc-8abc-123456789001',
           name: 'Acme',
           slug,
-          ownerId: '00000000-0000-0000-0000-000000000002',
+          ownerId: '12345678-1234-4abc-8abc-123456789002',
           isActive: true,
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
@@ -376,10 +376,10 @@ describe('tenantSchema', () => {
 
     it('should reject empty slug', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: '',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -391,10 +391,10 @@ describe('tenantSchema', () => {
 
     it('should reject slug longer than 100 characters', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'a'.repeat(101),
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -406,9 +406,9 @@ describe('tenantSchema', () => {
 
     it('should reject missing slug', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -422,11 +422,11 @@ describe('tenantSchema', () => {
   describe('logoUrl validation', () => {
     it('should accept valid HTTPS URL', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: 'https://example.com/logo.png',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -440,11 +440,11 @@ describe('tenantSchema', () => {
 
     it('should accept valid HTTP URL', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: 'http://example.com/logo.png',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -458,11 +458,11 @@ describe('tenantSchema', () => {
 
     it('should reject invalid URL format', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: 'not-a-url',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -474,11 +474,11 @@ describe('tenantSchema', () => {
 
     it('should reject relative URL', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         logoUrl: '/logo.png',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -495,7 +495,7 @@ describe('tenantSchema', () => {
         id: 'not-a-uuid',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -507,7 +507,7 @@ describe('tenantSchema', () => {
 
     it('should reject invalid UUID for ownerId', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         ownerId: 'not-a-uuid',
@@ -524,7 +524,7 @@ describe('tenantSchema', () => {
       const input = {
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -536,7 +536,7 @@ describe('tenantSchema', () => {
 
     it('should reject missing ownerId', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
         isActive: true,
@@ -552,10 +552,10 @@ describe('tenantSchema', () => {
   describe('timestamp validation', () => {
     it('should accept valid ISO datetime for createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T12:00:00.000Z',
         updatedAt: '2024-01-01T12:00:00.000Z',
@@ -569,10 +569,10 @@ describe('tenantSchema', () => {
 
     it('should reject invalid datetime for createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: 'invalid-date',
         updatedAt: '2024-01-01T12:00:00.000Z',
@@ -584,10 +584,10 @@ describe('tenantSchema', () => {
 
     it('should reject invalid date string for createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: 'not-a-date',
         updatedAt: '2024-01-01T12:00:00.000Z',
@@ -599,10 +599,10 @@ describe('tenantSchema', () => {
 
     it('should reject missing createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         updatedAt: '2024-01-01T12:00:00.000Z',
         metadata: {},
@@ -613,10 +613,10 @@ describe('tenantSchema', () => {
 
     it('should reject missing updatedAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T12:00:00.000Z',
         metadata: {},
@@ -629,10 +629,10 @@ describe('tenantSchema', () => {
   describe('metadata validation', () => {
     it('should accept valid metadata object', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -646,10 +646,10 @@ describe('tenantSchema', () => {
 
     it('should accept empty metadata object', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -663,10 +663,10 @@ describe('tenantSchema', () => {
 
     it('should reject non-object metadata', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
@@ -678,10 +678,10 @@ describe('tenantSchema', () => {
 
     it('should reject array for metadata', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         name: 'Acme',
         slug: 'acme',
-        ownerId: '00000000-0000-0000-0000-000000000002',
+        ownerId: '12345678-1234-4abc-8abc-123456789002',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',

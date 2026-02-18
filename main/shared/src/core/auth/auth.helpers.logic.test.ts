@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth.helpers.schemas.test.ts
+// main/shared/src/core/auth/auth.helpers.logic.test.ts
 /**
  * @file Auth Configuration Helpers Tests
  * @description Tests for pure utility functions that operate on AuthConfig.
@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.schemas';
+import { getRefreshCookieOptions, isStrategyEnabled } from './auth.helpers.logic';
 
 import type { AuthConfig, AuthStrategy } from '../../primitives/config/types/auth';
 

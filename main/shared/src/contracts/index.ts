@@ -10,7 +10,6 @@ export { featureFlagsContract } from './contract.feature.flags';
 export { filesContract } from './contract.files';
 export { healthContract } from './contract.health';
 export { jobsContract } from './contract.jobs';
-export { membershipContract } from './contract.membership';
 export { notificationsContract } from './contract.notifications';
 export { realtimeContract } from './contract.realtime';
 export { tenantContract } from './contract.tenant';

@@ -1,4 +1,4 @@
-// main/shared/src/core/auth/auth.helpers.schemas.ts
+// main/shared/src/core/auth/auth.helpers.logic.ts
 /**
  * @file Auth Configuration Helpers
  * @description Pure utility functions that operate on AuthConfig.
@@ -8,7 +8,7 @@
 
 import { MS_PER_DAY } from '../../primitives/constants/time';
 
-import type { AuthConfig, AuthStrategy } from '../../config/types/auth';
+import type { AuthConfig, AuthStrategy } from '../../config/env.auth';
 
 // ============================================================================
 // Functions

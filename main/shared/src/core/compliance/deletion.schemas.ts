@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/deletion.schemas.ts
+// main/shared/src/core/compliance/deletion.schemas.ts
 
 /**
  * @file Deletion Schemas

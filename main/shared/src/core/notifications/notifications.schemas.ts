@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.schemas.ts
+// main/shared/src/core/notifications/notifications.schemas.ts
 
 /**
  * @file Notification Contracts
@@ -18,7 +18,7 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../auth/auth.scalars.schemas';
+import { isoDateTimeSchema } from '../schemas';
 import { notificationIdSchema, userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/schema';

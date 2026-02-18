@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.errors.ts
+// main/shared/src/core/notifications/notifications.errors.ts
 /**
  * Push Notification Errors
  *

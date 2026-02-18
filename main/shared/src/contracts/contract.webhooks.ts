@@ -1,4 +1,4 @@
-// main/shared/src/domain/webhooks/webhooks.contracts.ts
+// main/shared/src/contracts/contract.webhooks.ts
 /**
  * Webhooks Contracts
  *

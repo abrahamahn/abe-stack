@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/tenant.logic.test.ts
+// main/shared/src/core/tenant/tenant.logic.test.ts
 
 /**
  * @file Unit Tests for Tenant Logic
@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ERROR_CODES } from '../../core/constants';
+import { ERROR_CODES } from '../../engine/constants';
 
 import {
   WORKSPACE_ID_HEADER,

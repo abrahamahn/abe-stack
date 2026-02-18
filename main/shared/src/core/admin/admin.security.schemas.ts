@@ -1,4 +1,4 @@
-// src/core/admin/admin.security.schemas.ts
+// main/shared/src/core/admin/admin.security.schemas.ts
 /**
  * Security Audit Schemas & Contract
  *

@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/tenant.workspace.test.ts
+// main/shared/src/core/tenant/tenant.workspace.test.ts
 
 /**
  * @file Unit Tests for Tenant Workspace Context
@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ForbiddenError } from '../../core/errors';
+import { ForbiddenError } from '../../engine/errors';
 
 import {
   assertWorkspaceScope,
@@ -421,12 +421,12 @@ describe('createWorkspaceContext', () => {
   describe('edge cases', () => {
     it('should handle UUID-format IDs', () => {
       const result = createWorkspaceContext(
-        '00000000-0000-0000-0000-000000000001',
-        '00000000-0000-0000-0000-000000000002',
+        '12345678-1234-4abc-8abc-123456789001',
+        '12345678-1234-4abc-8abc-123456789002',
       );
 
-      expect(result.workspaceId).toBe('00000000-0000-0000-0000-000000000001');
-      expect(result.userId).toBe('00000000-0000-0000-0000-000000000002');
+      expect(result.workspaceId).toBe('12345678-1234-4abc-8abc-123456789001');
+      expect(result.userId).toBe('12345678-1234-4abc-8abc-123456789002');
     });
 
     it('should handle numeric string IDs', () => {
@@ -618,8 +618,8 @@ describe('isWorkspaceScoped', () => {
 
     it('should return true for UUID-format IDs', () => {
       const context: MaybeWorkspaceContext = {
-        workspaceId: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        workspaceId: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
       };
 
       expect(isWorkspaceScoped(context)).toBe(true);

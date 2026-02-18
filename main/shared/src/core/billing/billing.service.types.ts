@@ -1,4 +1,4 @@
-// src/core/billing/billing.service.types.ts
+// main/shared/src/core/billing/billing.service.types.ts
 
 /**
  * @file Billing Service Types

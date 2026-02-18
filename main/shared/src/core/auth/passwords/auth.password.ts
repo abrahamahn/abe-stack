@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.password.ts
+// main/shared/src/core/auth/passwords/auth.password.ts
 import { estimatePasswordStrength } from './auth.password.strength';
 
 /**

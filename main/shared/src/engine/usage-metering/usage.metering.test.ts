@@ -41,7 +41,7 @@ function createValidUsageMetric(overrides: Partial<UsageMetric> = {}): Record<st
 function createValidUsageSnapshot(overrides: Partial<UsageSnapshot> = {}): Record<string, unknown> {
   return {
     id: 'snap_001',
-    tenantId: '00000000-0000-0000-0000-000000000001',
+    tenantId: '12345678-1234-4abc-8abc-123456789001',
     metricKey: 'api_requests',
     value: 1000,
     periodStart: '2026-02-01T00:00:00.000Z',
@@ -227,7 +227,7 @@ describe('usageSnapshotSchema', () => {
 
       expect(result).toEqual({
         id: 'snap_001',
-        tenantId: '00000000-0000-0000-0000-000000000001',
+        tenantId: '12345678-1234-4abc-8abc-123456789001',
         metricKey: 'api_requests',
         value: 1000,
         periodStart: '2026-02-01T00:00:00.000Z',
@@ -295,7 +295,7 @@ describe('usageSnapshotSchema', () => {
 
     it('should throw error for UUID with extra characters', () => {
       const input = createValidUsageSnapshot({
-        tenantId: '00000000-0000-0000-0000-000000000001-extra',
+        tenantId: '12345678-1234-4abc-8abc-123456789001-extra',
       });
 
       expect(() => usageSnapshotSchema.parse(input)).toThrow('TenantId must be a valid UUID');

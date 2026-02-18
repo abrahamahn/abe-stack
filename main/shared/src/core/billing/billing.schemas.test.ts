@@ -31,7 +31,7 @@ import type {
 // Test Data Helpers
 // ============================================================================
 
-const VALID_USER_ID = '00000000-0000-0000-0000-000000000001';
+const VALID_USER_ID = '12345678-1234-4abc-8abc-123456789001';
 const VALID_PLAN_ID = 'pro_monthly';
 const VALID_SUBSCRIPTION_ID = 'sub_123';
 

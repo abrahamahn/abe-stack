@@ -7,7 +7,7 @@
  * reuse across packages without coupling to Fastify or pino.
  */
 
-import type { LogLevel } from '../../config/types/infra';
+import type { LogLevel } from '../../config/env.server';
 
 export type { LogLevel };
 

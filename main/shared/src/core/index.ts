@@ -2,7 +2,7 @@
 /**
  * Core Module Barrel
  *
- * Business logic: auth, billing, users, tenant, membership, notifications,
+ * Business logic: auth, billing, users, tenant (incl. membership), notifications,
  * compliance, activities, admin, audit-log, field schemas, transactions.
  * Infrastructure (errors, envelopes, env) lives in engine/.
  */
@@ -468,7 +468,7 @@ export {
 } from './tenant';
 
 // ============================================================================
-// Membership
+// Membership (colocated in tenant/)
 // ============================================================================
 
 export {
@@ -500,7 +500,7 @@ export {
   type InvitationStatus,
   type Membership,
   type UpdateMembershipRole,
-} from './membership';
+} from './tenant';
 
 // ============================================================================
 // Notifications

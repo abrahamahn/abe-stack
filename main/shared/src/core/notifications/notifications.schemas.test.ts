@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.schemas.test.ts
+// main/shared/src/core/notifications/notifications.schemas.test.ts
 
 /**
  * @file Unit Tests for Notification Schemas
@@ -49,8 +49,8 @@ describe('notificationSchema', () => {
   describe('valid inputs', () => {
     it('should parse complete notification with all fields', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test Notification',
         message: 'This is a test message',
@@ -67,8 +67,8 @@ describe('notificationSchema', () => {
 
     it('should parse notification with minimal required fields', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'success',
         title: 'Success',
         message: 'Operation completed',
@@ -77,8 +77,8 @@ describe('notificationSchema', () => {
 
       const result = notificationSchema.parse(input);
 
-      expect(result.id).toBe('00000000-0000-0000-0000-000000000001');
-      expect(result.userId).toBe('00000000-0000-0000-0000-000000000002');
+      expect(result.id).toBe('12345678-1234-4abc-8abc-123456789001');
+      expect(result.userId).toBe('12345678-1234-4abc-8abc-123456789002');
       expect(result.type).toBe('success');
       expect(result.title).toBe('Success');
       expect(result.message).toBe('Operation completed');
@@ -98,8 +98,8 @@ describe('notificationSchema', () => {
 
       for (const type of types) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
-          userId: '00000000-0000-0000-0000-000000000002',
+          id: '12345678-1234-4abc-8abc-123456789001',
+          userId: '12345678-1234-4abc-8abc-123456789002',
           type,
           title: 'Test',
           message: 'Test message',
@@ -115,8 +115,8 @@ describe('notificationSchema', () => {
   describe('defaults', () => {
     it('should default isRead to false when not provided', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -130,8 +130,8 @@ describe('notificationSchema', () => {
 
     it('should preserve isRead when explicitly set to true', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -146,8 +146,8 @@ describe('notificationSchema', () => {
 
     it('should preserve isRead when explicitly set to false', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -164,8 +164,8 @@ describe('notificationSchema', () => {
   describe('optional fields', () => {
     it('should accept optional data field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -180,8 +180,8 @@ describe('notificationSchema', () => {
 
     it('should handle undefined data field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -195,8 +195,8 @@ describe('notificationSchema', () => {
 
     it('should accept empty data object', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -213,8 +213,8 @@ describe('notificationSchema', () => {
   describe('nullable-optional readAt field', () => {
     it('should accept valid ISO datetime for readAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -229,8 +229,8 @@ describe('notificationSchema', () => {
 
     it('should accept null for readAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -245,8 +245,8 @@ describe('notificationSchema', () => {
 
     it('should handle undefined readAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -260,8 +260,8 @@ describe('notificationSchema', () => {
 
     it('should reject invalid ISO datetime for readAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -276,7 +276,7 @@ describe('notificationSchema', () => {
   describe('required fields validation', () => {
     it('should require id field', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000002',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -288,7 +288,7 @@ describe('notificationSchema', () => {
 
     it('should require userId field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -300,8 +300,8 @@ describe('notificationSchema', () => {
 
     it('should require type field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         title: 'Test',
         message: 'Message',
         createdAt: '2024-01-01T10:00:00.000Z',
@@ -312,8 +312,8 @@ describe('notificationSchema', () => {
 
     it('should require title field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         message: 'Message',
         createdAt: '2024-01-01T10:00:00.000Z',
@@ -324,8 +324,8 @@ describe('notificationSchema', () => {
 
     it('should require message field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         createdAt: '2024-01-01T10:00:00.000Z',
@@ -336,8 +336,8 @@ describe('notificationSchema', () => {
 
     it('should require createdAt field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -350,8 +350,8 @@ describe('notificationSchema', () => {
   describe('type validation', () => {
     it('should reject invalid notification type', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'invalid',
         title: 'Test',
         message: 'Message',
@@ -363,8 +363,8 @@ describe('notificationSchema', () => {
 
     it('should reject type as number', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 123,
         title: 'Test',
         message: 'Message',
@@ -379,7 +379,7 @@ describe('notificationSchema', () => {
     it('should reject invalid UUID format for id', () => {
       const input = {
         id: 'not-a-uuid',
-        userId: '00000000-0000-0000-0000-000000000002',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -391,7 +391,7 @@ describe('notificationSchema', () => {
 
     it('should reject invalid UUID format for userId', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         userId: 'not-a-uuid',
         type: 'info',
         title: 'Test',
@@ -406,8 +406,8 @@ describe('notificationSchema', () => {
   describe('ISO datetime validation', () => {
     it('should reject invalid ISO datetime for createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: 'Message',
@@ -426,8 +426,8 @@ describe('notificationSchema', () => {
 
       for (const date of dates) {
         const input = {
-          id: '00000000-0000-0000-0000-000000000001',
-          userId: '00000000-0000-0000-0000-000000000002',
+          id: '12345678-1234-4abc-8abc-123456789001',
+          userId: '12345678-1234-4abc-8abc-123456789002',
           type: 'info',
           title: 'Test',
           message: 'Message',
@@ -450,8 +450,8 @@ describe('notificationSchema', () => {
 
     it('should accept empty strings for title', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: '',
         message: 'Message',
@@ -464,8 +464,8 @@ describe('notificationSchema', () => {
 
     it('should accept empty strings for message', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
-        userId: '00000000-0000-0000-0000-000000000002',
+        id: '12345678-1234-4abc-8abc-123456789001',
+        userId: '12345678-1234-4abc-8abc-123456789002',
         type: 'info',
         title: 'Test',
         message: '',
@@ -486,7 +486,7 @@ describe('notificationPreferencesSchema', () => {
   describe('valid inputs', () => {
     it('should parse complete preferences with all fields', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         emailEnabled: false,
         pushEnabled: true,
         categories: {
@@ -498,7 +498,7 @@ describe('notificationPreferencesSchema', () => {
 
       const result = notificationPreferencesSchema.parse(input);
 
-      expect(result.userId).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.userId).toBe('12345678-1234-4abc-8abc-123456789001');
       expect(result.emailEnabled).toBe(false);
       expect(result.pushEnabled).toBe(true);
       expect(result.categories).toEqual({
@@ -510,12 +510,12 @@ describe('notificationPreferencesSchema', () => {
 
     it('should parse preferences with minimal required fields', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
       };
 
       const result = notificationPreferencesSchema.parse(input);
 
-      expect(result.userId).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.userId).toBe('12345678-1234-4abc-8abc-123456789001');
       expect(result.emailEnabled).toBe(true);
       expect(result.pushEnabled).toBe(false);
       expect(result.categories).toEqual({});
@@ -525,7 +525,7 @@ describe('notificationPreferencesSchema', () => {
   describe('defaults', () => {
     it('should default emailEnabled to true when not provided', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
       };
 
       const result = notificationPreferencesSchema.parse(input);
@@ -535,7 +535,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should default pushEnabled to false when not provided', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
       };
 
       const result = notificationPreferencesSchema.parse(input);
@@ -545,7 +545,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should default categories to empty object when not provided', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
       };
 
       const result = notificationPreferencesSchema.parse(input);
@@ -555,7 +555,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should preserve explicitly set emailEnabled false', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         emailEnabled: false,
       };
 
@@ -566,7 +566,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should preserve explicitly set pushEnabled true', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         pushEnabled: true,
       };
 
@@ -579,7 +579,7 @@ describe('notificationPreferencesSchema', () => {
   describe('categories field', () => {
     it('should parse categories with boolean values', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {
           cat1: true,
           cat2: false,
@@ -598,7 +598,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should handle empty categories object', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {},
       };
 
@@ -609,7 +609,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should require strict boolean values for categories', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {
           cat1: true,
           cat2: false,
@@ -626,7 +626,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should reject string boolean values for categories', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {
           invalid: 'true',
         },
@@ -637,7 +637,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should reject numeric values for categories', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {
           invalid: 1,
         },
@@ -648,7 +648,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should reject category values that cannot be parsed as boolean', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: {
           invalid: { nested: 'object' },
         },
@@ -659,7 +659,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should handle null categories by defaulting to empty object', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: null,
       };
 
@@ -670,7 +670,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should handle array categories by defaulting to empty object', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         categories: ['not', 'an', 'object'],
       };
 
@@ -706,7 +706,7 @@ describe('notificationPreferencesSchema', () => {
   describe('boolean fields validation', () => {
     it('should accept boolean values for emailEnabled', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         emailEnabled: true,
       };
 
@@ -717,7 +717,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should accept boolean values for pushEnabled', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         pushEnabled: true,
       };
 
@@ -728,7 +728,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should reject string boolean values', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         emailEnabled: 'true',
       };
 
@@ -737,7 +737,7 @@ describe('notificationPreferencesSchema', () => {
 
     it('should reject numeric boolean values', () => {
       const input = {
-        userId: '00000000-0000-0000-0000-000000000001',
+        userId: '12345678-1234-4abc-8abc-123456789001',
         pushEnabled: 1,
       };
 
@@ -1000,30 +1000,30 @@ describe('baseMarkAsReadRequestSchema', () => {
   describe('valid inputs', () => {
     it('should parse with one valid UUID', () => {
       const input = {
-        ids: ['00000000-0000-0000-0000-000000000001'],
+        ids: ['12345678-1234-4abc-8abc-123456789001'],
       };
 
       const result = baseMarkAsReadRequestSchema.parse(input);
 
-      expect(result.ids).toEqual(['00000000-0000-0000-0000-000000000001']);
+      expect(result.ids).toEqual(['12345678-1234-4abc-8abc-123456789001']);
       expect(result.ids).toHaveLength(1);
     });
 
     it('should parse with multiple valid UUIDs', () => {
       const input = {
         ids: [
-          '00000000-0000-0000-0000-000000000001',
-          '00000000-0000-0000-0000-000000000002',
-          '00000000-0000-0000-0000-000000000003',
+          '12345678-1234-4abc-8abc-123456789001',
+          '12345678-1234-4abc-8abc-123456789002',
+          '12345678-1234-4abc-8abc-123456789003',
         ],
       };
 
       const result = baseMarkAsReadRequestSchema.parse(input);
 
       expect(result.ids).toEqual([
-        '00000000-0000-0000-0000-000000000001',
-        '00000000-0000-0000-0000-000000000002',
-        '00000000-0000-0000-0000-000000000003',
+        '12345678-1234-4abc-8abc-123456789001',
+        '12345678-1234-4abc-8abc-123456789002',
+        '12345678-1234-4abc-8abc-123456789003',
       ]);
       expect(result.ids).toHaveLength(3);
     });
@@ -1031,7 +1031,7 @@ describe('baseMarkAsReadRequestSchema', () => {
     it('should parse with many valid UUIDs', () => {
       const ids = Array.from(
         { length: 10 },
-        (_, i) => `00000000-0000-0000-0000-00000000000${i.toString().padStart(1, '0')}`,
+        (_, i) => `12345678-1234-4abc-8abc-1234567890${i.toString().padStart(2, '0')}`,
       );
       const input = { ids };
 
@@ -1055,7 +1055,7 @@ describe('baseMarkAsReadRequestSchema', () => {
 
     it('should reject non-array input', () => {
       const input = {
-        ids: '00000000-0000-0000-0000-000000000001',
+        ids: '12345678-1234-4abc-8abc-123456789001',
       };
 
       expect(() => baseMarkAsReadRequestSchema.parse(input)).toThrow('ids must be an array');
@@ -1077,7 +1077,7 @@ describe('baseMarkAsReadRequestSchema', () => {
 
     it('should reject object instead of array', () => {
       const input = {
-        ids: { id: '00000000-0000-0000-0000-000000000001' },
+        ids: { id: '12345678-1234-4abc-8abc-123456789001' },
       };
 
       expect(() => baseMarkAsReadRequestSchema.parse(input)).toThrow('ids must be an array');
@@ -1096,9 +1096,9 @@ describe('baseMarkAsReadRequestSchema', () => {
     it('should reject when some UUIDs are invalid', () => {
       const input = {
         ids: [
-          '00000000-0000-0000-0000-000000000001',
+          '12345678-1234-4abc-8abc-123456789001',
           'not-a-uuid',
-          '00000000-0000-0000-0000-000000000003',
+          '12345678-1234-4abc-8abc-123456789003',
         ],
       };
 
@@ -1148,7 +1148,7 @@ describe('baseMarkAsReadRequestSchema', () => {
     it('should validate all UUIDs in large array', () => {
       const validIds = Array.from(
         { length: 50 },
-        (_, i) => `00000000-0000-0000-0000-${i.toString().padStart(12, '0')}`,
+        (_, i) => `12345678-1234-4abc-8abc-${String(100000000000 + i)}`,
       );
       const input = { ids: validIds };
 
@@ -1161,17 +1161,17 @@ describe('baseMarkAsReadRequestSchema', () => {
     it('should preserve UUID order in array', () => {
       const input = {
         ids: [
-          '00000000-0000-0000-0000-000000000003',
-          '00000000-0000-0000-0000-000000000001',
-          '00000000-0000-0000-0000-000000000002',
+          '12345678-1234-4abc-8abc-123456789003',
+          '12345678-1234-4abc-8abc-123456789001',
+          '12345678-1234-4abc-8abc-123456789002',
         ],
       };
 
       const result = baseMarkAsReadRequestSchema.parse(input);
 
-      expect(result.ids[0]).toBe('00000000-0000-0000-0000-000000000003');
-      expect(result.ids[1]).toBe('00000000-0000-0000-0000-000000000001');
-      expect(result.ids[2]).toBe('00000000-0000-0000-0000-000000000002');
+      expect(result.ids[0]).toBe('12345678-1234-4abc-8abc-123456789003');
+      expect(result.ids[1]).toBe('12345678-1234-4abc-8abc-123456789001');
+      expect(result.ids[2]).toBe('12345678-1234-4abc-8abc-123456789002');
     });
   });
 });
@@ -1185,8 +1185,8 @@ describe('notificationsListResponseSchema', () => {
     const result = notificationsListResponseSchema.parse({
       notifications: [
         {
-          id: '00000000-0000-0000-0000-000000000001',
-          userId: '00000000-0000-0000-0000-000000000002',
+          id: '12345678-1234-4abc-8abc-123456789001',
+          userId: '12345678-1234-4abc-8abc-123456789002',
           type: 'info',
           title: 't',
           message: 'm',

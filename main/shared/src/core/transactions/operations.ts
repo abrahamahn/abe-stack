@@ -75,8 +75,6 @@ function invertListRemoveOperation(op: ListRemoveOperation): ListInsertOperation
  *   previousValue: 'Old Name',
  * };
  * const inverse = invertOperation(setOp);
- * // inverse.value === 'Old Name'
- * // inverse.previousValue === 'New Name'
  * ```
  */
 export function invertOperation(op: Operation): Operation {
@@ -106,8 +104,6 @@ export function invertOperation(op: Operation): Operation {
  *   ],
  * };
  * const inverse = invertTransaction(tx);
- * // Operations are reversed: b then a
- * // Each operation is inverted
  * ```
  */
 export function invertTransaction(tx: Transaction): Transaction {

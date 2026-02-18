@@ -1,4 +1,4 @@
-// src/engine/jobs/batched.queue.ts
+// main/shared/src/engine/jobs/batched.queue.ts
 /**
  * Batched Queue with Backpressure Control
  *

@@ -6,96 +6,167 @@
  */
 
 // ============================================================================
-// Type Definitions (from ./types/)
+// Auth Types & Schema
 // ============================================================================
 export type {
-  // Main configuration
-  AppConfig,
-  // Auth configuration
   Argon2Config,
   AuthConfig,
   AuthEnv,
   AuthStrategy,
-  // Service configuration
+  JwtRotationConfig,
+  OAuthProviderConfig,
+  RateLimitConfig,
+} from './env.auth';
+
+export { AuthEnvSchema } from './env.auth';
+
+// ============================================================================
+// Base Types & Schema
+// ============================================================================
+export type { BaseEnv, JwtEnv, NodeEnv } from './env.base';
+
+export { baseEnvSchema, BaseEnvSchema, NODE_ENV_VALUES, trueFalseSchema } from './env.base';
+
+// ============================================================================
+// Billing Types & Schema
+// ============================================================================
+export type {
   BillingConfig,
   BillingPlansConfig,
   BillingProvider,
   BillingUrlsConfig,
-  BrazeConfig,
-  // Infrastructure configuration
-  CacheConfig,
-  CourierConfig,
+  PayPalProviderConfig,
+  StripeProviderConfig,
+} from './env.billing';
+
+export { BillingEnvSchema } from './env.billing';
+
+// ============================================================================
+// Cache Types & Schema
+// ============================================================================
+export type { CacheConfig } from './env.cache';
+
+export { CacheEnvSchema } from './env.cache';
+
+// ============================================================================
+// Database Types & Schema
+// ============================================================================
+export type {
   DatabaseConfig,
   DatabaseProvider,
-  ElasticsearchProviderConfig,
-  ElasticsearchSearchConfig,
-  EmailConfig,
-  FcmConfig,
-  GenericNotificationConfig,
   JsonDatabaseConfig,
-  JwtRotationConfig,
-  KnockConfig,
-  LocalStorageConfig,
-  LoggingConfig,
-  LogLevel,
   MongoConfig,
   MySqlConfig,
+  PostgresConfig,
+  SqliteConfig,
+} from './env.database';
+
+export { DatabaseEnvSchema } from './env.database';
+
+// ============================================================================
+// Email Types & Schema
+// ============================================================================
+export type { EmailConfig, SmtpConfig } from './env.email';
+
+export { EmailEnvSchema } from './env.email';
+
+// ============================================================================
+// Frontend Schema
+// ============================================================================
+export { FrontendEnvSchema } from './env.frontend';
+
+// ============================================================================
+// Notification Types & Schema
+// ============================================================================
+export type {
+  BrazeConfig,
+  CourierConfig,
+  FcmConfig,
+  GenericNotificationConfig,
+  KnockConfig,
   NotificationConfig,
+  NotificationConfigValidated,
+  NotificationEnv,
   NotificationProvider,
   NotificationProviderConfig,
-  NpmConfig,
-  OAuthProviderConfig,
+  NotificationSchemaProvider,
   OneSignalConfig,
+  SnsConfig,
+} from './env.notification';
+
+export {
+  BrazeSchema,
+  CourierSchema,
+  FcmSchema,
+  KnockSchema,
+  NotificationConfigSchema,
+  NotificationEnvSchema,
+  NotificationProviderSchema,
+  OneSignalSchema,
+  SnsSchema,
+} from './env.notification';
+
+// ============================================================================
+// Package Manager Types & Schema
+// ============================================================================
+export type {
+  NpmConfig,
   PackageManagerConfig,
   PackageManagerProvider,
-  PayPalProviderConfig,
   PnpmConfig,
-  PostgresConfig,
-  QueueConfig,
-  QueueProvider,
-  RateLimitConfig,
-  S3StorageConfig,
+  YarnConfig,
+} from './env.package.manager';
+
+export { PackageManagerEnvSchema } from './env.package.manager';
+
+// ============================================================================
+// Queue Types & Schema
+// ============================================================================
+export type { QueueConfig, QueueProvider } from './env.queue';
+
+export { QueueEnvSchema } from './env.queue';
+
+// ============================================================================
+// Search Types & Schema
+// ============================================================================
+export type {
+  ElasticsearchProviderConfig,
+  ElasticsearchSearchConfig,
   SearchConfig,
-  ServerConfig,
-  SmtpConfig,
-  SnsConfig,
   SqlColumnMapping,
-  SqliteConfig,
   SqlSearchConfig,
   SqlSearchProviderConfig,
   SqlTableConfig,
+} from './env.search';
+
+export { SearchEnvSchema } from './env.search';
+
+// ============================================================================
+// Server Types & Schema
+// ============================================================================
+export type { LoggingConfig, LogLevel, ServerConfig } from './env.server';
+
+export { ServerEnvSchema } from './env.server';
+
+// ============================================================================
+// Storage Types & Schema
+// ============================================================================
+export type {
+  LocalStorageConfig,
+  S3StorageConfig,
   StorageConfig,
   StorageConfigBase,
   StorageProviderName,
-  StripeProviderConfig,
-  YarnConfig,
-} from './types/index';
+} from './env.storage';
+
+export { StorageEnvSchema } from './env.storage';
 
 // ============================================================================
-// Environment Schema (from ./env.ts)
+// Validation & Combined
 // ============================================================================
-export {
-  AuthEnvSchema,
-  baseEnvSchema,
-  BaseEnvSchema,
-  BillingEnvSchema,
-  CacheEnvSchema,
-  DatabaseEnvSchema,
-  EmailEnvSchema,
-  EnvSchema,
-  FrontendEnvSchema,
-  getRawEnv,
-  NODE_ENV_VALUES,
-  NotificationEnvSchema,
-  PackageManagerEnvSchema,
-  QueueEnvSchema,
-  SearchEnvSchema,
-  ServerEnvSchema,
-  StorageEnvSchema,
-  validateEnv,
-} from './env';
+export type { AppConfig, FullEnv } from './env.validation';
 
-export type { BaseEnv, FullEnv, NodeEnv } from './env';
+export { EnvSchema, getRawEnv, validateEnv } from './env.validation';
 
 // ============================================================================
 // Parsers (canonical source: primitives/helpers/parse.ts)

@@ -43,6 +43,8 @@ export { extractCsrfToken } from './csrf';
 
 export { extractBearerToken } from './auth';
 
+export { parseUserAgent, type ParsedUserAgent } from './user.agent';
+
 export {
     apiResultSchema,
     createErrorCodeSchema,

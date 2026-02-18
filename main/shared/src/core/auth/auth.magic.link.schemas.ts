@@ -1,4 +1,4 @@
-// src/core/auth/auth.magic.link.schemas.ts
+// main/shared/src/core/auth/auth.magic.link.schemas.ts
 /**
  * @file Auth Magic Link Schemas
  * @description Schemas for magic link authentication flows.
@@ -7,7 +7,7 @@
 
 import { createSchema, parseString } from '../../primitives/schema';
 
-import { emailSchema } from './auth.scalars.schemas';
+import { emailSchema } from '../schemas';
 
 import type { User } from '../users/users.schemas';
 import type { Schema } from '../../primitives/schema';

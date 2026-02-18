@@ -1,6 +1,6 @@
 // main/client/react/src/hooks/useDensity.ts
 
-import { DEFAULT_DENSITY, getDensityCssVariables, type Density } from '@abe-stack/shared';
+import { DEFAULT_DENSITY, getDensityCssVariables, type Density } from '@abe-stack/client-engine';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback, useEffect } from 'react';
 

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { useDensity } from './useDensity';
 
-import type { Density } from '@abe-stack/shared';
+import type { Density } from '@abe-stack/client-engine';
 
 describe('useDensity', () => {
   const storageKey = 'test-ui-density';

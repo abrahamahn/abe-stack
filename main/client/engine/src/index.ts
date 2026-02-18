@@ -110,3 +110,17 @@ export {
   createClientSearchQuery,
   fromClientSearchQuery,
 } from './search/query-builder';
+
+// Theme
+export {
+  DEFAULT_CONTRAST_MODE,
+  DEFAULT_DENSITY,
+  densityMultipliers,
+  getContrastCssVariables,
+  getDensityCssVariables,
+  getSpacingForDensity,
+  highContrastDarkOverrides,
+  highContrastLightOverrides,
+  type ContrastMode,
+  type Density,
+} from './theme';

@@ -296,7 +296,7 @@ describe('featureFlagSchema', () => {
 // ============================================================================
 
 describe('tenantFeatureOverrideSchema', () => {
-  const validTenantId = '00000000-0000-0000-0000-000000000001';
+  const validTenantId = '12345678-1234-4abc-8abc-123456789001';
 
   describe('valid inputs', () => {
     it('should parse valid input with all fields', () => {
@@ -412,7 +412,7 @@ describe('tenantFeatureOverrideSchema', () => {
 
   describe('edge cases', () => {
     it('should handle uppercase UUID for tenantId', () => {
-      const upperCaseUuid = '00000000-0000-0000-0000-000000000001'.toUpperCase();
+      const upperCaseUuid = '12345678-1234-4abc-8abc-123456789001'.toUpperCase();
       const input = {
         tenantId: upperCaseUuid,
         key: 'test',
@@ -425,7 +425,7 @@ describe('tenantFeatureOverrideSchema', () => {
     });
 
     it('should handle mixed case UUID for tenantId', () => {
-      const mixedCaseUuid = '00000000-0000-0000-0000-00000000000A';
+      const mixedCaseUuid = '12345678-1234-4ABC-8ABC-123456789001';
       const input = {
         tenantId: mixedCaseUuid,
         key: 'test',
@@ -505,14 +505,14 @@ describe('type validation', () => {
     };
 
     const override: TenantFeatureOverride = {
-      tenantId: '00000000-0000-0000-0000-000000000001' as TenantFeatureOverride['tenantId'],
+      tenantId: '12345678-1234-4abc-8abc-123456789001' as TenantFeatureOverride['tenantId'],
       key: 'test-override',
       value: 'test-value',
       isEnabled: true,
     };
 
     expect(flag.key).toBe('test-flag');
-    expect(override.tenantId).toBe('00000000-0000-0000-0000-000000000001');
+    expect(override.tenantId).toBe('12345678-1234-4abc-8abc-123456789001');
   });
 });
 

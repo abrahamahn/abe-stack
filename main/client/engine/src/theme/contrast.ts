@@ -9,6 +9,8 @@
 
 export type ContrastMode = 'system' | 'normal' | 'high';
 
+export const DEFAULT_CONTRAST_MODE: ContrastMode = 'system';
+
 /**
  * High-contrast color overrides for light theme.
  * Increases contrast ratios while maintaining color semantics.

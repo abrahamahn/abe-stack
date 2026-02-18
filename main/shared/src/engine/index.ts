@@ -1,4 +1,544 @@
 // main/shared/src/engine/index.ts
+/**
+ * Engine Module Barrel
+ *
+ * Infrastructure layer: errors, constants, env, HTTP, cache, search, logger,
+ * health, pubsub, pagination, security, crypto, plus domain-adjacent modules
+ * (api-keys, email, feature-flags, files, jobs, media, realtime, usage-metering, webhooks).
+ */
+
+// ============================================================================
+// Errors
+// ============================================================================
+
+export {
+  // Base classes + HTTP errors
+  AppError,
+  BadRequestError,
+  BaseError,
+  ConfigurationError,
+  ConflictError,
+  ForbiddenError,
+  formatValidationErrors,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  InternalError,
+  InternalServerError,
+  isAppError,
+  NotFoundError,
+  ResourceNotFoundError,
+  toAppError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  UnprocessableError,
+  ValidationError,
+  type AppErrorInfo,
+  type ValidationErrorDetail,
+  type ValidationErrorResponse,
+  type ValidationIssue,
+  // Auth errors
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+  // Error mapper
+  isKnownAuthError,
+  mapErrorToHttpResponse,
+  type EmailSendErrorShape,
+  type ErrorMapperLogger,
+  type ErrorMapperOptions,
+  type ErrorStatusCode,
+  type HttpErrorResponse,
+} from './errors';
+
+// ============================================================================
+// Constants
+// ============================================================================
+// Note: Some constants are also exported by domain sub-modules below.
+// To avoid duplicate exports, the following are excluded here:
+//   DEFAULT_PAGE_LIMIT, DEFAULT_SORT_BY, DEFAULT_SORT_ORDER, PAGINATION_ERROR_TYPES → pagination
+//   CONSOLE_LOG_LEVELS → logger
+//   JOB_PRIORITIES, JOB_PRIORITY_VALUES, JOB_STATUSES → jobs
+
+export {
+  // limits (excluding pagination/job/logger overlaps)
+  AGGREGATION_TYPES,
+  DEFAULT_PAGINATION,
+  FILTER_OPERATOR_VALUES,
+  FILTER_OPERATORS,
+  LIMITS,
+  LOGICAL_OPERATOR_VALUES,
+  LOGICAL_OPERATORS,
+  MAX_CHUNK_SIZE,
+  MAX_DELIVERY_ATTEMPTS,
+  MAX_FILENAME_LENGTH,
+  MAX_UPLOAD_FILE_SIZE,
+  MAX_UPLOAD_TIMEOUT_MS,
+  NOTIFICATION_PAYLOAD_MAX_SIZE,
+  QUOTAS,
+  RETRY_DELAYS_MINUTES,
+  SEARCH_DEFAULTS,
+  SEARCH_ERROR_TYPES,
+  SMS_LIMITS,
+  SORT_ORDER,
+  // platform
+  ACCESS_TOKEN_COOKIE_NAME,
+  ANSI,
+  API_PREFIX,
+  API_VERSIONS,
+  AUTH_CONSTANTS,
+  AUTH_ERROR_MESSAGES,
+  AUTH_ERROR_NAMES,
+  AUTH_SUCCESS_MESSAGES,
+  CACHE_TTL,
+  CORS_CONFIG,
+  CRYPTO,
+  CSRF_EXEMPT_PATHS,
+  DEVICE_TYPES,
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  ERROR_CODES,
+  ERROR_MESSAGES,
+  HEALTH_STATUS,
+  HTTP_ERROR_MESSAGES,
+  HTTP_STATUS,
+  JOB_STATUS_CONFIG,
+  LOG_LEVELS,
+  PLATFORM_TYPES,
+  RATE_LIMIT_WINDOWS,
+  SAFE_METHODS,
+  STANDARD_HEADERS,
+  SUBSCRIBABLE_EVENT_TYPES,
+  TERMINAL_DELIVERY_STATUSES,
+  TERMINAL_STATUSES,
+  WEBHOOK_DELIVERY_STATUSES,
+  WEBHOOK_EVENT_TYPES,
+  type ErrorCode,
+  type HttpStatusCode,
+  // security
+  SENSITIVE_KEYS,
+  // audit
+  AUDIT_CATEGORIES,
+  AUDIT_SEVERITIES,
+} from './constants';
+
+// ============================================================================
+// Env
+// ============================================================================
+
+export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './env';
+
+// ============================================================================
+// HTTP
+// ============================================================================
+
+export {
+  // cookies
+  parseCookies,
+  serializeCookie,
+  type CookieOptions,
+  type CookieSerializeOptions,
+  // http types
+  type BaseRouteDefinition,
+  type HandlerContext,
+  type HttpMethod,
+  type RequestInfo,
+  type RouteHandler,
+  type RouteMap,
+  type RouteResult,
+  type ValidationSchema,
+  // routes
+  createRouteMap,
+  protectedRoute,
+  publicRoute,
+  // proxy
+  getValidatedClientIp,
+  ipMatchesCidr,
+  isFromTrustedProxy,
+  isValidIp,
+  isValidIpv4,
+  isValidIpv6,
+  parseCidr,
+  parseXForwardedFor,
+  validateCidrList,
+  type ForwardedInfo,
+  type ProxyValidationConfig,
+  // multipart
+  parseMultipartFile,
+  type ParsedMultipartFile,
+  // request
+  extractIpAddress,
+  extractUserAgent,
+  getRequesterId,
+  // csrf
+  extractCsrfToken,
+  // auth
+  extractBearerToken,
+  // user agent
+  parseUserAgent,
+  type ParsedUserAgent,
+  // response
+  apiResultSchema,
+  createErrorCodeSchema,
+  emptyBodySchema,
+  envelopeErrorResponseSchema,
+  errorCodeSchema,
+  errorResponseSchema,
+  simpleErrorResponseSchema,
+  successResponseSchema,
+  type ApiResultEnvelope,
+  type EmptyBody,
+  type ErrorResponse,
+  type ErrorResponseEnvelope,
+  type SuccessResponseEnvelope,
+} from './http';
+
+// ============================================================================
+// Cache
+// ============================================================================
+
+export {
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  LRUCache,
+  memoize,
+  toCacheError,
+  type BaseCacheConfig,
+  type CacheConfig,
+  type CacheDeleteOptions,
+  type CacheEntry,
+  type CacheEntryMetadata,
+  type CacheGetOptions,
+  type CacheProvider,
+  type CacheSetOptions,
+  type CacheStats,
+  type LRUCacheOptions,
+  type MemoizeFunction,
+  type MemoizeOptions,
+  type MemoryCacheConfig,
+  type RedisCacheConfig,
+} from './cache';
+
+// ============================================================================
+// Search
+// ============================================================================
+
+export {
+  // errors
+  InvalidCursorError,
+  InvalidFieldError,
+  InvalidFilterError,
+  InvalidOperatorError,
+  InvalidPaginationError,
+  InvalidQueryError,
+  InvalidSortError,
+  isInvalidFilterError,
+  isInvalidQueryError,
+  isSearchError,
+  isSearchProviderError,
+  isSearchTimeoutError,
+  QueryTooComplexError,
+  SearchError,
+  SearchProviderError,
+  SearchProviderUnavailableError,
+  SearchTimeoutError,
+  UnsupportedOperatorError,
+  type SearchErrorType,
+  // types
+  isCompoundFilter,
+  isFilterCondition,
+  type CompoundFilter,
+  type CursorSearchResult,
+  type FacetBucket,
+  type FacetConfig,
+  type FacetedSearchQuery,
+  type FacetedSearchResult,
+  type FacetResult,
+  type FilterCondition,
+  type FilterOperator,
+  type FilterPrimitive,
+  type FilterValue,
+  type FullTextSearchConfig,
+  type HighlightedField,
+  type LogicalOperator,
+  type SearchCapabilities,
+  type SearchProvider,
+  type SearchQuery,
+  type SearchResult,
+  type SearchResultItem,
+  type SortConfig,
+  type SortOrder,
+  // operators
+  evaluateCompoundFilter,
+  evaluateCondition,
+  evaluateFilter,
+  filterArray,
+  paginateArray,
+  sortArray,
+  // schemas
+  compoundFilterSchema,
+  cursorSearchResultSchema,
+  facetBucketSchema,
+  facetConfigSchema,
+  facetedSearchQuerySchema,
+  facetedSearchResultSchema,
+  facetResultSchema,
+  filterConditionSchema,
+  filterOperatorSchema,
+  filterPrimitiveSchema,
+  filterSchema,
+  filterValueSchema,
+  fullTextSearchConfigSchema,
+  highlightedFieldSchema,
+  logicalOperatorSchema,
+  rangeValueSchema,
+  searchQuerySchema,
+  searchResultItemSchema,
+  searchResultSchema,
+  sortConfigSchema,
+  sortOrderSchema,
+  urlSearchParamsSchema,
+  type RangeValue,
+  type SearchQueryInput,
+  type SearchQueryOutput,
+  type UrlSearchParams,
+  type UrlSearchParamsInput,
+  // serialization
+  buildURLWithQuery,
+  deserializeFromHash,
+  deserializeFromJSON,
+  deserializeFromURLParams,
+  extractQueryFromURL,
+  mergeSearchParamsIntoURL,
+  serializeToHash,
+  serializeToJSON,
+  serializeToURLParams,
+  type SerializationOptions,
+  type SerializedFilter,
+  type SerializedQuery,
+  // query builder
+  contains,
+  createSearchQuery,
+  eq,
+  fromSearchQuery,
+  gt,
+  inArray,
+  lt,
+  neq,
+  SearchQueryBuilder,
+} from './search';
+
+// ============================================================================
+// Logger
+// ============================================================================
+
+export {
+  CONSOLE_LOG_LEVELS,
+  createConsoleLogger,
+  createJobCorrelationId,
+  createJobLogger,
+  createLogger,
+  createRequestContext,
+  createRequestLogger,
+  generateCorrelationId,
+  getOrCreateCorrelationId,
+  isValidCorrelationId,
+  shouldLog,
+  type BaseLogger,
+  type ConsoleLoggerConfig,
+  type ConsoleLogLevel,
+  type LogData,
+  type Logger,
+  type LoggerConfig,
+  type LogLevel,
+  type RequestContext,
+} from './logger';
+
+// ============================================================================
+// Health
+// ============================================================================
+
+export {
+  buildDetailedHealthResponse,
+  checkCache,
+  checkDatabase,
+  checkEmail,
+  checkPubSub,
+  checkQueue,
+  checkRateLimit,
+  checkSchema,
+  checkStorage,
+  checkWebSocket,
+  detailedHealthResponseSchema,
+  determineOverallStatus,
+  liveResponseSchema,
+  readyResponseSchema,
+  type DetailedHealthResponse,
+  type EmailHealthConfig,
+  type HealthCheckCache,
+  type HealthCheckDatabase,
+  type HealthCheckPubSub,
+  type HealthCheckQueue,
+  type LiveResponse,
+  type OverallStatus,
+  type ReadyResponse,
+  type RoutesResponse,
+  type SchemaHealth,
+  type SchemaValidationResult,
+  type SchemaValidator,
+  type ServiceHealth,
+  type ServiceStatus,
+  type StartupSummaryOptions,
+  type StorageHealthConfig,
+  type WebSocketStats,
+} from './health';
+
+// ============================================================================
+// PubSub
+// ============================================================================
+
+export {
+  parseRecordKey,
+  publishAfterWrite,
+  SubKeys,
+  SubscriptionManager,
+  type ClientMessage,
+  type ListKey,
+  type ParsedRecordKey,
+  type PostgresPubSub,
+  type PostgresPubSubOptions,
+  type PubSubMessage,
+  type RecordKey,
+  type ServerMessage,
+  type SubscriptionKey,
+  type SubscriptionManagerOptions,
+  type WebSocket,
+} from './pubsub';
+
+// ============================================================================
+// Pagination
+// ============================================================================
+
+export {
+  buildCursorPaginationQuery,
+  calculateCursorPaginationMetadata,
+  calculateOffsetPaginationMetadata,
+  createCursorForItem,
+  createCursorPaginatedResult,
+  createPaginatedResult,
+  cursorPaginatedResultSchema,
+  cursorPaginationOptionsSchema,
+  decodeCursor,
+  DEFAULT_PAGE_LIMIT,
+  DEFAULT_PAGINATION_PARAMS,
+  DEFAULT_SORT_BY,
+  DEFAULT_SORT_ORDER,
+  encodeCursor,
+  getQueryParam,
+  getSortableValue,
+  isCursorValue,
+  paginatedResultSchema,
+  paginateArrayWithCursor,
+  paginateLargeArrayWithCursor,
+  PAGINATION_ERROR_TYPES,
+  PaginationError,
+  paginationOptionsSchema,
+  parseLimitParam,
+  parsePageParam,
+  parseSortByParam,
+  parseSortOrderParam,
+  sortOrderSchema,
+  type CursorData,
+  type CursorPaginatedResult,
+  type CursorPaginationOptions,
+  type PaginatedResult,
+  type PaginationErrorType,
+  type PaginationOptions,
+  type PaginationParamNames,
+  type PaginationParseConfig,
+} from './pagination';
+
+// ============================================================================
+// Security
+// ============================================================================
+
+export {
+  // input
+  detectNoSQLInjection,
+  detectSQLInjection,
+  isValidInputKeyName,
+  sanitizeString,
+  type SQLInjectionDetectionOptions,
+  // prototype
+  hasDangerousKeys,
+  sanitizePrototype,
+  // rate limit
+  createRateLimiter,
+  type RateLimitInfo,
+  // sanitization
+  getInjectionErrors,
+  sanitizeObject,
+  type SanitizationResult,
+  type ValidationOptions,
+} from './security';
+
+// ============================================================================
+// Crypto
+// ============================================================================
+
+export {
+  // jwt
+  checkTokenSecret,
+  createJwtRotationHandler,
+  decode,
+  jwtDecode,
+  JwtError,
+  jwtSign,
+  jwtVerify,
+  sign,
+  signWithRotation,
+  verify,
+  verifyWithRotation,
+  type JwtErrorCode,
+  type JwtHeader,
+  type JwtPayload,
+  type JwtRotationConfig,
+  type SignOptions,
+  // token
+  addAuthHeader,
+  createTokenStore,
+  tokenStore,
+  type TokenStore,
+  // crypto (re-exported from primitives)
+  constantTimeCompare,
+  generateSecureId,
+  generateToken,
+  generateUUID,
+} from './crypto';
+
+// ============================================================================
+// API Keys
+// ============================================================================
 
 export {
   apiKeyItemSchema,
@@ -21,6 +561,10 @@ export {
   type UpdateApiKey,
 } from './api-keys';
 
+// ============================================================================
+// Email
+// ============================================================================
+
 export {
   createEmailLogEntrySchema,
   createEmailTemplateSchema,
@@ -38,36 +582,66 @@ export {
   type UpdateEmailTemplate,
 } from './email';
 
+// ============================================================================
+// Feature Flags
+// ============================================================================
+
 export {
   createFeatureFlagRequestSchema,
   evaluateFlag,
+  featureFlagActionResponseSchema,
   featureFlagSchema,
+  featureFlagsListResponseSchema,
   setTenantFeatureOverrideRequestSchema,
   tenantFeatureOverrideSchema,
   updateFeatureFlagRequestSchema,
   type CreateFeatureFlagRequest,
   type FeatureFlag,
+  type FeatureFlagActionResponse,
+  type FeatureFlagMetadata,
+  type FeatureFlagsListResponse,
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
   type UpdateFeatureFlagRequest,
 } from './feature-flags';
 
+// ============================================================================
+// Files
+// ============================================================================
+
 export {
+  ALLOWED_IMAGE_TYPES,
   createFileRecordSchema,
   FILE_PURPOSES,
+  fileDeleteResponseSchema,
   filePurposeSchema,
   fileRecordSchema,
+  filesListResponseSchema,
   fileUploadRequestSchema,
+  fileUploadResponseSchema,
+  generateUniqueFilename,
+  joinStoragePath,
+  MAX_IMAGE_SIZE,
+  MAX_LOGO_SIZE,
+  normalizeStoragePath,
   STORAGE_PROVIDERS,
   storageProviderSchema,
   updateFileRecordSchema,
+  validateFileType,
   type CreateFileRecord,
+  type FileDeleteResponse,
   type FilePurpose,
   type FileRecord,
+  type FilesListResponse,
   type FileUploadRequest,
+  type FileUploadResponse,
   type StorageProvider,
   type UpdateFileRecord,
 } from './files';
+
+// ============================================================================
+// Jobs
+// ============================================================================
 
 export {
   calculateBackoff,
@@ -76,20 +650,44 @@ export {
   getJobStatusLabel,
   getJobStatusTone,
   isTerminalStatus,
+  JOB_PRIORITIES,
+  JOB_PRIORITY_VALUES,
+  JOB_STATUSES,
+  jobActionResponseSchema,
+  jobDetailsSchema,
+  jobErrorSchema,
+  jobIdRequestSchema,
+  jobListQuerySchema,
+  jobListResponseSchema,
   jobSchema,
+  jobStatusSchema,
+  queueStatsSchema,
   shouldProcess,
   updateJobSchema,
   type CreateJob,
   type DomainJob,
+  type Job,
+  type JobActionResponse,
+  type JobDetails,
+  type JobError,
+  type JobIdRequest,
+  type JobListQuery,
+  type JobListResponse,
   type JobPriority,
   type JobStatus,
+  type QueueStats,
   type UpdateJob,
 } from './jobs';
+
+// ============================================================================
+// Media
+// ============================================================================
 
 export {
   detectFileType,
   detectFileTypeFromPath,
   generateFileId,
+  getMimeType,
   isAllowedFileType,
   parseAudioMetadataFromBuffer,
   sanitizeFilename,
@@ -106,6 +704,10 @@ export {
   type UploadConfig,
   type VideoProcessingOptions,
 } from './media';
+
+// ============================================================================
+// Realtime
+// ============================================================================
 
 export {
   applyOperation,
@@ -148,28 +750,28 @@ export {
   type WriteResponse,
 } from './realtime';
 
-export {
-  DEFAULT_CONTRAST_MODE,
-  DEFAULT_DENSITY,
-  densityMultipliers,
-  getContrastCssVariables,
-  getDensityCssVariables,
-  getSpacingForDensity,
-  highContrastDarkOverrides,
-  highContrastLightOverrides,
-  type ContrastMode,
-  type Density,
-} from './theme';
+// ============================================================================
+// Usage Metering
+// ============================================================================
 
 export {
   aggregateSnapshots,
   aggregateValues,
   isOverQuota,
   usageMetricSchema,
+  usageMetricSummarySchema,
   usageSnapshotSchema,
+  usageSummaryResponseSchema,
+  type AggregationType,
   type UsageMetric,
+  type UsageMetricSummary,
   type UsageSnapshot,
+  type UsageSummaryResponse,
 } from './usage-metering';
+
+// ============================================================================
+// Webhooks
+// ============================================================================
 
 export {
   calculateRetryDelay,
@@ -207,6 +809,10 @@ export {
   type WebhookWithDeliveries,
 } from './webhooks';
 
+// ============================================================================
+// Context
+// ============================================================================
+
 export type {
   AuthenticatedUser,
   BaseContext,
@@ -218,13 +824,25 @@ export type {
   HasQueue,
   HasStorage,
   ReplyContext,
-  RequestContext,
-  RequestInfo,
+  RequestContext as EngineRequestContext,
+  RequestInfo as EngineRequestInfo,
 } from './context';
+
+// ============================================================================
+// DI
+// ============================================================================
 
 export type { ModuleDeps, ModuleRegistrationOptions } from './di';
 
+// ============================================================================
+// Native
+// ============================================================================
+
 export type { NativeBridge } from './native';
+
+// ============================================================================
+// Ports
+// ============================================================================
 
 export type {
   Attachment,
@@ -240,7 +858,7 @@ export type {
   EmailService,
   HealthCheckResult,
   InfrastructureService,
-  Job,
+  Job as PortsJob,
   JobHandler,
   JobOptions,
   JobQueueService,

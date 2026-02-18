@@ -1,4 +1,4 @@
-// src/core/audit-log/audit.log.schemas.test.ts
+// main/shared/src/core/audit-log/audit.log.schemas.test.ts
 
 /**
  * @file Audit Log Schemas Tests
@@ -121,8 +121,8 @@ describe('createAuditEventSchema', () => {
   describe('valid inputs', () => {
     it('should parse valid audit event with all fields', () => {
       const input = {
-        tenantId: '00000000-0000-0000-0000-000000000001',
-        actorId: '00000000-0000-0000-0000-000000000002',
+        tenantId: '12345678-1234-4abc-8abc-123456789001',
+        actorId: '12345678-1234-4abc-8abc-123456789002',
         action: 'user.created',
         category: 'admin',
         severity: 'info',
@@ -252,7 +252,7 @@ describe('createAuditEventSchema', () => {
     it('should accept null tenantId', () => {
       const input = {
         tenantId: null,
-        actorId: '00000000-0000-0000-0000-000000000001',
+        actorId: '12345678-1234-4abc-8abc-123456789001',
         action: 'user.created',
         resource: 'user',
       };
@@ -264,7 +264,7 @@ describe('createAuditEventSchema', () => {
 
     it('should accept null actorId', () => {
       const input = {
-        tenantId: '00000000-0000-0000-0000-000000000001',
+        tenantId: '12345678-1234-4abc-8abc-123456789001',
         actorId: null,
         action: 'system.startup',
         resource: 'system',
@@ -539,10 +539,10 @@ describe('auditEventSchema', () => {
   describe('valid inputs', () => {
     it('should parse complete audit event with all fields', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: '2024-01-01T00:00:00.000Z',
-        tenantId: '00000000-0000-0000-0000-000000000002',
-        actorId: '00000000-0000-0000-0000-000000000003',
+        tenantId: '12345678-1234-4abc-8abc-123456789002',
+        actorId: '12345678-1234-4abc-8abc-123456789003',
         action: 'user.created',
         category: 'admin',
         severity: 'info',
@@ -560,7 +560,7 @@ describe('auditEventSchema', () => {
 
     it('should parse with minimal fields plus id and createdAt', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: '2024-01-01T00:00:00.000Z',
         tenantId: null,
         actorId: null,
@@ -570,7 +570,7 @@ describe('auditEventSchema', () => {
 
       const result = auditEventSchema.parse(input);
 
-      expect(result.id).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.id).toBe('12345678-1234-4abc-8abc-123456789001');
       expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
       expect(result.category).toBe('admin');
       expect(result.severity).toBe('info');
@@ -592,7 +592,7 @@ describe('auditEventSchema', () => {
 
     it('should require createdAt field', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         tenantId: null,
         actorId: null,
         action: 'user.created',
@@ -617,7 +617,7 @@ describe('auditEventSchema', () => {
 
     it('should validate createdAt as ISO datetime', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: 'invalid-date',
         tenantId: null,
         actorId: null,
@@ -632,7 +632,7 @@ describe('auditEventSchema', () => {
   describe('inherits base validation', () => {
     it('should validate action format', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: '2024-01-01T00:00:00.000Z',
         tenantId: null,
         actorId: null,
@@ -645,7 +645,7 @@ describe('auditEventSchema', () => {
 
     it('should validate category', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: '2024-01-01T00:00:00.000Z',
         tenantId: null,
         actorId: null,
@@ -659,7 +659,7 @@ describe('auditEventSchema', () => {
 
     it('should validate severity', () => {
       const input = {
-        id: '00000000-0000-0000-0000-000000000001',
+        id: '12345678-1234-4abc-8abc-123456789001',
         createdAt: '2024-01-01T00:00:00.000Z',
         tenantId: null,
         actorId: null,
@@ -703,8 +703,8 @@ describe('auditLogFilterSchema', () => {
 
     it('should parse with all audit filters', () => {
       const input = {
-        tenantId: '00000000-0000-0000-0000-000000000001',
-        actorId: '00000000-0000-0000-0000-000000000002',
+        tenantId: '12345678-1234-4abc-8abc-123456789001',
+        actorId: '12345678-1234-4abc-8abc-123456789002',
         action: 'user.created',
         resource: 'user',
         category: 'admin',
@@ -715,8 +715,8 @@ describe('auditLogFilterSchema', () => {
 
       const result = auditLogFilterSchema.parse(input);
 
-      expect(result.tenantId).toBe('00000000-0000-0000-0000-000000000001');
-      expect(result.actorId).toBe('00000000-0000-0000-0000-000000000002');
+      expect(result.tenantId).toBe('12345678-1234-4abc-8abc-123456789001');
+      expect(result.actorId).toBe('12345678-1234-4abc-8abc-123456789002');
       expect(result.action).toBe('user.created');
       expect(result.resource).toBe('user');
       expect(result.category).toBe('admin');
@@ -895,7 +895,7 @@ describe('auditLogListResponseSchema', () => {
       const input = {
         data: [
           {
-            id: '00000000-0000-0000-0000-000000000001',
+            id: '12345678-1234-4abc-8abc-123456789001',
             createdAt: '2024-01-01T00:00:00.000Z',
             tenantId: null,
             actorId: null,
@@ -914,7 +914,7 @@ describe('auditLogListResponseSchema', () => {
       const result = auditLogListResponseSchema.parse(input);
 
       expect(result.data).toHaveLength(1);
-      expect(result.data[0]?.id).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.data[0]?.id).toBe('12345678-1234-4abc-8abc-123456789001');
       expect(result.nextCursor).toBe('abc123');
       expect(result.hasNext).toBe(true);
       expect(result.limit).toBe(50);
@@ -939,7 +939,7 @@ describe('auditLogListResponseSchema', () => {
       const input = {
         data: [
           {
-            id: '00000000-0000-0000-0000-000000000001',
+            id: '12345678-1234-4abc-8abc-123456789001',
             createdAt: '2024-01-01T00:00:00.000Z',
             tenantId: null,
             actorId: null,
@@ -950,10 +950,10 @@ describe('auditLogListResponseSchema', () => {
             metadata: {},
           },
           {
-            id: '00000000-0000-0000-0000-000000000002',
+            id: '12345678-1234-4abc-8abc-123456789002',
             createdAt: '2024-01-02T00:00:00.000Z',
-            tenantId: '00000000-0000-0000-0000-000000000003',
-            actorId: '00000000-0000-0000-0000-000000000004',
+            tenantId: '12345678-1234-4abc-8abc-123456789003',
+            actorId: '12345678-1234-4abc-8abc-123456789004',
             action: 'auth.login',
             category: 'security',
             severity: 'info',
@@ -1034,7 +1034,7 @@ describe('auditLogListResponseSchema', () => {
       const input = {
         data: [
           {
-            id: '00000000-0000-0000-0000-000000000001',
+            id: '12345678-1234-4abc-8abc-123456789001',
             createdAt: '2024-01-01T00:00:00.000Z',
             tenantId: null,
             actorId: null,

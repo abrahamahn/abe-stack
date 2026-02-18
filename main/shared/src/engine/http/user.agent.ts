@@ -1,4 +1,4 @@
-// src/engine/http/user.agent.ts
+// main/shared/src/engine/http/user.agent.ts
 /**
  * @file User Agent Parsing
  * @description Utilities to extract browser and OS information from user agent strings.

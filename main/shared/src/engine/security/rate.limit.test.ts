@@ -1,4 +1,4 @@
-// src/engine/security/rate.limit.test.ts
+// main/shared/src/engine/security/rate.limit.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createRateLimiter } from './rate.limit';

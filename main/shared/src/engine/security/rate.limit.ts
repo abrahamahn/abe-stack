@@ -1,4 +1,4 @@
-// src/engine/security/rate.limit.ts
+// main/shared/src/engine/security/rate.limit.ts
 /**
  * Rate Limiting Utilities
  *

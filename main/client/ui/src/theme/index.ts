@@ -9,7 +9,7 @@ export {
   getSpacingForDensity,
   highContrastDarkOverrides,
   highContrastLightOverrides,
-} from '@abe-stack/shared';
+} from '@abe-stack/client-engine';
 export { motion } from './motion';
 export { ThemeProvider, useTheme } from './provider';
 export { radius } from './radius';
@@ -17,6 +17,6 @@ export { spacing } from './spacing';
 export { typography } from './typography';
 
 export type { DarkColors, LightColors, ThemeColors } from './colors';
-export type { ContrastMode, Density } from '@abe-stack/shared';
+export type { ContrastMode, Density } from '@abe-stack/client-engine';
 export type { ThemeContextValue, ThemeProviderProps } from './provider';
 export type { Radius } from './radius';

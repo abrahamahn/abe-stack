@@ -1,4 +1,4 @@
-// main/shared/src/domain/tenant/tenant.workspace.ts
+// main/shared/src/core/tenant/tenant.workspace.ts
 
 /**
  * @file Workspace/Tenant Scoping Types

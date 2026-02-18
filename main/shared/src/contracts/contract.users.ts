@@ -1,4 +1,4 @@
-// main/shared/src/domain/users/users.contracts.ts
+// main/shared/src/contracts/contract.users.ts
 /**
  * User Contracts
  *

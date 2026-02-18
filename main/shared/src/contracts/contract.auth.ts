@@ -1,4 +1,4 @@
-// main/shared/src/domain/auth/auth.contracts.ts
+// main/shared/src/contracts/contract.auth.ts
 /**
  * Auth Contracts
  *

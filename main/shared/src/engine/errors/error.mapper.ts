@@ -1,4 +1,4 @@
-// src/engine/errors/error.mapper.ts
+// main/shared/src/engine/errors/error.mapper.ts
 /**
  * HTTP Error Mapper
  *

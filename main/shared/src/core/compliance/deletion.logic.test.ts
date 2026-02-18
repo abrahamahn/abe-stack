@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/deletion.logic.test.ts
+// main/shared/src/core/compliance/deletion.logic.test.ts
 
 /**
  * @file Deletion Logic Unit Tests

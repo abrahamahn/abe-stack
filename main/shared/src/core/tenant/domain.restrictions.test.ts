@@ -1,4 +1,4 @@
-// src/core/tenant/domain.restrictions.test.ts
+// main/shared/src/core/tenant/domain.restrictions.test.ts
 
 /**
  * @file Unit Tests for Domain Restrictions

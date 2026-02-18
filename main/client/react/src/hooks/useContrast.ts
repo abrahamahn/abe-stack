@@ -4,7 +4,7 @@ import {
   DEFAULT_CONTRAST_MODE,
   getContrastCssVariables,
   type ContrastMode,
-} from '@abe-stack/shared';
+} from '@abe-stack/client-engine';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useMediaQuery } from '@hooks/useMediaQuery';
 import { useCallback, useEffect } from 'react';

@@ -1,4 +1,4 @@
-// main/shared/src/domain/admin/admin.display.ts
+// main/shared/src/core/admin/admin.display.ts
 
 import type { UserStatus } from './admin.schemas';
 

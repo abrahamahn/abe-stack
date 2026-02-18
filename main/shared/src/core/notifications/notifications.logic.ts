@@ -1,4 +1,4 @@
-// main/shared/src/domain/notifications/notifications.logic.ts
+// main/shared/src/core/notifications/notifications.logic.ts
 
 /**
  * @file Notification Logic

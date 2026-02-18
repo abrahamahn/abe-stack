@@ -1,7 +1,7 @@
 // main/shared/src/engine/pagination/helpers.ts
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
 
-import { PaginationError } from '.';
+import { PaginationError } from './pagination';
 
 import type { CursorData } from './cursor';
 import type { CursorPaginationOptions } from './pagination';

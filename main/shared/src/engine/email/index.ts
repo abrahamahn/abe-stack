@@ -14,5 +14,6 @@ export {
   type EmailProvider,
   type EmailStatus,
   type EmailTemplate,
-  type UpdateEmailTemplate,
-} from './email.schemas';
+  type UpdateEmailTemplate
+} from './email';
+

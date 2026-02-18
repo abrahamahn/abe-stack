@@ -6,48 +6,26 @@
  * Centralizes email, password, and other common field validations.
  */
 
-import { UUID_REGEX } from '../primitives/constants';
 import { createSchema } from '../primitives/schema';
+import { emailSchema, isoDateTimeSchema, passwordSchema, uuidSchema } from '../primitives/schema/scalars';
 
 import type { Schema } from '../primitives/schema';
 
 // ============================================================================
-// Validation Helpers (Ported from contracts/common.ts)
+// Re-exports from primitives (canonical source)
 // ============================================================================
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export { emailSchema, isoDateTimeSchema, passwordSchema, uuidSchema };
+
+// ============================================================================
+// Validation Helpers
+// ============================================================================
+
 const USERNAME_REGEX_LOCAL = /^[a-zA-Z0-9_]{1,15}$/;
-
-function isValidEmail(email: string): boolean {
-  return EMAIL_REGEX.test(email) && email.length >= 1 && email.length <= 255;
-}
-
-function isValidUuid(uuid: string): boolean {
-  return UUID_REGEX.test(uuid);
-}
 
 // ============================================================================
 // Common Schemas
 // ============================================================================
-
-export const emailSchema: Schema<string> = createSchema((data: unknown) => {
-  if (typeof data !== 'string') throw new Error('Email must be a string');
-  const normalized = data.trim().toLowerCase();
-  if (!isValidEmail(normalized)) throw new Error('Invalid email format');
-  return normalized;
-});
-
-export const passwordSchema: Schema<string> = createSchema((data: unknown) => {
-  if (typeof data !== 'string') throw new Error('Password must be a string');
-  if (data.length < 8) throw new Error('Password must be at least 8 characters');
-  return data;
-});
-
-export const uuidSchema: Schema<string> = createSchema((data: unknown) => {
-  if (typeof data !== 'string') throw new Error('UUID must be a string');
-  if (!isValidUuid(data)) throw new Error('Invalid UUID format');
-  return data;
-});
 
 export const nameSchema: Schema<string | undefined> = createSchema((data: unknown) => {
   if (data === undefined || data === null) return undefined;
@@ -92,13 +70,6 @@ export const identifierSchema: Schema<string> = createSchema((data: unknown) => 
   const trimmed = data.trim().toLowerCase();
   if (trimmed.length === 0) throw new Error('Email or username is required');
   return trimmed;
-});
-
-export const isoDateTimeSchema: Schema<string> = createSchema((data: unknown) => {
-  if (typeof data !== 'string') throw new Error('ISO datetime must be a string');
-  const d = new Date(data);
-  if (Number.isNaN(d.getTime())) throw new Error('Invalid ISO datetime format');
-  return data;
 });
 
 // ============================================================================

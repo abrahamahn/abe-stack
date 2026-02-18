@@ -1,4 +1,4 @@
-// main/shared/src/domain/compliance/compliance.logic.ts
+// main/shared/src/core/compliance/compliance.logic.ts
 
 /**
  * @file Compliance Logic

@@ -1,4 +1,4 @@
-// src/engine/jobs/reactive.map.ts
+// main/shared/src/engine/jobs/reactive.map.ts
 /**
  * An observable key-value store with subscription support.
  *

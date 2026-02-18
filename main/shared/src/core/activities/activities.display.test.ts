@@ -1,4 +1,4 @@
-// main/shared/src/domain/activities/activities.display.test.ts
+// main/shared/src/core/activities/activities.display.test.ts
 
 import { describe, expect, it } from 'vitest';
 

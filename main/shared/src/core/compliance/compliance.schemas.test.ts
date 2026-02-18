@@ -33,10 +33,10 @@ import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../
 // Test Data Fixtures
 // ============================================================================
 
-const VALID_USER_ID = '00000000-0000-0000-0000-000000000001' as UserId;
-const VALID_LEGAL_DOC_ID = '00000000-0000-0000-0000-000000000002' as LegalDocumentId;
-const VALID_USER_AGREEMENT_ID = '00000000-0000-0000-0000-000000000003' as UserAgreementId;
-const VALID_CONSENT_LOG_ID = '00000000-0000-0000-0000-000000000004' as ConsentLogId;
+const VALID_USER_ID = '12345678-1234-4abc-8abc-123456789001' as UserId;
+const VALID_LEGAL_DOC_ID = '12345678-1234-4abc-8abc-123456789002' as LegalDocumentId;
+const VALID_USER_AGREEMENT_ID = '12345678-1234-4abc-8abc-123456789003' as UserAgreementId;
+const VALID_CONSENT_LOG_ID = '12345678-1234-4abc-8abc-123456789004' as ConsentLogId;
 
 const VALID_DATE_ISO = '2024-01-01T00:00:00Z';
 const VALID_IP_ADDRESS = '192.168.1.1';
@@ -1041,10 +1041,10 @@ describe('dataExportRequestedResponseSchema', () => {
 
     it('should parse response with different requestId format', () => {
       const result: DataExportRequestedResponse = dataExportRequestedResponseSchema.parse(
-        createValidExportResponse({ requestId: '00000000-0000-0000-0000-000000000001' }),
+        createValidExportResponse({ requestId: '12345678-1234-4abc-8abc-123456789001' }),
       );
 
-      expect(result.requestId).toBe('00000000-0000-0000-0000-000000000001');
+      expect(result.requestId).toBe('12345678-1234-4abc-8abc-123456789001');
     });
   });
 
