@@ -1,9 +1,9 @@
 // main/client/ui/src/components/JobStatusBadge.tsx
-import { getJobStatusLabel, getJobStatusTone } from '@abe-stack/shared';
+import { getJobStatusLabel, getJobStatusTone } from '@bslt/shared';
 
 import { Badge } from '../elements/Badge';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 export interface JobStatusBadgeProps {

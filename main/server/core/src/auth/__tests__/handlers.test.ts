@@ -4,7 +4,7 @@
  *
  * Tests the auth handler functions by mocking service layer dependencies.
  */
-import * as shared from '@abe-stack/shared';
+import * as shared from '@bslt/shared';
 import {
   AccountLockedError,
   AUTH_ERROR_MESSAGES,
@@ -14,7 +14,7 @@ import {
   InvalidTokenError,
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   WeakPasswordError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 // Import actual modules to spy on their functions

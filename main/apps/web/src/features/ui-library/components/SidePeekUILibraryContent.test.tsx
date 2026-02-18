@@ -6,7 +6,7 @@ const { mockMarkdown } = vi.hoisted(() => ({
   mockMarkdown: vi.fn(),
 }));
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   ['Markdown']: (props: { children: string }) => {
     mockMarkdown(props);
     return <div>{props.children}</div>;

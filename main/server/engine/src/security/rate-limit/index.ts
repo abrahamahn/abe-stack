@@ -4,7 +4,7 @@
  *
  * Token Bucket rate limiter for API protection.
  *
- * @module @abe-stack/server-engine/security/rate-limit
+ * @module @bslt/server-engine/security/rate-limit
  */
 
 export {
@@ -14,7 +14,6 @@ export {
   RateLimitPresets,
   type MemoryStoreConfig,
   type MemoryStoreStats,
-  type RateLimitConfig,
-  type RateLimitInfo,
-  type RateLimiterStats,
+  type RateLimitConfig, type RateLimiterStats, type RateLimitInfo
 } from './limiter';
+

@@ -1,8 +1,8 @@
-# ABE Stack Desktop
+# BSLT Desktop
 
 > Your web app, but native.
 
-Electron wrapper that brings the ABE Stack web application to desktop. Shares 90% of code with `apps/web` - same React components, same UI kit, same business logic. The remaining 10% handles native features like file dialogs, system notifications, and OS integration.
+Electron wrapper that brings the BSLT web application to desktop. Shares 90% of code with `apps/web` - same React components, same UI kit, same business logic. The remaining 10% handles native features like file dialogs, system notifications, and OS integration.
 
 ## Features
 
@@ -23,10 +23,10 @@ Electron wrapper that brings the ABE Stack web application to desktop. Shares 90
 pnpm dev
 
 # standalone (runs its own Vite server)
-pnpm --filter @abe-stack/desktop dev:standalone
+pnpm --filter @bslt/desktop dev:standalone
 
 # just electron (if Vite already running)
-pnpm --filter @abe-stack/desktop dev
+pnpm --filter @bslt/desktop dev
 ```
 
 **Port Configuration**
@@ -39,16 +39,16 @@ Development mode auto-detects available ports. Priority order:
 
 ```sh
 # Use specific port
-DESKTOP_RENDERER_PORT=3000 pnpm --filter @abe-stack/desktop dev:standalone
+DESKTOP_RENDERER_PORT=3000 pnpm --filter @bslt/desktop dev:standalone
 ```
 
 ## Commands
 
-- `pnpm --filter @abe-stack/desktop build` - build renderer (Vite) + main process (esbuild)
-- `pnpm --filter @abe-stack/desktop package` - create distributable (.exe, .dmg, .AppImage)
-- `pnpm --filter @abe-stack/desktop test` - run tests
-- `pnpm --filter @abe-stack/desktop test:watch` - run tests in watch mode
-- `pnpm --filter @abe-stack/desktop type-check` - check types
+- `pnpm --filter @bslt/desktop build` - build renderer (Vite) + main process (esbuild)
+- `pnpm --filter @bslt/desktop package` - create distributable (.exe, .dmg, .AppImage)
+- `pnpm --filter @bslt/desktop test` - run tests
+- `pnpm --filter @bslt/desktop test:watch` - run tests in watch mode
+- `pnpm --filter @bslt/desktop type-check` - check types
 
 ## Architecture
 
@@ -92,7 +92,7 @@ apps/desktop/
 │   │   │   ├── ipc.ts       # IPCChannelMap, type-safe channel definitions
 │   │   │   └── index.ts
 │   │   ├── utils/
-│   │   │   └── index.ts     # re-exports port utils from @abe-stack/shared
+│   │   │   └── index.ts     # re-exports port utils from @bslt/shared
 │   │   └── __tests__/       # main process tests
 │   ├── main.tsx             # renderer entry (React app)
 │   ├── types.d.ts           # window.electronAPI type declarations
@@ -246,7 +246,7 @@ Tests use mocked Electron APIs and verify IPC type safety.
 **Type errors on `window.electronAPI`?**
 
 - Ensure `src/types.d.ts` is included in your tsconfig
-- Check that `@abe-stack/shared` types are accessible
+- Check that `@bslt/shared` types are accessible
 
 ---
 

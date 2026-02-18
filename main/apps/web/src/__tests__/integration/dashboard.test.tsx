@@ -8,7 +8,7 @@
  * - UI components and layout
  */
 
-import { Route, Routes } from '@abe-stack/react/router';
+import { Route, Routes } from '@bslt/react/router';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 

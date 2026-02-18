@@ -5,8 +5,8 @@
  * Modal with name and slug form for creating a new workspace.
  */
 
-import { slugify } from '@abe-stack/shared';
-import { Alert, Button, FormField, Input, Modal, Text } from '@abe-stack/ui';
+import { slugify } from '@bslt/shared';
+import { Alert, Button, FormField, Input, Modal, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useCreateWorkspace } from '../hooks';

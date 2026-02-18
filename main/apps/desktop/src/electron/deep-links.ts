@@ -12,12 +12,12 @@ export interface DeepLinkPayload {
 /**
  * Parses a deep link URL into a path and query-string key/value pairs.
  *
- * Custom protocol URLs like `abe-stack://dashboard` are parsed by the
+ * Custom protocol URLs like `bslt://dashboard` are parsed by the
  * URL API with `dashboard` as the hostname and an empty pathname. We
  * combine host + pathname to produce the expected path.
  *
  * @example
- *   parseDeepLinkUrl('abe-stack://settings/profile?tab=security')
+ *   parseDeepLinkUrl('bslt://settings/profile?tab=security')
  *   // => { path: '/settings/profile', query: { tab: 'security' } }
  */
 export function parseDeepLinkUrl(url: string): DeepLinkPayload {
@@ -44,7 +44,7 @@ export function parseDeepLinkUrl(url: string): DeepLinkPayload {
  *
  * If the window is destroyed the call is silently ignored.
  *
- * @param url        - The raw deep link URL (e.g. `abe-stack://dashboard`)
+ * @param url        - The raw deep link URL (e.g. `bslt://dashboard`)
  * @param mainWindow - The main BrowserWindow to notify
  */
 export function handleDeepLink(url: string, mainWindow: BrowserWindow): void {
@@ -64,7 +64,7 @@ export function handleDeepLink(url: string, mainWindow: BrowserWindow): void {
 
 /**
  * Registers the app as the default handler for a custom URL protocol
- * (e.g. `abe-stack://`).
+ * (e.g. `bslt://`).
  *
  * On macOS this relies on the `open-url` event. On Windows/Linux the URL
  * is passed as a command-line argument on the second instance, so we rely

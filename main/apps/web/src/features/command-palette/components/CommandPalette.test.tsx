@@ -1,6 +1,6 @@
 // main/apps/web/src/features/command-palette/components/CommandPalette.test.tsx
 import { screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 
@@ -67,8 +67,8 @@ vi.mock('../hooks', () => ({
 }));
 
 // Mock useThemeMode to avoid errors
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
   return {
     ...actual,
     useThemeMode: () => ({

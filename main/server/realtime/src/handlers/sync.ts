@@ -8,7 +8,7 @@
  * @module handlers/sync
  */
 
-import { withTransaction } from '@abe-stack/db';
+import { withTransaction } from '@bslt/db';
 import {
   applyOperations,
   checkVersionConflicts,
@@ -19,12 +19,12 @@ import {
   isAuthenticatedRequest,
   REALTIME_ERRORS,
   SubKeys,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { isTableAllowed, loadRecords, saveRecords } from '../service';
 
+import type { RealtimeTransaction, RecordPointer, RouteResult } from '@bslt/shared';
 import type { ConflictResult, RealtimeModuleDeps, RealtimeRequest, WriteResult } from '../types';
-import type { RecordPointer, RealtimeTransaction, RouteResult } from '@abe-stack/shared';
 
 // ============================================================================
 // Error Classes

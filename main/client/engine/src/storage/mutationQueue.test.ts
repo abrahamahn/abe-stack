@@ -68,7 +68,7 @@ describe('MutationQueue', () => {
       const existingQueue = [
         { id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 },
       ];
-      mockLocalStorage.setItem('abe-stack-mutation-queue', JSON.stringify(existingQueue));
+      mockLocalStorage.setItem('bslt-mutation-queue', JSON.stringify(existingQueue));
 
       queue = new MutationQueue();
       expect(queue.getPending()).toHaveLength(1);
@@ -81,7 +81,7 @@ describe('MutationQueue', () => {
     });
 
     test('should handle invalid JSON in localStorage gracefully', () => {
-      mockLocalStorage.setItem('abe-stack-mutation-queue', 'invalid json{{{');
+      mockLocalStorage.setItem('bslt-mutation-queue', 'invalid json{{{');
 
       queue = new MutationQueue();
       // Should not throw and queue should be empty
@@ -123,7 +123,7 @@ describe('MutationQueue', () => {
       queue = new MutationQueue();
       queue.add('test', { data: 'value' });
 
-      const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
+      const stored = mockLocalStorage.getItem('bslt-mutation-queue');
       expect(stored).not.toBeNull();
       if (stored !== null && stored !== '') {
         const parsed = JSON.parse(stored) as unknown[];
@@ -240,7 +240,7 @@ describe('MutationQueue', () => {
       queue.add('test', {});
       queue.clear();
 
-      const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
+      const stored = mockLocalStorage.getItem('bslt-mutation-queue');
       if (stored !== null && stored !== '') {
         expect(JSON.parse(stored)).toHaveLength(0);
       }

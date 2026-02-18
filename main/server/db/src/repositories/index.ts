@@ -4,10 +4,10 @@
  *
  * Exports functional-style repository factories and interfaces used by factory.ts.
  *
- * @module @abe-stack/db/repositories
+ * @module @bslt/db/repositories
  */
 
-// Common types (pagination types re-exported from @abe-stack/shared)
+// Common types (pagination types re-exported from @bslt/shared)
 export type { CursorPaginatedResult, CursorPaginationOptions, TimeRangeFilter } from './types';
 
 // Users
@@ -15,33 +15,16 @@ export {
   createUserRepository,
   type AdminUserListFilters,
   type UserRepository,
-  type UserStatus,
+  type UserStatus
 } from './users';
 
 // Auth
 export {
-  createRefreshTokenRepository,
-  createRefreshTokenFamilyRepository,
-  createLoginAttemptRepository,
-  createPasswordResetTokenRepository,
-  createEmailVerificationTokenRepository,
-  createSecurityEventRepository,
-  createTotpBackupCodeRepository,
-  createEmailChangeTokenRepository,
-  createEmailChangeRevertTokenRepository,
-  type RefreshTokenRepository,
-  type RefreshTokenFamilyRepository,
-  type LoginAttemptRepository,
-  type PasswordResetTokenRepository,
-  type EmailVerificationTokenRepository,
-  type SecurityEventRepository,
-  type TotpBackupCodeRepository,
-  type EmailChangeTokenRepository,
-  type EmailChangeRevertTokenRepository,
-  createTrustedDeviceRepository,
-  type TrustedDeviceRepository,
-  createWebauthnCredentialRepository,
-  type WebauthnCredentialRepository,
+  createEmailChangeRevertTokenRepository, createEmailChangeTokenRepository, createEmailVerificationTokenRepository, createLoginAttemptRepository,
+  createPasswordResetTokenRepository, createRefreshTokenFamilyRepository, createRefreshTokenRepository, createSecurityEventRepository,
+  createTotpBackupCodeRepository, createTrustedDeviceRepository, createWebauthnCredentialRepository, type EmailChangeRevertTokenRepository, type EmailChangeTokenRepository, type EmailVerificationTokenRepository, type LoginAttemptRepository,
+  type PasswordResetTokenRepository, type RefreshTokenFamilyRepository, type RefreshTokenRepository, type SecurityEventRepository,
+  type TotpBackupCodeRepository, type TrustedDeviceRepository, type WebauthnCredentialRepository
 } from './auth';
 
 // API Keys
@@ -55,10 +38,7 @@ export { createOAuthConnectionRepository, type OAuthConnectionRepository } from 
 
 // Push Notifications
 export {
-  createPushSubscriptionRepository,
-  createNotificationPreferenceRepository,
-  type PushSubscriptionRepository,
-  type NotificationPreferenceRepository,
+  createNotificationPreferenceRepository, createPushSubscriptionRepository, type NotificationPreferenceRepository, type PushSubscriptionRepository
 } from './push';
 
 // Billing (functional)
@@ -70,13 +50,10 @@ export {
   createPlanRepository,
   createSubscriptionRepository,
   type BillingEventRepository,
-  type CustomerMappingRepository,
-  type InvoiceRepository,
-  type InvoiceFilters,
-  type PaymentMethodRepository,
+  type CustomerMappingRepository, type InvoiceFilters, type InvoiceRepository, type PaymentMethodRepository,
   type PlanRepository,
   type SubscriptionFilters,
-  type SubscriptionRepository,
+  type SubscriptionRepository
 } from './billing';
 
 // Sessions
@@ -84,12 +61,7 @@ export { createUserSessionRepository, type UserSessionRepository } from './sessi
 
 // Tenant
 export {
-  createTenantRepository,
-  createMembershipRepository,
-  createInvitationRepository,
-  type TenantRepository,
-  type MembershipRepository,
-  type InvitationRepository,
+  createInvitationRepository, createMembershipRepository, createTenantRepository, type InvitationRepository, type MembershipRepository, type TenantRepository
 } from './tenant';
 
 // In-App Notifications
@@ -98,13 +70,8 @@ export { createNotificationRepository, type NotificationRepository } from './not
 // System (Audit, Jobs, Webhooks)
 export {
   createAuditEventRepository,
-  createJobRepository,
-  createWebhookRepository,
-  createWebhookDeliveryRepository,
-  type AuditEventRepository,
-  type JobRepository,
-  type WebhookRepository,
-  type WebhookDeliveryRepository,
+  createJobRepository, createWebhookDeliveryRepository, createWebhookRepository, type AuditEventRepository,
+  type JobRepository, type WebhookDeliveryRepository, type WebhookRepository
 } from './system';
 
 // Features
@@ -112,7 +79,7 @@ export {
   createFeatureFlagRepository,
   createTenantFeatureOverrideRepository,
   type FeatureFlagRepository,
-  type TenantFeatureOverrideRepository,
+  type TenantFeatureOverrideRepository
 } from './features';
 
 // Metering
@@ -120,19 +87,16 @@ export {
   createUsageMetricRepository,
   createUsageSnapshotRepository,
   type UsageMetricRepository,
-  type UsageSnapshotRepository,
+  type UsageSnapshotRepository
 } from './metering';
 
 // Compliance
 export {
-  createLegalDocumentRepository,
-  createUserAgreementRepository,
   createConsentLogRepository,
-  createDataExportRequestRepository,
-  type LegalDocumentRepository,
-  type UserAgreementRepository,
-  type ConsentLogRepository,
-  type DataExportRequestRepository,
+  createDataExportRequestRepository, createLegalDocumentRepository,
+  createUserAgreementRepository, type ConsentLogRepository,
+  type DataExportRequestRepository, type LegalDocumentRepository,
+  type UserAgreementRepository
 } from './compliance';
 
 // Files
@@ -140,10 +104,7 @@ export { createFileRepository, type FileRepository } from './files';
 
 // Email (Templates & Log)
 export {
-  createEmailTemplateRepository,
-  createEmailLogRepository,
-  type EmailTemplateRepository,
-  type EmailLogRepository,
+  createEmailLogRepository, createEmailTemplateRepository, type EmailLogRepository, type EmailTemplateRepository
 } from './email';
 
 // Tenant Settings

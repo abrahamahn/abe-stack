@@ -10,14 +10,14 @@
  *         /api/webhooks/:id/rotate-secret
  */
 
-import { createAuthGuard } from '@abe-stack/core';
-import { webhookRoutes } from '@abe-stack/core/webhooks';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core';
+import { webhookRoutes } from '@bslt/core/webhooks';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

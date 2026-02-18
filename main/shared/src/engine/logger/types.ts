@@ -7,9 +7,7 @@
  * reuse across packages without coupling to Fastify or pino.
  */
 
-import type { LogLevel } from '../../config/env.server';
-
-export type { LogLevel };
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 /**
  * Structured log data attached to log entries.

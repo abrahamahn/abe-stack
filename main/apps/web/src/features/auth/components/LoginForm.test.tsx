@@ -1,11 +1,11 @@
 // main/apps/web/src/features/auth/components/LoginForm.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock API hooks before imports
-vi.mock('@abe-stack/api', async () => {
-  const actual = await vi.importActual('@abe-stack/api');
+vi.mock('@bslt/api', async () => {
+  const actual = await vi.importActual('@bslt/api');
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({
@@ -20,8 +20,8 @@ vi.mock('@abe-stack/api', async () => {
 import { renderWithProviders } from './../../../__tests__/utils';
 import { LoginForm } from './LoginForm';
 
-import type { LoginFormProps } from './LoginForm';
 import type { ReactElement } from 'react';
+import type { LoginFormProps } from './LoginForm';
 
 // Helper function to render with providers
 function renderWithRouter(ui: ReactElement) {

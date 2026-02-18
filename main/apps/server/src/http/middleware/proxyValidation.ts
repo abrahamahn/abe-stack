@@ -2,7 +2,7 @@
 /**
  * Thin compatibility shim.
  *
- * Canonical proxy validation utilities now live in `@abe-stack/shared`.
+ * Canonical proxy validation utilities now live in `@bslt/shared`.
  * Keep this module so existing app-local import paths remain stable.
  */
 
@@ -17,5 +17,6 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig,
-} from '@abe-stack/shared';
+  type ProxyValidationConfig
+} from '@bslt/shared';
+

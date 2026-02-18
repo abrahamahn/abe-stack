@@ -3,7 +3,7 @@
  * Shared utilities for API client modules.
  */
 
-import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
+import { addAuthHeader, API_PREFIX, trimTrailingSlashes } from '@bslt/shared';
 
 import { createApiError, NetworkError } from './errors';
 

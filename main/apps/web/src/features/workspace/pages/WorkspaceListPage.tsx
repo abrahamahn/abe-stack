@@ -5,15 +5,15 @@
  * Displays all workspaces the user belongs to with a create button.
  */
 
-import { toastStore } from '@abe-stack/react';
-import { useNavigate } from '@abe-stack/react/router';
-import { Button, Heading, Text } from '@abe-stack/ui';
+import { toastStore } from '@bslt/react';
+import { useNavigate } from '@bslt/react/router';
+import { Button, Heading, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { CreateWorkspaceDialog, WorkspaceList } from '../components';
 import { useWorkspaces } from '../hooks';
 
-import type { Tenant } from '@abe-stack/shared';
+import type { Tenant } from '@bslt/shared';
 
 // ============================================================================
 // Component

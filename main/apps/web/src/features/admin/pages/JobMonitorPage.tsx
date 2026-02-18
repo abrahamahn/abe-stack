@@ -5,7 +5,7 @@
  * Admin page for monitoring background job queue.
  */
 
-import { Heading, PageContainer, SidePeek } from '@abe-stack/ui';
+import { Heading, PageContainer, SidePeek } from '@bslt/ui';
 import { useState } from 'react';
 
 import { JobDetailsPanel, JobsTable, QueueStatsCard } from '../components';

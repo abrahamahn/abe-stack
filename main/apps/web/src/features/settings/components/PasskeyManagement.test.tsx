@@ -4,11 +4,11 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PasskeyManagement } from './PasskeyManagement';
 
-import type { PasskeyListItem } from '@abe-stack/shared';
+import type { PasskeyListItem } from '@bslt/shared';
 
 // ============================================================================
 // Mocks
@@ -29,8 +29,8 @@ vi.mock('../../auth/hooks/useWebauthn', () => ({
   useRegisterPasskey: mockUseRegisterPasskey,
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     formatDateTime: (iso: string | null) => (iso !== null ? iso.slice(0, 10) : ''),

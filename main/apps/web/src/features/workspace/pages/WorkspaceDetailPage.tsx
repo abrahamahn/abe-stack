@@ -5,8 +5,8 @@
  * Displays workspace details with tabs for Settings, Members, and Invitations.
  */
 
-import { useNavigate, useParams, useSearchParams } from '@abe-stack/react/router';
-import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
+import { useNavigate, useParams, useSearchParams } from '@bslt/react/router';
+import { Button, Card, Heading, Skeleton, Tabs, Text } from '@bslt/ui';
 import { useAuth } from '@features/auth';
 import { useMemo, useState, type ReactElement } from 'react';
 

@@ -6,8 +6,8 @@
  * integration testing with fastify.inject().
  */
 
-import { createAccessToken } from '@abe-stack/core/auth';
-import { RateLimiter } from '@abe-stack/server-engine';
+import { createAccessToken } from '@bslt/core/auth';
+import { RateLimiter } from '@bslt/server-engine';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
@@ -16,12 +16,12 @@ import { registerCorrelationIdHook } from '../../http/middleware/correlationId';
 import { registerCsrf } from '../../http/middleware/csrf';
 import { registerRequestInfoHook } from '../../http/middleware/requestInfo';
 import {
-  registerPrototypePollutionProtection,
   applyCors,
   applySecurityHeaders,
+  registerPrototypePollutionProtection,
 } from '../../http/middleware/security';
 
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 
 // Mock function type that is callable

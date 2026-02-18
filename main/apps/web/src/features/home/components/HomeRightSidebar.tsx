@@ -1,6 +1,6 @@
 // main/apps/web/src/features/home/components/HomeRightSidebar.tsx
-import { Link, useSearchParams } from '@abe-stack/react/router';
-import { Text } from '@abe-stack/ui';
+import { Link, useSearchParams } from '@bslt/react/router';
+import { Text } from '@bslt/ui';
 import { useMemo } from 'react';
 
 import { docCategories, docsMeta } from '../data';

@@ -6,13 +6,13 @@
  * the same generic 401 message regardless of failure reason.
  */
 
-import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { authRoutes, createAuthGuard } from '@bslt/core/auth';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Factories

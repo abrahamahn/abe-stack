@@ -8,7 +8,7 @@
  * @module GeoIP
  */
 
-import { MS_PER_HOUR } from '@abe-stack/shared';
+import { MS_PER_HOUR } from '@bslt/shared';
 
 import type { GeoIpProvider, GeoIpResult } from './types';
 

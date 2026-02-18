@@ -5,13 +5,13 @@
  * Uses useMutation for write-only phone operations.
  */
 
-import { createPhoneClient } from '@abe-stack/api';
+import { createPhoneClient } from '@bslt/api';
 import { useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 
-import type { PhoneClientConfig } from '@abe-stack/api';
-import type { VerifyPhoneResponse } from '@abe-stack/shared';
+import type { PhoneClientConfig } from '@bslt/api';
+import type { VerifyPhoneResponse } from '@bslt/shared';
 
 // ============================================================================
 // Types

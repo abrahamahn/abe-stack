@@ -9,7 +9,7 @@ import {
   AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
   InvalidTokenError,
   TokenReuseError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { REFRESH_COOKIE_NAME } from '../types';
@@ -71,16 +71,16 @@ vi.mock('../security', () => ({
   sendTokenReuseAlert: mockSendTokenReuseAlert,
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
   };
 });
 
-// Mock @abe-stack/shared to intercept mapErrorToHttpResponse
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared to intercept mapErrorToHttpResponse
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToResponse,

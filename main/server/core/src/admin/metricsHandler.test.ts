@@ -8,14 +8,14 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleGetMetrics } from './metricsHandler';
 
-import type { AdminAppContext } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext } from './types';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/server-engine', async (importOriginal) => {
+vi.mock('@bslt/server-engine', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../engine/src')>();
 
   const mockCollector = {

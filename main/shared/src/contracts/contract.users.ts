@@ -6,7 +6,6 @@
  * @module Domain/Users
  */
 
-import { errorResponseSchema, successResponseSchema } from '../engine/http';
 import {
   accountLifecycleResponseSchema,
   deactivateAccountRequestSchema,
@@ -31,6 +30,7 @@ import {
   userSchema,
   usersListResponseSchema,
 } from '../core/users/users.schemas';
+import { errorResponseSchema, successResponseSchema } from '../engine/http';
 
 import type { Contract, Schema } from '../primitives/api';
 

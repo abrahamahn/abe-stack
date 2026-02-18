@@ -8,7 +8,7 @@
  * @module handlers
  */
 
-import { HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import {
   createWebhook,
@@ -20,13 +20,13 @@ import {
 } from './service';
 import { ERROR_MESSAGES } from './types';
 
+import type { HttpErrorResponse } from '@bslt/shared';
 import type {
   CreateWebhookData,
   UpdateWebhookData,
   WebhooksModuleDeps,
   WebhooksRequest,
 } from './types';
-import type { HttpErrorResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Handlers

@@ -3,11 +3,11 @@
  * PhoneManagement — Add, verify, and remove a phone number for SMS 2FA.
  */
 
-import { usePhone } from '@abe-stack/react';
-import { Alert, Button, Card, Input, Text } from '@abe-stack/ui';
+import { usePhone } from '@bslt/react';
+import { Alert, Button, Card, Input, Text } from '@bslt/ui';
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
-import type { User } from '@abe-stack/shared';
+import type { User } from '@bslt/shared';
 
 // ============================================================================
 // Types

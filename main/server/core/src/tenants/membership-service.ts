@@ -15,10 +15,10 @@ import {
   canRemoveMember,
   ForbiddenError,
   NotFoundError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
+import type { TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
-import type { TenantRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

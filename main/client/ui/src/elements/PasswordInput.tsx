@@ -1,5 +1,5 @@
 // main/client/ui/src/elements/PasswordInput.tsx
-import { estimatePasswordStrength, getStrengthLabel } from '@abe-stack/shared';
+import { estimatePasswordStrength, getStrengthLabel } from '@bslt/shared';
 import { forwardRef, useState } from 'react';
 
 import { Button } from './Button';

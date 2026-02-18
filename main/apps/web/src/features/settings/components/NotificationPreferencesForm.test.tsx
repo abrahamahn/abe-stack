@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/NotificationPreferencesForm.test.tsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NotificationPreferencesForm } from './NotificationPreferencesForm';
 
@@ -37,16 +37,16 @@ let mockState: MockState = {
   refresh: mockRefresh,
 };
 
-vi.mock('@abe-stack/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react')>();
+vi.mock('@bslt/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react')>();
   return {
     ...actual,
     useNotificationPreferences: () => mockState,
   };
 });
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
   return {
     ...actual,
     Alert: ({ children, tone }: { children: ReactNode; tone: string }) => (

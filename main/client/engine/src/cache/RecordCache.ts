@@ -28,7 +28,7 @@
  * ```
  */
 
-import type { RecordPointer } from '@abe-stack/shared';
+import type { RecordPointer } from '@bslt/shared';
 
 export type { RecordPointer };
 

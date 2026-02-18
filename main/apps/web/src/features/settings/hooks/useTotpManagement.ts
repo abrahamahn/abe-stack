@@ -8,11 +8,11 @@
  * @module settings/hooks
  */
 
-import { getApiClient } from '@abe-stack/api';
 import { getAccessToken } from '@app/authToken';
+import { getApiClient } from '@bslt/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { TotpSetupResponse } from '@abe-stack/shared';
+import type { TotpSetupResponse } from '@bslt/shared';
 
 // ============================================================================
 // Types

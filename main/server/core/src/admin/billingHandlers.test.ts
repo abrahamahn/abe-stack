@@ -12,7 +12,7 @@ import {
   PlanNotFoundError,
   type CreatePlanRequest,
   type UpdatePlanRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -24,8 +24,8 @@ import {
   handleAdminUpdatePlan,
 } from './billingHandlers';
 
-import type { AdminAppContext, AdminRequest } from './types';
 import type { Plan as DbPlan } from '../../../db/src';
+import type { AdminAppContext, AdminRequest } from './types';
 
 // ============================================================================
 // Mocks

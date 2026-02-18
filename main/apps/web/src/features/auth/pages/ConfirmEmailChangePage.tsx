@@ -9,9 +9,9 @@
  * @module ConfirmEmailChangePage
  */
 
-import { getApiClient } from '@abe-stack/api';
-import { useNavigate, useSearchParams } from '@abe-stack/react/router';
-import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@abe-stack/ui';
+import { getApiClient } from '@bslt/api';
+import { useNavigate, useSearchParams } from '@bslt/react/router';
+import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@bslt/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';

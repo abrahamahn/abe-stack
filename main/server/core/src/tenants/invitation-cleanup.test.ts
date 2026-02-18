@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { expireStaleInvitations } from './invitation-cleanup';
 
+import type { InvitationStatus, TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
-import type { InvitationStatus, TenantRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Helpers

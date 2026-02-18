@@ -2,11 +2,11 @@
 /**
  * Settings API Client (web adapter)
  *
- * Thin wrapper around centralized @abe-stack/api settings client to preserve
+ * Thin wrapper around centralized @bslt/api settings client to preserve
  * existing web-facing API naming.
  */
 
-import { createSettingsClient } from '@abe-stack/api';
+import { createSettingsClient } from '@bslt/api';
 
 import type {
   BaseClientConfig,
@@ -15,9 +15,9 @@ import type {
   SettingsCreateApiKeyResponse,
   SettingsListApiKeysResponse,
   SettingsRevokeApiKeyResponse,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
-export type ApiKeyLocal = import('@abe-stack/api').ApiKeyLocal;
+export type ApiKeyLocal = import('@bslt/api').ApiKeyLocal;
 export type CreateApiKeyRequest = SettingsCreateApiKeyRequest;
 export type CreateApiKeyResponse = SettingsCreateApiKeyResponse;
 export type ListApiKeysResponse = SettingsListApiKeysResponse;
@@ -30,7 +30,7 @@ export function createSettingsApi(config: SettingsApiConfig): SettingsApi {
   return createSettingsClient(config);
 }
 
-export type { ApiError } from '@abe-stack/api';
+export type { ApiError } from '@bslt/api';
 export type {
   AccountLifecycleResponse,
   AvatarDeleteResponse,
@@ -49,5 +49,6 @@ export type {
   UpdateProfileRequest,
   UpdateUsernameRequest,
   UpdateUsernameResponse,
-  User,
-} from '@abe-stack/shared';
+  User
+} from '@bslt/shared';
+

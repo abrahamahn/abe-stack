@@ -41,7 +41,7 @@ export default defineConfig({
 
   webServer: [
     {
-      command: CI ? 'pnpm --filter @abe-stack/web preview' : 'pnpm dev:web',
+      command: CI ? 'pnpm --filter @bslt/web preview' : 'pnpm dev:web',
       url: `http://localhost:${PORT}`,
       reuseExistingServer: !CI,
       stdout: 'pipe',
@@ -49,7 +49,7 @@ export default defineConfig({
     },
     /* Uncomment if your E2E tests require the live backend
     {
-      command: 'pnpm --filter @abe-stack/server dev',
+      command: 'pnpm --filter @bslt/server dev',
       url: `http://localhost:${API_PORT}/health`,
       reuseExistingServer: !CI,
     }

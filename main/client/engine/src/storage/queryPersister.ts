@@ -6,7 +6,7 @@
  * Queries are automatically restored when the app loads.
  */
 
-import { MS_PER_DAY, MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_SECOND } from '@bslt/shared';
 
 import { idbStorage } from './storage';
 
@@ -82,7 +82,7 @@ type QueryCacheSnapshotEntry = {
 // Persister Implementation
 // ============================================================================
 
-const DEFAULT_KEY = 'abe-stack-query-cache';
+const DEFAULT_KEY = 'bslt-query-cache';
 const DEFAULT_MAX_AGE = MS_PER_DAY;
 const DEFAULT_THROTTLE = MS_PER_SECOND;
 
@@ -91,7 +91,7 @@ const DEFAULT_THROTTLE = MS_PER_SECOND;
  *
  * Usage with manual persistence (recommended):
  * ```ts
- * import { QueryCache, createQueryPersister } from '@abe-stack/client-engine';
+ * import { QueryCache, createQueryPersister } from '@bslt/client-engine';
  *
  * const queryCache = new QueryCache({
  *   defaultGcTime: 1000 * 60 * 60 * 24, // 24 hours

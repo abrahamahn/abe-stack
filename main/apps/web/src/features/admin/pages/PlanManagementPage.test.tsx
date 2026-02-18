@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PlanManagementPage } from './PlanManagementPage';
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', () => {
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', () => {
   const badge = ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
     <span data-testid="badge" data-tone={tone}>
       {children}
@@ -129,9 +129,9 @@ vi.mock('@abe-stack/ui', () => {
   };
 });
 
-// Mock @abe-stack/shared
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {
@@ -140,9 +140,9 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
   };
 });
 
-// Mock @abe-stack/react
-vi.mock('@abe-stack/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react')>();
+// Mock @bslt/react
+vi.mock('@bslt/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react')>();
   return {
     ...actual,
     useAdminPlans: () => ({

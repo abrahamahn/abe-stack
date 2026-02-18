@@ -5,24 +5,24 @@
  * Dependency interface and shared types for the users module.
  * The server provides these dependencies when registering the users module.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  *
  * @module types
  */
 
-import { ERROR_MESSAGES as SHARED_ERRORS } from '@abe-stack/shared';
+import { ERROR_MESSAGES as SHARED_ERRORS } from '@bslt/shared';
 
-import type { DbClient, Repositories } from '../../../db/src';
 import type {
   BaseContext,
   CacheProvider,
   ContractRequestContext as RequestContext,
   RequestInfo,
   ServerLogger,
-} from '@abe-stack/shared';
-import type { Argon2Config } from '@abe-stack/shared/config';
-import type { StorageService } from '@abe-stack/shared/engine';
+} from '@bslt/shared';
+import type { Argon2Config } from '@bslt/shared/config';
+import type { StorageService } from '@bslt/shared/engine';
+import type { DbClient, Repositories } from '../../../db/src';
 
 // ============================================================================
 // Auth Config Subset
@@ -55,8 +55,8 @@ export interface UsersAuthConfig {
 /**
  * Request info extracted by middleware.
  *
- * Transition alias for `RequestInfo` from `@abe-stack/shared`.
- * New code should import `RequestInfo` from `@abe-stack/shared` directly.
+ * Transition alias for `RequestInfo` from `@bslt/shared`.
+ * New code should import `RequestInfo` from `@bslt/shared` directly.
  *
  * @complexity O(1) constant access
  */
@@ -65,8 +65,8 @@ export type UsersRequestInfo = RequestInfo;
 /**
  * Request with cookie support and auth context.
  *
- * Transition alias for `RequestContext` from `@abe-stack/shared`.
- * New code should import `RequestContext` from `@abe-stack/shared` directly.
+ * Transition alias for `RequestContext` from `@bslt/shared`.
+ * New code should import `RequestContext` from `@bslt/shared` directly.
  *
  * @complexity O(1) constant access
  */

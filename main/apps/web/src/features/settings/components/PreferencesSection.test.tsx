@@ -7,15 +7,15 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PreferencesSection } from './PreferencesSection';
 
 import type { ReactNode } from 'react';
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   const mockButton = ({
     children,

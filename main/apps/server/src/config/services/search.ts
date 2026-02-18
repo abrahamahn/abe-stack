@@ -4,7 +4,7 @@ import type {
   FullEnv,
   SqlSearchProviderConfig,
   SqlTableConfig,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Default Search Schemas

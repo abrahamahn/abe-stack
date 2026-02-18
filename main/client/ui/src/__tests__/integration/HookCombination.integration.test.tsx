@@ -21,7 +21,7 @@ import {
   useMediaQuery,
   useResendCooldown,
   useWindowSize,
-} from '@abe-stack/react/hooks';
+} from '@bslt/react/hooks';
 import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect, useRef, useState } from 'react';

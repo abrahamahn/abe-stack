@@ -1,5 +1,5 @@
 // main/apps/web/src/features/ui-library/components/UILibraryPreviewArea.tsx
-import { Button, Heading, ScrollArea, Text } from '@abe-stack/ui';
+import { Button, Heading, ScrollArea, Text } from '@bslt/ui';
 
 import type { ComponentDemo } from '../types';
 

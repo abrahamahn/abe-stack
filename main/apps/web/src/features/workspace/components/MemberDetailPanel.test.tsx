@@ -5,12 +5,12 @@
 
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MemberDetailPanel } from './MemberDetailPanel';
 
+import type { TenantRole } from '@bslt/shared';
 import type { MemberDetail } from './MemberDetailPanel';
-import type { TenantRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Data

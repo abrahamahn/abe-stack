@@ -9,16 +9,16 @@ import {
   revertEmailChange,
 } from './email-change';
 
-import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient, Repositories } from '../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     canonicalizeEmail: vi.fn((e: string) => e.toLowerCase()),
@@ -40,7 +40,7 @@ vi.mock('./utils', async (importOriginal) => {
 // ============================================================================
 
 const { verifyPasswordSafe, revokeAllUserTokens } = await import('./utils');
-const { InvalidCredentialsError, InvalidTokenError } = await import('@abe-stack/shared');
+const { InvalidCredentialsError, InvalidTokenError } = await import('@bslt/shared');
 
 describe('email-change', () => {
   let mockDb: DbClient;

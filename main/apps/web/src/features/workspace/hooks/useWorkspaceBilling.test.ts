@@ -3,11 +3,11 @@
  * Tests for useWorkspaceBilling hook.
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useWorkspaceBilling } from './useWorkspaceBilling';
 
@@ -19,7 +19,7 @@ import type { SubscriptionResponse } from './useWorkspaceBilling';
 
 const mockGetSubscription = vi.fn();
 
-vi.mock('@abe-stack/api', () => ({
+vi.mock('@bslt/api', () => ({
   createBillingClient: () => ({
     getSubscription: mockGetSubscription,
   }),

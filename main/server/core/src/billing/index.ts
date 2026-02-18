@@ -6,7 +6,7 @@
  * route definitions, and webhook processing for Stripe and PayPal.
  *
  * Note: Core billing types (BillingService, CheckoutParams, NormalizedWebhookEvent, etc.)
- * should be imported directly from @abe-stack/shared.
+ * should be imported directly from @bslt/shared.
  */
 
 // Factory (existing)
@@ -18,21 +18,9 @@ export { StripeProvider } from './stripe-provider';
 
 // Service
 export {
-  getActivePlans,
-  getPlanById,
-  getUserSubscription,
-  createCheckoutSession,
-  cancelSubscription,
-  resumeSubscription,
-  updateSubscription,
-  getUserInvoice,
+  addPaymentMethod, cancelSubscription, createCheckoutSession, createSetupIntent, getActivePlans, getCustomerId, getPlanById, getUserInvoice,
   getUserInvoices,
-  getUserPaymentMethods,
-  createSetupIntent,
-  addPaymentMethod,
-  removePaymentMethod,
-  setDefaultPaymentMethod,
-  getCustomerId,
+  getUserPaymentMethods, getUserSubscription, removePaymentMethod, resumeSubscription, setDefaultPaymentMethod, updateSubscription
 } from './service';
 
 // Types
@@ -49,25 +37,14 @@ export type {
   BillingRouteResult,
   BillingValidationSchema,
   WebhookRepositories,
-  WebhookResult,
+  WebhookResult
 } from './types';
 
 // Handlers
 export {
-  handleListPlans,
-  handleGetSubscription,
-  handleCreateCheckout,
-  handleCreatePortalSession,
-  handleCancelSubscription,
-  handleResumeSubscription,
-  handleUpdateSubscription,
-  handleGetInvoice,
-  handleListInvoices,
-  handleListPaymentMethods,
-  handleAddPaymentMethod,
-  handleRemovePaymentMethod,
-  handleSetDefaultPaymentMethod,
-  handleCreateSetupIntent,
+  handleAddPaymentMethod, handleCancelSubscription, handleCreateCheckout,
+  handleCreatePortalSession, handleCreateSetupIntent, handleGetInvoice, handleGetSubscription, handleListInvoices,
+  handleListPaymentMethods, handleListPlans, handleRemovePaymentMethod, handleResumeSubscription, handleSetDefaultPaymentMethod, handleUpdateSubscription
 } from './handlers';
 
 // Subscription Lifecycle
@@ -80,7 +57,7 @@ export {
   type LifecycleState,
   type SubscriptionEvent,
   type TransitionResult,
-  type TrialSubscription,
+  type TrialSubscription
 } from './subscription-lifecycle';
 
 // Plan Changes
@@ -89,14 +66,14 @@ export {
   downgradeSubscription,
   upgradeSubscription,
   type PlanChangeDirection,
-  type PlanChangeResult,
+  type PlanChangeResult
 } from './plan-changes';
 
 // Entitlements (server-side)
 export {
   assertUsageWithinLimit,
   resolveEntitlementsForUser,
-  type UsageCounter,
+  type UsageCounter
 } from './entitlements';
 
 // Middleware
@@ -106,4 +83,5 @@ export { requireEntitlement, type EntitlementMiddlewareOptions } from './middlew
 export { billingRoutes } from './routes';
 
 // Webhooks
-export { handleStripeWebhook, handlePayPalWebhook } from './webhooks';
+export { handlePayPalWebhook, handleStripeWebhook } from './webhooks';
+

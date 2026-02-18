@@ -1,5 +1,5 @@
 // main/client/ui/src/components/RoleBadge.tsx
-import { getAppRoleLabel, getAppRoleTone } from '@abe-stack/shared';
+import { getAppRoleLabel, getAppRoleTone } from '@bslt/shared';
 
 import { Badge } from '../elements/Badge';
 

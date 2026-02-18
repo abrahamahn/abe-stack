@@ -10,7 +10,7 @@
  * Similar pattern to audit_events in system.ts but user-facing.
  */
 
-import { ACTOR_TYPES, type ActorType } from '@abe-stack/shared';
+import { ACTOR_TYPES, type ActorType } from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { ACTOR_TYPES };

@@ -26,7 +26,7 @@ on:
       app_name:
         description: 'Application slug used in deployment path and compose project'
         required: false
-        default: 'abe-stack'
+        default: 'bslt'
         type: string
       instance_ip:
         description: 'Optional target server IP (used if deployment artifact is unavailable)'
@@ -125,7 +125,7 @@ jobs:
             export ROLLBACK_TAG="${{ steps.get-rollback-tag.outputs.rollback_tag }}"
             export REGISTRY="${{ vars.REGISTRY || secrets.REGISTRY || 'ghcr.io' }}"
             export IMAGE_NAME_RAW="${{ vars.IMAGE_NAME || github.event.repository.name }}"
-            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
+            export APP_NAME_INPUT="${{ inputs.app_name || 'bslt' }}"
 
             if [[ "$IMAGE_NAME_RAW" != */* ]]; then
               export IMAGE_NAME="${{ github.repository_owner }}/$IMAGE_NAME_RAW"
@@ -135,7 +135,7 @@ jobs:
 
             APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
             if [ -z "$APP_NAME" ]; then
-              APP_NAME="abe-stack"
+              APP_NAME="bslt"
             fi
             export APP_NAME
             export COMPOSE_PROJECT_NAME="${APP_NAME}-${DEPLOY_ENV}"
@@ -209,7 +209,7 @@ jobs:
         env:
           INPUT_ENVIRONMENT: ${{ inputs.environment }}
           INPUT_PROVIDER: ${{ inputs.provider }}
-          INPUT_APP_NAME: ${{ inputs.app_name || 'abe-stack' }}
+          INPUT_APP_NAME: ${{ inputs.app_name || 'bslt' }}
           ROLLBACK_TAG: ${{ steps.get-rollback-tag.outputs.rollback_tag }}
         run: |
           echo "## 🔄 Rollback Completed Successfully!" >> $GITHUB_STEP_SUMMARY

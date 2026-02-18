@@ -1,8 +1,8 @@
 {
-  "name": "@abe-stack/media",
+  "name": "@bslt/media",
   "version": "1.0.0",
   "type": "module",
-  "description": "Media processing utilities for abe-stack (server-only)",
+  "description": "Media processing utilities for bslt (server-only)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -15,18 +15,18 @@
   },
   "dependencies": {
     "sharp": "^0.33.2",
-    "@abe-stack/shared": "workspace:*"
+    "@bslt/shared": "workspace:*"
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-media --report-unused-disable-directives",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-media --report-unused-disable-directives",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "keywords": [
-    "abe-stack",
+    "bslt",
     "media",
     "ffmpeg",
     "image-processing"
@@ -35,13 +35,13 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "url": "https://github.com/abrahamahn/bslt.git",
     "directory": "main/server/media"
   },
   "bugs": {
-    "url": "https://github.com/abrahamahn/abe-stack/issues"
+    "url": "https://github.com/abrahamahn/bslt/issues"
   },
-  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "homepage": "https://github.com/abrahamahn/bslt#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

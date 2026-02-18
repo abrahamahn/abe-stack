@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { QueueStatsCard } from './QueueStatsCard';
 
-import type { QueueStats } from '@abe-stack/shared';
+import type { QueueStats } from '@bslt/shared';
 
 // ============================================================================
 // Test Data

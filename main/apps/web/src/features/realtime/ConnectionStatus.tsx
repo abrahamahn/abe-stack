@@ -2,7 +2,7 @@
 
 import { useConnectionStatus } from './useConnectionStatus';
 
-import type { ConnectionState, WebsocketPubsubClient } from '@abe-stack/client-engine';
+import type { ConnectionState, WebsocketPubsubClient } from '@bslt/client-engine';
 import type { ReactElement } from 'react';
 
 /**

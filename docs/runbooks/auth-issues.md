@@ -75,7 +75,7 @@ curl -X POST https://api.yourapp.com/admin/users/<user-id>/unlock \
 
 ## JWT Secret Rotation
 
-ABE Stack supports `JWT_SECRET` and `JWT_SECRET_PREVIOUS` for zero-downtime rotation.
+BSLT supports `JWT_SECRET` and `JWT_SECRET_PREVIOUS` for zero-downtime rotation.
 
 ### Procedure
 

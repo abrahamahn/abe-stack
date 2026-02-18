@@ -1,12 +1,12 @@
 # Horizontal Scaling Guide
 
-How to run multiple ABE Stack server instances behind a load balancer.
+How to run multiple BSLT server instances behind a load balancer.
 
 ---
 
 ## Architecture Overview
 
-ABE Stack is designed for stateless horizontal scaling:
+BSLT is designed for stateless horizontal scaling:
 
 - **No server-side sessions** — JWT-based auth, no sticky sessions needed
 - **Shared database** — PostgreSQL is the single source of truth

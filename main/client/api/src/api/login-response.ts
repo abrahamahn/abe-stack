@@ -3,13 +3,13 @@
  * Login response normalization and parsing for the web BFF flow.
  */
 
-import { totpLoginChallengeResponseSchema, userSchema } from '@abe-stack/shared';
+import { totpLoginChallengeResponseSchema, userSchema } from '@bslt/shared';
 
 import type {
   LoginSuccessResponse,
   SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 type LoginResponse = LoginSuccessResponse | TotpLoginChallengeResponse | SmsLoginChallengeResponse;
 

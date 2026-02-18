@@ -6,8 +6,8 @@
  * Sends an SMS code and accepts 6-digit verification input.
  */
 
-import { MS_PER_SECOND } from '@abe-stack/shared';
-import { Alert, Button, Input, Text } from '@abe-stack/ui';
+import { MS_PER_SECOND } from '@bslt/shared';
+import { Alert, Button, Input, Text } from '@bslt/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 
 // ============================================================================

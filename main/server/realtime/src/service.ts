@@ -4,15 +4,15 @@
  *
  * Server-side service for loading and saving realtime records.
  * Handles database operations, table registry, and optimistic locking.
- * Pure operation logic (apply, conflict detection) lives in @abe-stack/shared.
+ * Pure operation logic (apply, conflict detection) lives in @bslt/shared.
  *
  * @module service
  */
 
-import { and, eq, inArray, insert, select, update, USERS_TABLE } from '@abe-stack/db';
+import { and, eq, inArray, insert, select, update, USERS_TABLE } from '@bslt/db';
 
-import type { DbClient, User } from '@abe-stack/db';
-import type { RealtimeRecord, RecordMap, RecordPointer } from '@abe-stack/shared';
+import type { DbClient, User } from '@bslt/db';
+import type { RealtimeRecord, RecordMap, RecordPointer } from '@bslt/shared';
 
 // Re-export shared functions used by consumers of this module
 export {
@@ -20,8 +20,8 @@ export {
   applyOperations,
   checkVersionConflicts,
   getOperationPointers,
-  isFieldMutable,
-} from '@abe-stack/shared';
+  isFieldMutable
+} from '@bslt/shared';
 
 // ============================================================================
 // Table Configuration

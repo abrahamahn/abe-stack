@@ -77,22 +77,22 @@ importers:
 
   main/apps/desktop:
     dependencies:
-      '@abe-stack/api':
+      '@bslt/api':
         specifier: workspace:*
         version: link:../../client/api
-      '@abe-stack/client-engine':
+      '@bslt/client-engine':
         specifier: workspace:*
         version: link:../../client/engine
-      '@abe-stack/react':
+      '@bslt/react':
         specifier: workspace:*
         version: link:../../client/react
-      '@abe-stack/server-engine':
+      '@bslt/server-engine':
         specifier: workspace:*
         version: link:../../server/engine
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
-      '@abe-stack/ui':
+      '@bslt/ui':
         specifier: workspace:*
         version: link:../../client/ui
       react:
@@ -117,22 +117,22 @@ importers:
 
   main/apps/server:
     dependencies:
-      '@abe-stack/core':
+      '@bslt/core':
         specifier: workspace:*
         version: link:../../server/core
-      '@abe-stack/db':
+      '@bslt/db':
         specifier: workspace:*
         version: link:../../server/db
-      '@abe-stack/realtime':
+      '@bslt/realtime':
         specifier: workspace:*
         version: link:../../server/realtime
-      '@abe-stack/server-engine':
+      '@bslt/server-engine':
         specifier: workspace:*
         version: link:../../server/engine
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
-      '@abe-stack/websocket':
+      '@bslt/websocket':
         specifier: workspace:*
         version: link:../../server/websocket
       '@fastify/compress':
@@ -157,19 +157,19 @@ importers:
 
   main/apps/web:
     dependencies:
-      '@abe-stack/api':
+      '@bslt/api':
         specifier: workspace:*
         version: link:../../client/api
-      '@abe-stack/client-engine':
+      '@bslt/client-engine':
         specifier: workspace:*
         version: link:../../client/engine
-      '@abe-stack/react':
+      '@bslt/react':
         specifier: workspace:*
         version: link:../../client/react
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
-      '@abe-stack/ui':
+      '@bslt/ui':
         specifier: workspace:*
         version: link:../../client/ui
       '@simplewebauthn/browser':
@@ -215,7 +215,7 @@ importers:
 
   main/client/api:
     dependencies:
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       react:
@@ -224,10 +224,10 @@ importers:
 
   main/client/engine:
     dependencies:
-      '@abe-stack/api':
+      '@bslt/api':
         specifier: workspace:*
         version: link:../api
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       react:
@@ -236,10 +236,10 @@ importers:
 
   main/client/react:
     dependencies:
-      '@abe-stack/client-engine':
+      '@bslt/client-engine':
         specifier: workspace:*
         version: link:../engine
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       react-dom:
@@ -273,13 +273,13 @@ importers:
 
   main/client/ui:
     dependencies:
-      '@abe-stack/client-engine':
+      '@bslt/client-engine':
         specifier: workspace:*
         version: link:../engine
-      '@abe-stack/react':
+      '@bslt/react':
         specifier: workspace:*
         version: link:../react
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       react:
@@ -304,16 +304,16 @@ importers:
 
   main/server/core:
     dependencies:
-      '@abe-stack/db':
+      '@bslt/db':
         specifier: workspace:*
         version: link:../db
-      '@abe-stack/media':
+      '@bslt/media':
         specifier: workspace:*
         version: link:../media
-      '@abe-stack/server-engine':
+      '@bslt/server-engine':
         specifier: workspace:*
         version: link:../engine
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       '@simplewebauthn/server':
@@ -341,7 +341,7 @@ importers:
 
   main/server/db:
     dependencies:
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       postgres:
@@ -360,10 +360,10 @@ importers:
 
   main/server/engine:
     dependencies:
-      '@abe-stack/db':
+      '@bslt/db':
         specifier: workspace:*
         version: link:../db
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       '@aws-sdk/client-s3':
@@ -387,7 +387,7 @@ importers:
 
   main/server/media:
     dependencies:
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
       sharp:
@@ -396,13 +396,13 @@ importers:
 
   main/server/realtime:
     dependencies:
-      '@abe-stack/db':
+      '@bslt/db':
         specifier: workspace:*
         version: link:../db
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
-      '@abe-stack/websocket':
+      '@bslt/websocket':
         specifier: workspace:*
         version: link:../websocket
     devDependencies:
@@ -424,13 +424,13 @@ importers:
 
   main/server/websocket:
     dependencies:
-      '@abe-stack/db':
+      '@bslt/db':
         specifier: workspace:*
         version: link:../db
-      '@abe-stack/server-engine':
+      '@bslt/server-engine':
         specifier: workspace:*
         version: link:../engine
-      '@abe-stack/shared':
+      '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
     devDependencies:

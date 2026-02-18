@@ -13,7 +13,7 @@ import {
   emptyBodySchema,
   oauthCallbackQuerySchema,
   type OAuthCallbackQuery,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -33,8 +33,8 @@ import {
   handleOAuthUnlink,
 } from './handlers';
 
-import type { AppContext } from '../types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AppContext } from '../types';
 
 /**
  * Narrow HandlerContext to AppContext.

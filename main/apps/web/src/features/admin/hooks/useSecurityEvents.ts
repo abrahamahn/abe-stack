@@ -5,9 +5,9 @@
  * Fetch paginated security events with filtering support.
  */
 
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';

@@ -1,8 +1,8 @@
 // main/apps/web/src/features/auth/components/LoginForm.tsx
 
-import { Link } from '@abe-stack/react/router';
-import { AuthFormLayout, Button, Input, PasswordInput, Spinner, Text } from '@abe-stack/ui';
 import { SmsChallengeError, TotpChallengeError } from '@auth/services/AuthService';
+import { Link } from '@bslt/react/router';
+import { AuthFormLayout, Button, Input, PasswordInput, Spinner, Text } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
@@ -10,8 +10,8 @@ import { PasskeyLoginButton } from './PasskeyLoginButton';
 import { SmsChallenge } from './SmsChallenge';
 import { TurnstileWidget } from './TurnstileWidget';
 
-import type { AuthMode } from '@abe-stack/react/hooks';
-import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/shared';
+import type { AuthMode } from '@bslt/react/hooks';
+import type { ForgotPasswordRequest, LoginRequest } from '@bslt/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 export interface LoginFormProps {

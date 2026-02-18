@@ -1,7 +1,7 @@
 // main/apps/desktop/src/main.tsx
-import { QueryCache } from '@abe-stack/client-engine';
-import '@abe-stack/ui/styles/elements.css';
 import { App } from '@app/App';
+import { QueryCache } from '@bslt/client-engine';
+import '@bslt/ui/styles/elements.css';
 import { clientConfig } from '@config';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';

@@ -1,17 +1,17 @@
 // main/apps/server/src/manager.ts
 import http from 'node:http';
 
-import { bootstrapSystem, type SystemContext } from '@abe-stack/core';
-import { verifyToken } from '@abe-stack/core/auth';
-import { registerScheduledTasks, stopScheduledTasks } from '@abe-stack/core/scheduled-tasks';
-import { requireValidSchema } from '@abe-stack/db';
-import { resolveTableName } from '@abe-stack/realtime';
-import { logStartupSummary } from '@abe-stack/server-engine';
-import { getWebSocketStats, registerWebSocket } from '@abe-stack/websocket';
+import { bootstrapSystem, type SystemContext } from '@bslt/core';
+import { verifyToken } from '@bslt/core/auth';
+import { registerScheduledTasks, stopScheduledTasks } from '@bslt/core/scheduled-tasks';
+import { requireValidSchema } from '@bslt/db';
+import { resolveTableName } from '@bslt/realtime';
+import { logStartupSummary } from '@bslt/server-engine';
+import { getWebSocketStats, registerWebSocket } from '@bslt/websocket';
 
 import { createApp, type App } from './app';
 
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { AppConfig } from '@bslt/shared/config';
 
 /**
  * Server Manager

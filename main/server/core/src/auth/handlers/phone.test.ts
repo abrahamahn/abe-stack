@@ -40,8 +40,8 @@ vi.mock('../sms-2fa/service', () => ({
   verifySms2faCode: mockVerifySms2faCode,
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToHttpResponse,

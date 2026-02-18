@@ -5,9 +5,9 @@
  * Main settings page with tabs for Profile, Security, Sessions, Preferences, and more.
  */
 
-import { Link } from '@abe-stack/react/router';
-import { Button, Card, Heading, Skeleton, Tabs, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
+import { Link } from '@bslt/react/router';
+import { Button, Card, Heading, Skeleton, Tabs, Text } from '@bslt/ui';
 import { useMemo, type ReactElement } from 'react';
 
 import {
@@ -31,7 +31,7 @@ import {
   UsernameForm,
 } from '../components';
 
-import type { User } from '@abe-stack/shared';
+import type { User } from '@bslt/shared';
 
 // ============================================================================
 // Types

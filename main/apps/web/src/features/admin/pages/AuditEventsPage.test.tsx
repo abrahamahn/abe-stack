@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { AuditEventsPage } from './AuditEventsPage';
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   Badge: ({ children, tone }: { children: React.ReactNode; tone?: string }) => (
     <span data-tone={tone}>{children}</span>
   ),

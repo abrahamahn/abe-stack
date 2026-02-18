@@ -8,7 +8,7 @@ import {
   lt,
   neq,
   serializeToURLParams,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { describe, expect, test } from 'vitest';
 
 import {

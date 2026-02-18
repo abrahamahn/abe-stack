@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useResendCooldown.ts
-import { MS_PER_SECOND, SECONDS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_SECOND, SECONDS_PER_MINUTE } from '@bslt/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseResendCooldownReturn {

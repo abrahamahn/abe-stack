@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useMemo, useState } from 'react';
 
 import { useRouteManifest } from '../hooks/useRouteManifest';

@@ -9,7 +9,7 @@ import {
   loadDatabaseConfig,
 } from './database';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 describe('Database Configuration', () => {
   describe('loadDatabaseConfig', () => {

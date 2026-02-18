@@ -7,7 +7,7 @@
  * of binding to Fastify or any specific HTTP framework.
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { record } from '../audit/service';
 
@@ -29,9 +29,6 @@ import {
   updateSubscription,
 } from './service';
 
-import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
-import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
-import type { AuditRecordParams } from '../audit/types';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
@@ -54,7 +51,10 @@ import type {
   SubscriptionResponse,
   UpdateSubscriptionRequest,
   UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
+import type { AuditRecordParams } from '../audit/types';
+import type { BillingAppContext, BillingRepositories, BillingRequest } from './types';
 
 // ============================================================================
 // Helper Functions

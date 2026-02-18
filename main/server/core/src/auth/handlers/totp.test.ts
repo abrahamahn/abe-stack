@@ -15,13 +15,13 @@ import {
   handleTotpStatus,
 } from './totp';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   TotpLoginVerifyRequest,
   TotpSetupResponse,
   TotpStatusResponse,
   TotpVerifyRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 // ============================================================================
 // Mock Dependencies
@@ -87,8 +87,8 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-// Mock @abe-stack/server-engine for JWT
-vi.mock('@abe-stack/server-engine', () => ({
+// Mock @bslt/server-engine for JWT
+vi.mock('@bslt/server-engine', () => ({
   verify: mockJwtVerify,
   JwtError: class JwtError extends Error {
     constructor(message: string) {
@@ -98,14 +98,14 @@ vi.mock('@abe-stack/server-engine', () => ({
   },
 }));
 
-// Mock @abe-stack/db for transactions
-vi.mock('@abe-stack/db', () => ({
+// Mock @bslt/db for transactions
+vi.mock('@bslt/db', () => ({
   withTransaction: mockWithTransaction,
 }));
 
-// Mock @abe-stack/shared partially to provide error mapper and InvalidTokenError
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared partially to provide error mapper and InvalidTokenError
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToHttpResponse,

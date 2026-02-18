@@ -1,6 +1,6 @@
 # ⚙️ Configuration Architecture
 
-This directory (`config/`) acts as the **Central Command** for development tooling in the ABE Stack. Instead of cluttering the root directory with dozens of dotfiles, we consolidate tool-specific configurations here to maintain a clean workspace and centralized management.
+This directory (`config/`) acts as the **Central Command** for development tooling in the BSLT. Instead of cluttering the root directory with dozens of dotfiles, we consolidate tool-specific configurations here to maintain a clean workspace and centralized management.
 
 ## 📌 Philosophy: "Clean Root, Central Control"
 
@@ -127,7 +127,7 @@ If these rules are too "opinionated" for your taste, here is how to step down th
 
 ### A. Loosening TypeScript
 
-Edit [tsconfig.json](file:///home/abe/projects/main/abe-stack/abe-stack-main/tsconfig.json):
+Edit [tsconfig.json](/main/bslt/bslt-main/tsconfig.json):
 
 - Set `strict: false` (Not recommended).
 - Set `noUncheckedIndexedAccess: false` to stop checking if array indices exist.
@@ -135,7 +135,7 @@ Edit [tsconfig.json](file:///home/abe/projects/main/abe-stack/abe-stack-main/tsc
 
 ### B. Loosening ESLint
 
-Edit [eslint.config.ts](file:///home/abe/projects/main/abe-stack/abe-stack-main/eslint.config.ts):
+Edit [eslint.config.ts](/main/bslt/bslt-main/eslint.config.ts):
 
 - **Naming Conventions**: Locate `@typescript-eslint/naming-convention` and change `'error'` to `'off'` or `'warn'`.
 - **Boolean Expressions**: Search for `strict-boolean-expressions` and set to `'off'`.
@@ -143,7 +143,7 @@ Edit [eslint.config.ts](file:///home/abe/projects/main/abe-stack/abe-stack-main/
 
 ### C. Loosening Monorepo Boundaries
 
-Edit [.pnpmrc](file:///home/abe/projects/main/abe-stack/abe-stack-main/.pnpmrc):
+Edit [.pnpmrc](/main/bslt/bslt-main/.pnpmrc):
 
 - Change `shamefully-hoist=false` to `shamefully-hoist=true`. This allows you to import packages that are not explicitly listed in your `package.json` (Phantom Dependencies).
 

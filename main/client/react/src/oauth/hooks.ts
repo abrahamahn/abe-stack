@@ -8,15 +8,15 @@
  * - getOAuthLoginUrl: Pure function to build OAuth login URL
  */
 
-import { createApiClient } from '@abe-stack/api';
-import { API_PREFIX, trimTrailingSlashes } from '@abe-stack/shared';
+import { createApiClient } from '@bslt/api';
+import { API_PREFIX, trimTrailingSlashes } from '@bslt/shared';
 import { useCallback, useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { ApiClientConfig } from '@abe-stack/api';
-import type { OAuthConnection, OAuthProvider } from '@abe-stack/shared';
+import type { ApiClientConfig } from '@bslt/api';
+import type { OAuthConnection, OAuthProvider } from '@bslt/shared';
 
 // ============================================================================
 // Query Keys

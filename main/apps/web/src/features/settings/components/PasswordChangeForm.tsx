@@ -5,8 +5,8 @@
  * Form for changing user password with validation.
  */
 
-import { validatePasswordBasic } from '@abe-stack/shared';
-import { Alert, Button, FormField, PasswordInput, Text } from '@abe-stack/ui';
+import { validatePasswordBasic } from '@bslt/shared';
+import { Alert, Button, FormField, PasswordInput, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { usePasswordChange } from '../hooks';

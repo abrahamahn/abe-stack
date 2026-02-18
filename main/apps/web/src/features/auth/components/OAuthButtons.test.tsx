@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { OAuthButtons } from './OAuthButtons';
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockButton = ({ children }: { children: React.ReactNode }) => <Button>{children}</Button>;
   return {
     Button: mockButton,
@@ -12,8 +12,8 @@ vi.mock('@abe-stack/ui', () => {
   };
 });
 
-vi.mock('@abe-stack/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react')>();
+vi.mock('@bslt/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react')>();
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({

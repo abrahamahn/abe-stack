@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { isCaptchaRequired, verifyCaptchaToken, verifyTurnstileToken } from './captcha';
 
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Helpers

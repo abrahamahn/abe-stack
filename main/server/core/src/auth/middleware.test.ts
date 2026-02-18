@@ -1,5 +1,5 @@
 // main/server/core/src/auth/middleware.test.ts
-import { ForbiddenError, UnauthorizedError } from '@abe-stack/shared';
+import { ForbiddenError, UnauthorizedError } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -12,9 +12,9 @@ import {
 } from './middleware';
 import { verifyToken } from './utils/jwt';
 
-import type { Repositories } from '../../../db/src';
-import type { UserRole } from '@abe-stack/shared';
+import type { UserRole } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Repositories } from '../../../db/src';
 
 // ============================================================================
 // Mock Dependencies

@@ -6,7 +6,7 @@ import type {
   PackageManagerProvider,
   PnpmConfig,
   YarnConfig,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Loads package manager configuration from environment variables.

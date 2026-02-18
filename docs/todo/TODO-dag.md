@@ -309,17 +309,17 @@ No duplicated code between packages. Deep audit revealed **architectural misplac
 **P1: ui re-exports ~57 items from react** — **FIXED (R1)**
 
 - Deleted `ui/hooks/index.ts`, removed all hook/router/provider re-exports from ui barrels
-- All consumers now import hooks from `@abe-stack/react/hooks`, router from `@abe-stack/react/router`
+- All consumers now import hooks from `@bslt/react/hooks`, router from `@bslt/react/router`
 
 **P2: react owned theme tokens** — **FIXED (R2)**
 
 - Moved `contrast.ts` and `density.ts` to `shared/src/domain/theme/` (avoids cycle)
-- React hooks (useContrast, useDensity) now import from `@abe-stack/shared`
+- React hooks (useContrast, useDensity) now import from `@bslt/shared`
 
 **P3: engine→api re-exports (~100 items)** — **FIXED (F1)**
 
 - Removed all pass-through re-exports from `engine/index.ts`
-- Consumers import api items directly from `@abe-stack/api`
+- Consumers import api items directly from `@bslt/api`
 
 **P4: engine search re-export shims** — **FIXED (F4)**
 
@@ -416,7 +416,7 @@ No duplicated code between packages. Deep audit revealed **architectural misplac
 
 - Deleted `ui/src/hooks/index.ts` (100% re-exports)
 - Removed hooks, router, provider re-exports from `ui/src/index.ts` and `ui/src/components/index.ts`
-- Updated ~48 web files to import hooks from `@abe-stack/react/hooks`, router from `@abe-stack/react/router`
+- Updated ~48 web files to import hooks from `@bslt/react/hooks`, router from `@bslt/react/router`
 
 #### R2: Move theme tokens to shared (DONE)
 
@@ -425,12 +425,12 @@ Moved to `shared/src/domain/theme/` (not ui — to avoid cycle):
 - `contrast.ts` — pure CSS variable maps
 - `density.ts` — pure CSS variable generators
 
-React hooks (useContrast, useDensity) now import from `@abe-stack/shared`.
+React hooks (useContrast, useDensity) now import from `@bslt/shared`.
 
 #### F1: Remove engine→api re-exports (DONE)
 
 - Removed ~100 pass-through re-exports from `engine/index.ts` (api client, errors, notifications, billing, OAuth)
-- Updated 2 consumer source files to import from `@abe-stack/api` directly
+- Updated 2 consumer source files to import from `@bslt/api` directly
 
 #### F4: Delete engine search re-export shims (DONE)
 
@@ -508,23 +508,23 @@ Does each app contain logic that should be pushed down into a package?
 
 - [x] `web` vs `shared` — **FIXED (2026-02-13)**  
        Evidence: `0` non-test files now read `localStorage('accessToken')` directly.  
-       Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@abe-stack/shared` across web hooks/components.
+       Action completed: replaced direct storage reads with `tokenStore.get()` calls from `@bslt/shared` across web hooks/components.
 - [x] `web` → `api` — **FIXED (2026-02-13)**  
-       Relationship: `apps/web` now routes HTTP concerns through `@abe-stack/api` clients/helpers.  
+       Relationship: `apps/web` now routes HTTP concerns through `@bslt/api` clients/helpers.  
        Evidence: `0` non-test files in `apps/web/src` use raw `fetch()`; hook/app callsites migrated to package API methods.
-      Follow-up completed: extracted shared CSRF/auth transport helper (`createCsrfRequestClient`) into `@abe-stack/api` and removed duplicated request boilerplate across web domain API modules (admin/settings/workspace/media/notifications/activities).
+      Follow-up completed: extracted shared CSRF/auth transport helper (`createCsrfRequestClient`) into `@bslt/api` and removed duplicated request boilerplate across web domain API modules (admin/settings/workspace/media/notifications/activities).
 - [x] `web` vs `client-engine` — **CLEAN**  
        Evidence: no app-level cache/storage engine re-implementations found; only bootstrap `QueryCache` instantiation.  
-       Follow-up completed (2026-02-13): removed duplicated query-persister payload types from `apps/web/src/app/App.tsx` by exporting and consuming `PersistedQuery`/`PersistedClient`/`Persister` from `@abe-stack/client-engine`.
+       Follow-up completed (2026-02-13): removed duplicated query-persister payload types from `apps/web/src/app/App.tsx` by exporting and consuming `PersistedQuery`/`PersistedClient`/`Persister` from `@bslt/client-engine`.
 - [x] `web` vs `react` — **CLEAN**  
-       Evidence: heavy reuse (`82` non-test imports from `@abe-stack/react*`), no duplicate query/router/context infrastructure found in app code.  
-       Follow-up completed (2026-02-13): extracted reusable pubsub connection-state subscription hook into `@abe-stack/react` (`usePubsubConnectionState`) and updated web realtime hook to consume it; migrated settings theme system-detection logic to shared `@abe-stack/react/hooks/useMediaQuery`; extracted raw localStorage subscription primitive (`useLocalStorageValue`) into `@abe-stack/react/hooks` and refactored web hooks/components (`useWorkspaceContext`, `CookieConsentBanner`, `GettingStartedChecklist`, `useDataExport`) to consume it.
+       Evidence: heavy reuse (`82` non-test imports from `@bslt/react*`), no duplicate query/router/context infrastructure found in app code.  
+       Follow-up completed (2026-02-13): extracted reusable pubsub connection-state subscription hook into `@bslt/react` (`usePubsubConnectionState`) and updated web realtime hook to consume it; migrated settings theme system-detection logic to shared `@bslt/react/hooks/useMediaQuery`; extracted raw localStorage subscription primitive (`useLocalStorageValue`) into `@bslt/react/hooks` and refactored web hooks/components (`useWorkspaceContext`, `CookieConsentBanner`, `GettingStartedChecklist`, `useDataExport`) to consume it.
 - [x] `web` vs `ui` — **CLEAN (for now)**  
-       Evidence: heavy reuse (`138` non-test imports from `@abe-stack/ui`); app components appear domain-specific rather than reusable design-system primitives.
-      Follow-up completed (2026-02-13): extracted reusable presentation components from web into `@abe-stack/ui` and replaced app-local implementations with thin re-exports (`FeatureHint`, `SectionErrorBoundary`, `RoleBadge`, `JobStatusBadge`, `StatusBadge`, `getUserStatus`, `SessionCard`); moved profile completeness display rendering into shared UI component (`ProfileCompletenessCard`) while retaining web hook/data orchestration; introduced shared stat rendering primitive (`MetricValue`) for admin metric cards, extracted reusable settings device row renderer (`DeviceRowCard`), consolidated recurring card + heading shell markup via shared `TitledCardSection` (applied across admin metrics/queue/event detail panels), extracted shared labeled detail row rendering (`LabeledValueRow`) reused by admin event/job detail views, and standardized loading/error card handling via shared `CardAsyncState` (applied to queue stats, consent preferences, OAuth connections, and API keys sections).
+       Evidence: heavy reuse (`138` non-test imports from `@bslt/ui`); app components appear domain-specific rather than reusable design-system primitives.
+      Follow-up completed (2026-02-13): extracted reusable presentation components from web into `@bslt/ui` and replaced app-local implementations with thin re-exports (`FeatureHint`, `SectionErrorBoundary`, `RoleBadge`, `JobStatusBadge`, `StatusBadge`, `getUserStatus`, `SessionCard`); moved profile completeness display rendering into shared UI component (`ProfileCompletenessCard`) while retaining web hook/data orchestration; introduced shared stat rendering primitive (`MetricValue`) for admin metric cards, extracted reusable settings device row renderer (`DeviceRowCard`), consolidated recurring card + heading shell markup via shared `TitledCardSection` (applied across admin metrics/queue/event detail panels), extracted shared labeled detail row rendering (`LabeledValueRow`) reused by admin event/job detail views, and standardized loading/error card handling via shared `CardAsyncState` (applied to queue stats, consent preferences, OAuth connections, and API keys sections).
 - [x] `server` vs `shared`
 - [x] `server` vs `core` — **REFACTORED (2026-02-13)**  
-       Evidence: extracted canonical core module registry from app wiring into `@abe-stack/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
+       Evidence: extracted canonical core module registry from app wiring into `@bslt/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
        Boundary hardening: moved Fastify/raw-body billing webhook registration into app runtime layer (`main/apps/server/src/routes/billingWebhooks.ts`) and removed framework-specific webhook route registration from core (`main/server/core/src/billing/webhooks/routes.ts` deleted; core now exports webhook business handlers only).
 - [ ] `server` vs `server-engine`
 - [x] Create `ServerManager` to wrap logic
@@ -534,13 +534,13 @@ Does each app contain logic that should be pushed down into a package?
 - [x] `desktop` vs `shared` — **CLEAN**  
        Evidence: desktop uses shared types/utils in `4` non-test files (`NativeBridge`, duplicated API wrapper code found in app.
 - [x] `desktop` vs `ui` — **CLEAN (N/A usage)**  
-       Evidence: `0` non-test imports from `@abe-stack/ui` in current desktop code. No duplicated UI component implementations found in app.
+       Evidence: `0` non-test imports from `@bslt/ui` in current desktop code. No duplicated UI component implementations found in app.
 
 #### Phase 9 follow-up backlog (from audit)
 
 - [x] `web` token access consolidation: replace direct `localStorage('accessToken')` usage with unified token source (AuthService/tokenStore facade).
-- [x] `web` raw fetch migration: moved web fetch-based call sites to `@abe-stack/api` clients/helpers.
-- [ ] `desktop` dependency hygiene: verify whether unused `@abe-stack/api` and `@abe-stack/ui` dependencies should remain declared.
+- [x] `web` raw fetch migration: moved web fetch-based call sites to `@bslt/api` clients/helpers.
+- [ ] `desktop` dependency hygiene: verify whether unused `@bslt/api` and `@bslt/ui` dependencies should remain declared.
 
 ### Phase 10: apps laterals
 

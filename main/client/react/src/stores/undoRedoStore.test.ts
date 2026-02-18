@@ -1,5 +1,5 @@
 // main/client/react/src/stores/undoRedoStore.test.ts
-import { createSetOperation, createTransaction } from '@abe-stack/shared';
+import { createSetOperation, createTransaction } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createUndoRedoStore } from './undoRedoStore';

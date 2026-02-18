@@ -1,7 +1,7 @@
 // main/apps/desktop/src/electron/main.ts
 import { join } from 'node:path';
 
-import { waitForPort } from '@abe-stack/server-engine';
+import { waitForPort } from '@bslt/server-engine';
 import { app, BrowserWindow, nativeTheme } from 'electron';
 
 import { initAutoUpdater } from './auto-updater';
@@ -25,8 +25,8 @@ app.disableHardwareAcceleration();
 // Register all IPC handlers
 registerIPCHandlers(getMainWindow);
 
-// Register deep link protocol (abe-stack://)
-registerDeepLinkProtocol('abe-stack');
+// Register deep link protocol (bslt://)
+registerDeepLinkProtocol('bslt');
 
 // Force system theme detection
 nativeTheme.themeSource = 'system';
@@ -56,7 +56,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', (_event, commandLine) => {
     // The deep link URL is the last argument in the command line
-    const deepLinkUrl = commandLine.find((arg) => arg.startsWith('abe-stack://'));
+    const deepLinkUrl = commandLine.find((arg) => arg.startsWith('bslt://'));
     if (deepLinkUrl !== undefined && mainWindow !== null) {
       handleDeepLink(deepLinkUrl, mainWindow);
     }

@@ -19,9 +19,9 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { App } from './app';
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyBaseLogger } from 'fastify';
+import type { App } from './app';
 
 // ============================================================================
 // Mock Dependencies & Types

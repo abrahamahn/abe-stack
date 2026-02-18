@@ -2,7 +2,7 @@
 /**
  * Tests for server-specific audio metadata I/O wrapper.
  *
- * Pure buffer-based parser tests are in @abe-stack/shared
+ * Pure buffer-based parser tests are in @bslt/shared
  * (main/shared/src/domain/media/media.audio-metadata.test.ts)
  */
 

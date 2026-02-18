@@ -1,5 +1,5 @@
 // main/server/core/src/auth/__tests__/session-binding.test.ts
-import { TokenReuseError } from '@abe-stack/shared';
+import { TokenReuseError } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -25,8 +25,8 @@ vi.mock('../security/events', () => ({
   logTokenFamilyRevokedEvent: vi.fn(),
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => callback(db)),

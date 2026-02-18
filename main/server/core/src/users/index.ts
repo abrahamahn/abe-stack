@@ -5,7 +5,7 @@
  * Provides user profile, session management, and avatar functionality.
  * Extracted from apps/server for reuse across applications. Lives in packages/core/src/users/.
  *
- * @module @abe-stack/users
+ * @module @bslt/users
  */
 
 // Routes (for auto-registration)
@@ -20,7 +20,7 @@ export {
   listUserSessions,
   revokeAllSessions,
   revokeSession,
-  type UserSession,
+  type UserSession
 } from './handlers';
 
 // Profile & avatar service functions
@@ -31,7 +31,7 @@ export {
   updateProfile,
   uploadAvatar,
   type ProfileUser,
-  type UpdateProfileData,
+  type UpdateProfileData
 } from './handlers';
 
 // Service (business logic)
@@ -43,7 +43,7 @@ export type {
   UsersAuthConfig,
   UsersModuleDeps,
   UsersRequest,
-  UsersRequestInfo,
+  UsersRequestInfo
 } from './types';
 
 export { ERROR_MESSAGES } from './types';
@@ -54,9 +54,10 @@ export {
   filterDeletedUsers,
   hardDeleteAnonymizedUsers,
   isUserDeleted,
-  type HardDeleteResult,
+  type HardDeleteResult
 } from './data-hygiene';
 
 // Background crons
 export { anonymizeExpiredUsers, type AnonymizeResult } from './pii-anonymization';
 export { cleanupUnverifiedUsers, type CleanupResult } from './unverified-cleanup';
+

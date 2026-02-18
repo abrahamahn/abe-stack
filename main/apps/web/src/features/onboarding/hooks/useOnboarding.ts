@@ -6,7 +6,7 @@
  * Uses localStorage to persist completion flag so users don't see the wizard again.
  */
 
-import { useLocalStorage } from '@abe-stack/react/hooks';
+import { useLocalStorage } from '@bslt/react/hooks';
 import { useCallback, useState } from 'react';
 
 // ============================================================================

@@ -8,6 +8,7 @@
 
 import { createSchema } from '../../primitives/schema';
 import { FILTER_OPERATORS, LOGICAL_OPERATORS, SEARCH_DEFAULTS, SORT_ORDER } from '../constants/limits';
+import { sortOrderSchema } from '../pagination/pagination';
 
 import type {
     CompoundFilter,
@@ -202,15 +203,7 @@ export const filterSchema: Schema<FilterCondition | CompoundFilter> = createSche
 // Sort Schemas
 // ============================================================================
 
-/**
- * Schema for sort order.
- */
-export const sortOrderSchema: Schema<SortOrder> = createSchema((data: unknown) => {
-  if (data !== SORT_ORDER.ASC && data !== SORT_ORDER.DESC) {
-    throw new Error('Sort order must be "asc" or "desc"');
-  }
-  return data;
-});
+export { sortOrderSchema };
 
 /**
  * Schema for sort configuration.

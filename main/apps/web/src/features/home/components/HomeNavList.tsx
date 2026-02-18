@@ -1,6 +1,6 @@
 // main/apps/web/src/features/home/components/HomeNavList.tsx
-import { Link } from '@abe-stack/react/router';
-import { MenuItem, ScrollArea, Text } from '@abe-stack/ui';
+import { Link } from '@bslt/react/router';
+import { MenuItem, ScrollArea, Text } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

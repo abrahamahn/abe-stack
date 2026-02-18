@@ -11,7 +11,7 @@
  * - Components responding to theme changes
  */
 
-import { useThemeMode } from '@abe-stack/react/hooks';
+import { useThemeMode } from '@bslt/react/hooks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

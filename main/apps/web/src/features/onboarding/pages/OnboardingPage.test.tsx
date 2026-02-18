@@ -1,6 +1,6 @@
 // main/apps/web/src/features/onboarding/pages/OnboardingPage.test.tsx
 import { screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 
@@ -9,8 +9,8 @@ import { OnboardingPage } from './OnboardingPage';
 // Mock useNavigate
 const mockNavigate = vi.fn();
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
   return {
     ...actual,
     useNavigate: () => mockNavigate,

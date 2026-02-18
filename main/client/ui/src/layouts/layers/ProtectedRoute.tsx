@@ -1,5 +1,5 @@
 // main/client/ui/src/layouts/layers/ProtectedRoute.tsx
-import { Navigate, Outlet, useLocation } from '@abe-stack/react/router';
+import { Navigate, Outlet, useLocation } from '@bslt/react/router';
 
 import { LoadingContainer } from '../../components/LoadingContainer';
 import '../../styles/components.css';

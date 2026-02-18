@@ -8,7 +8,7 @@
  * for testability and decoupled architecture.
  */
 
-import { evaluateFlag } from '@abe-stack/shared';
+import { evaluateFlag } from '@bslt/shared';
 
 import type {
   FeatureFlag as DbFeatureFlag,

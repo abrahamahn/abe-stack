@@ -1,5 +1,5 @@
 # DigitalOcean Infrastructure Module
-# Deploys ABE Stack to DigitalOcean Droplet with optional managed database
+# Deploys BSLT to DigitalOcean Droplet with optional managed database
 
 terraform {
   required_providers {
@@ -29,7 +29,7 @@ resource "digitalocean_droplet" "abe_stack" {
   })
 
   tags = [
-    "abe-stack",
+    "bslt",
     var.environment,
     "managed-by-terraform"
   ]
@@ -129,7 +129,7 @@ resource "digitalocean_database_cluster" "abe_stack" {
   }
 
   tags = [
-    "abe-stack",
+    "bslt",
     var.environment,
     "managed-by-terraform"
   ]

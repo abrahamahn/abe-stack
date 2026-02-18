@@ -1,6 +1,6 @@
 // main/server/core/src/auth/oauth/service.test.ts
 // backend/core/src/auth/oauth/__tests__/service.test.ts
-import { asMockDb, createMockDb } from '@abe-stack/db/testing';
+import { asMockDb, createMockDb } from '@bslt/db/testing';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -16,7 +16,7 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
-import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 import type {
   DbClient,
   OAuthConnectionRepository,
@@ -24,7 +24,7 @@ import type {
   Repositories,
   UserRepository,
 } from '../../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from './types';
 
 // Mock the crypto module for consistent state generation in tests
 vi.mock('node:crypto', async () => {
@@ -61,8 +61,8 @@ vi.mock('../utils', () => ({
 }));
 
 // Mock db and transaction
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => {

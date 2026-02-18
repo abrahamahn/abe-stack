@@ -6,7 +6,7 @@
  * and copy-once secret display.
  */
 
-import { useRotateWebhookSecret, useWebhook } from '@abe-stack/react';
+import { useRotateWebhookSecret, useWebhook } from '@bslt/react';
 import {
   Alert,
   Badge,
@@ -21,10 +21,10 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
-import type { WebhookClientConfig, WebhookDeliveryItem } from '@abe-stack/api';
+import type { WebhookClientConfig, WebhookDeliveryItem } from '@bslt/api';
 
 // ============================================================================
 // Types

@@ -107,7 +107,7 @@ const run = (): void => {
   let totalFiles = 0;
   const packageStats: Array<{ name: string; count: number }> = [];
 
-  output += '# ABE Stack - Server Packages Source Code Export\n\n';
+  output += '# BSLT - Server Packages Source Code Export\n\n';
   output += `Generated: ${new Date().toISOString()}\n`;
   output += `Source: main/server/ (${SERVER_PACKAGES.join(', ')})\n\n`;
   output += '---\n\n';

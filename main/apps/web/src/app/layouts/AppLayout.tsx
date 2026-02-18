@@ -1,15 +1,15 @@
 // main/apps/web/src/app/layouts/AppLayout.tsx
+import { AuthModal, NewDeviceBanner } from '@auth/components';
+import { useAuth } from '@auth/hooks';
 import {
   useContrast,
   useDensity,
   useKeyboardShortcuts,
   useSidePeek,
   type AuthMode,
-} from '@abe-stack/react/hooks';
-import { Outlet } from '@abe-stack/react/router';
-import { ResizablePanelGroup } from '@abe-stack/ui';
-import { AuthModal, NewDeviceBanner } from '@auth/components';
-import { useAuth } from '@auth/hooks';
+} from '@bslt/react/hooks';
+import { Outlet } from '@bslt/react/router';
+import { ResizablePanelGroup } from '@bslt/ui';
 import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
 import { useCallback, useMemo, useState } from 'react';
 

@@ -24,7 +24,7 @@ import {
   type PaymentMethodType,
   type PlanInterval,
   type SubscriptionStatus,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export {
@@ -33,7 +33,7 @@ export {
   INVOICE_STATUSES,
   PAYMENT_METHOD_TYPES,
   PLAN_INTERVALS,
-  SUBSCRIPTION_STATUSES,
+  SUBSCRIPTION_STATUSES
 };
 export type {
   BillingEventType,
@@ -41,7 +41,7 @@ export type {
   InvoiceStatus,
   PaymentMethodType,
   PlanInterval,
-  SubscriptionStatus,
+  SubscriptionStatus
 };
 
 // ============================================================================

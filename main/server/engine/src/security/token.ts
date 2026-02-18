@@ -5,7 +5,7 @@
  * Common security functions for CSRF token generation, signing,
  * encryption, and validation. Uses Node.js native crypto module.
  *
- * @module @abe-stack/server-engine/security/token
+ * @module @bslt/server-engine/security/token
  */
 
 import {

@@ -6,7 +6,7 @@
  * Uses useQuery for reads and useMutation for writes.
  */
 
-import { createWebhookClient } from '@abe-stack/api';
+import { createWebhookClient } from '@bslt/api';
 import { useCallback, useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
@@ -18,7 +18,7 @@ import type {
   WebhookClientConfig,
   WebhookItem,
   WebhookWithDeliveries,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
 // ============================================================================
 // Query Keys

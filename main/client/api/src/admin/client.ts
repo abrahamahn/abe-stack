@@ -7,7 +7,6 @@
 
 import { createCsrfRequestClient } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   AdminLockUserRequest,
   AdminLockUserResponse,
@@ -18,7 +17,8 @@ import type {
   AdminUserListResponse,
   JobStatus,
   UnlockAccountRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 export interface JobDetailsLocal {
   id: string;

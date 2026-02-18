@@ -1,5 +1,5 @@
 // main/apps/web/src/app/components/NetworkStatus.tsx
-import { toastStore } from '@abe-stack/react';
+import { toastStore } from '@bslt/react';
 import { useEffect, useRef } from 'react';
 
 const DEBOUNCE_MS = 2000;

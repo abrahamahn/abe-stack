@@ -1,5 +1,5 @@
 # config/caddy/Caddyfile
-# Production Caddy Configuration for ABE Stack
+# Production Caddy Configuration for BSLT
 #
 # Features:
 #   - Automatic HTTPS via Let's Encrypt

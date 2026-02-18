@@ -44,13 +44,13 @@ Last updated: 2026-02-12
 For each feature slice:
 
 1. Contract first
-   - Add request/response schemas + types in `@abe-stack/shared` (domain contracts/schemas).
+   - Add request/response schemas + types in `@bslt/shared` (domain contracts/schemas).
 2. Service logic
-   - Implement pure logic in `@abe-stack/core` handlers (no HTTP).
+   - Implement pure logic in `@bslt/core` handlers (no HTTP).
 3. Unit tests (colocated)
    - Add/extend tests for handler behavior — colocated adjacent to the file under test.
 4. Route wiring
-   - Wire into Fastify in `@abe-stack/server` routes using `publicRoute` / `protectedRoute` / `adminProtectedRoute`.
+   - Wire into Fastify in `@bslt/server` routes using `publicRoute` / `protectedRoute` / `adminProtectedRoute`.
 5. Integration tests
    - Test the HTTP endpoint with real DB via Fastify inject — lives in `apps/server/src/__tests__/integration/`.
 6. Client hook
@@ -1948,7 +1948,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 >
 > - `RecordCache` — in-memory with version conflict resolution (69 tests)
 > - `WebSocketServer` — `apps/server/src/infra/websocket/`
-> - `WebSocketPubSubClient` — `@abe-stack/client-engine/pubsub` (20 tests)
+> - `WebSocketPubSubClient` — `@bslt/client-engine/pubsub` (20 tests)
 > - `SubscriptionCache` — subscribe/unsubscribe by key (20 tests)
 > - `RecordStorage` — IndexedDB wrapper (31 tests)
 > - `TransactionQueue` — offline writes (26 tests)
@@ -1987,7 +1987,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 >
 > **Already complete (ROADMAP `[x]` items):**
 >
-> - Error serialization with `.toJSON()` — `AppError` in `@abe-stack/shared/errors`
+> - Error serialization with `.toJSON()` — `AppError` in `@bslt/shared/errors`
 > - Correlation IDs for tracing — `apps/server/src/infra/logger/`
 > - Route registry pattern — `registerRouteMap` for DRY route registration
 > - Modular server composition — `QueueServer` pattern
@@ -1998,7 +1998,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 
 **Generated API Client (ROADMAP Infrastructure > API Versioning & Typed Client):**
 
-- [ ] Tool: publish as `@abe-stack/api-client` package (or npm-ready output) _(deferred to ROADMAP)_
+- [ ] Tool: publish as `@bslt/api-client` package (or npm-ready output) _(deferred to ROADMAP)_
 - [ ] Tool: generate React Query hooks from client definitions _(deferred to ROADMAP)_
 - [ ] CI: regenerate client on route/schema changes (pre-commit or CI step) _(deferred to ROADMAP)_
 

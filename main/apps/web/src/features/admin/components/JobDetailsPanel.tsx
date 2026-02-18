@@ -5,13 +5,13 @@
  * Displays detailed information about a job in a side panel.
  */
 
-import { formatDateTime } from '@abe-stack/shared';
-import { Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
-import { LabeledValueRow } from '@abe-stack/ui/components/LabeledValueRow';
+import { formatDateTime } from '@bslt/shared';
+import { Button, Card, Heading, Skeleton, Text } from '@bslt/ui';
+import { LabeledValueRow } from '@bslt/ui/components/LabeledValueRow';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

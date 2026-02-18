@@ -8,7 +8,7 @@
  *
  * The `db` and `repos` fields use opaque marker interfaces here to avoid a
  * circular dependency (core -> db -> core). Packages that need the concrete
- * `DbClient` or `Repositories` types import them from `@abe-stack/db` directly.
+ * `DbClient` or `Repositories` types import them from `@bslt/db` directly.
  * TypeScript's structural subtyping ensures the server's `AppContext` (which
  * provides the concrete types) satisfies `BaseContext` without casting.
  *
@@ -31,9 +31,9 @@ import type { EmailService, NotificationService, StorageService } from '../ports
  * in module-specific contexts that extend this interface.
  *
  * The `db` and `repos` fields are typed as `unknown` because core
- * cannot import `@abe-stack/db` (circular dependency: core -> db ->
+ * cannot import `@bslt/db` (circular dependency: core -> db ->
  * core). Module-specific contexts narrow these to the concrete
- * `DbClient` and `Repositories` types from `@abe-stack/db`.
+ * `DbClient` and `Repositories` types from `@bslt/db`.
  *
  * The server's `AppContext` structurally satisfies `BaseContext` (it has
  * `db`, `repos`, `log` plus additional services), so handlers can accept
@@ -41,7 +41,7 @@ import type { EmailService, NotificationService, StorageService } from '../ports
  *
  * @example
  * ```typescript
- * import type { DbClient, Repositories } from '@abe-stack/db';
+ * import type { DbClient, Repositories } from '@bslt/db';
  *
  * interface AuthContext extends BaseContext {
  *   readonly db: DbClient;
@@ -207,7 +207,7 @@ export interface HasNotifications {
  *
  * @example
  * ```typescript
- * import type { BillingService } from '@abe-stack/shared/domain';
+ * import type { BillingService } from '@bslt/shared/domain';
  * type BillingContext = BaseContext & { readonly billing: BillingService };
  * ```
  */
@@ -218,9 +218,9 @@ export interface HasBilling {
 /**
  * Pub/sub subscription capability.
  *
- * Typed as `unknown` because `SubscriptionManager` lives in `@abe-stack/shared`
+ * Typed as `unknown` because `SubscriptionManager` lives in `@bslt/shared`
  * utils which core cannot import (circular). Modules that need
- * pubsub narrow this to the concrete type from `@abe-stack/shared`.
+ * pubsub narrow this to the concrete type from `@bslt/shared`.
  */
 export interface HasPubSub {
   readonly pubsub: unknown;
@@ -229,9 +229,9 @@ export interface HasPubSub {
 /**
  * Cache provider capability.
  *
- * Typed as `unknown` because `CacheProvider` lives in `@abe-stack/cache`
+ * Typed as `unknown` because `CacheProvider` lives in `@bslt/cache`
  * (Tier 2), which core (Tier 1) cannot import. Modules that need
- * caching narrow this to the concrete type from `@abe-stack/cache`.
+ * caching narrow this to the concrete type from `@bslt/cache`.
  */
 export interface HasCache {
   readonly cache: unknown;
@@ -240,7 +240,7 @@ export interface HasCache {
 /**
  * Background job queue capability.
  *
- * Typed as `unknown` because `QueueServer` lives in `@abe-stack/server-engine`
+ * Typed as `unknown` because `QueueServer` lives in `@bslt/server-engine`
  * (Tier 2), which core (Tier 1) cannot import. Modules that need
  * queueing narrow this to the concrete type.
  */

@@ -1,10 +1,5 @@
 // main/server/engine/src/system/types.ts
-import type { AppConfig } from '../config';
-import type { AuthEmailTemplates } from '../mailer/types';
-import type { QueueStore, WriteService } from '../queue';
-import type { ServerSearchProvider } from '../search';
-import type { SmsProvider } from '../sms';
-import type { RawDb, Repositories, SessionContext } from '@abe-stack/db';
+import type { RawDb, Repositories, SessionContext } from '@bslt/db';
 import type {
   BillingService,
   DetailedHealthResponse as DetailedHealth,
@@ -17,7 +12,12 @@ import type {
   Logger,
   NotificationService,
   StorageClient,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AppConfig } from '../config';
+import type { AuthEmailTemplates } from '../mailer/types';
+import type { QueueStore, WriteService } from '../queue';
+import type { ServerSearchProvider } from '../search';
+import type { SmsProvider } from '../sms';
 
 /**
  * Context required by the system health-check functions.

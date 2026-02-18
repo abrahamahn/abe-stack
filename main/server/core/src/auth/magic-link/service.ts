@@ -20,7 +20,7 @@ import {
   QUOTAS,
   TooManyRequestsError,
   type UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   and,
@@ -48,8 +48,8 @@ import {
   hashToken,
 } from '../utils';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthEmailService, AuthEmailTemplates } from '../types';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Constants

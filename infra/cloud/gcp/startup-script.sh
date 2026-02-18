@@ -1,5 +1,5 @@
 #!/bin/bash
-# Startup script for ABE Stack GCP deployment
+# Startup script for BSLT GCP deployment
 # This script runs on first boot to prepare the compute instance
 
 set -euo pipefail
@@ -28,7 +28,7 @@ npm install -g pnpm
 
 # Install Docker
 curl -fsSL https://get.docker.com | sh
-usermod -aG docker abe-stack
+usermod -aG docker bslt
 
 # Install Caddy web server
 apt-get install -y debian-keyring debian-archive-keyring apt-transport-https
@@ -38,9 +38,9 @@ apt-get update
 apt-get install -y caddy
 
 # Create application user and directory
-useradd -m -s /bin/bash abe-stack
-mkdir -p /home/abe-stack/${app_name}
-chown -R abe-stack:abe-stack /home/abe-stack/${app_name}
+useradd -m -s /bin/bash bslt
+mkdir -p /home/bslt/${app_name}
+chown -R bslt:bslt /home/bslt/${app_name}
 
 # Set up basic firewall (ufw)
 ufw --force enable
@@ -54,14 +54,14 @@ dpkg-reconfigure --frontend=noninteractive unattended-upgrades
 
 # Set up log rotation
 cat > /etc/logrotate.d/${app_name} << EOF
-/home/abe-stack/${app_name}/logs/*.log {
+/home/bslt/${app_name}/logs/*.log {
     daily
     missingok
     rotate 52
     compress
     delaycompress
     notifempty
-    create 644 abe-stack abe-stack
+    create 644 bslt bslt
     postrotate
         systemctl reload ${app_name} || true
     endscript
@@ -76,9 +76,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=abe-stack
-WorkingDirectory=/home/abe-stack/${app_name}
-ExecStart=/usr/bin/node /home/abe-stack/${app_name}/dist/server.js
+User=bslt
+WorkingDirectory=/home/bslt/${app_name}
+ExecStart=/usr/bin/node /home/bslt/${app_name}/dist/server.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production
@@ -103,7 +103,7 @@ logging:
     ${app_name}:
       type: files
       include_paths:
-        - /home/abe-stack/${app_name}/logs/*.log
+        - /home/bslt/${app_name}/logs/*.log
       record_log_file_path: true
   service:
     pipelines:
@@ -117,4 +117,4 @@ systemctl restart google-cloud-ops-agent
 apt-get autoremove -y
 apt-get clean
 
-echo "ABE Stack GCP instance initialization complete!"
+echo "BSLT GCP instance initialization complete!"

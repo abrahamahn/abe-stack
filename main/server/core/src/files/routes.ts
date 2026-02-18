@@ -11,7 +11,7 @@
  * @module files/routes
  */
 
-import { emptyBodySchema, fileUploadRequestSchema } from '@abe-stack/shared';
+import { emptyBodySchema, fileUploadRequestSchema } from '@bslt/shared';
 
 import { createRouteMap, protectedRoute } from '../../../engine/src';
 

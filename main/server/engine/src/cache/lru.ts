@@ -8,7 +8,7 @@
  * MemoryCacheProvider.
  *
  * **Design decision**: This implementation is intentionally separate from
- * `@abe-stack/shared`'s LRU cache, which uses Map insertion order only.
+ * `@bslt/shared`'s LRU cache, which uses Map insertion order only.
  * The engine version uses a true doubly-linked list for:
  * - Per-entry TTL overrides (not just global TTL)
  * - Eviction reason callbacks (lru, expired, manual, clear)

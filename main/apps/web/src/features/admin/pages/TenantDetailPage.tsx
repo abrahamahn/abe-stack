@@ -5,8 +5,8 @@
  * Admin page for viewing and managing a single tenant/workspace.
  */
 
-import { useNavigate, useParams } from '@abe-stack/react/router';
-import { formatDateTime } from '@abe-stack/shared';
+import { useNavigate, useParams } from '@bslt/react/router';
+import { formatDateTime } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -17,8 +17,8 @@ import {
   PageContainer,
   Skeleton,
   Text,
-} from '@abe-stack/ui';
-import { useCallback, useState, type ChangeEvent, JSX } from 'react';
+} from '@bslt/ui';
+import { JSX, useCallback, useState, type ChangeEvent } from 'react';
 
 import { useTenant } from '../hooks';
 

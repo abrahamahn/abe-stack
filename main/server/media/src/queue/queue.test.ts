@@ -3,11 +3,11 @@
  * Tests for CustomJobQueue
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CustomJobQueue } from './queue';
 
-import type { Logger } from '@abe-stack/shared';
+import type { Logger } from '@bslt/shared';
 
 function createMockLogger(): Logger {
   return {

@@ -6,11 +6,11 @@
  * of the settings API.
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { type ReactElement, type ReactNode, createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, type Mock, beforeEach } from 'vitest';
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSettingsApi } from '../api';
 

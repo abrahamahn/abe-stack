@@ -1,7 +1,7 @@
 // main/apps/web/src/app/layouts/AppLayout.test.tsx
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppLayout } from './AppLayout';
 
@@ -52,12 +52,12 @@ vi.mock('@ui-library/hooks', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/react/router', () => ({
+vi.mock('@bslt/react/router', () => ({
   Outlet: () => <div data-testid="outlet">Outlet Content</div>,
 }));
 
-vi.mock('@abe-stack/react/hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/hooks')>();
+vi.mock('@bslt/react/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/hooks')>();
   return {
     ...actual,
     useDensity: () => ({
@@ -75,8 +75,8 @@ vi.mock('@abe-stack/react/hooks', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
   return {
     ...actual,
     ResizablePanelGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,

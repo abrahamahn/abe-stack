@@ -16,7 +16,7 @@ import {
   type AuditSeverity,
   type JobStatus,
   type WebhookDeliveryStatus,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { AUDIT_CATEGORIES, AUDIT_SEVERITIES, JOB_STATUSES, WEBHOOK_DELIVERY_STATUSES };

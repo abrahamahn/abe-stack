@@ -1,5 +1,5 @@
 // main/apps/web/src/app/layouts/AppBottomLayout.tsx
-import { Button, EnvironmentBadge, Kbd, ResizablePanel, Text, VersionBadge } from '@abe-stack/ui';
+import { Button, EnvironmentBadge, Kbd, ResizablePanel, Text, VersionBadge } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

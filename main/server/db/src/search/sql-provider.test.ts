@@ -1,11 +1,11 @@
 // main/server/db/src/search/sql-provider.test.ts
-import { FILTER_OPERATORS } from '@abe-stack/shared';
+import { FILTER_OPERATORS } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { SqlSearchProvider, createSqlSearchProvider } from './sql-provider';
 
-import type { SqlTableConfig } from './types';
 import type { RawDb, Repositories } from '../index';
+import type { SqlTableConfig } from './types';
 
 // Mock RawDb interface
 const mockRaw = vi.fn();

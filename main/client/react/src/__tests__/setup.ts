@@ -1,6 +1,6 @@
 // client/react/src/__tests__/setup.ts
 /**
- * Global test setup for @abe-stack/react package tests.
+ * Global test setup for @bslt/react package tests.
  *
  * This file is loaded before each test file and provides:
  * - Jest DOM matchers for vitest (via /vitest entry point)

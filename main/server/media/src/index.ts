@@ -1,6 +1,6 @@
 // main/server/media/src/index.ts
 /**
- * @abe-stack/media
+ * @bslt/media
  *
  * Media Processing (Server-only)
  * Audio, video, and image processing utilities using FFmpeg.
@@ -36,7 +36,7 @@ export {
   MIME_TO_EXT,
   STREAMING_THRESHOLD,
   TEMP_FILE_MAX_AGE_MS,
-  VIDEO_EXTENSIONS,
+  VIDEO_EXTENSIONS
 } from './constants';
 
 // Audio metadata
@@ -53,7 +53,7 @@ export {
   generateThumbnail,
   generateWaveform,
   getMediaMetadata,
-  runFFmpeg,
+  runFFmpeg
 } from './ffmpeg-wrapper';
 export type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from './ffmpeg-wrapper';
 
@@ -62,7 +62,7 @@ export {
   detectFileType,
   detectFileTypeFromFile,
   detectFileTypeFromPath,
-  isAllowedFileType,
+  isAllowedFileType
 } from './file-type';
 
 // Image processing
@@ -71,7 +71,7 @@ export type {
   ImageFormatOptions,
   ImageResizeOptions,
   ImageValidationOptions,
-  ValidationResult,
+  ValidationResult
 } from './image-processing';
 
 // Security scanning
@@ -88,7 +88,7 @@ export type {
   ProcessingResult,
   SecurityScanResult,
   UploadConfig,
-  VideoProcessingOptions,
+  VideoProcessingOptions
 } from './types';
 
 // Validation
@@ -96,7 +96,7 @@ export {
   generateFileId,
   sanitizeFilename,
   validateMediaFile,
-  validateUploadConfig,
+  validateUploadConfig
 } from './validation';
 
 // Processors (audio, image, video)
@@ -105,18 +105,14 @@ export { ImageProcessor } from './processors/image';
 export { VideoProcessor } from './processors/video';
 
 // Queue (job queue, retry handling)
+export {
+  createMediaProcessingQueue, MediaProcessingQueue, type MediaJobData,
+  type MediaJobResult
+} from './queue/jobs';
 export { CustomJobQueue, type JobData, type QueueOptions } from './queue/queue';
 export {
-  MediaProcessingQueue,
-  createMediaProcessingQueue,
-  type MediaJobData,
-  type MediaJobResult,
-} from './queue/jobs';
-export {
-  MediaProcessingRetryHandler,
-  createMediaRetryHandler,
-  type RetryOptions,
-  type RetryState,
+  createMediaRetryHandler, MediaProcessingRetryHandler, type RetryOptions,
+  type RetryState
 } from './queue/retry';
 
 // Utils (streaming)
@@ -126,7 +122,7 @@ export { StreamingMediaProcessor, type StreamingOptions } from './utils/streamin
 export {
   MediaProcessingOrchestrator,
   type ProcessingJob,
-  type ProcessingLimits,
+  type ProcessingLimits
 } from './processor';
 
 // Database
@@ -134,7 +130,7 @@ export {
   InMemoryMediaDatabase,
   type MediaDatabaseAdapter,
   type MediaProcessingRecord,
-  type ProcessingStats,
+  type ProcessingStats
 } from './database';
 
 // Facade (main entry point)
@@ -142,5 +138,6 @@ export {
   createServerMediaQueue,
   ServerMediaQueue,
   type MediaEntitlements,
-  type MediaJobData as ServerMediaJobData,
+  type MediaJobData as ServerMediaJobData
 } from './facade';
+

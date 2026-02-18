@@ -2,7 +2,7 @@
 /**
  * SDK Error Classes
  *
- * Maps HTTP response errors to typed error classes that extend @abe-stack/shared errors.
+ * Maps HTTP response errors to typed error classes that extend @bslt/shared errors.
  * Provides consistent error handling across the SDK.
  */
 
@@ -19,7 +19,7 @@ import {
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 /**
  * API Error response structure from the server
@@ -103,7 +103,7 @@ export class TimeoutError extends AppError {
 /**
  * Creates a typed error from an HTTP response
  *
- * Maps HTTP status codes to specific error types from @abe-stack/shared:
+ * Maps HTTP status codes to specific error types from @bslt/shared:
  * - 400 -> BadRequestError
  * - 401 -> UnauthorizedError
  * - 403 -> ForbiddenError

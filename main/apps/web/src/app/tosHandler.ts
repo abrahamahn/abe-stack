@@ -7,7 +7,7 @@
  * This module bridges the gap with a simple mutable reference.
  */
 
-import type { TosRequiredPayload } from '@abe-stack/api';
+import type { TosRequiredPayload } from '@bslt/api';
 
 type TosHandler = (payload: TosRequiredPayload) => Promise<void>;
 

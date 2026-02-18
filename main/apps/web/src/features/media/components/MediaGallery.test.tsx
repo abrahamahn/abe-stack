@@ -5,10 +5,10 @@
  * Tests for media gallery grid layout with detail modal and delete functionality.
  */
 
-import { QueryCacheProvider } from '@abe-stack/react';
-import { Button } from '@abe-stack/ui';
+import { QueryCacheProvider } from '@bslt/react';
+import { Button } from '@bslt/ui';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaGallery } from './MediaGallery';
 

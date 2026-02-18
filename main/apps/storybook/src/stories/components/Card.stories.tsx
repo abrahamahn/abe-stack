@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/components/Card.stories.tsx
+import { Button, Card, Text } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Card, Button, Text } from '@abe-stack/ui';
 
 const meta: Meta<typeof Card> = {
   title: 'Components/Card',

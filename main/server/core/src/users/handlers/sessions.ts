@@ -8,7 +8,7 @@
  * @module handlers/sessions
  */
 
-import { NotFoundError } from '@abe-stack/shared';
+import { NotFoundError } from '@bslt/shared';
 
 import type { Repositories } from '../../../../db/src';
 

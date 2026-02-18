@@ -5,7 +5,7 @@
  * Background job queue system with write service for atomic operations.
  * Includes in-memory store for dev/test and supports Postgres-backed production stores.
  *
- * @module @abe-stack/server-engine/queue
+ * @module @bslt/server-engine/queue
  */
 
 // ============================================================================
@@ -42,7 +42,7 @@ export type {
   TaskError,
   TaskHandler,
   TaskHandlers,
-  TaskResult,
+  TaskResult
 } from './types';
 
 // ============================================================================
@@ -59,5 +59,6 @@ export type {
   WriteError,
   WriteHooks,
   WriteOperation,
-  WriteResult,
+  WriteResult
 } from './types';
+

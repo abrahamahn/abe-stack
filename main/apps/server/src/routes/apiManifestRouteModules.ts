@@ -5,9 +5,9 @@
  * API-only module route maps for tooling (excludes realtime/system routes).
  */
 
-import { coreApiManifestRouteModuleRegistrations } from '@abe-stack/core';
+import { coreApiManifestRouteModuleRegistrations } from '@bslt/core';
 
-import type { RouteMap } from '@abe-stack/server-engine';
+import type { RouteMap } from '@bslt/server-engine';
 
 export interface ApiManifestRouteModuleRegistration {
   module: string;

@@ -5,10 +5,10 @@
  * Fetch the API route manifest for the admin routes page.
  */
 
-import { useQuery } from '@abe-stack/react';
-import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
+import { MS_PER_MINUTE } from '@bslt/shared';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';

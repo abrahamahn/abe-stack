@@ -10,7 +10,7 @@ import {
   type NotificationChannel,
   type NotificationType,
   type NotificationTypePreference,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 export { DEFAULT_NOTIFICATION_PREFERENCES };
 export type { NotificationChannel, NotificationType, NotificationTypePreference };

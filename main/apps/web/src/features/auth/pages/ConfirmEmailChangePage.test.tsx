@@ -12,7 +12,7 @@
  * @module ConfirmEmailChangePage.test
  */
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 import { ConfirmEmailChangePage } from './ConfirmEmailChangePage';
@@ -24,14 +24,14 @@ import { ConfirmEmailChangePage } from './ConfirmEmailChangePage';
 const mockConfirmEmailChange = vi.hoisted(() => vi.fn());
 const mockNavigate = vi.hoisted(() => vi.fn());
 
-vi.mock('@abe-stack/api', () => ({
+vi.mock('@bslt/api', () => ({
   getApiClient: () => ({
     confirmEmailChange: mockConfirmEmailChange,
   }),
 }));
 
-vi.mock('@abe-stack/react/router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
+vi.mock('@bslt/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/router')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,

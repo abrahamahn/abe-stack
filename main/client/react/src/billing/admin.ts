@@ -6,20 +6,20 @@
  * for admin plan management operations.
  */
 
-import { createAdminBillingClient } from '@abe-stack/api';
+import { createAdminBillingClient } from '@bslt/api';
 import { useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { AdminBillingClientConfig } from '@abe-stack/api';
-import type { QueryKey } from '@abe-stack/client-engine';
+import type { AdminBillingClientConfig } from '@bslt/api';
+import type { QueryKey } from '@bslt/client-engine';
 import type {
   AdminPlan,
   CreatePlanRequest,
   SyncStripeResponse,
   UpdatePlanRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Query Keys

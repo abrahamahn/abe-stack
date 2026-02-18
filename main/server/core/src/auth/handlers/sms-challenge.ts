@@ -14,7 +14,7 @@ import {
   mapErrorToHttpResponse,
   type AuthResponse,
   type HttpErrorResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { withTransaction } from '../../../../db/src';
 import { JwtError, verify as jwtVerify } from '../../../../engine/src';

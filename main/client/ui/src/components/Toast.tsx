@@ -3,7 +3,7 @@ import { useCallback, useEffect, type ReactElement } from 'react';
 
 import { Button } from '../elements/Button';
 
-import type { ToastMessage } from '@abe-stack/react';
+import type { ToastMessage } from '@bslt/react';
 
 import '../styles/components.css';
 

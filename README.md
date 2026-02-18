@@ -1,14 +1,14 @@
-# ABE Stack
+# BSLT
 
 **A full-stack TypeScript boilerplate for shipping real apps — fast.**
 
 I got tired of spending weeks on every new project just setting up the same things: monorepo config, auth, database, UI components, testing, Docker, CI... only to finally start building what actually mattered.
 
-So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Go from idea to deployed app in days instead of months.
+So I built **BSLT** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Go from idea to deployed app in days instead of months.
 
 ---
 
-## Why ABE Stack
+## Why BSLT
 
 |                                      |                                                                 |
 | ------------------------------------ | --------------------------------------------------------------- |
@@ -69,8 +69,8 @@ pnpm --version   # 10.x or higher
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/abrahamahn/abe-stack.git
-cd abe-stack
+git clone https://github.com/abrahamahn/bslt.git
+cd bslt
 pnpm install
 ```
 
@@ -178,7 +178,7 @@ pnpm dev
 
 ## Feature Coverage
 
-ABE Stack ships with production-ready implementations across these domains:
+BSLT ships with production-ready implementations across these domains:
 
 - **Identity & Access** — Registration, login, email verification, password reset, OAuth, TOTP 2FA, session management
 - **Teams & Workspaces** — Multi-tenant with roles, memberships, invitations, permission gating
@@ -201,7 +201,7 @@ Open an issue or PR. All contributions welcome.
 
 ## License
 
-MIT © 2026 ABE Stack Contributors
+MIT © 2026 BSLT Contributors
 
 ---
 

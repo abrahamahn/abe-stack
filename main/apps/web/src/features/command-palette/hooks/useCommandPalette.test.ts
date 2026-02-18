@@ -1,24 +1,24 @@
 // main/apps/web/src/features/command-palette/hooks/useCommandPalette.test.ts
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCommandPalette } from './useCommandPalette';
 
-// Mock @abe-stack/react/router for useNavigate
+// Mock @bslt/react/router for useNavigate
 const mockNavigate = vi.fn();
 const mockCycleMode = vi.fn();
 
-vi.mock('@abe-stack/react/router', async () => {
-  const actual = await vi.importActual('@abe-stack/react/router');
+vi.mock('@bslt/react/router', async () => {
+  const actual = await vi.importActual('@bslt/react/router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
   };
 });
 
-// Mock @abe-stack/react/hooks for useThemeMode and useKeyboardShortcuts
-vi.mock('@abe-stack/react/hooks', async () => {
-  const actual = await vi.importActual('@abe-stack/react/hooks');
+// Mock @bslt/react/hooks for useThemeMode and useKeyboardShortcuts
+vi.mock('@bslt/react/hooks', async () => {
+  const actual = await vi.importActual('@bslt/react/hooks');
   return {
     ...actual,
     useThemeMode: () => ({

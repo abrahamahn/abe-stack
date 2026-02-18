@@ -15,7 +15,7 @@
 
 import { usePermissions } from '../hooks/usePermissions';
 
-import type { PolicyAction, PolicyResource, TenantRole } from '@abe-stack/shared';
+import type { PolicyAction, PolicyResource, TenantRole } from '@bslt/shared';
 import type { ReactNode } from 'react';
 
 export interface CanProps {

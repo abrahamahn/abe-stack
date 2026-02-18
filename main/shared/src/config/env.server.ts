@@ -20,13 +20,10 @@ import {
 
 import { trueFalseSchema } from './env.base';
 
+import type { LogLevel } from '../engine/logger/types';
 import type { Schema } from '../primitives/schema';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+export type { LogLevel };
 
 /**
  * Logging behavior configuration.

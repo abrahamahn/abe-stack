@@ -2,7 +2,7 @@
 /**
  * Tests for server-specific file type detection (I/O wrapper).
  *
- * Pure detection logic tests are in @abe-stack/shared
+ * Pure detection logic tests are in @bslt/shared
  * (main/shared/src/domain/media/media.file-type.test.ts)
  */
 

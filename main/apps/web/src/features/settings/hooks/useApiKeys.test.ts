@@ -1,15 +1,15 @@
 // main/apps/web/src/features/settings/hooks/useApiKeys.test.ts
-import { useMutation, useQuery } from '@abe-stack/react';
+import { useMutation, useQuery } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createSettingsApi } from '../api';
 
 import { useApiKeys, useCreateApiKey, useDeleteApiKey, useRevokeApiKey } from './useApiKeys';
 
-import type { UseMutationResult, UseQueryResult } from '@abe-stack/react';
+import type { UseMutationResult, UseQueryResult } from '@bslt/react';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
   useMutation: vi.fn(),
 }));

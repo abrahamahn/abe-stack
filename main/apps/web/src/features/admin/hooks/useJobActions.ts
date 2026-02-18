@@ -5,9 +5,9 @@
  * Provides retry and cancel actions for jobs.
  */
 
-import { useMutation } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useMutation } from '@bslt/react';
 import { useCallback, useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';

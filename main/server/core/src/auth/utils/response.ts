@@ -5,9 +5,9 @@
  * @module utils/response
  */
 
-import { toISODateOnly } from '@abe-stack/shared';
+import { toISODateOnly } from '@bslt/shared';
 
-import type { AppRole, UserId } from '@abe-stack/shared';
+import type { AppRole, UserId } from '@bslt/shared';
 
 function normalizeNullableText(value: string | null | undefined): string | null {
   if (typeof value !== 'string') return null;
@@ -28,7 +28,7 @@ function normalizeNullableUrl(value: string | null | undefined): string | null {
 
 /**
  * Standard user object returned in authentication responses.
- * Uses branded `UserId` to match the domain `User` type from `@abe-stack/shared`.
+ * Uses branded `UserId` to match the domain `User` type from `@bslt/shared`.
  */
 export interface AuthUser {
   /** User's unique identifier (branded) */

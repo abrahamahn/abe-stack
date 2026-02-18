@@ -8,11 +8,11 @@
  * @module queue/retry
  */
 
-import { delay, MS_PER_HOUR, MS_PER_MINUTE } from '@abe-stack/shared';
+import { delay, MS_PER_HOUR, MS_PER_MINUTE } from '@bslt/shared';
 
 import { CLEANUP_INTERVAL_MS, DEFAULT_PROCESSING_TIMEOUT_MS, JOB_RETENTION_MS } from '../constants';
 
-import type { Logger } from '@abe-stack/shared';
+import type { Logger } from '@bslt/shared';
 
 /**
  * Configuration for retry behavior and circuit breaker thresholds

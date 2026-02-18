@@ -5,10 +5,10 @@
  * Manual cookie parsing and setting. Replaces @fastify/cookie.
  */
 
-import { signToken, verifyToken } from '@abe-stack/server-engine';
-import { parseCookies, serializeCookie } from '@abe-stack/shared';
+import { signToken, verifyToken } from '@bslt/server-engine';
+import { parseCookies, serializeCookie } from '@bslt/shared';
 
-import type { CookieOptions, CookieSerializeOptions } from '@abe-stack/shared';
+import type { CookieOptions, CookieSerializeOptions } from '@bslt/shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Re-export shared cookie utilities for barrel consumers

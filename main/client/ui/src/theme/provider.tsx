@@ -4,7 +4,7 @@ import { useDensity, type UseDensityReturn } from '@hooks/useDensity';
 import { useThemeMode, type ThemeMode, type UseThemeModeReturn } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
-import type { ContrastMode, Density } from '@abe-stack/client-engine';
+import type { ContrastMode, Density } from '@bslt/client-engine';
 import type { ReactElement, ReactNode } from 'react';
 
 /**
@@ -65,7 +65,7 @@ export type ThemeProviderProps = {
  *
  * @example
  * ```tsx
- * import { ThemeProvider } from '@abe-stack/ui';
+ * import { ThemeProvider } from '@bslt/ui';
  *
  * function App() {
  *   return (
@@ -79,7 +79,7 @@ export type ThemeProviderProps = {
  * @example
  * ```tsx
  * // Access theme values in child components
- * import { useTheme } from '@abe-stack/ui';
+ * import { useTheme } from '@bslt/ui';
  *
  * function ThemeToggle() {
  *   const { mode, cycleMode, isDark, density, cycleDensity, isHighContrast } = useTheme();

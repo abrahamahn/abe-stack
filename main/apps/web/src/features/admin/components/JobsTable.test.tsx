@@ -1,11 +1,11 @@
 // main/apps/web/src/features/admin/components/JobsTable.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobsTable } from './JobsTable';
 
+import type { JobStatus } from '@bslt/shared';
 import type { JobsTableProps } from './JobsTable';
-import type { JobStatus } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Types (matching component internal types)

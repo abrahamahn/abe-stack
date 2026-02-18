@@ -5,9 +5,9 @@
  * Displays security metrics summary in a card format.
  */
 
-import { Text } from '@abe-stack/ui';
-import { MetricValue } from '@abe-stack/ui/components/MetricValue';
-import { TitledCardSection } from '@abe-stack/ui/components/TitledCardSection';
+import { Text } from '@bslt/ui';
+import { MetricValue } from '@bslt/ui/components/MetricValue';
+import { TitledCardSection } from '@bslt/ui/components/TitledCardSection';
 
 import type { JSX } from 'react';
 

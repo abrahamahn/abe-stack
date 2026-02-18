@@ -5,9 +5,9 @@
  * API functions for tenant/workspace management operations.
  */
 
-import { createWorkspaceClient } from '@abe-stack/api';
+import { createWorkspaceClient } from '@bslt/api';
 
-import type { BaseClientConfig } from '@abe-stack/api';
+import type { BaseClientConfig } from '@bslt/api';
 import type {
   CreateInvitation,
   CreateTenantInput,
@@ -16,7 +16,7 @@ import type {
   Tenant,
   UpdateMembershipRole,
   UpdateTenantInput,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Types

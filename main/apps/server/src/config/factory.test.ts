@@ -1,7 +1,7 @@
 // main/apps/server/src/config/factory.test.ts
 import fs from 'node:fs';
 
-import { initEnv, loadServerEnv } from '@abe-stack/server-engine/config';
+import { initEnv, loadServerEnv } from '@bslt/server-engine/config';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { load } from './factory';

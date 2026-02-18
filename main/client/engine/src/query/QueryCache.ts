@@ -107,7 +107,7 @@ interface QueryEntry<TData = unknown, TError = Error> {
   subscribers: Set<() => void>;
 }
 
-import { MS_PER_DAY, MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_MINUTE } from '@bslt/shared';
 
 // ============================================================================
 // Constants

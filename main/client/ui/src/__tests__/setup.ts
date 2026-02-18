@@ -1,6 +1,6 @@
 // client/ui/src/__tests__/setup.ts
 /**
- * Global test setup for @abe-stack/ui package tests.
+ * Global test setup for @bslt/ui package tests.
  *
  * This file is loaded before each test file and provides:
  * - Jest DOM matchers for vitest (via /vitest entry point)

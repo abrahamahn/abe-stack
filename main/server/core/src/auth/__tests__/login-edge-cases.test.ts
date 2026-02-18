@@ -24,15 +24,15 @@ import {
 import { authenticateUser, refreshUserTokens, verifyEmail } from '../service';
 import { LOGIN_FAILURE_REASON, type AuthLogger } from '../types';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { RawDb, Repositories } from '../../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual('@abe-stack/shared');
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual('@bslt/shared');
   return {
     ...actual,
     validatePassword: vi.fn(),
@@ -49,8 +49,8 @@ vi.mock('../security/index', () => ({
   logLoginAttempt: vi.fn(),
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => callback(db)),

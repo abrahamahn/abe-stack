@@ -5,8 +5,8 @@
  * Component for uploading and managing user avatar.
  */
 
-import { MAX_IMAGE_SIZE } from '@abe-stack/shared';
-import { Alert, Avatar, Button, FileInput, Spinner } from '@abe-stack/ui';
+import { MAX_IMAGE_SIZE } from '@bslt/shared';
+import { Alert, Avatar, Button, FileInput, Spinner } from '@bslt/ui';
 import { useRef, useState, type ReactElement } from 'react';
 
 import { useAvatarDelete, useAvatarUpload } from '../hooks';

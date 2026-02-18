@@ -82,9 +82,9 @@ function estimateImportSize(importSource: string): number {
   const sizeMap: Record<string, number> = {
     react: 150,
     'react-dom': 1200,
-    '@abe-stack/ui': 200,
-    '@abe-stack/shared': 150,
-    '@abe-stack/engine': 100,
+    '@bslt/ui': 200,
+    '@bslt/shared': 150,
+    '@bslt/engine': 100,
     zod: 80,
     'date-fns': 300,
     lodash: 100,

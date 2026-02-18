@@ -6,19 +6,19 @@
  * of the settings API and query cache invalidation.
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSettingsApi } from '../api';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from './useSessions';
 
-import type { Session, SessionsListResponse } from '../api';
 import type { ReactElement, ReactNode } from 'react';
 import type { Mock } from 'vitest';
+import type { Session, SessionsListResponse } from '../api';
 
 // ============================================================================
 // Mocks

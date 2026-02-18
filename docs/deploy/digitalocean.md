@@ -1,6 +1,6 @@
 # DigitalOcean Deployment Guide
 
-Step-by-step guide to deploy ABE Stack on a DigitalOcean Droplet.
+Step-by-step guide to deploy BSLT on a DigitalOcean Droplet.
 
 ---
 
@@ -23,7 +23,7 @@ Step-by-step guide to deploy ABE Stack on a DigitalOcean Droplet.
    - **Regular**: $24/mo (4 GB RAM, 2 vCPUs) - recommended for production
 4. Choose datacenter region closest to your users
 5. Add your SSH key
-6. Set hostname: `abe-stack-prod`
+6. Set hostname: `bslt-prod`
 7. Click **Create Droplet**
 
 ### Via doctl CLI
@@ -35,7 +35,7 @@ Step-by-step guide to deploy ABE Stack on a DigitalOcean Droplet.
 doctl auth init
 
 # Create droplet
-doctl compute droplet create abe-stack-prod \
+doctl compute droplet create bslt-prod \
   --image ubuntu-24-04-x64 \
   --size s-2vcpu-4gb \
   --region nyc1 \
@@ -144,8 +144,8 @@ ssh deploy@<droplet-ip>
 ```bash
 # Clone repository
 cd ~
-git clone https://github.com/your-org/abe-stack.git
-cd abe-stack
+git clone https://github.com/your-org/bslt.git
+cd bslt
 
 # Create production environment file
 cp config/env/.env.production.example config/env/.env.production
@@ -194,7 +194,7 @@ chmod 600 config/env/.env.production
 ### Build and Start
 
 ```bash
-cd ~/abe-stack
+cd ~/bslt
 
 # Build and start all services
 docker compose -f infra/docker/production/docker-compose.prod.yml \
@@ -225,12 +225,12 @@ curl https://example.com/health
 Create a systemd service for automatic restarts:
 
 ```bash
-sudo nano /etc/systemd/system/abe-stack.service
+sudo nano /etc/systemd/system/bslt.service
 ```
 
 ```ini
 [Unit]
-Description=ABE Stack Docker Compose
+Description=BSLT Docker Compose
 Requires=docker.service
 After=docker.service
 
@@ -238,7 +238,7 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 User=deploy
-WorkingDirectory=/home/deploy/abe-stack
+WorkingDirectory=/home/deploy/bslt
 ExecStart=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml --env-file config/env/.env.production up -d
 ExecStop=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml down
 TimeoutStartSec=0
@@ -251,11 +251,11 @@ Enable and start:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable abe-stack
-sudo systemctl start abe-stack
+sudo systemctl enable bslt
+sudo systemctl start bslt
 
 # Check status
-sudo systemctl status abe-stack
+sudo systemctl status bslt
 ```
 
 ---
@@ -282,7 +282,7 @@ BACKUP_FILE="$BACKUP_DIR/abe_stack_$TIMESTAMP.sql.gz"
 mkdir -p $BACKUP_DIR
 
 # Dump and compress
-docker compose -f /home/deploy/abe-stack/infra/docker/production/docker-compose.prod.yml \
+docker compose -f /home/deploy/bslt/infra/docker/production/docker-compose.prod.yml \
   exec -T postgres pg_dump -U postgres abe_stack | gzip > $BACKUP_FILE
 
 # Keep only last 7 days
@@ -338,7 +338,7 @@ docker compose -f infra/docker/production/docker-compose.prod.yml start api
 ### Deploy Updates
 
 ```bash
-cd ~/abe-stack
+cd ~/bslt
 
 # Pull latest code
 git pull

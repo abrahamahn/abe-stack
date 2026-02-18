@@ -7,14 +7,14 @@
  * role management, paginated listing with filters, and account lock/unlock operations.
  */
 
-import { MS_PER_DAY } from '@abe-stack/shared';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { MS_PER_DAY } from '@bslt/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createUserRepository } from './users';
 
-import type { AdminUserListFilters } from './users';
 import type { RawDb } from '../../client';
-import type { User, NewUser, UpdateUser } from '../../schema/index';
+import type { NewUser, UpdateUser, User } from '../../schema/index';
+import type { AdminUserListFilters } from './users';
 
 // ============================================================================
 // Mock Database

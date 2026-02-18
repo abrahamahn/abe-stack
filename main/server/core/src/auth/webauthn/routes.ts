@@ -17,7 +17,7 @@ import {
   type WebauthnLoginOptionsRequest,
   type WebauthnLoginVerifyRequest,
   type WebauthnRegisterVerifyRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   protectedRoute,
@@ -35,8 +35,8 @@ import {
   handleWebauthnRegisterVerify,
 } from '../handlers/webauthn';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 function asAppContext(ctx: HandlerContext): AppContext {
   return ctx as unknown as AppContext;

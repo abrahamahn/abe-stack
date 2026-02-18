@@ -1,6 +1,6 @@
 # Enterprise SaaS Boilerplate Checklist
 
-> Comprehensive work tracker for ABE Stack. Each item maps to concrete files.
+> Comprehensive work tracker for BSLT. Each item maps to concrete files.
 > Status: [x] done, [-] partial, [ ] not started.
 > Last audited: 2026-02-11
 
@@ -662,7 +662,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 **Core Infrastructure:**
 
-- [x] Shared Zod schemas (`@abe-stack/shared`) + domain contracts (`*.contracts.ts` across auth, billing, users, jobs, audit-log, admin)
+- [x] Shared Zod schemas (`@bslt/shared`) + domain contracts (`*.contracts.ts` across auth, billing, users, jobs, audit-log, admin)
 - [x] Shared config module (`shared/config/` — env.schema, env.parsers, auth-helpers + config types: auth, infra, notification, services — all tested)
 - [x] Request/response validation at boundary
 - [x] Module layout: contracts → routes → service → repo → tests
@@ -790,7 +790,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 - [x] Request correlation IDs (`correlationId.ts` middleware)
 - [ ] Error reporting (Sentry)
 - [ ] Metrics (request count/latency, job success/fail)
-- [x] OpenAPI / Swagger generation — `@fastify/swagger` + `@fastify/swagger-ui` registered at `/api/docs` with ABE Stack theme (`swagger-theme.ts`)
+- [x] OpenAPI / Swagger generation — `@fastify/swagger` + `@fastify/swagger-ui` registered at `/api/docs` with BSLT theme (`swagger-theme.ts`)
 - [ ] Auth-protected docs in non-dev envs
 
 ---

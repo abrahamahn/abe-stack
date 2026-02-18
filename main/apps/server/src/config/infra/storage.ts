@@ -8,7 +8,7 @@ import type {
   S3StorageConfig,
   StorageConfig,
   StorageProviderName,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Storage Configuration Loader

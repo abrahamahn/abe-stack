@@ -1,6 +1,6 @@
 // main/apps/web/src/features/home/components/HomeDocViewer.tsx
-import { useDelayedFlag } from '@abe-stack/react/hooks';
-import { Heading, Markdown, Skeleton, Text } from '@abe-stack/ui';
+import { useDelayedFlag } from '@bslt/react/hooks';
+import { Heading, Markdown, Skeleton, Text } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

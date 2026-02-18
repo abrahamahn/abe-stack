@@ -19,18 +19,16 @@ import {
   describe,
   expect,
   it,
-  vi,
-  beforeEach,
-  afterEach,
+  vi
 } from 'vitest';
 
 import { useTotpManagement } from '../hooks/useTotpManagement';
 
 import { TotpManagement } from './TotpManagement';
 
-import type { UseTotpManagementResult } from '../hooks/useTotpManagement';
 import type { ReactNode } from 'react';
 import type { Mock } from 'vitest';
+import type { UseTotpManagementResult } from '../hooks/useTotpManagement';
 
 // ============================================================================
 // Mocks
@@ -42,7 +40,7 @@ vi.mock('../hooks/useTotpManagement', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockAlert = ({ children, tone }: { children: ReactNode; tone?: string }) => (
     <div data-testid="alert" data-tone={tone}>
       {children}

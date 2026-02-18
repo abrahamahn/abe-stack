@@ -13,16 +13,16 @@
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useProfileUpdate } from '../hooks';
 
 import { ProfileForm } from './ProfileForm';
 
+import type { UserId } from '@bslt/shared';
+import type { ChangeEvent, ReactNode } from 'react';
 import type { User } from '../api';
 import type { ProfileFormProps } from './ProfileForm';
-import type { UserId } from '@abe-stack/shared';
-import type { ChangeEvent, ReactNode } from 'react';
 
 // Mock the hooks
 vi.mock('../hooks', () => ({
@@ -30,8 +30,8 @@ vi.mock('../hooks', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   const mockAlert = ({ children, tone }: { children: ReactNode; tone: string }) => (
     <div data-testid="alert" data-tone={tone}>

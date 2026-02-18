@@ -26,34 +26,34 @@ import type { Plugin } from 'vite';
  * @complexity O(1) per lookup
  */
 const workspacePackages: Record<string, string> = {
-  '@abe-stack/shared': path.resolve(__dirname, '../../shared/src/index.ts'),
-  '@abe-stack/api': path.resolve(__dirname, '../../client/api/src/index.ts'),
-  '@abe-stack/ui': path.resolve(__dirname, '../../client/ui/src/index.ts'),
-  '@abe-stack/client-engine': path.resolve(__dirname, '../../client/engine/src/index.ts'),
-  '@abe-stack/react': path.resolve(__dirname, '../../client/react/src/index.ts'),
+  '@bslt/shared': path.resolve(__dirname, '../../shared/src/index.ts'),
+  '@bslt/api': path.resolve(__dirname, '../../client/api/src/index.ts'),
+  '@bslt/ui': path.resolve(__dirname, '../../client/ui/src/index.ts'),
+  '@bslt/client-engine': path.resolve(__dirname, '../../client/engine/src/index.ts'),
+  '@bslt/react': path.resolve(__dirname, '../../client/react/src/index.ts'),
 };
 
 /**
  * Map of workspace subpath imports (regex) to their source directories.
- * Handles imports like `@abe-stack/ui/elements` → source path.
+ * Handles imports like `@bslt/ui/elements` → source path.
  *
  * @complexity O(n) where n is the number of subpath patterns
  */
 const workspaceSubpaths: Array<{ pattern: RegExp; base: string }> = [
   {
-    pattern: /^@abe-stack\/kernel\/(.+)$/,
+    pattern: /^@bslt\/kernel\/(.+)$/,
     base: path.resolve(__dirname, '../../shared/src/'),
   },
   {
-    pattern: /^@abe-stack\/ui\/(.+)$/,
+    pattern: /^@bslt\/ui\/(.+)$/,
     base: path.resolve(__dirname, '../../client/ui/src/'),
   },
   {
-    pattern: /^@abe-stack\/client\/(.+)$/,
+    pattern: /^@bslt\/client\/(.+)$/,
     base: path.resolve(__dirname, '../../client/engine/src/'),
   },
   {
-    pattern: /^@abe-stack\/react\/(.+)$/,
+    pattern: /^@bslt\/react\/(.+)$/,
     base: path.resolve(__dirname, '../../client/react/src/'),
   },
 ];

@@ -6,7 +6,7 @@
  * to provide policy-based authorization checks in UI components.
  */
 
-import { can, hasPermission } from '@abe-stack/shared';
+import { can, hasPermission } from '@bslt/shared';
 import { useCallback, useMemo } from 'react';
 
 import type {
@@ -15,7 +15,7 @@ import type {
   PolicyAction,
   PolicyResource,
   TenantRole,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 /** Options for usePermissions hook */
 export interface UsePermissionsOptions {

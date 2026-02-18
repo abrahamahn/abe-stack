@@ -10,7 +10,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { NativeBridge } from '@abe-stack/shared';
+import type { NativeBridge } from '@bslt/shared';
 
 // ============================================================================
 // Shared Mock Setup using vi.hoisted
@@ -220,8 +220,8 @@ describe('Integration: End-to-End IPC Flow', () => {
       },
     }));
 
-    // Mock @abe-stack/shared which exports waitForPort
-    vi.doMock('@abe-stack/shared', () => ({
+    // Mock @bslt/shared which exports waitForPort
+    vi.doMock('@bslt/shared', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -229,7 +229,7 @@ describe('Integration: End-to-End IPC Flow', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('@abe-stack/shared');
+    vi.doUnmock('@bslt/shared');
   });
 
   describe('IPC handler registration and invocation flow', () => {
@@ -434,7 +434,7 @@ describe('Integration: Window Lifecycle Management', () => {
       },
     }));
 
-    vi.doMock('@abe-stack/shared', () => ({
+    vi.doMock('@bslt/shared', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -442,7 +442,7 @@ describe('Integration: Window Lifecycle Management', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('@abe-stack/shared');
+    vi.doUnmock('@bslt/shared');
   });
 
   describe('Window creation lifecycle', () => {
@@ -783,7 +783,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       },
     }));
 
-    vi.doMock('@abe-stack/shared', () => ({
+    vi.doMock('@bslt/shared', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -791,7 +791,7 @@ describe('Integration: App Initialization and Shutdown', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('@abe-stack/shared');
+    vi.doUnmock('@bslt/shared');
   });
 
   describe('App initialization sequence', () => {
@@ -857,7 +857,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       // Clear all mocks and reset modules first
       vi.doUnmock('electron');
       vi.doUnmock('path');
-      vi.doUnmock('@abe-stack/shared');
+      vi.doUnmock('@bslt/shared');
       vi.resetModules();
       appEventHandlers.clear();
       integrationMocks.clearAll();
@@ -912,7 +912,7 @@ describe('Integration: App Initialization and Shutdown', () => {
         },
       }));
 
-      vi.doMock('@abe-stack/shared', () => ({
+      vi.doMock('@bslt/shared', () => ({
         waitForPort: waitForPortMock,
       }));
 
@@ -939,7 +939,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       // Clear all mocks and reset modules first
       vi.doUnmock('electron');
       vi.doUnmock('path');
-      vi.doUnmock('@abe-stack/shared');
+      vi.doUnmock('@bslt/shared');
       vi.resetModules();
       appEventHandlers.clear();
       integrationMocks.clearAll();
@@ -994,7 +994,7 @@ describe('Integration: App Initialization and Shutdown', () => {
         },
       }));
 
-      vi.doMock('@abe-stack/shared', () => ({
+      vi.doMock('@bslt/shared', () => ({
         waitForPort: waitForPortMock,
       }));
 
@@ -1156,7 +1156,7 @@ describe('Integration: Window Security Settings', () => {
       },
     }));
 
-    vi.doMock('@abe-stack/shared', () => ({
+    vi.doMock('@bslt/shared', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -1164,7 +1164,7 @@ describe('Integration: Window Security Settings', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('@abe-stack/shared');
+    vi.doUnmock('@bslt/shared');
   });
 
   describe('Window webPreferences security', () => {

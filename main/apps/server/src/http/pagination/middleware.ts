@@ -5,21 +5,21 @@
  */
 
 import {
-  DEFAULT_SORT_BY,
   DEFAULT_PAGINATION,
+  DEFAULT_SORT_BY,
   getQueryParam,
   parseLimitParam,
   parsePageParam,
   parseSortByParam,
   parseSortOrderParam,
   SORT_ORDER,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { createPaginationHelpers } from './helpers';
 
-import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
-import type { CursorPaginationOptions } from '@abe-stack/shared';
+import type { CursorPaginationOptions } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
 
 /**
  * Default pagination middleware options

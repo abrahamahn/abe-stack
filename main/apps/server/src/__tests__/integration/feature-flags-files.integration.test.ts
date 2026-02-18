@@ -12,14 +12,14 @@
  * - Files routes: /api/files/*
  */
 
-import { createAuthGuard, fileRoutes } from '@abe-stack/core';
-import { featureFlagRoutes } from '@abe-stack/core/feature-flags';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard, fileRoutes } from '@bslt/core';
+import { featureFlagRoutes } from '@bslt/core/feature-flags';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

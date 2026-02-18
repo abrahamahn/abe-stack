@@ -1,6 +1,7 @@
 // main/shared/src/primitives/schema/scalars.ts
 
 import { EMAIL_REGEX, UUID_REGEX } from '../constants/regex';
+
 import { createSchema } from './factory';
 
 import type { Schema } from './types';

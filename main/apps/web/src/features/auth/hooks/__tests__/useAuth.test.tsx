@@ -1,15 +1,15 @@
 // main/apps/web/src/features/auth/hooks/__tests__/useAuth.test.tsx
-import { QueryCache } from '@abe-stack/client-engine';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
+import { QueryCache } from '@bslt/client-engine';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useAuth } from '../useAuth';
 
 import type { ClientConfig } from '@/config';
-import type { UserId } from '@abe-stack/shared';
 import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { AuthService } from '@auth/services/AuthService';
+import type { UserId } from '@bslt/shared';
 
 // Create a mock AuthService
 function createMockAuthService(

@@ -16,7 +16,6 @@ import {
   SecurityEventNotFoundError,
 } from './securityService';
 
-import type { AdminAppContext } from './types';
 import type {
   SecurityEvent,
   SecurityEventsExportRequest,
@@ -24,8 +23,9 @@ import type {
   SecurityEventsListRequest,
   SecurityEventsListResponse,
   SecurityMetrics,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext } from './types';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

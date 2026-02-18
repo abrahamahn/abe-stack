@@ -41,14 +41,14 @@ import {
   updateSubscription,
 } from './service';
 
+import type { BillingService, CheckoutParams } from '@bslt/shared';
 import type { BillingRepositories } from './types';
-import type { BillingService, CheckoutParams } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   createCustomerMappingRepository: vi.fn(),
   createInvoiceRepository: vi.fn(),
   createPaymentMethodRepository: vi.fn(),

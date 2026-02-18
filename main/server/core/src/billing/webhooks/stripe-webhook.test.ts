@@ -21,10 +21,9 @@ import {
 
 import { handleStripeWebhook } from './stripe-webhook';
 
+import type { NormalizedWebhookEvent, ServerLogger } from '@bslt/shared';
+import type { StripeProviderConfig as StripeConfig } from '@bslt/shared/config';
 import type { WebhookRepositories } from '../types';
-import type { NormalizedWebhookEvent } from '@abe-stack/shared';
-import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
-import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies
@@ -38,7 +37,7 @@ vi.mock('../stripe-provider', () => ({
   StripeProvider: MockStripeProvider,
 }));
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   createBillingEventRepository: vi.fn(),
   createCustomerMappingRepository: vi.fn(),
   createInvoiceRepository: vi.fn(),

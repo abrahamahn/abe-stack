@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cloud-init script for ABE Stack DigitalOcean deployment
+# Cloud-init script for BSLT DigitalOcean deployment
 # This script runs on first boot to prepare the server
 
 set -euo pipefail
@@ -37,9 +37,9 @@ apt-get update
 apt-get install -y caddy
 
 # Create application user and directory
-useradd -m -s /bin/bash abe-stack
-mkdir -p /home/abe-stack/${app_name}
-chown -R abe-stack:abe-stack /home/abe-stack/${app_name}
+useradd -m -s /bin/bash bslt
+mkdir -p /home/bslt/${app_name}
+chown -R bslt:bslt /home/bslt/${app_name}
 
 # Set up basic firewall (ufw)
 ufw --force enable
@@ -53,14 +53,14 @@ dpkg-reconfigure --frontend=noninteractive unattended-upgrades
 
 # Set up log rotation
 cat > /etc/logrotate.d/${app_name} << EOF
-/home/abe-stack/${app_name}/logs/*.log {
+/home/bslt/${app_name}/logs/*.log {
     daily
     missingok
     rotate 52
     compress
     delaycompress
     notifempty
-    create 644 abe-stack abe-stack
+    create 644 bslt bslt
     postrotate
         systemctl reload ${app_name} || true
     endscript
@@ -75,9 +75,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=abe-stack
-WorkingDirectory=/home/abe-stack/${app_name}
-ExecStart=/usr/bin/node /home/abe-stack/${app_name}/dist/server.js
+User=bslt
+WorkingDirectory=/home/bslt/${app_name}
+ExecStart=/usr/bin/node /home/bslt/${app_name}/dist/server.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production
@@ -95,4 +95,4 @@ systemctl enable caddy
 apt-get autoremove -y
 apt-get clean
 
-echo "ABE Stack server initialization complete!"
+echo "BSLT server initialization complete!"

@@ -1,8 +1,8 @@
 // main/apps/server/main/server.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { DbClient } from '@abe-stack/db';
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { DbClient } from '@bslt/db';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -57,16 +57,16 @@ vi.mock('fastify', () => ({
   default: vi.fn(() => mockFastifyInstance),
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     createConsoleLogger: mockCreateConsoleLogger,
   };
 });
 
-// Mock @abe-stack/db for RateLimiter (used by server.ts)
-vi.mock('@abe-stack/db', () => ({
+// Mock @bslt/db for RateLimiter (used by server.ts)
+vi.mock('@bslt/db', () => ({
   RateLimiter: class {
     check = vi.fn();
   },
@@ -77,7 +77,7 @@ vi.mock('./http/plugins', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 
-vi.mock('@abe-stack/server-engine/logger', () => ({
+vi.mock('@bslt/server-engine/logger', () => ({
   registerLoggingMiddleware: mockRegisterLoggingMiddleware,
   createConsoleLogger: mockCreateConsoleLogger,
 }));

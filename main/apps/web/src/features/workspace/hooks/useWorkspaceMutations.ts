@@ -5,14 +5,14 @@
  * Hooks for creating, updating, and deleting workspaces.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/react';
-import { useUndoableMutation } from '@abe-stack/react/hooks';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQueryCache } from '@bslt/react';
+import { useUndoableMutation } from '@bslt/react/hooks';
 import { useRef } from 'react';
 
 import { createWorkspaceApi } from '../api';
 
-import type { CreateTenantInput, Tenant, UpdateTenantInput } from '@abe-stack/shared';
+import type { CreateTenantInput, Tenant, UpdateTenantInput } from '@bslt/shared';
 
 // ============================================================================
 // API Instance

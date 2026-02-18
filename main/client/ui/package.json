@@ -1,7 +1,7 @@
 {
-  "name": "@abe-stack/ui",
+  "name": "@bslt/ui",
   "version": "1.1.0",
-  "description": "Shared UI components for abe-stack (web, desktop, mobile)",
+  "description": "Shared UI components for bslt (web, desktop, mobile)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -48,11 +48,11 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-ui --report-unused-disable-directives",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-ui --report-unused-disable-directives",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "keywords": [
-    "abe-stack",
+    "bslt",
     "ui",
     "components",
     "react"
@@ -61,22 +61,22 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "url": "https://github.com/abrahamahn/bslt.git",
     "directory": "client/ui"
   },
   "bugs": {
-    "url": "https://github.com/abrahamahn/abe-stack/issues"
+    "url": "https://github.com/abrahamahn/bslt/issues"
   },
-  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "homepage": "https://github.com/abrahamahn/bslt#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/client-engine": "workspace:*",
-    "@abe-stack/react": "workspace:*",
-    "@abe-stack/shared": "workspace:*"
+    "@bslt/client-engine": "workspace:*",
+    "@bslt/react": "workspace:*",
+    "@bslt/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",

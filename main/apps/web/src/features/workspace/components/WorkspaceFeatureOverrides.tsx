@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import {

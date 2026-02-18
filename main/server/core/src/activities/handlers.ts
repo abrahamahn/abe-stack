@@ -6,15 +6,15 @@
  * Uses narrow context interfaces from types.ts for decoupling.
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { getActivityFeed, getTenantActivityFeed } from './service';
 
-import type { ActivityAppContext } from './types';
+import type { AuthenticatedUser } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Activity as DbActivity } from '../../../db/src';
 import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser } from '@abe-stack/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { ActivityAppContext } from './types';
 
 // ============================================================================
 // Response Types

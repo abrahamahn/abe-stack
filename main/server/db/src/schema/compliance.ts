@@ -16,7 +16,7 @@ import {
   type DataExportStatus,
   type DataExportType,
   type DocumentType,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { CONSENT_TYPES, DATA_EXPORT_STATUSES, DATA_EXPORT_TYPES, DOCUMENT_TYPES };
@@ -173,7 +173,7 @@ export const CONSENT_LOG_COLUMNS = {
   createdAt: 'created_at',
 } as const;
 
-// DataExportType, DataExportStatus imported from @abe-stack/shared above
+// DataExportType, DataExportStatus imported from @bslt/shared above
 
 // ============================================================================
 // Data Export Request Types

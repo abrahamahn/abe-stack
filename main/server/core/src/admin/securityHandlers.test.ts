@@ -19,22 +19,22 @@ import {
   handleListSecurityEvents,
 } from './securityHandlers';
 
-import type { AdminAppContext } from './types';
 import type {
   SecurityEvent,
   SecurityEventsExportRequest,
   SecurityEventsFilter,
   SecurityEventsListRequest,
   SecurityMetrics,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext } from './types';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../db/src')>('@bslt/db');
   return {
     ...actual,
   };

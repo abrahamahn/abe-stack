@@ -8,6 +8,7 @@
 import {
   BillingProviderNotConfiguredError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
+  PlanId,
   PlanNotFoundError,
   type AdminPlan,
   type AdminPlanResponse,
@@ -16,8 +17,8 @@ import {
   type PlanFeature,
   type SubscriptionActionResponse,
   type SyncStripeResponse,
-  type UpdatePlanRequest, PlanId 
-} from '@abe-stack/shared';
+  type UpdatePlanRequest
+} from '@bslt/shared';
 
 import { createBillingProvider } from '../billing';
 
@@ -31,8 +32,8 @@ import {
   type AdminBillingRepositories,
 } from './billingService';
 
-import type { AdminAppContext, AdminRequest } from './types';
 import type { Plan as DbPlan } from '../../../db/src';
+import type { AdminAppContext, AdminRequest } from './types';
 
 // ============================================================================
 // Helper Functions

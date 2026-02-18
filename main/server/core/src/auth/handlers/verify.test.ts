@@ -39,9 +39,9 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-// Mock @abe-stack/shared to intercept mapErrorToHttpResponse
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared to intercept mapErrorToHttpResponse
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToResponse,

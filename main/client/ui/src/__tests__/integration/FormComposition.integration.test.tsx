@@ -10,7 +10,7 @@
  * - Accessibility of form compositions
  */
 
-import { useFormState, useResendCooldown } from '@abe-stack/react/hooks';
+import { useFormState, useResendCooldown } from '@bslt/react/hooks';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';

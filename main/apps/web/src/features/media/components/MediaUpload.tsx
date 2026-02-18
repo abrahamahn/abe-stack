@@ -5,8 +5,8 @@
  * File upload component with drag-and-drop support for media files.
  */
 
-import { formatBytes } from '@abe-stack/shared';
-import { Button, FileInput, Spinner, Text } from '@abe-stack/ui';
+import { formatBytes } from '@bslt/shared';
+import { Button, FileInput, Spinner, Text } from '@bslt/ui';
 import React, { useState } from 'react';
 
 import { useUploadMedia } from '../hooks';

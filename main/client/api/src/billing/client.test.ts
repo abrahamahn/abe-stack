@@ -25,7 +25,7 @@ import type {
   SubscriptionResponse,
   UpdateSubscriptionRequest,
   UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 describe('createBillingClient', () => {
   const baseUrl = 'http://localhost:3001';

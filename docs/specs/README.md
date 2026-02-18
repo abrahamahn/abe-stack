@@ -1,6 +1,6 @@
 # Specifications
 
-System design and coding standards for ABE Stack.
+System design and coding standards for BSLT.
 
 ---
 

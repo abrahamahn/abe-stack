@@ -5,7 +5,7 @@
  * Core permission checking logic for row-level access control.
  * Supports ownership-based, membership-based, and role-based permissions.
  *
- * @module @abe-stack/server-engine/security/permissions
+ * @module @bslt/server-engine/security/permissions
  */
 
 import {
@@ -27,7 +27,7 @@ import {
   type TablePermissionConfig,
 } from './types';
 
-import type { UserRole } from '@abe-stack/db';
+import type { UserRole } from '@bslt/db';
 
 // ============================================================================
 // Permission Checker Class

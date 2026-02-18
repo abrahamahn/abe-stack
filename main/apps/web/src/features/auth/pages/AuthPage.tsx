@@ -1,12 +1,12 @@
 // main/apps/web/src/features/auth/pages/AuthPage.tsx
 
-import { toastStore } from '@abe-stack/react';
-import { useFormState, type AuthMode } from '@abe-stack/react/hooks';
-import { useNavigate, useSearchParams } from '@abe-stack/react/router';
-import { AuthLayout } from '@abe-stack/ui';
 import { AuthForm, type AuthFormProps } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
+import { toastStore } from '@bslt/react';
+import { useFormState, type AuthMode } from '@bslt/react/hooks';
+import { useNavigate, useSearchParams } from '@bslt/react/router';
+import { AuthLayout } from '@bslt/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';

@@ -12,11 +12,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleDeleteFile, handleDownloadFile, handleGetFile, handleUploadFile } from './handlers';
 
-import type { FileStorageProvider } from './types';
+import type { AuthenticatedUser, Logger } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FileRepository } from '../../../db/src';
 import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser, Logger } from '@abe-stack/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FileStorageProvider } from './types';
 
 // ============================================================================
 // Mock Setup

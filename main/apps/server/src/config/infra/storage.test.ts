@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { loadStorageConfig, validateStorage } from './storage';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 describe('Storage Configuration', () => {
   describe('Local Provider', () => {

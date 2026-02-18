@@ -1,6 +1,6 @@
 // main/apps/web/src/app/layouts/AppTopLayout.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppTopLayout } from './AppTopLayout';
 
@@ -8,12 +8,12 @@ const mockToggle = vi.fn();
 const mockSidePeekOpen = vi.hoisted(() => ({ current: false }));
 const mockTokenStoreGet = vi.hoisted(() => vi.fn<() => string | null>(() => null));
 
-vi.mock('@abe-stack/react/hooks', () => ({
+vi.mock('@bslt/react/hooks', () => ({
   useSidePeek: () => ({ toggle: mockToggle, isOpen: mockSidePeekOpen.current }),
 }));
 
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');
   return {
     ...actual,
     tokenStore: {
@@ -51,7 +51,7 @@ describe('AppTopLayout', () => {
       />,
     );
 
-    expect(screen.getByRole('heading', { name: 'ABE Stack' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'BSLT' })).toBeInTheDocument();
   });
 
   it('opens auth modal with login/register modes', () => {

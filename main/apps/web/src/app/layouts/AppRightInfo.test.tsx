@@ -6,7 +6,7 @@ import { AppRightInfo } from './AppRightInfo';
 
 const mockPathname = vi.hoisted(() => ({ current: '/dashboard' }));
 
-vi.mock('@abe-stack/react/router', () => ({
+vi.mock('@bslt/react/router', () => ({
   useLocation: () => ({ pathname: mockPathname.current }),
 }));
 

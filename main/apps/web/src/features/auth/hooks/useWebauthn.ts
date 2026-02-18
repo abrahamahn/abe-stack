@@ -3,11 +3,11 @@
  * WebAuthn/Passkey hooks for registration, login, and management.
  */
 
-import { getApiClient } from '@abe-stack/api';
+import { getApiClient } from '@bslt/api';
 import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { PasskeyListItem } from '@abe-stack/shared';
+import type { PasskeyListItem } from '@bslt/shared';
 
 // ============================================================================
 // usePasskeys — List, rename, delete passkeys

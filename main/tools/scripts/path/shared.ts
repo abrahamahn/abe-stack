@@ -3,7 +3,7 @@
 
 /**
  * @file shared.ts
- * @description Exports all files in @abe-stack/shared package to .tmp/PATH-shared.md
+ * @description Exports all files in @bslt/shared package to .tmp/PATH-shared.md
  * This serves as the Source of Truth list for the shared package.
  * @module tools/scripts/path/shared
  */
@@ -51,7 +51,7 @@ function walkDir(dir: string, files: string[] = []): string[] {
  * Exports shared package files to PATH-shared.md
  */
 function exportSharedFiles(): void {
-  console.log('🔄 Scanning @abe-stack/shared package...');
+  console.log('🔄 Scanning @bslt/shared package...');
 
   if (!fs.existsSync(SHARED_ROOT)) {
     console.error(`❌ Error: ${SHARED_ROOT} does not exist.`);
@@ -81,7 +81,7 @@ function exportSharedFiles(): void {
   }
 
   const categories = ['config', 'contracts', 'core', 'domain', 'types', 'utils', 'Root'];
-  let output = '# @abe-stack/shared Package Files\n';
+  let output = '# @bslt/shared Package Files\n';
   output += '\n> This package is the single source of truth for environment-agnostic code.\n';
   output += '> All files below are located in `main/shared/src/`.\n';
 

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { RouteManifestPage } from './RouteManifestPage';
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const heading = ({ children, as }: { children: any; as?: string }) => {
     if (as === 'h1') return <h1>{children}</h1>;
     if (as === 'h3') return <h3>{children}</h3>;

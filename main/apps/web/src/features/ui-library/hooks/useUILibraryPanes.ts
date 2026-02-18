@@ -1,5 +1,5 @@
 // main/apps/web/src/features/ui-library/hooks/useUILibraryPanes.ts
-import { useLocalStorage, useMediaQuery } from '@abe-stack/react/hooks';
+import { useLocalStorage, useMediaQuery } from '@bslt/react/hooks';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { UILibraryPaneConfig } from '../types';

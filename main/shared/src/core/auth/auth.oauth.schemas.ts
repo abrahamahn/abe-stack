@@ -9,9 +9,9 @@
 
 import { createSchema, type Schema } from '../../primitives/schema';
 import { OAUTH_PROVIDERS } from '../constants/auth';
+import { uuidSchema } from '../schemas';
 import { userSchema } from '../users/users.schemas';
 
-import { uuidSchema } from '../schemas';
 import type { User } from '../users/users.schemas';
 
 // ============================================================================

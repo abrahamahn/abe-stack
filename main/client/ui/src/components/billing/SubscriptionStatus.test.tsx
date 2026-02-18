@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SubscriptionStatus } from './SubscriptionStatus';
 
-import type { Subscription, SubscriptionId, UserId, PlanId } from '@abe-stack/shared';
+import type { PlanId, Subscription, SubscriptionId, UserId } from '@bslt/shared';
 
 const createMockSubscription = (overrides?: Partial<Subscription>): Subscription => ({
   id: 'sub_123' as unknown as SubscriptionId,

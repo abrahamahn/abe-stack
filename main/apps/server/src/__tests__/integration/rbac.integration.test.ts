@@ -10,14 +10,14 @@
  * require authenticated requests → deferred.
  */
 
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { tenantRoutes } from '@abe-stack/core/tenants';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core/auth';
+import { tenantRoutes } from '@bslt/core/tenants';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories (minimal set for tenant routes)

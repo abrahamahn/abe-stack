@@ -1,6 +1,6 @@
 // main/client/ui/src/components/UndoHistoryPanel.test.tsx
 /** @vitest-environment jsdom */
-import { createSetOperation, createTransaction } from '@abe-stack/shared';
+import { createSetOperation, createTransaction } from '@bslt/shared';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,11 +10,11 @@ import { UndoHistoryPanel } from './UndoHistoryPanel';
 // Mock the undo/redo store
 // ============================================================================
 
-import type { Transaction } from '@abe-stack/shared';
+import type { Transaction } from '@bslt/shared';
 
 let mockUndoStack: Transaction[] = [];
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useUndoRedoStore: () => ({
     undoStack: mockUndoStack,
   }),

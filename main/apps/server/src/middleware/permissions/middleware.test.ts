@@ -1,5 +1,5 @@
 // main/apps/server/src/middleware/permissions/middleware.test.ts
-import { createDefaultPermissionConfig, createPermissionChecker } from '@abe-stack/server-engine';
+import { createDefaultPermissionConfig, createPermissionChecker } from '@bslt/server-engine';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -10,7 +10,7 @@ import {
   hasPermission,
 } from './index';
 
-import type { PermissionChecker, PermissionRecord, RecordLoader } from '@abe-stack/server-engine';
+import type { PermissionChecker, PermissionRecord, RecordLoader } from '@bslt/server-engine';
 
 // ============================================================================
 // Test Helpers

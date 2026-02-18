@@ -5,8 +5,8 @@
  * Hooks for listing, creating, revoking, and deleting API keys.
  */
 
-import { useMutation, useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQuery } from '@bslt/react';
 
 import { createSettingsApi } from '../api';
 

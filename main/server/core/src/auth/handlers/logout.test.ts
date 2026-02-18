@@ -38,8 +38,8 @@ vi.mock('../utils', () => ({
 }));
 
 // Mock @shared to provide working mapErrorToResponse
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToResponse: mockMapErrorToResponse,

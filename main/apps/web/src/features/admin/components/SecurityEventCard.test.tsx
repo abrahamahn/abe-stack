@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SecurityEventCard } from './SecurityEventCard';
 
-import type { SecurityEvent } from '@abe-stack/shared';
+import type { SecurityEvent } from '@bslt/shared';
 
 // ============================================================================
 // Test Data

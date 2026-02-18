@@ -106,7 +106,7 @@ const createLocalStorageTokenStore = (): TokenStore => ({
  *
  * To use localStorage instead (less secure), use:
  * ```typescript
- * import { createTokenStore } from '@abe-stack/shared';
+ * import { createTokenStore } from '@bslt/shared';
  * const tokenStore = createTokenStore.localStorage();
  * ```
  */

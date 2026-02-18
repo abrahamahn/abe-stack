@@ -11,9 +11,9 @@ import {
 } from './userHandlers';
 import * as userService from './userService';
 
-import type { AdminAppContext, AdminRequest } from './types';
-import type { AdminUser } from '@abe-stack/shared';
+import type { AdminUser } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext, AdminRequest } from './types';
 
 // ============================================================================
 // Mocks - use relative path to match vitest module resolution
@@ -30,10 +30,10 @@ const { MockUserNotFoundError } = vi.hoisted(() => {
   return { MockUserNotFoundError };
 });
 
-// Mock @abe-stack/shared to export our MockUserNotFoundError
+// Mock @bslt/shared to export our MockUserNotFoundError
 // This ensures the handler's instanceof check works with our mock
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     UserNotFoundError: MockUserNotFoundError,

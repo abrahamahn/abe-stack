@@ -1,5 +1,5 @@
 # config/docker/docker-compose.prod.yml
-# Production Docker Compose for ABE Stack
+# Production Docker Compose for BSLT
 #
 # Usage:
 #   docker compose -f config/docker/docker-compose.prod.yml --env-file config/env/.env.production up -d
@@ -17,7 +17,7 @@
 #                  +-> /api/*   -> api:8080
 #                  +-> /*       -> web:80
 
-name: abe-stack-prod
+name: bslt-prod
 
 services:
   # ===========================================================================
@@ -25,7 +25,7 @@ services:
   # ===========================================================================
   caddy:
     image: caddy:2-alpine
-    container_name: abe-stack-caddy
+    container_name: bslt-caddy
     ports:
       - '80:80'
       - '443:443'
@@ -64,7 +64,7 @@ services:
   # ===========================================================================
   postgres:
     image: postgres:16-alpine
-    container_name: abe-stack-postgres
+    container_name: bslt-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-abe_stack}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -95,7 +95,7 @@ services:
     build:
       context: ../../..
       dockerfile: infra/docker/Dockerfile
-    container_name: abe-stack-api
+    container_name: bslt-api
     env_file:
       - ../../../config/env/.env.production
     environment:
@@ -119,7 +119,7 @@ services:
       STORAGE_LOCAL_PUBLIC_URL: ${STORAGE_LOCAL_PUBLIC_URL:-/uploads}
       # Email configuration
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-console}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-ABE Stack}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-BSLT}
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-noreply@example.com}
     volumes:
       # Persistent storage for uploaded files (if using local storage)
@@ -160,7 +160,7 @@ services:
       args:
         # Empty = relative URLs (reverse proxy handles /api routing)
         VITE_API_URL: ${VITE_API_URL:-}
-    container_name: abe-stack-web
+    container_name: bslt-web
     networks:
       - internal
     depends_on:
@@ -187,10 +187,10 @@ networks:
 
 volumes:
   postgres_data:
-    name: abe-stack-postgres-data
+    name: bslt-postgres-data
   uploads_data:
-    name: abe-stack-uploads-data
+    name: bslt-uploads-data
   caddy_data:
-    name: abe-stack-caddy-data
+    name: bslt-caddy-data
   caddy_config:
-    name: abe-stack-caddy-config
+    name: bslt-caddy-config

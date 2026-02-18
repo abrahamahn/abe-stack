@@ -11,7 +11,7 @@
  * - Skip links and focus landmarks
  */
 
-import { useDisclosure } from '@abe-stack/react/hooks';
+import { useDisclosure } from '@bslt/react/hooks';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect, useRef, useState } from 'react';

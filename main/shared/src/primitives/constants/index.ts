@@ -25,7 +25,6 @@ export {
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
   TIME,
-  TIME_CONSTANTS,
   TIME_ZONE
 } from './time';
 

@@ -6,13 +6,13 @@
  * filtering, and upsert logic for billing invoice records.
  */
 
-import { encodeCursor } from '@abe-stack/shared';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { encodeCursor } from '@bslt/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createInvoiceRepository } from './invoices';
 
 import type { RawDb } from '../../client';
-import type { Invoice, NewInvoice, UpdateInvoice, InvoiceStatus } from '../../schema/index';
+import type { Invoice, InvoiceStatus, NewInvoice, UpdateInvoice } from '../../schema/index';
 import type { CursorPaginationOptions } from '../types';
 
 // ============================================================================

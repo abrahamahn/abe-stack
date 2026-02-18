@@ -25,8 +25,8 @@ import {
   type TableMap,
   type UndoableOperation,
   type UndoRedoState,
-} from '@abe-stack/client-engine';
-import { generateSecureId } from '@abe-stack/shared';
+} from '@bslt/client-engine';
+import { generateSecureId } from '@bslt/shared';
 import {
   createContext,
   useCallback,
@@ -35,11 +35,11 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
   type ReactElement,
+  type ReactNode,
 } from 'react';
 
-import type { RealtimeOperation, VersionedRecord } from '@abe-stack/shared';
+import type { RealtimeOperation, VersionedRecord } from '@bslt/shared';
 
 // ============================================================================
 // Types
@@ -157,7 +157,7 @@ export interface RealtimeProviderProps<TTables extends TableMap = TableMap> {
  *
  * @example
  * ```tsx
- * import { RecordCache } from '@abe-stack/client-engine';
+ * import { RecordCache } from '@bslt/client-engine';
  *
  * const cache = new RecordCache<MyTables>();
  *

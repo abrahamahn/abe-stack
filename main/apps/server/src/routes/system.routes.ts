@@ -13,12 +13,12 @@ import {
   getDetailedHealth,
   getMetricsCollector,
   publicRoute,
-} from '@abe-stack/server-engine';
-import { HTTP_STATUS } from '@abe-stack/shared';
-import { getWebSocketStats } from '@abe-stack/websocket';
+} from '@bslt/server-engine';
+import { HTTP_STATUS } from '@bslt/shared';
+import { getWebSocketStats } from '@bslt/websocket';
 
-import type { HandlerContext, RouteMap, SystemContext } from '@abe-stack/server-engine';
-import type { LiveResponse, ReadyResponse } from '@abe-stack/shared';
+import type { HandlerContext, RouteMap, SystemContext } from '@bslt/server-engine';
+import type { LiveResponse, ReadyResponse } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function asSystemContext(ctx: HandlerContext): SystemContext {

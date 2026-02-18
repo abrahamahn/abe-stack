@@ -1,6 +1,6 @@
 # Production PostgreSQL Configuration
 
-Settings and recommendations for running PostgreSQL in production with ABE Stack.
+Settings and recommendations for running PostgreSQL in production with BSLT.
 
 ---
 
@@ -27,7 +27,7 @@ DB_SSL=true
 
 ### Connection Pooling
 
-ABE Stack uses Drizzle with `node-postgres` (`pg`), which maintains a client-side connection pool.
+BSLT uses Drizzle with `node-postgres` (`pg`), which maintains a client-side connection pool.
 
 | Setting              | Dev Default | Production Recommendation | Notes                                                                        |
 | -------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ ABE Stack uses Drizzle with `node-postgres` (`pg`), which maintains a client-sid
 **External pooler (PgBouncer):** If you need >100 concurrent connections or are on a managed database with connection limits (e.g., Supabase, Neon, RDS), place PgBouncer in front of Postgres:
 
 ```bash
-# Point ABE Stack at PgBouncer instead of Postgres directly
+# Point BSLT at PgBouncer instead of Postgres directly
 DATABASE_URL=postgresql://user:password@pgbouncer-host:6432/abe_stack?sslmode=require
 
 # PgBouncer settings (pgbouncer.ini)
@@ -171,7 +171,7 @@ For managed databases, enable the provider's automated backup feature in additio
 
 ## Health Monitoring
 
-ABE Stack checks database connectivity at multiple levels:
+BSLT checks database connectivity at multiple levels:
 
 | Endpoint             | What It Checks                         |
 | -------------------- | -------------------------------------- |

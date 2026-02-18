@@ -8,7 +8,7 @@
  * @module utils/refresh-token
  */
 
-import { TokenReuseError } from '@abe-stack/shared';
+import { TokenReuseError } from '@bslt/shared';
 
 import {
   and,
@@ -40,7 +40,7 @@ import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../security/even
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 import { parseUserAgentDeviceInfo } from './user-agent';
 
-import type { UserRole } from '@abe-stack/shared';
+import type { UserRole } from '@bslt/shared';
 
 // ============================================================================
 // Token Family Management

@@ -11,7 +11,7 @@
  * - Nested modals with forms
  */
 
-import { useDisclosure, useFormState } from '@abe-stack/react/hooks';
+import { useDisclosure, useFormState } from '@bslt/react/hooks';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';

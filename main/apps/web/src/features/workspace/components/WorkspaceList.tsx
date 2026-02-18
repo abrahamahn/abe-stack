@@ -5,9 +5,9 @@
  * Displays a grid of workspace cards with basic info.
  */
 
-import { Badge, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { Badge, Card, Heading, Skeleton, Text } from '@bslt/ui';
 
-import type { Tenant } from '@abe-stack/shared';
+import type { Tenant } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

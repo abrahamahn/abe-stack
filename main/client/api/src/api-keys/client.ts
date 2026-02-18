@@ -11,11 +11,10 @@ import {
   deleteApiKeyResponseSchema,
   listApiKeysResponseSchema,
   revokeApiKeyResponseSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   ApiKeyItem,
   CreateApiKeyRequest,
@@ -23,7 +22,8 @@ import type {
   DeleteApiKeyResponse,
   ListApiKeysResponse,
   RevokeApiKeyResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 export type ApiKeysClientConfig = BaseClientConfig;
 export type {
@@ -32,7 +32,7 @@ export type {
   CreateApiKeyResponse,
   DeleteApiKeyResponse,
   ListApiKeysResponse,
-  RevokeApiKeyResponse,
+  RevokeApiKeyResponse
 };
 
 export interface ApiKeysClient {

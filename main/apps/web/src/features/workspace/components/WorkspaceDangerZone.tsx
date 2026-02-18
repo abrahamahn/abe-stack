@@ -6,7 +6,7 @@
  * Follows the same pattern as DataControlsSection's delete flow.
  */
 
-import { Alert, Button, Card, Heading, Text } from '@abe-stack/ui';
+import { Alert, Button, Card, Heading, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 import { SudoModal } from '../../settings/components/SudoModal';

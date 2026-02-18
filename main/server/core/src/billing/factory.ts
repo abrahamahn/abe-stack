@@ -5,7 +5,7 @@
  * Creates the appropriate billing provider based on configuration.
  */
 
-import { BillingProviderNotConfiguredError } from '@abe-stack/shared';
+import { BillingProviderNotConfiguredError } from '@bslt/shared';
 
 import { PayPalProvider } from './paypal-provider';
 import { StripeProvider } from './stripe-provider';
@@ -21,8 +21,8 @@ import type {
   ProviderPaymentMethod,
   ProviderSubscription,
   SetupIntentResult,
-} from '@abe-stack/shared';
-import type { BillingConfig } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import type { BillingConfig } from '@bslt/shared/config';
 
 /**
  * Disabled billing provider that throws errors for all operations.

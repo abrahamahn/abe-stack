@@ -8,7 +8,7 @@
  * @module webauthn/service
  */
 
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -16,9 +16,9 @@ import {
   verifyRegistrationResponse,
 } from '@simplewebauthn/server';
 
-import type { Repositories } from '../../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+import type { Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Constants

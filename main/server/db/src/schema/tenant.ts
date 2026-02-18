@@ -6,7 +6,7 @@
  * Maps to migration 0001_tenant.sql.
  */
 
-import { INVITATION_STATUSES, type InvitationStatus, type TenantRole } from '@abe-stack/shared';
+import { INVITATION_STATUSES, type InvitationStatus, type TenantRole } from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { INVITATION_STATUSES };

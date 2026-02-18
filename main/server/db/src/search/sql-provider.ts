@@ -31,15 +31,15 @@ import {
   type SearchQuery,
   type SearchResult,
   type SortConfig,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
+import type { RawDb, Repositories } from '../index';
 import type {
   SearchContext,
   ServerSearchProvider,
   SqlSearchProviderConfig,
   SqlTableConfig,
 } from './types';
-import type { RawDb, Repositories } from '../index';
 
 // ============================================================================
 // Types

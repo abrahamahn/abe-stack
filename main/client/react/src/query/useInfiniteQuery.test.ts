@@ -1,10 +1,10 @@
 // main/client/react/src/query/useInfiniteQuery.test.ts
 /** @vitest-environment jsdom */
+import { QueryCache } from '@bslt/client-engine';
 import '@testing-library/jest-dom/vitest';
-import { QueryCache } from '@abe-stack/client-engine';
-import { renderHook, waitFor, act, cleanup } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useInfiniteQuery, type InfiniteData } from './useInfiniteQuery';

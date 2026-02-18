@@ -8,7 +8,7 @@
  * @module users/data-hygiene
  */
 
-import { RETENTION_PERIODS } from '@abe-stack/shared';
+import { RETENTION_PERIODS } from '@bslt/shared';
 
 import {
   and,
@@ -24,7 +24,7 @@ import {
   type User,
 } from '../../../db/src';
 
-import type { ServerLogger } from '@abe-stack/shared';
+import type { ServerLogger } from '@bslt/shared';
 
 // ============================================================================
 // Soft-Delete Checks

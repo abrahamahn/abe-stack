@@ -1,12 +1,12 @@
 // main/apps/web/src/features/realtime/ConnectionStatus.test.tsx
 /** @vitest-environment jsdom */
 
-import { render, screen, act } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach, beforeEach, afterEach } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConnectionStatus } from './ConnectionStatus';
 
-import type { ConnectionState, ConnectionStateListener } from '@abe-stack/client-engine';
+import type { ConnectionState, ConnectionStateListener } from '@bslt/client-engine';
 
 // ============================================================================
 // Mock PubSub Client

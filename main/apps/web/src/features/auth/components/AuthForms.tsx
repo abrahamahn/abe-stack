@@ -4,7 +4,7 @@ import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { ResetPasswordForm } from './ResetPasswordForm';
 
-import type { AuthMode } from '@abe-stack/react/hooks';
+import type { AuthMode } from '@bslt/react/hooks';
 import type {
   ForgotPasswordRequest,
   LoginRequest,
@@ -12,7 +12,7 @@ import type {
   RegisterResponse,
   ResendVerificationRequest,
   ResetPasswordRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 export interface AuthFormProps {

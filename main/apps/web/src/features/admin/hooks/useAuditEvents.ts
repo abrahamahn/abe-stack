@@ -5,9 +5,9 @@
  * Fetch audit events for the admin audit log page.
  */
 
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';

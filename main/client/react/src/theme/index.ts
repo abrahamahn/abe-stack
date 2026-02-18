@@ -5,13 +5,14 @@ export {
   getContrastCssVariables,
   highContrastDarkOverrides,
   highContrastLightOverrides,
-  type ContrastMode,
-} from '@abe-stack/client-engine';
+  type ContrastMode
+} from '@bslt/client-engine';
 
 export {
   DEFAULT_DENSITY,
   densityMultipliers,
   getDensityCssVariables,
   getSpacingForDensity,
-  type Density,
-} from '@abe-stack/client-engine';
+  type Density
+} from '@bslt/client-engine';
+

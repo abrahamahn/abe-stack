@@ -28,15 +28,13 @@ import {
   totpVerifyResponseSchema,
   updateConsentPreferencesRequestSchema,
   userSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { createApiError, NetworkError } from '../errors';
 import { API_PREFIX, createRequestFactory } from '../utils';
 
 import { parseLoginResponse } from './login-response';
 
-import type { ApiErrorBody } from '../errors';
-import type { BaseClientConfig } from '../utils';
 import type {
   AuthResponse,
   ChangeEmailRequest,
@@ -48,12 +46,12 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
+  LoginSuccessResponse,
   LogoutResponse,
   MagicLinkRequest,
   MagicLinkRequestResponse,
   MagicLinkVerifyRequest,
   MagicLinkVerifyResponse,
-  LoginSuccessResponse,
   OAuthConnectionsResponse,
   OAuthEnabledProvidersResponse,
   OAuthProvider,
@@ -79,7 +77,9 @@ import type {
   TotpVerifyResponse,
   UpdateConsentPreferencesRequest,
   User,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { ApiErrorBody } from '../errors';
+import type { BaseClientConfig } from '../utils';
 
 /** Payload emitted when the server requires ToS acceptance (403 TOS_ACCEPTANCE_REQUIRED) */
 export interface TosRequiredPayload {

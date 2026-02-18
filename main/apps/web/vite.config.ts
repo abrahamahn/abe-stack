@@ -35,13 +35,13 @@ export default defineConfig({
     conditions: ['source'],
     alias: {
       // Monorepo packages → source files
-      '@abe-stack/shared': resolveAlias('shared/src'),
-      '@abe-stack/ui': resolveAlias('client/ui/src'),
-      '@abe-stack/api': resolveAlias('client/api/src'),
-      '@abe-stack/client-engine': resolveAlias('client/engine/src'),
-      '@abe-stack/react': resolveAlias('client/react/src'),
-      '@abe-stack/db': resolveAlias('server/db/src'),
-      '@abe-stack/media': resolveAlias('server/media/src'),
+      '@bslt/shared': resolveAlias('shared/src'),
+      '@bslt/ui': resolveAlias('client/ui/src'),
+      '@bslt/api': resolveAlias('client/api/src'),
+      '@bslt/client-engine': resolveAlias('client/engine/src'),
+      '@bslt/react': resolveAlias('client/react/src'),
+      '@bslt/db': resolveAlias('server/db/src'),
+      '@bslt/media': resolveAlias('server/media/src'),
 
       // UI package internal aliases
       '@components': resolveAlias('client/ui/src/components'),

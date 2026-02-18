@@ -5,12 +5,12 @@
  * Hook for fetching the list of workspaces the user belongs to.
  */
 
-import { useQuery, useQueryCache } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useQuery, useQueryCache } from '@bslt/react';
 
 import { createWorkspaceApi } from '../api';
 
-import type { Tenant } from '@abe-stack/shared';
+import type { Tenant } from '@bslt/shared';
 
 // ============================================================================
 // API Instance

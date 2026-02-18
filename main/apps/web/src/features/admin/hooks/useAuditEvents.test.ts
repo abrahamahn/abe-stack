@@ -1,15 +1,15 @@
 // main/apps/web/src/features/admin/hooks/useAuditEvents.test.ts
-import { useQuery } from '@abe-stack/react';
+import { useQuery } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createAdminApiClient } from './../services/adminApi';
 import { useAuditEvents } from './useAuditEvents';
 
+import type { UseQueryResult } from '@bslt/react';
 import type { AdminApiClient } from './../services/adminApi';
-import type { UseQueryResult } from '@abe-stack/react';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
 }));
 

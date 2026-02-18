@@ -1,12 +1,12 @@
 // main/apps/web/src/features/home/components/HomeNavList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HomeNavList } from './HomeNavList';
 
 import type { ReactElement, ReactNode } from 'react';
 
-vi.mock('@abe-stack/react/router', () => {
+vi.mock('@bslt/react/router', () => {
   const mockLink = ({
     children,
     to,
@@ -21,7 +21,7 @@ vi.mock('@abe-stack/react/router', () => {
   };
 });
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockButton = ({
     children,
     onClick,

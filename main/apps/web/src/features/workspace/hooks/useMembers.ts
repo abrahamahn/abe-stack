@@ -5,12 +5,12 @@
  * Hooks for listing and managing workspace members.
  */
 
-import { useMutation, useQuery, useQueryCache } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQuery, useQueryCache } from '@bslt/react';
 
 import { createWorkspaceApi } from '../api';
 
-import type { Membership, UpdateMembershipRole } from '@abe-stack/shared';
+import type { Membership, UpdateMembershipRole } from '@bslt/shared';
 
 // ============================================================================
 // API Instance

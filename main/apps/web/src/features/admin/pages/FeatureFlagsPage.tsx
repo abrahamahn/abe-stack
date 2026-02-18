@@ -6,7 +6,7 @@
  * Supports listing, creating, toggling, and deleting flags.
  */
 
-import { formatDate } from '@abe-stack/shared';
+import { formatDate } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import {

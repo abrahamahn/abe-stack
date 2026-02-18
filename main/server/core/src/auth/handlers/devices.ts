@@ -8,12 +8,12 @@
  * @module handlers/devices
  */
 
-import { HTTP_STATUS, NotFoundError, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { HTTP_STATUS, NotFoundError, mapErrorToHttpResponse } from '@bslt/shared';
 
 import { createErrorMapperLogger } from '../types';
 
+import type { HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
-import type { HttpErrorResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Response Types

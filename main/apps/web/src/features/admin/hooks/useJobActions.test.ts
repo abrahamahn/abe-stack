@@ -1,16 +1,16 @@
 // main/apps/web/src/features/admin/hooks/useJobActions.test.ts
-import { useMutation } from '@abe-stack/react';
+import { useMutation } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 
 import { useJobActions } from './useJobActions';
 
+import type { JobActionResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
-import type { JobActionResponse } from '@abe-stack/shared';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useMutation: vi.fn(),
 }));
 
@@ -27,8 +27,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

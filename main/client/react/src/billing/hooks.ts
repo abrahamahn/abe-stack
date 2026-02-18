@@ -9,22 +9,22 @@
  * - usePaymentMethods: Manage payment methods
  */
 
-import { createBillingClient } from '@abe-stack/api';
+import { createBillingClient } from '@bslt/api';
 import { useMemo, useState } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { BillingClientConfig } from '@abe-stack/api';
-import type { QueryKey } from '@abe-stack/client-engine';
+import type { BillingClientConfig } from '@bslt/api';
+import type { QueryKey } from '@bslt/client-engine';
 import type {
   CheckoutRequest,
   Invoice,
   PaymentMethod,
-  PlanId,
   Plan,
+  PlanId,
   Subscription,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Query Keys

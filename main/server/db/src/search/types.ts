@@ -16,7 +16,7 @@ import type {
   SearchCapabilities,
   SearchQuery,
   SearchResult,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // SQL Table/Column Types

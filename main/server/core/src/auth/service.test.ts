@@ -1,6 +1,6 @@
 // main/server/core/src/auth/service.test.ts
 // backend/core/src/auth/__tests__/service.test.ts
-import { canonicalizeEmail, validatePassword } from '@abe-stack/shared';
+import { canonicalizeEmail, validatePassword } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { toCamelCase, type DbClient, type Repositories, type User } from '../../../db/src';
@@ -38,16 +38,16 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './index';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
 // Mock only validatePassword, let error classes be the real ones
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     validatePassword: vi.fn(),
@@ -66,7 +66,7 @@ vi.mock('../tenants', () => ({
   createTenant: vi.fn(),
 }));
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   emailTemplates: {
     emailVerification: vi.fn(() => ({
       subject: 'Verify your email',
@@ -86,7 +86,7 @@ vi.mock('@abe-stack/db', () => ({
   },
 }));
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   withTransaction: vi.fn((db, callback) => callback(db)),
   toCamelCase: vi.fn(),
   USERS_TABLE: 'users',

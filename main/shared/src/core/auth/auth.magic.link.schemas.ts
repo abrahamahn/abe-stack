@@ -6,13 +6,12 @@
  */
 
 import { createSchema, parseString } from '../../primitives/schema';
-
 import { emailSchema } from '../schemas';
-
-import type { User } from '../users/users.schemas';
-import type { Schema } from '../../primitives/schema';
-
 import { userSchema } from '../users/users.schemas';
+
+import type { Schema } from '../../primitives/schema';
+import type { User } from '../users/users.schemas';
+
 
 // ============================================================================
 // Types

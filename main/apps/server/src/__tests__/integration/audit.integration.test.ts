@@ -6,10 +6,10 @@
  * verifying HTTP layer behavior: routing, auth guards, and shared contract imports.
  */
 
-import { adminRoutes } from '@abe-stack/core/admin';
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/server-engine';
-import { SECURITY_SEVERITIES } from '@abe-stack/shared';
+import { adminRoutes } from '@bslt/core/admin';
+import { createAuthGuard } from '@bslt/core/auth';
+import { registerRouteMap } from '@bslt/server-engine';
+import { SECURITY_SEVERITIES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -21,8 +21,8 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@abe-stack/server-engine';
-import type { SecurityEventsFilter } from '@abe-stack/shared';
+import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-engine';
+import type { SecurityEventsFilter } from '@bslt/shared';
 
 // ============================================================================
 // Mock Repositories
@@ -270,7 +270,7 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
   // ==========================================================================
 
   describe('contract verification', () => {
-    it('SECURITY_SEVERITIES is available from @abe-stack/shared', () => {
+    it('SECURITY_SEVERITIES is available from @bslt/shared', () => {
       expect(SECURITY_SEVERITIES).toBeDefined();
       expect(Array.isArray(SECURITY_SEVERITIES)).toBe(true);
       expect(SECURITY_SEVERITIES).toContain('low');
@@ -280,7 +280,7 @@ describe('Audit/Security Events Admin API Integration Tests', () => {
       expect(SECURITY_SEVERITIES.length).toBe(4);
     });
 
-    it('SecurityEventsFilter type is usable from @abe-stack/shared', () => {
+    it('SecurityEventsFilter type is usable from @bslt/shared', () => {
       // Verify the type compiles and can be used at runtime
       const filter: SecurityEventsFilter = {
         eventType: 'login_failure',

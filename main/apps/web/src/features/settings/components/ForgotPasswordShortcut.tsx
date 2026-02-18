@@ -5,8 +5,8 @@
  * Allows a logged-in user to request a password reset email without logging out.
  */
 
-import { getApiClient } from '@abe-stack/api';
-import { Alert, Button, Text } from '@abe-stack/ui';
+import { getApiClient } from '@bslt/api';
+import { Alert, Button, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 export interface ForgotPasswordShortcutProps {

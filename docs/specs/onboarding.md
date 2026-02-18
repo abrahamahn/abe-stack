@@ -1,8 +1,8 @@
 # Developer Onboarding Guide
 
-Welcome to ABE Stack. This guide will get you productive in your first day.
+Welcome to BSLT. This guide will get you productive in your first day.
 
-ABE Stack is a TypeScript monorepo for building full-stack web applications. It ships with authentication, a design system, an admin dashboard, billing scaffolding, and real-time infrastructure — all wired together and ready for production.
+BSLT is a TypeScript monorepo for building full-stack web applications. It ships with authentication, a design system, an admin dashboard, billing scaffolding, and real-time infrastructure — all wired together and ready for production.
 
 **Stack:** Turbo, pnpm, Vite, React, Fastify, Drizzle ORM, Zod, PostgreSQL
 
@@ -12,7 +12,7 @@ ABE Stack is a TypeScript monorepo for building full-stack web applications. It 
 
 ```bash
 # 1. Clone and install
-git clone <repo-url> && cd abe-stack-main
+git clone <repo-url> && cd bslt-main
 pnpm install
 
 # 2. Start database (Docker required)
@@ -80,7 +80,7 @@ The server follows **hexagonal architecture**:
 - **Barrel exports:** Every directory has an `index.ts` that explicitly re-exports its public API. Always use named exports, never `export *`.
 - **Named imports only:** Always use explicit named imports (`import { foo } from 'bar'`), never namespace imports (`import * as bar from 'bar'`). Exception: test files where `import *` is needed for `vi.spyOn`.
 - **Colocated tests:** Test files live next to the code they test (`UserService.ts` + `UserService.test.ts`).
-- **Path aliases:** Instead of `../../../shared/domain/auth`, you write `@abe-stack/shared`. The web app has shorter aliases like `@auth`, `@features`, `@app`. These are auto-generated.
+- **Path aliases:** Instead of `../../../shared/domain/auth`, you write `@bslt/shared`. The web app has shorter aliases like `@auth`, `@features`, `@app`. These are auto-generated.
 - **File headers:** Every `.ts`/`.tsx` file starts with a `// path/to/file.ts` comment. Don't edit these manually — the `sync-file-headers` tool manages them.
 
 ---
@@ -139,13 +139,13 @@ type User = z.infer<typeof userSchema>;
 Keep imports in this order (ESLint enforces this):
 
 1. External packages (`react`, `zod`, `drizzle-orm`)
-2. Internal packages (`@abe-stack/shared`, `@abe-stack/ui`)
+2. Internal packages (`@bslt/shared`, `@bslt/ui`)
 3. Path aliases (`@auth`, `@features`)
 4. Styles (last)
 
 ### Error Handling
 
-- **Server:** Use try/catch with typed HTTP error responses (400, 404, 500). The `AppError` class in `@abe-stack/shared` standardizes error shapes.
+- **Server:** Use try/catch with typed HTTP error responses (400, 404, 500). The `AppError` class in `@bslt/shared` standardizes error shapes.
 - **Client:** Use React Query's built-in `error`/`isLoading`/`isError` states. Don't catch errors in components and swallow them.
 - **Never** fail silently. If something goes wrong, surface it.
 
@@ -159,14 +159,14 @@ Keep imports in this order (ESLint enforces this):
 
 ## Styling and the Design System
 
-ABE Stack has a design system built on CSS custom properties (variables). Every visual value — colors, spacing, borders, shadows, typography — comes from the theme.
+BSLT has a design system built on CSS custom properties (variables). Every visual value — colors, spacing, borders, shadows, typography — comes from the theme.
 
 ### Use design system components
 
-When you need a button, input, table, card, or other standard UI element, import it from `@abe-stack/ui`:
+When you need a button, input, table, card, or other standard UI element, import it from `@bslt/ui`:
 
 ```tsx
-import { Button, Input, Card, Text, Heading } from '@abe-stack/ui';
+import { Button, Input, Card, Text, Heading } from '@bslt/ui';
 ```
 
 Don't use raw `<Button>`, `<input>`, `<select>`, `<table>`, or `<a>` elements. The design system components handle theming, accessibility, and consistent styling automatically.
@@ -286,13 +286,13 @@ During development, run targeted checks on just the files you changed:
 npx eslint main/apps/web/src/features/auth/pages/LoginPage.tsx
 
 # Type-check a specific package
-pnpm --filter @abe-stack/web type-check
+pnpm --filter @bslt/web type-check
 
 # Run a specific test file
 pnpm test -- --run main/server/core/src/auth/service.test.ts
 
 # Run all tests for a package
-pnpm --filter @abe-stack/shared test
+pnpm --filter @bslt/shared test
 
 # Format specific files
 npx prettier --config config/.prettierrc --write main/apps/web/src/features/auth/pages/LoginPage.tsx
@@ -308,7 +308,7 @@ pnpm build    # Runs: build + lint + type-check + test (with Turbo caching)
 
 When using `pnpm --filter`, these are the package names:
 
-`@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`, `@abe-stack/ui`, `@abe-stack/shared`, `@abe-stack/engine`, `@abe-stack/stores`, `@abe-stack/media`
+`@bslt/web`, `@bslt/server`, `@bslt/desktop`, `@bslt/ui`, `@bslt/shared`, `@bslt/engine`, `@bslt/stores`, `@bslt/media`
 
 ### CI pipeline
 

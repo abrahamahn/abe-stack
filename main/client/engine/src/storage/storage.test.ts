@@ -68,7 +68,7 @@ describe('localStorageQueue', () => {
     });
 
     test('should return stored value', (): void => {
-      mockStorage.setItem('abe-stack-mutation-queue', 'test-value');
+      mockStorage.setItem('bslt-mutation-queue', 'test-value');
       const result = localStorageQueue.get();
       expect(result).toBe('test-value');
     });
@@ -87,7 +87,7 @@ describe('localStorageQueue', () => {
   describe('set', () => {
     test('should store value in localStorage', (): void => {
       localStorageQueue.set('test-data');
-      expect(setItemMock).toHaveBeenCalledWith('abe-stack-mutation-queue', 'test-data');
+      expect(setItemMock).toHaveBeenCalledWith('bslt-mutation-queue', 'test-data');
     });
 
     test('should handle undefined localStorage gracefully', (): void => {
@@ -105,9 +105,9 @@ describe('localStorageQueue', () => {
 
   describe('remove', () => {
     test('should remove value from localStorage', (): void => {
-      mockStorage.setItem('abe-stack-mutation-queue', 'test');
+      mockStorage.setItem('bslt-mutation-queue', 'test');
       localStorageQueue.remove();
-      expect(removeItemMock).toHaveBeenCalledWith('abe-stack-mutation-queue');
+      expect(removeItemMock).toHaveBeenCalledWith('bslt-mutation-queue');
     });
 
     test('should handle undefined localStorage gracefully', (): void => {

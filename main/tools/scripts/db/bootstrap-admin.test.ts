@@ -53,7 +53,7 @@ vi.mock('crypto', async () => {
 });
 
 // Mock the database module using package path
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',
@@ -63,7 +63,7 @@ vi.mock('@abe-stack/db', () => ({
 }));
 
 // Mock the auth package — hashPassword uses DEFAULT_ARGON2_CONFIG when called without config arg
-vi.mock('@abe-stack/core/auth', () => ({
+vi.mock('@bslt/core/auth', () => ({
   hashPassword: mockHashPassword,
 }));
 

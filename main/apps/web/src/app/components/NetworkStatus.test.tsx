@@ -1,13 +1,13 @@
 // main/apps/web/src/app/components/NetworkStatus.test.tsx
 /** @vitest-environment jsdom */
 import { render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NetworkStatus } from './NetworkStatus';
 
 // Mock toastStore
 const mockShow = vi.fn();
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   toastStore: {
     getState: () => ({ show: mockShow }),
   },

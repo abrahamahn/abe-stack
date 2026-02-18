@@ -1,6 +1,6 @@
 # Google Cloud Platform Deployment Guide
 
-Step-by-step guide to deploy ABE Stack on Google Cloud Platform using Compute Engine.
+Step-by-step guide to deploy BSLT on Google Cloud Platform using Compute Engine.
 
 ---
 
@@ -29,10 +29,10 @@ This guide covers **Compute Engine** (recommended for most use cases).
 
 ```bash
 # Set project ID
-PROJECT_ID="abe-stack-prod"
+PROJECT_ID="bslt-prod"
 
 # Create project
-gcloud projects create $PROJECT_ID --name="ABE Stack Production"
+gcloud projects create $PROJECT_ID --name="BSLT Production"
 
 # Set as default
 gcloud config set project $PROJECT_ID
@@ -55,7 +55,7 @@ gcloud services enable compute.googleapis.com
 
 ```bash
 # Create VM
-gcloud compute instances create abe-stack-vm \
+gcloud compute instances create bslt-vm \
   --zone=us-central1-a \
   --machine-type=e2-small \
   --image-family=ubuntu-2404-lts-amd64 \
@@ -70,7 +70,7 @@ gcloud compute instances create abe-stack-vm \
     systemctl start docker'
 
 # Get external IP
-gcloud compute instances describe abe-stack-vm \
+gcloud compute instances describe bslt-vm \
   --zone=us-central1-a \
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
@@ -90,7 +90,7 @@ gcloud compute instances describe abe-stack-vm \
 
 1. Go to **Compute Engine → VM instances → Create**
 2. Configure:
-   - Name: `abe-stack-vm`
+   - Name: `bslt-vm`
    - Region: `us-central1` (or closest to users)
    - Machine type: `e2-small` or `e2-medium`
    - Boot disk: Ubuntu 24.04 LTS, 20 GB
@@ -133,13 +133,13 @@ If using Cloud DNS:
 
 ```bash
 # Create managed zone
-gcloud dns managed-zones create abe-stack-zone \
+gcloud dns managed-zones create bslt-zone \
   --dns-name="example.com." \
-  --description="ABE Stack DNS"
+  --description="BSLT DNS"
 
 # Add A record
 gcloud dns record-sets create example.com. \
-  --zone=abe-stack-zone \
+  --zone=bslt-zone \
   --type=A \
   --ttl=300 \
   --rrdatas="<vm-external-ip>"
@@ -152,7 +152,7 @@ gcloud dns record-sets create example.com. \
 ### SSH into VM
 
 ```bash
-gcloud compute ssh abe-stack-vm --zone=us-central1-a
+gcloud compute ssh bslt-vm --zone=us-central1-a
 ```
 
 ### Create Deploy User
@@ -178,7 +178,7 @@ sudo usermod -aG docker $USER
 
 # Log out and back in
 exit
-gcloud compute ssh abe-stack-vm --zone=us-central1-a -- -l deploy
+gcloud compute ssh bslt-vm --zone=us-central1-a -- -l deploy
 ```
 
 ---
@@ -188,8 +188,8 @@ gcloud compute ssh abe-stack-vm --zone=us-central1-a -- -l deploy
 ```bash
 # Clone repository
 cd ~
-git clone https://github.com/your-org/abe-stack.git
-cd abe-stack
+git clone https://github.com/your-org/bslt.git
+cd bslt
 
 # Create production environment file
 cp config/env/.env.production.example config/env/.env.production
@@ -235,7 +235,7 @@ chmod 600 config/env/.env.production
 ### Build and Start
 
 ```bash
-cd ~/abe-stack
+cd ~/bslt
 
 # Build and start all services
 docker compose -f infra/docker/production/docker-compose.prod.yml \
@@ -264,12 +264,12 @@ curl https://example.com/health
 ## 8. Set Up Systemd (Auto-restart)
 
 ```bash
-sudo nano /etc/systemd/system/abe-stack.service
+sudo nano /etc/systemd/system/bslt.service
 ```
 
 ```ini
 [Unit]
-Description=ABE Stack Docker Compose
+Description=BSLT Docker Compose
 Requires=docker.service
 After=docker.service
 
@@ -277,7 +277,7 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 User=deploy
-WorkingDirectory=/home/deploy/abe-stack
+WorkingDirectory=/home/deploy/bslt
 ExecStart=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml --env-file config/env/.env.production up -d
 ExecStop=/usr/bin/docker compose -f infra/docker/production/docker-compose.prod.yml down
 TimeoutStartSec=0
@@ -290,8 +290,8 @@ Enable and start:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable abe-stack
-sudo systemctl start abe-stack
+sudo systemctl enable bslt
+sudo systemctl start bslt
 ```
 
 ---
@@ -304,7 +304,7 @@ Create a GCS bucket:
 
 ```bash
 # From local machine or Cloud Shell
-gsutil mb -l us-central1 gs://abe-stack-backups-$PROJECT_ID
+gsutil mb -l us-central1 gs://bslt-backups-$PROJECT_ID
 ```
 
 Create backup script:
@@ -319,10 +319,10 @@ set -e
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="/tmp/abe_stack_$TIMESTAMP.sql.gz"
-BUCKET="gs://abe-stack-backups-YOUR_PROJECT_ID"
+BUCKET="gs://bslt-backups-YOUR_PROJECT_ID"
 
 # Dump and compress
-docker compose -f /home/deploy/abe-stack/infra/docker/production/docker-compose.prod.yml \
+docker compose -f /home/deploy/bslt/infra/docker/production/docker-compose.prod.yml \
   exec -T postgres pg_dump -U postgres abe_stack | gzip > $BACKUP_FILE
 
 # Upload to Cloud Storage
@@ -368,10 +368,10 @@ crontab -e
 
 ```bash
 # List backups
-gsutil ls gs://abe-stack-backups-$PROJECT_ID/
+gsutil ls gs://bslt-backups-$PROJECT_ID/
 
 # Download backup
-gsutil cp gs://abe-stack-backups-$PROJECT_ID/abe_stack_20260122.sql.gz /tmp/
+gsutil cp gs://bslt-backups-$PROJECT_ID/abe_stack_20260122.sql.gz /tmp/
 
 # Stop API
 docker compose -f infra/docker/production/docker-compose.prod.yml stop api
@@ -392,7 +392,7 @@ docker compose -f infra/docker/production/docker-compose.prod.yml start api
 ### Deploy Updates
 
 ```bash
-cd ~/abe-stack
+cd ~/bslt
 
 # Pull latest
 git pull
@@ -407,13 +407,13 @@ docker compose -f infra/docker/production/docker-compose.prod.yml \
 
 ```bash
 # Standard SSH
-gcloud compute ssh abe-stack-vm --zone=us-central1-a
+gcloud compute ssh bslt-vm --zone=us-central1-a
 
 # As deploy user
-gcloud compute ssh abe-stack-vm --zone=us-central1-a -- -l deploy
+gcloud compute ssh bslt-vm --zone=us-central1-a -- -l deploy
 
 # SSH tunnel for local access
-gcloud compute ssh abe-stack-vm --zone=us-central1-a -- -L 5432:localhost:5432
+gcloud compute ssh bslt-vm --zone=us-central1-a -- -L 5432:localhost:5432
 ```
 
 ---
@@ -433,8 +433,8 @@ Automatically enabled. View in Console → Monitoring:
 ```bash
 # Via Console: Monitoring → Uptime Checks → Create
 # Or use gcloud:
-gcloud monitoring uptime-check-configs create abe-stack-health \
-  --display-name="ABE Stack Health" \
+gcloud monitoring uptime-check-configs create bslt-health \
+  --display-name="BSLT Health" \
   --http-check-path="/health" \
   --monitored-resource-type="uptime-url" \
   --monitored-resource-labels="host=example.com"
@@ -464,11 +464,11 @@ For serverless deployment with auto-scaling:
 
 ```bash
 # Build and push image
-gcloud builds submit --tag gcr.io/$PROJECT_ID/abe-stack-api
+gcloud builds submit --tag gcr.io/$PROJECT_ID/bslt-api
 
 # Deploy
-gcloud run deploy abe-stack-api \
-  --image gcr.io/$PROJECT_ID/abe-stack-api \
+gcloud run deploy bslt-api \
+  --image gcr.io/$PROJECT_ID/bslt-api \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
@@ -496,7 +496,7 @@ gcloud run deploy abe-stack-api \
 Edit SSH config via metadata:
 
 ```bash
-gcloud compute instances add-metadata abe-stack-vm \
+gcloud compute instances add-metadata bslt-vm \
   --zone=us-central1-a \
   --metadata=enable-oslogin=TRUE
 ```
@@ -564,7 +564,7 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 
 # Upgrade VM for permanent fix
-gcloud compute instances set-machine-type abe-stack-vm \
+gcloud compute instances set-machine-type bslt-vm \
   --zone=us-central1-a \
   --machine-type=e2-medium
 ```

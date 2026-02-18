@@ -3,11 +3,11 @@
  * Repository Types
  *
  * Common types used across all repositories.
- * Pagination types are re-exported from @abe-stack/shared for DRY compliance.
+ * Pagination types are re-exported from @bslt/shared for DRY compliance.
  */
 
 // Re-export pagination types from shared (replaces DB-local duplicates)
-export type { CursorPaginatedResult, CursorPaginationOptions } from '@abe-stack/shared';
+export type { CursorPaginatedResult, CursorPaginationOptions } from '@bslt/shared';
 
 /**
  * Time range filter

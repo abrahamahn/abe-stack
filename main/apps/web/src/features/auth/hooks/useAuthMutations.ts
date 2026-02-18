@@ -9,7 +9,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   RegisterResponse,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
 // ============================================================================
 // Types

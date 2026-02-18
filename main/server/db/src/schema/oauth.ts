@@ -5,7 +5,7 @@
  * Explicit TypeScript interfaces for OAuth provider connections.
  */
 
-import { OAUTH_PROVIDERS, type OAuthProvider } from '@abe-stack/shared';
+import { OAUTH_PROVIDERS, type OAuthProvider } from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { OAUTH_PROVIDERS };

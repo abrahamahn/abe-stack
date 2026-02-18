@@ -1,8 +1,8 @@
 // main/apps/web/src/features/dashboard/pages/DashboardPage.tsx
-import { useNavigate, type NavigateFunction } from '@abe-stack/react/router';
-import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
+import { useNavigate, type NavigateFunction } from '@bslt/react/router';
+import { Button, Card, Heading, PageContainer, Text } from '@bslt/ui';
 import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
 

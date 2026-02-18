@@ -18,11 +18,11 @@
  * @packageDocumentation
  */
 
-import { deepEqual, MS_PER_MINUTE } from '@abe-stack/shared';
+import { deepEqual, MS_PER_MINUTE } from '@bslt/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Re-export so existing consumers of this module still get deepEqual
-export { deepEqual } from '@abe-stack/shared';
+export { deepEqual } from '@bslt/shared';
 
 /**
  * Shallow equality check for objects.

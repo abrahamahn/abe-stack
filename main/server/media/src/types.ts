@@ -2,7 +2,7 @@
 /**
  * Core Media Processing Types
  *
- * Re-exports framework-agnostic type definitions from @abe-stack/shared.
+ * Re-exports framework-agnostic type definitions from @bslt/shared.
  * Server-specific types can be added here as needed.
  */
 
@@ -16,5 +16,6 @@ export type {
   ProcessingResult,
   SecurityScanResult,
   UploadConfig,
-  VideoProcessingOptions,
-} from '@abe-stack/shared';
+  VideoProcessingOptions
+} from '@bslt/shared';
+

@@ -9,11 +9,10 @@
  * VAPID key, test notification, and send notification endpoints are stubbed.
  */
 
-import { HTTP_STATUS, isAppError } from '@abe-stack/shared';
+import { HTTP_STATUS, isAppError } from '@bslt/shared';
 
 import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
 
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   BaseMarkAsReadRequest,
   Notification,
@@ -24,7 +23,8 @@ import type {
   UnsubscribeResponse,
   UpdatePreferencesRequest,
   VapidKeyResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Type Definitions

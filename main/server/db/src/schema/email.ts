@@ -14,7 +14,7 @@ import {
   EMAIL_STATUSES,
   type EmailProvider,
   type EmailStatus,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { EMAIL_PROVIDERS, EMAIL_STATUSES };

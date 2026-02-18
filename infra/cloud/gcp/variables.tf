@@ -12,7 +12,7 @@ variable "project_id" {
 variable "app_name" {
   description = "Application name for resource naming"
   type        = string
-  default     = "abe-stack"
+  default     = "bslt"
 }
 
 variable "environment" {

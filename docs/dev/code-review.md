@@ -24,7 +24,7 @@
 
 ## Security
 
-- [ ] No hardcoded secrets, API keys, or credentials (use env vars via `@abe-stack/shared/config`)
+- [ ] No hardcoded secrets, API keys, or credentials (use env vars via `@bslt/shared/config`)
 - [ ] All external input validated with Zod schemas at the boundary
 - [ ] Database queries use parameterized inputs (Drizzle enforces this by default)
 - [ ] Auth-protected routes check appropriate permissions
@@ -43,7 +43,7 @@
 
 - [ ] All colors use CSS variables (`var(--ui-color-*)`) -- no hardcoded hex/rgb values
 - [ ] Spacing uses design tokens (`var(--ui-gap-*)`) -- no arbitrary `px` values (exception: `1px` borders)
-- [ ] UI components from `@abe-stack/ui` used instead of raw HTML elements
+- [ ] UI components from `@bslt/ui` used instead of raw HTML elements
 - [ ] Utility classes preferred over inline styles
 
 ## Documentation

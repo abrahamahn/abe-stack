@@ -14,16 +14,16 @@ export default mergeConfig(baseConfig, {
     exclude: ['**/node_modules/**', '**/dist/**', 'stores/**', 'ui/**'],
     server: {
       deps: {
-        inline: ['@abe-stack/shared', '@abe-stack/api'],
+        inline: ['@bslt/shared', '@bslt/api'],
       },
     },
   },
   resolve: {
     alias: [
-      { find: '@abe-stack/api', replacement: `${apiPkg}/index.ts` },
-      { find: /^@abe-stack\/kernel\/(.*)$/, replacement: `${corePkg}/$1` },
-      { find: '@abe-stack/shared', replacement: `${corePkg}/index.ts` },
-      { find: '@abe-stack/shared', replacement: `${corePkg}/index.ts` },
+      { find: '@bslt/api', replacement: `${apiPkg}/index.ts` },
+      { find: /^@bslt\/kernel\/(.*)$/, replacement: `${corePkg}/$1` },
+      { find: '@bslt/shared', replacement: `${corePkg}/index.ts` },
+      { find: '@bslt/shared', replacement: `${corePkg}/index.ts` },
     ],
   },
 });

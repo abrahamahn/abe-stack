@@ -6,16 +6,16 @@
  * Tests request handling, verification, security logging, and error scenarios.
  */
 
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/shared';
+import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 import { requestMagicLink, verifyMagicLink } from './service';
 
+import type { MagicLinkRequest, UserId } from '@bslt/shared';
+import type { AppConfig } from '@bslt/shared/config';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../index';
 import type { MagicLinkResult, RequestMagicLinkResult } from './service';
-import type { MagicLinkRequest, UserId } from '@abe-stack/shared';
-import type { AppConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -36,15 +36,15 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: vi.fn(),
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
   };
 });
 
-vi.mock('@abe-stack/shared/config', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared/config')>();
+vi.mock('@bslt/shared/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared/config')>();
   return {
     ...actual,
     isStrategyEnabled: vi.fn(),
@@ -242,7 +242,7 @@ function createMagicLinkRequestBody(overrides?: Partial<MagicLinkRequest>): Magi
 describe('handleMagicLinkRequest', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/shared/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -375,7 +375,7 @@ describe('handleMagicLinkRequest', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/shared/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();
@@ -551,7 +551,7 @@ describe('handleMagicLinkRequest', () => {
 describe('handleMagicLinkVerify', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/shared/config'));
+    const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
     isStrategyEnabled.mockReturnValue(true);
   });
 
@@ -802,7 +802,7 @@ describe('handleMagicLinkVerify', () => {
 
   describe('when magic link strategy is disabled', () => {
     test('should return 404 when magic link authentication is not enabled', async () => {
-      const { isStrategyEnabled } = vi.mocked(await import('@abe-stack/shared/config'));
+      const { isStrategyEnabled } = vi.mocked(await import('@bslt/shared/config'));
       isStrategyEnabled.mockReturnValue(false);
 
       const ctx = createMockContext();

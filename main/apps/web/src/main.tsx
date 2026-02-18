@@ -7,8 +7,8 @@
  * - Environment assembled inline and passed to App
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { MS_PER_DAY, MS_PER_MINUTE } from '@abe-stack/shared';
+import { QueryCache } from '@bslt/client-engine';
+import { MS_PER_DAY, MS_PER_MINUTE } from '@bslt/shared';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -21,7 +21,7 @@ import type { ClientEnvironment } from '@app/ClientEnvironment';
 
 import { clientConfig } from '@/config';
 
-import '@abe-stack/ui/styles/elements.css';
+import '@bslt/ui/styles/elements.css';
 
 // ============================================================================
 // Service Creation (module level, before React renders)

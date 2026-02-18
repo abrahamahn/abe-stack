@@ -5,14 +5,14 @@
  * Fetch paginated jobs list with filtering support.
  */
 
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 
 // ============================================================================
 // Types

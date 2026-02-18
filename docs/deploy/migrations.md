@@ -2,7 +2,7 @@
 
 ## Overview
 
-ABE Stack uses sequential SQL migration files managed by a custom migration runner (not Drizzle Kit). Migration files live in `main/server/db/migrations/` and are named `NNNN_description.sql` (e.g., `0000_init.sql` through `0026_performance_indexes.sql`). Applied migrations are tracked in a `migrations` table in PostgreSQL.
+BSLT uses sequential SQL migration files managed by a custom migration runner (not Drizzle Kit). Migration files live in `main/server/db/migrations/` and are named `NNNN_description.sql` (e.g., `0000_init.sql` through `0026_performance_indexes.sql`). Applied migrations are tracked in a `migrations` table in PostgreSQL.
 
 The migration runner (`main/tools/scripts/db/migrate.ts`) reads all `.sql` files in order, skips already-applied ones, and wraps each new migration in a transaction.
 
@@ -54,7 +54,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS timezone text;
 
 ## Rollback Procedure
 
-Drizzle/ABE Stack migrations are forward-only. There is no automatic rollback mechanism.
+Drizzle/BSLT migrations are forward-only. There is no automatic rollback mechanism.
 
 ### Manual rollback steps
 

@@ -5,13 +5,13 @@
  * Hook for fetching the user's profile completeness percentage and missing fields.
  */
 
-import { useQuery, useQueryCache } from '@abe-stack/react';
-import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { getAccessToken } from '@app/authToken';
+import { useQuery, useQueryCache } from '@bslt/react';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
 import { createSettingsApi } from '../api';
 
-import type { ProfileCompletenessResponse } from '@abe-stack/shared';
+import type { ProfileCompletenessResponse } from '@bslt/shared';
 
 // ============================================================================
 // Settings API Instance

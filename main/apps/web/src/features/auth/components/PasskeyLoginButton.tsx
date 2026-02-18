@@ -4,7 +4,7 @@
  * Only renders when WebAuthn is supported by the browser.
  */
 
-import { Button, Text } from '@abe-stack/ui';
+import { Button, Text } from '@bslt/ui';
 
 import { useLoginWithPasskey } from '../hooks/useWebauthn';
 

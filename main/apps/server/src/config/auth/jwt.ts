@@ -1,5 +1,5 @@
 // main/apps/server/src/config/auth/jwt.ts
-import type { JwtRotationConfig } from '@abe-stack/shared/config';
+import type { JwtRotationConfig } from '@bslt/shared/config';
 
 /**
  * Load JWT Rotation Configuration.

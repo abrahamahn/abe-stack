@@ -5,17 +5,17 @@
  * API client for media upload, retrieval, and management operations.
  */
 
-import { createMediaClient } from '@abe-stack/api';
+import { createMediaClient } from '@bslt/api';
 
-import type { MediaClient, MediaClientConfig } from '@abe-stack/api';
+import type { MediaClient, MediaClientConfig } from '@bslt/api';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type MediaUploadResponse = import('@abe-stack/api').MediaUploadResponse;
-export type MediaMetadata = import('@abe-stack/api').ApiMediaMetadata;
-export type MediaStatusResponse = import('@abe-stack/api').MediaStatusResponse;
+export type MediaUploadResponse = import('@bslt/api').MediaUploadResponse;
+export type MediaMetadata = import('@bslt/api').ApiMediaMetadata;
+export type MediaStatusResponse = import('@bslt/api').MediaStatusResponse;
 export type MediaApiConfig = MediaClientConfig;
 export type MediaApi = MediaClient;
 

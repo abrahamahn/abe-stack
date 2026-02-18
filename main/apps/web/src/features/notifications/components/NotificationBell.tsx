@@ -6,7 +6,7 @@
  * Clicking toggles the notification dropdown.
  */
 
-import { Badge, Button } from '@abe-stack/ui';
+import { Badge, Button } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

@@ -6,9 +6,9 @@ import { UserListPage } from './UserListPage';
 
 import type { ReactNode } from 'react';
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
 
   const mockAlert = ({ children, tone }: { children: ReactNode; tone?: string }) => (
     <div role="alert" data-tone={tone}>

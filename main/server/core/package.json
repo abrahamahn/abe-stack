@@ -1,9 +1,9 @@
 {
-  "name": "@abe-stack/core",
+  "name": "@bslt/core",
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Business modules for abe-stack — auth, admin, billing, notifications, users",
+  "description": "Business modules for bslt — auth, admin, billing, notifications, users",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -104,14 +104,14 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
     "test:watch": "vitest",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-core --report-unused-disable-directives",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-core --report-unused-disable-directives",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
-    "@abe-stack/media": "workspace:*",
-    "@abe-stack/server-engine": "workspace:*",
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/shared": "workspace:*",
+    "@bslt/media": "workspace:*",
+    "@bslt/server-engine": "workspace:*",
+    "@bslt/db": "workspace:*",
+    "@bslt/shared": "workspace:*",
     "@simplewebauthn/server": "^13.2.2",
     "argon2": "^0.41.1",
     "otpauth": "^9.4.1",

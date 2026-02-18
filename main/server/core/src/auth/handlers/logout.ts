@@ -8,16 +8,16 @@
  */
 
 import {
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   mapErrorToHttpResponse,
-} from '@abe-stack/shared';
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+} from '@bslt/shared';
 
 import { logoutUser } from '../service';
 import { createErrorMapperLogger, REFRESH_COOKIE_NAME } from '../types';
 import { clearRefreshTokenCookie } from '../utils';
 
+import type { HttpErrorResponse, LogoutResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { HttpErrorResponse, LogoutResponse } from '@abe-stack/shared';
 
 /**
  * Handle user logout.

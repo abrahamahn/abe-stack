@@ -5,13 +5,13 @@
  * Uses useQuery/useMutation for data fetching and mutations.
  */
 
-import { createDeviceClient } from '@abe-stack/api';
+import { createDeviceClient } from '@bslt/api';
 import { useMemo } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { DeviceClientConfig, DeviceItem } from '@abe-stack/api';
+import type { DeviceClientConfig, DeviceItem } from '@bslt/api';
 
 // ============================================================================
 // Query Keys

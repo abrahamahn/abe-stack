@@ -9,7 +9,7 @@
  * - apps/server/src/modules/realtime/ (handlers, routes, service, types)
  * - apps/server/src/infrastructure/messaging/websocket/ (lifecycle, stats)
  *
- * @module @abe-stack/realtime
+ * @module @bslt/realtime
  */
 
 // Routes (for auto-registration)
@@ -17,10 +17,9 @@ export { realtimeRoutes } from './routes';
 
 // Handlers
 export {
-  RecordNotFoundError,
-  VersionConflictError,
   handleGetRecords,
-  handleWrite,
+  handleWrite, RecordNotFoundError,
+  VersionConflictError
 } from './handlers';
 
 // Service — server-specific (DB operations, table registry)
@@ -29,21 +28,19 @@ export {
   loadRecords,
   registerRealtimeTable,
   resolveTableName,
-  saveRecords,
+  saveRecords
 } from './service';
 
-// Service — re-exported from @abe-stack/shared (pure operation logic)
+// Service — re-exported from @bslt/shared (pure operation logic)
 export {
-  PROTECTED_FIELDS,
-  REALTIME_ERRORS,
   applyOperation,
   applyOperations,
   checkVersionConflicts,
   getOperationPointers,
-  isFieldMutable,
-  type ApplyOperationsResult,
-  type VersionConflict,
-} from '@abe-stack/shared';
+  isFieldMutable, PROTECTED_FIELDS,
+  REALTIME_ERRORS, type ApplyOperationsResult,
+  type VersionConflict
+} from '@bslt/shared';
 
 // WebSocket
 export {
@@ -53,8 +50,8 @@ export {
   type SubscriptionKey,
   type TokenVerifier,
   type WebSocketRegistrationOptions,
-  type WebSocketStats,
-} from '@abe-stack/websocket';
+  type WebSocketStats
+} from '@bslt/websocket';
 
 // Types — server-specific
 export type {
@@ -69,5 +66,6 @@ export type {
   RealtimeRecord,
   RealtimeRequest,
   TableConfig,
-  WriteResult,
+  WriteResult
 } from './types';
+

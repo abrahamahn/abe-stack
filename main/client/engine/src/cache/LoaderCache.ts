@@ -1,6 +1,6 @@
 // main/client/engine/src/cache/LoaderCache.ts
 
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
 /**
  * Default TTL for cached entries (5 minutes).

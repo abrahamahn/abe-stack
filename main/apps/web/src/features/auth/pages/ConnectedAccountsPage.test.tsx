@@ -7,8 +7,8 @@ import { renderWithProviders } from '../../../__tests__/utils';
 import { ConnectedAccountsPage } from './ConnectedAccountsPage';
 
 // Mock the react hooks consumed by the page
-vi.mock('@abe-stack/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react')>();
+vi.mock('@bslt/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react')>();
   return {
     ...actual,
     useEnabledOAuthProviders: () => ({

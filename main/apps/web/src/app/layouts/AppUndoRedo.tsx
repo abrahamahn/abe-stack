@@ -1,6 +1,6 @@
 // main/apps/web/src/app/layouts/AppUndoRedo.tsx
-import { useUndoRedoController } from '@abe-stack/react';
-import { UndoRedoToolbar } from '@abe-stack/ui';
+import { useUndoRedoController } from '@bslt/react';
+import { UndoRedoToolbar } from '@bslt/ui';
 import { useUndoHandler } from '@features/settings/hooks/useUndoHandler';
 
 import type { ReactElement } from 'react';

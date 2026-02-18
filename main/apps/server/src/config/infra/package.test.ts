@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_PACKAGE_MANAGER_CONFIG, loadPackageManagerConfig } from './package';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 describe('Package Manager Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {

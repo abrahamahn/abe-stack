@@ -5,8 +5,8 @@
  * Hook for uploading and deleting user avatar.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQueryCache } from '@bslt/react';
 
 import { createSettingsApi, type AvatarDeleteResponse, type AvatarUploadResponse } from '../api';
 

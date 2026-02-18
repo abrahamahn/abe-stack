@@ -6,13 +6,13 @@
  * automatic version bumping, PubSub integration, and extensible hooks.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WriteService, createWriteService, type WriteServiceOptions } from './write-service';
 
-import type { WriteBatch, WriteOperation } from './types';
+import type { SubscriptionManager } from '@bslt/shared';
 import type { DbClient } from '../client';
-import type { SubscriptionManager } from '@abe-stack/shared';
+import type { WriteBatch, WriteOperation } from './types';
 
 // ============================================================================
 // Mock Modules
@@ -28,7 +28,7 @@ vi.mock('../utils/transaction', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@bslt/shared', () => ({
   SubKeys: {
     record: vi.fn((table: string, id: string) => `record:${table}:${id}`),
   },

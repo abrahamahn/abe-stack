@@ -7,7 +7,7 @@ import {
   validateNotificationsConfig,
 } from './notifications';
 
-import type { FullEnv, NotificationConfig, OneSignalConfig } from '@abe-stack/shared/config';
+import type { FullEnv, NotificationConfig, OneSignalConfig } from '@bslt/shared/config';
 
 describe('Notifications Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {

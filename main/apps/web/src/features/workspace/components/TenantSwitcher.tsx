@@ -5,7 +5,7 @@
  * Dropdown in the header for switching between workspaces.
  */
 
-import { Button, Dropdown, Text } from '@abe-stack/ui';
+import { Button, Dropdown, Text } from '@bslt/ui';
 
 import { useWorkspaceContext, useWorkspaces } from '../hooks';
 

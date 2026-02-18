@@ -12,12 +12,12 @@
  * - Short-lived tokens (30 min default)
  */
 
-import { AUTH_EXPIRY, ForbiddenError, QUOTAS, TooManyRequestsError } from '@abe-stack/shared';
+import { AUTH_EXPIRY, ForbiddenError, QUOTAS, TooManyRequestsError } from '@bslt/shared';
 
 import { sign as jwtSign, verify as jwtVerify } from '../../../engine/src';
 
+import type { AdminUser, AppRole } from '@bslt/shared';
 import type { UserRepository } from '../../../db/src';
-import type { AdminUser, AppRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Constants

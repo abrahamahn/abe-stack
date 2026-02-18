@@ -16,12 +16,13 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../schemas';
 import { PLAN_INTERVALS } from '../constants/billing';
+import { isoDateTimeSchema } from '../schemas';
+
 import { planFeatureSchema, planSchema } from './billing.schemas';
 
-import type { Schema } from '../../primitives/schema';
 import type { Plan, PlanFeature, PlanInterval } from './billing.schemas';
+import type { Schema } from '../../primitives/schema';
 
 // ============================================================================
 // Types

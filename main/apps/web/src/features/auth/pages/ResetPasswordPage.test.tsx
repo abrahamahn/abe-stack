@@ -1,6 +1,6 @@
 // main/apps/web/src/features/auth/pages/ResetPasswordPage.test.tsx
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 import { ResetPasswordPage } from './ResetPasswordPage';
@@ -21,10 +21,10 @@ vi.mock('@auth/hooks', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock toastStore from @abe-stack/react
+// Mock toastStore from @bslt/react
 const mockToastShow = vi.fn();
-vi.mock('@abe-stack/react', async () => {
-  const actual = await vi.importActual('@abe-stack/react');
+vi.mock('@bslt/react', async () => {
+  const actual = await vi.importActual('@bslt/react');
   return {
     ...actual,
     toastStore: {

@@ -19,18 +19,18 @@ import {
   NotFoundError,
   validatePassword,
   WeakPasswordError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';
 import { hashPassword, revokeAllUserTokens, verifyPassword } from '../../auth';
 import { ERROR_MESSAGES } from '../types';
 
+import type { UserRole } from '@bslt/shared';
+import type { FastifyRequest } from 'fastify';
 import type { DbClient, Repositories } from '../../../../db/src';
 import type { HandlerContext, RouteResult } from '../../../../engine/src';
 import type { UsersAuthConfig, UsersModuleDeps, UsersRequest } from '../types';
-import type { UserRole } from '@abe-stack/shared';
-import type { FastifyRequest } from 'fastify';
 
 /**
  * Storage service interface for file operations.

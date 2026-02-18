@@ -2,11 +2,11 @@
 /** @vitest-environment jsdom */
 
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useConnectionStatus } from './useConnectionStatus';
 
-import type { ConnectionState, ConnectionStateListener } from '@abe-stack/client-engine';
+import type { ConnectionState, ConnectionStateListener } from '@bslt/client-engine';
 
 // ============================================================================
 // Mock PubSub Client

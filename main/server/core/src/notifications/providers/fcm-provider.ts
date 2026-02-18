@@ -6,13 +6,13 @@
  * To be implemented when FCM integration is needed.
  */
 
-import type { FcmConfig, PushNotificationProvider, SendOptions, SubscriptionWithId } from './types';
 import type {
   BatchSendResult,
   NotificationPayload,
-  PushSendResult as SendResult,
   PushSubscription,
-} from '@abe-stack/shared';
+  PushSendResult as SendResult,
+} from '@bslt/shared';
+import type { FcmConfig, PushNotificationProvider, SendOptions, SubscriptionWithId } from './types';
 
 // ============================================================================
 // FCM Provider Stub

@@ -4,15 +4,15 @@
  *
  * Wraps Fastify's pino logger with correlation ID support
  * and consistent structured logging. Only the Fastify-specific
- * bridge lives here; pure utilities are in @abe-stack/shared.
+ * bridge lives here; pure utilities are in @bslt/shared.
  */
 
 import {
   createLogger as createKernelLogger,
   createRequestLogger as createKernelRequestLogger,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
-import type { RequestContext, Logger } from '@abe-stack/shared';
+import type { Logger, RequestContext } from '@bslt/shared';
 import type { FastifyBaseLogger } from 'fastify';
 
 export type { Logger };
@@ -32,7 +32,7 @@ export function createLogger(
   // FastifyBaseLogger structurally satisfies BaseLogger interface
   // The kernel logger returns utils/Logger which satisfies contracts/Logger
   return createKernelLogger(
-    baseLogger as unknown as import('@abe-stack/shared').BaseLogger,
+    baseLogger as unknown as import('@bslt/shared').BaseLogger,
     context,
   );
 }
@@ -51,7 +51,7 @@ export function createRequestLogger(
   // FastifyBaseLogger structurally satisfies BaseLogger interface
   // The kernel logger returns utils/Logger which satisfies contracts/Logger
   return createKernelRequestLogger(
-    baseLogger as unknown as import('@abe-stack/shared').BaseLogger,
+    baseLogger as unknown as import('@bslt/shared').BaseLogger,
     requestContext,
   );
 }

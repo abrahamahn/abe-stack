@@ -6,8 +6,8 @@
  * Core billing keeps provider verification and event-processing logic.
  */
 
-import { handlePayPalWebhook, handleStripeWebhook } from '@abe-stack/core/billing';
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { handlePayPalWebhook, handleStripeWebhook } from '@bslt/core/billing';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';

@@ -11,8 +11,8 @@
 import {
   AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   mapErrorToHttpResponse,
-} from '@abe-stack/shared';
-import { isStrategyEnabled } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import { isStrategyEnabled } from '@bslt/shared/config';
 
 import { getMetricsCollector } from '../../../../engine/src';
 import {
@@ -25,14 +25,14 @@ import { setRefreshTokenCookie } from '../utils';
 
 import { requestMagicLink, verifyMagicLink } from './service';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   AuthResponse,
   EmailSendError,
   HttpErrorResponse,
   MagicLinkRequest,
   MagicLinkRequestResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 /**
  * Handle magic link request.

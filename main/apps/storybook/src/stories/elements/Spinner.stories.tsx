@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/elements/Spinner.stories.tsx
+import { Spinner } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Spinner } from '@abe-stack/ui';
 
 const meta: Meta<typeof Spinner> = {
   title: 'Elements/Spinner',

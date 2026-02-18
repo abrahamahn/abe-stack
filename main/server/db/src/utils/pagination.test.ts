@@ -1,5 +1,5 @@
 // main/server/db/src/utils/pagination.test.ts
-import { encodeCursor } from '@abe-stack/shared';
+import { encodeCursor } from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import { and, eq, gt, lt, or } from '../builder/index';

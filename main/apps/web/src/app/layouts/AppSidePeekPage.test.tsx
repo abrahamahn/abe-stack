@@ -14,7 +14,7 @@ vi.mock('@ui-library/components', () => {
   };
 });
 
-vi.mock('@abe-stack/react/router', () => ({
+vi.mock('@bslt/react/router', () => ({
   useNavigate: () => mockNavigate,
 }));
 

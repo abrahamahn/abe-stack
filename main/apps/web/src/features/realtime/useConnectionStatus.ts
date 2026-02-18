@@ -1,8 +1,8 @@
 // main/apps/web/src/features/realtime/useConnectionStatus.ts
 
-import { usePubsubConnectionState } from '@abe-stack/react';
+import { usePubsubConnectionState } from '@bslt/react';
 
-import type { ConnectionState, WebsocketPubsubClient } from '@abe-stack/client-engine';
+import type { ConnectionState, WebsocketPubsubClient } from '@bslt/client-engine';
 
 /**
  * Result from useConnectionStatus hook.

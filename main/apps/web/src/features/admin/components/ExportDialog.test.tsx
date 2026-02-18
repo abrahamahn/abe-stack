@@ -1,12 +1,12 @@
 // main/apps/web/src/features/admin/components/ExportDialog.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useExportEvents } from '../hooks/useExportEvents';
 
 import { ExportDialog } from './ExportDialog';
 
-import type { SecurityEventsFilter } from '@abe-stack/shared';
+import type { SecurityEventsFilter } from '@bslt/shared';
 
 // ============================================================================
 // Mocks

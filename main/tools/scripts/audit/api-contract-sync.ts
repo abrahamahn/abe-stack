@@ -15,10 +15,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { apiRouter } from '@abe-stack/shared';
+import { apiRouter } from '@bslt/shared';
 import { generateManifest, populateRegistryFromRouteMaps } from './route-manifest';
 
-import type { Contract, EndpointContract } from '@abe-stack/shared';
+import type { Contract, EndpointContract } from '@bslt/shared';
 import type { RouteManifestEntry } from './route-manifest';
 
 type EndpointKey = `${Uppercase<string>} ${string}`;

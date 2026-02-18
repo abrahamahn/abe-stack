@@ -35,7 +35,7 @@ const VALID_ISO = '2026-01-15T12:00:00.000Z';
 const VALID_EMAIL_TEMPLATE = {
   key: VALID_TEMPLATE_KEY,
   name: 'Welcome Email',
-  subject: 'Welcome to ABE Stack',
+  subject: 'Welcome to BSLT',
   bodyHtml: '<h1>Welcome!</h1>',
   bodyText: 'Welcome!',
   variables: { userName: 'string', appUrl: 'string' },
@@ -144,7 +144,7 @@ describe('emailTemplateSchema', () => {
 
       expect(result.key).toBe(VALID_TEMPLATE_KEY);
       expect(result.name).toBe('Welcome Email');
-      expect(result.subject).toBe('Welcome to ABE Stack');
+      expect(result.subject).toBe('Welcome to BSLT');
       expect(result.bodyHtml).toBe('<h1>Welcome!</h1>');
       expect(result.bodyText).toBe('Welcome!');
       expect(result.variables).toEqual({ userName: 'string', appUrl: 'string' });

@@ -1,10 +1,10 @@
 // main/apps/web/src/features/admin/components/JobActionsMenu.test.tsx
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { JobActionsMenu } from './JobActionsMenu';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 
 // ============================================================================
 // Test Data

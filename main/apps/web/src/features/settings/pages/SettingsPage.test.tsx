@@ -1,13 +1,13 @@
 // main/apps/web/src/features/settings/pages/SettingsPage.test.tsx
 import { useAuth } from '@auth/hooks';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SettingsPage } from './SettingsPage';
 
-import type { User } from '../api';
-import type { UserId } from '@abe-stack/shared';
+import type { UserId } from '@bslt/shared';
 import type { ReactNode } from 'react';
+import type { User } from '../api';
 
 vi.mock('@auth/hooks', () => ({
   useAuth: vi.fn(),
@@ -72,7 +72,7 @@ vi.mock('../components', () => {
   };
 });
 
-vi.mock('@abe-stack/react/router', () => {
+vi.mock('@bslt/react/router', () => {
   const mockLink = ({ children, to }: { children: ReactNode; to?: string }) => (
     <a href={to}>{children}</a>
   );
@@ -82,8 +82,8 @@ vi.mock('@abe-stack/react/router', () => {
   };
 });
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
 
   const mockButton = ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
     <button onClick={onClick}>{children}</button>

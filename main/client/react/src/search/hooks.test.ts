@@ -2,15 +2,15 @@
 /**
  * @vitest-environment jsdom
  */
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { describe, expect, test, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { QueryCacheProvider } from '../query/QueryCacheProvider';
 
-import { useSearch, useInfiniteSearch, useSearchParams, useDebounceSearch } from './hooks';
+import { useDebounceSearch, useInfiniteSearch, useSearch, useSearchParams } from './hooks';
 
-import type { CursorSearchResult, SearchResult } from '@abe-stack/shared';
+import type { CursorSearchResult, SearchResult } from '@bslt/shared';
 
 // Helper to create wrapper with QueryCacheProvider
 function createWrapper() {

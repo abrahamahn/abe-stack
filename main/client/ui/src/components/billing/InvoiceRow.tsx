@@ -1,5 +1,5 @@
 // main/client/ui/src/components/billing/InvoiceRow.tsx
-import { formatPrice, getInvoiceStatusLabel, getInvoiceStatusVariant } from '@abe-stack/shared';
+import { formatPrice, getInvoiceStatusLabel, getInvoiceStatusVariant } from '@bslt/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { Button } from '../../elements/Button';
@@ -7,7 +7,7 @@ import { Skeleton } from '../../elements/Skeleton';
 import { cn } from '../../utils/cn';
 import { EmptyState } from '../EmptyState';
 
-import type { Invoice } from '@abe-stack/shared';
+import type { Invoice } from '@bslt/shared';
 
 // ============================================================================
 // Types

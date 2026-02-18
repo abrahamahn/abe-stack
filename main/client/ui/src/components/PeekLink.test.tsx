@@ -5,7 +5,7 @@
  * Tests link behavior for opening content in side-peek panel.
  */
 
-import { MemoryRouter } from '@abe-stack/react/router';
+import { MemoryRouter } from '@bslt/react/router';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

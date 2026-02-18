@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { createPaginationHelpers } from './helpers';
 import { createPaginationMiddleware } from './middleware';
 
-import type { PaginationRequest } from './types';
-import type { PaginationOptions } from '@abe-stack/shared';
+import type { PaginationOptions } from '@bslt/shared';
 import type { FastifyReply } from 'fastify';
+import type { PaginationRequest } from './types';
 
 describe('Pagination Integration', () => {
   it('should work end-to-end with middleware and helpers', () => {

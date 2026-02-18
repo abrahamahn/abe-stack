@@ -10,14 +10,14 @@
  * Admin routes: publish legal documents
  */
 
-import { createLegalDocumentSchema } from '@abe-stack/shared';
+import { createLegalDocumentSchema } from '@bslt/shared';
 
 import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../../../engine/src';
 
 import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } from './handlers';
 
-import type { LegalAppContext } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { LegalAppContext } from './types';
 
 // ============================================================================
 // Route Helper

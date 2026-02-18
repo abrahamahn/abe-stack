@@ -7,7 +7,7 @@
  * the built-in /health route conflict).
  */
 
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { registerRouteMap } from '@bslt/server-engine';
 import fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,16 +17,16 @@ import { createTest } from './test-utils';
 
 import type { FastifyInstance, preHandlerHookHandler } from 'fastify';
 
-// Mock @abe-stack/websocket to avoid real WebSocket dependency
-vi.mock('@abe-stack/websocket', () => ({
+// Mock @bslt/websocket to avoid real WebSocket dependency
+vi.mock('@bslt/websocket', () => ({
   getWebSocketStats: vi.fn().mockReturnValue({
     pluginRegistered: true,
     activeConnections: 0,
   }),
 }));
 
-// Mock @abe-stack/db for schema validation (used by checkSchemaStatus)
-vi.mock('@abe-stack/db', () => ({
+// Mock @bslt/db for schema validation (used by checkSchemaStatus)
+vi.mock('@bslt/db', () => ({
   REQUIRED_TABLES: ['users', 'refresh_tokens'],
   validateSchema: vi.fn().mockResolvedValue({
     valid: true,

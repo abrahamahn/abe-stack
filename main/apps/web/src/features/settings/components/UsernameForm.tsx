@@ -6,8 +6,8 @@
  * reserved word checking, and 30-day cooldown display.
  */
 
-import { MS_PER_DAY, RESERVED_USERNAMES, USERNAME_CHANGE_COOLDOWN_DAYS } from '@abe-stack/shared';
-import { Alert, Button, FormField, Input, Text } from '@abe-stack/ui';
+import { MS_PER_DAY, RESERVED_USERNAMES, USERNAME_CHANGE_COOLDOWN_DAYS } from '@bslt/shared';
+import { Alert, Button, FormField, Input, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useUsernameUpdate } from '../hooks/useUsername';

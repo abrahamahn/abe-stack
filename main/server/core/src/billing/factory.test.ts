@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createBillingProvider, isBillingConfigured } from './factory';
 
-import type { BillingConfig } from '@abe-stack/shared/config';
+import type { BillingConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies

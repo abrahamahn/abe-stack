@@ -14,8 +14,8 @@ vi.mock('@ui-library/components', () => {
   };
 });
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
 
   const root = ({
     children,

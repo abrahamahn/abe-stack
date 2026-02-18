@@ -12,7 +12,7 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment } from '../__tests__/utils';
 import { App } from '../app/App'; // Import App component
@@ -48,8 +48,8 @@ describe('App', () => {
       render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        // HomePage renders "ABE Stack" heading
-        expect(screen.getAllByText('ABE Stack').length).toBeGreaterThanOrEqual(1);
+        // HomePage renders "BSLT" heading
+        expect(screen.getAllByText('BSLT').length).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -70,9 +70,9 @@ describe('App', () => {
       window.history.replaceState({}, '', '/');
       render(<App environment={mockEnvironment} />);
 
-      // Verify the app renders content - the HomePage renders "ABE Stack" heading
+      // Verify the app renders content - the HomePage renders "BSLT" heading
       await waitFor(() => {
-        expect(screen.getAllByText('ABE Stack').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('BSLT').length).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -93,7 +93,7 @@ describe('App', () => {
 
       // App renders immediately without waiting for cache restoration
       await waitFor(() => {
-        expect(screen.getAllByText('ABE Stack').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('BSLT').length).toBeGreaterThanOrEqual(1);
       });
     });
 
@@ -101,7 +101,7 @@ describe('App', () => {
       render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        expect(screen.getAllByText('ABE Stack').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('BSLT').length).toBeGreaterThanOrEqual(1);
       });
 
       // Verify queryCache is available in environment

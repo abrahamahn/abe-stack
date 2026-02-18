@@ -28,7 +28,7 @@ Central registry is now:
 
 - `main/shared/src/api/router.ts`
 - exported as `apiRouter`
-- package entrypoint: `@abe-stack/shared/api`
+- package entrypoint: `@bslt/shared/api`
 
 Current domains included:
 

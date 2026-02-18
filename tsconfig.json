@@ -3,18 +3,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@abe-stack/shared": ["./main/shared/src/index.ts"],
-      "@abe-stack/shared/*": ["./main/shared/src/*"],
-      "@abe-stack/server-engine": ["./main/server/engine/src/index.ts"],
-      "@abe-stack/server-engine/*": ["./main/server/engine/src/*"],
-      "@abe-stack/db": ["./main/server/db/src/index.ts"],
-      "@abe-stack/db/*": ["./main/server/db/src/*"],
-      "@abe-stack/core": ["./main/server/core/src/index.ts"],
-      "@abe-stack/core/*": ["./main/server/core/src/*"],
-      "@abe-stack/api": ["./main/client/api/src/index.ts"],
-      "@abe-stack/api/*": ["./main/client/api/src/*"],
-      "@abe-stack/ui": ["./main/client/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["./main/client/ui/src/*"]
+      "@bslt/shared": ["./main/shared/src/index.ts"],
+      "@bslt/shared/*": ["./main/shared/src/*"],
+      "@bslt/server-engine": ["./main/server/engine/src/index.ts"],
+      "@bslt/server-engine/*": ["./main/server/engine/src/*"],
+      "@bslt/db": ["./main/server/db/src/index.ts"],
+      "@bslt/db/*": ["./main/server/db/src/*"],
+      "@bslt/core": ["./main/server/core/src/index.ts"],
+      "@bslt/core/*": ["./main/server/core/src/*"],
+      "@bslt/api": ["./main/client/api/src/index.ts"],
+      "@bslt/api/*": ["./main/client/api/src/*"],
+      "@bslt/ui": ["./main/client/ui/src/index.ts"],
+      "@bslt/ui/*": ["./main/client/ui/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", "coverage"],

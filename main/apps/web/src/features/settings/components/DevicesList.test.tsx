@@ -5,25 +5,25 @@
  * Tests for device list display, trust, revoke interactions, and loading/error states.
  */
 
-import { useDevices } from '@abe-stack/react';
+import { useDevices } from '@bslt/react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DevicesList } from './DevicesList';
 
-import type { DeviceItem } from '@abe-stack/api';
-import type { DevicesState } from '@abe-stack/react';
+import type { DeviceItem } from '@bslt/api';
+import type { DevicesState } from '@bslt/react';
 import type { ReactNode } from 'react';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useDevices: vi.fn(),
 }));
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockAlert = ({ children, tone }: { children: ReactNode; tone?: string }) => (
     <div data-testid="alert" data-variant={tone}>
       {children}

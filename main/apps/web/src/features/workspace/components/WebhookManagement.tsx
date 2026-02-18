@@ -6,7 +6,8 @@
  * Follows the same CRUD management pattern as ApiKeysManagement.
  */
 
-import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@abe-stack/react';
+import { getAccessToken } from '@app/authToken';
+import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@bslt/react';
 import {
   Alert,
   Badge,
@@ -23,13 +24,12 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
-import { getAccessToken } from '@app/authToken';
+} from '@bslt/ui';
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 
 import { WebhookDetailView } from './WebhookDetailView';
 
-import type { WebhookClientConfig, WebhookItem } from '@abe-stack/api';
+import type { WebhookClientConfig, WebhookItem } from '@bslt/api';
 
 // ============================================================================
 // Types

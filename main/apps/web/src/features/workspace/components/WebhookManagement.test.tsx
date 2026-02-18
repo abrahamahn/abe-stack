@@ -3,20 +3,20 @@
  * Tests for WebhookManagement component.
  */
 
-import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@abe-stack/react';
+import { useCreateWebhook, useDeleteWebhook, useWebhooks } from '@bslt/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WebhookManagement } from './WebhookManagement';
 
-import type { WebhookItem } from '@abe-stack/api';
+import type { WebhookItem } from '@bslt/api';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useWebhooks: vi.fn(),
   useCreateWebhook: vi.fn(),
   useDeleteWebhook: vi.fn(),

@@ -1,5 +1,5 @@
 // main/server/engine/src/search/query-builder.test.ts
-import * as shared from '@abe-stack/shared';
+import * as shared from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import * as engine from './query-builder';

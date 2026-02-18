@@ -9,7 +9,7 @@
  * - Authentication requirements
  */
 
-import { recordPointerSchema, transactionSchema } from '@abe-stack/shared';
+import { recordPointerSchema, transactionSchema } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================

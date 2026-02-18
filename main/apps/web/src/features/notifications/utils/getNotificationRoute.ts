@@ -6,7 +6,7 @@
  * to determine which page the user should navigate to.
  */
 
-import type { Notification } from '@abe-stack/shared';
+import type { Notification } from '@bslt/shared';
 
 /**
  * Returns the route path for a given notification, or null if no

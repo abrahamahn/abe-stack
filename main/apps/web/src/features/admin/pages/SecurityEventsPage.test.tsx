@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SecurityEventsPage } from './SecurityEventsPage';
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', () => {
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', () => {
   const Button = ({
     children,
     onClick,

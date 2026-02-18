@@ -1,11 +1,11 @@
 // main/apps/server/src/http/pagination/middleware.test.ts
-import { PAGINATION_ERROR_TYPES } from '@abe-stack/shared';
+import { PAGINATION_ERROR_TYPES } from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import { createPaginationMiddleware } from './middleware';
 
-import type { PaginationRequest } from './types';
 import type { FastifyReply } from 'fastify';
+import type { PaginationRequest } from './types';
 
 describe('Pagination Middleware', () => {
   const createMockRequest = (query: Record<string, string | string[]> = {}) => ({

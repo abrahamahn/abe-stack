@@ -18,11 +18,11 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { initEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, createDbClient } from '@bslt/db';
+import { initEnv } from '@bslt/server-engine';
 
-import { REQUIRED_TABLES } from '../../../server/db/src/validation';
 import * as schema from '../../../server/db/src/schema';
+import { REQUIRED_TABLES } from '../../../server/db/src/validation';
 
 type AuditResult = {
   ok: boolean;

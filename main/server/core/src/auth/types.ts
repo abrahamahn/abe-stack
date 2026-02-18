@@ -3,8 +3,8 @@
 export {
   LOGIN_FAILURE_REASON,
   REFRESH_TOKEN_COOKIE_NAME as REFRESH_COOKIE_NAME,
-  type LoginFailureReason,
-} from '@abe-stack/shared';
+  type LoginFailureReason
+} from '@bslt/shared';
 
 /**
  * Auth Module Types
@@ -12,23 +12,26 @@ export {
  * Dependency interface and shared types for the auth module.
  * The server provides these dependencies when registering the auth module.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger, RequestInfo, and reply/request interfaces across packages.
  *
  * @module types
  */
 
-import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
-import type { DbClient, Repositories } from '../../../db/src';
-import type { SmsProvider } from '../../../engine/src';
-import type { EmailOptions, SendResult,
+import type {
   AuthenticatedUser,
   BaseContext,
-  ContractRequestContext as RequestContext,
+  EmailOptions,
   ReplyContext,
+  ContractRequestContext as RequestContext,
   RequestInfo,
-  ServerLogger } from '@abe-stack/shared';
+  SendResult,
+  ServerLogger
+} from '@bslt/shared';
+import type { DbClient, Repositories } from '../../../db/src';
+import type { SmsProvider } from '../../../engine/src';
 
 // ============================================================================
 // Logger Interface
@@ -83,13 +86,13 @@ export interface AuthLogger extends ServerLogger {
 
 /**
  * Email options for sending messages.
- * Matches the EmailOptions from @abe-stack/shared.
+ * Matches the EmailOptions from @bslt/shared.
  */
 export type AuthEmailOptions = EmailOptions;
 
 /**
  * Email service interface used by the auth module.
- * Matches the EmailService from @abe-stack/shared.
+ * Matches the EmailService from @bslt/shared.
  *
  * @complexity O(1) per send call (async I/O)
  */
@@ -261,7 +264,7 @@ export interface AuthModuleDeps {
  * Transition alias for `ReplyContext` from contracts.
  * Existing code importing `ReplyWithCookies` from this module continues
  * working without changes. New code should import `ReplyContext` from
- * `@abe-stack/shared` directly.
+ * `@bslt/shared` directly.
  */
 export type ReplyWithCookies = ReplyContext;
 
@@ -324,7 +327,7 @@ export interface AppContext extends BaseContext {
   readonly sms?: SmsProvider | undefined;
   /** Application configuration */
   readonly config: {
-    readonly auth: import('@abe-stack/server-engine/config').AuthConfig;
+    readonly auth: import('@bslt/server-engine/config').AuthConfig;
     readonly server: {
       readonly appBaseUrl: string;
     };
@@ -353,7 +356,7 @@ export const MAX_PROGRESSIVE_DELAY_MS = 30 * MS_PER_SECOND;
 
 /**
  * Adapts an AppContext logger to the ErrorMapperLogger interface
- * used by @abe-stack/shared's mapErrorToHttpResponse.
+ * used by @bslt/shared's mapErrorToHttpResponse.
  *
  * @param log - Auth logger instance
  * @returns ErrorMapperLogger-compatible object

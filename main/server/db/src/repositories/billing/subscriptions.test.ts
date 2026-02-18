@@ -6,13 +6,13 @@
  * and specialized queries for expiring/past-due subscriptions.
  */
 
-import { encodeCursor, MS_PER_DAY } from '@abe-stack/shared';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { encodeCursor, MS_PER_DAY } from '@bslt/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSubscriptionRepository } from './subscriptions';
 
 import type { RawDb } from '../../client';
-import type { Subscription, NewSubscription, UpdateSubscription } from '../../schema/index';
+import type { NewSubscription, Subscription, UpdateSubscription } from '../../schema/index';
 
 // ============================================================================
 // Mock Database

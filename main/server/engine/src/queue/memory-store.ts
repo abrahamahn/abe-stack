@@ -5,7 +5,7 @@
  * Simple in-memory implementation for testing and development.
  * Not suitable for production (no persistence, no horizontal scaling).
  *
- * @module @abe-stack/server-engine/queue
+ * @module @bslt/server-engine/queue
  */
 
 import type { QueueStore, Task, TaskError, TaskResult } from './types';

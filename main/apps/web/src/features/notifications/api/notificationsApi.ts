@@ -6,14 +6,14 @@
  * list, mark-read, mark-all-read, and delete.
  */
 
-import { createNotificationClient } from '@abe-stack/api';
+import { createNotificationClient } from '@bslt/api';
 
 import type {
   BaseClientConfig,
   DeleteNotificationResponse,
   MarkReadResponse,
   NotificationsListResponse,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
 // ============================================================================
 // Types
@@ -57,5 +57,6 @@ export function createNotificationsApi(config: NotificationsApiConfig): Notifica
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
-  NotificationsListResponse,
-} from '@abe-stack/api';
+  NotificationsListResponse
+} from '@bslt/api';
+

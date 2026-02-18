@@ -6,9 +6,9 @@
  * Allows admins to view the app as a specific user for debugging.
  */
 
-import { getApiClient } from '@abe-stack/api';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useAuth } from '@auth/hooks';
+import { getApiClient } from '@bslt/api';
 import { useCallback, useMemo } from 'react';
 
 // ============================================================================

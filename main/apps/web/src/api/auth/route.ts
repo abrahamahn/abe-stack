@@ -2,12 +2,12 @@
 import type {
   ApiClient,
   AuthResponse,
-  LoginSuccessResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
+  LoginSuccessResponse,
   MagicLinkRequest,
   MagicLinkRequestResponse,
   MagicLinkVerifyRequest,
@@ -21,7 +21,7 @@ import type {
   SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   User,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
 export interface AuthRouteClient {
   login: (

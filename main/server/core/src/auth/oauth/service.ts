@@ -22,7 +22,7 @@ import {
   OAuthStateMismatchError,
   toISODateOnly,
   type UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   insert,
@@ -51,6 +51,7 @@ import {
   extractAppleUserFromIdToken,
 } from './providers';
 
+import type { AuthConfig, OAuthProviderConfig } from '@bslt/shared/config';
 import type {
   OAuthConnectionInfo,
   OAuthProviderClient,
@@ -58,7 +59,6 @@ import type {
   OAuthTokenResponse,
   OAuthUserInfo,
 } from './types';
-import type { AuthConfig, OAuthProviderConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Types
@@ -72,7 +72,7 @@ export interface OAuthAuthResult {
   accessToken: string;
   /** Opaque refresh token */
   refreshToken: string;
-  /** Authenticated user data (matches domain User from @abe-stack/shared) */
+  /** Authenticated user data (matches domain User from @bslt/shared) */
   user: {
     id: UserId;
     email: string;

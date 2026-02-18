@@ -6,7 +6,7 @@
  * location, language, and website.
  */
 
-import { Alert, Button, FormField, Input, Text, TextArea } from '@abe-stack/ui';
+import { Alert, Button, FormField, Input, Text, TextArea } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useProfileUpdate } from '../hooks';

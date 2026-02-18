@@ -6,7 +6,7 @@
  * Includes payload redaction for sensitive fields.
  */
 
-import { AppError, NotFoundError } from '@abe-stack/shared';
+import { AppError, NotFoundError } from '@bslt/shared';
 
 import type {
   JobDetails,

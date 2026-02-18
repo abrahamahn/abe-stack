@@ -3,7 +3,7 @@
  * Configuration Module
  *
  * Server-side configuration loading (Node.js fs/path).
- * All portable types, schemas, and parsers are re-exported from @abe-stack/shared/config.
+ * All portable types, schemas, and parsers are re-exported from @bslt/shared/config.
  */
 
 // ============================================================================
@@ -12,7 +12,7 @@
 export { initEnv, loadServerEnv, validateEnvironment } from './env.loader';
 
 // ============================================================================
-// Re-exports from @abe-stack/shared/config (backward compatibility)
+// Re-exports from @bslt/shared/config (backward compatibility)
 // ============================================================================
 export type {
   AppConfig,
@@ -59,17 +59,14 @@ export type {
   ServerConfig,
   SmtpConfig,
   SnsConfig,
-  SqlColumnMapping,
-  SqlSearchConfig,
+  SqlColumnMapping, SqliteConfig, SqlSearchConfig,
   SqlSearchProviderConfig,
-  SqlTableConfig,
-  SqliteConfig,
-  StorageConfig,
+  SqlTableConfig, StorageConfig,
   StorageConfigBase,
   StorageProviderName,
   StripeProviderConfig,
-  YarnConfig,
-} from '@abe-stack/shared/config';
+  YarnConfig
+} from '@bslt/shared/config';
 
 export {
   AuthEnvSchema,
@@ -79,17 +76,16 @@ export {
   DatabaseEnvSchema,
   EmailEnvSchema,
   EnvSchema,
-  FrontendEnvSchema,
-  NotificationEnvSchema,
-  PackageManagerEnvSchema,
-  QueueEnvSchema,
-  SearchEnvSchema,
-  ServerEnvSchema,
-  StorageEnvSchema,
-  getBool,
+  FrontendEnvSchema, getBool,
   getInt,
   getList,
   getRefreshCookieOptions,
   getRequired,
-  isStrategyEnabled,
-} from '@abe-stack/shared/config';
+  isStrategyEnabled, NotificationEnvSchema,
+  PackageManagerEnvSchema,
+  QueueEnvSchema,
+  SearchEnvSchema,
+  ServerEnvSchema,
+  StorageEnvSchema
+} from '@bslt/shared/config';
+

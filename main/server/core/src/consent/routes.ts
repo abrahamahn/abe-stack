@@ -8,14 +8,14 @@
  * User routes: get and update consent preferences
  */
 
-import { updateConsentPreferencesRequestSchema } from '@abe-stack/shared';
+import { updateConsentPreferencesRequestSchema } from '@bslt/shared';
 
 import { createRouteMap, protectedRoute, type RouteMap } from '../../../engine/src';
 
 import { handleGetConsent, handleUpdateConsent } from './handlers';
 
-import type { ConsentAppContext } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { ConsentAppContext } from './types';
 
 // ============================================================================
 // Route Helper

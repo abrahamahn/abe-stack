@@ -1,4 +1,4 @@
-# ABE Stack Web
+# BSLT Web
 
 > Services before React.
 
@@ -23,7 +23,7 @@ Vite + React 19 frontend. The key insight: services are created before React ren
 pnpm dev
 
 # standalone
-pnpm --filter @abe-stack/web dev
+pnpm --filter @bslt/web dev
 ```
 
 Vite runs on port 5173, proxies `/api` to the backend on 8080.
@@ -31,11 +31,11 @@ Vite runs on port 5173, proxies `/api` to the backend on 8080.
 ## Commands
 
 ```sh
-pnpm --filter @abe-stack/web dev        # development (HMR)
-pnpm --filter @abe-stack/web build      # production build
-pnpm --filter @abe-stack/web preview    # preview production build
-pnpm --filter @abe-stack/web test       # run tests
-pnpm --filter @abe-stack/web type-check # check types
+pnpm --filter @bslt/web dev        # development (HMR)
+pnpm --filter @bslt/web build      # production build
+pnpm --filter @bslt/web preview    # preview production build
+pnpm --filter @bslt/web test       # run tests
+pnpm --filter @bslt/web type-check # check types
 ```
 
 ## Architecture
@@ -115,7 +115,7 @@ Protected area for authenticated users.
 
 ### UI Library (`src/features/ui-library/`)
 
-Interactive component catalog at `/ui-library`. Displays all `@abe-stack/ui` components with:
+Interactive component catalog at `/ui-library`. Displays all `@bslt/ui` components with:
 
 - Live examples with theme switching
 - Code snippets
@@ -324,13 +324,13 @@ React Query cache persisted to IndexedDB (24-hour max age):
 
 **Internal:**
 
-- `@abe-stack/shared` - types, validation, stores
-- `@abe-stack/ui` - React components
-- `@abe-stack/engine` - API client + React Query hooks
+- `@bslt/shared` - types, validation, stores
+- `@bslt/ui` - React components
+- `@bslt/engine` - API client + React Query hooks
 
 **External:**
 
-- React 19 + custom router (via @abe-stack/ui)
+- React 19 + custom router (via @bslt/ui)
 - TanStack Query (React Query)
 - Vite
 

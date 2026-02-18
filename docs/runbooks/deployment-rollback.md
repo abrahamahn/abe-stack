@@ -18,7 +18,7 @@
    - **environment:** `production` or `staging`
    - **provider:** `digitalocean` or `gcp`
    - **target_tag:** The Docker image tag to rollback to (required)
-   - **app_name:** Application slug (default: `abe-stack`)
+   - **app_name:** Application slug (default: `bslt`)
 3. The workflow will:
    - Pull the specified Docker images
    - Stop current containers
@@ -41,13 +41,13 @@ gh run list --workflow=deploy.yml --limit=5
 ```bash
 ssh user@your-server
 
-cd ~/deployments/abe-stack/production
+cd ~/deployments/bslt/production
 
 # Update docker-compose to use the previous image tag
 # Edit docker-compose.prod.yml: change image tags to the previous version
 
-docker compose --project-name abe-stack-production -f docker-compose.prod.yml down --timeout 30
-docker compose --project-name abe-stack-production -f docker-compose.prod.yml up -d
+docker compose --project-name bslt-production -f docker-compose.prod.yml down --timeout 30
+docker compose --project-name bslt-production -f docker-compose.prod.yml up -d
 ```
 
 ## Database Considerations

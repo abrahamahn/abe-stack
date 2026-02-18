@@ -8,8 +8,8 @@
 import {
   addPaymentMethodRequestSchema,
   cancelSubscriptionRequestSchema,
-  checkoutResponseSchema,
   checkoutRequestSchema,
+  checkoutResponseSchema,
   invoicesListResponseSchema,
   paymentMethodResponseSchema,
   paymentMethodsListResponseSchema,
@@ -20,18 +20,17 @@ import {
   subscriptionActionResponseSchema,
   subscriptionResponseSchema,
   updateSubscriptionRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   AddPaymentMethodRequest,
   CancelSubscriptionRequest,
   CheckoutRequest,
   CheckoutResponse,
-  InvoicesListResponse,
   InvoiceResponse,
+  InvoicesListResponse,
   PaymentMethodResponse,
   PaymentMethodsListResponse,
   PlansListResponse,
@@ -41,7 +40,8 @@ import type {
   SubscriptionActionResponse,
   SubscriptionResponse,
   UpdateSubscriptionRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types

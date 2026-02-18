@@ -14,7 +14,7 @@ import {
   emptyBodySchema,
   portalSessionRequestSchema,
   updateSubscriptionRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   handleAddPaymentMethod,
@@ -34,6 +34,13 @@ import {
 } from './handlers';
 
 import type {
+  AddPaymentMethodRequest,
+  CancelSubscriptionRequest,
+  CheckoutRequest,
+  PortalSessionRequest,
+  UpdateSubscriptionRequest,
+} from '@bslt/shared';
+import type {
   BillingAppContext,
   BillingBaseRouteDefinition,
   BillingRequest,
@@ -41,13 +48,6 @@ import type {
   BillingRouteResult,
   BillingValidationSchema,
 } from './types';
-import type {
-  AddPaymentMethodRequest,
-  CancelSubscriptionRequest,
-  CheckoutRequest,
-  PortalSessionRequest,
-  UpdateSubscriptionRequest,
-} from '@abe-stack/shared';
 
 // ============================================================================
 // Route Helper Functions

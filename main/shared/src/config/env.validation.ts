@@ -30,7 +30,6 @@ import { SearchEnvSchema } from './env.search';
 import { ServerEnvSchema } from './env.server';
 import { StorageEnvSchema } from './env.storage';
 
-import type { Schema } from '../primitives/schema';
 import type { AuthConfig, AuthEnv } from './env.auth';
 import type { BaseEnv, JwtEnv } from './env.base';
 import type { BillingConfig, BillingEnv } from './env.billing';
@@ -44,6 +43,7 @@ import type { QueueConfig, QueueEnv } from './env.queue';
 import type { SearchConfig, SearchEnv } from './env.search';
 import type { ServerConfig, ServerEnv } from './env.server';
 import type { StorageConfig, StorageEnv } from './env.storage';
+import type { Schema } from '../primitives/schema';
 
 // ============================================================================
 // Combined Environment

@@ -9,10 +9,10 @@ import {
   formatDateTime,
   formatSecurityEventType,
   getSecuritySeverityTone,
-} from '@abe-stack/shared';
-import { Badge, Text } from '@abe-stack/ui';
-import { LabeledValueRow } from '@abe-stack/ui/components/LabeledValueRow';
-import { TitledCardSection } from '@abe-stack/ui/components/TitledCardSection';
+} from '@bslt/shared';
+import { Badge, Text } from '@bslt/ui';
+import { LabeledValueRow } from '@bslt/ui/components/LabeledValueRow';
+import { TitledCardSection } from '@bslt/ui/components/TitledCardSection';
 
 import type { JSX } from 'react';
 

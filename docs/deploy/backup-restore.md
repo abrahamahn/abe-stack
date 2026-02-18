@@ -52,7 +52,7 @@ aws s3 cp "abe_stack_*.dump" s3://your-backup-bucket/db-backups/
 ### Step 1: Stop the application
 
 ```bash
-docker compose --project-name abe-stack-production -f docker-compose.prod.yml down
+docker compose --project-name bslt-production -f docker-compose.prod.yml down
 ```
 
 ### Step 2: Restore the database
@@ -70,7 +70,7 @@ For managed databases, use the provider's restore-from-backup UI or CLI.
 ### Step 3: Restart the application
 
 ```bash
-docker compose --project-name abe-stack-production -f docker-compose.prod.yml up -d
+docker compose --project-name bslt-production -f docker-compose.prod.yml up -d
 ```
 
 ### Step 4: Run pending migrations

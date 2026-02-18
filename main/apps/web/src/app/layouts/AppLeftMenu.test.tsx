@@ -1,6 +1,6 @@
 // main/apps/web/src/app/layouts/AppLeftMenu.test.tsx
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppLeftMenu } from './AppLeftMenu';
 
@@ -12,7 +12,7 @@ vi.mock('@features/auth', () => ({
   useAuth: (...args: unknown[]) => mockUseAuth(...args),
 }));
 
-vi.mock('@abe-stack/react/router', () => {
+vi.mock('@bslt/react/router', () => {
   const link = ({
     children,
     to,

@@ -321,7 +321,7 @@ self.addEventListener('message', (event) => {
 /**
  * Push event - receive and display push notifications
  *
- * Expected payload format (matches NotificationPayload from @abe-stack/shared):
+ * Expected payload format (matches NotificationPayload from @bslt/shared):
  * {
  *   title: string,
  *   body: string,

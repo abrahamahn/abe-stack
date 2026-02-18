@@ -5,12 +5,12 @@
  * Hook for sudo re-authentication (elevated privilege confirmation).
  */
 
-import { useMutation } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation } from '@bslt/react';
 
 import { createSettingsApi } from '../api';
 
-import type { SudoRequest, SudoResponse } from '@abe-stack/shared';
+import type { SudoRequest, SudoResponse } from '@bslt/shared';
 
 // ============================================================================
 // Settings API Instance

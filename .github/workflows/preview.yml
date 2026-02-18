@@ -49,7 +49,7 @@ jobs:
       - name: Generate preview URL
         id: preview
         run: |
-          PREVIEW_URL="pr-${{ github.event.number }}.preview.abe-stack.dev"
+          PREVIEW_URL="pr-${{ github.event.number }}.preview.bslt.dev"
           echo "url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
           # Placeholder: actual preview deployment depends on infrastructure
           # For production use, this step would:
@@ -114,7 +114,7 @@ jobs:
       - name: Cleanup preview environment
         run: |
           echo "Cleaning up preview environment for PR #${{ github.event.number }}"
-          echo "Preview URL: pr-${{ github.event.number }}.preview.abe-stack.dev"
+          echo "Preview URL: pr-${{ github.event.number }}.preview.bslt.dev"
           # Placeholder: actual cleanup depends on infrastructure
           # For production use, this step would:
           # 1. Remove the preview Docker containers/services

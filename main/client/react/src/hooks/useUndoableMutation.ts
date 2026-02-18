@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useUndoableMutation.ts
-import { createSetOperation, createTransaction } from '@abe-stack/shared';
+import { createSetOperation, createTransaction } from '@bslt/shared';
 import { useRef } from 'react';
 
 import { useMutation } from '../query/useMutation';

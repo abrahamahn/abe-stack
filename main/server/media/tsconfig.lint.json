@@ -5,8 +5,8 @@
     "composite": false,
     "noEmit": true,
     "paths": {
-      "@abe-stack/shared": ["../../shared/src/index.ts"],
-      "@abe-stack/shared/*": ["../../shared/src/*"],
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
       "@/*": ["./src/*"]
     }
   },

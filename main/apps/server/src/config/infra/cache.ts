@@ -1,7 +1,7 @@
 // main/apps/server/src/config/infra/cache.ts
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
-import type { CacheConfig, FullEnv } from '@abe-stack/shared/config';
+import type { CacheConfig, FullEnv } from '@bslt/shared/config';
 
 /**
  * Loads Caching configuration.

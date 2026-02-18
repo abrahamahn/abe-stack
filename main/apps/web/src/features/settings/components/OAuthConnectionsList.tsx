@@ -5,13 +5,13 @@
  * Displays linked OAuth providers and allows connecting/disconnecting.
  */
 
-import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/react';
-import { Alert, Button, Card, Skeleton, Text } from '@abe-stack/ui';
-import { CardAsyncState } from '@abe-stack/ui/components/CardAsyncState';
 import { getAccessToken } from '@app/authToken';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@bslt/react';
+import { Alert, Button, Card, Skeleton, Text } from '@bslt/ui';
+import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
 import { useMemo, useState, type ReactElement } from 'react';
 
-import type { ApiClientConfig } from '@abe-stack/api';
+import type { ApiClientConfig } from '@bslt/api';
 
 // ============================================================================
 // Local Types (for ESLint type resolution)

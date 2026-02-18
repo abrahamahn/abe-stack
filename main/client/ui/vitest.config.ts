@@ -12,28 +12,28 @@ export default mergeConfig(baseConfig, {
   resolve: {
     alias: [
       {
-        find: '@abe-stack/client-engine',
+        find: '@bslt/client-engine',
         replacement: path.resolve(__dirname, '..', 'engine', 'src'),
       },
       {
-        find: /^@abe-stack\/api\/(.*)$/,
+        find: /^@bslt\/api\/(.*)$/,
         replacement: path.resolve(__dirname, '..', 'api', 'src', '$1'),
       },
       {
-        find: '@abe-stack/api',
+        find: '@bslt/api',
         replacement: path.resolve(__dirname, '..', 'api', 'src', 'index.ts'),
       },
       {
-        find: /^@abe-stack\/shared\/(.*)$/,
+        find: /^@bslt\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '..', '..', 'shared', 'src', '$1'),
       },
       {
-        find: '@abe-stack/shared',
+        find: '@bslt/shared',
         replacement: path.resolve(__dirname, '..', '..', 'shared', 'src', 'index.ts'),
       },
-      { find: '@abe-stack/react', replacement: path.resolve(__dirname, '..', 'react', 'src') },
+      { find: '@bslt/react', replacement: path.resolve(__dirname, '..', 'react', 'src') },
       {
-        find: /^@abe-stack\/client\/(.*)$/,
+        find: /^@bslt\/client\/(.*)$/,
         replacement: path.resolve(__dirname, '..', 'engine', 'src', '$1'),
       },
       { find: '@components', replacement: path.join(srcDir, 'components') },

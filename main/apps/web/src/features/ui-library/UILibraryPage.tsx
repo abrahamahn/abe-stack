@@ -1,14 +1,14 @@
 // main/apps/web/src/features/ui-library/UILibraryPage.tsx
-import { useKeyboardShortcut } from '@abe-stack/react/hooks';
-import { Button, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
 import { useAppRightSidebar } from '@app/layouts';
+import { useKeyboardShortcut } from '@bslt/react/hooks';
+import { Button, MenuItem, ScrollArea, Text } from '@bslt/ui';
 import { getAllCategories, getComponentsByCategory } from '@catalog/index';
 import { useCallback, useMemo, useState } from 'react';
 
 import { UILibraryPreviewArea } from './components/UILibraryPreviewArea';
 
-import type { ComponentDemo } from './types';
 import type { ReactElement } from 'react';
+import type { ComponentDemo } from './types';
 
 export const UILibraryPage = (): ReactElement => {
   const [activeCategory, setActiveCategory] = useState<string>('elements');

@@ -7,7 +7,7 @@
  *
  * Note: Fastify-specific middleware has been moved to apps/server/src/middleware/permissions/.
  *
- * @module @abe-stack/server-engine/security/permissions
+ * @module @bslt/server-engine/security/permissions
  */
 
 // ============================================================================
@@ -40,7 +40,7 @@ export {
   type RecordLoader,
   type RecordPointer,
   type RoleRule,
-  type TablePermissionConfig,
+  type TablePermissionConfig
 } from './types';
 
 // ============================================================================
@@ -55,5 +55,6 @@ export {
   createOwnerRule,
   createPermissionChecker,
   PermissionChecker,
-  type PermissionCheckerOptions,
+  type PermissionCheckerOptions
 } from './checker';
+

@@ -14,44 +14,44 @@ export default mergeConfig(baseConfig, {
       },
       // Handle subpath imports first
       {
-        find: /^@abe-stack\/shared\/(.*)$/,
+        find: /^@bslt\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '../../shared/src/$1'),
       },
       {
-        find: /^@abe-stack\/ui\/(.*)$/,
+        find: /^@bslt\/ui\/(.*)$/,
         replacement: path.resolve(__dirname, '../../client/ui/src/$1'),
       },
       {
-        find: /^@abe-stack\/api\/(.*)$/,
+        find: /^@bslt\/api\/(.*)$/,
         replacement: path.resolve(__dirname, '../../client/api/src/$1'),
       },
       {
-        find: /^@abe-stack\/client-engine\/(.*)$/,
+        find: /^@bslt\/client-engine\/(.*)$/,
         replacement: path.resolve(__dirname, '../../client/engine/src/$1'),
       },
       {
-        find: /^@abe-stack\/react\/(.*)$/,
+        find: /^@bslt\/react\/(.*)$/,
         replacement: path.resolve(__dirname, '../../client/react/src/$1'),
       },
       // Handle main package imports
       {
-        find: '@abe-stack/shared',
+        find: '@bslt/shared',
         replacement: path.resolve(__dirname, '../../shared/src/index.ts'),
       },
       {
-        find: '@abe-stack/ui',
+        find: '@bslt/ui',
         replacement: path.resolve(__dirname, '../../client/ui/src/index.ts'),
       },
       {
-        find: '@abe-stack/api',
+        find: '@bslt/api',
         replacement: path.resolve(__dirname, '../../client/api/src/index.ts'),
       },
       {
-        find: '@abe-stack/client-engine',
+        find: '@bslt/client-engine',
         replacement: path.resolve(__dirname, '../../client/engine/src/index.ts'),
       },
       {
-        find: '@abe-stack/react',
+        find: '@bslt/react',
         replacement: path.resolve(__dirname, '../../client/react/src/index.ts'),
       },
       {

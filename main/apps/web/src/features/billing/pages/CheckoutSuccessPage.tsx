@@ -3,9 +3,9 @@
  * CheckoutSuccessPage - Displayed after successful checkout.
  */
 
-import { useNavigate } from '@abe-stack/react/router';
-import { MS_PER_SECOND } from '@abe-stack/shared';
-import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
+import { useNavigate } from '@bslt/react/router';
+import { MS_PER_SECOND } from '@bslt/shared';
+import { Button, Card, Heading, PageContainer, Text } from '@bslt/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';

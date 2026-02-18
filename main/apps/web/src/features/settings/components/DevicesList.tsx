@@ -3,9 +3,9 @@
  * DevicesList — Displays and manages trusted devices.
  */
 
-import { useDevices } from '@abe-stack/react';
-import { Alert, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
-import { DeviceRowCard } from '@abe-stack/ui/components/DeviceRowCard';
+import { useDevices } from '@bslt/react';
+import { Alert, Card, Heading, Skeleton, Text } from '@bslt/ui';
+import { DeviceRowCard } from '@bslt/ui/components/DeviceRowCard';
 import { useCallback, useMemo, type ReactElement } from 'react';
 
 // ============================================================================

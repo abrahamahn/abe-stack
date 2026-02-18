@@ -6,7 +6,7 @@
  * before performing sensitive operations like account deactivation or deletion.
  */
 
-import { Alert, Button, FormField, Input, Modal, Text } from '@abe-stack/ui';
+import { Alert, Button, FormField, Input, Modal, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useSudo } from '../hooks/useSudo';

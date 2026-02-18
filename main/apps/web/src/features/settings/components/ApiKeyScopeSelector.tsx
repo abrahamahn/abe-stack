@@ -1,6 +1,6 @@
 // main/apps/web/src/features/settings/components/ApiKeyScopeSelector.tsx
 
-import { Checkbox, Text } from '@abe-stack/ui';
+import { Checkbox, Text } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

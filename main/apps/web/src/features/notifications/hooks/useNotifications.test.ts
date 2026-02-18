@@ -1,13 +1,13 @@
 // main/apps/web/src/features/notifications/hooks/useNotifications.test.ts
-import { useMutation, useQuery } from '@abe-stack/react';
+import { useMutation, useQuery } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { useNotifications } from './useNotifications';
 
-import type { UseQueryResult } from '@abe-stack/react';
+import type { UseQueryResult } from '@bslt/react';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
   useMutation: vi.fn(),
 }));
@@ -25,7 +25,7 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@bslt/shared', () => ({
   tokenStore: { get: () => 'mock-token' },
 }));
 

@@ -5,8 +5,8 @@
  * Displays users in a table format with pagination for admin management.
  */
 
-import { useNavigate } from '@abe-stack/react/router';
-import { formatDate } from '@abe-stack/shared';
+import { useNavigate } from '@bslt/react/router';
+import { formatDate } from '@bslt/shared';
 import {
   Button,
   Pagination,
@@ -18,12 +18,12 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
-import type { AdminUser, AdminUserListResponse } from '@abe-stack/shared';
+import type { AdminUser, AdminUserListResponse } from '@bslt/shared';
 import type { JSX } from 'react';
 
 type AdminUserLocal = AdminUser;

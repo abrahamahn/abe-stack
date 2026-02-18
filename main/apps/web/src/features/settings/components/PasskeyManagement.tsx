@@ -5,13 +5,13 @@
  * and provides an "Add Passkey" button.
  */
 
-import { formatDateTime } from '@abe-stack/shared';
-import { Button, Card, Input, Skeleton, Text } from '@abe-stack/ui';
+import { formatDateTime } from '@bslt/shared';
+import { Button, Card, Input, Skeleton, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 import { usePasskeys, useRegisterPasskey } from '../../auth/hooks/useWebauthn';
 
-import type { PasskeyListItem } from '@abe-stack/shared';
+import type { PasskeyListItem } from '@bslt/shared';
 
 // ============================================================================
 // Passkey Row

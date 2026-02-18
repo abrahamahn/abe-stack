@@ -6,8 +6,8 @@
  * Uses useSyncExternalStore for optimal React integration.
  */
 
-import { hashQueryKey } from '@abe-stack/client-engine';
-import { MS_PER_SECOND } from '@abe-stack/shared';
+import { hashQueryKey } from '@bslt/client-engine';
+import { MS_PER_SECOND } from '@bslt/shared';
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from './debug';
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey, QueryState } from '@abe-stack/client-engine';
+import type { QueryKey, QueryState } from '@bslt/client-engine';
 
 // ============================================================================
 // Types

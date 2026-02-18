@@ -15,10 +15,10 @@ import {
   StackedLayout,
   Text,
   TopbarLayout,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
-import type { ComponentDemo } from '../types';
 import type { ReactElement } from 'react';
+import type { ComponentDemo } from '../types';
 
 export const layoutCatalog: Record<string, ComponentDemo> = {
   container: {

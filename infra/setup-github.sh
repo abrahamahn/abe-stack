@@ -1,10 +1,10 @@
 #!/bin/bash
-# GitHub Repository Setup Script for ABE Stack IaC
+# GitHub Repository Setup Script for BSLT IaC
 # This script helps configure the required secrets and variables for CI/CD
 
 set -e
 
-echo "🚀 ABE Stack GitHub Repository Setup"
+echo "🚀 BSLT GitHub Repository Setup"
 echo "===================================="
 echo ""
 echo "This script will help you configure the required GitHub secrets and variables"
@@ -30,7 +30,7 @@ echo "DIGITALOCEAN_TOKEN        - Your DigitalOcean API token"
 echo "GCP_SA_KEY               - GCP Service Account JSON (base64 encoded)"
 echo "SSH_PUBLIC_KEY           - SSH public key for server access"
 echo "SSH_PRIVATE_KEY          - SSH private key for server access"
-echo "DOMAIN                   - Your domain name (e.g., abe-stack.com)"
+echo "DOMAIN                   - Your domain name (e.g., bslt.com)"
 echo ""
 
 # Application secrets
@@ -54,7 +54,7 @@ echo ""
 # Registry variables
 echo "## Container Registry Variables"
 echo "REGISTRY                 - Container registry URL (e.g., ghcr.io)"
-echo "IMAGE_NAME              - Image name (e.g., username/abe-stack)"
+echo "IMAGE_NAME              - Image name (e.g., username/bslt)"
 echo ""
 
 # Infrastructure variables
@@ -97,7 +97,7 @@ echo "openssl rand -hex 16"
 echo ""
 
 echo "# SSH Key Pair (if you don't have one)"
-echo "ssh-keygen -t rsa -b 4096 -C 'abe-stack-deploy'"
+echo "ssh-keygen -t rsa -b 4096 -C 'bslt-deploy'"
 echo "# This creates id_rsa and id_rsa.pub"
 echo ""
 
@@ -132,7 +132,7 @@ echo ""
 
 VARIABLES=(
     "REGISTRY=ghcr.io"
-    "IMAGE_NAME=YOUR_USERNAME/abe-stack"
+    "IMAGE_NAME=YOUR_USERNAME/bslt"
     "DO_REGION=nyc1"
     "DO_INSTANCE_SIZE=s-1vcpu-1gb"
     "DO_ENABLE_MANAGED_DB=false"

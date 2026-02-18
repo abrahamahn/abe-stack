@@ -10,13 +10,13 @@ import {
   InvalidCredentialsError,
   InvalidTokenError,
   WeakPasswordError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 
+import type { AppConfig } from '@bslt/shared/config';
 import type { AppContext, RequestWithCookies } from '../types';
-import type { AppConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -73,9 +73,9 @@ vi.mock('../security', async (importOriginal) => {
   };
 });
 
-// Mock @abe-stack/shared to intercept mapErrorToHttpResponse
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared to intercept mapErrorToHttpResponse
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToResponse,

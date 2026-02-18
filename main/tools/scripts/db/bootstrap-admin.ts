@@ -27,10 +27,10 @@ import {
   insert,
   select,
   USERS_TABLE,
-} from '@abe-stack/db';
+} from '@bslt/db';
 
-import { hashPassword } from '@abe-stack/core/auth';
-import { canonicalizeEmail } from '@abe-stack/shared';
+import { hashPassword } from '@bslt/core/auth';
+import { canonicalizeEmail } from '@bslt/shared';
 
 interface BootstrapResult {
   email: string;
@@ -58,7 +58,7 @@ function generateSecurePassword(length = 24): string {
 /**
  * Bootstrap the initial admin user in the database.
  *
- * Uses DEFAULT_ARGON2_CONFIG from @abe-stack/auth for password hashing,
+ * Uses DEFAULT_ARGON2_CONFIG from @bslt/auth for password hashing,
  * avoiding the need to load the full server AppConfig.
  *
  * @returns Bootstrap result with email, generated password, and creation status

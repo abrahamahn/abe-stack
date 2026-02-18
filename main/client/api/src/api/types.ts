@@ -4,7 +4,7 @@
  *
  * Local types for the API client module.
  * Shared types (AuthResponse, User, etc.) should be imported
- * from `@abe-stack/shared` directly by consumers.
+ * from `@bslt/shared` directly by consumers.
  *
  * @module types
  */

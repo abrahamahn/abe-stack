@@ -9,8 +9,8 @@ import {
   SECURITY_EVENT_TYPES,
   SECURITY_SEVERITIES,
   type SecurityEventsFilter,
-} from '@abe-stack/shared';
-import { Button, Input, Select } from '@abe-stack/ui';
+} from '@bslt/shared';
+import { Button, Input, Select } from '@bslt/ui';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { JSX } from 'react';

@@ -12,7 +12,7 @@ import {
   webhookListResponseSchema,
   webhookMutationResponseSchema,
   webhookResponseSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 

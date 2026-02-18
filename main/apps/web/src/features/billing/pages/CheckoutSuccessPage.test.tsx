@@ -1,13 +1,13 @@
 // main/apps/web/src/features/billing/pages/CheckoutSuccessPage.test.tsx
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CheckoutSuccessPage } from './CheckoutSuccessPage';
 
-// Mock useNavigate from @abe-stack/react/router
+// Mock useNavigate from @bslt/react/router
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/react/router', async () => {
-  const actual = await vi.importActual('@abe-stack/react/router');
+vi.mock('@bslt/react/router', async () => {
+  const actual = await vi.importActual('@bslt/react/router');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

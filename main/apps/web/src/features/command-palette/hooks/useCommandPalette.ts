@@ -6,8 +6,8 @@
  * for the command palette overlay.
  */
 
-import { useKeyboardShortcuts, useThemeMode } from '@abe-stack/react/hooks';
-import { useNavigate } from '@abe-stack/react/router';
+import { useKeyboardShortcuts, useThemeMode } from '@bslt/react/hooks';
+import { useNavigate } from '@bslt/react/router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { createCommands, filterCommands } from '../data';

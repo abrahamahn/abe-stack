@@ -12,16 +12,16 @@
  * @complexity O(1) - Direct route definition validation
  */
 
-import { emptyBodySchema } from '@abe-stack/shared';
+import { emptyBodySchema } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@abe-stack/server-engine', async () => {
+vi.mock('@bslt/server-engine', async () => {
   const actual = await vi.importActual<typeof import('../../../../engine/src')>(
-    '@abe-stack/server-engine',
+    '@bslt/server-engine',
   );
   return {
     ...actual,
@@ -38,9 +38,9 @@ vi.mock('./handlers', () => ({
 
 import { oauthRoutes } from './routes';
 
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { RouteDefinition } from '../../../../engine/src';
 import type { AppContext } from '../index';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers

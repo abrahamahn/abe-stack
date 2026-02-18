@@ -1,6 +1,6 @@
-# @abe-stack/shared
+# @bslt/shared
 
-Environment-agnostic shared package for the ABE Stack. Contains all business logic, schemas, API contracts, error hierarchies, and platform utilities — consumed by both server and client apps.
+Environment-agnostic shared package for the BSLT. Contains all business logic, schemas, API contracts, error hierarchies, and platform utilities — consumed by both server and client apps.
 
 **Zero runtime dependencies.** Pure TypeScript with Zod schemas.
 
@@ -134,13 +134,13 @@ Environment variable schemas split by concern: auth, billing, cache, database, e
 ## Package Exports
 
 ```typescript
-import { ... } from '@abe-stack/shared'             // Root barrel (everything)
-import { ... } from '@abe-stack/shared/primitives'   // Primitives layer only
-import { ... } from '@abe-stack/shared/engine'        // Engine layer only
-import { ... } from '@abe-stack/shared/core'          // Core layer only
-import { ... } from '@abe-stack/shared/contracts'     // API contracts only
-import { ... } from '@abe-stack/shared/api'           // API router
-import { ... } from '@abe-stack/shared/config'        // Config schemas
+import { ... } from '@bslt/shared'             // Root barrel (everything)
+import { ... } from '@bslt/shared/primitives'   // Primitives layer only
+import { ... } from '@bslt/shared/engine'        // Engine layer only
+import { ... } from '@bslt/shared/core'          // Core layer only
+import { ... } from '@bslt/shared/contracts'     // API contracts only
+import { ... } from '@bslt/shared/api'           // API router
+import { ... } from '@bslt/shared/config'        // Config schemas
 ```
 
 ## Domain Reference

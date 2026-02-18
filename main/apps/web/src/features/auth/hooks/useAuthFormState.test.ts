@@ -1,5 +1,5 @@
 // main/apps/web/src/features/auth/hooks/useAuthFormState.test.ts
-import { useFormState, type FormState } from '@abe-stack/react/hooks';
+import { useFormState, type FormState } from '@bslt/react/hooks';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -53,7 +53,7 @@ describe('useAuthFormState', () => {
 });
 
 describe('FormState type', () => {
-  it('is compatible with FormState from @abe-stack/react/hooks', () => {
+  it('is compatible with FormState from @bslt/react/hooks', () => {
     // Type-level test: FormState should be assignable
     const formState: FormState = {
       isLoading: false,

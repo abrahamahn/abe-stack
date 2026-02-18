@@ -11,21 +11,21 @@
  * @module test-utils
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
-import { MemoryRouter } from '@abe-stack/react/router';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
+import { MemoryRouter } from '@bslt/react/router';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { ClientEnvironmentProvider } from '../app/ClientEnvironment';
 
+import type { User, UserId } from '@bslt/shared';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
 import type { ClientEnvironment } from '../app/ClientEnvironment';
 import type { ClientConfig } from '../config';
 import type { AuthService, AuthState } from '../features/auth';
-import type { User, UserId } from '@abe-stack/shared';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import type { ReactElement, ReactNode } from 'react';
 
 // ============================================================================
 // Mock User Data

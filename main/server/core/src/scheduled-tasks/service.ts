@@ -8,7 +8,7 @@
  * @module
  */
 
-import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, RETENTION_PERIODS } from '@abe-stack/shared';
+import { DAYS_PER_WEEK, MS_PER_DAY, MS_PER_HOUR, RETENTION_PERIODS } from '@bslt/shared';
 
 import { refreshExpiringOAuthTokens } from '../auth/oauth/refresh';
 import { expireStaleInvitations } from '../tenants/invitation-cleanup';
@@ -16,9 +16,9 @@ import { hardDeleteAnonymizedUsers } from '../users/data-hygiene';
 
 import { anonymizeDeletedUsers } from './pii-anonymization';
 
-import type { ScheduledTask, ScheduledTaskLogger, TaskTracker } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient, QueueStore, Repositories } from '../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { ScheduledTask, ScheduledTaskLogger, TaskTracker } from './types';
 
 // ============================================================================
 // Constants

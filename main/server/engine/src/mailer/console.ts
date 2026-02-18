@@ -6,7 +6,7 @@
  * Use this in development to see email output without SMTP.
  */
 
-import { generateSecureId } from '@abe-stack/shared';
+import { generateSecureId } from '@bslt/shared';
 
 import type { EmailOptions, EmailResult, EmailService } from './types';
 

@@ -1,9 +1,9 @@
 // main/apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
 
-import { useNavigate, useSearchParams } from '@abe-stack/react/router';
-import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@abe-stack/ui';
 import { useAuth, useVerifyEmail } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
+import { useNavigate, useSearchParams } from '@bslt/react/router';
+import { Alert, AuthLayout, Button, Heading, Spinner, Text } from '@bslt/ui';
 import { useEffect, useRef, useState } from 'react';
 
 import type { ReactElement } from 'react';

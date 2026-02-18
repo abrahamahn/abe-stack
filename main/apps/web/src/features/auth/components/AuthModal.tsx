@@ -1,8 +1,8 @@
 // main/apps/web/src/features/auth/components/AuthModal.tsx
 
-import { useFormState, type AuthMode } from '@abe-stack/react/hooks';
-import { Modal } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
+import { useFormState, type AuthMode } from '@bslt/react/hooks';
+import { Modal } from '@bslt/ui';
 import { useEffect, useState } from 'react';
 
 import { AuthForm, type AuthFormProps } from './AuthForms';

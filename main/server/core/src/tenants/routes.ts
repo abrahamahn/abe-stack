@@ -3,7 +3,7 @@
  * Tenant Routes
  *
  * Route definitions for tenants module.
- * Uses the generic router pattern from @abe-stack/server-engine.
+ * Uses the generic router pattern from @bslt/server-engine.
  *
  * @module routes
  */
@@ -17,7 +17,7 @@ import {
   updateMembershipRoleSchema,
   updateTenantSchema,
   type TransferOwnershipInput,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -46,8 +46,8 @@ import {
   handleUpdateTenant,
 } from './handlers';
 
-import type { TenantsModuleDeps, TenantsRequest } from './types';
 import type { FastifyRequest } from 'fastify';
+import type { TenantsModuleDeps, TenantsRequest } from './types';
 
 // ============================================================================
 // Context Bridge
@@ -85,7 +85,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
         const deps = asTenantsDeps(ctx);
         return handleCreateTenant(
           deps,
-          body as import('@abe-stack/shared').CreateTenantInput,
+          body as import('@bslt/shared').CreateTenantInput,
           req as unknown as TenantsRequest,
         );
       },
@@ -251,7 +251,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleAddMember(
           deps,
           tenantId,
-          body as import('@abe-stack/shared').AddMember,
+          body as import('@bslt/shared').AddMember,
           req as unknown as TenantsRequest,
         );
       },
@@ -273,7 +273,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
           deps,
           params.id,
           params.userId,
-          body as import('@abe-stack/shared').UpdateMembershipRole,
+          body as import('@bslt/shared').UpdateMembershipRole,
           req as unknown as TenantsRequest,
         );
       },
@@ -314,7 +314,7 @@ export const tenantRoutes: RouteMap = createRouteMap([
         return handleCreateInvitation(
           deps,
           tenantId,
-          body as import('@abe-stack/shared').CreateInvitation,
+          body as import('@bslt/shared').CreateInvitation,
           req as unknown as TenantsRequest,
         );
       },

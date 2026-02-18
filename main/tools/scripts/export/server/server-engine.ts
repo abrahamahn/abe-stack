@@ -93,7 +93,7 @@ const listFiles = (dir: string, base = ''): string[] => {
  * Excludes test files, node_modules, dist, and other build artifacts.
  */
 const run = (): void => {
-  console.log('Exporting @abe-stack/server-engine source code...');
+  console.log('Exporting @bslt/server-engine source code...');
 
   if (!fs.existsSync(packagePath)) {
     console.error(`Error: ${packagePath} does not exist.`);

@@ -12,7 +12,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PricingTable } from './PricingTable';
 
-import type { Plan, PlanId } from '@abe-stack/shared';
+import type { Plan, PlanId } from '@bslt/shared';
 
 const createMockPlans = (): Plan[] => [
   {

@@ -10,23 +10,23 @@
  * - User confirmations and error handling
  */
 
-import { useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/react';
+import { useEnabledOAuthProviders, useOAuthConnections } from '@bslt/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { OAuthConnectionsList, type OAuthConnectionsListProps } from './OAuthConnectionsList';
 
-import type { OAuthConnection, OAuthProvider } from '@abe-stack/shared';
+import type { OAuthConnection, OAuthProvider } from '@bslt/shared';
 
 // Mock the SDK hooks
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useEnabledOAuthProviders: vi.fn(),
   useOAuthConnections: vi.fn(),
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   const mockAlert = ({ children, tone }: { children: React.ReactNode; tone: string }) => (
     <div data-testid="alert" data-tone={tone}>

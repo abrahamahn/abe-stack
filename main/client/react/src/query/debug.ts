@@ -1,7 +1,7 @@
 // main/client/react/src/query/debug.ts
-import { hashQueryKey } from '@abe-stack/client-engine';
+import { hashQueryKey } from '@bslt/client-engine';
 
-import type { QueryKey } from '@abe-stack/client-engine';
+import type { QueryKey } from '@bslt/client-engine';
 
 export interface RetryDecision {
   retryable: boolean;

@@ -1,15 +1,15 @@
 // main/apps/server/src/app.ts
-import { SubscriptionManager } from '@abe-stack/shared';
+import { SubscriptionManager } from '@bslt/shared';
 import { registerRoutes } from '@routes';
 
-import type { SystemContext } from '@abe-stack/core';
-import type { DbClient, QueueStore, Repositories, SessionContext } from '@abe-stack/db';
+import type { SystemContext } from '@bslt/core';
+import type { DbClient, QueueStore, Repositories, SessionContext } from '@bslt/db';
 import type {
   QueueServer,
   ServerSearchProvider,
   SmsProvider,
   WriteService,
-} from '@abe-stack/server-engine';
+} from '@bslt/server-engine';
 import type {
   BillingService,
   CacheProvider,
@@ -17,8 +17,8 @@ import type {
   ErrorTracker,
   NotificationService,
   StorageClient,
-} from '@abe-stack/shared';
-import type { AppConfig } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import type { AppConfig } from '@bslt/shared/config';
 import type { AppContext, IServiceContainer } from '@shared';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 

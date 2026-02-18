@@ -37,8 +37,8 @@ vi.mock('../security/events', () => ({
   logTokenFamilyRevokedEvent: vi.fn(),
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     withTransaction: vi.fn((db, callback) => callback(db)),

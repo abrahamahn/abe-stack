@@ -5,7 +5,7 @@
  * Tests for the device management API client.
  */
 
-import { BadRequestError, NotFoundError, UnauthorizedError } from '@abe-stack/shared';
+import { BadRequestError, NotFoundError, UnauthorizedError } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NetworkError } from '../errors';
@@ -15,8 +15,8 @@ import { createDeviceClient } from './client';
 import type { DeviceClientConfig, DeviceItem } from './client';
 
 // Mock addAuthHeader from shared
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');
   return {
     ...actual,
     addAuthHeader: vi.fn((headers: Headers, token: string | null) => {

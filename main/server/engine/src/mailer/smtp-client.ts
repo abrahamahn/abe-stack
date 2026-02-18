@@ -9,7 +9,7 @@
 import { createConnection, type Socket } from 'node:net';
 import { connect as tlsConnect, type TLSSocket } from 'node:tls';
 
-import { delay, generateSecureId, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+import { delay, generateSecureId, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
 // ============================================================================
 // Types

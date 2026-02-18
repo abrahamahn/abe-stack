@@ -1,5 +1,5 @@
 # config/caddy/Caddyfile.dev
-# Development Caddy Configuration for ABE Stack
+# Development Caddy Configuration for BSLT
 #
 # HTTP-only (no TLS) for local development.
 # Use this when testing the full reverse proxy setup locally.

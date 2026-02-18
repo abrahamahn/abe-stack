@@ -1,6 +1,6 @@
 # Development Guides
 
-Workflow, testing, configuration, and tooling documentation for ABE Stack.
+Workflow, testing, configuration, and tooling documentation for BSLT.
 
 ---
 

@@ -5,11 +5,11 @@
  * Displays a paginated table of jobs with filtering by status.
  */
 
-import { formatDateTime } from '@abe-stack/shared';
+import { formatDateTime } from '@bslt/shared';
 import {
   Button,
-  Pagination,
   EmptyState,
+  Pagination,
   Skeleton,
   Table,
   TableBody,
@@ -19,11 +19,11 @@ import {
   TableRow,
   Tabs,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import { JobStatusBadge } from './JobStatusBadge';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

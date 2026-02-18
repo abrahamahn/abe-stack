@@ -11,13 +11,13 @@
  *         /api/users/me/reactivate
  */
 
-import { createAuthGuard, userRoutes } from '@abe-stack/core';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard, userRoutes } from '@bslt/core';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestJwt, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

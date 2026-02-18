@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useUndoRedoShortcuts.ts
-import { isEditableElement, isMac, matchesAnyBinding } from '@abe-stack/shared';
+import { isEditableElement, isMac, matchesAnyBinding } from '@bslt/shared';
 import { useCallback, useEffect, useRef } from 'react';
 
 // ============================================================================

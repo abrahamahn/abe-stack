@@ -7,7 +7,7 @@ import {
   type CursorPaginationOptions,
   type PaginatedResult,
   type PaginationOptions,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { useCallback, useMemo, useRef } from 'react';
 
 import { useQueryCache } from '../query/QueryCacheProvider';

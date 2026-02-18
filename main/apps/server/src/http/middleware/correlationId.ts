@@ -13,7 +13,7 @@
  * 4. Available on the request object for use in handlers and error responses
  */
 
-import { generateCorrelationId, isValidCorrelationId } from '@abe-stack/shared';
+import { generateCorrelationId, isValidCorrelationId } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

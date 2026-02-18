@@ -6,12 +6,12 @@
  * These are minimal contracts that the server composition root satisfies
  * when wiring the notification handlers into the application.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  */
 
+import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@bslt/shared';
 import type { DbClient, Repositories } from '../../../db/src';
-import type { BaseContext, ContractRequestContext as RequestContext, ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Context Interfaces
@@ -43,6 +43,6 @@ export interface NotificationModuleDeps extends BaseContext {
  *
  * Transition alias for `RequestContext` from contracts.
  * Existing code importing `NotificationRequest` from this module continues
- * working. New code should import `RequestContext` from `@abe-stack/shared`.
+ * working. New code should import `RequestContext` from `@bslt/shared`.
  */
 export type NotificationRequest = RequestContext;

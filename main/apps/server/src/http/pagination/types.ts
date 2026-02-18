@@ -3,14 +3,14 @@
  * Pagination type definitions for HTTP middleware and helpers.
  */
 
-import type { CursorPaginationQueryBuilder, OffsetPaginationQueryBuilder } from '@abe-stack/db';
+import type { CursorPaginationQueryBuilder, OffsetPaginationQueryBuilder } from '@bslt/db';
 import type {
   CursorPaginatedResult,
   CursorPaginationOptions,
   PaginatedResult,
   PaginationOptions,
   SortOrder,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyRequest } from 'fastify';
 
 /**

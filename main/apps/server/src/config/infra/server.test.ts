@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { loadServerConfig } from './server';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with server-related defaults (as applied by Zod schema).

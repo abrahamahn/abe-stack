@@ -6,7 +6,7 @@
  * serialization errors, and capacity limits.
  */
 
-import { AppError, HTTP_STATUS } from '@abe-stack/shared';
+import { AppError, HTTP_STATUS } from '@bslt/shared';
 
 // ============================================================================
 // Base Cache Error

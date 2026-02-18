@@ -7,7 +7,7 @@
  * { buffer, mimetype, filename, originalName, size }.
  */
 
-import { parseMultipartFile, type ParsedMultipartFile } from '@abe-stack/shared';
+import { parseMultipartFile, type ParsedMultipartFile } from '@bslt/shared';
 
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 

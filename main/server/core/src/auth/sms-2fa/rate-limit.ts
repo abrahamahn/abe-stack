@@ -8,14 +8,14 @@
  * @module sms-2fa
  */
 
-import { MS_PER_DAY, MS_PER_HOUR } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_HOUR } from '@bslt/shared';
 
 import { SMS_VERIFICATION_CODES_TABLE } from '../../../../db/src';
 
 import { SMS_RATE_LIMIT_DAILY, SMS_RATE_LIMIT_HOURLY } from './types';
 
-import type { SmsRateLimitResult } from './types';
 import type { DbClient } from '../../../../db/src';
+import type { SmsRateLimitResult } from './types';
 
 // ============================================================================
 // Rate Limit Check

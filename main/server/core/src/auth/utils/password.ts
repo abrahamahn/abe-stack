@@ -12,7 +12,7 @@ import { randomInt, randomUUID } from 'node:crypto';
 
 import argon2 from 'argon2';
 
-import type { Argon2Config } from '@abe-stack/shared/config';
+import type { Argon2Config } from '@bslt/shared/config';
 import type { Options } from 'argon2';
 
 // ============================================================================

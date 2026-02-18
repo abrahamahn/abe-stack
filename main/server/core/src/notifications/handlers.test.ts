@@ -28,7 +28,7 @@ vi.mock('./service', () => ({
   updatePreferences: vi.fn(),
 }));
 
-// Note: We don't mock @abe-stack/shared because Vitest's optimizeDeps pre-bundles it,
+// Note: We don't mock @bslt/shared because Vitest's optimizeDeps pre-bundles it,
 // making mocking unreliable. Tests for AppError handling use real AppError instances.
 
 import {
@@ -42,7 +42,6 @@ import {
 } from './handlers';
 import * as service from './service';
 
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   NotificationPreferences,
   PreferencesResponse,
@@ -51,7 +50,8 @@ import type {
   UnsubscribeRequest,
   UnsubscribeResponse,
   UpdatePreferencesRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Test Helpers

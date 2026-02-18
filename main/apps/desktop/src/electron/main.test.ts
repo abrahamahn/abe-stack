@@ -93,8 +93,8 @@ vi.mock('./deep-links', () => ({
   handleDeepLink: mocks.mockHandleDeepLink,
 }));
 
-// Mock @abe-stack/shared which exports waitForPort
-vi.mock('@abe-stack/shared', () => ({
+// Mock @bslt/shared which exports waitForPort
+vi.mock('@bslt/shared', () => ({
   waitForPort: mocks.mockWaitForPort,
 }));
 
@@ -140,7 +140,7 @@ describe('main', () => {
       await import('./main');
 
       expect(mocks.mockRegisterDeepLinkProtocol).toHaveBeenCalledTimes(1);
-      expect(mocks.mockRegisterDeepLinkProtocol).toHaveBeenCalledWith('abe-stack');
+      expect(mocks.mockRegisterDeepLinkProtocol).toHaveBeenCalledWith('bslt');
     });
 
     it('should request single instance lock', async () => {

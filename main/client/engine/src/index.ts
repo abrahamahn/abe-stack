@@ -2,8 +2,8 @@
 
 // In-Memory Cache
 export { Loader, LoaderCache, loadWithCache } from './cache/LoaderCache';
-export { RecordCache } from './cache/RecordCache';
 export type { LoaderCacheOptions, LoaderOptions, LoaderState } from './cache/LoaderCache';
+export { RecordCache } from './cache/RecordCache';
 export type {
   CacheStats,
   IdentifiableRecord,
@@ -11,11 +11,11 @@ export type {
   RecordChange,
   RecordChangeListener,
   SetRecordOptions,
-  TableMap,
+  TableMap
 } from './cache/RecordCache';
 
 // Shared types (used alongside engine's realtime features)
-export type { RecordPointer, VersionedRecord } from '@abe-stack/shared';
+export type { RecordPointer, VersionedRecord } from '@bslt/shared';
 
 // Offline Support
 export { createTransactionQueue, TransactionQueue } from './offline/TransactionQueue';
@@ -24,7 +24,7 @@ export type {
   TransactionQueueOptions,
   TransactionQueueStatus,
   TransactionRecordPointer,
-  TransactionResponse,
+  TransactionResponse
 } from './offline/TransactionQueue';
 
 // Real-Time
@@ -34,7 +34,7 @@ export {
   type ConnectionState,
   type ConnectionStateListener,
   type ServerPubsubMessage,
-  type WebsocketPubsubClientConfig,
+  type WebsocketPubsubClientConfig
 } from './realtime/WebsocketPubsubClient';
 
 export { SubscriptionCache, type SubscriptionCacheOptions } from './realtime/SubscriptionCache';
@@ -45,7 +45,7 @@ export {
   createRecordStorage,
   iterateRecordMap,
   RecordStorage,
-  RecordStorageError,
+  RecordStorageError
 } from './storage/RecordStorage';
 export type {
   RecordMap,
@@ -53,7 +53,7 @@ export type {
   RecordStorageEvent,
   RecordStorageListener,
   RecordStorageOptions,
-  RecordWithTable,
+  RecordWithTable
 } from './storage/RecordStorage';
 
 export { clear, createStore, del, get, keys, set, type IDBStore } from './storage/idb';
@@ -64,12 +64,10 @@ export {
   clearQueryCache,
   createPersistedClientFromQueryCache,
   createQueryPersister,
-  restorePersistedQueryCache,
-  type QueryPersisterOptions,
-  type PersistedClient,
+  restorePersistedQueryCache, type PersistedClient,
   type PersistedClientState,
   type PersistedQuery,
-  type Persister,
+  type Persister, type QueryPersisterOptions
 } from './storage/queryPersister';
 
 export {
@@ -77,7 +75,7 @@ export {
   MutationQueue,
   type MutationQueueOptions,
   type QueuedMutation,
-  type QueueStatus,
+  type QueueStatus
 } from './storage/mutationQueue';
 
 // Undo/Redo
@@ -86,7 +84,7 @@ export type {
   OperationGroup,
   UndoableOperation,
   UndoRedoStackOptions,
-  UndoRedoState,
+  UndoRedoState
 } from './undo/UndoRedoStack';
 
 // Query Cache
@@ -97,7 +95,7 @@ export type {
   QueryKey,
   QueryState,
   QueryStatus,
-  SetQueryDataOptions,
+  SetQueryDataOptions
 } from './query/QueryCache';
 
 // Query Keys
@@ -108,7 +106,7 @@ export type { PostListFilters, QueryKeys, UserListFilters } from './queryKeys';
 export {
   ClientSearchQueryBuilder,
   createClientSearchQuery,
-  fromClientSearchQuery,
+  fromClientSearchQuery
 } from './search/query-builder';
 
 // Theme
@@ -122,5 +120,6 @@ export {
   highContrastDarkOverrides,
   highContrastLightOverrides,
   type ContrastMode,
-  type Density,
+  type Density
 } from './theme';
+

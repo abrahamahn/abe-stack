@@ -1,17 +1,17 @@
 // main/apps/web/src/features/dashboard/components/GettingStartedChecklist.test.tsx
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../../../__tests__/utils';
 
 import { GettingStartedChecklist } from './GettingStartedChecklist';
 
-import type { User } from '@abe-stack/shared';
+import type { User } from '@bslt/shared';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/react/router', async () => {
-  const actual = await vi.importActual('@abe-stack/react/router');
+vi.mock('@bslt/react/router', async () => {
+  const actual = await vi.importActual('@bslt/react/router');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

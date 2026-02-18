@@ -5,12 +5,12 @@
  * Displays security events in a table format with pagination.
  */
 
-import { useNavigate } from '@abe-stack/react/router';
+import { useNavigate } from '@bslt/react/router';
 import {
   formatDateTime,
   formatSecurityEventType,
   getSecuritySeverityTone,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import {
   Badge,
   Button,
@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import type { JSX } from 'react';
 

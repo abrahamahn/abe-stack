@@ -1,6 +1,6 @@
 // main/server/core/src/cache/cache-aside.ts
 
-import type { CacheProvider } from '@abe-stack/shared';
+import type { CacheProvider } from '@bslt/shared';
 
 export async function cacheAside<T>(
   cache: CacheProvider,

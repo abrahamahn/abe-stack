@@ -7,11 +7,11 @@
 
 import {
   SearchQueryBuilder,
+  deserializeFromURLParams,
   fromSearchQuery,
   serializeToURLParams,
-  deserializeFromURLParams,
   type SearchQuery,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Client Query Builder

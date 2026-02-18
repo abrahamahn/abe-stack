@@ -5,14 +5,14 @@
  * Fetch detailed information for a single job.
  */
 
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 
 // ============================================================================
 // Types

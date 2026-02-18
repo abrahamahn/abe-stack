@@ -18,7 +18,7 @@ import {
   type SearchCapabilities,
   type SearchQuery,
   type SearchResult,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import type { ElasticsearchProviderConfig, SearchContext, ServerSearchProvider } from './types';
 

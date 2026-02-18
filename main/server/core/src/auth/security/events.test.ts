@@ -64,8 +64,8 @@ import {
   sendTokenReuseAlert,
 } from './events';
 
+import type { EmailService } from '@bslt/shared';
 import type { DbClient } from '../../../../db/src';
-import type { EmailService } from '@abe-stack/shared';
 
 // Create mock db matching RawDb interface
 function createMockDb() {

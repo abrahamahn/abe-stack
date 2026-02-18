@@ -50,7 +50,7 @@ import {
   type TotpLoginVerifyRequest,
   type TotpVerifyRequest,
   type VerifyPhoneRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -97,8 +97,8 @@ import { magicLinkRouteEntries } from './magic-link';
 import { oauthRouteEntries } from './oauth';
 import { webauthnRouteEntries } from './webauthn';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from './types';
 
 /**
  * Narrow HandlerContext to AppContext.

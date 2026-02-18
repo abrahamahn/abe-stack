@@ -1,13 +1,13 @@
 // main/apps/web/src/features/admin/hooks/useAdminUsers.test.ts
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 
 import { useAdminUsers } from './useAdminUsers';
 
+import type { AdminUserListFilters, AdminUserListResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
-import type { AdminUserListFilters, AdminUserListResponse } from '@abe-stack/shared';
 
 vi.mock('../services/adminApi', () => ({
   createAdminApiClient: vi.fn(),
@@ -17,8 +17,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

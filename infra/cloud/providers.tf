@@ -1,4 +1,4 @@
-# Provider configurations for ABE Stack Infrastructure
+# Provider configurations for BSLT Infrastructure
 # This file defines the required providers and their configurations
 
 terraform {

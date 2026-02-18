@@ -17,10 +17,10 @@
 
 import { createHash, timingSafeEqual } from 'node:crypto';
 
-import { HTTP_STATUS, extractBearerToken } from '@abe-stack/shared';
+import { HTTP_STATUS, extractBearerToken } from '@bslt/shared';
 
-import type { ApiKeyRepository } from '../../../db/src';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { ApiKeyRepository } from '../../../db/src';
 
 // ============================================================================
 // Types

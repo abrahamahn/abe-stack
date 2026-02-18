@@ -6,8 +6,8 @@ import { dirname, join } from 'node:path';
 
 import { normalizeStorageKey } from '../signing';
 
+import type { ReadableStreamLike } from '@bslt/shared';
 import type { LocalStorageConfig, StorageProvider } from '../types';
-import type { ReadableStreamLike } from '@abe-stack/shared';
 
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}

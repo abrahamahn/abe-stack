@@ -6,8 +6,8 @@
     "baseUrl": "./",
     "composite": true,
     "paths": {
-      "@abe-stack/shared": ["../../shared/src/index.ts"],
-      "@abe-stack/shared/*": ["../../shared/src/*"],
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
       "@hooks": ["../../client/react/src/hooks"],
       "@hooks/*": ["../../client/react/src/hooks/*"]
     },

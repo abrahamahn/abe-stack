@@ -6,7 +6,7 @@
  * and cursor-based pagination.
  */
 
-import { hashQueryKey } from '@abe-stack/client-engine';
+import { hashQueryKey } from '@bslt/client-engine';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import {
@@ -18,7 +18,7 @@ import {
 } from './debug';
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey, QueryState } from '@abe-stack/client-engine';
+import type { QueryKey, QueryState } from '@bslt/client-engine';
 
 // ============================================================================
 // Types

@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 
 /**
  * Checks if a port is free (not in use) by attempting to bind to it.
- * Inlined here to avoid transitive dependency on @abe-stack/shared
+ * Inlined here to avoid transitive dependency on @bslt/shared
  * which fails under Node's strict ESM resolver at config-load time.
  *
  * @param port - The port number to check
@@ -26,7 +26,7 @@ function isPortFree(port: number, host: string): Promise<boolean> {
 
 /**
  * Picks the first available (free) port from a list of preferred ports.
- * Inlined to avoid loading @abe-stack/shared during Vite config resolution.
+ * Inlined to avoid loading @bslt/shared during Vite config resolution.
  *
  * @param preferredPorts - Array of port numbers to try, in order of preference
  * @param host - The host to check availability on
@@ -69,13 +69,13 @@ export default defineConfig(async ({ command }) => {
       conditions: ['source'],
       alias: {
         // Monorepo packages → source files
-        '@abe-stack/shared': resolveAlias('shared/src'),
-        '@abe-stack/ui': resolveAlias('client/ui/src'),
-        '@abe-stack/api': resolveAlias('client/api/src'),
-        '@abe-stack/client-engine': resolveAlias('client/engine/src'),
-        '@abe-stack/react': resolveAlias('client/react/src'),
-        '@abe-stack/db': resolveAlias('server/db/src'),
-        '@abe-stack/media': resolveAlias('server/media/src'),
+        '@bslt/shared': resolveAlias('shared/src'),
+        '@bslt/ui': resolveAlias('client/ui/src'),
+        '@bslt/api': resolveAlias('client/api/src'),
+        '@bslt/client-engine': resolveAlias('client/engine/src'),
+        '@bslt/react': resolveAlias('client/react/src'),
+        '@bslt/db': resolveAlias('server/db/src'),
+        '@bslt/media': resolveAlias('server/media/src'),
         // UI package internal aliases
         '@components': resolveAlias('client/ui/src/components'),
         '@containers': resolveAlias('client/ui/src/layouts/containers'),

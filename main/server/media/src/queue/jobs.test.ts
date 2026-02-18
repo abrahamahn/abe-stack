@@ -3,12 +3,12 @@
  * Tests for MediaProcessingQueue and createMediaProcessingQueue
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaProcessingQueue, createMediaProcessingQueue } from './jobs';
 
+import type { Logger } from '@bslt/shared';
 import type { MediaProcessingOrchestrator } from '../processor';
-import type { Logger } from '@abe-stack/shared';
 
 // Mock the processor module with proper class constructors
 vi.mock('../processor', () => {

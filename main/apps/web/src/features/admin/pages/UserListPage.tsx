@@ -5,7 +5,7 @@
  * Admin page for listing and managing users.
  */
 
-import { Alert, Button, Heading, PageContainer, Text } from '@abe-stack/ui';
+import { Alert, Button, Heading, PageContainer, Text } from '@bslt/ui';
 
 import { UserFilters, UserTable } from '../components';
 import { useAdminUsers } from '../hooks';

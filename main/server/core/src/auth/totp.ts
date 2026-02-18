@@ -17,8 +17,8 @@ import { TOTP_BACKUP_CODES_TABLE, USERS_TABLE } from '../../../db/src';
 
 import { hashPassword, verifyPasswordSafe } from './utils';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient } from '../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Constants

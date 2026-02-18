@@ -6,7 +6,7 @@
 # ============================================================================
 
 # Your domain name (must be registered and DNS configured)
-domain = "abe-stack.example.com"
+domain = "bslt.example.com"
 
 # SSH public key for server access (generate with: ssh-keygen -t rsa -b 4096)
 # IMPORTANT: This should be the PUBLIC key content, not the private key
@@ -30,7 +30,7 @@ project_id = "your-gcp-project-id"
 environment = "staging"
 
 # Application name (used for resource naming)
-app_name = "abe-stack"
+app_name = "bslt"
 
 # Cloud region (choose based on your users' location)
 region = "nyc1"        # DigitalOcean regions: nyc1, sfo3, lon1, etc.

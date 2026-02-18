@@ -5,13 +5,13 @@
  * Hook for fetching workspace subscription and billing info.
  */
 
-import { createBillingClient } from '@abe-stack/api';
-import { useQuery } from '@abe-stack/react';
-import { MS_PER_MINUTE } from '@abe-stack/shared';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { createBillingClient } from '@bslt/api';
+import { useQuery } from '@bslt/react';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
-import type { UseQueryResult } from '@abe-stack/react';
+import type { UseQueryResult } from '@bslt/react';
 
 // ============================================================================
 // Types

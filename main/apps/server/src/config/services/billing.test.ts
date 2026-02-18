@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loadBillingConfig, validateBillingConfig } from './billing';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with billing-related defaults (as applied by Zod schema).

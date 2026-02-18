@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/CookieConsentBanner.test.tsx
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CookieConsentBanner } from './CookieConsentBanner';
 
@@ -9,10 +9,10 @@ import { CookieConsentBanner } from './CookieConsentBanner';
 // Mocks
 // ============================================================================
 
-// Mock useNavigate from @abe-stack/react/router
+// Mock useNavigate from @bslt/react/router
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/react/router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
+vi.mock('@bslt/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/router')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,

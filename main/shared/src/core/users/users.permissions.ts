@@ -10,9 +10,9 @@ import {
   can as baseCan,
 } from '../auth/auth.policy';
 
-import type { AuthContext, PolicyAction, PolicyResource } from '../auth/auth.policy';
 import type { AppRole, User } from './users.schemas';
 import type { UserId } from '../../primitives/schema/ids';
+import type { AuthContext, PolicyAction, PolicyResource } from '../auth/auth.policy';
 
 // ============================================================================
 // Access Control Logic

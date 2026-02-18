@@ -1,19 +1,19 @@
 // main/apps/web/src/features/auth/components/RegisterForm.tsx
 
-import { useResendCooldown } from '@abe-stack/react/hooks';
-import { Link } from '@abe-stack/react/router';
-import { AuthFormLayout, Button, Input, PasswordInput, Spinner, Text } from '@abe-stack/ui';
+import { useResendCooldown } from '@bslt/react/hooks';
+import { Link } from '@bslt/react/router';
+import { AuthFormLayout, Button, Input, PasswordInput, Spinner, Text } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import { OAuthButtons } from './OAuthButtons';
 import { TurnstileWidget } from './TurnstileWidget';
 
-import type { AuthMode } from '@abe-stack/react/hooks';
+import type { AuthMode } from '@bslt/react/hooks';
 import type {
   RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { ChangeEvent, ReactElement } from 'react';
 
 // ============================================================================

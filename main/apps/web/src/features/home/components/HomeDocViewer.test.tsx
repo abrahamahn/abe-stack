@@ -4,10 +4,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { HomeDocViewer } from './HomeDocViewer';
 
-import type { HomeDocViewerProps } from './HomeDocViewer';
 import type { ElementType, ReactElement, ReactNode } from 'react';
+import type { HomeDocViewerProps } from './HomeDocViewer';
 
-vi.mock('@abe-stack/react/hooks', () => {
+vi.mock('@bslt/react/hooks', () => {
   const mockUseDelayedFlag = (value: boolean): boolean => value;
 
   return {
@@ -15,7 +15,7 @@ vi.mock('@abe-stack/react/hooks', () => {
   };
 });
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockHeading = ({
     children,
     as: tag = 'h2',

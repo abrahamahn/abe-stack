@@ -13,7 +13,7 @@
  *
  * @packageDocumentation
  */
-import { invertTransaction, mergeTransactions, type Transaction } from '@abe-stack/shared';
+import { invertTransaction, mergeTransactions, type Transaction } from '@bslt/shared';
 
 import { createStore, type UseBoundStore } from './createStore';
 

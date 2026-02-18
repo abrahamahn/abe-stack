@@ -14,7 +14,7 @@ import type { RawDb } from './client';
 
 /**
  * All tables required for the application to function.
- * Keep in sync with @abe-stack/db schema
+ * Keep in sync with @bslt/db schema
  */
 export const REQUIRED_TABLES = [
   // 0000_init: Users & Auth

@@ -1,5 +1,5 @@
 // main/apps/server/src/http/pagination/helpers.test.ts
-import { encodeCursor, type CursorPaginatedResult, type PaginatedResult } from '@abe-stack/shared';
+import { encodeCursor, type CursorPaginatedResult, type PaginatedResult } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createPaginationHelpers } from './helpers';

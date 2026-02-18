@@ -89,7 +89,7 @@ export function generateTemplates(name: string): Map<string, string> {
  * Narrow dependency interfaces for the ${name} module.
  */
 
-import type { BaseContext } from '@abe-stack/shared';
+import type { BaseContext } from '@bslt/shared';
 
 /**
  * Application context for ${name} handlers.
@@ -176,7 +176,7 @@ describe('${name} service', () => {
 import { list${pascal} } from './service';
 
 import type { ${pascal}AppContext } from './types';
-import type { HandlerContext } from '@abe-stack/server-engine';
+import type { HandlerContext } from '@bslt/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function asAppContext(ctx: HandlerContext): ${pascal}AppContext {
@@ -213,7 +213,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { handleList${pascal} } from './handlers';
 
-import type { HandlerContext } from '@abe-stack/server-engine';
+import type { HandlerContext } from '@bslt/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function createMockContext(): HandlerContext {
@@ -256,11 +256,11 @@ describe('${name} handlers', () => {
  * Route definitions for the ${name} module.
  */
 
-import { createRouteMap, protectedRoute } from '@abe-stack/server-engine';
+import { createRouteMap, protectedRoute } from '@bslt/server-engine';
 
 import { handleList${pascal} } from './handlers';
 
-import type { RouteDefinition } from '@abe-stack/server-engine';
+import type { RouteDefinition } from '@bslt/server-engine';
 
 const ${camel}RouteEntries: [string, RouteDefinition][] = [
   ['${name}', protectedRoute('GET', handleList${pascal}, 'user')],
@@ -309,9 +309,9 @@ export function patchRoutesFile(name: string, routesFilePath: string = ROUTES_FI
   const camel = toCamelCase(name);
   const content = fs.readFileSync(routesFilePath, 'utf-8');
 
-  // Add import after last @abe-stack/core/* import
-  const importLine = `import { ${camel}Routes } from '@abe-stack/core/${name}';`;
-  const lastCoreImport = content.lastIndexOf("from '@abe-stack/core/");
+  // Add import after last @bslt/core/* import
+  const importLine = `import { ${camel}Routes } from '@bslt/core/${name}';`;
+  const lastCoreImport = content.lastIndexOf("from '@bslt/core/");
   const nextNewline = content.indexOf('\n', lastCoreImport);
   const withImport =
     content.slice(0, nextNewline + 1) + importLine + '\n' + content.slice(nextNewline + 1);

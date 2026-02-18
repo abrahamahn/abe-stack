@@ -6,12 +6,12 @@
  * Decouples API key logic from concrete server implementations,
  * keeping the package framework-agnostic.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  */
 
+import type { BaseContext } from '@bslt/shared';
 import type { ApiKeyRepository, AuditEventRepository } from '../../../db/src';
-import type { BaseContext } from '@abe-stack/shared';
 
 // ============================================================================
 // Handler Context

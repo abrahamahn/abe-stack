@@ -4,11 +4,11 @@
  * @module Domain/Jobs
  */
 
-import { jobIdSchema } from '../../primitives/schema/ids';
 import {
   coerceDate,
   createEnumSchema,
   createSchema,
+  isoDateTimeSchema,
   parseBoolean,
   parseNullable,
   parseNullableOptional,
@@ -17,11 +17,11 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../primitives/schema';
+import { jobIdSchema } from '../../primitives/schema/ids';
 import { JOB_PRIORITIES, JOB_PRIORITY_VALUES, JOB_STATUSES } from '../constants/platform';
 
-import type { JobId } from '../../primitives/schema/ids';
 import type { Schema } from '../../primitives/schema';
+import type { JobId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Types

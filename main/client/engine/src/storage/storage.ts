@@ -24,8 +24,8 @@ export interface StorageAdapter {
 // IndexedDB Storage
 // ============================================================================
 
-const STORE_NAME = 'abe-stack-cache';
-const DB_NAME = 'abe-stack-db';
+const STORE_NAME = 'bslt-cache';
+const DB_NAME = 'bslt-db';
 
 // Create a custom store for our app
 const store = createStore(DB_NAME, STORE_NAME);
@@ -61,7 +61,7 @@ export const idbStorage: StorageAdapter = {
 // LocalStorage Fallback (for mutation queue - needs sync access)
 // ============================================================================
 
-const QUEUE_KEY = 'abe-stack-mutation-queue';
+const QUEUE_KEY = 'bslt-mutation-queue';
 
 /**
  * Sync localStorage access for mutation queue

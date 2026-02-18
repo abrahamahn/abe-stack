@@ -1,11 +1,11 @@
 // main/client/ui/src/components/billing/PaymentMethodCard.tsx
-import { getCardBrandLabel, getPaymentMethodIcon, getPaymentMethodLabel } from '@abe-stack/shared';
+import { getCardBrandLabel, getPaymentMethodIcon, getPaymentMethodLabel } from '@bslt/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
-import type { PaymentMethod } from '@abe-stack/shared';
+import type { PaymentMethod } from '@bslt/shared';
 
 // ============================================================================
 // Types

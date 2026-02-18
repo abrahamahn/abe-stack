@@ -1,6 +1,6 @@
 // main/server/engine/src/cache/index.ts
 /**
- * @abe-stack/server-engine
+ * @bslt/server-engine
  *
  * Cache layer with LRU and memory provider.
  *
@@ -9,11 +9,11 @@
  * - Tag-based cache invalidation
  * - Optional memory tracking
  *
- * For memoization, import `memoize` from `@abe-stack/shared` directly.
+ * For memoization, import `memoize` from `@bslt/shared` directly.
  *
  * @example
  * ```ts
- * import { createMemoryCache } from '@abe-stack/server-engine';
+ * import { createMemoryCache } from '@bslt/server-engine';
  *
  * const cache = createMemoryCache({ maxSize: 1000 });
  * ```
@@ -56,7 +56,7 @@ export {
   isCacheConnectionError,
   isCacheError,
   isCacheTimeoutError,
-  toCacheError,
+  toCacheError
 } from './errors';
 
 // ============================================================================
@@ -80,7 +80,7 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
+  RedisCacheConfig
 } from './types';
 
 // Cache-specific types
@@ -91,5 +91,6 @@ export type {
   CreateCacheOptions,
   MemoizedFunction,
   MemoizeOptions,
-  MemoizeStats,
+  MemoizeStats
 } from './types';
+

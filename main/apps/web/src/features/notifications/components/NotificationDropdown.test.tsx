@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { NotificationDropdown } from './NotificationDropdown';
 
-import type { Notification } from '@abe-stack/shared';
+import type { Notification } from '@bslt/shared';
 import type { ReactNode } from 'react';
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   return {
     ...actual,

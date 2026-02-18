@@ -1,6 +1,6 @@
 # 🔐 Environment Files
 
-This directory contains all environment variable files for ABE Stack. The configuration system loads and validates these files before the application starts.
+This directory contains all environment variable files for BSLT. The configuration system loads and validates these files before the application starts.
 
 ## 🚀 Quick Start for New Users
 
@@ -201,7 +201,7 @@ Check the priority order above. Higher priority sources override lower ones. Deb
 
 ```javascript
 // Add after imports in your entry file
-import { initEnv } from '@abe-stack/shared/config';
+import { initEnv } from '@bslt/shared/config';
 initEnv();
 console.log('MY_VAR:', process.env.MY_VAR);
 ```

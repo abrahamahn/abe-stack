@@ -248,7 +248,7 @@ const run = (): void => {
 
   let output = '';
 
-  output += '# ABE Stack - Code Snapshot\n\n';
+  output += '# BSLT - Code Snapshot\n\n';
   output += `Generated: ${new Date().toISOString()}\n\n`;
   output += '---\n\n';
 

@@ -1,5 +1,5 @@
 // main/apps/web/src/features/ui-library/components/SidePeekUILibraryContent.tsx
-import { Markdown } from '@abe-stack/ui';
+import { Markdown } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 
@@ -15,7 +15,7 @@ const SIDE_PEEK_MARKDOWN = `This is a **Notion-style side peek** panel. It slide
 
 ## Usage
 \`\`\`tsx
-import { SidePeek, useSidePeek } from '@abe-stack/ui';
+import { SidePeek, useSidePeek } from '@bslt/ui';
 
 const { isOpen, open, close } = useSidePeek();
 

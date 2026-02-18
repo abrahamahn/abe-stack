@@ -1,5 +1,5 @@
 // main/apps/web/src/features/home/components/HomeSidePeek.tsx
-import { Button, SidePeek, Text } from '@abe-stack/ui';
+import { Button, SidePeek, Text } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import type { ReactElement } from 'react';

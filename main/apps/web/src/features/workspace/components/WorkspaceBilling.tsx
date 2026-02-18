@@ -6,9 +6,9 @@
  * Shows current plan, billing period, and provides quick actions.
  */
 
-import { useNavigate } from '@abe-stack/react/router';
-import { formatDate } from '@abe-stack/shared';
-import { Badge, Button, Card, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { useNavigate } from '@bslt/react/router';
+import { formatDate } from '@bslt/shared';
+import { Badge, Button, Card, Heading, Skeleton, Text } from '@bslt/ui';
 
 import { useWorkspaceBilling } from '../hooks/useWorkspaceBilling';
 

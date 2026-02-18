@@ -16,7 +16,30 @@ const TEST_PATTERN = /\.(test|spec)\.(ts|tsx)$/;
 
 function countLines(filePath: string): number {
   const content = readFileSync(filePath, 'utf-8');
-  return content.split('\n').length;
+  const lines = content.split('\n');
+  let count = 0;
+  let inBlockComment = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    if (inBlockComment) {
+      if (line.includes('*/')) inBlockComment = false;
+      continue;
+    }
+
+    if (line.startsWith('/*')) {
+      if (!line.includes('*/')) inBlockComment = true;
+      continue;
+    }
+
+    // Skip blank lines, single-line comments, and JSDoc-style comments
+    if (line === '' || line.startsWith('//') || line.startsWith('*')) continue;
+
+    count++;
+  }
+
+  return count;
 }
 
 function walkFiles(dir: string): string[] {
@@ -62,7 +85,7 @@ function findPackages(dir: string): PackageInfo[] {
 const packages = findPackages(MAIN_DIR).sort((a, b) => b.lines - a.lines);
 const maxLabel = Math.max(...packages.map((p) => `${p.name} (${relative(MAIN_DIR, p.dir)})`.length));
 
-console.log('Lines of Code by Package (excluding tests and node_modules):');
+console.log('Lines of Code by Package (excluding tests, comments, and blank lines):');
 console.log('-'.repeat(maxLabel + 12));
 
 let total = 0;
@@ -73,4 +96,4 @@ for (const pkg of packages) {
 }
 
 console.log('-'.repeat(maxLabel + 12));
-console.log(`Total Source Lines of Code (excluding tests): ${total}`);
+console.log(`Total Source Lines of Code (excluding tests, comments, blank lines): ${total}`);

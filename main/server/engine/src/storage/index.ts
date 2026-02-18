@@ -1,6 +1,6 @@
 // main/server/engine/src/storage/index.ts
 /**
- * @abe-stack/server-engine
+ * @bslt/server-engine
  *
  * Storage providers (Local, S3) and HTTP file server.
  */
@@ -15,7 +15,7 @@ export type {
   StorageConfig,
   StorageProvider,
   StorageProviderName,
-  UploadParams,
+  UploadParams
 } from './types';
 
 // Factory
@@ -27,15 +27,13 @@ export { S3StorageProvider } from './providers/s3';
 
 // URL Signing (canonical implementations)
 export {
-  createSignature as createStorageSignature,
-  createSignedUrl,
-  getDefaultExpiration,
+  createSignedUrl, createSignature as createStorageSignature, getDefaultExpiration,
   isUrlExpired,
   normalizeFilename as normalizeStorageFilename,
   normalizeStorageKey,
   parseSignedUrl,
   verifySignature as verifyStorageSignature,
-  type SignedUrlData,
+  type SignedUrlData
 } from './signing';
 
 // HTTP Server
@@ -43,7 +41,6 @@ export {
   createSignature as createFileSignature,
   normalizeFilename,
   registerFileServer,
-  verifySignature as verifyFileSignature,
-  type FileSignatureData,
-  type FilesConfig,
+  verifySignature as verifyFileSignature, type FilesConfig, type FileSignatureData
 } from './http/index';
+

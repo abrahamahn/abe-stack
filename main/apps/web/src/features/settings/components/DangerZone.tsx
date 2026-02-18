@@ -6,8 +6,8 @@
  * Integrates with SudoModal for re-authentication before destructive actions.
  */
 
-import { Alert, Button, Card, FormField, Heading, Input, Text } from '@abe-stack/ui';
-import { useState, type ReactElement, type ChangeEvent } from 'react';
+import { Alert, Button, Card, FormField, Heading, Input, Text } from '@bslt/ui';
+import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 import {
   useDeactivateAccount,

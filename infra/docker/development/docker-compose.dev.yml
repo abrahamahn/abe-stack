@@ -1,5 +1,5 @@
 # config/docker/docker-compose.dev.yml
-# Development Docker Compose for ABE Stack
+# Development Docker Compose for BSLT
 #
 # Usage:
 #   docker compose -f config/docker/docker-compose.dev.yml up -d
@@ -12,7 +12,7 @@
 #   2. Run migrations: pnpm db:push
 #   3. Start dev servers: pnpm dev
 
-name: abe-stack-dev
+name: bslt-dev
 
 services:
   # ===========================================================================
@@ -20,7 +20,7 @@ services:
   # ===========================================================================
   postgres:
     image: postgres:16-alpine
-    container_name: abe-stack-dev-postgres
+    container_name: bslt-dev-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-abe_stack_dev}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -43,7 +43,7 @@ services:
   # Uncomment if your development requires Redis
   # redis:
   #   image: redis:7-alpine
-  #   container_name: abe-stack-dev-redis
+  #   container_name: bslt-dev-redis
   #   ports:
   #     - '${REDIS_PORT:-6379}:6379'
   #   volumes:
@@ -57,6 +57,6 @@ services:
 
 volumes:
   postgres_dev_data:
-    name: abe-stack-postgres-dev-data
+    name: bslt-postgres-dev-data
   # redis_dev_data:
-  #   name: abe-stack-redis-dev-data
+  #   name: bslt-redis-dev-data

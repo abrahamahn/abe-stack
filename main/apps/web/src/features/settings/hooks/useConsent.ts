@@ -5,8 +5,8 @@
  * Hooks for fetching and updating user consent preferences.
  */
 
-import { getApiClient } from '@abe-stack/api';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { getApiClient } from '@bslt/api';
 import { useCallback, useEffect, useState } from 'react';
 
 // ============================================================================

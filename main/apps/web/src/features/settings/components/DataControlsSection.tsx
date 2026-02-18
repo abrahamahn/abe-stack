@@ -6,8 +6,8 @@
  * Includes account lifecycle actions (deactivate/delete), consent preferences, and data export.
  */
 
-import { MS_PER_DAY } from '@abe-stack/shared';
-import { Alert, Badge, Button, Card, Heading, Text } from '@abe-stack/ui';
+import { MS_PER_DAY } from '@bslt/shared';
+import { Alert, Badge, Button, Card, Heading, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 import {

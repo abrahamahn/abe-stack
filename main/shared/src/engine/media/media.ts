@@ -9,15 +9,26 @@
  */
 
 import { EXT_TO_MIME, EXTRA_EXT_TO_MIME } from '../../primitives/constants/media';
+import { generateUUID } from '../../primitives/helpers/crypto';
 import {
   MAX_CHUNK_SIZE,
   MAX_FILENAME_LENGTH,
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
 } from '../constants/limits';
-import { generateUUID } from '../../primitives/helpers/crypto';
 
-import type { FileTypeResult } from './media.types';
+import type {
+  AudioProcessingOptions,
+  ContentModerationResult,
+  FileTypeResult,
+  ImageProcessingOptions,
+  MediaMetadata,
+  MediaProcessingOptions,
+  ProcessingResult,
+  SecurityScanResult,
+  UploadConfig,
+  VideoProcessingOptions,
+} from './media.types';
 
 // ============================================================================
 // Types
@@ -46,7 +57,7 @@ export type {
   SecurityScanResult,
   UploadConfig,
   VideoProcessingOptions,
-} from './media.types';
+};
 
 // ============================================================================
 // Constants

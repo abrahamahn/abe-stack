@@ -20,7 +20,7 @@ import {
 } from '../../primitives/schema';
 import { fileIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 import { LIMITS } from '../constants/limits';
-import { generateSecureId } from '../crypto';
+import { generateSecureId } from '../../primitives/helpers/crypto';
 
 import type { Schema } from '../../primitives/api';
 import type { FileId, TenantId, UserId } from '../../primitives/schema/ids';

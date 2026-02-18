@@ -9,13 +9,13 @@ import {
   AccountLockedError,
   EmailNotVerifiedError,
   InvalidCredentialsError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleLogin } from './login';
 
+import type { LoginRequest } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { LoginRequest } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies
@@ -97,8 +97,8 @@ vi.mock('../security', () => ({
 }));
 
 // Mock @shared to provide working mapErrorToResponse (use relative path from handler's location)
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToHttpResponse,

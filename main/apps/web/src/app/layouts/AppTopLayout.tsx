@@ -1,8 +1,8 @@
 // main/apps/web/src/app/layouts/AppTopLayout.tsx
-import { toastStore } from '@abe-stack/react';
-import { useSidePeek, type AuthMode } from '@abe-stack/react/hooks';
-import { Button, Heading, ResizablePanel, Skeleton, Text } from '@abe-stack/ui';
 import { getAccessToken } from '@app/authToken';
+import { toastStore } from '@bslt/react';
+import { useSidePeek, type AuthMode } from '@bslt/react/hooks';
+import { Button, Heading, ResizablePanel, Skeleton, Text } from '@bslt/ui';
 import { TenantSwitcher } from '@features/workspace/components';
 
 import { AppUndoRedo } from './AppUndoRedo';
@@ -131,7 +131,7 @@ export const AppTopLayout = ({
         </div>
         <div className="flex-1 flex-center">
           <Heading as="h1" size="lg" className="m-0">
-            ABE Stack
+            BSLT
           </Heading>
         </div>
         <div className="w-auto min-w-88 flex items-center gap-2 justify-end">

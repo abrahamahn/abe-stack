@@ -8,7 +8,7 @@
  * - code.ts: Exports source code files to .tmp/PATH-code.md
  * - source-code.ts: Exports package src .ts/.tsx paths + configs to PATH-source-code.md
  * - all.ts: Exports all files to .tmp/PATH-all.md
- * - shared.ts: Exports all files in @abe-stack/shared to .tmp/PATH-shared.md
+ * - shared.ts: Exports all files in @bslt/shared to .tmp/PATH-shared.md
  *
  * @module tools/scripts/path
  */

@@ -6,8 +6,8 @@
  * Displays toggle switches for different consent categories with descriptions.
  */
 
-import { Alert, Button, Card, Heading, Switch, Text } from '@abe-stack/ui';
-import { CardAsyncState } from '@abe-stack/ui/components/CardAsyncState';
+import { Alert, Button, Card, Heading, Switch, Text } from '@bslt/ui';
+import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
 import { useState, type ReactElement } from 'react';
 
 import { useConsent, useUpdateConsent } from '../hooks/useConsent';

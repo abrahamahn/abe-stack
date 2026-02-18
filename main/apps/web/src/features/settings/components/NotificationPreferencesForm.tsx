@@ -6,13 +6,13 @@
  * global enable/disable, per-type toggles, and quiet hours.
  */
 
-import { useNotificationPreferences } from '@abe-stack/react';
-import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } from '@abe-stack/ui';
 import { getAccessToken } from '@app/authToken';
+import { useNotificationPreferences } from '@bslt/react';
+import { Alert, Checkbox, EmptyState, Heading, Input, Skeleton, Switch, Text } from '@bslt/ui';
 import { useMemo, useState } from 'react';
 
-import type { NotificationClientConfig } from '@abe-stack/api';
-import type { NotificationPreferences, NotificationType } from '@abe-stack/shared';
+import type { NotificationClientConfig } from '@bslt/api';
+import type { NotificationPreferences, NotificationType } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

@@ -20,12 +20,12 @@ export default mergeConfig(baseConfig, {
       deps: {
         inline: [
           /src\//,
-          '@abe-stack/core',
-          '@abe-stack/db',
-          '@abe-stack/server-engine',
-          '@abe-stack/shared',
-          '@abe-stack/realtime',
-          '@abe-stack/websocket',
+          '@bslt/core',
+          '@bslt/db',
+          '@bslt/server-engine',
+          '@bslt/shared',
+          '@bslt/realtime',
+          '@bslt/websocket',
         ],
       },
     },
@@ -34,66 +34,66 @@ export default mergeConfig(baseConfig, {
     alias: [
       // Core package shortcut exports (must come before regex)
       {
-        find: '@abe-stack/packages/shared/http',
+        find: '@bslt/packages/shared/http',
         replacement: `${corePkg}/infrastructure/http/index.ts`,
       },
       {
-        find: '@abe-stack/packages/shared/crypto',
+        find: '@bslt/packages/shared/crypto',
         replacement: `${corePkg}/infrastructure/crypto/index.ts`,
       },
       {
-        find: '@abe-stack/packages/shared/errors',
+        find: '@bslt/packages/shared/errors',
         replacement: `${corePkg}/infrastructure/errors/index.ts`,
       },
       {
-        find: '@abe-stack/packages/shared/shared',
+        find: '@bslt/packages/shared/shared',
         replacement: `${corePkg}/packages/shared/index.ts`,
       },
-      { find: '@abe-stack/packages/shared/utils', replacement: `${corePkg}/utils/index.ts` },
-      { find: '@abe-stack/packages/shared/env', replacement: `${corePkg}/config/index.ts` },
+      { find: '@bslt/packages/shared/utils', replacement: `${corePkg}/utils/index.ts` },
+      { find: '@bslt/packages/shared/env', replacement: `${corePkg}/config/index.ts` },
       {
-        find: '@abe-stack/packages/shared/pubsub/postgres',
+        find: '@bslt/packages/shared/pubsub/postgres',
         replacement: `${corePkg}/infrastructure/pubsub/postgres-pubsub.ts`,
       },
       {
-        find: '@abe-stack/packages/shared/pubsub',
+        find: '@bslt/packages/shared/pubsub',
         replacement: `${corePkg}/infrastructure/pubsub/index.ts`,
       },
-      { find: '@abe-stack/packages/shared/config', replacement: `${corePkg}/config/index.ts` },
+      { find: '@bslt/packages/shared/config', replacement: `${corePkg}/config/index.ts` },
       // Handle subpath imports with regex
       {
-        find: /^@abe-stack\/core\/(.*)$/,
+        find: /^@bslt\/core\/(.*)$/,
         replacement: `${modulesPkg}/$1/index.ts`,
       },
-      { find: '@abe-stack/core', replacement: `${modulesPkg}/index.ts` },
+      { find: '@bslt/core', replacement: `${modulesPkg}/index.ts` },
       // Subpath imports for remaining packages
-      { find: /^@abe-stack\/realtime\/(.*)$/, replacement: `${realtimePkg}/$1` },
+      { find: /^@bslt\/realtime\/(.*)$/, replacement: `${realtimePkg}/$1` },
       // Engine subpath exports (must come before main package catch-all)
       {
-        find: '@abe-stack/server-engine/logger',
+        find: '@bslt/server-engine/logger',
         replacement: `${infraPkg}/logger/index.ts`,
       },
       {
-        find: '@abe-stack/server-engine/config',
+        find: '@bslt/server-engine/config',
         replacement: `${infraPkg}/config/index.ts`,
       },
       // Shared subpath exports (must come before main package catch-all)
-      { find: '@abe-stack/shared/domain', replacement: `${corePkg}/domain/index.ts` },
-      { find: '@abe-stack/shared/config', replacement: `${corePkg}/config/index.ts` },
+      { find: '@bslt/shared/domain', replacement: `${corePkg}/domain/index.ts` },
+      { find: '@bslt/shared/config', replacement: `${corePkg}/config/index.ts` },
       {
-        find: '@abe-stack/shared/pubsub/postgres',
+        find: '@bslt/shared/pubsub/postgres',
         replacement: `${corePkg}/utils/pubsub/postgres-pubsub.ts`,
       },
       {
-        find: '@abe-stack/shared/pubsub',
+        find: '@bslt/shared/pubsub',
         replacement: `${corePkg}/utils/pubsub/index.ts`,
       },
       // Handle main package imports
-      { find: '@abe-stack/server-engine', replacement: infraPkg },
-      { find: '@abe-stack/db', replacement: dbPkg },
-      { find: '@abe-stack/shared', replacement: corePkg },
-      { find: '@abe-stack/realtime', replacement: realtimePkg },
-      { find: '@abe-stack/websocket', replacement: websocketPkg },
+      { find: '@bslt/server-engine', replacement: infraPkg },
+      { find: '@bslt/db', replacement: dbPkg },
+      { find: '@bslt/shared', replacement: corePkg },
+      { find: '@bslt/realtime', replacement: realtimePkg },
+      { find: '@bslt/websocket', replacement: websocketPkg },
       // Server-specific local aliases
       { find: /^@health\/(.*)$/, replacement: path.resolve(__dirname, 'src/health/$1') },
       { find: '@health', replacement: path.resolve(__dirname, 'src/health/index.ts') },

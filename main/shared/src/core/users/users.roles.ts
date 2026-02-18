@@ -2,46 +2,13 @@
 
 /**
  * @file User Roles
- * @description Role definitions, schemas, and role-checking utilities.
+ * @description Role-checking utility functions.
  * @module Core/Users
  */
 
-import { createEnumSchema } from '../../primitives/schema';
 import { APP_ROLES } from '../constants/auth';
-import { PERMISSIONS, TENANT_ROLES } from '../constants/iam';
 
-// ============================================================================
-// App Role Definitions
-// ============================================================================
-
-/**
- * Type representing a valid application role.
- * - `user`: Standard authenticated user
- * - `admin`: System administrator with full access
- * - `moderator`: Content or community moderator
- */
-export type AppRole = (typeof APP_ROLES)[number];
-
-/** Schema for validating application roles. */
-export const appRoleSchema = createEnumSchema(APP_ROLES, 'app role');
-
-// ============================================================================
-// Tenant Role Definitions
-// ============================================================================
-
-export type TenantRole = (typeof TENANT_ROLES)[keyof typeof TENANT_ROLES];
-
-/** All valid tenant role values */
-const TENANT_ROLE_VALUES = Object.values(TENANT_ROLES) as readonly TenantRole[];
-
-export const tenantRoleSchema = createEnumSchema(TENANT_ROLE_VALUES, 'tenant role');
-
-// ============================================================================
-// Permissions
-// ============================================================================
-
-export type Permission = (typeof PERMISSIONS)[number];
-export const permissionSchema = createEnumSchema(PERMISSIONS, 'permission');
+import type { AppRole } from '../auth/roles';
 
 // ============================================================================
 // Functions

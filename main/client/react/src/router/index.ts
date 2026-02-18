@@ -7,7 +7,7 @@
  *
  * @example
  * // In your app root
- * import { Router, Routes, Route } from '@abe-stack/ui';
+ * import { Router, Routes, Route } from '@bslt/ui';
  *
  * function App() {
  *   return (
@@ -21,7 +21,7 @@
  * }
  *
  * // Navigation
- * import { useNavigate, Link } from '@abe-stack/ui';
+ * import { useNavigate, Link } from '@bslt/ui';
  *
  * function Nav() {
  *   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export type {
   RouterContextValue,
   RouterLocation,
   RouterProps,
-  RouterState,
+  RouterState
 } from './context';
 
 // Hooks
@@ -58,7 +58,7 @@ export type {
   NavigateProps,
   OutletProviderProps,
   RouteProps,
-  RoutesProps,
+  RoutesProps
 } from './components';
 
 // Alias for compatibility

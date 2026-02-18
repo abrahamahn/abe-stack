@@ -1,5 +1,5 @@
 // main/client/ui/src/components/PeekLink.tsx
-import { useSidePeek } from '@abe-stack/react/hooks';
+import { useSidePeek } from '@bslt/react/hooks';
 import {
   useCallback,
   type ComponentPropsWithoutRef,

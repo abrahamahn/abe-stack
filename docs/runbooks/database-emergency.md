@@ -80,7 +80,7 @@ WHERE datname = 'abe_stack'
 Then restart the application to reset the connection pool:
 
 ```bash
-docker compose --project-name abe-stack-production -f docker-compose.prod.yml restart api
+docker compose --project-name bslt-production -f docker-compose.prod.yml restart api
 ```
 
 ### Prevention

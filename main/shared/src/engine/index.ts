@@ -316,7 +316,6 @@ export {
   searchResultItemSchema,
   searchResultSchema,
   sortConfigSchema,
-  sortOrderSchema,
   urlSearchParamsSchema,
   type RangeValue,
   type SearchQueryInput,
@@ -529,11 +528,6 @@ export {
   createTokenStore,
   tokenStore,
   type TokenStore,
-  // crypto (re-exported from primitives)
-  constantTimeCompare,
-  generateSecureId,
-  generateToken,
-  generateUUID,
 } from './crypto';
 
 // ============================================================================

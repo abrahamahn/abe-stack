@@ -1,5 +1,5 @@
 // main/server/core/src/users/handlers/username.test.ts
-import { BadRequestError, ConflictError, NotFoundError } from '@abe-stack/shared';
+import { BadRequestError, ConflictError, NotFoundError } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleUpdateUsername } from './username';

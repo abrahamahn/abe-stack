@@ -1,6 +1,6 @@
 // main/server/core/src/cache/keys.ts
 
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
 export const CacheKeys = {
   user: (id: string) => `user:${id}`,

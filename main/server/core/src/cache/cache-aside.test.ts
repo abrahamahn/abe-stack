@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { cacheAside } from './cache-aside';
 
-import type { CacheProvider, CacheSetOptions } from '@abe-stack/shared';
+import type { CacheProvider, CacheSetOptions } from '@bslt/shared';
 
 // ============================================================================
 // Test Helpers

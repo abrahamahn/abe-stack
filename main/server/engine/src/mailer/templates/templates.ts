@@ -498,13 +498,13 @@ If you need assistance, please contact our support team immediately.
   welcome(firstName: string, loginUrl: string): EmailOptions & { to: '' } {
     return {
       to: '',
-      subject: 'Welcome to ABE Stack!',
+      subject: 'Welcome to BSLT!',
       text: `
-Hi ${firstName}, welcome to ABE Stack!
+Hi ${firstName}, welcome to BSLT!
 
 Your email has been verified and your account is ready to go.
 
-ABE Stack gives you a complete, production-ready foundation for building modern applications — authentication, billing, notifications, and more, all out of the box.
+BSLT gives you a complete, production-ready foundation for building modern applications — authentication, billing, notifications, and more, all out of the box.
 
 Sign in to get started:
 ${loginUrl}
@@ -514,9 +514,9 @@ If you have any questions, reply to this email. We're happy to help.
       html: renderLayout(
         'Welcome',
         `
-        <h2 style="${styles.heading}">Welcome to ABE Stack!</h2>
+        <h2 style="${styles.heading}">Welcome to BSLT!</h2>
         <p style="${styles.text}">Hi <strong>${firstName}</strong>, your email has been verified and your account is ready to go.</p>
-        <p style="${styles.text}">ABE Stack gives you a complete, production-ready foundation for building modern applications &mdash; authentication, billing, notifications, and more, all out of the box.</p>
+        <p style="${styles.text}">BSLT gives you a complete, production-ready foundation for building modern applications &mdash; authentication, billing, notifications, and more, all out of the box.</p>
         <p>
           <a href="${loginUrl}" style="${styles.buttonSuccess}">
             Get Started

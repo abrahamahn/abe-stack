@@ -20,8 +20,8 @@ vi.mock('../components/ActivityFeed', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   return {
     ...actual,

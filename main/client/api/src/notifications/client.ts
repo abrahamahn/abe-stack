@@ -12,19 +12,18 @@ import {
   notificationDeleteRequestSchema,
   notificationsListResponseSchema,
   preferencesResponseSchema,
-  sendNotificationResponseSchema,
   sendNotificationRequestSchema,
-  subscribeResponseSchema,
+  sendNotificationResponseSchema,
   subscribeRequestSchema,
-  unsubscribeResponseSchema,
+  subscribeResponseSchema,
   unsubscribeRequestSchema,
+  unsubscribeResponseSchema,
   updatePreferencesRequestSchema,
   vapidKeyResponseSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   DeleteNotificationResponse,
   MarkReadResponse,
@@ -38,15 +37,16 @@ import type {
   UnsubscribeResponse,
   UpdatePreferencesRequest,
   VapidKeyResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
-  NotificationsListResponse,
-} from '@abe-stack/shared';
+  NotificationsListResponse
+} from '@bslt/shared';
 
 /** localStorage key for persisting device ID across sessions */
-const DEVICE_ID_STORAGE_KEY = 'abe-stack-device-id';
+const DEVICE_ID_STORAGE_KEY = 'bslt-device-id';
 
 // ============================================================================
 // Types

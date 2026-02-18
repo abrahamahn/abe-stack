@@ -14,7 +14,7 @@ import {
   emptyBodySchema,
   setTenantFeatureOverrideRequestSchema,
   updateFeatureFlagRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -36,8 +36,8 @@ import {
   handleUpdateFlag,
 } from './handlers';
 
-import type { FeatureFlagAppContext } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FeatureFlagAppContext } from './types';
 
 // ============================================================================
 // Route Helper

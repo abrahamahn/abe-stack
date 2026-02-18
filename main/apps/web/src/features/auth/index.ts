@@ -23,10 +23,10 @@ export {
   useRegisterPasskey,
   type LoginWithPasskeyState,
   type PasskeysState,
-  type RegisterPasskeyState,
+  type RegisterPasskeyState
 } from './hooks/useWebauthn';
 
-// Note: useAuthModeNavigation, AuthMode, createFormHandler should be imported directly from @abe-stack/ui
+// Note: useAuthModeNavigation, AuthMode, createFormHandler should be imported directly from @bslt/ui
 
 // Pages
 export { AuthPage } from './pages/AuthPage';
@@ -41,11 +41,8 @@ export { RevertEmailChangePage } from './pages/RevertEmailChangePage';
 
 // Services
 export {
-  AuthService,
-  TotpChallengeError,
-  createAuthService,
-  type AuthState,
+  AuthService, createAuthService, TotpChallengeError, type AuthState
 } from './services/AuthService';
 
 // External Types
-export type { User } from '@abe-stack/api';
+export type { User } from '@bslt/api';

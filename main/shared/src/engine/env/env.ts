@@ -8,8 +8,8 @@
  * @module Engine/Env
  */
 
-import { ConfigurationError } from '../errors';
 import { createEnumSchema, createSchema, parseOptional, parseString } from '../../primitives/schema';
+import { ConfigurationError } from '../errors';
 
 import type { Schema } from '../../primitives/api';
 

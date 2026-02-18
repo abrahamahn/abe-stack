@@ -17,14 +17,14 @@ export {
   signCookie,
   unsignCookie,
   type CookieOptions,
-  type CookiePluginOptions,
+  type CookiePluginOptions
 } from './middleware';
 
 // Middleware - Correlation ID
 export {
   generateCorrelationId,
   registerCorrelationIdHook,
-  type CorrelationIdOptions,
+  type CorrelationIdOptions
 } from './middleware';
 
 // Middleware - CSRF
@@ -40,7 +40,7 @@ export {
   registerPrototypePollutionProtection,
   sanitizePrototype,
   type CorsOptions,
-  type SecurityHeaderOptions,
+  type SecurityHeaderOptions
 } from './middleware';
 
 // Middleware - Static & Request Info
@@ -48,7 +48,7 @@ export {
   registerRequestInfoHook,
   registerStaticServe,
   type RequestInfo,
-  type StaticServeOptions,
+  type StaticServeOptions
 } from './middleware';
 
 // Middleware - Proxy Validation
@@ -63,7 +63,7 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig,
+  type ProxyValidationConfig
 } from './middleware';
 
 // Middleware - Input Validation
@@ -72,13 +72,10 @@ export {
   detectSQLInjection,
   registerInputValidation,
   sanitizeObject as sanitizeInput,
-  sanitizeString,
-  type SQLInjectionDetectionOptions,
-  type SanitizationResult,
-  type ValidationOptions,
+  sanitizeString, type SanitizationResult, type SQLInjectionDetectionOptions, type ValidationOptions
 } from './middleware';
 
-// Router — re-exported from @abe-stack/server-engine (canonical implementation)
+// Router — re-exported from @bslt/server-engine (canonical implementation)
 export {
   createRouteMap,
   protectedRoute,
@@ -92,8 +89,8 @@ export {
   type RouteMap,
   type RouteResult,
   type RouterOptions,
-  type ValidationSchema,
-} from '@abe-stack/server-engine';
+  type ValidationSchema
+} from '@bslt/server-engine';
 
 // Pagination
 export {
@@ -102,7 +99,7 @@ export {
   type PaginationContext,
   type PaginationHelpers,
   type PaginationMiddlewareOptions,
-  type PaginationRequest,
+  type PaginationRequest
 } from './pagination';
 
 // Plugins
@@ -111,5 +108,6 @@ export {
   type AppErrorInfo,
   type PluginOptions,
   type RateLimiterLike,
-  type StaticServeConfig,
+  type StaticServeConfig
 } from './plugins';
+

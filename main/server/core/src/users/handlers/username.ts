@@ -17,7 +17,7 @@ import {
   RESERVED_USERNAMES,
   type UpdateUsernameRequest,
   type UpdateUsernameResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';

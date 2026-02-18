@@ -41,9 +41,9 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: vi.fn(),
 }));
 
-// Mock @abe-stack/db for OAUTH_PROVIDERS
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+// Mock @bslt/db for OAUTH_PROVIDERS
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     OAUTH_PROVIDERS: ['google', 'github', 'apple'] as const,
@@ -75,10 +75,10 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
+import type { UserId } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext } from '../index';
 import type { OAuthConnectionInfo } from './types';
-import type { UserId } from '@abe-stack/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Test Helpers

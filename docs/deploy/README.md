@@ -1,6 +1,6 @@
-# ABE Stack Deployment Guide
+# BSLT Deployment Guide
 
-Docker-based deployment for the ABE Stack monorepo.
+Docker-based deployment for the BSLT monorepo.
 
 ---
 

@@ -5,19 +5,19 @@
  * Validates security events listing with filters, pagination, and state management.
  */
 
-import { useQuery } from '@abe-stack/react';
+import { useQuery } from '@bslt/react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useSecurityEvents } from './useSecurityEvents';
 
-import type { SecurityEventsFilter, SecurityEventsListResponse } from '@abe-stack/shared';
+import type { SecurityEventsFilter, SecurityEventsListResponse } from '@bslt/shared';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -33,8 +33,8 @@ vi.mock('../services/adminApi', () => ({
   })),
 }));
 
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');
   return {
     ...actual,
     tokenStore: {

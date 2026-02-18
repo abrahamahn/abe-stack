@@ -9,7 +9,7 @@ import {
   UnauthorizedError,
   UnprocessableError,
   type AppError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import {

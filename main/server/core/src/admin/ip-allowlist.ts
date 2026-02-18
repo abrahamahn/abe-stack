@@ -8,7 +8,7 @@
  * @module admin/ip-allowlist
  */
 
-import { ForbiddenError } from '@abe-stack/shared';
+import { ForbiddenError } from '@bslt/shared';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

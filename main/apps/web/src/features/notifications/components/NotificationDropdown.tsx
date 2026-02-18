@@ -6,10 +6,10 @@
  * mark-as-read and mark-all-read actions.
  */
 
-import { MS_PER_MINUTE } from '@abe-stack/shared';
-import { Button, EmptyState, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { MS_PER_MINUTE } from '@bslt/shared';
+import { Button, EmptyState, Heading, Skeleton, Text } from '@bslt/ui';
 
-import type { Notification } from '@abe-stack/shared';
+import type { Notification } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

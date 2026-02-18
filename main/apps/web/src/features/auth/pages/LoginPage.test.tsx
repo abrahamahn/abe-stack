@@ -1,7 +1,7 @@
 // main/apps/web/src/features/auth/pages/LoginPage.test.tsx
 import { LoginPage } from '@auth/pages/LoginPage';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 
@@ -22,18 +22,18 @@ const mockUseAuth = vi.fn(() => ({
 const mockNavigate = vi.fn();
 const mockNavigateToMode = vi.fn();
 
-// Mock @abe-stack/react/router for useNavigate
-vi.mock('@abe-stack/react/router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
+// Mock @bslt/react/router for useNavigate
+vi.mock('@bslt/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/router')>();
   return {
     ...actual,
     useNavigate: () => mockNavigate,
   };
 });
 
-// Mock @abe-stack/react/hooks for useAuthModeNavigation
-vi.mock('@abe-stack/react/hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/hooks')>();
+// Mock @bslt/react/hooks for useAuthModeNavigation
+vi.mock('@bslt/react/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/hooks')>();
   return {
     ...actual,
     useAuthModeNavigation: () => ({

@@ -5,13 +5,13 @@
  * @module admin/ip-allowlist.test
  */
 
-import { ForbiddenError } from '@abe-stack/shared';
+import { ForbiddenError } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createIpAllowlistMiddleware } from './ip-allowlist';
 
-import type { IpAllowlistConfig } from './ip-allowlist';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { IpAllowlistConfig } from './ip-allowlist';
 
 // ============================================================================
 // Test Helpers

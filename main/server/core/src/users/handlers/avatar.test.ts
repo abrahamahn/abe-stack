@@ -35,8 +35,8 @@ const { mockValidatePassword, mockHashPassword, mockVerifyPassword, mockRevokeAl
     mockRevokeAllUserTokens: vi.fn(),
   }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     validatePassword: mockValidatePassword,

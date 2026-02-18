@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadAuthConfig, validateAuthConfig } from './auth';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with auth-related defaults (as applied by Zod schema).
@@ -12,8 +12,8 @@ import type { FullEnv } from '@abe-stack/shared/config';
 function createBaseEnv(overrides: Partial<FullEnv> = {}): FullEnv {
   return {
     ACCESS_TOKEN_EXPIRY: '15m',
-    JWT_ISSUER: 'abe-stack',
-    JWT_AUDIENCE: 'abe-stack-api',
+    JWT_ISSUER: 'bslt',
+    JWT_AUDIENCE: 'bslt-api',
     REFRESH_TOKEN_EXPIRY_DAYS: 7,
     REFRESH_TOKEN_GRACE_PERIOD: 30,
     PASSWORD_MIN_LENGTH: 8,
@@ -23,7 +23,7 @@ function createBaseEnv(overrides: Partial<FullEnv> = {}): FullEnv {
     LOCKOUT_DURATION_MS: 1800000,
     MAGIC_LINK_EXPIRY_MINUTES: 15,
     MAGIC_LINK_MAX_ATTEMPTS: 3,
-    TOTP_ISSUER: 'ABE Stack',
+    TOTP_ISSUER: 'BSLT',
     TOTP_WINDOW: 1,
     ...overrides,
   } as unknown as FullEnv;
@@ -43,7 +43,7 @@ describe('Auth Configuration', () => {
     );
     expect(config.strategies).toEqual(['local']);
     expect(config.jwt.secret).toBe('a-very-secure-secret-key-at-least-32-chars!');
-    expect(config.jwt.issuer).toBe('abe-stack');
+    expect(config.jwt.issuer).toBe('bslt');
   });
 
   test('should parse proxy settings', () => {

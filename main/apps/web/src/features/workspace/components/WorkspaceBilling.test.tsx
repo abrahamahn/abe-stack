@@ -3,12 +3,12 @@
  * Tests for WorkspaceBilling component.
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
-import { MemoryRouter } from '@abe-stack/react/router';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
+import { MemoryRouter } from '@bslt/react/router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // Mocks
@@ -25,9 +25,9 @@ import { WorkspaceBilling } from './WorkspaceBilling';
 import type { Plan, Subscription } from '../hooks/useWorkspaceBilling';
 
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/react/router', async () => {
+vi.mock('@bslt/react/router', async () => {
   const actual =
-    await vi.importActual<typeof import('@abe-stack/react/router')>('@abe-stack/react/router');
+    await vi.importActual<typeof import('@bslt/react/router')>('@bslt/react/router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,

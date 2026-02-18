@@ -56,10 +56,10 @@ COPY . .
 # Install dependencies and build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
-    pnpm --filter @abe-stack/shared build && \
-    pnpm --filter @abe-stack/ui build && \
-    pnpm --filter @abe-stack/api build && \
-    pnpm --filter @abe-stack/web build
+    pnpm --filter @bslt/shared build && \
+    pnpm --filter @bslt/ui build && \
+    pnpm --filter @bslt/api build && \
+    pnpm --filter @bslt/web build
 
 # =============================================================================
 # Production Stage - Minimal nginx image serving static files

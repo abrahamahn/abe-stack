@@ -14,6 +14,11 @@ import {
   parseOptional,
   parseString,
 } from '../../primitives/schema';
+import {
+  DEFAULT_PAGINATION,
+  DEFAULT_SORT_ORDER,
+  PAGINATION_ERROR_TYPES,
+} from '../constants/limits';
 
 import type { Schema } from '../../primitives/schema';
 
@@ -22,12 +27,6 @@ export const sortOrderSchema = createEnumSchema(['asc', 'desc'] as const, 'sort 
 // ============================================================================
 // Pagination Defaults
 // ============================================================================
-
-import {
-  DEFAULT_PAGINATION,
-  DEFAULT_SORT_ORDER,
-  PAGINATION_ERROR_TYPES,
-} from '../constants/limits';
 
 export const DEFAULT_PAGE_LIMIT = DEFAULT_PAGINATION.LIMIT;
 export const DEFAULT_SORT_BY = 'createdAt';

@@ -10,7 +10,7 @@
  */
 
 import { screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthModal } from '../../features/auth';
 import { renderWithProviders } from '../utils';
@@ -42,8 +42,8 @@ vi.mock('../../features/auth/hooks', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
   return {
     ...actual,
     useResendCooldown: () => ({

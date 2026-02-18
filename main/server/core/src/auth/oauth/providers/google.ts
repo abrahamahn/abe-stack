@@ -8,7 +8,7 @@
  * @module oauth/providers/google
  */
 
-import { OAuthError } from '@abe-stack/shared';
+import { OAuthError } from '@bslt/shared';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 

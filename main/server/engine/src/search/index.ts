@@ -3,14 +3,14 @@
  * Search Module
  *
  * Server-side search providers for PostgreSQL.
- * Canonical types and SQL provider live in @abe-stack/db;
+ * Canonical types and SQL provider live in @bslt/db;
  * engine provides the factory, query builder, and re-exports.
  *
- * @module @abe-stack/server-engine/search
+ * @module @bslt/server-engine/search
  */
 
 // ============================================================================
-// Types (re-exported from @abe-stack/db)
+// Types (re-exported from @bslt/db)
 // ============================================================================
 
 export type {
@@ -30,17 +30,17 @@ export type {
   SqlOperatorTranslator,
   SqlQueryOptions,
   SqlSearchProviderConfig,
-  SqlTableConfig,
-} from '@abe-stack/db';
+  SqlTableConfig
+} from '@bslt/db';
 
 // ============================================================================
-// SQL Provider (re-exported from @abe-stack/db)
+// SQL Provider (re-exported from @bslt/db)
 // ============================================================================
 
-export { createSqlSearchProvider, SqlSearchProvider } from '@abe-stack/db';
+export { createSqlSearchProvider, SqlSearchProvider } from '@bslt/db';
 
 // ============================================================================
-// Query Builder (re-exported from @abe-stack/shared)
+// Query Builder (re-exported from @bslt/shared)
 // ============================================================================
 
 export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from './query-builder';
@@ -54,5 +54,6 @@ export {
   resetSearchProviderFactory,
   SearchProviderFactory,
   type ProviderOptions,
-  type SqlSearchProviderOptions,
+  type SqlSearchProviderOptions
 } from './factory';
+

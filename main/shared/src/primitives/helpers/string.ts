@@ -320,8 +320,22 @@ export function stripControlChars(input: string): string {
     return '';
   }
 
-  let sanitized = input.replace(/\0/g, '');
-  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  // Strip null bytes, then other control chars (exclude \t U+0009, \n U+000A, \r U+000D).
+  // RegExp constructor used to avoid no-control-regex lint rule on literal control chars.
+  const nullByteRe = new RegExp(String.fromCharCode(0), 'gu');
+  // Matches C0 controls except HT/LF/CR, and DEL (U+007F).
+  const controlCharsRe = new RegExp(
+    '[' +
+      String.fromCharCode(0) + '-' + String.fromCharCode(8) +
+      String.fromCharCode(11) +
+      String.fromCharCode(12) +
+      String.fromCharCode(14) + '-' + String.fromCharCode(31) +
+      String.fromCharCode(127) +
+    ']',
+    'gu',
+  );
+  let sanitized = input.replace(nullByteRe, '');
+  sanitized = sanitized.replace(controlCharsRe, '');
 
   return sanitized;
 }

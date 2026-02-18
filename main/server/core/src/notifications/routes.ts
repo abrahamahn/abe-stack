@@ -3,7 +3,7 @@
  * Notification Routes
  *
  * Route definitions for the notifications module.
- * Uses the generic router pattern from @abe-stack/db for DRY registration.
+ * Uses the generic router pattern from @bslt/db for DRY registration.
  *
  * The handler context is narrowed from HandlerContext to NotificationModuleDeps
  * at the route definition boundary. At runtime, the server passes AppContext
@@ -18,7 +18,7 @@ import {
   subscribeRequestSchema,
   unsubscribeRequestSchema,
   updatePreferencesRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { createRouteMap, type HandlerContext, type RouteDefinition } from '../../../engine/src';
 
@@ -36,7 +36,6 @@ import {
   handleUpdatePreferences,
 } from './handlers';
 
-import type { NotificationModuleDeps, NotificationRequest } from './types';
 import type {
   BaseMarkAsReadRequest,
   EmptyBody,
@@ -44,8 +43,9 @@ import type {
   SubscribeRequest,
   UnsubscribeRequest,
   UpdatePreferencesRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Local Types
@@ -80,14 +80,14 @@ type NotificationHandler<TBody> = (
 /**
  * Create a public notification route definition.
  *
- * Wraps the handler to bridge between @abe-stack/db's generic HandlerContext
+ * Wraps the handler to bridge between @bslt/db's generic HandlerContext
  * and the notification module's NotificationModuleDeps. At runtime, the server
  * passes its AppContext (a superset of NotificationModuleDeps) as the context.
  *
  * @param method - HTTP method
  * @param handler - Notification handler function
  * @param schema - Optional validation schema
- * @returns RouteDefinition compatible with @abe-stack/db route map
+ * @returns RouteDefinition compatible with @bslt/db route map
  * @complexity O(1)
  */
 function notificationPublicRoute<TBody>(
@@ -119,7 +119,7 @@ function notificationPublicRoute<TBody>(
 /**
  * Create a protected notification route definition.
  *
- * Wraps the handler to bridge between @abe-stack/db's generic HandlerContext
+ * Wraps the handler to bridge between @bslt/db's generic HandlerContext
  * and the notification module's NotificationModuleDeps. At runtime, the server
  * passes its AppContext (a superset of NotificationModuleDeps) as the context.
  *

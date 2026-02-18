@@ -132,7 +132,7 @@ jobs:
           environment = "production"
           domain = "example.com"
           ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBXn3QpXrUNQqXWnB6I6Q8r8j4NQFizH8hK2w5fQ8wz1 ci@test"
-          app_name = "abe-stack-test"
+          app_name = "bslt-test"
           app_port = 3000
           EOF
 

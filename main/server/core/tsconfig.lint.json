@@ -5,10 +5,10 @@
     "composite": false,
     "noEmit": true,
     "paths": {
-      "@abe-stack/shared": ["../../shared/src/index.ts"],
-      "@abe-stack/shared/*": ["../../shared/src/*"],
-      "@abe-stack/db": ["../../server/db/src/index.ts"],
-      "@abe-stack/db/*": ["../../server/db/src/*"]
+      "@bslt/shared": ["../../shared/src/index.ts"],
+      "@bslt/shared/*": ["../../shared/src/*"],
+      "@bslt/db": ["../../server/db/src/index.ts"],
+      "@bslt/db/*": ["../../server/db/src/*"]
     }
   },
   "include": ["src/**/*.ts", "tsconfig*.json"],

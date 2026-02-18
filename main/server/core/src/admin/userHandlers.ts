@@ -6,7 +6,7 @@
  * All handlers expect admin role (enforced by route middleware).
  */
 
-import { HTTP_STATUS, UserNotFoundError } from '@abe-stack/shared';
+import { HTTP_STATUS, UserNotFoundError } from '@bslt/shared';
 
 import { ERROR_MESSAGES } from '../auth';
 
@@ -20,9 +20,6 @@ import {
   updateUser,
 } from './userService';
 
-import type { AdminAppContext } from './types';
-import type { HardBanResult, SearchUsersResponse } from './userService';
-import type { UserRole } from '../../../db/src';
 import type {
   AdminHardBanRequest,
   AdminLockUserRequest,
@@ -33,8 +30,11 @@ import type {
   AdminUserListFilters,
   AdminUserListResponse,
   UnlockAccountRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { UserRole } from '../../../db/src';
+import type { AdminAppContext } from './types';
+import type { HardBanResult, SearchUsersResponse } from './userService';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

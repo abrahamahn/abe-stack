@@ -5,12 +5,12 @@
  * Hook for updating the user's username.
  */
 
-import { useMutation, useQueryCache } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQueryCache } from '@bslt/react';
 
 import { createSettingsApi } from '../api';
 
-import type { UpdateUsernameRequest, UpdateUsernameResponse } from '@abe-stack/shared';
+import type { UpdateUsernameRequest, UpdateUsernameResponse } from '@bslt/shared';
 
 // ============================================================================
 // Settings API Instance

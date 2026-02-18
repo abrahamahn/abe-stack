@@ -33,17 +33,17 @@ const CONFIG_FILE_PATTERNS: RegExp[] = [
 
 /** Package alias mappings to source directories for import resolution */
 const PACKAGE_ALIASES: Record<string, string> = {
-  '@abe-stack/server-engine': 'main/server/engine/src',
-  '@abe-stack/shared': 'main/shared/src',
-  '@abe-stack/ui': 'main/client/ui/src',
-  '@abe-stack/react': 'main/client/react/src',
-  '@abe-stack/db': 'main/server/db/src',
-  '@abe-stack/media': 'main/server/media/src',
-  '@abe-stack/websocket': 'main/server/websocket/src',
-  '@abe-stack/core': 'main/server/core/src',
-  '@abe-stack/api': 'main/client/api/src',
-  '@abe-stack/client-engine': 'main/client/engine/src',
-  '@abe-stack/realtime': 'main/server/realtime/src',
+  '@bslt/server-engine': 'main/server/engine/src',
+  '@bslt/shared': 'main/shared/src',
+  '@bslt/ui': 'main/client/ui/src',
+  '@bslt/react': 'main/client/react/src',
+  '@bslt/db': 'main/server/db/src',
+  '@bslt/media': 'main/server/media/src',
+  '@bslt/websocket': 'main/server/websocket/src',
+  '@bslt/core': 'main/server/core/src',
+  '@bslt/api': 'main/client/api/src',
+  '@bslt/client-engine': 'main/client/engine/src',
+  '@bslt/realtime': 'main/server/realtime/src',
 };
 
 /** External packages to skip during import resolution */
@@ -289,7 +289,7 @@ function exportServerConfig(): void {
   let output = '';
   let count = 0;
 
-  output += '# ABE Stack - Server Configuration Export\n\n';
+  output += '# BSLT - Server Configuration Export\n\n';
   output += `Generated: ${new Date().toISOString()}\n`;
   output += `Source: main/server/*/\n\n`;
   output += '---\n\n';

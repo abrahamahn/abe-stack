@@ -8,19 +8,19 @@
  * @module handlers/profile
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { CacheKeys, CacheTags, CacheTTL } from '../../cache';
 import { getUserById, listUsers } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
-import type { HandlerContext } from '../../../../engine/src';
 import type {
   CursorPaginatedResult,
   CursorPaginationOptions,
   User,
   UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { HandlerContext } from '../../../../engine/src';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

@@ -8,6 +8,7 @@
  * @module Domain/Admin/Security
  */
 
+import { errorResponseSchema } from '../../engine/http';
 import {
   paginatedResultSchema,
   paginationOptionsSchema,
@@ -15,7 +16,6 @@ import {
   type PaginationOptions,
 } from '../../engine/pagination';
 import { createSchema } from '../../primitives/schema';
-import { errorResponseSchema } from '../../engine/http';
 import { uuidSchema } from '../schemas';
 
 import type { Contract, Schema } from '../../primitives/api';

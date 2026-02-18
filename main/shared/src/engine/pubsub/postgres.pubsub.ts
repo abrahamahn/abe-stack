@@ -3,7 +3,7 @@
  * PostgresPubSub Type Definitions
  *
  * Server-only PostgreSQL LISTEN/NOTIFY pub/sub adapter types.
- * The implementation lives in @abe-stack/db (server-side only).
+ * The implementation lives in @bslt/db (server-side only).
  * This file provides type definitions for use in shared code.
  */
 

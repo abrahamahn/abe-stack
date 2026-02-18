@@ -1,13 +1,13 @@
 // main/apps/web/src/features/admin/hooks/useFeatureFlag.test.ts
-import { useQuery } from '@abe-stack/react';
+import { useQuery } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
-import type { UseQueryResult } from '@abe-stack/react';
+import type { UseQueryResult } from '@bslt/react';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
 }));
 

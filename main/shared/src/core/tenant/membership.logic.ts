@@ -5,8 +5,8 @@
  * @module Core/Tenant
  */
 
-import type { TenantRole } from '../auth/roles';
 import type { Invitation, Membership } from './membership.schemas';
+import type { TenantRole } from '../auth/roles';
 
 // ============================================================================
 // Constants

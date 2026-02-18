@@ -1,19 +1,19 @@
-# @abe-stack/infra
+# @bslt/infra
 
-Consolidated infrastructure adapters for the abe-stack monorepo. This package
+Consolidated infrastructure adapters for the bslt monorepo. This package
 bundles cache, database, email, HTTP/router utilities, job queue, security, and
 storage providers behind a single entry point.
 
 ## Install
 
 ```bash
-pnpm add @abe-stack/infra
+pnpm add @bslt/infra
 ```
 
 ## Usage
 
 ```ts
-import { createMemoryCache, createDbClient, createEmailService } from '@abe-stack/infra';
+import { createMemoryCache, createDbClient, createEmailService } from '@bslt/infra';
 ```
 
 ## Contents
@@ -28,5 +28,5 @@ import { createMemoryCache, createDbClient, createEmailService } from '@abe-stac
 
 ## Notes
 
-- Prefer importing from the root entry: `@abe-stack/infra`.
+- Prefer importing from the root entry: `@bslt/infra`.
 - Subpath imports are not guaranteed to stay stable as consolidation continues.

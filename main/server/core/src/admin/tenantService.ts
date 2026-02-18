@@ -6,7 +6,7 @@
  * All operations require admin privileges (enforced at route level).
  */
 
-import { NotFoundError } from '@abe-stack/shared';
+import { NotFoundError } from '@bslt/shared';
 
 import {
   ilike,

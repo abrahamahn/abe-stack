@@ -2,26 +2,26 @@
 /**
  * Route Registration
  *
- * Wires all route maps from @abe-stack/* packages into the Fastify server.
+ * Wires all route maps from @bslt/* packages into the Fastify server.
  * Only the system module remains local (deployment-specific health checks).
  *
  * No re-exports — consumers import directly from source packages.
  */
 
-import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
-import { userRoutes } from '@abe-stack/core/users';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { authRoutes, createAuthGuard } from '@bslt/core/auth';
+import { userRoutes } from '@bslt/core/users';
+import { registerRouteMap } from '@bslt/server-engine';
 
 import { buildBillingRouteMap } from './billingRouteAdapter';
 import { registerBillingWebhookRoutes } from './billingWebhooks';
 import { appRouteModuleRegistrations } from './routeModules';
 
 import type {
-  HandlerContext,
   RouteDefinition as DbRouteDefinition,
   RouteMap as DbRouteMap,
+  HandlerContext,
   RouteOpenApiMeta,
-} from '@abe-stack/server-engine';
+} from '@bslt/server-engine';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 

@@ -9,8 +9,8 @@
  * @module websocket/lifecycle
  */
 
-import { eq, select } from '@abe-stack/db';
-import { validateCsrfToken } from '@abe-stack/server-engine';
+import { eq, select } from '@bslt/db';
+import { validateCsrfToken } from '@bslt/server-engine';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
   CSRF_COOKIE_NAME,
@@ -20,19 +20,19 @@ import {
   WS_CLOSE_POLICY_VIOLATION,
   parseCookies,
   parseRecordKey,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { WebSocketServer } from 'ws';
 
 import { decrementConnections, incrementConnections, markPluginRegistered } from './stats';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@bslt/db';
 import type {
   Logger,
+  WebSocket as PubSubWebSocket,
   ServerMessage,
   SubscriptionKey,
   SubscriptionManager,
-  WebSocket as PubSubWebSocket,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';

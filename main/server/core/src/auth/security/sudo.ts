@@ -8,7 +8,7 @@
  * @module security/sudo
  */
 
-import { HTTP_STATUS, SUDO_TOKEN_HEADER } from '@abe-stack/shared';
+import { HTTP_STATUS, SUDO_TOKEN_HEADER } from '@bslt/shared';
 
 import { verifySudoToken } from '../handlers/sudo';
 

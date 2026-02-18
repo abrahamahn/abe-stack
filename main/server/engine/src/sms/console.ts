@@ -8,7 +8,7 @@
  * @module SMS
  */
 
-import { generateSecureId } from '@abe-stack/shared';
+import { generateSecureId } from '@bslt/shared';
 
 import type { SmsOptions, SmsProvider, SmsResult } from './types';
 

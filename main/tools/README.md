@@ -1,6 +1,6 @@
 # Tools (`tools/`)
 
-This directory contains all the meta-development tools and utilities that power the Abe-Stack development experience.
+This directory contains all the meta-development tools and utilities that power the bslt development experience.
 
 ## Directory Structure
 

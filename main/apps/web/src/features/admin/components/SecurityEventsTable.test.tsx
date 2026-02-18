@@ -1,6 +1,6 @@
 // main/apps/web/src/features/admin/components/SecurityEventsTable.test.tsx
 import { fireEvent, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 
@@ -10,7 +10,7 @@ import type {
   PaginationOptions,
   SecurityEvent,
   SecurityEventsListResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Test Data

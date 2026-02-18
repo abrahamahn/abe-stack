@@ -3,15 +3,15 @@
  * PricingPage - Public pricing page with plan selection.
  */
 
-import { usePlans, useSubscription } from '@abe-stack/react';
-import { useNavigate } from '@abe-stack/react/router';
-import { Heading, PageContainer, PricingTable, Text } from '@abe-stack/ui';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { usePlans, useSubscription } from '@bslt/react';
+import { useNavigate } from '@bslt/react/router';
+import { Heading, PageContainer, PricingTable, Text } from '@bslt/ui';
 import { useMemo } from 'react';
 
-import type { BillingClientConfig } from '@abe-stack/api';
-import type { PlanId } from '@abe-stack/shared';
+import type { BillingClientConfig } from '@bslt/api';
+import type { PlanId } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

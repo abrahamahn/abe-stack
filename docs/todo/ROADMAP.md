@@ -1,4 +1,4 @@
-# ABE Stack Roadmap
+# BSLT Roadmap
 
 > **Scope:** Features deferred beyond the current sprint plan — require enterprise customers, dedicated platform engineers, or large teams (5+ engineers).
 
@@ -25,7 +25,7 @@ Add real-time collaboration, offline support, and optimistic updates.
 
 - [ ] Add `version` field to all syncable database tables
 - [ ] Create `infra/realtime` with transaction types
-- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/client-engine/cache`
+- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@bslt/client-engine/cache`
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
@@ -35,7 +35,7 @@ Add real-time collaboration, offline support, and optimistic updates.
 ### Phase 2: Real-Time Sync
 
 - [x] Implement `WebSocketServer` (ws package) → `apps/server/src/infra/websocket/`
-- [x] Implement `WebSocketPubSubClient` → `@abe-stack/client-engine/pubsub` (20 tests)
+- [x] Implement `WebSocketPubSubClient` → `@bslt/client-engine/pubsub` (20 tests)
 - [ ] Create `RealtimeContext` and `RealtimeProvider`
 - [x] Add subscription management (subscribe/unsubscribe by key) → `SubscriptionCache` (20 tests)
 - [ ] Version-based update notifications
@@ -44,8 +44,8 @@ Add real-time collaboration, offline support, and optimistic updates.
 
 ### Phase 3: Offline Support
 
-- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/client-engine/cache` (31 tests)
-- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/client-engine/offline` (26 tests)
+- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@bslt/client-engine/cache` (31 tests)
+- [x] Implement `TransactionQueue` for offline writes → `@bslt/client-engine/offline` (26 tests)
 - [x] Add stale-while-revalidate loaders → `LoaderCache` with TTL (57 tests)
 - [ ] Service worker for asset caching
 - [x] Conflict resolution (last-write-wins) → Built into RecordCache/RecordStorage
@@ -54,7 +54,7 @@ Add real-time collaboration, offline support, and optimistic updates.
 
 ### Phase 4: Undo/Redo
 
-- [x] Implement `UndoRedoStack` → `@abe-stack/client-engine/undo` (38 tests)
+- [x] Implement `UndoRedoStack` → `@bslt/client-engine/undo` (38 tests)
 - [x] Operation inversion logic → Built into UndoRedoStack with grouping support
 - [ ] Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z)
 - [ ] UI indicators for undo/redo availability (use `onStateChange` callback)
@@ -109,7 +109,7 @@ Passwordless authentication via hardware keys and biometrics. Standalone — doe
 ### Error Handling
 
 - [ ] Request context logging (IP, method, path, user agent)
-- [x] Error serialization with `.toJSON()` - AppError in `@abe-stack/shared/errors`
+- [x] Error serialization with `.toJSON()` - AppError in `@bslt/shared/errors`
 - [x] Correlation IDs for tracing requests - `apps/server/src/infra/logger/`
 - [ ] Conditional logging by severity (500+ vs client errors)
 

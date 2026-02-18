@@ -4,7 +4,7 @@
  *
  * Server-specific file validation (I/O). Pure validation helpers
  * (sanitizeFilename, generateFileId, validateUploadConfig) re-exported
- * from @abe-stack/shared.
+ * from @bslt/shared.
  */
 
 import { promises as fs } from 'fs';
@@ -14,7 +14,7 @@ import { detectFileTypeFromFile, isAllowedFileType } from './file-type';
 import type { FileTypeResult, MediaProcessingOptions } from './types';
 
 // Re-export pure functions from shared
-export { generateFileId, sanitizeFilename, validateUploadConfig } from '@abe-stack/shared';
+export { generateFileId, sanitizeFilename, validateUploadConfig } from '@bslt/shared';
 
 /**
  * Validate file against media processing options

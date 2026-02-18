@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/elements/Badge.stories.tsx
+import { Badge } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Badge } from '@abe-stack/ui';
 
 const meta: Meta<typeof Badge> = {
   title: 'Elements/Badge',

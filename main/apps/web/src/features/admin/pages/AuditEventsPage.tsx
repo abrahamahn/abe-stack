@@ -6,7 +6,7 @@
  * Supports filtering by action, actor, and tenant.
  */
 
-import { formatDateTime, getAuditSeverityTone, truncate } from '@abe-stack/shared';
+import { formatDateTime, getAuditSeverityTone, truncate } from '@bslt/shared';
 import {
   Badge,
   Button,
@@ -22,13 +22,13 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import { useAuditEvents } from '../hooks/useAuditEvents';
 
-import type { AuditEventLocal, AuditEventsFilterLocal } from '../services/adminApi';
 import type { ReactElement } from 'react';
+import type { AuditEventLocal, AuditEventsFilterLocal } from '../services/adminApi';
 
 // ============================================================================
 // Constants

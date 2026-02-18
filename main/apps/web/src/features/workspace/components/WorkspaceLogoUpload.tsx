@@ -6,8 +6,8 @@
  * Reuses the AvatarUpload pattern with media API.
  */
 
-import { MAX_LOGO_SIZE } from '@abe-stack/shared';
-import { Alert, Avatar, Button, FileInput, Spinner } from '@abe-stack/ui';
+import { MAX_LOGO_SIZE } from '@bslt/shared';
+import { Alert, Avatar, Button, FileInput, Spinner } from '@bslt/ui';
 import { useRef, useState, type ReactElement } from 'react';
 
 import { useUploadMedia } from '../../media/hooks/useMedia';

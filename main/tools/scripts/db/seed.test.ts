@@ -21,24 +21,24 @@ const { mockBuildConnectionString, mockCreateDbClient, mockExecute, mockClose, m
   }));
 
 // Mock the database module using package path
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',
 }));
 
 // Mock the auth package — hashPassword uses DEFAULT_ARGON2_CONFIG when called without config arg
-vi.mock('@abe-stack/core/auth', () => ({
+vi.mock('@bslt/core/auth', () => ({
   hashPassword: mockHashPassword,
 }));
 
 // Mock canonicalizeEmail — just lowercase for tests
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@bslt/shared', () => ({
   canonicalizeEmail: (email: string) => email.toLowerCase(),
 }));
 
 // Mock server-engine env loader
-vi.mock('@abe-stack/server-engine', () => ({
+vi.mock('@bslt/server-engine', () => ({
   loadServerEnv: vi.fn(),
 }));
 

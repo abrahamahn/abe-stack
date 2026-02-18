@@ -6,7 +6,7 @@ import type {
   NotificationConfig,
   NotificationProvider,
   OneSignalConfig,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Load Push Notification Configuration.

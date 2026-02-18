@@ -6,9 +6,9 @@
  * verifying HTTP layer behavior: routing, auth guards, and public route logic.
  */
 
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { notificationRoutes } from '@abe-stack/core/notifications';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core/auth';
+import { notificationRoutes } from '@bslt/core/notifications';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -20,7 +20,7 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

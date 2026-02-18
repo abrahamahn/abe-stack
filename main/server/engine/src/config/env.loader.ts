@@ -2,9 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { EnvSchema } from '@abe-stack/shared/config';
+import { EnvSchema } from '@bslt/shared/config';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * 1. Low-Level Disk Reader
@@ -132,7 +132,7 @@ export function loadServerEnv(): FullEnv {
     | { success: false; error: { message: string } };
 
   if (!result.success) {
-    process.stderr.write('\n❌ ABE-STACK: Environment Validation Failed\n');
+    process.stderr.write('\n❌ bslt: Environment Validation Failed\n');
     process.stderr.write(`   ↳ ${result.error.message}\n`);
     process.exit(1);
   }

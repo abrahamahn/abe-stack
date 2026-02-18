@@ -14,7 +14,7 @@ import {
   SearchProviderFactory,
 } from './factory';
 
-import type { DbClient, Repositories, SqlTableConfig } from '@abe-stack/db';
+import type { DbClient, Repositories, SqlTableConfig } from '@bslt/db';
 
 // ============================================================================
 // Test Fixtures

@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/elements/Button.stories.tsx
+import { Button } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '@abe-stack/ui';
 
 const meta: Meta<typeof Button> = {
   title: 'Elements/Button',

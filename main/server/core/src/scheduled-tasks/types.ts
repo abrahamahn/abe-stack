@@ -8,7 +8,7 @@
  * @module
  */
 
-import type { Logger } from '@abe-stack/shared';
+import type { Logger } from '@bslt/shared';
 
 /**
  * Task schedule configuration

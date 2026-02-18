@@ -1,10 +1,10 @@
 # ⚙️ Core Configuration System
 
-**The foundation of ABE Stack's configuration architecture** - a framework-agnostic system that loads, validates, and provides type-safe access to environment variables.
+**The foundation of BSLT's configuration architecture** - a framework-agnostic system that loads, validates, and provides type-safe access to environment variables.
 
 ## 🎯 Purpose
 
-This package provides the **core infrastructure** that all ABE Stack applications use for configuration. It's designed to be:
+This package provides the **core infrastructure** that all BSLT applications use for configuration. It's designed to be:
 
 - **Framework Agnostic** - Works with any Node.js application
 - **Type Safe** - Full TypeScript support with runtime validation
@@ -184,7 +184,7 @@ export const BaseEnvSchema: Schema<BaseEnv> = createSchema<BaseEnv>((data: unkno
 ### Basic Usage
 
 ```typescript
-import { initEnv, loadServerEnv } from '@abe-stack/server-engine/config';
+import { initEnv, loadServerEnv } from '@bslt/server-engine/config';
 
 // 1. Load .env files into process.env
 initEnv();
@@ -199,7 +199,7 @@ console.log(`Server starting on port ${env.PORT}`);
 ### In Application Code
 
 ```typescript
-import type { AuthConfig } from '@abe-stack/server-engine/config';
+import type { AuthConfig } from '@bslt/server-engine/config';
 
 // Use type contracts for function parameters
 function setupAuth(config: AuthConfig) {
@@ -211,7 +211,7 @@ function setupAuth(config: AuthConfig) {
 ### With Parsers
 
 ```typescript
-import { getInt, getBool, getList } from '@abe-stack/server-engine/config';
+import { getInt, getBool, getList } from '@bslt/server-engine/config';
 
 const port = getInt(process.env, 'PORT', 3000);
 const debug = getBool(process.env, 'DEBUG', false);

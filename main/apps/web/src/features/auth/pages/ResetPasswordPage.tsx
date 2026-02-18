@@ -1,10 +1,10 @@
 // main/apps/web/src/features/auth/pages/ResetPasswordPage.tsx
-import { toastStore } from '@abe-stack/react';
-import { useAuthModeNavigation, useFormState } from '@abe-stack/react/hooks';
-import { useSearchParams } from '@abe-stack/react/router';
-import { AuthLayout } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
+import { toastStore } from '@bslt/react';
+import { useAuthModeNavigation, useFormState } from '@bslt/react/hooks';
+import { useSearchParams } from '@bslt/react/router';
+import { AuthLayout } from '@bslt/ui';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';

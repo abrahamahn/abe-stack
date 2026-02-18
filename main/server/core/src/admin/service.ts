@@ -6,7 +6,7 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
-import { UserNotFoundError } from '@abe-stack/shared';
+import { UserNotFoundError } from '@bslt/shared';
 
 import { eq, select, USERS_TABLE } from '../../../db/src';
 import { unlockAccount as infraUnlockAccount } from '../auth';

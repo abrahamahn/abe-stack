@@ -5,8 +5,8 @@
  * Query and mutation hooks for media upload and retrieval.
  */
 
-import { useMutation, useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQuery } from '@bslt/react';
 import { useEffect } from 'react';
 
 import { createMediaApi } from '../api';

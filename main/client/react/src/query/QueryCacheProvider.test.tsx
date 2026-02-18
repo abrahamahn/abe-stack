@@ -1,9 +1,9 @@
 // main/client/react/src/query/QueryCacheProvider.test.tsx
 /** @vitest-environment jsdom */
+import { QueryCache } from '@bslt/client-engine';
 import '@testing-library/jest-dom/vitest';
-import { QueryCache } from '@abe-stack/client-engine';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryCacheProvider, useQueryCache } from './QueryCacheProvider';
 

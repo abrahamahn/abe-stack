@@ -5,7 +5,7 @@
  * Factory for creating and managing search providers.
  * Currently supports SQL providers with a unified interface.
  *
- * @module @abe-stack/server-engine/search
+ * @module @bslt/server-engine/search
  */
 
 import {
@@ -17,7 +17,7 @@ import {
   type SqlSearchProvider,
   type SqlSearchProviderConfig,
   type SqlTableConfig,
-} from '@abe-stack/db';
+} from '@bslt/db';
 
 // ============================================================================
 // Factory Types

@@ -20,8 +20,8 @@ import type {
   ProviderPaymentMethod,
   ProviderSubscription,
   SetupIntentResult,
-} from '@abe-stack/shared';
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // PayPal API Types
@@ -247,7 +247,7 @@ export class PayPalProvider implements BillingService {
           email_address: params.email,
         },
         application_context: {
-          brand_name: 'ABE Stack',
+          brand_name: 'BSLT',
           locale: 'en-US',
           shipping_preference: 'NO_SHIPPING',
           user_action: 'SUBSCRIBE_NOW',

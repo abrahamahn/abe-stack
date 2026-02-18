@@ -8,14 +8,14 @@
  * Tests requestMagicLink and verifyMagicLink with repository pattern.
  */
 
-import { canonicalizeEmail } from '@abe-stack/shared';
+import { canonicalizeEmail } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient, MagicLinkToken, RawDb, Repositories, User } from '../../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates } from '../index';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -58,7 +58,7 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   emailTemplates: {
     magicLink: vi.fn((url: string, expiryMinutes: number) => ({
       subject: 'Your Magic Link',
@@ -68,8 +68,8 @@ vi.mock('@abe-stack/db', () => ({
   },
 }));
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
     withTransaction: vi.fn(async (_db: DbClient, callback: TransactionCallback) => {

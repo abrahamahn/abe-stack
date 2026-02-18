@@ -28,7 +28,7 @@ vi.mock('electron', () => ({
 }));
 
 // Re-import the types for testing
-import type { NativeBridge } from '@abe-stack/shared';
+import type { NativeBridge } from '@bslt/shared';
 
 describe('preload', () => {
   beforeEach(() => {

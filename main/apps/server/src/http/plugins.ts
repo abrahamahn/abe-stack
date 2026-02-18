@@ -22,7 +22,7 @@
  * ```
  */
 
-import { ERROR_CODES, HTTP_STATUS } from '@abe-stack/shared';
+import { ERROR_CODES, HTTP_STATUS } from '@bslt/shared';
 import compress from '@fastify/compress';
 
 import {
@@ -40,9 +40,9 @@ import {
   registerStaticServe,
 } from './middleware';
 
-import type { AppErrorInfo, ApiErrorResponse, RateLimitInfo } from '@abe-stack/shared';
-export type { AppErrorInfo, ApiErrorResponse, RateLimitInfo };
+import type { ApiErrorResponse, AppErrorInfo, RateLimitInfo } from '@bslt/shared';
 import type { FastifyInstance } from 'fastify';
+export type { ApiErrorResponse, AppErrorInfo, RateLimitInfo };
 
 // ============================================================================
 // Types
@@ -50,7 +50,7 @@ import type { FastifyInstance } from 'fastify';
 
 /**
  * Rate limiter interface for dependency injection.
- * Compatible with @abe-stack/db RateLimiter or any implementation
+ * Compatible with @bslt/db RateLimiter or any implementation
  * that provides a `check` method returning rate limit info.
  */
 export interface RateLimiterLike {

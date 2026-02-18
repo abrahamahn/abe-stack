@@ -15,13 +15,13 @@ import {
   generateSecurityHeaders,
   getProductionSecurityDefaults,
   type SecurityHeaderOptions,
-} from '@abe-stack/server-engine';
+} from '@bslt/server-engine';
 import {
   HTTP_STATUS,
   SECONDS_PER_DAY,
   hasDangerousKeys,
   sanitizePrototype,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

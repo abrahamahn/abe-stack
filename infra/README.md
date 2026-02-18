@@ -1,6 +1,6 @@
 # Infrastructure (`infra/`)
 
-This directory contains all infrastructure-as-code configurations for deploying and orchestrating the Abe-Stack applications.
+This directory contains all infrastructure-as-code configurations for deploying and orchestrating the bslt applications.
 
 ## Directory Structure
 

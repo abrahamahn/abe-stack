@@ -1,6 +1,6 @@
 // main/server/core/src/bootstrap.ts
-import { loadServerEnv } from '@abe-stack/server-engine/config';
-import { createLogger, type BaseLogger, type LogData } from '@abe-stack/shared';
+import { loadServerEnv } from '@bslt/server-engine/config';
+import { createLogger, type BaseLogger, type LogData } from '@bslt/shared';
 
 import {
   createDbClient,
@@ -30,8 +30,8 @@ import {
 
 export type { SystemContext };
 
-// Removed import from @abe-stack/core/auth since we import from server-engine
-import type { AppConfig, PostgresConfig } from '@abe-stack/server-engine/config';
+// Removed import from @bslt/core/auth since we import from server-engine
+  import type { AppConfig, PostgresConfig } from '@bslt/server-engine/config';
 
 /**
  * Simple Console Logger Adapter to avoid dependency on pino in core.

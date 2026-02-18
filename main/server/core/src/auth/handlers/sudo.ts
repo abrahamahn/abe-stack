@@ -8,7 +8,7 @@
  * @module handlers/sudo
  */
 
-import { AUTH_EXPIRY, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { AUTH_EXPIRY, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import { sign, verify } from '../../../../engine/src';
 import { assertUserActive } from '../middleware';
@@ -16,8 +16,8 @@ import { verifyTotpCode } from '../totp';
 import { createErrorMapperLogger } from '../types';
 import { verifyPasswordSafe } from '../utils/password';
 
+import type { HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
-import type { HttpErrorResponse } from '@abe-stack/shared';
 
 /** Sudo token TTL in minutes */
 export const SUDO_TOKEN_TTL_MINUTES = AUTH_EXPIRY.SUDO_MINUTES;

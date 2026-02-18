@@ -7,7 +7,7 @@
  */
 
 // ============================================================================
-// Re-exported from @abe-stack/shared (canonical definitions)
+// Re-exported from @bslt/shared (canonical definitions)
 // ============================================================================
 
 export type {
@@ -21,8 +21,8 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
-} from '@abe-stack/shared';
+  RedisCacheConfig
+} from '@bslt/shared';
 
 // Re-export eviction types from local LRU implementation
 export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';

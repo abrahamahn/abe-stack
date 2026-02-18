@@ -9,7 +9,7 @@
  * @module queue/queue
  */
 
-import { delay } from '@abe-stack/shared';
+import { delay } from '@bslt/shared';
 
 import {
   CLEANUP_INTERVAL_MS,
@@ -19,7 +19,7 @@ import {
   JOB_RETENTION_MS,
 } from '../constants';
 
-import type { Logger } from '@abe-stack/shared';
+import type { Logger } from '@bslt/shared';
 
 /**
  * Serialized job data with metadata for tracking and retry

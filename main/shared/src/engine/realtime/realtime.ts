@@ -8,9 +8,8 @@
  * @module Domain/Realtime
  */
 
-import { createSchema } from '../../primitives/schema';
-import { uuidSchema } from '../../primitives/schema';
 import { deepEqual, getFieldValue, isSafeObjectKey } from '../../primitives/helpers/object';
+import { createSchema, uuidSchema } from '../../primitives/schema';
 import { errorResponseSchema } from '../http/response';
 
 import type { Contract, Schema } from '../../primitives/api';
@@ -162,7 +161,7 @@ export const PROTECTED_FIELDS = new Set<string>([
 
 /**
  * Domain-specific error messages for realtime operations.
- * Generic errors (auth, internal) use `ERROR_CODES` from `@abe-stack/shared`.
+ * Generic errors (auth, internal) use `ERROR_CODES` from `@bslt/shared`.
  */
 export const REALTIME_ERRORS = {
   AUTHOR_MISMATCH: 'Author ID must match authenticated user',

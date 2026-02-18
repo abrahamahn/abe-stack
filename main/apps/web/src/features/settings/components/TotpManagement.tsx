@@ -8,7 +8,7 @@
  * @module settings/components
  */
 
-import { Alert, Button, Input, Text } from '@abe-stack/ui';
+import { Alert, Button, Input, Text } from '@bslt/ui';
 import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 import { useTotpManagement } from '../hooks/useTotpManagement';

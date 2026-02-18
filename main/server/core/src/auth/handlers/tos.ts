@@ -7,18 +7,18 @@
  * @module handlers/tos
  */
 
-import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import { acceptTos, checkTosAcceptance } from '../tos-gating';
 import { createErrorMapperLogger } from '../types';
 
-import type { AppContext, RequestWithCookies } from '../types';
 import type {
   AcceptTosRequest,
   AcceptTosResponse,
   HttpErrorResponse,
   TosStatusResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AppContext, RequestWithCookies } from '../types';
 
 /**
  * Handle ToS acceptance.

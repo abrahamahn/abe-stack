@@ -6,14 +6,14 @@
  * Decouples file logic from concrete server implementations,
  * keeping the package framework-agnostic.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  */
 
-import { LIMITS } from '@abe-stack/shared';
+import { LIMITS } from '@bslt/shared';
 
+import type { BaseContext, HasStorage } from '@bslt/shared';
 import type { FileRepository } from '../../../db/src';
-import type { BaseContext, HasStorage } from '@abe-stack/shared';
 
 // ============================================================================
 // Storage Interface

@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
-import type { AdminUser, AdminUserListFilters } from '@abe-stack/shared';
+import type { AdminUser, AdminUserListFilters } from '@bslt/shared';
 
 type AdminUserLocal = AdminUser;
 type AdminUserListFiltersLocal = AdminUserListFilters;

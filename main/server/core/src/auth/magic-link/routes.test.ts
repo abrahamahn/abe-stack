@@ -20,15 +20,15 @@ import {
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
   type UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../../db/src')>('@bslt/db');
   return {
     ...actual,
   };

@@ -1,7 +1,7 @@
 // main/apps/web/src/api/ApiProvider.tsx
-import { getApiClient, type ApiClient } from '@abe-stack/api';
 import { useClientEnvironment } from '@app';
 import { getAccessToken } from '@app/authToken';
+import { getApiClient, type ApiClient } from '@bslt/api';
 import { createContext, useContext, useMemo } from 'react';
 
 import type { ReactElement, ReactNode } from 'react';
@@ -27,7 +27,7 @@ type ApiProviderProps = {
  * Must be used within ClientEnvironmentProvider.
  *
  * Note: Error handling (unauthorized, server errors) should be done at the
- * call site using try-catch. Use isUnauthorizedError() from @abe-stack/api
+ * call site using try-catch. Use isUnauthorizedError() from @bslt/api
  * to check for 401 errors.
  */
 export const ApiProvider = ({ children }: ApiProviderProps): ReactElement => {

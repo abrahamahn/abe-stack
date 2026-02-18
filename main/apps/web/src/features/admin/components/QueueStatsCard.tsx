@@ -5,10 +5,10 @@
  * Displays queue statistics in a card format with alert banners.
  */
 
-import { Alert, Skeleton } from '@abe-stack/ui';
-import { CardAsyncState } from '@abe-stack/ui/components/CardAsyncState';
-import { MetricValue } from '@abe-stack/ui/components/MetricValue';
-import { TitledCardSection } from '@abe-stack/ui/components/TitledCardSection';
+import { Alert, Skeleton } from '@bslt/ui';
+import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
+import { MetricValue } from '@bslt/ui/components/MetricValue';
+import { TitledCardSection } from '@bslt/ui/components/TitledCardSection';
 
 import type { JSX } from 'react';
 

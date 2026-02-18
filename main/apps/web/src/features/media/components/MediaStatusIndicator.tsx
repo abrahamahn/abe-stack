@@ -5,7 +5,7 @@
  * Displays the processing status of a media file with polling.
  */
 
-import { Spinner, Text } from '@abe-stack/ui';
+import { Spinner, Text } from '@bslt/ui';
 import React from 'react';
 
 import { useMediaStatus } from '../hooks';

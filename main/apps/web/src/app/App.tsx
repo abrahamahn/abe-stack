@@ -8,16 +8,17 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { getApiClient } from '@abe-stack/api';
+import { TosAcceptanceModal } from '@auth/components';
+import { getApiClient } from '@bslt/api';
 import {
   createPersistedClientFromQueryCache,
   createQueryPersister,
   restorePersistedQueryCache,
   type Persister,
-} from '@abe-stack/client-engine';
-import { LiveRegion, QueryCacheProvider, toastStore } from '@abe-stack/react';
-import { HistoryProvider, useRouteFocusAnnounce } from '@abe-stack/react/hooks';
-import { BrowserRouter, Route, Routes } from '@abe-stack/react/router';
+} from '@bslt/client-engine';
+import { LiveRegion, QueryCacheProvider, toastStore } from '@bslt/react';
+import { HistoryProvider, useRouteFocusAnnounce } from '@bslt/react/hooks';
+import { BrowserRouter, Route, Routes } from '@bslt/react/router';
 import {
   ErrorBoundary,
   LoadingContainer,
@@ -25,8 +26,7 @@ import {
   SkipLink,
   ThemeProvider,
   Toaster,
-} from '@abe-stack/ui';
-import { TosAcceptanceModal } from '@auth/components';
+} from '@bslt/ui';
 import { useAuth } from '@features/auth';
 import { CookieConsentBanner } from '@settings/components';
 import {
@@ -45,7 +45,7 @@ import { NetworkStatus } from './components';
 import { appRoutes, type AppRoute } from './routes'; // Import appRoutes and AppRoute type
 import { setTosHandler } from './tosHandler';
 
-import type { TosRequiredPayload } from '@abe-stack/api';
+import type { TosRequiredPayload } from '@bslt/api';
 
 // ============================================================================
 // Types

@@ -6,10 +6,19 @@
  * These interfaces decouple the billing logic from concrete server
  * implementations, keeping the package framework-agnostic.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  */
 
+import type {
+  AuthenticatedUser,
+  BaseContext,
+  BillingService,
+  ContractRequestContext as RequestContext,
+  RequestInfo,
+  ServerLogger,
+} from '@bslt/shared';
+import type { BillingConfig } from '@bslt/shared/config';
 import type {
   AuditEventRepository,
   BillingEventRepository,
@@ -21,15 +30,6 @@ import type {
   RawDb,
   SubscriptionRepository,
 } from '../../../db/src';
-import type {
-  AuthenticatedUser,
-  BaseContext,
-  BillingService,
-  ContractRequestContext as RequestContext,
-  RequestInfo,
-  ServerLogger,
-} from '@abe-stack/shared';
-import type { BillingConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Module Dependencies

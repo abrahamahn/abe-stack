@@ -5,12 +5,12 @@
  * Dialog for exporting security events as CSV or JSON.
  */
 
-import { Button, Modal, Radio, RadioGroup, Text } from '@abe-stack/ui';
+import { Button, Modal, Radio, RadioGroup, Text } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import { useExportEvents } from '../hooks/useExportEvents';
 
-import type { SecurityEventsFilter } from '@abe-stack/shared';
+import type { SecurityEventsFilter } from '@bslt/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

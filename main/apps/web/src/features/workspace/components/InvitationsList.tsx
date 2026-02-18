@@ -5,7 +5,7 @@
  * Table of workspace invitations with status and action controls.
  */
 
-import { getInvitationStatusTone } from '@abe-stack/shared';
+import { getInvitationStatusTone } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import { useInvitations, useResendInvitation, useRevokeInvitation } from '../hooks';
 

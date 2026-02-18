@@ -1,10 +1,10 @@
 // main/apps/web/src/features/admin/components/UserFilters.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UserFilters } from './UserFilters';
 
-import type { AdminUserListFilters } from '@abe-stack/shared';
+import type { AdminUserListFilters } from '@bslt/shared';
 
 describe('UserFilters', () => {
   const defaultFilters: AdminUserListFilters = {

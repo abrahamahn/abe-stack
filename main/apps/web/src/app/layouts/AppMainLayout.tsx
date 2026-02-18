@@ -1,5 +1,5 @@
 // main/apps/web/src/app/layouts/AppMainLayout.tsx
-import { Button, ResizablePanel, ResizablePanelGroup, ScrollArea } from '@abe-stack/ui';
+import { Button, ResizablePanel, ResizablePanelGroup, ScrollArea } from '@bslt/ui';
 import { useCallback } from 'react';
 
 import { AppLeftLayout } from './AppLeftLayout';

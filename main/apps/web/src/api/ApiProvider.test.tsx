@@ -1,8 +1,8 @@
 // main/apps/web/src/api/ApiProvider.test.tsx
-import { QueryCache } from '@abe-stack/client-engine';
-import { MemoryRouter } from '@abe-stack/react/router';
+import { QueryCache } from '@bslt/client-engine';
+import { MemoryRouter } from '@bslt/react/router';
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ClientEnvironmentProvider } from '../app';
 
@@ -16,9 +16,9 @@ const { mockTokenGet } = vi.hoisted(() => ({
   mockTokenGet: vi.fn(() => 'test-token'),
 }));
 
-// Mock dependencies - createApiClient is in @abe-stack/api
-vi.mock('@abe-stack/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/api')>();
+// Mock dependencies - createApiClient is in @bslt/api
+vi.mock('@bslt/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/api')>();
   return {
     ...actual,
     getApiClient: vi.fn(() => ({
@@ -35,8 +35,8 @@ vi.mock('@abe-stack/api', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

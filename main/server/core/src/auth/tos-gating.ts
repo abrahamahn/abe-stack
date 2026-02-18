@@ -11,10 +11,10 @@
  * @module tos-gating
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
-import type { Repositories } from '../../../db/src';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Repositories } from '../../../db/src';
 
 // ============================================================================
 // Constants

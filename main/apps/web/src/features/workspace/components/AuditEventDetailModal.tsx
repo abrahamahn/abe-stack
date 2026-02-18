@@ -5,11 +5,11 @@
  * Displays full details for a single audit event in a modal dialog.
  */
 
-import { getAuditActionTone } from '@abe-stack/shared';
-import { Badge, Button, Modal, Text } from '@abe-stack/ui';
+import { getAuditActionTone } from '@bslt/shared';
+import { Badge, Button, Modal, Text } from '@bslt/ui';
 
-import type { AuditEvent } from '../hooks/useAuditLog';
 import type { ReactElement } from 'react';
+import type { AuditEvent } from '../hooks/useAuditLog';
 
 // ============================================================================
 // Types

@@ -11,10 +11,10 @@
  * correctly across tests.
  */
 
-import { QueryCacheProvider } from '@abe-stack/react';
+import { QueryCacheProvider } from '@bslt/react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MediaMetadata, MediaStatusResponse, MediaUploadResponse } from '../api';
 

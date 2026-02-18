@@ -5,8 +5,8 @@
  * Hooks for account deactivation, deletion request, and reactivation.
  */
 
-import { useMutation } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation } from '@bslt/react';
 
 import { createSettingsApi } from '../api';
 
@@ -14,7 +14,7 @@ import type {
   AccountLifecycleResponse,
   DeactivateAccountRequest,
   DeleteAccountRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Settings API Instance

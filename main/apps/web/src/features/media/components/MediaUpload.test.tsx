@@ -9,9 +9,9 @@
  * delegate to the current globalThis.fetch, allowing vi.stubGlobal to work.
  */
 
-import { QueryCacheProvider } from '@abe-stack/react';
+import { QueryCacheProvider } from '@bslt/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaUpload } from './MediaUpload';
 

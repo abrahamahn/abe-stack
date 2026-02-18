@@ -1,5 +1,5 @@
 // main/apps/web/src/features/home/HomePage.tsx
-import { useSearchParams } from '@abe-stack/react/router';
+import { useSearchParams } from '@bslt/react/router';
 
 import { HomeDocViewer } from './components/HomeDocViewer';
 import { docsMeta } from './data/docsMeta';

@@ -166,7 +166,7 @@ describe('handleTransferOwnership', () => {
   });
 
   it('should return 404 when service throws NotFoundError', async () => {
-    const { NotFoundError } = await import('@abe-stack/shared');
+    const { NotFoundError } = await import('@bslt/shared');
     mockTransferOwnership.mockRejectedValue(new NotFoundError('Workspace not found'));
     const request = createMockRequest({ userId: 'user-1' });
 
@@ -181,7 +181,7 @@ describe('handleTransferOwnership', () => {
   });
 
   it('should return 403 when service throws ForbiddenError', async () => {
-    const { ForbiddenError } = await import('@abe-stack/shared');
+    const { ForbiddenError } = await import('@bslt/shared');
     mockTransferOwnership.mockRejectedValue(new ForbiddenError('Not the owner'));
     const request = createMockRequest({ userId: 'user-1' });
 

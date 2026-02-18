@@ -1,5 +1,5 @@
 # Google Cloud Platform Infrastructure Module
-# Deploys ABE Stack to GCP Compute Instance with optional Cloud SQL
+# Deploys BSLT to GCP Compute Instance with optional Cloud SQL
 
 terraform {
   required_providers {
@@ -32,7 +32,7 @@ resource "google_compute_instance" "abe_stack" {
   }
 
   metadata = {
-    ssh-keys = "abe-stack:${var.ssh_public_key}"
+    ssh-keys = "bslt:${var.ssh_public_key}"
   }
 
   metadata_startup_script = templatefile("${path.module}/startup-script.sh", {
@@ -46,7 +46,7 @@ resource "google_compute_instance" "abe_stack" {
   }
 
   tags = [
-    "abe-stack",
+    "bslt",
     var.environment,
     "managed-by-terraform"
   ]
@@ -69,7 +69,7 @@ resource "google_compute_instance" "abe_stack" {
 resource "google_service_account" "abe_stack" {
   account_id   = "${var.app_name}-${var.environment}"
   display_name = "${var.app_name} ${var.environment} Service Account"
-  description  = "Service account for ABE Stack ${var.environment} environment"
+  description  = "Service account for BSLT ${var.environment} environment"
 }
 
 # IAM binding for the service account (minimal permissions)
@@ -111,7 +111,7 @@ resource "google_compute_firewall" "abe_stack_ssh" {
   }
 
   source_ranges = ["0.0.0.0/0"]  # Restrict in production
-  target_tags   = ["abe-stack"]
+  target_tags   = ["bslt"]
 }
 
 resource "google_compute_firewall" "abe_stack_http" {
@@ -124,7 +124,7 @@ resource "google_compute_firewall" "abe_stack_http" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["abe-stack"]
+  target_tags   = ["bslt"]
 }
 
 # Cloud DNS for domain management

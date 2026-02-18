@@ -8,19 +8,19 @@
  */
 
 import {
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   ERROR_MESSAGES,
   HTTP_STATUS,
   mapErrorToHttpResponse,
-} from '@abe-stack/shared';
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+} from '@bslt/shared';
 
 import { assertUserActive } from '../middleware';
 import { isCaptchaRequired, sendPasswordChangedAlert, verifyCaptchaToken } from '../security';
 import { requestPasswordReset, resetPassword, setPassword } from '../service';
 import { createErrorMapperLogger } from '../types';
 
+import type { ForgotPasswordRequest, HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, RequestWithCookies } from '../types';
-import type { ForgotPasswordRequest, HttpErrorResponse } from '@abe-stack/shared';
 
 /**
  * Handle forgot password request.

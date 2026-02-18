@@ -11,7 +11,7 @@
  * Based on chet-stack's RecordStorage pattern.
  */
 
-import type { RecordPointer, VersionedRecord } from '@abe-stack/shared';
+import type { RecordPointer, VersionedRecord } from '@bslt/shared';
 
 export type { RecordPointer, VersionedRecord };
 
@@ -555,7 +555,7 @@ export class RecordStorage<Tables extends string = string> {
   private readonly readyPromise: Promise<void>;
 
   constructor(options: RecordStorageOptions = {}) {
-    const { dbName = 'abe-stack-records', storeName = 'records', debug = false } = options;
+    const { dbName = 'bslt-records', storeName = 'records', debug = false } = options;
 
     this.debug = debug;
     this.listeners = new Set();

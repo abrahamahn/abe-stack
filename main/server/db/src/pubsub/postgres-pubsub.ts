@@ -12,10 +12,10 @@
  * 4. Each instance forwards to its local WebSocket clients
  */
 
-import { generateSecureId, MS_PER_SECOND } from '@abe-stack/shared';
+import { generateSecureId, MS_PER_SECOND } from '@bslt/shared';
 import postgres, { type Options } from 'postgres';
 
-import type { SubscriptionKey } from '@abe-stack/shared';
+import type { SubscriptionKey } from '@bslt/shared';
 
 // ============================================================================
 // Types

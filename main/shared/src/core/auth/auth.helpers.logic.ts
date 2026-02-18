@@ -8,7 +8,34 @@
 
 import { MS_PER_DAY } from '../../primitives/constants/time';
 
-import type { AuthConfig, AuthStrategy } from '../../config/env.auth';
+// ============================================================================
+// Local Types (structural to avoid config layer import)
+// ============================================================================
+
+/** Minimal auth strategy type needed for helpers. */
+export type AuthStrategy =
+  | 'local'
+  | 'magic'
+  | 'webauthn'
+  | 'google'
+  | 'github'
+  | 'facebook'
+  | 'microsoft'
+  | 'apple';
+
+/** Minimal auth config shape needed for helpers. */
+export interface AuthConfig {
+  strategies: AuthStrategy[];
+  cookie: {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: 'strict' | 'lax' | 'none';
+    path: string;
+  };
+  refreshToken: {
+    expiryDays: number;
+  };
+}
 
 // ============================================================================
 // Functions

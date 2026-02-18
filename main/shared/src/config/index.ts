@@ -25,7 +25,7 @@ export { AuthEnvSchema } from './env.auth';
 // ============================================================================
 export type { BaseEnv, JwtEnv, NodeEnv } from './env.base';
 
-export { baseEnvSchema, BaseEnvSchema, NODE_ENV_VALUES, trueFalseSchema } from './env.base';
+export { BaseEnvSchema, NODE_ENV_VALUES, trueFalseSchema } from './env.base';
 
 // ============================================================================
 // Billing Types & Schema

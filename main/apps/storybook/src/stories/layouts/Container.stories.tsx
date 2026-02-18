@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/layouts/Container.stories.tsx
+import { Container, Text } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Container, Text } from '@abe-stack/ui';
 
 const meta: Meta<typeof Container> = {
   title: 'Layouts/Container',

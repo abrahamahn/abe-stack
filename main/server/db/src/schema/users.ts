@@ -9,7 +9,7 @@
  * @see 0012_user_profile.sql - Profile expansion (username, firstName/lastName, profile fields)
  */
 
-import type { UserRole } from '@abe-stack/shared';
+import type { UserRole } from '@bslt/shared';
 export type { UserRole };
 
 // ============================================================================

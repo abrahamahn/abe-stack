@@ -1,6 +1,6 @@
 // main/tools/scripts/dev/setup.ts
 /**
- * ABE Stack Interactive Setup Script
+ * BSLT Interactive Setup Script
  *
  * Sets up a fresh clone of the repository with:
  * - Setup presets for different use cases
@@ -120,7 +120,7 @@ const QUICK_START_ENV: EnvConfig = {
   appPort: '3000',
   apiPort: '8080',
   viteApiUrl: 'http://localhost:8080',
-  viteAppName: 'abe-stack-web',
+  viteAppName: 'bslt-web',
   jwtSecret: '',
   sessionSecret: '',
   storageProvider: 'local',
@@ -132,7 +132,7 @@ const QUICK_START_ENV: EnvConfig = {
   smtpSecure: false,
   smtpUser: '',
   smtpPassword: '',
-  emailFromName: 'ABE Stack',
+  emailFromName: 'BSLT',
   emailFromAddress: 'noreply@example.com',
 };
 
@@ -769,7 +769,7 @@ async function setupDocker(envConfig: EnvConfig, step: number, total: number): P
   while (retries > 0) {
     const result = spawnSync(
       'docker',
-      ['inspect', '--format', '{{.State.Health.Status}}', 'abe-stack-postgres'],
+      ['inspect', '--format', '{{.State.Health.Status}}', 'bslt-postgres'],
       { stdio: 'pipe' },
     );
 
@@ -806,7 +806,7 @@ function pushDatabaseSchema(pm: PackageManager, step: number, total: number): vo
 
   const envVars = parseEnvFile(ENV_DEV);
 
-  if (!run(pm, ['--filter', '@abe-stack/server', 'db:push'], { env: envVars })) {
+  if (!run(pm, ['--filter', '@bslt/server', 'db:push'], { env: envVars })) {
     logError('Failed to push database schema');
     process.exit(1);
   }

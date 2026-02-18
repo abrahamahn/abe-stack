@@ -5,7 +5,7 @@ import type {
   FullEnv,
   JsonDatabaseConfig,
   PostgresConfig,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Load Database Configuration.

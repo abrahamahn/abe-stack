@@ -11,22 +11,22 @@ import {
   setPhoneRequestSchema,
   setPhoneResponseSchema,
   smsChallengeRequestSchema,
-  totpVerifyResponseSchema,
   smsVerifyRequestSchema,
+  totpVerifyResponseSchema,
   verifyPhoneRequestSchema,
   verifyPhoneResponseSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   AuthResponse,
   RemovePhoneResponse,
   SetPhoneResponse,
   TotpVerifyResponse,
   VerifyPhoneResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types

@@ -15,11 +15,11 @@ import {
   PlanNotActiveError,
   PlanNotFoundError,
   SubscriptionNotActiveError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
-import type { BillingRepositories } from './types';
+import type { BillingService } from '@bslt/shared';
 import type { Plan as DbPlan, Subscription as DbSubscription } from '../../../db/src';
-import type { BillingService } from '@abe-stack/shared';
+import type { BillingRepositories } from './types';
 
 // ============================================================================
 // Types

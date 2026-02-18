@@ -6,18 +6,18 @@
  */
 
 import {
-  createApiClient,
-  type ApiClient,
   ApiError,
   NetworkError,
   TimeoutError,
+  createApiClient,
   createApiError,
   getErrorMessage,
   isApiError,
   isNetworkError,
   isTimeoutError,
   isUnauthorizedError,
-} from '@abe-stack/api';
+  type ApiClient,
+} from '@bslt/api';
 import {
   AppError,
   BadRequestError,
@@ -28,7 +28,7 @@ import {
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================

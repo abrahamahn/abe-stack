@@ -6,12 +6,12 @@
  * for the current user. Uses the public flag evaluation endpoint.
  */
 
-import { getApiClient } from '@abe-stack/api';
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { getApiClient } from '@bslt/api';
+import { useQuery } from '@bslt/react';
 
-import type { UseQueryResult } from '@abe-stack/react';
+import type { UseQueryResult } from '@bslt/react';
 
 // ============================================================================
 // Types

@@ -12,24 +12,24 @@ import {
   InternalError,
   NotFoundError,
   UnauthorizedError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NetworkError } from '../errors';
 
 import { createAdminBillingClient } from './admin';
 
-import type { AdminBillingClientConfig } from './admin';
 import type {
   AdminPlan,
   AdminPlanResponse,
   AdminPlansListResponse,
   CreatePlanRequest,
+  PlanId,
   SubscriptionActionResponse,
   SyncStripeResponse,
   UpdatePlanRequest,
-  PlanId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AdminBillingClientConfig } from './admin';
 
 // ============================================================================
 // Test Data

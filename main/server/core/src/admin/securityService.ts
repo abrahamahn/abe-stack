@@ -12,7 +12,7 @@ import {
   MS_PER_HOUR,
   NotFoundError,
   toISODateOnly,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   SECURITY_EVENTS_TABLE,
@@ -37,7 +37,7 @@ import type {
   SecurityEventsFilter,
   SecurityEventsListResponse,
   SecurityMetrics,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Types

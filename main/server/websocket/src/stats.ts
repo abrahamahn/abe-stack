@@ -8,7 +8,7 @@
  * @module websocket/stats
  */
 
-import type { WebSocketStats } from '@abe-stack/shared';
+import type { WebSocketStats } from '@bslt/shared';
 
 // ============================================================================
 // Module State

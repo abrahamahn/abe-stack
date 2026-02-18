@@ -16,7 +16,7 @@ import type {
   AdminLockUserResponse,
   AdminUpdateUserRequest,
   AdminUpdateUserResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Types

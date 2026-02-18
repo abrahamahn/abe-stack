@@ -1,7 +1,7 @@
 // main/apps/server/src/config/infra/queue.ts
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
-import type { FullEnv, QueueConfig } from '@abe-stack/shared/config';
+import type { FullEnv, QueueConfig } from '@bslt/shared/config';
 
 /**
  * Loads Queue configuration for background job processing.

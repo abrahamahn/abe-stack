@@ -12,7 +12,7 @@ import {
   mapErrorToHttpResponse,
   type ErrorMapperLogger,
   type HttpErrorResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { ERROR_MESSAGES, type TenantsModuleDeps, type TenantsRequest } from '../types';
 

@@ -97,7 +97,7 @@ function printReport(assets: AssetEntry[]): boolean {
 function main(): void {
   if (!existsSync(DIST_ASSETS)) {
     console.error('Build output not found at:', DIST_ASSETS);
-    console.error('Run: pnpm --filter @abe-stack/web build');
+    console.error('Run: pnpm --filter @bslt/web build');
     process.exit(1);
   }
 

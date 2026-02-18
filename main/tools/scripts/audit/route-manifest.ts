@@ -10,18 +10,18 @@
  * @module tools/audit/route-manifest
  */
 
-import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
-import { clearRegistry, getRegisteredRoutes, registerRouteMap } from '@abe-stack/server-engine';
+import { authRoutes, createAuthGuard } from '@bslt/core/auth';
+import { clearRegistry, getRegisteredRoutes, registerRouteMap } from '@bslt/server-engine';
 
-import { buildBillingRouteMap } from '../../../apps/server/src/routes/billingRouteAdapter';
 import { apiManifestRouteModuleRegistrations } from '../../../apps/server/src/routes/apiManifestRouteModules';
+import { buildBillingRouteMap } from '../../../apps/server/src/routes/billingRouteAdapter';
 
 import type {
   AuthGuardFactory,
   HandlerContext,
   RouteMap,
   RouteRegistryEntry,
-} from '@abe-stack/server-engine';
+} from '@bslt/server-engine';
 
 /**
  * Route manifest entry (JSON-serializable subset of RouteRegistryEntry).

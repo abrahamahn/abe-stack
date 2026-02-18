@@ -5,9 +5,9 @@
  * Provides functions to seed isolated test databases with required data.
  */
 
-import { hashPassword } from '@abe-stack/core/auth';
-import { createDbClient, USERS_TABLE } from '@abe-stack/db';
-import { canonicalizeEmail } from '@abe-stack/shared';
+import { hashPassword } from '@bslt/core/auth';
+import { createDbClient, USERS_TABLE } from '@bslt/db';
+import { canonicalizeEmail } from '@bslt/shared';
 
 /**
  * Seed a test user into the provided database.

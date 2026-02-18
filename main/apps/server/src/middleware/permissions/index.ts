@@ -3,7 +3,7 @@
  * Permission Middleware
  *
  * Fastify-specific permission guards for route-level access control.
- * Uses the permission checker from @abe-stack/server-engine.
+ * Uses the permission checker from @bslt/server-engine.
  */
 
 export {
@@ -14,5 +14,6 @@ export {
   hasPermission,
   type PermissionGuardOptions,
   type PermissionMiddlewareOptions,
-  type PreHandlerHook,
+  type PreHandlerHook
 } from './middleware';
+

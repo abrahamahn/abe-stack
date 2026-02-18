@@ -6,9 +6,9 @@
  * verifying HTTP layer behavior: routing, auth guards (admin role required).
  */
 
-import { adminRoutes } from '@abe-stack/core/admin';
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { adminRoutes } from '@bslt/core/admin';
+import { createAuthGuard } from '@bslt/core/auth';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -20,7 +20,7 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@abe-stack/server-engine';
+import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

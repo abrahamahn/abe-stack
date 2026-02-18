@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { createAuthResponse } from './response';
 
-import type { UserRole } from '@abe-stack/shared';
+import type { UserRole } from '@bslt/shared';
 
 // ============================================================================
 // Tests: createAuthResponse

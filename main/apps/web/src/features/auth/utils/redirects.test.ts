@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getPostLoginRedirect } from './redirects';
 
-import type { AppRole, User, UserId } from '@abe-stack/shared';
+import type { AppRole, User, UserId } from '@bslt/shared';
 
 describe('getPostLoginRedirect', () => {
   const createUser = (role: AppRole): User => ({

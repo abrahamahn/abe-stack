@@ -6,14 +6,14 @@
  * verifying HTTP layer behavior: routing, validation, auth guards, CSRF.
  */
 
-import { authRoutes, createAuthGuard, hashPassword } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/server-engine';
-import { AUTH_SUCCESS_MESSAGES, HTTP_ERROR_MESSAGES } from '@abe-stack/shared';
+import { authRoutes, createAuthGuard, hashPassword } from '@bslt/core/auth';
+import { registerRouteMap } from '@bslt/server-engine';
+import { AUTH_SUCCESS_MESSAGES, HTTP_ERROR_MESSAGES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

@@ -11,7 +11,7 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { QUOTAS } from '@abe-stack/shared';
+import { QUOTAS } from '@bslt/shared';
 
 import type { Repositories } from '../../../../db/src';
 

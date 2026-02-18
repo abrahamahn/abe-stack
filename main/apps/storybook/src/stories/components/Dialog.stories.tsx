@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/components/Dialog.stories.tsx
+import { Button, Dialog, Text } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Dialog, Button, Text } from '@abe-stack/ui';
 
 const meta: Meta<typeof Dialog.Root> = {
   title: 'Components/Dialog',

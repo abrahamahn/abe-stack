@@ -20,7 +20,7 @@ import {
   type AccountStatus,
   type DeactivateAccountRequest,
   type DeleteAccountRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { record } from '../../audit/service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';

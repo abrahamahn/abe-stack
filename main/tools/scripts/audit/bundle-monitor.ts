@@ -64,11 +64,11 @@ function estimatePackageBundleSize(packageName: string, packagePath: string): Bu
     vitest: { size: 0, gzipSize: 0 },
 
     // UI Libraries
-    '@abe-stack/ui': { size: 200, gzipSize: 60 }, // Our custom UI
-    '@abe-stack/shared': { size: 150, gzipSize: 40 }, // Our core utilities
+    '@bslt/ui': { size: 200, gzipSize: 60 }, // Our custom UI
+    '@bslt/shared': { size: 150, gzipSize: 40 }, // Our core utilities
 
     // Database (runtime only, not in client bundle)
-    '@abe-stack/db': { size: 0, gzipSize: 0 },
+    '@bslt/db': { size: 0, gzipSize: 0 },
     postgres: { size: 0, gzipSize: 0 },
 
     // Security (runtime only)
@@ -121,8 +121,8 @@ function generateBundleReport(): BundleReport {
   // Analyze web app
   const webPath = join(rootDir, 'src', 'apps', 'web');
   if (existsSync(webPath)) {
-    const bundles = estimatePackageBundleSize('@abe-stack/web', webPath);
-    packages['@abe-stack/web'] = bundles;
+    const bundles = estimatePackageBundleSize('@bslt/web', webPath);
+    packages['@bslt/web'] = bundles;
 
     const total = bundles.reduce(
       (acc, bundle) => ({
@@ -131,7 +131,7 @@ function generateBundleReport(): BundleReport {
       }),
       { size: 0, gzipSize: 0 },
     );
-    totals['@abe-stack/web'] = total;
+    totals['@bslt/web'] = total;
   }
 
   // Analyze packages across main/client/*, main/server/*, main/shared
@@ -144,8 +144,8 @@ function generateBundleReport(): BundleReport {
     for (const pkgName of packageDirs) {
       const pkgPath = join(layerDir, pkgName);
       if (existsSync(join(pkgPath, 'package.json'))) {
-        const bundles = estimatePackageBundleSize(`@abe-stack/${pkgName}`, pkgPath);
-        packages[`@abe-stack/${pkgName}`] = bundles;
+        const bundles = estimatePackageBundleSize(`@bslt/${pkgName}`, pkgPath);
+        packages[`@bslt/${pkgName}`] = bundles;
 
         const total = bundles.reduce(
           (acc, bundle) => ({
@@ -154,7 +154,7 @@ function generateBundleReport(): BundleReport {
           }),
           { size: 0, gzipSize: 0 },
         );
-        totals[`@abe-stack/${pkgName}`] = total;
+        totals[`@bslt/${pkgName}`] = total;
       }
     }
   }
@@ -162,8 +162,8 @@ function generateBundleReport(): BundleReport {
   // Analyze main/shared
   const sharedPath = join(rootDir, 'src', 'shared');
   if (existsSync(join(sharedPath, 'package.json'))) {
-    const bundles = estimatePackageBundleSize('@abe-stack/shared', sharedPath);
-    packages['@abe-stack/shared'] = bundles;
+    const bundles = estimatePackageBundleSize('@bslt/shared', sharedPath);
+    packages['@bslt/shared'] = bundles;
 
     const total = bundles.reduce(
       (acc, bundle) => ({
@@ -172,7 +172,7 @@ function generateBundleReport(): BundleReport {
       }),
       { size: 0, gzipSize: 0 },
     );
-    totals['@abe-stack/shared'] = total;
+    totals['@bslt/shared'] = total;
   }
 
   return {

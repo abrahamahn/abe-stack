@@ -1,9 +1,9 @@
 // main/apps/web/src/features/ui-library/UILibraryPage.test.tsx
-import { MemoryRouter } from '@abe-stack/react/router';
 import { AppLayoutContext } from '@app/layouts';
+import { MemoryRouter } from '@bslt/react/router';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createElement, useCallback, useMemo, useState } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UILibraryPage } from './UILibraryPage';
 

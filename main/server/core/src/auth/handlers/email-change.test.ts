@@ -1,5 +1,5 @@
 // main/server/core/src/auth/handlers/email-change.test.ts
-import { InvalidCredentialsError, InvalidTokenError } from '@abe-stack/shared';
+import { InvalidCredentialsError, InvalidTokenError } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

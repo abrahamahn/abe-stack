@@ -11,15 +11,15 @@ import {
   AUTH_ERROR_MESSAGES as ERROR_MESSAGES,
   HTTP_STATUS,
   mapErrorToHttpResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { sendTokenReuseAlert } from '../security';
 import { refreshUserTokens } from '../service';
 import { createErrorMapperLogger, REFRESH_COOKIE_NAME } from '../types';
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from '../utils';
 
+import type { HttpErrorResponse, RefreshResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { HttpErrorResponse, RefreshResponse } from '@abe-stack/shared';
 
 /**
  * Handle token refresh.

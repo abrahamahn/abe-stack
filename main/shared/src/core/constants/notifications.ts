@@ -34,4 +34,6 @@ export const NOTIFICATION_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as co
 // Audit (canonical source: engine/constants/audit.ts)
 // ============================================================================
 
-export { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../engine/constants/audit';
+import { AUDIT_CATEGORIES, AUDIT_SEVERITIES } from '../../engine/constants/audit';
+
+export { AUDIT_CATEGORIES, AUDIT_SEVERITIES };

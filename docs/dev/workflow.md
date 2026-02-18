@@ -33,9 +33,9 @@ The `pnpm dev` command runs sync scripts (file headers, theme CSS) alongside the
 npx eslint src/path/to/file.ts
 
 # Type-check a single package
-pnpm --filter @abe-stack/web type-check
-pnpm --filter @abe-stack/server type-check
-pnpm --filter @abe-stack/ui type-check
+pnpm --filter @bslt/web type-check
+pnpm --filter @bslt/server type-check
+pnpm --filter @bslt/ui type-check
 
 # Run a specific test file
 pnpm test -- --run src/path/to/file.test.ts

@@ -1,4 +1,4 @@
-# ABE Stack Server
+# BSLT Server
 
 > Hexagonal architecture that doesn't get in your way.
 
@@ -24,27 +24,27 @@ Fastify 5.x backend with PostgreSQL and Drizzle ORM. Business logic in the cente
 pnpm dev
 
 # standalone
-pnpm --filter @abe-stack/server dev
+pnpm --filter @bslt/server dev
 
 # with database
 docker compose up -d postgres
-pnpm --filter @abe-stack/server db:push
-pnpm --filter @abe-stack/server dev
+pnpm --filter @bslt/server db:push
+pnpm --filter @bslt/server dev
 ```
 
 ## Commands
 
 ```sh
-pnpm --filter @abe-stack/server dev        # development (hot reload)
-pnpm --filter @abe-stack/server build      # production build
-pnpm --filter @abe-stack/server start      # run production build
-pnpm --filter @abe-stack/server test       # run tests
-pnpm --filter @abe-stack/server type-check # check types
+pnpm --filter @bslt/server dev        # development (hot reload)
+pnpm --filter @bslt/server build      # production build
+pnpm --filter @bslt/server start      # run production build
+pnpm --filter @bslt/server test       # run tests
+pnpm --filter @bslt/server type-check # check types
 
 # database
-pnpm --filter @abe-stack/server db:push    # push schema to database
-pnpm --filter @abe-stack/server db:studio  # open Drizzle Studio
-pnpm --filter @abe-stack/server db:seed    # seed test data
+pnpm --filter @bslt/server db:push    # push schema to database
+pnpm --filter @bslt/server db:studio  # open Drizzle Studio
+pnpm --filter @bslt/server db:seed    # seed test data
 ```
 
 ## Architecture
@@ -147,9 +147,9 @@ const results = await provider.search({ filters: { role: 'admin' }, limit: 20 })
 - SQL: Full-text search with Postgres
 - Elasticsearch: Stub implementation ready for future integration
 
-### WebSocket (`@abe-stack/realtime`)
+### WebSocket (`@bslt/realtime`)
 
-Authenticated WebSocket connections with CSRF protection. Provided by the `@abe-stack/realtime` package.
+Authenticated WebSocket connections with CSRF protection. Provided by the `@bslt/realtime` package.
 
 ```typescript
 registerWebSocket(server, ctx, { verifyToken }); // handles /ws endpoint
@@ -320,7 +320,7 @@ await service.send(subscriptions, { title: 'Hello', body: 'World' });
 - Web Push: VAPID-based browser notifications
 - FCM: Firebase Cloud Messaging (stub implementation)
 
-## Modules (via `@abe-stack/core`)
+## Modules (via `@bslt/core`)
 
 ### Auth (`backend/core/src/auth/`)
 
@@ -442,7 +442,7 @@ apps/server/src/
 │   ├── notifications/         # push notifications
 │   └── monitor/               # health checks, logger
 ├── modules/
-│   ├── routes.ts              # route wiring (imports from @abe-stack/core)
+│   ├── routes.ts              # route wiring (imports from @bslt/core)
 │   └── system/                # system routes/handlers (health, uptime)
 └── shared/                    # errors, types, constants
 ```
@@ -530,8 +530,8 @@ VAPID_SUBJECT=mailto:admin@example.com
 Run tests:
 
 ```sh
-pnpm --filter @abe-stack/server test
-pnpm --filter @abe-stack/server test -- --run <test-file>
+pnpm --filter @bslt/server test
+pnpm --filter @bslt/server test -- --run <test-file>
 ```
 
 ## Trade-offs

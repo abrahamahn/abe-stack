@@ -6,14 +6,14 @@
  * Uses narrow context interfaces from types.ts for decoupling.
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { deleteFile, getDownloadUrl, getFileMetadata, uploadFile } from './service';
 
-import type { FileAppContext, FileMetadata, FileStorageProvider } from './types';
-import type { HandlerContext } from '../../../engine/src';
-import type { AuthenticatedUser } from '@abe-stack/shared';
+import type { AuthenticatedUser } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { HandlerContext } from '../../../engine/src';
+import type { FileAppContext, FileMetadata, FileStorageProvider } from './types';
 
 // ============================================================================
 // Helpers

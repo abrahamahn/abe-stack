@@ -30,7 +30,7 @@ on:
       app_name:
         description: 'Application slug used to isolate deployment resources (e.g., portfolio-api)'
         required: false
-        default: 'abe-stack'
+        default: 'bslt'
         type: string
       instance_ip:
         description: 'Optional target server IP (used if deployment artifact is unavailable)'
@@ -46,7 +46,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: deploy-${{ inputs.environment || 'production' }}-${{ inputs.app_name || 'abe-stack' }}
+  group: deploy-${{ inputs.environment || 'production' }}-${{ inputs.app_name || 'bslt' }}
   cancel-in-progress: false
 
 jobs:
@@ -199,14 +199,14 @@ jobs:
           script: |
             export DEPLOY_ENV="${{ inputs.environment || 'production' }}"
             export DOMAIN="${{ needs.get-infrastructure-info.outputs.domain }}"
-            export APP_NAME_INPUT="${{ inputs.app_name || 'abe-stack' }}"
+            export APP_NAME_INPUT="${{ inputs.app_name || 'bslt' }}"
             export DEPLOY_COMMIT_SHA="${{ steps.image-vars.outputs.commit_sha }}"
             export API_IMAGE="${{ steps.image-refs.outputs.api_image }}"
             export WEB_IMAGE="${{ steps.image-refs.outputs.web_image }}"
 
             APP_NAME=$(echo "$APP_NAME_INPUT" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9-' '-' | sed 's/^-//; s/-$//')
             if [ -z "$APP_NAME" ]; then
-              APP_NAME="abe-stack"
+              APP_NAME="bslt"
             fi
 
             export APP_NAME
@@ -235,7 +235,7 @@ jobs:
             STORAGE_LOCAL_PATH=/app/uploads
             STORAGE_LOCAL_PUBLIC_URL=/uploads
             EMAIL_PROVIDER=console
-            EMAIL_FROM_NAME=ABE Stack
+            EMAIL_FROM_NAME=BSLT
             EMAIL_FROM_ADDRESS=noreply@\${DOMAIN}
             EOF
 
@@ -307,7 +307,7 @@ jobs:
       - name: Deployment Summary
         env:
           DEPLOY_ENV: ${{ inputs.environment || 'production' }}
-          APP_NAME: ${{ inputs.app_name || 'abe-stack' }}
+          APP_NAME: ${{ inputs.app_name || 'bslt' }}
           IMAGE_SOURCE: ${{ steps.image-refs.outputs.source }}
           API_IMAGE: ${{ steps.image-refs.outputs.api_image }}
           WEB_IMAGE: ${{ steps.image-refs.outputs.web_image }}

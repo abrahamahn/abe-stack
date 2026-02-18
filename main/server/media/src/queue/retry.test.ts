@@ -3,11 +3,11 @@
  * Tests for MediaProcessingRetryHandler
  */
 
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaProcessingRetryHandler, createMediaRetryHandler } from './retry';
 
-import type { Logger } from '@abe-stack/shared';
+import type { Logger } from '@bslt/shared';
 
 function createMockLogger(): Logger {
   return {

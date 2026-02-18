@@ -14,7 +14,7 @@
  * @module security/rateLimitPresets
  */
 
-import { HTTP_STATUS, MS_PER_SECOND } from '@abe-stack/shared';
+import { HTTP_STATUS, MS_PER_SECOND } from '@bslt/shared';
 
 import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '../../../../engine/src';
 

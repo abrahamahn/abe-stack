@@ -13,7 +13,7 @@ import {
   type LogData,
   type NormalizedWebhookEvent,
   type Logger as ServerLogger,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createBillingEventRepository,
@@ -25,9 +25,9 @@ import {
 } from '../../../../db/src';
 import { StripeProvider } from '../stripe-provider';
 
-import type { WebhookRepositories, WebhookResult } from '../types';
-import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
+import type { StripeProviderConfig as StripeConfig } from '@bslt/shared/config';
 import type { Buffer } from 'node:buffer';
+import type { WebhookRepositories, WebhookResult } from '../types';
 
 // ============================================================================
 // Webhook Handler

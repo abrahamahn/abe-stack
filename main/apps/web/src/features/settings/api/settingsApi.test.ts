@@ -11,12 +11,11 @@
  * - Authentication header handling
  */
 
-import { NetworkError } from '@abe-stack/api';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { NetworkError } from '@bslt/api';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createSettingsApi } from './settingsApi';
 
-import type { SettingsApiConfig } from './settingsApi';
 import type {
   AvatarDeleteResponse,
   AvatarUploadResponse,
@@ -29,7 +28,8 @@ import type {
   UpdateProfileRequest,
   User,
   UserId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { SettingsApiConfig } from './settingsApi';
 
 describe('createSettingsApi', () => {
   let mockFetch: ReturnType<typeof vi.fn>;

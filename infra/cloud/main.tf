@@ -1,4 +1,4 @@
-# Root Terraform configuration for ABE Stack Infrastructure
+# Root Terraform configuration for BSLT Infrastructure
 # This file defines the main infrastructure setup across providers
 
 terraform {
@@ -6,7 +6,7 @@ terraform {
 
   # TODO: Configure backend for state management (recommended for production)
   # backend "s3" {
-  #   bucket = "abe-stack-terraform-state"
+  #   bucket = "bslt-terraform-state"
   #   key    = "infrastructure/terraform.tfstate"
   #   region = "us-east-1"
   # }

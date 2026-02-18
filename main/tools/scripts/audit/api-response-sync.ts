@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { apiRouter } from '@abe-stack/shared';
+import { apiRouter } from '@bslt/shared';
 
 type ContractCheck = {
   name: string;

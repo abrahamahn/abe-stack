@@ -6,17 +6,17 @@
  * Adopted from Chet-stack's QueueServer pattern.
  *
  * Monitoring types (JobStatus, JobDetails, QueueStats, etc.) are imported
- * from @abe-stack/shared to enforce DRY.
+ * from @bslt/shared to enforce DRY.
  */
 
 import type {
-  JobDetails as SharedJobDetails,
   JobError,
   JobListQuery,
   JobListResponse,
   JobStatus,
   QueueStats,
-} from '@abe-stack/shared';
+  JobDetails as SharedJobDetails,
+} from '@bslt/shared';
 
 // Re-export shared types for consumers that import from queue-types
 export type { JobStatus, QueueStats };
@@ -160,4 +160,4 @@ export interface QueueStore {
 }
 
 // Job monitoring types (JobStatus, JobDetails, JobListOptions, JobListResult,
-// QueueStats) are imported from @abe-stack/shared — see top of file.
+// QueueStats) are imported from @bslt/shared — see top of file.

@@ -1,5 +1,5 @@
 // main/apps/web/src/app/layouts/AppSidePeekLayout.tsx
-import { Button, SidePeek } from '@abe-stack/ui';
+import { Button, SidePeek } from '@bslt/ui';
 import { SidePeekUILibraryContent } from '@ui-library/components';
 import { useCallback, useState } from 'react';
 

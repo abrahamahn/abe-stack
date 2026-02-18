@@ -5,13 +5,13 @@
  * Displays detailed information about a user for admin viewing.
  */
 
-import { formatDateTime } from '@abe-stack/shared';
-import { Card, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { formatDateTime } from '@bslt/shared';
+import { Card, Heading, Skeleton, Text } from '@bslt/ui';
 
 import { RoleBadge } from './RoleBadge';
 import { getUserStatus, StatusBadge } from './StatusBadge';
 
-import type { AdminUser } from '@abe-stack/shared';
+import type { AdminUser } from '@bslt/shared';
 import type { JSX } from 'react';
 
 type AdminUserLocal = AdminUser;

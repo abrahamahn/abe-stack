@@ -1,13 +1,13 @@
 // main/apps/server/src/config/auth/auth.ts
-import { BaseError, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
-import { getList } from '@abe-stack/shared/config';
+import { BaseError, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
+import { getList } from '@bslt/shared/config';
 
 import type {
   AuthConfig,
   AuthStrategy,
-  OAuthProviderConfig,
   FullEnv,
-} from '@abe-stack/shared/config';
+  OAuthProviderConfig,
+} from '@bslt/shared/config';
 
 const WEAK_SECRETS = new Set([
   'secret',

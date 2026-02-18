@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { loadEmailConfig } from './email';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with email-related defaults (as applied by Zod schema).
@@ -27,7 +27,7 @@ describe('Email Configuration', () => {
 
       expect(config.provider).toBe('console');
       expect(config.smtp.host).toBe('localhost');
-      expect(config.from.name).toBe('ABE Stack');
+      expect(config.from.name).toBe('BSLT');
       expect(config.smtp.auth).toEqual({ user: '', pass: '' });
     });
 

@@ -12,14 +12,14 @@
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { usePasswordChange } from '../hooks';
 
 import { PasswordChangeForm } from './PasswordChangeForm';
 
-import type { PasswordChangeFormProps } from './PasswordChangeForm';
 import type { ChangeEvent, ReactNode } from 'react';
+import type { PasswordChangeFormProps } from './PasswordChangeForm';
 
 // Mock the hooks
 vi.mock('../hooks', () => ({
@@ -27,8 +27,8 @@ vi.mock('../hooks', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   const mockAlert = ({ children, tone }: { children: ReactNode; tone: string }) => (
     <div data-testid="alert" data-tone={tone}>

@@ -11,7 +11,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PaymentMethodCard } from './PaymentMethodCard';
 
-import type { PaymentMethod } from '@abe-stack/shared';
+import type { PaymentMethod } from '@bslt/shared';
 
 const mockCardPaymentMethod: PaymentMethod = {
   id: 'pm_123',

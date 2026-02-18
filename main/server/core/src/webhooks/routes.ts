@@ -3,12 +3,12 @@
  * Webhook Routes
  *
  * Route definitions for the webhooks module.
- * Uses the generic router pattern from @abe-stack/server-engine.
+ * Uses the generic router pattern from @bslt/server-engine.
  *
  * @module routes
  */
 
-import { createWebhookSchema, emptyBodySchema, updateWebhookSchema } from '@abe-stack/shared';
+import { createWebhookSchema, emptyBodySchema, updateWebhookSchema } from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -27,13 +27,13 @@ import {
   handleUpdateWebhook,
 } from './handlers';
 
+import type { FastifyRequest } from 'fastify';
 import type {
   CreateWebhookData,
   UpdateWebhookData,
   WebhooksModuleDeps,
   WebhooksRequest,
 } from './types';
-import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Context Bridge

@@ -58,10 +58,10 @@ COPY . .
 # Install dependencies, build, and deploy to clean directory
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
-    pnpm --filter @abe-stack/shared build && \
-    pnpm --filter @abe-stack/core build && \
-    pnpm --filter @abe-stack/server build && \
-    pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy
+    pnpm --filter @bslt/shared build && \
+    pnpm --filter @bslt/core build && \
+    pnpm --filter @bslt/server build && \
+    pnpm --filter @bslt/server deploy --prod --legacy /app/server-deploy
 # node main/tools/dev/create-server-aliases.js /app/server-deploy main/apps/server/tsconfig.json
 
 # =============================================================================

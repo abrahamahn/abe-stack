@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/elements/Alert.stories.tsx
+import { Alert } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Alert } from '@abe-stack/ui';
 
 const meta: Meta<typeof Alert> = {
   title: 'Elements/Alert',

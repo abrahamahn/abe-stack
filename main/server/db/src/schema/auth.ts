@@ -17,13 +17,13 @@ import {
   SECURITY_SEVERITIES,
   type SecurityEventType,
   type SecuritySeverity,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { SECURITY_EVENT_TYPES, SECURITY_SEVERITIES };
 export type { SecurityEventType, SecuritySeverity };
 
-/** @deprecated Use `SecuritySeverity` from `@abe-stack/shared` instead */
+/** @deprecated Use `SecuritySeverity` from `@bslt/shared` instead */
 export type SecurityEventSeverity = SecuritySeverity;
 
 // ============================================================================
@@ -201,7 +201,7 @@ export const EMAIL_VERIFICATION_TOKEN_COLUMNS = {
 // Security Events
 // ============================================================================
 
-// SecurityEventType and SecuritySeverity imported from @abe-stack/shared above
+// SecurityEventType and SecuritySeverity imported from @bslt/shared above
 
 /**
  * Security event record (SELECT result)

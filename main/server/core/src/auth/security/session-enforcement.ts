@@ -8,7 +8,7 @@
  * @module security/session-enforcement
  */
 
-import { MS_PER_DAY } from '@abe-stack/shared';
+import { MS_PER_DAY } from '@bslt/shared';
 
 import type { Repositories } from '../../../../db/src';
 

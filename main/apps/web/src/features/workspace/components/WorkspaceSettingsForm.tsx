@@ -5,15 +5,15 @@
  * Form for editing workspace name and settings.
  */
 
-import { Alert, Button, FormField, Input } from '@abe-stack/ui';
-import { useState, type ReactElement, type ChangeEvent } from 'react';
+import { Alert, Button, FormField, Input } from '@bslt/ui';
+import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 import { useUpdateWorkspace } from '../hooks';
 
 import { DomainAllowlistEditor } from './DomainAllowlistEditor';
 import { WorkspaceLogoUpload } from './WorkspaceLogoUpload';
 
-import type { Tenant } from '@abe-stack/shared';
+import type { Tenant } from '@bslt/shared';
 
 // ============================================================================
 // Types

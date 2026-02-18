@@ -9,8 +9,8 @@
  *   pnpm db:push
  */
 
-import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { loadServerEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, createDbClient } from '@bslt/db';
+import { loadServerEnv } from '@bslt/server-engine';
 
 export const STATEMENTS: string[] = [
   `CREATE EXTENSION IF NOT EXISTS "pgcrypto";`,

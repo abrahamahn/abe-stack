@@ -11,8 +11,8 @@ import { useRef } from 'react';
 
 import { createSettingsApi } from '../api';
 
-import type { UndoRedoHandler } from '@abe-stack/react';
-import type { SetOperation, Transaction } from '@abe-stack/shared';
+import type { UndoRedoHandler } from '@bslt/react';
+import type { SetOperation, Transaction } from '@bslt/shared';
 
 // ============================================================================
 // API Instance (lazy singleton)

@@ -1,12 +1,12 @@
 // main/server/engine/src/mailer/smtp-client.test.ts
-import { delay } from '@abe-stack/shared';
+import { delay } from '@bslt/shared';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SmtpClient } from './smtp-client';
 
 // Mock the shared delay function used for retry backoff
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     delay: vi.fn(() => Promise.resolve(undefined)),

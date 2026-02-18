@@ -1,8 +1,8 @@
 // main/apps/web/src/features/settings/hooks/useUndoHandler.test.ts
 /** @vitest-environment jsdom */
-import { createSetOperation, createTransaction } from '@abe-stack/shared';
+import { createSetOperation, createTransaction } from '@bslt/shared';
 import { renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useUndoHandler } from './useUndoHandler';
 

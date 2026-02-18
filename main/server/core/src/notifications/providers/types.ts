@@ -10,9 +10,9 @@
 import type {
   BatchSendResult,
   NotificationPayload,
-  PushSendResult as SendResult,
   PushSubscription,
-} from '@abe-stack/shared';
+  PushSendResult as SendResult,
+} from '@bslt/shared';
 
 // ============================================================================
 // Provider Interface

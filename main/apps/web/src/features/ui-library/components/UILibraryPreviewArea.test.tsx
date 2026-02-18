@@ -1,7 +1,7 @@
 // main/apps/web/src/features/ui-library/components/UILibraryPreviewArea.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock clipboard API
 const mockClipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
@@ -15,7 +15,7 @@ const { mockButton, mockHeading, mockScrollArea, mockText } = vi.hoisted(() => (
   mockText: vi.fn(),
 }));
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   ['Button']: (props: ComponentProps<'button'>): ReactElement => {
     mockButton(props);
     const { children, onClick, ...rest } = props;

@@ -9,7 +9,7 @@
  * 4. If offline, waits for online event to flush queue
  */
 
-import { delay, generateSecureId, MS_PER_SECOND } from '@abe-stack/shared';
+import { delay, generateSecureId, MS_PER_SECOND } from '@bslt/shared';
 
 import { localStorageQueue } from './storage';
 
@@ -277,8 +277,8 @@ export class MutationQueue {
  *
  * Usage:
  * ```ts
- * import { createMutationQueue } from '@abe-stack/client-engine/storage';
- * import { apiClient } from '@abe-stack/client-engine';
+ * import { createMutationQueue } from '@bslt/client-engine/storage';
+ * import { apiClient } from '@bslt/client-engine';
  *
  * const queue = createMutationQueue({
  *   onProcess: async (mutation) => {

@@ -13,7 +13,7 @@ import {
   type ErrorMapperLogger,
   type HttpErrorResponse,
   type TenantRole,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';

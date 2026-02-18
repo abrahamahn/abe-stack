@@ -45,21 +45,21 @@ describe('deep-links', () => {
 
   describe('parseDeepLinkUrl', () => {
     it('should parse a simple path', () => {
-      const result = parseDeepLinkUrl('abe-stack://dashboard');
+      const result = parseDeepLinkUrl('bslt://dashboard');
 
       expect(result.path).toBe('/dashboard');
       expect(result.query).toEqual({});
     });
 
     it('should parse path with query parameters', () => {
-      const result = parseDeepLinkUrl('abe-stack://settings/profile?tab=security&mode=edit');
+      const result = parseDeepLinkUrl('bslt://settings/profile?tab=security&mode=edit');
 
       expect(result.path).toBe('/settings/profile');
       expect(result.query).toEqual({ tab: 'security', mode: 'edit' });
     });
 
     it('should handle root path', () => {
-      const result = parseDeepLinkUrl('abe-stack://');
+      const result = parseDeepLinkUrl('bslt://');
 
       expect(result.path).toBe('/');
       expect(result.query).toEqual({});
@@ -73,14 +73,14 @@ describe('deep-links', () => {
     });
 
     it('should handle URL with empty query string', () => {
-      const result = parseDeepLinkUrl('abe-stack://users?');
+      const result = parseDeepLinkUrl('bslt://users?');
 
       expect(result.path).toBe('/users');
       expect(result.query).toEqual({});
     });
 
     it('should handle deeply nested paths', () => {
-      const result = parseDeepLinkUrl('abe-stack://admin/users/123/edit');
+      const result = parseDeepLinkUrl('bslt://admin/users/123/edit');
 
       expect(result.path).toBe('/admin/users/123/edit');
       expect(result.query).toEqual({});
@@ -91,7 +91,7 @@ describe('deep-links', () => {
     it('should send deep-link-navigation event to renderer', () => {
       const mainWindow = createMockWindow();
 
-      handleDeepLink('abe-stack://dashboard', mainWindow);
+      handleDeepLink('bslt://dashboard', mainWindow);
 
       expect(mocks.webContentsSend).toHaveBeenCalledWith('deep-link-navigation', {
         path: '/dashboard',
@@ -102,7 +102,7 @@ describe('deep-links', () => {
     it('should include query params in the payload', () => {
       const mainWindow = createMockWindow();
 
-      handleDeepLink('abe-stack://settings?tab=profile', mainWindow);
+      handleDeepLink('bslt://settings?tab=profile', mainWindow);
 
       expect(mocks.webContentsSend).toHaveBeenCalledWith('deep-link-navigation', {
         path: '/settings',
@@ -114,7 +114,7 @@ describe('deep-links', () => {
       const mainWindow = createMockWindow();
       mocks.isDestroyed.mockReturnValue(true);
 
-      handleDeepLink('abe-stack://dashboard', mainWindow);
+      handleDeepLink('bslt://dashboard', mainWindow);
 
       expect(mocks.webContentsSend).not.toHaveBeenCalled();
     });
@@ -123,7 +123,7 @@ describe('deep-links', () => {
       const mainWindow = createMockWindow();
       mocks.isVisible.mockReturnValue(false);
 
-      handleDeepLink('abe-stack://dashboard', mainWindow);
+      handleDeepLink('bslt://dashboard', mainWindow);
 
       expect(mocks.show).toHaveBeenCalledTimes(1);
     });
@@ -131,7 +131,7 @@ describe('deep-links', () => {
     it('should focus the window', () => {
       const mainWindow = createMockWindow();
 
-      handleDeepLink('abe-stack://dashboard', mainWindow);
+      handleDeepLink('bslt://dashboard', mainWindow);
 
       expect(mocks.focus).toHaveBeenCalledTimes(1);
     });
@@ -140,7 +140,7 @@ describe('deep-links', () => {
       const mainWindow = createMockWindow();
       mocks.isVisible.mockReturnValue(true);
 
-      handleDeepLink('abe-stack://dashboard', mainWindow);
+      handleDeepLink('bslt://dashboard', mainWindow);
 
       expect(mocks.show).not.toHaveBeenCalled();
     });
@@ -151,16 +151,16 @@ describe('deep-links', () => {
       mocks.isDefaultProtocolClient.mockReturnValue(false);
       mocks.setAsDefaultProtocolClient.mockReturnValue(true);
 
-      registerDeepLinkProtocol('abe-stack');
+      registerDeepLinkProtocol('bslt');
 
-      expect(mocks.isDefaultProtocolClient).toHaveBeenCalledWith('abe-stack');
-      expect(mocks.setAsDefaultProtocolClient).toHaveBeenCalledWith('abe-stack');
+      expect(mocks.isDefaultProtocolClient).toHaveBeenCalledWith('bslt');
+      expect(mocks.setAsDefaultProtocolClient).toHaveBeenCalledWith('bslt');
     });
 
     it('should not re-register if already registered', () => {
       mocks.isDefaultProtocolClient.mockReturnValue(true);
 
-      registerDeepLinkProtocol('abe-stack');
+      registerDeepLinkProtocol('bslt');
 
       expect(mocks.setAsDefaultProtocolClient).not.toHaveBeenCalled();
     });
@@ -171,10 +171,10 @@ describe('deep-links', () => {
 
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      registerDeepLinkProtocol('abe-stack');
+      registerDeepLinkProtocol('bslt');
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        '[DeepLinks] Failed to register protocol abe-stack://',
+        '[DeepLinks] Failed to register protocol bslt://',
       );
       consoleSpy.mockRestore();
     });

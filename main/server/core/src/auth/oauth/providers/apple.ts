@@ -15,7 +15,7 @@
 
 import { createPrivateKey, createPublicKey, createVerify } from 'node:crypto';
 
-import { MS_PER_HOUR, OAuthError } from '@abe-stack/shared';
+import { MS_PER_HOUR, OAuthError } from '@bslt/shared';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 

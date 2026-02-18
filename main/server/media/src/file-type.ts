@@ -2,18 +2,18 @@
 /**
  * File Type Detection
  *
- * Pure detection logic re-exported from @abe-stack/shared.
+ * Pure detection logic re-exported from @bslt/shared.
  * Server-specific file I/O wrapper provided here.
  */
 
 import { promises as fs } from 'fs';
 
-import { detectFileType, detectFileTypeFromPath } from '@abe-stack/shared';
+import { detectFileType, detectFileTypeFromPath } from '@bslt/shared';
 
-import type { FileTypeResult } from '@abe-stack/shared';
+import type { FileTypeResult } from '@bslt/shared';
 
 // Re-export pure functions from shared
-export { detectFileType, detectFileTypeFromPath, isAllowedFileType } from '@abe-stack/shared';
+export { detectFileType, detectFileTypeFromPath, isAllowedFileType } from '@bslt/shared';
 
 /**
  * Read file header and detect type.

@@ -1,5 +1,5 @@
 // main/server/db/src/pubsub/postgres-pubsub.test.ts
-import { SubKeys } from '@abe-stack/shared';
+import { SubKeys } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PostgresPubSub, type PostgresPubSubOptions } from './postgres-pubsub';

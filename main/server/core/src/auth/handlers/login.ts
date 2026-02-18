@@ -7,7 +7,7 @@
  * @module handlers/login
  */
 
-import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import { getMetricsCollector } from '../../../../engine/src';
 import {
@@ -23,15 +23,15 @@ import { authenticateUser, resendVerificationEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
-import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 import type {
   AuthResponse,
   HttpErrorResponse,
   LoginRequest,
   SmsChallengeResponse,
   TotpLoginChallengeResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AuthResult, SmsChallengeResult, TotpChallengeResult } from '../service';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 type LoginResult = AuthResult | TotpChallengeResult | SmsChallengeResult;
 type BffLoginResponse = Pick<AuthResponse, 'user' | 'isNewDevice' | 'defaultTenantId'>;

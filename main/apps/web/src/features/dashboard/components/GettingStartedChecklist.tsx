@@ -1,8 +1,8 @@
 // main/apps/web/src/features/dashboard/components/GettingStartedChecklist.tsx
-import { useLocalStorageValue } from '@abe-stack/react/hooks';
-import { useNavigate } from '@abe-stack/react/router';
-import { Button, Card, Heading, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth';
+import { useLocalStorageValue } from '@bslt/react/hooks';
+import { useNavigate } from '@bslt/react/router';
+import { Button, Card, Heading, Text } from '@bslt/ui';
 import { useWorkspaces } from '@features/workspace';
 import { useCallback } from 'react';
 

@@ -1,10 +1,10 @@
 // main/apps/web/src/features/admin/components/SecurityEventsFilters.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SecurityEventsFilters } from './SecurityEventsFilters';
 
-import type { SecurityEventsFilter } from '@abe-stack/shared';
+import type { SecurityEventsFilter } from '@bslt/shared';
 
 // ============================================================================
 // Tests

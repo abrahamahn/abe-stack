@@ -8,7 +8,7 @@
  * @module magic-link/routes
  */
 
-import { magicLinkRequestSchema, magicLinkVerifyRequestSchema } from '@abe-stack/shared';
+import { magicLinkRequestSchema, magicLinkVerifyRequestSchema } from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -19,9 +19,9 @@ import {
 
 import { handleMagicLinkRequest, handleMagicLinkVerify } from './handlers';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { MagicLinkRequest, MagicLinkVerifyRequest } from '@abe-stack/shared';
+import type { MagicLinkRequest, MagicLinkVerifyRequest } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
 
 /**
  * Narrow HandlerContext to AppContext.

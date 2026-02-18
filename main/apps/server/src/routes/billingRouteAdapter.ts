@@ -5,14 +5,14 @@
  * Adapts billing module route definitions into server-engine RouteMap format.
  */
 
-import { billingRoutes } from '@abe-stack/core/billing';
+import { billingRoutes } from '@bslt/core/billing';
 
-import type { BillingBaseRouteDefinition } from '@abe-stack/core/billing';
+import type { BillingBaseRouteDefinition } from '@bslt/core/billing';
 import type {
-  HandlerContext,
   RouteDefinition as DbRouteDefinition,
   RouteMap as DbRouteMap,
-} from '@abe-stack/server-engine';
+  HandlerContext,
+} from '@bslt/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export function buildBillingRouteMap(): DbRouteMap {
@@ -28,9 +28,9 @@ export function buildBillingRouteMap(): DbRouteMap {
       reply: FastifyReply,
     ): Promise<unknown> => {
       const result = await billingDef.handler(
-        handlerCtx as unknown as import('@abe-stack/core/billing').BillingAppContext,
+        handlerCtx as unknown as import('@bslt/core/billing').BillingAppContext,
         body,
-        req as unknown as import('@abe-stack/core/billing').BillingRequest,
+        req as unknown as import('@bslt/core/billing').BillingRequest,
       );
       reply.status(result.status);
       return result.body;

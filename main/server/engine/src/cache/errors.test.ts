@@ -1,5 +1,5 @@
 // main/server/engine/src/cache/errors.test.ts
-import { AppError } from '@abe-stack/shared';
+import { AppError } from '@bslt/shared';
 import { describe, expect, test } from 'vitest';
 
 import {

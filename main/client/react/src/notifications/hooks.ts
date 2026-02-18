@@ -18,18 +18,18 @@ import {
   requestPushPermission,
   subscribeToPush,
   unsubscribeFromPush,
-} from '@abe-stack/api';
+} from '@bslt/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useMutation } from '../query/useMutation';
 import { useQuery } from '../query/useQuery';
 
-import type { NotificationClientConfig } from '@abe-stack/api';
+import type { NotificationClientConfig } from '@bslt/api';
 import type {
   NotificationPreferences,
   PushSubscription as PushSubscriptionType,
   UpdatePreferencesRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 /** Polling interval for checking push permission changes (ms) */
 const PERMISSION_POLL_INTERVAL_MS = 1000;

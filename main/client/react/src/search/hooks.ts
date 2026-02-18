@@ -6,8 +6,8 @@
  * Provides useSearch for paginated results and useInfiniteSearch for infinite scrolling.
  */
 
-import { type ClientSearchQueryBuilder, fromClientSearchQuery } from '@abe-stack/client-engine';
-import { deserializeFromURLParams, serializeToURLParams } from '@abe-stack/shared';
+import { type ClientSearchQueryBuilder, fromClientSearchQuery } from '@bslt/client-engine';
+import { deserializeFromURLParams, serializeToURLParams } from '@bslt/shared';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useInfiniteQuery as useInfiniteQueryBase } from '../query/useInfiniteQuery';
@@ -18,7 +18,7 @@ import type {
   SearchQuery,
   SearchResult,
   SearchResultItem,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Types

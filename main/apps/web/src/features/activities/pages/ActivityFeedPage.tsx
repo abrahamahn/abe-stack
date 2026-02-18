@@ -5,7 +5,7 @@
  * Full-page activity feed showing the authenticated user's recent actions.
  */
 
-import { Card, Heading, PageContainer, Text } from '@abe-stack/ui';
+import { Card, Heading, PageContainer, Text } from '@bslt/ui';
 
 import { ActivityFeed } from '../components/ActivityFeed';
 

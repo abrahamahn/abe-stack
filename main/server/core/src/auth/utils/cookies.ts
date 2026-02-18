@@ -8,12 +8,12 @@
  * @module utils/cookies
  */
 
-import { getRefreshCookieOptions } from '@abe-stack/shared/config';
+import { getRefreshCookieOptions } from '@bslt/shared/config';
 
 import { REFRESH_COOKIE_NAME } from '../types';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { ReplyWithCookies } from '../types';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 /**
  * Set the refresh token as an HTTP-only cookie.

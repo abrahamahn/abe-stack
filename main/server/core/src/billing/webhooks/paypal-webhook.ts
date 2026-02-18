@@ -14,7 +14,7 @@ import {
   type LogData,
   type NormalizedWebhookEvent,
   type Logger as ServerLogger,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createBillingEventRepository,
@@ -26,8 +26,8 @@ import {
 } from '../../../../db/src';
 import { PayPalProvider } from '../paypal-provider';
 
+import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 import type { WebhookRepositories, WebhookResult } from '../types';
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Webhook Handler

@@ -1,11 +1,11 @@
 // main/apps/web/src/features/auth/pages/LoginPage.tsx
 
-import { useAuthModeNavigation, useFormState } from '@abe-stack/react/hooks';
-import { useNavigate, useSearchParams } from '@abe-stack/react/router';
-import { AuthLayout } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
+import { useAuthModeNavigation, useFormState } from '@bslt/react/hooks';
+import { useNavigate, useSearchParams } from '@bslt/react/router';
+import { AuthLayout } from '@bslt/ui';
 import { useEffect } from 'react';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';

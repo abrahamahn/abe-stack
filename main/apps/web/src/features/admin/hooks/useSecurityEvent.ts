@@ -5,9 +5,9 @@
  * Fetch a single security event by ID.
  */
 
-import { useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useQuery } from '@bslt/react';
 import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';

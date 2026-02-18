@@ -6,19 +6,19 @@
  * for marking as read, marking all as read, and deleting.
  */
 
-import { useMutation, useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useMutation, useQuery } from '@bslt/react';
 import { useCallback, useMemo } from 'react';
 
 import { createNotificationsApi } from '../api/notificationsApi';
 
+import type { Notification } from '@bslt/shared';
 import type {
   DeleteNotificationResponse,
   MarkReadResponse,
   NotificationsListResponse,
 } from '../api/notificationsApi';
-import type { Notification } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

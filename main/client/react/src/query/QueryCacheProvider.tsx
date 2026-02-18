@@ -5,10 +5,10 @@
  * Provides a shared QueryCache instance to the component tree.
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
+import { QueryCache } from '@bslt/client-engine';
 import { createContext, useContext, useMemo } from 'react';
 
-import type { QueryCacheOptions } from '@abe-stack/client-engine';
+import type { QueryCacheOptions } from '@bslt/client-engine';
 import type { ReactNode } from 'react';
 
 // ============================================================================

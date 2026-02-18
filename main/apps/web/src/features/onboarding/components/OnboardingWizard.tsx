@@ -8,10 +8,10 @@
  * 3. You're all set! (success message with CTA)
  */
 
-import { Button, Card, Heading, Input, Text } from '@abe-stack/ui';
+import { Button, Card, Heading, Input, Text } from '@bslt/ui';
 
-import type { UseOnboardingResult } from '../hooks/useOnboarding';
 import type { ReactElement } from 'react';
+import type { UseOnboardingResult } from '../hooks/useOnboarding';
 
 // ============================================================================
 // Types

@@ -1,5 +1,5 @@
 // main/client/ui/src/components/UndoRedoToolbar.tsx
-import { getRedoShortcutText, getUndoShortcutText } from '@abe-stack/react';
+import { getRedoShortcutText, getUndoShortcutText } from '@bslt/react';
 
 import { Button } from '../elements/Button';
 

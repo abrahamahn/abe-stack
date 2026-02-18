@@ -6,9 +6,9 @@
  * Provides Accept All, Reject Non-Essential, and a link to manage preferences.
  */
 
-import { useLocalStorageValue } from '@abe-stack/react/hooks';
-import { useNavigate } from '@abe-stack/react/router';
-import { Button, Text } from '@abe-stack/ui';
+import { useLocalStorageValue } from '@bslt/react/hooks';
+import { useNavigate } from '@bslt/react/router';
+import { Button, Text } from '@bslt/ui';
 import { useCallback, type ReactElement } from 'react';
 
 import { useUpdateConsent } from '../hooks/useConsent';

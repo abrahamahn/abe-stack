@@ -5,12 +5,13 @@
  * Hook for listing, creating, updating, and deleting feature flags via admin API.
  */
 
-import { useMutation, useQuery } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useMutation, useQuery } from '@bslt/react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
+import type { UseQueryResult } from '@bslt/react';
 import type {
   CreateFeatureFlagRequest,
   FeatureFlagDeleteResponse,
@@ -18,7 +19,6 @@ import type {
   FeatureFlagResponse,
   UpdateFeatureFlagRequest,
 } from '../services/adminApi';
-import type { UseQueryResult } from '@abe-stack/react';
 
 // ============================================================================
 // List Feature Flags

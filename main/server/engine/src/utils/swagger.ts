@@ -1,6 +1,6 @@
 // main/server/engine/src/utils/swagger.ts
 /**
- * Custom CSS theme for Swagger UI that matches the ABE Stack design system.
+ * Custom CSS theme for Swagger UI that matches the BSLT design system.
  */
 
 export const swaggerThemeCss = `

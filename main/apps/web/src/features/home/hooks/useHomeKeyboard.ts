@@ -1,5 +1,5 @@
 // main/apps/web/src/features/home/hooks/useHomeKeyboard.ts
-import { useKeyboardShortcuts } from '@abe-stack/react/hooks';
+import { useKeyboardShortcuts } from '@bslt/react/hooks';
 
 import type { HomePaneConfig } from '../types';
 

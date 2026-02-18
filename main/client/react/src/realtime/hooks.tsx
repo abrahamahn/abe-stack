@@ -18,8 +18,8 @@ import type {
   ConnectionState,
   RecordChangeListener,
   WebsocketPubsubClient,
-} from '@abe-stack/client-engine';
-import type { VersionedRecord } from '@abe-stack/shared';
+} from '@bslt/client-engine';
+import type { VersionedRecord } from '@bslt/shared';
 
 // ============================================================================
 // useRecord

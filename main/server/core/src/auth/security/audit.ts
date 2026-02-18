@@ -11,7 +11,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
 interface AuditRequest {
   headers: Record<string, string | string[] | undefined>;

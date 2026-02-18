@@ -8,15 +8,15 @@
  * @vitest-environment jsdom
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
+import { QueryCache } from '@bslt/client-engine';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useMutation } from './useMutation';
 
-import type { UseMutationOptions } from './useMutation';
 import type { ReactNode } from 'react';
+import type { UseMutationOptions } from './useMutation';
 
 // ============================================================================
 // Test Utilities

@@ -14,12 +14,12 @@ import {
   HTTP_STATUS,
   isAuthenticatedRequest,
   REALTIME_ERRORS,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { isTableAllowed, loadRecords } from '../service';
 
+import type { RecordPointer, RouteResult } from '@bslt/shared';
 import type { GetRecordsResult, RealtimeModuleDeps, RealtimeRequest } from '../types';
-import type { RecordPointer, RouteResult } from '@abe-stack/shared';
 
 // ============================================================================
 // Handlers

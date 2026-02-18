@@ -1,11 +1,11 @@
 // main/apps/web/src/features/ui-library/hooks/useUILibraryPanes.test.ts
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useUILibraryPanes } from './useUILibraryPanes';
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   useLocalStorage: vi.fn((_key, defaultValue) => {
     const [value, setValue] = useState(defaultValue);
     return [value, setValue];

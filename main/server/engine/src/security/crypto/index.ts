@@ -4,7 +4,7 @@
  *
  * JWT signing, verification, and secret rotation utilities.
  *
- * @module @abe-stack/server-engine/security/crypto
+ * @module @bslt/server-engine/security/crypto
  */
 
 // ============================================================================
@@ -22,6 +22,7 @@ export {
   checkTokenSecret,
   createJwtRotationHandler,
   signWithRotation,
-  verifyWithRotation,
+  verifyWithRotation
 } from './jwt-rotation';
 export type { JwtRotationConfig, JwtRotationHandler, RotatingJwtOptions } from './jwt-rotation';
+

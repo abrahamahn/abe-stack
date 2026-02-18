@@ -1,5 +1,5 @@
 // main/server/engine/src/cache/config.ts
-import { MS_PER_MINUTE } from '@abe-stack/shared';
+import { MS_PER_MINUTE } from '@bslt/shared';
 
 import type { CacheConfig, RedisCacheConfig } from './types';
 

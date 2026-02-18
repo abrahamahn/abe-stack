@@ -18,16 +18,16 @@
  * @vitest-environment jsdom
  */
 
-import { QueryCache } from '@abe-stack/client-engine';
-import { UnauthorizedError } from '@abe-stack/shared';
+import { QueryCache } from '@bslt/client-engine';
+import { UnauthorizedError } from '@bslt/shared';
 import { cleanup, renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QueryCacheProvider } from './QueryCacheProvider';
 import { useQuery } from './useQuery';
 
-import type { UseQueryOptions } from './useQuery';
 import type { ReactNode } from 'react';
+import type { UseQueryOptions } from './useQuery';
 
 // ============================================================================
 // Test Setup

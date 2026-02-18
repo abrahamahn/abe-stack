@@ -10,13 +10,13 @@ import {
   HTTP_STATUS,
   detectNoSQLInjection,
   detectSQLInjection,
-  sanitizeString,
   getInjectionErrors,
   sanitizeObject,
+  sanitizeString,
+  type SQLInjectionDetectionOptions,
   type SanitizationResult,
   type ValidationOptions,
-  type SQLInjectionDetectionOptions,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -24,19 +24,19 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 // Types
 // ============================================================================
 
-export type { ValidationOptions, SanitizationResult };
+export type { SanitizationResult, ValidationOptions };
 
 // ============================================================================
 // Input Sanitization
 // ============================================================================
 
-export { sanitizeString, sanitizeObject };
+  export { sanitizeObject, sanitizeString };
 
 // ============================================================================
 // SQL Injection Prevention
 // ============================================================================
 
-export type { SQLInjectionDetectionOptions };
+  export type { SQLInjectionDetectionOptions };
 
 /**
  * Check for potential SQL injection patterns.
@@ -49,7 +49,7 @@ export type { SQLInjectionDetectionOptions };
  * @param options - Detection options
  * @returns true if potential SQL injection is detected
  */
-export { detectSQLInjection };
+  export { detectSQLInjection };
 
 /**
  * Check for potential NoSQL injection patterns
@@ -57,7 +57,7 @@ export { detectSQLInjection };
  * @param input - The value to check for NoSQL injection patterns
  * @returns true if potential NoSQL injection is detected
  */
-export { detectNoSQLInjection, getInjectionErrors };
+  export { detectNoSQLInjection, getInjectionErrors };
 
 // ============================================================================
 // Fastify Middleware

@@ -13,8 +13,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { buildConnectionString, createRawDb } from '@abe-stack/db';
-import { initEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, createRawDb } from '@bslt/db';
+import { initEnv } from '@bslt/server-engine';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

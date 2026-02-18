@@ -5,13 +5,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { SecurityEventDetailPage } from './SecurityEventDetailPage';
 
 // Mock router hooks
-vi.mock('@abe-stack/react/router', () => ({
+vi.mock('@bslt/react/router', () => ({
   useNavigate: () => vi.fn(),
   useParams: () => ({ id: 'test-event-id' }),
 }));
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', () => {
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', () => {
   const button = ({
     children,
     onClick,

@@ -7,7 +7,7 @@
  * @module sms-2fa
  */
 
-import { AUTH_EXPIRY, MS_PER_MINUTE, SMS_LIMITS } from '@abe-stack/shared';
+import { AUTH_EXPIRY, MS_PER_MINUTE, SMS_LIMITS } from '@bslt/shared';
 
 // ============================================================================
 // Request/Response Types

@@ -7,7 +7,7 @@
  * @module handlers/email-change
  */
 
-import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import {
   confirmEmailChange,
@@ -19,16 +19,16 @@ import { assertUserActive } from '../middleware';
 import { sendEmailChangedAlert } from '../security';
 import { createErrorMapperLogger } from '../types';
 
-import type { AppContext, RequestWithCookies } from '../types';
 import type {
-  HttpErrorResponse,
   ChangeEmailRequest,
   ChangeEmailResponse,
   ConfirmEmailChangeRequest,
   ConfirmEmailChangeResponse,
+  HttpErrorResponse,
   RevertEmailChangeRequest,
   RevertEmailChangeResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { AppContext, RequestWithCookies } from '../types';
 
 /**
  * Handle email change initiation.

@@ -21,8 +21,8 @@ import {
   notificationDeleteRequestSchema,
   notificationsListResponseSchema,
 } from '../core/notifications/notifications.schemas';
-import { createSchema, parseString } from '../primitives/schema';
 import { errorResponseSchema, successResponseSchema } from '../engine/http';
+import { createSchema, parseString } from '../primitives/schema';
 
 
 import type { Contract, Schema } from '../primitives/api';

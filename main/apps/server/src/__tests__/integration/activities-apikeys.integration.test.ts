@@ -6,15 +6,15 @@
  * for activities and api-keys modules via fastify.inject().
  */
 
-import { createAuthGuard } from '@abe-stack/core';
-import { activityRoutes } from '@abe-stack/core/activities';
-import { apiKeyRoutes } from '@abe-stack/core/api-keys';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core';
+import { activityRoutes } from '@bslt/core/activities';
+import { apiKeyRoutes } from '@bslt/core/api-keys';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Repositories

@@ -6,14 +6,14 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 
 import { useUserActions } from './useUserActions';
 
+import type { AdminLockUserResponse, AdminUpdateUserResponse } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
-import type { AdminLockUserResponse, AdminUpdateUserResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Mocks
@@ -27,8 +27,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

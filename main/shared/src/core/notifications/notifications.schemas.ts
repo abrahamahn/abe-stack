@@ -18,11 +18,11 @@ import {
   parseString,
   withDefault,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../schemas';
 import { notificationIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import { isoDateTimeSchema } from '../schemas';
 
-import type { Schema } from '../../primitives/schema';
 import type { CursorPaginationOptions } from '../../engine/pagination';
+import type { Schema } from '../../primitives/schema';
 import type { NotificationId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================

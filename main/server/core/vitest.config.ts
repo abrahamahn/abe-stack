@@ -7,31 +7,31 @@ export default defineConfig({
     alias: [
       // Subpath imports must come before bare imports
       {
-        find: /^@abe-stack\/shared\/(.*)$/,
+        find: /^@bslt\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '../../shared/src/$1/index.ts'),
       },
       {
-        find: /^@abe-stack\/server-engine\/(.*)$/,
+        find: /^@bslt\/server-engine\/(.*)$/,
         replacement: path.resolve(__dirname, '../engine/src/$1/index.ts'),
       },
       {
-        find: /^@abe-stack\/engine\/(.*)$/,
+        find: /^@bslt\/engine\/(.*)$/,
         replacement: path.resolve(__dirname, '../engine/src/$1/index.ts'),
       },
       {
-        find: '@abe-stack/shared',
+        find: '@bslt/shared',
         replacement: path.resolve(__dirname, '../../shared/src/index.ts'),
       },
       {
-        find: '@abe-stack/server-engine',
+        find: '@bslt/server-engine',
         replacement: path.resolve(__dirname, '../engine/src/index.ts'),
       },
       {
-        find: /^@abe-stack\/db\/(.*)$/,
+        find: /^@bslt\/db\/(.*)$/,
         replacement: path.resolve(__dirname, '../db/src/$1/index.ts'),
       },
       {
-        find: '@abe-stack/db',
+        find: '@bslt/db',
         replacement: path.resolve(__dirname, '../db/src/index.ts'),
       },
     ],

@@ -5,9 +5,9 @@
  * Dropdown menu with job actions (retry, cancel).
  */
 
-import { Button, Dropdown, MenuItem, Text } from '@abe-stack/ui';
+import { Button, Dropdown, MenuItem, Text } from '@bslt/ui';
 
-import type { JobStatus } from '@abe-stack/shared';
+import type { JobStatus } from '@bslt/shared';
 import type { JSX } from 'react';
 
 // ============================================================================

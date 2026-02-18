@@ -2,10 +2,10 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 
-import { RecordCache, type TableMap } from '@abe-stack/client-engine';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { RecordCache, type TableMap } from '@bslt/client-engine';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { createElement, useEffect, useState } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RealtimeProvider, useRealtime, type RealtimeProviderConfig } from './RealtimeContext';
 

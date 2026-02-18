@@ -15,7 +15,7 @@
  * Minimal server environment contract.
  *
  * Uses `unknown` for `config` to avoid circular dependencies with
- * `@abe-stack/server-engine/config`. Extended by `AppContext` in the
+ * `@bslt/server-engine/config`. Extended by `AppContext` in the
  * server to provide the concrete `AppConfig` type.
  */
 export interface ServerEnvironment {

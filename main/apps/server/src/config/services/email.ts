@@ -1,7 +1,7 @@
 // main/apps/server/src/config/services/email.ts
-import { getInt } from '@abe-stack/shared/config';
+import { getInt } from '@bslt/shared/config';
 
-import type { EmailConfig, FullEnv, SmtpConfig } from '@abe-stack/shared/config';
+import type { EmailConfig, FullEnv, SmtpConfig } from '@bslt/shared/config';
 
 /**
  * Loads raw SMTP transport settings from environment variables.
@@ -68,7 +68,7 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
 
     // Global "From" identity
     from: {
-      name: env.EMAIL_FROM_NAME ?? 'ABE Stack',
+      name: env.EMAIL_FROM_NAME ?? 'BSLT',
       address: env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
     },
 

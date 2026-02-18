@@ -2,6 +2,6 @@
 /**
  * DEPRECATED
  *
- * Access permission utilities via @abe-stack/server-engine/security/permissions
+ * Access permission utilities via @bslt/server-engine/security/permissions
  * or Fastify middleware via apps/server/src/middleware/permissions.
  */

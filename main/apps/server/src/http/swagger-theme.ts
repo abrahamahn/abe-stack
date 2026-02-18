@@ -1,4 +1,4 @@
 // main/apps/server/src/http/swagger-theme.ts
-import { swaggerThemeCss } from '@abe-stack/server-engine';
+import { swaggerThemeCss } from '@bslt/server-engine';
 
 export { swaggerThemeCss };

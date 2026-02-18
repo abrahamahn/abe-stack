@@ -7,7 +7,6 @@
 
 import { createCsrfRequestClient } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   AccountLifecycleResponse,
   AvatarDeleteResponse,
@@ -26,7 +25,8 @@ import type {
   UpdateUsernameRequest,
   UpdateUsernameResponse,
   User,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 export interface ApiKeyLocal {
   id: string;
@@ -241,5 +241,6 @@ export type {
   UpdateProfileRequest,
   UpdateUsernameRequest,
   UpdateUsernameResponse,
-  User,
-} from '@abe-stack/shared';
+  User
+} from '@bslt/shared';
+

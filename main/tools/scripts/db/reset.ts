@@ -12,8 +12,8 @@
 
 import { createInterface } from 'node:readline';
 
-import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { loadServerEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, createDbClient } from '@bslt/db';
+import { loadServerEnv } from '@bslt/server-engine';
 
 import { pushSchema } from './push';
 import { seed } from './seed';

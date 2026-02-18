@@ -6,12 +6,12 @@
  * bootstrap and route-manifest generation use the same source.
  */
 
-import { coreApiManifestRouteModuleRegistrations } from '@abe-stack/core';
-import { realtimeRoutes } from '@abe-stack/realtime';
+import { coreApiManifestRouteModuleRegistrations } from '@bslt/core';
+import { realtimeRoutes } from '@bslt/realtime';
 
 import { systemRoutes } from './system.routes';
 
-import type { RouteMap } from '@abe-stack/server-engine';
+import type { RouteMap } from '@bslt/server-engine';
 
 export interface RouteModuleRegistration {
   module: string;

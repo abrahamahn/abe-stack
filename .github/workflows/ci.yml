@@ -71,7 +71,7 @@ jobs:
         run: pnpm lint
 
       - name: Build Storybook
-        run: pnpm --filter @abe-stack/storybook build-storybook --quiet 2>/dev/null || echo "Storybook build skipped (package not found)"
+        run: pnpm --filter @bslt/storybook build-storybook --quiet 2>/dev/null || echo "Storybook build skipped (package not found)"
 
   sanity-checks:
     runs-on: ubuntu-latest
@@ -79,14 +79,14 @@ jobs:
       matrix:
         package:
           [
-            '@abe-stack/shared',
-            '@abe-stack/db',
-            '@abe-stack/server',
-            '@abe-stack/web',
-            '@abe-stack/api',
-            '@abe-stack/client-engine',
-            '@abe-stack/react',
-            '@abe-stack/ui',
+            '@bslt/shared',
+            '@bslt/db',
+            '@bslt/server',
+            '@bslt/web',
+            '@bslt/api',
+            '@bslt/client-engine',
+            '@bslt/react',
+            '@bslt/ui',
           ]
     steps:
       - uses: actions/checkout@v4
@@ -215,7 +215,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build web app
-        run: pnpm --filter @abe-stack/web build
+        run: pnpm --filter @bslt/web build
 
       - name: Run Lighthouse CI
         run: npx @lhci/cli@0.14.x autorun

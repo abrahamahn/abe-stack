@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PayPalProvider } from './paypal-provider';
 
-import type { CheckoutParams, CreateProductParams } from '@abe-stack/shared';
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
+import type { CheckoutParams, CreateProductParams } from '@bslt/shared';
+import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Dependencies

@@ -18,13 +18,13 @@ import {
   InvalidTokenError,
   MS_PER_HOUR,
   normalizeEmail,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { generateSecureToken, hashToken, revokeAllUserTokens, verifyPasswordSafe } from './utils';
 
-import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 import type { DbClient, Repositories } from '../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 
 // ============================================================================
 // Types

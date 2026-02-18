@@ -38,14 +38,14 @@ graph TD
 
 | Layer              | Package                    | Workspace deps                                                                   |
 | ------------------ | -------------------------- | -------------------------------------------------------------------------------- |
-| `apps/server`      | `@abe-stack/server`        | server/core, server/db, server/realtime, server/engine, shared, server/websocket |
-| `server/core`      | `@abe-stack/core`          | server/media, server/engine, server/db, shared                                   |
-| `server/engine`    | `@abe-stack/server-engine` | server/db, shared                                                                |
-| `server/realtime`  | `@abe-stack/realtime`      | server/db, server/websocket, shared                                              |
-| `server/websocket` | `@abe-stack/websocket`     | server/engine, server/db, shared                                                 |
-| `server/media`     | `@abe-stack/media`         | shared                                                                           |
-| `server/db`        | `@abe-stack/db`            | shared                                                                           |
-| `shared`           | `@abe-stack/shared`        | —                                                                                |
+| `apps/server`      | `@bslt/server`        | server/core, server/db, server/realtime, server/engine, shared, server/websocket |
+| `server/core`      | `@bslt/core`          | server/media, server/engine, server/db, shared                                   |
+| `server/engine`    | `@bslt/server-engine` | server/db, shared                                                                |
+| `server/realtime`  | `@bslt/realtime`      | server/db, server/websocket, shared                                              |
+| `server/websocket` | `@bslt/websocket`     | server/engine, server/db, shared                                                 |
+| `server/media`     | `@bslt/media`         | shared                                                                           |
+| `server/db`        | `@bslt/db`            | shared                                                                           |
+| `shared`           | `@bslt/shared`        | —                                                                                |
 
 ## Import Edge Hotspots (source-level)
 

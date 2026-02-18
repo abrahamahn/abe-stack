@@ -3,20 +3,20 @@
  * Tests for useWorkspaceFeatureOverrides hooks.
  */
 
-import { clearApiClient, getApiClient } from '@abe-stack/api';
-import { QueryCache } from '@abe-stack/client-engine';
-import { QueryCacheProvider } from '@abe-stack/react';
+import { clearApiClient, getApiClient } from '@bslt/api';
+import { QueryCache } from '@bslt/client-engine';
+import { QueryCacheProvider } from '@bslt/react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   useSetFeatureOverride,
   useWorkspaceFeatureOverrides,
 } from './useWorkspaceFeatureOverrides';
 
-import type { FlagWithOverride, TenantOverridesResponse } from './useWorkspaceFeatureOverrides';
 import type { FeatureFlagListResponse } from '../../admin/services/adminApi';
+import type { FlagWithOverride, TenantOverridesResponse } from './useWorkspaceFeatureOverrides';
 
 // ============================================================================
 // Mocks
@@ -27,8 +27,8 @@ const mockListTenantFeatureOverrides = vi.fn();
 const mockSetTenantFeatureOverride = vi.fn();
 const mockDeleteTenantFeatureOverride = vi.fn();
 
-vi.mock('@abe-stack/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/api')>();
+vi.mock('@bslt/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/api')>();
   return {
     ...actual,
     clearApiClient: vi.fn(),

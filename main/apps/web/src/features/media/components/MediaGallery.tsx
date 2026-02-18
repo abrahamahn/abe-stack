@@ -6,8 +6,8 @@
  * status badges, and a detail dialog for each item.
  */
 
-import { formatBytes } from '@abe-stack/shared';
-import { Badge, Button, Card, EmptyState, Image, Modal, Skeleton, Text } from '@abe-stack/ui';
+import { formatBytes } from '@bslt/shared';
+import { Badge, Button, Card, EmptyState, Image, Modal, Skeleton, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 import { useDeleteMedia } from '../hooks/useMedia';

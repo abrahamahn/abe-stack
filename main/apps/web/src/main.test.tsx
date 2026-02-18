@@ -17,7 +17,7 @@ import { describe, expect, it, vi } from 'vitest';
 // Vi.mock calls - these must come before any imports that use them
 // ============================================================================
 
-vi.mock('@abe-stack/client-engine', () => ({
+vi.mock('@bslt/client-engine', () => ({
   QueryCache: vi.fn(function queryCacheCtor() {
     return {
       getQueryData: vi.fn(),
@@ -35,8 +35,8 @@ vi.mock('@abe-stack/client-engine', () => ({
   })),
 }));
 
-vi.mock('@abe-stack/react', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/react')>('@abe-stack/react');
+vi.mock('@bslt/react', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/react')>('@bslt/react');
   const { MemoryRouter } = actual;
   return {
     ...actual,
@@ -80,9 +80,9 @@ vi.mock('./utils/registerServiceWorker', () => ({
   }),
 }));
 
-// Mock @abe-stack/ui
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/ui')>('@abe-stack/ui');
+// Mock @bslt/ui
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/ui')>('@bslt/ui');
   return {
     ...actual,
     ScrollArea: vi.fn(({ children }: { children: unknown }) => children),
@@ -130,14 +130,14 @@ describe('main.tsx', () => {
 
     it('should import mocked SDK dependencies', async () => {
       // Verify mocks are in place via dynamic import
-      const sdk = await import('@abe-stack/client-engine');
+      const sdk = await import('@bslt/client-engine');
       expect(sdk.QueryCache).toBeDefined();
-      const react = await import('@abe-stack/react');
+      const react = await import('@bslt/react');
       expect(react.QueryCacheProvider).toBeDefined();
     });
 
     it('should have QueryCache constructor mocked', async () => {
-      const sdk = await import('@abe-stack/client-engine');
+      const sdk = await import('@bslt/client-engine');
       expect(typeof sdk.QueryCache).toBe('function');
     });
   });

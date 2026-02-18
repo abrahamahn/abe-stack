@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useContrast } from './useContrast';
 
-import type { ContrastMode } from '@abe-stack/client-engine';
+import type { ContrastMode } from '@bslt/client-engine';
 
 describe('useContrast', () => {
   const storageKey = 'test-ui-contrast';

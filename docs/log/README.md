@@ -2,7 +2,7 @@
 
 **Last Updated: February 11, 2026**
 
-Weekly and monthly engineering changelog for the ABE Stack project.
+Weekly and monthly engineering changelog for the BSLT project.
 
 ---
 

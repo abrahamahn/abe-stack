@@ -42,7 +42,7 @@ The staging workflow (`staging.yml`) runs build and test validation before deplo
 ### How It Works
 
 1. Open a PR (or push to an existing PR) -- `.github/workflows/preview.yml` triggers automatically.
-2. The workflow builds the project and generates a preview URL: `pr-{number}.preview.abe-stack.dev`.
+2. The workflow builds the project and generates a preview URL: `pr-{number}.preview.bslt.dev`.
 3. A comment is posted (or updated) on the PR with the preview URL.
 4. When the PR is closed or merged, the preview environment is cleaned up automatically.
 
@@ -51,7 +51,7 @@ The staging workflow (`staging.yml`) runs build and test validation before deplo
 Each PR gets a unique, deterministic URL:
 
 ```
-https://pr-123.preview.abe-stack.dev
+https://pr-123.preview.bslt.dev
 ```
 
 The comment on the PR is updated on each push (not duplicated), showing the latest commit and timestamp.

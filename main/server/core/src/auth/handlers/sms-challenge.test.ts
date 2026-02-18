@@ -66,7 +66,7 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-vi.mock('@abe-stack/server-engine', () => ({
+vi.mock('@bslt/server-engine', () => ({
   verify: mockJwtVerify,
   JwtError: class JwtError extends Error {
     constructor(message: string) {
@@ -76,12 +76,12 @@ vi.mock('@abe-stack/server-engine', () => ({
   },
 }));
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   withTransaction: mockWithTransaction,
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToHttpResponse,

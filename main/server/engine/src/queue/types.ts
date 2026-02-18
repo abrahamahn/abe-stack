@@ -3,10 +3,10 @@
  * Queue & Write Types
  *
  * Type definitions for the background job queue system and unified write pattern.
- * Queue infrastructure types imported from @abe-stack/db (canonical source).
+ * Queue infrastructure types imported from @bslt/db (canonical source).
  * Write operation types are engine-specific.
  *
- * @module @abe-stack/server-engine/queue
+ * @module @bslt/server-engine/queue
  */
 
 // Re-export all queue types from db (which re-exports monitoring types from shared)
@@ -22,8 +22,8 @@ export type {
   TaskError,
   TaskHandler,
   TaskHandlers,
-  TaskResult,
-} from '@abe-stack/db';
+  TaskResult
+} from '@bslt/db';
 
 // ============================================================================
 // Write Operation Types

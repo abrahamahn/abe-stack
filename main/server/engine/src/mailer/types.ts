@@ -6,7 +6,7 @@
  * (without healthCheck requirement from the shared port contract).
  */
 
-import type { EmailOptions, SendResult } from '@abe-stack/shared';
+import type { EmailOptions, SendResult } from '@bslt/shared';
 
 export type { EmailOptions };
 

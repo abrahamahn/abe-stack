@@ -12,7 +12,7 @@ import { cn } from '../../utils/cn';
 
 import { PlanCard } from './PlanCard';
 
-import type { Plan, PlanFeature, PlanInterval } from '@abe-stack/shared';
+import type { Plan, PlanFeature, PlanInterval } from '@bslt/shared';
 
 // ============================================================================
 // Types

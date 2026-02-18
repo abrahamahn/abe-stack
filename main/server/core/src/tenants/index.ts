@@ -4,7 +4,7 @@
  *
  * Provides workspace/tenant CRUD and management functionality.
  *
- * @module @abe-stack/tenants
+ * @module @bslt/tenants
  */
 
 // Routes (for auto-registration)
@@ -26,7 +26,7 @@ export {
   handleRevokeInvitation,
   handleTransferOwnership,
   handleUpdateMemberRole,
-  handleUpdateTenant,
+  handleUpdateTenant
 } from './handlers';
 
 // Service (business logic)
@@ -39,7 +39,7 @@ export {
   updateTenant,
   type CreateTenantData,
   type TenantWithRole,
-  type UpdateTenantData,
+  type UpdateTenantData
 } from './service';
 
 // Membership Service
@@ -48,7 +48,7 @@ export {
   listMembers,
   removeMember,
   updateMemberRole,
-  type MemberInfo,
+  type MemberInfo
 } from './membership-service';
 
 // Invitation Service
@@ -58,7 +58,7 @@ export {
   listInvitations,
   resendInvitation,
   revokeInvitation,
-  type InvitationInfo,
+  type InvitationInfo
 } from './invitation-service';
 
 // Invitation Cleanup
@@ -72,7 +72,7 @@ export {
   createWorkspaceScopeMiddleware,
   getRequestWorkspaceContext,
   requireRequestWorkspaceContext,
-  type WorkspaceScopedRequest,
+  type WorkspaceScopedRequest
 } from './middleware';
 
 // Types (module dependency types)
@@ -80,7 +80,7 @@ export type {
   TenantsEmailOptions,
   TenantsEmailTemplates,
   TenantsModuleDeps,
-  TenantsRequest,
+  TenantsRequest
 } from './types';
 
 export { ERROR_MESSAGES } from './types';

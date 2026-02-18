@@ -1,5 +1,5 @@
 // main/client/ui/src/components/billing/PlanCard.tsx
-import { formatPriceWithInterval } from '@abe-stack/shared';
+import { formatPriceWithInterval } from '@bslt/shared';
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -10,7 +10,7 @@ import {
 import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
-import type { Plan, PlanFeature } from '@abe-stack/shared';
+import type { Plan, PlanFeature } from '@bslt/shared';
 
 // ============================================================================
 // Types

@@ -56,7 +56,7 @@ function parseOutput(fullLog: string) {
   const TSC_REGEX = /Found (\d+) error/;
 
   // We need to associate errors with packages.
-  // Turbo output prefixes lines with package name colorfully, e.g. "@abe-stack/server:lint: ..."
+  // Turbo output prefixes lines with package name colorfully, e.g. "@bslt/server:lint: ..."
   // We can scan line by line to attribute errors, or just sum totals.
   // For "Comprehensive Total", summing is sufficient.
 
@@ -81,7 +81,7 @@ function parseOutput(fullLog: string) {
 
     const packages = JSON.parse(listProc.stdout) as PnpmPackageInfo[];
     for (const pkg of packages) {
-      if (pkg.name && pkg.name !== '@abe-stack/root') {
+      if (pkg.name && pkg.name !== '@bslt/root') {
         packageStats[pkg.name] = { lint: 0, type: 0, test: 0 };
       }
     }
@@ -99,7 +99,7 @@ function parseOutput(fullLog: string) {
         try {
           const pkgContent = readFileSync(resolve(process.cwd(), f), 'utf-8');
           const pkg = JSON.parse(pkgContent) as PnpmPackageInfo;
-          if (pkg.name && pkg.name !== '@abe-stack/root') {
+          if (pkg.name && pkg.name !== '@bslt/root') {
             packageStats[pkg.name] = { lint: 0, type: 0, test: 0 };
           }
         } catch {
@@ -119,7 +119,7 @@ function parseOutput(fullLog: string) {
     const line = rawLine.replace(/\x1B\[[0-9;]*m/g, '');
 
     // Attempt to detect package from turbo prefix
-    // Prefix might look like: "@abe-stack/server:lint: " or "package:command: "
+    // Prefix might look like: "@bslt/server:lint: " or "package:command: "
     // Only works if prefix is present (turbo 2.x streams usually have it)
     const prefixMatch = line.match(/^(@?[a-zA-Z0-9\-\/]+):([a-z\-]+):/);
     if (prefixMatch) {

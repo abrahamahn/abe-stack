@@ -1,7 +1,7 @@
 // main/apps/web/src/features/settings/components/SessionsList.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Hoist mock fn references so they are available when vi.mock factories execute
 const { mockSessionCardFn, mockAlertFn, mockButtonFn, mockSkeletonFn } = vi.hoisted(() => ({
@@ -29,7 +29,7 @@ vi.mock('./SessionCard', () => ({
   },
 }));
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   ['Alert']: (props: { children?: ReactNode; tone?: string }) => {
     mockAlertFn(props);
     return (
@@ -64,8 +64,8 @@ import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
 
 import { SessionsList } from './SessionsList';
 
-import type { Session } from '../api';
 import type { ReactNode } from 'react';
+import type { Session } from '../api';
 
 describe('SessionsList', () => {
   let mockRefetch: any;

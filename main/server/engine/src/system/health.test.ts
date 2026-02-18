@@ -3,11 +3,11 @@
  * System Health Check Tests
  *
  * Tests the health orchestration layer in engine which delegates
- * to the pure health-check utilities in @abe-stack/shared. Validates
+ * to the pure health-check utilities in @bslt/shared. Validates
  * context wiring, WebSocket stats injection, and the aggregation of
  * individual service checks into a single detailed response.
  */
-import { validateSchema } from '@abe-stack/db';
+import { validateSchema } from '@bslt/db';
 import { describe, expect, test, vi } from 'vitest';
 
 import {
@@ -24,8 +24,8 @@ import {
 
 import type { SystemContext } from './types';
 
-vi.mock('@abe-stack/db', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/db')>();
+vi.mock('@bslt/db', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/db')>();
   return {
     ...original,
     validateSchema: vi.fn().mockResolvedValue({

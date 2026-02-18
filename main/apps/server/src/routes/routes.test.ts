@@ -12,7 +12,7 @@
  * @complexity O(1) - Route registration is a constant-time operation
  */
 
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { registerRouteMap } from '@bslt/server-engine';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { registerBillingWebhookRoutes } from './billingWebhooks';
@@ -26,31 +26,31 @@ import type { FastifyInstance } from 'fastify';
 // ============================================================================
 
 // Mock dependencies
-vi.mock('@abe-stack/server-engine', () => ({
+vi.mock('@bslt/server-engine', () => ({
   registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),
   createRouteMap: vi.fn(),
 }));
 
-vi.mock('@abe-stack/core/admin', () => ({
+vi.mock('@bslt/core/admin', () => ({
   adminRoutes: { ['admin/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/activities', () => ({
+vi.mock('@bslt/core/activities', () => ({
   activityRoutes: { ['activities/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/api-keys', () => ({
+vi.mock('@bslt/core/api-keys', () => ({
   apiKeyRoutes: { ['api-keys/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/auth', () => ({
+vi.mock('@bslt/core/auth', () => ({
   authRoutes: { ['auth/test']: { method: 'POST', handler: vi.fn() } },
   createAuthGuard: vi.fn(),
 }));
 
-vi.mock('@abe-stack/core/billing', () => ({
+vi.mock('@bslt/core/billing', () => ({
   billingRoutes: { ['billing/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
@@ -58,39 +58,39 @@ vi.mock('./billingWebhooks', () => ({
   registerBillingWebhookRoutes: vi.fn(),
 }));
 
-vi.mock('@abe-stack/core/notifications', () => ({
+vi.mock('@bslt/core/notifications', () => ({
   notificationRoutes: { ['notifications/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/feature-flags', () => ({
+vi.mock('@bslt/core/feature-flags', () => ({
   featureFlagRoutes: { ['feature-flags/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/files', () => ({
+vi.mock('@bslt/core/files', () => ({
   fileRoutes: { ['files/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/legal', () => ({
+vi.mock('@bslt/core/legal', () => ({
   legalRoutes: { ['legal/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/consent', () => ({
+vi.mock('@bslt/core/consent', () => ({
   consentRoutes: { ['consent/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/data-export', () => ({
+vi.mock('@bslt/core/data-export', () => ({
   dataExportRoutes: { ['data-export/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/tenants', () => ({
+vi.mock('@bslt/core/tenants', () => ({
   tenantRoutes: { ['tenants/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/webhooks', () => ({
+vi.mock('@bslt/core/webhooks', () => ({
   webhookRoutes: { ['webhooks/test']: { method: 'POST', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/realtime', () => ({
+vi.mock('@bslt/realtime', () => ({
   realtimeRoutes: { ['realtime/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
@@ -98,7 +98,7 @@ vi.mock('./system.routes', () => ({
   systemRoutes: { ['system/test']: { method: 'GET', handler: vi.fn() } },
 }));
 
-vi.mock('@abe-stack/core/users', () => ({
+vi.mock('@bslt/core/users', () => ({
   userRoutes: { ['users/test']: { method: 'GET', handler: vi.fn() } },
 }));
 

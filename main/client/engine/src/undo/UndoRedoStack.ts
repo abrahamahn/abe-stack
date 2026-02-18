@@ -11,7 +11,7 @@
  * - Emits state change notifications
  */
 
-import { generateSecureId } from '@abe-stack/shared';
+import { generateSecureId } from '@bslt/shared';
 
 // ============================================================================
 // Types
@@ -449,7 +449,7 @@ function noop(): void {
  *
  * @example
  * ```typescript
- * import { createUndoRedoStack } from '@abe-stack/client-engine/undo';
+ * import { createUndoRedoStack } from '@bslt/client-engine/undo';
  *
  * interface Command {
  *   type: 'add' | 'remove' | 'update';

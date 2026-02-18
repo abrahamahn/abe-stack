@@ -14,7 +14,7 @@ import {
   generateSecureId,
   NotFoundError,
   slugify,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   deleteFrom,

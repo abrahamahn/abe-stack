@@ -1,19 +1,19 @@
 // main/apps/web/src/features/admin/pages/UserDetailPage.test.tsx
 import { render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { UserDetailPage } from './UserDetailPage';
 
 import type { ReactNode } from 'react';
 
 // Mock router hooks
-vi.mock('@abe-stack/react/router', () => ({
+vi.mock('@bslt/react/router', () => ({
   useNavigate: () => vi.fn(),
   useParams: () => ({ id: 'test-user-id' }),
 }));
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', () => {
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', () => {
   const mockAlert = ({ children, tone }: { children: ReactNode; tone?: string }) => (
     <div role="alert" data-tone={tone}>
       {children}

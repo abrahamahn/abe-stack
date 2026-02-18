@@ -23,8 +23,8 @@ import {
   ReactiveMap,
   type RealtimeOperation,
   type RealtimeTransaction,
-} from '@abe-stack/shared';
-import { DeferredPromise } from '@abe-stack/shared/primitives';
+} from '@bslt/shared';
+import { DeferredPromise } from '@bslt/shared/primitives';
 
 // ============================================================================
 // Types
@@ -694,7 +694,7 @@ export class TransactionQueue {
  *
  * @example
  * ```typescript
- * import { createTransactionQueue } from '@abe-stack/client-engine/offline';
+ * import { createTransactionQueue } from '@bslt/client-engine/offline';
  *
  * const queue = createTransactionQueue({
  *   submitTransaction: async (tx) => {

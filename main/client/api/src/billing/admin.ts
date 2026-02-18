@@ -12,11 +12,10 @@ import {
   subscriptionActionResponseSchema,
   syncStripeResponseSchema,
   updatePlanRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 
-import type { BaseClientConfig } from '../utils';
 import type {
   AdminPlanResponse,
   AdminPlansListResponse,
@@ -24,7 +23,8 @@ import type {
   SubscriptionActionResponse,
   SyncStripeResponse,
   UpdatePlanRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { BaseClientConfig } from '../utils';
 
 // ============================================================================
 // Types

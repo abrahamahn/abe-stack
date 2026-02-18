@@ -9,9 +9,9 @@
  * @module settings/components
  */
 
-import { getApiClient } from '@abe-stack/api';
-import { Alert, Button, FormField, Input, PasswordInput, Text } from '@abe-stack/ui';
 import { getAccessToken } from '@app/authToken';
+import { getApiClient } from '@bslt/api';
+import { Alert, Button, FormField, Input, PasswordInput, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 // ============================================================================

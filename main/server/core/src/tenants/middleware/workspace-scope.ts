@@ -16,17 +16,17 @@ import {
   HTTP_STATUS,
   ROLE_LEVELS,
   WORKSPACE_ID_HEADER,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
-import type { Repositories } from '../../../../db/src';
 import type {
   AuthContext,
   PolicyAction,
   PolicyResource,
   TenantRole,
   WorkspaceContext,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Types
@@ -163,7 +163,7 @@ export function createWorkspaceRoleGuard(options: WorkspaceRoleGuardOptions) {
 /**
  * Create a preHandler hook that enforces a policy-based permission.
  *
- * Uses the centralized `can()` policy engine from @abe-stack/shared
+ * Uses the centralized `can()` policy engine from @bslt/shared
  * to check if the user can perform the specified action on the resource.
  *
  * Must be used AFTER `createWorkspaceScopeMiddleware` in the hook chain.

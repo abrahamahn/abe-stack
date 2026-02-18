@@ -11,7 +11,7 @@ import {
   extractIpAddress,
   extractUserAgent,
   type RequestInfo as SharedRequestInfo,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import type { FastifyInstance } from 'fastify';
 

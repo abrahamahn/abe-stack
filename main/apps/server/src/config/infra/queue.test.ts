@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with queue-related defaults (as applied by Zod schema).

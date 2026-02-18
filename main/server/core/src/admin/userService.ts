@@ -6,24 +6,24 @@
  * All operations require admin privileges (enforced at route level).
  */
 
-import { MS_PER_DAY, RETENTION_PERIODS, UserNotFoundError } from '@abe-stack/shared';
+import { MS_PER_DAY, RETENTION_PERIODS, UserNotFoundError } from '@bslt/shared';
 
 import { logSecurityEvent } from '../auth/security/events';
 import { revokeAllUserTokens } from '../auth/utils';
 
-import type {
-  AdminUserListFilters as DbAdminUserListFilters,
-  DbClient,
-  User as DbUser,
-  UserRepository,
-} from '../../../db/src';
 import type {
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
   UserRole,
   UserStatus,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type {
+  AdminUserListFilters as DbAdminUserListFilters,
+  DbClient,
+  User as DbUser,
+  UserRepository,
+} from '../../../db/src';
 
 // ============================================================================
 // Type Conversion Helpers

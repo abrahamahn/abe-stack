@@ -5,15 +5,15 @@
  * Comprehensive tests for user registration with email verification.
  */
 
-import { EmailSendError, WeakPasswordError } from '@abe-stack/shared';
+import { EmailSendError, WeakPasswordError } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleRegister } from './register';
 
+import type { RegisterRequest } from '@bslt/shared';
+import type { AppConfig } from '@bslt/shared/config';
 import type { RegisterResult } from '../service';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../types';
-import type { RegisterRequest } from '@abe-stack/shared';
-import type { AppConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock Dependencies
@@ -48,9 +48,9 @@ vi.mock('../service', () => ({
   registerUser: mockRegisterUser,
 }));
 
-// Mock @abe-stack/shared to intercept mapErrorToHttpResponse
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared to intercept mapErrorToHttpResponse
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...original,
     mapErrorToHttpResponse: mockMapErrorToResponse,

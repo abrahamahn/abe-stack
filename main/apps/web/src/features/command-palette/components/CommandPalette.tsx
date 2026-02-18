@@ -7,14 +7,14 @@
  * and provides keyboard navigation (arrow keys + Enter).
  */
 
-import { Dialog, Input, Kbd, Text } from '@abe-stack/ui';
+import { Dialog, Input, Kbd, Text } from '@bslt/ui';
 import {
+  ReactElement,
+  KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useRef,
   type ChangeEvent,
-  KeyboardEvent as ReactKeyboardEvent,
-  ReactElement,
 } from 'react';
 
 import { useCommandPalette } from '../hooks';

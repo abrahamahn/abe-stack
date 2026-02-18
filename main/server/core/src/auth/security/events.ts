@@ -8,7 +8,7 @@
  * @module security/events
  */
 
-import { MS_PER_DAY } from '@abe-stack/shared';
+import { MS_PER_DAY } from '@bslt/shared';
 
 import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '../../../../db/src';
 

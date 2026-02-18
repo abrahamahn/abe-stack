@@ -1,12 +1,12 @@
 // main/apps/web/src/features/admin/components/UserTable.test.tsx
 import { fireEvent, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '../../../__tests__/utils';
 
 import { UserTable } from './UserTable';
 
-import type { AdminUser, AdminUserListResponse } from '@abe-stack/shared';
+import type { AdminUser, AdminUserListResponse } from '@bslt/shared';
 
 // ============================================================================
 // Test Data

@@ -11,7 +11,7 @@
  * @complexity O(1) - All tests are unit tests with mocked dependencies
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ============================================================================
 // Hoisted mocks - MUST use vi.hoisted to avoid reference issues
@@ -45,16 +45,16 @@ const mocks = vi.hoisted(() => ({
 // Vi.mock calls - these reference hoisted mocks
 // ============================================================================
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: mocks.mockTokenStore,
   };
 });
 
-vi.mock('@abe-stack/api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/api')>();
+vi.mock('@bslt/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/api')>();
   return {
     ...actual,
     getApiClient: () => mocks.mockApiClient,
@@ -68,9 +68,9 @@ vi.mock('@abe-stack/api', async (importOriginal) => {
 
 import { AuthService, createAuthService } from './AuthService';
 
+import type { LoginSuccessResponse, RegisterResponse, User } from '@bslt/api';
+import type { UserId } from '@bslt/shared';
 import type { ClientConfig } from '../../../config';
-import type { LoginSuccessResponse, RegisterResponse, User } from '@abe-stack/api';
-import type { UserId } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Helpers

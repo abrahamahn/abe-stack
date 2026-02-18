@@ -4,7 +4,7 @@ import type {
   BillingPlansConfig,
   BillingProvider,
   FullEnv,
-} from '@abe-stack/shared/config';
+} from '@bslt/shared/config';
 
 /**
  * Load Billing Configuration.

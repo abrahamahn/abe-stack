@@ -9,26 +9,26 @@
  * - Error handling and loading states
  */
 
-import { usePhone } from '@abe-stack/react';
+import { usePhone } from '@bslt/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PhoneManagement } from './PhoneManagement';
 
-import type { PhoneState } from '@abe-stack/react';
-import type { User } from '@abe-stack/shared';
+import type { PhoneState } from '@bslt/react';
+import type { User } from '@bslt/shared';
 import type { ReactNode } from 'react';
 
 // ============================================================================
 // Mocks
 // ============================================================================
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   usePhone: vi.fn(),
 }));
 
-vi.mock('@abe-stack/ui', () => {
+vi.mock('@bslt/ui', () => {
   const mockAlert = ({
     children,
     variant,

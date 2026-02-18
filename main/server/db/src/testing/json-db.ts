@@ -25,16 +25,16 @@
  * @module
  */
 
-import { existsSync, mkdirSync, openSync, readFileSync, writeSync, closeSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 // =============================================================================
-// Configuration Type (locally defined to avoid @abe-stack/shared dependency)
+// Configuration Type (locally defined to avoid @bslt/shared dependency)
 // =============================================================================
 
 /**
  * JSON file-based database configuration.
- * Compatible with the interface defined in @abe-stack/shared.
+ * Compatible with the interface defined in @bslt/shared.
  */
 export interface JsonDatabaseConfig {
   /** Must be 'json' to identify this provider type */

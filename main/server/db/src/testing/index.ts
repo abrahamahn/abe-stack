@@ -1,6 +1,6 @@
 // main/server/db/src/testing/index.ts
 /**
- * Testing utilities for @abe-stack/db
+ * Testing utilities for @bslt/db
  *
  * Exports mock database clients and test helpers for use in test files.
  */
@@ -10,7 +10,7 @@ export {
   createMockDb,
   createMockDbWithData,
   type MockDbClient,
-  type MockDbClientAsDb,
+  type MockDbClientAsDb
 } from './mocks';
 
 export { createJsonDbClient, JsonDatabase, JsonDbClient, type JsonDatabaseConfig } from './json-db';

@@ -1,5 +1,5 @@
 // main/client/ui/src/components/DeviceRowCard.tsx
-import { formatDateTime, parseUserAgent } from '@abe-stack/shared';
+import { formatDateTime, parseUserAgent } from '@bslt/shared';
 
 import { Button } from '../elements/Button';
 import { Text } from '../elements/Text';

@@ -16,21 +16,21 @@ import {
   parseOptional,
   parseString,
 } from '../../primitives/schema';
-import { emailSchema, isoDateTimeSchema, passwordSchema } from '../schemas';
+import { userIdSchema } from '../../primitives/schema/ids';
 import { appRoleSchema } from '../auth/roles';
 import { APP_ROLES } from '../constants/auth';
-import { userIdSchema } from '../../primitives/schema/ids';
+import { emailSchema, isoDateTimeSchema, passwordSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/schema';
-import type { AppRole } from '../auth/roles';
 import type { UserId } from '../../primitives/schema/ids';
+import type { AppRole } from '../auth/roles';
 
 // ============================================================================
 // Shared Types & Re-exports
 // ============================================================================
 
-export type { UserId } from '../../primitives/schema/ids';
 export { userIdSchema };
+export type { UserId };
 
 // Re-export AppRole from core types (plus legacy aliases)
 export { APP_ROLES, appRoleSchema, type AppRole };

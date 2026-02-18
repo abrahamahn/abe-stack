@@ -8,7 +8,7 @@
  * @module auth/components
  */
 
-import { Button, Modal, Text } from '@abe-stack/ui';
+import { Button, Modal, Text } from '@bslt/ui';
 import { useCallback, useState, type ReactElement } from 'react';
 
 // ============================================================================

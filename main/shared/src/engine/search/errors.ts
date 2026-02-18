@@ -1,7 +1,7 @@
 // main/shared/src/engine/search/errors.ts
-import { AppError } from '../errors';
 import { SEARCH_ERROR_TYPES } from '../constants/limits';
 import { HTTP_STATUS } from '../constants/platform';
+import { AppError } from '../errors';
 
 export type SearchErrorType = (typeof SEARCH_ERROR_TYPES)[keyof typeof SEARCH_ERROR_TYPES];
 

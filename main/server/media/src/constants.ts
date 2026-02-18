@@ -4,10 +4,10 @@
  *
  * Server-specific constants (size limits, timeouts, queue defaults, image
  * processing defaults) are defined here. Framework-agnostic constants
- * (MIME mappings, extension categories) are re-exported from @abe-stack/shared.
+ * (MIME mappings, extension categories) are re-exported from @bslt/shared.
  */
 
-import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
 // Re-export framework-agnostic constants from shared
 export {
@@ -21,8 +21,8 @@ export {
   MAX_UPLOAD_FILE_SIZE,
   MAX_UPLOAD_TIMEOUT_MS,
   MIME_TO_EXT,
-  VIDEO_EXTENSIONS,
-} from '@abe-stack/shared';
+  VIDEO_EXTENSIONS
+} from '@bslt/shared';
 
 // --- Size limits ---
 

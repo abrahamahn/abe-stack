@@ -5,7 +5,7 @@ import { REFRESH_COOKIE_NAME } from '../index';
 
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from './cookies';
 
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Mock Helpers

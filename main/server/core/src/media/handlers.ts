@@ -6,7 +6,7 @@
  * Framework-agnostic: uses narrow interfaces from types.ts.
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { deleteMedia, getMediaMetadata, getProcessingStatus, uploadMedia } from './service';
 

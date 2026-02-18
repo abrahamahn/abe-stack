@@ -3,12 +3,12 @@
  * Tests for ServerMediaQueue, createServerMediaQueue, and entitlement gating
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ServerMediaQueue, createServerMediaQueue } from './facade';
 
+import type { Logger } from '@bslt/shared';
 import type { MediaEntitlements } from './facade';
-import type { Logger } from '@abe-stack/shared';
 
 // Mock processor module with proper class constructors
 vi.mock('./processor', () => {

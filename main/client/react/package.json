@@ -1,8 +1,8 @@
 {
-  "name": "@abe-stack/react",
+  "name": "@bslt/react",
   "version": "1.0.0",
   "type": "module",
-  "description": "React interface for abe-stack client",
+  "description": "React interface for bslt client",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,15 +30,15 @@
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f node_modules/.cache/typescript/*.tsbuildinfo && tsc --build",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-react --report-unused-disable-directives",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-react --report-unused-disable-directives",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
-    "@abe-stack/client-engine": "workspace:*",
-    "@abe-stack/shared": "workspace:*"
+    "@bslt/client-engine": "workspace:*",
+    "@bslt/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -56,7 +56,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "url": "https://github.com/abrahamahn/bslt.git",
     "directory": "client/react"
   }
 }

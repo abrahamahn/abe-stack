@@ -2,7 +2,7 @@
 
 ## Password Hashing
 
-ABE Stack uses **Argon2id** (OWASP recommended) for password hashing.
+BSLT uses **Argon2id** (OWASP recommended) for password hashing.
 
 ### Configuration
 

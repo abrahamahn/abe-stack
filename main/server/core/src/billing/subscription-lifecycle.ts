@@ -9,9 +9,9 @@
  * @module billing/subscription-lifecycle
  */
 
-import { MS_PER_DAY } from '@abe-stack/shared';
+import { MS_PER_DAY } from '@bslt/shared';
 
-import type { SubscriptionStatus } from '@abe-stack/shared';
+import type { SubscriptionStatus } from '@bslt/shared';
 
 // ============================================================================
 // Types

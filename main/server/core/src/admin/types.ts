@@ -7,16 +7,7 @@
  */
 
 import type {
-  AuditEventRepository,
-  DbClient,
-  PlanRepository,
-  Repositories,
-  SubscriptionRepository,
-  UserRepository,
-} from '../../../db/src';
-import type {
   BaseContext,
-  ContractRequestContext as RequestContext,
   HasBilling,
   HasCache,
   HasEmail,
@@ -24,8 +15,17 @@ import type {
   HasPubSub,
   HasStorage,
   Logger,
-} from '@abe-stack/shared';
-import type { BillingConfig } from '@abe-stack/shared/config';
+  ContractRequestContext as RequestContext,
+} from '@bslt/shared';
+import type { BillingConfig } from '@bslt/shared/config';
+import type {
+  AuditEventRepository,
+  DbClient,
+  PlanRepository,
+  Repositories,
+  SubscriptionRepository,
+  UserRepository,
+} from '../../../db/src';
 
 /**
  * Application context narrowed for the admin module.

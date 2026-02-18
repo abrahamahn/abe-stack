@@ -1,6 +1,6 @@
 // main/server/engine/src/system/health.ts
 
-import { REQUIRED_TABLES, validateSchema } from '@abe-stack/db';
+import { REQUIRED_TABLES, validateSchema } from '@bslt/db';
 import {
   buildDetailedHealthResponse,
   checkCache,
@@ -12,10 +12,9 @@ import {
   checkSchema,
   checkStorage,
   checkWebSocket,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
-import type { SystemContext } from './types';
-import type { RawDb } from '@abe-stack/db';
+import type { RawDb } from '@bslt/db';
 import type {
   DetailedHealthResponse,
   HealthCheckDatabase,
@@ -23,7 +22,8 @@ import type {
   ServiceHealth,
   StartupSummaryOptions,
   WebSocketStats,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
+import type { SystemContext } from './types';
 
 /** Callback shape expected by the shared `checkSchema` utility. */
 type SchemaValidator = (
@@ -118,7 +118,7 @@ export function checkPubSubStatus(ctx: SystemContext): ServiceHealth {
 /**
  * Check WebSocket status using externally-provided connection stats.
  *
- * The caller must supply stats (e.g. from `@abe-stack/realtime`) so that
+ * The caller must supply stats (e.g. from `@bslt/realtime`) so that
  * engine remains free of realtime/premium module dependencies.
  *
  * @param stats - Current WebSocket connection statistics

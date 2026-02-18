@@ -6,8 +6,8 @@
  * Lives in engine/ so contracts can import without violating the DAG.
  */
 
-import { ERROR_CODES } from '../constants/platform';
 import { createSchema, type Schema } from '../../primitives/schema';
+import { ERROR_CODES } from '../constants/platform';
 
 // ============================================================================
 // Response Envelope Types

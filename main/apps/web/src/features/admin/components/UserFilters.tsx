@@ -5,11 +5,11 @@
  * Filter controls for the admin user list.
  */
 
-import { APP_ROLES, USER_STATUSES } from '@abe-stack/shared';
-import { Button, Input, Select } from '@abe-stack/ui';
-import { useCallback, useState, type ChangeEvent, JSX } from 'react';
+import { APP_ROLES, USER_STATUSES } from '@bslt/shared';
+import { Button, Input, Select } from '@bslt/ui';
+import { JSX, useCallback, useState, type ChangeEvent } from 'react';
 
-import type { AdminUserListFilters } from '@abe-stack/shared';
+import type { AdminUserListFilters } from '@bslt/shared';
 
 type AdminUserListFiltersLocal = AdminUserListFilters;
 

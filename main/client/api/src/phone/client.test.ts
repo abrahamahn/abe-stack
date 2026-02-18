@@ -10,12 +10,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createPhoneClient } from './client';
 
+import type { User, UserId } from '@bslt/shared';
 import type { PhoneClientConfig } from './client';
-import type { User, UserId } from '@abe-stack/shared';
 
-// Mock @abe-stack/shared
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/shared')>('@abe-stack/shared');
+// Mock @bslt/shared
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual<typeof import('@bslt/shared')>('@bslt/shared');
   return {
     ...actual,
     addAuthHeader: vi.fn((headers: Headers, token: string | null | undefined) => {

@@ -13,15 +13,15 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^@abe-stack\/shared\/(.*)$/,
+        find: /^@bslt\/shared\/(.*)$/,
         replacement: path.resolve(__dirname, '../../shared/src/$1'),
       },
       {
-        find: '@abe-stack/shared',
+        find: '@bslt/shared',
         replacement: path.resolve(__dirname, '../../shared/src/index.ts'),
       },
       {
-        find: '@abe-stack/db',
+        find: '@bslt/db',
         replacement: path.resolve(__dirname, 'src/index.ts'),
       },
     ],

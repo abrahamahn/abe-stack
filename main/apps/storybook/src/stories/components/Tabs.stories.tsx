@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/components/Tabs.stories.tsx
+import { Tabs, Text } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Tabs, Text } from '@abe-stack/ui';
 
 const sampleItems = [
   { id: 'overview', label: 'Overview', content: <Text>Overview panel content.</Text> },

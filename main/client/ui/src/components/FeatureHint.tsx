@@ -1,5 +1,5 @@
 // main/client/ui/src/components/FeatureHint.tsx
-import { useKeyboardShortcut, useLocalStorage } from '@abe-stack/react/hooks';
+import { useKeyboardShortcut, useLocalStorage } from '@bslt/react/hooks';
 import { Button } from '@elements/Button';
 import { Text } from '@elements/Text';
 import { useCallback, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';

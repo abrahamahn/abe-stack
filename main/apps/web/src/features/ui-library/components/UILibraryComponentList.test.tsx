@@ -11,7 +11,7 @@ const { mockCloseButton, mockHeading, mockMenuItem, mockScrollArea, mockText } =
   mockText: vi.fn(),
 }));
 
-vi.mock('@abe-stack/ui', () => ({
+vi.mock('@bslt/ui', () => ({
   ['CloseButton']: (props: { onClick: () => void }) => {
     mockCloseButton(props);
     return <button onClick={props.onClick}>Close</button>;

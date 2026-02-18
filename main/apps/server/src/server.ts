@@ -13,9 +13,9 @@
 
 import path from 'node:path';
 
-import { RateLimiter } from '@abe-stack/server-engine';
-import { createConsoleLogger, registerLoggingMiddleware } from '@abe-stack/server-engine/logger';
-import { ERROR_CODES, HTTP_BODY_LIMIT, isAppError } from '@abe-stack/shared';
+import { RateLimiter } from '@bslt/server-engine';
+import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-engine/logger';
+import { ERROR_CODES, HTTP_BODY_LIMIT, isAppError } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import fastify from 'fastify';
@@ -24,10 +24,10 @@ import { registerPlugins, type AppErrorInfo } from './http/plugins';
 import { swaggerThemeCss } from './http/swagger-theme';
 import { contextualizeRequest } from './middleware/context';
 
-import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
-import type { DbClient } from '@abe-stack/db';
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { DbClient } from '@bslt/db';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
+import type { HasContext, IServiceContainer, RequestWithCookies } from './types/context';
 
 // ============================================================================
 // Types
@@ -126,9 +126,9 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   await server.register(swagger, {
     openapi: {
       info: {
-        title: 'ABE Stack API',
+        title: 'BSLT API',
         description: [
-          'API documentation for the ABE Stack application.',
+          'API documentation for the BSLT application.',
           '',
           '## Authentication',
           'Most endpoints require a Bearer JWT token in the `Authorization` header.',
@@ -182,7 +182,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
       deepLinking: true,
     },
     theme: {
-      title: 'ABE Stack API',
+      title: 'BSLT API',
       css: [{ filename: 'theme.css', content: swaggerThemeCss }],
     },
   });

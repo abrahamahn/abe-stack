@@ -17,7 +17,7 @@ output "instance_private_ip" {
 
 output "ssh_connection_string" {
   description = "SSH connection command"
-  value       = "ssh -i <your-private-key> abe-stack@${google_compute_instance.abe_stack.network_interface[0].access_config[0].nat_ip}"
+  value       = "ssh -i <your-private-key> bslt@${google_compute_instance.abe_stack.network_interface[0].access_config[0].nat_ip}"
 }
 
 output "service_account_email" {

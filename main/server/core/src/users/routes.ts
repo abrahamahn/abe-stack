@@ -5,7 +5,7 @@
  * Route definitions for users module.
  * All routes require authentication.
  *
- * Uses the generic router pattern from @abe-stack/server-engine.
+ * Uses the generic router pattern from @bslt/server-engine.
  * Route handlers accept HandlerContext (Record<string, unknown>) from the
  * generic router and narrow it to UsersModuleDeps at the call boundary.
  *
@@ -25,7 +25,7 @@ import {
   type DeactivateAccountRequest,
   type DeleteAccountRequest,
   type UpdateUsernameRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   createRouteMap,
@@ -56,8 +56,8 @@ import {
 } from './handlers';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from './types';
 
-import type { Repositories } from '../../../db/src';
 import type { FastifyRequest } from 'fastify';
+import type { Repositories } from '../../../db/src';
 
 // ============================================================================
 // Context Bridge

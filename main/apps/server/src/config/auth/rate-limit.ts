@@ -1,8 +1,8 @@
 // main/apps/server/src/config/auth/rate-limit.ts
-import { MS_PER_MINUTE } from '@abe-stack/shared';
-import { getBool, getInt } from '@abe-stack/shared/config';
+import { MS_PER_MINUTE } from '@bslt/shared';
+import { getBool, getInt } from '@bslt/shared/config';
 
-import type { RateLimitConfig } from '@abe-stack/shared/config';
+import type { RateLimitConfig } from '@bslt/shared/config';
 
 /**
  * Load Rate Limit Configuration.

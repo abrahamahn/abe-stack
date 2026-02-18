@@ -1,6 +1,6 @@
 // main/apps/server/src/config/factory.ts
-import { initEnv } from '@abe-stack/server-engine/config';
-import { EnvSchema } from '@abe-stack/shared/config';
+import { initEnv } from '@bslt/server-engine/config';
+import { EnvSchema } from '@bslt/shared/config';
 
 import { loadAuthConfig, validateAuthConfig } from './auth/auth';
 import { loadCacheConfig } from './infra/cache';
@@ -19,7 +19,7 @@ import {
   validateSqlSearchConfig,
 } from './services/search';
 
-import type { AppConfig, FullEnv } from '@abe-stack/shared/config';
+import type { AppConfig, FullEnv } from '@bslt/shared/config';
 
 /**
  * Config Factory
@@ -45,7 +45,7 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   const envResult = EnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
-    process.stderr.write('\n❌ ABE-STACK: Environment Validation Failed\n');
+    process.stderr.write('\n❌ bslt: Environment Validation Failed\n');
     process.stderr.write(`   ↳ ${envResult.error.message}\n`);
     process.exit(1);
   }
@@ -133,7 +133,7 @@ function validate(config: AppConfig): void {
     const report = errors.map((e) => `  ↳ ❌ ${e}`).join('\n');
     const separator = '='.repeat(50);
     process.stderr.write(`\n${separator}\n`);
-    process.stderr.write('  ABE-STACK CONFIGURATION ERROR\n');
+    process.stderr.write('  bslt CONFIGURATION ERROR\n');
     process.stderr.write(`${separator}\n`);
     process.stderr.write(`${report}\n`);
     process.stderr.write(`${separator}\n\n`);

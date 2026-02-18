@@ -8,10 +8,10 @@
  * for testability and decoupled architecture.
  */
 
-import { CONSENT_TYPES } from '@abe-stack/shared';
+import { CONSENT_TYPES } from '@bslt/shared';
 
-import type { ConsentPreferences, UpdateConsentInput } from './types';
 import type { ConsentLogRepository, ConsentLog as DbConsentLog } from '../../../db/src';
+import type { ConsentPreferences, UpdateConsentInput } from './types';
 
 // ============================================================================
 // Consent Operations

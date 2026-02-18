@@ -1,5 +1,5 @@
 // main/apps/web/src/features/workspace/components/WorkspaceWelcomeBanner.tsx
-import { Alert, Button, Heading, Text } from '@abe-stack/ui';
+import { Alert, Button, Heading, Text } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

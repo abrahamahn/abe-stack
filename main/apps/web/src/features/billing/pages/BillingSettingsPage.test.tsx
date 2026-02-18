@@ -1,24 +1,24 @@
 // main/apps/web/src/features/billing/pages/BillingSettingsPage.test.tsx
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BillingSettingsPage } from './BillingSettingsPage';
 
-// Mock useNavigate from @abe-stack/react/router
+// Mock useNavigate from @bslt/react/router
 const { mockNavigate } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
 }));
-vi.mock('@abe-stack/react/router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
+vi.mock('@bslt/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/router')>();
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,
   };
 });
 
-// Mock @abe-stack/react hooks
-vi.mock('@abe-stack/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react')>();
+// Mock @bslt/react hooks
+vi.mock('@bslt/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react')>();
   return {
     ...actual,
     useSubscription: vi.fn(() => ({
@@ -54,9 +54,9 @@ vi.mock('@app/ClientEnvironment', () => ({
   })),
 }));
 
-// Mock @abe-stack/shared tokenStore - use importOriginal to preserve AppError and other exports
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+// Mock @bslt/shared tokenStore - use importOriginal to preserve AppError and other exports
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

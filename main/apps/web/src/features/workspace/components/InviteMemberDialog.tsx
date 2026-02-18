@@ -5,12 +5,12 @@
  * Modal for inviting a new member to a workspace via email.
  */
 
-import { Alert, Button, FormField, Input, Modal, Select, Text } from '@abe-stack/ui';
-import { useState, type ReactElement, type ChangeEvent } from 'react';
+import { Alert, Button, FormField, Input, Modal, Select, Text } from '@bslt/ui';
+import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 import { useCreateInvitation } from '../hooks';
 
-import type { TenantRole } from '@abe-stack/shared';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Types

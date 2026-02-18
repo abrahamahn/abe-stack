@@ -10,7 +10,9 @@
  * - Sync with Stripe
  */
 
-import { useAdminPlans } from '@abe-stack/react';
+import { getAccessToken } from '@app/authToken';
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useAdminPlans } from '@bslt/react';
 import {
   Badge,
   Button,
@@ -28,19 +30,17 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
-import { getAccessToken } from '@app/authToken';
-import { useClientEnvironment } from '@app/ClientEnvironment';
-import { useState, useCallback, type ChangeEvent, ReactElement } from 'react';
+} from '@bslt/ui';
+import { ReactElement, useCallback, useState, type ChangeEvent } from 'react';
 
-import type { AdminBillingClientConfig } from '@abe-stack/api';
+import type { AdminBillingClientConfig } from '@bslt/api';
 import type {
   AdminPlan,
   CreatePlanRequest,
   FeatureKey,
   PlanFeature,
   UpdatePlanRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Local Types (for form state)

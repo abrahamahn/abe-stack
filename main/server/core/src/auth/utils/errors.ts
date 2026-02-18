@@ -2,7 +2,7 @@
 /**
  * Re-exports auth domain errors from shared package.
  *
- * @module @abe-stack/auth/utils/errors
+ * @module @bslt/auth/utils/errors
  */
 export {
   AccountLockedError,
@@ -16,5 +16,6 @@ export {
   TotpInvalidError,
   TotpRequiredError,
   UserNotFoundError,
-  WeakPasswordError,
-} from '@abe-stack/shared'; // Changed from @abe-stack/shared
+  WeakPasswordError
+} from '@bslt/shared'; // Changed from @bslt/shared
+

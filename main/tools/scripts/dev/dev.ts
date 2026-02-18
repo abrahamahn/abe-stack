@@ -13,14 +13,14 @@
  */
 
 import { execSync, spawn } from 'child_process';
-import { Socket } from 'node:net';
 import { Buffer } from 'node:buffer';
-import process from 'node:process';
+import { Socket } from 'node:net';
 import { basename, dirname, resolve } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'url';
 
-import { buildConnectionString, canReachDatabase } from '@abe-stack/db';
-import { loadServerEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, canReachDatabase } from '@bslt/db';
+import { loadServerEnv } from '@bslt/server-engine';
 
 import { colorize, isTurboSummaryLine, logLine, normalizeServerLine } from './logger';
 
@@ -44,11 +44,11 @@ function centerLine(text: string, width: number): string {
 }
 
 function renderStartupBanner(filters: string[]): void {
-  const title = 'ABE Stack';
+  const title = 'BSLT';
   const subtitle = 'Development Environment';
   const mode =
     filters.length > 0
-      ? `Mode: ${filters.map((f) => `@abe-stack/${f}`).join(' + ')}`
+      ? `Mode: ${filters.map((f) => `@bslt/${f}`).join(' + ')}`
       : 'Mode: full workspace';
   const hint = 'Press Ctrl+C to stop all dev processes';
   const timestamp = `Started: ${new Date().toLocaleString()}`;
@@ -234,7 +234,7 @@ function startWatcher(script: string): ChildProcess {
 function startTurboDev(filters: string[]): ChildProcess {
   const args = ['turbo', 'run', 'dev', '--log-order=stream', '--log-prefix=task'];
   for (const f of filters) {
-    args.push(`--filter=@abe-stack/${f}`);
+    args.push(`--filter=@bslt/${f}`);
   }
 
   const turbo = spawn('pnpm', args, {
@@ -257,8 +257,8 @@ function startTurboDev(filters: string[]): ChildProcess {
     if (normalized === '') return;
 
     // Extract scope and message
-    // Format: @abe-stack/server:dev: Message content...
-    const match = withoutCR.match(/^@abe-stack\/([^:]+):dev:(.*)$/);
+    // Format: @bslt/server:dev: Message content...
+    const match = withoutCR.match(/^@bslt\/([^:]+):dev:(.*)$/);
 
     if (match) {
       // Known scope
@@ -292,7 +292,7 @@ function startTurboDev(filters: string[]): ChildProcess {
       logLine(scope, message, isError ? 'error' : 'info');
     } else if (isTurboSummaryLine(normalized)) {
       // Turbo summary lines
-      logLine('turbo', normalized.replace(/@abe-stack\//g, ''), 'info');
+      logLine('turbo', normalized.replace(/@bslt\//g, ''), 'info');
     } else {
       // Unknown or raw line (common with stack traces)
       logLine('turbo', withoutCR, isError ? 'error' : 'info');
@@ -339,7 +339,7 @@ async function main(): Promise<void> {
 
   logHeader('Development Environment', 'Preparing local services and watchers');
   if (filters.length > 0) {
-    logLine('dev', `Filter: ${filters.map((f) => `@abe-stack/${f}`).join(', ')}`);
+    logLine('dev', `Filter: ${filters.map((f) => `@bslt/${f}`).join(', ')}`);
   }
 
   runEnvPreflight(filters);

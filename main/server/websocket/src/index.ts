@@ -9,7 +9,7 @@
 export {
   registerWebSocket,
   type TokenVerifier,
-  type WebSocketRegistrationOptions,
+  type WebSocketRegistrationOptions
 } from './lifecycle';
 
 // Stats
@@ -18,12 +18,11 @@ export {
   getWebSocketStats,
   incrementConnections,
   markPluginRegistered,
-  resetStats,
+  resetStats
 } from './stats';
 
-// Types (re-exported from shared — canonical definitions live in @abe-stack/shared)
+// Types (re-exported from shared — canonical definitions live in @bslt/shared)
 export type {
-  SubscriptionKey,
-  WebSocket as PubSubWebSocket,
-  WebSocketStats,
-} from '@abe-stack/shared';
+  WebSocket as PubSubWebSocket, SubscriptionKey, WebSocketStats
+} from '@bslt/shared';
+

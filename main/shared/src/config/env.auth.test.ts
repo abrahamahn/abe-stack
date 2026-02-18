@@ -113,8 +113,8 @@ describe('auth.ts type definitions', () => {
         secret: 'super-secret-jwt-key-at-least-32-characters-long',
         previousSecret: 'old-secret-for-rotation',
         accessTokenExpiry: '15m',
-        issuer: 'abe-stack',
-        audience: 'abe-stack-api',
+        issuer: 'bslt',
+        audience: 'bslt-api',
       },
       refreshToken: {
         expiryDays: 30,
@@ -168,7 +168,7 @@ describe('auth.ts type definitions', () => {
         maxAttempts: 3,
       },
       totp: {
-        issuer: 'ABE Stack',
+        issuer: 'BSLT',
         window: 1,
       },
     };

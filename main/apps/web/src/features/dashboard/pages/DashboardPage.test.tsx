@@ -1,18 +1,18 @@
 // main/apps/web/src/features/dashboard/pages/DashboardPage.test.tsx
 import { DashboardPage } from '@dashboard/pages/DashboardPage';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../../../__tests__/utils';
 
+import type { UserId } from '@bslt/shared';
 import type { RenderWithProvidersResult } from '../../../__tests__/utils';
 import type { User } from '../../auth';
-import type { UserId } from '@abe-stack/shared';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();
-vi.mock('@abe-stack/react/router', async () => {
-  const actual = await vi.importActual('@abe-stack/react/router');
+vi.mock('@bslt/react/router', async () => {
+  const actual = await vi.importActual('@bslt/react/router');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

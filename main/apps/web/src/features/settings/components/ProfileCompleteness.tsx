@@ -1,5 +1,5 @@
 // main/apps/web/src/features/settings/components/ProfileCompleteness.tsx
-import { ProfileCompletenessCard } from '@abe-stack/ui/components/ProfileCompletenessCard';
+import { ProfileCompletenessCard } from '@bslt/ui/components/ProfileCompletenessCard';
 
 import { useProfileCompleteness } from '../hooks/useProfileCompleteness';
 

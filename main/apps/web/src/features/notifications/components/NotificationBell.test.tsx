@@ -6,8 +6,8 @@ import { NotificationBell } from './NotificationBell';
 
 import type { ReactNode } from 'react';
 
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   return {
     ...actual,

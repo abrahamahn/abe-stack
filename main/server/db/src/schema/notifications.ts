@@ -10,7 +10,7 @@
  * notifications table itself.
  */
 
-import { NOTIFICATION_LEVELS, type NotificationLevel } from '@abe-stack/shared';
+import { NOTIFICATION_LEVELS, type NotificationLevel } from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { NOTIFICATION_LEVELS };

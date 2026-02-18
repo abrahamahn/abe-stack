@@ -44,7 +44,7 @@ import {
   Tooltip,
   VersionBadge,
   VisuallyHidden,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import type { ComponentDemo } from '../types';

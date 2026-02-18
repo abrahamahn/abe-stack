@@ -6,13 +6,13 @@
  * automatic version bumping, PubSub integration, and extensible hooks.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WriteService, createWriteService, type WriteServiceOptions } from './writer';
 
+import type { DbClient } from '@bslt/db';
+import type { SubscriptionManager } from '@bslt/shared';
 import type { WriteBatch, WriteOperation } from './types';
-import type { DbClient } from '@abe-stack/db';
-import type { SubscriptionManager } from '@abe-stack/shared';
 
 /**
  * Logger interface matching WriteService's internal Logger type
@@ -28,7 +28,7 @@ interface Logger {
 // Mock Modules
 // ============================================================================
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   escapeIdentifier: vi.fn((id: string) => `"${id}"`),
   withTransaction: vi.fn(async (db: unknown, fn: (tx: unknown) => Promise<unknown>) => {
     return fn(db);
@@ -36,7 +36,7 @@ vi.mock('@abe-stack/db', () => ({
   isInTransaction: vi.fn(() => false),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@bslt/shared', () => ({
   SubKeys: {
     record: vi.fn((table: string, id: string) => `record:${table}:${id}`),
   },

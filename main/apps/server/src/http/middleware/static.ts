@@ -10,9 +10,9 @@ import { createReadStream } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { isSafePath } from '@abe-stack/server-engine';
-import { createRateLimiter, HTTP_STATUS, getRequesterId } from '@abe-stack/shared';
-import { getMimeType } from '@abe-stack/shared/engine/media';
+import { isSafePath } from '@bslt/server-engine';
+import { createRateLimiter, getRequesterId, HTTP_STATUS } from '@bslt/shared';
+import { getMimeType } from '@bslt/shared/engine/media';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

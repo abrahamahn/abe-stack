@@ -8,8 +8,10 @@
  * - Invoice history
  */
 
-import { useInvoices, usePaymentMethods, useSubscription } from '@abe-stack/react';
-import { useNavigate } from '@abe-stack/react/router';
+import { getAccessToken } from '@app/authToken';
+import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useInvoices, usePaymentMethods, useSubscription } from '@bslt/react';
+import { useNavigate } from '@bslt/react/router';
 import {
   Button,
   Card,
@@ -22,16 +24,14 @@ import {
   Skeleton,
   SubscriptionStatus,
   Text,
-} from '@abe-stack/ui';
-import { getAccessToken } from '@app/authToken';
-import { useClientEnvironment } from '@app/ClientEnvironment';
+} from '@bslt/ui';
 import { useCallback, useMemo, useState } from 'react';
 
-import type { BillingClientConfig } from '@abe-stack/api';
+import type { BillingClientConfig } from '@bslt/api';
 import type {
   PaymentMethod,
   SubscriptionStatus as SubscriptionStatusType,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

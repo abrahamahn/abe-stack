@@ -6,23 +6,23 @@
  * Follows the narrow dependency pattern: the server's AppContext satisfies
  * RealtimeModuleDeps structurally, keeping this package decoupled.
  *
- * Uses shared context contracts from `@abe-stack/shared` to eliminate
+ * Uses shared context contracts from `@bslt/shared` to eliminate
  * duplicate Logger and request interfaces across packages.
  *
  * @module types
  */
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@bslt/db';
 import type {
   BaseContext,
-  ContractRequestContext as RequestContext,
   Logger,
   RecordMap,
+  ContractRequestContext as RequestContext,
   SubscriptionManager,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared types for backward compatibility
-export type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from '@abe-stack/shared';
+export type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from '@bslt/shared';
 
 // ============================================================================
 // Logger Interface (Transition Alias)
@@ -33,7 +33,7 @@ export type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from '@ab
  *
  * Transition alias for the shared `Logger` contract.
  * The contracts `Logger` provides all overloads needed by realtime.
- * New code should import `Logger` from `@abe-stack/shared` directly.
+ * New code should import `Logger` from `@bslt/shared` directly.
  *
  * @complexity O(1) per log call
  */
@@ -79,7 +79,7 @@ export interface RealtimeModuleDeps extends Omit<BaseContext, 'repos' | 'log'> {
  *
  * Transition alias for `RequestContext` from contracts.
  * Existing code importing `RealtimeRequest` from this module continues
- * working. New code should import `RequestContext` from `@abe-stack/shared`.
+ * working. New code should import `RequestContext` from `@bslt/shared`.
  */
 export type RealtimeRequest = RequestContext;
 

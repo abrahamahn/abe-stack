@@ -1,11 +1,11 @@
 // main/server/engine/src/index.ts
 /**
- * @abe-stack/server-engine
+ * @bslt/server-engine
  *
  * Server Engine — Consolidated infrastructure adapters and singletons.
  * Provides cache, config, logger, mailer, queue, search, security, and storage.
  *
- * @module @abe-stack/server-engine
+ * @module @bslt/server-engine
  */
 
 // ============================================================================
@@ -13,9 +13,7 @@
 // ============================================================================
 
 export {
-  CONSOLE_LOG_LEVELS,
-  LOG_LEVELS,
-  createBaseLogger,
+  CONSOLE_LOG_LEVELS, createBaseLogger,
   createBaseRequestLogger,
   createConsoleLogger,
   createJobCorrelationId,
@@ -25,18 +23,11 @@ export {
   createRequestLogger,
   generateCorrelationId,
   getOrCreateCorrelationId,
-  isValidCorrelationId,
-  registerLoggingMiddleware,
+  isValidCorrelationId, LOG_LEVELS, registerLoggingMiddleware,
   shouldLog,
   type BaseLogger,
-  type BaseLoggerType,
-  type ConsoleLogLevel,
-  type ConsoleLoggerConfig,
-  type LogData,
-  type LogLevel,
-  type Logger,
-  type LoggerConfig,
-  type RequestContext,
+  type BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type Logger,
+  type LoggerConfig, type LogLevel, type RequestContext
 } from './logger';
 
 // ============================================================================
@@ -48,7 +39,7 @@ export {
   type AuthEmailTemplates,
   type EmailOptions,
   type EmailResult,
-  type EmailService,
+  type EmailService
 } from './mailer';
 export { MailerClient } from './mailer/client';
 
@@ -103,7 +94,7 @@ export {
   type MemoizedFunction,
   type MemoizeOptions,
   type MemoizeStats,
-  type MemoryCacheConfig,
+  type MemoryCacheConfig
 } from './cache';
 
 // ============================================================================
@@ -133,7 +124,7 @@ export {
   ServerEnvSchema,
   StorageEnvSchema,
   validateEnvironment,
-  type FullEnv,
+  type FullEnv
 } from './config';
 
 // ============================================================================
@@ -156,7 +147,7 @@ export {
   type JwtRotationHandler,
   type RotatingJwtOptions,
   type SignOptions,
-  type VerifyOptions,
+  type VerifyOptions
 } from './security/crypto';
 
 // ============================================================================
@@ -172,14 +163,14 @@ export {
   validateCsrfToken,
   verifyToken as verifyCsrfToken,
   verifyToken,
-  type CsrfValidationOptions,
+  type CsrfValidationOptions
 } from './security/token';
 
 export {
   generateSecurityHeaders,
   getProductionSecurityDefaults,
   type SecurityHeaderOptions,
-  type SecurityHeaders,
+  type SecurityHeaders
 } from './security/headers';
 
 // ============================================================================
@@ -220,7 +211,7 @@ export {
   type RecordLoader,
   type RecordPointer,
   type RoleRule,
-  type TablePermissionConfig,
+  type TablePermissionConfig
 } from './security/permissions';
 
 // ============================================================================
@@ -236,7 +227,7 @@ export {
   type MemoryStoreStats,
   type RateLimitConfig,
   type RateLimiterStats,
-  type RateLimitInfo,
+  type RateLimitInfo
 } from './security/rate-limit';
 
 // ============================================================================
@@ -275,7 +266,7 @@ export {
   type StorageConfig,
   type StorageProvider,
   type StorageProviderName,
-  type UploadParams,
+  type UploadParams
 } from './storage';
 
 // ============================================================================
@@ -317,7 +308,7 @@ export {
   type WriteHooks,
   type WriteOperation,
   type WriteResult,
-  type WriteServiceOptions,
+  type WriteServiceOptions
 } from './queue';
 
 // ============================================================================
@@ -348,7 +339,7 @@ export {
   type SqlQueryOptions,
   type SqlSearchProviderConfig,
   type SqlSearchProviderOptions,
-  type SqlTableConfig,
+  type SqlTableConfig
 } from './search';
 
 // ============================================================================
@@ -369,7 +360,7 @@ export {
   MetricsCollector,
   resetMetricsCollector,
   type MetricsSummary,
-  type SystemContext,
+  type SystemContext
 } from './system';
 
 // ============================================================================
@@ -384,7 +375,7 @@ export {
   type SmsOptions,
   type SmsProvider,
   type SmsResult,
-  type TwilioConfig,
+  type TwilioConfig
 } from './sms';
 
 // ============================================================================
@@ -397,7 +388,7 @@ export {
   NoopGeoIpProvider,
   type GeoIpConfig,
   type GeoIpProvider,
-  type GeoIpResult,
+  type GeoIpResult
 } from './geo-ip';
 
 // ============================================================================
@@ -424,7 +415,7 @@ export {
   type RouteResult,
   type RouterOptions,
   type RouteSchema,
-  type ValidationSchema,
+  type ValidationSchema
 } from './routing';
 
 // ============================================================================
@@ -443,19 +434,20 @@ export {
   type BreadcrumbLevel,
   type ErrorContext,
   type ErrorTrackingConfig,
-  type ErrorTrackingProvider,
+  type ErrorTrackingProvider
 } from './observability';
 
 // ============================================================================
 // Utils
 // ============================================================================
 
-export { swaggerThemeCss } from './utils/swagger';
 export { isSafePath } from './utils/fs';
 export {
   isPortFree,
   isPortListening,
   pickAvailablePort,
   uniquePorts,
-  waitForPort,
+  waitForPort
 } from './utils/port';
+export { swaggerThemeCss } from './utils/swagger';
+

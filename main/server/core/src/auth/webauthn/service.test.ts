@@ -13,8 +13,8 @@ import {
   verifyRegistration,
 } from './service';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { Repositories } from '../../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mock @simplewebauthn/server

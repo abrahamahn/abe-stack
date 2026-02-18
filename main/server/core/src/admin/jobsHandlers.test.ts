@@ -18,8 +18,8 @@ import {
   handleRetryJob,
 } from './jobsHandlers';
 
-import type { AdminAppContext } from './types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext } from './types';
 
 // ============================================================================
 // Mocks
@@ -46,8 +46,8 @@ vi.mock('./jobsService', () => ({
   },
 }));
 
-vi.mock('@abe-stack/shared', async () => {
-  const actual = await vi.importActual('@abe-stack/shared');
+vi.mock('@bslt/shared', async () => {
+  const actual = await vi.importActual('@bslt/shared');
   return {
     ...actual,
     jobListQuerySchema: {
@@ -56,8 +56,8 @@ vi.mock('@abe-stack/shared', async () => {
   };
 });
 
-vi.mock('@abe-stack/db', async () => {
-  const actual = await vi.importActual<typeof import('../../../db/src')>('@abe-stack/db');
+vi.mock('@bslt/db', async () => {
+  const actual = await vi.importActual<typeof import('../../../db/src')>('@bslt/db');
   return {
     ...actual,
     PostgresQueueStore: vi.fn(),
@@ -157,7 +157,7 @@ describe('Jobs Handlers', () => {
     describe('when authenticated', () => {
       test('should return 200 with job list on success', async () => {
         const { listJobs } = await import('./jobsService');
-        const { jobListQuerySchema } = await import('@abe-stack/shared');
+        const { jobListQuerySchema } = await import('@bslt/shared');
 
         const mockJobList = {
           data: [
@@ -206,7 +206,7 @@ describe('Jobs Handlers', () => {
 
       test('should pass all query parameters to listJobs service', async () => {
         const { listJobs } = await import('./jobsService');
-        const { jobListQuerySchema } = await import('@abe-stack/shared');
+        const { jobListQuerySchema } = await import('@bslt/shared');
 
         const queryParams = {
           status: 'pending' as const,
@@ -240,7 +240,7 @@ describe('Jobs Handlers', () => {
 
       test('should return 200 when query has invalid page (uses defaults)', async () => {
         const { listJobs } = await import('./jobsService');
-        const { jobListQuerySchema } = await import('@abe-stack/shared');
+        const { jobListQuerySchema } = await import('@bslt/shared');
 
         // When invalid, the schema coerces to defaults
         vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
@@ -266,7 +266,7 @@ describe('Jobs Handlers', () => {
 
       test('should handle QueueStoreNotAvailableError with 500 status', async () => {
         const { listJobs, QueueStoreNotAvailableError } = await import('./jobsService');
-        const { jobListQuerySchema } = await import('@abe-stack/shared');
+        const { jobListQuerySchema } = await import('@bslt/shared');
 
         vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
           success: true,
@@ -284,7 +284,7 @@ describe('Jobs Handlers', () => {
 
       test('should return 500 for unexpected errors', async () => {
         const { listJobs } = await import('./jobsService');
-        const { jobListQuerySchema } = await import('@abe-stack/shared');
+        const { jobListQuerySchema } = await import('@bslt/shared');
 
         vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
           success: true,
@@ -666,7 +666,7 @@ describe('Jobs Handlers', () => {
 
   describe('edge cases', () => {
     test('should handle null user object gracefully', async () => {
-      const { jobListQuerySchema } = await import('@abe-stack/shared');
+      const { jobListQuerySchema } = await import('@bslt/shared');
 
       vi.mocked(jobListQuerySchema.safeParse).mockReturnValue({
         success: true,

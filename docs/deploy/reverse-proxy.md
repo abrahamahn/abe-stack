@@ -1,6 +1,6 @@
 # Reverse Proxy Configuration
 
-Caddy-based reverse proxy for TLS termination and request routing in ABE Stack.
+Caddy-based reverse proxy for TLS termination and request routing in BSLT.
 
 ---
 

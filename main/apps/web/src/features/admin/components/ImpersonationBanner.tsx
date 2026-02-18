@@ -6,7 +6,7 @@
  * Shows the target user's email and provides a button to end the session.
  */
 
-import { Alert, Button, Text } from '@abe-stack/ui';
+import { Alert, Button, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useImpersonation } from '../hooks/useImpersonation';

@@ -13,14 +13,14 @@ import {
   createApiKeyAuthMiddleware,
   createScopeGuard,
   getApiKeyContext,
-} from '@abe-stack/core/api-keys';
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { registerRouteMap } from '@abe-stack/server-engine';
+} from '@bslt/core/api-keys';
+import { createAuthGuard } from '@bslt/core/auth';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestJwt, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 interface ApiKeyRecord {

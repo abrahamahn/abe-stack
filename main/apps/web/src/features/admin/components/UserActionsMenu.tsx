@@ -5,7 +5,7 @@
  * Actions menu for admin user management (edit, lock, unlock).
  */
 
-import { Alert, Button, Card, Heading, Input, Select, Text, TextArea } from '@abe-stack/ui';
+import { Alert, Button, Card, Heading, Input, Select, Text, TextArea } from '@bslt/ui';
 import { useCallback, useState } from 'react';
 
 import { getUserStatus } from './StatusBadge';

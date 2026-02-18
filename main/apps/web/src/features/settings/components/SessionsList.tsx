@@ -5,7 +5,7 @@
  * Displays list of user sessions with revoke functionality.
  */
 
-import { Alert, Button, Heading, Skeleton, Text } from '@abe-stack/ui';
+import { Alert, Button, Heading, Skeleton, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';

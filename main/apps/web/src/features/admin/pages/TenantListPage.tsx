@@ -5,8 +5,8 @@
  * Admin page for listing and managing tenants/workspaces.
  */
 
-import { useNavigate } from '@abe-stack/react/router';
-import { formatDate } from '@abe-stack/shared';
+import { useNavigate } from '@bslt/react/router';
+import { formatDate } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -21,12 +21,12 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import { useTenants } from '../hooks';
 
-import type { AdminTenantLocal } from '../services/adminApi';
 import type { JSX } from 'react';
+import type { AdminTenantLocal } from '../services/adminApi';
 
 export const TenantListPage = (): JSX.Element => {
   const { tenants, total, isLoading, error, refresh } = useTenants();

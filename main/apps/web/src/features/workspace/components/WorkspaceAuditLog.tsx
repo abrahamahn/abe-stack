@@ -5,7 +5,7 @@
  * Displays a table of audit events for the workspace.
  */
 
-import { getAuditActionTone } from '@abe-stack/shared';
+import { getAuditActionTone } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
 import { useAuditLog } from '../hooks/useAuditLog';

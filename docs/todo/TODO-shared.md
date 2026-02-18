@@ -2,7 +2,7 @@
 
 ## Goal Description
 
-Refactor `@abe-stack/shared` to eliminate redundancy and "spaghetti code" by implementing a strict 4-Layer Architecture.
+Refactor `@bslt/shared` to eliminate redundancy and "spaghetti code" by implementing a strict 4-Layer Architecture.
 
 ## The 4-Layer Architecture
 

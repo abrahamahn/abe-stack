@@ -6,7 +6,7 @@ import { useUndoRedoStore } from '../stores/undoRedoStore';
 
 import { useUndoRedoShortcuts } from './useUndoRedoShortcuts';
 
-import type { Transaction } from '@abe-stack/shared';
+import type { Transaction } from '@bslt/shared';
 
 /** Handler for applying undo/redo transactions. */
 export interface UndoRedoHandler {

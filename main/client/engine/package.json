@@ -1,8 +1,8 @@
 {
-  "name": "@abe-stack/client-engine",
+  "name": "@bslt/client-engine",
   "version": "1.1.0",
   "type": "module",
-  "description": "Engine for abe-stack API (web/desktop/mobile)",
+  "description": "Engine for bslt API (web/desktop/mobile)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -30,28 +30,28 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-engine --report-unused-disable-directives",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-engine --report-unused-disable-directives",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "author": "",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "url": "https://github.com/abrahamahn/bslt.git",
     "directory": "client/engine"
   },
   "bugs": {
-    "url": "https://github.com/abrahamahn/abe-stack/issues"
+    "url": "https://github.com/abrahamahn/bslt/issues"
   },
-  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "homepage": "https://github.com/abrahamahn/bslt#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/api": "workspace:*",
-    "@abe-stack/shared": "workspace:*"
+    "@bslt/api": "workspace:*",
+    "@bslt/shared": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"

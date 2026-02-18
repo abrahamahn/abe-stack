@@ -11,14 +11,14 @@ import {
   generateToken,
   signToken,
   validateCsrfToken,
-} from '@abe-stack/server-engine';
+} from '@bslt/server-engine';
 import {
   CSRF_COOKIE_NAME,
   CSRF_EXEMPT_PATHS,
   HTTP_STATUS,
   SAFE_METHODS,
   extractCsrfToken,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 

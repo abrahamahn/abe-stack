@@ -24,9 +24,9 @@ pnpm test:verbose                  # All tests with full output
 pnpm test -- --run path/to/file    # Single test file
 
 # Package-scoped
-pnpm --filter @abe-stack/web test
-pnpm --filter @abe-stack/server test
-pnpm --filter @abe-stack/ui test
+pnpm --filter @bslt/web test
+pnpm --filter @bslt/server test
+pnpm --filter @bslt/ui test
 ```
 
 ## Configuration
@@ -55,7 +55,7 @@ export const baseConfig = defineConfig({
 - `environment: 'jsdom'` for browser API simulation
 - `setupFiles: ['./src/__tests__/setup.ts']` for global mocks
 - `pool: 'threads'` with `maxConcurrency: 4` for memory management
-- Custom `resolveWorkspaceToSource` plugin to resolve `@abe-stack/*` to source files
+- Custom `resolveWorkspaceToSource` plugin to resolve `@bslt/*` to source files
 
 ## Test Setup (Golden Standard)
 
@@ -151,7 +151,7 @@ Tests must be run from the package directory (not root) for jsdom environment to
 
 ```bash
 # CORRECT
-pnpm --filter @abe-stack/web test
+pnpm --filter @bslt/web test
 
 # ALSO CORRECT
 cd main/apps/web && pnpm test

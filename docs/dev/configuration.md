@@ -47,14 +47,14 @@ Defined in the root `tsconfig.json` `compilerOptions.paths`:
 
 | Alias                      | Source                              |
 | -------------------------- | ----------------------------------- |
-| `@abe-stack/shared`        | `./main/shared/src/index.ts`        |
-| `@abe-stack/ui`            | `./main/client/ui/src/index.ts`     |
-| `@abe-stack/api`           | `./main/client/api/src/index.ts`    |
-| `@abe-stack/core`          | `./main/server/core/src/index.ts`   |
-| `@abe-stack/db`            | `./main/server/db/src/index.ts`     |
-| `@abe-stack/server-engine` | `./main/server/engine/src/index.ts` |
+| `@bslt/shared`        | `./main/shared/src/index.ts`        |
+| `@bslt/ui`            | `./main/client/ui/src/index.ts`     |
+| `@bslt/api`           | `./main/client/api/src/index.ts`    |
+| `@bslt/core`          | `./main/server/core/src/index.ts`   |
+| `@bslt/db`            | `./main/server/db/src/index.ts`     |
+| `@bslt/server-engine` | `./main/server/engine/src/index.ts` |
 
-Subpath aliases (e.g., `@abe-stack/shared/*`) map to the corresponding source directories.
+Subpath aliases (e.g., `@bslt/shared/*`) map to the corresponding source directories.
 
 ## Path Aliases (Web App)
 
@@ -125,7 +125,7 @@ Environment variables are validated at startup using Zod schemas defined in `mai
 
 ```typescript
 // Example: accessing validated config
-import { config } from '@abe-stack/shared/config';
+import { config } from '@bslt/shared/config';
 
 config.server.port; // number, validated
 config.auth.jwtSecret; // string, validated length >= 32

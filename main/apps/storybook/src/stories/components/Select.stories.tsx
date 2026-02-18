@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/components/Select.stories.tsx
+import { Select } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Select } from '@abe-stack/ui';
 
 const meta: Meta<typeof Select> = {
   title: 'Components/Select',

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { getNotificationRoute } from './getNotificationRoute';
 
-import type { Notification } from '@abe-stack/shared';
+import type { Notification } from '@bslt/shared';
 
 function makeNotification(data?: Record<string, unknown>): Notification {
   return {

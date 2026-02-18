@@ -1,9 +1,9 @@
 // main/client/ui/src/components/StatusBadge.tsx
-import { getUserStatusLabel, getUserStatusTone } from '@abe-stack/shared';
+import { getUserStatusLabel, getUserStatusTone } from '@bslt/shared';
 
 import { Badge } from '../elements/Badge';
 
-import type { UserStatus } from '@abe-stack/shared';
+import type { UserStatus } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 interface AdminUserLocal {

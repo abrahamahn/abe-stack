@@ -10,7 +10,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { useQueryCache } from './QueryCacheProvider';
 
-import type { QueryKey } from '@abe-stack/client-engine';
+import type { QueryKey } from '@bslt/client-engine';
 
 // ============================================================================
 // Types

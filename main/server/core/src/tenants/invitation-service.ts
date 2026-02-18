@@ -20,10 +20,10 @@ import {
   MS_PER_DAY,
   NotFoundError,
   QUOTAS,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
+import type { Invitation as DomainInvitation, TenantRole } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
-import type { Invitation as DomainInvitation, TenantRole } from '@abe-stack/shared';
 
 // ============================================================================
 // Constants

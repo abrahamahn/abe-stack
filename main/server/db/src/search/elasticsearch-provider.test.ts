@@ -6,13 +6,13 @@
  * This is a placeholder until actual Elasticsearch integration is implemented.
  */
 
-import { FILTER_OPERATORS } from '@abe-stack/shared';
+import { FILTER_OPERATORS } from '@bslt/shared';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { createElasticsearchProvider, ElasticsearchProvider } from './elasticsearch-provider';
 
+import type { FacetedSearchQuery, SearchQuery } from '@bslt/shared';
 import type { ElasticsearchProviderConfig } from './types';
-import type { FacetedSearchQuery, SearchQuery } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Utilities

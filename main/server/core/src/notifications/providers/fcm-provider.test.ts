@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FcmProvider, createFcmProvider } from './fcm-provider';
 
+import type { NotificationPayload, PushSendResult, PushSubscription } from '@bslt/shared';
 import type { SubscriptionWithId } from './types';
-import type { NotificationPayload, PushSendResult, PushSubscription } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Utilities

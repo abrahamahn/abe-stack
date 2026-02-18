@@ -5,10 +5,10 @@
  * Type definitions for the row-level permissions system.
  * Supports ownership-based, workspace/team membership, and role-based permissions.
  *
- * @module @abe-stack/server-engine/security/permissions
+ * @module @bslt/server-engine/security/permissions
  */
 
-import type { UserRole } from '@abe-stack/db';
+import type { UserRole } from '@bslt/db';
 
 // ============================================================================
 // Permission Types

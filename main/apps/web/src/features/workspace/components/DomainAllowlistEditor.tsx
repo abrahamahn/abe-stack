@@ -6,8 +6,8 @@
  * Users can add domains (Enter key) and remove them (X button).
  */
 
-import { Alert, Badge, Button, CloseButton, FormField, Input } from '@abe-stack/ui';
-import { useState, type ReactElement, type ChangeEvent } from 'react';
+import { Alert, Badge, Button, CloseButton, FormField, Input } from '@bslt/ui';
+import { useState, type ChangeEvent, type ReactElement } from 'react';
 
 // ============================================================================
 // Types

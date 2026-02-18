@@ -5,16 +5,16 @@
  * API client for fetching user and tenant activity feeds.
  */
 
-import { createActivitiesClient } from '@abe-stack/api';
+import { createActivitiesClient } from '@bslt/api';
 
-import type { ActivitiesClient, ActivitiesClientConfig } from '@abe-stack/api';
+import type { ActivitiesClient, ActivitiesClientConfig } from '@bslt/api';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type ActivityLocal = import('@abe-stack/api').ActivityLocal;
-export type ActivityListResponse = import('@abe-stack/api').ActivityListResponse;
+export type ActivityLocal = import('@bslt/api').ActivityLocal;
+export type ActivityListResponse = import('@bslt/api').ActivityListResponse;
 export type ActivitiesApiConfig = ActivitiesClientConfig;
 export type ActivitiesApi = ActivitiesClient;
 

@@ -24,7 +24,7 @@ import {
   WeakPasswordError,
   type UserId,
   type UserRole,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   and,
@@ -67,9 +67,9 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
+import type { AuthConfig } from '@bslt/shared/config';
 import type { EmailOptions } from '../../../engine/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 
 // ============================================================================
 // Helper Functions
@@ -114,7 +114,7 @@ export interface AuthResult {
   accessToken: string;
   /** Opaque refresh token */
   refreshToken: string;
-  /** Authenticated user data (matches domain User from @abe-stack/shared) */
+  /** Authenticated user data (matches domain User from @bslt/shared) */
   user: {
     id: UserId;
     email: string;

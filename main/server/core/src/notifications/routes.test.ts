@@ -19,16 +19,16 @@ import {
   subscribeRequestSchema,
   unsubscribeRequestSchema,
   updatePreferencesRequestSchema,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ============================================================================
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@abe-stack/server-engine', async () => {
+vi.mock('@bslt/server-engine', async () => {
   const actual = await vi.importActual<typeof import('../../../engine/src')>(
-    '@abe-stack/server-engine',
+    '@bslt/server-engine',
   );
   return {
     ...actual,
@@ -47,9 +47,9 @@ vi.mock('./handlers', () => ({
 
 import { notificationRoutes } from './routes';
 
-import type { NotificationModuleDeps, NotificationRequest } from './types';
-import type { RouteDefinition } from '../../../engine/src';
 import type { FastifyReply } from 'fastify';
+import type { RouteDefinition } from '../../../engine/src';
+import type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // ============================================================================
 // Test Helpers

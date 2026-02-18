@@ -1,5 +1,5 @@
 // main/apps/web/src/features/ui-library/components/UILibraryComponentList.tsx
-import { CloseButton, Heading, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
+import { CloseButton, Heading, MenuItem, ScrollArea, Text } from '@bslt/ui';
 
 import type { ComponentDemo } from '../types';
 

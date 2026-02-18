@@ -6,9 +6,9 @@
  * Only shows buttons for enabled providers.
  */
 
-import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@abe-stack/react';
-import { AuthFormLayout, OAuthButton, Text } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@bslt/react';
+import { AuthFormLayout, OAuthButton, Text } from '@bslt/ui';
 import { useMemo } from 'react';
 
 import type { ReactElement } from 'react';

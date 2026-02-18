@@ -8,8 +8,8 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { buildConnectionString, createDbClient, type DbClient } from '@abe-stack/db';
-import { loadServerEnv } from '@abe-stack/server-engine';
+import { buildConnectionString, createDbClient, type DbClient } from '@bslt/db';
+import { loadServerEnv } from '@bslt/server-engine';
 
 export interface DbHarness {
   /** The connection string for the isolated test database */

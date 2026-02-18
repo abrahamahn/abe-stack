@@ -5,10 +5,10 @@ import {
   type PermissionRecord,
   type PermissionType,
   type RecordPointer,
-} from '@abe-stack/server-engine';
-import { HTTP_STATUS } from '@abe-stack/shared';
+} from '@bslt/server-engine';
+import { HTTP_STATUS } from '@bslt/shared';
 
-import type { UserRole } from '@abe-stack/db';
+import type { UserRole } from '@bslt/db';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

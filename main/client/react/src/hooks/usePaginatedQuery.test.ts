@@ -1,6 +1,6 @@
 // main/client/react/src/hooks/usePaginatedQuery.test.ts
 /** @vitest-environment jsdom */
-import { QueryCache } from '@abe-stack/client-engine';
+import { QueryCache } from '@bslt/client-engine';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import react from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -9,13 +9,13 @@ import { QueryCacheProvider } from '../query/QueryCacheProvider';
 
 import { useOffsetPaginatedQuery, usePaginatedQuery } from './usePaginatedQuery';
 
+import type { ReactElement, ReactNode } from 'react';
 import type {
   UseOffsetPaginatedQueryOptions,
   UseOffsetPaginatedQueryResult,
   UsePaginatedQueryOptions,
   UsePaginatedQueryResult,
 } from './usePaginatedQuery';
-import type { ReactElement, ReactNode } from 'react';
 const createWrapper = () => {
   const queryCache = new QueryCache({
     defaultStaleTime: 0,

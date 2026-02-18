@@ -6,16 +6,16 @@
  * Tests complex stateful behaviors like token rotation and revocation.
  */
 
-import { authRoutes, createAuthGuard } from '@abe-stack/core/auth';
-import { createRepositories } from '@abe-stack/db';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { authRoutes, createAuthGuard } from '@bslt/core/auth';
+import { createRepositories } from '@bslt/db';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDbHarness, type DbHarness } from './db-harness';
 import { seedTestUser } from './seed-helpers';
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 describe.skip('Auth API Integration (Real DB)', () => {
   let testServer: TestServer;

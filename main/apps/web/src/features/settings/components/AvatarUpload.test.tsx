@@ -12,7 +12,7 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the hooks
 vi.mock('../hooks', () => ({
@@ -21,8 +21,8 @@ vi.mock('../hooks', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@bslt/ui', async () => {
+  const actual = await vi.importActual('@bslt/ui');
 
   const mockAlert = ({ children, tone }: { children: React.ReactNode; tone: string }) => (
     <div data-testid="alert" data-tone={tone}>

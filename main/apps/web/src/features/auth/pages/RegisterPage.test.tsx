@@ -1,7 +1,7 @@
 // main/apps/web/src/features/auth/pages/RegisterPage.test.tsx
 import { RegisterPage } from '@auth/pages/RegisterPage';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from './../../../__tests__/utils';
 
@@ -21,9 +21,9 @@ const mockUseAuth = vi.fn(() => ({
 // Mock navigate
 const mockNavigateToMode = vi.fn();
 
-// Mock @abe-stack/ui - only mock useAuthModeNavigation, keep useFormState real
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+// Mock @bslt/ui - only mock useAuthModeNavigation, keep useFormState real
+vi.mock('@bslt/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/ui')>();
   return {
     ...actual,
     useAuthModeNavigation: () => ({

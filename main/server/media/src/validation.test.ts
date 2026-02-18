@@ -3,7 +3,7 @@
  * Tests for server-specific validation functions.
  *
  * Pure validation utility tests (sanitizeFilename, generateFileId,
- * validateUploadConfig) are in @abe-stack/shared
+ * validateUploadConfig) are in @bslt/shared
  * (main/shared/src/domain/media/media.validation.test.ts)
  */
 

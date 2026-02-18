@@ -12,10 +12,10 @@ import {
   Spinner,
   Text,
   ToastContainer,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
-import type { ComponentDemo } from '../types';
 import type { ReactElement } from 'react';
+import type { ComponentDemo } from '../types';
 
 export const componentCatalog: Record<string, ComponentDemo> = {
   box: {

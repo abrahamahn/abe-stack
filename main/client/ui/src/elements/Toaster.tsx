@@ -1,8 +1,8 @@
 // main/client/ui/src/elements/Toaster.tsx
-import '../styles/elements.css';
 import { ToastContainer } from '@components/Toast';
+import '../styles/elements.css';
 
-import type { ToastMessage } from '@abe-stack/react';
+import type { ToastMessage } from '@bslt/react';
 import type { ReactElement } from 'react';
 
 /** Position options for the fixed-position toast container */

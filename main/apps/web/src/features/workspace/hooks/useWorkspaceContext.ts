@@ -5,7 +5,7 @@
  * Manages the current workspace selection in localStorage.
  */
 
-import { useLocalStorageValue } from '@abe-stack/react/hooks';
+import { useLocalStorageValue } from '@bslt/react/hooks';
 
 // ============================================================================
 // Constants

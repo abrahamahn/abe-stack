@@ -1,6 +1,6 @@
 // main/apps/web/src/app/layouts/AppRightInfo.tsx
-import { useLocation } from '@abe-stack/react/router';
-import { Text } from '@abe-stack/ui';
+import { useLocation } from '@bslt/react/router';
+import { Text } from '@bslt/ui';
 import { HomeRightSidebar } from '@features/home/components';
 
 import type { ReactElement } from 'react';

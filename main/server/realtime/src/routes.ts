@@ -19,11 +19,11 @@ import {
   transactionSchema,
   type GetRecordsRequest,
   type HandlerContext,
-  type RecordPointer,
   type RealtimeTransaction,
+  type RecordPointer,
   type RouteMap,
   type RouteResult,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { handleGetRecords, handleWrite } from './handlers';
 

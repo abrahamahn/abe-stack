@@ -6,7 +6,7 @@
  *   ENV_FILE=config/env/.env.local node --import tsx main/tools/scripts/audit/check-smtp-env.ts
  */
 
-import { initEnv, loadServerEnv } from '@abe-stack/server-engine';
+import { initEnv, loadServerEnv } from '@bslt/server-engine';
 
 initEnv();
 const env = loadServerEnv();

@@ -14,7 +14,7 @@ import {
   STORAGE_PROVIDERS,
   type FilePurpose,
   type StorageProvider,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // Re-export shared constants for consumers that import from schema
 export { FILE_PURPOSES, STORAGE_PROVIDERS };

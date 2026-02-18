@@ -6,7 +6,7 @@
  * Supports listing, creating, revoking, and deleting API keys.
  */
 
-import { formatDate } from '@abe-stack/shared';
+import { formatDate } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -22,8 +22,8 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
-import { CardAsyncState } from '@abe-stack/ui/components/CardAsyncState';
+} from '@bslt/ui';
+import { CardAsyncState } from '@bslt/ui/components/CardAsyncState';
 import { useCallback, useState } from 'react';
 
 import { useApiKeys, useCreateApiKey, useDeleteApiKey, useRevokeApiKey } from '../hooks/useApiKeys';

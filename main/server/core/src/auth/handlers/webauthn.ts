@@ -12,7 +12,7 @@ import {
   type HttpErrorResponse,
   type PasskeyListItem,
   type RenamePasskeyRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { withTransaction } from '../../../../db/src';
 import { assertUserActive } from '../middleware';

@@ -6,11 +6,11 @@
  * Only users with 'owner' or 'admin' roles can perform actions.
  */
 
-import { getRoleLevel } from '@abe-stack/shared';
-import { Badge, Button, Card, Modal, Select, Text } from '@abe-stack/ui';
+import { getRoleLevel } from '@bslt/shared';
+import { Badge, Button, Card, Modal, Select, Text } from '@bslt/ui';
 import { useState, type ReactElement } from 'react';
 
-import type { TenantRole } from '@abe-stack/shared';
+import type { TenantRole } from '@bslt/shared';
 
 // ============================================================================
 // Types

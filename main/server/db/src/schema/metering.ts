@@ -6,7 +6,7 @@
  * Maps to migration 0007_metering.sql.
  */
 
-import type { AggregationType } from '@abe-stack/shared';
+import type { AggregationType } from '@bslt/shared';
 
 // Re-export shared type for consumers that import from schema
 export type { AggregationType };

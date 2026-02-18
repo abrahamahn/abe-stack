@@ -10,12 +10,12 @@ import {
   coerceDate,
   createArraySchema,
   createSchema,
+  isoDateTimeSchema,
   parseNullable,
   parseNullableOptional,
   parseOptional,
   parseString,
 } from '../../primitives/schema';
-import { isoDateTimeSchema } from '../../primitives/schema';
 import { apiKeyIdSchema, tenantIdSchema, userIdSchema } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';

@@ -1,11 +1,7 @@
 // main/client/api/src/index.ts
-// Lightweight API client wrappers for abe-stack
+// Lightweight API client wrappers for bslt
 
 // API Client
-export { createApiClient } from './api/client';
-export type { ApiClient, ApiClientConfig, TosRequiredPayload } from './api/client';
-export { clearApiClient, getApiClient } from './api/instance';
-export type { ApiClientOptions } from './api/types';
 export type {
   AuthResponse,
   BffLoginResponse,
@@ -17,17 +13,13 @@ export type {
   EmailVerificationResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
-  LoginRequest,
-  MagicLinkRequest,
+  LoginRequest, LoginSuccessResponse, MagicLinkRequest,
   MagicLinkRequestResponse,
   MagicLinkVerifyRequest,
-  MagicLinkVerifyResponse,
-  LoginSuccessResponse,
-  OAuthConnectionsResponse,
+  MagicLinkVerifyResponse, OAuthConnectionsResponse,
   OAuthEnabledProvidersResponse,
   OAuthProvider,
-  OAuthUnlinkResponse,
-  RegisterRequest,
+  OAuthUnlinkResponse, PasskeyListItem, RegisterRequest,
   RegisterResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
@@ -39,17 +31,18 @@ export type {
   TotpSetupResponse,
   TotpStatusResponse,
   TotpVerifyRequest,
-  TotpVerifyResponse,
-  VerifyPhoneResponse,
-  User,
-  PasskeyListItem,
-} from '@abe-stack/shared';
+  TotpVerifyResponse, User, VerifyPhoneResponse
+} from '@bslt/shared';
+export { createApiClient } from './api/client';
+export type { ApiClient, ApiClientConfig, TosRequiredPayload } from './api/client';
+export { clearApiClient, getApiClient } from './api/instance';
+export type { ApiClientOptions } from './api/types';
 
 // Billing
-export { createBillingClient } from './billing/client';
-export type { BillingClient, BillingClientConfig } from './billing/client';
 export { createAdminBillingClient } from './billing/admin';
 export type { AdminBillingClient, AdminBillingClientConfig } from './billing/admin';
+export { createBillingClient } from './billing/client';
+export type { BillingClient, BillingClientConfig } from './billing/client';
 
 // Admin
 export { createAdminClient } from './admin/client';
@@ -61,27 +54,24 @@ export type {
   ActivitiesClient,
   ActivitiesClientConfig,
   ActivityListResponse,
-  ActivityLocal,
+  ActivityLocal
 } from './activities/client';
 
 // Errors
 export {
-  ApiError,
-  NetworkError,
-  TimeoutError,
-  createApiError,
+  ApiError, createApiError,
   getErrorMessage,
   isApiError,
   isNetworkError,
   isTimeoutError,
-  isUnauthorizedError,
+  isUnauthorizedError, NetworkError,
+  TimeoutError
 } from './errors';
 export type { ApiErrorBody } from './errors';
 
 // Utils
-export { API_PREFIX, trimTrailingSlashes } from './utils';
+export { API_PREFIX, createCsrfRequestClient, trimTrailingSlashes } from './utils';
 export type { BaseClientConfig } from './utils';
-export { createCsrfRequestClient } from './utils';
 
 // Notifications
 export {
@@ -93,14 +83,14 @@ export {
   requestPushPermission,
   subscribeToPush,
   unsubscribeFromPush,
-  urlBase64ToUint8Array,
+  urlBase64ToUint8Array
 } from './notifications/client';
 export type {
   DeleteNotificationResponse,
   MarkReadResponse,
   NotificationClient,
   NotificationClientConfig,
-  NotificationsListResponse,
+  NotificationsListResponse
 } from './notifications/client';
 
 // Devices
@@ -117,7 +107,7 @@ export type {
   CreateApiKeyResponse,
   DeleteApiKeyResponse,
   ListApiKeysResponse,
-  RevokeApiKeyResponse,
+  RevokeApiKeyResponse
 } from './api-keys/client';
 
 // Phone/SMS
@@ -133,7 +123,7 @@ export type {
   WebhookClientConfig,
   WebhookDeliveryItem,
   WebhookItem,
-  WebhookWithDeliveries,
+  WebhookWithDeliveries
 } from './webhooks/client';
 
 // Workspace
@@ -143,21 +133,18 @@ export type { WorkspaceClient, WorkspaceClientConfig } from './workspace/client'
 // Media
 export { createMediaClient } from './media/client';
 export type {
-  MediaClient,
-  MediaClientConfig,
-  MediaMetadata as ApiMediaMetadata,
-  MediaStatusResponse,
-  MediaUploadResponse,
+  MediaMetadata as ApiMediaMetadata, MediaClient,
+  MediaClientConfig, MediaStatusResponse,
+  MediaUploadResponse
 } from './media/client';
 
 // Settings
 export { createSettingsClient } from './settings/client';
 export type {
-  ApiKeyLocal,
-  CreateApiKeyRequest as SettingsCreateApiKeyRequest,
+  ApiKeyLocal, SettingsClient,
+  SettingsClientConfig, CreateApiKeyRequest as SettingsCreateApiKeyRequest,
   CreateApiKeyResponse as SettingsCreateApiKeyResponse,
   ListApiKeysResponse as SettingsListApiKeysResponse,
-  RevokeApiKeyResponse as SettingsRevokeApiKeyResponse,
-  SettingsClient,
-  SettingsClientConfig,
+  RevokeApiKeyResponse as SettingsRevokeApiKeyResponse
 } from './settings/client';
+

@@ -1,11 +1,11 @@
 // main/client/ui/src/components/UndoHistoryPanel.tsx
 
-import { useUndoRedoStore } from '@abe-stack/react';
+import { useUndoRedoStore } from '@bslt/react';
 
 import { Button } from '../elements/Button';
 import { Text } from '../elements/Text';
 
-import type { Transaction } from '@abe-stack/shared';
+import type { Transaction } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 /** Props for the UndoHistoryPanel component. */

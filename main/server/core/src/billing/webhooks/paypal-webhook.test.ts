@@ -19,10 +19,9 @@ import {
 
 import { handlePayPalWebhook } from './paypal-webhook';
 
+import type { NormalizedWebhookEvent, ServerLogger } from '@bslt/shared';
+import type { PayPalProviderConfig as PayPalConfig } from '@bslt/shared/config';
 import type { WebhookRepositories } from '../types';
-import type { NormalizedWebhookEvent } from '@abe-stack/shared';
-import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/shared/config';
-import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Mock Dependencies
@@ -32,7 +31,7 @@ const { MockPayPalProvider } = vi.hoisted(() => {
   return { MockPayPalProvider: vi.fn() };
 });
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   createBillingEventRepository: vi.fn(),
   createCustomerMappingRepository: vi.fn(),
   createInvoiceRepository: vi.fn(),

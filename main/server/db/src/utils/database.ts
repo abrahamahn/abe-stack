@@ -9,7 +9,7 @@
  * @module
  */
 
-import { camelToSnake, camelizeKeys, snakeToCamel, snakeifyKeys } from '@abe-stack/shared';
+import { camelToSnake, camelizeKeys, snakeToCamel, snakeifyKeys } from '@bslt/shared';
 
 // Re-export shared casing utilities so the barrel (utils/index.ts) stays unchanged
 export { camelToSnake, camelizeKeys, snakeToCamel, snakeifyKeys };

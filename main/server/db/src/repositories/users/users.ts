@@ -13,7 +13,7 @@ import {
   canonicalizeEmail,
   type PaginatedResult,
   type UserStatus,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   and,
@@ -31,12 +31,12 @@ import {
   update,
 } from '../../builder/index';
 import {
+  USER_COLUMNS,
+  USERS_TABLE,
   type NewUser,
   type UpdateUser,
   type User,
   type UserRole,
-  USER_COLUMNS,
-  USERS_TABLE,
 } from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
@@ -47,7 +47,7 @@ import type { RawDb } from '../../client';
 // Admin User List Types
 // ============================================================================
 
-// UserStatus imported from @abe-stack/shared (re-exported for consumers)
+// UserStatus imported from @bslt/shared (re-exported for consumers)
 export type { UserStatus };
 
 /**

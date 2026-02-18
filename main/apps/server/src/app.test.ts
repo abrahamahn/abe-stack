@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp } from './app';
 
-import type { CacheProvider, QueueServer } from '@abe-stack/server-engine';
-import type { AppConfig } from '@abe-stack/shared/config';
+import type { CacheProvider, QueueServer } from '@bslt/server-engine';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -29,7 +29,7 @@ vi.mock('@/config', () => ({
   },
 }));
 
-vi.mock('@abe-stack/db', () => ({
+vi.mock('@bslt/db', () => ({
   USERS_TABLE: 'users',
   createDbClient: vi.fn(() => ({
     query: vi.fn(),
@@ -121,15 +121,15 @@ vi.mock('@/server', () => ({
   listen: mockListenFactory,
 }));
 
-// Mock @abe-stack/core/auth for verifyToken (used by app.ts for WebSocket DI)
-vi.mock('@abe-stack/core/auth', () => ({
+// Mock @bslt/core/auth for verifyToken (used by app.ts for WebSocket DI)
+vi.mock('@bslt/core/auth', () => ({
   verifyToken: vi.fn(),
   createAuthGuard: vi.fn(),
 }));
 
-// Mock @abe-stack/websocket for WebSocket registration
-// app.ts imports registerWebSocket and getWebSocketStats from @abe-stack/websocket
-vi.mock('@abe-stack/websocket', () => ({
+// Mock @bslt/websocket for WebSocket registration
+// app.ts imports registerWebSocket and getWebSocketStats from @bslt/websocket
+vi.mock('@bslt/websocket', () => ({
   registerWebSocket: vi.fn(),
   getWebSocketStats: vi.fn(() => ({
     connections: 0,
@@ -138,8 +138,8 @@ vi.mock('@abe-stack/websocket', () => ({
   })),
 }));
 
-// Mock @abe-stack/core/notifications for notification provider service
-vi.mock('@abe-stack/core/notifications', () => ({
+// Mock @bslt/core/notifications for notification provider service
+vi.mock('@bslt/core/notifications', () => ({
   createNotificationProviderService: vi.fn(() => ({
     send: vi.fn(),
     isConfigured: vi.fn(() => false),
@@ -148,8 +148,8 @@ vi.mock('@abe-stack/core/notifications', () => ({
 }));
 
 // Mock health module (logStartupSummary used by app.ts)
-vi.mock('@abe-stack/server-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/server-engine')>();
+vi.mock('@bslt/server-engine', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/server-engine')>();
   return {
     ...actual,
     logStartupSummary: vi.fn().mockResolvedValue(undefined),
@@ -277,10 +277,10 @@ vi.mock('./infrastructure', () => ({
   })),
 }));
 
-// Note: We don't mock @abe-stack/shared because vite-tsconfig-paths resolves it
+// Note: We don't mock @bslt/shared because vite-tsconfig-paths resolves it
 // differently than the mock path. Instead, we spy on the App.log getter in tests.
 
-vi.mock('@abe-stack/shared/pubsub', () => {
+vi.mock('@bslt/shared/pubsub', () => {
   // Mock class that can be instantiated with `new`
   class MockSubscriptionManager {
     setAdapter = vi.fn();
@@ -291,7 +291,7 @@ vi.mock('@abe-stack/shared/pubsub', () => {
   };
 });
 
-vi.mock('@abe-stack/shared/pubsub/postgres', () => {
+vi.mock('@bslt/shared/pubsub/postgres', () => {
   return {
     createPostgresPubSub: vi.fn(() => ({
       start: vi.fn().mockResolvedValue(undefined),
@@ -486,12 +486,12 @@ describe('App', () => {
     mockServerFactory.mockReset();
     mockListenFactory.mockReset();
     mockListenFactory.mockResolvedValue(undefined);
-    // Reset @abe-stack/db mocks
-    const db = await import('@abe-stack/db');
+    // Reset @bslt/db mocks
+    const db = await import('@bslt/db');
     vi.mocked(db.requireValidSchema).mockReset();
     vi.mocked(db.requireValidSchema).mockResolvedValue(undefined);
     // Reset health mocks
-    const health = await import('@abe-stack/server-engine');
+    const health = await import('@bslt/server-engine');
     vi.mocked(health.logStartupSummary).mockReset();
     vi.mocked(health.logStartupSummary).mockResolvedValue(undefined);
   });
@@ -671,9 +671,9 @@ describe('App', () => {
       mockServerFactory.mockResolvedValue(mockServer);
       mockListenFactory.mockResolvedValue(undefined);
 
-      const { requireValidSchema } = await import('@abe-stack/db');
+      const { requireValidSchema } = await import('@bslt/db');
       vi.mocked(requireValidSchema).mockResolvedValue(undefined);
-      const { logStartupSummary } = await import('@abe-stack/server-engine');
+      const { logStartupSummary } = await import('@bslt/server-engine');
       vi.mocked(logStartupSummary).mockResolvedValue(undefined);
 
       const mockSystemContext = {
@@ -756,7 +756,7 @@ describe('App', () => {
 
       mockServerFactory.mockResolvedValue(mockServer);
 
-      const { requireValidSchema } = await import('@abe-stack/db');
+      const { requireValidSchema } = await import('@bslt/db');
       vi.mocked(requireValidSchema).mockRejectedValue(new Error('Invalid schema'));
 
       const app = new App(config, {} as any);

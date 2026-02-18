@@ -1,4 +1,4 @@
-# @abe-stack/client-engine
+# @bslt/client-engine
 
 > Optimistic-first data layer.
 
@@ -21,13 +21,13 @@ Type-safe API client and client-side state management. The client is the optimis
 ## Installation
 
 ```bash
-pnpm add @abe-stack/client-engine
+pnpm add @bslt/client-engine
 ```
 
 ## Quick Start
 
 ```typescript
-import { RealtimeProvider, useRecord, useWrite } from '@abe-stack/client-engine';
+import { RealtimeProvider, useRecord, useWrite } from '@bslt/client-engine';
 
 // Wrap your app
 function App() {
@@ -60,7 +60,7 @@ Type-safe REST clients with automatic auth headers.
 **Standalone Client** (simple fetch-based):
 
 ```typescript
-import { createApiClient } from '@abe-stack/client-engine';
+import { createApiClient } from '@bslt/client-engine';
 
 const api = createApiClient({
   baseUrl: 'http://localhost:3000',
@@ -86,7 +86,7 @@ await api.resendVerification({ email });
 **With Query Cache** (for generic fetching):
 
 ```typescript
-import { QueryCache, QueryCacheProvider, useQuery } from '@abe-stack/client-engine';
+import { QueryCache, QueryCacheProvider, useQuery } from '@bslt/client-engine';
 
 const queryCache = new QueryCache({ defaultStaleTime: 5 * 60 * 1000 });
 
@@ -114,7 +114,7 @@ function UserList() {
 In-memory cache with version conflict resolution and optimistic updates.
 
 ```typescript
-import { RecordCache } from '@abe-stack/client-engine';
+import { RecordCache } from '@bslt/client-engine';
 
 const cache = new RecordCache<{ user: User; post: Post }>();
 
@@ -140,7 +140,7 @@ try {
 Request deduplication with TTL.
 
 ```typescript
-import { LoaderCache, loadWithCache } from '@abe-stack/client-engine';
+import { LoaderCache, loadWithCache } from '@bslt/client-engine';
 
 const cache = new LoaderCache<User>({ defaultTtlMs: 60000 });
 
@@ -156,7 +156,7 @@ const [user1, user2] = await Promise.all([
 Real-time subscriptions with automatic reconnection.
 
 ```typescript
-import { WebsocketPubsubClient } from '@abe-stack/client-engine';
+import { WebsocketPubsubClient } from '@bslt/client-engine';
 
 const pubsub = new WebsocketPubsubClient({
   host: 'localhost:3000',
@@ -172,7 +172,7 @@ pubsub.subscribe('user:123');
 Offline-first mutation queue with conflict resolution.
 
 ```typescript
-import { createTransactionQueue } from '@abe-stack/client-engine';
+import { createTransactionQueue } from '@bslt/client-engine';
 
 const queue = createTransactionQueue({
   submitTransaction: async (tx) =>
@@ -198,7 +198,7 @@ await queue.enqueue({ operations: [{ type: 'set', path: ['user', '1'], value }] 
 Persistent IndexedDB with localStorage/memory fallback.
 
 ```typescript
-import { createRecordStorage } from '@abe-stack/client-engine';
+import { createRecordStorage } from '@bslt/client-engine';
 
 const storage = createRecordStorage({ dbName: 'myapp' });
 await storage.setRecord('user', { id: '1', version: 1, name: 'Alice' });
@@ -210,7 +210,7 @@ const user = await storage.getRecord({ table: 'user', id: '1' });
 Offline mutation handling with exponential backoff.
 
 ```typescript
-import { createMutationQueue } from '@abe-stack/client-engine';
+import { createMutationQueue } from '@bslt/client-engine';
 
 const queue = createMutationQueue({
   maxRetries: 3,
@@ -234,7 +234,7 @@ await queue.enqueue({
 QueryCache persistence to IndexedDB.
 
 ```typescript
-import { createQueryPersister, clearQueryCache, QueryCache } from '@abe-stack/client-engine';
+import { createQueryPersister, clearQueryCache, QueryCache } from '@bslt/client-engine';
 
 const queryCache = new QueryCache();
 const persister = createQueryPersister({
@@ -252,7 +252,7 @@ await clearQueryCache('myapp-queries');
 Generic undo/redo with operation grouping.
 
 ```typescript
-import { createUndoRedoStack } from '@abe-stack/client-engine';
+import { createUndoRedoStack } from '@bslt/client-engine';
 
 const history = createUndoRedoStack({
   onUndo: (op) => applyReverse(op),
@@ -276,7 +276,7 @@ import {
   serializeToURLParams,
   useSearch,
   useInfiniteSearch,
-} from '@abe-stack/client-engine';
+} from '@bslt/client-engine';
 
 // Build queries
 const query = createClientSearchQuery<User>()
@@ -314,7 +314,7 @@ import {
   usePushSubscription,
   useNotificationPreferences,
   usePushPermission,
-} from '@abe-stack/client-engine';
+} from '@bslt/client-engine';
 
 // Client
 const client = createNotificationClient({
@@ -365,7 +365,7 @@ import {
   useNotificationPreferences, // Notification preferences
   usePushPermission, // Push permission status
   useTestNotification, // Send test notification
-} from '@abe-stack/client-engine';
+} from '@bslt/client-engine';
 
 function Component() {
   // Realtime

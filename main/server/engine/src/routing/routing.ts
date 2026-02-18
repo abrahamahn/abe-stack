@@ -11,11 +11,11 @@
  * @module routing
  */
 
-import { HTTP_STATUS } from '@abe-stack/shared';
+import { HTTP_STATUS } from '@bslt/shared';
 
 import { registerRoute } from './route-registry';
 
-import type { BaseContext } from '@abe-stack/shared';
+import type { BaseContext } from '@bslt/shared';
 import type {
   FastifyInstance,
   FastifyReply,
@@ -46,7 +46,7 @@ export type RouteHandler<Body = unknown, Response = unknown> = (
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 /**
- * Validation schema interface compatible with `@abe-stack/shared` Schema<T>.
+ * Validation schema interface compatible with `@bslt/shared` Schema<T>.
  * Accepts objects with `parse` and `safeParse` methods (e.g.,
  * custom Schema<T> from shared contracts).
  *

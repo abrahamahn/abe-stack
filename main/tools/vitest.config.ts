@@ -2,9 +2,9 @@
 /**
  * Vitest configuration for tools/scripts/ tests.
  *
- * Provides @abe-stack/* package alias resolution so tests that mock
+ * Provides @bslt/* package alias resolution so tests that mock
  * these packages can resolve the module specifiers. Since all
- * @abe-stack/* imports are mocked in the DB script tests, only the
+ * @bslt/* imports are mocked in the DB script tests, only the
  * type declarations need to be reachable.
  */
 import path from 'path';
@@ -22,16 +22,16 @@ export default mergeConfig(baseConfig, {
     include: ['main/tools/scripts/**/*.test.ts'],
     server: {
       deps: {
-        inline: ['@abe-stack/core', '@abe-stack/shared', '@abe-stack/db'],
+        inline: ['@bslt/core', '@bslt/shared', '@bslt/db'],
       },
     },
   },
   resolve: {
     alias: [
-      { find: /^@abe-stack\/core\/(.*)$/, replacement: `${corePkg}/$1/index.ts` },
-      { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
-      { find: '@abe-stack/shared', replacement: `${sharedPkg}/index.ts` },
-      { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
+      { find: /^@bslt\/core\/(.*)$/, replacement: `${corePkg}/$1/index.ts` },
+      { find: '@bslt/core', replacement: `${corePkg}/index.ts` },
+      { find: '@bslt/shared', replacement: `${sharedPkg}/index.ts` },
+      { find: '@bslt/db', replacement: `${dbPkg}/index.ts` },
     ],
   },
 });

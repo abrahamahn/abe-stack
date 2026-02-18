@@ -72,7 +72,7 @@ const listFiles = (dir: string, base = ''): string[] => {
 };
 
 const run = (): void => {
-  console.log('📦 Exporting @abe-stack/shared source code...');
+  console.log('📦 Exporting @bslt/shared source code...');
 
   if (!fs.existsSync(sharedPath)) {
     console.error(`❌ Error: ${sharedPath} does not exist.`);

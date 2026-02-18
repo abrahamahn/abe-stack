@@ -1,6 +1,6 @@
 # Legacy Codebase Reference
 
-> Reference guide for migrating utilities and components from `../../abe-stack-legacy`.
+> Reference guide for migrating utilities and components from `../../bslt-legacy`.
 > Copy patterns when needed. Do not import directly.
 
 ---

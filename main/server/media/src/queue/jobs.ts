@@ -17,16 +17,16 @@ import {
   DEFAULT_RETRY_DELAY_MS,
 } from '../constants';
 import {
-  ImageProcessor,
   AudioProcessor,
-  VideoProcessor,
+  ImageProcessor,
   MediaProcessingOrchestrator,
+  VideoProcessor,
 } from '../processor';
 
 import { CustomJobQueue } from './queue';
 
+import type { Logger } from '@bslt/shared';
 import type { MediaMetadata } from '../types';
-import type { Logger } from '@abe-stack/shared';
 
 /**
  * Data payload for a media processing job

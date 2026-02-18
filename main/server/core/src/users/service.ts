@@ -8,10 +8,10 @@
  * @module service
  */
 
-import { toISODateOnly } from '@abe-stack/shared';
+import { toISODateOnly } from '@bslt/shared';
 
+import type { CursorPaginationOptions, AppRole as UserRole } from '@bslt/shared';
 import type { UserRepository } from '../../../db/src';
-import type { AppRole as UserRole, CursorPaginationOptions } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

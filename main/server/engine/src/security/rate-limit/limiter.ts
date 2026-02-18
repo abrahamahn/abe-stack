@@ -10,10 +10,10 @@
  * - More predictable behavior for clients
  * - Pluggable storage backend (memory store included)
  *
- * @module @abe-stack/server-engine/security/rate-limit
+ * @module @bslt/server-engine/security/rate-limit
  */
 
-import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
 
 // ============================================================================
 // Types

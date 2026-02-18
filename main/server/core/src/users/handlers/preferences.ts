@@ -8,7 +8,7 @@
  * @module handlers/preferences
  */
 
-import { toISODateOnly } from '@abe-stack/shared';
+import { toISODateOnly } from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';

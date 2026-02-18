@@ -6,9 +6,9 @@
  * Uses internal state management for user data, token store for persistence.
  */
 
-import { getApiClient, NetworkError } from '@abe-stack/api';
-import { MS_PER_MINUTE, tokenStore } from '@abe-stack/shared';
 import { createAuthRoute, type AuthRouteClient } from '@api/auth/route';
+import { getApiClient, NetworkError } from '@bslt/api';
+import { MS_PER_MINUTE, tokenStore } from '@bslt/shared';
 
 import type { ClientConfig } from '@/config';
 import type {
@@ -30,7 +30,7 @@ import type {
   SmsLoginChallengeResponse,
   TotpLoginChallengeResponse,
   User,
-} from '@abe-stack/api';
+} from '@bslt/api';
 
 interface TokenStore {
   get: () => string | null;

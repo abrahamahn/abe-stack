@@ -6,7 +6,7 @@
  * - Table registry (isTableAllowed, registerRealtimeTable)
  * - Record loading (loadRecords)
  *
- * Pure operation logic tests are in @abe-stack/shared
+ * Pure operation logic tests are in @bslt/shared
  * (main/shared/src/domain/realtime/realtime.operations.test.ts)
  */
 

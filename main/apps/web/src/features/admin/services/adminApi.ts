@@ -2,15 +2,16 @@
 /**
  * Admin API Service
  *
- * Web-facing wrapper around centralized @abe-stack/api admin client.
+ * Web-facing wrapper around centralized @bslt/api admin client.
  */
 
-import { createAdminClient } from '@abe-stack/api';
+import { createAdminClient } from '@bslt/api';
 
-import type { AdminClient, AdminClientConfig } from '@abe-stack/api';
+import type { AdminClient, AdminClientConfig } from '@bslt/api';
 
 export type {
-  AuditEventLocal,
+  AdminTenantDetailLocal,
+  AdminTenantLocal, AuditEventLocal,
   AuditEventsFilterLocal,
   AuditEventsResponseLocal,
   CreateFeatureFlagRequest,
@@ -32,10 +33,8 @@ export type {
   SecurityEventsListResponseLocal,
   SecurityMetricsLocal,
   TenantListResponse,
-  UpdateFeatureFlagRequest,
-  AdminTenantDetailLocal,
-  AdminTenantLocal,
-} from '@abe-stack/api/admin/client';
+  UpdateFeatureFlagRequest
+} from '@bslt/api/admin/client';
 
 export type AdminApiConfig = AdminClientConfig;
 export type AdminApiClient = AdminClient;
@@ -52,5 +51,6 @@ export type {
   AdminUser,
   AdminUserListFilters,
   AdminUserListResponse,
-  UnlockAccountRequest,
-} from '@abe-stack/shared';
+  UnlockAccountRequest
+} from '@bslt/shared';
+

@@ -16,7 +16,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   MS_PER_DAY,
   PushSubscriptionExistsError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import {
   NOTIFICATIONS_TABLE,
@@ -48,7 +48,7 @@ import type {
   PushSubscription,
   StoredPushSubscription,
   UpdatePreferencesRequest,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 // ============================================================================
 // Subscription Management

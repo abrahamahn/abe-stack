@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { anonymizeDeletedUsers } from './pii-anonymization';
 
+import type { ServerLogger } from '@bslt/shared';
 import type { Repositories } from '../../../db/src';
-import type { ServerLogger } from '@abe-stack/shared';
 
 // ============================================================================
 // Helpers

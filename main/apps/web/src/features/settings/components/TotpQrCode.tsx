@@ -10,7 +10,7 @@
  * @module settings/components
  */
 
-import { Text } from '@abe-stack/ui';
+import { Text } from '@bslt/ui';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 
 // ============================================================================

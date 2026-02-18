@@ -6,7 +6,7 @@
  * All handlers require admin role (enforced by route definitions).
  */
 
-import { HTTP_STATUS, jobListQuerySchema } from '@abe-stack/shared';
+import { HTTP_STATUS, jobListQuerySchema } from '@bslt/shared';
 
 import { PostgresQueueStore, type JobListOptions } from '../../../db/src';
 import { ERROR_MESSAGES } from '../auth';
@@ -21,9 +21,9 @@ import {
   retryJob,
 } from './jobsService';
 
-import type { AdminAppContext } from './types';
-import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@abe-stack/shared';
+import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { AdminAppContext } from './types';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

@@ -11,7 +11,7 @@ import {
   validateSqlSearchConfig,
 } from './search';
 
-import type { FullEnv } from '@abe-stack/shared/config';
+import type { FullEnv } from '@bslt/shared/config';
 
 /**
  * Creates a base environment with search-related defaults (as applied by Zod schema).

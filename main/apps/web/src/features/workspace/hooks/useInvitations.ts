@@ -5,12 +5,12 @@
  * Hooks for listing, creating, revoking, and resending workspace invitations.
  */
 
-import { useMutation, useQuery, useQueryCache } from '@abe-stack/react';
 import { getAccessToken } from '@app/authToken';
+import { useMutation, useQuery, useQueryCache } from '@bslt/react';
 
 import { createWorkspaceApi } from '../api';
 
-import type { CreateInvitation, Invitation } from '@abe-stack/shared';
+import type { CreateInvitation, Invitation } from '@bslt/shared';
 
 // ============================================================================
 // API Instance

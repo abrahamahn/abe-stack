@@ -1,7 +1,7 @@
 {
-  "name": "@abe-stack/root",
+  "name": "@bslt/root",
   "version": "1.0.0",
-  "description": "Abe-Stack: A Modern Full-Stack Typescript Monorepo for Developers.",
+  "description": "BSLT: Build, Scale, Launch, Toggle. A Modern Full-Stack Typescript Monorepo for Developers.",
   "private": true,
   "engines": {
     "node": ">=18.19 <25"
@@ -11,7 +11,7 @@
     "dev": "node --import tsx main/tools/scripts/dev/dev.ts server web",
     "dev:desktop": "node --import tsx main/tools/scripts/dev/dev.ts server desktop",
     "dev:all": "node --import tsx main/tools/scripts/dev/dev.ts",
-    "start": "turbo run start --filter=@abe-stack/web --filter=@abe-stack/server",
+    "start": "turbo run start --filter=@bslt/web --filter=@bslt/server",
     "lint": "pnpm run lint:test-pairs && turbo run lint --continue",
     "lint:test-pairs": "node --import tsx main/tools/scripts/audit/colocated-test-pairs.ts",
     "lint:test-pairs:strict": "node --import tsx main/tools/scripts/audit/colocated-test-pairs.ts --strict",
@@ -27,7 +27,7 @@
     "test:full": "turbo run test:full",
     "test:coverage": "turbo run test --output-logs=errors-only --continue -- --coverage.enabled=true",
     "test:e2e": "playwright test --config config/playwright.config.ts",
-    "build": "turbo run build lint type-check --output-logs=errors-only && turbo run test --filter=!@abe-stack/server --output-logs=errors-only",
+    "build": "turbo run build lint type-check --output-logs=errors-only && turbo run test --filter=!@bslt/server --output-logs=errors-only",
     "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules",
     "sync:headers": "node --import tsx main/tools/sync/sync-file-headers.ts",
     "sync:headers:staged": "node --import tsx main/tools/sync/sync-file-headers.ts --staged --quiet",

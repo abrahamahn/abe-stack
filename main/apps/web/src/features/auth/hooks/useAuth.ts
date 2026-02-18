@@ -11,6 +11,7 @@
 import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useEffect, useState } from 'react';
 
+import type { AuthState } from '@auth/services/AuthService';
 import type {
   EmailVerificationRequest,
   EmailVerificationResponse,
@@ -23,8 +24,7 @@ import type {
   ResendVerificationRequest,
   ResetPasswordRequest,
   User,
-} from '@abe-stack/api';
-import type { AuthState } from '@auth/services/AuthService';
+} from '@bslt/api';
 
 // Import directly from services to avoid circular dependency through barrel
 

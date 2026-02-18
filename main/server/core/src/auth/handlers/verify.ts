@@ -8,17 +8,17 @@
  */
 
 import {
-  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
   HTTP_STATUS,
   mapErrorToHttpResponse,
-} from '@abe-stack/shared';
+  AUTH_SUCCESS_MESSAGES as SUCCESS_MESSAGES,
+} from '@bslt/shared';
 
 import { resendVerificationEmail, verifyEmail } from '../service';
 import { createErrorMapperLogger } from '../types';
 import { setRefreshTokenCookie } from '../utils';
 
+import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
 import type { AppContext, ReplyWithCookies } from '../types';
-import type { AuthResponse, HttpErrorResponse } from '@abe-stack/shared';
 
 /**
  * Handle email verification.

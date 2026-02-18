@@ -13,7 +13,7 @@
  * ```
  */
 
-import type { TenantRole } from '@abe-stack/shared';
+import type { TenantRole } from '@bslt/shared';
 import type { ReactNode } from 'react';
 
 export interface RequireWorkspaceRoleProps {

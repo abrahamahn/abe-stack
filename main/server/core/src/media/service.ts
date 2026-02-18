@@ -13,8 +13,8 @@ import {
   generateFileId,
   MIME_TO_EXT,
   sanitizeFilename,
-} from '@abe-stack/media';
-import { BadRequestError, NotFoundError } from '@abe-stack/shared';
+} from '@bslt/media';
+import { BadRequestError, NotFoundError } from '@bslt/shared';
 
 import type {
   MediaMetadataResponse,

@@ -13,7 +13,7 @@ import {
   type CreateInvitation,
   type ErrorMapperLogger,
   type HttpErrorResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';

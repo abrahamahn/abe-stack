@@ -5,7 +5,7 @@
  * Table of workspace members with role badges and action controls.
  */
 
-import { getRoleLevel, getTenantRoleTone } from '@abe-stack/shared';
+import { getRoleLevel, getTenantRoleTone } from '@bslt/shared';
 import {
   Alert,
   Badge,
@@ -19,11 +19,11 @@ import {
   TableHeader,
   TableRow,
   Text,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 import { useMembers, useRemoveMember, useUpdateMemberRole } from '../hooks';
 
-import type { TenantRole } from '@abe-stack/shared';
+import type { TenantRole } from '@bslt/shared';
 import type { ReactElement } from 'react';
 
 // ============================================================================

@@ -5,8 +5,8 @@
  * Admin page for viewing and filtering security events.
  */
 
-import { Button, Heading, PageContainer, Select, Text } from '@abe-stack/ui';
-import { useState, useCallback } from 'react';
+import { Button, Heading, PageContainer, Select, Text } from '@bslt/ui';
+import { useCallback, useState } from 'react';
 
 import {
   ExportDialog,
@@ -16,8 +16,8 @@ import {
 } from '../components';
 import { useSecurityEvents, useSecurityMetrics } from '../hooks';
 
-import type { MetricsPeriod } from '../hooks';
 import type { JSX } from 'react';
+import type { MetricsPeriod } from '../hooks';
 
 // ============================================================================
 // Component

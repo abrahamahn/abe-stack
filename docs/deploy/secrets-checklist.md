@@ -10,7 +10,7 @@ Set these in your GitHub repository settings:
 
 ```bash
 REGISTRY=ghcr.io                    # GitHub Container Registry
-IMAGE_NAME=username/abe-stack       # Your username/repo-name
+IMAGE_NAME=username/bslt       # Your username/repo-name
 VITE_API_URL=                       # Empty for relative URLs (reverse proxy handles routing)
 ```
 
@@ -105,7 +105,7 @@ S3_BUCKET_NAME=your-s3-bucket
 
 ## Environment File Template
 
-Create this file on your server at `~/abe-stack-deploy/config/env/.env.production`:
+Create this file on your server at `~/bslt-deploy/config/env/.env.production`:
 
 ```bash
 # Domain Configuration
@@ -133,7 +133,7 @@ STORAGE_LOCAL_PUBLIC_URL=/uploads
 
 # Email Configuration
 EMAIL_PROVIDER=console
-EMAIL_FROM_NAME=ABE Stack
+EMAIL_FROM_NAME=BSLT
 EMAIL_FROM_ADDRESS=noreply@yourdomain.com
 
 # Frontend Configuration
@@ -193,7 +193,7 @@ pwgen -s 32 1
 
 - Check server has Docker and Docker Compose installed
 - Verify user has sudo access for Docker commands
-- Ensure deployment directory exists: `mkdir -p ~/abe-stack-deploy`
+- Ensure deployment directory exists: `mkdir -p ~/bslt-deploy`
 
 **Container Health Check Failed**
 

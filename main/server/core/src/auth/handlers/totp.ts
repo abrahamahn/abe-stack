@@ -19,7 +19,7 @@ import {
   type TotpStatusResponse,
   type TotpVerifyRequest,
   type TotpVerifyResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { withTransaction } from '../../../../db/src';
 import { JwtError, verify as jwtVerify } from '../../../../engine/src';

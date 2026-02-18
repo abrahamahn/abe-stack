@@ -1,6 +1,6 @@
 // main/server/core/src/notifications/index.ts
 /**
- * @abe-stack/notifications - Push Notification Module
+ * @bslt/notifications - Push Notification Module
  *
  * Provides push notification infrastructure including:
  * - Subscription management (subscribe, unsubscribe, query)
@@ -15,7 +15,7 @@
  *   getPreferences,
  *   notificationRoutes,
  *   createNotificationProviderService,
- * } from '@abe-stack/notifications';
+ * } from '@bslt/notifications';
  *
  * // Register routes
  * registerRouteMap(app, ctx, notificationRoutes, routerOptions);
@@ -31,9 +31,7 @@ export type { NotificationModuleDeps, NotificationRequest } from './types';
 
 // Service - Subscription management
 export {
-  clearAllData,
-  cleanupExpiredSubscriptions,
-  createNotificationForEvent,
+  cleanupExpiredSubscriptions, clearAllData, createNotificationForEvent,
   getActiveSubscriptionCount,
   getAllActiveSubscriptions,
   getPreferences,
@@ -46,7 +44,7 @@ export {
   subscribe,
   unsubscribe,
   updatePreferences,
-  type NotificationEventType,
+  type NotificationEventType
 } from './service';
 
 // Handlers
@@ -61,21 +59,18 @@ export {
   handleSubscribe,
   handleTestNotification,
   handleUnsubscribe,
-  handleUpdatePreferences,
+  handleUpdatePreferences
 } from './handlers';
 
 // Routes
 export { notificationRoutes } from './routes';
 
-// Errors (re-exported from @abe-stack/shared)
+// Errors (re-exported from @bslt/shared)
 export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
-  NotificationRateLimitError,
-  NotificationSendError,
-  NotificationsDisabledError,
-  PayloadTooLargeError,
+  NotificationRateLimitError, NotificationsDisabledError, NotificationSendError, PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
@@ -86,8 +81,8 @@ export {
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
-  VapidNotConfiguredError,
-} from '@abe-stack/shared';
+  VapidNotConfiguredError
+} from '@bslt/shared';
 
 // Provider types
 export type {
@@ -97,14 +92,15 @@ export type {
   ProviderConfig,
   PushNotificationProvider,
   SendOptions,
-  SubscriptionWithId,
+  SubscriptionWithId
 } from './providers';
 
 // Provider implementations
-export { FcmProvider, createFcmProvider } from './providers';
+export { createFcmProvider, FcmProvider } from './providers';
 
 // Provider factory
 export {
   createNotificationProviderService,
-  createNotificationProviderServiceFromEnv,
+  createNotificationProviderServiceFromEnv
 } from './providers';
+

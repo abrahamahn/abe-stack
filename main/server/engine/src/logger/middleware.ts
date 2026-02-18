@@ -3,7 +3,7 @@
  * Logging Middleware
  *
  * Fastify hooks for request logging with correlation IDs.
- * Pure correlation utilities imported from @abe-stack/shared.
+ * Pure correlation utilities imported from @bslt/shared.
  */
 
 import {
@@ -11,15 +11,15 @@ import {
   createJobCorrelationId as createSharedJobCorrelationId,
   createJobLogger as createSharedJobLogger,
   getOrCreateCorrelationId,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { getMetricsCollector } from '../system/metrics';
 
 import { createRequestLogger } from './logger';
 
-import type { UserRole } from '@abe-stack/db';
-import type { Logger, RequestContext } from '@abe-stack/shared';
-import type { LoggingConfig } from '@abe-stack/shared/config';
+import type { UserRole } from '@bslt/db';
+import type { Logger, RequestContext } from '@bslt/shared';
+import type { LoggingConfig } from '@bslt/shared/config';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Extend Fastify request with our custom properties
@@ -237,7 +237,7 @@ export function createJobLogger(
   jobId?: string,
 ): Logger {
   return createSharedJobLogger(
-    baseLogger as unknown as import('@abe-stack/shared').BaseLogger,
+    baseLogger as unknown as import('@bslt/shared').BaseLogger,
     jobName,
     jobId,
   ) as Logger;

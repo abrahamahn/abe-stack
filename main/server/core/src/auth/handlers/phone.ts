@@ -7,7 +7,7 @@
  * @module handlers/phone
  */
 
-import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@abe-stack/shared';
+import { ERROR_MESSAGES, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
 import { SMS_VERIFICATION_CODES_TABLE, USERS_TABLE } from '../../../../db/src';
 import { assertUserActive } from '../middleware';
@@ -15,8 +15,8 @@ import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
 import { sendSms2faCode, verifySms2faCode } from '../sms-2fa/service';
 import { createErrorMapperLogger, type AppContext, type RequestWithCookies } from '../types';
 
+import type { HttpErrorResponse } from '@bslt/shared';
 import type { SetPhoneRequest, VerifyPhoneRequest } from '../sms-2fa/types';
-import type { HttpErrorResponse } from '@abe-stack/shared';
 
 // ============================================================================
 // Phone Regex (E.164-compatible, loose)

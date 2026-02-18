@@ -5,7 +5,7 @@
  * All environment variables and app-level constants in one place.
  */
 
-import { MS_PER_DAY, MS_PER_MINUTE, MS_PER_SECOND, trimTrailingSlashes } from '@abe-stack/shared';
+import { MS_PER_DAY, MS_PER_MINUTE, MS_PER_SECOND, trimTrailingSlashes } from '@bslt/shared';
 
 // ============================================================================
 // Environment Variables

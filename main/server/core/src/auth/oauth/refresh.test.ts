@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { refreshExpiringOAuthTokens } from './refresh';
 
+import type { AuthConfig } from '@bslt/shared/config';
 import type { OAuthConnection, Repositories } from '../../../../db/src';
-import type { AuthConfig } from '@abe-stack/shared/config';
 
 // ============================================================================
 // Mocks

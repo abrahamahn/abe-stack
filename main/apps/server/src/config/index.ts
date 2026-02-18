@@ -12,7 +12,7 @@ export { load, load as loadConfig } from './factory';
  */
 export { AuthValidationError, loadAuthConfig, validateAuthConfig } from './auth/auth';
 
-export { getRefreshCookieOptions, isStrategyEnabled } from '@abe-stack/shared/config';
+export { getRefreshCookieOptions, isStrategyEnabled } from '@bslt/shared/config';
 
 export { loadJwtRotationConfig } from './auth/jwt';
 export { loadRateLimitConfig } from './auth/rate-limit';
@@ -25,7 +25,7 @@ export { loadCacheConfig } from './infra/cache';
 export {
   buildConnectionString,
   getSafeConnectionString,
-  loadDatabaseConfig,
+  loadDatabaseConfig
 } from './infra/database';
 export { loadServerConfig } from './infra/server';
 export { loadStorageConfig } from './infra/storage';
@@ -59,5 +59,6 @@ export type {
   QueueConfig,
   SearchConfig,
   ServerConfig,
-  StorageConfig,
-} from '@abe-stack/shared/config';
+  StorageConfig
+} from '@bslt/shared/config';
+

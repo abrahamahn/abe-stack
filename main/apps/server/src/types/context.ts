@@ -9,8 +9,8 @@ import type {
   SessionContext,
   SmsProvider,
   WriteService,
-} from '@abe-stack/core';
-import type { AuthEmailTemplates } from '@abe-stack/server-engine';
+} from '@bslt/core';
+import type { AuthEmailTemplates } from '@bslt/server-engine';
 import type {
   BaseContext,
   BillingService,
@@ -22,8 +22,8 @@ import type {
   RequestInfo,
   StorageClient,
   SubscriptionManager,
-} from '@abe-stack/shared';
-import type { AppConfig } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================
@@ -33,7 +33,7 @@ import type { FastifyBaseLogger } from 'fastify';
 /**
  * Fastify-specific reply augmentation.
  *
- * Structurally identical to `ReplyContext` from `@abe-stack/shared`,
+ * Structurally identical to `ReplyContext` from `@bslt/shared`,
  * but kept as a distinct type alias for Fastify's `declare module` augmentation.
  */
 export type ReplyWithCookies = ReplyContext;
@@ -41,7 +41,7 @@ export type ReplyWithCookies = ReplyContext;
 /**
  * Fastify-specific request augmentation.
  *
- * Uses `RequestInfo` from `@abe-stack/shared` for client metadata.
+ * Uses `RequestInfo` from `@bslt/shared` for client metadata.
  * Extends the framework-agnostic `RequestContext` with Fastify-specific
  * properties (ip, requestStart, context).
  */
@@ -144,7 +144,7 @@ export interface HasContext {
  * Application context passed to all handlers.
  *
  * Extends `IServiceContainer` with runtime-specific dependencies (logger).
- * Structurally satisfies `BaseContext` from `@abe-stack/shared` --
+ * Structurally satisfies `BaseContext` from `@bslt/shared` --
  * verified at compile time via `AppContextSatisfiesBaseContext` below.
  *
  * Package handlers accept `BaseContext` (or module-specific extensions);
@@ -156,7 +156,7 @@ export interface HasContext {
  * `IServiceContainer.db` is `DbClient` while `BaseContext.db` is `unknown`.
  * These are compatible (DbClient assignable to unknown) but not identical.
  *
- * @see {@link BaseContext} from `@abe-stack/shared`
+ * @see {@link BaseContext} from `@bslt/shared`
  */
 export interface AppContext extends IServiceContainer {
   /** Logger instance (from Fastify's Pino logger) */

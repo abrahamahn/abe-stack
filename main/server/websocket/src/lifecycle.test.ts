@@ -8,7 +8,7 @@
 
 import { EventEmitter } from 'node:events';
 
-import { WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } from '@abe-stack/shared';
+import { WEBSOCKET_PATH, WS_CLOSE_POLICY_VIOLATION } from '@bslt/shared';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Use vi.hoisted() to define mocks that can be referenced in vi.mock() factories
@@ -40,7 +40,7 @@ vi.mock('ws', () => {
   };
 });
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
+vi.mock('@bslt/shared', async (importOriginal) => {
   const actual = await importOriginal<object>();
   return {
     ...actual,
@@ -48,7 +48,7 @@ vi.mock('@abe-stack/shared', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/server-engine', () => ({
+vi.mock('@bslt/server-engine', () => ({
   validateCsrfToken: mockValidateCsrfToken,
 }));
 

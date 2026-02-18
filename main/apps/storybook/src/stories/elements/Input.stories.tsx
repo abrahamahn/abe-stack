@@ -1,6 +1,6 @@
 // main/apps/storybook/src/stories/elements/Input.stories.tsx
+import { Input } from '@bslt/ui';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Input } from '@abe-stack/ui';
 
 const meta: Meta<typeof Input> = {
   title: 'Elements/Input',

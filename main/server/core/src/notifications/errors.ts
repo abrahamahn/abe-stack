@@ -2,7 +2,7 @@
 /**
  * Push Notification Errors
  *
- * Re-exports all notification error classes from @abe-stack/shared.
+ * Re-exports all notification error classes from @bslt/shared.
  * Server/core consumers can import from this file or directly from shared.
  */
 
@@ -10,10 +10,7 @@ export {
   InvalidPreferencesError,
   InvalidSubscriptionError,
   NOTIFICATION_PAYLOAD_MAX_SIZE,
-  NotificationRateLimitError,
-  NotificationSendError,
-  NotificationsDisabledError,
-  PayloadTooLargeError,
+  NotificationRateLimitError, NotificationsDisabledError, NotificationSendError, PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
   ProviderNotConfiguredError,
@@ -24,5 +21,6 @@ export {
   SubscriptionExistsError,
   SubscriptionExpiredError,
   SubscriptionNotFoundError,
-  VapidNotConfiguredError,
-} from '@abe-stack/shared';
+  VapidNotConfiguredError
+} from '@bslt/shared';
+

@@ -8,14 +8,14 @@
  * @module handlers/ownership
  */
 
-import { mapErrorToHttpResponse } from '@abe-stack/shared';
+import { mapErrorToHttpResponse } from '@bslt/shared';
 
 import { logActivity } from '../../activities';
 import { record } from '../../audit/service';
 import { transferOwnership } from '../service';
 import { ERROR_MESSAGES, type TenantsModuleDeps, type TenantsRequest } from '../types';
 
-import type { HttpErrorResponse } from '@abe-stack/shared';
+import type { HttpErrorResponse } from '@bslt/shared';
 
 // ============================================================================
 // Types

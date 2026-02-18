@@ -1,8 +1,8 @@
 {
-  "name": "@abe-stack/shared",
+  "name": "@bslt/shared",
   "version": "1.0.0",
   "type": "module",
-  "description": "Shared environment-agnostic code for ABE Stack",
+  "description": "Shared environment-agnostic code for BSLT",
   "keywords": [
     "shared",
     "types",
@@ -12,18 +12,18 @@
     "constants",
     "environment-agnostic"
   ],
-  "author": "ABE Stack",
+  "author": "Abraham Joongwhan Ahn",
   "sideEffects": false,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/abe-stack/abe-stack.git",
+    "url": "https://github.com/bslt/bslt.git",
     "directory": "main/shared"
   },
   "bugs": {
-    "url": "https://github.com/abe-stack/abe-stack/issues"
+    "url": "https://github.com/bslt/bslt/issues"
   },
-  "homepage": "https://github.com/abe-stack/abe-stack#readme",
+  "homepage": "https://github.com/bslt/bslt#readme",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

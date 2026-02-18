@@ -7,14 +7,14 @@
 
 import {
   deviceListResponseSchema,
-  trustDeviceResponseSchema,
-  totpVerifyResponseSchema,
   invalidateSessionsResponseSchema,
-  type DeviceItem as SharedDeviceItem,
+  totpVerifyResponseSchema,
+  trustDeviceResponseSchema,
   type InvalidateSessionsResponse,
+  type DeviceItem as SharedDeviceItem,
   type TotpVerifyResponse,
   type TrustDeviceResponse,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { apiRequest, createRequestFactory } from '../utils';
 

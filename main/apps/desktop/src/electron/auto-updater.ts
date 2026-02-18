@@ -1,5 +1,5 @@
 // main/apps/desktop/src/electron/auto-updater.ts
-import { MS_PER_HOUR } from '@abe-stack/shared';
+import { MS_PER_HOUR } from '@bslt/shared';
 import { autoUpdater } from 'electron';
 
 import type { BrowserWindow } from 'electron';

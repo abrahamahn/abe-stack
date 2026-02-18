@@ -6,8 +6,8 @@
  * Stores theme in localStorage and applies it via data-theme attribute on document root.
  */
 
-import { useMediaQuery } from '@abe-stack/react/hooks';
-import { Button, Card, Heading, Text } from '@abe-stack/ui';
+import { useMediaQuery } from '@bslt/react/hooks';
+import { Button, Card, Heading, Text } from '@bslt/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 
 // ============================================================================

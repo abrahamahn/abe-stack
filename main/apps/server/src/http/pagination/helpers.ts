@@ -4,11 +4,11 @@
  * and applying pagination to database queries.
  */
 
-import { applyCursorPagination, applyOffsetPagination } from '@abe-stack/db';
-import { createPaginatedResult } from '@abe-stack/shared';
+import { applyCursorPagination, applyOffsetPagination } from '@bslt/db';
+import { createPaginatedResult } from '@bslt/shared';
 
+import type { CursorPaginatedResult, PaginatedResult, PaginationOptions } from '@bslt/shared';
 import type { PaginationHelpers } from './types';
-import type { CursorPaginatedResult, PaginatedResult, PaginationOptions } from '@abe-stack/shared';
 
 /**
  * Create pagination helper functions

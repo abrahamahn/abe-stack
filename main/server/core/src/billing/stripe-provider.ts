@@ -7,7 +7,6 @@
 
 import stripeDefault from 'stripe';
 
-import type { SubscriptionStatus } from '../../../db/src';
 import type {
   BillingService,
   CheckoutParams,
@@ -22,9 +21,10 @@ import type {
   ProviderPaymentMethod,
   ProviderSubscription,
   SetupIntentResult,
-} from '@abe-stack/shared';
-import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
+} from '@bslt/shared';
+import type { StripeProviderConfig as StripeConfig } from '@bslt/shared/config';
 import type stripeLib from 'stripe';
+import type { SubscriptionStatus } from '../../../db/src';
 
 // ============================================================================
 // Stripe Status Mapping

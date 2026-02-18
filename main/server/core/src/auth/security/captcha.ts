@@ -9,9 +9,9 @@
  * @module security/captcha
  */
 
-import { MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_SECOND } from '@bslt/shared';
 
-import type { AuthConfig } from '@abe-stack/shared/config';
+import type { AuthConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Constants

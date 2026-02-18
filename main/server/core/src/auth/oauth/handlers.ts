@@ -12,7 +12,7 @@ import {
   mapErrorToHttpResponse,
   OAuthError,
   TooManyRequestsError,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 
 import { OAUTH_PROVIDERS, type OAuthProvider } from '../../../../db/src';
 import { getMetricsCollector } from '../../../../engine/src';
@@ -35,10 +35,10 @@ import {
   unlinkOAuthAccount,
 } from './service';
 
+import type { AuthResponse, HttpErrorResponse } from '@bslt/shared';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext, ReplyWithCookies } from '../types';
 import type { OAuthConnectionInfo } from './types';
-import type { AuthResponse, HttpErrorResponse } from '@abe-stack/shared';
-import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types

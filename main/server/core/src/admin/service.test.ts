@@ -7,7 +7,7 @@ import { unlockUserAccount, UserNotFoundError } from './service';
 
 import type { DbClient } from '../../../db/src';
 
-// Mock dependencies - service.ts imports unlockAccount from @abe-stack/auth
+// Mock dependencies - service.ts imports unlockAccount from @bslt/auth
 vi.mock('../auth', () => ({
   unlockAccount: vi.fn().mockResolvedValue(undefined),
 }));

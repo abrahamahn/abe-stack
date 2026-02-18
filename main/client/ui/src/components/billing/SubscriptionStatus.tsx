@@ -4,13 +4,13 @@ import {
   formatPrice,
   getSubscriptionStatusLabel,
   getSubscriptionStatusVariant,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { Button } from '../../elements/Button';
 import { cn } from '../../utils/cn';
 
-import type { Subscription } from '@abe-stack/shared';
+import type { Subscription } from '@bslt/shared';
 
 // ============================================================================
 // Types

@@ -1,8 +1,8 @@
 {
-  "name": "@abe-stack/server-engine",
+  "name": "@bslt/server-engine",
   "version": "1.0.0",
   "type": "module",
-  "description": "Consolidated infrastructure adapters for abe-stack",
+  "description": "Consolidated infrastructure adapters for bslt",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -29,12 +29,12 @@
     "clean": "rm -rf dist node_modules/.cache/typescript/*.tsbuildinfo",
     "type-check": "tsc --noEmit",
     "test": "vitest run --reporter=dot --silent=passed-only",
-    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-server-engine --report-unused-disable-directives",
-    "migrate": "pnpm --filter @abe-stack/db migrate",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-bslt-server-engine --report-unused-disable-directives",
+    "migrate": "pnpm --filter @bslt/db migrate",
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "keywords": [
-    "abe-stack",
+    "bslt",
     "infra",
     "infrastructure"
   ],
@@ -42,21 +42,21 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "url": "https://github.com/abrahamahn/bslt.git",
     "directory": "main/server/engine"
   },
   "bugs": {
-    "url": "https://github.com/abrahamahn/abe-stack/issues"
+    "url": "https://github.com/abrahamahn/bslt/issues"
   },
-  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "homepage": "https://github.com/abrahamahn/bslt#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/shared": "workspace:*",
+    "@bslt/db": "workspace:*",
+    "@bslt/shared": "workspace:*",
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/credential-providers": "^3.600.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",

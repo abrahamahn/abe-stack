@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useCopyToClipboard.ts
-import { MS_PER_SECOND } from '@abe-stack/shared';
+import { MS_PER_SECOND } from '@bslt/shared';
 import { useEffect, useRef, useState } from 'react';
 
 const COPY_FEEDBACK_MS = MS_PER_SECOND * 2;

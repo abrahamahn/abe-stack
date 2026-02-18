@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { HomePage } from './HomePage';
 
-vi.mock('@abe-stack/react/router', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/react/router')>();
+vi.mock('@bslt/react/router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/react/router')>();
   return {
     ...actual,
     useSearchParams: () => [new URLSearchParams(), vi.fn()],

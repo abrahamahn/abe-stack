@@ -8,9 +8,9 @@
  * Billing routes are conditionally registered when config.billing.enabled = true.
  */
 
-import { createAuthGuard } from '@abe-stack/core/auth';
-import { billingRoutes } from '@abe-stack/core/billing';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core/auth';
+import { billingRoutes } from '@bslt/core/billing';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
@@ -19,13 +19,13 @@ import type {
   BillingAppContext,
   BillingBaseRouteDefinition,
   BillingRequest,
-} from '@abe-stack/core/billing';
+} from '@bslt/core/billing';
 import type {
   AuthGuardFactory,
-  HandlerContext,
-  RouteMap as DbRouteMap,
   RouteDefinition as DbRouteDefinition,
-} from '@abe-stack/server-engine';
+  RouteMap as DbRouteMap,
+  HandlerContext,
+} from '@bslt/server-engine';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

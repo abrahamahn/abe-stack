@@ -69,35 +69,35 @@ Goal:
 
 Scope:
 
-- Migrate remaining app-level raw API calls to `@abe-stack/api` (or contract-backed adapters).
+- Migrate remaining app-level raw API calls to `@bslt/api` (or contract-backed adapters).
 - Standardize auth/header/retry/error handling paths through common client helpers.
 - Remove duplicated route strings in feature code where practical.
 
 Progress (2026-02-13):
 
 - Notifications slice migrated:
-  - Extended `@abe-stack/api` notification client to cover in-app notification endpoints:
+  - Extended `@bslt/api` notification client to cover in-app notification endpoints:
     - `listNotifications`
     - `markRead`
     - `markAllRead`
     - `deleteNotification`
-  - Web notifications adapter now delegates to centralized `@abe-stack/api` client instead of owning endpoint strings.
+  - Web notifications adapter now delegates to centralized `@bslt/api` client instead of owning endpoint strings.
   - Shared notification runtime schemas now align with actual server list response shape (`{ notifications, unreadCount }`) and include mutation response schemas for mark-read/delete.
 - Workspace slice migrated:
-  - Added centralized workspace client in `@abe-stack/api` (`createWorkspaceClient`) for tenant/member/invitation operations.
-  - Web workspace adapter now delegates to centralized `@abe-stack/api` workspace client.
+  - Added centralized workspace client in `@bslt/api` (`createWorkspaceClient`) for tenant/member/invitation operations.
+  - Web workspace adapter now delegates to centralized `@bslt/api` workspace client.
 - Settings slice migrated:
-  - Added centralized settings client in `@abe-stack/api` (`createSettingsClient`) for profile/password/avatar/sessions/sudo/account-lifecycle/api-key operations.
-  - Web settings adapter now delegates to centralized `@abe-stack/api` settings client.
+  - Added centralized settings client in `@bslt/api` (`createSettingsClient`) for profile/password/avatar/sessions/sudo/account-lifecycle/api-key operations.
+  - Web settings adapter now delegates to centralized `@bslt/api` settings client.
 - Admin slice migrated:
-  - Added centralized admin client in `@abe-stack/api` (`createAdminClient`) for admin user/security/jobs/audit/feature-flag endpoints.
-  - Web admin API service now delegates to centralized `@abe-stack/api` admin client.
+  - Added centralized admin client in `@bslt/api` (`createAdminClient`) for admin user/security/jobs/audit/feature-flag endpoints.
+  - Web admin API service now delegates to centralized `@bslt/api` admin client.
 - Activities slice migrated:
-  - Added centralized activities client in `@abe-stack/api` (`createActivitiesClient`) for global/tenant activity feeds.
-  - Web activities API adapter now delegates to centralized `@abe-stack/api` activities client.
+  - Added centralized activities client in `@bslt/api` (`createActivitiesClient`) for global/tenant activity feeds.
+  - Web activities API adapter now delegates to centralized `@bslt/api` activities client.
 - Media slice migrated:
-  - Added centralized media client in `@abe-stack/api` (`createMediaClient`) for upload/retrieve/delete/status operations.
-  - Web media API adapter now delegates to centralized `@abe-stack/api` media client.
+  - Added centralized media client in `@bslt/api` (`createMediaClient`) for upload/retrieve/delete/status operations.
+  - Web media API adapter now delegates to centralized `@bslt/api` media client.
 
 Remaining high-priority web adapters for Phase 2:
 

@@ -207,7 +207,7 @@ export {
   type AuthContext,
   type PolicyAction,
   type PolicyResource
-} from './core/auth/auth.policy.schemas';
+} from './core/auth/auth.policy';
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './engine/env';
 

@@ -8,7 +8,7 @@
  * @module routes.test
  */
 
-import { emptyBodySchema } from '@abe-stack/shared';
+import { emptyBodySchema } from '@bslt/shared';
 import { describe, expect, test, vi } from 'vitest';
 
 // Use vi.hoisted to create mock functions that survive hoisting

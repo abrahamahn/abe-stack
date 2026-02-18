@@ -4,8 +4,8 @@ import '@testing-library/jest-dom/vitest';
 import { act, cleanup, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock @abe-stack/ui components before any imports that use them
-vi.mock('@abe-stack/ui', () => ({
+// Mock @bslt/ui components before any imports that use them
+vi.mock('@bslt/ui', () => ({
   ['Card']: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>
       {children}
@@ -44,7 +44,7 @@ vi.mock('@abe-stack/ui', () => ({
 }));
 
 // Mock CSS import
-vi.mock('@abe-stack/ui/styles/elements.css', () => ({}));
+vi.mock('@bslt/ui/styles/elements.css', () => ({}));
 
 // Mock react-dom/client
 const mockRender = vi.fn();
@@ -218,7 +218,7 @@ describe('main.tsx', () => {
 
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
-      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@abe-stack/ui');
+      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@bslt/ui');
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
@@ -230,7 +230,7 @@ describe('main.tsx', () => {
                   <PageContainer>
                     <section className="grid gap-3">
                       <Heading as="h1" size="xl">
-                        ABE Stack Desktop
+                        BSLT Desktop
                       </Heading>
                       <Text className="text-md">
                         A native desktop application built with Electron, sharing code with the web
@@ -250,7 +250,7 @@ describe('main.tsx', () => {
         });
 
         await waitFor(() => {
-          expect(screen.getByText('ABE Stack Desktop')).toBeInTheDocument();
+          expect(screen.getByText('BSLT Desktop')).toBeInTheDocument();
         });
 
         expect(
@@ -269,7 +269,7 @@ describe('main.tsx', () => {
 
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
-      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@abe-stack/ui');
+      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@bslt/ui');
 
       if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
@@ -286,7 +286,7 @@ describe('main.tsx', () => {
                       <li>
                         <Text as="span">
                           Shared UI from{' '}
-                          <code className="bg-subtle px-1 rounded">@abe-stack/ui</code>
+                          <code className="bg-subtle px-1 rounded">@bslt/ui</code>
                         </Text>
                       </li>
                     </ul>
@@ -301,7 +301,7 @@ describe('main.tsx', () => {
           expect(screen.getByText('Architecture')).toBeInTheDocument();
         });
 
-        expect(screen.getByText('@abe-stack/ui')).toBeInTheDocument();
+        expect(screen.getByText('@bslt/ui')).toBeInTheDocument();
 
         root.unmount();
       }
@@ -318,7 +318,7 @@ describe('main.tsx', () => {
 
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
-      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@abe-stack/ui');
+      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@bslt/ui');
 
       const isElectron =
         typeof window !== 'undefined' && 'electronAPI' in window && Boolean(window.electronAPI);
@@ -331,7 +331,7 @@ describe('main.tsx', () => {
               <ThemeProvider>
                 <PageContainer>
                   <Heading as="h1" size="xl">
-                    ABE Stack Desktop
+                    BSLT Desktop
                   </Heading>
                   {isElectron && (
                     <Card className="p-4 bg-info-subtle">
@@ -367,7 +367,7 @@ describe('main.tsx', () => {
 
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
-      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@abe-stack/ui');
+      const { Card, Heading, PageContainer, Text, ThemeProvider } = await import('@bslt/ui');
 
       const isElectron =
         typeof window !== 'undefined' && 'electronAPI' in window && Boolean(window.electronAPI);
@@ -380,7 +380,7 @@ describe('main.tsx', () => {
               <ThemeProvider>
                 <PageContainer>
                   <Heading as="h1" size="xl">
-                    ABE Stack Desktop
+                    BSLT Desktop
                   </Heading>
                   {isElectron && (
                     <Card className="p-4 bg-info-subtle">
@@ -397,7 +397,7 @@ describe('main.tsx', () => {
         });
 
         await waitFor(() => {
-          expect(screen.getByText('ABE Stack Desktop')).toBeInTheDocument();
+          expect(screen.getByText('BSLT Desktop')).toBeInTheDocument();
         });
 
         expect(screen.queryByText('Running in Electron')).not.toBeInTheDocument();

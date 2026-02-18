@@ -69,7 +69,7 @@ describe('createQueryPersister', () => {
       persister.persistClient(mockClient as never);
       vi.advanceTimersByTime(1000);
 
-      expect(mockSetItem).toHaveBeenCalledWith('abe-stack-query-cache', expect.any(String));
+      expect(mockSetItem).toHaveBeenCalledWith('bslt-query-cache', expect.any(String));
     });
 
     test('should use custom key', () => {
@@ -131,7 +131,7 @@ describe('createQueryPersister', () => {
 
       await persister.removeClient();
 
-      expect(mockRemoveItem).toHaveBeenCalledWith('abe-stack-query-cache');
+      expect(mockRemoveItem).toHaveBeenCalledWith('bslt-query-cache');
     });
 
     test('should use custom key', async () => {
@@ -152,7 +152,7 @@ describe('clearQueryCache', () => {
 
   test('should remove default key', async () => {
     await clearQueryCache();
-    expect(mockRemoveItem).toHaveBeenCalledWith('abe-stack-query-cache');
+    expect(mockRemoveItem).toHaveBeenCalledWith('bslt-query-cache');
   });
 
   test('should remove custom key', async () => {

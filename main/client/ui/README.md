@@ -1,4 +1,4 @@
-# @abe-stack/ui
+# @bslt/ui
 
 > Write once, use everywhere.
 
@@ -19,13 +19,13 @@ Shared React components for web and desktop. 80-90% code reuse across platforms.
 ## Installation
 
 ```bash
-pnpm add @abe-stack/ui
+pnpm add @bslt/ui
 ```
 
 ## Usage
 
 ```typescript
-import { Button, Card, Dialog, AppShell, useDisclosure, Router, Routes, Route } from '@abe-stack/ui';
+import { Button, Card, Dialog, AppShell, useDisclosure, Router, Routes, Route } from '@bslt/ui';
 
 function MyComponent() {
   const { isOpen, open, close } = useDisclosure();
@@ -79,7 +79,7 @@ import {
   PasswordInput, Progress, Skeleton, Spinner, Switch,
   Table, Text, TextArea, Toaster, Tooltip,
   VersionBadge, VisuallyHidden
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // Table has composable parts
 <Table>
@@ -105,7 +105,7 @@ import {
   Accordion, Card, Dialog, Dropdown, FocusTrap, FormField,
   Image, LoadingContainer, Pagination, Popover,
   Radio, RadioGroup, Select, Slider, Tabs, Toast
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // Composable parts
 <Card>
@@ -126,17 +126,17 @@ Page structure and overlays (15 total).
 
 ```typescript
 // Containers (4)
-import { AuthLayout, Container, PageContainer, StackedLayout } from '@abe-stack/ui';
+import { AuthLayout, Container, PageContainer, StackedLayout } from '@bslt/ui';
 
 // Layers (4)
-import { Modal, Overlay, ProtectedRoute, ScrollArea } from '@abe-stack/ui';
+import { Modal, Overlay, ProtectedRoute, ScrollArea } from '@bslt/ui';
 
 // Shells (7)
 import {
   AppShell, BottombarLayout, LeftSidebarLayout,
   ResizablePanel, ResizablePanelGroup, ResizableSeparator,
   RightSidebarLayout, TopbarLayout
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // AppShell for complex layouts
 <AppShell>
@@ -203,7 +203,7 @@ import {
   useExpensiveComputation, // memoized expensive calculations
   useTTLCache, // time-based cache
   useLRUCache, // LRU cache
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 ```
 
 ## Router
@@ -215,7 +215,7 @@ import {
   Router, Routes, Route, Link, Navigate,
   useNavigate, useLocation, useParams, useSearchParams,
   useNavigationType, useHistory
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 function App() {
   return (
@@ -276,7 +276,7 @@ import {
   Memoized,                    // memoized wrapper component
   SelectiveMemo,               // selective memo wrapper
   useRenderPerformance,        // performance monitoring
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // Create optimized context
 const { Provider, useContext } = createMemoizedContext<UserState>();
@@ -299,7 +299,7 @@ import {
   Markdown,            // markdown component
   SyntaxHighlighter,   // code syntax highlighting
   highlightCode,       // highlight code string
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // Merge classNames conditionally
 const className = cn('base-class', {
@@ -344,7 +344,7 @@ import {
 
   // Density & contrast
   useDensity, useContrast, DEFAULT_DENSITY, DEFAULT_CONTRAST_MODE,
-} from '@abe-stack/ui';
+} from '@bslt/ui';
 
 // Wrap app with theme provider
 <ThemeProvider defaultMode="dark" defaultDensity="comfortable">
@@ -378,9 +378,9 @@ shared/ui/src/
 ## Commands
 
 ```sh
-pnpm --filter @abe-stack/ui build      # build
-pnpm --filter @abe-stack/ui test       # run tests
-pnpm --filter @abe-stack/ui type-check # check types
+pnpm --filter @bslt/ui build      # build
+pnpm --filter @bslt/ui test       # run tests
+pnpm --filter @bslt/ui type-check # check types
 ```
 
 ## Creating Components
@@ -397,7 +397,7 @@ const Tag = forwardRef<HTMLSpanElement, TagProps>((props, ref) => {
 // 3. Export from elements/index.ts
 // 4. Write tests
 // 5. Use anywhere
-import { Tag } from '@abe-stack/ui';
+import { Tag } from '@bslt/ui';
 ```
 
 ## Trade-offs

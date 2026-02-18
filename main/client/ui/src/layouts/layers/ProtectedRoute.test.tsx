@@ -1,6 +1,6 @@
 // main/client/ui/src/layouts/layers/ProtectedRoute.test.tsx
 /** @vitest-environment jsdom */
-import { MemoryRouter, Route, Routes } from '@abe-stack/react/router';
+import { MemoryRouter, Route, Routes } from '@bslt/react/router';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

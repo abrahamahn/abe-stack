@@ -6,16 +6,16 @@
  * verifying routing, auth guards, and method enforcement.
  */
 
-import { createAuthGuard } from '@abe-stack/core';
-import { consentRoutes } from '@abe-stack/core/consent';
-import { dataExportRoutes } from '@abe-stack/core/data-export';
-import { legalRoutes } from '@abe-stack/core/legal';
-import { registerRouteMap } from '@abe-stack/server-engine';
+import { createAuthGuard } from '@bslt/core';
+import { consentRoutes } from '@bslt/core/consent';
+import { dataExportRoutes } from '@bslt/core/data-export';
+import { legalRoutes } from '@bslt/core/legal';
+import { registerRouteMap } from '@bslt/server-engine';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@abe-stack/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-engine';
 
 // ============================================================================
 // Mock Factories

@@ -16,10 +16,10 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { hashPassword } from '@abe-stack/core/auth';
-import { buildConnectionString, createDbClient, USERS_TABLE } from '@abe-stack/db';
-import { loadServerEnv } from '@abe-stack/server-engine';
-import { canonicalizeEmail } from '@abe-stack/shared';
+import { hashPassword } from '@bslt/core/auth';
+import { buildConnectionString, createDbClient, USERS_TABLE } from '@bslt/db';
+import { loadServerEnv } from '@bslt/server-engine';
+import { canonicalizeEmail } from '@bslt/shared';
 
 /** Supported user roles for seed data */
 type SeedUserRole = 'admin' | 'user';
@@ -68,7 +68,7 @@ export const TEST_USERS: SeedUser[] = [
 /**
  * Seed the database with test user data.
  *
- * Uses DEFAULT_ARGON2_CONFIG from @abe-stack/auth for password hashing,
+ * Uses DEFAULT_ARGON2_CONFIG from @bslt/auth for password hashing,
  * avoiding the need to load the full server AppConfig.
  *
  * @throws {Error} If NODE_ENV is 'production' (exits with code 1)
@@ -107,7 +107,7 @@ export async function seed(): Promise<void> {
       try {
         const passwordHash = await hashPassword(user.password);
         const canonical = canonicalizeEmail(user.email);
-        // USERS_TABLE is a compile-time constant from @abe-stack/db (not user input)
+        // USERS_TABLE is a compile-time constant from @bslt/db (not user input)
         const table = USERS_TABLE;
         const sql = [
           `INSERT INTO ${table} (email, canonical_email, password_hash, username, first_name, last_name, role, email_verified_at, email_verified)`,

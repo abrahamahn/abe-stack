@@ -12,11 +12,13 @@
  * - Extensible hooks for validation and side effects
  */
 
-import { SubKeys } from '@abe-stack/shared';
+import { SubKeys } from '@bslt/shared';
 
 import { escapeIdentifier } from '../builder/types/types';
 import { withTransaction } from '../utils/transaction';
 
+import type { SubscriptionManager } from '@bslt/shared';
+import type { DbClient } from '../client';
 import type {
   AfterWriteHook,
   BeforeValidateHook,
@@ -28,8 +30,6 @@ import type {
   WriteOperation,
   WriteResult,
 } from './types';
-import type { DbClient } from '../client';
-import type { SubscriptionManager } from '@abe-stack/shared';
 
 // ============================================================================
 // Logger Interface

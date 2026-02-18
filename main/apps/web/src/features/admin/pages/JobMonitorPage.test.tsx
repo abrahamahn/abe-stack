@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { JobMonitorPage } from './JobMonitorPage';
 
-// Mock @abe-stack/ui components
-vi.mock('@abe-stack/ui', () => {
+// Mock @bslt/ui components
+vi.mock('@bslt/ui', () => {
   const heading = ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>;
   const pageContainer = ({ children }: { children: React.ReactNode }) => (
     <div data-testid="page-container">{children}</div>

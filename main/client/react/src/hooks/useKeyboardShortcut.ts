@@ -7,7 +7,7 @@ import {
   parseKeyBinding,
   type KeyModifiers,
   type ParsedKeyBinding,
-} from '@abe-stack/shared';
+} from '@bslt/shared';
 import { useCallback, useEffect, useRef } from 'react';
 
 // Re-export shared types and utilities for consumers of this module

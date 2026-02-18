@@ -12,15 +12,15 @@ export default mergeConfig(baseConfig, {
   resolve: {
     alias: [
       {
-        find: '@abe-stack/client-engine',
+        find: '@bslt/client-engine',
         replacement: path.resolve(__dirname, '..', 'engine', 'src'),
       },
       {
-        find: '@abe-stack/api',
+        find: '@bslt/api',
         replacement: path.resolve(__dirname, '..', 'api', 'src', 'index.ts'),
       },
       {
-        find: '@abe-stack/shared',
+        find: '@bslt/shared',
         replacement: path.resolve(__dirname, '..', '..', 'shared', 'src'),
       },
       { find: '@hooks', replacement: path.join(srcDir, 'hooks') },

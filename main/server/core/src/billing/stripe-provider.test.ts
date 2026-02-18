@@ -97,8 +97,8 @@ vi.mock('stripe', () => {
 
 import { StripeProvider } from './stripe-provider';
 
-import type { CheckoutParams, CreateProductParams } from '@abe-stack/shared';
-import type { StripeProviderConfig as StripeConfig } from '@abe-stack/shared/config';
+import type { CheckoutParams, CreateProductParams } from '@bslt/shared';
+import type { StripeProviderConfig as StripeConfig } from '@bslt/shared/config';
 
 // ============================================================================
 // Test Helpers

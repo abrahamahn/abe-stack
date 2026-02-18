@@ -10,8 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createGoogleProvider } from './google';
 
+import type { OAuthError } from '@bslt/shared';
 import type { OAuthProviderClient } from '../types';
-import type { OAuthError } from '@abe-stack/shared';
 
 // ============================================================================
 // Test Setup

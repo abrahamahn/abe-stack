@@ -1,6 +1,6 @@
 // main/apps/web/src/pages/ForbiddenPage.tsx
-import { useNavigate } from '@abe-stack/react/router';
-import { EmptyState, PageContainer } from '@abe-stack/ui';
+import { useNavigate } from '@bslt/react/router';
+import { EmptyState, PageContainer } from '@bslt/ui';
 
 import type { ReactElement } from 'react';
 

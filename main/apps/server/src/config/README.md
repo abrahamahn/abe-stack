@@ -1,6 +1,6 @@
 # ⚙️ Configuration Architecture
 
-This directory houses the **Configuration Factory**, the central "brain" of the ABE Stack. Unlike standard Node.js applications that rely on fragile `process.env` strings, the ABE Stack transforms raw environment variables into a **validated, deeply-typed, and domain-mapped** configuration object.
+This directory houses the **Configuration Factory**, the central "brain" of the BSLT. Unlike standard Node.js applications that rely on fragile `process.env` strings, the BSLT transforms raw environment variables into a **validated, deeply-typed, and domain-mapped** configuration object.
 
 ## 📌 High-Level Philosophy
 
@@ -12,7 +12,7 @@ This directory houses the **Configuration Factory**, the central "brain" of the 
 
 ## 🏗 Three-Directory Architecture
 
-The ABE Stack configuration system spans **three directories** that work together:
+The BSLT configuration system spans **three directories** that work together:
 
 ### 1. **`config/env/`** - Environment Files
 
@@ -77,7 +77,7 @@ apps/server/src/config/
 
 ## 🏗 The Multi-Stage Environment Strategy
 
-The ABE Stack supports a sophisticated loading strategy with **six priority levels**:
+The BSLT supports a sophisticated loading strategy with **six priority levels**:
 
 | Priority | Source                 | Purpose                                 | Location            |
 | -------- | ---------------------- | --------------------------------------- | ------------------- |
@@ -155,7 +155,7 @@ apps/server/src/__tests__/integration/
 
 ### 1. Extraction (initEnv)
 
-The stack uses `initEnv()` from `@abe-stack/shared` to recursively resolve the project root and load the appropriate `.env` files based on the hierarchy above.
+The stack uses `initEnv()` from `@bslt/shared` to recursively resolve the project root and load the appropriate `.env` files based on the hierarchy above.
 
 ### 2. Validation (The Zod Gatekeeper)
 

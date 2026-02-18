@@ -1,5 +1,5 @@
 // main/client/react/src/hooks/useUndoRedoController.test.ts
-import { createSetOperation, createTransaction } from '@abe-stack/shared';
+import { createSetOperation, createTransaction } from '@bslt/shared';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

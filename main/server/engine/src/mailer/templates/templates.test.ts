@@ -120,7 +120,7 @@ describe('emailTemplates', () => {
       const loginUrl = 'https://example.com/login';
       const result = emailTemplates.welcome('Alice', loginUrl);
 
-      expect(result.subject).toBe('Welcome to ABE Stack!');
+      expect(result.subject).toBe('Welcome to BSLT!');
       expect(result.text).toContain('Alice');
       expect(result.text).toContain(loginUrl);
       expect(result.html).toContain('Alice');

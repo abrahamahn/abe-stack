@@ -1,5 +1,5 @@
 // main/server/core/src/auth/handlers/sudo.test.ts
-import { SUDO_TOKEN_HEADER } from '@abe-stack/shared';
+import { SUDO_TOKEN_HEADER } from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
 import { sign } from '../../../../engine/src';

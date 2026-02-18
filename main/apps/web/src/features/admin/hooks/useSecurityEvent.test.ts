@@ -1,17 +1,17 @@
 // main/apps/web/src/features/admin/hooks/useSecurityEvent.test.ts
-import { useQuery } from '@abe-stack/react';
+import { useQuery } from '@bslt/react';
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, test, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createAdminApiClient } from '../services/adminApi';
 
 import { useSecurityEvent } from './useSecurityEvent';
 
+import type { UseQueryResult } from '@bslt/react';
+import type { SecurityEvent } from '@bslt/shared';
 import type { AdminApiClient } from '../services/adminApi';
-import type { UseQueryResult } from '@abe-stack/react';
-import type { SecurityEvent } from '@abe-stack/shared';
 
-vi.mock('@abe-stack/react', () => ({
+vi.mock('@bslt/react', () => ({
   useQuery: vi.fn(),
 }));
 
@@ -23,8 +23,8 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/shared', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/shared')>();
+vi.mock('@bslt/shared', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/shared')>();
   return {
     ...actual,
     tokenStore: {

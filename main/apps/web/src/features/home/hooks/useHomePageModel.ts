@@ -1,5 +1,5 @@
 // main/apps/web/src/features/home/hooks/useHomePageModel.ts
-import { useContrast, useDensity, useSidePeek } from '@abe-stack/react/hooks';
+import { useContrast, useDensity, useSidePeek } from '@bslt/react/hooks';
 import { useUILibraryPanes, useUILibraryTheme } from '@ui-library/hooks';
 import { useState } from 'react';
 

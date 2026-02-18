@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
-import { beforeEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useUILibraryPanes } from '../useUILibraryPanes';
 
@@ -16,8 +16,8 @@ const defaultPaneConfig: UILibraryPaneConfig = {
 // Create a mock function for useMediaQuery
 const mockUseMediaQuery = vi.fn();
 
-// Mock @abe-stack/react/hooks
-vi.mock('@abe-stack/react/hooks', () => ({
+// Mock @bslt/react/hooks
+vi.mock('@bslt/react/hooks', () => ({
   useLocalStorage: vi.fn((_key: string, defaultValue: unknown) => {
     const [value, setValue] = useState(defaultValue);
     return [value, setValue];
