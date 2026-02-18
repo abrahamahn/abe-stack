@@ -294,4 +294,189 @@ describe('cache errors', () => {
       }
     });
   });
+
+  // ==========================================================================
+  // Adversarial: Error hierarchy instanceof checks
+  // ==========================================================================
+  describe('adversarial: instanceof hierarchy', () => {
+    test('CacheConnectionError is instanceof all ancestor classes', () => {
+      const err = new CacheConnectionError('redis');
+      expect(err).toBeInstanceOf(Error);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(CacheError);
+      expect(err).toBeInstanceOf(CacheConnectionError);
+    });
+
+    test('CacheTimeoutError is instanceof all ancestor classes', () => {
+      const err = new CacheTimeoutError('del', 100);
+      expect(err).toBeInstanceOf(Error);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(CacheError);
+      expect(err).toBeInstanceOf(CacheTimeoutError);
+    });
+
+    test('CacheSerializationError is not instanceof CacheConnectionError', () => {
+      const err = new CacheSerializationError('k');
+      expect(err).not.toBeInstanceOf(CacheConnectionError);
+      expect(err).not.toBeInstanceOf(CacheTimeoutError);
+    });
+
+    test('CacheCapacityError is not instanceof CacheMemoryLimitError', () => {
+      const capacity = new CacheCapacityError(10, 10);
+      const memory = new CacheMemoryLimitError(1024, 512);
+      expect(capacity).not.toBeInstanceOf(CacheMemoryLimitError);
+      expect(memory).not.toBeInstanceOf(CacheCapacityError);
+    });
+
+    test('all subclasses share statusCode 500 (internal server error)', () => {
+      const allErrors = [
+        new CacheConnectionError('redis'),
+        new CacheTimeoutError('get', 1000),
+        new CacheSerializationError('key'),
+        new CacheDeserializationError('key'),
+        new CacheInvalidKeyError('k', 'bad'),
+        new CacheCapacityError(1, 1),
+        new CacheMemoryLimitError(1, 1),
+        new CacheProviderNotFoundError('x'),
+        new CacheNotInitializedError('y'),
+      ];
+      for (const err of allErrors) {
+        expect(err.statusCode).toBe(500);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Error message content validation
+  // ==========================================================================
+  describe('adversarial: message content validation', () => {
+    test('CacheTimeoutError embeds operation name in message', () => {
+      const err = new CacheTimeoutError('mget', 250);
+      expect(err.message).toContain('mget');
+      expect(err.message).toContain('250ms');
+    });
+
+    test('CacheConnectionError embeds provider name in message', () => {
+      const err = new CacheConnectionError('upstash', 'Could not reach cache');
+      expect(err.message).toContain('upstash');
+      expect(err.message).toContain('Could not reach cache');
+    });
+
+    test('CacheInvalidKeyError embeds key and reason in message', () => {
+      const err = new CacheInvalidKeyError('a'.repeat(300), 'key too long');
+      expect(err.message).toContain('key too long');
+      expect(err.key).toHaveLength(300);
+    });
+
+    test('CacheCapacityError formats currentSize and maxSize correctly', () => {
+      const err = new CacheCapacityError(0, 0);
+      expect(err.message).toContain('0/0 entries');
+      expect(err.currentSize).toBe(0);
+      expect(err.maxSize).toBe(0);
+    });
+
+    test('CacheMemoryLimitError with 0 bytes formats as "0 B"', () => {
+      const err = new CacheMemoryLimitError(0, 1024);
+      expect(err.message).toContain('0 B');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Serialization round-trip
+  // ==========================================================================
+  describe('adversarial: serialization round-trip', () => {
+    test('JSON.stringify/JSON.parse preserves error shape', () => {
+      const err = new CacheConnectionError('redis', 'Refused', new Error('root'));
+      const json = err.toJSON();
+      const serialized = JSON.stringify(json);
+      const parsed = JSON.parse(serialized) as { ok: boolean; error: { code: string; message: string } };
+
+      expect(parsed.ok).toBe(false);
+      expect(parsed.error.code).toBe('CACHE_CONNECTION_ERROR');
+      expect(parsed.error.message).toContain('redis');
+    });
+
+    test('toJSON omits undefined details field', () => {
+      const err = new CacheConnectionError('redis');
+      const json = err.toJSON();
+      // details should be undefined (not present or explicitly undefined)
+      expect(json.error.details).toBeUndefined();
+    });
+
+    test('toCacheError wraps CacheError subclass and returns same instance', () => {
+      const sub = new CacheConnectionError('redis');
+      const result = toCacheError(sub);
+      expect(result).toBe(sub);
+    });
+
+    test('toCacheError with number input uses default message', () => {
+      const result = toCacheError(42);
+      expect(result.message).toBe('Cache operation failed');
+      expect(result).toBeInstanceOf(CacheError);
+    });
+
+    test('toCacheError with object (non-Error) uses default message', () => {
+      const result = toCacheError({ code: 'SOMETHING' });
+      expect(result.message).toBe('Cache operation failed');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Stack trace preservation
+  // ==========================================================================
+  describe('adversarial: stack trace preservation', () => {
+    test('CacheError has a stack trace', () => {
+      const err = new CacheError('trace check');
+      expect(err.stack).toBeDefined();
+      expect(err.stack).toContain('CacheError');
+    });
+
+    test('CacheConnectionError has a stack trace pointing to its constructor', () => {
+      const err = new CacheConnectionError('redis');
+      expect(err.stack).toBeDefined();
+      // Stack should mention some frame from this test
+      expect(typeof err.stack).toBe('string');
+    });
+
+    test('error name reflects constructor class name', () => {
+      expect(new CacheError('x').name).toBe('CacheError');
+      expect(new CacheConnectionError('x').name).toBe('CacheConnectionError');
+      expect(new CacheTimeoutError('op', 1).name).toBe('CacheTimeoutError');
+      expect(new CacheSerializationError('k').name).toBe('CacheSerializationError');
+      expect(new CacheDeserializationError('k').name).toBe('CacheDeserializationError');
+      expect(new CacheInvalidKeyError('k', 'r').name).toBe('CacheInvalidKeyError');
+      expect(new CacheCapacityError(1, 1).name).toBe('CacheCapacityError');
+      expect(new CacheMemoryLimitError(1, 1).name).toBe('CacheMemoryLimitError');
+      expect(new CacheProviderNotFoundError('p').name).toBe('CacheProviderNotFoundError');
+      expect(new CacheNotInitializedError('p').name).toBe('CacheNotInitializedError');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: Unknown error wrapping edge cases
+  // ==========================================================================
+  describe('adversarial: unknown error wrapping', () => {
+    test('wrapping undefined produces default message', () => {
+      const result = toCacheError(undefined);
+      expect(result.message).toBe('Cache operation failed');
+      expect(result).toBeInstanceOf(CacheError);
+      // cacheErrorCause is undefined because the value was not an Error
+      expect(result.cacheErrorCause).toBeUndefined();
+    });
+
+    test('wrapping an Error preserves original message over default message', () => {
+      const original = new Error('specific failure');
+      const result = toCacheError(original, 'fallback message');
+      // When wrapped from a real Error, message comes from the Error, not the default
+      expect(result.message).toBe('specific failure');
+    });
+
+    test('wrapping a CacheError subclass preserves the exact subclass', () => {
+      const sub = new CacheTimeoutError('hgetall', 5000);
+      const result = toCacheError(sub);
+      expect(result).toBeInstanceOf(CacheTimeoutError);
+      expect(result.operation).toBe('hgetall');
+      expect(result.timeoutMs).toBe(5000);
+    });
+  });
 });

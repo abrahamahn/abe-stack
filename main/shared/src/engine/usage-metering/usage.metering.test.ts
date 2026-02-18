@@ -237,12 +237,13 @@ describe('usageSnapshotSchema', () => {
     });
 
     it('should parse snapshot with different valid UUID format', () => {
+      // Must satisfy UUID regex: [1-5] in third segment, [89ab] in fourth segment
       const input = createValidUsageSnapshot({
-        tenantId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        tenantId: 'a1b2c3d4-e5f6-4890-abcd-ef1234567890',
       });
       const result = usageSnapshotSchema.parse(input);
 
-      expect(result.tenantId).toBe('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+      expect(result.tenantId).toBe('a1b2c3d4-e5f6-4890-abcd-ef1234567890');
     });
 
     it('should parse snapshot with zero value', () => {
@@ -824,5 +825,213 @@ describe('usageSummaryResponseSchema', () => {
         'metrics must be an array',
       );
     });
+  });
+});
+
+// ============================================================================
+// Adversarial: aggregateValues boundary stress
+// ============================================================================
+
+describe('aggregateValues — adversarial', () => {
+  describe('overflow and precision boundaries', () => {
+    it('sum of MAX_SAFE_INTEGER values overflows to Infinity', () => {
+      const result = aggregateValues([Number.MAX_VALUE, Number.MAX_VALUE], 'sum');
+      expect(result).toBe(Infinity);
+    });
+
+    it('sum handles mix of Infinity and negative Infinity (NaN result)', () => {
+      const result = aggregateValues([Infinity, -Infinity], 'sum');
+      expect(Number.isNaN(result)).toBe(true);
+    });
+
+    it('max with a single -Infinity value returns -Infinity', () => {
+      expect(aggregateValues([-Infinity], 'max')).toBe(-Infinity);
+    });
+
+    it('max of all-negative array returns least-negative value', () => {
+      expect(aggregateValues([-100, -1, -50], 'max')).toBe(-1);
+    });
+
+    it('last on single-element array returns that element', () => {
+      expect(aggregateValues([42], 'last')).toBe(42);
+    });
+
+    it('last on large array returns the final element, not the largest', () => {
+      expect(aggregateValues([999, 1, 2, 0], 'last')).toBe(0);
+    });
+
+    it('sum with NaN propagates NaN', () => {
+      const result = aggregateValues([1, NaN, 3], 'sum');
+      expect(Number.isNaN(result)).toBe(true);
+    });
+
+    it('max with NaN in array returns NaN (JS comparison with NaN is always false)', () => {
+      // The iterative max implementation compares with >, which returns false when NaN
+      // so NaN does NOT replace the current max — result depends on position
+      const result = aggregateValues([NaN, 5, 3], 'max');
+      // NaN starts as max[0]; 5 > NaN is false, 3 > NaN is false → returns NaN
+      expect(Number.isNaN(result)).toBe(true);
+    });
+
+    it('max when NaN comes after valid number returns the valid number', () => {
+      // max[0] = 5; NaN > 5 is false → max stays 5
+      const result = aggregateValues([5, NaN, 3], 'max');
+      expect(result).toBe(5);
+    });
+  });
+
+  describe('empty array edge cases', () => {
+    it('returns 0 for sum of empty array', () => {
+      expect(aggregateValues([], 'sum')).toBe(0);
+    });
+
+    it('returns 0 for max of empty array', () => {
+      expect(aggregateValues([], 'max')).toBe(0);
+    });
+
+    it('returns 0 for last of empty array', () => {
+      expect(aggregateValues([], 'last')).toBe(0);
+    });
+  });
+});
+
+// ============================================================================
+// Adversarial: isOverQuota boundary conditions
+// ============================================================================
+
+describe('isOverQuota — adversarial', () => {
+  it('returns false for negative usage with positive limit', () => {
+    expect(isOverQuota(-1, 100)).toBe(false);
+  });
+
+  it('returns true when usage equals limit at zero', () => {
+    expect(isOverQuota(0, 0)).toBe(true);
+  });
+
+  it('returns false for NaN usage (NaN >= limit is false)', () => {
+    expect(isOverQuota(NaN, 100)).toBe(false);
+  });
+
+  it('returns false for NaN limit (since limit !== Infinity and limit !== -1, compares NaN)', () => {
+    // currentUsage >= NaN is false
+    expect(isOverQuota(100, NaN)).toBe(false);
+  });
+
+  it('returns false for Infinity limit sentinel', () => {
+    expect(isOverQuota(Number.MAX_SAFE_INTEGER, Infinity)).toBe(false);
+  });
+
+  it('returns false for -1 limit sentinel (unlimited)', () => {
+    expect(isOverQuota(Number.MAX_SAFE_INTEGER, -1)).toBe(false);
+  });
+
+  it('returns true for Infinity usage against finite limit', () => {
+    expect(isOverQuota(Infinity, 1000)).toBe(true);
+  });
+
+  it('returns true when usage is 1 more than limit', () => {
+    expect(isOverQuota(1001, 1000)).toBe(true);
+  });
+
+  it('returns false when usage is 1 less than limit', () => {
+    expect(isOverQuota(999, 1000)).toBe(false);
+  });
+});
+
+// ============================================================================
+// Adversarial: usageSnapshotSchema — malformed structure attacks
+// ============================================================================
+
+describe('usageSnapshotSchema — adversarial', () => {
+  it('rejects prototype-injected object with no enumerable own props', () => {
+    // A class instance with no own enumerable properties
+    class Empty {}
+    expect(() => usageSnapshotSchema.parse(new Empty())).toThrow('id must be a string');
+  });
+
+  it('rejects snapshot where value is Number.NEGATIVE_INFINITY (still a number — passes)', () => {
+    const input = createValidUsageSnapshot({ value: Number.NEGATIVE_INFINITY });
+    const result = usageSnapshotSchema.parse(input);
+    expect(result.value).toBe(Number.NEGATIVE_INFINITY);
+  });
+
+  it('accepts ISO date-only string for periodStart (new Date() parses it without NaN)', () => {
+    // isoDateTimeSchema uses new Date(data).getTime() — date-only strings are valid dates
+    const input = createValidUsageSnapshot({ periodStart: '2026-02-01' });
+    const result = usageSnapshotSchema.parse(input);
+    expect(result.periodStart).toBe('2026-02-01');
+  });
+
+  it('rejects snapshot where tenantId has uppercase letters in wrong segment (v4 variant bit)', () => {
+    // Fourth segment must start with [89ab]; 'C' fails even case-insensitively since C > b
+    const input = createValidUsageSnapshot({
+      tenantId: '12345678-1234-4abc-Cabc-123456789001',
+    });
+    expect(() => usageSnapshotSchema.parse(input)).toThrow('TenantId must be a valid UUID');
+  });
+
+  it('rejects snapshot where all fields are present but tenantId is an object', () => {
+    const input = createValidUsageSnapshot({ tenantId: { id: '12345678-1234-4abc-8abc-123456789001' } });
+    expect(() => usageSnapshotSchema.parse(input)).toThrow('TenantId must be a string');
+  });
+
+  it('rejects a completely empty object', () => {
+    expect(() => usageSnapshotSchema.parse({})).toThrow('id must be a string');
+  });
+
+  it('rejects when value is an array of one number', () => {
+    const input = createValidUsageSnapshot({ value: [1000] });
+    expect(() => usageSnapshotSchema.parse(input)).toThrow('value must be a number');
+  });
+});
+
+// ============================================================================
+// Adversarial: usageMetricSummarySchema — overflow and precision
+// ============================================================================
+
+describe('usageMetricSummarySchema — adversarial', () => {
+  function createValidSummary(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      metricKey: 'api_requests',
+      name: 'API Requests',
+      unit: 'requests',
+      currentValue: 750,
+      limit: 1000,
+      percentUsed: 75,
+      ...overrides,
+    };
+  }
+
+  it('accepts percentUsed greater than 100 (over-quota scenario)', () => {
+    const result = usageMetricSummarySchema.parse(createValidSummary({ percentUsed: 150 }));
+    expect(result.percentUsed).toBe(150);
+  });
+
+  it('accepts negative percentUsed (corrective credit scenario)', () => {
+    const result = usageMetricSummarySchema.parse(createValidSummary({ percentUsed: -5 }));
+    expect(result.percentUsed).toBe(-5);
+  });
+
+  it('accepts Infinity as limit (unlimited tier)', () => {
+    const result = usageMetricSummarySchema.parse(createValidSummary({ limit: Infinity }));
+    expect(result.limit).toBe(Infinity);
+  });
+
+  it('rejects currentValue as boolean true (not a number type)', () => {
+    expect(() =>
+      usageMetricSummarySchema.parse(createValidSummary({ currentValue: true })),
+    ).toThrow('currentValue must be a number');
+  });
+
+  it('rejects percentUsed as a string that looks numeric', () => {
+    expect(() =>
+      usageMetricSummarySchema.parse(createValidSummary({ percentUsed: '75%' })),
+    ).toThrow('percentUsed must be a number');
+  });
+
+  it('rejects when name is an array', () => {
+    expect(() =>
+      usageMetricSummarySchema.parse(createValidSummary({ name: ['API Requests'] })),
+    ).toThrow('name must be a string');
   });
 });

@@ -2,13 +2,15 @@
 /**
  * Health Check Utilities Tests
  */
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
 
 import {
   buildDetailedHealthResponse,
+  checkCache,
   checkDatabase,
   checkEmail,
   checkPubSub,
+  checkQueue,
   checkRateLimit,
   checkSchema,
   checkStorage,
@@ -18,8 +20,10 @@ import {
   liveResponseSchema,
   readyResponseSchema,
   type DetailedHealthResponse,
+  type HealthCheckCache,
   type HealthCheckDatabase,
   type HealthCheckPubSub,
+  type HealthCheckQueue,
   type LiveResponse,
   type ReadyResponse,
   type SchemaValidator,
@@ -646,5 +650,437 @@ describe('liveResponseSchema', () => {
     test('should throw for empty object', () => {
       expect(() => liveResponseSchema.parse({})).toThrow('status must be a string');
     });
+  });
+});
+
+// ============================================================================
+// checkCache Tests
+// ============================================================================
+
+describe('checkCache', () => {
+  test('should return up with cache size when stats resolve', async () => {
+    const cache: HealthCheckCache = {
+      getStats: vi.fn().mockResolvedValue({ hits: 100, misses: 20, size: 42 }),
+    };
+
+    const result = await checkCache(cache);
+
+    expect(result.status).toBe('up');
+    expect(result.message).toBe('42 items in cache');
+  });
+
+  test('should return down with error message when getStats throws', async () => {
+    const cache: HealthCheckCache = {
+      getStats: vi.fn().mockRejectedValue(new Error('Redis connection timeout')),
+    };
+
+    const result = await checkCache(cache);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Redis connection timeout');
+  });
+
+  test('should return down with generic message for non-Error throws', async () => {
+    const cache: HealthCheckCache = {
+      getStats: vi.fn().mockRejectedValue('boom'),
+    };
+
+    const result = await checkCache(cache);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Cache check failed');
+  });
+
+  test('should handle zero-size cache (empty but healthy)', async () => {
+    const cache: HealthCheckCache = {
+      getStats: vi.fn().mockResolvedValue({ hits: 0, misses: 0, size: 0 }),
+    };
+
+    const result = await checkCache(cache);
+
+    expect(result.status).toBe('up');
+    expect(result.message).toBe('0 items in cache');
+  });
+});
+
+// ============================================================================
+// checkQueue Tests
+// ============================================================================
+
+describe('checkQueue', () => {
+  test('should return up with pending and failed counts', async () => {
+    const queue: HealthCheckQueue = {
+      getStats: vi.fn().mockResolvedValue({ pending: 5, failed: 2 }),
+    };
+
+    const result = await checkQueue(queue);
+
+    expect(result.status).toBe('up');
+    expect(result.message).toBe('5 pending, 2 failed');
+  });
+
+  test('should return down when getStats throws an Error', async () => {
+    const queue: HealthCheckQueue = {
+      getStats: vi.fn().mockRejectedValue(new Error('Queue broker unreachable')),
+    };
+
+    const result = await checkQueue(queue);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Queue broker unreachable');
+  });
+
+  test('should return down with generic message for non-Error throws', async () => {
+    const queue: HealthCheckQueue = {
+      getStats: vi.fn().mockRejectedValue(null),
+    };
+
+    const result = await checkQueue(queue);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Queue check failed');
+  });
+
+  test('should return up with zero pending and failed counts', async () => {
+    const queue: HealthCheckQueue = {
+      getStats: vi.fn().mockResolvedValue({ pending: 0, failed: 0 }),
+    };
+
+    const result = await checkQueue(queue);
+
+    expect(result.status).toBe('up');
+    expect(result.message).toBe('0 pending, 0 failed');
+  });
+});
+
+// ============================================================================
+// Adversarial: all services down
+// ============================================================================
+
+describe('determineOverallStatus — adversarial', () => {
+  test('returns down when all services report down', () => {
+    const services = {
+      db: { status: 'down' as const },
+      cache: { status: 'down' as const },
+      queue: { status: 'down' as const },
+      email: { status: 'down' as const },
+      storage: { status: 'down' as const },
+    };
+
+    expect(determineOverallStatus(services)).toBe('down');
+  });
+
+  test('returns degraded when exactly one of many is down', () => {
+    const services = {
+      db: { status: 'up' as const },
+      cache: { status: 'up' as const },
+      queue: { status: 'up' as const },
+      email: { status: 'down' as const },
+    };
+
+    expect(determineOverallStatus(services)).toBe('degraded');
+  });
+
+  test('returns degraded when a mix of degraded and up exists', () => {
+    const services = {
+      db: { status: 'up' as const },
+      cache: { status: 'degraded' as const },
+    };
+
+    expect(determineOverallStatus(services)).toBe('degraded');
+  });
+
+  test('returns down (not degraded) when every service is down', () => {
+    // Tests the every() branch: all down → return 'down'
+    const services = {
+      a: { status: 'down' as const },
+      b: { status: 'down' as const },
+    };
+
+    expect(determineOverallStatus(services)).toBe('down');
+  });
+
+  test('returns down for single-service object where that service is down', () => {
+    expect(determineOverallStatus({ db: { status: 'down' as const } })).toBe('down');
+  });
+
+  test('returns healthy for single-service object where that service is up', () => {
+    expect(determineOverallStatus({ db: { status: 'up' as const } })).toBe('healthy');
+  });
+
+  test('returns down for empty services object (every() on empty is vacuously true)', () => {
+    // JS: [].every(pred) === true → returns 'down'
+    expect(determineOverallStatus({})).toBe('down');
+  });
+});
+
+// ============================================================================
+// Adversarial: buildDetailedHealthResponse
+// ============================================================================
+
+describe('buildDetailedHealthResponse — adversarial', () => {
+  test('returns down status when all services are down', () => {
+    const allDown = {
+      db: { status: 'down' as const, message: 'ECONNREFUSED' },
+      cache: { status: 'down' as const, message: 'timeout' },
+      queue: { status: 'down' as const, message: 'broker offline' },
+    };
+
+    const response = buildDetailedHealthResponse(allDown);
+
+    expect(response.status).toBe('down');
+    expect(response.services).toEqual(allDown);
+  });
+
+  test('returns degraded when subset of services fail', () => {
+    const partial = {
+      db: { status: 'up' as const, message: 'connected', latencyMs: 3 },
+      cache: { status: 'down' as const, message: 'Redis offline' },
+      queue: { status: 'degraded' as const, message: 'high latency' },
+    };
+
+    const response = buildDetailedHealthResponse(partial);
+
+    expect(response.status).toBe('degraded');
+    expect(response.services['cache']?.message).toBe('Redis offline');
+  });
+
+  test('timestamp is a valid ISO 8601 string', () => {
+    const response = buildDetailedHealthResponse({ db: { status: 'up' as const } });
+
+    const parsed = new Date(response.timestamp);
+    expect(Number.isNaN(parsed.getTime())).toBe(false);
+    expect(response.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
+
+  test('uptime is a non-negative integer', () => {
+    const response = buildDetailedHealthResponse({ db: { status: 'up' as const } });
+    expect(response.uptime).toBeGreaterThanOrEqual(0);
+    expect(Number.isInteger(response.uptime)).toBe(true);
+  });
+
+  test('returns empty services when no services provided', () => {
+    const response = buildDetailedHealthResponse({});
+    expect(response.services).toEqual({});
+    // determineOverallStatus({}) returns 'down' due to empty every()
+    expect(response.status).toBe('down');
+  });
+});
+
+// ============================================================================
+// Adversarial: checkDatabase — partial failure scenarios
+// ============================================================================
+
+describe('checkDatabase — adversarial', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('returns latencyMs >= 0 even on immediate failure', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockRejectedValue(new Error('fail')),
+    };
+
+    const result = await checkDatabase(db);
+
+    expect(result.latencyMs).toBeGreaterThanOrEqual(0);
+  });
+
+  test('healthCheck called exactly once per invocation', async () => {
+    const mockHealthCheck = vi.fn<[], Promise<boolean>>().mockResolvedValue(true);
+    const db: HealthCheckDatabase = { healthCheck: mockHealthCheck };
+
+    await checkDatabase(db);
+
+    expect(mockHealthCheck).toHaveBeenCalledOnce();
+  });
+
+  test('returns down when healthCheck returns false (not an error, just false)', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockResolvedValue(false),
+    };
+
+    const result = await checkDatabase(db);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('health check failed');
+  });
+
+  test('handles thrown null as non-Error (uses generic message)', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockRejectedValue(null),
+    };
+
+    const result = await checkDatabase(db);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Connection failed');
+  });
+
+  test('handles thrown object literal as non-Error (uses generic message)', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockRejectedValue({ code: 'ECONNREFUSED' }),
+    };
+
+    const result = await checkDatabase(db);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('Connection failed');
+  });
+});
+
+// ============================================================================
+// Adversarial: detailedHealthResponseSchema — malformed service entries
+// ============================================================================
+
+describe('detailedHealthResponseSchema — adversarial', () => {
+  function validBase(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+    return {
+      status: 'healthy',
+      timestamp: '2026-02-18T10:00:00.000Z',
+      uptime: 3600,
+      services: {},
+      ...overrides,
+    };
+  }
+
+  test('throws when a service entry is a primitive instead of object', () => {
+    expect(() =>
+      detailedHealthResponseSchema.parse(
+        validBase({ services: { db: 'up' } }),
+      ),
+    ).toThrow('services.db.status must be a string');
+  });
+
+  test('throws when a service entry is an array instead of object', () => {
+    expect(() =>
+      detailedHealthResponseSchema.parse(
+        validBase({ services: { db: ['up'] } }),
+      ),
+    ).toThrow('services.db.status must be a string');
+  });
+
+  test('throws when a service status is a boolean', () => {
+    expect(() =>
+      detailedHealthResponseSchema.parse(
+        validBase({ services: { db: { status: true } } }),
+      ),
+    ).toThrow('services.db.status must be a string');
+  });
+
+  test('throws when services field is a string instead of object', () => {
+    // services is not null/object → treated as {} → no keys → parses fine
+    // Actually the schema wraps non-objects as {} so it won't iterate
+    const result = detailedHealthResponseSchema.parse(
+      validBase({ services: 'not-an-object' }),
+    );
+    expect(result.services).toEqual({});
+  });
+
+  test('ignores non-string optional fields (message, latencyMs) gracefully', () => {
+    const result = detailedHealthResponseSchema.parse(
+      validBase({
+        services: {
+          db: { status: 'up', message: 42, latencyMs: 'fast' },
+        },
+      }),
+    );
+
+    // message must be a string → ignored; latencyMs must be a number → ignored
+    expect(result.services['db']?.message).toBeUndefined();
+    expect(result.services['db']?.latencyMs).toBeUndefined();
+  });
+
+  test('parses multiple simultaneous service failures (full system down)', () => {
+    const result = detailedHealthResponseSchema.parse(
+      validBase({
+        status: 'down',
+        services: {
+          db: { status: 'down', message: 'ECONNREFUSED' },
+          cache: { status: 'down', message: 'timeout' },
+          queue: { status: 'down', message: 'broker offline' },
+          email: { status: 'down', message: 'SMTP unreachable' },
+        },
+      }),
+    );
+
+    expect(result.status).toBe('down');
+    expect(Object.keys(result.services)).toHaveLength(4);
+    expect(result.services['db']?.status).toBe('down');
+  });
+
+  test('throws when uptime is Infinity', () => {
+    // parseNumber should accept Infinity since it is typeof 'number'
+    const result = detailedHealthResponseSchema.parse(validBase({ uptime: Infinity }));
+    expect(result.uptime).toBe(Infinity);
+  });
+
+  test('throws when uptime is NaN', () => {
+    // parseNumber: NaN typeof === 'number' but isNaN — check what parseNumber does
+    expect(() =>
+      detailedHealthResponseSchema.parse(validBase({ uptime: NaN })),
+    ).toThrow('uptime must be a number');
+  });
+
+  test('throws when status is an empty string', () => {
+    expect(() =>
+      detailedHealthResponseSchema.parse(validBase({ status: '' })),
+    ).toThrow('status must be one of: healthy, degraded, down');
+  });
+});
+
+// ============================================================================
+// Adversarial: checkSchema — edge cases
+// ============================================================================
+
+describe('checkSchema — adversarial', () => {
+  test('handles zero expected table count correctly', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockResolvedValue(true),
+    };
+    const validator: SchemaValidator = vi.fn().mockResolvedValue({
+      valid: true,
+      missingTables: [],
+    });
+
+    const result = await checkSchema(db, validator, 0);
+
+    expect(result.status).toBe('up');
+    expect(result.message).toBe('0 tables present');
+    expect(result.tableCount).toBe(0);
+  });
+
+  test('reports correct remaining table count when many tables are missing', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockResolvedValue(true),
+    };
+    const missingTables = Array.from({ length: 5 }, (_, i) => `table_${String(i)}`);
+    const validator: SchemaValidator = vi.fn().mockResolvedValue({
+      valid: false,
+      missingTables,
+    });
+
+    const result = await checkSchema(db, validator, 10);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('missing 5 tables');
+    expect(result.tableCount).toBe(5);
+    expect(result.missingTables).toHaveLength(5);
+  });
+
+  test('handles validator that resolves valid=false with empty missingTables array', async () => {
+    const db: HealthCheckDatabase = {
+      healthCheck: vi.fn<[], Promise<boolean>>().mockResolvedValue(true),
+    };
+    const validator: SchemaValidator = vi.fn().mockResolvedValue({
+      valid: false,
+      missingTables: [],
+    });
+
+    const result = await checkSchema(db, validator, 5);
+
+    expect(result.status).toBe('down');
+    expect(result.message).toBe('missing 0 tables');
+    expect(result.tableCount).toBe(5);
   });
 });

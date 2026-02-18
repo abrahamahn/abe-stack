@@ -437,4 +437,477 @@ describe('operators', () => {
       expect(result.totalPages).toBe(0);
     });
   });
+
+  // ============================================================================
+  // Adversarial Tests
+  // ============================================================================
+
+  describe('adversarial: null and undefined field values', () => {
+    test('eq with null filter value matches null field', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'eq', value: null };
+      expect(evaluateCondition(cond, { x: null })).toBe(true);
+    });
+
+    test('eq with null filter value does NOT match undefined field', () => {
+      // null !== undefined in strict comparison even after normalization
+      const cond: FilterCondition = { field: 'x', operator: 'eq', value: null };
+      // undefined field: getFieldValue returns undefined; normalized stays undefined
+      // normalizeForComparison(undefined) === undefined !== null
+      expect(evaluateCondition(cond, { x: undefined })).toBe(false);
+    });
+
+    test('gt with null filter value returns false', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'gt', value: null };
+      expect(evaluateCondition(cond, { x: 5 })).toBe(false);
+    });
+
+    test('gte with null filter value returns false', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'gte', value: null };
+      expect(evaluateCondition(cond, { x: 5 })).toBe(false);
+    });
+
+    test('lt with null filter value returns false', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'lt', value: null };
+      expect(evaluateCondition(cond, { x: 5 })).toBe(false);
+    });
+
+    test('lte with null filter value returns false', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'lte', value: null };
+      expect(evaluateCondition(cond, { x: 5 })).toBe(false);
+    });
+
+    test('contains with null filter value returns false', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'contains', value: null };
+      expect(evaluateCondition(cond, { name: 'John' })).toBe(false);
+    });
+
+    test('contains on null field value returns false', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'contains', value: 'Jo' };
+      expect(evaluateCondition(cond, { name: null })).toBe(false);
+    });
+
+    test('in with non-array filter value returns false', () => {
+      // value is a string, not an array — in operator requires array
+      const cond: FilterCondition = { field: 'x', operator: 'in', value: 'notAnArray' };
+      expect(evaluateCondition(cond, { x: 'notAnArray' })).toBe(false);
+    });
+
+    test('between with array filter value (not a range object) returns false', () => {
+      const cond: FilterCondition = {
+        field: 'age',
+        operator: 'between',
+        // Arrays are not valid between values (must have min/max)
+        value: [18, 65],
+      };
+      expect(evaluateCondition(cond, { age: 30 })).toBe(false);
+    });
+
+    test('arrayContains on non-array field value returns false', () => {
+      const cond: FilterCondition = { field: 'tags', operator: 'arrayContains', value: 'ts' };
+      expect(evaluateCondition(cond, { tags: 'ts' })).toBe(false);
+    });
+
+    test('arrayContainsAny on non-array field value returns false', () => {
+      const cond: FilterCondition = {
+        field: 'tags',
+        operator: 'arrayContainsAny',
+        value: ['ts', 'js'],
+      };
+      expect(evaluateCondition(cond, { tags: 'ts' })).toBe(false);
+    });
+
+    test('arrayContainsAny with non-array filter value returns false', () => {
+      const cond: FilterCondition = {
+        field: 'tags',
+        operator: 'arrayContainsAny',
+        value: 'ts',
+      };
+      expect(evaluateCondition(cond, { tags: ['ts', 'js'] })).toBe(false);
+    });
+  });
+
+  describe('adversarial: type coercion traps (string "1" vs number 1)', () => {
+    test('eq does NOT coerce string "1" to number 1 with caseSensitive=true', () => {
+      const cond: FilterCondition = {
+        field: 'count',
+        operator: 'eq',
+        value: 1,
+        caseSensitive: true,
+      };
+      // Field value is string "1", filter is number 1 — strict equality fails
+      expect(evaluateCondition(cond, { count: '1' })).toBe(false);
+    });
+
+    test('eq does NOT coerce string "true" to boolean true', () => {
+      const cond: FilterCondition = {
+        field: 'active',
+        operator: 'eq',
+        value: true,
+        caseSensitive: true,
+      };
+      expect(evaluateCondition(cond, { active: 'true' })).toBe(false);
+    });
+
+    test('gt does not coerce string "20" to number for comparison against number 18', () => {
+      // Field is string, filterValue is number — types mismatch; comparePrimitives falls back
+      // to string comparison: "20".localeCompare(String(18)) — this is an adversarial case
+      const cond: FilterCondition = { field: 'age', operator: 'gt', value: 18 };
+      // String "20" vs number 18 — comparePrimitives uses fallback String() comparison
+      // We just verify it doesn't throw and returns a boolean
+      const result = evaluateCondition(cond, { age: '20' });
+      expect(typeof result).toBe('boolean');
+    });
+
+    test('in operator: string "1" in array [1] does not match (strict equality)', () => {
+      const cond: FilterCondition = {
+        field: 'x',
+        operator: 'in',
+        value: [1, 2, 3],
+        caseSensitive: true,
+      };
+      expect(evaluateCondition(cond, { x: '1' })).toBe(false);
+    });
+
+    test('in operator: number 1 in array ["1"] does not match (strict equality)', () => {
+      const cond: FilterCondition = {
+        field: 'x',
+        operator: 'in',
+        value: ['1', '2'],
+        caseSensitive: true,
+      };
+      expect(evaluateCondition(cond, { x: 1 })).toBe(false);
+    });
+  });
+
+  describe('adversarial: empty filter arrays and conditions', () => {
+    test('filterArray with empty items array returns empty array', () => {
+      const filter: FilterCondition = { field: 'name', operator: 'eq', value: 'John' };
+      expect(filterArray([], filter)).toEqual([]);
+    });
+
+    test('in operator with empty array never matches', () => {
+      const cond: FilterCondition = { field: 'status', operator: 'in', value: [] };
+      expect(evaluateCondition(cond, { status: 'active' })).toBe(false);
+      expect(evaluateCondition(cond, { status: null })).toBe(false);
+    });
+
+    test('notIn operator with empty array always matches (nothing to exclude)', () => {
+      const cond: FilterCondition = { field: 'status', operator: 'notIn', value: [] };
+      expect(evaluateCondition(cond, { status: 'active' })).toBe(true);
+      expect(evaluateCondition(cond, { status: 'deleted' })).toBe(true);
+    });
+
+    test('arrayContainsAny with empty filter array never matches', () => {
+      const cond: FilterCondition = {
+        field: 'tags',
+        operator: 'arrayContainsAny',
+        value: [],
+      };
+      expect(evaluateCondition(cond, { tags: ['ts', 'js'] })).toBe(false);
+    });
+
+    test('fullText with empty query string never matches (no terms)', () => {
+      const cond: FilterCondition = { field: 'desc', operator: 'fullText', value: '' };
+      // Empty query splits to [] terms; every([]) === true by vacuous truth
+      const result = evaluateCondition(cond, { desc: 'hello world' });
+      expect(result).toBe(true); // vacuous truth — document behavior not a bug
+    });
+
+    test('sortArray with empty items returns empty array', () => {
+      expect(sortArray([], [{ field: 'name', order: 'asc' }])).toEqual([]);
+    });
+
+    test('sortArray does not mutate original array', () => {
+      const items = [{ name: 'B' }, { name: 'A' }];
+      const sorted = sortArray(items, [{ field: 'name', order: 'asc' }]);
+      // Original unchanged
+      expect(items[0]!.name).toBe('B');
+      expect(sorted[0]!.name).toBe('A');
+    });
+  });
+
+  describe('adversarial: deeply nested compound filters', () => {
+    test('deeply nested AND/OR chain evaluates correctly', () => {
+      // Build 5-level deep nesting
+      const deepFilter: CompoundFilter = {
+        operator: 'and',
+        conditions: [
+          {
+            operator: 'or',
+            conditions: [
+              {
+                operator: 'and',
+                conditions: [
+                  {
+                    operator: 'or',
+                    conditions: [
+                      { field: 'score', operator: 'gte', value: 90 },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(evaluateFilter(deepFilter, { score: 95 })).toBe(true);
+      expect(evaluateFilter(deepFilter, { score: 50 })).toBe(false);
+    });
+
+    test('NOT with multiple conditions negates entire conjunction', () => {
+      // NOT(a AND b) — since NOT uses every(), NOT(true AND true) = false
+      const filter: CompoundFilter = {
+        operator: 'not',
+        conditions: [
+          { field: 'role', operator: 'eq', value: 'admin' },
+          { field: 'active', operator: 'eq', value: true },
+        ],
+      };
+
+      // Both match → every() is true → NOT is false
+      expect(evaluateCompoundFilter(filter, { role: 'admin', active: true })).toBe(false);
+
+      // One does not match → every() is false → NOT is true
+      expect(evaluateCompoundFilter(filter, { role: 'admin', active: false })).toBe(true);
+    });
+
+    test('compound filter with single condition behaves correctly for all operators', () => {
+      const andFilter: CompoundFilter = {
+        operator: 'and',
+        conditions: [{ field: 'x', operator: 'eq', value: 'y' }],
+      };
+      const orFilter: CompoundFilter = {
+        operator: 'or',
+        conditions: [{ field: 'x', operator: 'eq', value: 'y' }],
+      };
+      const notFilter: CompoundFilter = {
+        operator: 'not',
+        conditions: [{ field: 'x', operator: 'eq', value: 'y' }],
+      };
+
+      expect(evaluateFilter(andFilter, { x: 'y' })).toBe(true);
+      expect(evaluateFilter(orFilter, { x: 'y' })).toBe(true);
+      expect(evaluateFilter(notFilter, { x: 'y' })).toBe(false);
+
+      expect(evaluateFilter(andFilter, { x: 'z' })).toBe(false);
+      expect(evaluateFilter(orFilter, { x: 'z' })).toBe(false);
+      expect(evaluateFilter(notFilter, { x: 'z' })).toBe(true);
+    });
+  });
+
+  describe('adversarial: case sensitivity edge cases', () => {
+    test('contains is case-insensitive by default', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'contains', value: 'JOHN' };
+      expect(evaluateCondition(cond, { name: 'john doe' })).toBe(true);
+    });
+
+    test('startsWith is case-insensitive by default', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'startsWith', value: 'JOHN' };
+      expect(evaluateCondition(cond, { name: 'johnny' })).toBe(true);
+    });
+
+    test('endsWith is case-insensitive by default', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'endsWith', value: 'DOE' };
+      expect(evaluateCondition(cond, { name: 'John Doe' })).toBe(true);
+    });
+
+    test('like is case-insensitive by default', () => {
+      const cond: FilterCondition = { field: 'name', operator: 'like', value: 'JOHN%' };
+      expect(evaluateCondition(cond, { name: 'johnny' })).toBe(true);
+    });
+
+    test('ilike always case-insensitive regardless of caseSensitive flag', () => {
+      const cond: FilterCondition = {
+        field: 'email',
+        operator: 'ilike',
+        value: '%@EXAMPLE.COM',
+        caseSensitive: true, // ilike ignores this — always insensitive
+      };
+      expect(evaluateCondition(cond, { email: 'user@example.com' })).toBe(true);
+    });
+
+    test('in is case-insensitive by default', () => {
+      const cond: FilterCondition = {
+        field: 'role',
+        operator: 'in',
+        value: ['ADMIN', 'USER'],
+      };
+      expect(evaluateCondition(cond, { role: 'admin' })).toBe(true);
+    });
+
+    test('in is case-sensitive when caseSensitive=true', () => {
+      const cond: FilterCondition = {
+        field: 'role',
+        operator: 'in',
+        value: ['admin'],
+        caseSensitive: true,
+      };
+      expect(evaluateCondition(cond, { role: 'ADMIN' })).toBe(false);
+      expect(evaluateCondition(cond, { role: 'admin' })).toBe(true);
+    });
+  });
+
+  describe('adversarial: LIKE pattern edge cases', () => {
+    test('% alone matches everything', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'like', value: '%' };
+      expect(evaluateCondition(cond, { x: '' })).toBe(true);
+      expect(evaluateCondition(cond, { x: 'anything goes here' })).toBe(true);
+    });
+
+    test('%% matches everything', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'like', value: '%%' };
+      expect(evaluateCondition(cond, { x: 'abc' })).toBe(true);
+    });
+
+    test('_ matches exactly one character', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'like', value: '_' };
+      expect(evaluateCondition(cond, { x: 'a' })).toBe(true);
+      expect(evaluateCondition(cond, { x: '' })).toBe(false);
+      expect(evaluateCondition(cond, { x: 'ab' })).toBe(false);
+    });
+
+    test('like with no wildcard requires exact match', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'like', value: 'exact' };
+      expect(evaluateCondition(cond, { x: 'exact' })).toBe(true);
+      expect(evaluateCondition(cond, { x: 'exactplus' })).toBe(false);
+      expect(evaluateCondition(cond, { x: 'notexact' })).toBe(false);
+    });
+
+    test('adversarial ReDoS-style pattern %a%a%a%a%a does not hang', () => {
+      // The iterative algorithm should handle this in O(n*m), not exponential
+      const cond: FilterCondition = {
+        field: 'x',
+        operator: 'like',
+        value: '%a%a%a%a%a',
+      };
+      // A string designed to cause catastrophic backtracking in naive regex implementations
+      const evilString = 'b'.repeat(50);
+      const start = Date.now();
+      const result = evaluateCondition(cond, { x: evilString });
+      const elapsed = Date.now() - start;
+
+      expect(result).toBe(false);
+      // Should complete in well under 1 second
+      expect(elapsed).toBeLessThan(1000);
+    });
+
+    test('like empty pattern matches only empty string', () => {
+      const cond: FilterCondition = { field: 'x', operator: 'like', value: '' };
+      expect(evaluateCondition(cond, { x: '' })).toBe(true);
+      expect(evaluateCondition(cond, { x: 'a' })).toBe(false);
+    });
+  });
+
+  describe('adversarial: paginateArray boundary values', () => {
+    test('page beyond total returns empty data', () => {
+      const items = [{ id: 1 }, { id: 2 }];
+      const result = paginateArray(items, 99, 10);
+      expect(result.data).toHaveLength(0);
+      expect(result.hasNext).toBe(false);
+      expect(result.hasPrev).toBe(true);
+    });
+
+    test('limit of 1 returns single item per page', () => {
+      const items = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      const p1 = paginateArray(items, 1, 1);
+      expect(p1.data).toHaveLength(1);
+      expect(p1.data[0]!.id).toBe(1);
+      expect(p1.totalPages).toBe(3);
+      expect(p1.hasNext).toBe(true);
+      expect(p1.hasPrev).toBe(false);
+    });
+
+    test('limit larger than total returns all items on page 1', () => {
+      const items = [{ id: 1 }, { id: 2 }];
+      const result = paginateArray(items, 1, 100);
+      expect(result.data).toHaveLength(2);
+      expect(result.hasNext).toBe(false);
+      expect(result.hasPrev).toBe(false);
+      expect(result.totalPages).toBe(1);
+    });
+
+    test('single item: page 1 has no next or prev', () => {
+      const result = paginateArray([{ id: 1 }], 1, 10);
+      expect(result.hasNext).toBe(false);
+      expect(result.hasPrev).toBe(false);
+      expect(result.total).toBe(1);
+    });
+
+    test('exact fit: items divisible by limit', () => {
+      const items = Array.from({ length: 20 }, (_, i) => ({ id: i }));
+      const result = paginateArray(items, 2, 10);
+      expect(result.data).toHaveLength(10);
+      expect(result.hasNext).toBe(false);
+      expect(result.hasPrev).toBe(true);
+      expect(result.totalPages).toBe(2);
+    });
+  });
+
+  describe('adversarial: date comparison edge cases', () => {
+    test('same Date instances are equal via eq', () => {
+      const d = new Date('2024-06-01T00:00:00.000Z');
+      const same = new Date('2024-06-01T00:00:00.000Z');
+      const cond: FilterCondition = { field: 'ts', operator: 'eq', value: d, caseSensitive: true };
+      expect(evaluateCondition(cond, { ts: same })).toBe(true);
+    });
+
+    test('between with date range is inclusive on both ends', () => {
+      const min = new Date('2024-01-01');
+      const max = new Date('2024-12-31');
+      const cond: FilterCondition = { field: 'ts', operator: 'between', value: { min, max } };
+
+      expect(evaluateCondition(cond, { ts: min })).toBe(true);
+      expect(evaluateCondition(cond, { ts: max })).toBe(true);
+      expect(evaluateCondition(cond, { ts: new Date('2024-06-15') })).toBe(true);
+      expect(evaluateCondition(cond, { ts: new Date('2023-12-31') })).toBe(false);
+      expect(evaluateCondition(cond, { ts: new Date('2025-01-01') })).toBe(false);
+    });
+
+    test('gt on identical dates returns false', () => {
+      const d = new Date('2024-01-01');
+      const cond: FilterCondition = { field: 'ts', operator: 'gt', value: d };
+      expect(evaluateCondition(cond, { ts: new Date('2024-01-01') })).toBe(false);
+    });
+  });
+
+  describe('adversarial: boolean field edge cases', () => {
+    test('eq matches false === false', () => {
+      const cond: FilterCondition = { field: 'active', operator: 'eq', value: false };
+      expect(evaluateCondition(cond, { active: false })).toBe(true);
+      expect(evaluateCondition(cond, { active: true })).toBe(false);
+    });
+
+    test('eq: false !== 0 (no coercion)', () => {
+      const cond: FilterCondition = {
+        field: 'active',
+        operator: 'eq',
+        value: false,
+        caseSensitive: true,
+      };
+      expect(evaluateCondition(cond, { active: 0 })).toBe(false);
+    });
+
+    test('gt on boolean: true > false', () => {
+      const cond: FilterCondition = { field: 'active', operator: 'gt', value: false };
+      expect(evaluateCondition(cond, { active: true })).toBe(true);
+      expect(evaluateCondition(cond, { active: false })).toBe(false);
+    });
+  });
+
+  describe('adversarial: evaluateFilter throws on invalid structure', () => {
+    test('evaluateFilter throws on object without field or conditions', () => {
+      expect(() =>
+        evaluateFilter({ operator: 'and' } as unknown as CompoundFilter, {}),
+      ).toThrow();
+    });
+
+    test('evaluateCompoundFilter throws on unknown logical operator', () => {
+      const badFilter = {
+        operator: 'xor',
+        conditions: [{ field: 'x', operator: 'eq', value: 'y' }],
+      } as unknown as CompoundFilter;
+      expect(() => evaluateCompoundFilter(badFilter, { x: 'y' })).toThrow('Unknown logical operator: xor');
+    });
+  });
 });

@@ -815,7 +815,7 @@ describe('oauthConnectionsResponseSchema', () => {
         connections: [makeValidConnection()],
       });
       expect(result.connections).toHaveLength(1);
-      expect(result.connections[0].provider).toBe(OAUTH_PROVIDERS[0]);
+      expect(result.connections[0]!.provider).toBe(OAUTH_PROVIDERS[0]);
     });
 
     it('should parse multiple connections', () => {

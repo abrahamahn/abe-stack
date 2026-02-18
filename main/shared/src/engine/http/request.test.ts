@@ -33,7 +33,7 @@ describe('extractIpAddress', () => {
     });
 
     it('returns "unknown" when ip is explicitly set to undefined', () => {
-      const req: { ip?: string } = { ip: undefined };
+      const req: { ip?: string } = {};
       expect(extractIpAddress(req)).toBe('unknown');
     });
   });

@@ -644,8 +644,8 @@ describe('JOB_PRIORITY_VALUES', () => {
 
   it('should have values in ascending order', () => {
     const values = Object.values(JOB_PRIORITY_VALUES);
-    expect(values[0]).toBeLessThan(values[1]); // low < normal
-    expect(values[1]).toBeLessThan(values[2]); // normal < high
-    expect(values[2]).toBeLessThan(values[3]); // high < critical
+    expect(values[0]!).toBeLessThan(values[1]!); // low < normal
+    expect(values[1]!).toBeLessThan(values[2]!); // normal < high
+    expect(values[2]!).toBeLessThan(values[3]!); // high < critical
   });
 });

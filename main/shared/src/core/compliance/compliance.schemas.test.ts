@@ -27,7 +27,7 @@ import type {
   DataExportRequestedResponse,
 } from './compliance.schemas';
 
-import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../types/ids';
+import type { ConsentLogId, LegalDocumentId, UserAgreementId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Test Data Fixtures

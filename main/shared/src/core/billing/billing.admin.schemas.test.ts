@@ -205,8 +205,8 @@ describe('adminPlansListResponseSchema', () => {
       const result = adminPlansListResponseSchema.parse(input);
 
       expect(result.plans).toHaveLength(2);
-      expect(result.plans[0].id).toBe('pro_monthly');
-      expect(result.plans[1].id).toBe('enterprise_yearly');
+      expect(result.plans[0]!.id).toBe('pro_monthly');
+      expect(result.plans[1]!.id).toBe('enterprise_yearly');
     });
 
     it('should parse successfully with empty plans array', () => {

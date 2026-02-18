@@ -860,14 +860,9 @@ describe('validateUploadConfig', () => {
       expect(validateUploadConfig({})).toEqual({ valid: true, errors: [] });
     });
 
-    it('returns valid=true when all fields are undefined', () => {
+    it('returns valid=true when all fields are omitted', () => {
       expect(
-        validateUploadConfig({
-          maxFileSize: undefined,
-          chunkSize: undefined,
-          timeout: undefined,
-          allowedTypes: undefined,
-        }),
+        validateUploadConfig({}),
       ).toEqual({ valid: true, errors: [] });
     });
   });
@@ -981,8 +976,8 @@ describe('validateUploadConfig', () => {
       expect(result.errors).toContain('allowedTypes cannot be empty');
     });
 
-    it('accepts undefined allowedTypes (not provided)', () => {
-      const result = validateUploadConfig({ allowedTypes: undefined });
+    it('accepts omitted allowedTypes (not provided)', () => {
+      const result = validateUploadConfig({});
       expect(result.valid).toBe(true);
     });
   });

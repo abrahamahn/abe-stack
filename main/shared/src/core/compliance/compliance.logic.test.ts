@@ -10,9 +10,11 @@ import { describe, expect, it } from 'vitest';
 
 import { getEffectiveConsent, isConsentGranted, needsReacceptance } from './compliance.logic';
 
-const uuid1 = '00000000-0000-4000-a000-000000000001' as string & { readonly brand: unique symbol };
-const uuid2 = '00000000-0000-4000-a000-000000000002' as string & { readonly brand: unique symbol };
-const uuid3 = '00000000-0000-4000-a000-000000000003' as string & { readonly brand: unique symbol };
+import type { LegalDocumentId } from '../../primitives/schema/ids';
+
+const uuid1 = '00000000-0000-4000-a000-000000000001' as unknown as LegalDocumentId;
+const uuid2 = '00000000-0000-4000-a000-000000000002' as unknown as LegalDocumentId;
+const uuid3 = '00000000-0000-4000-a000-000000000003' as unknown as LegalDocumentId;
 
 describe('compliance.logic', () => {
   // ==========================================================================

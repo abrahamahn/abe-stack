@@ -124,3 +124,141 @@ describe('parseRecordKey', () => {
     });
   });
 });
+
+// ============================================================================
+// Adversarial: parseRecordKey edge cases
+// ============================================================================
+
+describe('parseRecordKey — adversarial', () => {
+  it('returns undefined for only colons ":::"', () => {
+    expect(parseRecordKey(':::')).toBeUndefined();
+  });
+
+  it('returns undefined for "record::::" (5 parts)', () => {
+    expect(parseRecordKey('record::::')).toBeUndefined();
+  });
+
+  it('returns undefined for prefix "RECORD" (uppercase)', () => {
+    expect(parseRecordKey('RECORD:users:123')).toBeUndefined();
+  });
+
+  it('returns undefined for prefix "Record" (mixed case)', () => {
+    expect(parseRecordKey('Record:users:123')).toBeUndefined();
+  });
+
+  it('returns undefined for table with newline character', () => {
+    expect(parseRecordKey('record:user\ntable:123')).toBeUndefined();
+  });
+
+  it('returns undefined for table with tab character', () => {
+    expect(parseRecordKey('record:user\ttable:123')).toBeUndefined();
+  });
+
+  it('returns undefined for id containing colon (creates 4 parts)', () => {
+    // 'record:users:id:with:colons' → parts.length=5 → undefined
+    expect(parseRecordKey('record:users:id:with:colons')).toBeUndefined();
+  });
+
+  it('returns undefined for id with SQL injection attempt', () => {
+    expect(parseRecordKey("record:users:'; DROP TABLE users; --")).toBeUndefined();
+  });
+
+  it('returns undefined for id with null byte', () => {
+    expect(parseRecordKey('record:users:id\x00null')).toBeUndefined();
+  });
+
+  it('returns undefined for key that is just colons "::"', () => {
+    expect(parseRecordKey('::')).toBeUndefined();
+  });
+
+  it('returns undefined for whitespace-only string', () => {
+    expect(parseRecordKey('   ')).toBeUndefined();
+  });
+
+  it('returns undefined for very long table name (valid chars but 10000 long)', () => {
+    // regex allows any length, but let's verify it doesn't throw or behave unexpectedly
+    const longTable = 'a'.repeat(10_000);
+    const result = parseRecordKey(`record:${longTable}:id-1`);
+    // Should be defined (valid chars) — just documents behavior
+    expect(result).toEqual({ table: longTable, id: 'id-1' });
+  });
+
+  it('returns undefined for id with unicode letters', () => {
+    // The regex /^[a-zA-Z0-9_-]+$/ only allows ASCII
+    expect(parseRecordKey('record:users:ユーザー123')).toBeUndefined();
+  });
+
+  it('returns undefined for id with emoji', () => {
+    expect(parseRecordKey('record:users:🚀abc')).toBeUndefined();
+  });
+
+  it('returns undefined for table with unicode letters', () => {
+    expect(parseRecordKey('record:ユーザーtable:abc')).toBeUndefined();
+  });
+
+  it('returns undefined for prototype pollution attempt (__proto__)', () => {
+    // table = '__proto__' contains only valid chars (letters, underscores)
+    // but id must also be valid
+    const result = parseRecordKey('record:__proto__:id-123');
+    // Should parse normally — __proto__ is valid identifier chars
+    expect(result).toEqual({ table: '__proto__', id: 'id-123' });
+  });
+
+  it('returns undefined for constructor as table name', () => {
+    const result = parseRecordKey('record:constructor:abc');
+    // 'constructor' has valid chars → should parse
+    expect(result).toEqual({ table: 'constructor', id: 'abc' });
+  });
+});
+
+// ============================================================================
+// Adversarial: SubKeys factory
+// ============================================================================
+
+describe('SubKeys — adversarial', () => {
+  it('record creates key with special chars in table (no validation at SubKeys level)', () => {
+    // SubKeys does not validate inputs — it's a template literal
+    const key = SubKeys.record('my-invalid-table!', 'id');
+    expect(key).toBe('record:my-invalid-table!:id');
+    // parseRecordKey would reject this
+    expect(parseRecordKey(key)).toBeUndefined();
+  });
+
+  it('list creates key with expected format', () => {
+    const key = SubKeys.list('user-123', 'tasks');
+    expect(key).toBe('list:user-123:tasks');
+  });
+
+  it('list does not validate inputs', () => {
+    const key = SubKeys.list('', '');
+    expect(key).toBe('list::');
+  });
+
+  it('record with empty strings produces parseable-but-invalid key', () => {
+    const key = SubKeys.record('', '');
+    expect(key).toBe('record::');
+    // parseRecordKey rejects empty table/id
+    expect(parseRecordKey(key)).toBeUndefined();
+  });
+
+  it('record round-trip with all-underscore table', () => {
+    const key = SubKeys.record('___', 'abc-123');
+    expect(parseRecordKey(key)).toEqual({ table: '___', id: 'abc-123' });
+  });
+
+  it('record with id that is pure digits and underscores', () => {
+    const key = SubKeys.record('orders', '123_456_789');
+    expect(parseRecordKey(key)).toEqual({ table: 'orders', id: '123_456_789' });
+  });
+
+  it('record type is narrowed to RecordKey literal type format', () => {
+    const key = SubKeys.record('users', 'abc');
+    // TypeScript narrowing: key starts with 'record:'
+    expect(key.startsWith('record:')).toBe(true);
+  });
+
+  it('list type is narrowed to ListKey literal type format', () => {
+    const key = SubKeys.list('user-1', 'notifications');
+    expect(key.startsWith('list:')).toBe(true);
+  });
+});

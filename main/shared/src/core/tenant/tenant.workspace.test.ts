@@ -172,10 +172,7 @@ describe('assertWorkspaceScope', () => {
     });
 
     it('should throw for context with both fields undefined', () => {
-      const context: MaybeWorkspaceContext = {
-        workspaceId: undefined,
-        userId: undefined,
-      };
+      const context = {} as MaybeWorkspaceContext;
 
       expect(() => {
         assertWorkspaceScope(context);
@@ -504,10 +501,7 @@ describe('isWorkspaceScoped', () => {
     });
 
     it('should return false when both are undefined', () => {
-      const context: MaybeWorkspaceContext = {
-        workspaceId: undefined,
-        userId: undefined,
-      };
+      const context = {} as MaybeWorkspaceContext;
 
       expect(isWorkspaceScoped(context)).toBe(false);
     });

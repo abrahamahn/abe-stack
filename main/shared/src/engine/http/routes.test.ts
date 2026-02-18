@@ -66,7 +66,7 @@ describe('publicRoute', () => {
       // Confirm the function signature does NOT accept a path parameter by
       // verifying the returned object has no path property.
       const route = publicRoute('GET', makeHandler());
-      expect((route as Record<string, unknown>)['path']).toBeUndefined();
+      expect((route as unknown as Record<string, unknown>)['path']).toBeUndefined();
     });
 
     it('stores whatever handler is supplied without validation — null handler produces broken route', () => {

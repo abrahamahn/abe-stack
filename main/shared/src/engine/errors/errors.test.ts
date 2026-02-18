@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { ERROR_CODES, HTTP_STATUS } from '../constants/platform';
 
 import {
+    AccountLockedError,
     AppError,
     BadRequestError,
     BaseError,
@@ -11,6 +12,7 @@ import {
     ConflictError,
     EmailAlreadyExistsError,
     EmailNotVerifiedError,
+    EmailSendError,
     ForbiddenError,
     formatValidationErrors,
     getErrorStatusCode,
@@ -29,6 +31,7 @@ import {
     TotpInvalidError,
     TotpRequiredError,
     UnauthorizedError,
+    UnprocessableError,
     UserNotFoundError,
     ValidationError,
     WeakPasswordError,
@@ -606,6 +609,413 @@ describe('errors', () => {
       const result = formatValidationErrors(issues);
       expect(result.error.details.fields['_root']).toEqual(['Invalid input']);
       expect(result.error.details.issues[0]?.field).toBe('_root');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: All subclass instantiation with edge cases
+  // ==========================================================================
+  describe('adversarial: subclass instantiation edge cases', () => {
+    it('AccountLockedError has statusCode 429 and stores retryAfter', () => {
+      const withRetry = new AccountLockedError(60);
+      expect(withRetry.statusCode).toBe(429);
+      expect(withRetry.retryAfter).toBe(60);
+      expect(withRetry.code).toBe(ERROR_CODES.ACCOUNT_LOCKED);
+
+      const noRetry = new AccountLockedError();
+      expect(noRetry.retryAfter).toBeUndefined();
+    });
+
+    it('AccountLockedError extends TooManyRequestsError and AppError', () => {
+      const err = new AccountLockedError();
+      expect(err).toBeInstanceOf(TooManyRequestsError);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('UnprocessableError has statusCode 422', () => {
+      const err = new UnprocessableError();
+      expect(err.statusCode).toBe(422);
+      expect(err.message).toBe('Unprocessable entity');
+      expect(err.code).toBe(ERROR_CODES.VALIDATION_ERROR);
+    });
+
+    it('UnprocessableError accepts custom message, code, and details', () => {
+      const details = { reason: 'circular reference' };
+      const err = new UnprocessableError('Cannot process', 'CUSTOM_UNPROCESSABLE', details);
+      expect(err.message).toBe('Cannot process');
+      expect(err.code).toBe('CUSTOM_UNPROCESSABLE');
+      expect(err.details).toEqual(details);
+    });
+
+    it('EmailSendError has statusCode 500 and stores originalError', () => {
+      const original = new Error('SMTP failure');
+      const err = new EmailSendError('Failed to send', original);
+      expect(err.statusCode).toBe(500);
+      expect(err.code).toBe(ERROR_CODES.EMAIL_SEND_FAILED);
+      expect(err.originalError).toBe(original);
+      expect(err.expose).toBe(false);
+    });
+
+    it('EmailSendError uses default message when none provided', () => {
+      const err = new EmailSendError();
+      expect(err.message).toBe('Failed to send email');
+    });
+
+    it('TokenReuseError stores all optional security fields', () => {
+      const err = new TokenReuseError('user-1', 'user@example.com', 'family-x', '1.2.3.4', 'Chrome');
+      expect(err.userId).toBe('user-1');
+      expect(err.email).toBe('user@example.com');
+      expect(err.familyId).toBe('family-x');
+      expect(err.ipAddress).toBe('1.2.3.4');
+      expect(err.userAgent).toBe('Chrome');
+    });
+
+    it('TokenReuseError with all-undefined optional fields', () => {
+      const err = new TokenReuseError(undefined, undefined, undefined, undefined, undefined);
+      expect(err.userId).toBeUndefined();
+      expect(err.email).toBeUndefined();
+    });
+
+    it('ConfigurationError with empty string message falls back to variable name message', () => {
+      // Empty string is falsy — triggers the fallback
+      const err = new ConfigurationError('MY_VAR', '');
+      expect(err.message).toBe('Missing required environment variable: MY_VAR');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: statusCode correctness across all classes
+  // ==========================================================================
+  describe('adversarial: statusCode correctness', () => {
+    const statusCodeMatrix: Array<[string, AppError, number]> = [
+      ['BadRequestError', new BadRequestError(), 400],
+      ['UnauthorizedError', new UnauthorizedError(), 401],
+      ['ForbiddenError', new ForbiddenError(), 403],
+      ['NotFoundError', new NotFoundError(), 404],
+      ['ConflictError', new ConflictError(), 409],
+      ['ValidationError', new ValidationError('v', {}), 422],
+      ['UnprocessableError', new UnprocessableError(), 422],
+      ['TooManyRequestsError', new TooManyRequestsError(), 429],
+      ['InternalServerError', new InternalServerError(), 500],
+      ['ConfigurationError', new ConfigurationError('X'), 500],
+      ['InvalidCredentialsError', new InvalidCredentialsError(), 401],
+      ['WeakPasswordError', new WeakPasswordError(), 400],
+      ['AccountLockedError', new AccountLockedError(), 429],
+      ['EmailAlreadyExistsError', new EmailAlreadyExistsError(), 409],
+      ['EmailNotVerifiedError', new EmailNotVerifiedError('e@x.com'), 401],
+      ['UserNotFoundError', new UserNotFoundError(), 404],
+      ['InvalidTokenError', new InvalidTokenError(), 401],
+      ['TokenReuseError', new TokenReuseError(), 401],
+      ['OAuthError', new OAuthError('msg', 'github'), 400],
+      ['OAuthStateMismatchError', new OAuthStateMismatchError('github'), 400],
+      ['TotpRequiredError', new TotpRequiredError(), 401],
+      ['TotpInvalidError', new TotpInvalidError(), 400],
+      ['EmailSendError', new EmailSendError(), 500],
+      ['ResourceNotFoundError', new ResourceNotFoundError('Item'), 404],
+    ];
+
+    for (const [name, err, expectedStatus] of statusCodeMatrix) {
+      it(`${name} has statusCode ${String(expectedStatus)}`, () => {
+        expect(err.statusCode).toBe(expectedStatus);
+      });
+    }
+  });
+
+  // ==========================================================================
+  // Adversarial: toJSON serialization
+  // ==========================================================================
+  describe('adversarial: toJSON serialization', () => {
+    it('toJSON always has ok: false', () => {
+      const errors: AppError[] = [
+        new BadRequestError(),
+        new UnauthorizedError(),
+        new ForbiddenError(),
+        new NotFoundError(),
+        new InternalServerError(),
+      ];
+      for (const err of errors) {
+        expect(err.toJSON().ok).toBe(false);
+      }
+    });
+
+    it('toJSON round-trips through JSON.parse without loss', () => {
+      const err = new ValidationError('bad input', { email: ['required'] });
+      const serialized = JSON.stringify(err.toJSON());
+      const parsed = JSON.parse(serialized) as ReturnType<typeof err.toJSON>;
+      expect(parsed.ok).toBe(false);
+      expect(parsed.error.code).toBe(ERROR_CODES.VALIDATION_ERROR);
+      expect(parsed.error.message).toBe('bad input');
+    });
+
+    it('toJSON includes details when present', () => {
+      const err = new BadRequestError('bad', ERROR_CODES.BAD_REQUEST, { field: 'x' });
+      const json = err.toJSON();
+      expect(json.error.details).toEqual({ field: 'x' });
+    });
+
+    it('toJSON omits details when undefined', () => {
+      const err = new ConflictError('conflict');
+      const json = err.toJSON();
+      expect(json.error.details).toBeUndefined();
+    });
+
+    it('ValidationError toJSON includes fields in details', () => {
+      const fields = { name: ['too short'], email: ['invalid'] };
+      const err = new ValidationError('failed', fields);
+      const json = err.toJSON();
+      expect(json.error.details).toEqual({ fields });
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: instanceof checks across class hierarchy
+  // ==========================================================================
+  describe('adversarial: instanceof hierarchy checks', () => {
+    it('OAuthStateMismatchError is instanceof OAuthError, AppError, Error', () => {
+      const err = new OAuthStateMismatchError('google');
+      expect(err).toBeInstanceOf(OAuthError);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('TotpInvalidError is instanceof BadRequestError, AppError, Error', () => {
+      const err = new TotpInvalidError();
+      expect(err).toBeInstanceOf(BadRequestError);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('ResourceNotFoundError is instanceof NotFoundError, AppError, Error', () => {
+      const err = new ResourceNotFoundError('Doc');
+      expect(err).toBeInstanceOf(NotFoundError);
+      expect(err).toBeInstanceOf(AppError);
+      expect(err).toBeInstanceOf(Error);
+    });
+
+    it('sibling classes are not instances of each other', () => {
+      expect(new BadRequestError()).not.toBeInstanceOf(UnauthorizedError);
+      expect(new ForbiddenError()).not.toBeInstanceOf(NotFoundError);
+      expect(new ConflictError()).not.toBeInstanceOf(ValidationError);
+    });
+
+    it('isAppError returns true for deeply nested subclasses', () => {
+      expect(isAppError(new OAuthStateMismatchError('github'))).toBe(true);
+      expect(isAppError(new InvalidCredentialsError())).toBe(true);
+      expect(isAppError(new TotpInvalidError())).toBe(true);
+      expect(isAppError(new AccountLockedError())).toBe(true);
+      expect(isAppError(new ResourceNotFoundError('X'))).toBe(true);
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: error.name reflects constructor class name
+  // ==========================================================================
+  describe('adversarial: error.name class identity', () => {
+    it('each error class sets name to its own constructor name', () => {
+      expect(new BadRequestError().name).toBe('BadRequestError');
+      expect(new UnauthorizedError().name).toBe('UnauthorizedError');
+      expect(new ForbiddenError().name).toBe('ForbiddenError');
+      expect(new NotFoundError().name).toBe('NotFoundError');
+      expect(new ConflictError().name).toBe('ConflictError');
+      expect(new ValidationError('v', {}).name).toBe('ValidationError');
+      expect(new TooManyRequestsError().name).toBe('TooManyRequestsError');
+      expect(new InternalServerError().name).toBe('InternalServerError');
+      expect(new ConfigurationError('V').name).toBe('ConfigurationError');
+      expect(new OAuthError('m', 'g').name).toBe('OAuthError');
+      expect(new OAuthStateMismatchError('g').name).toBe('OAuthStateMismatchError');
+      expect(new TotpRequiredError().name).toBe('TotpRequiredError');
+      expect(new TotpInvalidError().name).toBe('TotpInvalidError');
+      expect(new InvalidCredentialsError().name).toBe('InvalidCredentialsError');
+      expect(new AccountLockedError().name).toBe('AccountLockedError');
+      expect(new EmailSendError().name).toBe('EmailSendError');
+      expect(new TokenReuseError().name).toBe('TokenReuseError');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: error.stack trace
+  // ==========================================================================
+  describe('adversarial: stack trace', () => {
+    it('AppError has a non-empty stack', () => {
+      const err = new AppError('trace');
+      expect(err.stack).toBeDefined();
+      expect(typeof err.stack).toBe('string');
+      expect((err.stack ?? '').length).toBeGreaterThan(0);
+    });
+
+    it('all subclasses have stack traces', () => {
+      const errors: Error[] = [
+        new BadRequestError(),
+        new UnauthorizedError(),
+        new InternalServerError(),
+        new OAuthError('m', 'github'),
+        new TotpRequiredError(),
+        new InvalidCredentialsError(),
+      ];
+      for (const err of errors) {
+        expect(err.stack).toBeDefined();
+      }
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: expose flag correctness
+  // ==========================================================================
+  describe('adversarial: expose flag', () => {
+    it('all 4xx errors are exposed by default', () => {
+      const clientErrors: AppError[] = [
+        new BadRequestError(),
+        new UnauthorizedError(),
+        new ForbiddenError(),
+        new NotFoundError(),
+        new ConflictError(),
+        new ValidationError('v', {}),
+        new UnprocessableError(),
+        new TooManyRequestsError(),
+        new InvalidCredentialsError(),
+        new WeakPasswordError(),
+        new AccountLockedError(),
+        new EmailAlreadyExistsError(),
+        new EmailNotVerifiedError('e@x.com'),
+        new UserNotFoundError(),
+        new InvalidTokenError(),
+        new TokenReuseError(),
+        new OAuthError('m', 'g'),
+        new OAuthStateMismatchError('g'),
+        new TotpRequiredError(),
+        new TotpInvalidError(),
+      ];
+      for (const err of clientErrors) {
+        expect(err.expose).toBe(true);
+      }
+    });
+
+    it('all 5xx errors are not exposed by default', () => {
+      const serverErrors: AppError[] = [
+        new InternalServerError(),
+        new ConfigurationError('X'),
+        new EmailSendError(),
+      ];
+      for (const err of serverErrors) {
+        expect(err.expose).toBe(false);
+      }
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: formatValidationErrors edge cases
+  // ==========================================================================
+  describe('adversarial: formatValidationErrors edge cases', () => {
+    it('empty issues array produces empty fields and issues', () => {
+      const result = formatValidationErrors([]);
+      expect(result.ok).toBe(false);
+      expect(result.error.details.fields).toEqual({});
+      expect(result.error.details.issues).toEqual([]);
+    });
+
+    it('path with numeric segments joins with dot notation', () => {
+      const result = formatValidationErrors([
+        { path: ['items', 0, 'name'], message: 'required', code: 'custom' },
+      ]);
+      expect(result.error.details.fields['items.0.name']).toEqual(['required']);
+    });
+
+    it('100 issues for the same field accumulate all messages', () => {
+      const issues = Array.from({ length: 100 }, (_, i) => ({
+        path: ['field'],
+        message: `error ${String(i)}`,
+        code: 'custom',
+      }));
+      const result = formatValidationErrors(issues);
+      expect(result.error.details.fields['field']).toHaveLength(100);
+      expect(result.error.details.issues).toHaveLength(100);
+    });
+
+    it('issue with only root path maps to _root', () => {
+      const result = formatValidationErrors([{ path: [], message: 'Root error', code: 'custom' }]);
+      expect(result.error.details.fields['_root']).toEqual(['Root error']);
+      expect(result.error.details.issues[0]?.field).toBe('_root');
+    });
+
+    it('deeply nested path joins all segments', () => {
+      const result = formatValidationErrors([
+        { path: ['a', 'b', 'c', 'd', 'e'], message: 'deep', code: 'custom' },
+      ]);
+      expect(result.error.details.fields['a.b.c.d.e']).toEqual(['deep']);
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: toAppError edge cases
+  // ==========================================================================
+  describe('adversarial: toAppError edge cases', () => {
+    it('wraps null in AppError with default message', () => {
+      const result = toAppError(null);
+      expect(result).toBeInstanceOf(AppError);
+      expect(result.statusCode).toBe(500);
+    });
+
+    it('wraps undefined in AppError with default message', () => {
+      const result = toAppError(undefined);
+      expect(result).toBeInstanceOf(AppError);
+      expect(result.statusCode).toBe(500);
+    });
+
+    it('wraps a thrown number in AppError', () => {
+      const result = toAppError(42);
+      expect(result).toBeInstanceOf(AppError);
+      expect(result.statusCode).toBe(500);
+    });
+
+    it('wraps an object (non-Error) in AppError', () => {
+      const result = toAppError({ code: 'CUSTOM', status: 503 });
+      expect(result).toBeInstanceOf(AppError);
+      expect(result.statusCode).toBe(500);
+    });
+
+    it('returns the exact same AppError subclass instance', () => {
+      const original = new ForbiddenError('no access');
+      const result = toAppError(original);
+      expect(result).toBe(original);
+      expect(result).toBeInstanceOf(ForbiddenError);
+    });
+
+    it('wraps an Error with empty message', () => {
+      const result = toAppError(new Error(''));
+      expect(result).toBeInstanceOf(AppError);
+      expect(result.message).toBe('');
+    });
+  });
+
+  // ==========================================================================
+  // Adversarial: getSafeErrorMessage edge cases
+  // ==========================================================================
+  describe('adversarial: getSafeErrorMessage edge cases', () => {
+    it('InternalServerError in development returns the real message', () => {
+      const err = new InternalServerError('DB is down');
+      expect(getSafeErrorMessage(err, false)).toBe('DB is down');
+    });
+
+    it('explicitly expose=true server error is shown in production', () => {
+      const err = new AppError('visible', 500, 'CODE', undefined, true);
+      expect(err.expose).toBe(true);
+      expect(getSafeErrorMessage(err, true)).toBe('visible');
+    });
+
+    it('non-Error object returns default message in both modes', () => {
+      expect(getSafeErrorMessage({ message: 'hidden' }, false)).toBe('An unexpected error occurred');
+      expect(getSafeErrorMessage({ message: 'hidden' }, true)).toBe('An unexpected error occurred');
+    });
+
+    it('Error with empty message returns empty string in dev', () => {
+      const err = new Error('');
+      expect(getSafeErrorMessage(err, false)).toBe('');
+    });
+
+    it('Error with empty message returns default in production', () => {
+      const err = new Error('');
+      expect(getSafeErrorMessage(err, true)).toBe('An unexpected error occurred');
     });
   });
 });

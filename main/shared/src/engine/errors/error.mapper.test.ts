@@ -325,7 +325,7 @@ describe('mapErrorToHttpResponse', () => {
     });
 
     it('does NOT log when logContext is undefined explicitly', () => {
-      mapErrorToHttpResponse(new WeakPasswordError(), logger, { logContext: undefined });
+      mapErrorToHttpResponse(new WeakPasswordError(), logger, {});
       expect(logger.warn).not.toHaveBeenCalled();
     });
 

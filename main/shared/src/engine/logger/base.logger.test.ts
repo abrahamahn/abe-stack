@@ -61,12 +61,12 @@ describe('createLogger', () => {
     const base = createMockBaseLogger();
     const logger = createLogger(base as unknown as BaseLogger);
 
-    logger.trace('trace message');
+    logger.trace!('trace message');
     logger.debug('debug message');
     logger.info('info message');
     logger.warn('warn message');
     logger.error('error message');
-    logger.fatal('fatal message');
+    logger.fatal!('fatal message');
 
     expect(base.trace).toHaveBeenCalledWith({}, 'trace message');
     expect(base.debug).toHaveBeenCalledWith({}, 'debug message');
@@ -151,7 +151,7 @@ describe('createLogger', () => {
     const logger = createLogger(base as unknown as BaseLogger);
     const error = new Error('Critical');
 
-    logger.fatal(error, { component: 'db' });
+    logger.fatal!(error, { component: 'db' });
 
     expect(base.fatal).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -167,7 +167,7 @@ describe('createLogger', () => {
     const base = createMockBaseLogger();
     const logger = createLogger(base as unknown as BaseLogger);
 
-    logger.fatal('System down', { uptime: 3600 });
+    logger.fatal!('System down', { uptime: 3600 });
 
     expect(base.fatal).toHaveBeenCalledWith({ uptime: 3600 }, 'System down');
   });
@@ -178,7 +178,7 @@ describe('createLogger', () => {
     base.child.mockReturnValue(childBase);
 
     const logger = createLogger(base as unknown as BaseLogger, { correlationId: 'abc-123' });
-    const child = logger.child({ module: 'auth' });
+    const child = logger.child!({ module: 'auth' });
 
     expect(base.child).toHaveBeenCalledWith({ module: 'auth' });
 
@@ -262,7 +262,7 @@ describe('createRequestLogger', () => {
       ip: '127.0.0.1',
     });
 
-    const childLogger = logger.child({ module: 'auth' });
+    const childLogger = logger.child!({ module: 'auth' });
     childLogger.info('Child message');
 
     expect(base.child).toHaveBeenCalledWith({ module: 'auth' });

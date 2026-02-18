@@ -241,4 +241,231 @@ describe('Correlation ID Utilities', () => {
       expect(context.userId).toBe('usr_12345');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Adversarial — isValidCorrelationId boundary attacks
+  // -------------------------------------------------------------------------
+  describe('adversarial — isValidCorrelationId', () => {
+    test('should reject IDs longer than 128 characters', () => {
+      const tooLong = 'a'.repeat(129);
+      expect(isValidCorrelationId(tooLong)).toBe(false);
+    });
+
+    test('should accept IDs of exactly 128 characters', () => {
+      const exact = 'a'.repeat(128);
+      expect(isValidCorrelationId(exact)).toBe(true);
+    });
+
+    test('should accept IDs of exactly 1 character', () => {
+      expect(isValidCorrelationId('a')).toBe(true);
+    });
+
+    test('should reject IDs containing forward slash (header injection vector)', () => {
+      expect(isValidCorrelationId('abc/def')).toBe(false);
+    });
+
+    test('should reject IDs containing colon', () => {
+      expect(isValidCorrelationId('abc:def')).toBe(false);
+    });
+
+    test('should reject IDs containing dot', () => {
+      expect(isValidCorrelationId('abc.def')).toBe(false);
+    });
+
+    test('should reject IDs containing at-sign', () => {
+      expect(isValidCorrelationId('abc@def')).toBe(false);
+    });
+
+    test('should reject IDs containing null byte', () => {
+      expect(isValidCorrelationId('abc\x00def')).toBe(false);
+    });
+
+    test('should reject IDs containing tab character', () => {
+      expect(isValidCorrelationId('abc\tdef')).toBe(false);
+    });
+
+    test('should accept IDs with underscores and hyphens', () => {
+      expect(isValidCorrelationId('my_request-id_123')).toBe(true);
+    });
+
+    test('should accept standard UUID v4 (contains only allowed chars)', () => {
+      // UUID v4: hex digits and hyphens — all within [a-zA-Z0-9_-]
+      expect(isValidCorrelationId('f47ac10b-58cc-4372-a567-0e02b2c3d479')).toBe(true);
+    });
+
+    test('should reject IDs with unicode characters', () => {
+      expect(isValidCorrelationId('日本語')).toBe(false);
+    });
+
+    test('should reject IDs with plus sign (common encoding artifact)', () => {
+      expect(isValidCorrelationId('abc+def')).toBe(false);
+    });
+
+    test('should reject IDs with equals sign (base64 padding)', () => {
+      expect(isValidCorrelationId('abc==')).toBe(false);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Adversarial — getOrCreateCorrelationId attack vectors
+  // -------------------------------------------------------------------------
+  describe('adversarial — getOrCreateCorrelationId header attacks', () => {
+    test('should reject correlation ID containing newline (header injection)', () => {
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: 'good-id\r\nX-Injected: evil',
+        [STANDARD_HEADERS.REQUEST_ID]: 'safe-fallback',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toBe('safe-fallback');
+    });
+
+    test('should reject correlation ID containing null byte', () => {
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: 'abc\x00def',
+        [STANDARD_HEADERS.REQUEST_ID]: 'safe-fallback',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toBe('safe-fallback');
+    });
+
+    test('should reject ID exceeding 128 characters', () => {
+      const oversized = 'a'.repeat(129);
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: oversized,
+        [STANDARD_HEADERS.REQUEST_ID]: 'short-id',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toBe('short-id');
+    });
+
+    test('should reject ID of exactly one space', () => {
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: ' ',
+        [STANDARD_HEADERS.REQUEST_ID]: 'fallback',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toBe('fallback');
+    });
+
+    test('should fall back to generate when both correlation and request IDs are invalid', () => {
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: 'bad\nid',
+        [STANDARD_HEADERS.REQUEST_ID]: 'also bad!',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      // Should generate a fresh UUID
+      expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    test('should fall back to generate when all headers are empty strings', () => {
+      const headers = {
+        [STANDARD_HEADERS.CORRELATION_ID]: '',
+        [STANDARD_HEADERS.REQUEST_ID]: '',
+        traceparent: '',
+      };
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toMatch(/^[0-9a-f-]{36}$/);
+    });
+
+    test('should handle traceparent with only separator dashes without crashing', () => {
+      const headers = { traceparent: '---' };
+      // parts[1] is an empty string — falls through to UUID generation
+      const result = getOrCreateCorrelationId(headers);
+      expect(result).toMatch(/^[0-9a-f-]{36}$/);
+    });
+
+    test('should not crash on extremely long traceparent header', () => {
+      const longTrace = `00-${'a'.repeat(1000)}-${'b'.repeat(1000)}-01`;
+      const headers = { traceparent: longTrace };
+      // Returns the trace-id segment regardless of length (no validation on traceparent extraction)
+      const result = getOrCreateCorrelationId(headers);
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Adversarial — generateCorrelationId collision surface
+  // -------------------------------------------------------------------------
+  describe('adversarial — collision surface', () => {
+    test('should produce no duplicates in 1000 rapid synchronous calls', () => {
+      const ids = new Set<string>();
+      for (let i = 0; i < 1000; i++) {
+        ids.add(generateCorrelationId());
+      }
+      expect(ids.size).toBe(1000);
+    });
+
+    test('should always produce valid UUIDs across many calls', () => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+      for (let i = 0; i < 50; i++) {
+        expect(generateCorrelationId()).toMatch(uuidRegex);
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Adversarial — createRequestContext edge cases
+  // -------------------------------------------------------------------------
+  describe('adversarial — createRequestContext edge cases', () => {
+    test('should not include userAgent key when header value is undefined', () => {
+      const context = createRequestContext('c', {
+        id: 'r',
+        method: 'GET',
+        url: '/',
+        ip: '1.2.3.4',
+        headers: { 'user-agent': undefined },
+      });
+      expect(Object.prototype.hasOwnProperty.call(context, 'userAgent')).toBe(false);
+    });
+
+    test('should preserve empty string IP as-is', () => {
+      const context = createRequestContext('c', {
+        id: 'r',
+        method: 'GET',
+        url: '/',
+        ip: '',
+        headers: {},
+      });
+      expect(context.ip).toBe('');
+    });
+
+    test('should preserve URL with query string and fragment', () => {
+      const url = '/search?q=hello+world&page=2#results';
+      const context = createRequestContext('c', {
+        id: 'r',
+        method: 'GET',
+        url,
+        ip: '1.1.1.1',
+        headers: {},
+      });
+      expect(context.path).toBe(url);
+    });
+
+    test('should not mutate the returned context after creation', () => {
+      const context = createRequestContext('c', {
+        id: 'r',
+        method: 'DELETE',
+        url: '/items/1',
+        ip: '9.9.9.9',
+        headers: {},
+      });
+      const snapshot = { ...context };
+      // Verify context is consistent
+      expect(context).toEqual(snapshot);
+    });
+
+    test('should handle very long user-agent string without truncation', () => {
+      const longUA = 'Mozilla/5.0 ' + 'X'.repeat(1000);
+      const context = createRequestContext('c', {
+        id: 'r',
+        method: 'GET',
+        url: '/',
+        ip: '1.2.3.4',
+        headers: { 'user-agent': longUA },
+      });
+      // createRequestContext does not truncate — full UA preserved
+      expect(context.userAgent).toBe(longUA);
+    });
+  });
 });

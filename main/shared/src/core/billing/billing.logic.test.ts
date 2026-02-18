@@ -174,7 +174,7 @@ describe('billing.logic', () => {
             name: 'Projects',
             included: true,
             value: undefined,
-          } as Plan['features'][number],
+          } as unknown as Plan['features'][number],
         ],
       };
 
