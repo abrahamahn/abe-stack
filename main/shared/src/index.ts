@@ -11,7 +11,7 @@ export type {
   EndpointContract,
   ErrorResponse,
   InferResponseData,
-  StatusCode,
+  StatusCode
 } from './primitives/api';
 
 export {
@@ -37,9 +37,64 @@ export {
   type AppErrorInfo,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
-  type ValidationIssue,
+  type ValidationIssue
 } from './engine/errors';
 
+export {
+  ACCESS_TOKEN_COOKIE_NAME,
+  AGGREGATION_TYPES,
+  ANSI,
+  API_PREFIX,
+  API_VERSIONS,
+  AUDIT_CATEGORIES,
+  AUDIT_SEVERITIES,
+  AUTH_CONSTANTS,
+  CACHE_TTL,
+  CORS_CONFIG,
+  CRYPTO,
+  CSRF_EXEMPT_PATHS,
+  DEFAULT_PAGINATION,
+  DEVICE_TYPES,
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  ERROR_CODES,
+  ERROR_MESSAGES,
+  FILTER_OPERATOR_VALUES,
+  FILTER_OPERATORS,
+  HEALTH_STATUS,
+  HTTP_STATUS,
+  JOB_PRIORITIES,
+  JOB_PRIORITY_VALUES,
+  JOB_STATUS_CONFIG,
+  JOB_STATUSES,
+  LIMITS,
+  LOG_LEVELS,
+  LOGICAL_OPERATOR_VALUES,
+  LOGICAL_OPERATORS,
+  MAX_CHUNK_SIZE,
+  MAX_DELIVERY_ATTEMPTS,
+  MAX_FILENAME_LENGTH,
+  MAX_UPLOAD_FILE_SIZE,
+  MAX_UPLOAD_TIMEOUT_MS,
+  PLATFORM_TYPES,
+  QUOTAS,
+  RATE_LIMIT_WINDOWS,
+  RETRY_DELAYS_MINUTES,
+  SAFE_METHODS,
+  SEARCH_DEFAULTS,
+  SEARCH_ERROR_TYPES,
+  SENSITIVE_KEYS,
+  SMS_LIMITS,
+  SORT_ORDER,
+  STANDARD_HEADERS,
+  SUBSCRIBABLE_EVENT_TYPES,
+  TERMINAL_DELIVERY_STATUSES,
+  TERMINAL_STATUSES,
+  WEBHOOK_DELIVERY_STATUSES,
+  WEBHOOK_EVENT_TYPES,
+  type ErrorCode,
+  type HttpStatusCode
+} from './engine/constants';
 export {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -53,72 +108,35 @@ export {
   TotpInvalidError,
   TotpRequiredError,
   UserNotFoundError,
-  WeakPasswordError,
+  WeakPasswordError
 } from './engine/errors';
 export {
-  AUDIT_ACTION_REGEX,
-  AUDIT_PATTERNS,
-  DATE_ONLY_REGEX,
-  EMAIL_REGEX,
-  IP_V4_REGEX,
-  IP_V6_REGEX,
-  PHONE_REGEX,
-  REGEX_PATTERNS,
-  URL_REGEX,
-  USERNAME_REGEX_LOCAL,
-  UUID_REGEX,
-  DATE_FORMATS,
-  DAYS_PER_WEEK,
-  HOURS_PER_DAY,
-  MINUTES_PER_HOUR,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-  MS_PER_SECOND,
-  SECONDS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_MINUTE,
-  TIME,
-  TIME_ZONE,
   ALL_MEDIA_EXTENSIONS,
   ALLOWED_IMAGE_MIME_TYPES,
   ALLOWED_MEDIA_MIME_TYPES,
-  AUDIO_EXTENSIONS,
-  EXT_TO_MIME,
+  AUDIO_EXTENSIONS, AUDIT_ACTION_REGEX,
+  AUDIT_PATTERNS, DATE_FORMATS, DATE_ONLY_REGEX, DAYS_PER_WEEK, EMAIL_REGEX, EXT_TO_MIME,
   EXTRA_EXT_TO_MIME,
-  FILE_PURPOSES,
-  IMAGE_EXTENSIONS,
-  MAGIC_NUMBERS,
-  MIME_TO_EXT,
-  STORAGE_PROVIDERS,
-  VIDEO_EXTENSIONS,
+  FILE_PURPOSES, HOURS_PER_DAY, IMAGE_EXTENSIONS, IP_V4_REGEX,
+  IP_V6_REGEX, MAGIC_NUMBERS,
+  MIME_TO_EXT, MINUTES_PER_HOUR,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  MS_PER_SECOND, PHONE_REGEX,
+  REGEX_PATTERNS, SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE, STORAGE_PROVIDERS, TIME,
+  TIME_ZONE, URL_REGEX,
+  USERNAME_REGEX_LOCAL,
+  UUID_REGEX, VIDEO_EXTENSIONS
 } from './primitives/constants';
-export {
-  AUTH_CONSTANTS,
-  ERROR_CODES,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-  LIMITS,
-  LOG_LEVELS,
-  MAX_CHUNK_SIZE,
-  MAX_DELIVERY_ATTEMPTS,
-  MAX_FILENAME_LENGTH,
-  MAX_UPLOAD_FILE_SIZE,
-  MAX_UPLOAD_TIMEOUT_MS,
-  QUOTAS,
-  RETRY_DELAYS_MINUTES,
-  SMS_LIMITS,
-  SUBSCRIBABLE_EVENT_TYPES,
-  WEBHOOK_EVENT_TYPES,
-  type ErrorCode,
-  type HttpStatusCode,
-} from './engine/constants';
 
 export {
   isErrorResponse,
   isSuccessResponse,
   type ApiErrorResponse,
-  type ApiSuccessResponse,
+  type ApiSuccessResponse
 } from './primitives/helpers/response';
 
 export {
@@ -131,34 +149,17 @@ export {
   isObjectLike,
   isPlainObject,
   isSafeObjectKey,
-  isString,
+  isString
 } from './primitives/helpers';
 export {
-  createSchema,
-  coerceDate,
-  coerceNumber,
-  parseBoolean,
-  parseNullable,
-  parseNullableOptional,
-  parseNumber,
-  parseObject,
-  parseOptional,
-  parseRecord,
-  parseString,
-  parseTypedRecord,
-  withDefault,
-  createArraySchema,
+  activityIdSchema,
+  apiKeyIdSchema,
+  auditEventIdSchema, coerceDate,
+  coerceNumber, consentLogIdSchema, createArraySchema,
   createBrandedStringSchema,
   createBrandedUuidSchema,
   createEnumSchema,
-  createLiteralSchema,
-  createUnionSchema,
-  uuidSchema,
-  activityIdSchema,
-  apiKeyIdSchema,
-  auditEventIdSchema,
-  consentLogIdSchema,
-  emailLogIdSchema,
+  createLiteralSchema, createSchema, createUnionSchema, emailLogIdSchema,
   emailTemplateKeySchema,
   fileIdSchema,
   inviteIdSchema,
@@ -166,40 +167,36 @@ export {
   legalDocumentIdSchema,
   membershipIdSchema,
   notificationIdSchema,
-  organizationIdSchema,
-  parsePlanId,
-  parseTenantId,
-  parseUserId,
+  organizationIdSchema, parseBoolean,
+  parseNullable,
+  parseNullableOptional,
+  parseNumber,
+  parseObject,
+  parseOptional, parsePlanId, parseRecord,
+  parseString, parseTenantId, parseTypedRecord, parseUserId,
   planIdSchema,
   sessionIdSchema,
   subscriptionIdSchema,
   tenantIdSchema,
-  userAgreementIdSchema,
-  webhookDeliveryIdSchema,
-  webhookIdSchema,
-  type InferSchema,
-  type SafeParseResult,
-  type Schema,
-  type ParseNumberOptions,
-  type ParseStringOptions,
-  type ActivityId,
+  userAgreementIdSchema, uuidSchema, webhookDeliveryIdSchema,
+  webhookIdSchema, withDefault, type ActivityId,
   type ApiKeyId,
   type AuditEventId,
   type ConsentLogId,
   type EmailLogId,
   type EmailTemplateKey,
-  type FileId,
-  type InviteId,
+  type FileId, type InferSchema, type InviteId,
   type JobId,
   type LegalDocumentId,
   type MembershipId,
   type NotificationId,
-  type OrganizationId,
-  type SessionId,
+  type OrganizationId, type ParseNumberOptions,
+  type ParseStringOptions, type SafeParseResult,
+  type Schema, type SessionId,
   type TenantId,
   type UserAgreementId,
   type WebhookDeliveryId,
-  type WebhookId,
+  type WebhookId
 } from './primitives/schema';
 
 export { err, isErr, isOk, ok, type Result } from './primitives/helpers/result';
@@ -209,8 +206,8 @@ export {
   hasPermission,
   type AuthContext,
   type PolicyAction,
-  type PolicyResource,
-} from './core/auth/auth.policy';
+  type PolicyResource
+} from './core/auth/auth.policy.schemas';
 
 export { baseEnvSchema, getRawEnv, validateEnv, type BaseEnv } from './engine/env';
 
@@ -235,13 +232,13 @@ export {
   type SendResult,
   type StorageClient,
   type StorageConfig,
-  type StorageProvider,
+  type StorageProvider
 } from './engine/ports';
 
 export {
   type BreadcrumbData,
   type ErrorTracker,
-  type HasErrorTracker,
+  type HasErrorTracker
 } from './primitives/observability';
 
 export type { ServerLogger } from './primitives/logger';
@@ -252,7 +249,7 @@ export {
   errorCodeSchema,
   errorResponseSchema,
   successResponseSchema,
-  type EmptyBody,
+  type EmptyBody
 } from './engine/http';
 
 export { emailSchema, isoDateTimeSchema, passwordSchema } from './core/schemas';
@@ -274,7 +271,7 @@ export {
   type ListRemoveOperation,
   type Operation,
   type SetOperation,
-  type Transaction,
+  type Transaction
 } from './core/transactions';
 
 // ============================================================================
@@ -296,12 +293,11 @@ export {
   filesContract,
   healthContract,
   jobsContract,
-  membershipContract,
   notificationsContract,
   realtimeContract,
   tenantContract,
   usersContract,
-  webhooksContract,
+  webhooksContract
 } from './contracts';
 
 // ============================================================================
@@ -324,7 +320,7 @@ export {
   type AuditLogFilter,
   type AuditLogListResponse,
   type AuditSeverity,
-  type CreateAuditEvent,
+  type CreateAuditEvent
 } from './core/audit-log';
 
 // Auth error mapper
@@ -334,14 +330,14 @@ export {
   type ErrorMapperLogger,
   type ErrorMapperOptions,
   type ErrorStatusCode,
-  type HttpErrorResponse,
+  type HttpErrorResponse
 } from './engine/errors';
 
 // Auth constants
 export {
   AUTH_ERROR_MESSAGES,
   AUTH_SUCCESS_MESSAGES,
-  HTTP_ERROR_MESSAGES,
+  HTTP_ERROR_MESSAGES
 } from './engine/constants';
 
 export {
@@ -349,7 +345,7 @@ export {
   COMMON_PASSWORDS,
   KEYBOARD_PATTERNS,
   LOGIN_FAILURE_REASON,
-  RETENTION_PERIODS,
+  RETENTION_PERIODS
 } from './core/constants';
 
 // Auth schemas & utilities
@@ -388,8 +384,16 @@ export {
   magicLinkRequestResponseSchema,
   magicLinkRequestSchema,
   magicLinkVerifyRequestSchema,
-  magicLinkVerifyResponseSchema,
-  refreshResponseSchema,
+  magicLinkVerifyResponseSchema, oauthCallbackQuerySchema,
+  oauthCallbackResponseSchema,
+  oauthConnectionSchema,
+  oauthConnectionsResponseSchema,
+  oauthEnabledProvidersResponseSchema,
+  oauthInitiateResponseSchema,
+  oauthLinkCallbackResponseSchema,
+  oauthLinkResponseSchema,
+  oauthProviderSchema,
+  oauthUnlinkResponseSchema, refreshResponseSchema,
   registerRequestSchema,
   registerResponseSchema,
   removePhoneResponseSchema,
@@ -424,18 +428,7 @@ export {
   webauthnLoginVerifyRequestSchema,
   webauthnOptionsResponseSchema,
   webauthnRegisterVerifyRequestSchema,
-  webauthnRegisterVerifyResponseSchema,
-  oauthCallbackQuerySchema,
-  oauthCallbackResponseSchema,
-  oauthConnectionSchema,
-  oauthConnectionsResponseSchema,
-  oauthEnabledProvidersResponseSchema,
-  oauthInitiateResponseSchema,
-  oauthLinkCallbackResponseSchema,
-  oauthLinkResponseSchema,
-  oauthProviderSchema,
-  oauthUnlinkResponseSchema,
-  type AcceptTosRequest,
+  webauthnRegisterVerifyResponseSchema, type AcceptTosRequest,
   type AcceptTosResponse,
   type AuthResponse,
   type BffLoginResponse,
@@ -456,8 +449,16 @@ export {
   type MagicLinkRequest,
   type MagicLinkRequestResponse,
   type MagicLinkVerifyRequest,
-  type MagicLinkVerifyResponse,
-  type PasskeyListItem,
+  type MagicLinkVerifyResponse, type OAuthCallbackQuery,
+  type OAuthCallbackResponse,
+  type OAuthConnection,
+  type OAuthConnectionsResponse,
+  type OAuthEnabledProvidersResponse,
+  type OAuthInitiateResponse,
+  type OAuthLinkCallbackResponse,
+  type OAuthLinkResponse,
+  type OAuthProvider,
+  type OAuthUnlinkResponse, type PasskeyListItem,
   type PasswordConfig,
   type PasswordPenalties,
   type PasswordValidationResult,
@@ -497,17 +498,7 @@ export {
   type WebauthnLoginVerifyRequest,
   type WebauthnOptionsResponse,
   type WebauthnRegisterVerifyRequest,
-  type WebauthnRegisterVerifyResponse,
-  type OAuthCallbackQuery,
-  type OAuthCallbackResponse,
-  type OAuthConnection,
-  type OAuthConnectionsResponse,
-  type OAuthEnabledProvidersResponse,
-  type OAuthInitiateResponse,
-  type OAuthLinkCallbackResponse,
-  type OAuthLinkResponse,
-  type OAuthProvider,
-  type OAuthUnlinkResponse,
+  type WebauthnRegisterVerifyResponse
 } from './core/auth';
 
 // Billing
@@ -547,13 +538,10 @@ export {
   getPaymentMethodLabel,
   getSubscriptionStatusLabel,
   getSubscriptionStatusVariant,
-  hasActiveSubscription,
-  InvoiceNotFoundError,
+  hasActiveSubscription, INVOICE_STATUSES, InvoiceNotFoundError,
   invoiceResponseSchema,
   invoiceSchema,
-  invoicesListResponseSchema,
-  INVOICE_STATUSES,
-  isBillingProviderError,
+  invoicesListResponseSchema, isBillingProviderError,
   isEntitled,
   isPlanError,
   isSubscriptionError,
@@ -574,15 +562,12 @@ export {
   portalSessionRequestSchema,
   portalSessionResultSchema,
   resolveEntitlements,
-  setupIntentResponseSchema,
-  subscriptionActionResponseSchema,
+  setupIntentResponseSchema, SUBSCRIPTION_STATUSES, subscriptionActionResponseSchema,
   SubscriptionAlreadyCanceledError,
   SubscriptionNotActiveError,
   SubscriptionNotCancelingError,
   subscriptionResponseSchema,
-  subscriptionSchema,
-  SUBSCRIPTION_STATUSES,
-  syncStripeResponseSchema,
+  subscriptionSchema, syncStripeResponseSchema,
   updatePlanRequestSchema,
   updateSubscriptionRequestSchema,
   WebhookEventAlreadyProcessedError,
@@ -629,7 +614,7 @@ export {
   type SubscriptionStatus,
   type SyncStripeResponse,
   type UpdatePlanRequest,
-  type UpdateSubscriptionRequest,
+  type UpdateSubscriptionRequest
 } from './core/billing';
 
 // Compliance
@@ -666,7 +651,7 @@ export {
   type LegalDocument,
   type UpdateConsentPreferencesRequest,
   type UpdateLegalDocument,
-  type UserAgreement,
+  type UserAgreement
 } from './core/compliance';
 
 // Email
@@ -683,7 +668,7 @@ export {
   type FileRecord,
   type FilesListResponse,
   type FileUploadRequest,
-  type FileUploadResponse,
+  type FileUploadResponse
 } from './engine/files';
 
 // Feature flags
@@ -702,7 +687,7 @@ export {
   type FeatureFlagsListResponse,
   type SetTenantFeatureOverrideRequest,
   type TenantFeatureOverride,
-  type UpdateFeatureFlagRequest,
+  type UpdateFeatureFlagRequest
 } from './engine/feature-flags';
 
 // Jobs
@@ -720,10 +705,10 @@ export {
   type DomainJob,
   type JobPriority,
   type JobStatus,
-  type UpdateJob,
+  type UpdateJob
 } from './engine/jobs';
 
-// Membership
+// Membership (colocated in tenant/)
 export {
   acceptInvitationSchema,
   addMemberSchema,
@@ -751,14 +736,11 @@ export {
   type AcceptInvitation,
   type AddMember,
   type CreateInvitation,
-  type Invitation,
-  type InvitationStatus,
-  type InvitationsListResponse,
-  type Membership,
+  type Invitation, type InvitationsListResponse, type InvitationStatus, type Membership,
   type MembershipActionResponse,
   type MembersListResponse,
-  type UpdateMembershipRole,
-} from './core/membership';
+  type UpdateMembershipRole
+} from './core/tenant';
 
 // Notifications
 export {
@@ -832,7 +814,7 @@ export {
   type UnsubscribeRequest,
   type UnsubscribeResponse,
   type UpdatePreferencesRequest,
-  type VapidKeyResponse,
+  type VapidKeyResponse
 } from './core/notifications';
 
 // Sessions
@@ -845,7 +827,7 @@ export {
   userSessionSchema,
   type CreateUserSession,
   type UpdateUserSession,
-  type UserSession,
+  type UserSession
 } from './core/auth';
 
 // Tenant
@@ -872,7 +854,7 @@ export {
   type TenantListResponse,
   type TransferOwnershipInput,
   type UpdateTenantInput,
-  type WorkspaceContext,
+  type WorkspaceContext
 } from './core/tenant';
 
 // Usage metering
@@ -888,7 +870,7 @@ export {
   type UsageMetric,
   type UsageMetricSummary,
   type UsageSnapshot,
-  type UsageSummaryResponse,
+  type UsageSummaryResponse
 } from './engine/usage-metering';
 
 // Users
@@ -954,7 +936,7 @@ export {
   type UpdateUsernameRequest,
   type UpdateUsernameResponse,
   type User,
-  type UserId,
+  type UserId
 } from './core/users';
 
 // API Keys
@@ -976,7 +958,7 @@ export {
   type DeleteApiKeyResponse,
   type ListApiKeysResponse,
   type RevokeApiKeyResponse,
-  type UpdateApiKey,
+  type UpdateApiKey
 } from './engine/api-keys';
 
 // Webhooks
@@ -1014,7 +996,7 @@ export {
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
-  type WebhookWithDeliveries,
+  type WebhookWithDeliveries
 } from './engine/webhooks';
 
 // ============================================================================
@@ -1069,7 +1051,7 @@ export {
   type SystemStatsResponse,
   type UnlockAccountRequest,
   type UnlockAccountResponse,
-  type UserStatus,
+  type UserStatus
 } from './core/admin';
 
 // Context (from engine)
@@ -1084,7 +1066,7 @@ export {
   type HasNotifications,
   type HasPubSub,
   type HasStorage,
-  type ReplyContext,
+  type ReplyContext
 } from './engine/context';
 
 // Jobs (additional contract exports)
@@ -1099,7 +1081,7 @@ export {
   type JobError,
   type JobListQuery,
   type JobListResponse,
-  type QueueStats,
+  type QueueStats
 } from './engine/jobs';
 
 // Billing Service types (from domain)
@@ -1114,7 +1096,7 @@ export {
   type ProviderInvoice,
   type ProviderPaymentMethod,
   type ProviderSubscription,
-  type SetupIntentResult,
+  type SetupIntentResult
 } from './core/billing';
 
 // OAuth constants (schemas already exported from core/auth above)
@@ -1166,7 +1148,7 @@ export {
   type SetNowOperation,
   type VersionConflict,
   type VersionedRecord,
-  type WriteResponse,
+  type WriteResponse
 } from './engine/realtime';
 
 // Media (from engine/media — functions and types only; constants via primitives/constants above)
@@ -1189,7 +1171,7 @@ export {
   type ProcessingResult,
   type SecurityScanResult,
   type UploadConfig,
-  type VideoProcessingOptions,
+  type VideoProcessingOptions
 } from './engine/media';
 
 // Activities (from domain/activities)
@@ -1201,7 +1183,7 @@ export {
   type ActivitiesListFilters,
   type Activity,
   type ActorType,
-  type CreateActivity,
+  type CreateActivity
 } from './core/activities';
 
 // Security (from domain/admin)
@@ -1232,7 +1214,7 @@ export {
   type SecurityMetrics,
   type SecurityMetricsRequest,
   type SecurityMetricsResponse,
-  type SecuritySeverity,
+  type SecuritySeverity
 } from './core/admin';
 
 // Commonly-used role types
@@ -1276,7 +1258,7 @@ export {
   type MemoizeFunction,
   type MemoizeOptions,
   type MemoryCacheConfig,
-  type RedisCacheConfig,
+  type RedisCacheConfig
 } from './engine/cache';
 
 // --- Search ---
@@ -1372,7 +1354,7 @@ export {
   type SerializedFilter,
   type SerializedQuery,
   type SortConfig,
-  type UrlSearchParamsInput,
+  type UrlSearchParamsInput
 } from './engine/search';
 
 // --- Logger ---
@@ -1395,7 +1377,7 @@ export {
   type Logger,
   type LoggerConfig,
   type LogLevel,
-  type RequestContext,
+  type RequestContext
 } from './engine/logger';
 
 // --- Monitor ---
@@ -1431,7 +1413,7 @@ export {
   type ServiceStatus,
   type StartupSummaryOptions,
   type StorageHealthConfig,
-  type WebSocketStats,
+  type WebSocketStats
 } from './engine/health';
 
 // --- PubSub ---
@@ -1450,7 +1432,7 @@ export {
   type ServerMessage,
   type SubscriptionKey,
   type SubscriptionManagerOptions,
-  type WebSocket,
+  type WebSocket
 } from './engine/pubsub';
 
 // --- Casing ---
@@ -1461,7 +1443,7 @@ export {
   snakeToCamel,
   toCamelCaseArray,
   toSnakeCase,
-  type KeyMapping,
+  type KeyMapping
 } from './primitives/helpers';
 
 // --- Comparison ---
@@ -1472,24 +1454,21 @@ export {
   constantTimeCompare,
   generateSecureId,
   generateToken,
-  generateUUID,
+  generateUUID
 } from './primitives/helpers/crypto';
 
 // --- HTTP ---
 export {
   extractBearerToken,
   parseCookies,
-  serializeCookie,
-  type CookieOptions,
-  type CookieSerializeOptions,
-  type BaseRouteDefinition,
-  type HandlerContext,
+  serializeCookie, type BaseRouteDefinition, type CookieOptions,
+  type CookieSerializeOptions, type HandlerContext,
   type HttpMethod,
   type RequestInfo,
   type RouteHandler,
   type RouteMap,
   type RouteResult,
-  type ValidationSchema,
+  type ValidationSchema
 } from './engine/http';
 
 export { extractCsrfToken } from './engine/http/csrf';
@@ -1505,7 +1484,7 @@ export {
   parseXForwardedFor,
   validateCidrList,
   type ForwardedInfo,
-  type ProxyValidationConfig,
+  type ProxyValidationConfig
 } from './engine/http/proxy';
 export { extractIpAddress, extractUserAgent, getRequesterId } from './engine/http/request';
 
@@ -1514,14 +1493,14 @@ export {
   detectSQLInjection,
   isValidInputKeyName,
   sanitizeString,
-  type SQLInjectionDetectionOptions,
+  type SQLInjectionDetectionOptions
 } from './engine/security/input';
 export { hasDangerousKeys, sanitizePrototype } from './engine/security/prototype';
 export {
   getInjectionErrors,
   sanitizeObject,
   type SanitizationResult,
-  type ValidationOptions,
+  type ValidationOptions
 } from './engine/security/sanitization';
 
 // --- Routes ---
@@ -1561,7 +1540,7 @@ export {
   type PaginationErrorType,
   type PaginationOptions,
   type PaginationParamNames,
-  type PaginationParseConfig,
+  type PaginationParseConfig
 } from './engine/pagination';
 
 // --- Rate Limit ---
@@ -1575,7 +1554,7 @@ export {
   MAX_IMAGE_SIZE,
   MAX_LOGO_SIZE,
   normalizeStoragePath,
-  validateFileType,
+  validateFileType
 } from './engine/files';
 
 // --- String ---
@@ -1596,7 +1575,7 @@ export {
   toKebabCase,
   toPascalCase,
   trimTrailingSlashes,
-  truncate,
+  truncate
 } from './primitives/helpers';
 
 // --- User Agent ---
@@ -1607,19 +1586,6 @@ export {
   addAuthHeader,
   createTokenStore,
   tokenStore,
-  type TokenStore,
+  type TokenStore
 } from './engine/crypto/token';
 
-// --- Theme tokens ---
-export {
-  DEFAULT_CONTRAST_MODE,
-  DEFAULT_DENSITY,
-  densityMultipliers,
-  getContrastCssVariables,
-  getDensityCssVariables,
-  getSpacingForDensity,
-  highContrastDarkOverrides,
-  highContrastLightOverrides,
-  type ContrastMode,
-  type Density,
-} from './engine/theme';

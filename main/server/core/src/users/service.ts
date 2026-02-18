@@ -11,8 +11,7 @@
 import { toISODateOnly } from '@abe-stack/shared';
 
 import type { UserRepository } from '../../../db/src';
-import type { CursorPaginationOptions } from '@abe-stack/shared';
-import type { AppRole as UserRole } from '@abe-stack/shared/domain';
+import type { AppRole as UserRole, CursorPaginationOptions } from '@abe-stack/shared';
 
 // ============================================================================
 // Types

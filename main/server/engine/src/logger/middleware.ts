@@ -18,9 +18,8 @@ import { getMetricsCollector } from '../system/metrics';
 import { createRequestLogger } from './logger';
 
 import type { UserRole } from '@abe-stack/db';
-import type { RequestContext } from '@abe-stack/shared';
+import type { Logger, RequestContext } from '@abe-stack/shared';
 import type { LoggingConfig } from '@abe-stack/shared/config';
-import type { Logger } from '@abe-stack/shared/core';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Extend Fastify request with our custom properties

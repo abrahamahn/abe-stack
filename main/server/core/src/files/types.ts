@@ -13,7 +13,7 @@
 import { LIMITS } from '@abe-stack/shared';
 
 import type { FileRepository } from '../../../db/src';
-import type { BaseContext, HasStorage } from '@abe-stack/shared/core';
+import type { BaseContext, HasStorage } from '@abe-stack/shared';
 
 // ============================================================================
 // Storage Interface
