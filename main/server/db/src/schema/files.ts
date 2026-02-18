@@ -4,7 +4,7 @@
  *
  * Explicit TypeScript interfaces for the files table.
  * Manages file uploads with multi-provider storage support.
- * Maps to migration 0013_files.sql.
+ * Maps to migration 0600_files.sql.
  *
  * @remarks Uses `FileRecord` (not `File`) to avoid collision with the DOM `File` global.
  */
@@ -34,7 +34,7 @@ export const FILES_TABLE = 'files';
  * File record from database (SELECT result).
  * Named `FileRecord` to avoid collision with DOM `File`.
  *
- * @see 0013_files.sql — size_bytes is BIGINT, purpose has CHECK constraint
+ * @see 0600_files.sql — size_bytes is BIGINT, purpose has CHECK constraint
  */
 export interface FileRecord {
   id: string;

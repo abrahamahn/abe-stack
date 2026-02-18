@@ -4,7 +4,7 @@
  *
  * Explicit TypeScript interfaces for the tenant_settings table.
  * Provides key-value configuration storage per tenant.
- * Maps to migration 0015_tenant_settings.sql.
+ * Maps to migration 0100_tenants.sql.
  *
  * @remarks Uses composite primary key: (tenant_id, key).
  * Same pattern as tenant_feature_overrides in features.ts.
@@ -24,7 +24,7 @@ export const TENANT_SETTINGS_TABLE = 'tenant_settings';
  * Tenant setting record (SELECT result).
  * Composite primary key: (tenantId, key).
  *
- * @see 0015_tenant_settings.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
+ * @see 0100_tenants.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
  */
 export interface TenantSetting {
   tenantId: string;

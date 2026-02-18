@@ -3,7 +3,7 @@
  * Usage Metering Schema Types
  *
  * TypeScript interfaces for usage_metrics and usage_snapshots tables.
- * Maps to migration 0007_metering.sql.
+ * Maps to migration 0404_metering.sql.
  */
 
 import type { AggregationType } from '@bslt/shared';
@@ -33,7 +33,7 @@ export const USAGE_SNAPSHOTS_TABLE = 'usage_snapshots';
  * Metric definition record (SELECT result).
  * Uses TEXT primary key (e.g., "api_calls", "storage_gb", "seats").
  *
- * @see 0007_metering.sql — key format: `^[a-z][a-z0-9_]+$`, max 100 chars
+ * @see 0404_metering.sql — key format: `^[a-z][a-z0-9_]+$`, max 100 chars
  */
 export interface UsageMetric {
   key: string;
@@ -71,7 +71,7 @@ export interface UpdateUsageMetric {
 /**
  * Recorded usage data per tenant per period (SELECT result).
  *
- * @see 0007_metering.sql — UNIQUE(tenant_id, metric_key, period_start),
+ * @see 0404_metering.sql — UNIQUE(tenant_id, metric_key, period_start),
  *   value >= 0, period_end > period_start
  */
 export interface UsageSnapshot {

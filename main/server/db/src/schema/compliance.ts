@@ -4,7 +4,7 @@
  *
  * TypeScript interfaces for legal_documents, user_agreements,
  * consent_logs, and data_export_requests tables.
- * Maps to migrations 0008_compliance.sql and 0011_data_exports.sql.
+ * Maps to migration 0500_compliance.sql.
  */
 
 import {
@@ -39,7 +39,7 @@ export const DATA_EXPORT_REQUESTS_TABLE = 'data_export_requests';
  * Legal document record (SELECT result).
  * Versioned ToS, Privacy Policy, etc.
  *
- * @see 0008_compliance.sql — UNIQUE(type, version), version >= 1
+ * @see 0500_compliance.sql — UNIQUE(type, version), version >= 1
  */
 export interface LegalDocument {
   id: string;
@@ -83,7 +83,7 @@ export interface UpdateLegalDocument {
  * Tracks which user accepted which legal document version.
  * Append-only — no UpdateUserAgreement type.
  *
- * @see 0008_compliance.sql
+ * @see 0500_compliance.sql
  */
 export interface UserAgreement {
   id: string;
@@ -113,7 +113,7 @@ export interface NewUserAgreement {
  * Append-only — records every consent grant or revocation.
  * No UpdateConsentLog type.
  *
- * @see 0008_compliance.sql
+ * @see 0500_compliance.sql
  */
 export interface ConsentLog {
   id: string;
@@ -183,7 +183,7 @@ export const CONSENT_LOG_COLUMNS = {
  * Data export request record (SELECT result).
  * Tracks GDPR data export and deletion workflows.
  *
- * @see 0011_data_exports.sql
+ * @see 0500_compliance.sql
  */
 export interface DataExportRequest {
   id: string;

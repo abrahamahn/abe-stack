@@ -255,7 +255,7 @@ export const SECURITY_EVENT_COLUMNS = {
  * Each user has up to 10 single-use backup codes for 2FA recovery.
  * Append-only — codes are consumed by setting `usedAt`, never updated otherwise.
  *
- * @see 0009_auth_extensions.sql
+ * @see 0001_auth_extensions.sql
  */
 export interface TotpBackupCode {
   id: string;
@@ -293,7 +293,7 @@ export const TOTP_BACKUP_CODE_COLUMNS = {
  * Used for the email change flow with verification.
  * Append-only — tokens are consumed by setting `usedAt`, never updated otherwise.
  *
- * @see 0009_auth_extensions.sql
+ * @see 0001_auth_extensions.sql
  */
 export interface EmailChangeToken {
   id: string;
@@ -382,7 +382,7 @@ export const WEBAUTHN_CREDENTIALS_TABLE = 'webauthn_credentials';
  * WebAuthn credential record (SELECT result).
  * Stores FIDO2/WebAuthn public key credentials for passkey authentication.
  *
- * @see 0027_webauthn_credentials.sql
+ * @see 0001_auth_extensions.sql
  */
 export interface WebauthnCredential {
   id: string;
@@ -447,7 +447,7 @@ export const WEBAUTHN_CREDENTIAL_COLUMNS = {
  * Single-use OTP codes for phone-based 2FA verification.
  * Append-only with short expiry — codes are consumed by setting `verified = true`.
  *
- * @see 0023_sms_verification.sql
+ * @see 0001_auth_extensions.sql
  */
 export interface SmsVerificationCode {
   id: string;

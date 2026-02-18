@@ -4,7 +4,7 @@
  *
  * TypeScript interfaces for jobs, audit_events, webhooks, and
  * webhook_deliveries tables.
- * Maps to migration 0005_system.sql.
+ * Maps to migrations 0400_jobs.sql, 0401_audit.sql, and 0402_webhooks.sql.
  */
 
 import {
@@ -39,7 +39,7 @@ export const WEBHOOK_DELIVERIES_TABLE = 'webhook_deliveries';
  * Background job record (SELECT result).
  * Postgres-backed job queue with priority and retry support.
  *
- * @see 0005_system.sql — priority range [-100, 100], max_attempts >= 1
+ * @see 0400_jobs.sql — priority range [-100, 100], max_attempts >= 1
  */
 export interface Job {
   id: string;
@@ -97,7 +97,7 @@ export interface UpdateJob {
  * Audit event record (SELECT result).
  * Append-only table — no UpdateAuditEvent type.
  *
- * @see 0005_system.sql — action format: "noun.verb" (e.g., "user.created")
+ * @see 0401_audit.sql — action format: "noun.verb" (e.g., "user.created")
  */
 export interface AuditEvent {
   id: string;
@@ -139,7 +139,7 @@ export interface NewAuditEvent {
 /**
  * Webhook registration record (SELECT result).
  *
- * @see 0005_system.sql
+ * @see 0402_webhooks.sql
  */
 export interface Webhook {
   id: string;
@@ -184,7 +184,7 @@ export interface UpdateWebhook {
 /**
  * Webhook delivery attempt record (SELECT result).
  *
- * @see 0005_system.sql — attempts >= 0
+ * @see 0402_webhooks.sql — attempts >= 0
  */
 export interface WebhookDelivery {
   id: string;

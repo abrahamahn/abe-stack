@@ -5,8 +5,7 @@
  * Explicit TypeScript interfaces for users and refresh_tokens tables.
  * These replace Drizzle's inferred types with explicit definitions.
  *
- * @see 0000_init.sql - Original users table
- * @see 0012_user_profile.sql - Profile expansion (username, firstName/lastName, profile fields)
+ * @see 0000_users.sql
  */
 
 import type { UserRole } from '@bslt/shared';
@@ -31,7 +30,7 @@ export const REFRESH_TOKENS_TABLE = 'refresh_tokens';
 /**
  * User record from database (SELECT result).
  *
- * @see 0012_user_profile.sql for profile expansion fields
+ * @see 0000_users.sql
  */
 export interface User {
   id: string;

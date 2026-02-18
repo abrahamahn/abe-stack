@@ -3,7 +3,7 @@
  * Feature Management Schema Types
  *
  * TypeScript interfaces for feature_flags and tenant_feature_overrides tables.
- * Maps to migration 0006_features.sql.
+ * Maps to migration 0403_feature_flags.sql.
  */
 
 // ============================================================================
@@ -21,7 +21,7 @@ export const TENANT_FEATURE_OVERRIDES_TABLE = 'tenant_feature_overrides';
  * Feature flag record (SELECT result).
  * Uses TEXT primary key (e.g., "billing.seat_based", "ui.dark_mode").
  *
- * @see 0006_features.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
+ * @see 0403_feature_flags.sql — key format: `^[a-z][a-z0-9_.]+$`, max 100 chars
  */
 export interface FeatureFlag {
   key: string;
@@ -66,7 +66,7 @@ export interface UpdateFeatureFlag {
  * Per-tenant feature flag override (SELECT result).
  * Composite primary key: (tenant_id, key).
  *
- * @see 0006_features.sql
+ * @see 0403_feature_flags.sql
  */
 export interface TenantFeatureOverride {
   tenantId: string;

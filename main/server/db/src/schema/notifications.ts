@@ -3,7 +3,7 @@
  * Notifications Schema Types
  *
  * TypeScript interfaces for the notifications table (in-app alerts).
- * Maps to migration 0004_notifications.sql.
+ * Maps to migration 0300_notifications.sql.
  *
  * Note: push_subscriptions and notification_preferences are in ./push.ts
  * since they were part of the original schema. This file covers only the
@@ -29,7 +29,7 @@ export const NOTIFICATIONS_TABLE = 'notifications';
 /**
  * In-app notification record (SELECT result).
  *
- * @see 0004_notifications.sql
+ * @see 0300_notifications.sql
  */
 export interface Notification {
   id: string;
