@@ -12,7 +12,7 @@
  * @complexity O(1) - Route registration is a constant-time operation
  */
 
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { registerBillingWebhookRoutes } from './billingWebhooks';
@@ -26,7 +26,7 @@ import type { FastifyInstance } from 'fastify';
 // ============================================================================
 
 // Mock dependencies
-vi.mock('@bslt/server-engine', () => ({
+vi.mock('@bslt/server-system', () => ({
   registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),

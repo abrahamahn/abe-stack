@@ -1,5 +1,5 @@
 // main/apps/server/src/config/factory.ts
-import { initEnv } from '@bslt/server-engine/config';
+import { initEnv } from '@bslt/server-system/config';
 import { EnvSchema } from '@bslt/shared/config';
 
 import { loadAuthConfig, validateAuthConfig } from './auth/auth';

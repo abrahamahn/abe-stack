@@ -42,7 +42,9 @@ describe('ReactiveMap — basic CRUD', () => {
   });
 
   it('delete on a non-existent key is a no-op', () => {
-    expect(() => map.delete('ghost')).not.toThrow();
+    expect(() => {
+      map.delete('ghost');
+    }).not.toThrow();
     expect(map.size).toBe(0);
   });
 
@@ -181,7 +183,9 @@ describe('ReactiveMap — unsubscribe', () => {
     const fn = vi.fn();
     const unsub = map.subscribe('a', fn);
     unsub();
-    expect(() => unsub()).not.toThrow();
+    expect(() => {
+      unsub();
+    }).not.toThrow();
   });
 
   it('calling unsubscribe twice does not corrupt the listener set for other listeners', () => {
@@ -312,7 +316,9 @@ describe('ReactiveMap — write error isolation', () => {
     });
     map.subscribe('a', fn2);
 
-    expect(() => map.set('a', 1)).not.toThrow();
+    expect(() => {
+      map.set('a', 1);
+    }).not.toThrow();
     expect(fn2).toHaveBeenCalledWith(1);
   });
 
@@ -401,7 +407,9 @@ describe('ReactiveMap — clear', () => {
   });
 
   it('clear on an empty map is a no-op and does not throw', () => {
-    expect(() => map.clear()).not.toThrow();
+    expect(() => {
+      map.clear();
+    }).not.toThrow();
     expect(map.size).toBe(0);
   });
 

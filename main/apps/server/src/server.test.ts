@@ -77,7 +77,7 @@ vi.mock('./http/plugins', () => ({
   registerPlugins: mockRegisterPlugins,
 }));
 
-vi.mock('@bslt/server-engine/logger', () => ({
+vi.mock('@bslt/server-system/logger', () => ({
   registerLoggingMiddleware: mockRegisterLoggingMiddleware,
   createConsoleLogger: mockCreateConsoleLogger,
 }));

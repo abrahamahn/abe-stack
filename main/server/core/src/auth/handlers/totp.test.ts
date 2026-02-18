@@ -87,8 +87,8 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-// Mock @bslt/server-engine for JWT
-vi.mock('@bslt/server-engine', () => ({
+// Mock @bslt/server-system for JWT
+vi.mock('@bslt/server-system', () => ({
   verify: mockJwtVerify,
   JwtError: class JwtError extends Error {
     constructor(message: string) {
@@ -946,7 +946,7 @@ describe('handleTotpLoginVerify', () => {
         code: '123456',
       };
 
-      const JwtError = vi.mocked(await import('../../../../engine/src'))
+      const JwtError = vi.mocked(await import('../../../../system/src'))
         .JwtError as unknown as new (message: string) => Error;
       mockJwtVerify.mockImplementation(() => {
         throw new JwtError('Invalid JWT');

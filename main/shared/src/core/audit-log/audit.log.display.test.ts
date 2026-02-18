@@ -9,6 +9,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { AUDIT_SEVERITIES } from '../constants/notifications';
+
 import { getAuditActionTone, getAuditSeverityTone } from './audit.log.display';
 
 import type { AuditSeverity } from './audit.log.schemas';

@@ -20,7 +20,7 @@
       "path": "../db"
     },
     {
-      "path": "../engine"
+      "path": "../system"
     }
   ]
 }

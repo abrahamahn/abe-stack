@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getInjectionErrors, sanitizeObject } from './sanitization';
+
 import type { SanitizationResult, ValidationOptions } from './sanitization';
 
 // ============================================================================
@@ -238,7 +239,7 @@ describe('sanitizeObject', () => {
         },
         enumerable: true,
         configurable: true,
-      }) as Record<string, unknown>;
+      });
 
       const result = sanitizeObject(obj);
       expect(result.valid).toBe(true);
@@ -255,7 +256,7 @@ describe('sanitizeObject', () => {
         },
         enumerable: true,
         configurable: true,
-      }) as Record<string, unknown>;
+      });
 
       // Object.entries() will propagate the getter error — we verify behavior:
       // Either the function throws or it handles it gracefully.

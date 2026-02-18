@@ -218,10 +218,10 @@ describe('memoize', () => {
   describe('async: rejected promise eviction', () => {
     it('evicts rejected promises from cache so next call retries', async () => {
       let callCount = 0;
-      const fn = vi.fn(async (_key: unknown): Promise<string> => {
+      const fn = vi.fn((_key: unknown): Promise<string> => {
         callCount++;
-        if (callCount === 1) throw new Error('network timeout');
-        return 'success';
+        if (callCount === 1) return Promise.reject(new Error('network timeout'));
+        return Promise.resolve('success');
       });
       const memoized = memoize(fn as (...args: unknown[]) => unknown);
 
@@ -239,7 +239,7 @@ describe('memoize', () => {
     });
 
     it('keeps resolved promises cached normally', async () => {
-      const fn = vi.fn(async (_key: unknown) => 'data');
+      const fn = vi.fn((_key: unknown) => Promise.resolve('data'));
       const memoized = memoize(fn as (...args: unknown[]) => unknown);
 
       const first = memoized('key') as Promise<string>;

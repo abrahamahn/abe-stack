@@ -490,11 +490,7 @@ describe('search errors', () => {
 
     test('re-throwing preserves instanceof identity', () => {
       function rethrow(): never {
-        try {
-          throw new InvalidQueryError('original');
-        } catch (e) {
-          throw e;
-        }
+        throw new InvalidQueryError('original');
       }
 
       expect(() => rethrow()).toThrow(InvalidQueryError);

@@ -12,12 +12,12 @@
 
 import { createAuthGuard } from '@bslt/core/auth';
 import { tenantRoutes } from '@bslt/core/tenants';
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-system';
 
 // ============================================================================
 // Mock Repositories (minimal set for tenant routes)

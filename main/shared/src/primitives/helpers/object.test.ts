@@ -230,7 +230,7 @@ describe('adversarial — sanitizePrototype', () => {
     const dangerous = { constructor: () => 'evil', name: 'test' };
     const result = sanitizePrototype(dangerous) as Record<string, unknown>;
     expect(result).not.toHaveProperty('constructor');
-    expect((result as Record<string, unknown>)['name']).toBe('test');
+    expect(result['name']).toBe('test');
   });
 
   it('removes prototype key from a flat object', () => {
@@ -446,8 +446,8 @@ describe('adversarial — deepEqual', () => {
     const a: Record<string, number> = {};
     const b: Record<string, number> = {};
     for (let i = 0; i < 1000; i++) {
-      a[`key${i}`] = i;
-      b[`key${i}`] = i;
+      a[`key${String(i)}`] = i;
+      b[`key${String(i)}`] = i;
     }
     expect(deepEqual(a, b)).toBe(true);
     b['key999'] = 9999;

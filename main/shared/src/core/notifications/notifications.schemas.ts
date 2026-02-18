@@ -6,7 +6,6 @@
  * @module Domain/Notifications
  */
 
-import { cursorPaginationOptionsSchema } from '../../system/pagination';
 import {
   createEnumSchema,
   createSchema,
@@ -19,11 +18,12 @@ import {
   withDefault,
 } from '../../primitives/schema';
 import { notificationIdSchema, userIdSchema } from '../../primitives/schema/ids';
+import { cursorPaginationOptionsSchema } from '../../system/pagination';
 import { isoDateTimeSchema } from '../schemas';
 
-import type { CursorPaginationOptions } from '../../system/pagination';
 import type { Schema } from '../../primitives/schema';
 import type { NotificationId, UserId } from '../../primitives/schema/ids';
+import type { CursorPaginationOptions } from '../../system/pagination';
 
 // ============================================================================
 // Constants

@@ -3,7 +3,7 @@
  * Engine Colocated Test Audit
  *
  * Verifies a 1-to-1 mapping between source files and colocated unit tests in:
- *   main/server/engine/src/**
+ *   main/server/system/src/**
  *
  * Rules:
  * - For each `*.ts` file (excluding `index.ts`, `types.ts`, `*.d.ts`, and test files),
@@ -130,7 +130,7 @@ function print(result: AuditResult): void {
 }
 
 async function main(): Promise<void> {
-  const result = audit('main/server/engine/src');
+  const result = audit('main/server/system/src');
   print(result);
 
   const strict = process.argv.includes('--strict');

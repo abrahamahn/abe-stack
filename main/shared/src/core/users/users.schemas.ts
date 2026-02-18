@@ -6,7 +6,6 @@
  * @module Core/Users
  */
 
-import { cursorPaginatedResultSchema } from '../../system/pagination/pagination';
 import {
   createSchema,
   parseBoolean,
@@ -17,6 +16,7 @@ import {
   parseString,
 } from '../../primitives/schema';
 import { userIdSchema } from '../../primitives/schema/ids';
+import { cursorPaginatedResultSchema } from '../../system/pagination/pagination';
 import { appRoleSchema } from '../auth/roles';
 import { APP_ROLES } from '../constants/auth';
 import { emailSchema, isoDateTimeSchema, passwordSchema } from '../schemas';

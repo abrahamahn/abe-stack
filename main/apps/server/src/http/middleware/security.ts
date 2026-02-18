@@ -15,7 +15,7 @@ import {
   generateSecurityHeaders,
   getProductionSecurityDefaults,
   type SecurityHeaderOptions,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import {
   HTTP_STATUS,
   SECONDS_PER_DAY,

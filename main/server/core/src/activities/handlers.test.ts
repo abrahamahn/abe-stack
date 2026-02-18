@@ -5,7 +5,7 @@ import { handleListActivities, handleListTenantActivities } from './handlers';
 
 import type { ActivityAppContext } from './types';
 import type { Activity } from '../../../db/src';
-import type { HandlerContext } from '../../../engine/src';
+import type { HandlerContext } from '../../../system/src';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

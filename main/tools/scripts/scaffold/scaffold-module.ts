@@ -176,7 +176,7 @@ describe('${name} service', () => {
 import { list${pascal} } from './service';
 
 import type { ${pascal}AppContext } from './types';
-import type { HandlerContext } from '@bslt/server-engine';
+import type { HandlerContext } from '@bslt/server-system';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function asAppContext(ctx: HandlerContext): ${pascal}AppContext {
@@ -213,7 +213,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { handleList${pascal} } from './handlers';
 
-import type { HandlerContext } from '@bslt/server-engine';
+import type { HandlerContext } from '@bslt/server-system';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 function createMockContext(): HandlerContext {
@@ -256,11 +256,11 @@ describe('${name} handlers', () => {
  * Route definitions for the ${name} module.
  */
 
-import { createRouteMap, protectedRoute } from '@bslt/server-engine';
+import { createRouteMap, protectedRoute } from '@bslt/server-system';
 
 import { handleList${pascal} } from './handlers';
 
-import type { RouteDefinition } from '@bslt/server-engine';
+import type { RouteDefinition } from '@bslt/server-system';
 
 const ${camel}RouteEntries: [string, RouteDefinition][] = [
   ['${name}', protectedRoute('GET', handleList${pascal}, 'user')],

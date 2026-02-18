@@ -20,7 +20,7 @@ import { tenantRoutes } from './tenants';
 import { userRoutes } from './users';
 import { webhookRoutes } from './webhooks';
 
-import type { RouteMap } from '../../engine/src';
+import type { RouteMap } from '../../system/src';
 
 export interface CoreRouteModuleRegistration {
   module: string;

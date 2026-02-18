@@ -12,8 +12,8 @@
     "paths": {
       "@bslt/shared": ["../../shared/src/index.ts"],
       "@bslt/shared/*": ["../../shared/src/*"],
-      "@bslt/server-engine": ["../../server/engine/src/index.ts"],
-      "@bslt/server-engine/*": ["../../server/engine/src/*"],
+      "@bslt/server-system": ["../../server/system/src/index.ts"],
+      "@bslt/server-system/*": ["../../server/system/src/*"],
       "@bslt/db": ["../../server/db/src/index.ts"],
       "@bslt/db/*": ["../../server/db/src/*"],
       "@bslt/core": ["../../server/core/src/index.ts"],
@@ -40,7 +40,7 @@
       "path": "../../server/core"
     },
     {
-      "path": "../../server/engine"
+      "path": "../../server/system"
     },
     {
       "path": "../../shared"

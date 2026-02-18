@@ -192,7 +192,7 @@ function exportCodeFiles(): void {
     'main/shared',
     'main/server/core',
     'main/server/db',
-    'main/server/engine',
+    'main/server/system',
     'main/server/media',
     'main/server/realtime',
     'main/server/websocket',

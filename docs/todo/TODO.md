@@ -945,7 +945,7 @@ The ordering mirrors `docs/CHECKLIST.md` priority actions. Sprints 1-3 cover **a
 
 #### 3.24 Phone / SMS Two-Factor Authentication (CHECKLIST 3.5 | BUSINESS 1.9) — COMPLETE
 
-> **Existing:** TOTP 2FA is fully implemented. SMS provider in `server/engine/src/sms/`.
+> **Existing:** TOTP 2FA is fully implemented. SMS provider in `server/system/src/sms/`.
 > Migration `0023_sms_verification.sql` creates `sms_verification_codes` table.
 
 **Backend — SMS Provider:**

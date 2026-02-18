@@ -11,7 +11,7 @@ import { realtimeRoutes } from '@bslt/realtime';
 
 import { systemRoutes } from './system.routes';
 
-import type { RouteMap } from '@bslt/server-engine';
+import type { RouteMap } from '@bslt/server-system';
 
 export interface RouteModuleRegistration {
   module: string;

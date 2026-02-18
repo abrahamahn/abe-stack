@@ -8,8 +8,9 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FEATURE_KEYS } from '../constants/billing';
 import { parsePlanId, parseUserId } from '../../primitives/schema/ids';
+import { FEATURE_KEYS } from '../constants/billing';
+
 import {
   calculateProration,
   canCancelSubscription,

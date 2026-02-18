@@ -20,7 +20,7 @@ import {
   updatePreferencesRequestSchema,
 } from '@bslt/shared';
 
-import { createRouteMap, type HandlerContext, type RouteDefinition } from '../../../engine/src';
+import { createRouteMap, type HandlerContext, type RouteDefinition } from '../../../system/src';
 
 import {
   handleDeleteNotification,

@@ -1,7 +1,7 @@
 // main/server/core/src/admin/impersonation.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { sign as jwtSign } from '../../../engine/src';
+import { sign as jwtSign } from '../../../system/src';
 
 import {
   endImpersonation,

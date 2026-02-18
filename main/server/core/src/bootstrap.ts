@@ -1,5 +1,5 @@
 // main/server/core/src/bootstrap.ts
-import { loadServerEnv } from '@bslt/server-engine/config';
+import { loadServerEnv } from '@bslt/server-system/config';
 import { createLogger, type BaseLogger, type LogData } from '@bslt/shared';
 
 import {
@@ -21,17 +21,17 @@ import {
   initSentry,
   logStartupSummary,
   setUserContext,
-  type AuthEmailTemplates, // Import from server-engine
+  type AuthEmailTemplates, // Import from server-system
   type QueueStore,
   type ServerSearchProvider,
   type SystemContext,
   type WriteService,
-} from '../../engine/src';
+} from '../../system/src';
 
 export type { SystemContext };
 
-// Removed import from @bslt/core/auth since we import from server-engine
-  import type { AppConfig, PostgresConfig } from '@bslt/server-engine/config';
+// Removed import from @bslt/core/auth since we import from server-system
+  import type { AppConfig, PostgresConfig } from '@bslt/server-system/config';
 
 /**
  * Simple Console Logger Adapter to avoid dependency on pino in core.

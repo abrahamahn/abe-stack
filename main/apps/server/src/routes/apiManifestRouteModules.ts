@@ -7,7 +7,7 @@
 
 import { coreApiManifestRouteModuleRegistrations } from '@bslt/core';
 
-import type { RouteMap } from '@bslt/server-engine';
+import type { RouteMap } from '@bslt/server-system';
 
 export interface ApiManifestRouteModuleRegistration {
   module: string;

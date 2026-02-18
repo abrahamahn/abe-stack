@@ -20,7 +20,7 @@
 - [ ] No cross-app imports (apps import from packages, never from each other)
 - [ ] Barrel exports (`index.ts`) updated with explicit named exports for new public APIs
 - [ ] Path aliases used instead of deep relative imports (`@auth/...` not `../../features/auth/...`)
-- [ ] Server follows hexagonal architecture: `server/core/` for logic, `server/engine/` for adapters
+- [ ] Server follows hexagonal architecture: `server/core/` for logic, `server/system/` for adapters
 
 ## Security
 

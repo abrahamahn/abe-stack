@@ -5,7 +5,7 @@ import {
   type PermissionRecord,
   type PermissionType,
   type RecordPointer,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import { HTTP_STATUS } from '@bslt/shared';
 
 import type { UserRole } from '@bslt/db';

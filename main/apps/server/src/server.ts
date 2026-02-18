@@ -13,8 +13,8 @@
 
 import path from 'node:path';
 
-import { RateLimiter } from '@bslt/server-engine';
-import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-engine/logger';
+import { RateLimiter } from '@bslt/server-system';
+import { createConsoleLogger, registerLoggingMiddleware } from '@bslt/server-system/logger';
 import { ERROR_CODES, HTTP_BODY_LIMIT, isAppError } from '@bslt/shared';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';

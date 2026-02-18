@@ -23,7 +23,7 @@ import {
   type RouteHandler,
   type RouteMap,
   type ValidationSchema,
-} from '../../../engine/src';
+} from '../../../system/src';
 
 import {
   handleCreateFlag,
@@ -59,7 +59,7 @@ function adminProtectedRoute(
     reply: FastifyReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
 ): RouteDefinition {
   return protectedRoute(method, handler as unknown as RouteHandler, 'admin', schema, openapi);
 }
@@ -76,7 +76,7 @@ function userProtectedRoute(
     reply: FastifyReply,
   ) => Promise<unknown>,
   schema?: ValidationSchema,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
 ): RouteDefinition {
   return protectedRoute(method, handler as unknown as RouteHandler, 'user', schema, openapi);
 }

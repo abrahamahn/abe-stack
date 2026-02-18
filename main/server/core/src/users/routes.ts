@@ -5,7 +5,7 @@
  * Route definitions for users module.
  * All routes require authentication.
  *
- * Uses the generic router pattern from @bslt/server-engine.
+ * Uses the generic router pattern from @bslt/server-system.
  * Route handlers accept HandlerContext (Record<string, unknown>) from the
  * generic router and narrow it to UsersModuleDeps at the call boundary.
  *
@@ -33,7 +33,7 @@ import {
   type HandlerContext,
   type RouteMap,
   type RouteResult,
-} from '../../../engine/src';
+} from '../../../system/src';
 import { REFRESH_COOKIE_NAME } from '../auth';
 
 import {

@@ -607,7 +607,7 @@ describe('serialization', () => {
   describe('adversarial: large payload handling', () => {
     test('many sort fields round-trip correctly', () => {
       const sort = Array.from({ length: 50 }, (_, i) => ({
-        field: `field_${i}`,
+        field: `field_${String(i)}`,
         order: i % 2 === 0 ? ('asc' as const) : ('desc' as const),
       }));
       const query: SearchQuery = { sort };
@@ -648,7 +648,7 @@ describe('serialization', () => {
     });
 
     test('many select fields round-trip', () => {
-      const select = Array.from({ length: 100 }, (_, i) => `field${i}`);
+      const select = Array.from({ length: 100 }, (_, i) => `field${String(i)}`);
       const query: SearchQuery = { select };
 
       const params = serializeToURLParams(query);

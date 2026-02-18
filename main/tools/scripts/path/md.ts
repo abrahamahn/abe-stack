@@ -122,7 +122,7 @@ function exportMarkdownFiles(): void {
     'main/shared',
     'main/server/core',
     'main/server/db',
-    'main/server/engine',
+    'main/server/system',
     'main/client/ui',
     'main/client/react',
     'main/client/api',

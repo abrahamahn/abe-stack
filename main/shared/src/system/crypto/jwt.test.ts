@@ -637,7 +637,7 @@ describe('JWT', () => {
     it('handles payload with 1000 keys', () => {
       const largePayload: Record<string, string> = {};
       for (let i = 0; i < 1000; i++) {
-        largePayload[`key${i}`] = `value${i}`;
+        largePayload[`key${String(i)}`] = `value${String(i)}`;
       }
       const token = sign(largePayload, secret);
       const verified = verify(token, secret);

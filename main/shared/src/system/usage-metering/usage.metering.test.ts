@@ -946,9 +946,9 @@ describe('isOverQuota — adversarial', () => {
 
 describe('usageSnapshotSchema — adversarial', () => {
   it('rejects prototype-injected object with no enumerable own props', () => {
-    // A class instance with no own enumerable properties
-    class Empty {}
-    expect(() => usageSnapshotSchema.parse(new Empty())).toThrow('id must be a string');
+    // An object with a null prototype and no own properties
+    const empty = Object.create(null) as Record<string, unknown>;
+    expect(() => usageSnapshotSchema.parse(empty)).toThrow('id must be a string');
   });
 
   it('rejects snapshot where value is Number.NEGATIVE_INFINITY (still a number — passes)', () => {

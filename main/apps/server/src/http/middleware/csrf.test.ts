@@ -1,5 +1,5 @@
 // main/apps/server/src/http/middleware/csrf.test.ts
-import { validateCsrfToken } from '@bslt/server-engine';
+import { validateCsrfToken } from '@bslt/server-system';
 import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

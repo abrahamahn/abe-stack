@@ -20,7 +20,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'url';
 
 import { buildConnectionString, canReachDatabase } from '@bslt/db';
-import { loadServerEnv } from '@bslt/server-engine';
+import { loadServerEnv } from '@bslt/server-system';
 
 import { colorize, isTurboSummaryLine, logLine, normalizeServerLine } from './logger';
 

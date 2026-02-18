@@ -17,8 +17,8 @@ import {
   updateJobSchema,
 } from './jobs';
 
-import type { JobId } from '../../primitives/schema/ids';
 import type { JobStatus } from './jobs';
+import type { JobId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Display Functions

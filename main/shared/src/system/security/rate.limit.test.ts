@@ -96,7 +96,7 @@ describe('rate-limit', () => {
 
       // Make requests from many identifiers
       for (let i = 0; i < 10; i++) {
-        limiter(`user-${i}`);
+        limiter(`user-${String(i)}`);
       }
 
       // Advance past window + cleanup interval (60 seconds)

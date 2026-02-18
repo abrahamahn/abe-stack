@@ -432,7 +432,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 - [x] Route-level auth guard — `protectedRoute()` / `publicRoute()` helpers
 - [x] Route-level role check — `createRequireRole()`, checks JWT role
 - [x] Admin routes enforce `admin` role — `adminProtectedRoute()` wrapper
-- [x] Permission checker (row-level) — `server-engine/security/permissions/checker.ts`
+- [x] Permission checker (row-level) — `server-system/security/permissions/checker.ts`
 - [x] Per-operation permission enforcement in handlers — role hierarchy enforced in tenant membership/invitation handlers
 - [x] Per-tenant role enforcement middleware — workspace-scope middleware validates membership (`core/tenants/middleware/workspace-scope.ts`)
 - [ ] Resource ownership validation ("is this in the user's tenant?")
@@ -488,7 +488,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 - [x] `notifications` table + routes wired
 - [x] `email_templates` + `email_log` tables + repos
-- [x] Mailer module (`server-engine/mailer/`): client abstraction, SMTP transport, console provider (dev), template renderer
+- [x] Mailer module (`server-system/mailer/`): client abstraction, SMTP transport, console provider (dev), template renderer
 - [ ] SMTP configuration docs + sanity check (dev/prod) so emails can be sent end-to-end
 - [x] Notification service + handlers (`core/notifications/service.ts`, `handlers.ts`)
 - [x] Push provider factory: FCM provider (`fcm-provider.ts`) + factory pattern
@@ -502,7 +502,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 ### 6.5 File Storage
 
 - [x] `files` table + repository
-- [x] S3 storage provider (`server-engine/storage/providers/s3.ts`)
+- [x] S3 storage provider (`server-system/storage/providers/s3.ts`)
 - [x] Media processing pipeline (`server/media/`)
 - [-] Avatar upload handler (exists, wiring unclear)
 - [ ] File upload/download/delete HTTP endpoints
@@ -674,14 +674,14 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 **Server Engine Adapters:**
 
-- [x] Cache layer (`server-engine/cache/` — config, errors, factory, LRU, memory provider + tests)
-- [x] Mailer (`server-engine/mailer/` — client abstraction, SMTP transport, console provider, template renderer)
-- [x] Storage (`server-engine/storage/` — S3 provider, local provider, presigned URLs, HTTP server, config, factory)
+- [x] Cache layer (`server-system/cache/` — config, errors, factory, LRU, memory provider + tests)
+- [x] Mailer (`server-system/mailer/` — client abstraction, SMTP transport, console provider, template renderer)
+- [x] Storage (`server-system/storage/` — S3 provider, local provider, presigned URLs, HTTP server, config, factory)
 - [x] Queue + jobs: write service, client, types, memory store + admin management routes
 - [x] Search: SQL provider, factory, query builder, types (+ Elasticsearch adapter stub)
-- [x] Config loader (`server-engine/config/env.loader.ts`)
-- [x] Logger (`server-engine/logger.ts`)
-- [x] Routing (`server-engine/routing/routing.ts` — generic Fastify registration with Zod + native validation)
+- [x] Config loader (`server-system/config/env.loader.ts`)
+- [x] Logger (`server-system/logger.ts`)
+- [x] Routing (`server-system/routing/routing.ts` — generic Fastify registration with Zod + native validation)
 
 **Security:**
 
@@ -786,7 +786,7 @@ Service: `core/tenants/invitation-service.ts` + test. Client: `InviteMemberDialo
 
 ## 10. Operational Quality
 
-- [-] Health endpoints — `server-engine/system/health.ts` (tested) + `shared/utils/monitor/health.ts` exist; wiring to `/health` + `/ready` routes needs verification
+- [-] Health endpoints — `server-system/system/health.ts` (tested) + `shared/utils/monitor/health.ts` exist; wiring to `/health` + `/ready` routes needs verification
 - [x] Request correlation IDs (`correlationId.ts` middleware)
 - [ ] Error reporting (Sentry)
 - [ ] Metrics (request count/latency, job success/fail)
@@ -1416,7 +1416,7 @@ The boilerplate is "enterprise-ready" when you can:
 
 ## Appendix C: Engine Module Status
 
-> `server/engine/` — infrastructure adapters. Core modules complete, scheduled jobs pending.
+> `server/system/` — infrastructure adapters. Core modules complete, scheduled jobs pending.
 
 <details>
 <summary>Queue / Job System (5/9 files ready)</summary>

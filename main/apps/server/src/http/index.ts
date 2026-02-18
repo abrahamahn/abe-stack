@@ -75,7 +75,7 @@ export {
   sanitizeString, type SanitizationResult, type SQLInjectionDetectionOptions, type ValidationOptions
 } from './middleware';
 
-// Router — re-exported from @bslt/server-engine (canonical implementation)
+// Router — re-exported from @bslt/server-system (canonical implementation)
 export {
   createRouteMap,
   protectedRoute,
@@ -90,7 +90,7 @@ export {
   type RouteResult,
   type RouterOptions,
   type ValidationSchema
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 
 // Pagination
 export {

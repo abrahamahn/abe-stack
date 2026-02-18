@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@bslt/media": "workspace:*",
-    "@bslt/server-engine": "workspace:*",
+    "@bslt/server-system": "workspace:*",
     "@bslt/db": "workspace:*",
     "@bslt/shared": "workspace:*",
     "@simplewebauthn/server": "^13.2.2",

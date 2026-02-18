@@ -9,5 +9,5 @@ export {
   createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets, type MemoryStoreConfig,
   type MemoryStoreStats,
   type RateLimitConfig, type RateLimiterStats, type RateLimitInfo
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 

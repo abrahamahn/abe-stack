@@ -15,7 +15,7 @@ import { SMS_VERIFICATION_CODES_TABLE } from '../../../../db/src';
 import { SMS_CODE_EXPIRY_MS, SMS_MAX_ATTEMPTS } from './types';
 
 import type { DbClient } from '../../../../db/src';
-import type { SmsProvider } from '../../../../engine/src';
+import type { SmsProvider } from '../../../../system/src';
 
 // ============================================================================
 // Internal Helpers

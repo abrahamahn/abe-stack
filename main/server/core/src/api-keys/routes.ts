@@ -13,7 +13,7 @@
 
 import { createApiKeyRequestSchema, emptyBodySchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute } from '../../../engine/src';
+import { createRouteMap, protectedRoute } from '../../../system/src';
 
 import {
   handleCreateApiKey,
@@ -22,7 +22,7 @@ import {
   handleRevokeApiKey,
 } from './handlers';
 
-import type { RouteDefinition } from '../../../engine/src';
+import type { RouteDefinition } from '../../../system/src';
 
 // ============================================================================
 // Route Definitions

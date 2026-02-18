@@ -715,7 +715,15 @@ describe('sanitizeFilename', () => {
       const filename = `file${controlChars}name.txt`;
       const result = sanitizeFilename(filename);
       // No control chars should remain
-      expect(result).not.toMatch(/[\x01-\x1f]/);
+      let hasControlChars = false;
+      for (let i = 0; i < result.length; i++) {
+        const code = result.charCodeAt(i);
+        if (code >= 1 && code <= 31) {
+          hasControlChars = true;
+          break;
+        }
+      }
+      expect(hasControlChars).toBe(false);
     });
   });
 

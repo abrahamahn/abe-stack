@@ -2,8 +2,9 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ERROR_CODES } from '../constants/platform';
 import { createSchema } from '../../primitives/schema';
+import { ERROR_CODES } from '../constants/platform';
+
 import {
   apiResultSchema,
   createErrorCodeSchema,

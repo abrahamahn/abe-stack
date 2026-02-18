@@ -13,7 +13,7 @@
 import { createInterface } from 'node:readline';
 
 import { buildConnectionString, createDbClient } from '@bslt/db';
-import { loadServerEnv } from '@bslt/server-engine';
+import { loadServerEnv } from '@bslt/server-system';
 
 import { pushSchema } from './push';
 import { seed } from './seed';

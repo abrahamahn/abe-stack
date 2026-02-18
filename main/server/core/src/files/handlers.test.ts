@@ -15,7 +15,7 @@ import { handleDeleteFile, handleDownloadFile, handleGetFile, handleUploadFile }
 import type { AuthenticatedUser, Logger } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FileRepository } from '../../../db/src';
-import type { HandlerContext } from '../../../engine/src';
+import type { HandlerContext } from '../../../system/src';
 import type { FileStorageProvider } from './types';
 
 // ============================================================================

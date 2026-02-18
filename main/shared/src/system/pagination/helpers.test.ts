@@ -284,7 +284,7 @@ describe('Large Array Pagination', () => {
     const itemsWithSameValue = Array.from({ length: 50 }, (_, i) => ({
       id: String(i + 1),
       createdAt: '2024-01-01', // All same date
-      name: `Item ${i + 1}`,
+      name: `Item ${String(i + 1)}`,
     }));
 
     const firstPage = paginateLargeArrayWithCursor(itemsWithSameValue, {
@@ -464,7 +464,7 @@ describe('calculateCursorPaginationMetadata — adversarial', () => {
       result.nextCursor !== null
         ? (() => {
             try {
-              return Buffer.from(result.nextCursor!, 'base64url').toString('utf8');
+              return Buffer.from(result.nextCursor, 'base64url').toString('utf8');
             } catch {
               return null;
             }
@@ -533,7 +533,9 @@ describe('paginateArrayWithCursor — adversarial', () => {
     expect(page2.data).toHaveLength(2);
     // No items should overlap between pages
     const page1Ids = new Set(page1.data.map((i) => i.id));
-    page2.data.forEach((item) => expect(page1Ids.has(item.id)).toBe(false));
+    page2.data.forEach((item) => {
+      expect(page1Ids.has(item.id)).toBe(false);
+    });
   });
 
   it('cursor from desc pagination fails gracefully when used with asc', () => {

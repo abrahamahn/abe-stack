@@ -1,7 +1,7 @@
 // main/apps/desktop/src/electron/main.ts
 import { join } from 'node:path';
 
-import { waitForPort } from '@bslt/server-engine';
+import { waitForPort } from '@bslt/server-system';
 import { app, BrowserWindow, nativeTheme } from 'electron';
 
 import { initAutoUpdater } from './auto-updater';

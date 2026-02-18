@@ -1,8 +1,8 @@
 // main/tools/scripts/export/server/server-engine.ts
 /**
- * Server Engine Package Code Exporter
+ * Server System Package Code Exporter
  *
- * Exports all source code from main/server/engine into a single file
+ * Exports all source code from main/server/system into a single file
  * for code review or AI context. Excludes test files and build artifacts.
  *
  * @usage pnpm tsx main/tools/scripts/export/server/server-engine.ts
@@ -14,9 +14,9 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..', '..', '..', '..', '..');
-const packagePath = path.join(root, 'src', 'server', 'engine');
+const packagePath = path.join(root, 'src', 'server', 'system');
 const outputDir = path.join(root, '.tmp');
-const outputPath = path.join(outputDir, 'server-engine.txt');
+const outputPath = path.join(outputDir, 'server-system.txt');
 
 const excludedDirs = new Set<string>([
   'node_modules',
@@ -89,11 +89,11 @@ const listFiles = (dir: string, base = ''): string[] => {
 };
 
 /**
- * Exports all source files from main/server/engine into .tmp/server-engine.txt.
+ * Exports all source files from main/server/system into .tmp/server-system.txt.
  * Excludes test files, node_modules, dist, and other build artifacts.
  */
 const run = (): void => {
-  console.log('Exporting @bslt/server-engine source code...');
+  console.log('Exporting @bslt/server-system source code...');
 
   if (!fs.existsSync(packagePath)) {
     console.error(`Error: ${packagePath} does not exist.`);
@@ -105,7 +105,7 @@ const run = (): void => {
 
   let output = '';
   output += '================================================================================\n';
-  output += 'ABE STACK - SERVER ENGINE PACKAGE SOURCE CODE EXPORT\n';
+  output += 'ABE STACK - SERVER SYSTEM PACKAGE SOURCE CODE EXPORT\n';
   output += `Generated: ${new Date().toISOString()}\n`;
   output += `Total Files: ${String(allFiles.length)}\n`;
   output += '================================================================================\n\n';
@@ -114,7 +114,7 @@ const run = (): void => {
 
   for (const relPath of allFiles) {
     const fullPath = path.join(packagePath, relPath);
-    const displayPath = path.join('src', 'server', 'engine', relPath);
+    const displayPath = path.join('src', 'server', 'system', relPath);
 
     try {
       const content = fs.readFileSync(fullPath, 'utf8');
@@ -141,7 +141,7 @@ const run = (): void => {
   }
   fs.writeFileSync(outputPath, output, 'utf8');
 
-  console.log(`\n✅ Server engine code exported to ${outputPath}`);
+  console.log(`\n✅ Server system code exported to ${outputPath}`);
   console.log(`   Files included: ${String(exportedCount)}`);
   console.log(`   Total size: ${(output.length / 1024).toFixed(2)} KB`);
 };

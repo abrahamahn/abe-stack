@@ -22,7 +22,7 @@ import {
 } from '@bslt/shared';
 
 import { withTransaction } from '../../../../db/src';
-import { JwtError, verify as jwtVerify } from '../../../../engine/src';
+import { JwtError, verify as jwtVerify } from '../../../../system/src';
 import { assertUserActive } from '../middleware';
 import { disableTotp, enableTotp, getTotpStatus, setupTotp, verifyTotpForLogin } from '../totp';
 import {

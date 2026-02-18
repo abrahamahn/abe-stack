@@ -15,8 +15,8 @@ import type { AdminAppContext } from './types';
 // Mocks
 // ============================================================================
 
-vi.mock('@bslt/server-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../engine/src')>();
+vi.mock('@bslt/server-system', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../system/src')>();
 
   const mockCollector = {
     getMetricsSummary: vi.fn().mockReturnValue({

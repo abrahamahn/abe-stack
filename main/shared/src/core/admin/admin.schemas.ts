@@ -7,10 +7,10 @@
  */
 
 import {
+  coerceNumber,
   createSchema,
   parseBoolean,
   parseNullable,
-  coerceNumber,
   parseNumber,
   parseOptional,
   parseString,

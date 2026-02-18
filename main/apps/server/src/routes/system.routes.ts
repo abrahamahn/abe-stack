@@ -13,11 +13,11 @@ import {
   getDetailedHealth,
   getMetricsCollector,
   publicRoute,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import { HTTP_STATUS } from '@bslt/shared';
 import { getWebSocketStats } from '@bslt/websocket';
 
-import type { HandlerContext, RouteMap, SystemContext } from '@bslt/server-engine';
+import type { HandlerContext, RouteMap, SystemContext } from '@bslt/server-system';
 import type { LiveResponse, ReadyResponse } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 

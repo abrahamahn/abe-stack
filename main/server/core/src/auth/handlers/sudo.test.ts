@@ -2,7 +2,7 @@
 import { SUDO_TOKEN_HEADER } from '@bslt/shared';
 import { describe, expect, it } from 'vitest';
 
-import { sign } from '../../../../engine/src';
+import { sign } from '../../../../system/src';
 
 import { SUDO_TOKEN_TTL_MINUTES, verifySudoToken } from './sudo';
 

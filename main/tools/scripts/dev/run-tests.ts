@@ -26,7 +26,7 @@ const PACKAGES: Array<[string, string]> = [
   ['shared', 'main/shared'],
   ['srv-core', 'main/server/core'],
   ['srv-db', 'main/server/db'],
-  ['srv-engine', 'main/server/engine'],
+  ['srv-system', 'main/server/system'],
   ['srv-media', 'main/server/media'],
   ['cli-engine', 'main/client/engine'],
   ['ui', 'main/client/ui'],

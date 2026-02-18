@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleUpdateUsername } from './username';
 
-import type { HandlerContext } from '../../../../engine/src';
+import type { HandlerContext } from '../../../../system/src';
 import type { UsersRequest } from '../types';
 
 // ============================================================================

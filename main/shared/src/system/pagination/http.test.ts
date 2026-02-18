@@ -1,7 +1,6 @@
 // main/shared/src/system/pagination/http.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { PAGINATION_ERROR_TYPES, PaginationError } from './pagination';
 import {
   DEFAULT_PAGINATION_PARAMS,
   getQueryParam,
@@ -10,6 +9,7 @@ import {
   parseSortByParam,
   parseSortOrderParam,
 } from './http';
+import { PAGINATION_ERROR_TYPES, PaginationError } from './pagination';
 
 // DEFAULT_PAGE_LIMIT comes from DEFAULT_PAGINATION.LIMIT = 50
 const DEFAULT_LIMIT = 50;

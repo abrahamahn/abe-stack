@@ -59,7 +59,7 @@ import {
   type HandlerContext,
   type RouteDefinition,
   type RouteSchema,
-} from '../../../engine/src';
+} from '../../../system/src';
 
 import {
   handleAcceptTos,

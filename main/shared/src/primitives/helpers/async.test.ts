@@ -41,13 +41,12 @@ describe('delay', () => {
   it('resolves with undefined (not a value)', async () => {
     const p = delay(10);
     await vi.advanceTimersByTimeAsync(10);
-    const result = await p;
-    expect(result).toBeUndefined();
+    await expect(p).resolves.toBeUndefined();
   });
 
   it('does not resolve before time elapses', async () => {
     let resolved = false;
-    delay(500).then(() => {
+    void delay(500).then(() => {
       resolved = true;
     });
 
@@ -110,7 +109,7 @@ describe('DeferredPromise', () => {
     it('promise is pending on construction — does not auto-settle', async () => {
       const d = new DeferredPromise<number>();
       let settled = false;
-      d.promise.then(() => {
+      void d.promise.then(() => {
         settled = true;
       });
       // Flush microtask queue without resolving
@@ -282,7 +281,9 @@ describe('DeferredPromise', () => {
         [d.promise, d.promise, d.promise.then((v) => v * 2)].map((p, i) => {
           if (i === 0) {
             // Resolve after all awaiters are registered
-            Promise.resolve().then(() => d.resolve(5));
+            void Promise.resolve().then(() => {
+              d.resolve(5);
+            });
           }
           return p;
         }),
@@ -298,7 +299,9 @@ describe('DeferredPromise', () => {
       const settled = await Promise.allSettled(
         [d.promise, d.promise, d.promise].map((p, i) => {
           if (i === 0) {
-            Promise.resolve().then(() => d.reject(err));
+            void Promise.resolve().then(() => {
+              d.reject(err);
+            });
           }
           return p;
         }),
@@ -338,7 +341,7 @@ describe('DeferredPromise', () => {
     it('then() callbacks are only called once regardless of multiple resolves', async () => {
       const d = new DeferredPromise<number>();
       const handler = vi.fn();
-      d.promise.then(handler);
+      void d.promise.then(handler);
 
       d.resolve(1);
       d.resolve(2);
@@ -374,7 +377,7 @@ describe('DeferredPromise', () => {
       a.resolve(1);
 
       let bSettled = false;
-      b.promise.then(() => {
+      void b.promise.then(() => {
         bSettled = true;
       });
 
@@ -391,7 +394,7 @@ describe('DeferredPromise', () => {
       a.promise.catch(() => {}); // suppress unhandled rejection
 
       let bSettled = false;
-      b.promise.then(() => {
+      void b.promise.then(() => {
         bSettled = true;
       });
 

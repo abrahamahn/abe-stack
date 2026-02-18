@@ -16,7 +16,7 @@
 
 import { HTTP_STATUS, MS_PER_SECOND } from '@bslt/shared';
 
-import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '../../../../engine/src';
+import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '../../../../system/src';
 
 // ============================================================================
 // Types

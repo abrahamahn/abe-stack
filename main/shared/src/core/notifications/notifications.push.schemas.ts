@@ -7,13 +7,12 @@
 
 import { UUID_REGEX } from '../../primitives/constants/regex';
 import { createSchema } from '../../primitives/schema';
+import { NOTIFICATION_PAYLOAD_MAX_SIZE } from '../../system/constants';
 import {
   NOTIFICATION_CHANNELS,
   NOTIFICATION_PRIORITIES,
   NOTIFICATION_TYPES,
 } from '../constants/notifications';
-
-import { NOTIFICATION_PAYLOAD_MAX_SIZE } from '../../system/constants';
 
 import type { Schema } from '../../primitives/schema';
 

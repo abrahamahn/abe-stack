@@ -11,18 +11,18 @@ import { describe, expect, it } from 'vitest';
 import { ERROR_CODES } from '../../system/constants';
 
 import {
+  ScopeError,
   WORKSPACE_ID_HEADER,
   WORKSPACE_ROLE_HEADER,
-  ScopeError,
   assertWorkspaceScope,
   createWorkspaceContext,
-  isWorkspaceScoped,
   getWorkspaceContext,
   hasRequiredWorkspaceRole,
   isAdmin,
   isOwner,
-  type WorkspaceContext,
+  isWorkspaceScoped,
   type MaybeWorkspaceContext,
+  type WorkspaceContext,
 } from './tenant.logic';
 
 // ============================================================================

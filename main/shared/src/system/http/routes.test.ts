@@ -2,8 +2,9 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { BaseRouteDefinition, HandlerContext, RouteResult } from './http';
 import { createRouteMap, protectedRoute, publicRoute } from './routes';
+
+import type { BaseRouteDefinition, HandlerContext, RouteResult } from './http';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -15,7 +16,7 @@ function makeHandler(): (
   request: unknown,
   reply: unknown,
 ) => Promise<RouteResult> {
-  return async (_ctx, _body, _request, _reply) => ({ status: 200, body: { ok: true } });
+  return (_ctx, _body, _request, _reply) => Promise.resolve({ status: 200, body: { ok: true } });
 }
 
 function makeSchema() {
@@ -88,7 +89,8 @@ describe('publicRoute', () => {
     });
 
     it('does not throw when handler is an empty arrow function returning wrong shape', () => {
-      const badHandler = async () => ({ status: 'oops', body: null }) as unknown as RouteResult;
+      const badHandler = () =>
+        Promise.resolve({ status: 'oops', body: null } as unknown as RouteResult);
       expect(() => publicRoute('POST', badHandler)).not.toThrow();
     });
   });

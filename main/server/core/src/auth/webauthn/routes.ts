@@ -24,7 +24,7 @@ import {
   publicRoute,
   type HandlerContext,
   type RouteDefinition,
-} from '../../../../engine/src';
+} from '../../../../system/src';
 import {
   handleDeletePasskey,
   handleListPasskeys,

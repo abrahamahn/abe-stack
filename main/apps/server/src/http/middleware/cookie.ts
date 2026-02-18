@@ -5,7 +5,7 @@
  * Manual cookie parsing and setting. Replaces @fastify/cookie.
  */
 
-import { signToken, verifyToken } from '@bslt/server-engine';
+import { signToken, verifyToken } from '@bslt/server-system';
 import { parseCookies, serializeCookie } from '@bslt/shared';
 
 import type { CookieOptions, CookieSerializeOptions } from '@bslt/shared';

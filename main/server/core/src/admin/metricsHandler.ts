@@ -7,7 +7,7 @@
  * Requires admin role (enforced by route definitions).
  */
 
-import { getMetricsCollector, type MetricsSummary } from '../../../engine/src';
+import { getMetricsCollector, type MetricsSummary } from '../../../system/src';
 import { ERROR_MESSAGES } from '../auth';
 
 import type { AdminAppContext } from './types';

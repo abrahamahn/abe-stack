@@ -1,6 +1,5 @@
 // main/shared/src/system/http/http.ts
-
-// RequestInfo is canonical in system/context/context.ts — re-exported via barrel
+import type { HttpMethod } from '../../primitives/api';
 import type { RequestInfo } from '../context/context';
 
 export type { RequestInfo };
@@ -42,12 +41,6 @@ export interface ValidationSchema<T = unknown> {
 // ============================================================================
 // Route Handler Types
 // ============================================================================
-
-/**
- * HTTP methods supported by routes.
- * Canonical definition in primitives/api.ts — re-exported for engine consumers.
- */
-import type { HttpMethod } from '../../primitives/api';
 
 export type { HttpMethod };
 

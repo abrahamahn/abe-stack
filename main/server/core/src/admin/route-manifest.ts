@@ -6,9 +6,9 @@
  * Admin-only endpoint for API introspection.
  */
 
-import { getRegisteredRoutes } from '../../../engine/src';
+import { getRegisteredRoutes } from '../../../system/src';
 
-import type { RouteRegistryEntry } from '../../../engine/src';
+import type { RouteRegistryEntry } from '../../../system/src';
 
 // ============================================================================
 // Types

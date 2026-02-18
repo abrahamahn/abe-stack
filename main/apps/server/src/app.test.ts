@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App, createApp } from './app';
 
-import type { CacheProvider, QueueServer } from '@bslt/server-engine';
+import type { CacheProvider, QueueServer } from '@bslt/server-system';
 import type { AppConfig } from '@bslt/shared/config';
 import type { FastifyInstance } from 'fastify';
 
@@ -148,8 +148,8 @@ vi.mock('@bslt/core/notifications', () => ({
 }));
 
 // Mock health module (logStartupSummary used by app.ts)
-vi.mock('@bslt/server-engine', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@bslt/server-engine')>();
+vi.mock('@bslt/server-system', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/server-system')>();
   return {
     ...actual,
     logStartupSummary: vi.fn().mockResolvedValue(undefined),
@@ -491,7 +491,7 @@ describe('App', () => {
     vi.mocked(db.requireValidSchema).mockReset();
     vi.mocked(db.requireValidSchema).mockResolvedValue(undefined);
     // Reset health mocks
-    const health = await import('@bslt/server-engine');
+    const health = await import('@bslt/server-system');
     vi.mocked(health.logStartupSummary).mockReset();
     vi.mocked(health.logStartupSummary).mockResolvedValue(undefined);
   });
@@ -673,7 +673,7 @@ describe('App', () => {
 
       const { requireValidSchema } = await import('@bslt/db');
       vi.mocked(requireValidSchema).mockResolvedValue(undefined);
-      const { logStartupSummary } = await import('@bslt/server-engine');
+      const { logStartupSummary } = await import('@bslt/server-system');
       vi.mocked(logStartupSummary).mockResolvedValue(undefined);
 
       const mockSystemContext = {

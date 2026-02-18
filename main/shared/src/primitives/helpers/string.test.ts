@@ -294,7 +294,7 @@ describe('toCamelCase', () => {
   });
 
   it('does not recursively convert nested objects (shallow)', () => {
-    const result = toCamelCase({ outer_key: { inner_key: 1 } }) as Record<string, unknown>;
+    const result = toCamelCase<Record<string, unknown>>({ outer_key: { inner_key: 1 } });
     expect(result['outerKey']).toEqual({ inner_key: 1 });
   });
 

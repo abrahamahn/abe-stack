@@ -9,7 +9,7 @@
 
 import { EmailNotVerifiedError, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
-import { getMetricsCollector } from '../../../../engine/src';
+import { getMetricsCollector } from '../../../../system/src';
 import {
   generateDeviceFingerprint,
   isCaptchaRequired,

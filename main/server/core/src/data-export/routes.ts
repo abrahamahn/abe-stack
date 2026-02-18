@@ -10,7 +10,7 @@
 
 import { emptyBodySchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute, type RouteMap } from '../../../engine/src';
+import { createRouteMap, protectedRoute, type RouteMap } from '../../../system/src';
 
 import { handleGetExportStatus, handleRequestExport } from './handlers';
 
@@ -32,11 +32,11 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
-): import('../../../engine/src').RouteDefinition {
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
+): import('../../../system/src').RouteDefinition {
   return protectedRoute(
     method,
-    handler as import('../../../engine/src').RouteHandler,
+    handler as import('../../../system/src').RouteHandler,
     'user',
     undefined,
     openapi,
@@ -60,7 +60,7 @@ export const dataExportRoutes: RouteMap = createRouteMap([
     'users/me/export',
     protectedRoute(
       'POST',
-      handleRequestExport as import('../../../engine/src').RouteHandler,
+      handleRequestExport as import('../../../system/src').RouteHandler,
       'user',
       emptyBodySchema,
       { summary: 'Request data export', tags: ['Data Export'] },

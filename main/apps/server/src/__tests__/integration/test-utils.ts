@@ -7,7 +7,7 @@
  */
 
 import { createAccessToken } from '@bslt/core/auth';
-import { RateLimiter } from '@bslt/server-engine';
+import { RateLimiter } from '@bslt/server-system';
 import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 

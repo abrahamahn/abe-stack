@@ -19,9 +19,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('@bslt/server-engine', async () => {
-  const actual = await vi.importActual<typeof import('../../../../engine/src')>(
-    '@bslt/server-engine',
+vi.mock('@bslt/server-system', async () => {
+  const actual = await vi.importActual<typeof import('../../../../system/src')>(
+    '@bslt/server-system',
   );
   return {
     ...actual,
@@ -39,7 +39,7 @@ vi.mock('./handlers', () => ({
 import { oauthRoutes } from './routes';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { RouteDefinition } from '../../../../engine/src';
+import type { RouteDefinition } from '../../../../system/src';
 import type { AppContext } from '../index';
 
 // ============================================================================

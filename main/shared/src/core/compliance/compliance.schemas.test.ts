@@ -26,7 +26,6 @@ import type {
   ConsentPreferencesResponse,
   DataExportRequestedResponse,
 } from './compliance.schemas';
-
 import type {
   ConsentLogId,
   LegalDocumentId,

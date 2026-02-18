@@ -72,8 +72,8 @@ Dependencies always flow downward. An app can import from any package below it, 
 The server follows **hexagonal architecture**:
 
 - `server/core/` contains business logic (auth flows, user management, admin routes). This is the "what" of the application.
-- `server/engine/` contains infrastructure adapters (sending emails, storing files, hashing passwords). This is the "how."
-- `server/core/` imports from `server/engine/`, never the reverse. This means you can swap an email provider without touching any business logic.
+- `server/system/` contains infrastructure adapters (sending emails, storing files, hashing passwords). This is the "how."
+- `server/core/` imports from `server/system/`, never the reverse. This means you can swap an email provider without touching any business logic.
 
 ### Conventions you'll see everywhere
 
@@ -95,7 +95,7 @@ This is the most common question for new developers. Here's the decision tree:
 | React component (feature-specific) | `main/apps/web/src/features/` | LoginForm, UserListPage                       |
 | Business logic or validation       | `main/shared/`                | Zod schemas, domain rules, type contracts     |
 | API route handler                  | `main/server/core/`           | Auth handlers, user CRUD, admin endpoints     |
-| Infrastructure adapter             | `main/server/engine/`         | Email sending, file storage, JWT signing      |
+| Infrastructure adapter             | `main/server/system/`         | Email sending, file storage, JWT signing      |
 | Database schema or migration       | `main/server/db/`             | Drizzle table definitions, SQL migrations     |
 | API client hook                    | `main/client/api/`            | `useLogin()`, `useUsers()`, React Query hooks |
 | Dev tooling or scripts             | `main/tools/`                 | Linters, sync scripts, DB utilities           |

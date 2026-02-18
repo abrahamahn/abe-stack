@@ -86,9 +86,9 @@ importers:
       '@bslt/react':
         specifier: workspace:*
         version: link:../../client/react
-      '@bslt/server-engine':
+      '@bslt/server-system':
         specifier: workspace:*
-        version: link:../../server/engine
+        version: link:../../server/system
       '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -126,9 +126,9 @@ importers:
       '@bslt/realtime':
         specifier: workspace:*
         version: link:../../server/realtime
-      '@bslt/server-engine':
+      '@bslt/server-system':
         specifier: workspace:*
-        version: link:../../server/engine
+        version: link:../../server/system
       '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -310,9 +310,9 @@ importers:
       '@bslt/media':
         specifier: workspace:*
         version: link:../media
-      '@bslt/server-engine':
+      '@bslt/server-system':
         specifier: workspace:*
-        version: link:../engine
+        version: link:../system
       '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -358,33 +358,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  main/server/engine:
-    dependencies:
-      '@bslt/db':
-        specifier: workspace:*
-        version: link:../db
-      '@bslt/shared':
-        specifier: workspace:*
-        version: link:../../shared
-      '@aws-sdk/client-s3':
-        specifier: ^3.600.0
-        version: 3.990.0
-      '@aws-sdk/credential-providers':
-        specifier: ^3.600.0
-        version: 3.990.0
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.600.0
-        version: 3.990.0
-      '@simplewebauthn/server':
-        specifier: ^13.2.2
-        version: 13.2.2
-      fastify:
-        specifier: ^5.7.4
-        version: 5.7.4
-      ioredis:
-        specifier: ^5.9.2
-        version: 5.9.3
-
   main/server/media:
     dependencies:
       '@bslt/shared':
@@ -422,14 +395,41 @@ importers:
         specifier: ^8.18.0
         version: 8.19.0
 
+  main/server/system:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.600.0
+        version: 3.990.0
+      '@aws-sdk/credential-providers':
+        specifier: ^3.600.0
+        version: 3.990.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.600.0
+        version: 3.990.0
+      '@bslt/db':
+        specifier: workspace:*
+        version: link:../db
+      '@bslt/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      '@simplewebauthn/server':
+        specifier: ^13.2.2
+        version: 13.2.2
+      fastify:
+        specifier: ^5.7.4
+        version: 5.7.4
+      ioredis:
+        specifier: ^5.9.2
+        version: 5.9.3
+
   main/server/websocket:
     dependencies:
       '@bslt/db':
         specifier: workspace:*
         version: link:../db
-      '@bslt/server-engine':
+      '@bslt/server-system':
         specifier: workspace:*
-        version: link:../engine
+        version: link:../system
       '@bslt/shared':
         specifier: workspace:*
         version: link:../../shared

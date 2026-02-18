@@ -13,11 +13,11 @@
 
 import { emptyBodySchema, fileUploadRequestSchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute } from '../../../engine/src';
+import { createRouteMap, protectedRoute } from '../../../system/src';
 
 import { handleDeleteFile, handleDownloadFile, handleGetFile, handleUploadFile } from './handlers';
 
-import type { RouteDefinition } from '../../../engine/src';
+import type { RouteDefinition } from '../../../system/src';
 
 // ============================================================================
 // Route Definitions

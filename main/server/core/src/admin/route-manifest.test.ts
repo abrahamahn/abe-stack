@@ -5,11 +5,11 @@
 
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { clearRegistry, registerRoute } from '../../../engine/src';
+import { clearRegistry, registerRoute } from '../../../system/src';
 
 import { handleGetRouteManifest } from './route-manifest';
 
-import type { RouteRegistryEntry } from '../../../engine/src';
+import type { RouteRegistryEntry } from '../../../system/src';
 
 // ============================================================================
 // Helpers

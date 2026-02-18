@@ -4,7 +4,7 @@ import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../../vitest.config';
 
 const modulesPkg = path.resolve(__dirname, '../../server/core/src');
-const infraPkg = path.resolve(__dirname, '../../server/engine/src');
+const infraPkg = path.resolve(__dirname, '../../server/system/src');
 const dbPkg = path.resolve(__dirname, '../../server/db/src');
 const corePkg = path.resolve(__dirname, '../../shared/src');
 const realtimePkg = path.resolve(__dirname, '../../server/realtime/src');
@@ -22,7 +22,7 @@ export default mergeConfig(baseConfig, {
           /src\//,
           '@bslt/core',
           '@bslt/db',
-          '@bslt/server-engine',
+          '@bslt/server-system',
           '@bslt/shared',
           '@bslt/realtime',
           '@bslt/websocket',
@@ -70,11 +70,11 @@ export default mergeConfig(baseConfig, {
       { find: /^@bslt\/realtime\/(.*)$/, replacement: `${realtimePkg}/$1` },
       // Engine subpath exports (must come before main package catch-all)
       {
-        find: '@bslt/server-engine/logger',
+        find: '@bslt/server-system/logger',
         replacement: `${infraPkg}/logger/index.ts`,
       },
       {
-        find: '@bslt/server-engine/config',
+        find: '@bslt/server-system/config',
         replacement: `${infraPkg}/config/index.ts`,
       },
       // Shared subpath exports (must come before main package catch-all)
@@ -89,7 +89,7 @@ export default mergeConfig(baseConfig, {
         replacement: `${corePkg}/utils/pubsub/index.ts`,
       },
       // Handle main package imports
-      { find: '@bslt/server-engine', replacement: infraPkg },
+      { find: '@bslt/server-system', replacement: infraPkg },
       { find: '@bslt/db', replacement: dbPkg },
       { find: '@bslt/shared', replacement: corePkg },
       { find: '@bslt/realtime', replacement: realtimePkg },

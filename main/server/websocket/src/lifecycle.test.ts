@@ -48,7 +48,7 @@ vi.mock('@bslt/shared', async (importOriginal) => {
   };
 });
 
-vi.mock('@bslt/server-engine', () => ({
+vi.mock('@bslt/server-system', () => ({
   validateCsrfToken: mockValidateCsrfToken,
 }));
 

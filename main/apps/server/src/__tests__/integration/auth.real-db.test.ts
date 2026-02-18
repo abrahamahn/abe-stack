@@ -8,14 +8,14 @@
 
 import { authRoutes, createAuthGuard } from '@bslt/core/auth';
 import { createRepositories } from '@bslt/db';
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDbHarness, type DbHarness } from './db-harness';
 import { seedTestUser } from './seed-helpers';
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-system';
 
 describe.skip('Auth API Integration (Real DB)', () => {
   let testServer: TestServer;

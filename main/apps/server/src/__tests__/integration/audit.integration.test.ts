@@ -8,7 +8,7 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { SECURITY_SEVERITIES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,7 +21,7 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-engine';
+import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
 import type { SecurityEventsFilter } from '@bslt/shared';
 
 // ============================================================================

@@ -10,7 +10,7 @@ import {
 
 import type { ApiKeyAppContext } from './types';
 import type { ApiKey } from '../../../db/src';
-import type { HandlerContext } from '../../../engine/src';
+import type { HandlerContext } from '../../../system/src';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

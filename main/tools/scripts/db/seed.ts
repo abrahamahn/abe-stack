@@ -18,7 +18,7 @@
 
 import { hashPassword } from '@bslt/core/auth';
 import { buildConnectionString, createDbClient, USERS_TABLE } from '@bslt/db';
-import { loadServerEnv } from '@bslt/server-engine';
+import { loadServerEnv } from '@bslt/server-system';
 import { canonicalizeEmail } from '@bslt/shared';
 
 /** Supported user roles for seed data */

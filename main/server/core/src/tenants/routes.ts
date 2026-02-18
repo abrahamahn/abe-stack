@@ -3,7 +3,7 @@
  * Tenant Routes
  *
  * Route definitions for tenants module.
- * Uses the generic router pattern from @bslt/server-engine.
+ * Uses the generic router pattern from @bslt/server-system.
  *
  * @module routes
  */
@@ -25,7 +25,7 @@ import {
   type HandlerContext,
   type RouteMap,
   type RouteResult,
-} from '../../../engine/src';
+} from '../../../system/src';
 
 import {
   handleAcceptInvitation,

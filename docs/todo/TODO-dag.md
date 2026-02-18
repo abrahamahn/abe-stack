@@ -85,12 +85,12 @@ Every package depends on `shared` (omitted from diagrams for clarity).
       │                 │
       ▼                 │
  ┌──────────────┐       │
- │ server-engine│       │
+ │ server-system│       │
  └─┬─────────┬──┘       │
    │         │          │
    ▼         ▼          ▼
 ┌─────────┐ ┌────────────┐
-│websocket│ │    core    │◄── db + media + server-engine
+│websocket│ │    core    │◄── db + media + server-system
 └────┬────┘ └────────────┘
      │
      ▼
@@ -101,9 +101,9 @@ Every package depends on `shared` (omitted from diagrams for clarity).
 
 **Edges** (excluding shared):
 
-- `server-engine` → db
-- `websocket` → db, server-engine
-- `core` → db, media, server-engine
+- `server-system` → db
+- `websocket` → db, server-system
+- `core` → db, media, server-system
 - `realtime` → db, websocket
 
 ### Apps (consumers)
@@ -119,7 +119,7 @@ Every package depends on `shared` (omitted from diagrams for clarity).
               │ web │  │ desktop │                │ server │
               └─────┘  └─────────┘                └────────┘
                            │
-                           └──── also depends on server-engine (⚠️ cross-boundary)
+                           └──── also depends on server-system (⚠️ cross-boundary)
 ```
 
 | Package           | Workspace dependencies (excl. shared)        |
@@ -131,13 +131,13 @@ Every package depends on `shared` (omitted from diagrams for clarity).
 | **ui**            | client-engine, react                         |
 | **db**            | —                                            |
 | **media**         | —                                            |
-| **server-engine** | db                                           |
-| **websocket**     | db, server-engine                            |
-| **core**          | db, media, server-engine                     |
+| **server-system** | db                                           |
+| **websocket**     | db, server-system                            |
+| **core**          | db, media, server-system                     |
 | **realtime**      | db, websocket                                |
 | **apps/web**      | api, client-engine, react, ui                |
-| **apps/desktop**  | api, client-engine, react, ui, server-engine |
-| **apps/server**   | core, db, realtime, server-engine, websocket |
+| **apps/desktop**  | api, client-engine, react, ui, server-system |
+| **apps/server**   | core, db, realtime, server-system, websocket |
 
 ### Client-Server Boundary (HTTP)
 
@@ -471,24 +471,24 @@ Uses the apps DAG from above. Recap:
 ```
    ┌──── CLIENT PKGS ────────┐       ┌───── SERVER PKGS ─────────┐
    │ api, client-engine,     │       │ core, db, realtime,       │
-   │ react, ui               │       │ server-engine, websocket  │
+   │ react, ui               │       │ server-system, websocket  │
    └───┬──────────────┬──────┘       └────────────┬──────────────┘
        │              │                            │
        ▼              ▼                            ▼
    ┌───────┐    ┌──────────┐                 ┌──────────┐
    │  web  │    │ desktop  │─ ─ ─ ─ ─ ─ ─ ─▶│  server  │
    └───────┘    └──────────┘  also depends   └──────────┘
-                   on server-engine
+                   on server-system
                    (⚠️ cross-boundary)
 ```
 
-> Note: desktop's server-engine dependency is unusual for a client app — flagged for review.
+> Note: desktop's server-system dependency is unusual for a client app — flagged for review.
 
 | App              | Package dependencies                                 |
 | ---------------- | ---------------------------------------------------- |
 | **apps/web**     | api, client-engine, react, shared, ui                |
-| **apps/desktop** | api, client-engine, react, shared, server-engine, ui |
-| **apps/server**  | core, db, realtime, server-engine, shared, websocket |
+| **apps/desktop** | api, client-engine, react, shared, server-system, ui |
+| **apps/server**  | core, db, realtime, server-system, shared, websocket |
 
 ### Server DAG Baseline (2026-02-13)
 
@@ -498,7 +498,7 @@ Uses the apps DAG from above. Recap:
 - [x] Confirmed package-layer direction:
   - top composition layer: `apps/server`
   - lower reusable domain layer: `server/core`
-  - infra/data leaves: `server-engine`, `db`, `media`, `websocket`, `realtime`, `shared`
+  - infra/data leaves: `server-system`, `db`, `media`, `websocket`, `realtime`, `shared`
 - [x] Decision: do **not** collapse `server/core` into `apps/server`.
 - [ ] Next refactor pass: move only app-runtime-specific code from `server/core` to `apps/server` where it cannot be reused outside app bootstrap/runtime wiring.
 
@@ -526,7 +526,7 @@ Does each app contain logic that should be pushed down into a package?
 - [x] `server` vs `core` — **REFACTORED (2026-02-13)**  
        Evidence: extracted canonical core module registry from app wiring into `@bslt/core` (`main/server/core/src/route-modules.ts`) and switched app route composition to consume it (`main/apps/server/src/routes/routeModules.ts`, `main/apps/server/src/routes/apiManifestRouteModules.ts`).  
        Boundary hardening: moved Fastify/raw-body billing webhook registration into app runtime layer (`main/apps/server/src/routes/billingWebhooks.ts`) and removed framework-specific webhook route registration from core (`main/server/core/src/billing/webhooks/routes.ts` deleted; core now exports webhook business handlers only).
-- [ ] `server` vs `server-engine`
+- [ ] `server` vs `server-system`
 - [x] Create `ServerManager` to wrap logic
   - [x] Standardize startup/shutdown signals
   - [x] Ensure correct configuration loading sequence
@@ -548,9 +548,9 @@ Do multiple apps share logic that should be in a package?
 
 - [ ] `web ↔ desktop` — **HIGH PRIORITY**: share 4 of 5 client deps (api, client-engine, react, ui). Very likely to have duplicated feature logic, auth flows, or UI patterns.
 - [ ] `web ↔ server` — different stacks, low probability.
-- [ ] `desktop ↔ server` — desktop has server-engine dep; check for duplicated server-side patterns.
+- [ ] `desktop ↔ server` — desktop has server-system dep; check for duplicated server-side patterns.
 
-> Note: desktop's server-engine dependency is unusual for a client app. Investigate whether this is intentional or a boundary violation.
+> Note: desktop's server-system dependency is unusual for a client app. Investigate whether this is intentional or a boundary violation.
 
 | Phase     | Vertical | Lateral | Total  |
 | --------- | -------- | ------- | ------ |
@@ -570,12 +570,12 @@ Do multiple apps share logic that should be in a package?
 | MED      | web vs api              | web may have raw fetch calls bypassing api client         |
 | MED      | server vs shared        | server may hardcode shared constants/schemas              |
 | MED      | desktop vs api          | same concern as web vs api                                |
-| MED      | server vs server-engine | server may duplicate infra adapter patterns               |
+| MED      | server vs server-system | server may duplicate infra adapter patterns               |
 | LOW      | web vs client-engine    | engine is low-level, less likely duplicated in app code   |
 | LOW      | desktop vs shared       | same concern as web vs shared                             |
 | LOW      | desktop vs ui           | same concern as web vs ui                                 |
 | LOW      | web ↔ server           | different stacks (HTTP boundary only)                     |
-| LOW      | desktop ↔ server       | check server-engine boundary only                         |
+| LOW      | desktop ↔ server       | check server-system boundary only                         |
 
 ---
 

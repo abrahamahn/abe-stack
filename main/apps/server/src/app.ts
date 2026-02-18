@@ -9,7 +9,7 @@ import type {
   ServerSearchProvider,
   SmsProvider,
   WriteService,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import type {
   BillingService,
   CacheProvider,

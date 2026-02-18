@@ -15,7 +15,7 @@ import {
 } from '@bslt/shared';
 
 import { OAUTH_PROVIDERS, type OAuthProvider } from '../../../../db/src';
-import { getMetricsCollector } from '../../../../engine/src';
+import { getMetricsCollector } from '../../../../system/src';
 import {
   authRateLimiters,
   logOAuthLinkSuccessEvent,

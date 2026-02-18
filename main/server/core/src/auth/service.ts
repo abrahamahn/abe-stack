@@ -43,7 +43,7 @@ import {
   type Repositories,
   type User,
 } from '../../../db/src';
-import { getMetricsCollector, sign as jwtSign } from '../../../engine/src';
+import { getMetricsCollector, sign as jwtSign } from '../../../system/src';
 import { createTenant } from '../tenants';
 
 import {
@@ -68,7 +68,7 @@ import {
 } from './utils';
 
 import type { AuthConfig } from '@bslt/shared/config';
-import type { EmailOptions } from '../../../engine/src';
+import type { EmailOptions } from '../../../system/src';
 import type { AuthEmailService, AuthEmailTemplates, AuthLogger } from './types';
 
 // ============================================================================

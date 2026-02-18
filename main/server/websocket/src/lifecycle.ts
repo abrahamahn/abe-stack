@@ -10,7 +10,7 @@
  */
 
 import { eq, select } from '@bslt/db';
-import { validateCsrfToken } from '@bslt/server-engine';
+import { validateCsrfToken } from '@bslt/server-system';
 import {
   ACCESS_TOKEN_COOKIE_NAME,
   CSRF_COOKIE_NAME,

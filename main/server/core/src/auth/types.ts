@@ -31,7 +31,7 @@ import type {
   ServerLogger
 } from '@bslt/shared';
 import type { DbClient, Repositories } from '../../../db/src';
-import type { SmsProvider } from '../../../engine/src';
+import type { SmsProvider } from '../../../system/src';
 
 // ============================================================================
 // Logger Interface
@@ -327,7 +327,7 @@ export interface AppContext extends BaseContext {
   readonly sms?: SmsProvider | undefined;
   /** Application configuration */
   readonly config: {
-    readonly auth: import('@bslt/server-engine/config').AuthConfig;
+    readonly auth: import('@bslt/server-system/config').AuthConfig;
     readonly server: {
       readonly appBaseUrl: string;
     };

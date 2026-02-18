@@ -11,7 +11,7 @@ import {
   generateToken,
   signToken,
   validateCsrfToken,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import {
   CSRF_COOKIE_NAME,
   CSRF_EXEMPT_PATHS,

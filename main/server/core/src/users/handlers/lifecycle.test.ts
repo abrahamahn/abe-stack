@@ -8,7 +8,7 @@ import {
 } from './lifecycle';
 
 import type { User } from '../../../../db/src';
-import type { HandlerContext } from '../../../../engine/src';
+import type { HandlerContext } from '../../../../system/src';
 import type { UsersRequest } from '../types';
 
 // ============================================================================

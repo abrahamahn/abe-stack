@@ -585,7 +585,7 @@ describe('parseXForwardedFor', () => {
     it('handles very long chain without crashing (DoS potential)', () => {
       const longChain = Array.from(
         { length: 1000 },
-        (_, i) => `10.0.${Math.floor(i / 256)}.${i % 256}`,
+        (_, i) => `10.0.${String(Math.floor(i / 256))}.${String(i % 256)}`,
       ).join(', ');
       const result = parseXForwardedFor(longChain);
       expect(result).toHaveLength(1000);

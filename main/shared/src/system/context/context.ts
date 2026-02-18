@@ -244,7 +244,7 @@ export interface HasCache {
 /**
  * Background job queue capability.
  *
- * Typed as `unknown` because `QueueServer` lives in `@bslt/server-engine`
+ * Typed as `unknown` because `QueueServer` lives in `@bslt/server-system`
  * (Tier 2), which core (Tier 1) cannot import. Modules that need
  * queueing narrow this to the concrete type.
  */

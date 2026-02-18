@@ -3,9 +3,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CONSOLE_LOG_LEVELS, createConsoleLogger, type ConsoleLogLevel } from './console';
 
+/** Extract the string written to stdout at the given call index. */
+function spyArg(spy: { mock: { calls: unknown[][] } }, index = 0): string {
+  return (spy.mock.calls[index]?.[0] as string | undefined) ?? '';
+}
+
+const createWriteSpy = () => vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
 describe('Console Logger', () => {
+  let stdoutWriteSpy: ReturnType<typeof createWriteSpy>;
+
   beforeEach(() => {
-    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    stdoutWriteSpy = createWriteSpy();
   });
 
   afterEach(() => {
@@ -55,8 +64,7 @@ describe('Console Logger', () => {
         }),
       );
 
-      const calls = vi.mocked(process.stdout.write).mock.calls;
-      const output = String(calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // Pretty JSON: JSON.stringify(payload, null, 2) then each line prefixed with "  "
       // so properties get 4 spaces total: 2 from stringify indent + 2 from line prefix
       expect(output).toContain('"method": "GET"');
@@ -81,7 +89,7 @@ describe('Console Logger', () => {
         logger.stream.write(
           JSON.stringify({ level: inLevel, msg: 'request', method: 'GET', statusCode: 200 }),
         );
-        const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+        const output = spyArg(stdoutWriteSpy);
         // The log was parsed without error — payload fields are present
         expect(output).toContain('"statusCode": 200');
         // "level" key is stripped from the payload
@@ -96,7 +104,7 @@ describe('Console Logger', () => {
     it('should treat missing level as INFO and still emit the payload', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ msg: 'request', method: 'POST' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // CRUD log path — method field is present in the pretty payload
       expect(output).toContain('"method": "POST"');
     });
@@ -109,7 +117,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'request', method: 'GET', ok: true }));
 
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('\u001B[');
       if (originalNoColor !== undefined) {
         process.env['NO_COLOR'] = originalNoColor;
@@ -129,10 +137,9 @@ describe('Console Logger', () => {
 
       logger.stream.write(chunk);
 
-      const calls = vi.mocked(process.stdout.write).mock.calls;
-      expect(calls.length).toBe(2);
-      expect(String(calls[0]?.[0] ?? '')).toContain('"path": "/first"');
-      expect(String(calls[1]?.[0] ?? '')).toContain('"path": "/second"');
+      expect(stdoutWriteSpy.mock.calls.length).toBe(2);
+      expect(spyArg(stdoutWriteSpy, 0)).toContain('"path": "/first"');
+      expect(spyArg(stdoutWriteSpy, 1)).toContain('"path": "/second"');
     });
   });
 
@@ -146,7 +153,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'WebSocket connected' }));
 
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('WebSocket connected');
       expect(output).not.toContain('\n  "msg"');
       // Single-line: no pretty-print indentation
@@ -158,7 +165,7 @@ describe('Console Logger', () => {
       logger.stream.write(
         JSON.stringify({ level: 30, msg: 'Server started', port: 3000, host: 'localhost' }),
       );
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('Server started');
       expect(output).toContain('port=3000');
       expect(output).toContain('host=localhost');
@@ -167,14 +174,14 @@ describe('Console Logger', () => {
     it('should use "log" as fallback message when msg is absent', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, foo: 'bar' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output.startsWith('log')).toBe(true);
     });
 
     it('should use "log" as fallback message when msg is empty string', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: '' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output.startsWith('log')).toBe(true);
     });
   });
@@ -184,13 +191,13 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write('');
       logger.stream.write('   ');
-      expect(process.stdout.write).not.toHaveBeenCalled();
+      expect(stdoutWriteSpy).not.toHaveBeenCalled();
     });
 
     it('should pass through invalid JSON unchanged', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write('not json');
-      expect(process.stdout.write).toHaveBeenCalledWith('not json\n');
+      expect(stdoutWriteSpy).toHaveBeenCalledWith('not json\n');
     });
   });
 
@@ -214,7 +221,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       // 'GARBAGE' is not a known level string — normalizeLevel returns 'INFO'
       logger.stream.write(JSON.stringify({ level: 'GARBAGE', msg: 'probe' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // Output must not crash and must contain the message
       expect(output).toContain('probe');
     });
@@ -222,14 +229,14 @@ describe('Console Logger', () => {
     it('should handle level = null without throwing', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: null, msg: 'nulllevel' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('nulllevel');
     });
 
     it('should handle level = false without throwing', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: false, msg: 'falselevel' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('falselevel');
     });
 
@@ -237,28 +244,28 @@ describe('Console Logger', () => {
       // Infinity >= 60 → 'fatal'; but Infinity is NOT finite so normalizeLevel returns 'INFO'
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 9999, msg: 'veryhigh' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('veryhigh');
     });
 
     it('should handle level = -Infinity without throwing', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: -1, msg: 'negative' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('negative');
     });
 
     it('should treat empty-string level as INFO fallback', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: '', msg: 'emptylevel' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('emptylevel');
     });
 
     it('should accept level as lowercase "info" and map to INFO', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 'info', msg: 'lowercase' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('lowercase');
     });
   });
@@ -274,9 +281,9 @@ describe('Console Logger', () => {
       const partial = '{"level":30,"msg"';
       logger.stream.write(partial);
       // writeFormattedLine was called immediately because no \n present
-      expect(process.stdout.write).toHaveBeenCalledOnce();
+      expect(stdoutWriteSpy).toHaveBeenCalledOnce();
       // Partial JSON fails JSON.parse → written as-is (trimmed) with \n appended
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toBe(`${partial}\n`);
     });
 
@@ -284,7 +291,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       // chunk with no newline → writeFormattedLine called immediately
       logger.stream.write(JSON.stringify({ level: 30, msg: 'nonewline' }));
-      expect(process.stdout.write).toHaveBeenCalledOnce();
+      expect(stdoutWriteSpy).toHaveBeenCalledOnce();
     });
 
     it('should process three lines delivered as one chunk', () => {
@@ -296,13 +303,13 @@ describe('Console Logger', () => {
           JSON.stringify({ level: 30, msg: 'three' }),
         ].join('\n') + '\n';
       logger.stream.write(lines);
-      expect(vi.mocked(process.stdout.write).mock.calls.length).toBe(3);
+      expect(stdoutWriteSpy.mock.calls.length).toBe(3);
     });
 
     it('should not emit anything for a chunk that is only whitespace lines', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write('\n\n   \n\t\n');
-      expect(process.stdout.write).not.toHaveBeenCalled();
+      expect(stdoutWriteSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -313,7 +320,7 @@ describe('Console Logger', () => {
     it('should route to pretty JSON when req field is present', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'test', req: { id: '1' } }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // CRUD path produces indented JSON, not a flat status line
       expect(output).toContain('\n');
     });
@@ -323,14 +330,14 @@ describe('Console Logger', () => {
       logger.stream.write(
         JSON.stringify({ level: 50, msg: 'boom', err: { message: 'oops', stack: 'trace' } }),
       );
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).toContain('"err"');
     });
 
     it('should route to status line when none of the CRUD fields are present', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'startup complete' }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // Single-line, no indented JSON
       expect(output).toBe('startup complete\n');
     });
@@ -340,7 +347,7 @@ describe('Console Logger', () => {
       logger.stream.write(
         JSON.stringify({ level: 30, msg: 'init', meta: { nested: true }, count: 5 }),
       );
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // count is a scalar — included; meta is object — excluded
       expect(output).toContain('count=5');
       expect(output).not.toContain('nested');
@@ -349,7 +356,7 @@ describe('Console Logger', () => {
     it('should detect CRUD when msg is exactly "Request completed"', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'Request completed', durationMs: 42 }));
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       // CRUD path — durationMs appears in payload JSON
       expect(output).toContain('"durationMs": 42');
     });
@@ -366,7 +373,7 @@ describe('Console Logger', () => {
       const logger = createConsoleLogger('info');
       logger.stream.write(JSON.stringify({ level: 30, msg: 'request', method: 'GET' }));
 
-      const output = String(vi.mocked(process.stdout.write).mock.calls[0]?.[0] ?? '');
+      const output = spyArg(stdoutWriteSpy);
       expect(output).not.toContain('\u001B[');
 
       if (original !== undefined) {

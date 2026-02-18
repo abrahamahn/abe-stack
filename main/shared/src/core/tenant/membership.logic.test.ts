@@ -21,8 +21,8 @@ import {
   isSoleOwner,
 } from './membership.logic';
 
-import type { TenantRole } from '../auth/roles';
 import type { Invitation, Membership } from './membership.schemas';
+import type { TenantRole } from '../auth/roles';
 
 describe('membership.logic', () => {
   // ==========================================================================

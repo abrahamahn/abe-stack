@@ -10,7 +10,7 @@ import type {
   SmsProvider,
   WriteService,
 } from '@bslt/core';
-import type { AuthEmailTemplates } from '@bslt/server-engine';
+import type { AuthEmailTemplates } from '@bslt/server-system';
 import type {
   BaseContext,
   BillingService,

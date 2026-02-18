@@ -26,7 +26,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "@bslt/shared": "workspace:*",
-    "@bslt/server-engine": "workspace:*"
+    "@bslt/server-system": "workspace:*"
   },
   "devDependencies": {
     "electron": "^40.0.0",

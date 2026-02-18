@@ -14,7 +14,7 @@ tsconfig.json (root)
 ├── main/shared/tsconfig.json
 ├── main/server/core/tsconfig.json
 ├── main/server/db/tsconfig.json
-├── main/server/engine/tsconfig.json
+├── main/server/system/tsconfig.json
 ├── main/client/ui/tsconfig.json
 ├── main/client/api/tsconfig.json
 └── main/client/react/tsconfig.json
@@ -52,7 +52,7 @@ Defined in the root `tsconfig.json` `compilerOptions.paths`:
 | `@bslt/api`           | `./main/client/api/src/index.ts`    |
 | `@bslt/core`          | `./main/server/core/src/index.ts`   |
 | `@bslt/db`            | `./main/server/db/src/index.ts`     |
-| `@bslt/server-engine` | `./main/server/engine/src/index.ts` |
+| `@bslt/server-system` | `./main/server/system/src/index.ts` |
 
 Subpath aliases (e.g., `@bslt/shared/*`) map to the corresponding source directories.
 

@@ -10,7 +10,7 @@
 
 import { AUTH_EXPIRY, HTTP_STATUS, mapErrorToHttpResponse } from '@bslt/shared';
 
-import { sign, verify } from '../../../../engine/src';
+import { sign, verify } from '../../../../system/src';
 import { assertUserActive } from '../middleware';
 import { verifyTotpCode } from '../totp';
 import { createErrorMapperLogger } from '../types';

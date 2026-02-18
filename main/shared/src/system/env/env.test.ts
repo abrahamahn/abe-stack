@@ -1,8 +1,8 @@
 // main/shared/src/system/env/env.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { ConfigurationError } from '../errors';
 import { createSchema, parseString } from '../../primitives/schema';
+import { ConfigurationError } from '../errors';
 
 import { baseEnvSchema, getRawEnv, validateEnv } from './env';
 

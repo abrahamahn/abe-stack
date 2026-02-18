@@ -8,7 +8,7 @@ Last generated: 2026-02-13
 graph TD
   server["apps/server"]
   core["server/core"]
-  server_engine["server/engine"]
+  server_engine["server/system"]
   realtime["server/realtime"]
   websocket["server/websocket"]
   media["server/media"]
@@ -38,11 +38,11 @@ graph TD
 
 | Layer              | Package                    | Workspace deps                                                                   |
 | ------------------ | -------------------------- | -------------------------------------------------------------------------------- |
-| `apps/server`      | `@bslt/server`        | server/core, server/db, server/realtime, server/engine, shared, server/websocket |
-| `server/core`      | `@bslt/core`          | server/media, server/engine, server/db, shared                                   |
-| `server/engine`    | `@bslt/server-engine` | server/db, shared                                                                |
+| `apps/server`      | `@bslt/server`        | server/core, server/db, server/realtime, server/system, shared, server/websocket |
+| `server/core`      | `@bslt/core`          | server/media, server/system, server/db, shared                                   |
+| `server/system`    | `@bslt/server-system` | server/db, shared                                                                |
 | `server/realtime`  | `@bslt/realtime`      | server/db, server/websocket, shared                                              |
-| `server/websocket` | `@bslt/websocket`     | server/engine, server/db, shared                                                 |
+| `server/websocket` | `@bslt/websocket`     | server/system, server/db, shared                                                 |
 | `server/media`     | `@bslt/media`         | shared                                                                           |
 | `server/db`        | `@bslt/db`            | shared                                                                           |
 | `shared`           | `@bslt/shared`        | —                                                                                |
@@ -55,10 +55,10 @@ graph TD
 | From               | To                 | Import count |
 | ------------------ | ------------------ | -----------: |
 | `server/core`      | `server/db`        |          182 |
-| `apps/server`      | `server/engine`    |           65 |
-| `server/core`      | `server/engine`    |           54 |
+| `apps/server`      | `server/system`    |           65 |
+| `server/core`      | `server/system`    |           54 |
 | `apps/server`      | `server/core`      |           49 |
-| `server/engine`    | `server/db`        |           14 |
+| `server/system`    | `server/db`        |           14 |
 | `apps/server`      | `server/db`        |            8 |
 | `server/realtime`  | `server/db`        |            4 |
 | `apps/server`      | `server/realtime`  |            2 |
@@ -66,7 +66,7 @@ graph TD
 | `server/websocket` | `server/db`        |            2 |
 | `server/core`      | `server/media`     |            1 |
 | `server/realtime`  | `server/websocket` |            1 |
-| `server/websocket` | `server/engine`    |            1 |
+| `server/websocket` | `server/system`    |            1 |
 
 ## Refactor Guidance
 

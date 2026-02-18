@@ -11,11 +11,11 @@
  * @module activities/routes
  */
 
-import { createRouteMap, protectedRoute } from '../../../engine/src';
+import { createRouteMap, protectedRoute } from '../../../system/src';
 
 import { handleListActivities, handleListTenantActivities } from './handlers';
 
-import type { RouteDefinition } from '../../../engine/src';
+import type { RouteDefinition } from '../../../system/src';
 
 // ============================================================================
 // Route Definitions

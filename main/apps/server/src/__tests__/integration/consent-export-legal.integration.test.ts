@@ -10,12 +10,12 @@ import { createAuthGuard } from '@bslt/core';
 import { consentRoutes } from '@bslt/core/consent';
 import { dataExportRoutes } from '@bslt/core/data-export';
 import { legalRoutes } from '@bslt/core/legal';
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-system';
 
 // ============================================================================
 // Mock Factories

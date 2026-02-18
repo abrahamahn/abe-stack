@@ -8,13 +8,13 @@
  * @module Domain/Admin/Security
  */
 
+import { createSchema } from '../../primitives/schema';
 import {
   paginatedResultSchema,
   paginationOptionsSchema,
   type PaginatedResult,
   type PaginationOptions,
 } from '../../system/pagination';
-import { createSchema } from '../../primitives/schema';
 import { uuidSchema } from '../schemas';
 
 import type { Schema } from '../../primitives/api';

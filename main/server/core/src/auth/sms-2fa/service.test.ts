@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getSmsVerificationCode, sendSms2faCode, verifySms2faCode } from './service';
 
 import type { DbClient } from '../../../../db/src';
-import type { SmsProvider } from '../../../../engine/src';
+import type { SmsProvider } from '../../../../system/src';
 
 // ============================================================================
 // Test Helpers

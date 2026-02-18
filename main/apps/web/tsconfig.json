@@ -70,7 +70,7 @@
       "path": "../../shared"
     },
     {
-      "path": "../../server/engine"
+      "path": "../../server/system"
     },
     {
       "path": "../../server/media"

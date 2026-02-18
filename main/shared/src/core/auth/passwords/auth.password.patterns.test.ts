@@ -1,6 +1,8 @@
 // main/shared/src/core/auth/passwords/auth.password.patterns.test.ts
 import { describe, expect, it } from 'vitest';
 
+import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants/auth';
+
 import {
   containsUserInput,
   hasKeyboardPattern,
@@ -8,7 +10,6 @@ import {
   hasSequentialChars,
   isCommonPassword,
 } from './auth.password.patterns';
-import { COMMON_PASSWORDS, KEYBOARD_PATTERNS } from '../../constants/auth';
 
 describe('Password Patterns', () => {
   describe('COMMON_PASSWORDS', () => {

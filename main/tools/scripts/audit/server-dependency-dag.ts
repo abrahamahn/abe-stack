@@ -32,7 +32,7 @@ const today = new Date().toISOString().slice(0, 10);
 const TARGET_PACKAGES: ReadonlyArray<PackageSpec> = [
   { name: '@bslt/server', path: 'main/apps/server', label: 'apps/server' },
   { name: '@bslt/core', path: 'main/server/core', label: 'server/core' },
-  { name: '@bslt/server-engine', path: 'main/server/engine', label: 'server/engine' },
+  { name: '@bslt/server-system', path: 'main/server/system', label: 'server/system' },
   { name: '@bslt/realtime', path: 'main/server/realtime', label: 'server/realtime' },
   { name: '@bslt/websocket', path: 'main/server/websocket', label: 'server/websocket' },
   { name: '@bslt/media', path: 'main/server/media', label: 'server/media' },
@@ -84,7 +84,7 @@ function walkSourceFiles(dir: string): string[] {
 function collectImportCounts(): Map<string, number> {
   const counts = new Map<string, number>();
   const importRegex =
-    /from\s+['"](@bslt\/(?:server|core|server-engine|realtime|websocket|media|db|shared)(?:\/[^'"]*)?)['"]/g;
+    /from\s+['"](@bslt\/(?:server|core|server-system|realtime|websocket|media|db|shared)(?:\/[^'"]*)?)['"]/g;
 
   for (const pkg of SOURCE_AUDIT_PACKAGES) {
     const srcDir = resolve(ROOT, pkg.path, 'src');

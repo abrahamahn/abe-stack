@@ -17,7 +17,7 @@ import {
 } from '@bslt/shared';
 
 import { withTransaction } from '../../../../db/src';
-import { JwtError, verify as jwtVerify } from '../../../../engine/src';
+import { JwtError, verify as jwtVerify } from '../../../../system/src';
 import { checkSmsRateLimit } from '../sms-2fa/rate-limit';
 import { sendSms2faCode, verifySms2faCode } from '../sms-2fa/service';
 import {

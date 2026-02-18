@@ -14,12 +14,12 @@
 
 import { createAuthGuard, fileRoutes } from '@bslt/core';
 import { featureFlagRoutes } from '@bslt/core/feature-flags';
-import { registerRouteMap } from '@bslt/server-engine';
+import { registerRouteMap } from '@bslt/server-system';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-engine';
+import type { AuthGuardFactory } from '@bslt/server-system';
 
 // ============================================================================
 // Mock Repositories

@@ -429,7 +429,9 @@ describe('LRUCache', () => {
 
       cache.set('a', 1);
       // Inserting 'b' triggers eviction of 'a' which calls the throwing dispose
-      expect(() => cache.set('b', 2)).toThrow('dispose failed');
+      expect(() => {
+        cache.set('b', 2);
+      }).toThrow('dispose failed');
     });
 
     it('dispose throwing on clear propagates the error', () => {
@@ -441,7 +443,9 @@ describe('LRUCache', () => {
       });
 
       cache.set('a', 1);
-      expect(() => cache.clear()).toThrow('dispose exploded');
+      expect(() => {
+        cache.clear();
+      }).toThrow('dispose exploded');
     });
 
     it('dispose throwing on delete propagates the error', () => {

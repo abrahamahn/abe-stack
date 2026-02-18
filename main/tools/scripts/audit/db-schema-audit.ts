@@ -19,7 +19,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { buildConnectionString, createDbClient } from '@bslt/db';
-import { initEnv } from '@bslt/server-engine';
+import { initEnv } from '@bslt/server-system';
 
 import * as schema from '../../../server/db/src/schema';
 import { REQUIRED_TABLES } from '../../../server/db/src/validation';

@@ -217,7 +217,9 @@ describe('parseCookies', () => {
     });
 
     it('handles a header with 1 000 cookies without throwing', () => {
-      const pairs = Array.from({ length: 1_000 }, (_, i) => `c${i}=${i}`).join('; ');
+      const pairs = Array.from({ length: 1_000 }, (_, i) => `c${String(i)}=${String(i)}`).join(
+        '; ',
+      );
       const result = parseCookies(pairs);
       expect(result['c0']).toBe('0');
       expect(result['c999']).toBe('999');

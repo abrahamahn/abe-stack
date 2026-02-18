@@ -494,7 +494,7 @@ describe('parseTypedRecord', () => {
 describe('parseOptional', () => {
   const parseStr = (v: unknown): string => {
     if (typeof v !== 'string') throw new Error('must be a string');
-    return v as string;
+    return v;
   };
 
   describe('happy path', () => {
@@ -528,7 +528,7 @@ describe('parseOptional', () => {
 describe('parseNullable', () => {
   const parseStr = (v: unknown): string => {
     if (typeof v !== 'string') throw new Error('must be a string');
-    return v as string;
+    return v;
   };
 
   describe('happy path', () => {
@@ -562,7 +562,7 @@ describe('parseNullable', () => {
 describe('parseNullableOptional', () => {
   const parseStr = (v: unknown): string => {
     if (typeof v !== 'string') throw new Error('must be a string');
-    return v as string;
+    return v;
   };
 
   it('returns undefined for undefined', () => {

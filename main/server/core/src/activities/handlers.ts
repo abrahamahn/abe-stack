@@ -13,7 +13,7 @@ import { getActivityFeed, getTenantActivityFeed } from './service';
 import type { AuthenticatedUser } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Activity as DbActivity } from '../../../db/src';
-import type { HandlerContext } from '../../../engine/src';
+import type { HandlerContext } from '../../../system/src';
 import type { ActivityAppContext } from './types';
 
 // ============================================================================

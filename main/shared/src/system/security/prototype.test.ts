@@ -129,7 +129,7 @@ describe('prototype pollution helpers', () => {
     it('handles very large flat object', () => {
       const large: Record<string, unknown> = {};
       for (let i = 0; i < 10000; i++) {
-        large[`key_${i}`] = i;
+        large[`key_${String(i)}`] = i;
       }
       // Use 'prototype' rather than '__proto__' so it's an own enumerable key
       large['prototype'] = { evil: true };

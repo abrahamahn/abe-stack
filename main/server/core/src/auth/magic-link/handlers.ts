@@ -14,7 +14,7 @@ import {
 } from '@bslt/shared';
 import { isStrategyEnabled } from '@bslt/shared/config';
 
-import { getMetricsCollector } from '../../../../engine/src';
+import { getMetricsCollector } from '../../../../system/src';
 import {
   logMagicLinkFailedEvent,
   logMagicLinkRequestEvent,

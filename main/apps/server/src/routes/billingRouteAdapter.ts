@@ -2,7 +2,7 @@
 /**
  * Billing Route Adapter
  *
- * Adapts billing module route definitions into server-engine RouteMap format.
+ * Adapts billing module route definitions into server-system RouteMap format.
  */
 
 import { billingRoutes } from '@bslt/core/billing';
@@ -12,7 +12,7 @@ import type {
   RouteDefinition as DbRouteDefinition,
   RouteMap as DbRouteMap,
   HandlerContext,
-} from '@bslt/server-engine';
+} from '@bslt/server-system';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 export function buildBillingRouteMap(): DbRouteMap {

@@ -234,12 +234,12 @@ describe('token', () => {
     test('100 memory stores are all independent', () => {
       const stores = Array.from({ length: 100 }, (_, i) => {
         const s = createTokenStore.memory();
-        s.set(`token-${i}`);
+        s.set(`token-${String(i)}`);
         return s;
       });
 
       for (let i = 0; i < 100; i++) {
-        expect(stores[i]!.get()).toBe(`token-${i}`);
+        expect(stores[i]!.get()).toBe(`token-${String(i)}`);
       }
     });
 
@@ -248,7 +248,7 @@ describe('token', () => {
       const seen = new Set<string>();
 
       for (let i = 0; i < 100; i++) {
-        const token = `unique-token-${i}`;
+        const token = `unique-token-${String(i)}`;
         store.set(token);
         seen.add(store.get()!);
       }
@@ -336,12 +336,16 @@ describe('token', () => {
 
     test('exposes guard gap: localStorage store set() throws when localStorage is set to undefined', () => {
       const store = createTokenStore.localStorage();
-      expect(() => store.set('token')).toThrow(TypeError);
+      expect(() => {
+        store.set('token');
+      }).toThrow(TypeError);
     });
 
     test('exposes guard gap: localStorage store clear() throws when localStorage is set to undefined', () => {
       const store = createTokenStore.localStorage();
-      expect(() => store.clear()).toThrow(TypeError);
+      expect(() => {
+        store.clear();
+      }).toThrow(TypeError);
     });
   });
 

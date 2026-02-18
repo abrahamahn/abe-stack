@@ -66,7 +66,7 @@ vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-vi.mock('@bslt/server-engine', () => ({
+vi.mock('@bslt/server-system', () => ({
   verify: mockJwtVerify,
   JwtError: class JwtError extends Error {
     constructor(message: string) {
@@ -186,7 +186,7 @@ describe('handleSendSmsCode', () => {
     const request = createRequest();
     const body: SmsChallengeRequest = { challengeToken: 'invalid-token' };
 
-    const JwtError = vi.mocked(await import('../../../../engine/src')).JwtError as unknown as new (
+    const JwtError = vi.mocked(await import('../../../../system/src')).JwtError as unknown as new (
       message: string,
     ) => Error;
     mockJwtVerify.mockImplementation(() => {
@@ -325,7 +325,7 @@ describe('handleVerifySmsCode', () => {
     const reply = createMockReply();
     const body: SmsVerifyRequest = { challengeToken: 'invalid-token', code: '123456' };
 
-    const JwtError = vi.mocked(await import('../../../../engine/src')).JwtError as unknown as new (
+    const JwtError = vi.mocked(await import('../../../../system/src')).JwtError as unknown as new (
       message: string,
     ) => Error;
     mockJwtVerify.mockImplementation(() => {

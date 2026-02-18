@@ -26,7 +26,7 @@ import { record } from '../../audit/service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { Repositories } from '../../../../db/src';
-import type { HandlerContext, RouteResult } from '../../../../engine/src';
+import type { HandlerContext, RouteResult } from '../../../../system/src';
 
 // ============================================================================
 // Context Bridge

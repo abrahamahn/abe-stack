@@ -586,6 +586,18 @@ describe('uuidSchema', () => {
 // Cross-schema: safeParse always returns SafeParseResult, never throws
 // ============================================================================
 
+function safeLabel(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'boolean') return String(value);
+  if (typeof value === 'bigint') return String(value);
+  if (typeof value === 'symbol') return value.toString();
+  if (typeof value === 'object') return JSON.stringify(value);
+  return 'unknown';
+}
+
 describe('safeParse contract — never throws', () => {
   const schemas = [isoDateTimeSchema, emailSchema, passwordSchema, uuidSchema];
   const adversarialInputs = [
@@ -607,7 +619,7 @@ describe('safeParse contract — never throws', () => {
 
   for (const schema of schemas) {
     for (const input of adversarialInputs) {
-      it(`${schema === isoDateTimeSchema ? 'isoDateTimeSchema' : schema === emailSchema ? 'emailSchema' : schema === passwordSchema ? 'passwordSchema' : 'uuidSchema'}.safeParse(${String(input)}) never throws`, () => {
+      it(`${schema === isoDateTimeSchema ? 'isoDateTimeSchema' : schema === emailSchema ? 'emailSchema' : schema === passwordSchema ? 'passwordSchema' : 'uuidSchema'}.safeParse(${safeLabel(input)}) never throws`, () => {
         expect(() => schema.safeParse(input)).not.toThrow();
         const result = schema.safeParse(input);
         expect(typeof result.success).toBe('boolean');

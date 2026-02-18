@@ -10,7 +10,7 @@
  */
 
 import { buildConnectionString, createDbClient } from '@bslt/db';
-import { loadServerEnv } from '@bslt/server-engine';
+import { loadServerEnv } from '@bslt/server-system';
 
 export const STATEMENTS: string[] = [
   `CREATE EXTENSION IF NOT EXISTS "pgcrypto";`,

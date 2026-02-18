@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { OAUTH_PROVIDERS } from '../constants/auth';
+
 import {
   oauthCallbackQuerySchema,
   oauthCallbackResponseSchema,
@@ -721,7 +722,7 @@ describe('oauthConnectionSchema', () => {
   describe('id validation', () => {
     it('should throw when id is missing', () => {
       const conn = makeValidConnection();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const { id: _removed, ...withoutId } = conn as any;
       expect(() => oauthConnectionSchema.parse(withoutId)).toThrow();
     });

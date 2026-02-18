@@ -9,11 +9,13 @@ import type { SubscriptionManager } from './subscription.manager';
 
 describe('pubsub helpers', () => {
   let mockPubsub: SubscriptionManager;
+  let publishSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    publishSpy = vi.fn();
     mockPubsub = {
-      publish: vi.fn(),
+      publish: publishSpy,
     } as unknown as SubscriptionManager;
   });
 
@@ -22,12 +24,12 @@ describe('pubsub helpers', () => {
       publishAfterWrite(mockPubsub, 'users', '123', 1);
 
       // Should not be called immediately
-      expect(mockPubsub.publish).not.toHaveBeenCalled();
+      expect(publishSpy).not.toHaveBeenCalled();
 
       // Wait for setImmediate
       await new Promise((resolve) => setImmediate(resolve));
 
-      expect(mockPubsub.publish).toHaveBeenCalledTimes(1);
+      expect(publishSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should publish with correct subscription key', async () => {
@@ -35,7 +37,7 @@ describe('pubsub helpers', () => {
 
       await new Promise((resolve) => setImmediate(resolve));
 
-      const call = (mockPubsub.publish as ReturnType<typeof vi.fn>).mock.calls[0]!;
+      const call = publishSpy.mock.calls[0] as [string, number];
       expect(call[0]).toBe('record:users:123');
       expect(call[1]).toBe(5);
     });
@@ -47,7 +49,7 @@ describe('pubsub helpers', () => {
 
       await new Promise((resolve) => setImmediate(resolve));
 
-      expect(mockPubsub.publish).toHaveBeenCalledTimes(3);
+      expect(publishSpy).toHaveBeenCalledTimes(3);
     });
 
     it('should not block the calling code', () => {
@@ -59,7 +61,7 @@ describe('pubsub helpers', () => {
 
       // Should complete immediately (< 10ms)
       expect(endTime - startTime).toBeLessThan(10);
-      expect(mockPubsub.publish).not.toHaveBeenCalled();
+      expect(publishSpy).not.toHaveBeenCalled();
     });
   });
 });
@@ -70,44 +72,46 @@ describe('pubsub helpers', () => {
 
 describe('publishAfterWrite — adversarial', () => {
   let mockPubsub: SubscriptionManager;
+  let publishSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    publishSpy = vi.fn();
     mockPubsub = {
-      publish: vi.fn(),
+      publish: publishSpy,
     } as unknown as SubscriptionManager;
   });
 
   it('publishes with version=0', async () => {
     publishAfterWrite(mockPubsub, 'users', 'abc', 0);
     await new Promise((resolve) => setImmediate(resolve));
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:users:abc', 0);
+    expect(publishSpy).toHaveBeenCalledWith('record:users:abc', 0);
   });
 
   it('publishes with negative version', async () => {
     publishAfterWrite(mockPubsub, 'users', 'abc', -1);
     await new Promise((resolve) => setImmediate(resolve));
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:users:abc', -1);
+    expect(publishSpy).toHaveBeenCalledWith('record:users:abc', -1);
   });
 
   it('publishes with empty table name (constructs key as-is)', async () => {
     publishAfterWrite(mockPubsub, '', 'id-1', 1);
     await new Promise((resolve) => setImmediate(resolve));
     // SubKeys.record('', 'id-1') = 'record::id-1'
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record::id-1', 1);
+    expect(publishSpy).toHaveBeenCalledWith('record::id-1', 1);
   });
 
   it('publishes with empty id (constructs key as-is)', async () => {
     publishAfterWrite(mockPubsub, 'users', '', 1);
     await new Promise((resolve) => setImmediate(resolve));
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:users:', 1);
+    expect(publishSpy).toHaveBeenCalledWith('record:users:', 1);
   });
 
   it('publishes with special characters in table name', async () => {
     publishAfterWrite(mockPubsub, 'my-table!', 'id-1', 2);
     await new Promise((resolve) => setImmediate(resolve));
     // Key is constructed with SubKeys.record — no validation at this layer
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:my-table!:id-1', 2);
+    expect(publishSpy).toHaveBeenCalledWith('record:my-table!:id-1', 2);
   });
 
   it('publishes with a very long channel name', async () => {
@@ -116,13 +120,13 @@ describe('publishAfterWrite — adversarial', () => {
     publishAfterWrite(mockPubsub, longTable, longId, 1);
     await new Promise((resolve) => setImmediate(resolve));
     const expectedKey = `record:${longTable}:${longId}`;
-    expect(mockPubsub.publish).toHaveBeenCalledWith(expectedKey, 1);
+    expect(publishSpy).toHaveBeenCalledWith(expectedKey, 1);
   });
 
   it('publishes with Number.MAX_SAFE_INTEGER version', async () => {
     publishAfterWrite(mockPubsub, 'users', 'x', Number.MAX_SAFE_INTEGER);
     await new Promise((resolve) => setImmediate(resolve));
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:users:x', Number.MAX_SAFE_INTEGER);
+    expect(publishSpy).toHaveBeenCalledWith('record:users:x', Number.MAX_SAFE_INTEGER);
   });
 
   it('does not invoke publish synchronously even in microtask context', async () => {
@@ -136,12 +140,12 @@ describe('publishAfterWrite — adversarial', () => {
     await Promise.resolve();
     callOrder.push('after-microtask');
 
-    expect(mockPubsub.publish).not.toHaveBeenCalled();
+    expect(publishSpy).not.toHaveBeenCalled();
 
     await new Promise((resolve) => setImmediate(resolve));
     callOrder.push('after-setImmediate');
 
-    expect(mockPubsub.publish).toHaveBeenCalledTimes(1);
+    expect(publishSpy).toHaveBeenCalledTimes(1);
     expect(callOrder).toEqual(['after-call', 'after-microtask', 'after-setImmediate']);
   });
 
@@ -149,15 +153,17 @@ describe('publishAfterWrite — adversarial', () => {
     // publishAfterWrite is fire-and-forget via setImmediate; the synchronous
     // invocation never calls publish directly, so it cannot throw synchronously
     // regardless of what publish does when eventually called.
-    (mockPubsub.publish as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    publishSpy.mockImplementation(() => {
       // intentionally left as a throwing mock — but we only test the sync side
       return undefined;
     });
 
     // The synchronous call must not throw
-    expect(() => publishAfterWrite(mockPubsub, 'users', 'err-id', 1)).not.toThrow();
+    expect(() => {
+      publishAfterWrite(mockPubsub, 'users', 'err-id', 1);
+    }).not.toThrow();
     // Publish has NOT been invoked yet
-    expect(mockPubsub.publish).not.toHaveBeenCalled();
+    expect(publishSpy).not.toHaveBeenCalled();
   });
 
   it('constructs key using SubKeys.record format exactly', async () => {
@@ -167,7 +173,7 @@ describe('publishAfterWrite — adversarial', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedKey = SubKeys.record(table, id);
-    expect(mockPubsub.publish).toHaveBeenCalledWith(expectedKey, 3);
+    expect(publishSpy).toHaveBeenCalledWith(expectedKey, 3);
   });
 
   it('rapid sequential calls all publish independently', async () => {
@@ -176,6 +182,6 @@ describe('publishAfterWrite — adversarial', () => {
       publishAfterWrite(mockPubsub, 'table', String(i), i);
     }
     await new Promise((resolve) => setImmediate(resolve));
-    expect(mockPubsub.publish).toHaveBeenCalledTimes(count);
+    expect(publishSpy).toHaveBeenCalledTimes(count);
   });
 });

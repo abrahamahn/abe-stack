@@ -14,7 +14,7 @@
 
 import { AUTH_EXPIRY, ForbiddenError, QUOTAS, TooManyRequestsError } from '@bslt/shared';
 
-import { sign as jwtSign, verify as jwtVerify } from '../../../engine/src';
+import { sign as jwtSign, verify as jwtVerify } from '../../../system/src';
 
 import type { AdminUser, AppRole } from '@bslt/shared';
 import type { UserRepository } from '../../../db/src';

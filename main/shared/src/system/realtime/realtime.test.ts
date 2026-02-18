@@ -1396,7 +1396,7 @@ describe('applyOperation — adversarial', () => {
         table: 'users',
         id: record.id,
         key: 'name',
-        value: `name-${i}`,
+        value: `name-${String(i)}`,
       };
       record = applyOperation(record, op);
     }
@@ -1567,28 +1567,32 @@ describe('setPath — adversarial', () => {
     const obj: Record<string, unknown> = {};
     setPath(obj, 'a.b.c', 42);
     const a = obj['a'] as Record<string, unknown>;
-    const b = a?.['b'] as Record<string, unknown>;
-    expect(b?.['c']).toBe(42);
+    const b = a['b'] as Record<string, unknown>;
+    expect(b['c']).toBe(42);
   });
 
   it('does not throw for prototype pollution attempt (__proto__)', () => {
     const obj: Record<string, unknown> = {};
     // isSafeObjectKey guards against __proto__ prototype pollution
-    expect(() => setPath(obj, '__proto__.polluted', true)).not.toThrow();
+    expect(() => {
+      setPath(obj, '__proto__.polluted', true);
+    }).not.toThrow();
     // The actual prototype should not be polluted
     expect((Object.prototype as Record<string, unknown>)['polluted']).toBeUndefined();
   });
 
   it('does not throw for constructor key attempt', () => {
     const obj: Record<string, unknown> = {};
-    expect(() => setPath(obj, 'constructor.prototype.evil', true)).not.toThrow();
+    expect(() => {
+      setPath(obj, 'constructor.prototype.evil', true);
+    }).not.toThrow();
   });
 
   it('overwrites existing string with object when nested', () => {
     const obj: Record<string, unknown> = { settings: 'old-string' };
     setPath(obj, 'settings.theme', 'dark');
     const settings = obj['settings'] as Record<string, unknown>;
-    expect(settings?.['theme']).toBe('dark');
+    expect(settings['theme']).toBe('dark');
   });
 });
 

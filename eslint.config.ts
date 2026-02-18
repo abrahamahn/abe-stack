@@ -82,7 +82,7 @@ export const baseConfig = [
         // Server Packages
         { type: 'db', pattern: 'main/server/db', mode: 'folder' },
         { type: 'media', pattern: 'main/server/media', mode: 'folder' },
-        { type: 's-engine', pattern: 'main/server/engine', mode: 'folder' },
+        { type: 's-system', pattern: 'main/server/system', mode: 'folder' },
         { type: 'websocket', pattern: 'main/server/websocket', mode: 'folder' },
         { type: 'core', pattern: 'main/server/core', mode: 'folder' },
         { type: 'realtime', pattern: 'main/server/realtime', mode: 'folder' },
@@ -117,13 +117,13 @@ export const baseConfig = [
             // ── Server DAG Edges ──
             { from: 'db', allow: [...allSharedLayers] },
             { from: 'media', allow: [...allSharedLayers] },
-            { from: 's-engine', allow: [...allSharedLayers, 'db'] },
-            { from: 'websocket', allow: [...allSharedLayers, 'db', 's-engine'] },
-            { from: 'core', allow: [...allSharedLayers, 'db', 'media', 's-engine'] },
+            { from: 's-system', allow: [...allSharedLayers, 'db'] },
+            { from: 'websocket', allow: [...allSharedLayers, 'db', 's-system'] },
+            { from: 'core', allow: [...allSharedLayers, 'db', 'media', 's-system'] },
             { from: 'realtime', allow: [...allSharedLayers, 'db', 'websocket'] },
             {
               from: 'app-server',
-              allow: [...allSharedLayers, 'core', 'db', 'realtime', 's-engine', 'websocket'],
+              allow: [...allSharedLayers, 'core', 'db', 'realtime', 's-system', 'websocket'],
             },
 
             // ── Client DAG Edges ──
@@ -135,7 +135,7 @@ export const baseConfig = [
             // Desktop Special Case (Client stack + local engine)
             {
               from: 'app-desktop',
-              allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui', 's-engine'],
+              allow: [...allSharedLayers, 'api', 'c-engine', 'react', 'ui', 's-system'],
             },
           ],
         },

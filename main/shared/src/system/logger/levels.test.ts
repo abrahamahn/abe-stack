@@ -214,10 +214,12 @@ describe('Log Level Utilities', () => {
       expect(LOG_LEVELS.info).toBe(30);
     });
 
-    test('LOG_LEVELS values used in shouldLog are compared with >=', () => {
+    test('LOG_LEVELS values used in shouldLog are compared with >= (same level passes)', () => {
       // Verify that shouldLog(x, x) is always true (edge of >=, not >)
-      expect(LOG_LEVELS.warn >= LOG_LEVELS.warn).toBe(true);
-      expect(LOG_LEVELS.warn > LOG_LEVELS.warn).toBe(false);
+      // If the implementation used > instead of >=, same-level would return false
+      expect(shouldLog('warn', 'warn')).toBe(true);
+      // Adjacent levels: warn should NOT pass at error threshold
+      expect(shouldLog('warn', 'error')).toBe(false);
     });
   });
 });

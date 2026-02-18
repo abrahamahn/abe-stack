@@ -6,7 +6,7 @@ import { verifyToken } from '@bslt/core/auth';
 import { registerScheduledTasks, stopScheduledTasks } from '@bslt/core/scheduled-tasks';
 import { requireValidSchema } from '@bslt/db';
 import { resolveTableName } from '@bslt/realtime';
-import { logStartupSummary } from '@bslt/server-engine';
+import { logStartupSummary } from '@bslt/server-system';
 import { getWebSocketStats, registerWebSocket } from '@bslt/websocket';
 
 import { createApp, type App } from './app';

@@ -174,4 +174,4 @@ export { EnvSchema, validateEnv } from './env.validation';
 import { getBool, getInt, getList, getRequired } from '../primitives/helpers';
 import { getRawEnv } from '../system/env';
 
-export { getBool, getInt, getList, getRequired, getRawEnv };
+export { getBool, getInt, getList, getRawEnv, getRequired };

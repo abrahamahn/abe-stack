@@ -220,7 +220,7 @@ describe('API Response Types', () => {
     it('success response handles very large data array (10000 items)', () => {
       const largeData = Array.from({ length: 10_000 }, (_, i) => ({
         id: i,
-        name: `user-${i}`,
+        name: `user-${String(i)}`,
         active: i % 2 === 0,
       }));
       const response: ApiSuccessResponse<typeof largeData> = { ok: true, data: largeData };
@@ -242,7 +242,7 @@ describe('API Response Types', () => {
     it('error response handles details with many keys', () => {
       const details: Record<string, unknown> = {};
       for (let i = 0; i < 1000; i++) {
-        details[`field${i}`] = `error message ${i}`;
+        details[`field${String(i)}`] = `error message ${String(i)}`;
       }
       const response: ApiErrorResponse = {
         ok: false,

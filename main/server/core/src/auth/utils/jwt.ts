@@ -10,11 +10,11 @@
 
 import crypto from 'node:crypto';
 
-import { JwtError, sign as jwtSign, verify as jwtVerify } from '../../../../engine/src';
+import { JwtError, sign as jwtSign, verify as jwtVerify } from '../../../../system/src';
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../types';
 
 import type { AppRole } from '@bslt/shared';
-import type { VerifyOptions } from '../../../../engine/src';
+import type { VerifyOptions } from '../../../../system/src';
 
 // ============================================================================
 // Types

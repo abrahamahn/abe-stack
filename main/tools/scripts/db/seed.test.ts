@@ -37,8 +37,8 @@ vi.mock('@bslt/shared', () => ({
   canonicalizeEmail: (email: string) => email.toLowerCase(),
 }));
 
-// Mock server-engine env loader
-vi.mock('@bslt/server-engine', () => ({
+// Mock server-system env loader
+vi.mock('@bslt/server-system', () => ({
   loadServerEnv: vi.fn(),
 }));
 

@@ -307,20 +307,20 @@ export {
   type HasErrorTracker,
   type HealthCheckResult,
   type InfrastructureService,
-  type QueueJob,
-  type QueueJobHandler,
   type JobOptions,
   type JobQueueService,
   type LocalStorageConfig,
   type MetricsService,
   type NotificationService,
+  type QueueJob,
+  type QueueJobHandler,
   type ReadableStreamLike,
   type S3StorageConfig,
   type SendResult,
   type ServerLogger,
+  type StorageBackend,
   type StorageClient,
   type StorageConfig,
-  type StorageBackend,
 } from './system/ports';
 
 // HTTP (consolidated: response schemas, cookies, types, csrf, multipart, proxy, request, routes, user agent)
@@ -378,9 +378,9 @@ export {
   type HasPubSub,
   type HasQueue,
   type HasStorage,
+  type ReplyContext,
   type RequestContext,
   type RequestInfo,
-  type ReplyContext,
 } from './system/context';
 
 // DI

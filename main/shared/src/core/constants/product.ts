@@ -7,12 +7,6 @@
  */
 
 import {
-  EMAIL_PROVIDERS,
-  EMAIL_STATUSES,
-  SUBSCRIBABLE_EVENT_TYPES,
-  WEBHOOK_EVENT_TYPES,
-} from '../../system/constants/platform';
-import {
   ALL_MEDIA_EXTENSIONS,
   ALLOWED_IMAGE_MIME_TYPES,
   ALLOWED_MEDIA_MIME_TYPES,
@@ -27,6 +21,12 @@ import {
   VIDEO_EXTENSIONS,
 } from '../../primitives/constants/media';
 import { TIME } from '../../primitives/constants/time';
+import {
+  EMAIL_PROVIDERS,
+  EMAIL_STATUSES,
+  SUBSCRIBABLE_EVENT_TYPES,
+  WEBHOOK_EVENT_TYPES,
+} from '../../system/constants/platform';
 
 import {
   APP_ROLES,

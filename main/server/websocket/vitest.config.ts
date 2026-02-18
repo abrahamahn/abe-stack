@@ -24,12 +24,12 @@ export default mergeConfig(baseConfig, {
         replacement: path.resolve(__dirname, '../../shared/src/index.ts'),
       },
       {
-        find: /^@bslt\/server-engine\/(.*)$/,
-        replacement: path.resolve(__dirname, '../engine/src/$1'),
+        find: /^@bslt\/server-system\/(.*)$/,
+        replacement: path.resolve(__dirname, '../system/src/$1'),
       },
       {
-        find: '@bslt/server-engine',
-        replacement: path.resolve(__dirname, '../engine/src/index.ts'),
+        find: '@bslt/server-system',
+        replacement: path.resolve(__dirname, '../system/src/index.ts'),
       },
     ],
   },

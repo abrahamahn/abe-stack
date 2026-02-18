@@ -12,7 +12,7 @@
 
 import { createLegalDocumentSchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../../../engine/src';
+import { createRouteMap, protectedRoute, publicRoute, type RouteMap } from '../../../system/src';
 
 import { handleGetCurrentLegal, handleGetUserAgreements, handlePublishLegal } from './handlers';
 
@@ -34,12 +34,12 @@ function adminRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
-  schema?: import('../../../engine/src').ValidationSchema,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
-): import('../../../engine/src').RouteDefinition {
+  schema?: import('../../../system/src').ValidationSchema,
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
+): import('../../../system/src').RouteDefinition {
   return protectedRoute(
     method,
-    handler as import('../../../engine/src').RouteHandler,
+    handler as import('../../../system/src').RouteHandler,
     'admin',
     schema,
     openapi,
@@ -57,11 +57,11 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
-): import('../../../engine/src').RouteDefinition {
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
+): import('../../../system/src').RouteDefinition {
   return protectedRoute(
     method,
-    handler as import('../../../engine/src').RouteHandler,
+    handler as import('../../../system/src').RouteHandler,
     'user',
     undefined,
     openapi,
@@ -90,7 +90,7 @@ export const legalRoutes: RouteMap = createRouteMap([
     'legal/current',
     publicRoute(
       'GET',
-      handleGetCurrentLegal as import('../../../engine/src').RouteHandler,
+      handleGetCurrentLegal as import('../../../system/src').RouteHandler,
       undefined,
       { summary: 'Get current legal documents', tags: ['Legal'] },
     ),

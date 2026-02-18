@@ -4,6 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AUTH_ERROR_NAMES, HTTP_ERROR_MESSAGES } from '../constants/platform';
 
 import {
+  type ErrorMapperLogger,
+  type HttpErrorResponse,
+  isKnownAuthError,
+  mapErrorToHttpResponse,
+} from './error.mapper';
+import {
   AccountLockedError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
@@ -12,12 +18,6 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from './errors';
-import {
-  type ErrorMapperLogger,
-  type HttpErrorResponse,
-  isKnownAuthError,
-  mapErrorToHttpResponse,
-} from './error.mapper';
 
 // ============================================================================
 // Test Helpers

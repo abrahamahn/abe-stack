@@ -11,7 +11,7 @@ import { getUserById } from '../service';
 import { ERROR_MESSAGES, type UsersModuleDeps, type UsersRequest } from '../types';
 
 import type { ProfileCompletenessResponse } from '@bslt/shared';
-import type { HandlerContext } from '../../../../engine/src';
+import type { HandlerContext } from '../../../../system/src';
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));

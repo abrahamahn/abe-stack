@@ -3,7 +3,7 @@
  * Permission Middleware
  *
  * Fastify-specific permission guards for route-level access control.
- * Uses the permission checker from @bslt/server-engine.
+ * Uses the permission checker from @bslt/server-system.
  */
 
 export {

@@ -33,7 +33,7 @@ const CONFIG_FILE_PATTERNS: RegExp[] = [
 
 /** Package alias mappings to source directories for import resolution */
 const PACKAGE_ALIASES: Record<string, string> = {
-  '@bslt/server-engine': 'main/server/engine/src',
+  '@bslt/server-system': 'main/server/system/src',
   '@bslt/shared': 'main/shared/src',
   '@bslt/ui': 'main/client/ui/src',
   '@bslt/react': 'main/client/react/src',

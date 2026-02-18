@@ -9,7 +9,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { buildConnectionString, createDbClient, type DbClient } from '@bslt/db';
-import { loadServerEnv } from '@bslt/server-engine';
+import { loadServerEnv } from '@bslt/server-system';
 
 export interface DbHarness {
   /** The connection string for the isolated test database */

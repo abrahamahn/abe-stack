@@ -22,7 +22,7 @@ import {
   type HandlerContext,
   type RouteDefinition,
   type RouteResult,
-} from '../../../../engine/src';
+} from '../../../../system/src';
 
 import {
   handleGetConnections,

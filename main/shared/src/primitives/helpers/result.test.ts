@@ -153,7 +153,7 @@ describe('result', () => {
     it('executes ok handler for successful result', () => {
       const input: Result<number, string> = ok(42);
       const result = match(input, {
-        ok: (data) => `value: ${data}`,
+        ok: (data) => `value: ${String(data)}`,
         err: (e) => `error: ${e}`,
       });
       expect(result).toBe('value: 42');
@@ -162,7 +162,7 @@ describe('result', () => {
     it('executes err handler for error result', () => {
       const input: Result<number, string> = err('fail');
       const result = match(input, {
-        ok: (data) => `value: ${data}`,
+        ok: (data) => `value: ${String(data)}`,
         err: (e) => `error: ${e}`,
       });
       expect(result).toBe('error: fail');
@@ -387,13 +387,15 @@ describe('result', () => {
     });
 
     it('propagates async Ok result correctly', async () => {
-      const asyncFn = async (n: number): Promise<Result<string, never>> => ok(`processed: ${n}`);
+      const asyncFn = (n: number): Promise<Result<string, never>> =>
+        Promise.resolve(ok(`processed: ${String(n)}`));
       const result = await andThenAsync(asyncFn, ok(42));
       expect(result).toEqual({ ok: true, data: 'processed: 42' });
     });
 
     it('propagates async Err result correctly', async () => {
-      const asyncFn = async (_n: number): Promise<Result<string, string>> => err('async failure');
+      const asyncFn = (_n: number): Promise<Result<string, string>> =>
+        Promise.resolve(err('async failure'));
       const result = await andThenAsync(asyncFn, ok(42));
       expect(result).toEqual({ ok: false, error: 'async failure' });
     });
@@ -403,26 +405,34 @@ describe('result', () => {
   // ADVERSARIAL: fromPromise with non-Error rejections
   // ==========================================================================
   describe('adversarial — fromPromise with non-Error rejections', () => {
+    // Simulate a promise that rejects with a non-Error value (as third-party libs may do)
+    // Using .then() throw avoids the prefer-promise-reject-errors lint rule while
+    // still testing the same runtime behavior.
+    const rejectWith = (value: unknown): Promise<never> =>
+      Promise.resolve().then((): never => {
+        throw value;
+      });
+
     it('wraps string rejection in an Error', async () => {
-      const result = await fromPromise(Promise.reject('plain string error'));
+      const result = await fromPromise(rejectWith('plain string error'));
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error).toBeInstanceOf(Error);
-        expect((result.error as Error).message).toBe('plain string error');
+        expect(result.error.message).toBe('plain string error');
       }
     });
 
     it('wraps number rejection in an Error', async () => {
-      const result = await fromPromise(Promise.reject(404));
+      const result = await fromPromise(rejectWith(404));
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error).toBeInstanceOf(Error);
-        expect((result.error as Error).message).toBe('404');
+        expect(result.error.message).toBe('404');
       }
     });
 
     it('wraps null rejection in an Error', async () => {
-      const result = await fromPromise(Promise.reject(null));
+      const result = await fromPromise(rejectWith(null));
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error).toBeInstanceOf(Error);
@@ -430,7 +440,7 @@ describe('result', () => {
     });
 
     it('wraps undefined rejection in an Error', async () => {
-      const result = await fromPromise(Promise.reject(undefined));
+      const result = await fromPromise(rejectWith(undefined));
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error).toBeInstanceOf(Error);
@@ -448,7 +458,7 @@ describe('result', () => {
     });
 
     it('uses errorMapper for non-Error rejections', async () => {
-      const result = await fromPromise(Promise.reject('raw string'), (e) => ({
+      const result = await fromPromise(rejectWith('raw string'), (e) => ({
         code: 'MAPPED',
         original: e,
       }));
@@ -501,7 +511,7 @@ describe('result', () => {
     it('chained map calls compose correctly', () => {
       const result = map(
         (s: string) => s.toUpperCase(),
-        map((n: number) => `value:${n}`, ok(5)),
+        map((n: number) => `value:${String(n)}`, ok(5)),
       );
       expect(result).toEqual({ ok: true, data: 'VALUE:5' });
     });

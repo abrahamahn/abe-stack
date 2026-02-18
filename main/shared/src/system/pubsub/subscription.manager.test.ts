@@ -7,21 +7,38 @@ import { SubKeys, type WebSocket } from './types';
 
 import type { PostgresPubSub } from './postgres.pubsub';
 
-// Mock WebSocket
-function createMockWebSocket(): WebSocket {
-  return {
-    send: vi.fn(),
+/** Creates a mock WebSocket with a tracked send spy */
+function createMockWebSocket(): { socket: WebSocket; sendSpy: ReturnType<typeof vi.fn> } {
+  const sendSpy = vi.fn();
+  const socket = {
+    send: sendSpy,
     readyState: 1, // WebSocket.OPEN
   } as unknown as WebSocket;
+  return { socket, sendSpy };
+}
+
+/** Creates a mock PostgresPubSub adapter with a tracked publish spy */
+function createMockAdapter(publishImpl?: ReturnType<typeof vi.fn>): {
+  adapter: PostgresPubSub;
+  publishSpy: ReturnType<typeof vi.fn>;
+} {
+  const publishSpy = publishImpl ?? vi.fn().mockResolvedValue(undefined);
+  const adapter = {
+    publish: publishSpy,
+  } as unknown as PostgresPubSub;
+  return { adapter, publishSpy };
 }
 
 describe('SubscriptionManager', () => {
   let manager: SubscriptionManager;
   let mockSocket: WebSocket;
+  let sendSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     manager = new SubscriptionManager();
-    mockSocket = createMockWebSocket();
+    const mock = createMockWebSocket();
+    mockSocket = mock.socket;
+    sendSpy = mock.sendSpy;
   });
 
   describe('Subscribe/Unsubscribe', () => {
@@ -35,7 +52,7 @@ describe('SubscriptionManager', () => {
 
     it('should support multiple sockets for same key', () => {
       const key = SubKeys.record('users', '123');
-      const socket2 = createMockWebSocket();
+      const { socket: socket2 } = createMockWebSocket();
 
       manager.subscribe(key, mockSocket);
       manager.subscribe(key, socket2);
@@ -81,8 +98,10 @@ describe('SubscriptionManager', () => {
 
       manager.publishLocal(key, 5);
 
-      expect(mockSocket.send).toHaveBeenCalledTimes(1);
-      const message = JSON.parse((mockSocket.send as any).mock.calls[0][0]);
+      expect(sendSpy).toHaveBeenCalledTimes(1);
+      const call = sendSpy.mock.calls[0];
+      expect(call).toBeDefined();
+      const message = JSON.parse(call![0] as string) as Record<string, unknown>;
       expect(message).toEqual({
         type: 'update',
         key,
@@ -95,25 +114,25 @@ describe('SubscriptionManager', () => {
 
       manager.publishLocal(key, 5);
 
-      expect(mockSocket.send).not.toHaveBeenCalled();
+      expect(sendSpy).not.toHaveBeenCalled();
     });
 
     it('should publish to multiple subscribers', () => {
       const key = SubKeys.record('users', '123');
-      const socket2 = createMockWebSocket();
+      const { socket: socket2, sendSpy: sendSpy2 } = createMockWebSocket();
 
       manager.subscribe(key, mockSocket);
       manager.subscribe(key, socket2);
 
       manager.publishLocal(key, 5);
 
-      expect(mockSocket.send).toHaveBeenCalledTimes(1);
-      expect(socket2.send).toHaveBeenCalledTimes(1);
+      expect(sendSpy).toHaveBeenCalledTimes(1);
+      expect(sendSpy2).toHaveBeenCalledTimes(1);
     });
 
     it('should only publish to sockets with OPEN state', () => {
       const key = SubKeys.record('users', '123');
-      const closedSocket = createMockWebSocket();
+      const { socket: closedSocket, sendSpy: closedSendSpy } = createMockWebSocket();
       closedSocket.readyState = 3; // WebSocket.CLOSED
 
       manager.subscribe(key, mockSocket);
@@ -121,34 +140,32 @@ describe('SubscriptionManager', () => {
 
       manager.publishLocal(key, 5);
 
-      expect(mockSocket.send).toHaveBeenCalledTimes(1);
-      expect(closedSocket.send).not.toHaveBeenCalled();
+      expect(sendSpy).toHaveBeenCalledTimes(1);
+      expect(closedSendSpy).not.toHaveBeenCalled();
     });
 
     it('should publish with adapter if configured', () => {
-      const mockAdapter: PostgresPubSub = {
-        publish: vi.fn().mockResolvedValue(undefined),
-      } as unknown as PostgresPubSub;
+      const { adapter: mockAdapter, publishSpy: adapterPublishSpy } = createMockAdapter();
 
-      manager = new SubscriptionManager({ adapter: mockAdapter as any });
+      manager = new SubscriptionManager({ adapter: mockAdapter });
       const key = SubKeys.record('users', '123');
 
       manager.subscribe(key, mockSocket);
       manager.publish(key, 5);
 
       // Should publish locally
-      expect(mockSocket.send).toHaveBeenCalled();
+      expect(sendSpy).toHaveBeenCalled();
 
       // Should also publish via adapter
-      expect(mockAdapter.publish as any).toHaveBeenCalledWith(key, 5);
+      expect(adapterPublishSpy).toHaveBeenCalledWith(key, 5);
     });
 
     it('should handle adapter errors gracefully', () => {
-      const mockAdapter: PostgresPubSub = {
-        publish: vi.fn().mockRejectedValue(new Error('Adapter error')),
-      } as unknown as PostgresPubSub;
+      const { adapter: mockAdapter } = createMockAdapter(
+        vi.fn().mockRejectedValue(new Error('Adapter error')),
+      );
 
-      manager = new SubscriptionManager({ adapter: mockAdapter as any });
+      manager = new SubscriptionManager({ adapter: mockAdapter });
       const key = SubKeys.record('users', '123');
 
       manager.subscribe(key, mockSocket);
@@ -159,7 +176,7 @@ describe('SubscriptionManager', () => {
       }).not.toThrow();
 
       // Local publish should still work
-      expect(mockSocket.send).toHaveBeenCalled();
+      expect(sendSpy).toHaveBeenCalled();
     });
   });
 
@@ -182,7 +199,7 @@ describe('SubscriptionManager', () => {
 
     it('should not affect other sockets', () => {
       const key = SubKeys.record('users', '123');
-      const socket2 = createMockWebSocket();
+      const { socket: socket2 } = createMockWebSocket();
 
       manager.subscribe(key, mockSocket);
       manager.subscribe(key, socket2);
@@ -193,7 +210,7 @@ describe('SubscriptionManager', () => {
     });
 
     it('should handle cleanup of non-subscribed socket', () => {
-      const socket2 = createMockWebSocket();
+      const { socket: socket2 } = createMockWebSocket();
 
       expect(() => {
         manager.cleanup(socket2);
@@ -249,17 +266,15 @@ describe('SubscriptionManager', () => {
 
   describe('Adapter Management', () => {
     it('should set adapter after construction', () => {
-      const mockAdapter: PostgresPubSub = {
-        publish: vi.fn().mockResolvedValue(undefined),
-      } as unknown as PostgresPubSub;
+      const { adapter: mockAdapter, publishSpy: adapterPublishSpy } = createMockAdapter();
 
-      manager.setAdapter(mockAdapter as any);
+      manager.setAdapter(mockAdapter);
 
       const key = SubKeys.record('users', '123');
       manager.subscribe(key, mockSocket);
       manager.publish(key, 5);
 
-      expect(mockAdapter.publish as any).toHaveBeenCalled();
+      expect(adapterPublishSpy).toHaveBeenCalled();
     });
   });
 
@@ -272,7 +287,7 @@ describe('SubscriptionManager', () => {
       manager.subscribe(key, mockSocket);
       expect(manager.getSubscriberCount(key)).toBe(1);
 
-      const socket2 = createMockWebSocket();
+      const { socket: socket2 } = createMockWebSocket();
       manager.subscribe(key, socket2);
       expect(manager.getSubscriberCount(key)).toBe(2);
     });
@@ -308,9 +323,11 @@ describe('SubscriptionManager', () => {
       manager.subscribe(key, mockSocket);
       manager.publishLocal(key, 10);
 
-      expect(mockSocket.send).toHaveBeenCalled();
-      const message = JSON.parse((mockSocket.send as any).mock.calls[0][0]);
-      expect(message.key).toEqual(key);
+      expect(sendSpy).toHaveBeenCalled();
+      const call = sendSpy.mock.calls[0];
+      expect(call).toBeDefined();
+      const message = JSON.parse(call![0] as string) as Record<string, unknown>;
+      expect(message['key']).toEqual(key);
     });
   });
 });

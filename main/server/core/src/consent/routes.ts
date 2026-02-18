@@ -10,7 +10,7 @@
 
 import { updateConsentPreferencesRequestSchema } from '@bslt/shared';
 
-import { createRouteMap, protectedRoute, type RouteMap } from '../../../engine/src';
+import { createRouteMap, protectedRoute, type RouteMap } from '../../../system/src';
 
 import { handleGetConsent, handleUpdateConsent } from './handlers';
 
@@ -32,11 +32,11 @@ function userRoute(
     request: FastifyRequest,
     reply: FastifyReply,
   ) => Promise<unknown>,
-  openapi?: import('../../../engine/src').RouteOpenApiMeta,
-): import('../../../engine/src').RouteDefinition {
+  openapi?: import('../../../system/src').RouteOpenApiMeta,
+): import('../../../system/src').RouteDefinition {
   return protectedRoute(
     method,
-    handler as import('../../../engine/src').RouteHandler,
+    handler as import('../../../system/src').RouteHandler,
     'user',
     undefined,
     openapi,
@@ -66,7 +66,7 @@ export const consentRoutes: RouteMap = createRouteMap([
     'users/me/consent/update',
     protectedRoute(
       'PATCH',
-      handleUpdateConsent as import('../../../engine/src').RouteHandler,
+      handleUpdateConsent as import('../../../system/src').RouteHandler,
       'user',
       updateConsentPreferencesRequestSchema,
       { summary: 'Update consent preferences', tags: ['Consent'] },

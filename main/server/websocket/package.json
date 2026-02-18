@@ -27,7 +27,7 @@
     "postbuild": "node --import tsx ../../tools/scripts/build/ensure-js-extensions.ts dist"
   },
   "dependencies": {
-    "@bslt/server-engine": "workspace:*",
+    "@bslt/server-system": "workspace:*",
     "@bslt/db": "workspace:*",
     "@bslt/shared": "workspace:*"
   },

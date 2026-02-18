@@ -197,7 +197,7 @@ describe('Configuration Utilities', () => {
     });
 
     it('handles a very large list (500 items)', () => {
-      const items = Array.from({ length: 500 }, (_, i) => `item${i}`);
+      const items = Array.from({ length: 500 }, (_, i) => `item${String(i)}`);
       const input = items.join(',');
       expect(getList(input)).toEqual(items);
     });
