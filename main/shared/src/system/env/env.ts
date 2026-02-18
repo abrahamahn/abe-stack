@@ -52,11 +52,15 @@ export const baseEnvSchema: Schema<BaseEnv> = createSchema((data: unknown) => {
 
 /**
  * Helper to get raw environment variables.
- * Can be overridden if the runtime doesn't use process.env (e.g. Cloudflare Workers).
+ * Pass an override for non-Node runtimes (e.g., Vite's import.meta.env, Cloudflare Workers).
  *
+ * @param override - Custom env record (e.g., import.meta.env for Vite clients)
  * @returns Record of raw environment variable key-value pairs
  */
-export function getRawEnv(): Record<string, string | undefined> {
+export function getRawEnv(
+  override?: Record<string, string | undefined>,
+): Record<string, string | undefined> {
+  if (override !== undefined) return override;
   return typeof process !== 'undefined' ? process.env : {};
 }
 
@@ -64,11 +68,15 @@ export function getRawEnv(): Record<string, string | undefined> {
  * Validates environment variables against a schema.
  *
  * @param schema - Schema to validate against
+ * @param rawEnv - Optional env source override (e.g., import.meta.env for Vite clients)
  * @returns Validated environment object
  * @throws ConfigurationError if validation fails
  */
-export function validateEnv<T>(schema: Schema<T>): T {
-  const result = schema.safeParse(getRawEnv());
+export function validateEnv<T>(
+  schema: Schema<T>,
+  rawEnv?: Record<string, string | undefined>,
+): T {
+  const result = schema.safeParse(getRawEnv(rawEnv));
 
   if (!result.success) {
     const message = `Environment validation failed: ${result.error.message}`;

@@ -15,6 +15,7 @@ import {
   parseString,
   withDefault,
 } from '../primitives/schema';
+import { getRawEnv } from '../system/env';
 
 import { AuthEnvSchema } from './env.auth';
 import { BaseEnvSchema } from './env.base';
@@ -158,14 +159,30 @@ export const EnvSchema: Schema<FullEnv> = createSchema<FullEnv>((data: unknown) 
 // Utilities
 // ============================================================================
 
-/** Get raw environment variables (overridable for non-Node runtimes). */
-export function getRawEnv(): Record<string, string | undefined> {
+/**
+ * Get raw environment variables.
+ * Pass an override for non-Node runtimes (e.g., Vite's import.meta.env).
+ *
+ * @param override - Custom env record (e.g., import.meta.env for Vite clients)
+ */
+export function getRawEnv(
+  override?: Record<string, string | undefined>,
+): Record<string, string | undefined> {
+  if (override !== undefined) return override;
   return typeof process !== 'undefined' ? process.env : {};
 }
 
-/** Validates environment variables against a schema. Throws on failure. */
-export function validateEnv<T>(schema: Schema<T>): T {
-  const result = schema.safeParse(getRawEnv());
+/**
+ * Validates environment variables against a schema. Throws on failure.
+ *
+ * @param schema - The schema to validate against
+ * @param rawEnv - Optional env source override (e.g., import.meta.env for Vite clients)
+ */
+export function validateEnv<T>(
+  schema: Schema<T>,
+  rawEnv?: Record<string, string | undefined>,
+): T {
+  const result = schema.safeParse(getRawEnv(rawEnv));
 
   if (!result.success) {
     const message = `Environment validation failed: ${result.error.message}`;

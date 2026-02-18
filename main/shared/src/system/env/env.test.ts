@@ -45,6 +45,19 @@ describe('env', () => {
       expect(typeof result).toBe('object');
       expect(result).toBe(process.env);
     });
+
+    it('returns override when provided', () => {
+      const custom = { VITE_API_URL: 'https://api.example.com' };
+      const result = getRawEnv(custom);
+      expect(result).toBe(custom);
+      expect(result['VITE_API_URL']).toBe('https://api.example.com');
+    });
+
+    it('does not fall through to process.env when override is provided', () => {
+      const custom = { CUSTOM_VAR: 'value' };
+      const result = getRawEnv(custom);
+      expect(result).not.toBe(process.env);
+    });
   });
 
   // ==========================================================================
@@ -83,6 +96,31 @@ describe('env', () => {
 
       const result = validateEnv(schema);
       expect(result.NODE_ENV).toBeDefined();
+    });
+
+    it('uses rawEnv override instead of process.env when provided', () => {
+      const schema = createSchema((data: unknown) => {
+        const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<
+          string,
+          unknown
+        >;
+        return { APP_NAME: parseString(obj['APP_NAME'], 'APP_NAME') };
+      });
+
+      const result = validateEnv(schema, { APP_NAME: 'test-app' });
+      expect(result.APP_NAME).toBe('test-app');
+    });
+
+    it('throws ConfigurationError when rawEnv override is missing required fields', () => {
+      const schema = createSchema((data: unknown) => {
+        const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<
+          string,
+          unknown
+        >;
+        return { REQUIRED: parseString(obj['REQUIRED'], 'REQUIRED', { min: 1 }) };
+      });
+
+      expect(() => validateEnv(schema, {})).toThrow(ConfigurationError);
     });
   });
 
