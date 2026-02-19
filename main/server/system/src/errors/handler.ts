@@ -16,7 +16,7 @@ import {
 
 import { replyError } from './reply';
 
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types
@@ -83,7 +83,13 @@ function isZodLikeError(error: unknown): error is ZodLikeError {
  */
 export function registerErrorHandler(server: FastifyInstance): void {
   server.setErrorHandler((error: Error, request: FastifyRequest, reply: FastifyReply): void => {
-    const log = request.logger;
+    // `request.logger` is typed as always-defined by Fastify, but in practice it
+    // may be undefined when an error fires before the onRequest lifecycle hook
+    // runs (e.g. a plugin throwing during server startup / route registration).
+    // We cast through `unknown` to expose that runtime optionality and fall back
+    // to the server-level logger so we never crash with "Cannot read properties
+    // of undefined".
+    const log = (request.logger as unknown as FastifyBaseLogger | undefined) ?? server.log;
 
     // ── 1. Fastify JSON-schema validation (ajv) ──────────────────────────
     if (isFastifyValidationError(error)) {

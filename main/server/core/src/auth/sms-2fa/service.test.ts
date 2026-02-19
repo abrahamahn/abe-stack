@@ -122,7 +122,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode(code),
+        code_hash: hashCode(code),
         attempts: 0,
         expires_at: new Date(Date.now() + 300000),
       },
@@ -138,7 +138,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode('654321'),
+        code_hash: hashCode('654321'),
         attempts: 0,
         expires_at: new Date(Date.now() + 300000),
       },
@@ -154,7 +154,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode('654321'),
+        code_hash: hashCode('654321'),
         attempts: 1,
         expires_at: new Date(Date.now() + 300000),
       },
@@ -179,7 +179,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode('654321'),
+        code_hash: hashCode('654321'),
         attempts: 3,
         expires_at: new Date(Date.now() + 300000),
       },
@@ -200,7 +200,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode('654321'),
+        code_hash: hashCode('654321'),
         attempts: 0,
         expires_at: new Date(Date.now() + 300000),
       },
@@ -218,7 +218,7 @@ describe('verifySms2faCode', () => {
     vi.mocked(db.raw).mockResolvedValueOnce([
       {
         id: 'code-1',
-        code: hashCode(code),
+        code_hash: hashCode(code),
         attempts: 0,
         expires_at: new Date(Date.now() + 300000),
       },

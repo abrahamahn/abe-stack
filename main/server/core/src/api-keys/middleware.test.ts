@@ -176,8 +176,8 @@ describe('createApiKeyAuthMiddleware', () => {
 
     await middleware(request, reply);
 
-    const user = (request as FastifyRequest & { user?: { userId: string } }).user;
-    expect(user).toEqual({ userId: 'user-1' });
+    const user = (request as FastifyRequest & { user?: { userId: string; role: string } }).user;
+    expect(user).toEqual({ userId: 'user-1', role: 'user' });
   });
 
   it('should call updateLastUsed for a valid key', async () => {

@@ -281,7 +281,7 @@ describe('parseMultipartFile', () => {
         `multipart/form-data; boundary=${boundary}`,
       );
       expect(parsed).not.toBeNull();
-      expect(parsed?.buffer).toEqual(binaryContent);
+      expect(parsed?.buffer).toEqual(new Uint8Array(binaryContent));
     });
 
     test('size matches buffer length', () => {

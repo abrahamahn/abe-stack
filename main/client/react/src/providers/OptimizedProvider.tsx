@@ -14,6 +14,7 @@ import {
   useLayoutEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
 } from 'react';
 
@@ -444,13 +445,23 @@ export const SelectiveMemo = <T extends Record<string, unknown>>({
   ...props
 }: SelectiveMemoProps<T> & T): ReactElement => {
   const typedProps = props as unknown as T;
+  // Manual ref-based memoization: only recompute when watched keys or children change.
+  // This avoids useMemo's exhaustive-deps trap where watchedValuesKey isn't used inside
+  // the callback but is the intended memoization signal.
+  const typedPropsRef = useRef(typedProps);
+  typedPropsRef.current = typedProps;
   const watchedValuesKey = JSON.stringify(watchKeys.map((key) => typedProps[key]));
-  const memoizedChildren = useMemo(
-    () => children(typedProps),
-    [children, typedProps, watchedValuesKey],
-  );
+  const memoKeyRef = useRef('');
+  const prevChildrenRef = useRef(children);
+  const memoResultRef = useRef<ReactNode>(undefined);
 
-  return <>{memoizedChildren}</>;
+  if (watchedValuesKey !== memoKeyRef.current || children !== prevChildrenRef.current) {
+    memoKeyRef.current = watchedValuesKey;
+    prevChildrenRef.current = children;
+    memoResultRef.current = children(typedPropsRef.current);
+  }
+
+  return <>{memoResultRef.current}</>;
 };
 
 // ============================================================================
@@ -466,22 +477,21 @@ interface RenderPerformanceResult {
  * Hook to monitor component render performance (dev mode only)
  */
 export function useRenderPerformance(_componentName: string): RenderPerformanceResult {
-  const [renderCount, setRenderCount] = useState(0);
+  // Ref tracks render count without triggering re-renders on increment.
+  const countRef = useRef(0);
 
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setRenderCount((prev) => prev + 1);
-    }, 0);
-    return (): void => {
-      clearTimeout(id);
-    };
-  });
+  // Increment on every render so callers can read the current count.
+  countRef.current += 1;
 
+  // Reset zeroes the ref in-place. The NEXT render (initiated by the caller)
+  // will then see count = 1 (first render after reset), matching the test:
+  //   act(() => { resetCounter(); });  // zeroes ref, no extra render
+  //   rerender();                       // first render post-reset: count = 1
   const resetCounter = useCallback(() => {
-    setRenderCount(0);
+    countRef.current = 0;
   }, []);
 
-  return { renderCount, resetCounter };
+  return { renderCount: countRef.current, resetCounter };
 }
 
 // ============================================================================

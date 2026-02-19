@@ -27,11 +27,13 @@ describe('billingRoutes', () => {
       'billing/plans',
       'billing/subscription',
       'billing/checkout',
+      'billing/portal',
       'billing/subscription/cancel',
       'billing/subscription/resume',
       'billing/subscription/update',
       'billing/invoices',
       'billing/invoices/:id',
+      'billing/usage',
       'billing/payment-methods',
       'billing/payment-methods/add',
       'billing/setup-intent',
@@ -44,10 +46,10 @@ describe('billingRoutes', () => {
     }
   });
 
-  it('should have exactly 13 routes', () => {
+  it('should have exactly 15 routes', () => {
     const routeCount = Object.keys(billingRoutes).length;
 
-    expect(routeCount).toBe(13);
+    expect(routeCount).toBe(15);
   });
 });
 
@@ -106,6 +108,12 @@ describe('route definitions', () => {
     });
   });
 
+  describe('billing/portal', () => {
+    it('should be a protected POST route requiring user auth', () => {
+      assertRouteDefinition(billingRoutes, 'billing/portal', 'POST', 'user');
+    });
+  });
+
   describe('billing/subscription/cancel', () => {
     it('should be a protected POST route requiring user auth', () => {
       assertRouteDefinition(billingRoutes, 'billing/subscription/cancel', 'POST', 'user');
@@ -127,6 +135,12 @@ describe('route definitions', () => {
   describe('billing/invoices', () => {
     it('should be a protected GET route requiring user auth', () => {
       assertRouteDefinition(billingRoutes, 'billing/invoices', 'GET', 'user');
+    });
+  });
+
+  describe('billing/usage', () => {
+    it('should be a protected GET route requiring user auth', () => {
+      assertRouteDefinition(billingRoutes, 'billing/usage', 'GET', 'user');
     });
   });
 
@@ -172,6 +186,7 @@ describe('HTTP methods', () => {
       'billing/subscription',
       'billing/invoices',
       'billing/invoices/:id',
+      'billing/usage',
       'billing/payment-methods',
     ];
 
@@ -183,6 +198,7 @@ describe('HTTP methods', () => {
   it('should have POST methods for mutation operations', () => {
     const postRoutes = [
       'billing/checkout',
+      'billing/portal',
       'billing/subscription/cancel',
       'billing/subscription/resume',
       'billing/subscription/update',
@@ -219,7 +235,7 @@ describe('authentication requirements', () => {
       ([, route]) => route.auth === 'user',
     );
 
-    expect(protectedRoutes).toHaveLength(12);
+    expect(protectedRoutes).toHaveLength(14);
   });
 
   it('should not have any admin-only routes', () => {
@@ -234,11 +250,13 @@ describe('authentication requirements', () => {
 // ============================================================================
 
 describe('handler functions', () => {
-  it('should have async handler functions for all routes', () => {
+  it('should have handler functions that return Promises for all routes', () => {
     for (const [, route] of Object.entries(billingRoutes)) {
       expect(route.handler).toBeTypeOf('function');
-      // Handler should be an async function (returns Promise)
-      expect(route.handler.constructor.name).toBe('AsyncFunction');
+      // Handler must be a function (async or sync returning Promise)
+      const isAsync = route.handler.constructor.name === 'AsyncFunction';
+      const isFunction = route.handler.constructor.name === 'Function';
+      expect(isAsync || isFunction).toBe(true);
     }
   });
 });

@@ -88,16 +88,18 @@ describe('handleListTenantAuditEvents', () => {
     expect(result.body).toEqual({ message: 'Unauthorized' });
   });
 
-  it('should return 200 with events from findByTenantId', async () => {
+  it('should return 200 with events from find', async () => {
     const events = [createMockAuditEvent()];
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue(events);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue(events);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(deps, 'tenant-1', {}, request);
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ events });
-    expect(deps.repos.auditEvents.findByTenantId).toHaveBeenCalledWith('tenant-1', 50);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', limit: 50 }),
+    );
   });
 
   it('should filter by action and tenant', async () => {
@@ -105,7 +107,7 @@ describe('handleListTenantAuditEvents', () => {
       createMockAuditEvent({ tenantId: 'tenant-1' }),
       createMockAuditEvent({ id: 'evt-2', tenantId: 'tenant-2' }),
     ];
-    vi.mocked(deps.repos.auditEvents.findByAction).mockResolvedValue(events);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue(events);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(
@@ -116,10 +118,9 @@ describe('handleListTenantAuditEvents', () => {
     );
 
     expect(result.status).toBe(200);
-    const body = result.body as { events: AuditEvent[] };
-    expect(body.events).toHaveLength(1);
-    expect(body.events.at(0)?.tenantId).toBe('tenant-1');
-    expect(deps.repos.auditEvents.findByAction).toHaveBeenCalledWith('workspace.member_added', 50);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', action: 'workspace.member_added' }),
+    );
   });
 
   it('should filter by actorId and tenant', async () => {
@@ -127,7 +128,7 @@ describe('handleListTenantAuditEvents', () => {
       createMockAuditEvent({ tenantId: 'tenant-1', actorId: 'actor-1' }),
       createMockAuditEvent({ id: 'evt-2', tenantId: 'tenant-2', actorId: 'actor-1' }),
     ];
-    vi.mocked(deps.repos.auditEvents.findByActorId).mockResolvedValue(events);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue(events);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(
@@ -138,54 +139,62 @@ describe('handleListTenantAuditEvents', () => {
     );
 
     expect(result.status).toBe(200);
-    const body = result.body as { events: AuditEvent[] };
-    expect(body.events).toHaveLength(1);
-    expect(body.events.at(0)?.tenantId).toBe('tenant-1');
-    expect(deps.repos.auditEvents.findByActorId).toHaveBeenCalledWith('actor-1', 50);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', actorId: 'actor-1' }),
+    );
   });
 
   it('should use default limit of 50', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue([]);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([]);
     const request = createMockRequest({ userId: 'user-1' });
 
     await handleListTenantAuditEvents(deps, 'tenant-1', {}, request);
 
-    expect(deps.repos.auditEvents.findByTenantId).toHaveBeenCalledWith('tenant-1', 50);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', limit: 50 }),
+    );
   });
 
   it('should use custom limit from query', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue([]);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([]);
     const request = createMockRequest({ userId: 'user-1' });
 
     await handleListTenantAuditEvents(deps, 'tenant-1', { limit: '25' }, request);
 
-    expect(deps.repos.auditEvents.findByTenantId).toHaveBeenCalledWith('tenant-1', 25);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', limit: 25 }),
+    );
   });
 
   it('should cap limit at 200', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue([]);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([]);
     const request = createMockRequest({ userId: 'user-1' });
 
     await handleListTenantAuditEvents(deps, 'tenant-1', { limit: '999' }, request);
 
-    expect(deps.repos.auditEvents.findByTenantId).toHaveBeenCalledWith('tenant-1', 200);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', limit: 200 }),
+    );
   });
 
   it('should fall back to 50 for non-numeric limit', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue([]);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([]);
     const request = createMockRequest({ userId: 'user-1' });
 
     await handleListTenantAuditEvents(deps, 'tenant-1', { limit: 'abc' }, request);
 
-    expect(deps.repos.auditEvents.findByTenantId).toHaveBeenCalledWith('tenant-1', 50);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: 'tenant-1', limit: 50 }),
+    );
   });
 
   it('should filter by startDate', async () => {
-    const events = [
+    const allEvents = [
       createMockAuditEvent({ createdAt: new Date('2026-01-10T10:00:00Z') }),
       createMockAuditEvent({ id: 'evt-2', createdAt: new Date('2026-01-20T10:00:00Z') }),
     ];
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue(events);
+    // Return only events after the startDate (simulating DB filtering)
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([allEvents[1]!]);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(
@@ -196,17 +205,21 @@ describe('handleListTenantAuditEvents', () => {
     );
 
     expect(result.status).toBe(200);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: new Date('2026-01-15T00:00:00Z') }),
+    );
     const body = result.body as { events: AuditEvent[] };
     expect(body.events).toHaveLength(1);
     expect(body.events.at(0)?.id).toBe('evt-2');
   });
 
   it('should filter by endDate', async () => {
-    const events = [
+    const allEvents = [
       createMockAuditEvent({ createdAt: new Date('2026-01-10T10:00:00Z') }),
       createMockAuditEvent({ id: 'evt-2', createdAt: new Date('2026-01-20T10:00:00Z') }),
     ];
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue(events);
+    // Return only events before the endDate (simulating DB filtering)
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([allEvents[0]!]);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(
@@ -217,6 +230,9 @@ describe('handleListTenantAuditEvents', () => {
     );
 
     expect(result.status).toBe(200);
+    expect(deps.repos.auditEvents.find).toHaveBeenCalledWith(
+      expect.objectContaining({ endDate: new Date('2026-01-15T00:00:00Z') }),
+    );
     const body = result.body as { events: AuditEvent[] };
     expect(body.events).toHaveLength(1);
     expect(body.events.at(0)?.id).toBe('evt-1');
@@ -224,7 +240,7 @@ describe('handleListTenantAuditEvents', () => {
 
   it('should ignore invalid date strings', async () => {
     const events = [createMockAuditEvent()];
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue(events);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue(events);
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(
@@ -234,25 +250,27 @@ describe('handleListTenantAuditEvents', () => {
       request,
     );
 
+    // Invalid dates produce NaN — filter object will have Invalid Date values
+    // which the DB layer would ignore or the handler passes through
     expect(result.status).toBe(200);
     const body = result.body as { events: AuditEvent[] };
     expect(body.events).toHaveLength(1);
   });
 
   it('should log the query on success', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockResolvedValue([]);
+    vi.mocked(deps.repos.auditEvents.find).mockResolvedValue([]);
     const request = createMockRequest({ userId: 'user-1' });
 
     await handleListTenantAuditEvents(deps, 'tenant-1', {}, request);
 
     expect(deps.log.info).toHaveBeenCalledWith(
-      { tenantId: 'tenant-1', userId: 'user-1', resultCount: 0 },
+      expect.objectContaining({ tenantId: 'tenant-1', userId: 'user-1', resultCount: 0 }),
       'Listed tenant audit events',
     );
   });
 
   it('should map service errors via mapErrorToHttpResponse', async () => {
-    vi.mocked(deps.repos.auditEvents.findByTenantId).mockRejectedValue(new Error('DB failure'));
+    vi.mocked(deps.repos.auditEvents.find).mockRejectedValue(new Error('DB failure'));
     const request = createMockRequest({ userId: 'user-1' });
 
     const result = await handleListTenantAuditEvents(deps, 'tenant-1', {}, request);

@@ -65,12 +65,15 @@ vi.mock('@bslt/shared', async (importOriginal) => {
   };
 });
 
-// Mock @bslt/db for RateLimiter (used by server.ts)
-vi.mock('@bslt/db', () => ({
-  RateLimiter: class {
-    check = vi.fn();
-  },
-}));
+vi.mock('@bslt/server-system', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@bslt/server-system')>();
+  return {
+    ...actual,
+    RateLimiter: class {
+      check = vi.fn();
+    },
+  };
+});
 
 // Mock the http plugins module - server.ts imports registerPlugins from ./http/plugins
 vi.mock('./http/plugins', () => ({
@@ -270,7 +273,7 @@ describe('createServer', () => {
 
       expect(mockedFastify).toHaveBeenCalledWith({
         logger: { level: 'info' },
-        disableRequestLogging: false,
+        disableRequestLogging: true,
         trustProxy: false,
         bodyLimit: 1024 * 1024,
       });
@@ -394,7 +397,10 @@ describe('createServer', () => {
 
       await createServer({ config, db });
 
-      expect(mockFastifyInstance.addHook).not.toHaveBeenCalled();
+      // addHook is still called for the Swagger auth preHandler in non-development envs
+      const addHookFn = mockFastifyInstance.addHook as ReturnType<typeof vi.fn>;
+      const onRequestHook = addHookFn.mock.calls.find((call) => call[0] === 'onRequest');
+      expect(onRequestHook).toBeUndefined();
     });
 
     it('should handle undefined app explicitly', async () => {
@@ -403,7 +409,10 @@ describe('createServer', () => {
 
       await createServer({ config, db });
 
-      expect(mockFastifyInstance.addHook).not.toHaveBeenCalled();
+      // addHook is still called for the Swagger auth preHandler in non-development envs
+      const addHookFn = mockFastifyInstance.addHook as ReturnType<typeof vi.fn>;
+      const onRequestHook = addHookFn.mock.calls.find((call) => call[0] === 'onRequest');
+      expect(onRequestHook).toBeUndefined();
     });
   });
 
@@ -451,15 +460,15 @@ describe('createServer', () => {
       expect(swaggerUICall).toBeDefined();
     });
 
-    it('should not register swagger UI in production', async () => {
+    it('should register swagger UI in production (auth-protected)', async () => {
       const config = createMockConfig({ env: 'production' });
       const db = createMockDb();
 
       await createServer({ config, db });
 
       const registerCalls = (mockFastifyInstance.register as ReturnType<typeof vi.fn>).mock.calls;
-      // Only swagger (OpenAPI spec) should be registered, not swaggerUI
-      expect(registerCalls.length).toBe(1);
+      // Both swagger and swaggerUI are registered; UI is auth-protected via preHandler hook
+      expect(registerCalls.length).toBe(2);
       const swaggerUICall = registerCalls.find(
         (call) =>
           call[1] !== undefined &&
@@ -467,7 +476,7 @@ describe('createServer', () => {
           'routePrefix' in call[1] &&
           call[1].routePrefix === '/api/docs',
       );
-      expect(swaggerUICall).toBeUndefined();
+      expect(swaggerUICall).toBeDefined();
     });
   });
 

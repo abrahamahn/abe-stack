@@ -22,7 +22,7 @@ export default mergeConfig(baseConfig, {
     alias: [
       { find: '@bslt/api', replacement: `${apiPkg}/index.ts` },
       { find: /^@bslt\/kernel\/(.*)$/, replacement: `${corePkg}/$1` },
-      { find: '@bslt/shared', replacement: `${corePkg}/index.ts` },
+      { find: /^@bslt\/shared\/(.+)$/, replacement: `${corePkg}/$1/index.ts` },
       { find: '@bslt/shared', replacement: `${corePkg}/index.ts` },
     ],
   },

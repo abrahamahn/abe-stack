@@ -358,7 +358,7 @@ describe('createPhoneClient', () => {
   describe('verifySmsCode', () => {
     it('should verify SMS code and return token and user', async () => {
       const mockUser: User = {
-        id: '00000000-0000-0000-0000-000000000001' as unknown as UserId,
+        id: '11111111-1111-4111-8111-111111111111' as unknown as UserId,
         email: 'test@example.com',
         username: 'testuser',
         firstName: 'Test',
@@ -389,7 +389,7 @@ describe('createPhoneClient', () => {
 
       expect(result).toEqual(mockResponse);
       expect(result.token).toBe('auth-token-xyz');
-      expect(result.user.id).toBe('00000000-0000-0000-0000-000000000001' as unknown as UserId);
+      expect(result.user.id).toBe('11111111-1111-4111-8111-111111111111' as unknown as UserId);
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/api/auth/sms/verify',
         expect.objectContaining({
@@ -410,7 +410,7 @@ describe('createPhoneClient', () => {
 
     it('should not require authentication before verification', async () => {
       const mockUser: User = {
-        id: '00000000-0000-0000-0000-000000000001' as unknown as UserId,
+        id: '11111111-1111-4111-8111-111111111111' as unknown as UserId,
         email: 'test@example.com',
         username: 'testuser',
         firstName: 'Test',

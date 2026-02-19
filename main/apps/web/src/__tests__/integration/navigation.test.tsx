@@ -118,9 +118,7 @@ describe('Navigation Integration', () => {
       );
 
       expect(screen.getByTestId('app-top-panel')).toBeInTheDocument();
-      expect(
-        screen.queryByRole('heading', { name: /BSLT Dashboard/i }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: /BSLT Dashboard/i })).not.toBeInTheDocument();
     });
 
     it('should render protected content when authenticated', () => {
@@ -177,8 +175,8 @@ describe('Navigation Integration', () => {
     it('should render home page with navigation elements', () => {
       renderAppAtRoute('/', createMockEnvironment());
 
-      // Main heading is "BSLT" (there may be duplicates in README content)
-      const headings = screen.getAllByRole('heading', { name: /abe stack/i, level: 1 });
+      // Main heading is "BSLT"
+      const headings = screen.getAllByRole('heading', { name: /bslt/i, level: 1 });
       expect(headings.length).toBeGreaterThanOrEqual(1);
       // Login and Register are buttons that trigger modals, not links
       expect(screen.getByRole('button', { name: /^login$/i })).toBeInTheDocument();

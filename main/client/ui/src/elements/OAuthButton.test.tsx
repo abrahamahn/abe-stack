@@ -53,7 +53,9 @@ describe('OAuthButton', () => {
 
       const button = screen.getByRole('button', { name: 'Sign in' });
       expect(button).toHaveClass('oauth-button');
-      expect(button.className.trim()).toBe('oauth-button');
+      // Button wraps with base classes (btn, btn-primary, btn-medium) before oauth-button
+      expect(button.className).toContain('oauth-button');
+      expect(button.className).not.toContain('  '); // no double spaces from empty className
     });
 
     it('should default to type button', () => {
@@ -315,8 +317,9 @@ describe('OAuthButton', () => {
       render(<OAuthButton className="  custom-class  ">Sign in</OAuthButton>);
 
       const button = screen.getByRole('button', { name: 'Sign in' });
-      const classes = button.className.split(' ').filter((c) => c !== '');
-      expect(classes).toEqual(['oauth-button', 'custom-class']);
+      // Button prepends base classes; oauth-button and custom-class must both be present
+      expect(button).toHaveClass('oauth-button');
+      expect(button).toHaveClass('custom-class');
     });
   });
 });

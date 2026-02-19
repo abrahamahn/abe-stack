@@ -5,11 +5,7 @@
  * Comprehensive tests for user authentication via email/password.
  */
 
-import {
-  AccountLockedError,
-  EmailNotVerifiedError,
-  InvalidCredentialsError,
-} from '@bslt/shared';
+import { AccountLockedError, EmailNotVerifiedError, InvalidCredentialsError } from '@bslt/shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleLogin } from './login';
@@ -156,6 +152,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     },
     storage: {} as AppContext['storage'],
     pubsub: {} as AppContext['pubsub'],
+    errorTracker: undefined,
     ...overrides,
   } as unknown as AppContext;
 }
@@ -343,6 +340,7 @@ describe('handleLogin', () => {
         '127.0.0.1',
         'Test Browser',
         expect.any(Function),
+        ctx.errorTracker,
       );
     });
 
@@ -594,7 +592,7 @@ describe('handleLogin', () => {
 
       let capturedCallback: ((userId: string) => void) | undefined;
       mockAuthenticateUser.mockImplementation(
-        (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
+        (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback, _errorTracker) => {
           capturedCallback = callback;
           return Promise.resolve(mockAuthResult);
         },
@@ -641,17 +639,10 @@ describe('handleLogin', () => {
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(mockAuthenticateUser).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        '192.168.1.100',
-        expect.anything(),
-        expect.anything(),
-      );
+      // Verify IP address is at argument position 6 (0-indexed)
+      const call = vi.mocked(mockAuthenticateUser).mock.calls[0];
+      expect(call).toBeDefined();
+      expect(call?.[6]).toBe('192.168.1.100');
     });
 
     test('should use user agent from requestInfo', async () => {
@@ -685,17 +676,10 @@ describe('handleLogin', () => {
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(mockAuthenticateUser).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        'Mozilla/5.0 Custom Browser',
-        expect.anything(),
-      );
+      // Verify user agent is at argument position 7 (0-indexed)
+      const call = vi.mocked(mockAuthenticateUser).mock.calls[0];
+      expect(call).toBeDefined();
+      expect(call?.[7]).toBe('Mozilla/5.0 Custom Browser');
     });
 
     test('should handle undefined user agent', async () => {
@@ -734,17 +718,10 @@ describe('handleLogin', () => {
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(mockAuthenticateUser).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        undefined,
-        expect.anything(),
-      );
+      // Verify user agent is undefined at argument position 7 (0-indexed)
+      const call = vi.mocked(mockAuthenticateUser).mock.calls[0];
+      expect(call).toBeDefined();
+      expect(call?.[7]).toBeUndefined();
     });
   });
 });
