@@ -3,13 +3,11 @@
  * Auth Schema Types
  *
  * Explicit TypeScript interfaces for authentication-related tables:
- * - refresh_token_families
+ * - auth_tokens (unified: password_reset, email_verification, email_change,
+ *                email_change_revert, magic_link)
  * - login_attempts
- * - password_reset_tokens
- * - email_verification_tokens
  * - security_events
  * - totp_backup_codes
- * - email_change_tokens
  */
 
 import {
@@ -30,56 +28,83 @@ export type SecurityEventSeverity = SecuritySeverity;
 // Table Names
 // ============================================================================
 
-export const REFRESH_TOKEN_FAMILIES_TABLE = 'refresh_token_families';
+export const AUTH_TOKENS_TABLE = 'auth_tokens';
 export const LOGIN_ATTEMPTS_TABLE = 'login_attempts';
-export const PASSWORD_RESET_TOKENS_TABLE = 'password_reset_tokens';
-export const EMAIL_VERIFICATION_TOKENS_TABLE = 'email_verification_tokens';
 export const SECURITY_EVENTS_TABLE = 'security_events';
 export const TOTP_BACKUP_CODES_TABLE = 'totp_backup_codes';
-export const EMAIL_CHANGE_TOKENS_TABLE = 'email_change_tokens';
-export const EMAIL_CHANGE_REVERT_TOKENS_TABLE = 'email_change_revert_tokens';
 export const SMS_VERIFICATION_CODES_TABLE = 'sms_verification_codes';
 
 // ============================================================================
-// Refresh Token Families
+// Auth Tokens (unified table for all short-lived one-time tokens)
 // ============================================================================
 
 /**
- * Refresh token family record (SELECT result)
- * Used for reuse detection - when a token is reused after rotation,
- * the entire family is revoked.
+ * Discriminator for which token flow this row belongs to.
+ * Stored in the `type` column with a CHECK constraint.
  */
-export interface RefreshTokenFamily {
+export type AuthTokenType =
+  | 'password_reset'
+  | 'email_verification'
+  | 'email_change'
+  | 'email_change_revert'
+  | 'magic_link';
+
+/**
+ * Auth token record (SELECT result).
+ *
+ * Unified record for: password_reset, email_verification, email_change,
+ * email_change_revert, magic_link tokens.
+ *
+ * - `userId` is NULL for magic_link tokens before a user account exists.
+ * - `email` carries the target for magic_link and is NULL for other types.
+ * - `metadata` holds per-type sparse fields (e.g. newEmail, oldEmail).
+ * - `ipAddress` / `userAgent` populated for magic_link rate-limiting.
+ *
+ * @see 0000_users.sql
+ */
+export interface AuthToken {
   id: string;
-  userId: string;
+  type: AuthTokenType;
+  userId: string | null;
+  email: string | null;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt: Date | null;
   ipAddress: string | null;
   userAgent: string | null;
+  metadata: Record<string, unknown>;
   createdAt: Date;
-  revokedAt: Date | null;
-  revokeReason: string | null;
 }
 
 /**
- * Data for creating a new refresh token family (INSERT)
+ * Fields for inserting a new auth token (INSERT).
  */
-export interface NewRefreshTokenFamily {
+export interface NewAuthToken {
   id?: string;
-  userId: string;
+  type: AuthTokenType;
+  userId?: string | null;
+  email?: string | null;
+  tokenHash: string;
+  expiresAt: Date;
+  usedAt?: Date | null;
   ipAddress?: string | null;
   userAgent?: string | null;
+  metadata?: Record<string, unknown>;
   createdAt?: Date;
-  revokedAt?: Date | null;
-  revokeReason?: string | null;
 }
 
-export const REFRESH_TOKEN_FAMILY_COLUMNS = {
+export const AUTH_TOKEN_COLUMNS = {
   id: 'id',
+  type: 'type',
   userId: 'user_id',
+  email: 'email',
+  tokenHash: 'token_hash',
+  expiresAt: 'expires_at',
+  usedAt: 'used_at',
   ipAddress: 'ip_address',
   userAgent: 'user_agent',
+  metadata: 'metadata',
   createdAt: 'created_at',
-  revokedAt: 'revoked_at',
-  revokeReason: 'revoke_reason',
 } as const;
 
 // ============================================================================
@@ -120,80 +145,6 @@ export const LOGIN_ATTEMPT_COLUMNS = {
   userAgent: 'user_agent',
   success: 'success',
   failureReason: 'failure_reason',
-  createdAt: 'created_at',
-} as const;
-
-// ============================================================================
-// Password Reset Tokens
-// ============================================================================
-
-/**
- * Password reset token record (SELECT result)
- */
-export interface PasswordResetToken {
-  id: string;
-  userId: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-  createdAt: Date;
-}
-
-/**
- * Data for creating a new password reset token (INSERT)
- */
-export interface NewPasswordResetToken {
-  id?: string;
-  userId: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt?: Date | null;
-  createdAt?: Date;
-}
-
-export const PASSWORD_RESET_TOKEN_COLUMNS = {
-  id: 'id',
-  userId: 'user_id',
-  tokenHash: 'token_hash',
-  expiresAt: 'expires_at',
-  usedAt: 'used_at',
-  createdAt: 'created_at',
-} as const;
-
-// ============================================================================
-// Email Verification Tokens
-// ============================================================================
-
-/**
- * Email verification token record (SELECT result)
- */
-export interface EmailVerificationToken {
-  id: string;
-  userId: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-  createdAt: Date;
-}
-
-/**
- * Data for creating a new email verification token (INSERT)
- */
-export interface NewEmailVerificationToken {
-  id?: string;
-  userId: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt?: Date | null;
-  createdAt?: Date;
-}
-
-export const EMAIL_VERIFICATION_TOKEN_COLUMNS = {
-  id: 'id',
-  userId: 'user_id',
-  tokenHash: 'token_hash',
-  expiresAt: 'expires_at',
-  usedAt: 'used_at',
   createdAt: 'created_at',
 } as const;
 
@@ -280,94 +231,6 @@ export const TOTP_BACKUP_CODE_COLUMNS = {
   id: 'id',
   userId: 'user_id',
   codeHash: 'code_hash',
-  usedAt: 'used_at',
-  createdAt: 'created_at',
-} as const;
-
-// ============================================================================
-// Email Change Tokens
-// ============================================================================
-
-/**
- * Email change token record (SELECT result).
- * Used for the email change flow with verification.
- * Append-only — tokens are consumed by setting `usedAt`, never updated otherwise.
- *
- * @see 0001_auth_extensions.sql
- */
-export interface EmailChangeToken {
-  id: string;
-  userId: string;
-  newEmail: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-  createdAt: Date;
-}
-
-/**
- * Fields for inserting a new email change token (INSERT).
- */
-export interface NewEmailChangeToken {
-  id?: string;
-  userId: string;
-  newEmail: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt?: Date | null;
-  createdAt?: Date;
-}
-
-export const EMAIL_CHANGE_TOKEN_COLUMNS = {
-  id: 'id',
-  userId: 'user_id',
-  newEmail: 'new_email',
-  tokenHash: 'token_hash',
-  expiresAt: 'expires_at',
-  usedAt: 'used_at',
-  createdAt: 'created_at',
-} as const;
-
-// ============================================================================
-// Email Change Revert Tokens
-// ============================================================================
-
-/**
- * Email change revert token record (SELECT result).
- * Used for "This wasn't me" reversion flow.
- */
-export interface EmailChangeRevertToken {
-  id: string;
-  userId: string;
-  oldEmail: string;
-  newEmail: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-  createdAt: Date;
-}
-
-/**
- * Fields for inserting a new email change revert token (INSERT).
- */
-export interface NewEmailChangeRevertToken {
-  id?: string;
-  userId: string;
-  oldEmail: string;
-  newEmail: string;
-  tokenHash: string;
-  expiresAt: Date;
-  usedAt?: Date | null;
-  createdAt?: Date;
-}
-
-export const EMAIL_CHANGE_REVERT_TOKEN_COLUMNS = {
-  id: 'id',
-  userId: 'user_id',
-  oldEmail: 'old_email',
-  newEmail: 'new_email',
-  tokenHash: 'token_hash',
-  expiresAt: 'expires_at',
   usedAt: 'used_at',
   createdAt: 'created_at',
 } as const;

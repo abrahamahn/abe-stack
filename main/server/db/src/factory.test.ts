@@ -55,16 +55,12 @@ describe('getRepositoryContext', () => {
     expect(repos.refreshTokens).toBeDefined();
 
     // Auth
-    expect(repos.refreshTokenFamilies).toBeDefined();
+    expect(repos.authTokens).toBeDefined();
     expect(repos.loginAttempts).toBeDefined();
-    expect(repos.passwordResetTokens).toBeDefined();
-    expect(repos.emailVerificationTokens).toBeDefined();
     expect(repos.securityEvents).toBeDefined();
     expect(repos.totpBackupCodes).toBeDefined();
-    expect(repos.emailChangeTokens).toBeDefined();
-
-    // Magic Link
-    expect(repos.magicLinkTokens).toBeDefined();
+    expect(repos.trustedDevices).toBeDefined();
+    expect(repos.webauthnCredentials).toBeDefined();
 
     // OAuth
     expect(repos.oauthConnections).toBeDefined();
@@ -109,18 +105,23 @@ describe('getRepositoryContext', () => {
     expect(repos.usageMetrics).toBeDefined();
     expect(repos.usageSnapshots).toBeDefined();
 
+    // Activities
+    expect(repos.activities).toBeDefined();
+
+    // Files
+    expect(repos.files).toBeDefined();
+
     // Compliance
     expect(repos.legalDocuments).toBeDefined();
-    expect(repos.userAgreements).toBeDefined();
-    expect(repos.consentLogs).toBeDefined();
+    expect(repos.consentRecords).toBeDefined();
     expect(repos.dataExportRequests).toBeDefined();
   });
 
-  it('should have exactly 42 keys in repos', () => {
+  it('should have exactly 36 keys in repos', () => {
     const ctx = getRepositoryContext(testConnectionString);
     const repoKeys = Object.keys(ctx.repos);
 
-    expect(repoKeys).toHaveLength(42);
+    expect(repoKeys).toHaveLength(36);
   });
 
   it('should expose repository methods', () => {
@@ -133,7 +134,7 @@ describe('getRepositoryContext', () => {
     expect(typeof ctx.repos.refreshTokens.deleteByToken).toBe('function');
     expect(typeof ctx.repos.plans.listActive).toBe('function');
     expect(typeof ctx.repos.oauthConnections.findByProviderUserId).toBe('function');
-    expect(typeof ctx.repos.magicLinkTokens.create).toBe('function');
+    expect(typeof ctx.repos.authTokens.create).toBe('function');
   });
 
   it('should expose raw database client methods', () => {

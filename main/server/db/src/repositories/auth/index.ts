@@ -5,47 +5,21 @@
  * Functional-style repositories for authentication-related tables.
  */
 
-// Refresh Tokens
-export { createRefreshTokenRepository, type RefreshTokenRepository } from './refresh-tokens';
+// Auth Tokens (unified: password_reset, email_verification, email_change,
+//              email_change_revert, magic_link)
+export { createAuthTokenRepository, type AuthTokenRepository } from './auth-tokens';
 
-// Refresh Token Families
-export {
-  createRefreshTokenFamilyRepository,
-  type RefreshTokenFamilyRepository,
-} from './refresh-token-families';
+// Refresh Tokens (includes family management methods)
+export { createRefreshTokenRepository, type RefreshTokenRepository } from './refresh-tokens';
 
 // Login Attempts
 export { createLoginAttemptRepository, type LoginAttemptRepository } from './login-attempts';
-
-// Password Reset Tokens
-export {
-  createPasswordResetTokenRepository,
-  type PasswordResetTokenRepository,
-} from './password-reset-tokens';
-
-// Email Verification Tokens
-export {
-  createEmailVerificationTokenRepository,
-  type EmailVerificationTokenRepository,
-} from './email-verification-tokens';
 
 // Security Events
 export { createSecurityEventRepository, type SecurityEventRepository } from './security-events';
 
 // TOTP Backup Codes
 export { createTotpBackupCodeRepository, type TotpBackupCodeRepository } from './totp-backup-codes';
-
-// Email Change Tokens
-export {
-  createEmailChangeTokenRepository,
-  type EmailChangeTokenRepository,
-} from './email-change-tokens';
-
-// Email Change Revert Tokens
-export {
-  createEmailChangeRevertTokenRepository,
-  type EmailChangeRevertTokenRepository,
-} from './email-change-revert-tokens';
 
 // Trusted Devices
 export { createTrustedDeviceRepository, type TrustedDeviceRepository } from './trusted-devices';

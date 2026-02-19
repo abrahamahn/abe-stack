@@ -13,6 +13,7 @@ export {
   REFRESH_TOKEN_COLUMNS,
   REFRESH_TOKENS_TABLE,
   type RefreshToken,
+  type RefreshTokenFamilyView,
   type UpdateUser,
   USER_COLUMNS,
   type User,
@@ -20,34 +21,21 @@ export {
   USERS_TABLE,
 } from './users';
 
-// Auth (token families, login attempts, password reset, email verification, security events, TOTP, email change)
+// Auth (unified auth tokens, login attempts, security events, TOTP, SMS, WebAuthn)
 export {
-  EMAIL_CHANGE_TOKEN_COLUMNS,
-  EMAIL_CHANGE_TOKENS_TABLE,
-  EMAIL_CHANGE_REVERT_TOKEN_COLUMNS,
-  EMAIL_CHANGE_REVERT_TOKENS_TABLE,
-  type EmailChangeToken,
-  type EmailChangeRevertToken,
-  EMAIL_VERIFICATION_TOKEN_COLUMNS,
-  EMAIL_VERIFICATION_TOKENS_TABLE,
-  type EmailVerificationToken,
+  AUTH_TOKEN_COLUMNS,
+  AUTH_TOKENS_TABLE,
+  type AuthToken,
+  type AuthTokenType,
   LOGIN_ATTEMPT_COLUMNS,
   LOGIN_ATTEMPTS_TABLE,
   type LoginAttempt,
-  type NewEmailChangeToken,
-  type NewEmailChangeRevertToken,
-  type NewEmailVerificationToken,
+  type NewAuthToken,
   type NewLoginAttempt,
-  type NewPasswordResetToken,
-  type NewRefreshTokenFamily,
   type NewSecurityEvent,
+  type NewSmsVerificationCode,
   type NewTotpBackupCode,
-  PASSWORD_RESET_TOKEN_COLUMNS,
-  PASSWORD_RESET_TOKENS_TABLE,
-  type PasswordResetToken,
-  REFRESH_TOKEN_FAMILIES_TABLE,
-  REFRESH_TOKEN_FAMILY_COLUMNS,
-  type RefreshTokenFamily,
+  type NewWebauthnCredential,
   SECURITY_EVENT_COLUMNS,
   SECURITY_EVENT_TYPES,
   SECURITY_EVENTS_TABLE,
@@ -58,7 +46,6 @@ export {
   type SecurityEventType,
   type SecuritySeverity,
   type SmsVerificationCode,
-  type NewSmsVerificationCode,
   type UpdateSmsVerificationCode,
   TOTP_BACKUP_CODES_TABLE,
   TOTP_BACKUP_CODE_COLUMNS,
@@ -66,17 +53,8 @@ export {
   WEBAUTHN_CREDENTIALS_TABLE,
   WEBAUTHN_CREDENTIAL_COLUMNS,
   type WebauthnCredential,
-  type NewWebauthnCredential,
   type UpdateWebauthnCredential,
 } from './auth';
-
-// Magic Link
-export {
-  MAGIC_LINK_TOKEN_COLUMNS,
-  MAGIC_LINK_TOKENS_TABLE,
-  type MagicLinkToken,
-  type NewMagicLinkToken,
-} from './magic-link';
 
 // OAuth
 export {
@@ -274,12 +252,13 @@ export {
   type UpdateApiKey,
 } from './api-keys';
 
-// Compliance (Legal Documents, User Agreements, Consent Logs, Data Export Requests)
+// Compliance (Legal Documents, Consent Records, Data Export Requests)
 export {
-  CONSENT_LOG_COLUMNS,
-  CONSENT_LOGS_TABLE,
+  CONSENT_RECORD_COLUMNS,
+  CONSENT_RECORDS_TABLE,
   CONSENT_TYPES,
-  type ConsentLog,
+  type ConsentRecord,
+  type ConsentRecordType,
   type ConsentType,
   DATA_EXPORT_REQUEST_COLUMNS,
   DATA_EXPORT_REQUESTS_TABLE,
@@ -293,15 +272,11 @@ export {
   LEGAL_DOCUMENT_COLUMNS,
   LEGAL_DOCUMENTS_TABLE,
   type LegalDocument,
-  type NewConsentLog,
+  type NewConsentRecord,
   type NewDataExportRequest,
   type NewLegalDocument,
-  type NewUserAgreement,
   type UpdateDataExportRequest,
   type UpdateLegalDocument,
-  USER_AGREEMENT_COLUMNS,
-  USER_AGREEMENTS_TABLE,
-  type UserAgreement,
 } from './compliance';
 
 // Files/Uploads

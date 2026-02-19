@@ -54,21 +54,6 @@ CREATE TRIGGER update_oauth_connections_updated_at
     EXECUTE PROCEDURE update_updated_at_column();
 
 -- ============================================================================
--- Magic Link Tokens (passwordless email login)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS magic_link_tokens (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email      TEXT NOT NULL,
-    token_hash TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    used_at    TIMESTAMPTZ,
-    ip_address TEXT,
-    user_agent TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
 -- Indexes
 -- ============================================================================
 
@@ -81,12 +66,6 @@ CREATE INDEX idx_user_sessions_device   ON user_sessions(user_id, device_id);
 -- OAuth Connections
 CREATE INDEX idx_oauth_connections_user     ON oauth_connections(user_id);
 CREATE INDEX idx_oauth_connections_provider ON oauth_connections(user_id, provider);
-
--- Magic Link Tokens
-CREATE INDEX idx_magic_link_tokens_email   ON magic_link_tokens(email);
-CREATE INDEX idx_magic_link_tokens_hash    ON magic_link_tokens(token_hash);
-CREATE INDEX idx_magic_link_tokens_expires ON magic_link_tokens(expires_at)
-    WHERE used_at IS NULL;
 
 -- deleteRevokedBefore() cleanup: scans all revoked rows by date
 CREATE INDEX idx_user_sessions_revoked_at

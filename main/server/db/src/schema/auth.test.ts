@@ -2,32 +2,17 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-  EMAIL_CHANGE_REVERT_TOKEN_COLUMNS,
-  EMAIL_CHANGE_REVERT_TOKENS_TABLE,
-  EMAIL_CHANGE_TOKEN_COLUMNS,
-  EMAIL_CHANGE_TOKENS_TABLE,
-  type EmailChangeRevertToken,
-  type EmailChangeToken,
-  EMAIL_VERIFICATION_TOKEN_COLUMNS,
-  EMAIL_VERIFICATION_TOKENS_TABLE,
-  type EmailVerificationToken,
+  AUTH_TOKEN_COLUMNS,
+  AUTH_TOKENS_TABLE,
+  type AuthToken,
+  type AuthTokenType,
+  type NewAuthToken,
   LOGIN_ATTEMPT_COLUMNS,
   LOGIN_ATTEMPTS_TABLE,
   type LoginAttempt,
-  type NewEmailChangeRevertToken,
-  type NewEmailChangeToken,
-  type NewEmailVerificationToken,
   type NewLoginAttempt,
-  type NewPasswordResetToken,
-  type NewRefreshTokenFamily,
   type NewSecurityEvent,
   type NewTotpBackupCode,
-  PASSWORD_RESET_TOKEN_COLUMNS,
-  PASSWORD_RESET_TOKENS_TABLE,
-  type PasswordResetToken,
-  REFRESH_TOKEN_FAMILIES_TABLE,
-  REFRESH_TOKEN_FAMILY_COLUMNS,
-  type RefreshTokenFamily,
   SECURITY_EVENT_COLUMNS,
   SECURITY_EVENTS_TABLE,
   type SecurityEvent,
@@ -44,20 +29,12 @@ import {
 } from './auth';
 
 describe('Auth Schema - Table Names', () => {
-  test('should have correct table name for refresh_token_families', () => {
-    expect(REFRESH_TOKEN_FAMILIES_TABLE).toBe('refresh_token_families');
+  test('should have correct table name for auth_tokens', () => {
+    expect(AUTH_TOKENS_TABLE).toBe('auth_tokens');
   });
 
   test('should have correct table name for login_attempts', () => {
     expect(LOGIN_ATTEMPTS_TABLE).toBe('login_attempts');
-  });
-
-  test('should have correct table name for password_reset_tokens', () => {
-    expect(PASSWORD_RESET_TOKENS_TABLE).toBe('password_reset_tokens');
-  });
-
-  test('should have correct table name for email_verification_tokens', () => {
-    expect(EMAIL_VERIFICATION_TOKENS_TABLE).toBe('email_verification_tokens');
   });
 
   test('should have correct table name for security_events', () => {
@@ -68,28 +45,16 @@ describe('Auth Schema - Table Names', () => {
     expect(TOTP_BACKUP_CODES_TABLE).toBe('totp_backup_codes');
   });
 
-  test('should have correct table name for email_change_tokens', () => {
-    expect(EMAIL_CHANGE_TOKENS_TABLE).toBe('email_change_tokens');
-  });
-
-  test('should have correct table name for email_change_revert_tokens', () => {
-    expect(EMAIL_CHANGE_REVERT_TOKENS_TABLE).toBe('email_change_revert_tokens');
-  });
-
   test('should have correct table name for sms_verification_codes', () => {
     expect(SMS_VERIFICATION_CODES_TABLE).toBe('sms_verification_codes');
   });
 
   test('table names should be unique', () => {
     const tableNames = [
-      REFRESH_TOKEN_FAMILIES_TABLE,
+      AUTH_TOKENS_TABLE,
       LOGIN_ATTEMPTS_TABLE,
-      PASSWORD_RESET_TOKENS_TABLE,
-      EMAIL_VERIFICATION_TOKENS_TABLE,
       SECURITY_EVENTS_TABLE,
       TOTP_BACKUP_CODES_TABLE,
-      EMAIL_CHANGE_TOKENS_TABLE,
-      EMAIL_CHANGE_REVERT_TOKENS_TABLE,
       SMS_VERIFICATION_CODES_TABLE,
     ];
 
@@ -100,57 +65,63 @@ describe('Auth Schema - Table Names', () => {
   test('table names should be in snake_case format', () => {
     const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
 
-    expect(REFRESH_TOKEN_FAMILIES_TABLE).toMatch(snakeCasePattern);
+    expect(AUTH_TOKENS_TABLE).toMatch(snakeCasePattern);
     expect(LOGIN_ATTEMPTS_TABLE).toMatch(snakeCasePattern);
-    expect(PASSWORD_RESET_TOKENS_TABLE).toMatch(snakeCasePattern);
-    expect(EMAIL_VERIFICATION_TOKENS_TABLE).toMatch(snakeCasePattern);
     expect(SECURITY_EVENTS_TABLE).toMatch(snakeCasePattern);
     expect(TOTP_BACKUP_CODES_TABLE).toMatch(snakeCasePattern);
-    expect(EMAIL_CHANGE_TOKENS_TABLE).toMatch(snakeCasePattern);
-    expect(EMAIL_CHANGE_REVERT_TOKENS_TABLE).toMatch(snakeCasePattern);
+    expect(SMS_VERIFICATION_CODES_TABLE).toMatch(snakeCasePattern);
   });
 });
 
-describe('Auth Schema - Refresh Token Family Columns', () => {
+describe('Auth Schema - Auth Token Columns', () => {
   test('should have correct column mappings', () => {
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS).toEqual({
+    expect(AUTH_TOKEN_COLUMNS).toEqual({
       id: 'id',
+      type: 'type',
       userId: 'user_id',
+      email: 'email',
+      tokenHash: 'token_hash',
+      expiresAt: 'expires_at',
+      usedAt: 'used_at',
       ipAddress: 'ip_address',
       userAgent: 'user_agent',
+      metadata: 'metadata',
       createdAt: 'created_at',
-      revokedAt: 'revoked_at',
-      revokeReason: 'revoke_reason',
     });
   });
 
   test('should map camelCase to snake_case correctly', () => {
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.userId).toBe('user_id');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.ipAddress).toBe('ip_address');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.userAgent).toBe('user_agent');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.createdAt).toBe('created_at');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.revokedAt).toBe('revoked_at');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.revokeReason).toBe('revoke_reason');
+    expect(AUTH_TOKEN_COLUMNS.userId).toBe('user_id');
+    expect(AUTH_TOKEN_COLUMNS.tokenHash).toBe('token_hash');
+    expect(AUTH_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
+    expect(AUTH_TOKEN_COLUMNS.usedAt).toBe('used_at');
+    expect(AUTH_TOKEN_COLUMNS.ipAddress).toBe('ip_address');
+    expect(AUTH_TOKEN_COLUMNS.userAgent).toBe('user_agent');
+    expect(AUTH_TOKEN_COLUMNS.createdAt).toBe('created_at');
   });
 
   test('should have all required columns', () => {
     const requiredColumns = [
       'id',
+      'type',
       'userId',
+      'email',
+      'tokenHash',
+      'expiresAt',
+      'usedAt',
       'ipAddress',
       'userAgent',
+      'metadata',
       'createdAt',
-      'revokedAt',
-      'revokeReason',
     ];
-    const actualColumns = Object.keys(REFRESH_TOKEN_FAMILY_COLUMNS);
+    const actualColumns = Object.keys(AUTH_TOKEN_COLUMNS);
 
     expect(actualColumns).toEqual(requiredColumns);
   });
 
   test('column values should be in snake_case format', () => {
     const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const columnValues = Object.values(REFRESH_TOKEN_FAMILY_COLUMNS);
+    const columnValues = Object.values(AUTH_TOKEN_COLUMNS);
 
     columnValues.forEach((value) => {
       expect(value).toMatch(snakeCasePattern);
@@ -158,20 +129,219 @@ describe('Auth Schema - Refresh Token Family Columns', () => {
   });
 
   test('should be immutable (as const assertion)', () => {
-    // TypeScript enforces immutability via 'as const' at compile time
-    // We can verify the object structure is correctly defined
-    const columns = REFRESH_TOKEN_FAMILY_COLUMNS;
+    const columns = AUTH_TOKEN_COLUMNS;
 
-    // Verify the object exists and has the expected shape
     expect(columns).toBeDefined();
     expect(typeof columns).toBe('object');
     expect(Object.keys(columns).length).toBeGreaterThan(0);
 
-    // The 'as const' assertion makes properties readonly in TypeScript
-    // Attempting to modify would be a compile-time error
     type IsReadonly = typeof columns extends { readonly id: string } ? true : false;
     const isReadonly: IsReadonly = true;
     expect(isReadonly).toBe(true);
+  });
+});
+
+describe('Auth Schema - AuthToken Type', () => {
+  test('should accept valid unused password_reset token', () => {
+    const token: AuthToken = {
+      id: 'token-123',
+      type: 'password_reset',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'hashed-token-value',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    expect(token.type).toBe('password_reset');
+    expect(token.usedAt).toBeNull();
+    expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  test('should accept valid used email_verification token', () => {
+    const usedToken: AuthToken = {
+      id: 'token-123',
+      type: 'email_verification',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'hashed-token-value',
+      expiresAt: new Date(Date.now() + 86400000),
+      usedAt: new Date(),
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(Date.now() - 3600000),
+    };
+
+    expect(usedToken.type).toBe('email_verification');
+    expect(usedToken.usedAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept email_change token with metadata', () => {
+    const changeToken: AuthToken = {
+      id: 'token-abc',
+      type: 'email_change',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'sha256-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: { newEmail: 'new@example.com' },
+      createdAt: new Date(),
+    };
+
+    expect(changeToken.type).toBe('email_change');
+    expect(changeToken.metadata['newEmail']).toBe('new@example.com');
+  });
+
+  test('should accept email_change_revert token with metadata', () => {
+    const revertToken: AuthToken = {
+      id: 'token-xyz',
+      type: 'email_change_revert',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'sha256-hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: { oldEmail: 'old@example.com', newEmail: 'new@example.com' },
+      createdAt: new Date(),
+    };
+
+    expect(revertToken.type).toBe('email_change_revert');
+    expect(revertToken.metadata['oldEmail']).toBe('old@example.com');
+  });
+
+  test('should accept magic_link token with null userId (pre-account)', () => {
+    const magicToken: AuthToken = {
+      id: 'token-ml-1',
+      type: 'magic_link',
+      userId: null,
+      email: 'user@example.com',
+      tokenHash: 'sha256-hash',
+      expiresAt: new Date(Date.now() + 900000),
+      usedAt: null,
+      ipAddress: '192.168.1.1',
+      userAgent: 'Mozilla/5.0',
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    expect(magicToken.type).toBe('magic_link');
+    expect(magicToken.userId).toBeNull();
+    expect(magicToken.email).toBe('user@example.com');
+    expect(magicToken.ipAddress).toBe('192.168.1.1');
+  });
+
+  test('should accept expired token', () => {
+    const expiredToken: AuthToken = {
+      id: 'token-789',
+      type: 'password_reset',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'hashed-token-value',
+      expiresAt: new Date(Date.now() - 3600000),
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(Date.now() - 7200000),
+    };
+
+    expect(expiredToken.expiresAt.getTime()).toBeLessThan(Date.now());
+  });
+
+  test('safeParse-like: all 5 token types are valid AuthTokenType values', () => {
+    const types: AuthTokenType[] = [
+      'password_reset',
+      'email_verification',
+      'email_change',
+      'email_change_revert',
+      'magic_link',
+    ];
+
+    types.forEach((type) => {
+      const token: Pick<AuthToken, 'type'> = { type };
+      expect(token.type).toBe(type);
+    });
+  });
+});
+
+describe('Auth Schema - NewAuthToken Type', () => {
+  test('should accept minimal new password_reset token', () => {
+    const newToken: NewAuthToken = {
+      type: 'password_reset',
+      tokenHash: 'hashed-token-value',
+      expiresAt: new Date(Date.now() + 3600000),
+    };
+
+    expect(newToken.type).toBe('password_reset');
+    expect(newToken.tokenHash).toBe('hashed-token-value');
+    expect(newToken.expiresAt).toBeInstanceOf(Date);
+  });
+
+  test('should accept new email_verification token with userId', () => {
+    const newToken: NewAuthToken = {
+      type: 'email_verification',
+      userId: 'user-456',
+      tokenHash: 'hash-value',
+      expiresAt: new Date(Date.now() + 86400000),
+    };
+
+    expect(newToken.userId).toBe('user-456');
+  });
+
+  test('should accept new magic_link token with email and ip context', () => {
+    const newToken: NewAuthToken = {
+      type: 'magic_link',
+      email: 'user@example.com',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() + 900000),
+      ipAddress: '192.168.1.1',
+      userAgent: 'Chrome/120',
+    };
+
+    expect(newToken.email).toBe('user@example.com');
+    expect(newToken.ipAddress).toBe('192.168.1.1');
+  });
+
+  test('should accept new email_change token with metadata', () => {
+    const newToken: NewAuthToken = {
+      type: 'email_change',
+      userId: 'user-456',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() + 3600000),
+      metadata: { newEmail: 'new@example.com' },
+    };
+
+    expect(newToken.metadata?.['newEmail']).toBe('new@example.com');
+  });
+
+  test('should accept new token with all optional fields', () => {
+    const newToken: NewAuthToken = {
+      id: 'token-123',
+      type: 'password_reset',
+      userId: 'user-456',
+      email: null,
+      tokenHash: 'hashed-token-value',
+      expiresAt: new Date(Date.now() + 3600000),
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    expect(newToken.id).toBe('token-123');
+    expect(newToken.usedAt).toBeNull();
+    expect(newToken.createdAt).toBeInstanceOf(Date);
   });
 });
 
@@ -217,223 +387,6 @@ describe('Auth Schema - Login Attempt Columns', () => {
     columnValues.forEach((value) => {
       expect(value).toMatch(snakeCasePattern);
     });
-  });
-});
-
-describe('Auth Schema - Password Reset Token Columns', () => {
-  test('should have correct column mappings', () => {
-    expect(PASSWORD_RESET_TOKEN_COLUMNS).toEqual({
-      id: 'id',
-      userId: 'user_id',
-      tokenHash: 'token_hash',
-      expiresAt: 'expires_at',
-      usedAt: 'used_at',
-      createdAt: 'created_at',
-    });
-  });
-
-  test('should map camelCase to snake_case correctly', () => {
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.userId).toBe('user_id');
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.tokenHash).toBe('token_hash');
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.usedAt).toBe('used_at');
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.createdAt).toBe('created_at');
-  });
-
-  test('should have all required columns', () => {
-    const requiredColumns = ['id', 'userId', 'tokenHash', 'expiresAt', 'usedAt', 'createdAt'];
-    const actualColumns = Object.keys(PASSWORD_RESET_TOKEN_COLUMNS);
-
-    expect(actualColumns).toEqual(requiredColumns);
-  });
-
-  test('column values should be in snake_case format', () => {
-    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const columnValues = Object.values(PASSWORD_RESET_TOKEN_COLUMNS);
-
-    columnValues.forEach((value) => {
-      expect(value).toMatch(snakeCasePattern);
-    });
-  });
-});
-
-describe('Auth Schema - Email Verification Token Columns', () => {
-  test('should have correct column mappings', () => {
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS).toEqual({
-      id: 'id',
-      userId: 'user_id',
-      tokenHash: 'token_hash',
-      expiresAt: 'expires_at',
-      usedAt: 'used_at',
-      createdAt: 'created_at',
-    });
-  });
-
-  test('should map camelCase to snake_case correctly', () => {
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.userId).toBe('user_id');
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.tokenHash).toBe('token_hash');
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.usedAt).toBe('used_at');
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.createdAt).toBe('created_at');
-  });
-
-  test('should have all required columns', () => {
-    const requiredColumns = ['id', 'userId', 'tokenHash', 'expiresAt', 'usedAt', 'createdAt'];
-    const actualColumns = Object.keys(EMAIL_VERIFICATION_TOKEN_COLUMNS);
-
-    expect(actualColumns).toEqual(requiredColumns);
-  });
-
-  test('column values should be in snake_case format', () => {
-    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const columnValues = Object.values(EMAIL_VERIFICATION_TOKEN_COLUMNS);
-
-    columnValues.forEach((value) => {
-      expect(value).toMatch(snakeCasePattern);
-    });
-  });
-
-  test('should have same structure as password reset token columns', () => {
-    // Both email verification and password reset tokens should have identical structure
-    expect(Object.keys(EMAIL_VERIFICATION_TOKEN_COLUMNS)).toEqual(
-      Object.keys(PASSWORD_RESET_TOKEN_COLUMNS),
-    );
-  });
-});
-
-describe('Auth Schema - Security Event Columns', () => {
-  test('should have correct column mappings', () => {
-    expect(SECURITY_EVENT_COLUMNS).toEqual({
-      id: 'id',
-      userId: 'user_id',
-      email: 'email',
-      eventType: 'event_type',
-      severity: 'severity',
-      ipAddress: 'ip_address',
-      userAgent: 'user_agent',
-      metadata: 'metadata',
-      createdAt: 'created_at',
-    });
-  });
-
-  test('should map camelCase to snake_case correctly', () => {
-    expect(SECURITY_EVENT_COLUMNS.userId).toBe('user_id');
-    expect(SECURITY_EVENT_COLUMNS.eventType).toBe('event_type');
-    expect(SECURITY_EVENT_COLUMNS.ipAddress).toBe('ip_address');
-    expect(SECURITY_EVENT_COLUMNS.userAgent).toBe('user_agent');
-    expect(SECURITY_EVENT_COLUMNS.createdAt).toBe('created_at');
-  });
-
-  test('should have all required columns', () => {
-    const requiredColumns = [
-      'id',
-      'userId',
-      'email',
-      'eventType',
-      'severity',
-      'ipAddress',
-      'userAgent',
-      'metadata',
-      'createdAt',
-    ];
-    const actualColumns = Object.keys(SECURITY_EVENT_COLUMNS);
-
-    expect(actualColumns).toEqual(requiredColumns);
-  });
-
-  test('column values should be in snake_case format', () => {
-    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const columnValues = Object.values(SECURITY_EVENT_COLUMNS);
-
-    columnValues.forEach((value) => {
-      expect(value).toMatch(snakeCasePattern);
-    });
-  });
-});
-
-describe('Auth Schema - RefreshTokenFamily Type', () => {
-  test('should accept valid refresh token family object', () => {
-    const validFamily: RefreshTokenFamily = {
-      id: 'family-123',
-      userId: 'user-456',
-      ipAddress: '192.168.1.1',
-      userAgent: 'Mozilla/5.0',
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-    };
-
-    expect(validFamily).toBeDefined();
-    expect(validFamily.id).toBe('family-123');
-    expect(validFamily.userId).toBe('user-456');
-  });
-
-  test('should handle null values for optional fields', () => {
-    const familyWithNulls: RefreshTokenFamily = {
-      id: 'family-123',
-      userId: 'user-456',
-      ipAddress: null,
-      userAgent: null,
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-    };
-
-    expect(familyWithNulls.ipAddress).toBeNull();
-    expect(familyWithNulls.userAgent).toBeNull();
-    expect(familyWithNulls.revokedAt).toBeNull();
-    expect(familyWithNulls.revokeReason).toBeNull();
-  });
-
-  test('should accept revoked token family', () => {
-    const revokedFamily: RefreshTokenFamily = {
-      id: 'family-123',
-      userId: 'user-456',
-      ipAddress: '192.168.1.1',
-      userAgent: 'Mozilla/5.0',
-      createdAt: new Date('2024-01-01'),
-      revokedAt: new Date('2024-01-02'),
-      revokeReason: 'Token reuse detected',
-    };
-
-    expect(revokedFamily.revokedAt).toBeInstanceOf(Date);
-    expect(revokedFamily.revokeReason).toBe('Token reuse detected');
-  });
-});
-
-describe('Auth Schema - NewRefreshTokenFamily Type', () => {
-  test('should accept minimal new refresh token family', () => {
-    const newFamily: NewRefreshTokenFamily = {
-      userId: 'user-456',
-    };
-
-    expect(newFamily.userId).toBe('user-456');
-  });
-
-  test('should accept new refresh token family with all optional fields', () => {
-    const newFamily: NewRefreshTokenFamily = {
-      id: 'family-123',
-      userId: 'user-456',
-      ipAddress: '192.168.1.1',
-      userAgent: 'Mozilla/5.0',
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-    };
-
-    expect(newFamily).toBeDefined();
-    expect(Object.keys(newFamily).length).toBeGreaterThan(1);
-  });
-
-  test('should accept new refresh token family with partial fields', () => {
-    const newFamily: NewRefreshTokenFamily = {
-      userId: 'user-456',
-      ipAddress: '192.168.1.1',
-      userAgent: 'Chrome/120.0',
-    };
-
-    expect(newFamily.ipAddress).toBe('192.168.1.1');
-    expect(newFamily.userAgent).toBe('Chrome/120.0');
   });
 });
 
@@ -522,155 +475,53 @@ describe('Auth Schema - NewLoginAttempt Type', () => {
   });
 });
 
-describe('Auth Schema - PasswordResetToken Type', () => {
-  test('should accept valid unused password reset token', () => {
-    const token: PasswordResetToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(token.usedAt).toBeNull();
-    expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
+describe('Auth Schema - Security Event Columns', () => {
+  test('should have correct column mappings', () => {
+    expect(SECURITY_EVENT_COLUMNS).toEqual({
+      id: 'id',
+      userId: 'user_id',
+      email: 'email',
+      eventType: 'event_type',
+      severity: 'severity',
+      ipAddress: 'ip_address',
+      userAgent: 'user_agent',
+      metadata: 'metadata',
+      createdAt: 'created_at',
+    });
   });
 
-  test('should accept valid used password reset token', () => {
-    const usedToken: PasswordResetToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: new Date(),
-      createdAt: new Date(Date.now() - 1800000),
-    };
-
-    expect(usedToken.usedAt).toBeInstanceOf(Date);
-    expect(usedToken.usedAt).toBeDefined();
+  test('should map camelCase to snake_case correctly', () => {
+    expect(SECURITY_EVENT_COLUMNS.userId).toBe('user_id');
+    expect(SECURITY_EVENT_COLUMNS.eventType).toBe('event_type');
+    expect(SECURITY_EVENT_COLUMNS.ipAddress).toBe('ip_address');
+    expect(SECURITY_EVENT_COLUMNS.userAgent).toBe('user_agent');
+    expect(SECURITY_EVENT_COLUMNS.createdAt).toBe('created_at');
   });
 
-  test('should accept expired token', () => {
-    const expiredToken: PasswordResetToken = {
-      id: 'token-789',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() - 3600000),
-      usedAt: null,
-      createdAt: new Date(Date.now() - 7200000),
-    };
+  test('should have all required columns', () => {
+    const requiredColumns = [
+      'id',
+      'userId',
+      'email',
+      'eventType',
+      'severity',
+      'ipAddress',
+      'userAgent',
+      'metadata',
+      'createdAt',
+    ];
+    const actualColumns = Object.keys(SECURITY_EVENT_COLUMNS);
 
-    expect(expiredToken.expiresAt.getTime()).toBeLessThan(Date.now());
-  });
-});
-
-describe('Auth Schema - NewPasswordResetToken Type', () => {
-  test('should accept minimal new password reset token', () => {
-    const newToken: NewPasswordResetToken = {
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 3600000),
-    };
-
-    expect(newToken.userId).toBe('user-456');
-    expect(newToken.tokenHash).toBe('hashed-token-value');
-    expect(newToken.expiresAt).toBeInstanceOf(Date);
+    expect(actualColumns).toEqual(requiredColumns);
   });
 
-  test('should accept new token with all optional fields', () => {
-    const newToken: NewPasswordResetToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
+  test('column values should be in snake_case format', () => {
+    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
+    const columnValues = Object.values(SECURITY_EVENT_COLUMNS);
 
-    expect(newToken.id).toBe('token-123');
-    expect(newToken.usedAt).toBeNull();
-    expect(newToken.createdAt).toBeInstanceOf(Date);
-  });
-});
-
-describe('Auth Schema - EmailVerificationToken Type', () => {
-  test('should accept valid unused email verification token', () => {
-    const token: EmailVerificationToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 86400000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(token.usedAt).toBeNull();
-    expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
-  });
-
-  test('should accept valid used email verification token', () => {
-    const usedToken: EmailVerificationToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 86400000),
-      usedAt: new Date(),
-      createdAt: new Date(Date.now() - 3600000),
-    };
-
-    expect(usedToken.usedAt).toBeInstanceOf(Date);
-  });
-
-  test('should have same structure as password reset token', () => {
-    const emailToken: EmailVerificationToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-value',
-      expiresAt: new Date(),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    const passwordToken: PasswordResetToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-value',
-      expiresAt: new Date(),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(Object.keys(emailToken).sort()).toEqual(Object.keys(passwordToken).sort());
-  });
-});
-
-describe('Auth Schema - NewEmailVerificationToken Type', () => {
-  test('should accept minimal new email verification token', () => {
-    const newToken: NewEmailVerificationToken = {
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 86400000),
-    };
-
-    expect(newToken.userId).toBe('user-456');
-    expect(newToken.tokenHash).toBe('hashed-token-value');
-    expect(newToken.expiresAt).toBeInstanceOf(Date);
-  });
-
-  test('should accept new token with all optional fields', () => {
-    const newToken: NewEmailVerificationToken = {
-      id: 'token-123',
-      userId: 'user-456',
-      tokenHash: 'hashed-token-value',
-      expiresAt: new Date(Date.now() + 86400000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(newToken.id).toBe('token-123');
-    expect(newToken.usedAt).toBeNull();
-    expect(newToken.createdAt).toBeInstanceOf(Date);
+    columnValues.forEach((value) => {
+      expect(value).toMatch(snakeCasePattern);
+    });
   });
 });
 
@@ -930,74 +781,37 @@ describe('Auth Schema - SecurityEventType Type', () => {
 });
 
 describe('Auth Schema - Type Consistency', () => {
-  test('New* types should be compatible with their base types', () => {
-    const newFamily: NewRefreshTokenFamily = {
-      userId: 'user-123',
-      ipAddress: '192.168.1.1',
-    };
-
-    // Should be able to spread New* into full type with additional fields
-    const fullFamily: RefreshTokenFamily = {
-      id: 'family-123',
-      userId: newFamily.userId,
-      ipAddress: newFamily.ipAddress ?? null,
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-      userAgent: null,
-    };
-
-    expect(fullFamily.userId).toBe(newFamily.userId);
-    expect(fullFamily.ipAddress).toBe(newFamily.ipAddress);
-  });
-
-  test('Column constants should cover all type properties', () => {
-    // Create sample objects to validate column mappings
-    const tokenFamily: RefreshTokenFamily = {
-      id: 'id',
-      userId: 'userId',
-      ipAddress: 'ipAddress',
-      userAgent: 'userAgent',
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-    };
-
-    const tokenFamilyKeys = Object.keys(tokenFamily);
-    const columnKeys = Object.keys(REFRESH_TOKEN_FAMILY_COLUMNS);
-
-    expect(columnKeys.sort()).toEqual(tokenFamilyKeys.sort());
-  });
-
   test('Date fields should be consistently named', () => {
     // All date fields should follow *At naming convention
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.createdAt).toMatch(/_at$/);
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS.revokedAt).toMatch(/_at$/);
+    expect(AUTH_TOKEN_COLUMNS.createdAt).toMatch(/_at$/);
+    expect(AUTH_TOKEN_COLUMNS.expiresAt).toMatch(/_at$/);
+    expect(AUTH_TOKEN_COLUMNS.usedAt).toMatch(/_at$/);
     expect(LOGIN_ATTEMPT_COLUMNS.createdAt).toMatch(/_at$/);
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.createdAt).toMatch(/_at$/);
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.expiresAt).toMatch(/_at$/);
-    expect(PASSWORD_RESET_TOKEN_COLUMNS.usedAt).toMatch(/_at$/);
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.createdAt).toMatch(/_at$/);
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.expiresAt).toMatch(/_at$/);
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS.usedAt).toMatch(/_at$/);
     expect(SECURITY_EVENT_COLUMNS.createdAt).toMatch(/_at$/);
   });
 
   test('All tables should have id and createdAt fields', () => {
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS).toHaveProperty('id');
-    expect(REFRESH_TOKEN_FAMILY_COLUMNS).toHaveProperty('createdAt');
+    expect(AUTH_TOKEN_COLUMNS).toHaveProperty('id');
+    expect(AUTH_TOKEN_COLUMNS).toHaveProperty('createdAt');
 
     expect(LOGIN_ATTEMPT_COLUMNS).toHaveProperty('id');
     expect(LOGIN_ATTEMPT_COLUMNS).toHaveProperty('createdAt');
 
-    expect(PASSWORD_RESET_TOKEN_COLUMNS).toHaveProperty('id');
-    expect(PASSWORD_RESET_TOKEN_COLUMNS).toHaveProperty('createdAt');
-
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS).toHaveProperty('id');
-    expect(EMAIL_VERIFICATION_TOKEN_COLUMNS).toHaveProperty('createdAt');
-
     expect(SECURITY_EVENT_COLUMNS).toHaveProperty('id');
     expect(SECURITY_EVENT_COLUMNS).toHaveProperty('createdAt');
+  });
+
+  test('AuthToken type discriminator covers all flows', () => {
+    const allTypes: AuthTokenType[] = [
+      'password_reset',
+      'email_verification',
+      'email_change',
+      'email_change_revert',
+      'magic_link',
+    ];
+
+    const uniqueTypes = new Set(allTypes);
+    expect(uniqueTypes.size).toBe(5);
   });
 });
 
@@ -1053,28 +867,38 @@ describe('Auth Schema - Edge Cases', () => {
     expect(event.userAgent).toBe(specialChars);
   });
 
-  test('should handle future dates', () => {
+  test('should handle future dates for token expiry', () => {
     const futureDate = new Date('2099-12-31');
-    const token: PasswordResetToken = {
+    const token: AuthToken = {
       id: 'token-123',
+      type: 'password_reset',
       userId: 'user-456',
+      email: null,
       tokenHash: 'hash',
       expiresAt: futureDate,
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     };
 
     expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
   });
 
-  test('should handle past dates', () => {
+  test('should handle past dates for expired tokens', () => {
     const pastDate = new Date('2000-01-01');
-    const token: PasswordResetToken = {
+    const token: AuthToken = {
       id: 'token-123',
+      type: 'email_verification',
       userId: 'user-456',
+      email: null,
       tokenHash: 'hash',
       expiresAt: pastDate,
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: pastDate,
     };
 
@@ -1125,40 +949,22 @@ describe('Auth Schema - Edge Cases', () => {
 
 describe('Auth Schema - Integration Scenarios', () => {
   test('should support token reuse detection workflow', () => {
-    // Create token family
-    const family: RefreshTokenFamily = {
-      id: 'family-123',
-      userId: 'user-456',
-      ipAddress: '192.168.1.1',
-      userAgent: 'Mozilla/5.0',
-      createdAt: new Date(),
-      revokedAt: null,
-      revokeReason: null,
-    };
-
-    // Revoke family on reuse detection
-    const revokedFamily: RefreshTokenFamily = {
-      ...family,
-      revokedAt: new Date(),
-      revokeReason: 'Token reuse detected',
-    };
-
-    // Create security event
+    // Create security event for token reuse
     const event: SecurityEvent = {
       id: 'event-123',
-      userId: family.userId,
+      userId: 'user-456',
       email: 'user@example.com',
       eventType: 'token_reuse',
       severity: 'critical',
-      ipAddress: family.ipAddress,
-      userAgent: family.userAgent,
-      metadata: { familyId: family.id },
+      ipAddress: '192.168.1.1',
+      userAgent: 'Mozilla/5.0',
+      metadata: { familyId: 'family-123' },
       createdAt: new Date(),
     };
 
-    expect(revokedFamily.revokedAt).toBeDefined();
     expect(event.eventType).toBe('token_reuse');
     expect(event.severity).toBe('critical');
+    expect(event.metadata?.['familyId']).toBe('family-123');
   });
 
   test('should support login attempt rate limiting workflow', () => {
@@ -1191,7 +997,7 @@ describe('Auth Schema - Integration Scenarios', () => {
     expect(lockEvent.severity).toBe('high');
   });
 
-  test('should support password reset workflow', () => {
+  test('should support password reset workflow with unified AuthToken', () => {
     // Create security event for reset request
     const requestEvent: SecurityEvent = {
       id: 'event-request',
@@ -1205,18 +1011,23 @@ describe('Auth Schema - Integration Scenarios', () => {
       createdAt: new Date(),
     };
 
-    // Create password reset token
-    const token: PasswordResetToken = {
+    // Create auth token for password reset
+    const token: AuthToken = {
       id: 'token-123',
+      type: 'password_reset',
       userId: 'user-456',
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 3600000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     };
 
     // Mark token as used
-    const usedToken: PasswordResetToken = {
+    const usedToken: AuthToken = {
       ...token,
       usedAt: new Date(),
     };
@@ -1235,18 +1046,24 @@ describe('Auth Schema - Integration Scenarios', () => {
     };
 
     expect(requestEvent.eventType).toBe('password_reset_requested');
+    expect(token.type).toBe('password_reset');
     expect(usedToken.usedAt).toBeDefined();
     expect(completeEvent.eventType).toBe('password_reset_completed');
   });
 
-  test('should support email verification workflow', () => {
-    // Create email verification token
-    const token: EmailVerificationToken = {
+  test('should support email verification workflow with unified AuthToken', () => {
+    // Create auth token for email verification
+    const token: AuthToken = {
       id: 'token-123',
+      type: 'email_verification',
       userId: 'user-456',
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 86400000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     };
 
@@ -1264,7 +1081,7 @@ describe('Auth Schema - Integration Scenarios', () => {
     };
 
     // Mark token as used
-    const usedToken: EmailVerificationToken = {
+    const usedToken: AuthToken = {
       ...token,
       usedAt: new Date(),
     };
@@ -1282,9 +1099,53 @@ describe('Auth Schema - Integration Scenarios', () => {
       createdAt: new Date(),
     };
 
+    expect(token.type).toBe('email_verification');
     expect(sentEvent.eventType).toBe('email_verification_sent');
     expect(usedToken.usedAt).toBeDefined();
     expect(verifiedEvent.eventType).toBe('email_verified');
+  });
+
+  test('should support magic link workflow with rate-limiting data', () => {
+    const magicToken: AuthToken = {
+      id: 'ml-123',
+      type: 'magic_link',
+      userId: null,
+      email: 'user@example.com',
+      tokenHash: 'hash',
+      expiresAt: new Date(Date.now() + 900000),
+      usedAt: null,
+      ipAddress: '192.168.1.1',
+      userAgent: 'Chrome/120',
+      metadata: {},
+      createdAt: new Date(),
+    };
+
+    // Rate-limiting uses ipAddress and email on the same type
+    expect(magicToken.type).toBe('magic_link');
+    expect(magicToken.userId).toBeNull();
+    expect(magicToken.email).toBe('user@example.com');
+    expect(magicToken.ipAddress).toBe('192.168.1.1');
+  });
+
+  test('killer test — expired + unused token with SQL-injection payload in metadata', () => {
+    const maliciousPayload = "'; DROP TABLE auth_tokens; --";
+    const token: AuthToken = {
+      id: 'token-999',
+      type: 'email_change',
+      userId: 'user-456',
+      email: null,
+      tokenHash: maliciousPayload,
+      expiresAt: new Date(Date.now() - 3600000), // already expired
+      usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: { newEmail: maliciousPayload },
+      createdAt: new Date(Date.now() - 7200000),
+    };
+
+    expect(token.expiresAt.getTime()).toBeLessThan(Date.now());
+    expect(token.usedAt).toBeNull();
+    expect(token.metadata['newEmail']).toBe(maliciousPayload);
   });
 });
 
@@ -1391,216 +1252,6 @@ describe('Auth Schema - NewTotpBackupCode Type', () => {
     expect(newCode.id).toBe('tbc-123');
     expect(newCode.usedAt).toBeNull();
     expect(newCode.createdAt).toBeInstanceOf(Date);
-  });
-});
-
-// ============================================================================
-// Email Change Token Tests
-// ============================================================================
-
-describe('Auth Schema - Email Change Token Columns', () => {
-  test('should have correct column mappings', () => {
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS).toEqual({
-      id: 'id',
-      userId: 'user_id',
-      newEmail: 'new_email',
-      tokenHash: 'token_hash',
-      expiresAt: 'expires_at',
-      usedAt: 'used_at',
-      createdAt: 'created_at',
-    });
-  });
-
-  test('should map camelCase to snake_case correctly', () => {
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.userId).toBe('user_id');
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.newEmail).toBe('new_email');
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.tokenHash).toBe('token_hash');
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.expiresAt).toBe('expires_at');
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.usedAt).toBe('used_at');
-    expect(EMAIL_CHANGE_TOKEN_COLUMNS.createdAt).toBe('created_at');
-  });
-
-  test('should have all required columns', () => {
-    const requiredColumns = [
-      'id',
-      'userId',
-      'newEmail',
-      'tokenHash',
-      'expiresAt',
-      'usedAt',
-      'createdAt',
-    ];
-    const actualColumns = Object.keys(EMAIL_CHANGE_TOKEN_COLUMNS);
-
-    expect(actualColumns).toEqual(requiredColumns);
-  });
-
-  test('column values should be in snake_case format', () => {
-    const snakeCasePattern = /^[a-z]+(_[a-z]+)*$/;
-    const columnValues = Object.values(EMAIL_CHANGE_TOKEN_COLUMNS);
-
-    columnValues.forEach((value) => {
-      expect(value).toMatch(snakeCasePattern);
-    });
-  });
-});
-
-describe('Auth Schema - EmailChangeToken Type', () => {
-  test('should accept valid unused email change token', () => {
-    const token: EmailChangeToken = {
-      id: 'ect-123',
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(token.usedAt).toBeNull();
-    expect(token.newEmail).toBe('new@example.com');
-    expect(token.expiresAt.getTime()).toBeGreaterThan(Date.now());
-  });
-
-  test('should accept valid used email change token', () => {
-    const usedToken: EmailChangeToken = {
-      id: 'ect-123',
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: new Date(),
-      createdAt: new Date(Date.now() - 1800000),
-    };
-
-    expect(usedToken.usedAt).toBeInstanceOf(Date);
-  });
-
-  test('should accept expired token', () => {
-    const expiredToken: EmailChangeToken = {
-      id: 'ect-789',
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'hash',
-      expiresAt: new Date(Date.now() - 3600000),
-      usedAt: null,
-      createdAt: new Date(Date.now() - 7200000),
-    };
-
-    expect(expiredToken.expiresAt.getTime()).toBeLessThan(Date.now());
-  });
-
-  test('should have similar structure to password reset token plus newEmail', () => {
-    const emailChangeToken: EmailChangeToken = {
-      id: 'ect-123',
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'hash',
-      expiresAt: new Date(),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    const emailChangeKeys = Object.keys(emailChangeToken).sort();
-    const passwordResetKeys = Object.keys({
-      id: '',
-      userId: '',
-      tokenHash: '',
-      expiresAt: new Date(),
-      usedAt: null,
-      createdAt: new Date(),
-    } satisfies PasswordResetToken).sort();
-
-    // EmailChangeToken has all fields of PasswordResetToken plus newEmail
-    passwordResetKeys.forEach((key) => {
-      expect(emailChangeKeys).toContain(key);
-    });
-    expect(emailChangeKeys).toContain('newEmail');
-  });
-});
-
-describe('Auth Schema - NewEmailChangeToken Type', () => {
-  test('should accept minimal new email change token', () => {
-    const newToken: NewEmailChangeToken = {
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-    };
-
-    expect(newToken.userId).toBe('user-456');
-    expect(newToken.newEmail).toBe('new@example.com');
-    expect(newToken.tokenHash).toBe('sha256-token-hash');
-    expect(newToken.expiresAt).toBeInstanceOf(Date);
-  });
-
-  test('should accept new token with all optional fields', () => {
-    const newToken: NewEmailChangeToken = {
-      id: 'ect-123',
-      userId: 'user-456',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(newToken.id).toBe('ect-123');
-    expect(newToken.usedAt).toBeNull();
-    expect(newToken.createdAt).toBeInstanceOf(Date);
-  });
-});
-
-// ============================================================================
-// Email Change Revert Token Tests
-// ============================================================================
-
-describe('Auth Schema - Email Change Revert Token Columns', () => {
-  test('should have correct column mappings', () => {
-    expect(EMAIL_CHANGE_REVERT_TOKEN_COLUMNS).toEqual({
-      id: 'id',
-      userId: 'user_id',
-      oldEmail: 'old_email',
-      newEmail: 'new_email',
-      tokenHash: 'token_hash',
-      expiresAt: 'expires_at',
-      usedAt: 'used_at',
-      createdAt: 'created_at',
-    });
-  });
-});
-
-describe('Auth Schema - EmailChangeRevertToken Type', () => {
-  test('should accept valid revert token', () => {
-    const token: EmailChangeRevertToken = {
-      id: 'ecrt-123',
-      userId: 'user-456',
-      oldEmail: 'old@example.com',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-      usedAt: null,
-      createdAt: new Date(),
-    };
-
-    expect(token.oldEmail).toBe('old@example.com');
-    expect(token.newEmail).toBe('new@example.com');
-    expect(token.usedAt).toBeNull();
-  });
-});
-
-describe('Auth Schema - NewEmailChangeRevertToken Type', () => {
-  test('should accept minimal new revert token', () => {
-    const newToken: NewEmailChangeRevertToken = {
-      userId: 'user-456',
-      oldEmail: 'old@example.com',
-      newEmail: 'new@example.com',
-      tokenHash: 'sha256-token-hash',
-      expiresAt: new Date(Date.now() + 3600000),
-    };
-
-    expect(newToken.oldEmail).toBe('old@example.com');
-    expect(newToken.newEmail).toBe('new@example.com');
   });
 });
 

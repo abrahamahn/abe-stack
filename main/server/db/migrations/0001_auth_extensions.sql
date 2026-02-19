@@ -20,35 +20,6 @@ CREATE TABLE IF NOT EXISTS totp_backup_codes (
 );
 
 -- ============================================================================
--- Email Change Tokens (verify new address before switching)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS email_change_tokens (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    new_email  TEXT NOT NULL,
-    token_hash TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    used_at    TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
--- Email Change Revert Tokens ("this wasn't me" recovery flow)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS email_change_revert_tokens (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    old_email  TEXT NOT NULL,
-    new_email  TEXT NOT NULL,
-    token_hash TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    used_at    TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
 -- SMS Verification Codes (phone-based 2FA OTPs)
 -- ============================================================================
 
@@ -108,12 +79,6 @@ CREATE INDEX idx_totp_backup_codes_user              ON totp_backup_codes(user_i
 CREATE INDEX idx_totp_backup_codes_unused            ON totp_backup_codes(user_id)
     WHERE used_at IS NULL;
 
-CREATE INDEX idx_email_change_tokens_user            ON email_change_tokens(user_id);
-CREATE INDEX idx_email_change_tokens_hash            ON email_change_tokens(token_hash);
-
-CREATE INDEX idx_email_change_revert_tokens_user     ON email_change_revert_tokens(user_id);
-CREATE INDEX idx_email_change_revert_tokens_hash     ON email_change_revert_tokens(token_hash);
-
 CREATE INDEX idx_sms_verification_codes_user         ON sms_verification_codes(user_id);
 CREATE INDEX idx_sms_verification_codes_expires      ON sms_verification_codes(expires_at);
 
@@ -121,14 +86,6 @@ CREATE INDEX idx_webauthn_cred_user                  ON webauthn_credentials(use
 CREATE UNIQUE INDEX idx_webauthn_cred_id             ON webauthn_credentials(credential_id);
 
 CREATE INDEX idx_trusted_devices_user                ON trusted_devices(user_id);
-
--- new deleteExpired() (used_at IS NULL guard)
-CREATE INDEX idx_email_change_tokens_expires
-    ON email_change_tokens(expires_at) WHERE used_at IS NULL;
-
--- existing deleteExpired() (same guard pattern)
-CREATE INDEX idx_email_change_revert_tokens_expires
-    ON email_change_revert_tokens(expires_at) WHERE used_at IS NULL;
 
 -- rate-limit check: unverified codes per user ordered by expiry
 CREATE INDEX idx_sms_verification_codes_unverified

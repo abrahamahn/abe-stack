@@ -6,11 +6,8 @@
 // Legal Documents
 export { createLegalDocumentRepository, type LegalDocumentRepository } from './legal-documents';
 
-// User Agreements
-export { createUserAgreementRepository, type UserAgreementRepository } from './user-agreements';
-
-// Consent Logs
-export { createConsentLogRepository, type ConsentLogRepository } from './consent-logs';
+// Consent Records (replaces UserAgreementRepository + ConsentLogRepository)
+export { createConsentRecordRepository, type ConsentRecordRepository } from './consent-records';
 
 // Data Export Requests
 export {

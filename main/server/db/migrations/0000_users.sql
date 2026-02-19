@@ -92,30 +92,23 @@ CREATE TRIGGER update_users_updated_at
     EXECUTE PROCEDURE update_updated_at_column();
 
 -- ============================================================================
--- Refresh Token Families (reuse detection — revoke entire family on theft)
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS refresh_token_families (
-    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    ip_address    TEXT,
-    user_agent    TEXT,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    revoked_at    TIMESTAMPTZ,
-    revoke_reason TEXT
-);
-
--- ============================================================================
 -- Refresh Tokens (short-lived, rotated on each use)
+-- Family metadata denormalized per row for family reuse detection
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    family_id  UUID REFERENCES refresh_token_families(id) ON DELETE CASCADE,
-    token      TEXT NOT NULL UNIQUE,
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id               UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    family_id             UUID NOT NULL,       -- plain UUID grouping key (no FK)
+    token                 TEXT NOT NULL UNIQUE,
+    expires_at            TIMESTAMPTZ NOT NULL,
+    -- Family-level metadata (denormalized for query efficiency)
+    family_ip_address     TEXT,
+    family_user_agent     TEXT,
+    family_created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    family_revoked_at     TIMESTAMPTZ,
+    family_revoke_reason  TEXT,
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================================
@@ -133,28 +126,23 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 );
 
 -- ============================================================================
--- Password Reset Tokens
+-- Auth Tokens (unified: password_reset, email_verification, email_change,
+--              email_change_revert, magic_link)
 -- ============================================================================
 
-CREATE TABLE IF NOT EXISTS password_reset_tokens (
+CREATE TABLE IF NOT EXISTS auth_tokens (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type       TEXT NOT NULL CHECK (type IN (
+                   'password_reset','email_verification',
+                   'email_change','email_change_revert','magic_link')),
+    user_id    UUID REFERENCES users(id) ON DELETE CASCADE, -- NULL for magic_link pre-user
+    email      TEXT,           -- magic_link: target email
     token_hash TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     used_at    TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================================
--- Email Verification Tokens
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS email_verification_tokens (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash TEXT NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    used_at    TIMESTAMPTZ,
+    ip_address TEXT,           -- magic_link: request IP
+    user_agent TEXT,           -- magic_link: request UA
+    metadata   JSONB NOT NULL DEFAULT '{}', -- new_email / old_email for change tokens
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -184,21 +172,21 @@ CREATE INDEX idx_users_username                 ON users(username) WHERE usernam
 CREATE INDEX idx_users_role                     ON users(role);
 CREATE INDEX idx_users_created_at               ON users(created_at DESC);
 
-CREATE INDEX idx_refresh_token_families_user    ON refresh_token_families(user_id);
-
 CREATE INDEX idx_refresh_tokens_token           ON refresh_tokens(token);
-CREATE INDEX idx_refresh_tokens_family          ON refresh_tokens(family_id);
 CREATE INDEX idx_refresh_tokens_user            ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_tokens_token_expires   ON refresh_tokens(token, expires_at);
+CREATE INDEX idx_refresh_tokens_family_id       ON refresh_tokens(family_id);
+CREATE INDEX idx_refresh_tokens_family_active   ON refresh_tokens(user_id, family_id)
+    WHERE family_revoked_at IS NULL;
 
 CREATE INDEX idx_login_attempts_email_created   ON login_attempts(email, created_at);
 CREATE INDEX idx_login_attempts_ip              ON login_attempts(ip_address);
 
-CREATE INDEX idx_password_reset_tokens_hash     ON password_reset_tokens(token_hash);
-CREATE INDEX idx_password_reset_tokens_user     ON password_reset_tokens(user_id);
-
-CREATE INDEX idx_email_verification_tokens_hash ON email_verification_tokens(token_hash);
-CREATE INDEX idx_email_verification_tokens_user ON email_verification_tokens(user_id);
+CREATE INDEX idx_auth_tokens_hash               ON auth_tokens(token_hash);
+CREATE INDEX idx_auth_tokens_user_type          ON auth_tokens(user_id, type) WHERE user_id IS NOT NULL;
+CREATE INDEX idx_auth_tokens_email_type         ON auth_tokens(email, type, created_at DESC) WHERE email IS NOT NULL;
+CREATE INDEX idx_auth_tokens_ip_type            ON auth_tokens(ip_address, type, created_at DESC) WHERE ip_address IS NOT NULL;
+CREATE INDEX idx_auth_tokens_expires_type       ON auth_tokens(type, expires_at) WHERE used_at IS NULL;
 
 CREATE INDEX idx_security_events_user           ON security_events(user_id);
 CREATE INDEX idx_security_events_user_created   ON security_events(user_id, created_at DESC);
@@ -219,14 +207,6 @@ CREATE INDEX idx_users_locked_until
 CREATE INDEX idx_users_deletion_grace
     ON users(deletion_grace_period_ends)
     WHERE deletion_grace_period_ends IS NOT NULL;
-
--- deleteExpired() cleanup task
-CREATE INDEX idx_password_reset_tokens_expires
-    ON password_reset_tokens(expires_at);
-
--- deleteExpired() cleanup task
-CREATE INDEX idx_email_verification_tokens_expires
-    ON email_verification_tokens(expires_at);
 
 -- admin security-event filtering by type
 CREATE INDEX idx_security_events_type

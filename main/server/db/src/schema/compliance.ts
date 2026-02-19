@@ -2,8 +2,8 @@
 /**
  * Compliance Schema Types
  *
- * TypeScript interfaces for legal_documents, user_agreements,
- * consent_logs, and data_export_requests tables.
+ * TypeScript interfaces for legal_documents, consent_records,
+ * and data_export_requests tables.
  * Maps to migration 0500_compliance.sql.
  */
 
@@ -27,8 +27,7 @@ export type { ConsentType, DataExportStatus, DataExportType, DocumentType };
 // ============================================================================
 
 export const LEGAL_DOCUMENTS_TABLE = 'legal_documents';
-export const USER_AGREEMENTS_TABLE = 'user_agreements';
-export const CONSENT_LOGS_TABLE = 'consent_logs';
+export const CONSENT_RECORDS_TABLE = 'consent_records';
 export const DATA_EXPORT_REQUESTS_TABLE = 'data_export_requests';
 
 // ============================================================================
@@ -74,76 +73,6 @@ export interface UpdateLegalDocument {
   effectiveAt?: Date;
 }
 
-// ============================================================================
-// User Agreement Types
-// ============================================================================
-
-/**
- * User agreement record (SELECT result).
- * Tracks which user accepted which legal document version.
- * Append-only — no UpdateUserAgreement type.
- *
- * @see 0500_compliance.sql
- */
-export interface UserAgreement {
-  id: string;
-  userId: string;
-  documentId: string;
-  agreedAt: Date;
-  ipAddress: string | null;
-}
-
-/**
- * Fields for inserting a new user agreement.
- */
-export interface NewUserAgreement {
-  id?: string;
-  userId: string;
-  documentId: string;
-  agreedAt?: Date;
-  ipAddress?: string | null;
-}
-
-// ============================================================================
-// Consent Log Types
-// ============================================================================
-
-/**
- * GDPR consent audit trail record (SELECT result).
- * Append-only — records every consent grant or revocation.
- * No UpdateConsentLog type.
- *
- * @see 0500_compliance.sql
- */
-export interface ConsentLog {
-  id: string;
-  userId: string;
-  consentType: string;
-  granted: boolean;
-  ipAddress: string | null;
-  userAgent: string | null;
-  metadata: Record<string, unknown>;
-  createdAt: Date;
-}
-
-/**
- * Fields for inserting a new consent log entry.
- */
-export interface NewConsentLog {
-  id?: string;
-  userId: string;
-  consentType: string;
-  granted: boolean;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  metadata?: Record<string, unknown>;
-  createdAt?: Date;
-}
-
-// ============================================================================
-// Column Name Mappings (camelCase TS → snake_case SQL)
-// ============================================================================
-
 export const LEGAL_DOCUMENT_COLUMNS = {
   id: 'id',
   type: 'type',
@@ -154,17 +83,61 @@ export const LEGAL_DOCUMENT_COLUMNS = {
   createdAt: 'created_at',
 } as const;
 
-export const USER_AGREEMENT_COLUMNS = {
-  id: 'id',
-  userId: 'user_id',
-  documentId: 'document_id',
-  agreedAt: 'agreed_at',
-  ipAddress: 'ip_address',
-} as const;
+// ============================================================================
+// Consent Record Types
+// ============================================================================
 
-export const CONSENT_LOG_COLUMNS = {
+/**
+ * Discriminator for which compliance record this row represents.
+ * - `legal_document`: user accepted a legal document (replaces user_agreements)
+ * - `consent_preference`: GDPR consent grant/revocation (replaces consent_logs)
+ */
+export type ConsentRecordType = 'legal_document' | 'consent_preference';
+
+/**
+ * Consent record (SELECT result).
+ * Unified append-only record for legal document acceptance and GDPR consent.
+ *
+ * - `documentId` is set for `legal_document` records, NULL for `consent_preference`.
+ * - `consentType` is set for `consent_preference` records, NULL for `legal_document`.
+ * - `granted` is set for `consent_preference` records, NULL for `legal_document`.
+ *
+ * @see 0500_compliance.sql
+ */
+export interface ConsentRecord {
+  id: string;
+  userId: string;
+  recordType: ConsentRecordType;
+  documentId: string | null;
+  consentType: string | null;
+  granted: boolean | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+}
+
+/**
+ * Fields for inserting a new consent record (INSERT).
+ */
+export interface NewConsentRecord {
+  id?: string;
+  userId: string;
+  recordType: ConsentRecordType;
+  documentId?: string | null;
+  consentType?: string | null;
+  granted?: boolean | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  metadata?: Record<string, unknown>;
+  createdAt?: Date;
+}
+
+export const CONSENT_RECORD_COLUMNS = {
   id: 'id',
   userId: 'user_id',
+  recordType: 'record_type',
+  documentId: 'document_id',
   consentType: 'consent_type',
   granted: 'granted',
   ipAddress: 'ip_address',
@@ -172,8 +145,6 @@ export const CONSENT_LOG_COLUMNS = {
   metadata: 'metadata',
   createdAt: 'created_at',
 } as const;
-
-// DataExportType, DataExportStatus imported from @bslt/shared above
 
 // ============================================================================
 // Data Export Request Types
