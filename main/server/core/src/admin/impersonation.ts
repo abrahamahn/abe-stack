@@ -162,7 +162,7 @@ export function resetRateLimitStore(): void {
 function toAdminUser(user: {
   id: string;
   email: string;
-  username: string;
+  username: string | null;
   firstName: string;
   lastName: string;
   role: AppRole;

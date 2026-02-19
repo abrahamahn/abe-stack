@@ -26,8 +26,8 @@ export interface User {
   id: string;
   /** User's email address */
   email: string;
-  /** User's unique username */
-  username: string;
+  /** User's unique username — null for users without one */
+  username: string | null;
   /** User's first name */
   firstName: string;
   /** User's last name */

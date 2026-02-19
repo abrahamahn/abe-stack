@@ -892,12 +892,12 @@ export async function resetPassword(
   }
 
   // Validate password strength first
-  const passwordValidation = await validatePassword(newPassword, [
-    user.email,
-    user.username,
-    user.firstName,
-    user.lastName,
-  ]);
+  const passwordValidation = await validatePassword(
+    newPassword,
+    [user.email, user.username, user.firstName, user.lastName].filter(
+      (s): s is string => s !== null,
+    ),
+  );
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -973,12 +973,12 @@ export async function setPassword(
   }
 
   // Validate password strength
-  const passwordValidation = await validatePassword(newPassword, [
-    user.email,
-    user.username,
-    user.firstName,
-    user.lastName,
-  ]);
+  const passwordValidation = await validatePassword(
+    newPassword,
+    [user.email, user.username, user.firstName, user.lastName].filter(
+      (s): s is string => s !== null,
+    ),
+  );
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }

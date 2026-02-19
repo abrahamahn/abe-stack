@@ -117,7 +117,7 @@ export async function handleUpdateUsername(
       lastUsernameChange: now,
     });
 
-    if (updated === null) {
+    if (updated === null || updated.username === null) {
       return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
     }
 

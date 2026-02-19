@@ -36,7 +36,7 @@ export interface User {
   id: string;
   email: string;
   canonicalEmail: string;
-  username: string;
+  username: string | null;
   passwordHash: string;
   firstName: string;
   lastName: string;
@@ -77,7 +77,7 @@ export interface NewUser {
   id?: string;
   email: string;
   canonicalEmail: string;
-  username: string;
+  username?: string | null;
   passwordHash: string;
   firstName: string;
   lastName: string;
@@ -117,7 +117,7 @@ export interface NewUser {
 export interface UpdateUser {
   email?: string;
   canonicalEmail?: string;
-  username?: string;
+  username?: string | null;
   passwordHash?: string;
   firstName?: string;
   lastName?: string;

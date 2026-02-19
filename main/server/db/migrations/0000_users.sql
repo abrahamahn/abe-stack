@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS users (
     totp_enabled               BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- Profile
-    first_name                 TEXT,
-    last_name                  TEXT,
+    first_name                 TEXT NOT NULL DEFAULT '',
+    last_name                  TEXT NOT NULL DEFAULT '',
     bio                        TEXT,
     website                    TEXT,
     language                   TEXT,

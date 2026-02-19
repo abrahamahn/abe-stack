@@ -48,8 +48,8 @@ export interface User {
   id: UserId;
   /** User's email address */
   email: string;
-  /** User's unique username */
-  username: string;
+  /** User's unique username — null for users without one (e.g. new OAuth users) */
+  username: string | null;
   /** User's first name */
   firstName: string;
   /** User's last name */
@@ -190,7 +190,7 @@ export const userSchema: Schema<User> = createSchema((data: unknown) => {
   return {
     id: userIdSchema.parse(obj['id']),
     email: emailSchema.parse(obj['email']),
-    username: parseString(obj['username'], 'username'),
+    username: parseNullable(obj['username'], (v) => parseString(v, 'username')),
     firstName: parseString(obj['firstName'], 'firstName'),
     lastName: parseString(obj['lastName'], 'lastName'),
     avatarUrl: parseNullable(obj['avatarUrl'], (v) => parseString(v, 'avatarUrl', { url: true })),

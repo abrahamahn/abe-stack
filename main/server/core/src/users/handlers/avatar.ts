@@ -67,8 +67,8 @@ export interface ProfileUser {
   id: string;
   /** User's email address */
   email: string;
-  /** User's unique username */
-  username: string;
+  /** User's unique username — null for users without one */
+  username: string | null;
   /** User's first name */
   firstName: string;
   /** User's last name */
@@ -88,8 +88,8 @@ export interface ProfileUser {
  * Nullable fields can be set to null to clear them.
  */
 export interface UpdateProfileData {
-  /** New username */
-  username?: string;
+  /** New username — pass null to clear */
+  username?: string | null;
   /** New first name */
   firstName?: string;
   /** New last name */
@@ -143,8 +143,8 @@ export async function updateProfile(
   // Build update payload from provided fields
   const updatePayload: Record<string, unknown> = {};
   if ('username' in data) {
-    // Check username uniqueness if changing
-    if (data.username !== user.username) {
+    // Check username uniqueness if changing to a non-null value
+    if (data.username !== null && data.username !== user.username) {
       const existing = await repos.users.findByUsername(data.username);
       if (existing !== null && existing.id !== userId) {
         throw new BadRequestError('Username is already taken', 'USERNAME_TAKEN');
@@ -263,12 +263,12 @@ export async function changePassword(
   }
 
   // Validate new password strength against user's personal info
-  const passwordValidation = await validatePassword(newPassword, [
-    user.email,
-    user.username,
-    user.firstName,
-    user.lastName,
-  ]);
+  const passwordValidation = await validatePassword(
+    newPassword,
+    [user.email, user.username, user.firstName, user.lastName].filter(
+      (s): s is string => s !== null,
+    ),
+  );
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }

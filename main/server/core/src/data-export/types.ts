@@ -76,7 +76,7 @@ export interface UserDataExport {
     readonly email: string;
     readonly firstName: string;
     readonly lastName: string;
-    readonly username: string;
+    readonly username: string | null;
     readonly role: string;
     readonly createdAt: string;
   };
