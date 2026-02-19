@@ -103,10 +103,6 @@ export const emailLogIdSchema = createBrandedUuidSchema<EmailLogId>('EmailLogId'
 export type LegalDocumentId = string & { readonly __brand: 'LegalDocumentId' };
 export const legalDocumentIdSchema = createBrandedUuidSchema<LegalDocumentId>('LegalDocumentId');
 
-/** User Agreement ID (UUID) */
-export type UserAgreementId = string & { readonly __brand: 'UserAgreementId' };
-export const userAgreementIdSchema = createBrandedUuidSchema<UserAgreementId>('UserAgreementId');
-
-/** Consent Log ID (UUID) */
-export type ConsentLogId = string & { readonly __brand: 'ConsentLogId' };
-export const consentLogIdSchema = createBrandedUuidSchema<ConsentLogId>('ConsentLogId');
+/** Consent Record ID (UUID) — unified replacement for UserAgreementId + ConsentLogId */
+export type ConsentRecordId = string & { readonly __brand: 'ConsentRecordId' };
+export const consentRecordIdSchema = createBrandedUuidSchema<ConsentRecordId>('ConsentRecordId');

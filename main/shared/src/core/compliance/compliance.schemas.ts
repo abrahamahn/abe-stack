@@ -18,19 +18,13 @@ import {
   parseString,
 } from '../../primitives/schema';
 import {
-  consentLogIdSchema,
+  consentRecordIdSchema,
   legalDocumentIdSchema,
-  userAgreementIdSchema,
   userIdSchema,
 } from '../../primitives/schema/ids';
 
 import type { Schema } from '../../primitives/api';
-import type {
-  ConsentLogId,
-  LegalDocumentId,
-  UserAgreementId,
-  UserId,
-} from '../../primitives/schema/ids';
+import type { ConsentRecordId, LegalDocumentId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Constants
@@ -107,39 +101,30 @@ export interface UpdateLegalDocument {
   effectiveAt?: Date | undefined;
 }
 
-/** Full user agreement entity */
-export interface UserAgreement {
-  id: UserAgreementId;
-  userId: UserId;
-  documentId: LegalDocumentId;
-  agreedAt: Date;
-  ipAddress: string | null;
-}
+/** Consent record type discriminator */
+export type ConsentRecordType = 'legal_document' | 'consent_preference';
 
-/** Input for creating a user agreement */
-export interface CreateUserAgreement {
+/** Full consent record entity (unified replacement for UserAgreement + ConsentLog) */
+export interface ConsentRecord {
+  id: ConsentRecordId;
   userId: UserId;
-  documentId: LegalDocumentId;
-  ipAddress?: string | null | undefined;
-}
-
-/** Full consent log entry */
-export interface ConsentLog {
-  id: ConsentLogId;
-  userId: UserId;
-  consentType: string;
-  granted: boolean;
+  recordType: ConsentRecordType;
+  documentId: LegalDocumentId | null;
+  consentType: string | null;
+  granted: boolean | null;
   ipAddress: string | null;
   userAgent: string | null;
   metadata: Record<string, unknown>;
   createdAt: Date;
 }
 
-/** Input for creating a consent log entry */
-export interface CreateConsentLog {
+/** Input for creating a consent record */
+export interface CreateConsentRecord {
   userId: UserId;
-  consentType: string;
-  granted: boolean;
+  recordType: ConsentRecordType;
+  documentId?: LegalDocumentId | null | undefined;
+  consentType?: string | null | undefined;
+  granted?: boolean | null | undefined;
   ipAddress?: string | null | undefined;
   userAgent?: string | null | undefined;
   metadata?: Record<string, unknown> | undefined;
@@ -232,54 +217,35 @@ export const updateLegalDocumentSchema: Schema<UpdateLegalDocument> = createSche
 );
 
 // ============================================================================
-// User Agreement Schemas
+// Consent Record Schemas
 // ============================================================================
 
 /**
- * Full user agreement schema (matches DB SELECT result).
+ * Validate a consent record type string.
  */
-export const userAgreementSchema: Schema<UserAgreement> = createSchema((data: unknown) => {
+function parseConsentRecordType(value: unknown, label: string): ConsentRecordType {
+  const s = parseString(value, label);
+  if (s !== 'legal_document' && s !== 'consent_preference') {
+    throw new Error(`${label} must be 'legal_document' or 'consent_preference'`);
+  }
+  return s as ConsentRecordType;
+}
+
+/**
+ * Full consent record schema (matches DB SELECT result).
+ */
+export const consentRecordSchema: Schema<ConsentRecord> = createSchema((data: unknown) => {
   const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   return {
-    id: userAgreementIdSchema.parse(obj['id']),
+    id: consentRecordIdSchema.parse(obj['id']),
     userId: userIdSchema.parse(obj['userId']),
-    documentId: legalDocumentIdSchema.parse(obj['documentId']),
-    agreedAt: coerceDate(obj['agreedAt'], 'agreedAt'),
-    ipAddress: parseNullable(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
-  };
-});
-
-/**
- * Schema for creating a new user agreement.
- */
-export const createUserAgreementSchema: Schema<CreateUserAgreement> = createSchema(
-  (data: unknown) => {
-    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
-
-    return {
-      userId: userIdSchema.parse(obj['userId']),
-      documentId: legalDocumentIdSchema.parse(obj['documentId']),
-      ipAddress: parseNullableOptional(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
-    };
-  },
-);
-
-// ============================================================================
-// Consent Log Schemas
-// ============================================================================
-
-/**
- * Full consent log schema (matches DB SELECT result).
- */
-export const consentLogSchema: Schema<ConsentLog> = createSchema((data: unknown) => {
-  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
-
-  return {
-    id: consentLogIdSchema.parse(obj['id']),
-    userId: userIdSchema.parse(obj['userId']),
-    consentType: parseString(obj['consentType'], 'consentType', { min: 1 }),
-    granted: parseBoolean(obj['granted'], 'granted'),
+    recordType: parseConsentRecordType(obj['recordType'], 'recordType'),
+    documentId: parseNullable(obj['documentId'], (v) => legalDocumentIdSchema.parse(v)),
+    consentType: parseNullable(obj['consentType'], (v) =>
+      parseString(v, 'consentType', { min: 1 }),
+    ),
+    granted: parseNullable(obj['granted'], (v) => parseBoolean(v, 'granted')),
     ipAddress: parseNullable(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
     userAgent: parseNullable(obj['userAgent'], (v) => parseString(v, 'userAgent')),
     metadata: parseRecord(obj['metadata'], 'metadata'),
@@ -288,20 +254,26 @@ export const consentLogSchema: Schema<ConsentLog> = createSchema((data: unknown)
 });
 
 /**
- * Schema for creating a new consent log entry.
+ * Schema for creating a new consent record.
  */
-export const createConsentLogSchema: Schema<CreateConsentLog> = createSchema((data: unknown) => {
-  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+export const createConsentRecordSchema: Schema<CreateConsentRecord> = createSchema(
+  (data: unknown) => {
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
-  return {
-    userId: userIdSchema.parse(obj['userId']),
-    consentType: parseString(obj['consentType'], 'consentType', { min: 1 }),
-    granted: parseBoolean(obj['granted'], 'granted'),
-    ipAddress: parseNullableOptional(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
-    userAgent: parseNullableOptional(obj['userAgent'], (v) => parseString(v, 'userAgent')),
-    metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
-  };
-});
+    return {
+      userId: userIdSchema.parse(obj['userId']),
+      recordType: parseConsentRecordType(obj['recordType'], 'recordType'),
+      documentId: parseNullableOptional(obj['documentId'], (v) => legalDocumentIdSchema.parse(v)),
+      consentType: parseNullableOptional(obj['consentType'], (v) =>
+        parseString(v, 'consentType', { min: 1 }),
+      ),
+      granted: parseNullableOptional(obj['granted'], (v) => parseBoolean(v, 'granted')),
+      ipAddress: parseNullableOptional(obj['ipAddress'], (v) => parseString(v, 'ipAddress')),
+      userAgent: parseNullableOptional(obj['userAgent'], (v) => parseString(v, 'userAgent')),
+      metadata: parseOptional(obj['metadata'], (v) => parseRecord(v, 'metadata')),
+    };
+  },
+);
 
 /**
  * Schema for updating consent preferences.

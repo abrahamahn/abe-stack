@@ -2,7 +2,7 @@
 
 /**
  * @file Compliance Schemas Unit Tests
- * @description Comprehensive tests for legal documents, user agreements, and consent log schemas.
+ * @description Comprehensive tests for legal documents, consent records, and data export schemas.
  * @module Core/Compliance/Tests
  */
 
@@ -10,15 +10,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
   complianceActionResponseSchema,
-  consentLogSchema,
   consentPreferencesResponseSchema,
-  createConsentLogSchema,
+  consentRecordSchema,
+  createConsentRecordSchema,
   createLegalDocumentSchema,
-  createUserAgreementSchema,
   dataExportRequestedResponseSchema,
   legalDocumentSchema,
   updateLegalDocumentSchema,
-  userAgreementSchema,
 } from './compliance.schemas';
 
 import type {
@@ -26,12 +24,7 @@ import type {
   ConsentPreferencesResponse,
   DataExportRequestedResponse,
 } from './compliance.schemas';
-import type {
-  ConsentLogId,
-  LegalDocumentId,
-  UserAgreementId,
-  UserId,
-} from '../../primitives/schema/ids';
+import type { ConsentRecordId, LegalDocumentId, UserId } from '../../primitives/schema/ids';
 
 // ============================================================================
 // Test Data Fixtures
@@ -39,8 +32,7 @@ import type {
 
 const VALID_USER_ID = '12345678-1234-4abc-8abc-123456789001' as UserId;
 const VALID_LEGAL_DOC_ID = '12345678-1234-4abc-8abc-123456789002' as LegalDocumentId;
-const VALID_USER_AGREEMENT_ID = '12345678-1234-4abc-8abc-123456789003' as UserAgreementId;
-const VALID_CONSENT_LOG_ID = '12345678-1234-4abc-8abc-123456789004' as ConsentLogId;
+const VALID_CONSENT_RECORD_ID = '12345678-1234-4abc-8abc-123456789003' as ConsentRecordId;
 
 const VALID_DATE_ISO = '2024-01-01T00:00:00Z';
 const VALID_IP_ADDRESS = '192.168.1.1';
@@ -401,479 +393,401 @@ describe('updateLegalDocumentSchema', () => {
 });
 
 // ============================================================================
-// User Agreement Schemas
+// Consent Record Schemas (unified replacement for UserAgreement + ConsentLog)
 // ============================================================================
 
-describe('userAgreementSchema', () => {
-  describe('when given valid input', () => {
-    it('should parse complete user agreement with ipAddress', () => {
+describe('consentRecordSchema', () => {
+  describe('legal_document records', () => {
+    it('should parse a legal_document agreement record', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
+        id: VALID_CONSENT_RECORD_ID,
         userId: VALID_USER_ID,
+        recordType: 'legal_document',
         documentId: VALID_LEGAL_DOC_ID,
-        agreedAt: VALID_DATE_ISO,
+        consentType: null,
+        granted: null,
         ipAddress: VALID_IP_ADDRESS,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
       };
 
-      const result = userAgreementSchema.parse(input);
+      const result = consentRecordSchema.parse(input);
 
-      expect(result).toEqual({
-        id: VALID_USER_AGREEMENT_ID,
-        userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
-        agreedAt: new Date(VALID_DATE_ISO),
-        ipAddress: VALID_IP_ADDRESS,
-      });
+      expect(result.id).toBe(VALID_CONSENT_RECORD_ID);
+      expect(result.userId).toBe(VALID_USER_ID);
+      expect(result.recordType).toBe('legal_document');
+      expect(result.documentId).toBe(VALID_LEGAL_DOC_ID);
+      expect(result.consentType).toBeNull();
+      expect(result.granted).toBeNull();
+      expect(result.ipAddress).toBe(VALID_IP_ADDRESS);
+      expect(result.createdAt).toEqual(new Date(VALID_DATE_ISO));
     });
 
-    it('should parse with null ipAddress', () => {
+    it('should parse with all nullable fields set to null', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
+        id: VALID_CONSENT_RECORD_ID,
         userId: VALID_USER_ID,
+        recordType: 'legal_document',
         documentId: VALID_LEGAL_DOC_ID,
-        agreedAt: VALID_DATE_ISO,
+        consentType: null,
+        granted: null,
         ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
       };
 
-      const result = userAgreementSchema.parse(input);
+      const result = consentRecordSchema.parse(input);
 
       expect(result.ipAddress).toBeNull();
+      expect(result.userAgent).toBeNull();
     });
+  });
 
-    it('should parse agreedAt from Date object', () => {
-      const dateObj = new Date('2024-03-15T14:30:00Z');
+  describe('consent_preference records', () => {
+    it('should parse a consent_preference grant record', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
+        id: VALID_CONSENT_RECORD_ID,
         userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
-        agreedAt: dateObj,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'marketing_email',
+        granted: true,
         ipAddress: VALID_IP_ADDRESS,
+        userAgent: VALID_USER_AGENT,
+        metadata: { source: 'settings-page' },
+        createdAt: VALID_DATE_ISO,
       };
 
-      const result = userAgreementSchema.parse(input);
+      const result = consentRecordSchema.parse(input);
 
-      expect(result.agreedAt).toEqual(dateObj);
+      expect(result.recordType).toBe('consent_preference');
+      expect(result.consentType).toBe('marketing_email');
+      expect(result.granted).toBe(true);
+      expect(result.documentId).toBeNull();
+      expect(result.metadata).toEqual({ source: 'settings-page' });
+    });
+
+    it('should parse a consent_preference revocation (granted false)', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'analytics',
+        granted: false,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
+      };
+
+      const result = consentRecordSchema.parse(input);
+
+      expect(result.granted).toBe(false);
     });
   });
 
   describe('when given invalid input', () => {
-    it('should reject invalid userId UUID', () => {
+    it('should reject invalid recordType', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
-        userId: 'invalid-uuid',
-        documentId: VALID_LEGAL_DOC_ID,
-        agreedAt: VALID_DATE_ISO,
-        ipAddress: VALID_IP_ADDRESS,
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'invalid_type',
+        documentId: null,
+        consentType: null,
+        granted: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
       };
 
-      expect(() => userAgreementSchema.parse(input)).toThrow();
+      expect(() => consentRecordSchema.parse(input)).toThrow();
     });
 
-    it('should reject invalid documentId UUID', () => {
+    it('should reject missing recordType', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
+        id: VALID_CONSENT_RECORD_ID,
         userId: VALID_USER_ID,
-        documentId: 'invalid-uuid',
-        agreedAt: VALID_DATE_ISO,
-        ipAddress: VALID_IP_ADDRESS,
+        documentId: null,
+        consentType: null,
+        granted: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
       };
 
-      expect(() => userAgreementSchema.parse(input)).toThrow();
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject invalid userId UUID', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: 'not-a-uuid',
+        recordType: 'legal_document',
+        documentId: VALID_LEGAL_DOC_ID,
+        consentType: null,
+        granted: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject invalid documentId UUID when provided', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'legal_document',
+        documentId: 'not-a-uuid',
+        consentType: null,
+        granted: null,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject non-boolean granted when provided', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'analytics',
+        granted: 'yes',
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject non-record metadata', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'analytics',
+        granted: true,
+        ipAddress: null,
+        userAgent: null,
+        metadata: 'not-an-object',
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject array as metadata', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'analytics',
+        granted: true,
+        ipAddress: null,
+        userAgent: null,
+        metadata: ['invalid'],
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject empty consentType when non-null', () => {
+      const input = {
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: '',
+        granted: true,
+        ipAddress: null,
+        userAgent: null,
+        metadata: {},
+        createdAt: VALID_DATE_ISO,
+      };
+
+      expect(() => consentRecordSchema.parse(input)).toThrow();
     });
 
     it('should reject missing required fields', () => {
       const input = {
-        id: VALID_USER_AGREEMENT_ID,
+        id: VALID_CONSENT_RECORD_ID,
+        userId: VALID_USER_ID,
       };
 
-      expect(() => userAgreementSchema.parse(input)).toThrow();
+      expect(() => consentRecordSchema.parse(input)).toThrow();
     });
   });
 });
 
-describe('createUserAgreementSchema', () => {
+describe('createConsentRecordSchema', () => {
   describe('when given valid input', () => {
-    it('should parse with ipAddress as string', () => {
+    it('should parse minimal input (userId + recordType only)', () => {
       const input = {
         userId: VALID_USER_ID,
+        recordType: 'legal_document',
+      };
+
+      const result = createConsentRecordSchema.parse(input);
+
+      expect(result.userId).toBe(VALID_USER_ID);
+      expect(result.recordType).toBe('legal_document');
+      expect(result.documentId).toBeUndefined();
+      expect(result.consentType).toBeUndefined();
+      expect(result.granted).toBeUndefined();
+      expect(result.ipAddress).toBeUndefined();
+      expect(result.userAgent).toBeUndefined();
+      expect(result.metadata).toBeUndefined();
+    });
+
+    it('should parse legal_document record with documentId', () => {
+      const input = {
+        userId: VALID_USER_ID,
+        recordType: 'legal_document',
         documentId: VALID_LEGAL_DOC_ID,
         ipAddress: VALID_IP_ADDRESS,
       };
 
-      const result = createUserAgreementSchema.parse(input);
+      const result = createConsentRecordSchema.parse(input);
 
-      expect(result).toEqual({
+      expect(result.documentId).toBe(VALID_LEGAL_DOC_ID);
+      expect(result.ipAddress).toBe(VALID_IP_ADDRESS);
+    });
+
+    it('should parse consent_preference record with consentType and granted', () => {
+      const input = {
         userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
+        recordType: 'consent_preference',
+        consentType: 'analytics',
+        granted: false,
         ipAddress: VALID_IP_ADDRESS,
-      });
+        userAgent: VALID_USER_AGENT,
+        metadata: { campaign: 'onboarding' },
+      };
+
+      const result = createConsentRecordSchema.parse(input);
+
+      expect(result.consentType).toBe('analytics');
+      expect(result.granted).toBe(false);
+      expect(result.metadata).toEqual({ campaign: 'onboarding' });
+    });
+
+    it('should parse with documentId as null', () => {
+      const input = {
+        userId: VALID_USER_ID,
+        recordType: 'consent_preference',
+        documentId: null,
+        consentType: 'marketing_email',
+        granted: true,
+      };
+
+      const result = createConsentRecordSchema.parse(input);
+
+      expect(result.documentId).toBeNull();
     });
 
     it('should parse with ipAddress as null', () => {
       const input = {
         userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
+        recordType: 'legal_document',
         ipAddress: null,
       };
 
-      const result = createUserAgreementSchema.parse(input);
+      const result = createConsentRecordSchema.parse(input);
 
       expect(result.ipAddress).toBeNull();
     });
 
-    it('should parse with ipAddress as undefined (omitted)', () => {
+    it('should parse with empty metadata object', () => {
       const input = {
         userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
-        ipAddress: undefined,
+        recordType: 'consent_preference',
+        consentType: 'profiling',
+        granted: true,
+        metadata: {},
       };
 
-      const result = createUserAgreementSchema.parse(input);
+      const result = createConsentRecordSchema.parse(input);
 
-      expect(result.ipAddress).toBeUndefined();
-    });
-
-    it('should parse without ipAddress key present', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        documentId: VALID_LEGAL_DOC_ID,
-      };
-
-      const result = createUserAgreementSchema.parse(input);
-
-      expect(result.ipAddress).toBeUndefined();
+      expect(result.metadata).toEqual({});
     });
   });
 
   describe('when given invalid input', () => {
-    it('should reject invalid userId', () => {
+    it('should reject missing userId', () => {
+      const input = {
+        recordType: 'legal_document',
+        documentId: VALID_LEGAL_DOC_ID,
+      };
+
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject missing recordType', () => {
+      const input = {
+        userId: VALID_USER_ID,
+        documentId: VALID_LEGAL_DOC_ID,
+      };
+
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject invalid recordType value', () => {
+      const input = {
+        userId: VALID_USER_ID,
+        recordType: 'user_agreement',
+      };
+
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
+    });
+
+    it('should reject invalid userId UUID', () => {
       const input = {
         userId: 'not-a-uuid',
-        documentId: VALID_LEGAL_DOC_ID,
-        ipAddress: VALID_IP_ADDRESS,
+        recordType: 'legal_document',
       };
 
-      expect(() => createUserAgreementSchema.parse(input)).toThrow();
-    });
-
-    it('should reject missing required userId', () => {
-      const input = {
-        documentId: VALID_LEGAL_DOC_ID,
-        ipAddress: VALID_IP_ADDRESS,
-      };
-
-      expect(() => createUserAgreementSchema.parse(input)).toThrow();
-    });
-
-    it('should reject missing required documentId', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        ipAddress: VALID_IP_ADDRESS,
-      };
-
-      expect(() => createUserAgreementSchema.parse(input)).toThrow();
-    });
-  });
-});
-
-// ============================================================================
-// Consent Log Schemas
-// ============================================================================
-
-describe('consentLogSchema', () => {
-  describe('when given valid input', () => {
-    it('should parse complete consent log with all fields', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: { source: 'web', version: '1.0' },
-        createdAt: VALID_DATE_ISO,
-      };
-
-      const result = consentLogSchema.parse(input);
-
-      expect(result).toEqual({
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: { source: 'web', version: '1.0' },
-        createdAt: new Date(VALID_DATE_ISO),
-      });
-    });
-
-    it('should parse with granted false', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'analytics',
-        granted: false,
-        ipAddress: null,
-        userAgent: null,
-        metadata: {},
-        createdAt: VALID_DATE_ISO,
-      };
-
-      const result = consentLogSchema.parse(input);
-
-      expect(result.granted).toBe(false);
-    });
-
-    it('should parse with null ipAddress and userAgent', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'third_party_sharing',
-        granted: true,
-        ipAddress: null,
-        userAgent: null,
-        metadata: {},
-        createdAt: VALID_DATE_ISO,
-      };
-
-      const result = consentLogSchema.parse(input);
-
-      expect(result.ipAddress).toBeNull();
-      expect(result.userAgent).toBeNull();
-    });
-
-    it('should parse with empty metadata object', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'profiling',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: {},
-        createdAt: VALID_DATE_ISO,
-      };
-
-      const result = consentLogSchema.parse(input);
-
-      expect(result.metadata).toEqual({});
-    });
-  });
-
-  describe('when given invalid input', () => {
-    it('should reject non-record metadata', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: 'not-a-record',
-        createdAt: VALID_DATE_ISO,
-      };
-
-      expect(() => consentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject array as metadata', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'analytics',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: ['array', 'values'],
-        createdAt: VALID_DATE_ISO,
-      };
-
-      expect(() => consentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject empty consentType string', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: '',
-        granted: true,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: {},
-        createdAt: VALID_DATE_ISO,
-      };
-
-      expect(() => consentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject non-boolean granted', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: 'yes',
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: {},
-        createdAt: VALID_DATE_ISO,
-      };
-
-      expect(() => consentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject missing required fields', () => {
-      const input = {
-        id: VALID_CONSENT_LOG_ID,
-        userId: VALID_USER_ID,
-      };
-
-      expect(() => consentLogSchema.parse(input)).toThrow();
-    });
-  });
-});
-
-describe('createConsentLogSchema', () => {
-  describe('when given valid input', () => {
-    it('should parse minimal required input', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-      };
-
-      const result = createConsentLogSchema.parse(input);
-
-      expect(result).toEqual({
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-        ipAddress: undefined,
-        userAgent: undefined,
-        metadata: undefined,
-      });
-    });
-
-    it('should parse with all optional fields provided', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'analytics',
-        granted: false,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: { campaign: 'summer2024' },
-      };
-
-      const result = createConsentLogSchema.parse(input);
-
-      expect(result).toEqual({
-        userId: VALID_USER_ID,
-        consentType: 'analytics',
-        granted: false,
-        ipAddress: VALID_IP_ADDRESS,
-        userAgent: VALID_USER_AGENT,
-        metadata: { campaign: 'summer2024' },
-      });
-    });
-
-    it('should parse with ipAddress null', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'third_party_sharing',
-        granted: true,
-        ipAddress: null,
-      };
-
-      const result = createConsentLogSchema.parse(input);
-
-      expect(result.ipAddress).toBeNull();
-    });
-
-    it('should parse with userAgent null', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'profiling',
-        granted: false,
-        userAgent: null,
-      };
-
-      const result = createConsentLogSchema.parse(input);
-
-      expect(result.userAgent).toBeNull();
-    });
-
-    it('should parse with empty metadata object', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-        granted: true,
-        metadata: {},
-      };
-
-      const result = createConsentLogSchema.parse(input);
-
-      expect(result.metadata).toEqual({});
-    });
-  });
-
-  describe('when given invalid input', () => {
-    it('should reject missing required userId', () => {
-      const input = {
-        consentType: 'marketing_email',
-        granted: true,
-      };
-
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject missing required consentType', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        granted: true,
-      };
-
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject missing required granted', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: 'marketing_email',
-      };
-
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
-    });
-
-    it('should reject empty consentType', () => {
-      const input = {
-        userId: VALID_USER_ID,
-        consentType: '',
-        granted: true,
-      };
-
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
     });
 
     it('should reject invalid metadata type', () => {
       const input = {
         userId: VALID_USER_ID,
+        recordType: 'consent_preference',
         consentType: 'analytics',
         granted: true,
         metadata: 'invalid',
       };
 
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
     });
 
     it('should reject array as metadata', () => {
       const input = {
         userId: VALID_USER_ID,
+        recordType: 'consent_preference',
         consentType: 'analytics',
         granted: true,
         metadata: [{ key: 'value' }],
       };
 
-      expect(() => createConsentLogSchema.parse(input)).toThrow();
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
     });
   });
 
@@ -881,6 +795,7 @@ describe('createConsentLogSchema', () => {
     it('should handle granted false with all optional fields', () => {
       const input = {
         userId: VALID_USER_ID,
+        recordType: 'consent_preference',
         consentType: 'marketing_email',
         granted: false,
         ipAddress: VALID_IP_ADDRESS,
@@ -888,7 +803,7 @@ describe('createConsentLogSchema', () => {
         metadata: { reason: 'user_declined' },
       };
 
-      const result = createConsentLogSchema.parse(input);
+      const result = createConsentRecordSchema.parse(input);
 
       expect(result.granted).toBe(false);
       expect(result.metadata).toEqual({ reason: 'user_declined' });
@@ -897,6 +812,7 @@ describe('createConsentLogSchema', () => {
     it('should handle complex metadata structures', () => {
       const input = {
         userId: VALID_USER_ID,
+        recordType: 'consent_preference',
         consentType: 'profiling',
         granted: true,
         metadata: {
@@ -910,7 +826,7 @@ describe('createConsentLogSchema', () => {
         },
       };
 
-      const result = createConsentLogSchema.parse(input);
+      const result = createConsentRecordSchema.parse(input);
 
       expect(result.metadata).toEqual({
         source: 'web',
@@ -921,6 +837,17 @@ describe('createConsentLogSchema', () => {
           region: 'US',
         },
       });
+    });
+
+    it('killer test: invalid userId + invalid recordType + array metadata', () => {
+      // Combines multiple failure conditions to verify schema validates all fields
+      const input = {
+        userId: 'bad-uuid',
+        recordType: 'not_a_type',
+        metadata: [1, 2, 3],
+      };
+
+      expect(() => createConsentRecordSchema.parse(input)).toThrow();
     });
   });
 });

@@ -564,11 +564,10 @@ export {
 export {
   calculateHardDeleteDate,
   CONSENT_TYPES,
-  consentLogSchema,
-  createConsentLogSchema,
+  consentRecordSchema,
+  createConsentRecordSchema,
   createDataExportRequestSchema,
   createLegalDocumentSchema,
-  createUserAgreementSchema,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
   dataExportRequestSchema,
@@ -585,13 +584,12 @@ export {
   needsReacceptance,
   updateConsentPreferencesRequestSchema,
   updateLegalDocumentSchema,
-  userAgreementSchema,
-  type ConsentLog,
+  type ConsentRecord,
+  type ConsentRecordType,
   type ConsentType,
-  type CreateConsentLog,
+  type CreateConsentRecord,
   type CreateDataExportRequest,
   type CreateLegalDocument,
-  type CreateUserAgreement,
   type DataExportRequest,
   type DataExportStatus,
   type DataExportType,
@@ -605,7 +603,6 @@ export {
   type SoftDeletable,
   type UpdateConsentPreferencesRequest,
   type UpdateLegalDocument,
-  type UserAgreement,
 } from './compliance';
 
 // ============================================================================

@@ -12,13 +12,12 @@ export { getEffectiveConsent, isConsentGranted, needsReacceptance } from './comp
 // --- compliance.schemas ---
 export {
   complianceActionResponseSchema,
-  CONSENT_TYPES,
-  consentLogSchema,
   consentPreferencesResponseSchema,
-  createConsentLogSchema,
+  consentRecordSchema,
+  CONSENT_TYPES,
+  createConsentRecordSchema,
   createDataExportRequestSchema,
   createLegalDocumentSchema,
-  createUserAgreementSchema,
   DATA_EXPORT_STATUSES,
   DATA_EXPORT_TYPES,
   dataExportRequestedResponseSchema,
@@ -27,18 +26,17 @@ export {
   legalDocumentSchema,
   updateConsentPreferencesRequestSchema,
   updateLegalDocumentSchema,
-  userAgreementSchema,
 } from './compliance.schemas';
 
 export type {
   ComplianceActionResponse,
-  ConsentLog,
   ConsentPreferencesResponse,
+  ConsentRecord,
+  ConsentRecordType,
   ConsentType,
-  CreateConsentLog,
+  CreateConsentRecord,
   CreateDataExportRequest,
   CreateLegalDocument,
-  CreateUserAgreement,
   DataExportRequest,
   DataExportRequestedResponse,
   DataExportStatus,
@@ -47,7 +45,6 @@ export type {
   LegalDocument,
   UpdateConsentPreferencesRequest,
   UpdateLegalDocument,
-  UserAgreement,
 } from './compliance.schemas';
 
 // --- deletion.logic ---
