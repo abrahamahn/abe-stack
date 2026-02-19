@@ -119,7 +119,7 @@ export interface AuthResult {
   user: {
     id: UserId;
     email: string;
-    username: string;
+    username: string | null;
     firstName: string;
     lastName: string;
     avatarUrl: string | null;
@@ -1170,7 +1170,7 @@ export async function verifyEmail(
     .findByUserId(userId)
     .then((memberships) => {
       if (memberships.length === 0) {
-        const workspaceName = `${username}'s Workspace`;
+        const workspaceName = `${username ?? 'My'}'s Workspace`;
         return createTenant(db, repos, userId, { name: workspaceName });
       }
       return undefined;
