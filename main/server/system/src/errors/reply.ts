@@ -19,8 +19,7 @@
 
 import { getErrorStatusCode, isOk, toAppError } from '@bslt/shared';
 
-import type { AppError, Result } from '@bslt/shared';
-import type { ApiErrorResponse, ApiSuccessResponse } from '@bslt/shared';
+import type { AppError, Result, ApiErrorResponse, ApiSuccessResponse } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -93,9 +92,7 @@ export function sendResult<T>(
   }
 
   const error = toAppError(result.error);
-  void reply
-    .status(getErrorStatusCode(error))
-    .send(buildErrorBody(error, request.correlationId));
+  void reply.status(getErrorStatusCode(error)).send(buildErrorBody(error, request.correlationId));
 }
 
 /**
@@ -119,6 +116,6 @@ export function replyError(reply: FastifyReply, error: AppError, correlationId?:
  * @param data - The response payload
  * @param status - HTTP status code (default: 200)
  */
-export function replyOk<T>(reply: FastifyReply, data: T, status = 200): void {
+export function replyOk(reply: FastifyReply, data: unknown, status = 200): void {
   void reply.status(status).send(buildOkBody(data));
 }

@@ -12,7 +12,7 @@
  * - Error serialization for debugging
  */
 
-import { getMetricsCollector } from '../system/metrics';
+import { getMetricsCollector } from '../metrics';
 
 import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
 

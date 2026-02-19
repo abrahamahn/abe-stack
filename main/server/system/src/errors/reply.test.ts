@@ -9,8 +9,6 @@
  *  3. Concurrent calls must not share reply state.
  */
 
-import { describe, expect, test, vi, type Mock } from 'vitest';
-
 import {
   AccountLockedError,
   BadRequestError,
@@ -22,9 +20,11 @@ import {
   TooManyRequestsError,
   UnauthorizedError,
 } from '@bslt/shared';
+import { describe, expect, test, vi, type Mock } from 'vitest';
 
 import { replyError, replyOk, sendResult } from './reply';
 
+import type { AppError } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -82,9 +82,7 @@ describe('replyError', () => {
     const { reply, status, send } = makeSend();
     replyError(reply, new NotFoundError('Missing item'));
     expect(status).toHaveBeenCalledWith(404);
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({ ok: false }),
-    );
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
   });
 
   test('includes correlationId when provided', () => {
@@ -216,4 +214,3 @@ describe('concurrent call isolation', () => {
 });
 
 // Type import used only in test assertion — suppresses lint unused import warning
-import type { AppError } from '@bslt/shared';

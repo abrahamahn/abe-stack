@@ -16,16 +16,18 @@ const OUT = join(ROOT, '_graphs');
 
 if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true });
 
-const EXCLUDE = String.raw`(__tests__|\.test\.|\.spec\.)`;
+// Exclude test files, compiled dist output, and TypeScript declaration files.
+// Without /dist/ and \.d\.ts, madge follows @bslt/* workspace packages into
+// their compiled output and reports hundreds of false circular dependencies.
+const EXCLUDE = String.raw`(__tests__|\.test\.|\.spec\.|/dist/|\.d\.ts$)`;
 
 const targets = [
   { name: 'system-src', dir: SRC },
   { name: 'system-cache', dir: join(SRC, 'cache') },
   { name: 'system-config', dir: join(SRC, 'config') },
+  { name: 'system-email', dir: join(SRC, 'email') },
   { name: 'system-geo-ip', dir: join(SRC, 'geo-ip') },
   { name: 'system-logger', dir: join(SRC, 'logger') },
-  { name: 'system-mailer', dir: join(SRC, 'mailer') },
-  { name: 'system-middleware', dir: join(SRC, 'middleware') },
   { name: 'system-observability', dir: join(SRC, 'observability') },
   { name: 'system-queue', dir: join(SRC, 'queue') },
   { name: 'system-routing', dir: join(SRC, 'routing') },

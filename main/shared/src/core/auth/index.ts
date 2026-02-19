@@ -189,61 +189,22 @@ export {
   getStrengthLabel,
   validatePassword,
   validatePasswordBasic,
-  type PasswordConfig,
-  type PasswordValidationResult,
-} from './passwords/auth.password';
-
-export { estimatePasswordStrength, type StrengthResult } from './passwords/auth.password.strength';
-
-export {
+  estimatePasswordStrength,
   calculateEntropy,
   calculateScore,
   estimateCrackTime,
   generateFeedback,
   getCharsetSize,
-  type PasswordPenalties,
-} from './passwords/auth.password.scoring';
-
-export {
   containsUserInput,
   hasKeyboardPattern,
   hasRepeatedChars,
   hasSequentialChars,
   isCommonPassword,
-} from './passwords/auth.password.patterns';
-
-// --- Auth errors (canonical in engine/errors) ---
-import {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  OAuthError,
-  OAuthStateMismatchError,
-  TokenReuseError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UserNotFoundError,
-  WeakPasswordError,
-} from '../../system/errors';
-
-export {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  OAuthError,
-  OAuthStateMismatchError,
-  TokenReuseError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UserNotFoundError,
-  WeakPasswordError,
-};
+  type PasswordConfig,
+  type PasswordValidationResult,
+  type StrengthResult,
+  type PasswordPenalties,
+} from './passwords';
 
 // --- Sessions ---
 export { getSessionAge, isSessionActive, isSessionRevoked } from './auth.sessions.logic';

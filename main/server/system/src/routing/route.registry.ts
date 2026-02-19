@@ -1,4 +1,4 @@
-// main/server/system/src/routing/route-registry.ts
+// main/server/system/src/routing/route.registry.ts
 /**
  * Route Registry
  *
@@ -8,7 +8,7 @@
  * @module routing/route-registry
  */
 
-import type { HttpMethod } from './routing';
+import type { HttpMethod } from './types';
 
 // ============================================================================
 // Types

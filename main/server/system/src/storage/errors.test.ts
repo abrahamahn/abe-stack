@@ -11,9 +11,8 @@
  *     (idempotency), preserving the original status code.
  */
 
-import { describe, expect, test } from 'vitest';
-
 import { AppError } from '@bslt/shared';
+import { describe, expect, test } from 'vitest';
 
 import {
   isStorageError,

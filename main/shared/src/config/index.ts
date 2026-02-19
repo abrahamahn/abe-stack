@@ -203,9 +203,6 @@ export {
 export { DEFAULT_SEARCH_SCHEMAS } from './search.defaults';
 
 // ============================================================================
-// Re-exports (canonical sources outside config/)
+// Env Helpers
 // ============================================================================
-import { getBool, getInt, getList, getRequired } from '../primitives/helpers';
-import { getRawEnv } from '../system/env';
-
-export { getBool, getInt, getList, getRawEnv, getRequired };
+export { getBool, getInt, getList, getRawEnv, getRequired } from './env.helpers';

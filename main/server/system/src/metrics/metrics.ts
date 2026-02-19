@@ -1,4 +1,4 @@
-// main/server/system/src/system/metrics.ts
+// main/server/system/src/metrics/metrics.ts
 /**
  * In-Memory Metrics Collector
  *

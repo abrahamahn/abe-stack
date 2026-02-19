@@ -6,13 +6,12 @@
  * Uses ioredis for connection pooling and pipelining.
  */
 
-import redisConstructor, { type Redis, type RedisOptions } from 'ioredis';
-
 import {
   CacheConnectionError,
   CacheDeserializationError,
   CacheSerializationError,
 } from '@bslt/shared';
+import redisConstructor, { type Redis, type RedisOptions } from 'ioredis';
 
 import type {
   CacheDeleteOptions,

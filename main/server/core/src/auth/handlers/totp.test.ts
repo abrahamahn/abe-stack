@@ -946,8 +946,9 @@ describe('handleTotpLoginVerify', () => {
         code: '123456',
       };
 
-      const JwtError = vi.mocked(await import('../../../../system/src'))
-        .JwtError as unknown as new (message: string) => Error;
+      const JwtError = vi.mocked(await import('../../../../system/src'))[
+        'JwtError'
+      ] as unknown as new (message: string) => Error;
       mockJwtVerify.mockImplementation(() => {
         throw new JwtError('Invalid JWT');
       });

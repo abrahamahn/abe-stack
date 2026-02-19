@@ -82,65 +82,61 @@ function isZodLikeError(error: unknown): error is ZodLikeError {
  * @param server - The Fastify instance to attach the handler to
  */
 export function registerErrorHandler(server: FastifyInstance): void {
-  server.setErrorHandler(
-    (error: Error, request: FastifyRequest, reply: FastifyReply): void => {
-      // Use request-scoped logger if available (set by logging middleware);
-      // fall back to server logger when the error fires before onRequest.
-      const log = request.logger ?? server.log;
+  server.setErrorHandler((error: Error, request: FastifyRequest, reply: FastifyReply): void => {
+    const log = request.logger;
 
-      // ── 1. Fastify JSON-schema validation (ajv) ──────────────────────────
-      if (isFastifyValidationError(error)) {
-        log.warn('Request schema validation failed', {
-          method: request.method,
-          url: request.url,
-          validationContext: error.validationContext,
-          errors: error.validation,
-        });
-        replyError(reply, new BadRequestError('Request validation failed'), request.correlationId);
-        return;
-      }
+    // ── 1. Fastify JSON-schema validation (ajv) ──────────────────────────
+    if (isFastifyValidationError(error)) {
+      log.warn('Request schema validation failed', {
+        method: request.method,
+        url: request.url,
+        validationContext: error.validationContext,
+        errors: error.validation,
+      });
+      replyError(reply, new BadRequestError('Request validation failed'), request.correlationId);
+      return;
+    }
 
-      // ── 2. Zod duck-typed errors ──────────────────────────────────────────
-      if (isZodLikeError(error)) {
-        log.warn('Zod validation failed', {
-          method: request.method,
-          url: request.url,
-          issueCount: error.issues.length,
-        });
-        void reply.status(422).send(formatValidationErrors(error.issues));
-        return;
-      }
+    // ── 2. Zod duck-typed errors ──────────────────────────────────────────
+    if (isZodLikeError(error)) {
+      log.warn('Zod validation failed', {
+        method: request.method,
+        url: request.url,
+        issueCount: error.issues.length,
+      });
+      void reply.status(422).send(formatValidationErrors(error.issues));
+      return;
+    }
 
-      // ── 3 & 4. AppError subclasses + generic errors via mapper ────────────
-      const response = mapErrorToHttpResponse(error, log);
+    // ── 3 & 4. AppError subclasses + generic errors via mapper ────────────
+    const response = mapErrorToHttpResponse(error, log);
 
-      if (response.status >= 500) {
-        log.error(error, {
-          method: request.method,
-          url: request.url,
+    if (response.status >= 500) {
+      log.error(error, {
+        method: request.method,
+        url: request.url,
+        statusCode: response.status,
+        ip: request.ip,
+      });
+    } else {
+      // AppError subclasses handled here (4xx) — summary only, no stack
+      if (!(error instanceof AppError)) {
+        // Rare: non-AppError that mapped to <500 — still warn
+        log.warn('Unexpected non-AppError mapped to 4xx', {
+          errorName: error.name,
           statusCode: response.status,
-          ip: request.ip,
         });
       } else {
-        // AppError subclasses handled here (4xx) — summary only, no stack
-        if (!(error instanceof AppError)) {
-          // Rare: non-AppError that mapped to <500 — still warn
-          log.warn('Unexpected non-AppError mapped to 4xx', {
-            errorName: (error as Error).name,
-            statusCode: response.status,
-          });
-        } else {
-          log.warn('Client error', {
-            code: error.code,
-            message: error.message,
-            statusCode: response.status,
-            method: request.method,
-            url: request.url,
-          });
-        }
+        log.warn('Client error', {
+          code: error.code,
+          message: error.message,
+          statusCode: response.status,
+          method: request.method,
+          url: request.url,
+        });
       }
+    }
 
-      void reply.status(response.status).send({ ok: false, error: response.body });
-    },
-  );
+    void reply.status(response.status).send({ ok: false, error: response.body });
+  });
 }

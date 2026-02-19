@@ -10,8 +10,6 @@
  *     not appear in the response body — only a generic 401 message is allowed.
  */
 
-import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
-
 import {
   AccountLockedError,
   BadRequestError,
@@ -24,6 +22,7 @@ import {
   UnauthorizedError,
   ValidationError,
 } from '@bslt/shared';
+import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 import { registerErrorHandler } from './handler';
 
@@ -352,7 +351,7 @@ describe('logger fallback when request.logger is undefined', () => {
     registerErrorHandler(server);
 
     // Simulate an error fired before onRequest (no request.logger set on request)
-    const request = createMockRequest();  // no `logger` key — tests the undefined fallback
+    const request = createMockRequest(); // no `logger` key — tests the undefined fallback
     const reply = createMockReply();
     const error = new Error('Crash before middleware');
 
@@ -366,7 +365,7 @@ describe('logger fallback when request.logger is undefined', () => {
     const { server, capturedHandler } = createMockServer(serverLog);
     registerErrorHandler(server);
 
-    const request = createMockRequest();  // no `logger` key
+    const request = createMockRequest(); // no `logger` key
     const reply = createMockReply();
     const error = new NotFoundError('No such thing');
 

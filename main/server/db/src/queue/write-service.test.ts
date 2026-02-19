@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WriteService, createWriteService, type WriteServiceOptions } from './write-service';
 
 import type { DbClient } from '../client';
-import type { BeforeValidateHook, WriteBatch, WriteContext, WriteOperation } from './types';
+import type { BeforeValidateHook, WriteBatch, WriteContext, WriteOperation } from './write-types';
 import type { SubscriptionManager } from '@bslt/shared';
 
 // ============================================================================

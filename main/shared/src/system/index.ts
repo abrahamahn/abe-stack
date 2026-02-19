@@ -806,6 +806,7 @@ export {
   type WebhookListResponse,
   type WebhookMutationResponse,
   type WebhookResponse,
+  type WebhookEventType,
   type WebhookWithDeliveries,
 } from './webhooks';
 

@@ -18,7 +18,7 @@ export {
   type SortSpec,
   type SqlFragment,
   type TableSpec,
-} from './types/types';
+} from './types';
 
 // Conditions
 export {

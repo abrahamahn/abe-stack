@@ -19,6 +19,6 @@ export {
   MetricsCollector,
   resetMetricsCollector,
   type MetricsSummary,
-} from './metrics';
+} from '../metrics';
 
 export type { SystemContext } from './types';

@@ -59,6 +59,7 @@
     "graph:shared": "node --import tsx main/tools/scripts/audit/graph-shared.ts",
     "graph:server": "node --import tsx main/tools/scripts/audit/graph-server.ts",
     "graph:server-system": "node --import tsx main/tools/scripts/audit/graph-server-system.ts",
+    "graph:server-system:full": "node --import tsx main/tools/scripts/audit/graph-server-system-full.ts",
     "graph:db": "node --import tsx main/tools/scripts/audit/graph-db.ts",
     "line-count": "node --import tsx main/tools/scripts/audit/line-count.ts"
   },

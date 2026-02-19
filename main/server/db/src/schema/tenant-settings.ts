@@ -30,6 +30,7 @@ export interface TenantSetting {
   tenantId: string;
   key: string;
   value: unknown;
+  createdAt: Date;
   updatedAt: Date;
 }
 
@@ -45,6 +46,7 @@ export interface NewTenantSetting {
   tenantId: string;
   key: string;
   value?: unknown;
+  createdAt?: Date;
   updatedAt?: Date;
 }
 
@@ -69,5 +71,6 @@ export const TENANT_SETTING_COLUMNS = {
   tenantId: 'tenant_id',
   key: 'key',
   value: 'value',
+  createdAt: 'created_at',
   updatedAt: 'updated_at',
 } as const;

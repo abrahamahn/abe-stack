@@ -37,6 +37,7 @@ const mockSettingRow = {
   tenant_id: 'tenant-001',
   key: 'branding.primary_color',
   value: '#3b82f6',
+  created_at: new Date('2024-01-01'),
   updated_at: new Date('2024-06-01'),
 };
 

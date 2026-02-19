@@ -1,4 +1,4 @@
-// main/server/system/src/system/metrics.test.ts
+// main/server/system/src/metrics/metrics.test.ts
 /**
  * Metrics Collector Tests
  *

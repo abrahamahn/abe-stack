@@ -2,7 +2,6 @@
 import { describe, expect, test } from 'vitest';
 
 import { JwtError, sign as jwtSign } from './jwt';
-
 import {
   checkTokenSecret,
   createJwtRotationHandler,

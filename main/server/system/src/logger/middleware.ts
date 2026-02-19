@@ -12,7 +12,7 @@ import {
   getOrCreateCorrelationId,
 } from '@bslt/shared';
 
-import { getMetricsCollector } from '../system/metrics';
+import { getMetricsCollector } from '../metrics';
 
 import { createRequestLogger } from './logger';
 

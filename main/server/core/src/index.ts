@@ -20,7 +20,7 @@ export { fileRoutes } from './files';
 export { notificationRoutes } from './notifications';
 export {
   coreApiManifestRouteModuleRegistrations,
-  coreRouteModuleRegistrations
+  coreRouteModuleRegistrations,
 } from './route-modules';
 export { userRoutes } from './users';
 export { webhookRoutes } from './webhooks';
@@ -29,18 +29,11 @@ export { bootstrapSystem, type SystemContext } from './bootstrap';
 
 // Re-export common types for consumers (apps/server)
 export type { AppConfig } from '@bslt/shared/config';
-export type {
-  DbClient,
-  PostgresPubSub,
-  QueueStore,
-  Repositories,
-  SessionContext
-} from '../../db/src';
+export type { DbClient, PostgresPubSub, QueueStore, Repositories, SessionContext } from '@bslt/db';
 export type {
   Logger,
   QueueServer,
   ServerSearchProvider,
   SmsProvider,
-  WriteService
-} from '../../system/src';
-
+  WriteService,
+} from '@bslt/server-system';

@@ -26,4 +26,4 @@ export type {
   JobListOptions,
   JobListResult,
   QueueStats,
-} from './types/index';
+} from './types';

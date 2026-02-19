@@ -1,13 +1,8 @@
 // main/server/system/src/security/crypto/jwt.ts
 // Re-export canonical JWT implementation from @bslt/shared.
 
-import {
-  checkTokenSecret,
-  decode,
-  JwtError,
-  sign,
-  verify,
-} from '@bslt/shared/system';
+import { checkTokenSecret, decode, JwtError, sign, verify } from '@bslt/shared/system';
+
 import type {
   JwtErrorCode,
   JwtHeader,

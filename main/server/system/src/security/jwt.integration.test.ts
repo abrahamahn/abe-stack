@@ -7,9 +7,8 @@
 
 import { createHmac } from 'node:crypto';
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { AppError } from '@bslt/shared';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { checkTokenSecret, decode, JwtError, sign, verify } from './crypto/jwt';
 

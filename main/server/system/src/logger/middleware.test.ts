@@ -1,7 +1,6 @@
 // main/server/system/src/logger/middleware.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import { createJobCorrelationId } from '@bslt/shared';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createJobLogger, registerLoggingMiddleware } from './middleware';
 

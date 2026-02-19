@@ -28,7 +28,7 @@ import type {
   WriteHooks,
   WriteOperation,
   WriteResult,
-} from './types';
+} from './write-types';
 import type { SubscriptionManager } from '@bslt/shared';
 
 // ============================================================================

@@ -1,7 +1,6 @@
-// main/server/system/src/mailer/client.test.ts
-import { describe, expect, it, vi } from 'vitest';
-
+// main/server/system/src/email/client.test.ts
 import { EmailSendError } from '@bslt/shared';
+import { describe, expect, it, vi } from 'vitest';
 
 const hoisted = vi.hoisted(() => {
   const consoleSend = vi.fn(() =>
@@ -38,7 +37,10 @@ describe('mailer/client', () => {
     hoisted.consoleSend.mockClear();
     hoisted.smtpCtor.mockClear();
 
-    const client = new MailerClient({ NODE_ENV: 'development', SMTP_HOST: undefined } as unknown as import('../config').FullEnv);
+    const client = new MailerClient({
+      NODE_ENV: 'development',
+      SMTP_HOST: undefined,
+    } as unknown as import('../config').FullEnv);
     const res = await client.send({ to: 'a@b.com', subject: 's', text: 't' });
 
     expect(res.success).toBe(true);
@@ -78,31 +80,49 @@ describe('mailer/client', () => {
 
   it('throws EmailSendError when the underlying service returns success=false', async () => {
     type R = Awaited<ReturnType<typeof hoisted.consoleSend>>;
-    hoisted.consoleSend.mockResolvedValueOnce({ success: false, error: 'SMTP connection refused' } as unknown as R);
+    hoisted.consoleSend.mockResolvedValueOnce({
+      success: false,
+      error: 'SMTP connection refused',
+    } as unknown as R);
 
-    const client = new MailerClient({ NODE_ENV: 'development', SMTP_HOST: undefined } as unknown as import('../config').FullEnv);
+    const client = new MailerClient({
+      NODE_ENV: 'development',
+      SMTP_HOST: undefined,
+    } as unknown as import('../config').FullEnv);
 
-    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' }))
-      .rejects.toBeInstanceOf(EmailSendError);
+    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' })).rejects.toBeInstanceOf(
+      EmailSendError,
+    );
   });
 
   it('throws EmailSendError with the provider error message', async () => {
     type R = Awaited<ReturnType<typeof hoisted.consoleSend>>;
-    hoisted.consoleSend.mockResolvedValueOnce({ success: false, error: 'Mailbox full' } as unknown as R);
+    hoisted.consoleSend.mockResolvedValueOnce({
+      success: false,
+      error: 'Mailbox full',
+    } as unknown as R);
 
-    const client = new MailerClient({ NODE_ENV: 'development', SMTP_HOST: undefined } as unknown as import('../config').FullEnv);
+    const client = new MailerClient({
+      NODE_ENV: 'development',
+      SMTP_HOST: undefined,
+    } as unknown as import('../config').FullEnv);
 
-    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' }))
-      .rejects.toThrow('Mailbox full');
+    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' })).rejects.toThrow(
+      'Mailbox full',
+    );
   });
 
   it('throws EmailSendError with default message when error string is absent', async () => {
     type R = Awaited<ReturnType<typeof hoisted.consoleSend>>;
     hoisted.consoleSend.mockResolvedValueOnce({ success: false } as unknown as R);
 
-    const client = new MailerClient({ NODE_ENV: 'development', SMTP_HOST: undefined } as unknown as import('../config').FullEnv);
+    const client = new MailerClient({
+      NODE_ENV: 'development',
+      SMTP_HOST: undefined,
+    } as unknown as import('../config').FullEnv);
 
-    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' }))
-      .rejects.toThrow('Failed to send email');
+    await expect(client.send({ to: 'a@b.com', subject: 's', text: 't' })).rejects.toThrow(
+      'Failed to send email',
+    );
   });
 });

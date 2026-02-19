@@ -1,4 +1,5 @@
-// main/server/db/src/queue/types.ts
+// main/server/db/src/queue/write-types.ts
+
 /**
  * Write Types
  *

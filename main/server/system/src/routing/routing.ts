@@ -15,6 +15,7 @@ import { HTTP_STATUS } from '@bslt/shared';
 
 import { registerRoute } from './route.registry';
 
+import type { HttpMethod } from './types';
 import type { BaseContext } from '@bslt/shared';
 import type {
   FastifyInstance,
@@ -43,7 +44,7 @@ export type RouteHandler<Body = unknown, Response = unknown> = (
   reply: FastifyReply,
 ) => Promise<RouteResult<Response>> | RouteResult<Response>;
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type { HttpMethod } from './types';
 
 /**
  * Validation schema interface compatible with `@bslt/shared` Schema<T>.

@@ -30,7 +30,12 @@ export type {
 
 // Hooks
 export { useAuth, useLoginWithPasskey, usePasskeys, useRegisterPasskey } from './hooks';
-export type { AuthContextType, LoginWithPasskeyState, PasskeysState, RegisterPasskeyState } from './hooks';
+export type {
+  AuthContextType,
+  LoginWithPasskeyState,
+  PasskeysState,
+  RegisterPasskeyState,
+} from './hooks';
 
 // Note: useAuthModeNavigation, AuthMode, createFormHandler should be imported directly from @bslt/ui
 
@@ -48,8 +53,11 @@ export {
 } from './pages';
 
 // Services
-export { AuthService, createAuthService, TotpChallengeError } from './services';
+export { AuthService, createAuthService, SmsChallengeError, TotpChallengeError } from './services';
 export type { AuthState } from './services';
+
+// Utils
+export { getPostLoginRedirect } from './utils';
 
 // External Types
 export type { User } from '@bslt/api';

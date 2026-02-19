@@ -10,8 +10,8 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-import { AppError } from '../errors';
 import { HTTP_STATUS } from '../constants/platform';
+import { AppError } from '../errors';
 
 // ============================================================================
 // Types
