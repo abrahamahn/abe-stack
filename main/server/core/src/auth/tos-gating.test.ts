@@ -14,9 +14,9 @@ function createMockRepos(): Repositories {
     legalDocuments: {
       findLatestByType: vi.fn(),
     },
-    userAgreements: {
-      findByUserAndDocument: vi.fn(),
-      create: vi.fn(),
+    consentRecords: {
+      findAgreementByUserAndDocument: vi.fn(),
+      recordAgreement: vi.fn(),
     },
   } as unknown as Repositories;
 }
@@ -68,18 +68,26 @@ describe('checkTosAcceptance', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue({
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue({
       id: 'agr-1',
       userId: 'user-123',
+      recordType: 'legal_document' as const,
       documentId: 'doc-1',
-      agreedAt: new Date(),
+      consentType: null,
+      granted: null,
       ipAddress: '192.168.1.1',
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(),
     });
 
     const status = await checkTosAcceptance(repos, 'user-123');
 
     expect(status).toEqual({ accepted: true, requiredVersion: 2, documentId: 'doc-1' });
-    expect(repos.userAgreements.findByUserAndDocument).toHaveBeenCalledWith('user-123', 'doc-1');
+    expect(repos.consentRecords.findAgreementByUserAndDocument).toHaveBeenCalledWith(
+      'user-123',
+      'doc-1',
+    );
   });
 
   it('should return accepted=false if user has NOT agreed to latest ToS', async () => {
@@ -93,7 +101,7 @@ describe('checkTosAcceptance', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue(null);
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue(null);
 
     const status = await checkTosAcceptance(repos, 'user-123');
 
@@ -113,20 +121,25 @@ describe('acceptTos', () => {
     repos = createMockRepos();
   });
 
-  it('should create a user agreement record', async () => {
-    const agreedAt = new Date();
-    vi.mocked(repos.userAgreements.create).mockResolvedValue({
+  it('should create a consent record and return agreedAt', async () => {
+    const createdAt = new Date();
+    vi.mocked(repos.consentRecords.recordAgreement).mockResolvedValue({
       id: 'agr-1',
       userId: 'user-123',
+      recordType: 'legal_document' as const,
       documentId: 'doc-1',
-      agreedAt,
+      consentType: null,
+      granted: null,
       ipAddress: '10.0.0.1',
+      userAgent: null,
+      metadata: {},
+      createdAt,
     });
 
     const result = await acceptTos(repos, 'user-123', 'doc-1', '10.0.0.1');
 
-    expect(result).toEqual({ agreedAt });
-    expect(repos.userAgreements.create).toHaveBeenCalledWith({
+    expect(result).toEqual({ agreedAt: createdAt });
+    expect(repos.consentRecords.recordAgreement).toHaveBeenCalledWith({
       userId: 'user-123',
       documentId: 'doc-1',
       ipAddress: '10.0.0.1',
@@ -134,18 +147,23 @@ describe('acceptTos', () => {
   });
 
   it('should handle missing IP address gracefully', async () => {
-    const agreedAt = new Date();
-    vi.mocked(repos.userAgreements.create).mockResolvedValue({
+    const createdAt = new Date();
+    vi.mocked(repos.consentRecords.recordAgreement).mockResolvedValue({
       id: 'agr-2',
       userId: 'user-456',
+      recordType: 'legal_document' as const,
       documentId: 'doc-2',
-      agreedAt,
+      consentType: null,
+      granted: null,
       ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt,
     });
 
     await acceptTos(repos, 'user-456', 'doc-2');
 
-    expect(repos.userAgreements.create).toHaveBeenCalledWith({
+    expect(repos.consentRecords.recordAgreement).toHaveBeenCalledWith({
       userId: 'user-456',
       documentId: 'doc-2',
       ipAddress: null,
@@ -176,12 +194,17 @@ describe('createRequireTosAcceptance', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue({
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue({
       id: 'agr-1',
       userId: 'user-123',
+      recordType: 'legal_document' as const,
       documentId: 'doc-1',
-      agreedAt: new Date(),
+      consentType: null,
+      granted: null,
       ipAddress: null,
+      userAgent: null,
+      metadata: {},
+      createdAt: new Date(),
     });
 
     const hook = createRequireTosAcceptance(repos);
@@ -217,7 +240,7 @@ describe('createRequireTosAcceptance', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc);
-    vi.mocked(repos.userAgreements.findByUserAndDocument).mockResolvedValue(null);
+    vi.mocked(repos.consentRecords.findAgreementByUserAndDocument).mockResolvedValue(null);
 
     const hook = createRequireTosAcceptance(repos);
     const req = createMockRequest('user-123');

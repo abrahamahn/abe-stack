@@ -3,7 +3,14 @@
 import { canonicalizeEmail, validatePassword } from '@bslt/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { toCamelCase, type DbClient, type LegalDocument, type RawDb, type Repositories, type User } from '../../../db/src';
+import {
+  toCamelCase,
+  type DbClient,
+  type LegalDocument,
+  type RawDb,
+  type Repositories,
+  type User,
+} from '../../../db/src';
 import { createTenant } from '../tenants';
 
 import {
@@ -67,33 +74,12 @@ vi.mock('../tenants', () => ({
 }));
 
 vi.mock('@bslt/db', () => ({
-  emailTemplates: {
-    emailVerification: vi.fn(() => ({
-      subject: 'Verify your email',
-      text: 'Click to verify',
-      html: '<p>Click to verify</p>',
-    })),
-    existingAccountRegistrationAttempt: vi.fn(() => ({
-      subject: 'Registration attempt',
-      text: 'Someone tried to register',
-      html: '<p>Someone tried to register</p>',
-    })),
-    passwordReset: vi.fn(() => ({
-      subject: 'Reset your password',
-      text: 'Click to reset',
-      html: '<p>Click to reset</p>',
-    })),
-  },
-}));
-
-vi.mock('@bslt/db', () => ({
   withTransaction: vi.fn(<T>(db: RawDb, callback: (tx: RawDb) => Promise<T>) => callback(db)),
   toCamelCase: vi.fn(),
   USERS_TABLE: 'users',
   USER_COLUMNS: [],
-  USER_AGREEMENTS_TABLE: 'user_agreements',
-  PASSWORD_RESET_TOKENS_TABLE: 'password_reset_tokens',
-  EMAIL_VERIFICATION_TOKENS_TABLE: 'email_verification_tokens',
+  AUTH_TOKENS_TABLE: 'auth_tokens',
+  CONSENT_RECORDS_TABLE: 'consent_records',
   and: vi.fn(),
   eq: vi.fn(),
   isNull: vi.fn(),
@@ -201,28 +187,28 @@ function createMockRepos(): Repositories {
     refreshTokens: {
       deleteByToken: vi.fn(),
     },
-    refreshTokenFamilies: {},
     loginAttempts: {},
-    passwordResetTokens: {
-      findValidByTokenHash: vi.fn(),
-    },
-    emailVerificationTokens: {
+    authTokens: {
       findValidByTokenHash: vi.fn(),
       create: vi.fn(),
+      markAsUsed: vi.fn(),
+      invalidateForUser: vi.fn(),
+      countRecentByEmail: vi.fn(),
+      countRecentByIp: vi.fn(),
+      deleteExpired: vi.fn(),
+      deleteExpiredByUser: vi.fn(),
     },
     memberships: {
       findByUserId: vi.fn().mockResolvedValue([]),
     },
     securityEvents: {},
-    magicLinkTokens: {},
     oauthConnections: {},
     pushSubscriptions: {},
     notificationPreferences: {},
     legalDocuments: {
       findLatestByType: vi.fn(),
     },
-    userAgreements: {},
-    consentLogs: {},
+    consentRecords: {},
     dataExportRequests: {},
   } as unknown as Repositories;
 }
@@ -400,7 +386,9 @@ describe('registerUser', () => {
       vi.mocked(db.query).mockResolvedValue([{ id: 'user-id', email, username }]);
 
       const tosDoc = { id: 'tos-doc-id', type: 'terms-of-service', version: 1 };
-      vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(tosDoc as unknown as LegalDocument);
+      vi.mocked(repos.legalDocuments.findLatestByType).mockResolvedValue(
+        tosDoc as unknown as LegalDocument,
+      );
 
       await registerUser(
         db,
@@ -1166,12 +1154,17 @@ describe('resetPassword', () => {
     const user = createMockUser({ id: userId });
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.passwordResetTokens.findValidByTokenHash).mockResolvedValue({
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue({
       id: 'token-id',
+      type: 'password_reset' as const,
       userId,
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 3600000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     });
     vi.mocked(repos.users.findById).mockResolvedValue(user);
@@ -1179,7 +1172,7 @@ describe('resetPassword', () => {
 
     await resetPassword(db, repos, config, token, newPassword);
 
-    expect(repos.passwordResetTokens.findValidByTokenHash).toHaveBeenCalled();
+    expect(repos.authTokens.findValidByTokenHash).toHaveBeenCalled();
     // Password validation is tested via WeakPasswordError tests
     expect(repos.users.findById).toHaveBeenCalledWith(userId);
   });
@@ -1189,7 +1182,7 @@ describe('resetPassword', () => {
     const newPassword = 'NewStrongPass123!';
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.passwordResetTokens.findValidByTokenHash).mockResolvedValue(null);
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue(null);
 
     await expect(resetPassword(db, repos, config, token, newPassword)).rejects.toMatchObject({
       name: 'InvalidTokenError',
@@ -1202,12 +1195,17 @@ describe('resetPassword', () => {
     const userId = 'user-id';
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.passwordResetTokens.findValidByTokenHash).mockResolvedValue({
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue({
       id: 'token-id',
+      type: 'password_reset' as const,
       userId,
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 3600000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     });
     vi.mocked(repos.users.findById).mockResolvedValue(null);
@@ -1224,12 +1222,17 @@ describe('resetPassword', () => {
     const user = createMockUser({ id: userId });
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.passwordResetTokens.findValidByTokenHash).mockResolvedValue({
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue({
       id: 'token-id',
+      type: 'password_reset' as const,
       userId,
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 3600000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     });
     vi.mocked(repos.users.findById).mockResolvedValue(user);
@@ -1265,12 +1268,17 @@ describe('verifyEmail', () => {
     const user = createMockUser({ id: userId, emailVerified: true });
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue({
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue({
       id: 'token-id',
+      type: 'email_verification' as const,
       userId,
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 3600000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     });
     vi.mocked(toCamelCase).mockReturnValue(user);
@@ -1326,7 +1334,7 @@ describe('verifyEmail', () => {
     const token = 'invalid-token';
 
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
-    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(null);
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue(null);
 
     await expect(verifyEmail(db, repos, config, token)).rejects.toMatchObject({
       name: 'InvalidTokenError',
@@ -1518,12 +1526,17 @@ describe('createEmailVerificationToken', () => {
   it('should create token using repositories', async () => {
     const userId = 'user-id';
 
-    vi.mocked(repos.emailVerificationTokens.create).mockResolvedValue({
+    vi.mocked(repos.authTokens.create).mockResolvedValue({
       id: 'token-id',
+      type: 'email_verification' as const,
       userId,
+      email: null,
       tokenHash: '3f4ef424246c2b4034a84c294e485ecb4bf8befdda82452fb860559a2d918bcb',
       expiresAt: new Date(),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     });
 
@@ -1532,8 +1545,9 @@ describe('createEmailVerificationToken', () => {
     expect(token).toBeTruthy();
     expect(typeof token).toBe('string');
     expect(token).toMatch(/^[a-f0-9]{64}$/);
-    expect(repos.emailVerificationTokens.create).toHaveBeenCalledWith(
+    expect(repos.authTokens.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        type: 'email_verification',
         userId,
         tokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
         expiresAt: expect.any(Date),

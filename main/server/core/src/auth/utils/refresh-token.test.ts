@@ -21,7 +21,7 @@ import {
   rotateRefreshToken,
 } from './refresh-token';
 
-import type { DbClient, RawDb, RefreshToken, RefreshTokenFamily, User } from '../../../../db/src';
+import type { DbClient, RawDb, RefreshToken, User } from '../../../../db/src';
 
 // ============================================================================
 // Mock Dependencies
@@ -79,20 +79,14 @@ function createMockRefreshToken(overrides?: Partial<RefreshToken>): RefreshToken
     familyId: 'family-123',
     token: 'mock-token-abc123',
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    familyIpAddress: null,
+    familyUserAgent: null,
+    familyCreatedAt: new Date('2024-01-01'),
+    familyRevokedAt: null,
+    familyRevokeReason: null,
     createdAt: new Date(Date.now() - 60000), // 1 minute ago
     ...overrides,
   } as RefreshToken;
-}
-
-function createMockRefreshTokenFamily(overrides?: Partial<RefreshTokenFamily>): RefreshTokenFamily {
-  return {
-    id: 'family-123',
-    userId: 'user-123',
-    revokedAt: null,
-    revokeReason: null,
-    createdAt: new Date('2024-01-01'),
-    ...overrides,
-  } as RefreshTokenFamily;
 }
 
 // ============================================================================
@@ -106,21 +100,11 @@ describe('createRefreshTokenFamily', () => {
 
   test('should create a new token family and return familyId and token', async () => {
     const db = createMockDbClient();
-    const mockFamily = createMockRefreshTokenFamily();
     const mockToken = 'generated-refresh-token-123';
     const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
       const tx = {
-        query: vi.fn().mockResolvedValue([
-          {
-            id: mockFamily.id,
-            user_id: mockFamily.userId,
-            revoked_at: null,
-            revoke_reason: null,
-            created_at: mockFamily.createdAt,
-          },
-        ]),
         execute: vi.fn().mockResolvedValue(1),
       };
       return await callback(tx as unknown as DbClient);
@@ -132,7 +116,7 @@ describe('createRefreshTokenFamily', () => {
     const result = await createRefreshTokenFamily(db, 'user-123', 7);
 
     expect(result).toEqual({
-      familyId: mockFamily.id,
+      familyId: expect.any(String),
       token: mockToken,
     });
 
@@ -141,37 +125,12 @@ describe('createRefreshTokenFamily', () => {
     expect(getRefreshTokenExpiry).toHaveBeenCalledWith(7);
   });
 
-  test('should throw error if family creation fails', async () => {
-    const db = createMockDbClient();
-
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      const tx = {
-        query: vi.fn().mockResolvedValue([]),
-        execute: vi.fn(),
-      };
-      return await callback(tx as unknown as DbClient);
-    });
-
-    await expect(createRefreshTokenFamily(db, 'user-123')).rejects.toThrow(
-      'Failed to create refresh token family',
-    );
-  });
-
   test('should use custom expiry days when provided', async () => {
     const db = createMockDbClient();
     const expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
       const tx = {
-        query: vi.fn().mockResolvedValue([
-          {
-            id: 'family-123',
-            user_id: 'user-123',
-            revoked_at: null,
-            revoke_reason: null,
-            created_at: new Date(),
-          },
-        ]),
         execute: vi.fn().mockResolvedValue(1),
       };
       return await callback(tx as unknown as DbClient);
@@ -183,6 +142,29 @@ describe('createRefreshTokenFamily', () => {
     await createRefreshTokenFamily(db, 'user-123', 30);
 
     expect(getRefreshTokenExpiry).toHaveBeenCalledWith(30);
+  });
+
+  test('should insert token and session via two execute calls', async () => {
+    const db = createMockDbClient();
+    const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    let executeCallCount = 0;
+
+    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+      const tx = {
+        execute: vi.fn().mockImplementation(() => {
+          executeCallCount++;
+          return Promise.resolve(1);
+        }),
+      };
+      return await callback(tx as unknown as DbClient);
+    });
+
+    vi.mocked(createRefreshToken).mockReturnValue('token-xyz');
+    vi.mocked(getRefreshTokenExpiry).mockReturnValue(expiryDate);
+
+    await createRefreshTokenFamily(db, 'user-123', 7);
+
+    expect(executeCallCount).toBe(2);
   });
 });
 
@@ -200,19 +182,25 @@ describe('rotateRefreshToken', () => {
       const db = createMockDbClient();
       const mockToken = createMockRefreshToken();
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
       const newToken = 'new-token-xyz789';
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -220,15 +208,8 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
-        .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null) // 3. session (parallel)
+        .mockResolvedValueOnce(null); // 4. recentToken
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
         const tx = {
@@ -237,6 +218,7 @@ describe('rotateRefreshToken', () => {
         return await callback(tx as unknown as DbClient);
       });
 
+      vi.mocked(db.execute).mockResolvedValue(1);
       vi.mocked(createRefreshToken).mockReturnValue(newToken);
       vi.mocked(getRefreshTokenExpiry).mockReturnValue(
         new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -260,21 +242,27 @@ describe('rotateRefreshToken', () => {
       const db = createMockDbClient();
       const mockToken = createMockRefreshToken();
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
       const mockTx = {
         execute: vi.fn().mockResolvedValue(1),
       };
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -282,20 +270,14 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
-        .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null) // 3. session (parallel)
+        .mockResolvedValueOnce(null); // 4. recentToken
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
         return await callback(mockTx as unknown as DbClient);
       });
 
+      vi.mocked(db.execute).mockResolvedValue(1);
       vi.mocked(createRefreshToken).mockReturnValue('new-token');
       vi.mocked(getRefreshTokenExpiry).mockReturnValue(new Date());
 
@@ -333,14 +315,21 @@ describe('rotateRefreshToken', () => {
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null) // 2. user (parallel) — null
+        .mockResolvedValueOnce(null); // 3. session (parallel)
 
       const result = await rotateRefreshToken(db, 'token-123');
 
@@ -351,20 +340,26 @@ describe('rotateRefreshToken', () => {
   describe('token reuse detection', () => {
     test('should throw TokenReuseError if family is already revoked', async () => {
       const db = createMockDbClient();
-      const mockToken = createMockRefreshToken();
+      const mockToken = createMockRefreshToken({ familyRevokedAt: new Date() });
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily({ revokedAt: new Date() });
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken — family_revoked_at is set
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: mockToken.familyRevokedAt,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: 'Token reuse detected',
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -372,14 +367,12 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
-        .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: mockFamily.revokedAt,
-          revoke_reason: 'Token reuse detected',
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null); // 3. session (parallel)
+
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const tx = { execute: vi.fn().mockResolvedValue(1) };
+        return await callback(tx as unknown as DbClient);
+      });
 
       await expect(rotateRefreshToken(db, 'old-token', '127.0.0.1', 'Mozilla/5.0')).rejects.toThrow(
         'Token has already been used',
@@ -400,7 +393,6 @@ describe('rotateRefreshToken', () => {
       const oldTokenCreatedAt = new Date(Date.now() - 60000); // 1 minute ago
       const mockToken = createMockRefreshToken({ createdAt: oldTokenCreatedAt });
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
       const newerToken = createMockRefreshToken({
         token: 'newer-token',
         createdAt: new Date(),
@@ -408,14 +400,21 @@ describe('rotateRefreshToken', () => {
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -423,22 +422,26 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
+        .mockResolvedValueOnce(null) // 3. session (parallel)
         .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
+          // 4. recentToken
           id: newerToken.id,
           user_id: newerToken.userId,
           family_id: newerToken.familyId,
           token: newerToken.token,
           expires_at: newerToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: newerToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: newerToken.createdAt,
         });
+
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const tx = { execute: vi.fn().mockResolvedValue(1) };
+        return await callback(tx as unknown as DbClient);
+      });
 
       await expect(
         rotateRefreshToken(db, mockToken.token, '127.0.0.1', 'Mozilla/5.0', 7, 30),
@@ -456,7 +459,6 @@ describe('rotateRefreshToken', () => {
       const recentCreatedAt = new Date(now - 10000); // 10 seconds ago (within 30s grace period)
       const mockToken = createMockRefreshToken({ createdAt: recentCreatedAt });
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
       const newerToken = createMockRefreshToken({
         token: 'newer-token-within-grace',
         createdAt: new Date(now - 5000), // 5 seconds ago
@@ -464,14 +466,21 @@ describe('rotateRefreshToken', () => {
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -479,20 +488,19 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
+        .mockResolvedValueOnce(null) // 3. session (parallel)
         .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
+          // 4. recentToken
           id: newerToken.id,
           user_id: newerToken.userId,
           family_id: newerToken.familyId,
           token: newerToken.token,
           expires_at: newerToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: newerToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: newerToken.createdAt,
         });
 
@@ -522,7 +530,6 @@ describe('rotateRefreshToken', () => {
       const recentCreatedAt = new Date(now - 50000); // 50 seconds ago
       const mockToken = createMockRefreshToken({ createdAt: recentCreatedAt });
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
       const newerToken = createMockRefreshToken({
         token: 'newer-token',
         createdAt: new Date(now - 40000), // 40 seconds ago
@@ -530,14 +537,21 @@ describe('rotateRefreshToken', () => {
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -545,20 +559,19 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
+        .mockResolvedValueOnce(null) // 3. session (parallel)
         .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
+          // 4. recentToken
           id: newerToken.id,
           user_id: newerToken.userId,
           family_id: newerToken.familyId,
           token: newerToken.token,
           expires_at: newerToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: newerToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: newerToken.createdAt,
         });
 
@@ -585,20 +598,27 @@ describe('rotateRefreshToken', () => {
   describe('edge cases', () => {
     test('should handle token without family ID', async () => {
       const db = createMockDbClient();
-      const mockToken = createMockRefreshToken({ familyId: null });
+      const mockToken = createMockRefreshToken();
       const mockUser = createMockUser();
       const newToken = 'new-token-xyz';
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: null,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -606,7 +626,8 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null) // 3. session (parallel)
+        .mockResolvedValueOnce(null); // 4. recentToken
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
         const tx = {
@@ -615,6 +636,7 @@ describe('rotateRefreshToken', () => {
         return await callback(tx as unknown as DbClient);
       });
 
+      vi.mocked(db.execute).mockResolvedValue(1);
       vi.mocked(createRefreshToken).mockReturnValue(newToken);
       vi.mocked(getRefreshTokenExpiry).mockReturnValue(new Date());
 
@@ -632,18 +654,24 @@ describe('rotateRefreshToken', () => {
       const db = createMockDbClient();
       const mockToken = createMockRefreshToken();
       const mockUser = createMockUser();
-      const mockFamily = createMockRefreshTokenFamily();
 
       vi.mocked(db.queryOne)
         .mockResolvedValueOnce({
+          // 1. storedToken
           id: mockToken.id,
           user_id: mockToken.userId,
           family_id: mockToken.familyId,
           token: mockToken.token,
           expires_at: mockToken.expiresAt,
+          family_revoked_at: null,
+          family_ip_address: null,
+          family_user_agent: null,
+          family_created_at: mockToken.familyCreatedAt,
+          family_revoke_reason: null,
           created_at: mockToken.createdAt,
         })
         .mockResolvedValueOnce({
+          // 2. user (parallel)
           id: mockUser.id,
           email: mockUser.email,
           role: mockUser.role,
@@ -651,15 +679,8 @@ describe('rotateRefreshToken', () => {
           created_at: mockUser.createdAt,
           updated_at: mockUser.updatedAt,
         })
-        .mockResolvedValueOnce({
-          id: mockFamily.id,
-          user_id: mockFamily.userId,
-          revoked_at: null,
-          revoke_reason: null,
-          created_at: mockFamily.createdAt,
-        })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null) // 3. session (parallel)
+        .mockResolvedValueOnce(null); // 4. recentToken
 
       vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
         const tx = {
@@ -668,6 +689,7 @@ describe('rotateRefreshToken', () => {
         return await callback(tx as unknown as DbClient);
       });
 
+      vi.mocked(db.execute).mockResolvedValue(1);
       vi.mocked(createRefreshToken).mockReturnValue('new-token');
       vi.mocked(getRefreshTokenExpiry).mockReturnValue(new Date());
 

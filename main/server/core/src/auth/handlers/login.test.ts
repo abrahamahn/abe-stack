@@ -109,9 +109,9 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
     repos: {
-      refreshTokenFamilies: {
-        findActiveByUserId: vi.fn().mockResolvedValue([]),
-        revoke: vi.fn().mockResolvedValue(undefined),
+      refreshTokens: {
+        findActiveFamilies: vi.fn().mockResolvedValue([]),
+        revokeFamily: vi.fn().mockResolvedValue(1),
       },
       memberships: {
         findByUserId: vi.fn().mockResolvedValue([]),

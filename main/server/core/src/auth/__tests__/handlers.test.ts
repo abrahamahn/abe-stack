@@ -164,39 +164,26 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         deleteByUserId: vi.fn() as Mock,
         deleteByFamilyId: vi.fn() as Mock,
         deleteExpired: vi.fn() as Mock,
+        findActiveFamilies: vi.fn().mockResolvedValue([]) as Mock,
+        findFamilyById: vi.fn() as Mock,
+        revokeFamily: vi.fn().mockResolvedValue(1) as Mock,
       },
-      refreshTokenFamilies: {
-        findById: vi.fn() as Mock,
-        findActiveByUserId: vi.fn().mockResolvedValue([]) as Mock,
+      authTokens: {
         create: vi.fn() as Mock,
-        revoke: vi.fn() as Mock,
-        revokeAllForUser: vi.fn() as Mock,
+        findValidByTokenHash: vi.fn() as Mock,
+        findByTokenHash: vi.fn() as Mock,
+        markAsUsed: vi.fn() as Mock,
+        invalidateForUser: vi.fn() as Mock,
+        deleteExpiredByUser: vi.fn() as Mock,
+        countRecentByEmail: vi.fn() as Mock,
+        countRecentByIp: vi.fn() as Mock,
+        deleteExpired: vi.fn() as Mock,
       },
       loginAttempts: {
         create: vi.fn() as Mock,
         countRecentFailures: vi.fn() as Mock,
         findRecentByEmail: vi.fn() as Mock,
         deleteOlderThan: vi.fn() as Mock,
-      },
-      passwordResetTokens: {
-        findById: vi.fn() as Mock,
-        findValidByTokenHash: vi.fn() as Mock,
-        findValidByUserId: vi.fn() as Mock,
-        create: vi.fn() as Mock,
-        markAsUsed: vi.fn() as Mock,
-        invalidateByUserId: vi.fn() as Mock,
-        deleteByUserId: vi.fn() as Mock,
-        deleteExpired: vi.fn() as Mock,
-      },
-      emailVerificationTokens: {
-        findById: vi.fn() as Mock,
-        findValidByTokenHash: vi.fn() as Mock,
-        findValidByUserId: vi.fn() as Mock,
-        create: vi.fn() as Mock,
-        markAsUsed: vi.fn() as Mock,
-        invalidateByUserId: vi.fn() as Mock,
-        deleteByUserId: vi.fn() as Mock,
-        deleteExpired: vi.fn() as Mock,
       },
       securityEvents: {
         create: vi.fn() as Mock,
@@ -206,17 +193,6 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         findBySeverity: vi.fn() as Mock,
         countByType: vi.fn() as Mock,
         deleteOlderThan: vi.fn() as Mock,
-      },
-      magicLinkTokens: {
-        findById: vi.fn() as Mock,
-        findValidByTokenHash: vi.fn() as Mock,
-        findValidByEmail: vi.fn() as Mock,
-        findRecentByEmail: vi.fn() as Mock,
-        countRecentByEmail: vi.fn() as Mock,
-        create: vi.fn() as Mock,
-        markAsUsed: vi.fn() as Mock,
-        deleteByEmail: vi.fn() as Mock,
-        deleteExpired: vi.fn() as Mock,
       },
       oauthConnections: {
         findById: vi.fn() as Mock,
@@ -964,8 +940,8 @@ describe('verifyToken (from utils/jwt)', () => {
       throw new Error('Invalid token');
     });
 
-    expect(() => { verifyTokenSpy('invalid-token', 'secret-key-32-characters-long!!'); }).toThrow(
-      'Invalid token',
-    );
+    expect(() => {
+      verifyTokenSpy('invalid-token', 'secret-key-32-characters-long!!');
+    }).toThrow('Invalid token');
   });
 });

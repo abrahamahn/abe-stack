@@ -13,7 +13,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from './service';
 
-import type { DbClient, MagicLinkToken, RawDb, Repositories, User } from '../../../../db/src';
+import type { AuthToken, DbClient, RawDb, Repositories, User } from '../../../../db/src';
 import type { AuthEmailService, AuthEmailTemplates } from '../index';
 import type { AuthConfig } from '@bslt/shared/config';
 
@@ -158,21 +158,20 @@ function createMockRepositories(): Repositories {
   return {
     users: {} as Repositories['users'],
     refreshTokens: {} as Repositories['refreshTokens'],
-    refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
     loginAttempts: {} as Repositories['loginAttempts'],
-    passwordResetTokens: {} as Repositories['passwordResetTokens'],
-    emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
-    securityEvents: {} as Repositories['securityEvents'],
-    totpBackupCodes: {} as Repositories['totpBackupCodes'],
-    emailChangeTokens: {} as Repositories['emailChangeTokens'],
-    emailChangeRevertTokens: {} as Repositories['emailChangeRevertTokens'],
-    magicLinkTokens: {
+    authTokens: {
       findValidByTokenHash: vi.fn(),
       create: vi.fn(),
-      deleteExpired: vi.fn(),
+      findByTokenHash: vi.fn(),
+      markAsUsed: vi.fn(),
+      invalidateForUser: vi.fn(),
       countRecentByEmail: vi.fn(),
       countRecentByIp: vi.fn(),
-    },
+      deleteExpired: vi.fn(),
+      deleteExpiredByUser: vi.fn(),
+    } as Repositories['authTokens'],
+    securityEvents: {} as Repositories['securityEvents'],
+    totpBackupCodes: {} as Repositories['totpBackupCodes'],
     oauthConnections: {} as Repositories['oauthConnections'],
     apiKeys: {} as Repositories['apiKeys'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
@@ -197,8 +196,7 @@ function createMockRepositories(): Repositories {
     usageMetrics: {} as Repositories['usageMetrics'],
     usageSnapshots: {} as Repositories['usageSnapshots'],
     legalDocuments: {} as Repositories['legalDocuments'],
-    userAgreements: {} as Repositories['userAgreements'],
-    consentLogs: {} as Repositories['consentLogs'],
+    consentRecords: {} as Repositories['consentRecords'],
     dataExportRequests: {} as Repositories['dataExportRequests'],
     activities: {} as Repositories['activities'],
     webauthnCredentials: {} as Repositories['webauthnCredentials'],
@@ -250,15 +248,18 @@ function createMockAuthConfig(): AuthConfig {
   };
 }
 
-function createMockMagicLinkToken(overrides?: Partial<MagicLinkToken>): MagicLinkToken {
+function createMockAuthToken(overrides?: Partial<AuthToken>): AuthToken {
   return {
     id: 'token-123',
+    type: 'magic_link' as const,
+    userId: null,
     email: 'test@example.com',
     tokenHash: 'hash123',
     expiresAt: new Date(Date.now() + 15 * 60 * 1000),
     usedAt: null,
     ipAddress: '127.0.0.1',
     userAgent: 'Test Browser',
+    metadata: {},
     createdAt: new Date(),
     ...overrides,
   };
@@ -321,9 +322,9 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       const result = await requestMagicLink(
         db,
@@ -347,13 +348,13 @@ describe('requestMagicLink', () => {
       const email = 'TEST@EXAMPLE.COM';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           email: canonicalizeEmail(email),
         }),
@@ -367,13 +368,13 @@ describe('requestMagicLink', () => {
       const email = '  test@example.com  ';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           email: canonicalizeEmail(email),
         }),
@@ -387,8 +388,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       const now = Date.now();
       await requestMagicLink(
@@ -405,15 +406,15 @@ describe('requestMagicLink', () => {
         },
       );
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           expiresAt: expect.any(Date),
         }),
       );
 
-      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
+      const call = vi.mocked(repos.authTokens.create).mock.calls[0]?.[0];
       if (call == null) {
-        throw new Error('Expected magicLinkTokens.create to be called');
+        throw new Error('Expected authTokens.create to be called');
       }
       const expectedExpiry = now + 20 * 60 * 1000;
       const actualExpiry = call.expiresAt.getTime();
@@ -428,9 +429,9 @@ describe('requestMagicLink', () => {
       const baseUrl = 'https://example.com';
       const ipAddress = '192.168.1.100';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(
         db,
@@ -442,7 +443,7 @@ describe('requestMagicLink', () => {
         ipAddress,
       );
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ipAddress,
         }),
@@ -457,8 +458,8 @@ describe('requestMagicLink', () => {
       const baseUrl = 'https://example.com';
       const userAgent = 'Mozilla/5.0';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(
         db,
@@ -471,7 +472,7 @@ describe('requestMagicLink', () => {
         userAgent,
       );
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           userAgent,
         }),
@@ -485,8 +486,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
 
@@ -507,7 +508,7 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(3);
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(3);
 
       await expect(
         requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl),
@@ -522,8 +523,8 @@ describe('requestMagicLink', () => {
       const baseUrl = 'https://example.com';
       const ipAddress = '192.168.1.100';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(10);
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(10);
 
       await expect(
         requestMagicLink(
@@ -545,7 +546,7 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(5);
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(5);
 
       await expect(
         requestMagicLink(
@@ -572,8 +573,8 @@ describe('requestMagicLink', () => {
       const baseUrl = 'https://example.com';
       const ipAddress = '192.168.1.100';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(20);
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.countRecentByIp).mockResolvedValue(20);
 
       await expect(
         requestMagicLink(
@@ -599,12 +600,12 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
 
-      expect(repos.magicLinkTokens.countRecentByIp).not.toHaveBeenCalled();
+      expect(repos.authTokens.countRecentByIp).not.toHaveBeenCalled();
     });
   });
 
@@ -616,8 +617,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP server unavailable'));
 
       await expect(
@@ -632,8 +633,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
       vi.mocked(emailService.send).mockRejectedValue('String error');
 
       await expect(
@@ -650,8 +651,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(
         db,
@@ -663,7 +664,7 @@ describe('requestMagicLink', () => {
         undefined,
       );
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ipAddress: null,
         }),
@@ -677,8 +678,8 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       await requestMagicLink(
         db,
@@ -691,7 +692,7 @@ describe('requestMagicLink', () => {
         undefined,
       );
 
-      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+      expect(repos.authTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
           userAgent: null,
         }),
@@ -705,15 +706,15 @@ describe('requestMagicLink', () => {
       const email = 'test@example.com';
       const baseUrl = 'https://example.com';
 
-      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
-      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(repos.authTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.authTokens.create).mockResolvedValue(createMockAuthToken());
 
       const now = Date.now();
       await requestMagicLink(db, repos, emailService, createMockEmailTemplates(), email, baseUrl);
 
-      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
+      const call = vi.mocked(repos.authTokens.create).mock.calls[0]?.[0];
       if (call == null) {
-        throw new Error('Expected magicLinkTokens.create to be called');
+        throw new Error('Expected authTokens.create to be called');
       }
       const expectedExpiry = now + 15 * 60 * 1000; // 15 minutes default
       const actualExpiry = call.expiresAt.getTime();
@@ -1242,19 +1243,19 @@ describe('cleanupExpiredMagicLinkTokens', () => {
     const db = createMockDb();
     const repos = createMockRepositories();
 
-    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(5);
+    vi.mocked(repos.authTokens.deleteExpired).mockResolvedValue(5);
 
     const result = await cleanupExpiredMagicLinkTokens(db, repos);
 
     expect(result).toBe(5);
-    expect(repos.magicLinkTokens.deleteExpired).toHaveBeenCalledTimes(1);
+    expect(repos.authTokens.deleteExpired).toHaveBeenCalledTimes(1);
   });
 
   test('should return zero when no tokens to delete', async () => {
     const db = createMockDb();
     const repos = createMockRepositories();
 
-    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(0);
+    vi.mocked(repos.authTokens.deleteExpired).mockResolvedValue(0);
 
     const result = await cleanupExpiredMagicLinkTokens(db, repos);
 
@@ -1265,7 +1266,7 @@ describe('cleanupExpiredMagicLinkTokens', () => {
     const db = createMockDb();
     const repos = createMockRepositories();
 
-    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(42);
+    vi.mocked(repos.authTokens.deleteExpired).mockResolvedValue(42);
 
     const result = await cleanupExpiredMagicLinkTokens(db, repos);
 
