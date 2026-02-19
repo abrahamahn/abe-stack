@@ -10,13 +10,13 @@
  * - StorageConfig = discriminated union of provider-specific configs
  */
 
-export type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@bslt/shared';
+export type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@bslt/shared/system';
 
 /**
  * Storage provider interface — alias for the shared StorageClient contract.
  * Backend-core providers (LocalStorageProvider, S3StorageProvider) implement this.
  */
-export type { StorageClient as StorageProvider } from '@bslt/shared';
+export type { StorageClient as StorageProvider } from '@bslt/shared/system';
 
 /**
  * Storage provider name string union — alias for the shared StorageProvider type.

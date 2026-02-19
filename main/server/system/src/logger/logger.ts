@@ -10,9 +10,9 @@
 import {
   createLogger as createKernelLogger,
   createRequestLogger as createKernelRequestLogger,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
-import type { BaseLogger, Logger, LogRequestContext } from '@bslt/shared';
+import type { BaseLogger, Logger, LogRequestContext } from '@bslt/shared/system';
 import type { FastifyBaseLogger } from 'fastify';
 
 export type { Logger };

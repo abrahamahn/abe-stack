@@ -8,11 +8,20 @@
 
 // Re-export shared logger constructors and types used by server infrastructure
 export {
-  createLogger as createBaseLogger, createRequestLogger as createBaseRequestLogger, createConsoleLogger,
+  createLogger as createBaseLogger,
+  createRequestLogger as createBaseRequestLogger,
+  createConsoleLogger,
   createLogRequestContext,
   getOrCreateCorrelationId,
-  type BaseLogger, type Logger as BaseLoggerType, type ConsoleLoggerConfig, type ConsoleLogLevel, type LogData, type LoggerConfig, type LogLevel, type LogRequestContext
-} from '@bslt/shared';
+  type BaseLogger,
+  type Logger as BaseLoggerType,
+  type ConsoleLoggerConfig,
+  type ConsoleLogLevel,
+  type LogData,
+  type LoggerConfig,
+  type LogLevel,
+  type LogRequestContext,
+} from '@bslt/shared/system';
 
 // Fastify-specific logger wrappers
 export { createLogger, createRequestLogger, type Logger } from './logger';

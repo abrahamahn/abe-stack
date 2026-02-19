@@ -10,7 +10,7 @@ import {
   CacheConnectionError,
   CacheDeserializationError,
   CacheSerializationError,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 import redisConstructor, { type Redis, type RedisOptions } from 'ioredis';
 
 import type {

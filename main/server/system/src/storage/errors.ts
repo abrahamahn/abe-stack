@@ -7,7 +7,7 @@
  * Follows the same pattern as cache/errors.ts.
  */
 
-import { AppError, HTTP_STATUS } from '@bslt/shared';
+import { AppError, HTTP_STATUS } from '@bslt/shared/system';
 
 // ============================================================================
 // Base Storage Error
@@ -54,7 +54,12 @@ export class StorageUploadError extends StorageError {
     public readonly key: string,
     cause?: Error,
   ) {
-    super(`Failed to upload object: ${key}`, HTTP_STATUS.INTERNAL_SERVER_ERROR, 'STORAGE_UPLOAD_ERROR', cause);
+    super(
+      `Failed to upload object: ${key}`,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'STORAGE_UPLOAD_ERROR',
+      cause,
+    );
   }
 }
 
@@ -96,7 +101,12 @@ export function toStorageError(
   }
 
   if (error instanceof Error) {
-    return new StorageError(error.message, HTTP_STATUS.INTERNAL_SERVER_ERROR, 'STORAGE_ERROR', error);
+    return new StorageError(
+      error.message,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'STORAGE_ERROR',
+      error,
+    );
   }
 
   return new StorageError(defaultMessage, HTTP_STATUS.INTERNAL_SERVER_ERROR, 'STORAGE_ERROR');

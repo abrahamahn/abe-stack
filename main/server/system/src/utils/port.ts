@@ -8,7 +8,7 @@
 
 import net from 'node:net';
 
-import { delay } from '@bslt/shared';
+import { delay } from '@bslt/shared/primitives';
 
 /**
  * Returns an array of unique port numbers, filtering out undefined and duplicate values.

@@ -1,4 +1,4 @@
-// main/server/system/src/search/query-builder.ts
+// main/server/system/src/search/query.builder.ts
 /**
  * Search Query Builder — Re-export from shared
  *
@@ -12,4 +12,4 @@
  * @module @bslt/server-system/search/query-builder
  */
 
-export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from '@bslt/shared';
+export { createSearchQuery, fromSearchQuery, SearchQueryBuilder } from '@bslt/shared/system';

@@ -10,15 +10,15 @@ import {
   createLogRequestContext,
   createJobLogger as createSharedJobLogger,
   getOrCreateCorrelationId,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 import { getMetricsCollector } from '../metrics';
 
 import { createRequestLogger } from './logger';
 
-import type { UserRole } from '@bslt/db';
-import type { BaseLogger, ErrorTracker, Logger, LogRequestContext } from '@bslt/shared';
 import type { LoggingConfig } from '@bslt/shared/config';
+import type { UserRole } from '@bslt/shared/core';
+import type { BaseLogger, ErrorTracker, Logger, LogRequestContext } from '@bslt/shared/system';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Extend Fastify request with our custom properties

@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/console.ts
+// main/server/system/src/email/console.ts
 /**
  * Console Email Service (Development)
  *
@@ -6,7 +6,7 @@
  * Use this in development to see email output without SMTP.
  */
 
-import { generateSecureId } from '@bslt/shared';
+import { generateSecureId } from '@bslt/shared/primitives';
 
 import type { EmailOptions, EmailResult, EmailService } from './types';
 

@@ -1,5 +1,5 @@
 // main/server/system/src/cache/config.ts
-import { MS_PER_MINUTE } from '@bslt/shared';
+import { MS_PER_MINUTE } from '@bslt/shared/primitives';
 
 import type { CacheConfig, RedisCacheConfig } from './types';
 

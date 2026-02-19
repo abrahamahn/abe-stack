@@ -8,7 +8,7 @@ import type {
   HealthCheckQueue,
   Logger,
   StorageClient,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 /**
  * Minimal context required by system health-check functions.

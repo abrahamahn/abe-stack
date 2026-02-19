@@ -13,7 +13,7 @@
  * @module @bslt/server-system/security/rate-limit
  */
 
-import { MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared/primitives';
 
 // ============================================================================
 // Types

@@ -27,7 +27,7 @@ import {
   type TablePermissionConfig,
 } from './types';
 
-import type { UserRole } from '@bslt/db';
+import type { UserRole } from '@bslt/shared/core';
 
 // ============================================================================
 // Permission Checker Class

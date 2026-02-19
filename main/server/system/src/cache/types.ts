@@ -21,8 +21,8 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig
-} from '@bslt/shared';
+  RedisCacheConfig,
+} from '@bslt/shared/system';
 
 // Re-export eviction types from local LRU implementation
 export type { EvictionCallback, EvictionReason, LRUCacheOptions } from './lru';

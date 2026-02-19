@@ -8,7 +8,7 @@ import { normalizeStorageKey } from '../signing';
 import { S3ClientWrapper } from './s3.client.wrapper';
 
 import type { S3StorageConfig, StorageProvider } from '../types';
-import type { ReadableStreamLike } from '@bslt/shared';
+import type { ReadableStreamLike } from '@bslt/shared/system';
 
 type AwsCredentials = ReturnType<typeof fromEnv> | { accessKeyId: string; secretAccessKey: string };
 

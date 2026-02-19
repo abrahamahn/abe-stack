@@ -57,7 +57,7 @@ import {
   isCacheError,
   isCacheTimeoutError,
   toCacheError,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 export {
   CacheCapacityError,
@@ -97,7 +97,7 @@ export type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig
+  RedisCacheConfig,
 } from './types';
 
 // Cache-specific types
@@ -108,6 +108,5 @@ export type {
   CreateCacheOptions,
   MemoizedFunction,
   MemoizeOptions,
-  MemoizeStats
+  MemoizeStats,
 } from './types';
-

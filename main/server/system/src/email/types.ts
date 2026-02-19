@@ -1,11 +1,11 @@
-// main/server/system/src/mailer/types.ts
+// main/server/system/src/email/types.ts
 /**
  * Email Service Types
  *
  * Re-exports shared email types and the canonical EmailService port contract.
  */
 
-import type { EmailOptions, EmailService, SendResult } from '@bslt/shared';
+import type { EmailOptions, EmailService, SendResult } from '@bslt/shared/system';
 
 export type { EmailOptions, EmailService };
 

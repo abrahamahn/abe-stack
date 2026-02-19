@@ -10,7 +10,7 @@ import {
   checkSchema,
   checkStorage,
   checkWebSocket,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 import type { HealthContext } from './types';
 import type {
@@ -19,7 +19,7 @@ import type {
   ServiceHealth,
   StartupSummaryOptions,
   WebSocketStats,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 /** Callback that performs the DB-level schema validation. */
 export type SchemaValidatorFn = () => Promise<{ valid: boolean; missingTables: string[] }>;

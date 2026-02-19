@@ -1,5 +1,5 @@
-// main/server/system/src/mailer/client.ts
-import { EmailSendError } from '@bslt/shared';
+// main/server/system/src/email/client.ts
+import { EmailSendError } from '@bslt/shared/system';
 
 import { ConsoleEmailService } from './console';
 import { SmtpEmailService } from './smtp';

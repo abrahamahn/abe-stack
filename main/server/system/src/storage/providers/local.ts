@@ -8,7 +8,7 @@ import { StorageNotFoundError, toStorageError } from '../errors';
 import { normalizeStorageKey } from '../signing';
 
 import type { LocalStorageConfig, StorageProvider } from '../types';
-import type { ReadableStreamLike } from '@bslt/shared';
+import type { ReadableStreamLike } from '@bslt/shared/system';
 
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}

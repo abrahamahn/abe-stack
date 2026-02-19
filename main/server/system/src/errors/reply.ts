@@ -17,9 +17,11 @@
  *   return replyOk(reply, { id: '123' }, 201);
  */
 
-import { getErrorStatusCode, isOk, toAppError } from '@bslt/shared';
+import { isOk } from '@bslt/shared/primitives';
+import { getErrorStatusCode, toAppError } from '@bslt/shared/system';
 
-import type { AppError, Result, ApiErrorResponse, ApiSuccessResponse } from '@bslt/shared';
+import type { ApiErrorResponse, ApiSuccessResponse, Result } from '@bslt/shared/primitives';
+import type { AppError } from '@bslt/shared/system';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

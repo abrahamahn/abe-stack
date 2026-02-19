@@ -1,4 +1,4 @@
-// main/server/system/src/mailer/smtp-client.ts
+// main/server/system/src/email/smtp.client.ts
 /**
  * Minimal SMTP Client
  *
@@ -9,7 +9,7 @@
 import { createConnection, type Socket } from 'node:net';
 import { connect as tlsConnect, type TLSSocket } from 'node:tls';
 
-import { delay, generateSecureId, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared';
+import { delay, generateSecureId, MS_PER_MINUTE, MS_PER_SECOND } from '@bslt/shared/primitives';
 
 // ============================================================================
 // Types

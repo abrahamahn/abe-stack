@@ -13,7 +13,7 @@
  */
 
 import { escapeIdentifier, withTransaction } from '@bslt/db';
-import { SubKeys } from '@bslt/shared';
+import { SubKeys } from '@bslt/shared/system';
 
 import type {
   AfterWriteHook,
@@ -27,7 +27,7 @@ import type {
   WriteResult,
 } from './types';
 import type { DbClient } from '@bslt/db';
-import type { SubscriptionManager } from '@bslt/shared';
+import type { SubscriptionManager } from '@bslt/shared/system';
 
 // ============================================================================
 // Logger Interface

@@ -11,12 +11,12 @@
  * @module routing
  */
 
-import { HTTP_STATUS } from '@bslt/shared';
+import { HTTP_STATUS } from '@bslt/shared/system';
 
 import { registerRoute } from './route.registry';
 
 import type { HttpMethod } from './types';
-import type { BaseContext } from '@bslt/shared';
+import type { BaseContext } from '@bslt/shared/system';
 import type {
   FastifyInstance,
   FastifyReply,

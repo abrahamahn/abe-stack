@@ -1,4 +1,4 @@
-// main/server/system/src/geo-ip/ip-api-provider.ts
+// main/server/system/src/geo-ip/ip.api.provider.ts
 /**
  * ip-api.com Geo-IP Provider
  *
@@ -8,7 +8,7 @@
  * @module GeoIP
  */
 
-import { MS_PER_HOUR } from '@bslt/shared';
+import { MS_PER_HOUR } from '@bslt/shared/primitives';
 
 import type { GeoIpProvider, GeoIpResult } from './types';
 
