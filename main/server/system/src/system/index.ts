@@ -12,6 +12,8 @@ export {
   checkWebSocketStatus,
   getDetailedHealth,
   logStartupSummary,
+  type DetailedHealthOptions,
+  type SchemaValidatorFn,
 } from './health';
 
 export {
@@ -21,4 +23,4 @@ export {
   type MetricsSummary,
 } from '../metrics';
 
-export type { SystemContext } from './types';
+export type { HealthContext } from './types';
