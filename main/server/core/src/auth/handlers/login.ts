@@ -130,15 +130,15 @@ export async function handleLogin(
 
     // Enforce max concurrent sessions: evict oldest if limit reached
     const maxSessions = ctx.config.auth.sessions?.maxConcurrentSessions ?? 10;
-    const activeFamilies = await ctx.repos.refreshTokenFamilies.findActiveByUserId(result.user.id);
+    const activeFamilies = await ctx.repos.refreshTokens.findActiveFamilies(result.user.id);
     if (activeFamilies.length >= maxSessions) {
       // Sort by creation date ascending, revoke oldest
       const sorted = [...activeFamilies].sort(
-        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        (a, b) => a.familyCreatedAt.getTime() - b.familyCreatedAt.getTime(),
       );
       const toEvict = sorted.slice(0, activeFamilies.length - maxSessions + 1);
       for (const family of toEvict) {
-        await ctx.repos.refreshTokenFamilies.revoke(family.id, 'Session limit exceeded');
+        await ctx.repos.refreshTokens.revokeFamily(family.familyId, 'Session limit exceeded');
       }
       ctx.log.info(
         { userId: result.user.id, evicted: toEvict.length },

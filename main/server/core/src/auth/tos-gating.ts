@@ -84,7 +84,7 @@ export async function checkTosAcceptance(
   }
 
   // Check if the user has agreed to this specific document
-  const agreement = await repos.userAgreements.findByUserAndDocument(userId, latestTos.id);
+  const agreement = await repos.consentRecords.findAgreementByUserAndDocument(userId, latestTos.id);
 
   return {
     accepted: agreement !== null,
@@ -112,13 +112,13 @@ export async function acceptTos(
   documentId: string,
   ipAddress?: string,
 ): Promise<{ agreedAt: Date }> {
-  const agreement = await repos.userAgreements.create({
+  const agreement = await repos.consentRecords.recordAgreement({
     userId,
     documentId,
     ipAddress: ipAddress ?? null,
   });
 
-  return { agreedAt: agreement.agreedAt };
+  return { agreedAt: agreement.createdAt };
 }
 
 // ============================================================================

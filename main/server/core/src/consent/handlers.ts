@@ -83,7 +83,7 @@ export async function handleGetConsent(
   }
 
   try {
-    const preferences = await getUserConsent(ctx.repos.consentLogs, user.userId);
+    const preferences = await getUserConsent(ctx.repos.consentRecords, user.userId);
     return {
       status: 200,
       body: { preferences },
@@ -137,7 +137,7 @@ export async function handleUpdateConsent(
     const userAgent = req.headers['user-agent'] ?? null;
 
     const entries = await updateUserConsent(
-      ctx.repos.consentLogs,
+      ctx.repos.consentRecords,
       user.userId,
       data,
       ipAddress,
@@ -159,7 +159,7 @@ export async function handleUpdateConsent(
     });
 
     // Return current state after update
-    const preferences = await getUserConsent(ctx.repos.consentLogs, user.userId);
+    const preferences = await getUserConsent(ctx.repos.consentRecords, user.userId);
 
     return {
       status: 200,

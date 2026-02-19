@@ -24,11 +24,11 @@ import {
 
 import {
   and,
+  AUTH_TOKENS_TABLE,
   eq,
   gt,
   insert,
   isNull,
-  MAGIC_LINK_TOKENS_TABLE,
   select,
   toCamelCase,
   update,
@@ -136,7 +136,7 @@ async function isEmailRateLimited(
   maxRequests: number = DEFAULT_MAX_REQUESTS_PER_EMAIL,
 ): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
-  const requestCount = await repos.magicLinkTokens.countRecentByEmail(email, windowStart);
+  const requestCount = await repos.authTokens.countRecentByEmail(email, windowStart);
   return requestCount >= maxRequests;
 }
 
@@ -156,7 +156,7 @@ async function isIpRateLimited(
   maxRequests: number = DEFAULT_MAX_REQUESTS_PER_IP,
 ): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
-  const requestCount = await repos.magicLinkTokens.countRecentByIp(ipAddress, windowStart);
+  const requestCount = await repos.authTokens.countRecentByIp(ipAddress, windowStart);
   return requestCount >= maxRequests;
 }
 
@@ -234,7 +234,8 @@ export async function requestMagicLink(
   const expiresAt = new Date(Date.now() + tokenExpiryMinutes * 60 * 1000);
 
   // Store hashed token (using repository)
-  await repos.magicLinkTokens.create({
+  await repos.authTokens.create({
+    type: 'magic_link',
     email: canonicalEmail,
     tokenHash,
     expiresAt,
@@ -313,9 +314,11 @@ export async function verifyMagicLink(
       used_at: Date | null;
     };
     const tokenRecords = await tx.query<TokenRecord>(
-      update(MAGIC_LINK_TOKENS_TABLE)
+      update(AUTH_TOKENS_TABLE)
         .set({ used_at: now })
-        .where(and(eq('token_hash', tokenHash), gt('expires_at', now), isNull('used_at')))
+        .where(
+          and(eq('token_hash', tokenHash), eq('type', 'magic_link'), gt('expires_at', now), isNull('used_at')),
+        )
         .returningAll()
         .toSql(),
     );
@@ -412,5 +415,5 @@ export async function cleanupExpiredMagicLinkTokens(
   _db: DbClient,
   repos: Repositories,
 ): Promise<number> {
-  return repos.magicLinkTokens.deleteExpired();
+  return repos.authTokens.deleteExpired();
 }

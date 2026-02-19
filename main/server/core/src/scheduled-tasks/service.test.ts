@@ -22,8 +22,8 @@ function createMockRepos(): Repositories {
     loginAttempts: {
       deleteOlderThan: vi.fn().mockResolvedValue(5),
     },
-    magicLinkTokens: {
-      deleteExpired: vi.fn().mockResolvedValue(3),
+    authTokens: {
+      deleteExpired: vi.fn().mockResolvedValue(0),
     },
     pushSubscriptions: {
       deleteExpired: vi.fn().mockResolvedValue(2),
@@ -36,12 +36,6 @@ function createMockRepos(): Repositories {
     },
     billingEvents: {
       deleteOlderThan: vi.fn().mockResolvedValue(0),
-    },
-    emailChangeTokens: {
-      deleteExpired: vi.fn().mockResolvedValue(0),
-    },
-    emailChangeRevertTokens: {
-      deleteExpired: vi.fn().mockResolvedValue(0),
     },
     dataExportRequests: {
       deleteExpired: vi.fn().mockResolvedValue(0),
@@ -97,7 +91,7 @@ describe('registerScheduledTasks', () => {
     registerScheduledTasks(repos, log);
 
     // Should log registration
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 14 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 10 }, 'Scheduled tasks registered');
   });
 
   it('should start executing tasks immediately', () => {
@@ -140,6 +134,6 @@ describe('stopScheduledTasks', () => {
     // Should be able to register again
     registerScheduledTasks(repos, log);
 
-    expect(log.info).toHaveBeenCalledWith({ taskCount: 14 }, 'Scheduled tasks registered');
+    expect(log.info).toHaveBeenCalledWith({ taskCount: 10 }, 'Scheduled tasks registered');
   });
 });

@@ -7,7 +7,7 @@
  * implementations, keeping the package framework-agnostic.
  */
 
-import type { AuditEventRepository, ConsentLogRepository } from '../../../db/src';
+import type { AuditEventRepository, ConsentRecordRepository } from '../../../db/src';
 import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
 
 // ============================================================================
@@ -22,7 +22,7 @@ import type { BaseContext, Logger, RequestContext } from '@bslt/shared';
  */
 export interface ConsentAppContext extends BaseContext {
   readonly repos: {
-    readonly consentLogs: ConsentLogRepository;
+    readonly consentRecords: ConsentRecordRepository;
     readonly auditEvents?: AuditEventRepository;
   };
   readonly log: Logger;

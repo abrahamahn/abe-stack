@@ -11,7 +11,7 @@
 import { CONSENT_TYPES } from '@bslt/shared';
 
 import type { ConsentPreferences, UpdateConsentInput } from './types';
-import type { ConsentLogRepository, ConsentLog as DbConsentLog } from '../../../db/src';
+import type { ConsentRecord as DbConsentRecord, ConsentRecordRepository } from '../../../db/src';
 
 // ============================================================================
 // Consent Operations
@@ -29,13 +29,13 @@ import type { ConsentLogRepository, ConsentLog as DbConsentLog } from '../../../
  * @complexity O(k) where k is the number of consent types
  */
 export async function getUserConsent(
-  consentLogs: ConsentLogRepository,
+  consentRecords: ConsentRecordRepository,
   userId: string,
 ): Promise<ConsentPreferences> {
   const preferences: Record<string, boolean | null> = {};
 
   for (const consentType of CONSENT_TYPES) {
-    const latest = await consentLogs.findLatestByUserAndType(userId, consentType);
+    const latest = await consentRecords.findLatestConsentByUserAndType(userId, consentType);
     preferences[consentType] = latest !== null ? latest.granted : null;
   }
 
@@ -58,13 +58,13 @@ export async function getUserConsent(
  * @complexity O(k) where k is the number of changed preferences
  */
 export async function updateUserConsent(
-  consentLogs: ConsentLogRepository,
+  consentRecords: ConsentRecordRepository,
   userId: string,
   preferences: UpdateConsentInput,
   ipAddress: string | null,
   userAgent: string | null,
-): Promise<DbConsentLog[]> {
-  const entries: DbConsentLog[] = [];
+): Promise<DbConsentRecord[]> {
+  const entries: DbConsentRecord[] = [];
 
   const updates: Array<{ type: string; granted: boolean }> = [];
 
@@ -82,7 +82,7 @@ export async function updateUserConsent(
   }
 
   for (const update of updates) {
-    const entry = await consentLogs.create({
+    const entry = await consentRecords.recordConsent({
       userId,
       consentType: update.type,
       granted: update.granted,

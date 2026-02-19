@@ -124,17 +124,14 @@ export function registerScheduledTasks(
       },
     },
 
-    // Daily cleanup: Expired magic link tokens
+    // Daily cleanup: Expired auth tokens (password reset, email verification, email change, magic link)
     {
-      name: 'magic-link-cleanup',
-      description: 'Delete expired magic link tokens',
+      name: 'auth-tokens-cleanup',
+      description: 'Delete expired auth tokens',
       schedule: 'daily',
       execute: async (): Promise<number> => {
-        const count = await repos.magicLinkTokens.deleteExpired();
-        log.info(
-          { task: 'magic-link-cleanup', deleted: count },
-          'Magic link tokens cleanup completed',
-        );
+        const count = await repos.authTokens.deleteExpired();
+        log.info({ task: 'auth-tokens-cleanup', deleted: count }, 'Auth tokens cleanup completed');
         return count;
       },
     },
@@ -214,66 +211,6 @@ export function registerScheduledTasks(
       schedule: 'daily',
       execute: async (): Promise<number> => {
         return anonymizeDeletedUsers(repos, RETENTION_PERIODS.PII_GRACE_DAYS, log);
-      },
-    },
-
-    // Daily cleanup: Expired password reset tokens
-    {
-      name: 'password-reset-cleanup',
-      description: 'Delete expired password reset tokens',
-      schedule: 'daily',
-      execute: async (): Promise<number> => {
-        const count = await repos.passwordResetTokens.deleteExpired();
-        log.info(
-          { task: 'password-reset-cleanup', deleted: count },
-          'Password reset tokens cleanup completed',
-        );
-        return count;
-      },
-    },
-
-    // Daily cleanup: Expired email verification tokens
-    {
-      name: 'email-verification-cleanup',
-      description: 'Delete expired email verification tokens',
-      schedule: 'daily',
-      execute: async (): Promise<number> => {
-        const count = await repos.emailVerificationTokens.deleteExpired();
-        log.info(
-          { task: 'email-verification-cleanup', deleted: count },
-          'Email verification tokens cleanup completed',
-        );
-        return count;
-      },
-    },
-
-    // Daily cleanup: Expired email change tokens
-    {
-      name: 'email-change-tokens-cleanup',
-      description: 'Delete expired email change tokens',
-      schedule: 'daily',
-      execute: async (): Promise<number> => {
-        const count = await repos.emailChangeTokens.deleteExpired();
-        log.info(
-          { task: 'email-change-tokens-cleanup', deleted: count },
-          'Email change tokens cleanup completed',
-        );
-        return count;
-      },
-    },
-
-    // Daily cleanup: Expired email change revert tokens
-    {
-      name: 'email-change-revert-tokens-cleanup',
-      description: 'Delete expired email change revert tokens',
-      schedule: 'daily',
-      execute: async (): Promise<number> => {
-        const count = await repos.emailChangeRevertTokens.deleteExpired();
-        log.info(
-          { task: 'email-change-revert-tokens-cleanup', deleted: count },
-          'Email change revert tokens cleanup completed',
-        );
-        return count;
       },
     },
 
