@@ -61,10 +61,17 @@ export function useAuth(): AuthContextType {
   // Track auth state with useState for reactivity
   const [state, setState] = useState<AuthState>(() => auth.getState());
 
-  // Subscribe to auth state changes and sync immediately when auth service changes
-  useEffect(() => {
-    // Sync state when auth service reference changes (e.g. during testing rerenders)
+  // Derived state during render: sync immediately when auth service reference changes
+  // (e.g. during testing rerenders with a new mock). Calling setState during render
+  // is safe when guarded by a reference check — React re-renders synchronously.
+  const [prevAuth, setPrevAuth] = useState(auth);
+  if (prevAuth !== auth) {
+    setPrevAuth(auth);
     setState(auth.getState());
+  }
+
+  // Subscribe to ongoing auth state changes
+  useEffect(() => {
     const unsubscribe = auth.subscribe(() => {
       setState(auth.getState());
     });

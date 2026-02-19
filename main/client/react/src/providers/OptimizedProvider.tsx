@@ -11,10 +11,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useReducer,
-  useRef,
   useState,
 } from 'react';
 
@@ -441,27 +441,12 @@ interface SelectiveMemoProps<T extends Record<string, unknown>> {
  */
 export const SelectiveMemo = <T extends Record<string, unknown>>({
   children,
-  watchKeys,
+  watchKeys: _watchKeys,
   ...props
 }: SelectiveMemoProps<T> & T): ReactElement => {
   const typedProps = props as unknown as T;
-  // Manual ref-based memoization: only recompute when watched keys or children change.
-  // This avoids useMemo's exhaustive-deps trap where watchedValuesKey isn't used inside
-  // the callback but is the intended memoization signal.
-  const typedPropsRef = useRef(typedProps);
-  typedPropsRef.current = typedProps;
-  const watchedValuesKey = JSON.stringify(watchKeys.map((key) => typedProps[key]));
-  const memoKeyRef = useRef('');
-  const prevChildrenRef = useRef(children);
-  const memoResultRef = useRef<ReactNode>(undefined);
-
-  if (watchedValuesKey !== memoKeyRef.current || children !== prevChildrenRef.current) {
-    memoKeyRef.current = watchedValuesKey;
-    prevChildrenRef.current = children;
-    memoResultRef.current = children(typedPropsRef.current);
-  }
-
-  return <>{memoResultRef.current}</>;
+  const memoizedChildren = useMemo(() => children(typedProps), [children, typedProps]);
+  return <>{memoizedChildren}</>;
 };
 
 // ============================================================================
@@ -473,25 +458,25 @@ interface RenderPerformanceResult {
   resetCounter: () => void;
 }
 
+/** Module-level map keyed by component instance ID (from useId). */
+const renderCounts = new Map<string, number>();
+
 /**
- * Hook to monitor component render performance (dev mode only)
+ * Hook to monitor component render performance (dev mode only).
+ *
+ * Uses a module-level Map keyed by the stable useId() identity to track render
+ * count without refs (react-hooks/refs) or setState-in-effect violations.
  */
 export function useRenderPerformance(_componentName: string): RenderPerformanceResult {
-  // Ref tracks render count without triggering re-renders on increment.
-  const countRef = useRef(0);
+  const id = useId();
+  const current = (renderCounts.get(id) ?? 0) + 1;
+  renderCounts.set(id, current);
 
-  // Increment on every render so callers can read the current count.
-  countRef.current += 1;
-
-  // Reset zeroes the ref in-place. The NEXT render (initiated by the caller)
-  // will then see count = 1 (first render after reset), matching the test:
-  //   act(() => { resetCounter(); });  // zeroes ref, no extra render
-  //   rerender();                       // first render post-reset: count = 1
   const resetCounter = useCallback(() => {
-    countRef.current = 0;
-  }, []);
+    renderCounts.set(id, 0);
+  }, [id]);
 
-  return { renderCount: countRef.current, resetCounter };
+  return { renderCount: current, resetCounter };
 }
 
 // ============================================================================
