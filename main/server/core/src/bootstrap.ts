@@ -39,6 +39,7 @@ import {
   type AuthEmailTemplates, // Import from server-system
   type QueueStore,
   type ServerSearchProvider,
+  type SmsProvider,
   type WriteService,
 } from '../../system/src';
 
@@ -71,7 +72,7 @@ export interface SystemContext {
   /** Optional: email service — injected at the app layer. */
   email?: EmailService;
   /** Optional: SMS provider — injected at the app layer. */
-  sms?: unknown;
+  sms?: SmsProvider;
   health(): Promise<DetailedHealthResponse>;
   contextualize(session: SessionContext): SystemContext;
 }
