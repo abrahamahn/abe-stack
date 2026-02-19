@@ -246,11 +246,11 @@ async function aggregateConsentHistory(
   repos: DataExportRepositories,
   userId: string,
 ): Promise<UserDataExport['consentHistory']> {
-  if (repos.consentLogs === undefined) return undefined;
-  const logs = await repos.consentLogs.findByUserId(userId);
+  if (repos.consentRecords === undefined) return undefined;
+  const logs = await repos.consentRecords.findConsentsByUserId(userId);
   return logs.map((c) => ({
-    consentType: c.consentType,
-    granted: c.granted,
+    consentType: c.consentType ?? '',
+    granted: c.granted ?? false,
     createdAt: c.createdAt.toISOString(),
   }));
 }

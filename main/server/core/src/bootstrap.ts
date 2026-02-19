@@ -5,11 +5,13 @@ import {
   type BaseLogger,
   type BillingService,
   type DetailedHealthResponse,
+  type EmailService,
   type ErrorTracker,
   type HealthCheckCache,
   type HealthCheckQueue,
   type LogData,
   type NotificationService,
+  type StorageClient,
 } from '@bslt/shared';
 
 import {
@@ -64,6 +66,12 @@ export interface SystemContext {
   errorTracker: ErrorTracker;
   notifications?: NotificationService;
   billing?: BillingService;
+  /** Optional: storage client — injected at the app layer. */
+  storage?: StorageClient;
+  /** Optional: email service — injected at the app layer. */
+  email?: EmailService;
+  /** Optional: SMS provider — injected at the app layer. */
+  sms?: unknown;
   health(): Promise<DetailedHealthResponse>;
   contextualize(session: SessionContext): SystemContext;
 }

@@ -18,24 +18,25 @@ import {
   type UserSession,
 } from './sessions';
 
-import type { RefreshTokenFamily, Repositories } from '../../../../db/src';
+import type { RefreshTokenFamilyView, Repositories } from '../../../../db/src';
 
 // ============================================================================
 // Test Data Factories
 // ============================================================================
 
 /**
- * Create a mock refresh token family
+ * Create a mock refresh token family view
  */
-function createMockFamily(overrides: Partial<RefreshTokenFamily> = {}): RefreshTokenFamily {
+function createMockFamily(overrides: Partial<RefreshTokenFamilyView> = {}): RefreshTokenFamilyView {
   return {
-    id: 'family-1',
+    familyId: 'family-1',
     userId: 'user-1',
-    createdAt: new Date('2026-01-15T10:00:00Z'),
+    familyCreatedAt: new Date('2026-01-15T10:00:00Z'),
+    familyRevokedAt: null,
+    familyRevokeReason: null,
+    latestExpiresAt: new Date('2026-02-15T10:00:00Z'),
     ipAddress: '192.168.1.1',
     userAgent: 'Mozilla/5.0',
-    revokedAt: null,
-    revokeReason: null,
     ...overrides,
   };
 }
@@ -46,19 +47,15 @@ function createMockFamily(overrides: Partial<RefreshTokenFamily> = {}): RefreshT
 function createMockRepos(): Repositories {
   return {
     users: {} as never,
-    refreshTokens: {} as never,
-    refreshTokenFamilies: {
-      findById: vi.fn(),
-      findActiveByUserId: vi.fn(),
-      create: vi.fn(),
-      revoke: vi.fn(),
-      revokeAllForUser: vi.fn(),
-    },
+    refreshTokens: {
+      findActiveFamilies: vi.fn(),
+      findFamilyById: vi.fn(),
+      revokeFamily: vi.fn(),
+    } as never,
+    authTokens: {} as never,
     loginAttempts: {} as never,
-    passwordResetTokens: {} as never,
-    emailVerificationTokens: {} as never,
     securityEvents: {} as never,
-    magicLinkTokens: {} as never,
+    totpBackupCodes: {} as never,
     oauthConnections: {} as never,
     pushSubscriptions: {} as never,
     notificationPreferences: {} as never,
@@ -82,11 +79,7 @@ function createMockRepos(): Repositories {
     usageMetrics: {} as never,
     usageSnapshots: {} as never,
     legalDocuments: {} as never,
-    userAgreements: {} as never,
-    consentLogs: {} as never,
-    totpBackupCodes: {} as never,
-    emailChangeTokens: {} as never,
-    emailChangeRevertTokens: {} as never,
+    consentRecords: {} as never,
     apiKeys: {} as never,
     dataExportRequests: {} as never,
     activities: {} as never,
@@ -112,30 +105,30 @@ describe('listUserSessions', () => {
     it('should return all active sessions with correct mapping', async () => {
       const mockFamilies = [
         createMockFamily({
-          id: 'family-1',
-          createdAt: new Date('2026-01-15T10:00:00Z'),
+          familyId: 'family-1',
+          familyCreatedAt: new Date('2026-01-15T10:00:00Z'),
           ipAddress: '192.168.1.1',
           userAgent: 'Mozilla/5.0 (Windows)',
         }),
         createMockFamily({
-          id: 'family-2',
-          createdAt: new Date('2026-01-14T10:00:00Z'),
+          familyId: 'family-2',
+          familyCreatedAt: new Date('2026-01-14T10:00:00Z'),
           ipAddress: '10.0.0.1',
           userAgent: 'Mozilla/5.0 (Mac)',
         }),
         createMockFamily({
-          id: 'family-3',
-          createdAt: new Date('2026-01-13T10:00:00Z'),
+          familyId: 'family-3',
+          familyCreatedAt: new Date('2026-01-13T10:00:00Z'),
           ipAddress: null,
           userAgent: null,
         }),
       ];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
       const result = await listUserSessions(repos, 'user-1');
 
-      expect(repos.refreshTokenFamilies.findActiveByUserId).toHaveBeenCalledWith('user-1');
+      expect(repos.refreshTokens.findActiveFamilies).toHaveBeenCalledWith('user-1');
       expect(result).toHaveLength(3);
       expect(result[0]).toEqual({
         id: 'family-1',
@@ -148,12 +141,12 @@ describe('listUserSessions', () => {
 
     it('should mark current session when familyId provided', async () => {
       const mockFamilies = [
-        createMockFamily({ id: 'family-1' }),
-        createMockFamily({ id: 'family-2' }),
-        createMockFamily({ id: 'family-3' }),
+        createMockFamily({ familyId: 'family-1' }),
+        createMockFamily({ familyId: 'family-2' }),
+        createMockFamily({ familyId: 'family-3' }),
       ];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
       const result = await listUserSessions(repos, 'user-1', 'family-2');
 
@@ -165,13 +158,13 @@ describe('listUserSessions', () => {
     it('should handle null ipAddress and userAgent', async () => {
       const mockFamilies = [
         createMockFamily({
-          id: 'family-1',
+          familyId: 'family-1',
           ipAddress: null,
           userAgent: null,
         }),
       ];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
       const result = await listUserSessions(repos, 'user-1');
 
@@ -182,7 +175,7 @@ describe('listUserSessions', () => {
 
   describe('when user has no sessions', () => {
     it('should return empty array', async () => {
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue([]);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue([]);
 
       const result = await listUserSessions(repos, 'user-1');
 
@@ -192,9 +185,9 @@ describe('listUserSessions', () => {
 
   describe('edge cases', () => {
     it('should handle single session', async () => {
-      const mockFamilies = [createMockFamily({ id: 'family-1' })];
+      const mockFamilies = [createMockFamily({ familyId: 'family-1' })];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
       const result = await listUserSessions(repos, 'user-1', 'family-1');
 
@@ -203,9 +196,9 @@ describe('listUserSessions', () => {
     });
 
     it('should return properly typed UserSession objects', async () => {
-      const mockFamilies = [createMockFamily({ id: 'family-1' })];
+      const mockFamilies = [createMockFamily({ familyId: 'family-1' })];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
       const result = await listUserSessions(repos, 'user-1', 'family-1');
 
@@ -232,17 +225,17 @@ describe('revokeSession', () => {
   describe('when session exists and belongs to user', () => {
     it('should revoke the session', async () => {
       const mockFamily = createMockFamily({
-        id: 'session-1',
+        familyId: 'session-1',
         userId: 'user-1',
       });
 
-      vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(mockFamily);
-      vi.mocked(repos.refreshTokenFamilies.revoke).mockResolvedValue(null);
+      vi.mocked(repos.refreshTokens.findFamilyById).mockResolvedValue(mockFamily);
+      vi.mocked(repos.refreshTokens.revokeFamily).mockResolvedValue(1);
 
       await revokeSession(repos, 'user-1', 'session-1');
 
-      expect(repos.refreshTokenFamilies.findById).toHaveBeenCalledWith('session-1');
-      expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+      expect(repos.refreshTokens.findFamilyById).toHaveBeenCalledWith('session-1');
+      expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
         'session-1',
         'User revoked session',
       );
@@ -250,17 +243,17 @@ describe('revokeSession', () => {
 
     it('should not revoke if already revoked', async () => {
       const mockFamily = createMockFamily({
-        id: 'session-1',
+        familyId: 'session-1',
         userId: 'user-1',
-        revokedAt: new Date('2026-01-15T10:00:00Z'),
-        revokeReason: 'Previously revoked',
+        familyRevokedAt: new Date('2026-01-15T10:00:00Z'),
+        familyRevokeReason: 'Previously revoked',
       });
 
-      vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(mockFamily);
+      vi.mocked(repos.refreshTokens.findFamilyById).mockResolvedValue(mockFamily);
 
       await revokeSession(repos, 'user-1', 'session-1');
 
-      expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
+      expect(repos.refreshTokens.revokeFamily).not.toHaveBeenCalled();
     });
   });
 
@@ -274,13 +267,13 @@ describe('revokeSession', () => {
         statusCode: 404,
       });
 
-      expect(repos.refreshTokenFamilies.findById).not.toHaveBeenCalled();
+      expect(repos.refreshTokens.findFamilyById).not.toHaveBeenCalled();
     });
   });
 
   describe('when session does not exist', () => {
     it('should throw NotFoundError', async () => {
-      vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(null);
+      vi.mocked(repos.refreshTokens.findFamilyById).mockResolvedValue(null);
 
       await expect(revokeSession(repos, 'user-1', 'non-existent')).rejects.toMatchObject({
         name: 'NotFoundError',
@@ -293,11 +286,11 @@ describe('revokeSession', () => {
   describe('when session belongs to different user', () => {
     it('should throw NotFoundError', async () => {
       const mockFamily = createMockFamily({
-        id: 'session-1',
+        familyId: 'session-1',
         userId: 'user-2',
       });
 
-      vi.mocked(repos.refreshTokenFamilies.findById).mockResolvedValue(mockFamily);
+      vi.mocked(repos.refreshTokens.findFamilyById).mockResolvedValue(mockFamily);
 
       await expect(revokeSession(repos, 'user-1', 'session-1')).rejects.toMatchObject({
         name: 'NotFoundError',
@@ -323,23 +316,23 @@ describe('revokeAllSessions', () => {
   describe('when user has multiple sessions', () => {
     it('should revoke all sessions except current', async () => {
       const mockFamilies = [
-        createMockFamily({ id: 'family-1' }),
-        createMockFamily({ id: 'family-2' }),
-        createMockFamily({ id: 'family-3' }),
+        createMockFamily({ familyId: 'family-1' }),
+        createMockFamily({ familyId: 'family-2' }),
+        createMockFamily({ familyId: 'family-3' }),
       ];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
-      vi.mocked(repos.refreshTokenFamilies.revoke).mockResolvedValue(null);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.revokeFamily).mockResolvedValue(1);
 
       const count = await revokeAllSessions(repos, 'user-1', 'family-2');
 
       expect(count).toBe(2);
-      expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledTimes(2);
-      expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+      expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledTimes(2);
+      expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
         'family-1',
         'User logged out from all devices',
       );
-      expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledWith(
+      expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledWith(
         'family-3',
         'User logged out from all devices',
       );
@@ -347,37 +340,37 @@ describe('revokeAllSessions', () => {
 
     it('should revoke all sessions when no current session specified', async () => {
       const mockFamilies = [
-        createMockFamily({ id: 'family-1' }),
-        createMockFamily({ id: 'family-2' }),
+        createMockFamily({ familyId: 'family-1' }),
+        createMockFamily({ familyId: 'family-2' }),
       ];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
-      vi.mocked(repos.refreshTokenFamilies.revoke).mockResolvedValue(null);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.revokeFamily).mockResolvedValue(1);
 
       const count = await revokeAllSessions(repos, 'user-1', undefined);
 
       expect(count).toBe(2);
-      expect(repos.refreshTokenFamilies.revoke).toHaveBeenCalledTimes(2);
+      expect(repos.refreshTokens.revokeFamily).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('when user has no sessions', () => {
     it('should return zero', async () => {
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue([]);
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue([]);
 
       const count = await revokeAllSessions(repos, 'user-1');
 
       expect(count).toBe(0);
-      expect(repos.refreshTokenFamilies.revoke).not.toHaveBeenCalled();
+      expect(repos.refreshTokens.revokeFamily).not.toHaveBeenCalled();
     });
   });
 
   describe('error handling', () => {
     it('should propagate repository errors', async () => {
-      const mockFamilies = [createMockFamily({ id: 'family-1' })];
+      const mockFamilies = [createMockFamily({ familyId: 'family-1' })];
 
-      vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
-      vi.mocked(repos.refreshTokenFamilies.revoke).mockRejectedValue(new Error('Database error'));
+      vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
+      vi.mocked(repos.refreshTokens.revokeFamily).mockRejectedValue(new Error('Database error'));
 
       await expect(revokeAllSessions(repos, 'user-1')).rejects.toThrow('Database error');
     });
@@ -398,21 +391,21 @@ describe('getSessionCount', () => {
 
   it('should return correct count for multiple sessions', async () => {
     const mockFamilies = [
-      createMockFamily({ id: 'family-1' }),
-      createMockFamily({ id: 'family-2' }),
-      createMockFamily({ id: 'family-3' }),
+      createMockFamily({ familyId: 'family-1' }),
+      createMockFamily({ familyId: 'family-2' }),
+      createMockFamily({ familyId: 'family-3' }),
     ];
 
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
     const count = await getSessionCount(repos, 'user-1');
 
     expect(count).toBe(3);
-    expect(repos.refreshTokenFamilies.findActiveByUserId).toHaveBeenCalledWith('user-1');
+    expect(repos.refreshTokens.findActiveFamilies).toHaveBeenCalledWith('user-1');
   });
 
   it('should return zero when user has no sessions', async () => {
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue([]);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue([]);
 
     const count = await getSessionCount(repos, 'user-1');
 
@@ -420,9 +413,9 @@ describe('getSessionCount', () => {
   });
 
   it('should return 1 for single session', async () => {
-    const mockFamilies = [createMockFamily({ id: 'family-1' })];
+    const mockFamilies = [createMockFamily({ familyId: 'family-1' })];
 
-    vi.mocked(repos.refreshTokenFamilies.findActiveByUserId).mockResolvedValue(mockFamilies);
+    vi.mocked(repos.refreshTokens.findActiveFamilies).mockResolvedValue(mockFamilies);
 
     const count = await getSessionCount(repos, 'user-1');
 

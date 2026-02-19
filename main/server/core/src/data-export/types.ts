@@ -58,7 +58,7 @@ export type DataExportRepositories = Pick<Repositories, 'dataExportRequests' | '
       | 'files'
       | 'notifications'
       | 'userSessions'
-      | 'consentLogs'
+      | 'consentRecords'
     >
   >;
 

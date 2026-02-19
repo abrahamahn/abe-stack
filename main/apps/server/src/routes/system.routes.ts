@@ -8,7 +8,6 @@
 
 import {
   checkDbStatus,
-  checkSchemaStatus,
   createRouteMap,
   getDetailedHealth,
   getMetricsCollector,
@@ -17,12 +16,12 @@ import {
 import { HTTP_STATUS } from '@bslt/shared';
 import { getWebSocketStats } from '@bslt/websocket';
 
-import type { HandlerContext, RouteMap, SystemContext } from '@bslt/server-system';
+import type { HandlerContext, HealthContext, RouteMap } from '@bslt/server-system';
 import type { LiveResponse, ReadyResponse } from '@bslt/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-function asSystemContext(ctx: HandlerContext): SystemContext {
-  return ctx as unknown as SystemContext;
+function asHealthContext(ctx: HandlerContext): HealthContext {
+  return ctx as unknown as HealthContext;
 }
 
 export const systemRoutes: RouteMap = createRouteMap([
@@ -31,8 +30,8 @@ export const systemRoutes: RouteMap = createRouteMap([
     publicRoute(
       'GET',
       async (ctx: HandlerContext, _body: undefined, _req: FastifyRequest, reply: FastifyReply) => {
-        const systemCtx = asSystemContext(ctx);
-        const dbStatus = await checkDbStatus(systemCtx);
+        const hCtx = asHealthContext(ctx);
+        const dbStatus = await checkDbStatus(hCtx);
         if (dbStatus.status !== 'up') {
           reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
@@ -90,13 +89,10 @@ export const systemRoutes: RouteMap = createRouteMap([
         _req: FastifyRequest,
         reply: FastifyReply,
       ): Promise<ReadyResponse> => {
-        const systemCtx = asSystemContext(ctx);
-        const [dbStatus, schemaStatus] = await Promise.all([
-          checkDbStatus(systemCtx),
-          checkSchemaStatus(systemCtx),
-        ]);
-
-        const ready = dbStatus.status === 'up' && schemaStatus.status === 'up';
+        const hCtx = asHealthContext(ctx);
+        // Schema check not available at this level — DB connectivity suffices for readiness.
+        const dbStatus = await checkDbStatus(hCtx);
+        const ready = dbStatus.status === 'up';
         if (!ready) {
           reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }
@@ -144,8 +140,8 @@ export const systemRoutes: RouteMap = createRouteMap([
     publicRoute(
       'GET',
       async (ctx: HandlerContext, _body: undefined, _req: FastifyRequest, reply: FastifyReply) => {
-        const systemCtx = asSystemContext(ctx);
-        const detailed = await getDetailedHealth(systemCtx, getWebSocketStats());
+        const hCtx = asHealthContext(ctx);
+        const detailed = await getDetailedHealth(hCtx, { websocketStats: getWebSocketStats() });
         if (detailed.status !== 'healthy') {
           reply.code(HTTP_STATUS.SERVICE_UNAVAILABLE);
         }

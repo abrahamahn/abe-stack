@@ -4,7 +4,7 @@ import http from 'node:http';
 import { bootstrapSystem, type SystemContext } from '@bslt/core';
 import { verifyToken } from '@bslt/core/auth';
 import { registerScheduledTasks, stopScheduledTasks } from '@bslt/core/scheduled-tasks';
-import { requireValidSchema } from '@bslt/db';
+import { REQUIRED_TABLES, requireValidSchema, validateSchema } from '@bslt/db';
 import { resolveTableName } from '@bslt/realtime';
 import { logStartupSummary } from '@bslt/server-system';
 import { getWebSocketStats, registerWebSocket } from '@bslt/websocket';
@@ -102,17 +102,21 @@ export class ServerManager {
           port: this.port,
           routeCount,
         },
-        getWebSocketStats(),
+        {
+          schemaValidator: () => validateSchema(db),
+          totalTableCount: REQUIRED_TABLES.length,
+          websocketStats: getWebSocketStats(),
+        },
       );
 
       // Setup graceful shutdown
       this.setupSignalHandlers();
     } catch (error: unknown) {
-      console.error('Failed to start server:', error);
+      process.stderr.write(`Failed to start server: ${String(error)}\n`);
       // Ensure we try to cleanup if start failed midway
       if (this.context) {
         await this.stop().catch((err: unknown) => {
-          console.error('Failed to stop during startup error:', err);
+          process.stderr.write(`Failed to stop during startup error: ${String(err)}\n`);
         });
       }
       process.exit(1);
@@ -123,8 +127,8 @@ export class ServerManager {
    * Stop the server
    */
   async stop(): Promise<void> {
-    const log = this.context?.log ?? console;
-    log.info('Stopping server...');
+    const log = this.context?.log;
+    log?.info('Stopping server...');
 
     // 1. Stop Background Tasks
     if (this.context) {
@@ -144,7 +148,7 @@ export class ServerManager {
       await this.app.server.close();
     }
 
-    log.info('Server stopped');
+    log?.info('Server stopped');
   }
 
   /**

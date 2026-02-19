@@ -273,6 +273,29 @@ export const baseConfig = [
     },
   },
 
+  // 5c. SERVER/SYSTEM: NO INTERNAL INDEX BARREL IMPORTS
+  // Inside a feature folder, nothing imports ./index — the barrel is for external consumers only.
+  // This prevents hidden circular dependencies and enforces explicit dependency paths.
+  {
+    files: ['main/server/system/src/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/__tests__/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              // Matches ./index, ../index, ./providers/index, ../../cache/index, etc.
+              regex: '^\\.{1,2}(?:\\/[^/]+)*\\/index$',
+              message:
+                'Do not import from internal index barrels. Import from the concrete module file instead. Barrels are for external consumers only.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // 6. TEST RELAXATION (Fast Loop support)
   // Test files are excluded from composite build tsconfigs (no .d.ts output needed).
   // Use project: false to skip project lookup — prevents "file not found in any project" errors.
@@ -289,8 +312,8 @@ export const baseConfig = [
     rules: {
       ...tseslint.configs.disableTypeChecked.rules,
       // Non-type-aware rules that are intentionally relaxed in tests:
-      '@typescript-eslint/no-explicit-any': 'off',        // mock patterns require any
-      '@typescript-eslint/no-non-null-assertion': 'off',  // common in test assertions
+      '@typescript-eslint/no-explicit-any': 'off', // mock patterns require any
+      '@typescript-eslint/no-non-null-assertion': 'off', // common in test assertions
       'no-console': 'off',
       // Raw HTML is acceptable in test render helpers (not shipped to users)
       'no-restricted-syntax': 'off',

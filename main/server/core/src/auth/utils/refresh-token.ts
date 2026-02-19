@@ -8,6 +8,8 @@
  * @module utils/refresh-token
  */
 
+import { randomUUID } from 'node:crypto';
+
 import { TokenReuseError } from '@bslt/shared';
 
 import {
@@ -18,8 +20,6 @@ import {
   insert,
   lt,
   REFRESH_TOKEN_COLUMNS,
-  REFRESH_TOKEN_FAMILIES_TABLE,
-  REFRESH_TOKEN_FAMILY_COLUMNS,
   REFRESH_TOKENS_TABLE,
   select,
   toCamelCase,
@@ -31,7 +31,6 @@ import {
   withTransaction,
   type DbClient,
   type RefreshToken,
-  type RefreshTokenFamily,
   type User,
   type UserSession,
 } from '../../../../db/src';
@@ -51,7 +50,7 @@ import type { UserRole } from '@bslt/shared';
  * Families are used to detect token reuse attacks.
  *
  * This operation is wrapped in a transaction for atomicity.
- * If token insertion fails, the family creation is rolled back.
+ * If token insertion fails, the session creation is rolled back.
  *
  * @param db - Database client
  * @param userId - User ID to create family for
@@ -68,25 +67,20 @@ export async function createRefreshTokenFamily(
   sessionMeta?: { ipAddress?: string; userAgent?: string; deviceId?: string },
 ): Promise<{ familyId: string; token: string }> {
   return await withTransaction(db, async (tx) => {
-    const familyRows = await tx.query(
-      insert(REFRESH_TOKEN_FAMILIES_TABLE).values({ user_id: userId }).returningAll().toSql(),
-    );
-
-    if (familyRows[0] === undefined) {
-      throw new Error('Failed to create refresh token family');
-    }
-
-    const family = toCamelCase<RefreshTokenFamily>(familyRows[0], REFRESH_TOKEN_FAMILY_COLUMNS);
-
+    const familyId = randomUUID();
     const token = createRefreshToken();
     const now = new Date();
+
     await tx.execute(
       insert(REFRESH_TOKENS_TABLE)
         .values({
           user_id: userId,
-          family_id: family.id,
+          family_id: familyId,
           token,
           expires_at: getRefreshTokenExpiry(expiryDays),
+          family_ip_address: sessionMeta?.ipAddress ?? null,
+          family_user_agent: sessionMeta?.userAgent ?? null,
+          family_created_at: now,
         })
         .toSql(),
     );
@@ -96,7 +90,7 @@ export async function createRefreshTokenFamily(
     await tx.execute(
       insert(USER_SESSIONS_TABLE)
         .values({
-          id: family.id,
+          id: familyId,
           user_id: userId,
           ip_address: sessionMeta?.ipAddress ?? null,
           user_agent: sessionMeta?.userAgent ?? null,
@@ -109,10 +103,7 @@ export async function createRefreshTokenFamily(
         .toSql(),
     );
 
-    return {
-      familyId: family.id,
-      token,
-    };
+    return { familyId, token };
   });
 }
 
@@ -123,7 +114,7 @@ export async function createRefreshTokenFamily(
  * PERFORMANCE OPTIMIZATIONS:
  * 1. Combined token + user lookup using parallel queries where safe
  * 2. Uses composite index (token, expires_at) for efficient token validation
- * 3. Single query for family status check with user info when possible
+ * 3. Family revocation status read from denormalized column on the token row
  * 4. Minimized round trips by batching independent queries
  *
  * @param db - Database client
@@ -167,26 +158,13 @@ export async function rotateRefreshToken(
   const tokenAge = Date.now() - storedToken.createdAt.getTime();
   const isWithinGracePeriod = tokenAge < gracePeriod;
 
-  // OPTIMIZATION 2: Parallel fetch of user and family data
+  // OPTIMIZATION 2: Parallel fetch of user and session data
   // These are independent queries that can run concurrently
-  const [userRow, familyRow, sessionRow] = await Promise.all([
+  const [userRow, sessionRow] = await Promise.all([
     // User lookup - always needed for the response
     db.queryOne(select(USERS_TABLE).where(eq('id', storedToken.userId)).limit(1).toSql()),
-    // Family lookup - only if familyId exists
-    storedToken.familyId !== null
-      ? db.queryOne(
-          select(REFRESH_TOKEN_FAMILIES_TABLE)
-            .where(eq('id', storedToken.familyId))
-            .limit(1)
-            .toSql(),
-        )
-      : Promise.resolve(null),
     // Session lookup - for checking User-Agent binding
-    storedToken.familyId !== null
-      ? db.queryOne(
-          select(USER_SESSIONS_TABLE).where(eq('id', storedToken.familyId)).limit(1).toSql(),
-        )
-      : Promise.resolve(null),
+    db.queryOne(select(USER_SESSIONS_TABLE).where(eq('id', storedToken.familyId)).limit(1).toSql()),
   ]);
 
   // Early exit if user doesn't exist
@@ -195,10 +173,6 @@ export async function rotateRefreshToken(
   }
 
   const user = toCamelCase<User>(userRow, USER_COLUMNS);
-  const family =
-    familyRow !== null
-      ? toCamelCase<RefreshTokenFamily>(familyRow, REFRESH_TOKEN_FAMILY_COLUMNS)
-      : null;
   const session =
     sessionRow !== null ? toCamelCase<UserSession>(sessionRow, USER_SESSION_COLUMNS) : null;
 
@@ -213,41 +187,29 @@ export async function rotateRefreshToken(
     userAgent !== undefined
   ) {
     if (session.userAgent !== userAgent) {
-      if (storedToken.familyId !== null) {
-        await logTokenReuseEvent(
-          db,
-          user.id,
-          user.email,
-          storedToken.familyId,
-          ipAddress,
-          userAgent,
-        );
-        await logTokenFamilyRevokedEvent(
-          db,
-          user.id,
-          user.email,
-          storedToken.familyId,
-          'Session hijacking detected: User-Agent mismatch',
-          ipAddress,
-          userAgent, // The attacker's UA
-        );
-        await revokeTokenFamily(
-          db,
-          storedToken.familyId,
-          'Session hijacking detected: User-Agent mismatch',
-        );
-        // We reuse TokenReuseError or throw a specific security error
-        throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
-      }
+      await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
+      await logTokenFamilyRevokedEvent(
+        db,
+        user.id,
+        user.email,
+        storedToken.familyId,
+        'Session hijacking detected: User-Agent mismatch',
+        ipAddress,
+        userAgent, // The attacker's UA
+      );
+      await revokeTokenFamily(
+        db,
+        storedToken.familyId,
+        'Session hijacking detected: User-Agent mismatch',
+      );
+      // We reuse TokenReuseError or throw a specific security error
+      throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
     }
   }
 
   // Check if family is revoked (token reuse attack)
-  if (
-    family?.revokedAt !== undefined &&
-    family.revokedAt !== null &&
-    storedToken.familyId !== null
-  ) {
+  // Family revocation is denormalized into the token row (familyRevokedAt column)
+  if (storedToken.familyRevokedAt !== null) {
     await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
     await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
     throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
@@ -255,16 +217,13 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 3: Only check for recent tokens if family exists
   // Uses index on (family_id) combined with created_at filter
-  const recentTokenRow =
-    storedToken.familyId !== null
-      ? await db.queryOne(
-          select(REFRESH_TOKENS_TABLE)
-            .where(and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)))
-            .orderBy('created_at', 'desc')
-            .limit(1)
-            .toSql(),
-        )
-      : null;
+  const recentTokenRow = await db.queryOne(
+    select(REFRESH_TOKENS_TABLE)
+      .where(and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)))
+      .orderBy('created_at', 'desc')
+      .limit(1)
+      .toSql(),
+  );
 
   const recentTokenInFamily =
     recentTokenRow !== null
@@ -291,24 +250,18 @@ export async function rotateRefreshToken(
     recentTokenInFamily.token !== oldToken &&
     !isWithinGracePeriod
   ) {
-    if (storedToken.familyId !== null) {
-      await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
-      await logTokenFamilyRevokedEvent(
-        db,
-        user.id,
-        user.email,
-        storedToken.familyId,
-        'Token reuse detected outside grace period',
-        ipAddress,
-        userAgent,
-      );
-      await revokeTokenFamily(
-        db,
-        storedToken.familyId,
-        'Token reuse detected outside grace period',
-      );
-      throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
-    }
+    await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
+    await logTokenFamilyRevokedEvent(
+      db,
+      user.id,
+      user.email,
+      storedToken.familyId,
+      'Token reuse detected outside grace period',
+      ipAddress,
+      userAgent,
+    );
+    await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected outside grace period');
+    throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
   }
 
   // OPTIMIZATION 4: Atomic token rotation in single transaction
@@ -325,6 +278,9 @@ export async function rotateRefreshToken(
           family_id: storedToken.familyId,
           token,
           expires_at: getRefreshTokenExpiry(expiryDays),
+          family_ip_address: storedToken.familyIpAddress,
+          family_user_agent: storedToken.familyUserAgent,
+          family_created_at: storedToken.familyCreatedAt,
         })
         .toSql(),
     );
@@ -332,14 +288,12 @@ export async function rotateRefreshToken(
     return token;
   });
 
-  if (storedToken.familyId !== null) {
-    await db.execute(
-      update(USER_SESSIONS_TABLE)
-        .set({ last_active_at: new Date() })
-        .where(eq('id', storedToken.familyId))
-        .toSql(),
-    );
-  }
+  await db.execute(
+    update(USER_SESSIONS_TABLE)
+      .set({ last_active_at: new Date() })
+      .where(eq('id', storedToken.familyId))
+      .toSql(),
+  );
 
   return {
     token: newToken,
@@ -357,13 +311,13 @@ export async function rotateRefreshToken(
  * Revoke an entire token family (all tokens created from the same initial login).
  *
  * This operation is wrapped in a transaction for atomicity.
- * If token deletion fails, the family update is rolled back.
+ * If any operation fails, all changes are rolled back.
  *
  * @param db - Database client
  * @param familyId - Token family ID to revoke
  * @param reason - Reason for revocation (for audit trail)
  * @returns Promise that resolves when revocation is complete
- * @complexity O(1) - two database operations
+ * @complexity O(1) - three database operations
  */
 export async function revokeTokenFamily(
   db: DbClient,
@@ -372,13 +326,11 @@ export async function revokeTokenFamily(
 ): Promise<void> {
   await withTransaction(db, async (tx) => {
     const now = new Date();
+    // Stamp revocation on all tokens in family before deleting
     await tx.execute(
-      update(REFRESH_TOKEN_FAMILIES_TABLE)
-        .set({
-          revoked_at: now,
-          revoke_reason: reason,
-        })
-        .where(eq('id', familyId))
+      update(REFRESH_TOKENS_TABLE)
+        .set({ family_revoked_at: now, family_revoke_reason: reason })
+        .where(eq('family_id', familyId))
         .toSql(),
     );
 
@@ -399,16 +351,16 @@ export async function revokeTokenFamily(
  * @param db - Database client
  * @param userId - User ID to revoke all tokens for
  * @returns Promise that resolves when all tokens are revoked
- * @complexity O(1) - two database operations
+ * @complexity O(1) - three database operations
  */
 export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
   await withTransaction(db, async (tx) => {
     const now = new Date();
     await tx.execute(
-      update(REFRESH_TOKEN_FAMILIES_TABLE)
+      update(REFRESH_TOKENS_TABLE)
         .set({
-          revoked_at: now,
-          revoke_reason: 'User logged out from all devices',
+          family_revoked_at: now,
+          family_revoke_reason: 'User logged out from all devices',
         })
         .where(eq('user_id', userId))
         .toSql(),

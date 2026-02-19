@@ -160,38 +160,22 @@ function createMockRepos() {
       deleteByFamilyId: vi.fn(),
       deleteExpired: vi.fn(),
     },
-    refreshTokenFamilies: {
-      findById: vi.fn(),
-      findActiveByUserId: vi.fn(),
+    authTokens: {
       create: vi.fn(),
-      revoke: vi.fn(),
-      revokeAllForUser: vi.fn(),
+      findValidByTokenHash: vi.fn(),
+      findByTokenHash: vi.fn(),
+      markAsUsed: vi.fn(),
+      invalidateForUser: vi.fn(),
+      countRecentByEmail: vi.fn(),
+      countRecentByIp: vi.fn(),
+      deleteExpired: vi.fn(),
+      deleteExpiredByUser: vi.fn(),
     },
     loginAttempts: {
       create: vi.fn(),
       countRecentFailures: vi.fn(),
       findRecentByEmail: vi.fn(),
       deleteOlderThan: vi.fn(),
-    },
-    passwordResetTokens: {
-      findById: vi.fn(),
-      findValidByTokenHash: vi.fn(),
-      findValidByUserId: vi.fn(),
-      create: vi.fn(),
-      markAsUsed: vi.fn(),
-      invalidateByUserId: vi.fn(),
-      deleteByUserId: vi.fn(),
-      deleteExpired: vi.fn(),
-    },
-    emailVerificationTokens: {
-      findById: vi.fn(),
-      findValidByTokenHash: vi.fn(),
-      findValidByUserId: vi.fn(),
-      create: vi.fn(),
-      markAsUsed: vi.fn(),
-      invalidateByUserId: vi.fn(),
-      deleteByUserId: vi.fn(),
-      deleteExpired: vi.fn(),
     },
     securityEvents: {
       create: vi.fn(),
@@ -201,17 +185,6 @@ function createMockRepos() {
       findBySeverity: vi.fn(),
       countByType: vi.fn(),
       deleteOlderThan: vi.fn(),
-    },
-    magicLinkTokens: {
-      findById: vi.fn(),
-      findValidByTokenHash: vi.fn(),
-      findValidByEmail: vi.fn(),
-      findRecentByEmail: vi.fn(),
-      countRecentByEmail: vi.fn(),
-      create: vi.fn(),
-      markAsUsed: vi.fn(),
-      deleteByEmail: vi.fn(),
-      deleteExpired: vi.fn(),
     },
     oauthConnections: {
       findById: vi.fn(),
@@ -1206,15 +1179,18 @@ describe('Email Verification Auto-Login', () => {
 
     const mockTokenRecord = {
       id: 'token-id',
+      type: 'email_verification' as const,
       userId: 'user-id',
+      email: null,
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 1000000),
       usedAt: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata: {},
       createdAt: new Date(),
     };
-    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(
-      mockTokenRecord,
-    );
+    vi.mocked(repos.authTokens.findValidByTokenHash).mockResolvedValue(mockTokenRecord);
 
     const mockUser = {
       id: 'user-id',

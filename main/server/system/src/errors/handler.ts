@@ -12,7 +12,7 @@ import {
   BadRequestError,
   formatValidationErrors,
   mapErrorToHttpResponse,
-} from '@bslt/shared';
+} from '@bslt/shared/system';
 
 import { replyError } from './reply';
 
@@ -93,23 +93,25 @@ export function registerErrorHandler(server: FastifyInstance): void {
 
     // ── 1. Fastify JSON-schema validation (ajv) ──────────────────────────
     if (isFastifyValidationError(error)) {
-      log.warn('Request schema validation failed', {
-        method: request.method,
-        url: request.url,
-        validationContext: error.validationContext,
-        errors: error.validation,
-      });
+      log.warn(
+        {
+          method: request.method,
+          url: request.url,
+          validationContext: error.validationContext,
+          errors: error.validation,
+        },
+        'Request schema validation failed',
+      );
       replyError(reply, new BadRequestError('Request validation failed'), request.correlationId);
       return;
     }
 
     // ── 2. Zod duck-typed errors ──────────────────────────────────────────
     if (isZodLikeError(error)) {
-      log.warn('Zod validation failed', {
-        method: request.method,
-        url: request.url,
-        issueCount: error.issues.length,
-      });
+      log.warn(
+        { method: request.method, url: request.url, issueCount: error.issues.length },
+        'Zod validation failed',
+      );
       void reply.status(422).send(formatValidationErrors(error.issues));
       return;
     }
@@ -118,28 +120,35 @@ export function registerErrorHandler(server: FastifyInstance): void {
     const response = mapErrorToHttpResponse(error, log);
 
     if (response.status >= 500) {
-      log.error(error, {
-        method: request.method,
-        url: request.url,
-        statusCode: response.status,
-        ip: request.ip,
-      });
+      log.error(
+        {
+          err: error,
+          method: request.method,
+          url: request.url,
+          statusCode: response.status,
+          ip: request.ip,
+        },
+        'Server error',
+      );
     } else {
       // AppError subclasses handled here (4xx) — summary only, no stack
       if (!(error instanceof AppError)) {
         // Rare: non-AppError that mapped to <500 — still warn
-        log.warn('Unexpected non-AppError mapped to 4xx', {
-          errorName: error.name,
-          statusCode: response.status,
-        });
+        log.warn(
+          { errorName: error.name, statusCode: response.status },
+          'Unexpected non-AppError mapped to 4xx',
+        );
       } else {
-        log.warn('Client error', {
-          code: error.code,
-          message: error.message,
-          statusCode: response.status,
-          method: request.method,
-          url: request.url,
-        });
+        log.warn(
+          {
+            code: error.code,
+            message: error.message,
+            statusCode: response.status,
+            method: request.method,
+            url: request.url,
+          },
+          'Client error',
+        );
       }
     }
 
