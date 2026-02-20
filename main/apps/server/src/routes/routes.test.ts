@@ -12,7 +12,6 @@
  * @complexity O(1) - Route registration is a constant-time operation
  */
 
-import { registerRouteMap } from '@bslt/server-system';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { registerBillingWebhookRoutes } from './billingWebhooks';
@@ -20,6 +19,8 @@ import { registerRoutes } from './routes';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mocks (must be before local imports)

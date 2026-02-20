@@ -10,7 +10,6 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -21,7 +20,10 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+import type { RouteMap as DbRouteMap } from '@bslt/server-system';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Factories

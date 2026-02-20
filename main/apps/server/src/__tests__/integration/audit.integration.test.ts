@@ -8,7 +8,6 @@
 
 import { adminRoutes } from '@bslt/core/admin';
 import { createAuthGuard } from '@bslt/core/auth';
-import { registerRouteMap } from '@/http';
 import { SECURITY_SEVERITIES } from '@bslt/shared';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,8 +20,11 @@ import {
   type TestServer,
 } from './test-utils';
 
-import type { AuthGuardFactory, RouteMap as DbRouteMap } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+import type { RouteMap as DbRouteMap } from '@bslt/server-system';
 import type { SecurityEventsFilter } from '@bslt/shared';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories

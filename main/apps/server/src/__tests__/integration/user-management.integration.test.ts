@@ -12,12 +12,13 @@
  */
 
 import { createAuthGuard, userRoutes } from '@bslt/core';
-import { registerRouteMap } from '@/http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createTestJwt, createTestServer, parseJsonResponse, type TestServer } from './test-utils';
 
-import type { AuthGuardFactory } from '@bslt/server-system';
+import type { AuthGuardFactory } from '@/http';
+
+import { registerRouteMap } from '@/http';
 
 // ============================================================================
 // Mock Repositories
