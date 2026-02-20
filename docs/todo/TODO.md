@@ -1812,7 +1812,7 @@ Use this block when starting a slice. Keep it tight and check it in with the cod
 - [x] Onboarding page — dedicated `/onboarding` route (`OnboardingPage.tsx` + test)
 - [x] First success moment — "You're all set!" completion step with CTA to dashboard (step 3 in `OnboardingWizard.tsx`)
 - [x] Usage/limits display — `UsageSummary` component shows plan features against current usage (`BillingSettingsPage.tsx`)
-- [ ] Usage bar on main dashboard — quick-glance plan utilisation from the primary dashboard view (not yet on dashboard page)
+- [x] Usage bar on main dashboard — "Current Plan" card with plan name badge + "Manage billing" link added to `DashboardPage.tsx` via `useSubscription` hook
 
 ---
 

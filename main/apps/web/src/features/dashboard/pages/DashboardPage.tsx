@@ -1,20 +1,36 @@
 // main/apps/web/src/features/dashboard/pages/DashboardPage.tsx
+import { getAccessToken } from '@app/authToken';
+import { useClientEnvironment } from '@app/ClientEnvironment';
 import { FeatureHint, SectionErrorBoundary } from '@app/components';
 import { useAuth } from '@auth';
-import { useNavigate, type NavigateFunction } from '@bslt/react/router';
-import { Button, Card, Heading, PageContainer, Skeleton, Text } from '@bslt/ui';
+import { useSubscription } from '@bslt/react';
+import { Link, useNavigate, type NavigateFunction } from '@bslt/react/router';
+import { Badge, Button, Card, Heading, PageContainer, Skeleton, Text } from '@bslt/ui';
 import { GettingStartedChecklist } from '@dashboard';
 import { ActivityFeed } from '@features/activities';
+import { useMemo } from 'react';
 
+import type { BillingClientConfig } from '@bslt/api';
 import type { JSX } from 'react';
 
 export const DashboardPage = (): JSX.Element => {
   const { user, isLoading, logout } = useAuth();
   const navigate: NavigateFunction = useNavigate();
+  const { config } = useClientEnvironment();
   const firstName = user?.firstName ?? '';
   const lastName = user?.lastName ?? '';
   const hasName = firstName.length > 0 || lastName.length > 0;
   const displayName = `${firstName} ${lastName}`.trim();
+
+  const clientConfig: BillingClientConfig = useMemo(
+    () => ({
+      baseUrl: config.apiUrl,
+      getToken: getAccessToken,
+    }),
+    [config.apiUrl],
+  );
+
+  const { subscription, isLoading: subLoading } = useSubscription(clientConfig);
 
   const handleLogout = async (): Promise<void> => {
     await logout();
@@ -27,6 +43,7 @@ export const DashboardPage = (): JSX.Element => {
         <div className="flex flex-col gap-4">
           <Skeleton width="10rem" height="2rem" />
           <Skeleton width="100%" height="6rem" radius="var(--ui-radius-md)" />
+          <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
           <Skeleton width="100%" height="8rem" radius="var(--ui-radius-md)" />
           <Skeleton width="100%" height="10rem" radius="var(--ui-radius-md)" />
         </div>
@@ -68,6 +85,34 @@ export const DashboardPage = (): JSX.Element => {
             </Text>
           </div>
         </Card>
+      </SectionErrorBoundary>
+
+      <SectionErrorBoundary>
+        {subLoading ? (
+          <Skeleton width="100%" height="4rem" radius="var(--ui-radius-md)" />
+        ) : (
+          <Card>
+            <div className="flex-between">
+              <div className="flex flex-col gap-1">
+                <Heading as="h2" size="sm">
+                  Current Plan
+                </Heading>
+                {subscription !== null ? (
+                  <Text>
+                    You&apos;re on the <Badge tone="info">{subscription.plan.name}</Badge>
+                  </Text>
+                ) : (
+                  <Text>No active subscription.</Text>
+                )}
+              </div>
+              <Link to="/billing">
+                <Button variant="text">
+                  {subscription !== null ? 'Manage billing' : 'Upgrade to unlock more features'}
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        )}
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
